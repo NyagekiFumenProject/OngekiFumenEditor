@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                 GL.NamedBufferSubData(line_vbo, IntPtr.Zero, postDataFillIndex, PostData);
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, postDataFillCount - 1);
-                target.PerfomenceMonitor.CountDrawCall(this);
+                target.PerfomenceMonitor.CountDrawCall();
 
                 postDataFillIndex = postDataFillCount = 0;
             }
@@ -213,12 +213,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
             GL.BindVertexArray(0);
             shader.End();
 
-            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
         public void Begin(IDrawingContext target, float lineWidth)
         {
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.lineWidth = lineWidth;
             postDataFillIndex = postDataFillCount = 0;
@@ -318,7 +316,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                 SwitchVertexVBO(handle.vbo);
 
                 GL.DrawElementsInstanced(PrimitiveType.Triangles, 6, DrawElementsType.UnsignedShort, IntPtr.Zero, handle.verticsCount - 1);
-                target.PerfomenceMonitor.CountDrawCall(this);
+                target.PerfomenceMonitor.CountDrawCall();
 
                 SwitchVertexVBO(line_vbo);
             }

@@ -61,7 +61,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
 
         public void Begin(IDrawingContext target, Primitive primitive = Primitive.TriangleStrip)
         {
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             this.primitive = primitive;
             shader.Begin();
@@ -91,7 +90,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
 
             GL.BindVertexArray(0);
             shader.End();
-            target.PerfomenceMonitor.OnAfterDrawing(this);
 
             target = default;
         }
@@ -106,7 +104,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
             };
             GL.NamedBufferSubData(vbo, IntPtr.Zero, postVertexCount * VertexByteSize, postData);
             GL.DrawArrays(glPrimitive, 0, postVertexCount);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
             postVertexCount = 0;
         }
     }

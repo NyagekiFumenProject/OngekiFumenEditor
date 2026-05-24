@@ -256,8 +256,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         private void PresentCommands(IRenderContext context, DrawCommandList drawCommandList, SKCanvas canvas, IPerfomenceMonitor perfomenceMonitor)
         {
-            using var replay = new SkiaDrawCommandListReplay(this, context, drawCommandList.FrameState, canvas, perfomenceMonitor);
-            replay.Present(drawCommandList.Commands);
+            perfomenceMonitor ??= new DummyPerformenceMonitor();
+            perfomenceMonitor.OnBeforePresent();
+            try
+            {
+                using var replay = new SkiaDrawCommandListReplay(this, context, drawCommandList.FrameState, canvas, perfomenceMonitor);
+                replay.Present(drawCommandList.Commands);
+            }
+            finally
+            {
+                perfomenceMonitor.OnAfterPresent();
+            }
         }
     }
 }

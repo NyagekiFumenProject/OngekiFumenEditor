@@ -19,7 +19,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
         {
             SkiaUtility.CheckSkiaRenderContext(target?.RenderContext);
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             canvas.Save();
@@ -40,7 +39,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
         {
             canvas.Restore();
 
-            target.PerfomenceMonitor.OnAfterDrawing(this);
             target = default;
             canvas = default;
         }

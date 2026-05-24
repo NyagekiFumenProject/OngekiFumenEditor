@@ -1,17 +1,21 @@
-﻿using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor;
+using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
 	public struct RenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
 	{
-		public double AveSpendTicks { get; set; }
+		public long CurrentOnRenderSpendTicks { get; set; }
 
-		public double MostSpendTicks { get; set; }
+		public double AveOnRenderSpendTicks { get; set; }
 
-		public int AveDrawCall { get; set; }
+		public double AveOnRenderFps { get; set; }
 
-		public long MostUIRenderSpendTicks { get; set; }
+		public long CurrentPresentSpendTicks { get; set; }
 
-		public double AveUIRenderSpendTicks { get; set; }
+		public double AvePresentSpendTicks { get; set; }
+
+		public double AvePresentFps { get; set; }
+
+		public double AveDrawCall { get; set; }
 	}
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.Text;
 
@@ -8,38 +8,39 @@ namespace OngekiFumenEditor.Kernel.Graphics
 	{
 		public interface IRenderPerformenceStatisticsData
 		{
-			public double AveSpendTicks { get; }
-			public double MostSpendTicks { get; }
-			public int AveDrawCall { get; }
-			public long MostUIRenderSpendTicks { get; }
-			public double AveUIRenderSpendTicks { get; }
+			public long CurrentOnRenderSpendTicks { get; }
+			public double AveOnRenderSpendTicks { get; }
+			public double AveOnRenderFps { get; }
+			public long CurrentPresentSpendTicks { get; }
+			public double AvePresentSpendTicks { get; }
+			public double AvePresentFps { get; }
+			public double AveDrawCall { get; }
 		}
 
-		public interface IDrawingPerformenceStatisticsData
+		public interface ICategorizedPerformenceStatisticsData
 		{
-			public record PerformenceItem(string Name, double AveSpendTicks, int AveDrawCall);
+			public record PerformenceItem(string Name, double AveSpendTicks);
 			public IEnumerable<PerformenceItem> PerformenceRanks { get; }
 			public double AveSpendTicks { get; }
 			public double MostSpendTicks { get; }
 		}
 
 		void OnBeforeRender();
-		void OnBeginDrawing(IDrawing drawing);
-		void OnBeginTargetDrawing(IDrawingTarget drawing);
-
-		void CountDrawCall(IDrawing drawing);
-
-		void OnAfterTargetDrawing(IDrawingTarget drawing);
-		void OnAfterDrawing(IDrawing drawing);
 		void OnAfterRender();
+		void OnBeforePresent();
+		void OnAfterPresent();
+		void OnBeginDrawCommand(DrawCommand command);
+		void OnAfterDrawCommand(DrawCommand command);
+		void OnBeginTargetDrawing(IDrawingTarget target);
+		void OnAfterTargetDrawing(IDrawingTarget target);
+		void CountDrawCall();
 
-		IDrawingPerformenceStatisticsData GetDrawingPerformenceData();
-		IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData();
+		ICategorizedPerformenceStatisticsData GetDrawCommandPerformenceData();
+		ICategorizedPerformenceStatisticsData GetDrawingTargetPerformenceData();
 		IRenderPerformenceStatisticsData GetRenderPerformenceData();
 
 		void FormatStatistics(StringBuilder builder);
 
 		void Clear();
-		void PostUIRenderTime(TimeSpan ts);
 	}
 }

@@ -91,7 +91,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 #endif
             var texture = (DefaultOpenGLTexture)tex;
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 var modelMatrix =
                     GetOverrideModelMatrix() *
@@ -110,13 +109,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-                        target.PerfomenceMonitor.CountDrawCall(this);
+                        target.PerfomenceMonitor.CountDrawCall();
                     }
                     GL.BindVertexArray(0);
                 }
                 shader.End();
             }
-            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
     }
 }

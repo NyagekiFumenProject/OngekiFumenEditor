@@ -48,7 +48,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
 		public void Draw(IDrawingContext target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
 		{
-			target.PerfomenceMonitor.OnBeginDrawing(this);
 			{
 				var count = UpdateBuffer(points, lineWidth);
 
@@ -61,7 +60,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 						GL.Enable(EnableCap.PolygonSmooth);
 
 						GL.DrawArrays(PrimitiveType.Triangles, 0, count);
-						target.PerfomenceMonitor.CountDrawCall(this);
+						target.PerfomenceMonitor.CountDrawCall();
 
 						GL.Disable(EnableCap.PolygonSmooth);
 					}
@@ -69,7 +68,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 				}
 				shader.End();
 			}
-			target.PerfomenceMonitor.OnAfterDrawing(this);
 		}
 
 		private int UpdateBuffer(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)

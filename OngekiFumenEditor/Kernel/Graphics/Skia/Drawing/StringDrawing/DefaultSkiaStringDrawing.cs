@@ -125,7 +125,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 
             var adjustPos = new SKPoint(-offsetPos.X, offsetPos.Y);
             canvas.DrawText(text, adjustPos, font, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
 
             if (isUnderline || isStrike)
             {
@@ -139,13 +139,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
                 {
                     var underlineY = adjustPos.Y + metrics.UnderlinePosition ?? 0;
                     canvas.DrawLine(adjustPos.X, underlineY, adjustPos.X + bounds.Width, underlineY, linePaint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    target.PerfomenceMonitor.CountDrawCall();
                 }
                 else
                 {
                     float strikeY = adjustPos.Y - metrics.XHeight / 2;
                     canvas.DrawLine(adjustPos.X, strikeY, adjustPos.X + bounds.Width, strikeY, linePaint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    target.PerfomenceMonitor.CountDrawCall();
                 }
             }
 

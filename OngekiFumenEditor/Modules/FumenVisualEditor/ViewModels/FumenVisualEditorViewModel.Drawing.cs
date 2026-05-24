@@ -22,7 +22,6 @@ using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection.Emit;
@@ -108,9 +107,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             PerfomenceMonitor = value ? actualPerformenceMonitor : dummyPerformenceMonitor;
         }
     }
-
-    private Stopwatch sw;
-    private float actualRenderInterval;
 
     public string DisplayFPS
     {
@@ -269,8 +265,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         IsDisplayFPS = IsDisplayFPS;
 
         UpdateActualRenderInterval();
-        sw = new Stopwatch();
-        sw.Start();
 
         renderInitializationTaskSource.SetResult();
     }
@@ -294,33 +288,19 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private void UpdateActualRenderInterval()
     {
-        actualRenderInterval = EditorGlobalSetting.Default.LimitFPS switch
-        {
-            <= 0 => 0,
-            _ => 1000.0F / EditorGlobalSetting.Default.LimitFPS
-        };
+        if (RenderContext is null)
+            return;
+
+        var limitFPS = EditorGlobalSetting.Default.LimitFPS;
+        RenderContext.LimitFPS = limitFPS <= 0 ? -1 : limitFPS;
     }
 
     private void OnEditorRender(TimeSpan ts)
     {
         IDrawCommandListBuilder builder = default;
 
-        #region limit fps
-
-        if (actualRenderInterval > 0)
-        {
-            var ms = sw.ElapsedMilliseconds;
-            if (ms < actualRenderInterval)
-                goto End;
-            ts = TimeSpan.FromMilliseconds(ms);
-            sw.Restart();
-        }
-
-        #endregion
-
         #region clean and prepare perfomence statistics
 
-        PerfomenceMonitor.PostUIRenderTime(ts);
         PerfomenceMonitor.OnBeforeRender();
 
         hits.Clear();
@@ -1029,6 +1009,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
         RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
+        UpdateActualRenderInterval();
         RenderContext.OnRender += Render;
         RenderContext.StartRendering();
     }

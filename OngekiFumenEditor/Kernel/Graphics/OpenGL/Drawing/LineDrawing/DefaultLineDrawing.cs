@@ -61,7 +61,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
             if (viewportWidth <= 0 || viewportHeight <= 0)
                 return;
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 var count = UpdateBuffer(points);
 
@@ -76,13 +75,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, count);
-                        target.PerfomenceMonitor.CountDrawCall(this);
+                        target.PerfomenceMonitor.CountDrawCall();
                     }
                     GL.BindVertexArray(0);
                 }
                 shader.End();
             }
-            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
         private int UpdateBuffer(IEnumerable<LineVertex> points)

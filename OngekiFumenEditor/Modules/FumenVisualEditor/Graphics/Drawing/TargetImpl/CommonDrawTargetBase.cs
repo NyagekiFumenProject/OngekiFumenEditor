@@ -34,7 +34,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public virtual void Begin(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
             this.builder = builder;
         }
@@ -43,7 +42,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public virtual void End()
         {
-            target.PerfomenceMonitor.OnAfterTargetDrawing(this);
             target = default;
             builder = default;
         }

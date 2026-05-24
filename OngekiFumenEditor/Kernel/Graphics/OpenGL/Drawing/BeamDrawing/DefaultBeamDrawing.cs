@@ -81,7 +81,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
 #endif
             var texture = (DefaultOpenGLTexture)tex;
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 var textureScaleY = target.CurrentDrawingTargetContext.Rect.Height / texture.Height;
 
@@ -104,13 +103,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-                        target.PerfomenceMonitor.CountDrawCall(this);
+                        target.PerfomenceMonitor.CountDrawCall();
                     }
                     GL.BindVertexArray(0);
                 }
                 shader.End();
             }
-            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
     }
 }

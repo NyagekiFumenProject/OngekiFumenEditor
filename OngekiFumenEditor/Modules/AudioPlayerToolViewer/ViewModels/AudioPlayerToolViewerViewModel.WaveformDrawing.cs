@@ -8,7 +8,6 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
-using System.Diagnostics;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +24,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private float renderScaleX = 1;
         private float renderScaleY = 1;
         private IPerfomenceMonitor performenceMonitor;
-        private Stopwatch sw;
         private ISamplePeak samplePeak;
         private CancellationTokenSource loadWaveformTask;
         private CancellationTokenSource resampleTaskCancelTokenSource;
@@ -105,7 +103,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             set => Set(ref isShowWaveform, value);
         }
 
-        private float actualRenderInterval = float.MaxValue;
         private int limitFPS = Properties.AudioPlayerToolViewerSetting.Default.LimitFPS;
         private IRenderManagerImpl renderImpl;
 
@@ -129,11 +126,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void UpdateActualRenderInterval()
         {
-            actualRenderInterval = LimitFPS switch
-            {
-                <= 0 => float.MaxValue,
-                _ => 1000.0F / LimitFPS
-            };
+            if (RenderContext is null)
+                return;
+
+            RenderContext.LimitFPS = LimitFPS <= 0 ? -1 : LimitFPS;
         }
 
         public async void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl impl)
@@ -156,8 +152,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             //performenceMonitor = IoC.Get<IPerfomenceMonitor>();
             performenceMonitor = new DummyPerformenceMonitor();
 
-            sw = new Stopwatch();
-            sw.Start();
+            UpdateActualRenderInterval();
         }
 
         private void PrepareWaveform(IAudioPlayer player)
@@ -217,15 +212,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             if (RenderContext is null || renderImpl is null)
                 return;
-            //limit
-            if (LimitFPS > 0)
-            {
-                if (sw.ElapsedMilliseconds < actualRenderInterval)
-                    return;
-                sw.Restart();
-            }
 
-            PerfomenceMonitor.PostUIRenderTime(ts);
             PerfomenceMonitor.OnBeforeRender();
 
             try
@@ -345,6 +332,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
             RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
+            UpdateActualRenderInterval();
             RenderContext.OnRender += Render;
             RenderContext.StartRendering();
         }

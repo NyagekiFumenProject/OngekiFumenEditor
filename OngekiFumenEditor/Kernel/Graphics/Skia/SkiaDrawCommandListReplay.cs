@@ -26,6 +26,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         private readonly DefaultSkiaPolygonDrawing polygonDrawing;
         private readonly DefaultSkiaStringDrawing stringDrawing;
         private readonly DefaultSkiaBeamDrawing beamDrawing;
+        private readonly IPerfomenceMonitor perfomenceMonitor;
 
         private readonly Stack<Matrix4x4> modelMatrixStack = new();
         private readonly Stack<Matrix4x4> viewMatrixStack = new();
@@ -48,6 +49,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             targetContext = CreateTargetContext(frameState);
             drawingContext = new ReplayDrawingContext(renderContext, targetContext, perfomenceMonitor);
+            this.perfomenceMonitor = perfomenceMonitor;
 
             lineDrawing = new NewSkiaLineDrawing(manager);
             textureDrawing = new DefaultSkiaTextureDrawing(manager);
@@ -67,7 +69,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             ArgumentNullException.ThrowIfNull(commands);
 
             foreach (var command in commands)
-                Present(command);
+            {
+                perfomenceMonitor.OnBeginDrawCommand(command);
+                try
+                {
+                    Present(command);
+                }
+                finally
+                {
+                    perfomenceMonitor.OnAfterDrawCommand(command);
+                }
+            }
         }
 
         public void Dispose()

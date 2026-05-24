@@ -78,7 +78,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
 
         public void Begin(IDrawingContext target)
         {
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
 
             var viewWidth = target.CurrentDrawingTargetContext.Rect.Width;
@@ -108,7 +107,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
             GL.NamedBufferSubData(vbo, (IntPtr)0, (IntPtr)(VertexSize * currentPostCount), postData);
 
             GL.DrawArrays(PrimitiveType.Points, 0, currentPostCount);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         private void Clear()
@@ -122,7 +121,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
             FlushDraw();
             GL.BindVertexArray(0);
             shader.End();
-            target.PerfomenceMonitor.OnAfterDrawing(this);
             target = default;
 
             //GL.PointSize(backupPointSize);

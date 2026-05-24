@@ -1,93 +1,103 @@
-﻿using System;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.Text;
 using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor;
-using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.IDrawingPerformenceStatisticsData;
+using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.ICategorizedPerformenceStatisticsData;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
-	public sealed class DummyPerformenceMonitor : IPerfomenceMonitor
-	{
-		private class DummyDrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
-		{
-			private PerformenceItem[] items = new PerformenceItem[0];
+    public sealed class DummyPerformenceMonitor : IPerfomenceMonitor
+    {
+        private sealed class DummyCategorizedPerformenceStatisticsData : ICategorizedPerformenceStatisticsData
+        {
+            private static readonly PerformenceItem[] items = [];
 
-			public IEnumerable<PerformenceItem> PerformenceRanks => items;
+            public IEnumerable<PerformenceItem> PerformenceRanks => items;
 
-			public double AveSpendTicks => 0;
+            public double AveSpendTicks => 0;
 
-			public double MostSpendTicks => 0;
-		}
+            public double MostSpendTicks => 0;
+        }
 
-		private class DummyRenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
-		{
-			public double AveSpendTicks => 0;
+        private sealed class DummyRenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
+        {
+            public long CurrentOnRenderSpendTicks => 0;
 
-			public double MostSpendTicks => 0;
+            public double AveOnRenderSpendTicks => 0;
 
-			public int AveDrawCall => 0;
+            public double AveOnRenderFps => 0;
 
-			public long MostUIRenderSpendTicks => 0;
+            public long CurrentPresentSpendTicks => 0;
 
-			public double AveUIRenderSpendTicks => 0;
-		}
+            public double AvePresentSpendTicks => 0;
 
-		private IDrawingPerformenceStatisticsData statisticsData = new DummyDrawingPerformenceStatisticsData();
-		private IRenderPerformenceStatisticsData renderData = new DummyRenderPerformenceStatisticsData();
+            public double AvePresentFps => 0;
 
-		public void Clear()
-		{
-		}
+            public double AveDrawCall => 0;
+        }
 
-		public void CountDrawCall(IDrawing drawing)
-		{
-		}
+        private static readonly ICategorizedPerformenceStatisticsData statisticsData = new DummyCategorizedPerformenceStatisticsData();
+        private static readonly IRenderPerformenceStatisticsData renderData = new DummyRenderPerformenceStatisticsData();
 
-		public void FormatStatistics(StringBuilder builder)
-		{
-		}
+        public void Clear()
+        {
+        }
 
-		public IDrawingPerformenceStatisticsData GetDrawingPerformenceData()
-		{
-			return statisticsData;
-		}
+        public void CountDrawCall()
+        {
+        }
 
-		public IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData()
-		{
-			return statisticsData;
-		}
+        public void FormatStatistics(StringBuilder builder)
+        {
+        }
 
-		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
-		{
-			return renderData;
-		}
+        public ICategorizedPerformenceStatisticsData GetDrawCommandPerformenceData()
+        {
+            return statisticsData;
+        }
 
-		public void OnAfterDrawing(IDrawing drawing)
-		{
-		}
+        public ICategorizedPerformenceStatisticsData GetDrawingTargetPerformenceData()
+        {
+            return statisticsData;
+        }
 
-		public void OnAfterRender()
-		{
-		}
+        public IRenderPerformenceStatisticsData GetRenderPerformenceData()
+        {
+            return renderData;
+        }
 
-		public void OnAfterTargetDrawing(IDrawingTarget drawing)
-		{
-		}
+        public void OnAfterDrawCommand(DrawCommand command)
+        {
+        }
 
-		public void OnBeforeRender()
-		{
-		}
+        public void OnAfterPresent()
+        {
+        }
 
-		public void OnBeginDrawing(IDrawing drawing)
-		{
-		}
+        public void OnAfterRender()
+        {
+        }
 
-		public void OnBeginTargetDrawing(IDrawingTarget drawing)
-		{
-		}
+        public void OnAfterTargetDrawing(IDrawingTarget target)
+        {
+        }
 
-		public void PostUIRenderTime(TimeSpan ts)
-		{
-		}
-	}
+        public void OnBeforePresent()
+        {
+        }
+
+        public void OnBeforeRender()
+        {
+        }
+
+        public void OnBeginDrawCommand(DrawCommand command)
+        {
+        }
+
+        public void OnBeginTargetDrawing(IDrawingTarget target)
+        {
+        }
+
+        public static DummyPerformenceMonitor Instance { get; } = new DummyPerformenceMonitor();
+    }
 }

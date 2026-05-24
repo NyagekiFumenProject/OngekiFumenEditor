@@ -276,7 +276,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     strokePaint.Color = SKColors.White;
 
                     canvas.DrawPath(path, strokePaint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    target.PerfomenceMonitor.CountDrawCall();
                 }
                 finally
                 {
@@ -320,7 +320,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 strokePaint.Color = ToSKColor(color);
 
                 canvas.DrawPath(path, strokePaint);
-                target.PerfomenceMonitor.CountDrawCall(this);
+                target.PerfomenceMonitor.CountDrawCall();
             }
             finally
             {
@@ -381,7 +381,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 return;
 
             canvas.DrawVertices(SKVertexMode.Triangles, meshPointsBuffer, meshColorsBuffer, meshPaint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         private void EnsureMeshCapacityAndClearTails(int required)

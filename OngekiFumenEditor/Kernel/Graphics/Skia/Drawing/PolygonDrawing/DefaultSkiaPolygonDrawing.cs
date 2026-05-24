@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
                 Primitive.Triangles => SKVertexMode.Triangles,
                 Primitive.TriangleStrip => SKVertexMode.TriangleStrip,
             }, points.ToArray(), colors.ToArray(), paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
 
             //clean
             OnEnd();

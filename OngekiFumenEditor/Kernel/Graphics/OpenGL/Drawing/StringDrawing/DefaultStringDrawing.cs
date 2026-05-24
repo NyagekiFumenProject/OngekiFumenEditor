@@ -179,7 +179,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize)
         {
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 text ??= string.Empty;
                 handle = handle ?? DefaultFont;
@@ -187,7 +186,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 handle = resolvedStyle.FontHandle;
                 var fontStyle = resolvedStyle.FontStyle;
 
-                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext), target.PerfomenceMonitor, this);
+                renderer.Begin(GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext), target.PerfomenceMonitor);
                 var font = GetFontSystem(handle).GetFont(fontSize);
                 var size = MeasureString(font, text, handle, fontSize, scale, fontStyle);
                 origin.X = origin.X * 2;
@@ -198,7 +197,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 measureTextSize = size;
                 renderer.End();
             }
-            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
 
         private ResolvedTextStyle ResolveTextStyle(IFontHandle handle, FontStyle style)

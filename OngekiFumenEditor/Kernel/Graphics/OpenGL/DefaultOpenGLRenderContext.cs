@@ -4,6 +4,7 @@ using OpenTK.Wpf;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -17,6 +18,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         private readonly DefaultOpenGLRenderManagerImpl manager;
         private readonly GLWpfControl glView;
         private bool isStart = false;
+        private long prevRenderTimestamp;
 
         public DefaultOpenGLRenderContext(DefaultOpenGLRenderManagerImpl manager, GLWpfControl glView)
         {
@@ -27,6 +29,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         public bool IsInitialized { get; internal set; }
 
         public event Action<IRenderContext, TimeSpan> OnRender;
+
+        public int LimitFPS { get; set; } = -1;
 
         public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default)
         {
@@ -58,6 +62,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 return;
             isStart = true;
 
+            prevRenderTimestamp = 0;
             glView.Render += GlView_Render;
         }
 
@@ -72,7 +77,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         private void GlView_Render(TimeSpan ts)
         {
-            OnRender?.Invoke(this, ts);
+            if (!TryUpdateRenderTime(out var actualTs))
+                return;
+
+            OnRender?.Invoke(this, actualTs);
+        }
+
+        private bool TryUpdateRenderTime(out TimeSpan ts)
+        {
+            var curRenderTimestamp = Stopwatch.GetTimestamp();
+
+            if (prevRenderTimestamp == 0)
+            {
+                prevRenderTimestamp = curRenderTimestamp;
+                ts = TimeSpan.Zero;
+                return true;
+            }
+
+            ts = Stopwatch.GetElapsedTime(prevRenderTimestamp, curRenderTimestamp);
+            var limitFPS = LimitFPS;
+            if (limitFPS > 0 && ts.TotalSeconds < 1.0 / limitFPS)
+                return false;
+
+            prevRenderTimestamp = curRenderTimestamp;
+            return true;
         }
     }
 }

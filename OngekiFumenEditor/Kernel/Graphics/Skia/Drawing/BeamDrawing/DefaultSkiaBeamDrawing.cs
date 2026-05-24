@@ -92,7 +92,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
             DrawTexturedRectWithRotation(canvas, new(0, 0),
                 rect, texture.Image, 360 - angle, new(rect.MidX, rect.MidY - judgeOffset / 2f), paint);
 
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
             canvas.Restore();
 
             End();

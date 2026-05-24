@@ -67,7 +67,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
         private object _lastTexture;
         private int _vertexIndex = 0;
         private IPerfomenceMonitor performenceMonitor;
-        private IDrawing refDrawing;
         private readonly Texture2DManager _textureManager;
 
         public ITexture2DManager TextureManager => _textureManager;
@@ -115,10 +114,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
             _shader.Dispose();
         }
 
-        public void Begin(Matrix4x4 mvp, IPerfomenceMonitor perfomenceMonitor, IDrawing refDrawing)
+        public void Begin(Matrix4x4 mvp, IPerfomenceMonitor perfomenceMonitor)
         {
-            performenceMonitor = perfomenceMonitor;
-            this.refDrawing = refDrawing;
+            this.performenceMonitor = perfomenceMonitor;
 
             _shader.Begin();
 
@@ -149,7 +147,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
         {
             FlushBuffer();
 
-            refDrawing = default;
             performenceMonitor = default;
         }
 
@@ -166,7 +163,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
             texture.Bind();
 
             GL.DrawElements(PrimitiveType.Triangles, _vertexIndex * 6 / 4, DrawElementsType.UnsignedShort, IntPtr.Zero);
-            performenceMonitor.CountDrawCall(refDrawing);
+            performenceMonitor.CountDrawCall();
 
             _vertexIndex = 0;
         }

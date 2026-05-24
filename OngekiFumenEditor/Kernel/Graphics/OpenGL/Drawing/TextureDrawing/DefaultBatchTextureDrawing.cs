@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             GL.NamedBufferSubData(vbo, (IntPtr)0, (IntPtr)(VertexSize * currentPostCount), postData);
 
             GL.DrawArraysInstanced(PrimitiveType.TriangleFan, 0, 4, currentPostCount);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         private void FlushDraw()
@@ -165,7 +165,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 
         public void Begin(IDrawingContext target, IImage texture)
         {
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
 #if DEBUG
             if (texture is not DefaultOpenGLTexture texture1)
@@ -204,7 +203,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
             GL.BindVertexArray(0);
             shader.End();
             texture = default;
-            target.PerfomenceMonitor.OnAfterDrawing(this);
             target = default;
         }
     }

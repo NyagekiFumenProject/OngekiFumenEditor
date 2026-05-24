@@ -3,6 +3,7 @@ using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using SkiaSharp;
 using System;
+using System.Diagnostics;
 using System.Numerics;
 using System.Windows.Controls;
 using System.Windows.Media.Media3D;
@@ -13,10 +14,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
     {
         private DefaultSkiaDrawingManagerImpl manager;
         private bool isStart;
-        private DateTime prevRenderTime;
+        private long prevRenderTimestamp;
         private readonly SkiaRenderControlBase renderControl;
 
         public event Action<IRenderContext, TimeSpan> OnRender;
+
+        public int LimitFPS { get; set; } = -1;
 
         public SKCanvas Canvas => renderControl.CurrentRenderSurface?.Canvas;
 
@@ -52,19 +55,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 return;
             isStart = true;
 
-            prevRenderTime = DateTime.UtcNow;
+            prevRenderTimestamp = 0;
             renderControl.PaintSurface += RenderControl_PaintSurface;
         }
 
         private void RenderControl_PaintSurface(object sender, SkiaSharp.Views.Desktop.SKPaintSurfaceEventArgs e)
         {
-            var curRenderTime = DateTime.UtcNow;
-            var ts = curRenderTime - prevRenderTime;
+            if (!TryUpdateRenderTime(out var ts))
+                return;
 
             OnRender?.Invoke(this, ts);
 
             PostAndPresentDrawCommandList();
-            prevRenderTime = curRenderTime;
         }
 
         public void StopRendering()
@@ -74,6 +76,26 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             isStart = false;
 
             renderControl.PaintSurface -= RenderControl_PaintSurface;
+        }
+
+        private bool TryUpdateRenderTime(out TimeSpan ts)
+        {
+            var curRenderTimestamp = Stopwatch.GetTimestamp();
+
+            if (prevRenderTimestamp == 0)
+            {
+                prevRenderTimestamp = curRenderTimestamp;
+                ts = TimeSpan.Zero;
+                return true;
+            }
+
+            ts = Stopwatch.GetElapsedTime(prevRenderTimestamp, curRenderTimestamp);
+            var limitFPS = LimitFPS;
+            if (limitFPS > 0 && ts.TotalSeconds < 1.0 / limitFPS)
+                return false;
+
+            prevRenderTimestamp = curRenderTimestamp;
+            return true;
         }
 
         private void PostAndPresentDrawCommandList()

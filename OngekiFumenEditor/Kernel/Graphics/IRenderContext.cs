@@ -9,6 +9,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
     {
         public event Action<IRenderContext, TimeSpan> OnRender;
 
+        int LimitFPS { get; set; }
+
         void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true, IPerfomenceMonitor perfomenceMonitor = default);
 
         void BeforeRender(IDrawingContext context);

@@ -49,7 +49,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
             paint.Color = color.ToSKColor();
 
             canvas.DrawImage(tex.Image, rect, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
 
             canvas.Restore();
 

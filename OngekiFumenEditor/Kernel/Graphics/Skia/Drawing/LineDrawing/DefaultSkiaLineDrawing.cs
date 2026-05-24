@@ -147,7 +147,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     continue;
                 canvas.DrawLine(cur, next, paint);
             }
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         private void DrawPath(IList<SKPoint> points, SKPaint paint)
@@ -163,7 +163,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 path.LineTo(next);
             }
             canvas.DrawPath(path, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         private void DrawPath(SKPath path, SKPaint paint)
@@ -171,7 +171,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             var actualPath = /*path.PointCount > 100 ? path.Simplify() : */path;
 
             canvas.DrawPath(actualPath, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
