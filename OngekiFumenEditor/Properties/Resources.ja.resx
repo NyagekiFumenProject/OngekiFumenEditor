@@ -1633,6 +1633,9 @@
   <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
     <value>パフォーマンス計測データがありません</value>
   </data>
+  <data name="RenderPerfomenceMeasurePanelMonitor" xml:space="preserve">
+    <value>パフォーマンスモニター:</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value />
   </data>

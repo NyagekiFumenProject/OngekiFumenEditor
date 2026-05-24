@@ -2079,6 +2079,9 @@
   <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
     <value>No performance measurement data</value>
   </data>
+  <data name="RenderPerfomenceMeasurePanelMonitor" xml:space="preserve">
+    <value>Performance monitor:</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>Restore the current time to before playback time when editor paused</value>
   </data>

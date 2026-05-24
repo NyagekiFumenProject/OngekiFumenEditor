@@ -10,9 +10,7 @@ using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.ICategorizedPe
 
 namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
-#if DEBUG
 	[Export(typeof(IPerfomenceMonitor))]
-#endif
 	[PartCreationPolicy(CreationPolicy.NonShared)]
 	public sealed class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
 	{

@@ -1,4 +1,5 @@
 ﻿using Caliburn.Micro;
+using FontStashSharp.RichText;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
@@ -316,6 +317,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
             RenderContext.OnRender -= Render;
+            RenderContext.Name = default;
             RenderContext.StopRendering();
         }
 
@@ -325,7 +327,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
             RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
-            RenderContext.PerfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
+            RenderContext.Name = "AudioPlayerToolViewerViewModel.WaveRender";
             UpdateActualRenderInterval();
             RenderContext.OnRender += Render;
             RenderContext.StartRendering();

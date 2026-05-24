@@ -3,8 +3,11 @@ using Gemini.Framework;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Properties;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,6 +26,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
         private readonly DispatcherTimer refreshTimer;
         private bool isInitialized;
 
+        public IReadOnlyList<PerfomenceMonitorOption> PerfomenceMonitorOptions { get; }
+
         public ObservableCollection<RenderPerfomenceMeasureItem> Items { get; } = new();
 
         public bool HasRenderContexts => Items.Count > 0;
@@ -31,6 +36,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
 
         public RenderPerfomenceMeasurePanelViewModel()
         {
+            PerfomenceMonitorOptions = IoC.GetAll<IPerfomenceMonitor>()
+                .Select(x => x.GetType())
+                .Distinct()
+                .OrderBy(x => x.Name)
+                .Select(x => new PerfomenceMonitorOption(x))
+                .ToArray();
+
             DisplayName = GetResourceString(
                 "RenderPerfomenceMeasurePanelTitle",
                 "Render Performance Measurement");
@@ -39,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
             {
                 Interval = System.TimeSpan.FromSeconds(1)
             };
-            refreshTimer.Tick += (_, _) => RefreshStatistics();
+            refreshTimer.Tick += (_, _) => RefreshPanel();
         }
 
         protected override void OnViewLoaded(object view)
@@ -68,19 +80,91 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
                 return;
 
             isInitialized = true;
-            Items.Clear();
+
+            RefreshPanel();
+            refreshTimer.Start();
+        }
+
+        private void RefreshPanel()
+        {
+            SyncRenderContexts();
+            RefreshStatistics();
+        }
+
+        private void SyncRenderContexts()
+        {
+            var snapshots = EnumerateRenderContextSnapshots();
+            var changed = false;
+
+            for (var i = Items.Count - 1; i >= 0; i--)
+            {
+                var item = Items[i];
+                if (snapshots.Any(x => ReferenceEquals(x.Context, item.Context)))
+                    continue;
+
+                Items.RemoveAt(i);
+                changed = true;
+            }
+
+            for (var targetIndex = 0; targetIndex < snapshots.Count; targetIndex++)
+            {
+                var snapshot = snapshots[targetIndex];
+                var existingIndex = IndexOfItem(snapshot.Context);
+
+                if (existingIndex < 0)
+                {
+                    Items.Insert(targetIndex, new RenderPerfomenceMeasureItem(
+                        snapshot.RenderManagerName,
+                        snapshot.Context,
+                        PerfomenceMonitorOptions));
+                    changed = true;
+                    continue;
+                }
+
+                var item = Items[existingIndex];
+                item.RefreshHeader(snapshot.RenderManagerName);
+
+                if (existingIndex != targetIndex)
+                {
+                    Items.Move(existingIndex, targetIndex);
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                NotifyOfPropertyChange(() => HasRenderContexts);
+                NotifyOfPropertyChange(() => HasNoRenderContexts);
+            }
+        }
+
+        private List<RenderContextSnapshot> EnumerateRenderContextSnapshots()
+        {
+            var snapshots = new List<RenderContextSnapshot>();
 
             foreach (var renderManager in IoC.GetAll<IRenderManagerImpl>())
             {
                 foreach (var context in renderManager.GetRenderContexts())
-                    Items.Add(new RenderPerfomenceMeasureItem(renderManager.Name, context));
+                {
+                    if (context is null || snapshots.Any(x => ReferenceEquals(x.Context, context)))
+                        continue;
+
+                    snapshots.Add(new RenderContextSnapshot(renderManager.Name, context));
+                }
             }
 
-            NotifyOfPropertyChange(() => HasRenderContexts);
-            NotifyOfPropertyChange(() => HasNoRenderContexts);
+            return snapshots;
+        }
 
-            RefreshStatistics();
-            refreshTimer.Start();
+        private int IndexOfItem(IRenderContext context)
+        {
+            for (var i = 0; i < Items.Count; i++)
+            {
+                if (ReferenceEquals(Items[i].Context, context))
+                    return i;
+            }
+
+            return -1;
         }
 
         private void RefreshStatistics()
@@ -94,21 +178,85 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
             return Resources.ResourceManager.GetString(key) ?? fallback;
         }
 
-        public sealed class RenderPerfomenceMeasureItem : PropertyChangedBase
+        private readonly record struct RenderContextSnapshot(string RenderManagerName, IRenderContext Context);
+
+        public sealed class PerfomenceMonitorOption
         {
-            private readonly IRenderContext context;
-            private readonly StringBuilder builder = new();
-            private string statisticsText = NoPerfomenceDataText;
-
-            public RenderPerfomenceMeasureItem(string renderManagerName, IRenderContext context)
+            public PerfomenceMonitorOption(Type monitorType)
             {
-                this.context = context;
-
-                var monitor = context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
-                Header = $"{context.Name} {renderManagerName} / {context.GetType().Name} #{context.GetHashCode()} ({monitor.GetType().Name})";
+                MonitorType = monitorType;
+                Name = monitorType.Name;
             }
 
-            public string Header { get; }
+            public Type MonitorType { get; }
+
+            public string Name { get; }
+
+            public IPerfomenceMonitor CreateMonitor()
+            {
+                return IoC.GetAll<IPerfomenceMonitor>().First(x => x.GetType() == MonitorType);
+            }
+        }
+
+        public sealed class RenderPerfomenceMeasureItem : PropertyChangedBase
+        {
+            private readonly StringBuilder builder = new();
+            private readonly IReadOnlyList<PerfomenceMonitorOption> perfomenceMonitorOptions;
+            private string header;
+            private string renderManagerName;
+            private PerfomenceMonitorOption selectedPerfomenceMonitorOption;
+            private string statisticsText = NoPerfomenceDataText;
+
+            public RenderPerfomenceMeasureItem(
+                string renderManagerName,
+                IRenderContext context,
+                IReadOnlyList<PerfomenceMonitorOption> perfomenceMonitorOptions)
+            {
+                Context = context;
+                this.perfomenceMonitorOptions = perfomenceMonitorOptions;
+                RefreshHeader(renderManagerName);
+            }
+
+            public IRenderContext Context { get; }
+
+            public IReadOnlyList<PerfomenceMonitorOption> PerfomenceMonitorOptions => perfomenceMonitorOptions;
+
+            public PerfomenceMonitorOption SelectedPerfomenceMonitorOption
+            {
+                get => selectedPerfomenceMonitorOption;
+                set
+                {
+                    if (value is null || ReferenceEquals(value, selectedPerfomenceMonitorOption))
+                        return;
+
+                    Context.PerfomenceMonitor = value.CreateMonitor();
+                    Set(ref selectedPerfomenceMonitorOption, value);
+                    RefreshHeader(renderManagerName);
+                    RefreshStatistics();
+                }
+            }
+
+            public string Header
+            {
+                get => header;
+                private set => Set(ref header, value);
+            }
+
+            public void RefreshHeader(string renderManagerName)
+            {
+                this.renderManagerName = renderManagerName;
+
+                var monitor = Context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
+                RefreshSelectedPerfomenceMonitorOption(monitor.GetType());
+                Header = $"{Context.Name} {renderManagerName} / {Context.GetType().Name} #{Context.GetHashCode()} ({monitor.GetType().Name})";
+            }
+
+            private void RefreshSelectedPerfomenceMonitorOption(Type monitorType)
+            {
+                var option = perfomenceMonitorOptions.FirstOrDefault(x => x.MonitorType == monitorType);
+                if (!ReferenceEquals(option, selectedPerfomenceMonitorOption))
+                    Set(ref selectedPerfomenceMonitorOption, option, nameof(SelectedPerfomenceMonitorOption));
+            }
 
             public string StatisticsText
             {
@@ -118,7 +266,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
 
             public void RefreshStatistics()
             {
-                var monitor = context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
+                var monitor = Context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
 
                 builder.Clear();
                 monitor.FormatStatistics(builder);

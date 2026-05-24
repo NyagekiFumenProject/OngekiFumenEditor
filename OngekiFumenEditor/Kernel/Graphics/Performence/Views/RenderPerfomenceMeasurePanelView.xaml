@@ -38,17 +38,34 @@
                             Margin="0,0,0,8"
                             Header="{Binding Header}"
                             IsExpanded="True">
-                            <Border
-                                Margin="8"
-                                Padding="8"
-                                Background="{StaticResource EnvironmentWindowBackground}"
-                                BorderBrush="LightGray"
-                                BorderThickness="1">
-                                <TextBlock
-                                    FontFamily="Consolas"
-                                    Foreground="{StaticResource EnvironmentToolWindowText}"
-                                    Text="{Binding StatisticsText}" />
-                            </Border>
+                            <StackPanel>
+                                <StackPanel
+                                    Margin="8,8,8,0"
+                                    Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        Foreground="{StaticResource EnvironmentToolWindowText}"
+                                        Text="{markup:Translate [RenderPerfomenceMeasurePanelMonitor]}" />
+                                    <ComboBox
+                                        Width="260"
+                                        VerticalAlignment="Center"
+                                        DisplayMemberPath="Name"
+                                        ItemsSource="{Binding PerfomenceMonitorOptions}"
+                                        SelectedItem="{Binding SelectedPerfomenceMonitorOption, Mode=TwoWay}" />
+                                </StackPanel>
+                                <Border
+                                    Margin="8"
+                                    Padding="8"
+                                    Background="{StaticResource EnvironmentWindowBackground}"
+                                    BorderBrush="LightGray"
+                                    BorderThickness="1">
+                                    <TextBlock
+                                        FontFamily="Consolas"
+                                        Foreground="{StaticResource EnvironmentToolWindowText}"
+                                        Text="{Binding StatisticsText}" />
+                                </Border>
+                            </StackPanel>
                         </Expander>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

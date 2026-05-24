@@ -1,11 +1,14 @@
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
+using System.ComponentModel.Composition;
 using System.Text;
 using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor;
 using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.ICategorizedPerformenceStatisticsData;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
+    [Export(typeof(IPerfomenceMonitor))]
+    [PartCreationPolicy(CreationPolicy.NonShared)]
     public sealed class DummyPerformenceMonitor : IPerfomenceMonitor
     {
         private sealed class DummyCategorizedPerformenceStatisticsData : ICategorizedPerformenceStatisticsData

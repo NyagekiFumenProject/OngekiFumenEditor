@@ -2079,6 +2079,9 @@
   <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
     <value>无性能测量数据</value>
   </data>
+  <data name="RenderPerfomenceMeasurePanelMonitor" xml:space="preserve">
+    <value>性能测量器:</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>当播放暂停后, 编辑器时间跳转回播放前</value>
   </data>

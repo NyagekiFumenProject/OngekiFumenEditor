@@ -992,7 +992,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
         RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
-        RenderContext.PerfomenceMonitor = IoC.Get<IPerfomenceMonitor>();
+        RenderContext.Name = "FumenVisualEditorViewModel.Render";
         UpdateActualRenderInterval();
         RenderContext.OnRender += Render;
         RenderContext.StartRendering();
