@@ -29,6 +29,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public bool IsInitialized { get; internal set; }
 
+        public string Name { get; set; }
+
         public event Action<IRenderContext, TimeSpan> OnRender;
 
         public int LimitFPS { get; set; } = -1;

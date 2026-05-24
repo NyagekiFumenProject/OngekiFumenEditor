@@ -3,6 +3,7 @@ using AssocSupport.Models;
 using Caliburn.Micro;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
@@ -258,6 +259,11 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         public async Task OpenShowNewVersionDialog(ActionExecutionContext e)
         {
             await IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
+        }
+
+        public async Task OpenRenderPerfomenceMeasurePanel()
+        {
+            await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<IRenderPerfomenceMeasurePanel>());
         }
 
         public void UnRegisterNyagekiAssociations()

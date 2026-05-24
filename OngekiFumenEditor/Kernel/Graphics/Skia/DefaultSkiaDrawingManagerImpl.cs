@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -128,6 +129,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 renderContext = cachedRenderControlMap[renderControl] = new DefaultSkiaRenderContext(this, renderControl);
 
             return Task.FromResult(renderContext);
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyList<IRenderContext> GetRenderContexts()
+        {
+            return cachedRenderControlMap.Values.Cast<IRenderContext>().ToArray();
         }
 
         private SkiaRenderControlBase CheckRenderControl(FrameworkElement rc)

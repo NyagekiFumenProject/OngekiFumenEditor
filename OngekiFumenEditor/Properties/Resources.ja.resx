@@ -1621,6 +1621,18 @@
   <data name="D3DRenderQueueFrameCountHint" xml:space="preserve">
     <value>2 = double buffering, 3 = triple buffering</value>
   </data>
+  <data name="OpenRenderPerfomenceMeasurePanel" xml:space="preserve">
+    <value>パフォーマンス計測パネルを開く</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelTitle" xml:space="preserve">
+    <value>描画パフォーマンス計測</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoContext" xml:space="preserve">
+    <value>描画コンテキストが見つかりません。エディターまたは波形ビューを開いてから、このパネルを開き直してください。</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
+    <value>パフォーマンス計測データがありません</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value />
   </data>

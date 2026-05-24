@@ -157,6 +157,12 @@
                         Foreground="DarkSlateGray"
                         Text="{markup:Translate [D3DRenderQueueFrameCountHint]}" />
                 </StackPanel>
+                <Button
+                    Margin="10,0,0,0"
+                    Padding="10,5"
+                    HorizontalAlignment="Left"
+                    cal:Message.Attach="OpenRenderPerfomenceMeasurePanel()"
+                    Content="{markup:Translate [OpenRenderPerfomenceMeasurePanel]}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">

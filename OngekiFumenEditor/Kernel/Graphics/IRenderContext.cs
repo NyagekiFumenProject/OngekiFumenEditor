@@ -13,6 +13,8 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         IPerfomenceMonitor PerfomenceMonitor { get; set; }
 
+        String Name { get; set; }
+
         void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
 
         void BeforeRender(IDrawingContext context);

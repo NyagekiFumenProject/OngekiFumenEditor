@@ -2067,6 +2067,18 @@
   <data name="D3DRenderQueueFrameCountHint" xml:space="preserve">
     <value>2 = double buffering, 3 = triple buffering</value>
   </data>
+  <data name="OpenRenderPerfomenceMeasurePanel" xml:space="preserve">
+    <value>Open performance measurement panel</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelTitle" xml:space="preserve">
+    <value>Render Performance Measurement</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoContext" xml:space="preserve">
+    <value>No render context found. Reopen this panel after opening an editor or waveform view.</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
+    <value>No performance measurement data</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>Restore the current time to before playback time when editor paused</value>
   </data>

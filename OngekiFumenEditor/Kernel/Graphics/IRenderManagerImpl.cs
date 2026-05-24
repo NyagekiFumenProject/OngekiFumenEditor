@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +32,11 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// Gets or creates the render context associated with the specified render control.
         /// </summary>
         Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default);
+
+        /// <summary>
+        /// Gets the render contexts currently cached by this render manager.
+        /// </summary>
+        IReadOnlyList<IRenderContext> GetRenderContexts();
 
         /// <summary>
         /// Loads an image resource from the provided stream.

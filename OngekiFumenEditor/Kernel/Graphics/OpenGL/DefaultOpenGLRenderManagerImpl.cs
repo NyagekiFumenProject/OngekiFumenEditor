@@ -224,6 +224,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return Task.FromResult(renderContext);
         }
 
+        /// <inheritdoc />
+        public IReadOnlyList<IRenderContext> GetRenderContexts()
+        {
+            return cachedRenderControlMap.Values.ToArray();
+        }
+
         private GLWpfControl CheckRenderControl(FrameworkElement renderControl)
         {
             if (renderControl is not GLWpfControl glView)

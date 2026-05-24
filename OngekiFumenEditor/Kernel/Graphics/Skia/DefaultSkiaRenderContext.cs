@@ -26,6 +26,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public SKCanvas Canvas => renderControl.CurrentRenderSurface?.Canvas;
 
+        public string Name { get; set; }
+
         public DefaultSkiaRenderContext(DefaultSkiaDrawingManagerImpl manager, SkiaRenderControlBase renderControl)
         {
             this.manager = manager;

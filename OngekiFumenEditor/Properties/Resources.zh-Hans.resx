@@ -2067,6 +2067,18 @@
   <data name="D3DRenderQueueFrameCountHint" xml:space="preserve">
     <value>2 = 双重缓冲，3 = 三重缓冲</value>
   </data>
+  <data name="OpenRenderPerfomenceMeasurePanel" xml:space="preserve">
+    <value>打开性能测量面板</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelTitle" xml:space="preserve">
+    <value>渲染性能测量</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoContext" xml:space="preserve">
+    <value>未发现渲染上下文。请先打开编辑器或波形视图后重新打开此面板。</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
+    <value>无性能测量数据</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>当播放暂停后, 编辑器时间跳转回播放前</value>
   </data>
