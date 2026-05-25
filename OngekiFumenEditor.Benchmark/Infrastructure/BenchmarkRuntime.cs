@@ -21,6 +21,9 @@ internal static class BenchmarkRuntime
             if (initialized)
                 return;
 
+            var attachMethod = typeof(App).Assembly.GetType("Costura.AssemblyLoader")?.GetMethod("Attach");
+            attachMethod?.Invoke(null, [true]);
+
             if (Application.Current is null)
                 app = new App(false);
             else

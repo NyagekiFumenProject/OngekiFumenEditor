@@ -38,10 +38,11 @@ namespace OngekiFumenEditor
 
         private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
         {
-            if (TryResolveAsSatelliteAssembly(sender, args) is { } asm)
-                return asm;
+            var requestedAssemblyName = new AssemblyName(args.Name);
+            if ((requestedAssemblyName.Name.EndsWith(".resources") && !string.IsNullOrWhiteSpace(requestedAssemblyName.CultureName)))
+                return TryResolveAsSatelliteAssembly(sender, args);
 
-            asm = TryResolveAssemblyNormally(sender, args);
+            var asm = TryResolveAssemblyNormally(sender, args);
 
             //log it
             var msg = $"try resolve assembly {args.Name} from requesting assembly {args.RequestingAssembly.FullName} {(asm is null ? "BAD" : "GOOD")}";

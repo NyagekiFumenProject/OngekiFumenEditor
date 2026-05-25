@@ -12,7 +12,7 @@
 	</PropertyGroup>
 
 	<!--当Debug编译或被Benchmark项目引用时禁止Costura.Fody处理-->
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug' Or $(OutputPath.Contains('OngekiFumenEditor.Benchmark'))">
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
 		<DisableFody>true</DisableFody>
 	</PropertyGroup>
 
@@ -27,11 +27,12 @@
 		<EmbeddedResource Include="costura-win-x64\SoundTouch.dll" />
 	</ItemGroup>
 
-	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)-->
+	<!--使用nvpatch工具让程序默认使用独显运行(核显给爷爬)
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="$(ProjectDir)Dependencies\Topten.nvpatch.exe --enable $(TargetDir)$(TargetName).exe" />
 	</Target>
-
+	-->
+	
 	<!--记录编译时间-->
 	<PropertyGroup>
 		<BuildDateTime>$([System.DateTime]::UtcNow.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff"))</BuildDateTime>
@@ -780,9 +781,4 @@
 	<Target Name="DeleteXmlFiles" AfterTargets="AfterBuild">
 		<Delete Files="$(OutputPath)/*.xml" />
 	</Target>
-	<!--
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Copy SourceFiles="$(NuGetPackageRoot)microsoft.extensions.objectpool\10.0.0\lib\net10.0\Microsoft.Extensions.ObjectPool.dll" DestinationFolder="$(OutDir)" />
-	</Target>
-	-->
 </Project>
