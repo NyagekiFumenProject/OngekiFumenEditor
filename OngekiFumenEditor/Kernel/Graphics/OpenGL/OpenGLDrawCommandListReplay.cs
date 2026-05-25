@@ -19,7 +19,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
     {
         private static readonly object replayGate = new();
         private static readonly ReplayDrawingContext drawingContext = new();
-        private static DefaultInstancedLineDrawing lineDrawing;
+        private static DefaultLineDrawing lineDrawing;
+        private static DefaultInstancedLineDrawing simpleLineDrawing;
         private static DefaultTextureDrawing textureDrawing;
         private static DefaultBatchTextureDrawing batchTextureDrawing;
         private static DefaultHighlightBatchTextureDrawing highlightBatchTextureDrawing;
@@ -55,14 +56,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             if (lineDrawing is not null)
                 return;
 
-            lineDrawing = new DefaultInstancedLineDrawing(manager);
-            textureDrawing = new DefaultTextureDrawing(manager);
-            batchTextureDrawing = new DefaultBatchTextureDrawing(manager);
-            highlightBatchTextureDrawing = new DefaultHighlightBatchTextureDrawing(manager);
-            circleDrawing = new DefaultInstancedCircleDrawing(manager);
-            polygonDrawing = new DefaultPolygonDrawing(manager);
-            stringDrawing = new DefaultStringDrawing(manager);
-            beamDrawing = new DefaultBeamDrawing(manager);
+            lineDrawing = new(manager);
+            simpleLineDrawing = new(manager);
+            textureDrawing = new(manager);
+            batchTextureDrawing = new(manager);
+            highlightBatchTextureDrawing = new(manager);
+            circleDrawing = new(manager);
+            polygonDrawing = new(manager);
+            stringDrawing = new(manager);
+            beamDrawing = new(manager);
         }
 
         public static void Dispose()
@@ -70,6 +72,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             lock (replayGate)
             {
                 lineDrawing?.Dispose();
+                simpleLineDrawing?.Dispose();
                 textureDrawing?.Dispose();
                 batchTextureDrawing?.Dispose();
                 highlightBatchTextureDrawing?.Dispose();
@@ -78,6 +81,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 beamDrawing?.Dispose();
 
                 lineDrawing = null;
+                simpleLineDrawing = null;
                 textureDrawing = null;
                 batchTextureDrawing = null;
                 highlightBatchTextureDrawing = null;
@@ -192,14 +196,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                     }
                     break;
                 case DrawSimpleLinesCommand drawSimpleLinesCommand:
-                    lineDrawing.PushOverrideModelMatrix(currentModelMatrix);
+                    simpleLineDrawing.PushOverrideModelMatrix(currentModelMatrix);
                     try
                     {
-                        lineDrawing.Draw(drawingContext, drawSimpleLinesCommand.Points, drawSimpleLinesCommand.LineWidth);
+                        simpleLineDrawing.Draw(drawingContext, drawSimpleLinesCommand.Points, drawSimpleLinesCommand.LineWidth);
                     }
                     finally
                     {
-                        lineDrawing.PopOverrideModelMatrix(out _);
+                        simpleLineDrawing.PopOverrideModelMatrix(out _);
                     }
                     break;
                 case DrawTextureCommand drawTextureCommand:
