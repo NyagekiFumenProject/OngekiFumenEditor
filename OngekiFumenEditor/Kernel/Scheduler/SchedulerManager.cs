@@ -1,5 +1,5 @@
 ﻿using Caliburn.Micro;
-using OngekiFumenEditor.Core.Utils;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;

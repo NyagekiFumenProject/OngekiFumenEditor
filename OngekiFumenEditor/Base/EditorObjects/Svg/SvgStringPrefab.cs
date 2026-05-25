@@ -1,0 +1,90 @@
+using System.Runtime.CompilerServices;
+
+namespace OngekiFumenEditor.Base.EditorObjects.Svg
+{
+	public class SvgStringPrefab : SvgPrefabBase
+	{
+		public enum FlowDirection
+		{
+			LeftToRight,
+			RightToLeft,
+			TopToBottom,
+			BottomToTop
+		}
+
+		public const string CommandName = "[SVG_STR]";
+		public override string IDShortName => CommandName;
+
+		private string content;
+		public string Content
+		{
+			get => content;
+			set => Set(ref content, value);
+		}
+
+		private FlowDirection contentFlowDirection = FlowDirection.LeftToRight;
+		public FlowDirection ContentFlowDirection
+		{
+			get => contentFlowDirection;
+			set => Set(ref contentFlowDirection, value);
+		}
+
+		private double fontSize = 16;
+		public double FontSize
+		{
+			get => fontSize;
+			set => Set(ref fontSize, value);
+		}
+
+		private double contentLineHeight = 16;
+		public double ContentLineHeight
+		{
+			get => contentLineHeight;
+			set => Set(ref contentLineHeight, value);
+		}
+
+		private string typefaceName = "Tahoma";
+		public string TypefaceName
+		{
+			get => typefaceName;
+			set => Set(ref typefaceName, value);
+		}
+
+		public override void NotifyOfPropertyChange([CallerMemberName] string propertyName = null)
+		{
+			switch (propertyName)
+			{
+				case nameof(Content):
+				case nameof(FontSize):
+				case nameof(ColorfulLaneColor):
+				case nameof(ContentLineHeight):
+				case nameof(ContentFlowDirection):
+				case nameof(TypefaceName):
+					RebuildSvgContent();
+					break;
+				default:
+					base.NotifyOfPropertyChange(propertyName);
+					break;
+			}
+		}
+
+		public void RebuildSvgContent()
+		{
+			CleanGeometry();
+		}
+
+		public override void Copy(OngekiObjectBase fromObj)
+		{
+			base.Copy(fromObj);
+
+			if (fromObj is not SvgStringPrefab from)
+				return;
+
+			Content = from.Content;
+			TypefaceName = from.TypefaceName;
+			ContentLineHeight = from.ContentLineHeight;
+			FontSize = from.FontSize;
+			ContentFlowDirection = from.ContentFlowDirection;
+		}
+	}
+}

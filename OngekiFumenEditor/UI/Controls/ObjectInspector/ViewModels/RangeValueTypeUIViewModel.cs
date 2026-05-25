@@ -1,5 +1,5 @@
 ﻿using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
-using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels

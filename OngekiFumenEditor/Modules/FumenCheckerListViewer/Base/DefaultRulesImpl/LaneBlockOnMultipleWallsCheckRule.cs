@@ -1,0 +1,34 @@
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
+using OngekiFumenEditor.Utils;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+
+namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
+
+[Export(typeof(IFumenCheckRule))]
+public class LaneBlockOnMultipleWallsCheckRule : IFumenCheckRule
+{
+    private const string RuleName = "LaneBlockAcrossWalls";
+
+    public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostEditor)
+    {
+        foreach (var laneBlock in fumen.LaneBlocks)
+        {
+            var (refLaneStart, refLaneEnd) = laneBlock.CalculateReferenceWallLanes(fumen);
+            if (refLaneStart != refLaneEnd)
+            {
+                yield return new CommonCheckResult
+                {
+                    Severity = RuleSeverity.Problem,
+                    Description = Resources.LaneBlockOnMultipleWalls.Format(refLaneStart?.RecordId, refLaneEnd?.RecordId),
+                    LocationDescription = laneBlock.TGrid.ToString(),
+                    NavigateBehavior = new NavigateToTGridBehavior(refLaneEnd?.ReferenceStartObject.TGrid),
+                    RuleName = RuleName
+                };
+            }
+        }
+    }
+}
+

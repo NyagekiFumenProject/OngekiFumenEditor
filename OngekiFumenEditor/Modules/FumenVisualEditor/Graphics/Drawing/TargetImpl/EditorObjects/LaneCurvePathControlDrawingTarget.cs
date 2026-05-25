@@ -1,5 +1,5 @@
 using Caliburn.Micro;
-using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;

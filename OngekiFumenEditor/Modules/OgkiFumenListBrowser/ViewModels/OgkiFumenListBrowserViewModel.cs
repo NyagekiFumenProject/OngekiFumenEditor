@@ -6,7 +6,7 @@ using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models;
-using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;

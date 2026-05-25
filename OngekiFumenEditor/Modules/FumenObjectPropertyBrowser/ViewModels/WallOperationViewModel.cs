@@ -1,5 +1,5 @@
-using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {

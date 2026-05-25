@@ -1,9 +1,9 @@
 using Caliburn.Micro;
-using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Core.Base.OngekiObjects;
-using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;

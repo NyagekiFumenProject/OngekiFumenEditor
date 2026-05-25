@@ -1,5 +1,5 @@
 using Caliburn.Micro;
-using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
@@ -10,7 +10,7 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
 using OngekiFumenEditor.Modules.PreviewSvgGenerator;
-using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;

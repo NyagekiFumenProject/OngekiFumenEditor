@@ -1,12 +1,12 @@
 using Gemini.Framework.Commands;
-using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Core.Kernel.CurveInterpolater.DefaultImpl.Factory;
-using OngekiFumenEditor.Core.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
-using CoreInterpolateAll = OngekiFumenEditor.Core.Utils.Ogkr.InterpolateAll;
+using CoreInterpolateAll = OngekiFumenEditor.Utils.Ogkr.InterpolateAll;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;

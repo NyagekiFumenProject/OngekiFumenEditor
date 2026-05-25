@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;

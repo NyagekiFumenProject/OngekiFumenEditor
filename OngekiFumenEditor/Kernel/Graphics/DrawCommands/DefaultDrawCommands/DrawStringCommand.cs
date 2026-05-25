@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Core.Utils.ObjectPool;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using System;
 using System.Numerics;

@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;

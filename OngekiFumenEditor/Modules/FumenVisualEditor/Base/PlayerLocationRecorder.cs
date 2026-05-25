@@ -1,5 +1,5 @@
-using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Base.Collections.Base;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Linq;

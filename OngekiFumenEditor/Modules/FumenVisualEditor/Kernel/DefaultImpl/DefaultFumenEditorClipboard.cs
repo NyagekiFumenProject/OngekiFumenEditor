@@ -1,9 +1,9 @@
 using Caliburn.Micro;
-using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Core.Base.OngekiObjects;
-using OngekiFumenEditor.Core.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -15,7 +15,7 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using static OngekiFumenEditor.Core.Base.OngekiObjects.Flick;
+using static OngekiFumenEditor.Base.OngekiObjects.Flick;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl

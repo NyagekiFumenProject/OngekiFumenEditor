@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base

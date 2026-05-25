@@ -1,12 +1,12 @@
 using Caliburn.Micro;
-using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Base.Collections;
-using OngekiFumenEditor.Core.Base.EditorObjects;
-using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.OngekiObjects;
 
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.UI.Controls.ObjectInspector;

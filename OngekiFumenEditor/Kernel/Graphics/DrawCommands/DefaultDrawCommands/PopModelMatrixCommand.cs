@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Core.Utils.ObjectPool;
+using OngekiFumenEditor.Utils.ObjectPool;
 
 namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
 {

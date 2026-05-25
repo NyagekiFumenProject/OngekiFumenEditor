@@ -1,7 +1,7 @@
-﻿using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Base.EditorObjects.Svg;
-using OngekiFumenEditor.Core.Base.OngekiObjects;
-using OngekiFumenEditor.Core.Parser.Ogkr;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Parser.Ogkr;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;

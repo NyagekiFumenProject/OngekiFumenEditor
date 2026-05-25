@@ -1,6 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Audio;
-using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using System.Collections.Generic;
 using System.Linq;

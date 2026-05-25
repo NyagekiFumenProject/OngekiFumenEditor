@@ -1,5 +1,5 @@
 using Caliburn.Micro;
-using OngekiFumenEditor.Core.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using System.Collections.Generic;
 using System.Linq;

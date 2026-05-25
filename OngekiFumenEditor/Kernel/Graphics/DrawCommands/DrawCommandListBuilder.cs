@@ -1,5 +1,5 @@
 using NetTopologySuite.Utilities;
-using OngekiFumenEditor.Core.Utils.ObjectPool;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using System;

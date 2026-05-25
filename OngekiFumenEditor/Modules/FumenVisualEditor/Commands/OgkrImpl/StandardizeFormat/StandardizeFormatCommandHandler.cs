@@ -3,7 +3,7 @@ using Gemini.Framework.Commands;
 using Microsoft.Win32;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System.Diagnostics;

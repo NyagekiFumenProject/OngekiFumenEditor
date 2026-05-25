@@ -30,10 +30,30 @@ namespace OngekiFumenEditor
         {
             CheckOrUpgradeAllSettings();
 
-            AppDomain.CurrentDomain.AssemblyResolve += OnSatelliteAssemblyResolve;
+            AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
             // 设置工作目录为执行文件所在的目录
             Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             IsGUIMode = isGUIMode;
+        }
+
+        private Assembly OnAssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            if (TryResolveAsSatelliteAssembly(sender, args) is { } asm)
+                return asm;
+
+            asm = TryResolveAssemblyNormally(sender, args);
+
+            //log it
+            var msg = $"try resolve assembly {args.Name} from requesting assembly {args.RequestingAssembly.FullName} {(asm is null ? "BAD" : "GOOD")}";
+            Debug.WriteLine(msg);
+            Console.WriteLine(msg);
+
+            return asm;
+        }
+
+        private Assembly TryResolveAssemblyNormally(object sender, ResolveEventArgs args)
+        {
+            return default;
         }
 
         public static void CheckOrUpgradeAllSettings()
@@ -85,7 +105,7 @@ namespace OngekiFumenEditor
             FileLogOutput.WriteLog($"Upgrade program settings finished\n");
         }
 
-        private Assembly OnSatelliteAssemblyResolve(object sender, ResolveEventArgs args)
+        private Assembly TryResolveAsSatelliteAssembly(object sender, ResolveEventArgs args)
         {
             /*
              这里解决Costura.Fody无法正常加载SatelliteAssembly的问题

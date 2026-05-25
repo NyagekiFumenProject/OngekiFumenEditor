@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Core.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Globalization;
 using System.Windows.Data;

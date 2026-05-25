@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Gemini.Framework;
-using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Parser;
 
 namespace OngekiFumenEditor.Modules.FumenConverter
 {

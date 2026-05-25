@@ -1,8 +1,8 @@
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
-using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Base.Attributes;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;

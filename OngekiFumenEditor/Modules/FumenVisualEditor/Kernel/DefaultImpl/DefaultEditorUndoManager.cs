@@ -2,7 +2,7 @@ using Caliburn.Micro;
 using Gemini.Modules.UndoRedo;
 using Gemini.Modules.UndoRedo.Services;
 using Gemini.Modules.UndoRedo.UndoAction;
-using OngekiFumenEditor.Core.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;

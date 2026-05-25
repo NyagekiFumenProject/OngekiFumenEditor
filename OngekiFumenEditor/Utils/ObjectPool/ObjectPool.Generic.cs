@@ -1,0 +1,63 @@
+using System;
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.ObjectPool;
+
+namespace OngekiFumenEditor.Utils.ObjectPool
+{
+    public class ObjectPool<T> where T : class, new()
+    {
+        private static readonly Microsoft.Extensions.ObjectPool.ObjectPool<T> pool =
+            new DefaultObjectPoolProvider().Create<T>();
+
+        private sealed class AutoDisposable : IDisposable
+        {
+            public T RefObject { get; set; }
+
+            public void Dispose()
+            {
+                if (RefObject is not null)
+                    Return(RefObject);
+
+                RefObject = default;
+                ObjectPool<AutoDisposable>.Return(this);
+            }
+        }
+
+        public static IDisposable GetWithUsingDisposable(out T obj)
+        {
+            Get(out obj);
+            var d = ObjectPool<AutoDisposable>.Get();
+            d.RefObject = obj;
+            return d;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(out T obj)
+        {
+            obj = pool.Get();
+        }
+
+#if DEBUG
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Get(string rentMark, out T obj) => Get(out obj);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T Get(string rentMark) => Get();
+#endif
+
+        public static T Get()
+        {
+            Get(out var t);
+            return t;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Return(T obj)
+        {
+            if (obj == null)
+                return;
+
+            pool.Return(obj);
+        }
+    }
+}

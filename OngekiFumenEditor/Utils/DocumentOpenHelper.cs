@@ -5,7 +5,7 @@ using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
-using OngekiFumenEditor.Core.Parser;
+using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using System;
 using System.IO;

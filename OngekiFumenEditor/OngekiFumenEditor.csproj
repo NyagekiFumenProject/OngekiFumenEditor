@@ -11,8 +11,8 @@
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
 	</PropertyGroup>
 
-	<!--当Debug编译时禁止Costura.Fody处理-->
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+	<!--当Debug编译或被Benchmark项目引用时禁止Costura.Fody处理-->
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' Or $(OutputPath.Contains('OngekiFumenEditor.Benchmark'))">
 		<DisableFody>true</DisableFody>
 	</PropertyGroup>
 
@@ -217,11 +217,14 @@
 		<PackageReference Include="Vortice.Direct3D12" Version="3.8.3" />
 		<PackageReference Include="Vortice.Direct3D9" Version="3.8.3" />
 		<PackageReference Include="Vortice.DXGI" Version="3.8.3" />
+		<PackageReference Include="Collections.Pooled" Version="1.0.82" />
+		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="10.0.0" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="10.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\OngekiFumenEditor.Core\OngekiFumenEditor.Core.csproj">
-			<PrivateAssets>false</PrivateAssets>
+		<ProjectReference Include="..\Dependences\gemini\Dependences\Caliburn.Micro\src\Caliburn.Micro.Core\Caliburn.Micro.Core.csproj">
+			<PrivateAssets>all</PrivateAssets>
 		</ProjectReference>
 		<ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj">
 			<PrivateAssets>all</PrivateAssets>
@@ -248,7 +251,7 @@
 			<HintPath>Dependencies\AcbGeneratorFuck\AcbGeneratorFuck.dll</HintPath>
 		</Reference>
 		<Reference Include="AkiraMindController.Communication">
-		  <HintPath>Dependencies\AkiraMindController.Communication\AkiraMindController.Communication.dll</HintPath>
+			<HintPath>Dependencies\AkiraMindController.Communication\AkiraMindController.Communication.dll</HintPath>
 		</Reference>
 		<Reference Include="DereTore.Common">
 			<HintPath>Dependencies\DereTore\DereTore.Common.dll</HintPath>
@@ -266,13 +269,13 @@
 			<HintPath>Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
 		</Reference>
 		<Reference Include="kRpc">
-		  <HintPath>Dependencies\AkiraMindController.Communication\kRpc.dll</HintPath>
+			<HintPath>Dependencies\AkiraMindController.Communication\kRpc.dll</HintPath>
 		</Reference>
 		<Reference Include="TexturePlugin">
 			<HintPath>Dependencies\JacketGenerator\TexturePlugin.dll</HintPath>
 		</Reference>
 		<Reference Include="websocket-sharp">
-		  <HintPath>Dependencies\AkiraMindController.Communication\websocket-sharp.dll</HintPath>
+			<HintPath>Dependencies\AkiraMindController.Communication\websocket-sharp.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
@@ -777,5 +780,9 @@
 	<Target Name="DeleteXmlFiles" AfterTargets="AfterBuild">
 		<Delete Files="$(OutputPath)/*.xml" />
 	</Target>
-
+	<!--
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Copy SourceFiles="$(NuGetPackageRoot)microsoft.extensions.objectpool\10.0.0\lib\net10.0\Microsoft.Extensions.ObjectPool.dll" DestinationFolder="$(OutDir)" />
+	</Target>
+	-->
 </Project>

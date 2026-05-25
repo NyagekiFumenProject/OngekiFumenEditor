@@ -1,5 +1,5 @@
-using OngekiFumenEditor.Core.Base;
-using OngekiFumenEditor.Core.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
