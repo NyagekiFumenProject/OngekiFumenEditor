@@ -45,7 +45,7 @@ namespace OngekiFumenEditor
             var asm = TryResolveAssemblyNormally(sender, args);
 
             //log it
-            var msg = $"try resolve assembly {args.Name} from requesting assembly {args.RequestingAssembly.FullName} {(asm is null ? "BAD" : "GOOD")}";
+            var msg = $"try resolve assembly {args.Name} from requesting assembly {args.RequestingAssembly?.FullName} {(asm is null ? "BAD" : "GOOD")}";
             Debug.WriteLine(msg);
             Console.WriteLine(msg);
 
