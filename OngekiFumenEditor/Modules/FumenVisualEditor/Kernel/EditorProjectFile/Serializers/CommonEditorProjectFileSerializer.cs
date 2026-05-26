@@ -53,14 +53,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile.S
 			jsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
 		}
 
-		public override async Task<bool> CheckParsableAsync(byte[] buffer)
+		public override Task<bool> CheckParsableAsync(byte[] buffer)
 		{
-			ValueTask<TX> DeserializeAnonymousType<TX>(Stream ms, TX _) => JsonSerializer.DeserializeAsync<TX>(ms, jsonSerializerOptions);
+			// 原版反序列化整个文件只为读 Version;改用 Utf8JsonReader 流式扫到第一个
+			// "Version" 顶层属性即可返回,常见情况几十字节就能判定,远早于完整解析。
+			return Task.FromResult(TryReadTopLevelVersion(buffer, out var ver) && ver == Version);
+		}
 
-			var ms = new MemoryStream(buffer);
-			var r = await DeserializeAnonymousType(ms, new { Version = new Version() });
+		private static bool TryReadTopLevelVersion(ReadOnlySpan<byte> buffer, out Version version)
+		{
+			version = null;
+			var reader = new Utf8JsonReader(buffer, isFinalBlock: true, state: default);
+			if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
+				return false;
 
-			return r?.Version == Version;
+			var depth = reader.CurrentDepth;
+			while (reader.Read())
+			{
+				if (reader.TokenType == JsonTokenType.EndObject && reader.CurrentDepth == depth)
+					return false;
+
+				if (reader.TokenType != JsonTokenType.PropertyName || reader.CurrentDepth != depth + 1)
+					continue;
+
+				if (!reader.ValueTextEquals("Version"u8))
+				{
+					reader.Skip();
+					continue;
+				}
+
+				if (!reader.Read())
+					return false;
+				var raw = reader.GetString();
+				return Version.TryParse(raw, out version);
+			}
+			return false;
 		}
 
 		public override async Task<T> ParseAsync(byte[] buffer)

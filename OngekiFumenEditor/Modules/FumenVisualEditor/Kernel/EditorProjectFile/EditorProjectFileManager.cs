@@ -41,7 +41,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile
 
 		public async Task<EditorProjectDataModel> Clone(EditorProjectDataModel proj)
 		{
-			var ms = new MemoryStream();
+			// 预估典型项目 ~256 KB,提前分配避免 MemoryStream 内部 byte[] 多次扩容拷贝。
+			// MigratableSerializerManager.Load 要求 byte[] 无法传 ArraySegment,
+			// 因此 ToArray 必要,但预分配可消除写入阶段 N 次 Array.Resize。
+			using var ms = new MemoryStream(256 * 1024);
 			await manager.Save(ms, proj, typeof(EditorProjectDataModel));
 			return await manager.Load<EditorProjectDataModel>(ms.ToArray());
 		}

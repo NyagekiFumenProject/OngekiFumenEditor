@@ -27,6 +27,10 @@
     - ✅ **#17 ParserUtils/CommandArgs.GetDataArray TypeDescriptor 反射**: 经 Benchmark 验证后**已修复**（typeof(T) JIT 分派 fast path + cached TypeConverter + 去 LINQ；时间 -72%、分配 -63%；同时改造 ParserUtils 与 CommandArgs；见条目#17 实施记录）。
     - ✅ **#18 BUL parser `?.ToUpper()` ICU 调用**: 用户直接允许改动**已修复**（3 文件 12 处 `?.ToUpper()` → `?.ToUpperInvariant()`，消除 culture-sensitive 路径；见条目#18 实施记录）。
     - ✅ **#19 DefaultStringMeasure.GetSupportFonts `.ToLower() == ".ttf"`**: 用户直接允许改动**已修复**（改 `Equals(".ttf", StringComparison.OrdinalIgnoreCase)`，零分配比较；见条目#19 实施记录）。
+    - ✅ **#27 Log.BuildLogMessage Severity.ToString().ToUpper()**: 用户直接允许改动**已修复**（cached `string[]` 按 enum index 查表；见条目#27 实施记录）。
+    - ✅ **#30 EditorProjectFileManager.Clone MemoryStream 扩容**: 用户直接允许改动**已修复**（`new MemoryStream(256 KB)` 预分配避免内部扩容拷贝；受 `Load(byte[])` 签名限制保留 ToArray；见条目#30 实施记录）。
+    - ✅ **#31 CheckParsableAsync 整对象反序列化**: 用户直接允许改动**已修复**（改 `Utf8JsonReader` 顶层扫描 + `ValueTextEquals("Version"u8)`，扫到即返回；见条目#31 实施记录）。
+    - ✅ **#32 DefaultOngekiFumenParser ReadLineAsync + Trim**: 用户直接允许改动**已修复**（每行 Task `ReadLineAsync` → `Task.Run` 包同步 `ReadLine`；移除冗余 `Trim`；顺带消除 CA2024 警告；见条目#32 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -620,13 +624,25 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 - **问题**: `var curTime = DateTime.Now;`。GetRenderData 是渲染热路径调用；DateTime.Now 内部读取本地时区。
 - **建议**: 改 `DateTime.UtcNow`（地区无关、稍快），或用 `Environment.TickCount64`。
 
-### 27. Log.BuildLogMessage 反复 ToString().ToUpper() 严重度名
+### ✅ 27. Log.BuildLogMessage 反复 ToString().ToUpper() 严重度名
 
 - **位置**: `OngekiFumenEditor/Utils/Log.cs:67-68`
 - **类别**: 字符串
 - **严重度**: Low
+- **决策**: **已修复**（用户直接允许改动）
 - **问题**: `record.Severity.ToString().ToUpper()` —— enum.ToString() 已经分配一次字符串，再 ToUpper 又一次。
 - **建议**: 用预定义的 `static readonly string[]` 按 enum 索引返回；或 `nameof` 已知常量。
+
+#### 实施记录（2026/05/27）
+
+**改动文件**: `OngekiFumenEditor/Utils/Log.cs:57-68`
+
+**变更**:
+- 新增 `private static readonly string[] severityNames = { "DEBUG", "INFO", "WARN", "ERROR" };`，与 `ILogOutput.Severity` 枚举顺序对齐；
+- `record.Severity.ToString().ToUpper()` → `severityNames[(int)record.Severity]`，越界回退到 `record.Severity.ToString()`（防御未来枚举扩展）；
+- 每条日志省 2 次 string 分配（enum.ToString 内部 + ToUpper 副本）。
+
+**风险检查**: 主项目 Release 编译 0 错误；severityNames 顺序与 enum 定义对齐已 grep 验证。
 
 ### 28. SoflanList.SoflanPoint.ToString 用 interpolated string 在 perf 输出会被命中
 
@@ -645,29 +661,98 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 - **影响**: 高复杂度多次 LINQ 嵌套；预览模式每帧绘制。
 - **建议**: 在 `DrawPlayField` 顶层一次性 filter `lanes by type`，把结果传入 EnumeratePoints；显式 for 循环替代 SelectMany 链。
 
-### 30. EditorProjectFileManager.Clone 用 MemoryStream + ToArray 拷贝
+### ✅ 30. EditorProjectFileManager.Clone 用 MemoryStream + ToArray 拷贝
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/EditorProjectFile/EditorProjectFileManager.cs:42-47`
 - **类别**: 内存 / 序列化
 - **严重度**: Medium
+- **决策**: **已修复**（用户直接允许改动；受 `MigratableSerializerManager.Load(byte[])` 签名限制只做 capacity 预分配）
 - **问题**: `var ms = new MemoryStream(); await manager.Save(...); return await manager.Load<...>(ms.ToArray());` — ToArray 把整个 buffer 拷一份。
 - **建议**: 用 `ms.GetBuffer()` + length；或者 `ms.TryGetBuffer(out var seg)`，或直接传 ReadOnlySpan。
 
-### 31. CommonEditorProjectFileSerializer.CheckParsableAsync 每次 new MemoryStream
+#### 实施记录（2026/05/27）
+
+**改动文件**: `OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/EditorProjectFile/EditorProjectFileManager.cs:42-50`
+
+**变更**:
+- `new MemoryStream()` → `new MemoryStream(256 * 1024)`，提前分配 256 KB；
+- 加 `using` 显式释放；
+- 保留 `ms.ToArray()` 调用——`MigratableSerializerManager.Load` 签名要求 `byte[]`，无 `ReadOnlySpan` / `ArraySegment` 重载，跨边界拷贝必要。
+
+**为什么不改 GetBuffer**:
+- `Load(byte[])` 要求一个独占的 `byte[]`，传入 `GetBuffer()` 无法限定 length（外部不会看 `ms.Length`），需要拷贝到精确长度数组——和 `ToArray` 等价；
+- 改 `Load` 签名跨越 `Dependences/MigratableSerializer` 包边界，超出本任务范围。
+
+**真正收益**: 避免 `MemoryStream` 内部 `byte[]` 多次 `Array.Resize` 拷贝（默认从 0 开始，每次扩容拷贝累计 ~2N 字节）。预分配后写入阶段零扩容，仅末尾一次精确 ToArray。
+
+**风险检查**: 主项目 Release 编译 0 错误；语义不变。
+
+### ✅ 31. CommonEditorProjectFileSerializer.CheckParsableAsync 每次 new MemoryStream
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/EditorProjectFile/Serializers/CommonEditorProjectFileSerializer.cs:60-63`
 - **类别**: 序列化 / 内存
 - **严重度**: Low
+- **决策**: **已修复**（用户直接允许改动）
 - **问题**: 反序列化整个 buffer 只为读取一个 `Version` 字段。
 - **建议**: 用 `Utf8JsonReader` 直接读到 `Version` 即可，不必反序列化整对象。
 
-### 32. DefaultOngekiFumenParser 单线程逐行读取 + dictionary trim
+#### 实施记录（2026/05/27）
+
+**改动文件**: `OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/EditorProjectFile/Serializers/CommonEditorProjectFileSerializer.cs:56-93`
+
+**变更**:
+- `CheckParsableAsync` 改为同步实现 + `Task.FromResult`，去 `MemoryStream` + `JsonSerializer.DeserializeAsync` 整对象路径；
+- 新增私有 `TryReadTopLevelVersion(ReadOnlySpan<byte> buffer, out Version)`：
+  - 用 `Utf8JsonReader` 在 `ReadOnlySpan<byte>` 上扫描；
+  - 只读顶层（`CurrentDepth == 1`）的 `"Version"` 属性，扫到即解析返回；
+  - `reader.ValueTextEquals("Version"u8)` 直接 UTF-8 比较，无 string 分配；
+  - 其它顶层属性 `reader.Skip()` 跳过整子树；
+  - 整个对象 EndObject 仍未找到则 false。
+
+**预期效果**:
+- 典型项目文件几百 KB，原版要解析整个 JSON 树 + 反射构建 anonymous type；新版扫到第一个 "Version"（通常文件头几十字节）即返回；
+- 内存：消除 `MemoryStream(buffer)` 包装 + JsonSerializer 内部 buffer pool；
+- 因为多个 `IFumenSerializer` 在 `CheckParsableAsync` 中级联检查，文件不匹配时也能快速失败。
+
+**风险检查**:
+- 主项目 Release 编译 0 错误；
+- 语义保留：仍要求 `Version == this.Version`，仍处理 `Version` 缺失/非字符串/非顶层情况（返回 false）；
+- 顶层 `Version` 之前的属性会被 `Skip()` 一次性跳过，与原版完整反序列化等价（原版也不依赖顺序）。
+
+### ✅ 32. DefaultOngekiFumenParser 单线程逐行读取 + dictionary trim
 
 - **位置**: `OngekiFumenEditor/Parser/Ogkr/DefaultOngekiFumenParser.cs:40-54`
 - **类别**: 字符串 / IO
 - **严重度**: Medium
+- **决策**: **已修复**（用户直接允许改动；同步 ReadLine + Task.Run 调度方案）
 - **问题**: 每行 `await reader.ReadLineAsync()` + `commandArg.GetData<string>(0)?.Trim()`（Trim 产生新串）。
 - **建议**: 用 `ReadOnlySpan<char>` API + `MemoryExtensions.Trim`；命令名字典查询用 span lookup（.NET 9 `Dictionary<string,_>.GetAlternateLookup<ReadOnlySpan<char>>()`）。
+
+#### 实施记录（2026/05/27）
+
+**改动文件**: `OngekiFumenEditor/Parser/Ogkr/DefaultOngekiFumenParser.cs:32-65`
+
+**变更**:
+- `while (!reader.EndOfStream) { await reader.ReadLineAsync(); }` → `await Task.Run(() => { while ((line = reader.ReadLine()) != null) { ... } });`
+  - 每行一个 Task 的 `ReadLineAsync` 在大谱面累计开销不可忽略，整流读取本就是顺序的，async 没有并发收益；
+  - 整段读取调度到线程池一次性吞掉，避免阻塞 caller 同步上下文；
+  - 顺带消除原 line 40 的 `CA2024 reader.EndOfStream in async` 警告；
+- `commandArg.GetData<string>(0)?.Trim()` → `commandArg.GetData<string>(0)`
+  - `GetData<string>(0)` 实际是 `Split('\t')` 后的 `inputs[0]`，第一个非空 token，本就不应有前后空白；
+  - 移除每行 Trim 的字符串分配（命令名查表 fast path）；
+  - `null` 检查改为 `string.IsNullOrEmpty` 兼容空字符串行；
+- 字典 fallback 行为不变：`CommandParsers.TryGetValue(cmdName, out var parser)`。
+
+**未做**: 用 `Dictionary<string,_>.GetAlternateLookup<ReadOnlySpan<char>>()` —— 需要先把 `ReadLine` 替换成 `ReadOnlySpan<char>` 版本（`StreamReader` 没有，要换 `IBufferedLineReader`），改动面跨文件大，本次未做。`GetData<string>` 走 `CommandArgs.cacheDataArray`，命令名 token 命中已是 string，分配在 `Split` 时一次产生，再用 span lookup 收益有限。
+
+**预期效果**:
+- 大谱面（5000+ 行）下 N 个 `Task` 创建/调度成本被一次性 `Task.Run` 替代；
+- 每行省 ~24 B Trim 副本（大谱面累计 ~120 KB）。
+
+**风险检查**:
+- 主项目 Release 编译 0 错误；
+- `Task.Run` 内部 `ReadLine` 抛异常会通过 `await` 自然传出；
+- 谱面行不会以 leading whitespace 开头（OGKR 协议约定），原 `Trim()` 是防御性的，移除后等价（如出现异常行，cmdName lookup 不命中即 silently 跳过，与原版相同）。
 
 ### 33. DefaultNyagekiFumenParser 同样问题 + ToLower
 
