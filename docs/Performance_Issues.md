@@ -31,6 +31,16 @@
     - ✅ **#30 EditorProjectFileManager.Clone MemoryStream 扩容**: 用户直接允许改动**已修复**（`new MemoryStream(256 KB)` 预分配避免内部扩容拷贝；受 `Load(byte[])` 签名限制保留 ToArray；见条目#30 实施记录）。
     - ✅ **#31 CheckParsableAsync 整对象反序列化**: 用户直接允许改动**已修复**（改 `Utf8JsonReader` 顶层扫描 + `ValueTextEquals("Version"u8)`，扫到即返回；见条目#31 实施记录）。
     - ✅ **#32 DefaultOngekiFumenParser ReadLineAsync + Trim**: 用户直接允许改动**已修复**（每行 Task `ReadLineAsync` → `Task.Run` 包同步 `ReadLine`；移除冗余 `Trim`；顺带消除 CA2024 警告；见条目#32 实施记录）。
+    - ✅ **#33 DefaultNyagekiFumenParser ToLower**: 用户直接允许改动**已修复**（字典 key 改 `StringComparer.OrdinalIgnoreCase`，行解析移除 `ToLower()`；见条目#33 实施记录）。
+    - ✅ **#34 RenderControl_UnLoaded async void**: 用户直接允许改动**已修复**（`RenderControl_Loaded/UnLoaded` 均加 try/catch 捕获 await 期间异常，避免 async void 异常逃逸；见条目#34 实施记录）。
+    - ✅ **#35 AbortableThread.Abort 阻塞 UI**: 用户直接允许改动**已修复**（新增 `AbortAsync()`；`SchedulerManager.Term` 改 async 调用避免 UI 同步等待；见条目#35 实施记录）。
+    - ✅ **#41 RandomHepler 自管理 Random**: 用户直接允许改动**已修复**（全 API 改 `Random.Shared`，消除 DateTime seed 与共享 StringBuilder 竞态；见条目#41 实施记录）。
+    - ✅ **#42 ImageLoader MD5.Create**: 用户直接允许改动**已修复**（改静态 `MD5.HashData(...)`，省 IDisposable；见条目#42 实施记录）。
+    - ✅ **#43 KeyBindingDefinition Regex**: 用户直接允许改动**已修复**（`partial class` + `[GeneratedRegex]` 源生成；见条目#43 实施记录）。
+    - ✅ **#44 OngekiFumenSet Regex**: 用户直接允许改动**已修复**（`BpmRegex`/`CreatorRegex` 改 `[GeneratedRegex]`；见条目#44 实施记录）。
+    - ✅ **#45 ParserUtils Regex**: 用户直接允许改动**已修复**（`static partial class` + `[GeneratedRegex]`；见条目#45 实施记录）。
+    - ✅ **#46 DocumentOpenHelper 方法内 new Regex**: 用户直接允许改动**已修复**（提取 `MusicIdFromFileNameRegex()` 为 `[GeneratedRegex]` 静态成员；见条目#46 实施记录）。
+    - ✅ **#47 GridBase.GetHashCode**: 用户直接允许改动**已修复**（改 `HashCode.Combine`，加注释说明 mutable hash 约束；未做不可变重构原因见条目#47 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
