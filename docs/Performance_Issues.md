@@ -24,6 +24,7 @@
     - ✅ **#7 SchedulerManager.Run 每 10ms 分配**: 用户直接允许改动**已修复**（LINQ + ToArray + ContinueWith 闭包 → 复用 List + InvokeAndStamp；DateTime.Now → Stopwatch；async void → async Task；见条目#7 实施记录）。
     - ✅ **#13 EnumerateAllDisplayableObjects 多层 LINQ**: 用户指示签名改为 `IPooledList<IDisplayableObject>`，**已修复**（13 层 Concat + SelectMany → PooledList 累加 + 单 foreach；调用方 OfType → 模式匹配；见条目#13 实施记录）。
     - ✅ **#14 RebuildSoflanGroupCache Parallel + LINQ**: 经 Benchmark 验证后**已修复**（LINQ 链 + IEnumerable Parallel → PooledList + Parallel.ForEach 直传；`objs.Any()` → `objs.Count > 0`；时间 -23%~-2%、分配 -35%~-2%；见条目#14 实施记录）。
+    - ✅ **#17 ParserUtils/CommandArgs.GetDataArray TypeDescriptor 反射**: 经 Benchmark 验证后**已修复**（typeof(T) JIT 分派 fast path + cached TypeConverter + 去 LINQ；时间 -72%、分配 -63%；同时改造 ParserUtils 与 CommandArgs；见条目#17 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -443,14 +444,74 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 - **问题**: 每次 BPM 哈希变化时（行 201 `CheckAndUpdateSoflanPositionList`）就重建整个 `sortList = new List<(...)>()` 并 `Add`。在编辑器频繁修改 BPM/Soflan 时这条路径非常热。
 - **建议**: 缓存 sortList，按 hash 渐进更新。
 
-### 17. ParserUtils.GetDataArray 每行解析 TypeDescriptor.GetConverter + LINQ ToArray
+### ✅ 17. ParserUtils.GetDataArray 每行解析 TypeDescriptor.GetConverter + LINQ ToArray
 
-- **位置**: `OngekiFumenEditor/Parser/ParserUtils.cs:11-25`
+- **位置**: `OngekiFumenEditor/Parser/ParserUtils.cs:11-25` (登记); 真正热路径在 `OngekiFumenEditor/Parser/Ogkr/CommandArgs.cs:40-66`
 - **类别**: 集合 / 反射 / 字符串
 - **严重度**: High
+- **决策**: **已修复**（Benchmark 验证后用户允许实施；fast-path 改造覆盖 ParserUtils + CommandArgs 两处）
 - **问题**: `SplitEmptyChar(line).Skip(1).Select(...).ToArray()` 中 `Split().ToArray()` 重复（line 13 已经 `.ToArray()`，line 19 再 `.Select(...).ToArray()`），且每行重新调用 `TypeDescriptor.GetConverter(typeof(T))`（行 18）—— 对每条 `.ogkr` 命令行都做一次反射查表。
 - **影响**: 谱面有几千行命令时，每行均触发 TypeDescriptor 查找 + 双倍 ToArray + LINQ 分配。
 - **建议**: 缓存每个 T 的 converter（静态 Lazy<Dictionary<Type, TypeConverter>>）；`Split` 已经返回数组，可以直接索引而非 LINQ；对 `int/float/string` 路径走专门快路径（`int.TryParse(ReadOnlySpan<char>)`）。
+
+#### Benchmark 复核结论（2026/05/26）
+
+对应基准: `OngekiFumenEditor.Benchmark/Benchmarks/ParserUtilsBenchmarks.cs`。
+环境: BenchmarkDotNet v0.15.8, .NET 10.0.8, AMD Ryzen 7 5800X, Default Job, MemoryDiagnoser。
+样本: 100 / 1000 / 5000 行典型 ogkr 命令（`"CMD i1 i2 i3 i4 i5"`，取 5 个 int）。
+
+| Method | Lines | Mean | Ratio | Allocated | Alloc Ratio |
+|---|---:|---:|---:|---:|---:|
+| Original | 100 | 53.21 µs | 1.01 | 77.99 KB | 1.00 |
+| Optimized_CachedConverter | 100 | 35.74 µs | 0.68 | 70.96 KB | 0.91 |
+| Optimized_NoLinqNoExtraToArray | 100 | 31.24 µs | 0.59 | 52.21 KB | 0.67 |
+| **Optimized_FastPathInt** | 100 | **14.66 µs** | **0.28** | 28.77 KB | **0.37** |
+| Original | 1000 | 490.45 µs | 1.00 | 780.34 KB | 1.00 |
+| Optimized_CachedConverter | 1000 | 356.99 µs | 0.73 | 710.03 KB | 0.91 |
+| Optimized_NoLinqNoExtraToArray | 1000 | 305.22 µs | 0.62 | 522.53 KB | 0.67 |
+| **Optimized_FastPathInt** | 1000 | **143.92 µs** | **0.29** | 288.16 KB | **0.37** |
+| Original | 5000 | 2550.58 µs | 1.01 | 3901.53 KB | 1.00 |
+| Optimized_CachedConverter | 5000 | 1953.17 µs | 0.77 | 3549.97 KB | 0.91 |
+| Optimized_NoLinqNoExtraToArray | 5000 | 1762.99 µs | 0.69 | 2612.47 KB | 0.67 |
+| **Optimized_FastPathInt** | 5000 | **703.97 µs** | **0.28** | 1440.59 KB | **0.37** |
+
+**各步贡献**（基于 Lines=5000）：
+1. 缓存 `TypeConverter`：-23% 时间、-9% 分配（GetConverter 反射查表）；
+2. + 去 LINQ 链 + 去重复 ToArray：累计 -31% 时间、-33% 分配（`Skip(1).Select.ToArray` 链 + `SplitEmptyChar` 内重复 ToArray）；
+3. + `int.TryParse(ReadOnlySpan<char>)` 完全绕过 TypeDescriptor：累计 **-72% 时间、-63% 分配**。FastPath 跨规模一致（约 0.28/0.37 比率）。
+
+**根因**：`converter.IsValid` 内部已 TryParse 一次、`ConvertFromString` 再 TryParse 一次后还要装箱回 `object` 再拆回 `T`——三次重复解析 + 装箱拆箱。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**:
+1. `OngekiFumenEditor/Parser/ParserUtils.cs`（重写）
+2. `OngekiFumenEditor/Parser/Ogkr/CommandArgs.cs`（重写）
+
+**为什么改两个**: grep 全仓库确认 `ParserUtils.GetDataArray` 没有任何调用方——真正在用的是 `CommandArgs.GetDataArray<T>`（30+ 处调用，覆盖所有 ogkr 命令解析）。`ParserUtils.GetDataArray` 是 `public static` 死代码（保留 API 一致性低成本），同等改造让两处行为一致以防未来有调用者切换。
+
+**核心变更（两处通用）**:
+1. 静态 `Dictionary<Type, TypeConverter> converterCache` + `GetCachedConverter(type)`，每个 T 的 TypeConverter 只查一次反射；
+2. 用 `typeof(T) == typeof(int)/(float)/(double)/(string)` 分派——这些表达式在 JIT 编译期被消除，每个泛型实例化只剩对应一条 branch；
+3. **数值类型 fast path**：`int.TryParse(parts[i].AsSpan(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var v)` + `(T)(object)v`（JIT 对 `(T)(object)valuetype` 在 specialization 后无装箱拆箱开销）；
+4. **string fast path**：`Array.Copy(inputs, ...)` 直接拷贝；
+5. **回退路径**：自定义类型走 cached `TypeConverter`，但去掉 LINQ 链，改用 `for + 索引 + 条件赋值`；
+6. `SplitEmptyChar` 不再 `.ToArray()` 重复——`Split` 本身就返回 `string[]`；
+7. `ParserUtils.GetDataArray` 跳过 index 0（命令名）；`CommandArgs.GetDataArray` 不跳过（保留原行为，与 30+ 调用方约定一致）。
+
+**关键约束**:
+- `CommandArgs` 保留 IoC 注入的 `IArgValueConverter` 优先级路径（用户自定义 converter 可覆盖 fast path）；
+- `CommandArgs` 保留 instance `cacheDataArray` per-line cache（同一行同类型只解析一次）；
+- 数值解析强制 `InvariantCulture`——OGKR 文件格式约定使用 `.` 小数点，与系统 locale 解耦；原版用 `TypeDescriptor.ConvertFromString` 默认走 `CurrentCulture`，在非英文 locale 下可能出现解析差异，本次改动顺手统一了。
+
+**风险检查**:
+- 主项目 Release 编译 0 错误；
+- 与 30+ 处调用方的契约保持：`CommandArgs.GetDataArray<float>()` 返回数组长度与原版一致（`inputs.Length`，不跳过命令名）；
+- `IArgValueConverter` 优先级路径完全未动；
+- `cacheDataArray` 每行 setter 处 Clear 行为未动；
+- Locale 行为变更（CurrentCulture → InvariantCulture）属于**修复式优化**：OGKR 是文本协议，本就该用 invariant。
+
+**预期生产收益**: 解析一份典型 OGKR（几千行）从 ~2.5 ms → ~0.7 ms（-72%），分配从 ~4 MB → ~1.4 MB（-63%）。打开谱面时间会有可观降低。
 
 ### 18. BulletPalleteCommandParser / CustomBulletCommandParser 多次 `?.ToUpper()` 不带 culture
 
