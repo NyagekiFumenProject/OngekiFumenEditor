@@ -290,6 +290,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 yield return child;
         }
 
+        // TEMP: 性能对比候选(方案 A)。展开 LINQ 链 + 直接走索引,顺便避开原版每个 child 被 yield 两次的副作用。
+        // 若 benchmark 确认收益再正式替换原方法。
+        public IEnumerable<IDisplayableObject> GetDisplayableObjectsFast()
+        {
+            yield return this;
+            for (var i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+                var pcs = child.PathControls;
+                for (var j = 0; j < pcs.Count; j++)
+                    yield return pcs[j];
+                yield return child;
+            }
+        }
+
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {
             if (maxVisibleTGrid < MinTGrid)

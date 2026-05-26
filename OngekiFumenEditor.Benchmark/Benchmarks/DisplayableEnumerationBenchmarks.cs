@@ -29,7 +29,7 @@ public class DisplayableEnumerationBenchmarks : FumenBenchmarkBase
         return count;
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     [STAThread]
     public int ConnectableStartGetDisplayableObjects()
     {
@@ -37,6 +37,20 @@ public class DisplayableEnumerationBenchmarks : FumenBenchmarkBase
         foreach (var start in ConnectableStarts)
         {
             foreach (var _ in start.GetDisplayableObjects())
+                count++;
+        }
+        return count;
+    }
+
+    // 方案 A 对比候选:展开 LINQ 链 + 修复每个 child 被 yield 两次。
+    [Benchmark]
+    [STAThread]
+    public int ConnectableStartGetDisplayableObjectsFast()
+    {
+        var count = 0;
+        foreach (var start in ConnectableStarts)
+        {
+            foreach (var _ in start.GetDisplayableObjectsFast())
                 count++;
         }
         return count;
