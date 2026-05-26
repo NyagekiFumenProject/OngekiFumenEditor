@@ -112,13 +112,13 @@ namespace OngekiFumenEditor.Kernel.Scheduler
             }
         }
 
-        public Task Term()
+        public async Task Term()
         {
             Log.LogDebug("call SchedulerManager.Dispose()");
 
             try
             {
-                runThread.Abort();
+                await runThread.AbortAsync();
             }
             catch { }
 
@@ -127,8 +127,6 @@ namespace OngekiFumenEditor.Kernel.Scheduler
                 Log.LogInfo("Call OnSchedulerTerm() :" + scheduler.SchedulerName);
                 scheduler.OnSchedulerTerm();
             }
-
-            return Task.CompletedTask;
         }
 
         public Task RemoveScheduler(ISchedulable s)

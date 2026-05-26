@@ -754,7 +754,7 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 - `Task.Run` 内部 `ReadLine` 抛异常会通过 `await` 自然传出；
 - 谱面行不会以 leading whitespace 开头（OGKR 协议约定），原 `Trim()` 是防御性的，移除后等价（如出现异常行，cmdName lookup 不命中即 silently 跳过，与原版相同）。
 
-### 33. DefaultNyagekiFumenParser 同样问题 + ToLower
+### ✅ 33. DefaultNyagekiFumenParser 同样问题 + ToLower
 
 - **位置**: `OngekiFumenEditor/Parser/DefaultImpl/Nyageki/DefaultNyagekiFumenParser.cs:24`、`:37`
 - **类别**: 字符串
@@ -762,7 +762,13 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 - **问题**: 字典 key 用 ToLower（构造时分配），每行 `seg[0].ToLower().Trim()` 再次分配。
 - **建议**: 字典用 `StringComparer.OrdinalIgnoreCase`，行解析就不再需要 ToLower。
 
-### 34. FumenVisualEditor RenderControl_UnLoaded async void
+#### 实施记录（2026/05/27）
+
+- 字典构造改为 `new Dictionary<string, INyagekiCommandParser>(StringComparer.OrdinalIgnoreCase)`，构造时不再 ToLower。
+- 行解析去掉 `ToLower()`，仅保留 `Trim()`（与 PI#32 不同：Nyageki 协议未保证无前导空白，保留更安全）。
+- 移除未用的 `System.Linq` using。
+
+### ✅ 34. FumenVisualEditor RenderControl_UnLoaded async void
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs:979`、`:989`
 - **类别**: 异步
@@ -770,13 +776,23 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 - **问题**: WPF 控件事件回调用 async void 是常见模式，但 `RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl); RenderContext.StopRendering();` 若 await 期间被取消会丢异常。
 - **建议**: 至少 try/catch 包住或改用任务跟踪。
 
-### 35. AbortableThread.Abort 用 task.Wait() 阻塞
+#### 实施记录（2026/05/27）
+
+- `RenderControl_UnLoaded` 与 `RenderControl_Loaded` 均加 try/catch，捕获 await 期间产生的异常并 `Log.LogError` 记录，避免 async void 异常逃逸到 SynchronizationContext 触发进程崩溃。
+
+### ✅ 35. AbortableThread.Abort 用 task.Wait() 阻塞
 
 - **位置**: `OngekiFumenEditor/Utils/AbortableThread.cs:34`
 - **类别**: 异步 / 并发
 - **严重度**: Medium
 - **问题**: `task?.Wait();` 在 UI 线程上同步等待——SchedulerManager.Term 中调用，关闭时可能卡 UI。
 - **建议**: 提供 `Task AbortAsync()`。
+
+#### 实施记录（2026/05/27）
+
+- 新增 `AbortableThread.AbortAsync()`，对取消后的任务使用 `await task.ConfigureAwait(false)` 等待；忽略 `OperationCanceledException`。
+- `SchedulerManager.Term()` 改为 `async Task`，调用 `await runThread.AbortAsync()`，避免 UI 线程同步等待。
+- 其它 `Abort()` 调用点（`AppBootstrapper.ipcThread`、`DefaultFumenSoundPlayer`）位于非 UI 线程或析构路径，保留同步 Abort 不变。
 
 ### 36. ObjectInspector / FumenObjectPropertyBrowser MultiObjectsPropertyInfoWrapper 每属性反射查找
 

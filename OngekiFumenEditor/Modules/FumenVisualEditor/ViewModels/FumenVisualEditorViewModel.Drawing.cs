@@ -1007,9 +1007,16 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
-        RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
-        RenderContext.OnRender -= Render;
-        RenderContext.StopRendering();
+        try
+        {
+            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
+            RenderContext.OnRender -= Render;
+            RenderContext.StopRendering();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"RenderControl_UnLoaded failed: {ex.Message}", ex);
+        }
     }
 
     private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
@@ -1017,11 +1024,18 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
-        RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
-        RenderContext.Name = "FumenVisualEditorViewModel.Render";
-        UpdateActualRenderInterval();
-        RenderContext.OnRender += Render;
-        RenderContext.StartRendering();
+        try
+        {
+            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
+            RenderContext.Name = "FumenVisualEditorViewModel.Render";
+            UpdateActualRenderInterval();
+            RenderContext.OnRender += Render;
+            RenderContext.StartRendering();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"RenderControl_Loaded failed: {ex.Message}", ex);
+        }
     }
 
     public Task WaitForRenderInitializationIsDone()

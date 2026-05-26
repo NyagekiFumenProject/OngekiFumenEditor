@@ -1,8 +1,8 @@
 using OngekiFumenEditor.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
@@ -21,7 +21,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
 		[ImportingConstructor]
 		public DefaultNyagekiFumenParser([ImportMany] IEnumerable<INyagekiCommandParser> commandParsers)
 		{
-			this.commandParsers = commandParsers.ToDictionary(x => x.CommandName.Trim().ToLower(), x => x);
+			this.commandParsers = new Dictionary<string, INyagekiCommandParser>(StringComparer.OrdinalIgnoreCase);
+			foreach (var parser in commandParsers)
+				this.commandParsers[parser.CommandName.Trim()] = parser;
 		}
 
 		public async Task<OngekiFumen> DeserializeAsync(Stream stream)
@@ -34,7 +36,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
 			{
 				var line = await reader.ReadLineAsync();
 				var seg = line.Split(':', 2);
-				var commandName = seg[0].ToLower().Trim();
+				var commandName = seg[0].Trim();
 
 				if (commandParsers.TryGetValue(commandName, out var commandParser))
 					commandParser.ParseAndApply(fumen, seg);

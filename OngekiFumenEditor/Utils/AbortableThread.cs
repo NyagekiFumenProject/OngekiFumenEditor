@@ -34,6 +34,18 @@ namespace OngekiFumenEditor.Utils
                 task?.Wait();
             CoreLog.LogDebug($"Aborted thread {Name}.");
         }
+
+        public async Task AbortAsync()
+        {
+            CoreLog.LogDebug($"Begin to abort thread {Name} (async).");
+            cancellationTokenSource.Cancel();
+            if (task is { } t)
+            {
+                try { await t.ConfigureAwait(false); }
+                catch (OperationCanceledException) { }
+            }
+            CoreLog.LogDebug($"Aborted thread {Name} (async).");
+        }
     }
 }
 
