@@ -9,22 +9,49 @@
 		<GenerateDocumentationFile>false</GenerateDocumentationFile>
 		<StartupObject>OngekiFumenEditor.Startup</StartupObject>
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
+		<UseAppHost>true</UseAppHost>
+		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 	</PropertyGroup>
 
-	<!--当Debug编译或被Benchmark项目引用时禁止Costura.Fody处理-->
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-		<DisableFody>true</DisableFody>
+	<!--仅 publish 时启用 RID 与 SingleFile 配置, 避免影响普通 build 的 bin 路径-->
+	<PropertyGroup Condition="'$(_IsPublishing)' == 'true' or '$(PublishProtocol)' != ''">
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<SelfContained>false</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 	</PropertyGroup>
 
-	<!--当Debug编译时, SoundTouch.dll就复制到输出目录-->
-	<Target Condition="'$(Configuration)' == 'Debug'" Name="CopySoundTouchDll" AfterTargets="AfterBuild">
-		<Copy SourceFiles="costura-win-x64\SoundTouch.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
-	</Target>
-
-	<!--当Release编译时, SoundTouch.dll就交给Costura.Fody处理-->
-	<ItemGroup Condition="'$(Configuration)' != 'Debug'">
+	<!--将 costura-win-x64 下原生 DLL 投到输出目录的 runtimes\win-x64\native, 由 PublishSingleFile 嵌入到 exe-->
+	<ItemGroup>
 		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
-		<EmbeddedResource Include="costura-win-x64\SoundTouch.dll" />
+		<ContentWithTargetPath Include="costura-win-x64\SoundTouch.dll">
+			<TargetPath>runtimes\win-x64\native\SoundTouch.dll</TargetPath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="costura-win-x64\crnlib.dll">
+			<TargetPath>runtimes\win-x64\native\crnlib.dll</TargetPath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="costura-win-x64\ispc_texcomp.dll">
+			<TargetPath>runtimes\win-x64\native\ispc_texcomp.dll</TargetPath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="costura-win-x64\PVRTexLib.dll">
+			<TargetPath>runtimes\win-x64\native\PVRTexLib.dll</TargetPath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</ContentWithTargetPath>
+		<ContentWithTargetPath Include="costura-win-x64\TexToolWrap.dll">
+			<TargetPath>runtimes\win-x64\native\TexToolWrap.dll</TargetPath>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</ContentWithTargetPath>
 	</ItemGroup>
 
 	<!--记录编译时间-->
@@ -97,10 +124,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="costura-win-x64\crnlib.dll" />
-		<None Remove="costura-win-x64\ispc_texcomp.dll" />
-		<None Remove="costura-win-x64\PVRTexLib.dll" />
-		<None Remove="costura-win-x64\TexToolWrap.dll" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\blue_tap.png" />
 		<None Remove="Modules\PreviewSvgGenerator\Resources\flick.png" />
@@ -140,14 +163,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="costura-win-x64\crnlib.dll">
-		</EmbeddedResource>
-		<EmbeddedResource Include="costura-win-x64\ispc_texcomp.dll">
-		</EmbeddedResource>
-		<EmbeddedResource Include="costura-win-x64\PVRTexLib.dll">
-		</EmbeddedResource>
-		<EmbeddedResource Include="costura-win-x64\TexToolWrap.dll">
-		</EmbeddedResource>
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\bell.png" />
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick.png" />
 		<EmbeddedResource Include="Modules\PreviewSvgGenerator\Resources\flick1.png" />
@@ -174,17 +189,12 @@
 
 	<ItemGroup>
 		<None Include="..\.editorconfig" Link=".editorconfig" />
-		<None Include="FodyWeavers.xsd" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AssetsTools.NET" Version="2.0.12" />
 		<PackageReference Include="AssocSupport" Version="1.1.0" />
 		<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
-		<PackageReference Include="Costura.Fody" Version="6.2.0">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime;compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
 		<PackageReference Include="FontStashSharp.PlatformAgnostic" Version="1.5.5" />
 		<PackageReference Include="FontStashSharp.Rasterizers.FreeType" Version="1.2.3" />
 		<PackageReference Include="Microsoft.Build" Version="17.7.2" />

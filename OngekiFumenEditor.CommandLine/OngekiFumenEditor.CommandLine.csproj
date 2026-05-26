@@ -2,16 +2,36 @@
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
 		<TargetFramework>net10.0-windows</TargetFramework>
-		<CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
 		<UseWPF>true</UseWPF>
 		<DebugSymbols>false</DebugSymbols>
 		<DebugType>none</DebugType>
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
+		<UseAppHost>true</UseAppHost>
+		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 	</PropertyGroup>
+
+	<!--仅 publish 时启用 SingleFile,把编辑器依赖一并打入 CommandLine.exe,
+	    这样 LoadFile(OngekiFumenEditor.dll) 后,编辑器引用的程序集能在 CommandLine.exe 的 bundle 里被解析-->
+	<PropertyGroup Condition="'$(_IsPublishing)' == 'true' or '$(PublishProtocol)' != ''">
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<SelfContained>false</SelfContained>
+		<PublishSingleFile>true</PublishSingleFile>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+	</PropertyGroup>
+
 	<ItemGroup>
-	  <None Remove="Resources\Icons\logo.ico" />
+		<None Remove="Resources\Icons\logo.ico" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Resource Include="Resources\Icons\logo.ico" />
+		<Resource Include="Resources\Icons\logo.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\OngekiFumenEditor\OngekiFumenEditor.csproj">
+			<Private>true</Private>
+		</ProjectReference>
 	</ItemGroup>
 </Project>

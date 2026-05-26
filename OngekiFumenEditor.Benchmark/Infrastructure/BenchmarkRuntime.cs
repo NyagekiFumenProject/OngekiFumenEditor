@@ -26,11 +26,7 @@ internal static class BenchmarkRuntime
             if (initialized)
                 return;
 
-            // 主项目用 Fody Costura 把依赖打包成嵌入资源;benchmark 进程也得显式 Attach,
-            // 否则 IoC 解析时找不到部分嵌入程序集。
-            var attach = typeof(App).Assembly.GetType("Costura.AssemblyLoader")?.GetMethod("Attach");
-            attach?.Invoke(null, [true]);
-
+            // 主项目使用 MSBuild PublishSingleFile 替代 Costura, 已无需手动 Attach 嵌入程序集。
             if (Application.Current is null)
                 app = new App(false);
             else
