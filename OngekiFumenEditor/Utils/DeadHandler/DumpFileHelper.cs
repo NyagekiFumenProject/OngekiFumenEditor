@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
 using System.Diagnostics;
@@ -44,8 +45,9 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 
 		public static string WriteMiniDump(IntPtr exceptionInfo)
 		{
-			Directory.CreateDirectory(ProgramSetting.Default.DumpFileDirPath);
-			var filePath = Path.GetFullPath(Path.Combine(ProgramSetting.Default.DumpFileDirPath, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp")));
+			var dumpDir = ProgramSetting.Default.DumpFileDirPath;
+			Directory.CreateDirectory(dumpDir);
+			var filePath = Path.GetFullPath(Path.Combine(dumpDir, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp")));
 
 			using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
 

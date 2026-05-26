@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.Composition;

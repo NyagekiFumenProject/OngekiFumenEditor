@@ -119,8 +119,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         base.BindServices(batch);
 
         //setup Pluigins
-        var exePath = Assembly.GetExecutingAssembly().Location;
-        var exeDir = Path.GetDirectoryName(exePath);
+        var exeDir = AppContext.BaseDirectory;
         var pluginsDirPath = Path.Combine(exeDir, "Plugins");
         Directory.CreateDirectory(pluginsDirPath);
         var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);
@@ -209,7 +208,9 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     protected void LogBaseInfos()
     {
         Log.LogInfo(
-            $"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
+            $"Application Verison+CommitHash : {ThisAssembly.AssemblyInformationalVersion}");
+        Log.LogInfo(
+            $"AppContext.BaseDirectory : {AppContext.BaseDirectory}");
         Log.LogInfo(
             $"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
     }

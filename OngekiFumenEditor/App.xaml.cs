@@ -17,7 +17,6 @@ namespace OngekiFumenEditor
         {
             CheckOrUpgradeAllSettings();
 
-            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
             IsGUIMode = isGUIMode;
         }
 

@@ -19,40 +19,31 @@
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<SelfContained>false</SelfContained>
 		<PublishSingleFile>true</PublishSingleFile>
-		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+		<IncludeAllContentForSelfExtract>false</IncludeAllContentForSelfExtract>
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 		<EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
 	</PropertyGroup>
 
-	<!--将 costura-win-x64 下原生 DLL 投到输出目录的 runtimes\win-x64\native, 由 PublishSingleFile 嵌入到 exe-->
+	<!--将 natives 下原生 DLL 投到输出目录的 runtimes\win-x64\native, 由 PublishSingleFile 嵌入到 exe-->
 	<ItemGroup>
-		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
-		<ContentWithTargetPath Include="costura-win-x64\SoundTouch.dll">
-			<TargetPath>runtimes\win-x64\native\SoundTouch.dll</TargetPath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</ContentWithTargetPath>
-		<ContentWithTargetPath Include="costura-win-x64\crnlib.dll">
-			<TargetPath>runtimes\win-x64\native\crnlib.dll</TargetPath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</ContentWithTargetPath>
-		<ContentWithTargetPath Include="costura-win-x64\ispc_texcomp.dll">
-			<TargetPath>runtimes\win-x64\native\ispc_texcomp.dll</TargetPath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</ContentWithTargetPath>
-		<ContentWithTargetPath Include="costura-win-x64\PVRTexLib.dll">
-			<TargetPath>runtimes\win-x64\native\PVRTexLib.dll</TargetPath>
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-		</ContentWithTargetPath>
-		<ContentWithTargetPath Include="costura-win-x64\TexToolWrap.dll">
-			<TargetPath>runtimes\win-x64\native\TexToolWrap.dll</TargetPath>
+		<None Remove="natives\**\*.dll" />
+		<ContentWithTargetPath Include="natives\*.dll">
+			<TargetPath>%(Filename)%(Extension)</TargetPath>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</ContentWithTargetPath>
 	</ItemGroup>
+
+	<!--Resources 子目录中以 PreserveNewest 方式 copy 到输出的内容(音色/纹理/模板等),
+	    publish 时仍以独立文件外置在 exe 旁,而不打入 single-file bundle.
+	    必须在 _ComputeFilesToBundle 之前标记,否则 SDK 已经把它们从 ResolvedFileToPublish 转移到 FilesToBundle 中-->
+	<Target Name="ExcludeResourcesFromSingleFile" BeforeTargets="_ComputeFilesToBundle">
+		<ItemGroup>
+			<ResolvedFileToPublish Update="@(ResolvedFileToPublish)" Condition="$([System.String]::Copy('%(ResolvedFileToPublish.RelativePath)').Replace('\','/').StartsWith('Resources/'))">
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
 
 	<!--记录编译时间-->
 	<PropertyGroup>
@@ -86,7 +77,7 @@
 		<Page Remove="Dependencies\**" />
 		<Page Remove="Modules\FumenBulletPalleteListViewer\Converters\**" />
 		<Page Remove="_bin\**" />
-		<None Remove="costura-win-x64\SoundTouch_x64.dll" />
+		<None Remove="natives\SoundTouch_x64.dll" />
 		<None Remove="Resources\Icons\notication.png" />
 		<None Remove="Resources\suggestLayout.bin" />
 		<None Remove="Resources\Icons\icons8-selection-16.png" />
