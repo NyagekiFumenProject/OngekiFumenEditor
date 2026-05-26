@@ -334,7 +334,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            return PathControls.Cast<IDisplayableObject>().Append(this);
+            for (var i = 0; i < PathControls.Count; i++)
+                yield return PathControls[i];
+            yield return this;
         }
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)

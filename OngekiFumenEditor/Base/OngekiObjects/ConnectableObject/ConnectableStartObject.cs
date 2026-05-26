@@ -286,15 +286,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
             yield return this;
-            foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
-                yield return child;
-        }
-
-        // TEMP: 性能对比候选(方案 A)。展开 LINQ 链 + 直接走索引,顺便避开原版每个 child 被 yield 两次的副作用。
-        // 若 benchmark 确认收益再正式替换原方法。
-        public IEnumerable<IDisplayableObject> GetDisplayableObjectsFast()
-        {
-            yield return this;
             for (var i = 0; i < children.Count; i++)
             {
                 var child = children[i];

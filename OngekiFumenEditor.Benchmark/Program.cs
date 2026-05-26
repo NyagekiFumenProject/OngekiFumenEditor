@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
@@ -6,25 +7,32 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 using BenchmarkDotNet.Toolchains;
-using BenchmarkDotNet.Toolchains.InProcess.Emit;
 using OngekiFumenEditor.Benchmark.Baselines;
+using OngekiFumenEditor.Benchmark.Infrastructure;
 
 namespace OngekiFumenEditor.Benchmark;
 
 internal static class Program
 {
-    // 主项目是 WPF + Fody Costura,BenchmarkDotNet 默认工具链会自动生成 wrapper csproj
-    // 并触发 WPF MarkupCompile 重跑,代价高且经常报错。改用 InProcessEmit 在当前已构建好
-    // 的进程内 emit IL 跑 benchmark,跳过 wrapper 重建。
-    private static readonly IToolchain InProcessToolchain =
-        new InProcessEmitToolchain(TimeSpan.FromHours(2), logOutput: false);
+    // 使用基于 BDN 默认 CsProjCoreToolchain 的自定义 Toolchain (HintPathRewriteToolchain):
+    // 复用默认 Builder/Executor,只在 IGenerator 层后处理 wrapper csproj,把 ProjectReference
+    // 链替换为指向已编译主 Benchmark bin 目录的 Reference HintPath。这样 wrapper 不再重建
+    // Caliburn.Micro.Core / OngekiFumenEditor 等 dll,从根上规避之前撞过的 CSC CS2012 文件锁;
+    // 同时保留了子进程隔离的测量精度,不必走 InProcessEmit。
+    //
+    // 前提: 主 Benchmark dll 必须先 build 一次,wrapper 才有 dll 可 link。
+    // `dotnet run` 默认会先 build,无需手动。
 
     [STAThread]
     private static int Main(string[] args)
     {
         var (jobPreset, remainingArgs) = ParseCliArgs(args);
 
-        var job = jobPreset.WithToolchain(InProcessToolchain);
+        var hostBin = Path.GetDirectoryName(typeof(Program).Assembly.Location)
+            ?? throw new InvalidOperationException("Cannot locate host benchmark bin directory.");
+        var toolchain = HintPathRewriteToolchain.Create("net10.0-windows", hostBin);
+
+        var job = jobPreset.WithToolchain(toolchain);
         var config = DefaultConfig.Instance
             .AddDiagnoser(MemoryDiagnoser.Default)
             .AddJob(job);
