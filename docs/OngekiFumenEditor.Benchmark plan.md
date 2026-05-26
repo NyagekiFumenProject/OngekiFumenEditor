@@ -1,0 +1,8 @@
+添加并实现OngekiFumenEditor.Benchmark，它可以测量OngekiFumenEditor项目与UI无关的性能热点代码
+
+1. 使用BenchmarkDotnet库
+2. 测量OngekiFumenEditor项目与UI无关的性能热点代码，比如谱面解析性能，以及ConnectableStartObject.GetDisplayableObjects()性能热点之类
+3. 测量用例单独一个类，比如谱面解析性能测量划分到类A, ConnectableStartObject.GetDisplayableObjects()性能热点划分到类B
+4. 用户可以通过项目代码直接dotnet run OngekiFumenEditor.Benchmark -c Release运行Benchmark项目程序，程序需要询问用户测量哪个类
+5. 性能测量结束之后就尝试从BenchmarkDotNet.Artifacts里面获取这个类对应的上一次用户保存的测量数据， 将当前测量数据进行baseline对比， 并询问用户是否将当前测量数据保存到上一个文件的位置， 上一个文件的位置文件名以类全名为基础
+6. 引用的OngekiFumenEditor初始化可以参考CommandLine项目，new OngekiFumenEditor.App(false)之后就可以通过IoC.Get*()方法去获取那些mef接口实现

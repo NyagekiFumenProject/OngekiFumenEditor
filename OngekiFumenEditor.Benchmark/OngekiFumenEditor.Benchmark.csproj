@@ -11,7 +11,7 @@
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
 		<PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.15.8" />
-		<!-- 对齐 Roslyn 版本以避开 Common 4.14 与 Features 4.11 的 API 不兼容 (NU1608) -->
+		<!-- 对齐 Roslyn 版本,避开 Common 4.14 与 Features 4.11 的 API 不兼容 (NU1608) -->
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.14.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.14.0" ExcludeAssets="contentfiles;runtime;" />
 	</ItemGroup>
@@ -24,5 +24,12 @@
 	<ItemGroup>
 		<EmbeddedResource Include="Data\FumenSamples\*.ogkr" />
 		<EmbeddedResource Include="Data\FumenSamples\*.nyageki" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="BenchmarkDotNet.Artifacts\**" />
+	  <EmbeddedResource Remove="BenchmarkDotNet.Artifacts\**" />
+	  <None Remove="BenchmarkDotNet.Artifacts\**" />
+	  <Page Remove="BenchmarkDotNet.Artifacts\**" />
 	</ItemGroup>
 </Project>

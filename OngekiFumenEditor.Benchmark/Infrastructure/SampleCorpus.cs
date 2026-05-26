@@ -1,5 +1,5 @@
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
@@ -18,10 +18,12 @@ public sealed record ParsedFumenSample(FumenSample Sample, OngekiFumen Fumen);
 internal static partial class SampleCorpus
 {
     private static readonly Lazy<IReadOnlyList<FumenSample>> allSamples = new(LoadSamples);
-    private static readonly Lazy<IReadOnlyList<FumenSample>> ogkrSamples = new(() => AllSamples.Where(x => x.IsOgkr).ToArray());
-    private static readonly Lazy<IReadOnlyList<FumenSample>> nyagekiSamples = new(() => AllSamples.Where(x => x.IsNyageki).ToArray());
+    private static readonly Lazy<IReadOnlyList<FumenSample>> ogkrSamples =
+        new(() => AllSamples.Where(x => x.IsOgkr).ToArray());
+    private static readonly Lazy<IReadOnlyList<FumenSample>> nyagekiSamples =
+        new(() => AllSamples.Where(x => x.IsNyageki).ToArray());
     private static readonly Lazy<IReadOnlyList<ParsedFumenSample>> parsedSamples = new(
-        () => AllSamples.Select(sample => new ParsedFumenSample(sample, Deserialize(sample))).ToArray());
+        () => AllSamples.Select(s => new ParsedFumenSample(s, Deserialize(s))).ToArray());
 
     public static IReadOnlyList<FumenSample> AllSamples => allSamples.Value;
     public static IReadOnlyList<FumenSample> OgkrSamples => ogkrSamples.Value;
@@ -34,7 +36,8 @@ internal static partial class SampleCorpus
 
         var parserManager = IoC.Get<IFumenParserManager>();
         var deserializer = parserManager.GetDeserializer(sample.FileName)
-            ?? throw new InvalidOperationException($"No deserializer found for embedded sample '{sample.FileName}'.");
+            ?? throw new InvalidOperationException(
+                $"No deserializer registered for sample '{sample.FileName}'.");
 
         using var stream = new MemoryStream(sample.Data, writable: false);
         return deserializer.DeserializeAsync(stream).GetAwaiter().GetResult();
@@ -44,31 +47,33 @@ internal static partial class SampleCorpus
     {
         var assembly = typeof(SampleCorpus).Assembly;
         var names = assembly.GetManifestResourceNames()
-            .Where(x => x.Contains(".Data.FumenSamples.", StringComparison.Ordinal)
-                        && (x.EndsWith(".ogkr", StringComparison.OrdinalIgnoreCase)
-                            || x.EndsWith(".nyageki", StringComparison.OrdinalIgnoreCase)))
-            .OrderBy(x => x, StringComparer.Ordinal)
+            .Where(n => n.Contains(".Data.FumenSamples.", StringComparison.Ordinal)
+                        && (n.EndsWith(".ogkr", StringComparison.OrdinalIgnoreCase)
+                            || n.EndsWith(".nyageki", StringComparison.OrdinalIgnoreCase)))
+            .OrderBy(n => n, StringComparer.Ordinal)
             .ToArray();
 
         if (names.Length == 0)
-            throw new InvalidOperationException("No embedded fumen samples found.");
+            throw new InvalidOperationException(
+                "No embedded fumen samples found under Data/FumenSamples/. " +
+                "Check that the .csproj <EmbeddedResource> globs are intact.");
 
         return names.Select(name =>
         {
             var match = SampleFileNameRegex().Match(name);
-            if (!match.Success)
-                throw new InvalidOperationException($"Embedded sample resource name is not supported: {name}");
+            // Resource name format: <RootNamespace>.Data.FumenSamples.<file>.{ogkr|nyageki}
+            // Tail group captures the original filename for parser hint matching.
+            var fileName = match.Success ? match.Value : Path.GetFileName(name);
 
             using var stream = assembly.GetManifestResourceStream(name)
-                ?? throw new InvalidOperationException($"Embedded sample resource stream not found: {name}");
-            using var memory = new MemoryStream();
-            stream.CopyTo(memory);
+                ?? throw new InvalidOperationException($"Embedded sample stream missing: {name}");
+            using var ms = new MemoryStream();
+            stream.CopyTo(ms);
 
-            var fileName = match.Value;
-            return new FumenSample(fileName, Path.GetExtension(fileName), memory.ToArray());
+            return new FumenSample(fileName, Path.GetExtension(fileName), ms.ToArray());
         }).ToArray();
     }
 
-    [GeneratedRegex(@"sample_\d{3}\.(?:ogkr|nyageki)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    [GeneratedRegex(@"[^.]+\.(?:ogkr|nyageki)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
     private static partial Regex SampleFileNameRegex();
 }

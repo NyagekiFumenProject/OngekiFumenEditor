@@ -1,6 +1,6 @@
 using BenchmarkDotNet.Reports;
 
-namespace OngekiFumenEditor.Benchmark.Infrastructure.ResultComparison;
+namespace OngekiFumenEditor.Benchmark.Baselines;
 
 public static class BaselineFactory
 {
@@ -13,7 +13,7 @@ public static class BaselineFactory
         var classFullName = firstReport.BenchmarkCase.Descriptor.Type.FullName
                             ?? firstReport.BenchmarkCase.Descriptor.Type.Name;
 
-        var methods = new Dictionary<string, MethodMetrics>();
+        var methods = new Dictionary<string, MethodMetric>();
         foreach (var report in summary.Reports)
         {
             if (!report.Success || report.ResultStatistics is null)
@@ -24,29 +24,24 @@ public static class BaselineFactory
             var gen0 = report.GcStats.GetCollectionsCount(0);
             var totalOps = report.GcStats.TotalOperations;
 
-            var metrics = new MethodMetrics(
+            methods[report.BenchmarkCase.DisplayInfo] = new MethodMetric(
                 MeanNs: stats.Mean,
                 StandardErrorNs: stats.StandardError,
                 StandardDeviationNs: stats.StandardDeviation,
                 AllocatedBytes: allocated,
                 Gen0Collections: gen0,
                 TotalOperations: totalOps);
-
-            methods[report.BenchmarkCase.DisplayInfo] = metrics;
         }
 
         if (methods.Count == 0)
             return null;
 
-        var machineInfo = summary.HostEnvironmentInfo.ToFormattedString().ToArray();
-        var runtime = summary.HostEnvironmentInfo.RuntimeVersion;
-
         return new BenchmarkBaseline(
             SchemaVersion: BenchmarkBaseline.CurrentSchemaVersion,
             BenchmarkClass: classFullName,
             SavedAtUtc: DateTime.UtcNow,
-            MachineInfo: machineInfo,
-            Runtime: runtime,
+            MachineInfo: summary.HostEnvironmentInfo.ToFormattedString().ToArray(),
+            Runtime: summary.HostEnvironmentInfo.RuntimeVersion,
             Methods: methods);
     }
 }

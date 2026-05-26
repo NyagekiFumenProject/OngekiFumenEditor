@@ -1,6 +1,6 @@
-namespace OngekiFumenEditor.Benchmark.Infrastructure.ResultComparison;
+namespace OngekiFumenEditor.Benchmark.Baselines;
 
-public sealed record MethodMetrics(
+public sealed record MethodMetric(
     double MeanNs,
     double StandardErrorNs,
     double StandardDeviationNs,

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.5.33627.172
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11819.183 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor", "OngekiFumenEditor\OngekiFumenEditor.csproj", "{53376E13-B8F4-4B1D-B377-3E938623B3D1}"
 EndProject
@@ -34,7 +34,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caliburn.Micro.Platform", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.CommandLine", "OngekiFumenEditor.CommandLine\OngekiFumenEditor.CommandLine.csproj", "{27A4738F-BE40-4037-A103-EF28FCEB4A82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Benchmark", "OngekiFumenEditor.Benchmark\OngekiFumenEditor.Benchmark.csproj", "{1CE3866B-C971-4F8E-945B-5AF75570232D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Benchmark", "OngekiFumenEditor.Benchmark\OngekiFumenEditor.Benchmark.csproj", "{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -178,18 +178,18 @@ Global
 		{27A4738F-BE40-4037-A103-EF28FCEB4A82}.Release|x64.Build.0 = Release|Any CPU
 		{27A4738F-BE40-4037-A103-EF28FCEB4A82}.Release|x86.ActiveCfg = Release|Any CPU
 		{27A4738F-BE40-4037-A103-EF28FCEB4A82}.Release|x86.Build.0 = Release|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Debug|x64.Build.0 = Debug|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Debug|x86.Build.0 = Debug|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Release|x64.ActiveCfg = Release|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Release|x64.Build.0 = Release|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Release|x86.ActiveCfg = Release|Any CPU
-		{1CE3866B-C971-4F8E-945B-5AF75570232D}.Release|x86.Build.0 = Release|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|x64.Build.0 = Debug|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|x86.Build.0 = Debug|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|x64.ActiveCfg = Release|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|x64.Build.0 = Release|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|x86.ActiveCfg = Release|Any CPU
+		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

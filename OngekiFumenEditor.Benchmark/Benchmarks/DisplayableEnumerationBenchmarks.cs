@@ -3,6 +3,10 @@ using OngekiFumenEditor.Benchmark.Infrastructure;
 
 namespace OngekiFumenEditor.Benchmark.Benchmarks;
 
+/// <summary>
+/// 可显示对象枚举(plan.md 第 2 条点名了 ConnectableStartObject.GetDisplayableObjects())。
+/// 覆盖三种枚举入口:全谱、范围内、ConnectableStart 逐个。
+/// </summary>
 public class DisplayableEnumerationBenchmarks : FumenBenchmarkBase
 {
     [Benchmark]
@@ -27,7 +31,7 @@ public class DisplayableEnumerationBenchmarks : FumenBenchmarkBase
 
     [Benchmark]
     [STAThread]
-    public int ConnectableGetDisplayableObjects()
+    public int ConnectableStartGetDisplayableObjects()
     {
         var count = 0;
         foreach (var start in ConnectableStarts)
@@ -35,7 +39,6 @@ public class DisplayableEnumerationBenchmarks : FumenBenchmarkBase
             foreach (var _ in start.GetDisplayableObjects())
                 count++;
         }
-
         return count;
     }
 }

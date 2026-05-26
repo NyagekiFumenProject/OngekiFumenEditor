@@ -1,8 +1,12 @@
 using System.IO;
 using System.Text.Json;
 
-namespace OngekiFumenEditor.Benchmark.Infrastructure.ResultComparison;
+namespace OngekiFumenEditor.Benchmark.Baselines;
 
+/// <summary>
+/// 将 baseline 序列化到 BenchmarkDotNet.Artifacts/Baselines/{ClassFullName}.json。
+/// 文件名以 benchmark 类全名为基础,plan.md 第 5 条要求。
+/// </summary>
 public static class BaselineStore
 {
     private const string ProjectFileName = "OngekiFumenEditor.Benchmark.csproj";
@@ -16,23 +20,28 @@ public static class BaselineStore
         PropertyNameCaseInsensitive = true
     };
 
-    private static string? _cachedBaselinesDir;
+    private static string? cachedBaselinesDir;
 
     public static string GetBaselinesDirectory()
     {
-        if (_cachedBaselinesDir is not null)
-            return _cachedBaselinesDir;
+        if (cachedBaselinesDir is not null)
+            return cachedBaselinesDir;
 
         var projectRoot = TryFindProjectRoot();
         if (projectRoot is null)
         {
-            Console.WriteLine($"[Baseline] Warning: could not locate {ProjectFileName} relative to '{AppContext.BaseDirectory}'; falling back to current directory for baselines.");
+            Console.WriteLine(
+                $"[Baseline] Warning: could not locate {ProjectFileName} relative to '{AppContext.BaseDirectory}'; "
+                + "falling back to current working directory.");
             projectRoot = Directory.GetCurrentDirectory();
         }
 
-        _cachedBaselinesDir = Path.Combine(projectRoot, ArtifactsDirName, BaselinesDirName);
-        return _cachedBaselinesDir;
+        cachedBaselinesDir = Path.Combine(projectRoot, ArtifactsDirName, BaselinesDirName);
+        return cachedBaselinesDir;
     }
+
+    public static string GetBaselinePath(string benchmarkClassFullName)
+        => Path.Combine(GetBaselinesDirectory(), $"{benchmarkClassFullName}.json");
 
     public static BenchmarkBaseline? Load(string benchmarkClassFullName)
     {
@@ -49,7 +58,9 @@ public static class BaselineStore
 
             if (baseline.SchemaVersion != BenchmarkBaseline.CurrentSchemaVersion)
             {
-                Console.WriteLine($"[Baseline] Skipping '{path}': schema version {baseline.SchemaVersion} != expected {BenchmarkBaseline.CurrentSchemaVersion}.");
+                Console.WriteLine(
+                    $"[Baseline] Ignoring '{path}': schema version {baseline.SchemaVersion} "
+                    + $"!= expected {BenchmarkBaseline.CurrentSchemaVersion}.");
                 return null;
             }
 
@@ -57,7 +68,7 @@ public static class BaselineStore
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Baseline] Failed to read baseline '{path}': {ex.Message}");
+            Console.WriteLine($"[Baseline] Failed to read '{path}': {ex.Message}");
             return null;
         }
     }
@@ -72,9 +83,6 @@ public static class BaselineStore
         File.WriteAllText(path, json);
         Console.WriteLine($"[Baseline] Saved -> {path}");
     }
-
-    private static string GetBaselinePath(string benchmarkClassFullName)
-        => Path.Combine(GetBaselinesDirectory(), $"{benchmarkClassFullName}.json");
 
     private static string? TryFindProjectRoot()
     {

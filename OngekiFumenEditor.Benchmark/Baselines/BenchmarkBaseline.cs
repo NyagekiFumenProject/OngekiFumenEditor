@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Benchmark.Infrastructure.ResultComparison;
+namespace OngekiFumenEditor.Benchmark.Baselines;
 
 public sealed record BenchmarkBaseline(
     int SchemaVersion,
@@ -6,7 +6,7 @@ public sealed record BenchmarkBaseline(
     DateTime SavedAtUtc,
     string[] MachineInfo,
     string Runtime,
-    Dictionary<string, MethodMetrics> Methods)
+    Dictionary<string, MethodMetric> Methods)
 {
     public const int CurrentSchemaVersion = 1;
 }
