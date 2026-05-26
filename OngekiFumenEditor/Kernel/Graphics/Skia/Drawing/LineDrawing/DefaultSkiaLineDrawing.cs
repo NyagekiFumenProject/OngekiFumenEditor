@@ -155,14 +155,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             target.RenderContext.PerfomenceMonitor.CountDrawCall();
         }
 
-        private void DrawPath(SKPath path, SKPaint paint)
-        {
-            var actualPath = /*path.PointCount > 100 ? path.Simplify() : */path;
-
-            canvas.DrawPath(actualPath, paint);
-            target.RenderContext.PerfomenceMonitor.CountDrawCall();
-        }
-
         public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
         {
             Begin(target, lineWidth);
