@@ -22,6 +22,7 @@
     - ✅ **#3 LaneCurvePathControlDrawingTarget 多次枚举**: 经 Benchmark 验证后**已修复**（单次扫描收集 + 字典桶 + IndexCache，时间 -41%~-57%、分配 -85%~-93%，见条目#3 实施记录）。
     - ✅ **#6 DefaultFumenSoundPlayer 顺序加载**: 用户直接允许改动**已修复**（17 个 wav 顺序 await → Task.WhenAll 并行；async void → async Task；见条目#6 实施记录）。
     - ✅ **#7 SchedulerManager.Run 每 10ms 分配**: 用户直接允许改动**已修复**（LINQ + ToArray + ContinueWith 闭包 → 复用 List + InvokeAndStamp；DateTime.Now → Stopwatch；async void → async Task；见条目#7 实施记录）。
+    - ✅ **#13 EnumerateAllDisplayableObjects 多层 LINQ**: 用户指示签名改为 `IPooledList<IDisplayableObject>`，**已修复**（13 层 Concat + SelectMany → PooledList 累加 + 单 foreach；调用方 OfType → 模式匹配；见条目#13 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -313,14 +314,61 @@
 - **影响**: 当 `currentTaskRunningCount >= ParallelCount` 时 CPU 占用高；MD5 反复创建/释放。
 - **建议**: 用 `SemaphoreSlim(2)` 控制并发；MD5 可用 `MD5.HashData(byte[])` 静态方法（不分配实例）。
 
-### 13. EnumerateAllDisplayableObjects 多层 LINQ Concat + SelectMany（每帧）
+### ✅ 13. EnumerateAllDisplayableObjects 多层 LINQ Concat + SelectMany（每帧）
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs:731-810`
 - **类别**: LINQ / 集合 / 渲染
 - **严重度**: High
+- **决策**: **已修复**（用户指示签名改为 `IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(OngekiFumen fumen, IEnumerable<(TGrid min, TGrid max)> visibleRanges)`；未做 Benchmark 复核；见下方"实施记录"）
 - **问题**: `visibleRanges.SelectMany(x => { ... var r = Enumerable.Empty<>().Concat(...).Concat(...) ... return r; })`（行 737–780），最后 `objects.Concat(objs).SelectMany(x => x.GetDisplayableObjects())`（行 809）。多层 Concat + SelectMany 在 IEnumerable 上构造长链路，每次枚举对象在迭代器之间跳转，无法被 JIT 内联。
 - **影响**: 谱面对象数千时，每帧都展开这条链；后续 `OfType<OngekiTimelineObjectBase>()`、`.Where(...)` 又再叠加。
 - **建议**: 提供一个集中预先填充的 `PooledList<IDisplayableObject>`（按 visible range 划分），用基于结构的迭代器；或者把"该 range 内的可见对象"在 Editor 内做"脏标记 + 缓存"。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**: `OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs`
+
+**签名变更**:
+```csharp
+// 旧
+private IEnumerable<IDisplayableObject> EnumerateAllDisplayableObjects(
+    OngekiFumen fumen, IEnumerable<(TGrid min, TGrid max)> visibleRanges)
+
+// 新
+private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
+    OngekiFumen fumen, IEnumerable<(TGrid min, TGrid max)> visibleRanges)
+```
+
+**核心变更**:
+1. 内部用 `ObjectPool.GetPooledList<IDisplayableObject>()` 借出 PooledList，所有展开后的 displayable 直接 `Add` 进去；`try/catch` + `result.Dispose()` 保证异常路径也归还对象池；
+2. 用 `foreach (var (min, max) in visibleRanges)` 替代 `visibleRanges.SelectMany(x => { ... })`——消除外层 SelectMany enumerator；
+3. 每个 range 内的原 `Enumerable.Empty<...>().Concat(A).Concat(B)...` 链路改为对每个集合直接调 `AppendDisplayables(result, collection)` 私有辅助；后者一个 foreach 把每个对象的 `GetDisplayableObjects()` 展开追加——消除 10+ 层 Concat enumerator；
+4. PreviewMode 下的 Holds (`EndTGrid > judgeTGrid`) / Flicks·Taps (`TGrid > judgeTGrid`) 过滤改为内联 `if (... continue;)`，不再 LINQ `Where`；
+5. Bells/Bullets 在 `!Editor.IsPreviewMode` 时直接 foreach 加入，不再 `objs.Concat(...)` 累积变量；
+6. 引入两个私有 helper：`AppendDisplayables<T>(IPooledList, IEnumerable<T>) where T : IDisplayableObject` 与 `AppendOne(IPooledList, IDisplayableObject)`，把"展开 GetDisplayableObjects 并 Add"逻辑集中；
+7. 保留原版语义：每个 range 都重复追加全局列表（MeterChanges.Skip(1) / BpmList.Skip(1) / SvgPrefabs），未修复——避免引入视觉差异；
+8. 顺序保留：MeterChanges / BpmList / ClickSEs / LaneBlocks / Comments / Soflans / IndividualSoflanArea / EnemySets / Lanes / SvgPrefabs / Holds / Flicks / Taps / Beams / Bells / Bullets。
+
+**调用点变更**（`FumenVisualEditorViewModel.Drawing.cs:407-441`）:
+- 原 `var visibleObjects = EnumerateAllDisplayableObjects(...).OfType<OngekiTimelineObjectBase>(); foreach (var obj in visibleObjects) { ... }`；
+- 新 `using (var visibleObjects = EnumerateAllDisplayableObjects(...)) { foreach (var displayable in visibleObjects) { if (displayable is not OngekiTimelineObjectBase obj) continue; ... } }`；
+- 用 `using ( ... ) { }` 显式块而非 `using var` 声明，避免与方法内已有的 `goto End` 冲突（C# 不允许 goto 跳过 using 变量声明）；
+- `OfType<OngekiTimelineObjectBase>` 改为 `is not ... continue` 模式匹配，省去额外 enumerator 层。
+
+**预期效果**:
+- 每帧消除一条 ~13 层 LINQ enumerator 链 + 一条 SelectMany 外层 → 节省 ~15 个 iterator 对象/帧；
+- `OfType` enumerator 也消除；
+- 主要内存增加：1 个 PooledList（来自对象池，零净分配，调用结束归还）；
+- 调用方迭代时直接 List 索引访问，可被 JIT 转为 array bounds check 后的紧致循环，相对原来的 enumerator MoveNext 链效率更高。
+
+**风险检查**:
+- 主项目 Release 编译 0 错误；
+- 顺序与原版逐项对照保留；
+- Hold/Flick/Tap 的 PreviewMode 过滤条件保留；
+- containBeams / `!editorIsPreviewMode` 的分支条件保留；
+- `using ( ) { ... }` 显式块保证 PooledList 100% 归还对象池，包括异常路径（PooledList Dispose 内部已是幂等）。
+
+**未做 Benchmark**: 收益主要来自分配减少 + JIT 友好的紧致循环，BDN 微基准对此场景信号一般（需要构造完整 Fumen + 多个 range，与现有 `DisplayableEnumerationBenchmarks` 重合度高且不能解耦 Editor 状态）；改动正确性由编译 + 语义等价分析覆盖。
 
 ### 14. RebuildSoflanGroupCache Parallel.ForEach + IEnumerable 多次枚举
 
