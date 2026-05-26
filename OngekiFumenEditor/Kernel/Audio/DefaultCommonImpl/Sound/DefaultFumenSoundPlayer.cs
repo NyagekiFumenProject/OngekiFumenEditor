@@ -64,10 +64,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         public DefaultFumenSoundPlayer()
         {
-            InitSounds();
+            // é€šè¿‡ loadTask å­—æ®µ(ç”± InitSoundsAsync å†…éƒ¨èµ‹å€¼)æš´éœ²å®Œæˆä¿¡å·,
+            // è¿™é‡Œä¸éœ€è¦ await,fire-and-forget å³å¯ã€‚
+            _ = InitSoundsAsync();
         }
 
-        private async void InitSounds()
+        private async Task InitSoundsAsync()
         {
             var source = new TaskCompletionSource<bool>();
             loadTask = source.Task;
@@ -85,41 +87,59 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             else
                 Log.LogInfo($"SoundFolderPath : {soundFolderPath} , fullpath : {Path.GetFullPath(soundFolderPath)}");
 
-            bool noError = true;
-
-            async Task load(SoundControl sound, string fileName)
+            // åŸæœ¬ 17 ä¸ªæ–‡ä»¶é¡ºåº await,ç­‰å¾…æ—¶é—´ç´¯åŠ ;æ”¹ä¸º Task.WhenAll å¹¶è¡ŒåŠ è½½ã€‚
+            // å• load è¿”å›ç»“æœ + æ˜¯å¦æˆåŠŸ,ä¸»æµç¨‹ç»Ÿä¸€å†™å…¥ cacheSounds å­—å…¸,
+            // é¿å…å¹¶å‘å†™å…¥æ™®é€š Dictionaryã€‚
+            async Task<(SoundControl sound, ISoundPlayer player, bool ok)> load(SoundControl sound, string fileName)
             {
                 var fixFilePath = Path.Combine(soundFolderPath, fileName);
 
                 try
                 {
-                    cacheSounds[sound] = await audioManager.LoadSoundAsync(fixFilePath);
+                    var player = await audioManager.LoadSoundAsync(fixFilePath);
+                    return (sound, player, true);
                 }
                 catch (Exception e)
                 {
                     Log.LogError($"Can't load {sound} sound file : {fixFilePath} , reason : {e.Message}");
-                    noError = false;
+                    return (sound, null, false);
                 }
             }
 
             cacheSounds.Clear();
-            await load(SoundControl.Tap, "tap.wav");
-            await load(SoundControl.Bell, "bell.wav");
-            await load(SoundControl.CriticalTap, "extap.wav");
-            await load(SoundControl.WallTap, "wall.wav");
-            await load(SoundControl.CriticalWallTap, "exwall.wav");
-            await load(SoundControl.Flick, "flick.wav");
-            await load(SoundControl.Bullet, "bullet.wav");
-            await load(SoundControl.CriticalFlick, "exflick.wav");
-            await load(SoundControl.HoldEnd, "holdend.wav");
-            await load(SoundControl.ClickSE, "clickse.wav");
-            await load(SoundControl.HoldTick, "holdtick.wav");
-            await load(SoundControl.BeamPrepare, "beamprepare.wav");
-            await load(SoundControl.BeamLoop, "beamlooping.wav");
-            await load(SoundControl.BeamEnd, "beamend.wav");
-            await load(SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav");
-            await load(SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav");
-            await load(SoundControl.BossWave, "bossWave.wav");
+
+            var loads = new[]
+            {
+                load(SoundControl.Tap, "tap.wav"),
+                load(SoundControl.Bell, "bell.wav"),
+                load(SoundControl.CriticalTap, "extap.wav"),
+                load(SoundControl.WallTap, "wall.wav"),
+                load(SoundControl.CriticalWallTap, "exwall.wav"),
+                load(SoundControl.Flick, "flick.wav"),
+                load(SoundControl.Bullet, "bullet.wav"),
+                load(SoundControl.CriticalFlick, "exflick.wav"),
+                load(SoundControl.HoldEnd, "holdend.wav"),
+                load(SoundControl.ClickSE, "clickse.wav"),
+                load(SoundControl.HoldTick, "holdtick.wav"),
+                load(SoundControl.BeamPrepare, "beamprepare.wav"),
+                load(SoundControl.BeamLoop, "beamlooping.wav"),
+                load(SoundControl.BeamEnd, "beamend.wav"),
+                load(SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav"),
+                load(SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav"),
+                load(SoundControl.BossWave, "bossWave.wav"),
+            };
+            var results = await Task.WhenAll(loads);
+
+            var noError = true;
+            foreach (var (sound, player, ok) in results)
+            {
+                if (!ok)
+                {
+                    noError = false;
+                    continue;
+                }
+                cacheSounds[sound] = player;
+            }
 
             if (!noError)
             {
@@ -352,7 +372,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             if (offsetMs != 0)
                 currentTime = currentTime + TimeSpan.FromMilliseconds(offsetMs);
 
-            //²¥·ÅÎï¼şÒôĞ§
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ§
             while (itor is not null)
             {
                 var nextBeatTime = itor.Value.Time.TotalMilliseconds;
@@ -367,12 +387,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //²¥·Å½ÚÅÄÆ÷
+            //ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½
             while (meterActionsItor is not null)
             {
                 var nextActionItor = meterActionsItor.Next;
 
-                //¼ì²éµ±Ç°ÊÇ·ñÓĞĞ§
+                //ï¿½ï¿½éµ±Ç°ï¿½Ç·ï¿½ï¿½ï¿½Ğ§
                 if (meterActionsItor.Value.isSkip)
                 {
                     meterActionsItor = nextActionItor;
@@ -383,7 +403,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var nextBeatTime = meterActionsItor.Value.Time +
                     meterActionsItor.Value.BeatInterval * currentMeterHitCount;
 
-                //¼ì²éÊÇ·ñ³¬¹ıÏÂÒ»¸ö
+                //ï¿½ï¿½ï¿½ï¿½Ç·ñ³¬¹ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
                 if (nextActionItor != null)
                 {
                     if (nextBeatTime > nextActionItor.Value.Time)
@@ -394,7 +414,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     }
                 }
 
-                //Ã»³¬¹ı¾Í¼ì²éÁË
+                //Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
                 var ct = currentTime.TotalMilliseconds - nextBeatTime.TotalMilliseconds;
                 if (ct >= 0)
                 {
@@ -408,13 +428,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //¼ì²éÑ­»·ÒôĞ§
+            //ï¿½ï¿½ï¿½Ñ­ï¿½ï¿½ï¿½ï¿½Ğ§
             lock (locker)
             {
                 var queryDurationEvents = durationEvents.Query(currentTime);
                 foreach (var durationEvent in queryDurationEvents)
                 {
-                    //¼ì²éÊÇ·ñÕıÔÚ²¥·ÅÁË
+                    //ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½
                     if (!currentPlayingDurationEvents.Contains(durationEvent))
                     {
                         if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
@@ -426,7 +446,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         }
                     }
                 }
-                //¼ì²éÊÇ·ñÒÑ¾­²¥·ÅÍê³É
+                //ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
                 {
                     if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
@@ -596,7 +616,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         public async Task<bool> ReloadSoundFiles()
         {
-            InitSounds();
+            _ = InitSoundsAsync();
             return await loadTask;
         }
     }

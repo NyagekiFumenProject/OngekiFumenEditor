@@ -20,6 +20,7 @@
     - ❌ **#1 DrawJudgeLineHelper 字符串内插**: 经 Benchmark 验证后**决定不修改**（详见条目#1 Benchmark 复核结论），实际严重度降级 Critical → Low。
     - ✅ **#2 CommonHorizonalDrawingTarget 每帧 LINQ 链**: 经 Benchmark 验证后**已修复**（字典桶替换 GroupBy + 多层 ToList，时间 -18%~-54%、分配 -64%~-75%，见条目#2 实施记录）。
     - ✅ **#3 LaneCurvePathControlDrawingTarget 多次枚举**: 经 Benchmark 验证后**已修复**（单次扫描收集 + 字典桶 + IndexCache，时间 -41%~-57%、分配 -85%~-93%，见条目#3 实施记录）。
+    - ✅ **#6 DefaultFumenSoundPlayer 顺序加载**: 用户直接允许改动**已修复**（17 个 wav 顺序 await → Task.WhenAll 并行；async void → async Task；见条目#6 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -196,14 +197,38 @@
 - **影响**: 这些方法每帧被每个 drawingTarget 调用多次，累计创建数百到数千次 `SKPaint`。
 - **建议**: 持有一个或多个常驻 `SKPaint`（按"颜色/描边"等少量参数对组合），在 `Begin`/`UpdatePaint` 中改写其字段（如 `DefaultSkiaLineDrawing.cs:62` 已经这样做了），其它实现统一改成这种模式。
 
-### 6. DefaultFumenSoundPlayer 同步顺序 await 加载 17 个 wav
+### ✅ 6. DefaultFumenSoundPlayer 同步顺序 await 加载 17 个 wav
 
 - **位置**: `OngekiFumenEditor/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs:105-122`
 - **类别**: 异步 / IO
 - **严重度**: High
+- **决策**: **已修复**（用户直接允许改动，未做 Benchmark 复核；见下方"实施记录"）
 - **问题**: 17 个 `await load(...)` 顺序执行，未并行；且 `InitSounds` 是 `async void`（第 70 行）。
 - **影响**: 启动阶段串行 IO，等待时间累加。
 - **建议**: `await Task.WhenAll(loads)` 并行加载；`InitSounds` 改成 `async Task` 并由调用方保留 task。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**: `OngekiFumenEditor/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs`
+
+**核心变更**:
+1. `InitSounds()` 重命名为 `InitSoundsAsync()`，签名从 `async void` 改为 `async Task`——异常不再在 SynchronizationContext 上 rethrow（`async void` 会让单个文件加载失败崩整个 UI 线程）。
+2. 构造函数调用从 `InitSounds()` 改为 `_ = InitSoundsAsync()`，配合现有的 `TaskCompletionSource` + `loadTask` 字段（外部仍可通过 `ReloadSoundFiles()` 等 await 完成）。
+3. 内嵌 `load()` 返回值从 `Task` 改为 `Task<(SoundControl sound, ISoundPlayer player, bool ok)>`，**不再直接写入字典**——避免并行环境下对普通 `Dictionary` 的并发写入。
+4. 17 行顺序 `await load(...)` 改为构造数组后 `await Task.WhenAll(loads)`，**所有 wav 并行加载**。
+5. `Task.WhenAll` 返回后单线程地把成功结果写入 `cacheSounds`，并按 `ok` 标记汇总 `noError`——线程安全且语义不变。
+6. `ReloadSoundFiles()` 内的旧 `InitSounds()` 调用同步更新为 `_ = InitSoundsAsync()`。
+
+**预期效果**:
+- 启动阶段 17 次磁盘 IO 与解码并行，端到端等待时间从"17 × 单文件加载耗时"近似下降到"max(单文件加载耗时)"，受磁盘吞吐和 audio 后端并发能力上限影响；
+- `async void` → `async Task` 让加载异常可被 `loadTask`/`source.SetException` 路径捕获，不再静默崩进程。
+
+**风险检查**:
+- 主项目 Release 编译 0 错误；
+- 并发写入字典的潜在数据竞争已被"先并行收集结果 → 单线程汇总"模式规避；
+- `cacheSounds.Clear()` 在 await 前调用，重载逻辑保持原顺序。
+
+**未做 Benchmark**: 启动阶段一次性 IO，BDN 微基准噪声会远大于实际收益信号（IO 时间分布跨 ms 级），改动正确性更重要。
 
 ### 7. SchedulerManager.Run 每 10ms 创建一堆 Task + ContinueWith + ToArray
 
