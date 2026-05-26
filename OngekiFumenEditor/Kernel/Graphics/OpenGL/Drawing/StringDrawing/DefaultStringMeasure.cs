@@ -131,7 +131,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             {
                 FamilyName = Path.GetFileNameWithoutExtension(x),
                 FilePath = x
-            }).Where(x => Path.GetExtension(x.FilePath).ToLower() == ".ttf").ToArray();
+            }).Where(x => Path.GetExtension(x.FilePath).Equals(".ttf", StringComparison.OrdinalIgnoreCase)).ToArray();
         }
 
         private static void OnDisableAntialiasingGlyphRenderer(byte[] input, byte[] output, GlyphRenderOptions options)

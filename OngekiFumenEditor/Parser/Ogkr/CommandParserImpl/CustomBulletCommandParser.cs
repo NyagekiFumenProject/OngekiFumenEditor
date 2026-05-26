@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             bullet.TGrid.Grid = (int)dataArr[2];
             bullet.XGrid.Unit = dataArr[3];
 
-            var damage = args.GetData<string>(4)?.ToUpper();
+            var damage = args.GetData<string>(4)?.ToUpperInvariant();
             bullet.BulletDamageTypeValue = damage switch
             {
                 "NML" => BulletDamageType.Normal,
@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
                 _ => throw new NotImplementedException($"BulletDamageTypeValue = {damage}"),
             };
 
-            var shoot = args.GetData<string>(5)?.ToUpper();
+            var shoot = args.GetData<string>(5)?.ToUpperInvariant();
             bullet.ShooterValue = shoot switch
             {
                 "UPS" => Shooter.TargetHead,
@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 
             bullet.PlaceOffset = args.GetData<int>(6);
 
-            var target = args.GetData<string>(7)?.ToUpper();
+            var target = args.GetData<string>(7)?.ToUpperInvariant();
             bullet.TargetValue = target switch
             {
                 "PLR" => Target.Player,
@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 
             bullet.Speed = args.GetData<float>(8);
 
-            var size = args.GetData<string>(9)?.ToUpper();
+            var size = args.GetData<string>(9)?.ToUpperInvariant();
             bullet.SizeValue = size switch
             {
                 "N" => BulletSize.Normal,
@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
                 _ => throw new NotImplementedException($"SizeValue = {size}"),
             };
 
-            var type = args.GetData<string>(10)?.ToUpper();
+            var type = args.GetData<string>(10)?.ToUpperInvariant();
             bullet.TypeValue = type switch
             {
                 "CIR" => BulletType.Circle,

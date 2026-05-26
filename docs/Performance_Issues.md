@@ -25,6 +25,8 @@
     - ✅ **#13 EnumerateAllDisplayableObjects 多层 LINQ**: 用户指示签名改为 `IPooledList<IDisplayableObject>`，**已修复**（13 层 Concat + SelectMany → PooledList 累加 + 单 foreach；调用方 OfType → 模式匹配；见条目#13 实施记录）。
     - ✅ **#14 RebuildSoflanGroupCache Parallel + LINQ**: 经 Benchmark 验证后**已修复**（LINQ 链 + IEnumerable Parallel → PooledList + Parallel.ForEach 直传；`objs.Any()` → `objs.Count > 0`；时间 -23%~-2%、分配 -35%~-2%；见条目#14 实施记录）。
     - ✅ **#17 ParserUtils/CommandArgs.GetDataArray TypeDescriptor 反射**: 经 Benchmark 验证后**已修复**（typeof(T) JIT 分派 fast path + cached TypeConverter + 去 LINQ；时间 -72%、分配 -63%；同时改造 ParserUtils 与 CommandArgs；见条目#17 实施记录）。
+    - ✅ **#18 BUL parser `?.ToUpper()` ICU 调用**: 用户直接允许改动**已修复**（3 文件 12 处 `?.ToUpper()` → `?.ToUpperInvariant()`，消除 culture-sensitive 路径；见条目#18 实施记录）。
+    - ✅ **#19 DefaultStringMeasure.GetSupportFonts `.ToLower() == ".ttf"`**: 用户直接允许改动**已修复**（改 `Equals(".ttf", StringComparison.OrdinalIgnoreCase)`，零分配比较；见条目#19 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -513,22 +515,51 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 
 **预期生产收益**: 解析一份典型 OGKR（几千行）从 ~2.5 ms → ~0.7 ms（-72%），分配从 ~4 MB → ~1.4 MB（-63%）。打开谱面时间会有可观降低。
 
-### 18. BulletPalleteCommandParser / CustomBulletCommandParser 多次 `?.ToUpper()` 不带 culture
+### ✅ 18. BulletPalleteCommandParser / CustomBulletCommandParser 多次 `?.ToUpper()` 不带 culture
 
 - **位置**: `OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/BulletPalleteCommandParser.cs:24,32,39,44`、`OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/CustomBulletCommandParser.cs:28,37,48,58,66`、`OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/CustomBellCommandParser.cs:29,40,50`
 - **类别**: 字符串
 - **严重度**: Medium
+- **决策**: **已修复**（用户直接允许改动；选 `ToUpperInvariant` 最小改动方案）
 - **问题**: `.ToUpper()` 在 culture-sensitive 路径上分配新字符串；对于 `"UPS"/"ENE"/"PLR"` 等已知 ASCII tag，标准做法是用 `StringComparer.OrdinalIgnoreCase` 或 `.ToUpperInvariant()`。
 - **影响**: 每条 BUL 命令产生 1 个临时字符串 + ICU 调用；谱面有数千子弹时持续分配。
 - **建议**: 改成 `switch` + `string.Equals(s, "UPS", StringComparison.OrdinalIgnoreCase)`，或在外层 toUpperInvariant 一次复用。
 
-### 19. DefaultStringMeasure.GetSupportFonts 启动期 Directory.GetFiles + LINQ ToLower 反复
+#### 实施记录（2026/05/26）
+
+**改动文件**:
+- `OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/BulletPalleteCommandParser.cs`（4 处）
+- `OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/CustomBulletCommandParser.cs`（5 处）
+- `OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/CustomBellCommandParser.cs`（3 处）
+
+**变更**: 12 处 `?.ToUpper()` → `?.ToUpperInvariant()`（替换所有 occurrences）。
+
+**为什么选 ToUpperInvariant 而不是 OrdinalIgnoreCase**:
+- `switch` 表达式 case 不能直接表达 `OrdinalIgnoreCase` 比较，要么改三元链失去可读性、要么写 `var s when ...` 模式啰嗦；
+- ToUpperInvariant 是建议里明确允许的最小改动方案；
+- 主收益：消除 culture-sensitive ICU 路径（`ToUpper` 默认走 `CurrentCulture`，在土耳其等 locale 下有著名的"I→ı"问题，对 OGKR ASCII 标签可能引入解析错误）；
+- 残余开销：仍分配 ~24 B/调用的临时小串——按 #18 Medium 严重度可接受，未做激进重构。
+
+**风险检查**: 主项目 Release 编译 0 错误；语义保持不变（每个 `?.ToUpper()` 仍然处理 null，仍然返回大写副本进 switch）；switch case literals 是 ordinal 比较，与 ToUpperInvariant 配对正确。
+
+### ✅ 19. DefaultStringMeasure.GetSupportFonts 启动期 Directory.GetFiles + LINQ ToLower 反复
 
 - **位置**: `OngekiFumenEditor/Kernel/Graphics/OpenGL/Drawing/StringDrawing/DefaultStringMeasure.cs:128-135`
 - **类别**: IO / 字符串
 - **严重度**: Medium
+- **决策**: **已修复**（用户直接允许改动）
 - **问题**: `Path.GetExtension(x).ToLower() == ".ttf"`（行 134）—— ToLower 创建新串。
 - **建议**: `Path.GetExtension(x).Equals(".ttf", StringComparison.OrdinalIgnoreCase)`，避免分配。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**: `OngekiFumenEditor/Kernel/Graphics/OpenGL/Drawing/StringDrawing/DefaultStringMeasure.cs:134`
+
+**变更**: 单行替换——`Path.GetExtension(x.FilePath).ToLower() == ".ttf"` → `Path.GetExtension(x.FilePath).Equals(".ttf", StringComparison.OrdinalIgnoreCase)`。
+
+**预期效果**: 每个字体文件少分配一个 `string`（GetExtension 返回的副本被 ToLower 又拷一份）；Windows Fonts 目录通常几百到上千文件，启动期节省 ~几 KB 分配并消除 ICU 调用。`OrdinalIgnoreCase` 比 `ToLower + ==` 还快（直接逐字节 case-fold 比较）。
+
+**风险检查**: 主项目 Release 编译 0 错误；语义等价。
 
 ### 20. CachedSvgRenderDataManager.OnScheduleCall LINQ Where + ToArray 删除
 
