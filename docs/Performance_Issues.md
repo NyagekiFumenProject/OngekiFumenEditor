@@ -13,13 +13,17 @@
   - **High**（频繁触发、容易放大）：13 项
   - **Medium**（中频路径或一次性但显著的浪费）：14 项
   - **Low**（边角问题、可读性 > 性能）：7 项
-- **复核记录**（条目标题前 ✅ 表示已 Benchmark 复核并落定决策）：
-  - ✅ **#1 DrawJudgeLineHelper 字符串内插**: 经 Benchmark 验证后**决定不修改**（详见条目#1 Benchmark 复核结论），实际严重度降级 Critical → Low。
-  - ✅ **#2 CommonHorizonalDrawingTarget 每帧 LINQ 链**: 经 Benchmark 验证后**已修复**（字典桶替换 GroupBy + 多层 ToList，时间 -18%~-54%、分配 -64%~-75%，见条目#2 实施记录）。
+- **复核记录**（条目标题前标记规则）：
+  - ✅ 已 Benchmark 复核且**允许改动**（已修复或将修复）
+  - ❌ 已 Benchmark 复核但**不允许改动**（性价比不足或风险更大）
+  - 条目列表：
+    - ❌ **#1 DrawJudgeLineHelper 字符串内插**: 经 Benchmark 验证后**决定不修改**（详见条目#1 Benchmark 复核结论），实际严重度降级 Critical → Low。
+    - ✅ **#2 CommonHorizonalDrawingTarget 每帧 LINQ 链**: 经 Benchmark 验证后**已修复**（字典桶替换 GroupBy + 多层 ToList，时间 -18%~-54%、分配 -64%~-75%，见条目#2 实施记录）。
+    - ✅ **#3 LaneCurvePathControlDrawingTarget 多次枚举**: 经 Benchmark 验证后**已修复**（单次扫描收集 + 字典桶 + IndexCache，时间 -41%~-57%、分配 -85%~-93%，见条目#3 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
-### ✅ 1. 渲染热路径中字符串内插每帧分配（DrawJudgeLineHelper）
+### ❌ 1. 渲染热路径中字符串内插每帧分配（DrawJudgeLineHelper）
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawJudgeLineHelper.cs:43`、`:66`
 - **类别**: 字符串 / 绘制
@@ -116,14 +120,57 @@
 
 **风险**: 字典遍历顺序与原 `GroupBy` 不同（原版按首次出现顺序，新版按 hash 顺序），不影响视觉结果——每个 group 都独立 `DrawSimpleLines`/`DrawString` 到自己的 Y 坐标，组间无依赖。
 
-### 3. LaneCurvePathControlDrawingTarget 每帧多次 yield + 多次枚举
+### ✅ 3. LaneCurvePathControlDrawingTarget 每帧多次 yield + 多次枚举
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/EditorObjects/LaneCurvePathControlDrawingTarget.cs:46`、`:55-79`、`:82-83`、`:88`
 - **类别**: LINQ / 集合 / 字符串
 - **严重度**: High
+- **决策**: **已修复**（见下方"Benchmark 复核结论"与"实施记录"）
 - **问题**: `DrawBatch` 中 `list.GroupBy(...).SelectMany(item => gen())`（gen 用 yield return），随后 `list.Where(...).Select(...)`、`list.Select(...)` 又分别枚举 list 多次，并每个 item `item.obj.Index.ToString()` 产生临时字符串。
 - **影响**: 每帧热路径上多次重复枚举 `list`，且 `gen()` 是延迟枚举器，会被传给 `builder.DrawSimpleLines` 后又被一次性 ToList，丢失对象池能力。
 - **建议**: 改成单次 `foreach`，把 lineVertices / texture instances / selectable 对象一次性收集到对象池容器；`Index.ToString()` 可缓存（Index 通常变化少）。
+
+#### Benchmark 复核结论（2026/05/26）
+
+对应基准: `OngekiFumenEditor.Benchmark/Benchmarks/LaneCurvePathBenchmarks.cs`。
+环境: BenchmarkDotNet v0.15.8, .NET 10.0.8, AMD Ryzen 7 5800X, Default Job, MemoryDiagnoser。
+样本: N=100 / 500 / 2000 控制点，每 4 个共享一个 RefCurveObject（模拟实际曲线分组）。
+
+| Method | N | Mean | Ratio | Allocated | Alloc Ratio |
+|---|---:|---:|---:|---:|---:|
+| Original_MultiPassLinq | 100 | 19.56 µs | 1.00 | 22.82 KB | 1.00 |
+| Optimized_SinglePass | 100 | 8.36 µs | **0.43** | 1.64 KB | **0.07** |
+| Original_MultiPassLinq | 500 | 96.14 µs | 1.00 | 116.54 KB | 1.00 |
+| Optimized_SinglePass | 500 | 47.82 µs | **0.50** | 15.97 KB | **0.14** |
+| Original_MultiPassLinq | 2000 | 453.31 µs | 1.00 | 491.71 KB | 1.00 |
+| Optimized_SinglePass | 2000 | 266.34 µs | **0.59** | 71.63 KB | **0.15** |
+
+**关键收益**:
+1. **CPU 时间下降 41%–57%**（N=100 减半还快 7%，最常见场景下尤其受益）；
+2. **分配下降 85%–93%**（N=100 从 22.82 KB → 1.64 KB，省 21 KB/帧 → 60 FPS 下省 **1.26 MB/秒**）；
+3. 分配大头来自 `GroupBy` 的 Grouping 节点 + `SelectMany` + `yield return` 内部 state machine + 多次 LINQ enumerator 分配。单次 foreach 完全消除这些中间层；
+4. `Index.ToString()` 缓存额外消除每帧 N 次小字符串分配（int → string 各分配 ~24 B，N=2000 时单这一项就省 ~50 KB/帧）；
+5. 优化版多用了 1 个 PooledDictionary + 3 个 PooledList，全部归还对象池，**净分配仍降到 7%–15%**。
+
+**风险**: `Dictionary<CurveRef, ...>` 字典遍历顺序与原 `GroupBy` 不同，但各 group 独立绘制无依赖，视觉无差异。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**: `OngekiFumenEditor/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/EditorObjects/LaneCurvePathControlDrawingTarget.cs`
+
+**核心变更**:
+1. 新增 `private readonly struct CtrlPoint(float y, float x, LaneCurvePathControlObject obj)`，替代原本的 `(float y, float x, obj)` 值元组——避免每帧分配元组装箱开销，并让排序比较器无需依赖元组语法；
+2. 新增 `static readonly IComparer<CtrlPoint> indexDescCmp`，按 `Index` 降序排序，替代 `OrderBy(Index).Reverse()`；
+3. 新增 `static readonly Dictionary<int, string> indexStringCache` + 私有 `GetIndexString`，替代每帧每对象的 `item.obj.Index.ToString()`；
+4. `DrawBatch` 用**一次 foreach 扫描** `objs` 同时完成：过滤可见性、收集 `allTex`/`selectedTex` 纹理实例、按 `RefCurveObject` 分桶——替代原本的 `Where + Select + ToListWithObjectPool + GroupBy + 多次 Where/Select`；
+5. 每桶 `items.Sort(indexDescCmp)` 一次排序，替代 `OrderBy(Index).Reverse()` 的延迟枚举；
+6. `lineVertices` 改为 `IPooledList<LineVertex>` 显式收集，替代 `GroupBy(...).SelectMany(item => gen())` 的 yield 链——消除编译器生成的 state-machine 实例与 `SelectMany` enumerator；
+7. `RegisterSelectableObject` 与 `DrawString` 合并到同一个 for 循环（共享一次 filtered 遍历），原本是两次独立 foreach；
+8. `try/finally` 保证每个桶 `IPooledList<CtrlPoint>` 都 `Dispose` 归还对象池。
+
+**保留 LINQ 风格语义**: `filtered` 顺序与原版一致（按 `objs` 首次出现顺序），桶之间顺序虽与 `GroupBy` 不同但绘制无依赖。
+
+**风险检查**: 主项目 Release 编译 0 错误。运行行为预期等价（只改了枚举策略，所有副作用调用顺序与原版同：先 `DrawSimpleLines` → `DrawHighlightBatchTexture` → `DrawTexture` → `RegisterSelectableObject`/`DrawString`）。
 
 ### 4. CommonOpenGLDrawingBase / DefaultSkiaLineDrawing 每帧创建/销毁 SKPath
 

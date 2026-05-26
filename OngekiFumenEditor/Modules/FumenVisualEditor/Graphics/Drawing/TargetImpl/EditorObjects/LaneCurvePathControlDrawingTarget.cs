@@ -1,13 +1,13 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
-using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.Linq;
 using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
@@ -26,12 +26,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override int DefaultRenderOrder => 2000;
 
+        private readonly struct CtrlPoint(float y, float x, LaneCurvePathControlObject obj)
+        {
+            public readonly float Y = y;
+            public readonly float X = x;
+            public readonly LaneCurvePathControlObject Obj = obj;
+        }
+
+        private static readonly IComparer<CtrlPoint> indexDescCmp =
+            Comparer<CtrlPoint>.Create(static (a, b) => b.Obj.Index.CompareTo(a.Obj.Index));
+
+        private static readonly Dictionary<int, string> indexStringCache = new();
+
         public override void Initialize(IRenderManagerImpl impl)
         {
             texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\commonCircle.png");
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
-
         }
 
         public void Dispose()
@@ -43,50 +54,95 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<LaneCurvePathControlObject> objs)
         {
             var isAlwaysShow = target.Editor.IsShowCurveControlAlways;
-            using var list = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
-                y: (float)target.ConvertToY_DefaultSoflanGroup(x.TGrid),
-                x: (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
-                obj: x
-            )).ToListWithObjectPool();
 
-            if (list.Count == 0)
+            using var filtered = ObjectPool.GetPooledList<CtrlPoint>();
+            using var allTex = ObjectPool.GetPooledList<TextureInstance>();
+            using var selectedTex = ObjectPool.GetPooledList<TextureInstance>();
+            using var buckets = ObjectPool.GetPooledDictionary<ConnectableChildObjectBase, IPooledList<CtrlPoint>>();
+
+            // 一次扫描完成: 过滤 + 纹理实例收集 + 按 RefCurve 分桶
+            foreach (var obj in objs)
+            {
+                var refCurve = obj.RefCurveObject;
+                if (!(refCurve.IsSelected || refCurve.IsAnyControlSelecting || isAlwaysShow))
+                    continue;
+
+                var y = (float)target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
+                var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
+                var point = new CtrlPoint(y, x, obj);
+
+                filtered.Add(point);
+                allTex.Add(new TextureInstance(size, new Vector2(x, y), 0f, Vector4.One));
+                if (obj.IsSelected)
+                    selectedTex.Add(new TextureInstance(size * 1.25f, new Vector2(x, y), 0f, Vector4.One));
+
+                if (!buckets.TryGetValue(refCurve, out var bucket))
+                {
+                    bucket = ObjectPool.GetPooledList<CtrlPoint>();
+                    buckets[refCurve] = bucket;
+                }
+                bucket.Add(point);
+            }
+
+            if (filtered.Count == 0)
                 return;
 
-            var lineVertices = list.GroupBy(x => x.obj.RefCurveObject).SelectMany(item =>
+            using var lineVertices = ObjectPool.GetPooledList<LineVertex>();
+
+            foreach (var kv in buckets)
             {
-                IEnumerable<LineVertex> gen()
+                var refConnectableObject = kv.Key;
+                var items = kv.Value;
+                try
                 {
-                    var refConnectableObject = item.Key;
+                    // 原版: item.OrderBy(Index).Reverse() -> 改为单次原地 Sort 降序
+                    items.Sort(indexDescCmp);
 
                     var hash = refConnectableObject.ReferenceStartObject.GetHashCode();
                     var alpha = (byte)((hash >> 24) & 0xFF);
-                    var color = new Vector4((((hash >> 16) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, (((hash >> 8) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, ((hash & 0xFF) ^ alpha) / 255f / 2 + 0.5f, 1f);
-                    //var color = new Vector4(1, 1, 1, 1f);
+                    var color = new Vector4(
+                        (((hash >> 16) & 0xFF) ^ alpha) / 255f / 2 + 0.5f,
+                        (((hash >> 8) & 0xFF) ^ alpha) / 255f / 2 + 0.5f,
+                        ((hash & 0xFF) ^ alpha) / 255f / 2 + 0.5f,
+                        1f);
 
                     var ry = (float)target.ConvertToY_DefaultSoflanGroup(refConnectableObject.TGrid);
                     var rx = (float)XGridCalculator.ConvertXGridToX(refConnectableObject.XGrid, target.Editor);
-                    yield return new LineVertex(new(rx, ry), Transparent, LineDash);
-                    yield return new LineVertex(new(rx, ry), color, LineDash);
-                    foreach (var curve in item.OrderBy(x => x.obj.Index).Reverse())
-                        yield return new LineVertex(new(curve.x, curve.y), color, LineDash);
+                    lineVertices.Add(new LineVertex(new(rx, ry), Transparent, LineDash));
+                    lineVertices.Add(new LineVertex(new(rx, ry), color, LineDash));
+                    for (var i = 0; i < items.Count; i++)
+                        lineVertices.Add(new LineVertex(new(items[i].X, items[i].Y), color, LineDash));
+
                     var parentConnectableObject = refConnectableObject.PrevObject;
                     var rpy = (float)target.ConvertToY_DefaultSoflanGroup(parentConnectableObject.TGrid);
                     var rpx = (float)XGridCalculator.ConvertXGridToX(parentConnectableObject.XGrid, target.Editor);
-                    yield return new LineVertex(new(rpx, rpy), color, LineDash);
-                    yield return new LineVertex(new(rpx, rpy), Transparent, LineDash);
+                    lineVertices.Add(new LineVertex(new(rpx, rpy), color, LineDash));
+                    lineVertices.Add(new LineVertex(new(rpx, rpy), Transparent, LineDash));
                 }
-                return gen();
-            });
+                finally
+                {
+                    items.Dispose();
+                }
+            }
+
             builder.DrawSimpleLines(lineVertices, 2);
+            builder.DrawHighlightBatchTexture(texture, selectedTex);
+            builder.DrawTexture(texture, allTex);
 
-            builder.DrawHighlightBatchTexture(texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f, Vector4.One)));
-            builder.DrawTexture(texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f, Vector4.One)));
-            foreach ((var y, var x, var obj) in list)
-                target.RegisterSelectableObject(obj, new Vector2(x, y), size);
+            for (var i = 0; i < filtered.Count; i++)
+            {
+                var p = filtered[i];
+                target.RegisterSelectableObject(p.Obj, new Vector2(p.X, p.Y), size);
+                builder.DrawString(GetIndexString(p.Obj.Index), new(p.X, p.Y + 4), Vector2.One, 15, 0,
+                    new(1, 0, 1, 1), new(0.5f, 0.5f), FontStyle.Bold, default);
+            }
+        }
 
-            foreach (var item in list)
-                builder.DrawString(item.obj.Index.ToString(), new(item.x, item.y + 4), Vector2.One, 15, 0, new(1, 0, 1, 1), new(0.5f, 0.5f),
-                     FontStyle.Bold, default);
+        private static string GetIndexString(int idx)
+        {
+            if (!indexStringCache.TryGetValue(idx, out var s))
+                indexStringCache[idx] = s = idx.ToString();
+            return s;
         }
     }
 }
