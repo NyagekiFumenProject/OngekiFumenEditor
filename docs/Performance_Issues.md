@@ -837,53 +837,85 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 
 ## 低优先级（Low）
 
-### 41. RandomHepler 用 DateTime.Now.GetHashCode() 作种子
+### ✅ 41. RandomHepler 用 DateTime.Now.GetHashCode() 作种子
 
 - **位置**: `OngekiFumenEditor/Utils/RandomHepler.cs:11`、`OngekiFumenEditor/Base/OngekiObjects/BulletPallete.cs:12`
 - **类别**: 杂项
 - **问题**: 既不是 cryptographic 也不是 monotonic 种子；并发场景下 DateTime.Now 分辨率低，会得到重复种子。
 - **建议**: `Random.Shared` 即可（线程安全，自带高熵）。
 
-### 42. ImageLoader.PrcessQueue 每次 MD5.Create + Convert.ToHexString
+#### 实施记录（2026/05/27）
+
+- `RandomHepler` 全部 API 改用 `Random.Shared`，移除自管理 `Random rand`/`StringBuilder sb` 静态字段。
+- `RandomString` 改为每次新建 `StringBuilder`，避免原本静态 `sb` 在多线程下的竞态（原实现非线程安全且复用同一 StringBuilder 也会产生 race）。
+- `BulletPallete.RandomSeed` 保留原语义（业务逻辑依赖该字段在每次刷新切换 seed，非性能关注点）。
+
+### ✅ 42. ImageLoader.PrcessQueue 每次 MD5.Create + Convert.ToHexString
 
 - **位置**: `OngekiFumenEditor/Utils/ImageLoader.cs:75-76`
 - **类别**: 内存 / 字符串
 - **问题**: 每次新建 MD5 实例。
 - **建议**: 用 `MD5.HashData(...)` 静态方法。
 
-### 43. KeyBindingDefinition.regex 编译选项缺失
+#### 实施记录（2026/05/27）
+
+- 改为 `MD5.HashData(Encoding.UTF8.GetBytes(path))`，省去 `MD5.Create()` + `IDisposable.Dispose()` 调用。
+
+### ✅ 43. KeyBindingDefinition.regex 编译选项缺失
 
 - **位置**: `OngekiFumenEditor/Kernel/KeyBinding/KeyBindingDefinition.cs:80`
 - **类别**: 正则
 - **问题**: `new Regex(@"(\s*\w+\s*\+\s*)?(\w+)")` 无 `RegexOptions.Compiled`，也未 `[GeneratedRegex]`。
 - **建议**: .NET 7+ 用 `[GeneratedRegex(@"...", RegexOptions.Compiled)]` 生成器。
 
-### 44. OgkiFumenSet 中 Regex 无 Compiled 标志
+#### 实施记录（2026/05/27）
+
+- 改为 `partial class` + `[GeneratedRegex]` 源生成 `KeybindRegex()`。
+
+### ✅ 44. OgkiFumenSet 中 Regex 无 Compiled 标志
 
 - **位置**: `OngekiFumenEditor/Modules/OgkiFumenListBrowser/Models/OngekiFumenSet.cs:90`、`:91`
 - **类别**: 正则
 - **问题**: `static Regex BpmRegex = new Regex(...)` 无 RegexOptions.Compiled。
 - **建议**: 改 `[GeneratedRegex]`。
 
-### 45. ParserUtils Regex 也未编译
+#### 实施记录（2026/05/27）
+
+- 改 `partial class`，`BpmRegex` 与 `CreatorRegex` 改为 `[GeneratedRegex]` 源生成方法。
+
+### ✅ 45. ParserUtils Regex 也未编译
 
 - **位置**: `OngekiFumenEditor/Parser/DefaultImpl/Nyageki/CommandImpl/ParserUtils.cs:25`
 - **类别**: 正则
 - **建议**: 同上。
 
-### 46. DocumentOpenHelper.cs 内部 new Regex 在方法内
+#### 实施记录（2026/05/27）
+
+- `ParserUtils` 改 `static partial class`，原 `static Regex s` 改为 `[GeneratedRegex]` 的 `ParamRegex()`。
+
+### ✅ 46. DocumentOpenHelper.cs 内部 new Regex 在方法内
 
 - **位置**: `OngekiFumenEditor/Utils/DocumentOpenHelper.cs:157`
 - **类别**: 正则
 - **问题**: `var match = new Regex(@"(\d+)_\d+").Match(...)` 在方法里临时实例化。
 - **建议**: 提为 static + Compiled / GeneratedRegex。
 
-### 47. GridBase.GetHashCode 用累加 hash 但未 readonly
+#### 实施记录（2026/05/27）
+
+- `DocumentOpenHelper` 改 `static partial class`，提取 `MusicIdFromFileNameRegex()` 为 `[GeneratedRegex]`。
+
+### ✅ 47. GridBase.GetHashCode 用累加 hash 但未 readonly
 
 - **位置**: `OngekiFumenEditor/Base/GridBase.cs:129-139`
 - **类别**: 集合
 - **问题**: Hashcode 基于 mutable 字段 Unit/Grid/GridRadix。把 GridBase 用作 Dictionary key 后修改会破坏 invariant。
 - **建议**: 显式标注或在 mutation 前删除-再插入；或建模为不可变结构体。
+
+#### 实施记录（2026/05/27）
+
+- 哈希实现改为 `HashCode.Combine(Unit, Grid, GridRadix)`（语义等价、更现代）。
+- 添加注释明确说明 hash 依赖 mutable 字段以及调用方需在 mutation 前先 remove-后 insert 的约束。
+- 未将 `GridBase` 改造为不可变结构体——该类型已被广泛继承（`TGrid`/`XGrid` 等）并依赖 PropertyChanged 通知，重构成本与回归风险过高。
 
 ## 跨切关注点 / 系统性建议
 

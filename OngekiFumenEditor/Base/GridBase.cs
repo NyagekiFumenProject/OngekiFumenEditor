@@ -128,14 +128,7 @@ namespace OngekiFumenEditor.Base
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hash = 17;
-                hash = hash * 31 + Unit.GetHashCode();
-                hash = hash * 31 + Grid.GetHashCode();
-                hash = hash * 31 + GridRadix.GetHashCode();
-                return hash;
-            }
+            return HashCode.Combine(Unit, Grid, GridRadix);
         }
 
         public int CompareTo(object obj)

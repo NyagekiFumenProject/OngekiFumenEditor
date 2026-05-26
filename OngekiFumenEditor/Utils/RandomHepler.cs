@@ -8,24 +8,22 @@ namespace OngekiFumenEditor.Utils
     {
         private const string CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        private static readonly Random rand = new Random(("ILoveOngeki_" + DateTime.Now).GetHashCode());
-        private static readonly StringBuilder sb = new StringBuilder();
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Random(int max)
         {
-            return rand.Next(max);
+            return System.Random.Shared.Next(max);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Random(int min, int max)
         {
-            return rand.Next(min, max);
+            return System.Random.Shared.Next(min, max);
         }
 
         public static string RandomString(int length = 10)
         {
-            sb.Clear();
+            var sb = new StringBuilder(length);
+            var rand = System.Random.Shared;
 
             for (int i = 0; i < length; i++)
                 sb.Append(CHARS[rand.Next(CHARS.Length)]);
@@ -36,7 +34,7 @@ namespace OngekiFumenEditor.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static double RandomDouble()
         {
-            return rand.NextDouble();
+            return System.Random.Shared.NextDouble();
         }
     }
 }

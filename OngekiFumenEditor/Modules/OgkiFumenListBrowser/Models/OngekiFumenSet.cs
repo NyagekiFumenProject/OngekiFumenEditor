@@ -13,7 +13,7 @@ using Xv2CoreLib.Resource;
 
 namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models
 {
-    public class OngekiFumenSet
+    public partial class OngekiFumenSet
     {
         public int MusicId { get; init; }
 
@@ -87,8 +87,10 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models
             return default;
         }
 
-        private static Regex BpmRegex = new Regex(@"BPM_DEF\s*([\d\.]+)");
-        private static Regex CreatorRegex = new Regex(@"CREATOR\s*(.+)");
+        [GeneratedRegex(@"BPM_DEF\s*([\d\.]+)")]
+        private static partial Regex BpmRegex();
+        [GeneratedRegex(@"CREATOR\s*(.+)")]
+        private static partial Regex CreatorRegex();
 
         private void ParseFumenFileInfo(OngekiFumenDiff fumenDiff)
         {
@@ -106,7 +108,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models
 
                     if (!isBpmSetup)
                     {
-                        var match = BpmRegex.Match(line);
+                        var match = BpmRegex().Match(line);
                         if (match.Success)
                         {
                             var bpm = float.Parse(match.Groups[1].Value);
@@ -118,7 +120,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models
 
                     if (!isCreatorSetup)
                     {
-                        var match = CreatorRegex.Match(line);
+                        var match = CreatorRegex().Match(line);
                         if (match.Success)
                         {
                             var creator = match.Groups[1].Value;

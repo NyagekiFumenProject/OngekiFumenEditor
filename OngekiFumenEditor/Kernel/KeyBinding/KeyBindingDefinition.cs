@@ -6,7 +6,7 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Kernel.KeyBinding
 {
-    public class KeyBindingDefinition : PropertyChangedBase
+    public partial class KeyBindingDefinition : PropertyChangedBase
     {
         private readonly string resourceName;
 
@@ -77,7 +77,8 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
         }
 
         //Ctrl + A
-        static Regex regex = new Regex(@"(\s*\w+\s*\+\s*)?(\w+)");
+        [GeneratedRegex(@"(\s*\w+\s*\+\s*)?(\w+)")]
+        private static partial Regex KeybindRegex();
 
         public static bool TryParseExpression(string keybindExpr, out Key key, out ModifierKeys modifier)
         {
@@ -87,7 +88,7 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
             if (string.IsNullOrWhiteSpace(keybindExpr))
                 return true;
 
-            var match = regex.Match(keybindExpr);
+            var match = KeybindRegex().Match(keybindExpr);
             if (!match.Success)
                 return false;
 

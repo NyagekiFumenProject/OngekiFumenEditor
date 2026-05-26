@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl
 {
-	internal static class ParserUtils
+	internal static partial class ParserUtils
 	{
 		private sealed class EmptyDisposable : IDisposable
 		{
@@ -22,11 +22,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl
 			return EmptyDisposable.Shared;
 		}
 
-		private static Regex s = new Regex(@"(\w+)\[(.*?)\]\s*(,|$)");
+		[GeneratedRegex(@"(\w+)\[(.*?)\]\s*(,|$)")]
+		private static partial Regex ParamRegex();
 
 		public static IEnumerable<(string name, string value)> ParseParams(string content)
 		{
-			foreach (Match m in s.Matches(content))
+			foreach (Match m in ParamRegex().Matches(content))
 				yield return (m.Groups[1].Value, m.Groups[2].Value);
 		}
 

@@ -72,8 +72,7 @@ namespace OngekiFumenEditor.Utils
 
         private async ValueTask ProcessTask(string path, TaskCompletionSource<byte[]> taskSource)
         {
-            using var md5 = MD5.Create();
-            var hash = Convert.ToHexString(md5.ComputeHash(Encoding.UTF8.GetBytes(path)));
+            var hash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(path)));
 
             var isNetworkLoad = path.StartsWith("http", StringComparison.InvariantCultureIgnoreCase);
 
