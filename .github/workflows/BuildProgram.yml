@@ -59,13 +59,6 @@ jobs:
       run: xcopy "C:\editorCmdBuild\" "C:\ogkrEditorBuild\" /E /Y /I
     - name: Delete unused .xml files
       run: Remove-Item -Path "C:\ogkrEditorBuild\*.xml" -Force
-    - name: Delete unused runtime subfolders
-      shell: pwsh
-      run: |
-        $runtimePath = "C:\ogkrEditorBuild\runtimes"
-        Get-ChildItem -Path $runtimePath -Directory | 
-          Where-Object { $_.Name -ne "win-x64" } | 
-          Remove-Item -Recurse -Force
     - name: Delete unused .pdb files
       shell: pwsh
       run: |
