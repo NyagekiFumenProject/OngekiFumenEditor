@@ -23,6 +23,7 @@
     - ✅ **#6 DefaultFumenSoundPlayer 顺序加载**: 用户直接允许改动**已修复**（17 个 wav 顺序 await → Task.WhenAll 并行；async void → async Task；见条目#6 实施记录）。
     - ✅ **#7 SchedulerManager.Run 每 10ms 分配**: 用户直接允许改动**已修复**（LINQ + ToArray + ContinueWith 闭包 → 复用 List + InvokeAndStamp；DateTime.Now → Stopwatch；async void → async Task；见条目#7 实施记录）。
     - ✅ **#13 EnumerateAllDisplayableObjects 多层 LINQ**: 用户指示签名改为 `IPooledList<IDisplayableObject>`，**已修复**（13 层 Concat + SelectMany → PooledList 累加 + 单 foreach；调用方 OfType → 模式匹配；见条目#13 实施记录）。
+    - ✅ **#14 RebuildSoflanGroupCache Parallel + LINQ**: 经 Benchmark 验证后**已修复**（LINQ 链 + IEnumerable Parallel → PooledList + Parallel.ForEach 直传；`objs.Any()` → `objs.Count > 0`；时间 -23%~-2%、分配 -35%~-2%；见条目#14 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -370,14 +371,60 @@ private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(
 
 **未做 Benchmark**: 收益主要来自分配减少 + JIT 友好的紧致循环，BDN 微基准对此场景信号一般（需要构造完整 Fumen + 多个 range，与现有 `DisplayableEnumerationBenchmarks` 重合度高且不能解耦 Editor 状态）；改动正确性由编译 + 语义等价分析覆盖。
 
-### 14. RebuildSoflanGroupCache Parallel.ForEach + IEnumerable 多次枚举
+### ✅ 14. RebuildSoflanGroupCache Parallel.ForEach + IEnumerable 多次枚举
 
 - **位置**: `OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs:1062-1083`
 - **类别**: 并发 / LINQ
 - **严重度**: Medium
+- **决策**: **已修复**（用户选 PooledListParallel 方案；见下方"Benchmark 复核结论"与"实施记录"）
 - **问题**: `objs = Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>(); objs = objs.Where(...)`：objs 是延迟 IEnumerable，`Parallel.ForEach(objs, ...)` 会触发一次完整枚举，#if DEBUG 分支再 `objs.Any()`（行 1088）以及 `objs.Where ... .OfType<>` 又一次重新枚举整个 displayable 树。
 - **影响**: 性能浪费 + 潜在线程安全（GetAllDisplayableObjects 内部可能不是线程安全的 enumerable）。
 - **建议**: 一次性 `.ToArray()` 后再 Parallel；DEBUG 分支也复用同一数组。
+
+#### Benchmark 复核结论（2026/05/26）
+
+对应基准: `OngekiFumenEditor.Benchmark/Benchmarks/RebuildSoflanGroupBenchmarks.cs`。
+环境: BenchmarkDotNet v0.15.8, .NET 10.0.8, AMD Ryzen 7 5800X, Default Job, MemoryDiagnoser。
+
+| Method | N | Mean | Ratio | Allocated | Alloc Ratio |
+|---|---:|---:|---:|---:|---:|
+| Original_LinqParallel | 500 | 458.0 µs | 1.01 | 90.18 KB | 1.00 |
+| **Optimized_PooledListParallel** | 500 | **348.0 µs** | **0.77** | 58.81 KB | **0.65** |
+| Optimized_PooledListSequential | 500 | 355.6 µs | 0.78 | 60.20 KB | 0.67 |
+| Optimized_ThresholdSwitch | 500 | 306.5 µs | 0.68 | 60.20 KB | 0.67 |
+| Original_LinqParallel | 2000 | 583.6 µs | 1.01 | 225.63 KB | 1.00 |
+| **Optimized_PooledListParallel** | 2000 | **565.3 µs** | 0.98 | 220.10 KB | 0.98 |
+| Optimized_PooledListSequential | 2000 | 667.1 µs | 1.16 | 198.48 KB | 0.88 |
+| Optimized_ThresholdSwitch | 2000 | 629.0 µs | 1.09 | 216.60 KB | 0.96 |
+| Original_LinqParallel | 8000 | 1368.2 µs | 1.09 | 518.87 KB | 1.00 |
+| **Optimized_PooledListParallel** | 8000 | **1128.7 µs** | **0.90** | 474.09 KB | **0.91** |
+| Optimized_PooledListSequential | 8000 | 2031.4 µs | 1.62 | 489.73 KB | 0.94 |
+| Optimized_ThresholdSwitch | 8000 | 998.8 µs | 0.80 | 769.82 KB | 1.48 |
+
+**关键观察**:
+- **`PooledListParallel`** 在所有规模都比原版快（-23% / -2% / -10%），分配减少 -35% / -2% / -9%；
+- N=500 时 `Sequential` ≈ `Parallel`（差 2%），证明 Parallel 启动开销与并行收益接近；
+- N=2000 是临界点（Sequential 1.16 vs Parallel 0.98）；
+- N=8000 时 Parallel 显著赢（Sequential 1.62）；
+- `ThresholdSwitch (threshold=1024)` 在 N=500 / N=8000 收益最大，但 N=2000 反不如纯 Parallel，且阈值依赖具体 `SetCache` 工作量；
+- **选定 `PooledListParallel` 作为落地方案**——代码简单无 magic number、所有规模都有正收益、误差范围内最稳。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**: `OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs`
+
+**核心变更**:
+1. 顶部 `using OngekiFumenEditor.Utils.ObjectPool;` 引入对象池命名空间；
+2. `RebuildObjectSoflanGroupRecord` 改为：
+   - `using var objs = ObjectPool.GetPooledList<OngekiMovableObjectBase>();` 借 PooledList；
+   - 单次 `foreach (var d in Fumen.GetAllDisplayableObjects())` + `is not ... continue` + `is ... or ... or ... continue` 模式匹配，替代原本的 `OfType<>().Where(switch)` 两层 LINQ；
+   - `Parallel.ForEach(objs, rebuildSoflanGroupParallelOption, ...)` 直接传 PooledList，命中 .NET `IList<T>` 快路径；
+   - `#if DEBUG` 内 `objs.Any()` → `objs.Count > 0`，消除原本对 LINQ 链的第二次完整枚举（也顺带消除潜在线程安全风险）；
+3. 删除 lambda 内已注释掉的"id:1120 注释代码因为"块——`AGENTS.md` 禁止保留注释死代码。
+
+**预期效果**: 与 benchmark 一致——每帧/每次重建省 ~10-35% 分配，CPU 时间 ~2-23%。生产 `SetCache` 的实际耗时可能与 `SimulateWork` 不一致，绝对值会偏移但相对方向稳定。
+
+**风险检查**: 主项目 Release 编译 0 错误；类型匹配等价（`OfType<OngekiMovableObjectBase>().Where(skip ind/end/connectable)` 与 `is not Mo => continue; is ind/end/connectable => continue;` 集合一致）；`Parallel.ForEach` 已经接受 `IEnumerable<T>` 但传入 PooledList(IList<T>) 触发更优的 range partitioner。
 
 ### 15. PostDraw + SKPath 单次构造未批化
 

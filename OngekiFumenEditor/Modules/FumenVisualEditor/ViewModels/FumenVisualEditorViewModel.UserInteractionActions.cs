@@ -20,6 +20,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -1057,46 +1058,46 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             _cacheSoflanGroupRecorder.Clear();
 
-            //if (IsPreviewMode)
+            // 轨道(ConnectableObjectBase)由依附物体决定 SoflanGroup,IndividualSoflanArea 自身也不参与重建。
+            using var objs = ObjectPool.GetPooledList<OngekiMovableObjectBase>();
+            foreach (var d in Fumen.GetAllDisplayableObjects())
             {
-                var objs = Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>();
-                objs = objs.Where(x => x switch
-                {
-                    IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
-                    or ConnectableObjectBase => false,//轨道由依附的物体去决定
-                    _ => true
-                });
-                //recache all objects
-
-                _cacheSoflanGroupRecorder.SetDefault(Fumen.SoflansMap.DefaultSoflanList);
-                Parallel.ForEach(objs, rebuildSoflanGroupParallelOption, obj =>
-                {
-                    var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
-                    var soflanList = Fumen.SoflansMap[soflanGroup];
-
-                    _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
-                    //目前只有Hold物体能影响到所属轨道的SoflanGroup?
-                    /* 注释代码因为id:1120
-                    if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
-                        _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
-                    */
-                });
-
-                _cacheSoflanGroupRecorder.Freeze();
-#if DEBUG
-                //print current selected objects' SoflanGroup
-                if (objs.Any())
-                {
-                    Log.LogDebug($"----Print Selected Objects' SoflanGroup----");
-                    foreach (var obj in SelectObjects.OfType<OngekiObjectBase>().OrderBy(x => x.Id))
-                    {
-                        _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
-                        Log.LogDebug($"{obj.Id}  {soflanGroup}  ->  {obj}");
-                    }
-                    Log.LogDebug($"-------------------------------------------");
-                }
-#endif
+                if (d is not OngekiMovableObjectBase mo)
+                    continue;
+                if (mo is IndividualSoflanArea
+                    or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
+                    or ConnectableObjectBase)
+                    continue;
+                objs.Add(mo);
             }
+
+            _cacheSoflanGroupRecorder.SetDefault(Fumen.SoflansMap.DefaultSoflanList);
+            Parallel.ForEach(objs, rebuildSoflanGroupParallelOption, obj =>
+            {
+                var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
+                var soflanList = Fumen.SoflansMap[soflanGroup];
+
+                _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
+                //目前只有Hold物体能影响到所属轨道的SoflanGroup?
+                /* 注释代码因为id:1120
+                if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
+                    cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
+                */
+            });
+
+            _cacheSoflanGroupRecorder.Freeze();
+#if DEBUG
+            if (objs.Count > 0)
+            {
+                Log.LogDebug($"----Print Selected Objects' SoflanGroup----");
+                foreach (var obj in SelectObjects.OfType<OngekiObjectBase>().OrderBy(x => x.Id))
+                {
+                    _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+                    Log.LogDebug($"{obj.Id}  {soflanGroup}  ->  {obj}");
+                }
+                Log.LogDebug($"-------------------------------------------");
+            }
+#endif
         }
 
         #endregion

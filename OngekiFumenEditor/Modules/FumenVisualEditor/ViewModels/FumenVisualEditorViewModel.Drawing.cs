@@ -405,7 +405,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         //Prepare objects we will draw them.
         //get&register all visible objects for every drawingContext(soflanGroup)
         var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
-        // 显式 using 块,避免与方法内 `goto End` 冲突(C# 编译器禁止 goto 跳过 using 变量声明)。
         using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges))
         {
             foreach (var displayable in visibleObjects)
