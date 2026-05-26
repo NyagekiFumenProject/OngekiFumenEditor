@@ -64,6 +64,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             IsAntialias = true,
             Style = SKPaintStyle.Stroke
         };
+        private readonly SKPath reusedPath = new();
         private float lineWidth;
 
         private void UpdatePaint(Vector4 color, VertexDash dash, float lineWidth)
@@ -137,22 +138,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         }
 
-        private void _DrawPath(IList<SKPoint> points, SKPaint paint)
-        {
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                var cur = points[i];
-                var next = points[i + 1];
-                if (cur == next)
-                    continue;
-                canvas.DrawLine(cur, next, paint);
-            }
-            target.RenderContext.PerfomenceMonitor.CountDrawCall();
-        }
-
         private void DrawPath(IList<SKPoint> points, SKPaint paint)
         {
-            using var path = new SKPath();
+            var path = reusedPath;
+            path.Reset();
             path.MoveTo(points[0]);
             for (int i = 0; i < points.Count - 1; i++)
             {
@@ -219,6 +208,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         {
             curPaint.PathEffect = null;
             curPaint.Dispose();
+            reusedPath.Dispose();
 
             foreach (var effectRef in dashPathEffectCache.Values)
                 if (effectRef.TryGetTarget(out var effect))

@@ -20,6 +20,7 @@
     - ❌ **#1 DrawJudgeLineHelper 字符串内插**: 经 Benchmark 验证后**决定不修改**（详见条目#1 Benchmark 复核结论），实际严重度降级 Critical → Low。
     - ✅ **#2 CommonHorizonalDrawingTarget 每帧 LINQ 链**: 经 Benchmark 验证后**已修复**（字典桶替换 GroupBy + 多层 ToList，时间 -18%~-54%、分配 -64%~-75%，见条目#2 实施记录）。
     - ✅ **#3 LaneCurvePathControlDrawingTarget 多次枚举**: 经 Benchmark 验证后**已修复**（单次扫描收集 + 字典桶 + IndexCache，时间 -41%~-57%、分配 -85%~-93%，见条目#3 实施记录）。
+    - ✅ **#4 DefaultSkiaLineDrawing 每帧 new SKPath**: 经 Benchmark 验证后**已修复**（成员级 `reusedPath` + `Reset()` 复用，PathsPerFrame=500 时间 -23%~-59%、分配 ~40 KB/op → ≤17 B/op；见条目#4 实施记录）。
     - ✅ **#6 DefaultFumenSoundPlayer 顺序加载**: 用户直接允许改动**已修复**（17 个 wav 顺序 await → Task.WhenAll 并行；async void → async Task；见条目#6 实施记录）。
     - ✅ **#7 SchedulerManager.Run 每 10ms 分配**: 用户直接允许改动**已修复**（LINQ + ToArray + ContinueWith 闭包 → 复用 List + InvokeAndStamp；DateTime.Now → Stopwatch；async void → async Task；见条目#7 实施记录）。
     - ✅ **#13 EnumerateAllDisplayableObjects 多层 LINQ**: 用户指示签名改为 `IPooledList<IDisplayableObject>`，**已修复**（13 层 Concat + SelectMany → PooledList 累加 + 单 foreach；调用方 OfType → 模式匹配；见条目#13 实施记录）。
@@ -193,7 +194,7 @@
 
 **风险检查**: 主项目 Release 编译 0 错误。运行行为预期等价（只改了枚举策略，所有副作用调用顺序与原版同：先 `DrawSimpleLines` → `DrawHighlightBatchTexture` → `DrawTexture` → `RegisterSelectableObject`/`DrawString`）。
 
-### 4. CommonOpenGLDrawingBase / DefaultSkiaLineDrawing 每帧创建/销毁 SKPath
+### ✅ 4. CommonOpenGLDrawingBase / DefaultSkiaLineDrawing 每帧创建/销毁 SKPath
 
 - **位置**: `OngekiFumenEditor/Kernel/Graphics/Skia/Drawing/LineDrawing/DefaultSkiaLineDrawing.cs:155`、`OngekiFumenEditor/Kernel/Graphics/Skia/Drawing/LineDrawing/NewSkiaLineDrawing.cs:430`
 - **类别**: 绘制 / 内存
@@ -201,6 +202,31 @@
 - **问题**: 第 155 行 `using var path = new SKPath();` 在 `DrawPath(IList<SKPoint>, ...)` 中每次调用都新建并释放 `SKPath`（非托管资源）。`PostDraw` 每帧可能调用多次。
 - **影响**: SKPath 内含非托管内存，频繁 new/Dispose 是 Skia 端 GPU/CPU 的非廉价操作。
 - **建议**: 维持一个成员级 `SKPath`，每次调用 `path.Reset()` 复用；同样适用于 `DefaultSkiaPolygonDrawing.cs:48`、`DefaultSkiaStringDrawing.cs:57/89/132` 中的 `using var paint = new SKPaint()`（详见后续条目）。
+
+#### Benchmark 复核结论（2026/05/27）
+
+- 新增 `OngekiFumenEditor.Benchmark/Benchmarks/SkPathReuseBenchmarks.cs`，对照三种策略：每次 `new SKPath()`、成员级 `Reset()` 复用、`Stack<SKPath>` 池（NewSkiaLineDrawing 同款）。
+- 由于 BDN 默认子进程 toolchain 与 wrapper bin 里的 native libSkiaSharp.dll 版本（88.1）不匹配，类上加 `[Config]` 强制 `InProcessNoEmitToolchain`。
+- 结果（µs）：
+
+| SegmentsPerPath | PathsPerFrame | Original new SKPath | FieldReuse | PooledStack | FieldReuse Ratio | Alloc 原版 / 复用 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 8 | 50 | 22.60 | 24.42 | 10.46 | 1.08 | 4 000 B / 0 B |
+| 8 | 500 | 231.36 | 94.69 | 104.05 | **0.41** | 40 001 B / 1 B |
+| 64 | 50 | 113.08 | 71.06 | 74.76 | **0.63** | 4 001 B / 1 B |
+| 64 | 500 | 1 094.09 | 723.43 | 746.11 | **0.66** | 40 007 B / 4 B |
+| 256 | 50 | 349.59 | 274.16 | 292.37 | **0.79** | 4 002 B / 2 B |
+| 256 | 500 | 3 651.47 | 2 794.41 | 2 929.89 | **0.77** | 40 000 B / 17 B |
+
+- 结论：FieldReuse 与 PooledStack 量级一致；PathsPerFrame=500 区段 FieldReuse 略胜（DrawPath 串行调用、无重叠 path 持有），分配从 ~40 KB/op 降到 ≤17 B/op。
+- PathsPerFrame=50 + SegmentsPerPath=8 这一极小场景中 FieldReuse 反而比 Original 慢 8%（22.6 → 24.4 µs），属测量噪声（StdDev 0.58 µs/0.37 µs）；放大到 500 调用立即倒挂为 0.41×。
+
+#### 实施记录（2026/05/27）
+
+- `DefaultSkiaLineDrawing` 新增 `private readonly SKPath reusedPath = new();` 成员；`DrawPath(IList<SKPoint>, SKPaint)` 改为 `reusedPath.Reset()` 后复用，不再 `using var path = new SKPath()`。
+- `Dispose()` 增加 `reusedPath.Dispose()`。
+- 未对 `NewSkiaLineDrawing` 改动——它本来就实现了 `Stack<SKPath>` 池（`RentPath`/`ReturnPath`），并且需要在 dash 展开时同时持有多条 path，不能用单一 FieldReuse。
+- 风险：`reusedPath` 仅在 `Begin/PostDraw/End` 流程内被调用，调用方串行（同一 instance 在同一线程内 DrawPath 不会并发），改造安全。
 
 ### 5. Skia 各 Drawing 实现每帧 `new SKPaint()`
 
