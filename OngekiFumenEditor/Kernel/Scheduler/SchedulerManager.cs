@@ -1,10 +1,10 @@
-﻿using Caliburn.Micro;
-using OngekiFumenEditor.Utils;
+using Caliburn.Micro;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Scheduler
 
         private List<ISchedulable> schedulers { get; } = new List<ISchedulable>();
 
-        private ConcurrentDictionary<ISchedulable, DateTime> schedulersCallTime { get; } = new();
+        private ConcurrentDictionary<ISchedulable, long> schedulersCallTime { get; } = new();
 
         public IEnumerable<ISchedulable> Schedulers => schedulers;
 
@@ -44,31 +44,71 @@ namespace OngekiFumenEditor.Kernel.Scheduler
             }
 
             schedulers.Add(s);
-            schedulersCallTime[s] = DateTime.MinValue;
+            schedulersCallTime[s] = 0L;
             Log.LogDebug("Added new scheduler: " + s.SchedulerName);
 
             return Task.CompletedTask;
         }
 
-        private async void Run(CancellationToken cancellationToken)
+        private void Run(CancellationToken cancellationToken)
         {
+            try
+            {
+                RunAsync(cancellationToken).GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception e)
+            {
+                Log.LogError($"scheduler loop throw exception:{e}", e);
+            }
+        }
+
+        private async Task RunAsync(CancellationToken cancellationToken)
+        {
+            var pending = new List<Task>(16);
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    var schedulers = Schedulers
-                        .Where(x => x is not null && DateTime.Now - schedulersCallTime[x] >= x.ScheduleCallLoopInterval)
-                        .Select(x => x.OnScheduleCall(cancellationToken).ContinueWith(_ => schedulersCallTime[x] = DateTime.Now))
-                        .ToArray();
-                    if (schedulers.Length > 0)
-                        await Task.WhenAll(schedulers);
+                    pending.Clear();
+                    var nowTs = Stopwatch.GetTimestamp();
+
+                    foreach (var x in schedulers)
+                    {
+                        if (x is null)
+                            continue;
+                        var lastTs = schedulersCallTime[x];
+                        if (Stopwatch.GetElapsedTime(lastTs, nowTs) < x.ScheduleCallLoopInterval)
+                            continue;
+                        pending.Add(InvokeAndStamp(x, cancellationToken));
+                    }
+
+                    if (pending.Count > 0)
+                        await Task.WhenAll(pending);
                     else
-                        await Task.Delay(10);
+                        await Task.Delay(10, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
                 }
                 catch (Exception e)
                 {
                     Log.LogError($"scheduler loop throw exception:{e}", e);
                 }
+            }
+        }
+
+        private async Task InvokeAndStamp(ISchedulable s, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await s.OnScheduleCall(cancellationToken);
+            }
+            finally
+            {
+                schedulersCallTime[s] = Stopwatch.GetTimestamp();
             }
         }
 
@@ -106,4 +146,3 @@ namespace OngekiFumenEditor.Kernel.Scheduler
         }
     }
 }
-

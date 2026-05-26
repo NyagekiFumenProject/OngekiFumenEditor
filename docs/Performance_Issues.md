@@ -21,6 +21,7 @@
     - ✅ **#2 CommonHorizonalDrawingTarget 每帧 LINQ 链**: 经 Benchmark 验证后**已修复**（字典桶替换 GroupBy + 多层 ToList，时间 -18%~-54%、分配 -64%~-75%，见条目#2 实施记录）。
     - ✅ **#3 LaneCurvePathControlDrawingTarget 多次枚举**: 经 Benchmark 验证后**已修复**（单次扫描收集 + 字典桶 + IndexCache，时间 -41%~-57%、分配 -85%~-93%，见条目#3 实施记录）。
     - ✅ **#6 DefaultFumenSoundPlayer 顺序加载**: 用户直接允许改动**已修复**（17 个 wav 顺序 await → Task.WhenAll 并行；async void → async Task；见条目#6 实施记录）。
+    - ✅ **#7 SchedulerManager.Run 每 10ms 分配**: 用户直接允许改动**已修复**（LINQ + ToArray + ContinueWith 闭包 → 复用 List + InvokeAndStamp；DateTime.Now → Stopwatch；async void → async Task；见条目#7 实施记录）。
 
 ## 关键热路径问题（Critical / High）
 
@@ -230,14 +231,43 @@
 
 **未做 Benchmark**: 启动阶段一次性 IO，BDN 微基准噪声会远大于实际收益信号（IO 时间分布跨 ms 级），改动正确性更重要。
 
-### 7. SchedulerManager.Run 每 10ms 创建一堆 Task + ContinueWith + ToArray
+### ✅ 7. SchedulerManager.Run 每 10ms 创建一堆 Task + ContinueWith + ToArray
 
 - **位置**: `OngekiFumenEditor/Kernel/Scheduler/SchedulerManager.cs:53-72`
 - **类别**: 异步 / LINQ / 内存
 - **严重度**: High
+- **决策**: **已修复**（用户直接允许改动，未做 Benchmark 复核；见下方"实施记录"）
 - **问题**: `private async void Run(...)`（async void），并且循环体 `Schedulers.Where(...).Select(x => ... ContinueWith ...).ToArray()` 每 10ms 都生成新 Task 数组（每个 task 还附带一个 ContinueWith 闭包）。同时 `DateTime.Now` 在第 60、61 行每次都查询。
 - **影响**: 即便无调度任务，每秒约 100 轮都创建 array / Task / closure，GC pressure 持续。
 - **建议**: 改成静态可复用的列表 + foreach；用 `Stopwatch.GetTimestamp()` 代替 `DateTime.Now`；`async void` 改 `async Task` 让顶层 catch 能正确传递异常。
+
+#### 实施记录（2026/05/26）
+
+**改动文件**: `OngekiFumenEditor/Kernel/Scheduler/SchedulerManager.cs`
+
+**核心变更**:
+1. `schedulersCallTime` 字段类型从 `ConcurrentDictionary<ISchedulable, DateTime>` 改为 `ConcurrentDictionary<ISchedulable, long>`，存 `Stopwatch` ticks——避免每轮 `DateTime.Now` 系统调用（涉及时区/夏令时换算，远慢于单调时钟）；
+2. `AddScheduler` 初值 `DateTime.MinValue` → `0L`；
+3. `async void Run(CancellationToken)` 拆分为：
+   - 同步入口 `void Run(CancellationToken)`（`AbortableThread` 只接受 `Action<CancellationToken>`），内部调用 `RunAsync(...).GetAwaiter().GetResult()`，异常通过 `try/catch` 直接路由到 `Log.LogError`，不再丢给 SynchronizationContext；
+   - `private async Task RunAsync(CancellationToken)` 跑实际异步循环；
+4. **复用同一个 `List<Task> pending` 字段**（初始容量 16），每轮 `Clear()` + `foreach + Add`，替代 `Schedulers.Where(...).Select(...).ToArray()` 每轮新分配的数组与 LINQ enumerator；
+5. 引入私有 `async Task InvokeAndStamp(ISchedulable, CancellationToken)`，替代 `.ContinueWith(_ => schedulersCallTime[x] = DateTime.Now)` 的闭包分配——`finally` 块写回时间戳，语义等价；
+6. 用 `Stopwatch.GetElapsedTime(lastTs, nowTs)` 比较间隔，替代 `DateTime.Now - schedulersCallTime[x]`；
+7. `Task.Delay(10, cancellationToken)` 加上 `cancellationToken` 让停止能即时退出，配合外层 `catch (OperationCanceledException) { }` 静默吞掉取消异常。
+
+**预期效果**:
+- 空闲态（无 scheduler 触发）每秒 ~100 轮原本要分配：1 个 Task[]、N 个 LINQ enumerator、N 个 ContinueWith Task + N 个闭包——现在仅一次 `List.Clear` + foreach + 一次 `Task.Delay`；
+- 活跃态（有 K 个 scheduler 触发）每轮少分配 1 个 array + K 个闭包 + K 个 ContinueWith Task，剩下 K 个 `InvokeAndStamp` async state machine（这是必要成本）；
+- `DateTime.Now` → `Stopwatch.GetTimestamp()`：单次开销从 ~100 ns 降到 ~10 ns，每秒省 ~18 µs，但更重要的是消除时区相关副作用。
+
+**风险检查**:
+- 主项目 Release 编译 0 错误；
+- `void Run` 内 `GetAwaiter().GetResult()` 在专属 LongRunning Task 上阻塞 OK（这条线程本来就只跑这个 loop）；
+- `OperationCanceledException` 单独 catch 静默退出，其它 `Exception` 仍走原本的 `Log.LogError` 路径；
+- `schedulersCallTime` 类型变更：上游/下游没有任何代码读写此字段，安全（grep 已验证）。
+
+**未做 Benchmark**: 调度循环是 wall-clock 时间驱动的（每 10ms 一轮），BDN 测的是吞吐而非 wall-clock，对此场景信号弱；改动正确性已由编译 + 语义等价分析覆盖。
 
 ### 8. FumenVisualEditorViewModel.UserInteractionActions.cs OnMouseLeftButtonUp 中 AsParallel + LINQ 链
 
