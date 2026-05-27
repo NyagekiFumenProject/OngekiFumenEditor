@@ -1,18 +1,10 @@
-﻿using ControlzEx.Standard;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.IO.MemoryMappedFiles;
-using System.IO.Pipes;
 using System.Linq;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace OngekiFumenEditor.Utils
 {
