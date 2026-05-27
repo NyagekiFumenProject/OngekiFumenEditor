@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
     {
         private const string SkillScheme = "skill://";
 
-        private static readonly string SkillsRootDirectory = Path.Combine("Resources", "skills");
+        private static readonly string SkillsRootDirectory = OngekiFumenEditor.Utils.AppDirectoryHelper.Combine("Resources", "skills");
         private IReadOnlyList<McpServerResource> directResources;
 
         public string BuildServerInstructions()

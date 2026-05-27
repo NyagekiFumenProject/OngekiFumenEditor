@@ -32,13 +32,13 @@ namespace OngekiFumenEditor.Utils
 
         public static IImage OpenReadTextureFromFile(IRenderManagerImpl impl, string filePath)
         {
-            using var stream = File.OpenRead(filePath);
+            using var stream = File.OpenRead(AppDirectoryHelper.ResolveRelative(filePath));
             return impl.LoadImageFromStream(stream);
         }
 
         static ResourceUtils()
         {
-            var iniFilePath = Path.GetFullPath(@".\Resources\editor\textureSizeAnchor.ini");
+            var iniFilePath = AppDirectoryHelper.Combine("Resources", "editor", "textureSizeAnchor.ini");
             foreach (var line in File.ReadAllLines(iniFilePath))
             {
                 var split = line.Split("=");

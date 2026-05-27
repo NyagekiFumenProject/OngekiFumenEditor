@@ -101,7 +101,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         {
             using var openFolderDialog = new FolderBrowserDialog();
             openFolderDialog.ShowNewFolderButton = true;
-            openFolderDialog.SelectedPath = Path.GetFullPath(Setting.DumpFileDirPath);
+            openFolderDialog.SelectedPath = Path.GetFullPath(AppDirectoryHelper.ResolveRelative(Setting.DumpFileDirPath));
             if (openFolderDialog.ShowDialog() == DialogResult.OK)
             {
                 var folderPath = openFolderDialog.SelectedPath;
@@ -123,7 +123,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
         public async void RegisterNyagekiAssociations()
         {
-            var iconFolder = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Resources", "FileAssociationIcons");
+            var iconFolder = Path.Combine(AppDirectoryHelper.ExecutableDirectory, "Resources", "FileAssociationIcons");
             var iconFilePath = Path.Combine(iconFolder, "icon.ico");
 
             if (!File.Exists(iconFilePath))

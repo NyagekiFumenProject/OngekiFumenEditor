@@ -119,7 +119,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         base.BindServices(batch);
 
         //setup Pluigins
-        var exeDir = AppContext.BaseDirectory;
+        var exeDir = AppDirectoryHelper.ExecutableDirectory;
         var pluginsDirPath = Path.Combine(exeDir, "Plugins");
         Directory.CreateDirectory(pluginsDirPath);
         var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);

@@ -39,13 +39,13 @@ namespace OngekiFumenEditor.Utils.DeadHandler
 
 		public static void Init()
 		{
-			Directory.CreateDirectory(ProgramSetting.Default.DumpFileDirPath);
+			Directory.CreateDirectory(AppDirectoryHelper.ResolveRelative(ProgramSetting.Default.DumpFileDirPath));
 			SetUnhandledExceptionFilter(OnWriteMiniDump);
 		}
 
 		public static string WriteMiniDump(IntPtr exceptionInfo)
 		{
-			var dumpDir = ProgramSetting.Default.DumpFileDirPath;
+			var dumpDir = AppDirectoryHelper.ResolveRelative(ProgramSetting.Default.DumpFileDirPath);
 			Directory.CreateDirectory(dumpDir);
 			var filePath = Path.GetFullPath(Path.Combine(dumpDir, FileHelper.FilterFileName(DateTime.Now.ToString() + ".dmp")));
 

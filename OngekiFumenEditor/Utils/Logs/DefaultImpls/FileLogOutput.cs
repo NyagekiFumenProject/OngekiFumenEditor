@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
         {
             try
             {
-                var logDir = LogSetting.Default.LogFileDirPath;
+                var logDir = AppDirectoryHelper.ResolveRelative(LogSetting.Default.LogFileDirPath);
                 Directory.CreateDirectory(logDir);
                 do
                 {

@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Logs.ViewModels
 		{
 			using var openFolderDialog = new FolderBrowserDialog();
 			openFolderDialog.ShowNewFolderButton = true;
-			openFolderDialog.SelectedPath = Path.GetFullPath(Setting.LogFileDirPath);
+			openFolderDialog.SelectedPath = Path.GetFullPath(AppDirectoryHelper.ResolveRelative(Setting.LogFileDirPath));
 			if (openFolderDialog.ShowDialog() == DialogResult.OK)
 			{
 				var folderPath = openFolderDialog.SelectedPath;
