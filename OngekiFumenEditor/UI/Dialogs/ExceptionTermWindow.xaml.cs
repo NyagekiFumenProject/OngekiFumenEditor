@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.UI.Dialogs
 		public string LogFile { get; init; }
 		public string DumpFile { get; init; }
 
-		public string ProgramVersion => FileVersionInfo.GetVersionInfo(typeof(AppBootstrapper).Assembly.Location).ProductVersion;
+		public string ProgramVersion => ThisAssembly.AssemblyInformationalVersion;
 
 		public ExceptionTermWindow(string exceptionMessage, string[] rescueFolderPaths, string logFile, string dumpFile)
 		{
