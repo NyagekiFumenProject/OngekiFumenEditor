@@ -78,7 +78,6 @@ namespace OngekiFumenEditor.Utils.Settings
             }
         }
 
-
         public override SettingsPropertyValueCollection GetPropertyValues(
             SettingsContext context,
             SettingsPropertyCollection collection)
@@ -91,7 +90,7 @@ namespace OngekiFumenEditor.Utils.Settings
             {
                 var value = new SettingsPropertyValue(property);
 
-                if (groupNode[property.Name] is not { } jsonObj)
+                if (!groupNode.TryGetPropertyValue(property.Name,out var jsonObj))
                 {
                     value.PropertyValue = TypeConvertHelper.ConvertFromString(property.PropertyType, property.DefaultValue?.ToString());
                 }
