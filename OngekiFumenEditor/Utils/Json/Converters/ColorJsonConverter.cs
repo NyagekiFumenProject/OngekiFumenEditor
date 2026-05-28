@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace OngekiFumenEditor.Utils.Json
+namespace OngekiFumenEditor.Utils.Json.Converters
 {
     public class ColorJsonConverter : JsonConverter<Color>
     {
