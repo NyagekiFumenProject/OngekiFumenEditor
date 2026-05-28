@@ -27,7 +27,8 @@ namespace OngekiFumenEditor.Utils.Settings
 
             InjectJsonProvider(settings);
 
-            CheckOrUpgradeAllSettings(settings);
+            //need't anymore
+            //CheckOrUpgradeAllSettings(settings);
         }
 
         private static void InjectJsonProvider(List<ApplicationSettingsBase> settings)
