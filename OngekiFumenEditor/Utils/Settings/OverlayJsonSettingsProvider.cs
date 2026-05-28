@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Utils.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -63,11 +64,7 @@ namespace OngekiFumenEditor.Utils.Settings
                     var json = JsonSerializer.Serialize(
                         jsonRoot
                         ,
-                        new JsonSerializerOptions
-                        {
-                            WriteIndented = true,
-                            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                        });
+                        CommonJsonSerializerOptions.Default);
 
                     File.WriteAllText(jsonFile, json, Encoding.UTF8);
                 }
@@ -90,7 +87,7 @@ namespace OngekiFumenEditor.Utils.Settings
             {
                 var value = new SettingsPropertyValue(property);
 
-                if (!groupNode.TryGetPropertyValue(property.Name,out var jsonObj))
+                if (!groupNode.TryGetPropertyValue(property.Name, out var jsonObj))
                 {
                     value.PropertyValue = TypeConvertHelper.ConvertFromString(property.PropertyType, property.DefaultValue?.ToString());
                 }
@@ -98,7 +95,7 @@ namespace OngekiFumenEditor.Utils.Settings
                 {
                     try
                     {
-                        value.PropertyValue = JsonSerializer.Deserialize(jsonObj, property.PropertyType);
+                        value.PropertyValue = JsonSerializer.Deserialize(jsonObj.ToJsonString(), property.PropertyType, CommonJsonSerializerOptions.Default);
                     }
                     catch (Exception e)
                     {
@@ -125,7 +122,7 @@ namespace OngekiFumenEditor.Utils.Settings
                 {
                     try
                     {
-                        groupNode[value.Name] = JsonSerializer.SerializeToNode(value.PropertyValue);
+                        groupNode[value.Name] = JsonSerializer.SerializeToNode(value.PropertyValue, CommonJsonSerializerOptions.Default);
                     }
                     catch
                     {
