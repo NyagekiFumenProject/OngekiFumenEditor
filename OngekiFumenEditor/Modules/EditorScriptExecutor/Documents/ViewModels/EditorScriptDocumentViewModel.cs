@@ -61,6 +61,11 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
         private string watchingCsFilePath;
         private string currentProjFilePath;
 
+        public EditorScriptDocumentViewModel()
+        {
+            DisplayName = default;
+        }
+
         public FileSystemWatcher Watcher
         {
             get => watcher;
@@ -156,6 +161,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
         {
             ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
             Init();
+            DisplayName = default;
             IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
         }
 
@@ -174,6 +180,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
             {
                 Log.LogDebug($"{Resources.UseTemplateScriptFileFail}{e.Message}");
             }
+            DisplayName = default;
         }
 
         protected override async Task DoSave(string filePath)
@@ -188,6 +195,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
                 }
                 await File.WriteAllTextAsync(filePath, ScriptDocument.Text);
                 IsDirty = false;
+                DisplayName = default;
                 IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
             }
             catch (Exception e)
