@@ -255,6 +255,19 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
         public async void OnVSEditButtonClicked()
         {
+            if (IsNew || string.IsNullOrWhiteSpace(FilePath))
+            {
+                if (MessageBox.Show(Resources.PleaseSaveScriptBeforeVSEdit, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                    return;
+
+                if (!await DoSaveAs(this))
+                    return;
+            }
+            else if (IsDirty)
+            {
+                await DoSave(FilePath);
+            }
+
             if (IsUsingWatcher && File.Exists(currentProjFilePath))
             {
                 Process.Start(new ProcessStartInfo(currentProjFilePath)

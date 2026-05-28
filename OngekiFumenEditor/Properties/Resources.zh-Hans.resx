@@ -822,6 +822,9 @@
   <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>生成脚本项目文件失败.</value>
   </data>
+  <data name="PleaseSaveScriptBeforeVSEdit" xml:space="preserve">
+    <value>使用Visual Studio编辑脚本前必须先将脚本保存为文件，是否立即保存？</value>
+  </data>
   <data name="GenerateSvg" xml:space="preserve">
     <value>生成铺面预览.svg文件</value>
   </data>

@@ -3110,7 +3110,16 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("GenerateScriptProjectFileFail", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 The script must be saved to a file before editing in Visual Studio. Save now? 的本地化字符串。
+        /// </summary>
+        public static string PleaseSaveScriptBeforeVSEdit {
+            get {
+                return ResourceManager.GetString("PleaseSaveScriptBeforeVSEdit", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Generate Preview SVG 的本地化字符串。
         /// </summary>

@@ -822,6 +822,9 @@
   <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>Generate script project file failed</value>
   </data>
+  <data name="PleaseSaveScriptBeforeVSEdit" xml:space="preserve">
+    <value>The script must be saved to a file before editing in Visual Studio. Save now?</value>
+  </data>
   <data name="GenerateSvg" xml:space="preserve">
     <value>Generate Preview SVG</value>
   </data>
