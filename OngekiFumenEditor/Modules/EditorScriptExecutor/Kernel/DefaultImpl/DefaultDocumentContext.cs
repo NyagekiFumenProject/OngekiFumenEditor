@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Completion;
 using Microsoft.CodeAnalysis.Text;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,45 +40,72 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel.DefaultImpl
 
 		public bool GenerateProjectFile(string genProjOutputDirPath, string scriptFilePath, out string projFilePath)
 		{
-			var root = ProjectRootElement.Create();
-			root.Sdk = "Microsoft.NET.Sdk";
+			projFilePath = null;
 
-			var projCommonGroup = root.AddPropertyGroup();
-			projCommonGroup.AddProperty("TargetFramework", "net8.0-windows");
-			projCommonGroup.AddProperty("OutputType", "Exe");
-
-
-			var refGroup = root.AddItemGroup();
-			//add references
-			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+			try
 			{
-				var name = assembly.GetName().Name;
+				var root = ProjectRootElement.Create();
+				root.Sdk = "Microsoft.NET.Sdk";
 
-				//filter System.*
-				if (name.StartsWith("System."))
-					continue;
+				var projCommonGroup = root.AddPropertyGroup();
+				projCommonGroup.AddProperty("TargetFramework", "net10.0-windows");
+				projCommonGroup.AddProperty("OutputType", "Library");
+				projCommonGroup.AddProperty("UseWPF", "true");
+				projCommonGroup.AddProperty("LangVersion", "preview");
+				projCommonGroup.AddProperty("AllowUnsafeBlocks", "true");
+				projCommonGroup.AddProperty("EnableDefaultCompileItems", "false");
+				projCommonGroup.AddProperty("EnableDefaultItems", "false");
 
-				try
+				var refGroup = root.AddItemGroup();
+				var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+				foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
 				{
-					if (!File.Exists(assembly.Location))
+					if (assembly.IsDynamic)
 						continue;
-				}
-				catch
-				{
-					//in-memory assembly will throw NotSupportException
-					continue;
+
+					string location;
+					try
+					{
+						location = assembly.Location;
+					}
+					catch
+					{
+						continue;
+					}
+
+					if (string.IsNullOrEmpty(location) || !File.Exists(location))
+						continue;
+
+					var name = assembly.GetName().Name;
+					if (string.IsNullOrEmpty(name))
+						continue;
+
+					if (name.StartsWith("System.", StringComparison.Ordinal))
+						continue;
+
+					if (!seen.Add(name))
+						continue;
+
+					var refElement = refGroup.AddItem("Reference", name);
+					refElement.AppendChild(root.CreateMetadataElement("HintPath", location));
+					refElement.AppendChild(root.CreateMetadataElement("Private", "false"));
 				}
 
-				var refElement = refGroup.AddItem("Reference", name);
+				var compileGroup = root.AddItemGroup();
+				compileGroup.AddItem("Compile", Path.GetFileName(scriptFilePath));
 
-				refElement.AppendChild(root.CreateMetadataElement("HintPath", assembly.Location));
-				refElement.AppendChild(root.CreateMetadataElement("Private", "false"));
+				projFilePath = Path.Combine(genProjOutputDirPath, "Script.csproj");
+				root.Save(projFilePath);
+
+				return true;
 			}
-
-			projFilePath = Path.Combine(genProjOutputDirPath, "Script.csproj");
-			root.Save(projFilePath);
-
-			return true;
+			catch (Exception e)
+			{
+				Log.LogError($"GenerateProjectFile failed: {e}");
+				projFilePath = null;
+				return false;
+			}
 		}
 
 		public void Dispose()
