@@ -39,6 +39,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private readonly List<int> tessellateHoleIndices = new();
         private readonly List<int> tessellateList = new();
 
+        private static readonly IComparer<(Vector2, Vector2)> PolylineByStartYComparer =
+            Comparer<(Vector2 a, Vector2 b)>.Create(static (x, y) => x.a.Y.CompareTo(y.a.Y));
+
         public void Initalize(IRenderManagerImpl impl)
         {
             UpdateProps();
@@ -227,23 +230,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 for (int i = 0; i < ranges.Count; i++)
                 {
                     var curRange = ranges[i];
-                    var nextRange = ranges.ElementAtOrDefault(i + 1);
 
                     using var lanes = fumen.Lanes
                         .GetVisibleStartObjects(TGrid.FromTotalGrid(curRange.Min), TGrid.FromTotalGrid(curRange.Max))
                         .Where(x => x.LaneType == type)
                         .ToListWithObjectPool();
 
-                    using var polylines = lanes
-                        .SelectMany(x =>
-                            x.GenAllPath()
-                            .Where(x => minTGrid.TotalGrid <= x.pos.Y && x.pos.Y <= maxTGrid.TotalGrid)
-                            .Select(x => x.pos)
-                            .SequenceConsecutivelyWrap(2)
-                            .Select(arr => (arr[0], arr[1])))
-                        .ToListWithObjectPool();
+                    using var polylines = ObjectPool.GetPooledList<(Vector2, Vector2)>();
+                    var rangeMinY = minTGrid.TotalGrid;
+                    var rangeMaxY = maxTGrid.TotalGrid;
+                    for (int li = 0; li < lanes.Count; li++)
+                    {
+                        var hasPrev = false;
+                        var prev = default(Vector2);
+                        foreach (var (pos, _) in lanes[li].GenAllPath())
+                        {
+                            if (pos.Y < rangeMinY || pos.Y > rangeMaxY)
+                            {
+                                hasPrev = false;
+                                continue;
+                            }
+                            if (hasPrev)
+                                polylines.Add((prev, pos));
+                            prev = pos;
+                            hasPrev = true;
+                        }
+                    }
 
-                    polylines.SortBy(x => x.Item1.Y);
+                    polylines.Sort(PolylineByStartYComparer);
 
                     for (int r = 0; r < polylines.Count; r++)
                     {
@@ -258,18 +272,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             if (a.Item2.Y < b.Item1.Y)
                                 break;
 
-                            if (GetLinesIntersection(a.Item1.ToSystemNumericsVector2(), a.Item2.ToSystemNumericsVector2(), b.Item1.ToSystemNumericsVector2(), b.Item2.ToSystemNumericsVector2()) is Vector2 p)
+                            if (GetLinesIntersection(a.Item1, a.Item2, b.Item1, b.Item2) is Vector2 p)
                                 points.Add(p.Y);
                         }
                     }
 
-                    points.AddRange(lanes
-                        .Select(x => (float)x.TGrid.TotalGrid)
-                        .Concat(lanes.Select(x => x.Children.LastOrDefault())
-                        .FilterNull()
-                        .Select(x => (float)x.TGrid.TotalGrid))
-                        .Where(x => curRange.Min <= x && x <= curRange.Max)
-                        );
+                    for (int li = 0; li < lanes.Count; li++)
+                    {
+                        var lane = lanes[li];
+                        var y1 = (float)lane.TGrid.TotalGrid;
+                        if (curRange.Min <= y1 && y1 <= curRange.Max)
+                            points.Add(y1);
+
+                        var children = (IList<ConnectableChildObjectBase>)lane.Children;
+                        if (children.Count > 0)
+                        {
+                            var y2 = (float)children[children.Count - 1].TGrid.TotalGrid;
+                            if (curRange.Min <= y2 && y2 <= curRange.Max)
+                                points.Add(y2);
+                        }
+                    }
                 }
 
                 using var sortedPoints = ObjectPool.GetPooledList<float>();

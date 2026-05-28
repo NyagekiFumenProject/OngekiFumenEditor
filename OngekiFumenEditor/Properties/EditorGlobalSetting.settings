@@ -90,7 +90,7 @@
       <Value Profile="(Default)">-16758145</Value>
     </Setting>
     <Setting Name="EnablePlayFieldDrawing" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
+      <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="EnableShowPlayerLocation" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
