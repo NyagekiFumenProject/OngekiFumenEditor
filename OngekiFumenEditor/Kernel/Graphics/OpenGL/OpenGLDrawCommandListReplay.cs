@@ -163,6 +163,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 case SetCurrentProjectionMatrixCommand setCurrentProjectionMatrixCommand:
                     SetCurrentProjectionMatrix(setCurrentProjectionMatrixCommand.Matrix);
                     break;
+                case SetCurrentRectCommand setCurrentRectCommand:
+                    drawingContext.CurrentDrawingTargetContext.Rect = setCurrentRectCommand.Rect;
+                    break;
                 case PushModelMatrixCommand pushModelMatrixCommand:
                     modelMatrixStack.Push(currentModelMatrix);
                     currentModelMatrix = pushModelMatrixCommand.Matrix;

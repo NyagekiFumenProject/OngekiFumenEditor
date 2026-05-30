@@ -37,6 +37,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         void SetCurrentProjectionMatrix(Matrix4x4 matrix);
 
         /// <summary>
+        /// Replaces the current visible rect and records a state-change command.
+        /// </summary>
+        void SetCurrentRect(VisibleRect rect);
+
+        /// <summary>
         /// Pushes a model matrix scope and records a state-change command.
         /// </summary>
         void PushModelMatrix(Matrix4x4 matrix);

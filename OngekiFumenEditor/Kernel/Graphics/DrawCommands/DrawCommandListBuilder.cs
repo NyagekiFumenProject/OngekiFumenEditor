@@ -90,6 +90,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         }
 
         /// <inheritdoc />
+        public void SetCurrentRect(VisibleRect rect)
+        {
+            ThrowIfDisposed();
+            commands.Add(RentCommand<SetCurrentRectCommand>().Initialize(rect));
+        }
+
+        /// <inheritdoc />
         public void PushModelMatrix(Matrix4x4 matrix)
         {
             ThrowIfDisposed();
@@ -418,6 +425,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                     return;
                 case SetCurrentProjectionMatrixCommand setCurrentProjectionMatrixCommand:
                     SetCurrentProjectionMatrix(setCurrentProjectionMatrixCommand.Matrix);
+                    return;
+                case SetCurrentRectCommand setCurrentRectCommand:
+                    SetCurrentRect(setCurrentRectCommand.Rect);
                     return;
                 case PushModelMatrixCommand pushModelMatrixCommand:
                     PushModelMatrix(pushModelMatrixCommand.Matrix);

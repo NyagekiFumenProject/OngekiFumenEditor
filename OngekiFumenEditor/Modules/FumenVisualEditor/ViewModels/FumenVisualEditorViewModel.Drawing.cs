@@ -549,6 +549,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         #region Rendering
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
+        builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
         builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
         builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -574,6 +575,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             prevOrder = order;
 
             CurrentDrawingTargetContext = defaultDrawingTargetContext;
+            builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
             builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
             builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -582,6 +584,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 foreach (var soflanGroupDrawing in drawingObjs)
                 {
                     CurrentDrawingTargetContext = soflanGroupDrawing.Key;
+                    builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
                     builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
                     builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -599,6 +602,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
+        builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
         builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
         builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 

@@ -119,6 +119,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 case SetCurrentProjectionMatrixCommand setCurrentProjectionMatrixCommand:
                     SetCurrentProjectionMatrix(setCurrentProjectionMatrixCommand.Matrix);
                     break;
+                case SetCurrentRectCommand setCurrentRectCommand:
+                    targetContext.Rect = setCurrentRectCommand.Rect;
+                    break;
                 case PushModelMatrixCommand pushModelMatrixCommand:
                     modelMatrixStack.Push(currentModelMatrix);
                     currentModelMatrix = pushModelMatrixCommand.Matrix;
