@@ -57,14 +57,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// <summary>
         /// Presents and clears the current front slot for the specified context.
         /// </summary>
-        public void Present(IRenderContext context)
-        {
-            Present(context, PresentCommands);
-        }
-
-        /// <summary>
-        /// Presents and clears the current front slot for the specified context.
-        /// </summary>
         public void Present(IRenderContext context, Action<DrawCommandList> presentCommands)
         {
             if (context is null)
@@ -117,39 +109,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             if (slot is { AutoDispose: true } value)
                 value.DrawCommandList.Dispose();
-        }
-
-        private static void PresentCommands(DrawCommandList drawCommandList)
-        {
-            foreach (var command in drawCommandList.Commands)
-            {
-                switch (command)
-                {
-                    case SetCurrentModelMatrixCommand:
-                    case SetCurrentViewMatrixCommand:
-                    case SetCurrentProjectionMatrixCommand:
-                    case PushModelMatrixCommand:
-                    case PushViewMatrixCommand:
-                    case PushProjectionMatrixCommand:
-                    case PopModelMatrixCommand:
-                    case PopViewMatrixCommand:
-                    case PopProjectionMatrixCommand:
-                    case DrawLinesCommand:
-                    case DrawSimpleLinesCommand:
-                    case DrawTextureCommand:
-                    case DrawBatchTextureCommand:
-                    case DrawHighlightBatchTextureCommand:
-                    case DrawCirclesCommand:
-                    case DrawPolygonCommand:
-                    case DrawStringCommand:
-                    case DrawBeamCommand:
-                        // TODO: Execute backend-specific draw command rendering here.
-                        break;
-                    default:
-                        // TODO: Decide how custom draw commands should be dispatched.
-                        break;
-                }
-            }
         }
     }
 }
