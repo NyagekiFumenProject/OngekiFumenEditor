@@ -21,6 +21,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         private IStringMeasure stringMeasurer;
         private bool disposed;
 
+        private Dictionary<Type, int> shortLastDrawCommandLocationMap = new Dictionary<Type, int>();
+        private Dictionary<Type, int> lastDrawCommandLocationMap = new Dictionary<Type, int>();
+
         private Vector4? cleanColor;
         private float viewWidth;
         private float viewHeight;
@@ -41,6 +44,50 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             projectionMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
             this.stringMeasurer = stringMeasurer;
             ResetState();
+        }
+
+        private void ClearShortLastDrawCommandLocationMap()
+        {
+            shortLastDrawCommandLocationMap.Clear();
+        }
+
+        private void ReplaceOrAppendDrawCommandForShort(DrawCommand drawCommand)
+        {
+            var type = drawCommand.GetType();
+            if (shortLastDrawCommandLocationMap.TryGetValue(type, out var prevIndex))
+            {
+                //replace
+                var prevCommand = commands[prevIndex];
+                commands[prevIndex] = drawCommand;
+                prevCommand?.DisposeAndReturnSelf();
+            }
+            else
+            {
+                if (TryReplaceDrawCommandIfEqual(drawCommand))
+                {
+                    //append
+                    shortLastDrawCommandLocationMap[type] = commands.Count;
+                    commands.Add(drawCommand);
+                }
+            }
+        }
+
+        private bool TryReplaceDrawCommandIfEqual(DrawCommand drawCommand)
+        {
+            var type = drawCommand.GetType();
+            if (lastDrawCommandLocationMap.TryGetValue(type, out var prevIndex))
+            {
+                //if they are equal, just ignore append
+                var prevCommand = commands[prevIndex];
+
+                if (prevCommand == drawCommand)
+                {
+                    drawCommand?.DisposeAndReturnSelf();
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <inheritdoc />
@@ -70,7 +117,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             modelMatrix = matrix;
-            commands.Add(RentCommand<SetCurrentModelMatrixCommand>().Initialize(matrix));
+            ReplaceOrAppendDrawCommandForShort(RentCommand<SetCurrentModelMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -78,7 +125,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             viewMatrix = matrix;
-            commands.Add(RentCommand<SetCurrentViewMatrixCommand>().Initialize(matrix));
+            ReplaceOrAppendDrawCommandForShort(RentCommand<SetCurrentViewMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
@@ -86,14 +133,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         {
             ThrowIfDisposed();
             projectionMatrix = matrix;
-            commands.Add(RentCommand<SetCurrentProjectionMatrixCommand>().Initialize(matrix));
+            ReplaceOrAppendDrawCommandForShort(RentCommand<SetCurrentProjectionMatrixCommand>().Initialize(matrix));
         }
 
         /// <inheritdoc />
         public void SetCurrentRect(VisibleRect rect)
         {
             ThrowIfDisposed();
-            commands.Add(RentCommand<SetCurrentRectCommand>().Initialize(rect));
+            ReplaceOrAppendDrawCommandForShort(RentCommand<SetCurrentRectCommand>().Initialize(rect));
         }
 
         /// <inheritdoc />
@@ -103,6 +150,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             modelMatrixStack.Add(modelMatrix);
             modelMatrix = matrix;
             commands.Add(RentCommand<PushModelMatrixCommand>().Initialize(matrix));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -112,6 +160,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             viewMatrixStack.Add(viewMatrix);
             viewMatrix = matrix;
             commands.Add(RentCommand<PushViewMatrixCommand>().Initialize(matrix));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -121,6 +170,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             projectionMatrixStack.Add(projectionMatrix);
             projectionMatrix = matrix;
             commands.Add(RentCommand<PushProjectionMatrixCommand>().Initialize(matrix));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -129,6 +179,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ThrowIfDisposed();
             modelMatrix = PopMatrix(modelMatrixStack, nameof(PopModelMatrix));
             commands.Add(RentCommand<PopModelMatrixCommand>().Initialize());
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -137,6 +188,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ThrowIfDisposed();
             viewMatrix = PopMatrix(viewMatrixStack, nameof(PopViewMatrix));
             commands.Add(RentCommand<PopViewMatrixCommand>().Initialize());
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -145,6 +197,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ThrowIfDisposed();
             projectionMatrix = PopMatrix(projectionMatrixStack, nameof(PopProjectionMatrix));
             commands.Add(RentCommand<PopProjectionMatrixCommand>().Initialize());
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -161,6 +214,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
 
             commands.Add(RentCommand<DrawLinesCommand>().Initialize(pointList, lineWidth));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -177,6 +231,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
 
             commands.Add(RentCommand<DrawSimpleLinesCommand>().Initialize(pointList, lineWidth));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -213,6 +268,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             var instances = ObjectPool.GetPooledList<CircleInstance>();
             instances.Add(new CircleInstance(point, color, isSolid, radius, hollowLineWidth));
             commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instances));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -234,6 +290,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
 
             commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instanceList));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -249,6 +306,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
 
             commands.Add(RentCommand<DrawPolygonCommand>().Initialize(primitive, vertexList));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -260,6 +318,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(fontSize, 0, nameof(fontSize));
 
             commands.Add(RentCommand<DrawStringCommand>().Initialize(text, pos, scale, fontSize, rotate, color, origin, style, handle));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -282,6 +341,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(width, 0, nameof(width));
 
             commands.Add(RentCommand<DrawBeamCommand>().Initialize(texture, width, x, progress, color, rotate, judgeOffset));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         /// <inheritdoc />
@@ -347,6 +407,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             projectionMatrixStack = null;
             (stringMeasurer as IDisposable)?.Dispose();
             stringMeasurer = null;
+            ClearShortLastDrawCommandLocationMap();
+            lastDrawCommandLocationMap.Clear();
         }
 
         private void AddTextureCommand<TCommand>(IImage texture, IEnumerable<TextureInstance> instances, Func<TCommand, IImage, IPooledList<TextureInstance>, TCommand> initialize)
@@ -360,6 +422,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
 
             commands.Add(initialize(RentCommand<TCommand>(), texture, instanceList));
+            ClearShortLastDrawCommandLocationMap();
         }
 
         private void ResetState()
@@ -375,6 +438,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             modelMatrixStack?.Clear();
             viewMatrixStack?.Clear();
             projectionMatrixStack?.Clear();
+            ClearShortLastDrawCommandLocationMap();
+            lastDrawCommandLocationMap.Clear();
         }
 
         private void ThrowIfDisposed()
