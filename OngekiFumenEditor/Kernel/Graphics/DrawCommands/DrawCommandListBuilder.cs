@@ -21,8 +21,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         private IStringMeasure stringMeasurer;
         private bool disposed;
 
-        private Dictionary<Type, int> shortLastDrawCommandLocationMap = new Dictionary<Type, int>();
-        private Dictionary<Type, int> lastDrawCommandLocationMap = new Dictionary<Type, int>();
+        private IPooledDictionary<Type, int> shortLastDrawCommandLocationMap;
+        private IPooledDictionary<Type, int> lastDrawCommandLocationMap;
 
         private Vector4? cleanColor;
         private float viewWidth;
@@ -38,6 +38,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
         /// </summary>
         public DrawCommandListBuilder(IStringMeasure stringMeasurer = default)
         {
+            shortLastDrawCommandLocationMap = ObjectPool.GetPooledDictionary<Type, int>();
+            lastDrawCommandLocationMap = ObjectPool.GetPooledDictionary<Type, int>();
             commands = ObjectPool.GetPooledList<DrawCommand>();
             modelMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
             viewMatrixStack = ObjectPool.GetPooledList<Matrix4x4>();
@@ -51,7 +53,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             shortLastDrawCommandLocationMap.Clear();
         }
 
-        private void ReplaceOrAppendDrawCommandForShort(DrawCommand drawCommand)
+        private void ReplaceOrAppendDrawCommandForShort<T>(T drawCommand) where T : DrawCommand, IComparable<T>
         {
             var type = drawCommand.GetType();
             if (shortLastDrawCommandLocationMap.TryGetValue(type, out var prevIndex))
@@ -63,24 +65,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
             else
             {
-                if (TryReplaceDrawCommandIfEqual(drawCommand))
+                if (!TryReplaceDrawCommandIfEqual(type, drawCommand))
                 {
                     //append
-                    shortLastDrawCommandLocationMap[type] = commands.Count;
+                    lastDrawCommandLocationMap[type] = shortLastDrawCommandLocationMap[type] = commands.Count;
                     commands.Add(drawCommand);
                 }
             }
         }
 
-        private bool TryReplaceDrawCommandIfEqual(DrawCommand drawCommand)
+        private bool TryReplaceDrawCommandIfEqual<T>(Type type, T drawCommand) where T : DrawCommand, IComparable<T>
         {
-            var type = drawCommand.GetType();
             if (lastDrawCommandLocationMap.TryGetValue(type, out var prevIndex))
             {
                 //if they are equal, just ignore append
-                var prevCommand = commands[prevIndex];
+                var prevCommand = (T)commands[prevIndex];
 
-                if (prevCommand == drawCommand)
+                if (drawCommand.CompareTo(prevCommand) == 0)
                 {
                     drawCommand?.DisposeAndReturnSelf();
                     return true;
@@ -399,6 +400,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
                 commands = null;
             }
 
+            lastDrawCommandLocationMap?.Dispose();
+            shortLastDrawCommandLocationMap = null;
+            lastDrawCommandLocationMap?.Dispose();
+            lastDrawCommandLocationMap = null;
+
             modelMatrixStack?.Dispose();
             modelMatrixStack = null;
             viewMatrixStack?.Dispose();
@@ -407,8 +413,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             projectionMatrixStack = null;
             (stringMeasurer as IDisposable)?.Dispose();
             stringMeasurer = null;
-            ClearShortLastDrawCommandLocationMap();
-            lastDrawCommandLocationMap.Clear();
         }
 
         private void AddTextureCommand<TCommand>(IImage texture, IEnumerable<TextureInstance> instances, Func<TCommand, IImage, IPooledList<TextureInstance>, TCommand> initialize)

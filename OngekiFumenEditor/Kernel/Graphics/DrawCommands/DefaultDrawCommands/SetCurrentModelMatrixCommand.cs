@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Utils.ObjectPool;
+using System;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
@@ -6,7 +7,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
     /// <summary>
     /// Replaces the current model matrix while presenting a command list.
     /// </summary>
-    public sealed class SetCurrentModelMatrixCommand : DrawCommand
+    public sealed class SetCurrentModelMatrixCommand : DrawCommand, IComparable<SetCurrentModelMatrixCommand>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SetCurrentModelMatrixCommand"/> class.
@@ -30,6 +31,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands
         protected override void ReturnToPoolCore()
         {
             ObjectPool<SetCurrentModelMatrixCommand>.Return(this);
+        }
+
+        public int CompareTo(SetCurrentModelMatrixCommand other)
+        {
+            return Matrix.Equals(other.Matrix) ? 0 : -1;
         }
     }
 }

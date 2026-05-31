@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics
@@ -5,7 +6,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
     /// <summary>
     /// 左手坐标系为世界坐标系的可视区域
     /// </summary>
-    public struct VisibleRect
+    public struct VisibleRect : IEquatable<VisibleRect>
     {
         public VisibleRect(Vector2 buttomRight, Vector2 topLeft)
         {
@@ -27,5 +28,31 @@ namespace OngekiFumenEditor.Kernel.Graphics
 
         public float MinX => TopLeft.X;
         public float MaxX => ButtomRight.X;
+
+        public override bool Equals(object obj)
+        {
+            return obj is VisibleRect rect && Equals(rect);
+        }
+
+        public bool Equals(VisibleRect other)
+        {
+            return TopLeft.Equals(other.TopLeft) &&
+                   ButtomRight.Equals(other.ButtomRight);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(TopLeft, ButtomRight);
+        }
+
+        public static bool operator ==(VisibleRect left, VisibleRect right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(VisibleRect left, VisibleRect right)
+        {
+            return !(left == right);
+        }
     }
 }
