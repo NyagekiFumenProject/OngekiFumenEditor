@@ -19,6 +19,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
         private readonly int vbo;
         private readonly int vao;
         private int bufferCapacityInBytes;
+        private float[] cacheVertexBuffer = new float[2048];
 
         public DefaultLineDrawing(DefaultOpenGLRenderManagerImpl manager) : base(manager)
         {
@@ -87,31 +88,28 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
         private int UpdateBuffer(IEnumerable<LineVertex> points)
         {
-            var uploadBuffer = ArrayPool<float>.Shared.Rent(1024);
-
             void ExtendBufferCapacity(int requiredFloatCount)
             {
-                if (uploadBuffer.Length > 0)
-                    ArrayPool<float>.Shared.Return(uploadBuffer);
-
-                uploadBuffer = ArrayPool<float>.Shared.Rent(requiredFloatCount);
+                var newBuffer = new float[requiredFloatCount];
+                cacheVertexBuffer.CopyTo(newBuffer);
+                cacheVertexBuffer = newBuffer;
             }
 
             void WriteVertex(ref int idx, LineVertex vertex)
             {
-                if (idx + 8 > uploadBuffer.Length)
+                if (idx + 8 > cacheVertexBuffer.Length)
                     ExtendBufferCapacity((idx + 8) * 2);
 
-                uploadBuffer[idx++] = vertex.Point.X;
-                uploadBuffer[idx++] = vertex.Point.Y;
+                cacheVertexBuffer[idx++] = vertex.Point.X;
+                cacheVertexBuffer[idx++] = vertex.Point.Y;
 
-                uploadBuffer[idx++] = vertex.Color.X;
-                uploadBuffer[idx++] = vertex.Color.Y;
-                uploadBuffer[idx++] = vertex.Color.Z;
-                uploadBuffer[idx++] = vertex.Color.W;
+                cacheVertexBuffer[idx++] = vertex.Color.X;
+                cacheVertexBuffer[idx++] = vertex.Color.Y;
+                cacheVertexBuffer[idx++] = vertex.Color.Z;
+                cacheVertexBuffer[idx++] = vertex.Color.W;
 
-                uploadBuffer[idx++] = vertex.Dash.DashSize;
-                uploadBuffer[idx++] = vertex.Dash.GapSize;
+                cacheVertexBuffer[idx++] = vertex.Dash.DashSize;
+                cacheVertexBuffer[idx++] = vertex.Dash.GapSize;
             }
 
             var vertexCount = 0;
@@ -149,10 +147,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
             var uploadSizeInBytes = vertexCount * VertexByteSize;
             EnsureVboCapacity(uploadSizeInBytes);
-            GL.NamedBufferSubData(vbo, IntPtr.Zero, new IntPtr(uploadSizeInBytes), uploadBuffer);
+            GL.NamedBufferSubData(vbo, IntPtr.Zero, new IntPtr(uploadSizeInBytes), cacheVertexBuffer);
 
-            if (uploadBuffer.Length > 0)
-                ArrayPool<float>.Shared.Return(uploadBuffer);
             return vertexCount;
         }
 
