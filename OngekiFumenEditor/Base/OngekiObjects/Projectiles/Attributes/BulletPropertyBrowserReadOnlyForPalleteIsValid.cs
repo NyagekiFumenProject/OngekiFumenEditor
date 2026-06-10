@@ -5,9 +5,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes
     public class BulletPropertyBrowserReadOnlyForPalleteIsValid : ObjectPropertyBrowserReadOnlyForCondition<IBulletPalleteReferencable>
     {
         public BulletPropertyBrowserReadOnlyForPalleteIsValid() :
-            base(b => b.ReferenceBulletPallete != null && b.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+            base(b => b.ReferenceBulletPallete is not null)
         {
-            //bullet's props are editable only when pallete is DummyCustomPallete or null
+            //bullet's local props are editable only when no palette is linked
         }
     }
 }

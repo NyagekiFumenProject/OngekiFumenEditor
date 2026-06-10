@@ -336,10 +336,10 @@ namespace OngekiFumenEditor.Parser.Ogkr
                     _ => default
                 };
 
-                if (u.ReferenceBulletPallete != null && u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (u.ReferenceBulletPallete is not null)
                 {
                     //serialize normal bullet
-                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
+                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
                 }
                 else
                 {
@@ -407,8 +407,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
 
             foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
             {
-                //Considering that the bell may not need BulletPallete, we only need to determine whether it is a DummyCustomPallete
-                if (u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (u.ReferenceBulletPallete is not null)
                 {
                     sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete?.StrID ?? "--"}");
                 }

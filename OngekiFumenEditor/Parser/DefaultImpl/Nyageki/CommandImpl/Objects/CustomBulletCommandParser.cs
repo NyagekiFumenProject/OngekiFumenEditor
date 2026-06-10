@@ -20,8 +20,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             var bullet = new Bullet();
             var data = seg[1].Split(":");
 
-            bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-
             using var d = data[0].GetValuesMapWithDisposable(out var map);
             bullet.TGrid = map["T"].ParseToTGrid();
             bullet.XGrid = map["X"].ParseToXGrid();

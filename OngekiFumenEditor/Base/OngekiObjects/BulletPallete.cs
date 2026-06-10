@@ -11,121 +11,100 @@ namespace OngekiFumenEditor.Base.OngekiObjects
     {
         public static int RandomSeed { get; set; } = DateTime.Now.ToString().GetHashCode();
 
-        public static BulletPallete DummyCustomPallete { get; } = new BulletPallete()
-        {
-            StrID = "----",
-            EditorName = "自定义无模板",
-        };
-
-        static BulletPallete()
-        {
-            DummyCustomPallete.PropertyChanged += (s, e) => throw new InvalidOperationException("DummyCustomPallete can't be modify");
-        }
-
-        private string strID = string.Empty;
         public string StrID
         {
-            get { return strID; }
+            get;
             set
             {
-                strID = value;
+                field = value;
                 NotifyOfPropertyChange(() => StrID);
             }
         }
 
-        private string editorName = string.Empty;
         public string EditorName
         {
-            get { return editorName; }
+            get;
             set
             {
-                editorName = value;
+                field = value;
                 NotifyOfPropertyChange(() => EditorName);
             }
-        }
+        } = string.Empty;
 
-        private Color editorAxuiliaryLineColor = Colors.DarkKhaki;
         public Color EditorAxuiliaryLineColor
         {
-            get { return editorAxuiliaryLineColor; }
+            get;
             set
             {
-                editorAxuiliaryLineColor = value;
+                field = value;
                 NotifyOfPropertyChange(() => EditorAxuiliaryLineColor);
             }
-        }
+        } = Colors.DarkKhaki;
 
-        private Shooter shooterValue = Shooter.Center;
         public Shooter ShooterValue
         {
-            get { return shooterValue; }
+            get;
             set
             {
-                shooterValue = value;
+                field = value;
                 NotifyOfPropertyChange(() => ShooterValue);
             }
-        }
+        } = Shooter.Center;
 
-        private int placeOffset = default;
         public int PlaceOffset
         {
-            get { return placeOffset; }
+            get;
             set
             {
-                placeOffset = value;
+                field = value;
                 NotifyOfPropertyChange(() => PlaceOffset);
             }
-        }
+        } = default;
 
-        private int randomOffsetRange = default;
         public int RandomOffsetRange
         {
-            get { return randomOffsetRange; }
+            get;
             set
             {
-                randomOffsetRange = value;
+                field = value;
                 NotifyOfPropertyChange(() => RandomOffsetRange);
             }
-        }
+        } = default;
 
-        private Target targetValue = Target.FixField;
         public Target TargetValue
         {
-            get { return targetValue; }
+            get;
             set
             {
-                targetValue = value;
+                field = value;
                 NotifyOfPropertyChange(() => TargetValue);
             }
-        }
+        } = Target.FixField;
 
-        private BulletSize sizeValue = BulletSize.Normal;
         public BulletSize SizeValue
         {
-            get => sizeValue;
-            set => Set(ref sizeValue, value);
-        }
+            get;
+            set => Set(ref field, value);
+        } = BulletSize.Normal;
 
-        private BulletType typeValue = BulletType.Circle;
         public BulletType TypeValue
         {
-            get => typeValue;
-            set => Set(ref typeValue, value);
-        }
+            get;
+            set => Set(ref field, value);
+        } = BulletType.Circle;
 
-        private float speed = 1;
         public float Speed
         {
-            get { return speed; }
+            get;
             set
             {
-                speed = value;
+                field = value;
                 NotifyOfPropertyChange(() => Speed);
             }
-        }
+        } = 1;
 
         /// <summary>
-        /// 是否受到变速影响
+        /// 锟角凤拷锟杰碉拷锟斤拷锟斤拷影锟斤拷
         /// </summary>
         public bool IsEnableSoflan => TargetValue != Target.Player;
 

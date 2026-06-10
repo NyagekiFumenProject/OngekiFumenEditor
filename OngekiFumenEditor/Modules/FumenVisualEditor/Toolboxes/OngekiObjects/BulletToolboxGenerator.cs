@@ -11,9 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
     {
         public override OngekiObjectBase CreateDisplayObject()
         {
-            var bullet = base.CreateDisplayObject() as Bullet;
-            bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-            return bullet;
+            return base.CreateDisplayObject();
         }
     }
 }

@@ -288,9 +288,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         {
             foreach (var bullet in fumen.Bullets.OrderBy(x => x.TGrid))
             {
-                if (bullet.ReferenceBulletPallete is { } pallete && pallete != BulletPallete.DummyCustomPallete)
+                if (bullet.ReferenceBulletPallete is not null)
                 {
-                    sb.WriteLine($"Bullet\t:\t{bullet.ReferenceBulletPallete?.StrID}\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
+                    sb.WriteLine($"Bullet\t:\t{bullet.ReferenceBulletPallete.StrID}\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
                 }
                 else
                 {
@@ -341,7 +341,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         {
             foreach (var bell in fumen.Bells.OrderBy(x => x.TGrid))
             {
-                if (bell.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (bell.ReferenceBulletPallete is not null)
                 {
                     sb.WriteLine($"Bell\t:\t{bell.ReferenceBulletPallete?.StrID}\t:\tX[{bell.XGrid.Unit},{bell.XGrid.Grid}], T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
                 }

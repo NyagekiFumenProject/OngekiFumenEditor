@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow
+<mah:MetroWindow
     x:Class="OngekiFumenEditor.UI.Controls.ObjectInspector.Views.Dialogs.BulletPalleteSelectDialogView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -20,9 +20,6 @@
     SizeToContent="Width"
     Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
-    <mah:MetroWindow.Resources>
-        <valueconverters:HideIfDummyPalleteConverter x:Key="HideIfDummyPalleteConverter" />
-    </mah:MetroWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -66,14 +63,7 @@
                     <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="ShooterValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding ShooterValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -81,14 +71,7 @@
                     <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="PlaceOffset" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding PlaceOffset}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -96,14 +79,7 @@
                     <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="TargetValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding TargetValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -111,14 +87,7 @@
                     <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="Speed" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding Speed}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -126,14 +95,7 @@
                     <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="SizeValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding SizeValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -141,14 +103,7 @@
                     <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="TypeValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding TypeValue}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
@@ -156,14 +111,7 @@
                     <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="RandomOffsetRange" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock HorizontalAlignment="Center" Text="{Binding RandomOffsetRange}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

@@ -109,8 +109,8 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 }
             }
 
-            CheckAndProcess(fumen.Bells.Where(x => x.ReferenceBulletPallete == BulletPallete.DummyCustomPallete));
-            CheckAndProcess(fumen.Bullets.Where(x => x.ReferenceBulletPallete == BulletPallete.DummyCustomPallete || x.ReferenceBulletPallete == null));
+            CheckAndProcess(fumen.Bells.Where(x => x.ReferenceBulletPallete is null));
+            CheckAndProcess(fumen.Bullets.Where(x => x.ReferenceBulletPallete is null));
         }
 
         public static void RegularizeAllObjectGrids(OngekiFumen fumen)
@@ -165,7 +165,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 var beforeLane = obj.ReferenceLaneStart;
 
                 (var afterLane, var afterXGrid) =
-                    //¿¼ÂÇµ½´¦ÀíHoldEndµÄrefLaneÖ®Ç°£¬ÒÑ¾­±»Ç°ÕßHold´¦Àí¹ýÁË
+                    //ï¿½ï¿½ï¿½Çµï¿½ï¿½ï¿½ï¿½ï¿½HoldEndï¿½ï¿½refLaneÖ®Ç°ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Holdï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                     (obj.ReferenceLaneStart is not null && laneMap.TryGetValue(obj.ReferenceLaneStart, out var genStarts) ? genStarts : Enumerable.Empty<ConnectableStartObject>())
                     .Where(x => tGrid >= x.MinTGrid && tGrid <= x.MaxTGrid)
                     .Select(x => (x, x.CalulateXGrid(tGrid)))
