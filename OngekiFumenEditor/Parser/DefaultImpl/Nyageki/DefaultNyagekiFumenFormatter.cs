@@ -302,7 +302,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
                     sb.Write($", SizeValue[{bullet.SizeValue}]");
                     sb.Write($", ShooterValue[{bullet.ShooterValue}]");
                     sb.Write($", TargetValue[{bullet.TargetValue}]");
-                    sb.WriteLine($", Speed[{bullet.Speed}]");
+                    sb.WriteLine();
                 }
             }
             sb.WriteLine();
