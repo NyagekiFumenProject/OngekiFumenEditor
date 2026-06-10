@@ -775,7 +775,7 @@
     <value>Fumen Info</value>
   </data>
   <data name="FumenObjectPropertyBrowser" xml:space="preserve">
-    <value>Object Property</value>
+    <value>Object Properties</value>
   </data>
   <data name="FumenProjectFile" xml:space="preserve">
     <value>Fumen Project File</value>
@@ -2050,7 +2050,7 @@
     <value>Change color</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
-    <value>Soflan Group</value>
+    <value>Soflan Groups</value>
   </data>
   <data name="CurrentDisplaySelectedSoflanPointList" xml:space="preserve">
     <value>Current {0} soflan point list:</value>
