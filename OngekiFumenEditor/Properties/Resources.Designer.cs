@@ -3722,7 +3722,25 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("kbd_editor_FastSwitchFlickDirection", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   查找类似 Select attached curve control points 的本地化字符串。
+        /// </summary>
+        public static string kbd_editor_SelectAttachedCurves {
+            get {
+                return ResourceManager.GetString("kbd_editor_SelectAttachedCurves", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 Select entire lane 的本地化字符串。
+        /// </summary>
+        public static string kbd_editor_SelectEntireLane {
+            get {
+                return ResourceManager.GetString("kbd_editor_SelectEntireLane", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   查找类似 Toggle display mode 的本地化字符串。
         /// </summary>

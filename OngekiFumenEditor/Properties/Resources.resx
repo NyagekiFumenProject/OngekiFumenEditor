@@ -1794,6 +1794,12 @@
   <data name="kbd_editor_FastSwitchFlickDirection" xml:space="preserve">
     <value>Switch directions of selected flicks</value>
   </data>
+  <data name="kbd_editor_SelectEntireLane" xml:space="preserve">
+    <value>Select entire lane</value>
+  </data>
+  <data name="kbd_editor_SelectAttachedCurves" xml:space="preserve">
+    <value>Select attached curve control points</value>
+  </data>
   <data name="kbd_editor_CopySelectedObjects" xml:space="preserve">
     <value>Copy selection to clipboard</value>
   </data>

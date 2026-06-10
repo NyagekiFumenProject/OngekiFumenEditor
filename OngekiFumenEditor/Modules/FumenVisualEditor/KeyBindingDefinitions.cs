@@ -108,6 +108,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
              Key.F);
 
         [Export]
+        //        [Gesture Shift+E] = [Action MenuItemAction_SelectEntireLane];
+        public static KeyBindingDefinition KBD_SelectEntireLane = new KeyBindingDefinition(
+            "kbd_editor_SelectEntireLane",
+             ModifierKeys.Shift, Key.E);
+
+        [Export]
+        //        [Gesture Shift+V] = [Action MenuItemAction_SelectAttachedCurves];
+        public static KeyBindingDefinition KBD_SelectAttachedCurves = new KeyBindingDefinition(
+            "kbd_editor_SelectAttachedCurves",
+             ModifierKeys.Shift, Key.V);
+
+        [Export]
         //        [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects];
         public static KeyBindingDefinition KBD_CopySelectedObjects = new KeyBindingDefinition(
             "kbd_editor_CopySelectedObjects",
