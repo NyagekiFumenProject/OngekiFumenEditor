@@ -2586,4 +2586,10 @@
   <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
     <value>Unable to generate the fumen and update it into the game: {0}</value>
   </data>
+  <data name="SetBulletPaletteToNull" xml:space="preserve">
+      <value>Set null</value>
+  </data>
+  <data name="SelectAndChangeBulletPalette" xml:space="preserve">
+      <value>Select palette...</value>
+  </data>
 </root>
