@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     d:Background="White"
     d:Height="75"
     d:Width="200"
@@ -47,15 +48,14 @@
                 <Button
                     Grid.Column="0"
                     cal:Message.Attach="SetNull()"
-                    Background="LightGray">
-                    Set Null
-                </Button>
+                    Background="LightGray"
+                    Content="{markup:Translate [SetBulletPaletteToNull]}" />
+
                 <Button
                     Grid.Column="2"
                     cal:Message.Attach="OpenSelectList()"
-                    Background="LightGray">
-                    更换模板
-                </Button>
+                    Background="LightGray"
+                    Content="{markup:Translate [SelectAndChangeBulletPalette]}" />
             </Grid>
         </StackPanel>
     </GroupBox>
