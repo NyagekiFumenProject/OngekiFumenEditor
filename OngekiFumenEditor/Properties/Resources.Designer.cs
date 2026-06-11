@@ -5930,6 +5930,15 @@ namespace OngekiFumenEditor.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Select palette....
+        /// </summary>
+        public static string SelectAndChangeBulletPalette {
+            get {
+                return ResourceManager.GetString("SelectAndChangeBulletPalette", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Select audio file.
         /// </summary>
         public static string SelectAudioFile {
@@ -6574,6 +6583,15 @@ namespace OngekiFumenEditor.Properties {
         public static string SerializeFileNotSupport {
             get {
                 return ResourceManager.GetString("SerializeFileNotSupport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set null.
+        /// </summary>
+        public static string SetBulletPaletteToNull {
+            get {
+                return ResourceManager.GetString("SetBulletPaletteToNull", resourceCulture);
             }
         }
         
