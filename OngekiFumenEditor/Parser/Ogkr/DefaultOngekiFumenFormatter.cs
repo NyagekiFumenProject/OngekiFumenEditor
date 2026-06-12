@@ -196,6 +196,11 @@ namespace OngekiFumenEditor.Parser.Ogkr
 
             foreach (var bpl in fumen.BulletPalleteList.OrderBy(x => x.StrID))
             {
+                // The default bell palette gets created during standardization if a bell has default projectile properties.
+                // The fumen doesn't need it, so we skip it
+                if (bpl.StrID == Bell.OngekiDefaultBellPaletteName)
+                    continue;
+
                 var shoot = bpl.ShooterValue switch
                 {
                     Shooter.TargetHead => "UPS",
@@ -336,10 +341,10 @@ namespace OngekiFumenEditor.Parser.Ogkr
                     _ => default
                 };
 
-                if (u.ReferenceBulletPallete != null && u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (u.ReferenceBulletPallete is not null)
                 {
                     //serialize normal bullet
-                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
+                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
                 }
                 else
                 {
@@ -407,10 +412,9 @@ namespace OngekiFumenEditor.Parser.Ogkr
 
             foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
             {
-                //Considering that the bell may not need BulletPallete, we only need to determine whether it is a DummyCustomPallete
-                if (u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (u.ReferenceBulletPallete is not null)
                 {
-                    sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete?.StrID ?? "--"}");
+                    sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete.StrID}");
                 }
                 else
                 {
@@ -436,15 +440,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
                         BulletSize.Large => "L",
                         _ => default
                     };
-                    /*
-                    var type = u.TypeValue switch
-                    {
-                        BulletType.Circle => "CIR",
-                        BulletType.Needle => "NDL",
-                        BulletType.Square => "SQR",
-                        _ => default
-                    };
-                    */
+
                     var idName = Bell.CustomCommandName;
                     sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{u.RandomOffsetRange}");
                 }

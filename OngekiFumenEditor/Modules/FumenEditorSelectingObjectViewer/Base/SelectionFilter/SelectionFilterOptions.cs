@@ -460,7 +460,6 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
         NullPaletteItem = new Item(null);
         Items.Add(NullPaletteItem);
-        Items.Add(new(BulletPallete.DummyCustomPallete));
         Items.AddRange(paletteList.Select(p => new Item(p)));
 
         PaletteTable = Items.Except([NullPaletteItem]).ToDictionary(i => i.Palette!, i => i);
@@ -555,9 +554,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
             {
                 var baseText = Palette is null
                     ? Resources.NoBulletPalette
-                    : Palette == BulletPallete.DummyCustomPallete
-                        ? Palette.EditorName
-                        : $"{Palette.StrID} {Palette.EditorName}";
+                    : $"{Palette.StrID} {Palette.EditorName}";
                 return $"{baseText} ({BulletCount} | {BellCount})";
             }
         }

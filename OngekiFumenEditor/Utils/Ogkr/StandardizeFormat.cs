@@ -97,6 +97,10 @@ namespace OngekiFumenEditor.Utils.Ogkr
                             RandomOffsetRange = projectile.RandomOffsetRange,
                         };
 
+                        // Bells with default properties can be represented by the "--" palette
+                        if (projectile is Bell bell && bell.IsOngekiDefaultBell())
+                            bpl.StrID = Bell.OngekiDefaultBellPaletteName;
+
                         fumen.AddObject(bpl);
                         //add to map for next lookup
                         bplMap[key] = bpl;
@@ -109,8 +113,8 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 }
             }
 
-            CheckAndProcess(fumen.Bells.Where(x => x.ReferenceBulletPallete == BulletPallete.DummyCustomPallete));
-            CheckAndProcess(fumen.Bullets.Where(x => x.ReferenceBulletPallete == BulletPallete.DummyCustomPallete || x.ReferenceBulletPallete == null));
+            CheckAndProcess(fumen.Bells.Where(x => x.ReferenceBulletPallete is null));
+            CheckAndProcess(fumen.Bullets.Where(x => x.ReferenceBulletPallete is null));
         }
 
         public static void RegularizeAllObjectGrids(OngekiFumen fumen)
@@ -165,7 +169,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 var beforeLane = obj.ReferenceLaneStart;
 
                 (var afterLane, var afterXGrid) =
-                    //考虑到处理HoldEnd的refLane之前，已经被前者Hold处理过了
+                    //鑰冭檻鍒板鐞咹oldEnd鐨剅efLane涔嬪墠锛屽凡缁忚鍓嶈�匟old澶勭悊杩囦簡
                     (obj.ReferenceLaneStart is not null && laneMap.TryGetValue(obj.ReferenceLaneStart, out var genStarts) ? genStarts : Enumerable.Empty<ConnectableStartObject>())
                     .Where(x => tGrid >= x.MinTGrid && tGrid <= x.MaxTGrid)
                     .Select(x => (x, x.CalulateXGrid(tGrid)))
