@@ -10,16 +10,15 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
     //[DontShowPropertyInfoAttrbute]
     public partial class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
-        private BulletPallete? referenceBulletPallete;
         [LocalizableObjectPropertyBrowserAlias("BulletPalleteDisplayName")]
         public BulletPallete? ReferenceBulletPallete
         {
-            get { return referenceBulletPallete; }
+            get;
             set
             {
                 //Log.LogDebug($"bullet(id:{Id})'s pallete has been changed from {referenceBulletPallete?.StrID} to {value?.StrID}");
-                this.RegisterOrUnregisterPropertyChangeEvent(referenceBulletPallete, value, ReferenceBulletPallete_PropertyChanged);
-                Set(ref referenceBulletPallete, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(field, value, ReferenceBulletPallete_PropertyChanged);
+                Set(ref field, value);
 
                 NotifyOfPropertyChange(() => Speed);
                 NotifyOfPropertyChange(() => PlaceOffset);
