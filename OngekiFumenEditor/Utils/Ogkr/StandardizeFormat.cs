@@ -97,6 +97,10 @@ namespace OngekiFumenEditor.Utils.Ogkr
                             RandomOffsetRange = projectile.RandomOffsetRange,
                         };
 
+                        // Bells with default properties can be represented by the "--" palette
+                        if (projectile is Bell bell && bell.IsOngekiDefaultBell())
+                            bpl.StrID = Bell.OngekiDefaultBellPaletteName;
+
                         fumen.AddObject(bpl);
                         //add to map for next lookup
                         bplMap[key] = bpl;

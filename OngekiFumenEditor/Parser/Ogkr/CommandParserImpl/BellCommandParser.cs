@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 			bell.XGrid.Unit = dataArr[3];
 
 			var palleteId = args.GetData<string>(4);
-			if (!string.IsNullOrWhiteSpace(palleteId) && palleteId != "--")
+			if (!string.IsNullOrWhiteSpace(palleteId) && palleteId != Bell.OngekiDefaultBellPaletteName)
 				bell.ReferenceBulletPallete = fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == palleteId);
 
 			return bell;
