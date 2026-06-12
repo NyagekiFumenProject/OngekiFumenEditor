@@ -169,7 +169,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 var beforeLane = obj.ReferenceLaneStart;
 
                 (var afterLane, var afterXGrid) =
-                    ////考虑到处理HoldEnd的refLane之前，已经被前者Hold处理过了
+                    //考虑到处理HoldEnd的refLane之前，已经被前者Hold处理过了
                     (obj.ReferenceLaneStart is not null && laneMap.TryGetValue(obj.ReferenceLaneStart, out var genStarts) ? genStarts : Enumerable.Empty<ConnectableStartObject>())
                     .Where(x => tGrid >= x.MinTGrid && tGrid <= x.MaxTGrid)
                     .Select(x => (x, x.CalulateXGrid(tGrid)))
