@@ -909,6 +909,15 @@
   <data name="JustBefore" xml:space="preserve">
     <value>今</value>
   </data>
+  <data name="BpmFilter" xml:space="preserve">
+    <value>BPMフィルター:</value>
+  </data>
+  <data name="BpmMin" xml:space="preserve">
+    <value>最小</value>
+  </data>
+  <data name="BpmMax" xml:space="preserve">
+    <value>最大</value>
+  </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>キーワード並び替え</value>
   </data>

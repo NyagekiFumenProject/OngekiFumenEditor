@@ -918,6 +918,15 @@
   <data name="JustBefore" xml:space="preserve">
     <value>刚刚</value>
   </data>
+  <data name="BpmFilter" xml:space="preserve">
+    <value>BPM过滤:</value>
+  </data>
+  <data name="BpmMin" xml:space="preserve">
+    <value>最小</value>
+  </data>
+  <data name="BpmMax" xml:space="preserve">
+    <value>最大</value>
+  </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>关键词排序:</value>
   </data>

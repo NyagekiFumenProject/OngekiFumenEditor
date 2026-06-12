@@ -24,39 +24,42 @@ using System.Xml.XPath;
 namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 {
 	[Export(typeof(IOgkiFumenListBrowser))]
-	public class OgkiFumenListBrowserViewModel : WindowBase, IOgkiFumenListBrowser
+	public sealed class OgkiFumenListBrowserViewModel : WindowBase, IOgkiFumenListBrowser
 	{
 		private List<OngekiFumenSet> fumenSets = new();
 
-		private string rootFolderPath = string.Empty;
 		public string RootFolderPath
 		{
-			get => rootFolderPath;
+			get;
 			set
 			{
-				Set(ref rootFolderPath, value);
+				Set(ref field, value);
 				RefreshList();
 			}
 		}
 
-		private bool isBusy = false;
 		public bool IsBusy
 		{
-			get => isBusy;
-			set
-			{
-				Set(ref isBusy, value);
-			}
+			get;
+			set => Set(ref field, value);
 		}
 
-		private string keywords = string.Empty;
 		public string Keywords
 		{
-			get => keywords;
-			set
-			{
-				Set(ref keywords, value);
-			}
+			get;
+			set => Set(ref field, value);
+		}
+
+		public string BpmMin
+		{
+			get;
+			set => Set(ref field, value);
+		}
+
+		public string BpmMax
+		{
+			get;
+			set => Set(ref field, value);
 		}
 
 		public ObservableCollection<OngekiFumenSet> DisplayFumenSets { get; } = new ObservableCollection<OngekiFumenSet>();
@@ -64,7 +67,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 		public OgkiFumenListBrowserViewModel()
 		{
 			DisplayName = Resources.OgkiFumenListBrowser;
-			rootFolderPath = Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
+			RootFolderPath = OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
 		}
 
 		protected override void OnViewLoaded(object view)
@@ -79,7 +82,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 			IsBusy = true;
 			fumenSets.Clear();
 			DisplayFumenSets.Clear();
-			
+
 			var folder = await SearchFumenSet(RootFolderPath);
 
 			fumenSets.AddRange(folder);
@@ -148,6 +151,16 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
 				return (q, r);
 			}).Where(x => x.q < 5).OrderBy(x => x.q).Select(x => x.r);
+
+			float? minBpm = float.TryParse(BpmMin, out var minVal) ? minVal : null;
+			float? maxBpm = float.TryParse(BpmMax, out var maxVal) ? maxVal : null;
+
+			if (minBpm.HasValue || maxBpm.HasValue)
+			{
+				result = result.Where(set => set.Difficults.Any(d =>
+					(!minBpm.HasValue || d.Bpm >= minBpm.Value) &&
+					(!maxBpm.HasValue || d.Bpm <= maxBpm.Value)));
+			}
 
 			DisplayFumenSets.AddRange(result);
 		}

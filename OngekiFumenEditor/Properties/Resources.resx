@@ -918,6 +918,15 @@
   <data name="JustBefore" xml:space="preserve">
     <value>Just now</value>
   </data>
+  <data name="BpmFilter" xml:space="preserve">
+    <value>BPM filter:</value>
+  </data>
+  <data name="BpmMin" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="BpmMax" xml:space="preserve">
+    <value>Max</value>
+  </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>Keywords sorting:</value>
   </data>

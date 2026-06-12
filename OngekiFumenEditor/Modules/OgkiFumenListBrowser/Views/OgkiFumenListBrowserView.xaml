@@ -59,6 +59,24 @@
                     Text="{Binding Keywords}">
                 </TextBox>
             </StackPanel>
+            <StackPanel Margin="5,0,5,10" Orientation="Horizontal">
+                <Label Content="{markup:Translate [BpmFilter]}" />
+                <Label Content="{markup:Translate [BpmMin]}" VerticalAlignment="Center" />
+                <TextBox
+                    Width="70"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding BpmMin}">
+                </TextBox>
+                <Label Margin="5,0,0,0" VerticalAlignment="Center" Content="–" />
+                <Label Content="{markup:Translate [BpmMax]}" VerticalAlignment="Center" />
+                <TextBox
+                    Width="70"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding BpmMax}">
+                </TextBox>
+            </StackPanel>
             <Button
                 Margin="5,0,15,0"
                 Padding="20,5,20,5"
@@ -201,6 +219,11 @@
                                                             FontSize="14"
                                                             FontWeight="Bold"
                                                             Text="{Binding Level}">
+                                                        </Run>
+                                                    </TextBlock>
+                                                    <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
+                                                        <Run>BPM:</Run>
+                                                        <Run Text="{Binding Bpm, Mode=OneTime}">
                                                         </Run>
                                                     </TextBlock>
                                                     <Button
