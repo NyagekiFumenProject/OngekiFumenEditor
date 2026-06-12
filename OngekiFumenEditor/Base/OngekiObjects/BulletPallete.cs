@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         } = 1;
 
         /// <summary>
-        /// �Ƿ��ܵ�����Ӱ��
+        /// 是否受到变速影响
         /// </summary>
         public bool IsEnableSoflan => TargetValue != Target.Player;
 
