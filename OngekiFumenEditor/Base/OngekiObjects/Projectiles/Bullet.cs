@@ -64,7 +64,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         } = BulletDamageType.Normal;
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public float Speed
         {
             get => ReferenceBulletPallete?.Speed ?? field;
@@ -72,7 +72,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public int RandomOffsetRange
         {
             get => ReferenceBulletPallete?.RandomOffsetRange ?? field;
@@ -80,7 +80,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public int PlaceOffset
         {
             get => ReferenceBulletPallete?.PlaceOffset ?? field;
@@ -88,7 +88,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public BulletType TypeValue
         {
             get => ReferenceBulletPallete?.TypeValue ?? field;
@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public Target TargetValue
         {
             get => ReferenceBulletPallete?.TargetValue ?? field;
@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public Shooter ShooterValue
         {
             get => ReferenceBulletPallete?.ShooterValue ?? field;
@@ -116,7 +116,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public BulletSize SizeValue
         {
             get => ReferenceBulletPallete?.SizeValue ?? field;
