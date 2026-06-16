@@ -57,7 +57,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             get => ReferenceBulletPallete?.Speed ?? field;
             set => Set(ref field, value);
-        }
+        } = 1;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
@@ -65,7 +65,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             get => ReferenceBulletPallete?.RandomOffsetRange ?? field;
             set => Set(ref field, value);
-        }
+        } = 0;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
@@ -73,7 +73,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             get => ReferenceBulletPallete?.PlaceOffset ?? field;
             set => Set(ref field, value);
-        }
+        } = 0;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
                 Set(ref field, value);
                 NotifyOfPropertyChange(() => IsEnableSoflan);
             }
-        }
+        } = Target.FixField;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             get => ReferenceBulletPallete?.ShooterValue ?? field;
             set => Set(ref field, value);
-        }
+        } = Shooter.Center;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
@@ -101,7 +101,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             get => ReferenceBulletPallete?.SizeValue ?? field;
             set => Set(ref field, value);
-        }
+        } = BulletSize.Normal;
 
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
