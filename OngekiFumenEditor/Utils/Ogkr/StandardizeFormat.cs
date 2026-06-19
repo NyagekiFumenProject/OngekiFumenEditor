@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Utils.Ogkr
             var bplMap = fumen.BulletPalleteList.GroupBy(bpl => (bpl.PlaceOffset, bpl.SizeValue, bpl.Speed, bpl.ShooterValue, bpl.TargetValue, bpl.TypeValue, bpl.RandomOffsetRange))
                                    .ToDictionary(x => x.Key, x => x.First());
 
-            void CheckAndProcess<T>(IEnumerable<T> customProjectiles) where T : IProjectile, IBulletPalleteReferencable
+            void CheckAndProcess<T>(IEnumerable<T> customProjectiles) where T : class, IProjectile, IBulletPalleteReferencable
             {
                 foreach (var projectile in customProjectiles)
                 {
