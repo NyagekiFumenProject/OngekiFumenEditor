@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             }
         } = null;
 
-        private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ReferenceBulletPallete_PropertyChanged(object? _, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {

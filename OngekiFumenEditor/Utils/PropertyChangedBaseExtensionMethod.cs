@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Utils
     {
         private static readonly ConcurrentDictionary<int, WeakReference<PropertyChangedEventHandler>> savedMethod = new ConcurrentDictionary<int, WeakReference<PropertyChangedEventHandler>>();
 
-        public static void RegisterOrUnregisterPropertyChangeEvent<T>(this PropertyChangedBase t, T oldValue, T newValue, PropertyChangedEventHandler handler) where T : INotifyPropertyChanged
+        public static void RegisterOrUnregisterPropertyChangeEvent<T>(this PropertyChangedBase t, T? oldValue, T? newValue, PropertyChangedEventHandler handler) where T : INotifyPropertyChanged
         {
             if (oldValue is not null)
                 oldValue.PropertyChanged -= handler;
