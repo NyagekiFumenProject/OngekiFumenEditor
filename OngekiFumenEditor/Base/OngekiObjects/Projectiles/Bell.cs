@@ -125,6 +125,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
                 ShooterValue = from.ShooterValue;
                 Speed = from.Speed;
                 TargetValue = from.TargetValue;
+                SizeValue = from.SizeValue;
             }
             else {
                 ReferenceBulletPallete = from.ReferenceBulletPallete;
