@@ -140,7 +140,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
                 ShooterValue: Shooter.Center,
                 Speed: 1,
                 SizeValue: BulletSize.Normal,
-                TargetValue: Target.Player
+                TargetValue: Target.FixField
             };
         }
     }
