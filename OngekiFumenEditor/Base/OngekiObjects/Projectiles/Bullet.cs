@@ -105,7 +105,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
                 Set(ref field, value);
                 NotifyOfPropertyChange(() => IsEnableSoflan);
             }
-        } = Target.Player;
+        } = Target.FixField;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]

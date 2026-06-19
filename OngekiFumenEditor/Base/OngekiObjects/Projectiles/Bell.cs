@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             get => ReferenceBulletPallete?.ShooterValue ?? field;
             set => Set(ref field, value);
-        } = Shooter.Center;
+        } = Shooter.TargetHead;
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
@@ -137,7 +137,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             {
                 PlaceOffset: 0,
                 RandomOffsetRange: 0,
-                ShooterValue: Shooter.Center,
+                ShooterValue: Shooter.TargetHead,
                 Speed: 1,
                 SizeValue: BulletSize.Normal,
                 TargetValue: Target.FixField
