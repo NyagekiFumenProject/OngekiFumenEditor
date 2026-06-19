@@ -136,6 +136,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         {
             return this is
             {
+                ReferenceBulletPallete: null,
                 PlaceOffset: 0,
                 RandomOffsetRange: 0,
                 ShooterValue: Shooter.TargetHead,
