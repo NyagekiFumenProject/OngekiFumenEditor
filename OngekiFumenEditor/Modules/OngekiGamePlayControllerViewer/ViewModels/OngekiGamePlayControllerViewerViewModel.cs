@@ -402,6 +402,9 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public async Task<bool> IsPlaying()
         {
+            if (ConnectStatus != ConnectStatus.Disconnected)
+                return false;
+
             var play = await RequestRemoteService<IPlayingRpcService>();
             return PlayStatus.Playing == await play.GetPlayStatus().StartValueTask();
         }
