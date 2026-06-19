@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Base.Attributes;
+﻿using System;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using System.Collections.Generic;
@@ -77,33 +78,28 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
 
         [ObjectPropertyBrowserShow]
         [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
-        public Target TargetValue
-        {
-            get => ReferenceBulletPallete?.TargetValue ?? field;
-            set
-            {
-                Set(ref field, value);
-                NotifyOfPropertyChange(() => IsEnableSoflan);
-            }
-        } = Target.FixField;
-
-        [ObjectPropertyBrowserShow]
-        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public Shooter ShooterValue
         {
             get => ReferenceBulletPallete?.ShooterValue ?? field;
             set => Set(ref field, value);
         } = Shooter.TargetHead;
 
-        [ObjectPropertyBrowserShow]
-        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
+        [ObjectPropertyBrowserHide] // SizeValue has no effect on bells
         public BulletSize SizeValue
         {
             get => ReferenceBulletPallete?.SizeValue ?? field;
             set => Set(ref field, value);
         } = BulletSize.Normal;
 
-        public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
+        [ObjectPropertyBrowserHide] // TargetValue has no effect on Bells
+        public Target TargetValue
+        {
+            get => ReferenceBulletPallete?.TargetValue ?? field;
+            set => Set(ref field, value);
+        } = Target.FixField;
+
+        // Unlike bullets, bells cannot target the player so soflan always applies to them
+        public bool IsEnableSoflan => true;
 
         public BulletType TypeValue => BulletType.Circle;
 
