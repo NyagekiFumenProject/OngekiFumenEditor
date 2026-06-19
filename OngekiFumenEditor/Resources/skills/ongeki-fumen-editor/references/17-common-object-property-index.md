@@ -59,11 +59,11 @@ Use this page after choosing an object family but before writing the script. It 
 
 * `Bullet`:
   common fields are `TGrid`, `XGrid`, `ReferenceBulletPallete`, and `BulletDamageTypeValue`.
-  `ReferenceBulletPallete` is nullable; `null` means local mode — the bullet's own `localSpeed`, `localPlaceOffset`, `localTargetValue`, `localShooterValue`, `localSizeValue`, and `localRandomOffsetRange` are used directly.
+  `Speed`, `PlaceOffset`, `TargetValue`, `ShooterValue`, `SizeValue`, `TypeValue`, and `RandomOffsetRange` each store their own configured value. `ReferenceBulletPallete` is nullable; when set, the palette's parameters override these configured values when the palette is not null.
 
 * `Bell`:
   common fields are `TGrid`, `XGrid`, and `ReferenceBulletPallete`.
-  `ReferenceBulletPallete` is nullable; `null` means local mode — bell-local `localSpeed`, `localPlaceOffset`, `localTargetValue`, `localShooterValue`, `localSizeValue`, and `localRandomOffsetRange` are used directly.
+  same override behavior as `Bullet`: `Speed`, `PlaceOffset`, `TargetValue`, `ShooterValue`, and `SizeValue` are overridden by the palette's parameters while `ReferenceBulletPallete` is set.
 
 ## Connectable Paths
 
