@@ -198,7 +198,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
             {
                 // The default bell palette gets created during standardization if a bell has default projectile properties.
                 // The fumen doesn't need it, so we skip it
-                if (bpl.StrID == Bell.OngekiDefaultBellPaletteName)
+                if (bpl is StandardizedDefaultBellBulletPalette)
                     continue;
 
                 var shoot = bpl.ShooterValue switch
