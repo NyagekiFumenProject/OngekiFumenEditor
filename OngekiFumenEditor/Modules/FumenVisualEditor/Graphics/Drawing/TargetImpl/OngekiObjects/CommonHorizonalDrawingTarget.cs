@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     bucket = ObjectPool.GetPooledList<RegisterDrawingInfo>();
                     buckets[key] = bucket;
                 }
-                bucket.Add(new RegisterDrawingInfo(obj, target.ConvertToY_DefaultSoflanGroup(obj.TGrid)));
+                bucket.Add(new RegisterDrawingInfo(obj, target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid)));
             }
 
             foreach (var kv in buckets)

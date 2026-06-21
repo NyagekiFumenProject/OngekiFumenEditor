@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 minTGrid = TGrid.Zero;
             var durationTotalGrid = maxTGrid.TotalGrid - minTGrid.TotalGrid;
 
-            var y = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
+            var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(maxTGrid);
             using var circles = ObjectPool.GetPooledList<CircleInstance>();
 
             void drawColorCircle(float progress, Vector2 pos, Vector4 solidColor, float radius, bool showHollow = true)

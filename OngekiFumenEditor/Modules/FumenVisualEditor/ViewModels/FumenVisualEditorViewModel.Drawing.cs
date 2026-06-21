@@ -645,12 +645,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     }
 
     public double ConvertToY(double tGridUnit, SoflanList soflanList)
-    {
-        var worldY = convertToY(tGridUnit, this, soflanList);
-        return CurrentDrawingTargetContext is { } drawingTargetContext
-            ? worldY - drawingTargetContext.ViewRelativeOriginY
-            : worldY;
-    }
+        => convertToY(tGridUnit, this, soflanList);
 
     public bool CheckVisible(TGrid tGrid)
     {

@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, SoflanList soflanList, Vector4? specifyColor = default)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridTotalUnit, soflanList);
+                var y = (float)target.ConvertToViewRelativeY(tGridTotalUnit, soflanList);
 
                 polygonVertices.Add(new PolygonVertex(new(x, y), Vector4.One));
                 polygonVertices.Add(new PolygonVertex(new(x + offsetX, y), colorF));

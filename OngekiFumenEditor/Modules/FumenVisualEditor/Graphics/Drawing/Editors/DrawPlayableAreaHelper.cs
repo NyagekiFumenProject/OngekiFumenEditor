@@ -203,7 +203,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 void appendPoint2(IList<Vector2> list, float totalXGrid, float totalTGrid)
                 {
                     var px = (float)XGridCalculator.ConvertXGridToX(totalXGrid / XGrid.DEFAULT_RES_X, target.Editor);
-                    var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
+                    var py = (float)target.ConvertToViewRelativeY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
 
                     appendPoint3(list, px, py, list.Count);
                 }
@@ -356,8 +356,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .Where(x => x.LaneType == type)
                             .Where(x =>
                             {
-                                var laneMinY = target.ConvertToY(x.MinTGrid, soflanGroup);
-                                var laneMaxY = target.ConvertToY(x.MaxTGrid, soflanGroup);
+                                var laneMinY = target.ConvertToViewRelativeY(x.MinTGrid, soflanGroup);
+                                var laneMaxY = target.ConvertToViewRelativeY(x.MaxTGrid, soflanGroup);
 
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
@@ -377,7 +377,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         {
                             var cur = itor.Current.pos;
 
-                            var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                            var curPy = (float)target.ConvertToViewRelativeY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                             if (/*cur.Y > tGrid.TotalGrid*/curPy > actualY)
                             {
@@ -389,7 +389,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                                    var prevPy = (float)target.ConvertToViewRelativeY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                                     var nowPy = actualY;
                                     var nowPx = (float)MathUtils.CalculateXFromTwoPointFormFormula(nowPy, prevPx, prevPy, curPx, curPy);
@@ -460,7 +460,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (fieldFlag.HasFlag(FieldRangeParam.LastRange) && currentTGrid <= maxTGrid)
                 {
-                    var maxY = (float)target.ConvertToY(maxTGrid, soflanGroup);
+                    var maxY = (float)target.ConvertToViewRelativeY(maxTGrid, soflanGroup);
                     var actualMaxY = target.CurrentDrawingTargetContext.ViewRelativeRect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
@@ -475,7 +475,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (fieldFlag.HasFlag(FieldRangeParam.FirstRange) && minTGrid <= currentTGrid)
                 {
-                    var minY = (float)target.ConvertToY(minTGrid, soflanGroup);
+                    var minY = (float)target.ConvertToViewRelativeY(minTGrid, soflanGroup);
                     var actualMinY = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;

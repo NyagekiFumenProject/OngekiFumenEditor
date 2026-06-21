@@ -97,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
             var soflanList = specifySoflanList ?? target.Editor._cacheSoflanGroupRecorder.GetCache(tap);
-            var y = target.ConvertToY(tap.TGrid, soflanList);
+            var y = target.ConvertToViewRelativeY(tap.TGrid, soflanList);
 
             var pos = new Vector2((float)x, (float)y);
             normalList[texture].Add((size, pos, 0f, Vector4.One));

@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (!(refCurve.IsSelected || refCurve.IsAnyControlSelecting || isAlwaysShow))
                     continue;
 
-                var y = (float)target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
+                var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid);
                 var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
                 var point = new CtrlPoint(y, x, obj);
 
@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         ((hash & 0xFF) ^ alpha) / 255f / 2 + 0.5f,
                         1f);
 
-                    var ry = (float)target.ConvertToY_DefaultSoflanGroup(refConnectableObject.TGrid);
+                    var ry = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(refConnectableObject.TGrid);
                     var rx = (float)XGridCalculator.ConvertXGridToX(refConnectableObject.XGrid, target.Editor);
                     lineVertices.Add(new LineVertex(new(rx, ry), Transparent, LineDash));
                     lineVertices.Add(new LineVertex(new(rx, ry), color, LineDash));
@@ -114,7 +114,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         lineVertices.Add(new LineVertex(new(items[i].X, items[i].Y), color, LineDash));
 
                     var parentConnectableObject = refConnectableObject.PrevObject;
-                    var rpy = (float)target.ConvertToY_DefaultSoflanGroup(parentConnectableObject.TGrid);
+                    var rpy = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(parentConnectableObject.TGrid);
                     var rpx = (float)XGridCalculator.ConvertXGridToX(parentConnectableObject.XGrid, target.Editor);
                     lineVertices.Add(new LineVertex(new(rpx, rpy), color, LineDash));
                     lineVertices.Add(new LineVertex(new(rpx, rpy), Transparent, LineDash));

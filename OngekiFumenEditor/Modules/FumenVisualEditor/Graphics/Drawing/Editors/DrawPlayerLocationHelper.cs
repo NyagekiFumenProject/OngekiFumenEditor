@@ -58,7 +58,7 @@ public class DrawPlayerLocationHelper
         var tGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-        var y = target.ConvertToY(tGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
+        var y = target.ConvertToViewRelativeY(tGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
 
         arr[0].position = new Vector2((float)x, (float)y);
         arr[0].size = size;

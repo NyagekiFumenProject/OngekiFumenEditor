@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             var x = (float)XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
             var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-            var y = (float)target.ConvertToY(obj.TGrid, soflanList);
+            var y = (float)target.ConvertToViewRelativeY(obj.TGrid, soflanList);
             var pos = new Vector2(x, y);
 
             var vertics = cachedSvgRenderDataManager.GetRenderData(target, obj, out var isCached, out var bound);
