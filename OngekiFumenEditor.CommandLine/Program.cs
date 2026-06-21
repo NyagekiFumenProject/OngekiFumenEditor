@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 
 namespace OngekiFumenEditor.CommandLine
@@ -8,6 +9,8 @@ namespace OngekiFumenEditor.CommandLine
         [STAThread]
         static int Main(string[] args)
         {
+            Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
+
             Assembly assembly;
             try
             {
