@@ -1602,7 +1602,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (!drawingContexts.TryGetValue(0, out var drwaingContext))
                     return string.Empty;
                 var canvasX = pos.X;
-                var canvasY = drwaingContext.ViewRelativeRect.MaxY - pos.Y;
+                var canvasY = drwaingContext.WorldRect.MaxY - pos.Y;
                 CurrentCursorPosition = new(canvasX, canvasY);
 
                 var tGrid = default(TGrid);
@@ -1631,7 +1631,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var canvasX = pos.X;
                 var persentY = pos.Y / ViewHeight;
-                var drwaingY = drawingTargetContext.ViewRelativeRect.MaxY - drawingTargetContext.ViewRelativeRect.Height * persentY;
+                var drwaingY = drawingTargetContext.WorldRect.MaxY - drawingTargetContext.WorldRect.Height * persentY;
 
                 var tGrid = default(TGrid);
                 if (IsDesignMode)
