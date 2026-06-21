@@ -84,6 +84,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             set => Set(ref field, value);
         } = Shooter.TargetHead;
 
+        [ObjectPropertyBrowserShow]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
+        public Target TargetValue
+        {
+            get => ReferenceBulletPallete?.TargetValue ?? field;
+            set => Set(ref field, value);
+        } = Target.FixField;
+
         [ObjectPropertyBrowserHide] // SizeValue has no effect on bells
         public BulletSize SizeValue
         {
@@ -91,15 +99,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             set => Set(ref field, value);
         } = BulletSize.Normal;
 
-        [ObjectPropertyBrowserHide] // TargetValue has no effect on Bells
-        public Target TargetValue
-        {
-            get => ReferenceBulletPallete?.TargetValue ?? field;
-            set => Set(ref field, value);
-        } = Target.FixField;
-
-        // Unlike bullets, bells cannot target the player so soflan always applies to them
-        public bool IsEnableSoflan => true;
+        public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
         public BulletType TypeValue => BulletType.Circle;
 
