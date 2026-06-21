@@ -7,13 +7,5 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
     [ToolboxItem(typeof(FumenVisualEditorViewModel), "Bullet", "Ongeki Objects")]
-    public class BulletToolboxGenerator : ToolboxGenerator<Bullet>
-    {
-        public override OngekiObjectBase CreateDisplayObject()
-        {
-            var bullet = base.CreateDisplayObject() as Bullet;
-            bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-            return bullet;
-        }
-    }
+    public class BulletToolboxGenerator : ToolboxGenerator<Bullet>;
 }

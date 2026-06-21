@@ -1,50 +1,40 @@
-﻿using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+﻿using System;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
-using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
 {
     public partial class Bell : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
+        public const string OngekiDefaultBellPaletteName = "--";
 
         public static string CommandName => "BEL";
         public static string CustomCommandName => "[CUSTOM_BEL]";
 
         public override string IDShortName => CommandName;
 
-        public Bell()
-        {
-            ReferenceBulletPallete = null;
-        }
-
-        bool IsUsePalleteValue => ReferenceBulletPallete != null && ReferenceBulletPallete != BulletPallete.DummyCustomPallete;
-        bool IsUseLocalCustomValue => ReferenceBulletPallete == BulletPallete.DummyCustomPallete;
-
-        private BulletPallete referenceBulletPallete;
         [LocalizableObjectPropertyBrowserAlias("BulletPalleteDisplayName")]
-        public BulletPallete ReferenceBulletPallete
+        public BulletPallete? ReferenceBulletPallete
         {
-            get { return referenceBulletPallete; }
+            get;
             set
             {
                 //Log.LogDebug($"bell(id:{Id})'s pallete has been changed from {referenceBulletPallete?.StrID} to {value?.StrID}");
-                this.RegisterOrUnregisterPropertyChangeEvent(referenceBulletPallete, value, ReferenceBulletPallete_PropertyChanged);
-                Set(ref referenceBulletPallete, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(field, value, ReferenceBulletPallete_PropertyChanged);
+                Set(ref field, value);
 
                 NotifyOfPropertyChange(() => Speed);
                 NotifyOfPropertyChange(() => PlaceOffset);
                 NotifyOfPropertyChange(() => TargetValue);
                 NotifyOfPropertyChange(() => ShooterValue);
                 NotifyOfPropertyChange(() => RandomOffsetRange);
-                NotifyOfPropertyChange(() => SizeValue);
                 NotifyOfPropertyChange(() => IsEnableSoflan);
             }
         }
 
-        private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void ReferenceBulletPallete_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -62,112 +52,53 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             }
         }
 
-        private float localSpeed = 1f;
         [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public float Speed
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.Speed : (IsUseLocalCustomValue ? localSpeed : 1f);
-            set
-            {
-                Set(ref localSpeed, value);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
+            get => ReferenceBulletPallete?.Speed ?? field;
+            set => Set(ref field, value);
+        } = 1;
 
-        private int localRandomOffsetRange = 0;
         [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public int RandomOffsetRange
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.RandomOffsetRange : (IsUseLocalCustomValue ? localRandomOffsetRange : 0);
-            set
-            {
-                Set(ref localRandomOffsetRange, value);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
+            get => ReferenceBulletPallete?.RandomOffsetRange ?? field;
+            set => Set(ref field, value);
+        } = 0;
 
-        private int localPlaceOffset = 0;
         [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public int PlaceOffset
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.PlaceOffset : (IsUseLocalCustomValue ? localPlaceOffset : 0);
-            set
-            {
-                Set(ref localPlaceOffset, value);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
+            get => ReferenceBulletPallete?.PlaceOffset ?? field;
+            set => Set(ref field, value);
+        } = 0;
 
-        private Target localTargetValue = Target.FixField;
         [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
-        public Target TargetValue
-        {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.TargetValue : (IsUseLocalCustomValue ? localTargetValue : Target.FixField);
-            set
-            {
-                Set(ref localTargetValue, value);
-                NotifyOfPropertyChange(() => IsEnableSoflan);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
-
-        private Shooter localShooterValue = Shooter.TargetHead;
-        [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public Shooter ShooterValue
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.ShooterValue : (IsUseLocalCustomValue ? localShooterValue : Shooter.TargetHead);
-            set
-            {
-                Set(ref localShooterValue, value);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
+            get => ReferenceBulletPallete?.ShooterValue ?? field;
+            set => Set(ref field, value);
+        } = Shooter.TargetHead;
 
-        private BulletSize localSizeValue = BulletSize.Normal;
         [ObjectPropertyBrowserShow]
-        [BellPropertyBrowserReadOnlyForPalleteIsNotDummyCustom]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
+        public Target TargetValue
+        {
+            get => ReferenceBulletPallete?.TargetValue ?? field;
+            set => Set(ref field, value);
+        } = Target.FixField;
+
+        [ObjectPropertyBrowserHide] // SizeValue has no effect on bells
         public BulletSize SizeValue
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.SizeValue : (IsUseLocalCustomValue ? localSizeValue : BulletSize.Normal);
-            set
-            {
-                Set(ref localSizeValue, value);
-                if (ReferenceBulletPallete == null)
-                {
-                    //auto set pallete to dummy if value is set and current pallete is null
-                    ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-                }
-            }
-        }
+            get => ReferenceBulletPallete?.SizeValue ?? field;
+            set => Set(ref field, value);
+        } = BulletSize.Normal;
 
-        /// <summary>
-        /// 锟角凤拷锟杰碉拷锟斤拷锟斤拷影锟斤拷
-        /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
         public BulletType TypeValue => BulletType.Circle;
@@ -184,15 +115,31 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             if (fromObj is not Bell from)
                 return;
 
-            ReferenceBulletPallete = from.ReferenceBulletPallete;
+            if (from.ReferenceBulletPallete is null) {
+                PlaceOffset = from.PlaceOffset;
+                RandomOffsetRange = from.RandomOffsetRange;
+                ShooterValue = from.ShooterValue;
+                Speed = from.Speed;
+                TargetValue = from.TargetValue;
+                SizeValue = from.SizeValue;
+            }
+            else {
+                ReferenceBulletPallete = from.ReferenceBulletPallete;
+            }
+        }
 
-            localPlaceOffset = from.localPlaceOffset;
-            localRandomOffsetRange = from.localRandomOffsetRange;
-            localShooterValue = from.localShooterValue;
-            localSizeValue = from.localSizeValue;
-            localSpeed = from.localSpeed;
-            localTargetValue = from.localTargetValue;
+        public bool IsOngekiDefaultBell()
+        {
+            return this is
+            {
+                ReferenceBulletPallete: null,
+                PlaceOffset: 0,
+                RandomOffsetRange: 0,
+                ShooterValue: Shooter.TargetHead,
+                Speed: 1,
+                SizeValue: BulletSize.Normal,
+                TargetValue: Target.FixField
+            };
         }
     }
 }
-

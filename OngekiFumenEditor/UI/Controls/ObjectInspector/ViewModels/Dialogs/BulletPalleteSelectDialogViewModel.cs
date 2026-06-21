@@ -10,9 +10,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs
 {
     public class BulletPalleteSelectDialogViewModel : Screen
     {
-        private BulletPallete selectedPallete;
-
-        public BulletPalleteSelectDialogViewModel(IEnumerable<BulletPallete> list, BulletPallete initSelectedPallete)
+        public BulletPalleteSelectDialogViewModel(IEnumerable<BulletPallete> list, BulletPallete? initSelectedPallete)
         {
             BulletPalleteList = list;
             SelectedPallete = initSelectedPallete;
@@ -20,10 +18,10 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs
 
         public IEnumerable<BulletPallete> BulletPalleteList { get; }
 
-        public BulletPallete SelectedPallete
+        public BulletPallete? SelectedPallete
         {
-            get => selectedPallete;
-            set => Set(ref selectedPallete, value);
+            get;
+            set => Set(ref field, value);
         }
 
         public async void OnItemDoubleClick(BulletPallete bulletPallete)

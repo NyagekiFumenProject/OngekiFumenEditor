@@ -56,16 +56,14 @@ Use this page after choosing an object family but before writing the script. It 
 
 * `BulletPallete`:
   common fields are `StrID`, `EditorName`, `ShooterValue`, `TargetValue`, `PlaceOffset`, `RandomOffsetRange`, `SizeValue`, `TypeValue`, and `Speed`.
-  `DummyCustomPallete` is a sentinel palette object. Do not mutate it directly.
 
 * `Bullet`:
   common fields are `TGrid`, `XGrid`, `ReferenceBulletPallete`, and `BulletDamageTypeValue`.
-  if no real palette is assigned, local `Speed`, `PlaceOffset`, `TargetValue`, `ShooterValue`, `SizeValue`, and `RandomOffsetRange` become meaningful.
+  `Speed`, `PlaceOffset`, `TargetValue`, `ShooterValue`, `SizeValue`, `TypeValue`, and `RandomOffsetRange` each store their own configured value. `ReferenceBulletPallete` is nullable; when set, the palette's parameters override these configured values when the palette is not null.
 
 * `Bell`:
   common fields are `TGrid`, `XGrid`, and `ReferenceBulletPallete`.
-  bell-local overrides also use `Speed`, `PlaceOffset`, `TargetValue`, `ShooterValue`, `SizeValue`, and `RandomOffsetRange`.
-  setting those locals when `ReferenceBulletPallete` is `null` will switch the bell to `DummyCustomPallete`.
+  same override behavior as `Bullet`: `Speed`, `PlaceOffset`, `TargetValue`, `ShooterValue`, and `SizeValue` are overridden by the palette's parameters while `ReferenceBulletPallete` is set.
 
 ## Connectable Paths
 

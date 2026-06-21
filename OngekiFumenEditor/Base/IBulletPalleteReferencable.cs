@@ -5,6 +5,6 @@ namespace OngekiFumenEditor.Base
 {
     public interface IBulletPalleteReferencable
     {
-        BulletPallete ReferenceBulletPallete { get; set; }
+        BulletPallete? ReferenceBulletPallete { get; set; }
     }
 }
