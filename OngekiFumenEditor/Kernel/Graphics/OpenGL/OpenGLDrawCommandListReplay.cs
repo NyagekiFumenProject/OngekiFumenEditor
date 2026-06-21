@@ -140,7 +140,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         {
             return new DrawingTargetContext
             {
-                Rect = new VisibleRect(new Vector2(frameState.ViewWidth, 0), new Vector2(0, frameState.ViewHeight)),
+                ViewRelativeRect = new VisibleRect(new Vector2(frameState.ViewWidth, 0), new Vector2(0, frameState.ViewHeight)),
                 ViewWidth = frameState.ViewWidth,
                 ViewHeight = frameState.ViewHeight,
                 RenderScaleX = frameState.RenderScaleX,
@@ -164,7 +164,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                     SetCurrentProjectionMatrix(setCurrentProjectionMatrixCommand.Matrix);
                     break;
                 case SetCurrentRectCommand setCurrentRectCommand:
-                    drawingContext.CurrentDrawingTargetContext.Rect = setCurrentRectCommand.Rect;
+                    drawingContext.CurrentDrawingTargetContext.ViewRelativeRect = setCurrentRectCommand.Rect;
                     break;
                 case PushModelMatrixCommand pushModelMatrixCommand:
                     modelMatrixStack.Push(currentModelMatrix);

@@ -89,7 +89,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                     var y = (float)actualItems[0].Y;
                     using var lineVertices = ObjectPool.GetPooledList<LineVertex>();
-                    var per = 1.0f * target.CurrentDrawingTargetContext.Rect.Width / actualItems.Count;
+                    var per = 1.0f * target.CurrentDrawingTargetContext.ViewRelativeRect.Width / actualItems.Count;
                     for (var i = 0; i < actualItems.Count; i++)
                     {
                         var c = colors[actualItems[i].TimelineObject.IDShortName];

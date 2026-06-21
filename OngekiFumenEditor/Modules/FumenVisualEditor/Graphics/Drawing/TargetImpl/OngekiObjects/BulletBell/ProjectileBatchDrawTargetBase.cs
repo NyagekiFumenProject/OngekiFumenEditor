@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             var currentTGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var rect = target.CurrentDrawingTargetContext.Rect;
+            var rect = target.CurrentDrawingTargetContext.ViewRelativeRect;
             var rectMinX = rect.MinX;
             var rectMaxX = rect.MaxX;
             var rectMinY = rect.MinY;

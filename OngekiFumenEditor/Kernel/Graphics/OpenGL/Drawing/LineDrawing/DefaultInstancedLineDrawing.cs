@@ -1,4 +1,4 @@
-﻿/*
+/*
 Code copied and modified from https://github.com/mhalber/Lines/blob/master/instancing_lines.h
 */
 
@@ -225,7 +225,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
             GL.BindVertexArray(vao);
             var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
             shader.PassUniform(mvp_loc, mvpMatrix);
-            shader.PassUniform(viewport_size_loc, new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height));
+            shader.PassUniform(viewport_size_loc, new Vector2(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height));
             shader.PassUniform(aa_radius_loc, aa_radius_val);
         }
 

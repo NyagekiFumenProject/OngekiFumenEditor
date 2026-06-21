@@ -57,8 +57,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
             if (lineWidth <= 0)
                 return;
 
-            var viewportWidth = target.CurrentDrawingTargetContext.Rect.Width;
-            var viewportHeight = target.CurrentDrawingTargetContext.Rect.Height;
+            var viewportWidth = target.CurrentDrawingTargetContext.ViewRelativeRect.Width;
+            var viewportHeight = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
             if (viewportWidth <= 0 || viewportHeight <= 0)
                 return;
 

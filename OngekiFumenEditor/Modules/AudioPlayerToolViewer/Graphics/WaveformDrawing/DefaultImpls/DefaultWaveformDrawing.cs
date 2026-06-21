@@ -58,8 +58,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
-            var width = target.CurrentDrawingTargetContext.Rect.Width;
-            var height = target.CurrentDrawingTargetContext.Rect.Height;
+            var width = target.CurrentDrawingTargetContext.ViewRelativeRect.Width;
+            var height = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
             var curTime = target.CurrentTime;
             var fromTime = curTime - TimeSpan.FromMilliseconds(target.CurrentTimeXOffset * target.DurationMsPerPixel);

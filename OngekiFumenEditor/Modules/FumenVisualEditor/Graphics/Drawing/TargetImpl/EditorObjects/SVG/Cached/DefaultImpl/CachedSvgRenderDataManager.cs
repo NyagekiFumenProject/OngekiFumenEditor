@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 			if (!(data.SvgPrefab?.ProcessingVectorScene?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
 				return false;
 
-			if (new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height) != data.ViewSize)
+			if (new Vector2(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height) != data.ViewSize)
 				return false;
 
 			return true;
@@ -123,7 +123,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 				var genData = GenerateLineVertexData(svgPrefab);
 				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingVectorScene?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
 				cachedItem.GeneratedPointsPool = genData;
-				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
+				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height);
 				cachedItem.Bound = svgPrefab.ProcessingVectorScene is VectorScene scene
 					? new Rect(scene.Bounds.X, scene.Bounds.Y, scene.Bounds.Width, scene.Bounds.Height)
 					: default;

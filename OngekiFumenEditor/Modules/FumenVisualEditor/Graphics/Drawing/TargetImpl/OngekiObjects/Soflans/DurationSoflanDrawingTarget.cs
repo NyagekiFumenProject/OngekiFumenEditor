@@ -97,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void DrawCommonSoflanStart(Soflan soflan, int queryPlaceholdPosIndex)
             {
                 var color = GetSoflanGroupColor(soflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
                 var placeholdY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.TGrid);
 
                 var placeholdLeftX = placeholdCenterX - width / 2;
@@ -114,7 +114,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 DrawCommonSoflanStart(soflan, queryPlaceholdPosIndex);
 
                 var color = GetSoflanGroupColor(soflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
                 var startCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.TGrid);
                 var endCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.EndTGrid);
 
@@ -153,7 +153,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 DrawCommonSoflanStart(soflan, queryPlaceholdPosIndex);
 
                 var color = GetSoflanGroupColor(soflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
                 var startCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.TGrid);
                 var endCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.EndTGrid);
 
@@ -171,7 +171,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void DrawKeyframeSoflan(KeyframeSoflan keyframeSoflan, int queryPlaceholdPosIndex)
             {
                 var color = GetSoflanGroupColor(keyframeSoflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
                 var placeholdY = (float)target.ConvertToY_DefaultSoflanGroup(keyframeSoflan.TGrid);
 
                 var placeholdLeftX = placeholdCenterX - width / 2;

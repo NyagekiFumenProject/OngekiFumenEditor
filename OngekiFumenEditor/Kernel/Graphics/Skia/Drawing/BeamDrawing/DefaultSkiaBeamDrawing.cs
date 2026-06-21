@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System;
@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
 
             var texture = (SkiaImage)tex;
             var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
-            var height = target.CurrentDrawingTargetContext.Rect.Height;
+            var height = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
             var alpha = MathUtils.SmoothStep(-1, 0, progress) * (1 - MathUtils.SmoothStep(1, 2, progress));
             var actualWidth = MathUtils.SmoothStep(-1, 0, progress) * (1 - MathUtils.SmoothStep(1, 2f, progress)) * width;

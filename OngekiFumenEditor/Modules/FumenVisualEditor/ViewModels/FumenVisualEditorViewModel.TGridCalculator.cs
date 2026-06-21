@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode()
-            => TGridCalculator.GetVisbleTimelines_PreviewMode(CurrentDrawingTargetContext.CurrentSoflanList, Fumen.BpmList, Fumen.MeterChanges, CurrentDrawingTargetContext.Rect.MinY, CurrentDrawingTargetContext.Rect.MaxY, Setting.JudgeLineOffsetY, Setting.BeatSplit, Setting.VerticalDisplayScale);
+            => TGridCalculator.GetVisbleTimelines_PreviewMode(CurrentDrawingTargetContext.CurrentSoflanList, Fumen.BpmList, Fumen.MeterChanges, CurrentDrawingTargetContext.ViewRelativeRect.MinY, CurrentDrawingTargetContext.ViewRelativeRect.MaxY, Setting.JudgeLineOffsetY, Setting.BeatSplit, Setting.VerticalDisplayScale);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_DesignMode()

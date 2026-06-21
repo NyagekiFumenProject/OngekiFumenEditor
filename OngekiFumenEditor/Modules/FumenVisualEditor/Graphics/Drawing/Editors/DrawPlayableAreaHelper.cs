@@ -75,11 +75,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private void DrawAudioDuration(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.Editor.TotalDurationHeight;
+            var y = (float)(target.Editor.TotalDurationHeight - target.CurrentDrawingTargetContext.ViewRelativeOriginY);
 
             var color = new Vector4(1, 0, 0, 1);
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
-            vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
+            vertices[1] = new(new(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, y), color, VertexDash.Solider);
 
             builder.DrawSimpleLines(vertices, 3);
         }
@@ -347,7 +347,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
-                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualY);
+                    var actualWorldY = actualY + target.CurrentDrawingTargetContext.ViewRelativeOriginY;
+                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualWorldY);
 
                     isPickLane = false;
                     var pickables = tGrids.SelectMany(tGrid => fumen.Lanes
@@ -460,7 +461,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (fieldFlag.HasFlag(FieldRangeParam.LastRange) && currentTGrid <= maxTGrid)
                 {
                     var maxY = (float)target.ConvertToY(maxTGrid, soflanGroup);
-                    var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
+                    var actualMaxY = target.CurrentDrawingTargetContext.ViewRelativeRect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
                     IEnumerable<float> calcYArr = maxDiff > 0 ? [actualMaxY, maxY] : [maxY, actualMaxY];
@@ -475,7 +476,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (fieldFlag.HasFlag(FieldRangeParam.FirstRange) && minTGrid <= currentTGrid)
                 {
                     var minY = (float)target.ConvertToY(minTGrid, soflanGroup);
-                    var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
+                    var actualMinY = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
                     IEnumerable<float> calcYArr = minDiff > 0 ? [minY, actualMinY] : [actualMinY, minY];
@@ -1067,7 +1068,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         [Conditional("PLAYFIELD_DEBUG")]
         private void debugDrawIntersectionPoint(IDrawingContext target, IDrawCommandListBuilder builder, int leftIdx, int rightIdx, Vector2 intersectionPoint)
         {
-            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX*/true;
+            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.ViewRelativeRect.CenterX*/true;
             builder.DrawCircle(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
             builder.DrawString(
                 $"[{leftIdx}, {rightIdx}]",
@@ -1133,4 +1134,3 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
     }
 }
-

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OpenTK.Graphics.OpenGL;
@@ -80,8 +80,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
         {
             this.target = target;
 
-            var viewWidth = target.CurrentDrawingTargetContext.Rect.Width;
-            var viewHeight = target.CurrentDrawingTargetContext.Rect.Height;
+            var viewWidth = target.CurrentDrawingTargetContext.ViewRelativeRect.Width;
+            var viewHeight = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
             shader.Begin();
             GL.BindVertexArray(vao);

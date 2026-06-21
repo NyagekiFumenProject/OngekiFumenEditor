@@ -166,7 +166,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
         }
 
         /// <summary>
-        /// 锟角凤拷锟杰碉拷锟斤拷锟斤拷影锟斤拷
+        /// 是否受到变速影响
         /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
