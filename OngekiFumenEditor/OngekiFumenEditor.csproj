@@ -151,6 +151,7 @@
 		<None Remove="Resources\Icons\search.png" />
 		<None Remove="Resources\Music.xml" />
 		<None Remove="Resources\MusicSource.xml" />
+		<None Remove="Resources\Scripts\EmbbedRecommended\**\*.nyagekiScript" />
 		<None Remove="Resources\ui_jacket_0666" />
 	</ItemGroup>
 
@@ -175,6 +176,7 @@
 		<EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
 		<EmbeddedResource Include="Resources\Music.xml" />
 		<EmbeddedResource Include="Resources\MusicSource.xml" />
+		<EmbeddedResource Include="Resources\Scripts\EmbbedRecommended\**\*.nyagekiScript" />
 		<EmbeddedResource Include="Resources\suggestLayout.bin" />
 		<EmbeddedResource Include="Resources\ui_jacket_0666" />
 	</ItemGroup>

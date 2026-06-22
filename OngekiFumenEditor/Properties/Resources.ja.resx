@@ -1903,4 +1903,40 @@
   <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
     <value>譜面を生成してゲームへ反映できませんでした: {0}</value>
   </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>スクリプト(_S)</value>
+  </data>
+  <data name="NewScript" xml:space="preserve">
+    <value>新規スクリプト</value>
+  </data>
+  <data name="NewScriptToolTip" xml:space="preserve">
+    <value>新しいエディタースクリプトを作成します。</value>
+  </data>
+  <data name="RecommendedScripts" xml:space="preserve">
+    <value>推奨スクリプト</value>
+  </data>
+  <data name="RecommendedScriptsToolTip" xml:space="preserve">
+    <value>組み込みの推奨スクリプトを確認・編集用に開きます。</value>
+  </data>
+  <data name="RecentScripts" xml:space="preserve">
+    <value>最近のスクリプト</value>
+  </data>
+  <data name="RecentScriptsToolTip" xml:space="preserve">
+    <value>最近使用したスクリプトを開きます。</value>
+  </data>
+  <data name="NoScriptsFound" xml:space="preserve">
+    <value>利用可能なスクリプトがありません</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptDocumentTitleFormat" xml:space="preserve">
+    <value>[組み込み/読み取り専用]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptRecentDisplayNameFormat" xml:space="preserve">
+    <value>[組み込み]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptNotFound" xml:space="preserve">
+    <value>組み込み推奨スクリプトが見つかりません。</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
+    <value>組み込み推奨スクリプトを開けませんでした。</value>
+  </data>
 </root>

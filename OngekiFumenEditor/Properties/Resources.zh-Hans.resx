@@ -2565,4 +2565,40 @@
   <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
     <value>无法生成谱面并更新到游戏中: {0}</value>
   </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>脚本(_S)</value>
+  </data>
+  <data name="NewScript" xml:space="preserve">
+    <value>新建脚本</value>
+  </data>
+  <data name="NewScriptToolTip" xml:space="preserve">
+    <value>创建一个新的编辑器脚本。</value>
+  </data>
+  <data name="RecommendedScripts" xml:space="preserve">
+    <value>推荐脚本</value>
+  </data>
+  <data name="RecommendedScriptsToolTip" xml:space="preserve">
+    <value>打开一个内置推荐脚本以便查看和编辑。</value>
+  </data>
+  <data name="RecentScripts" xml:space="preserve">
+    <value>最近脚本</value>
+  </data>
+  <data name="RecentScriptsToolTip" xml:space="preserve">
+    <value>打开最近使用过的脚本。</value>
+  </data>
+  <data name="NoScriptsFound" xml:space="preserve">
+    <value>没有可用脚本</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptDocumentTitleFormat" xml:space="preserve">
+    <value>[内置/只读]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptRecentDisplayNameFormat" xml:space="preserve">
+    <value>[内置]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptNotFound" xml:space="preserve">
+    <value>找不到内置推荐脚本。</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
+    <value>打开内置推荐脚本失败。</value>
+  </data>
 </root>

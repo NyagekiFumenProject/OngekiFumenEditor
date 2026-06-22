@@ -6,6 +6,7 @@ namespace OngekiFumenEditor.Kernel.RecentFiles
 	{
 		IEnumerable<RecentRecordInfo> RecentRecordInfos { get; }
 		void PostRecord(RecentRecordInfo info);
+		bool CheckValid(RecentRecordInfo info);
 		void ClearAllRecords();
 	}
 }

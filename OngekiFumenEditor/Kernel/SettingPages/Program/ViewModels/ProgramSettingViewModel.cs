@@ -73,6 +73,13 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             set => Set(ref enableAssociateOgkr, value);
         }
 
+        private bool enableAssociateNyagekiScript = true;
+        public bool EnableAssociateNyagekiScript
+        {
+            get => enableAssociateNyagekiScript;
+            set => Set(ref enableAssociateNyagekiScript, value);
+        }
+
         public ProgramSettingViewModel()
         {
             ProgramUpdater = IoC.Get<IProgramUpdater>();
@@ -199,6 +206,26 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
                         Argument = "%1"
                     },
                     Description = "Ongeki Fumen File",
+                    Icon = iconFilePath,
+                });
+            }
+
+            if (EnableAssociateNyagekiScript)
+            {
+                software.Identifiers.Add(new ProgrammaticID
+                {
+                    Type = new FileType
+                    {
+                        Extension = ".nyagekiScript",
+                        ContentType = "application/sample",
+                        PerceivedType = PerceivedTypes.Application,
+                    },
+                    Command = new ShellCommand
+                    {
+                        Path = Application.ExecutablePath,
+                        Argument = "%1"
+                    },
+                    Description = "Ongeki Fumen Editor Script File",
                     Icon = iconFilePath,
                 });
             }

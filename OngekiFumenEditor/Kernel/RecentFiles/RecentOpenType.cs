@@ -4,5 +4,6 @@
 	{
 		NormalDocumentOpen,
 		CommandOpen,
+		OpenEmbeddedRecommendedScript,
 	}
 }

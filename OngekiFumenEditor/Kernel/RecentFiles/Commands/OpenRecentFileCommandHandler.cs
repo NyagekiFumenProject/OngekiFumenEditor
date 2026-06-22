@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Services;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -18,13 +19,19 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 	public class OpenRecentFileCommandHandler : ICommandListHandler<OpenRecentFileCommandListDefinition>
 	{
 		private readonly IEditorRecentFilesManager recentOpenedManager;
+		private readonly IEmbeddedRecommendedScriptService embeddedRecommendedScriptService;
 		private readonly IShell shell;
 		private readonly IEditorProvider[] editorProviders;
 
 		[ImportingConstructor]
-		public OpenRecentFileCommandHandler(IEditorRecentFilesManager recentOpenedManager, IShell shell, [ImportMany] IEditorProvider[] editorProviders)
+		public OpenRecentFileCommandHandler(
+			IEditorRecentFilesManager recentOpenedManager,
+			IEmbeddedRecommendedScriptService embeddedRecommendedScriptService,
+			IShell shell,
+			[ImportMany] IEditorProvider[] editorProviders)
 		{
 			this.recentOpenedManager = recentOpenedManager;
+			this.embeddedRecommendedScriptService = embeddedRecommendedScriptService;
 			this.shell = shell;
 			this.editorProviders = editorProviders;
 		}
@@ -38,9 +45,11 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 				var item = recentOpened.ElementAtOrDefault(i);
 				commands.Add(new Command(command.CommandDefinition)
 				{
-					Text = $"_{i + 1} {item.DisplayName} ({item.FileName})",
+					Text = item.Type == RecentOpenType.OpenEmbeddedRecommendedScript
+						? item.DisplayName
+						: $"_{i + 1} {item.DisplayName} ({item.FileName})",
 					Tag = item,
-					Enabled = File.Exists(item.FileName)
+					Enabled = recentOpenedManager.CheckValid(item)
 				});
 			}
 		}
@@ -57,6 +66,9 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 					break;
 				case RecentOpenType.CommandOpen:
 					await OpenRecentFileByCommandOpen(info);
+					break;
+				case RecentOpenType.OpenEmbeddedRecommendedScript:
+					await embeddedRecommendedScriptService.OpenScriptAsync(info.FileName);
 					break;
 				default:
 					break;
