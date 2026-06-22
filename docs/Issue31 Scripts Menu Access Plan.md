@@ -178,8 +178,13 @@ Decision for recent record validation:
 
 Decision for recent-script item display:
 
-- For ordinary filesystem script records, use the existing recent-file menu display style: `_1 DisplayName (FullPath)`.
-- Keep full filesystem paths visible for ordinary script files, consistent with the current `File > Recent Files` behavior.
+- For ordinary filesystem script records, use compact display by default.
+- If no other ordinary recent script record has the same `DisplayName`, show only the numbered `DisplayName`.
+- If another ordinary recent script record has the same `DisplayName`, include the `FullPath` portion to disambiguate.
+- Apply the same duplicate-only path display rule to the general `File > Recent Files` menu, not only to `Scripts > Recent Scripts`.
+- Keep numeric mnemonic prefixes for the general `File > Recent Files` menu.
+- Keep numeric mnemonic prefixes for ordinary user script records under `Scripts > Recent Scripts`.
+- Do not add numeric mnemonic prefixes to built-in recommended script recent records; keep their display exactly `[内置]xxxxx.nyagekiScript`.
 - For `OpenEmbeddedRecommendedScript` records, store `RecentRecordInfo.DisplayName` as `[内置]xxxxx.nyagekiScript`.
 - For `OpenEmbeddedRecommendedScript` menu items, display exactly `[内置]xxxxx.nyagekiScript`.
 - Do not show a numeric mnemonic or the embedded-resource path for built-in recent menu items.
@@ -245,7 +250,7 @@ Likely new or modified areas:
 12. Resolved: embedded recommended scripts use source path `OngekiFumenEditor/Resources/Scripts/EmbbedRecommended/*.nyagekiScript`.
 13. Resolved: built-in/read-only script documents allow in-memory editing; save still forces Save As because the embedded source cannot be overwritten.
 14. Resolved: after a built-in script is saved through Save As, the resulting user script should be added to recent records and appear in `Recent Scripts`.
-15. Resolved: ordinary `Recent Scripts` file items use `_1 DisplayName (FullPath)`; embedded recommended script items display exactly `[内置]xxxxx.nyagekiScript`.
+15. Resolved: ordinary `Recent Scripts` file items show compact `DisplayName` by default and include `FullPath` only when another ordinary recent script item has the same `DisplayName`; embedded recommended script items display exactly `[内置]xxxxx.nyagekiScript`.
 16. Resolved: do not add `Open Scripts Folder` or `Refresh Scripts Menu` in the first implementation.
 17. Resolved: `Recommended Scripts` item text should be the embedded script file name without the `.nyagekiScript` extension.
 18. Resolved: built-in script document titles keep the `.nyagekiScript` extension: `[内置/只读]xxxxx.nyagekiScript`.
@@ -266,7 +271,7 @@ Likely new or modified areas:
 - Built-in script recent entries use `DisplayName` format `[内置]xxxxx.nyagekiScript`.
 - Built-in script Save As results become ordinary user scripts and should immediately appear in `Recent Scripts`.
 - `Recent Scripts` should reuse existing recent records, including ordinary `.nyagekiScript` file records and `OpenEmbeddedRecommendedScript` records.
-- Ordinary `Recent Scripts` file item text should follow existing recent-file format `_1 DisplayName (FullPath)`.
+- Ordinary `Recent Scripts` file item text should show `DisplayName` by default and include the full path only when duplicate display names need disambiguation.
 - Embedded recommended script recent item text should be exactly `[内置]xxxxx.nyagekiScript`, with no resource path displayed.
 - `IEditorRecentFilesManager.CheckValid(...)` should replace direct file-existence checks for dynamic recent menus.
 - `Recommended Scripts` item text should be the script file name without `.nyagekiScript`.
@@ -277,3 +282,139 @@ Likely new or modified areas:
 - Implement the placement by assigning `Scripts` order `7` and moving `Assist` to order `8`.
 - `.nyagekiScript` file association should be added to the existing Program settings association UI.
 - `.nyagekiScript` file association should be checked by default and use description `Ongeki Fumen Editor Script File`.
+
+## Follow-Up: Expandable Script Record Action Menus
+
+New requested behavior:
+
+- The script records under `Recommended Scripts` and `Recent Scripts` should become expandable submenu entries.
+- Each script record submenu should expose at least:
+  - `Open Script`
+  - `Run To...`
+- `Run To...` should expose another submenu for choosing the execution target.
+
+Updated design intent:
+
+- `Recommended Scripts` and `Recent Scripts` remain the two primary script source groups.
+- The source group entries no longer directly open scripts when clicked; the user first expands a script record, then chooses an explicit action.
+- This keeps the previous safe default available through `Open Script` while making deliberate direct execution faster.
+- Direct execution must still make the target editor explicit through `Run To...` rather than silently using whichever editor happens to be active.
+- `Run To...` target submenu should contain:
+  - `Current Activing Editor`
+  - `No Editor`
+  - separator
+  - dynamic list of currently opened fumen editors
+- Final script record submenu structure:
+  - `<Script Record>`
+    - `Open Script`
+    - `Run To...`
+      - `Current Activing Editor`
+      - `No Editor`
+      - separator
+      - dynamic list of currently opened fumen editors
+- `Open Script` should be the first script-record action.
+- `Run To...` should be the second script-record action.
+- Built-in recommended script record menu text should remain the short display name without `.nyagekiScript`.
+- Confirmation `MessageBox`, result `MessageBox`, and logs should use the clearer script file name with `.nyagekiScript` when available.
+- Ordinary recent-script record menu text should show the full path only when another ordinary recent-script record has the same `DisplayName`.
+- The general `File > Recent Files` menu should follow the same duplicate-only full-path display rule.
+- Numeric mnemonic prefixes remain enabled for `File > Recent Files` and ordinary user script records in `Scripts > Recent Scripts`.
+- Built-in recommended script recent records keep no numeric mnemonic prefix.
+- `Open Script` should preserve the current open behavior.
+- For ordinary recent user scripts, `Open Script` should use `DocumentOpenHelper.TryOpenAsDocument(path)`.
+- For built-in recommended scripts, `Open Script` should use `IEmbeddedRecommendedScriptService.OpenScriptAsync(resourceName)`.
+- Moving open behavior under `Open Script` should not change recent-record posting, built-in/read-only document title behavior, or Save As behavior.
+- `Current Activing Editor` means the currently opened and activated fumen editor at execution time.
+- If the implementation surface provides a single `IEditorDocumentManager.CurrentActivatedEditor`, use that value.
+- If multiple activated editor candidates are observable, use the first candidate in the manager-provided order.
+- `Current Activing Editor` should be resolved when the user clicks that target menu item, not when the menu is populated.
+- `Current Activing Editor` and the dynamic opened-editor list should not be de-duplicated even if they resolve to the same editor instance.
+- Rationale: `Current Activing Editor` is a quick semantic target, while the dynamic list is explicit instance selection.
+- `No Editor` executes the script with a `null` target editor, matching the script editor's existing no-target option.
+- The dynamic editor list should come from `IEditorDocumentManager.GetCurrentEditors()`.
+- Dynamic editor-list menu item text should use `FumenVisualEditorViewModel.DisplayName`.
+- If an editor `DisplayName` is empty, use a clear unnamed-editor fallback text.
+- Do not append the editor file path to dynamic editor-list menu items.
+- Confirmation and result `MessageBox` target display text should use the same editor display rule.
+- If there is no current activated fumen editor, `Current Activing Editor` should be disabled.
+- If there are no opened fumen editors, the editor-list section should show a disabled empty item or be omitted; `No Editor` remains available.
+- Direct menu execution must still show a confirmation `MessageBox` before compiling/executing.
+- The confirmation message must include:
+  - the script display name that will be executed
+  - the resolved target editor instance display text
+- For `No Editor`, the target display text should clearly say that no editor target will be passed.
+- For `Current Activing Editor`, the confirmation should resolve and show the actual current editor instance at the time the command is invoked, not just the literal words `Current Activing Editor`.
+- After the confirmation dialog returns Yes, validate the resolved target editor again before executing.
+- If the target was an editor instance and it is no longer present in `IEditorDocumentManager.GetCurrentEditors()`, cancel execution, show a `MessageBox`, and write a log entry.
+- `No Editor` does not require target-existence validation.
+- Direct menu execution should show result `MessageBox` feedback after compile/execute completes.
+- Compile failure should show the compile error message and compiler diagnostics.
+- Execute completion should show the script display name, target editor display text, and success/failure result.
+- Execute failure should include the failure reason in the result `MessageBox`.
+- First implementation should not add a new global or per-script execution lock for menu-triggered execution.
+- Menu-triggered execution should remain consistent with the existing script editor run button behavior.
+- Each execution attempt should still log start and end so repeated execution can be audited.
+- Direct menu execution must also write logs.
+- Logs should include at least:
+  - script display name
+  - script source kind and source identifier, such as embedded resource name or filesystem path
+  - target editor display text
+  - compile start/result
+  - execute start/result
+  - detailed compile diagnostics or execute exception/failure reason when failed
+- Invalid script records should remain visible but disabled.
+- Invalid script records should not expose the `Open Script` or `Run To...` submenu actions.
+- Invalid examples include missing filesystem script files and embedded recommended script resource names that no longer exist in the current application build.
+- For built-in recommended scripts, menu-triggered direct execution should execute the embedded resource content from the current application build.
+- It should not execute the in-memory content of an already opened built-in script document.
+- If a user edits a built-in script and wants the edited version to be menu-runnable, they should save it as a normal user script first; it can then appear under `Recent Scripts`.
+- For ordinary recent user scripts, menu-triggered direct execution should read and execute the current filesystem content at the recorded script path.
+- It should not execute the in-memory content of an already opened script document with unsaved changes.
+- If a user wants to execute unsaved script-editor buffer changes, they should use the script editor's own run command.
+- Menu-triggered direct execution should not post or refresh recent-script records.
+- Recent-script records should only be updated when a script is explicitly opened in the script editor or saved from the script editor.
+- This applies to both ordinary filesystem scripts and built-in recommended scripts.
+
+Code facts from current implementation:
+
+- `Recommended Scripts` and `Recent Scripts` are currently implemented as flat `CommandListDefinition` lists in `Modules/EditorScriptExecutor/Commands/ScriptMenuCommandHandlers.cs`.
+- Flat list items currently execute the open behavior directly through `OpenRecommendedScriptCommandHandler.Run(...)` and `OpenRecentScriptCommandHandler.Run(...)`.
+- Gemini's current `CommandListDefinition` expansion inserts generated `CommandMenuItem` entries into the parent menu in `Gemini.Modules.MainMenu.Models.CommandMenuItem`.
+- The generated `Command` model has no child collection, and `CommandMenuItem` does not recursively attach menu groups to dynamic list results.
+- Therefore, dynamic list entries cannot become expandable submenus by only changing the current `ICommandListHandler<T>.Populate(...)` code.
+
+Likely implementation directions:
+
+1. Extend or adapt the menu model so dynamically generated script records can own child menu items.
+2. Replace the script-record portions of the menu with a custom script menu model/control path that can build nested dynamic items.
+3. If a lower-risk implementation is preferred, keep Gemini's menu definitions for the top-level `Scripts` menu and add a narrowly scoped custom dynamic nested menu builder only for the `Recommended Scripts` and `Recent Scripts` cascades.
+
+Implementation decision:
+
+- It is acceptable to modify the local Gemini dependency with a small, generic menu-model extension.
+- Preferred approach: allow dynamically populated `Command` items to carry submenu children so `CommandMenuItem` can attach them when inserting list results.
+- Keep the existing `CommandListDefinition` and `ICommandListHandler<T>` route for `Recommended Scripts` and `Recent Scripts`.
+- Do not replace the main menu with a script-specific WPF menu control.
+- The Gemini change should stay generic enough for other dynamic menu lists, but the first consumer can be the script menu.
+- Avoid changing menu sorting, command routing, key gesture handling, or the existing static menu definition model unless required by dynamic submenu support.
+
+Open design questions for this follow-up:
+
+1. Resolved: `Run To...` shows `Current Activing Editor`, `No Editor`, a separator, then the current opened editor list.
+2. Resolved: direct execution must show a confirmation `MessageBox` that includes both the script name and the resolved target editor instance.
+3. Resolved: menu-triggered compile/execute result should be displayed with `MessageBox`, and the same flow must also write detailed logs.
+4. Resolved: invalid script records remain visible as disabled leaf items and do not expose action submenus.
+5. Resolved: built-in recommended script menu execution uses the embedded resource original, not an already-open edited document buffer.
+6. Resolved: local Gemini dependency may receive a small generic dynamic-submenu extension to support expandable script records.
+7. Resolved: script record submenu structure is `Open Script` first, then `Run To...` with the agreed target submenu.
+8. Resolved: `Current Activing Editor` and the dynamic opened-editor list are not de-duplicated; if multiple activated editor candidates exist, use the first.
+9. Resolved: dynamic opened-editor menu text uses `FumenVisualEditorViewModel.DisplayName`, with an unnamed fallback and no appended path.
+10. Resolved: `Open Script` preserves the existing ordinary-script and built-in recommended-script open behavior.
+11. Resolved: ordinary recent script menu execution reads the recorded filesystem script, not an already-open unsaved document buffer.
+12. Resolved: menu-triggered direct execution does not update recent records; only script editor open/save updates recent records.
+13. Resolved: recommended script menu records keep the short name without extension, while confirmation/result/log text should use the file name with `.nyagekiScript` when available.
+14. Resolved: ordinary recent records, including both `Scripts > Recent Scripts` and `File > Recent Files`, show full path only when duplicate `DisplayName` values need disambiguation.
+15. Resolved: numeric mnemonic prefixes remain for `File > Recent Files` and ordinary user script recent records, but not for built-in recommended script recent records.
+16. Resolved: after confirmation and before execution, validate that a resolved editor target is still open; cancel with `MessageBox` and log if it was closed.
+17. Resolved: `Current Activing Editor` is resolved when clicked, not when the menu is populated.
+18. Resolved: first implementation does not add a new global or per-script execution lock for menu-triggered execution.

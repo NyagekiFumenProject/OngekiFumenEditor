@@ -2589,6 +2589,45 @@
   <data name="NoScriptsFound" xml:space="preserve">
     <value>没有可用脚本</value>
   </data>
+  <data name="OpenScript" xml:space="preserve">
+    <value>打开脚本</value>
+  </data>
+  <data name="OpenScriptToolTip" xml:space="preserve">
+    <value>在脚本编辑器中打开此脚本。</value>
+  </data>
+  <data name="RunTo" xml:space="preserve">
+    <value>运行到...</value>
+  </data>
+  <data name="RunToToolTip" xml:space="preserve">
+    <value>编译脚本并对选定目标执行。</value>
+  </data>
+  <data name="CurrentActivingEditor" xml:space="preserve">
+    <value>当前激活编辑器</value>
+  </data>
+  <data name="NoEditor" xml:space="preserve">
+    <value>无编辑器</value>
+  </data>
+  <data name="NoOpenedEditors" xml:space="preserve">
+    <value>没有已打开的编辑器</value>
+  </data>
+  <data name="UnnamedEditor" xml:space="preserve">
+    <value>未命名编辑器</value>
+  </data>
+  <data name="ConfirmRunScriptFormat" xml:space="preserve">
+    <value>确认将脚本“{0}”执行到“{1}”？</value>
+  </data>
+  <data name="ScriptExecutionResultFormat" xml:space="preserve">
+    <value>脚本：{0}{1}目标：{2}{1}结果：{3}</value>
+  </data>
+  <data name="ScriptCompileFailedFormat" xml:space="preserve">
+    <value>脚本编译失败：{0}{1}{2}</value>
+  </data>
+  <data name="ScriptExecutionTargetClosed" xml:space="preserve">
+    <value>选定的目标编辑器已关闭。</value>
+  </data>
+  <data name="ScriptExecutionSourceReadFailed" xml:space="preserve">
+    <value>读取脚本源失败。</value>
+  </data>
   <data name="EmbeddedRecommendedScriptDocumentTitleFormat" xml:space="preserve">
     <value>[内置/只读]{0}</value>
   </data>

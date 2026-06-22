@@ -38,16 +38,22 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 
 		public void Populate(Command command, List<Command> commands)
 		{
-			var recentOpened = recentOpenedManager.RecentRecordInfos;
+			var recentOpened = recentOpenedManager.RecentRecordInfos.ToArray();
+			var duplicatedDisplayNames = recentOpened
+				.Where(x => x.Type != RecentOpenType.OpenEmbeddedRecommendedScript)
+				.GroupBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
+				.Where(x => x.Count() > 1)
+				.Select(x => x.Key)
+				.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-			for (var i = 0; i < recentOpened.Count(); i++)
+			for (var i = 0; i < recentOpened.Length; i++)
 			{
-				var item = recentOpened.ElementAtOrDefault(i);
+				var item = recentOpened[i];
 				commands.Add(new Command(command.CommandDefinition)
 				{
 					Text = item.Type == RecentOpenType.OpenEmbeddedRecommendedScript
 						? item.DisplayName
-						: $"_{i + 1} {item.DisplayName} ({item.FileName})",
+						: BuildRecentFileMenuText(i + 1, item, duplicatedDisplayNames),
 					Tag = item,
 					Enabled = recentOpenedManager.CheckValid(item)
 				});
@@ -126,6 +132,17 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 			};
 
 			await shell.OpenDocumentAsync(doc);
+		}
+
+		private static string BuildRecentFileMenuText(int index, RecentRecordInfo info, ISet<string> duplicatedDisplayNames)
+		{
+			var displayName = string.IsNullOrWhiteSpace(info.DisplayName)
+				? Path.GetFileName(info.FileName)
+				: info.DisplayName;
+
+			return duplicatedDisplayNames.Contains(info.DisplayName)
+				? $"_{index} {displayName} ({info.FileName})"
+				: $"_{index} {displayName}";
 		}
 	}
 }

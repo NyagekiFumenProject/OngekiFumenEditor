@@ -37,4 +37,26 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Commands
     {
         public override string Name => "Scripts.OpenRecentScriptList";
     }
+
+    [CommandDefinition]
+    public sealed class OpenScriptMenuActionCommandDefinition : CommandDefinition
+    {
+        public override string Name => "Scripts.OpenScriptMenuAction";
+        public override string Text => ScriptMenuResources.OpenScript;
+        public override string ToolTip => ScriptMenuResources.OpenScriptToolTip;
+    }
+
+    [CommandDefinition]
+    public sealed class RunScriptToCommandDefinition : CommandDefinition
+    {
+        public override string Name => "Scripts.RunScriptTo";
+        public override string Text => ScriptMenuResources.RunTo;
+        public override string ToolTip => ScriptMenuResources.RunToToolTip;
+    }
+
+    [CommandDefinition]
+    public sealed class RunScriptToTargetCommandListDefinition : CommandListDefinition
+    {
+        public override string Name => "Scripts.RunScriptToTargetList";
+    }
 }
