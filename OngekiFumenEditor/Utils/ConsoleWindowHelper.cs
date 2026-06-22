@@ -37,13 +37,47 @@ namespace OngekiFumenEditor.Utils
         [LibraryImport("Kernel32.dll")]
         private static partial int GetConsoleProcessList(IntPtr lpdwProcessList, int dwProcessCount);
 
+        [LibraryImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool SetConsoleOutputCP(uint wCodePageID);
+
+        [LibraryImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static partial bool SetConsoleCP(uint wCodePageID);
+
         private static int hasConsole = 0;
+        private const uint Utf8CodePage = 65001;
+        private static readonly Encoding ConsoleTextEncoding = new UTF8Encoding(false);
 
         private enum StdHandle
         {
             Stdin = -10,
             Stdout = -11,
             Stderr = -12,
+        }
+
+        private static void ConfigureConsoleEncoding()
+        {
+            SetConsoleOutputCP(Utf8CodePage);
+            SetConsoleCP(Utf8CodePage);
+
+            Console.OutputEncoding = ConsoleTextEncoding;
+            Console.InputEncoding = ConsoleTextEncoding;
+        }
+
+        private static void BindConsoleStreams()
+        {
+            ConfigureConsoleEncoding();
+
+            SafeFileHandle stdoutHandle = new(GetStdHandle((int)StdHandle.Stdout), false);
+            SafeFileHandle stdinHandle = new(GetStdHandle((int)StdHandle.Stdin), false);
+            SafeFileHandle stderrHandle = new(GetStdHandle((int)StdHandle.Stderr), false);
+            var stdoutStream = new System.IO.FileStream(stdoutHandle, System.IO.FileAccess.Write);
+            var stdinStream = new System.IO.FileStream(stdinHandle, System.IO.FileAccess.Read);
+            var stderrStream = new System.IO.FileStream(stderrHandle, System.IO.FileAccess.Write);
+            Console.SetOut(new System.IO.StreamWriter(stdoutStream, ConsoleTextEncoding) { AutoFlush = true });
+            Console.SetIn(new System.IO.StreamReader(stdinStream, ConsoleTextEncoding, false));
+            Console.SetError(new System.IO.StreamWriter(stderrStream, ConsoleTextEncoding) { AutoFlush = true });
         }
 
 
@@ -82,29 +116,13 @@ namespace OngekiFumenEditor.Utils
                 return;
             }
             AllocConsole();
-            SafeFileHandle stdoutHandle = new(GetStdHandle((int)StdHandle.Stdout), false);
-            SafeFileHandle stdinHandle = new(GetStdHandle((int)StdHandle.Stdin), false);
-            SafeFileHandle stderrHandle = new(GetStdHandle((int)StdHandle.Stderr), false);
-            var stdoutStream = new System.IO.FileStream(stdoutHandle, System.IO.FileAccess.Write);
-            var stdinStream = new System.IO.FileStream(stdinHandle, System.IO.FileAccess.Read);
-            var stderrStream = new System.IO.FileStream(stderrHandle, System.IO.FileAccess.Write);
-            Console.SetOut(new System.IO.StreamWriter(stdoutStream) { AutoFlush = true });
-            Console.SetIn(new System.IO.StreamReader(stdinStream));
-            Console.SetError(new System.IO.StreamWriter(stderrStream) { AutoFlush = true });
+            BindConsoleStreams();
         }
 
         public static void AttachConsole()
         {
             AttachConsole(-1);
-            SafeFileHandle stdoutHandle = new(GetStdHandle((int)StdHandle.Stdout), false);
-            SafeFileHandle stdinHandle = new(GetStdHandle((int)StdHandle.Stdin), false);
-            SafeFileHandle stderrHandle = new(GetStdHandle((int)StdHandle.Stderr), false);
-            var stdoutStream = new System.IO.FileStream(stdoutHandle, System.IO.FileAccess.Write);
-            var stdinStream = new System.IO.FileStream(stdinHandle, System.IO.FileAccess.Read);
-            var stderrStream = new System.IO.FileStream(stderrHandle, System.IO.FileAccess.Write);
-            Console.SetOut(new System.IO.StreamWriter(stdoutStream) { AutoFlush = true });
-            Console.SetIn(new System.IO.StreamReader(stdinStream));
-            Console.SetError(new System.IO.StreamWriter(stderrStream) { AutoFlush = true });
+            BindConsoleStreams();
         }
 
     }

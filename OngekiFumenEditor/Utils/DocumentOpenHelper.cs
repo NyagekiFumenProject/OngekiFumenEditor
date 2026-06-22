@@ -108,6 +108,7 @@ namespace OngekiFumenEditor.Utils
 
             using var fs = File.OpenRead(ogkrFilePath);
             var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(ogkrFilePath).DeserializeAsync(fs);
+            Log.LogInfo($"Fumen file loaded: {ogkrFilePath}");
 
             var newProj = new EditorProjectDataModel();
             newProj.FumenFilePath = ogkrFilePath;
