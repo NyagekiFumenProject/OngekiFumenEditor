@@ -5,9 +5,11 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
@@ -21,7 +23,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private const double MaxSampleScreenDistance = 32;
         private const int MaxExtraSamplesPerSegment = 64;
         private const double MinQuadScreenHeight = 0.001;
-        private static readonly Vector4 PlayFieldForegroundColor = new(0.25f, 0.25f, 0, 1);
+        private Vector4 playFieldForegroundColor;
+        private bool enablePlayFieldDrawing;
         private readonly LineVertex[] vertices = new LineVertex[2];
 
         private readonly record struct FieldAreaSample(
@@ -51,6 +54,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Initalize(IRenderManagerImpl impl)
         {
+            UpdateProps();
+            Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+        }
+
+        private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Properties.EditorGlobalSetting.EnablePlayFieldDrawing):
+                case nameof(Properties.EditorGlobalSetting.PlayFieldForegroundColor):
+                    UpdateProps();
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateProps()
+        {
+            enablePlayFieldDrawing = Properties.EditorGlobalSetting.Default.EnablePlayFieldDrawing;
+            playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         }
 
         public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
@@ -72,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void DrawPlayField(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
         {
-            if (target.Editor.IsDesignMode)
+            if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
 
             if (fieldMinTGrid is null || fieldMaxTGrid is null || fieldMaxTGrid < fieldMinTGrid)
@@ -97,7 +121,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 limitParams.Add(ConvertToLimitParam(target, soflanGroup, sample));
             }
 
-            DrawFieldQuads(builder, limitParams);
+            DrawFieldQuads(builder, limitParams, playFieldForegroundColor);
 
             DebugDrawSamples(target, builder, limitParams);
         }
@@ -318,7 +342,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 isValid);
         }
 
-        private static void DrawFieldQuads(IDrawCommandListBuilder builder, IList<FieldLimitParam> limitParams)
+        private static void DrawFieldQuads(IDrawCommandListBuilder builder, IList<FieldLimitParam> limitParams, Vector4 playFieldForegroundColor)
         {
             using var vertices = ObjectPool.GetPooledList<PolygonVertex>();
             for (var i = 0; i < limitParams.Count - 1; i++)
@@ -334,13 +358,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (cur.XAftL > cur.XAftR || next.XBefL > next.XBefR)
                     continue;
 
-                vertices.Add(new(new(cur.XAftL, cur.Y), PlayFieldForegroundColor));
-                vertices.Add(new(new(next.XBefL, next.Y), PlayFieldForegroundColor));
-                vertices.Add(new(new(cur.XAftR, cur.Y), PlayFieldForegroundColor));
+                vertices.Add(new(new(cur.XAftL, cur.Y), playFieldForegroundColor));
+                vertices.Add(new(new(next.XBefL, next.Y), playFieldForegroundColor));
+                vertices.Add(new(new(cur.XAftR, cur.Y), playFieldForegroundColor));
 
-                vertices.Add(new(new(cur.XAftR, cur.Y), PlayFieldForegroundColor));
-                vertices.Add(new(new(next.XBefL, next.Y), PlayFieldForegroundColor));
-                vertices.Add(new(new(next.XBefR, next.Y), PlayFieldForegroundColor));
+                vertices.Add(new(new(cur.XAftR, cur.Y), playFieldForegroundColor));
+                vertices.Add(new(new(next.XBefL, next.Y), playFieldForegroundColor));
+                vertices.Add(new(new(next.XBefR, next.Y), playFieldForegroundColor));
             }
 
             if (vertices.Count > 0)

@@ -504,66 +504,63 @@
 
 问题：`DrawPlayableAreaHelper_new` 第一版是否复用旧 helper 的 `EditorGlobalSetting` 读取和订阅逻辑？
 
-结论：暂时不复用设置。新 helper 第一版写死配置，不订阅全局设置。
+结论：复用旧 helper 的运行时设置读取和订阅逻辑。
 
 实现要求：
 
-- 不读取 `EditorGlobalSetting.Default.EnablePlayFieldDrawing`。
-- 不读取 `EditorGlobalSetting.Default.PlayFieldForegroundColor`。
-- 不订阅 `EditorGlobalSetting.Default.PropertyChanged`。
-- `Initalize(IRenderManagerImpl impl)` 可保留为空实现或只做未来预留。
-- Playfield 绘制开关第一版写死为启用。
-- Playfield 填充色第一版使用配置默认值对应的颜色，而不是读取用户当前设置。
+- `Initalize(IRenderManagerImpl impl)` 调用 `UpdateProps()`。
+- 订阅 `EditorGlobalSetting.Default.PropertyChanged`。
+- 读取 `EditorGlobalSetting.Default.EnablePlayFieldDrawing` 到 `enablePlayFieldDrawing`。
+- 读取 `EditorGlobalSetting.Default.PlayFieldForegroundColor` 到 `playFieldForegroundColor`。
+- 只响应 `EnablePlayFieldDrawing` 和 `PlayFieldForegroundColor` 变化。
+- `PlayFieldBackgroundColor` 仍由 `FumenVisualEditorViewModel` 更新并用于预览模式清屏色。
+- `HideWallLaneWhenEnablePlayField` 仍由 `FumenVisualEditorViewModel` 暴露给 `WallLaneDrawTarget`，不放入新 helper。
 - 设计模式音频结束线仍保持红色。
 
 影响：
 
-- 新 helper 第一版不会响应 UI/配置中的 Playfield 开关和前景色设置。
-- 新 helper 第一版使用配置默认值保持初始视觉一致，例如 `PlayFieldForegroundColor` 默认值对应的不透明黑色。
-- 这样做降低新文件对全局设置系统的耦合，方便整体采纳或删除。
-- 后续确认算法可用后，再决定是否接回 `EditorGlobalSetting`。
+- 新 helper 会和旧 helper 一样响应 UI/配置中的 Playfield 开关和前景色设置。
+- 背景色、隐藏墙轨等非几何设置继续走编辑器原有状态，不重复实现。
+- 新 helper 仍然把 Playfield 几何算法集中在单文件内，方便后续整体采纳或删除。
 
 状态：已确认。
 
 ### D23: 第一版填充色
 
-问题：新 helper 写死配置时，Playfield 填充色使用什么值？
+问题：新 helper 的 Playfield 填充色使用什么值？
 
-结论：使用配置默认值，不使用任意临时颜色，也不读取用户当前设置。
+结论：使用 `EditorGlobalSetting.Default.PlayFieldForegroundColor` 的当前运行时值。
 
 实现要求：
 
-- 填充色使用 `EditorGlobalSetting.settings` 中 `PlayFieldForegroundColor` 的默认语义。
-- 当前已知默认值为 ARGB `-16777216`，即不透明黑色。
-- 可在新 helper 中以常量形式表达，例如 `new Vector4(0, 0, 0, 1)`。
-- 不读取 `EditorGlobalSetting.Default.PlayFieldForegroundColor` 的当前运行时值。
+- 初始化时读取 `PlayFieldForegroundColor`。
+- 设置变化时重新读取并转为 `Vector4`。
+- `DrawFieldQuads(...)` 使用当前 `playFieldForegroundColor` 写入 polygon vertex。
 
 原因：
 
-- 第一版仍保持自包含，方便整体采纳或删除。
-- 使用配置默认值能保持默认视觉和旧 helper 初始状态一致。
-- 不引入设置订阅，避免新 helper 试验阶段耦合全局设置系统。
+- 用户切换前景色后，Playfield 填充色应与旧 helper 保持一致。
+- 默认值仍由配置系统负责，helper 不再维护单独的默认色常量。
 
 状态：已确认。
 
 ### D24: 第一版绘制开关行为
 
-问题：新 helper 第一版不读取 `EnablePlayFieldDrawing` 时，Playfield 绘制条件是什么？
+问题：新 helper 的 Playfield 绘制条件是什么？
 
-结论：预览模式始终绘制 Playfield，设计模式不绘制 Playfield。
+结论：设计模式不绘制 Playfield；预览模式还必须满足 `EnablePlayFieldDrawing = true`。
 
 实现要求：
 
 - `DrawPlayField(...)` 中如果 `target.Editor.IsDesignMode` 为 true，直接返回。
-- 不检查 `EditorGlobalSetting.Default.EnablePlayFieldDrawing`。
+- 如果 `enablePlayFieldDrawing` 为 false，直接返回。
 - 预览模式下只要渲染管线调用 `DrawPlayField(...)`，就尝试绘制。
 - 如果无有效截面或所有 quad 退化，则自然不提交 polygon。
 
 原因：
 
-- 第一版写死配置，不读取用户当前设置。
+- 新 helper 接回旧实现设置语义后，关闭 `EnablePlayFieldDrawing` 不应继续绘制 Playfield。
 - 设计模式 Playfield 原本也不绘制，只保留音频结束线。
-- 算法稳定后再决定是否接回 `EnablePlayFieldDrawing`。
 
 状态：已确认。
 
