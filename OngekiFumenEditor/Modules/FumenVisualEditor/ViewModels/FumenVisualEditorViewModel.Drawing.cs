@@ -57,7 +57,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private bool showDebugInfo;
     private DrawJudgeLineHelper judgeLineHelper;
-    private DrawPlayableAreaHelper playableAreaHelper;
+    private DrawPlayableAreaHelper_new playableAreaHelper;
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
     private DrawHitObjectEffectHelper hitObjectEffectHelper;
     private DrawPlayerLocationHelper playerLocationHelper;
@@ -250,7 +250,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         selectingRangeHelper = new DrawSelectingRangeHelper();
         selectingRangeHelper.Initalize(renderImpl);
 
-        playableAreaHelper = new DrawPlayableAreaHelper();
+        playableAreaHelper = new DrawPlayableAreaHelper_new();
         playableAreaHelper.Initalize(renderImpl);
 
         playerLocationHelper = new DrawPlayerLocationHelper();
