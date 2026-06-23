@@ -17,7 +17,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 		private readonly int vbo;
 		private readonly int vao;
 		private int bufferCapacityInBytes;
-        private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         public DefaultLineDrawing_old(DefaultOpenGLRenderManagerImpl manager) : base(manager)
         {

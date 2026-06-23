@@ -19,7 +19,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing
         private int postVertexCount = 0;
         private IDrawingContext target;
         private Primitive primitive;
-        private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         public int AvailablePostableVertexCount => VertexCount - postVertexCount;
 

@@ -31,7 +31,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
         };
         private IDrawingContext target;
         private DefaultOpenGLTexture texture;
-        private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
 
         /*-----------------CURRENT VERSION------------------ -
                                         size(float)  position(float)  rotation(float)  color(float)
