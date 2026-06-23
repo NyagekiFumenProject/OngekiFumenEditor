@@ -263,7 +263,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 if (timeY > rectMaxY)
                     return;
-                //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
                 if (timeY < rectMinY || (precent > 1 && !target.CheckVisible(objTGrid)))
                     return;
 

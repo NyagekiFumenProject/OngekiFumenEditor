@@ -155,7 +155,6 @@ namespace OngekiFumenEditor.Parser.Ogkr
                 (var startWallLane, var endWallLane) = lbk.CalculateReferenceWallLanes(fumen);
                 var startXGrid = startWallLane?.CalulateXGrid(lbk.TGrid) ?? new XGrid();
                 var endXGrid = endWallLane?.CalulateXGrid(lbk.EndIndicator.TGrid) ?? new XGrid();
-                //todo XGRID计算更准确一点点
                 sb.AppendLine($"LBK\t{startWallLane?.RecordId ?? -1}\t{lbk.TGrid.Unit}\t{lbk.TGrid.Grid}\t{startXGrid.Unit}\t{startXGrid.Grid}\t{lbk.EndIndicator.TGrid.Unit}\t{lbk.EndIndicator.TGrid.Grid}\t{endXGrid.Unit}\t{endXGrid.Grid}");
             }
         }

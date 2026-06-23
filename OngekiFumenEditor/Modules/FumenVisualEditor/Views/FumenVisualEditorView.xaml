@@ -25,16 +25,6 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <ResourceDictionary>
-            <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
-            <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
-            <converters:BeatRhythmToBrushConverter x:Key="BeatRhythmToBrushConverter" />
-            <converters:TGridDisplayConverter x:Key="TGridDisplayConverter">
-            </converters:TGridDisplayConverter>
-            <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
-            <converters:BeatRhythmToVisibleConverter x:Key="BeatRhythmToVisibleConverter" />
-            <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
-            <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
-            <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
             <converters:KeyBindingToTextConverter x:Key="KeyBindingToTextConverter" />
         </ResourceDictionary>
     </UserControl.Resources>

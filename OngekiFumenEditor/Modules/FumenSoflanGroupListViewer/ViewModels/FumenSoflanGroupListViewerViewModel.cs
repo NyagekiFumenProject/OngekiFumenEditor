@@ -115,12 +115,12 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         {
             if (string.IsNullOrWhiteSpace(CreateNewGroupName))
             {
-                //todo messagebox
+                MessageBox.Show("Soflan group name cannot be empty.", Resources.SoflanGroupListViewer, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             if (DisplaySoflanGroupItemGroupRoot is null)
             {
-                //todo messagebox
+                MessageBox.Show("Cannot create a Soflan group because no fumen is loaded.", Resources.SoflanGroupListViewer, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 

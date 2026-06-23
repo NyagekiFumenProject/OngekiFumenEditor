@@ -10,8 +10,6 @@
     d:DesignWidth="300"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter">
-        </converters:IsStringEmptyConverter>
     </UserControl.Resources>
     <Grid>
         <ScrollViewer Name="HostContent">

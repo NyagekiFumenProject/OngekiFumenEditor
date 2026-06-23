@@ -3,22 +3,17 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
-    xmlns:converters1="clr-namespace:Gemini.Modules.MainMenu.Converters"
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:local="clr-namespace:OngekiFumenEditor"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters">
     <Application.Resources>
         <ResourceDictionary>
-            <converters:EnumToIntConverter x:Key="EnumToIntConverter">
-            </converters:EnumToIntConverter>
             <valueconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter">
             </valueconverters:BoolToVisibilityConverter>
             <valueconverters:ReverseBoolToVisibilityConverter x:Key="ReverseBoolToVisibilityConverter">
             </valueconverters:ReverseBoolToVisibilityConverter>
             <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter">
             </valueconverters:ReverseBoolConverter>
-            <converters:CurvePathControlVisibilityConverter x:Key="CurvePathControlVisibilityConverter">
-            </converters:CurvePathControlVisibilityConverter>
             <valueconverters:EnumToStringConverter x:Key="EnumToStringConverter">
             </valueconverters:EnumToStringConverter>
             <valueconverters:CultureInfoNameConverter x:Key="CultureInfoNameConverter">

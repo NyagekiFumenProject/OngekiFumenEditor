@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> timelines = Enumerable.Empty<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)>();
             if (target.Editor.IsDesignMode)
             {
-                //todo 暂时显示默认的变速组
+                //显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_DesignMode(
                     fumen.SoflansMap.DefaultSoflanList,
                     fumen.BpmList,
@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             else
             {
                 var currentY = target.Editor.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime);
-                //todo 暂时显示默认的变速组
+                //显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.SoflansMap.DefaultSoflanList,
                     fumen.BpmList,

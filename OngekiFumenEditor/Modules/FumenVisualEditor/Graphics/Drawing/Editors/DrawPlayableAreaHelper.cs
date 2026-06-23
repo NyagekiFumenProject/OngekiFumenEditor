@@ -96,7 +96,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return;
 
             var fumen = target.Editor.Fumen;
-            //todo 暂时显示默认的变速组
+            //显示默认的变速组
             var soflanList = fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
 
             var minIdx = soflanList.LastOrDefaultIndexByBinarySearch(fieldMinTGrid, x => x.TGrid);

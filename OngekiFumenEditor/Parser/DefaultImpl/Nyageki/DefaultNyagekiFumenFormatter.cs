@@ -236,7 +236,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
                         sb.Write($": EndSpeed[{(isf.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed}], Easing[{isf.Easing}]");
                     sb.Write($": SoflanGroup[{soflan.SoflanGroup}]");
                     sb.WriteLine();
-                    //todo add soflanGroup
                 }
                 sb.WriteLine();
             }
