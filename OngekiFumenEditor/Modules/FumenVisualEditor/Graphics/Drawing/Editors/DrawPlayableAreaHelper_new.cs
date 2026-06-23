@@ -216,7 +216,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 limitParams,
                 playFieldForegroundColor,
                 fieldMinTGrid.TotalGrid,
-                fieldMaxTGrid.TotalGrid);
+                fieldMaxTGrid.TotalGrid,
+                target.CurrentDrawingTargetContext.ViewRelativeRect.MinY,
+                target.CurrentDrawingTargetContext.ViewRelativeRect.MaxY);
 
             DebugDrawSamples(target, builder, limitParams);
         }
@@ -703,7 +705,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             IList<PlayFieldLimitParam> limitParams,
             Vector4 playFieldForegroundColor,
             int visibleMinTotalTGrid,
-            int visibleMaxTotalTGrid)
+            int visibleMaxTotalTGrid,
+            float visibleMinY,
+            float visibleMaxY)
         {
             using var vertices = ObjectPool.GetPooledList<PolygonVertex>();
             for (var i = 0; i < limitParams.Count - 1; i++)
@@ -715,7 +719,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var clippedFromTotalTGrid = Math.Max(cur.TotalTGrid, visibleMinTotalTGrid);
                 var clippedToTotalTGrid = Math.Min(next.TotalTGrid, visibleMaxTotalTGrid);
-                if (clippedToTotalTGrid <= clippedFromTotalTGrid)
+                var hasVisibleTGridOverlap = clippedToTotalTGrid > clippedFromTotalTGrid;
+                var touchesVisibleBoundary = IsRangeBoundarySegment(cur.TotalTGrid, next.TotalTGrid, visibleMinTotalTGrid, visibleMaxTotalTGrid);
+                // 可见范围由屏幕 Y 反算 TGrid 时会取整，贴边相邻段仍可能穿过视口。
+                if (!hasVisibleTGridOverlap && !touchesVisibleBoundary)
                     continue;
 
                 var fromL = cur.XNextL;
@@ -725,7 +732,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 var toR = next.XPrevR;
                 var toY = next.Y;
 
-                if (cur.TotalTGrid < clippedFromTotalTGrid)
+                if (hasVisibleTGridOverlap && cur.TotalTGrid < clippedFromTotalTGrid)
                 {
                     var rate = CalculateTotalTGridRate(cur.TotalTGrid, next.TotalTGrid, clippedFromTotalTGrid);
                     fromL = Lerp(cur.XNextL, next.XPrevL, rate);
@@ -733,13 +740,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     fromY = Lerp(cur.Y, next.Y, rate);
                 }
 
-                if (clippedToTotalTGrid < next.TotalTGrid)
+                if (hasVisibleTGridOverlap && clippedToTotalTGrid < next.TotalTGrid)
                 {
                     var rate = CalculateTotalTGridRate(cur.TotalTGrid, next.TotalTGrid, clippedToTotalTGrid);
                     toL = Lerp(cur.XNextL, next.XPrevL, rate);
                     toR = Lerp(cur.XNextR, next.XPrevR, rate);
                     toY = Lerp(cur.Y, next.Y, rate);
                 }
+
+                if (!ClipQuadToVisibleY(
+                        ref fromL,
+                        ref fromR,
+                        ref fromY,
+                        ref toL,
+                        ref toR,
+                        ref toY,
+                        visibleMinY,
+                        visibleMaxY))
+                    continue;
 
                 if (Math.Abs(toY - fromY) < MinQuadScreenHeight)
                     continue;
@@ -762,6 +780,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
 
         /// <summary>
+        /// 判断采样段是否正好贴住当前可见 TGrid 范围边界。
+        /// </summary>
+        private static bool IsRangeBoundarySegment(int fromTotalTGrid, int toTotalTGrid, int visibleMinTotalTGrid, int visibleMaxTotalTGrid)
+            => (fromTotalTGrid <= visibleMinTotalTGrid && visibleMinTotalTGrid <= toTotalTGrid)
+               || (fromTotalTGrid <= visibleMaxTotalTGrid && visibleMaxTotalTGrid <= toTotalTGrid);
+
+        /// <summary>
         /// 计算一个 TGrid 在相邻采样截面之间的插值比例。
         /// </summary>
         private static float CalculateTotalTGridRate(int fromTotalTGrid, int toTotalTGrid, int targetTotalTGrid)
@@ -772,6 +797,74 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             return (float)((targetTotalTGrid - fromTotalTGrid) / (double)span);
         }
+
+        /// <summary>
+        /// 把一个四边形沿屏幕 Y 裁剪到当前视口内。
+        /// </summary>
+        private static bool ClipQuadToVisibleY(
+            ref float fromL,
+            ref float fromR,
+            ref float fromY,
+            ref float toL,
+            ref float toR,
+            ref float toY,
+            float visibleMinY,
+            float visibleMaxY)
+        {
+            if (visibleMaxY < visibleMinY)
+                (visibleMinY, visibleMaxY) = (visibleMaxY, visibleMinY);
+
+            var segmentMinY = Math.Min(fromY, toY);
+            var segmentMaxY = Math.Max(fromY, toY);
+            if (segmentMaxY < visibleMinY || visibleMaxY < segmentMinY)
+                return false;
+
+            var ySpan = toY - fromY;
+            if (Math.Abs(ySpan) <= float.Epsilon)
+                return visibleMinY <= fromY && fromY <= visibleMaxY;
+
+            var fromRate = 0f;
+            var toRate = 1f;
+            if (ySpan > 0)
+            {
+                if (fromY < visibleMinY)
+                    fromRate = CalculateYRate(fromY, toY, visibleMinY);
+                if (toY > visibleMaxY)
+                    toRate = CalculateYRate(fromY, toY, visibleMaxY);
+            }
+            else
+            {
+                if (fromY > visibleMaxY)
+                    fromRate = CalculateYRate(fromY, toY, visibleMaxY);
+                if (toY < visibleMinY)
+                    toRate = CalculateYRate(fromY, toY, visibleMinY);
+            }
+
+            if (toRate < fromRate)
+                return false;
+
+            var clippedFromL = Lerp(fromL, toL, fromRate);
+            var clippedFromR = Lerp(fromR, toR, fromRate);
+            var clippedFromY = Lerp(fromY, toY, fromRate);
+            var clippedToL = Lerp(fromL, toL, toRate);
+            var clippedToR = Lerp(fromR, toR, toRate);
+            var clippedToY = Lerp(fromY, toY, toRate);
+
+            fromL = clippedFromL;
+            fromR = clippedFromR;
+            fromY = clippedFromY;
+            toL = clippedToL;
+            toR = clippedToR;
+            toY = clippedToY;
+
+            return true;
+        }
+
+        /// <summary>
+        /// 计算一个 Y 坐标在相邻采样截面之间的插值比例。
+        /// </summary>
+        private static float CalculateYRate(float fromY, float toY, float targetY)
+            => (targetY - fromY) / (toY - fromY);
 
         /// <summary>
         /// 线性插值两个屏幕坐标值。
