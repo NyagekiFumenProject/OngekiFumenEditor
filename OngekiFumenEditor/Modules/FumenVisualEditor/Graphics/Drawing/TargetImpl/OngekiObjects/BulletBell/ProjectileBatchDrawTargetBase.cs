@@ -50,6 +50,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
+            ResetDrawResources();
+
             parallelOptions = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2),
@@ -69,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public virtual void Dispose()
         {
-            ClearDrawList();
+            ResetDrawResources();
         }
 
         public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate, DrawBuffer buffer);
@@ -99,6 +101,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             drawStrList.Clear();
         }
 
+        private void ResetDrawResources()
+        {
+            foreach (var texture in normalDrawList.Keys)
+                texture.Dispose();
+
+            normalDrawList.Clear();
+            selectedDrawList.Clear();
+            drawStrList.Clear();
+
+            lock (bufferPool)
+            {
+                bufferPool.Clear();
+            }
+        }
+
         private DrawBuffer CreateThreadLocalBuffer()
         {
             var normal = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(normalDrawList.Count);
@@ -114,16 +131,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             lock (bufferPool)
             {
-                if (bufferPool.TryPop(out var buf))
+                while (bufferPool.TryPop(out var buf))
                 {
-                    foreach (var list in buf.Normal.Values)
-                        list.Clear();
-                    foreach (var list in buf.Selected.Values)
-                        list.Clear();
-                    return buf;
+                    if (IsBufferCompatible(buf))
+                    {
+                        foreach (var list in buf.Normal.Values)
+                            list.Clear();
+                        foreach (var list in buf.Selected.Values)
+                            list.Clear();
+                        return buf;
+                    }
                 }
             }
             return CreateThreadLocalBuffer();
+        }
+
+        private bool IsBufferCompatible(DrawBuffer buffer)
+        {
+            return buffer.Normal.Count == normalDrawList.Count
+                && buffer.Selected.Count == selectedDrawList.Count
+                && normalDrawList.Keys.All(buffer.Normal.ContainsKey)
+                && selectedDrawList.Keys.All(buffer.Selected.ContainsKey);
         }
 
         private void MergeAndReturnBuffer(DrawBuffer local)
