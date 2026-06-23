@@ -588,19 +588,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// </summary>
         private static void AddMergedLimitParam(IList<PlayFieldLimitParam> limitParams, PlayFieldLimitParam limitParam)
         {
-            limitParams.Add(limitParam);
-
-            if (limitParams.Count < 3)
-                return;
-
-            var nextIndex = limitParams.Count - 1;
-            var curIndex = nextIndex - 1;
-            var prevIndex = curIndex - 1;
-            if (CanMergeLimitParam(limitParams[prevIndex], limitParams[curIndex], limitParams[nextIndex]))
+            if (limitParams.Count >= 2)
             {
-                limitParams[curIndex] = limitParams[nextIndex];
-                limitParams.RemoveAt(nextIndex);
+                var curIndex = limitParams.Count - 1;
+                var prevIndex = curIndex - 1;
+                if (CanMergeLimitParam(limitParams[prevIndex], limitParams[curIndex], limitParam))
+                {
+                    limitParams[curIndex] = limitParam;
+                    return;
+                }
             }
+
+            limitParams.Add(limitParam);
         }
 
         /// <summary>
