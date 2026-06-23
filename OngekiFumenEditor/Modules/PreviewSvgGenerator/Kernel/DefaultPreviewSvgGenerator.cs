@@ -765,6 +765,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                         EnemySet set => ($"{set.TagTblValue}", Color.Yellow),
                         BPMChange bpm => ($"? {bpm.BPM:f2}", Color.LightPink),
                         MeterChange met => ($"{met.BunShi} / {met.Bunbo}", Color.LightGreen),
+                        _ => throw new NotSupportedException()
                     };
 
                     if (obj is IKeyframeSoflan spd)

@@ -421,7 +421,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             var defaultY = flag switch
                             {
                                 FieldRangeParam.LastRange => result.LastOrDefault().Y,
-                                FieldRangeParam.FirstRange => result.FirstOrDefault().Y
+                                FieldRangeParam.FirstRange => result.FirstOrDefault().Y,
+                                _ => throw new NotSupportedException()
                             };
                             var a = interpolatedPoint;
                             var b = new Vector2((float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), defaultY);
@@ -439,12 +440,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             appendPoint3(result, a.X, a.Y, flag switch
                             {
                                 FieldRangeParam.LastRange => result.Count,
-                                FieldRangeParam.FirstRange => 0
+                                FieldRangeParam.FirstRange => 0,
+                                _ => throw new NotSupportedException()
                             });
                             appendPoint3(result, b.X, b.Y, flag switch
                             {
                                 FieldRangeParam.LastRange => result.Count,
-                                FieldRangeParam.FirstRange => 0
+                                FieldRangeParam.FirstRange => 0,
+                                _ => throw new NotSupportedException()
                             });
                         }
                         else
@@ -452,7 +455,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             appendPoint3(result, interpolatedPoint.X, interpolatedPoint.Y, flag switch
                             {
                                 FieldRangeParam.LastRange => result.Count,
-                                FieldRangeParam.FirstRange => 0
+                                FieldRangeParam.FirstRange => 0,
+                                _ => throw new NotSupportedException()
                             });
                         }
                     }
@@ -605,7 +609,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 foreach (var pos in data)
                 {
                     if (prevY == pos.Y)
-                        prevR = prevR switch { 1 => 0, 0 => 1 };
+                        prevR = prevR switch { 1 => 0, 0 => 1, _ => throw new NotSupportedException() };
                     else
                         prevR = 0;
                     prevY = pos.Y;

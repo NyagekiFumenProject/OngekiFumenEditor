@@ -9,9 +9,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
 {
     internal sealed class DefaultSkiaBeamDrawing : CommonSkiaDrawingBase, IBeamDrawing
     {
-        private SKCanvas canvas;
-        private IDrawingContext target;
-
         public DefaultSkiaBeamDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
 

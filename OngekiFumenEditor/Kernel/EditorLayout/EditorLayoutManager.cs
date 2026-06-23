@@ -22,17 +22,16 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
     public class EditorLayoutManager : IEditorLayoutManager
     {
         [Import]
-        private ILayoutItemStatePersister layoutItemStatePersister;
+        private ILayoutItemStatePersister? layoutItemStatePersister;
 
-        public bool TryGetDependices(out IShell shell, out IShellView shellView)
+        public bool TryGetDependices(out IShell shell, out IShellView? shellView)
         {
             shell = IoC.Get<IShell>();
             shellView = default;
 
             if (shell is ShellViewModel)
             {
-                if (shell.GetType().GetField("_shellView", BindingFlags.NonPublic | BindingFlags.Instance)
-                    is FieldInfo fieldInfo)
+                if (shell.GetType().GetField("_shellView", BindingFlags.NonPublic | BindingFlags.Instance) is FieldInfo fieldInfo)
                     shellView = fieldInfo.GetValue(shell) as IShellView;
                 else
                     Log.LogError($"shell object is ShellViewModel but can not locate IShellView object");
@@ -54,7 +53,7 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
                 if (!TryGetDependices(out var shell, out var shellView))
                     return false;
 
-                var r = layoutItemStatePersister.LoadState(shell, shellView, tempFilePath);
+                var r = layoutItemStatePersister!.LoadState(shell, shellView, tempFilePath);
                 if (!r)
 
                     return false;
@@ -80,7 +79,7 @@ namespace OngekiFumenEditor.Kernel.EditorLayout
                 if (!TryGetDependices(out var shell, out var shellView))
                     return false;
 
-                var r = layoutItemStatePersister.SaveState(shell, shellView, tempFilePath);
+                var r = layoutItemStatePersister!.SaveState(shell, shellView, tempFilePath);
                 if (!r)
                     return false;
                 using var fs = File.OpenRead(tempFilePath);

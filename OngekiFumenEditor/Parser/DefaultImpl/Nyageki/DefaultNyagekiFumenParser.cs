@@ -32,9 +32,12 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
 
 			var fumen = new OngekiFumen();
 
-			while (!reader.EndOfStream)
+			while (true)
 			{
 				var line = await reader.ReadLineAsync();
+				if (line is null)
+					break;
+
 				var seg = line.Split(':', 2);
 				var commandName = seg[0].Trim();
 

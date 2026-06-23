@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles
 {
 	public abstract class EditorProjectDataModelBase : PropertyChangedBase
 	{
-		[JsonInclude]
+        [JsonInclude]
 		public abstract Version Version { get; }
 	}
 }

@@ -320,7 +320,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             await play.SeekTo(currentPlaytime, IsPlayAfterSeek).StartValueTask();
         }
 
-        private async Task MakeSureOptionsApplied()
+        private async void MakeSureOptionsApplied()
         {
             if (ConnectStatus != ConnectStatus.Connected)
                 return;

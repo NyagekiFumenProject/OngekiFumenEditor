@@ -8,9 +8,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles
 {
 	public class EditorProjectDataModel_V0_5_2 : EditorProjectDataModelBase
 	{
-		public readonly static Version VERSION = new(0, 5, 2);
-
-		public override Version Version => VERSION;
+		public override Version Version => new(0, 5, 2);
 
 		public Guid guid = Guid.NewGuid();
 

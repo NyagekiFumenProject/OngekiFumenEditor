@@ -22,7 +22,6 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
         private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
         private Stopwatch sw = new();
         private TimeSpan pauseTime;
-        private float volume = 1;
         private bool isAvaliable;
         private byte[] samples;
         private BufferWaveStream audioFileReader;
