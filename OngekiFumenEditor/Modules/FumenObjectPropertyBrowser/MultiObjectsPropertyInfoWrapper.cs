@@ -95,7 +95,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
 
             if (list.IsEmpty())
                 return false;
-            //todo 严格一下？
 
             var propInfo = list.First().PropertyInfo;
             multiWrapper = new MultiObjectsPropertyInfoWrapper(list, propInfo);
