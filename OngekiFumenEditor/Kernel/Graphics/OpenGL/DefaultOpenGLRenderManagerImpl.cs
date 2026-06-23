@@ -235,6 +235,26 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return cachedRenderControlMap.Values.ToArray();
         }
 
+        /// <inheritdoc />
+        public bool RemoveRenderContext(IRenderContext renderContext)
+        {
+            if (renderContext is null)
+                throw new ArgumentNullException(nameof(renderContext));
+
+            lock (drawCommandListGate)
+                drawCommandListContextSlots.Remove(renderContext);
+
+            var pair = cachedRenderControlMap.FirstOrDefault(x => ReferenceEquals(x.Value, renderContext));
+            if (pair.Key is null)
+                return false;
+
+            renderContext.StopRendering();
+            renderContext.Name = default;
+            renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
+
+            return cachedRenderControlMap.Remove(pair.Key);
+        }
+
         private GLWpfControl CheckRenderControl(FrameworkElement renderControl)
         {
             if (renderControl is not GLWpfControl glView)

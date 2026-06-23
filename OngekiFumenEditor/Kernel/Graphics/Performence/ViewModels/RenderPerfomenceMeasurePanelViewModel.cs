@@ -2,6 +2,8 @@ using Caliburn.Micro;
 using Gemini.Framework;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using System;
 using System.Collections.Generic;
@@ -115,6 +117,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
                 {
                     Items.Insert(targetIndex, new RenderPerfomenceMeasureItem(
                         snapshot.RenderManagerName,
+                        snapshot.EditorDisplayName,
                         snapshot.Context,
                         PerfomenceMonitorOptions));
                     changed = true;
@@ -122,7 +125,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
                 }
 
                 var item = Items[existingIndex];
-                item.RefreshHeader(snapshot.RenderManagerName);
+                item.RefreshHeader(snapshot.RenderManagerName, snapshot.EditorDisplayName);
 
                 if (existingIndex != targetIndex)
                 {
@@ -141,6 +144,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
         private List<RenderContextSnapshot> EnumerateRenderContextSnapshots()
         {
             var snapshots = new List<RenderContextSnapshot>();
+            var editors = IoC.Get<IEditorDocumentManager>().GetCurrentEditors().ToArray();
 
             foreach (var renderManager in IoC.GetAll<IRenderManagerImpl>())
             {
@@ -149,7 +153,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
                     if (context is null || snapshots.Any(x => ReferenceEquals(x.Context, context)))
                         continue;
 
-                    snapshots.Add(new RenderContextSnapshot(renderManager.Name, context));
+                    snapshots.Add(new RenderContextSnapshot(
+                        renderManager.Name,
+                        ResolveEditorDisplayName(context, editors),
+                        context));
                 }
             }
 
@@ -178,7 +185,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
             return Resources.ResourceManager.GetString(key) ?? fallback;
         }
 
-        private readonly record struct RenderContextSnapshot(string RenderManagerName, IRenderContext Context);
+        private static string ResolveEditorDisplayName(
+            IRenderContext context,
+            IEnumerable<FumenVisualEditorViewModel> editors)
+        {
+            var editor = editors.FirstOrDefault(x => ReferenceEquals(x.RenderContext, context));
+            if (editor is null)
+                return string.Empty;
+
+            return string.IsNullOrWhiteSpace(editor.DisplayName) ? "Unnamed Editor" : editor.DisplayName;
+        }
+
+        private readonly record struct RenderContextSnapshot(string RenderManagerName, string EditorDisplayName, IRenderContext Context);
 
         public sealed class PerfomenceMonitorOption
         {
@@ -202,19 +220,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
         {
             private readonly StringBuilder builder = new();
             private readonly IReadOnlyList<PerfomenceMonitorOption> perfomenceMonitorOptions;
-            private string header;
+            private string headerTitle;
+            private string headerContext;
+            private string headerMonitor;
             private string renderManagerName;
+            private string editorDisplayName;
             private PerfomenceMonitorOption selectedPerfomenceMonitorOption;
             private string statisticsText = NoPerfomenceDataText;
 
             public RenderPerfomenceMeasureItem(
                 string renderManagerName,
+                string editorDisplayName,
                 IRenderContext context,
                 IReadOnlyList<PerfomenceMonitorOption> perfomenceMonitorOptions)
             {
                 Context = context;
                 this.perfomenceMonitorOptions = perfomenceMonitorOptions;
-                RefreshHeader(renderManagerName);
+                RefreshHeader(renderManagerName, editorDisplayName);
             }
 
             public IRenderContext Context { get; }
@@ -231,24 +253,43 @@ namespace OngekiFumenEditor.Kernel.Graphics.Performence.ViewModels
 
                     Context.PerfomenceMonitor = value.CreateMonitor();
                     Set(ref selectedPerfomenceMonitorOption, value);
-                    RefreshHeader(renderManagerName);
+                    RefreshHeader(renderManagerName, editorDisplayName);
                     RefreshStatistics();
                 }
             }
 
-            public string Header
+            public string HeaderTitle
             {
-                get => header;
-                private set => Set(ref header, value);
+                get => headerTitle;
+                private set => Set(ref headerTitle, value);
             }
 
-            public void RefreshHeader(string renderManagerName)
+            public string HeaderContext
+            {
+                get => headerContext;
+                private set => Set(ref headerContext, value);
+            }
+
+            public string HeaderMonitor
+            {
+                get => headerMonitor;
+                private set => Set(ref headerMonitor, value);
+            }
+
+            public void RefreshHeader(string renderManagerName, string editorDisplayName)
             {
                 this.renderManagerName = renderManagerName;
+                this.editorDisplayName = editorDisplayName;
 
                 var monitor = Context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
                 RefreshSelectedPerfomenceMonitorOption(monitor.GetType());
-                Header = $"{Context.Name} {renderManagerName} / {Context.GetType().Name} #{Context.GetHashCode()} ({monitor.GetType().Name})";
+
+                var contextName = string.IsNullOrWhiteSpace(Context.Name) ? Context.GetType().Name : Context.Name;
+                var contextDescription = $"{contextName} | {renderManagerName} / {Context.GetType().Name} #{Context.GetHashCode()}";
+
+                HeaderTitle = string.IsNullOrWhiteSpace(editorDisplayName) ? contextName : editorDisplayName;
+                HeaderContext = contextDescription;
+                HeaderMonitor = $"Monitor: {monitor.GetType().Name}";
             }
 
             private void RefreshSelectedPerfomenceMonitorOption(Type monitorType)

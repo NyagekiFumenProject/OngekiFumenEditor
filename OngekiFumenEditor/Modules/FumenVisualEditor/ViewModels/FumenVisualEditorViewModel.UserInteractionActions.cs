@@ -38,6 +38,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using System.Windows.Controls;
 using Gemini.Framework.Threading;
 using Microsoft.CodeAnalysis.Differencing;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
@@ -149,6 +150,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
 
         public ImmutableDictionary<OngekiObjectBase, Rect> GetHits() => hits.ToImmutableDictionary();
+
+        public async Task OpenRenderPerfomenceMeasurePanel()
+        {
+            await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<IRenderPerfomenceMeasurePanel>());
+        }
 
         #region provide extra MenuItem by plugins
 

@@ -1006,16 +1006,19 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         ViewHeight = (float)e.NewSize.Height;
     }
 
-    private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
+    private void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
     {
         var renderControl = sender as FrameworkElement;
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
         try
         {
-            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
-            RenderContext.OnRender -= Render;
-            RenderContext.StopRendering();
+            var context = RenderContext;
+            if (context is null)
+                return;
+
+            context.OnRender -= Render;
+            context.StopRendering();
         }
         catch (Exception ex)
         {
@@ -1045,5 +1048,20 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     public Task WaitForRenderInitializationIsDone()
     {
         return renderInitializationTaskSource.Task;
+    }
+
+    private void DisposeRenderLoop()
+    {
+        var context = RenderContext;
+        if (context is null)
+            return;
+
+        context.OnRender -= Render;
+        context.StopRendering();
+        context.Name = default;
+        context.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
+
+        renderImpl?.RemoveRenderContext(context);
+        RenderContext = null;
     }
 }

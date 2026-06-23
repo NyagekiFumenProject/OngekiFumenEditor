@@ -131,6 +131,9 @@
                     Header="{markup:Translate [ShowDebugInfo]}"
                     IsCheckable="True"
                     IsChecked="{Binding ShowDebugInfo}" />
+                <MenuItem
+                    cal:Message.Attach="OpenRenderPerfomenceMeasurePanel()"
+                    Header="{markup:Translate [OpenRenderPerfomenceMeasurePanel]}" />
             </ContextMenu>
         </Grid.ContextMenu>
 

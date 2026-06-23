@@ -137,6 +137,29 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return cachedRenderControlMap.Values.Cast<IRenderContext>().ToArray();
         }
 
+        /// <inheritdoc />
+        public bool RemoveRenderContext(IRenderContext renderContext)
+        {
+            if (renderContext is null)
+                throw new ArgumentNullException(nameof(renderContext));
+
+            if (contextSlots.Remove(renderContext, out var slot))
+            {
+                ReleaseSlot(slot.Front);
+                ReleaseSlot(slot.Back);
+            }
+
+            var pair = cachedRenderControlMap.FirstOrDefault(x => ReferenceEquals(x.Value, renderContext));
+            if (pair.Key is null)
+                return false;
+
+            renderContext.StopRendering();
+            renderContext.Name = default;
+            renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
+
+            return cachedRenderControlMap.Remove(pair.Key);
+        }
+
         private SkiaRenderControlBase CheckRenderControl(FrameworkElement rc)
         {
             if (rc is not SkiaRenderControlBase renderControl)

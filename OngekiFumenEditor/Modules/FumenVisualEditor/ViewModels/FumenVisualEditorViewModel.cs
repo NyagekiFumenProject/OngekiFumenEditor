@@ -372,6 +372,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
             EditorManager.NotifyDeactivate(this);
             AudioPlayer?.Pause();
+            if (close)
+                DisposeRenderLoop();
         }
 
         protected override async Task OnInitializeAsync(CancellationToken cancellationToken)

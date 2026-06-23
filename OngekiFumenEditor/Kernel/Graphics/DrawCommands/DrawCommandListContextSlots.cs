@@ -97,6 +97,22 @@ namespace OngekiFumenEditor.Kernel.Graphics.DrawCommands
             }
         }
 
+        /// <summary>
+        /// Removes and releases any queued command lists for the specified context.
+        /// </summary>
+        public bool Remove(IRenderContext context)
+        {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            if (!contextSlots.Remove(context, out var slot))
+                return false;
+
+            ReleaseSlot(slot.Front);
+            ReleaseSlot(slot.Back);
+            return true;
+        }
+
         private ContextSlot GetOrCreateSlot(IRenderContext context)
         {
             if (!contextSlots.TryGetValue(context, out var slot))

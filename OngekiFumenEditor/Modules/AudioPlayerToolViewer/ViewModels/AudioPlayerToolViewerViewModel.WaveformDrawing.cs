@@ -310,15 +310,18 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             renderScaleY = (float)dpi.DpiScaleY;
         }
 
-        private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
+        private void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
         {
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
-            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
-            RenderContext.OnRender -= Render;
-            RenderContext.Name = default;
-            RenderContext.StopRendering();
+            var context = RenderContext;
+            if (context is null)
+                return;
+
+            context.OnRender -= Render;
+            context.Name = default;
+            context.StopRendering();
         }
 
         private async void RenderControl_Loaded(object sender, RoutedEventArgs e)

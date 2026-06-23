@@ -39,6 +39,11 @@ namespace OngekiFumenEditor.Kernel.Graphics
         IReadOnlyList<IRenderContext> GetRenderContexts();
 
         /// <summary>
+        /// Removes the specified render context from the render manager cache.
+        /// </summary>
+        bool RemoveRenderContext(IRenderContext renderContext);
+
+        /// <summary>
         /// Loads an image resource from the provided stream.
         /// </summary>
         IImage LoadImageFromStream(Stream stream);
