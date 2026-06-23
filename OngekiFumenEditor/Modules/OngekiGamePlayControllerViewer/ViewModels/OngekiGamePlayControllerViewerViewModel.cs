@@ -368,6 +368,8 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             }
             catch (Exception e)
             {
+                if (ConnectStatus != ConnectStatus.Disconnected)
+                    Log.LogWarn($"AkariMindController connection check failed: {e}");
                 ConnectStatus = ConnectStatus.Disconnected;
                 return false;
             }

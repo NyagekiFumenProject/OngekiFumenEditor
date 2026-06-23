@@ -93,7 +93,7 @@ namespace OngekiFumenEditor.Utils
             }
             catch (Exception e)
             {
-                //todo log
+                Log.LogWarn($"Read texture size anchor failed: textureName={textureName}\n{e}");
                 return false;
             }
         }

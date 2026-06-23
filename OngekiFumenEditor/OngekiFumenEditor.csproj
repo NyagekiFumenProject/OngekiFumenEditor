@@ -11,7 +11,6 @@
 		<ApplicationIcon>Resources\Icons\logo.ico</ApplicationIcon>
 		<UseAppHost>true</UseAppHost>
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<!--仅 publish 时启用 RID 与 SingleFile 配置, 避免影响普通 build 的 bin 路径-->

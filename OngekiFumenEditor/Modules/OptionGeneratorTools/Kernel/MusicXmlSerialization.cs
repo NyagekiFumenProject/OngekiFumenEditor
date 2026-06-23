@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Linq;
 using System.Xml.Linq;
@@ -11,45 +12,48 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
     {
         private static (int id, string str) GetStringAndId(XNode document, string name, string strKey = "str", string idKey = "id")
         {
+            var strExpr = $@"//{name}[1]/{strKey}[1]";
+            var idExpr = $@"//{name}[1]/{idKey}[1]";
             try
             {
-                var str = document.XPathSelectElement($@"//{name}[1]/{strKey}[1]").Value;
-                var id = int.Parse(document.XPathSelectElement($@"//{name}[1]/{idKey}[1]").Value);
+                var str = document.XPathSelectElement(strExpr).Value;
+                var id = int.Parse(document.XPathSelectElement(idExpr).Value);
 
                 return (id, str);
             }
             catch (Exception e)
             {
-
+                Log.LogWarn($"Get music xml string/id failed: strExpr={strExpr}, idExpr={idExpr}\n{e}");
                 return default;
             }
         }
 
         private static string GetStringByPath(XNode document, params string[] fieldPaths)
         {
+            var selectExpr = $"//{string.Join("/", fieldPaths.Select(x => $"{x}[1]"))}";
             try
             {
-                var selectExpr = $"//{string.Join("/", fieldPaths.Select(x => $"{x}[1]"))}";
                 var str = document.XPathSelectElement(selectExpr).Value;
 
                 return str;
             }
             catch (Exception e)
             {
-
+                Log.LogWarn($"Get music xml string failed: expr={selectExpr}\n{e}");
                 return default;
             }
         }
 
         private static XElement GetNode(XNode document, params string[] fieldPaths)
         {
+            var selectExpr = $"//{string.Join("/", fieldPaths.Select(x => $"{x}[1]"))}";
             try
             {
-                var selectExpr = $"//{string.Join("/", fieldPaths.Select(x => $"{x}[1]"))}";
                 return document.XPathSelectElement(selectExpr);
             }
             catch (Exception e)
             {
+                Log.LogWarn($"Get music xml node failed: expr={selectExpr}\n{e}");
                 return default;
             }
         }

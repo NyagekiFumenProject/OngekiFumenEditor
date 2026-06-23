@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Utils.Settings
                 }
                 catch (Exception e)
                 {
-                    //todo
+                    Log.LogWarn($"Load overlay json settings failed: {jsonFile}\n{e}");
                 }
             }
         }
@@ -70,7 +70,7 @@ namespace OngekiFumenEditor.Utils.Settings
                 }
                 catch (Exception e)
                 {
-                    //todo
+                    Log.LogError($"Save overlay json settings failed: {jsonFile}", e);
                 }
             }
         }
@@ -99,6 +99,7 @@ namespace OngekiFumenEditor.Utils.Settings
                     }
                     catch (Exception e)
                     {
+                        Log.LogWarn($"Deserialize setting property failed: group={groupName}, property={property.Name}\n{e}");
                         value.PropertyValue = TypeConvertHelper.ConvertFromString(property.PropertyType, property.DefaultValue?.ToString());
                     }
                 }

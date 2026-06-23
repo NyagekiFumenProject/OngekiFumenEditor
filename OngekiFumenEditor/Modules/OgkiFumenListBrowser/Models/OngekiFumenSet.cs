@@ -136,7 +136,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models
             }
             catch (Exception e)
             {
-                //todo
+                Log.LogWarn($"Parse fumen file info failed: {fumenDiff.FilePath}\n{e}");
             }
         }
     }

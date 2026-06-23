@@ -291,6 +291,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 }
                 catch (Exception e)
                 {
+                    Log.LogError($"can't kill other editor, pid: {process.Id}", e);
                     return (-1, $"can't kill other editor, pid: {process.Id}");
                 }
             }
@@ -311,6 +312,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 }
                 catch (Exception e)
                 {
+                    Log.LogError($"backup file failed: {targetFilePath} -> {targetBackupFilePath}", e);
                     DoRollback();
                     return (-2, $"backup file failed: {targetFilePath} -> {targetBackupFilePath}");
                 }
@@ -329,6 +331,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 }
                 catch (Exception e)
                 {
+                    Log.LogError($"move file failed: {sourceFilePath} -> {targetFilePath}", e);
                     DoRollback();
                     return (-3, $"move file failed: {sourceFilePath} -> {targetFilePath}");
                 }
