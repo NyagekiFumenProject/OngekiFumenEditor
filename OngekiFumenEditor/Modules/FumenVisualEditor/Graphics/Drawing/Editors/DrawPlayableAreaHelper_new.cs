@@ -204,10 +204,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             for (var i = 0; i < sortedTGrids.Count; i++)
             {
                 var sample = BuildAreaSample(frameContext, sortedTGrids[i]);
-                AddMergedLimitParam(limitParams, ConvertToLimitParam(target, frameContext.SoflanGroup, sample));
+                AddMergedLimitParam(
+                    limitParams,
+                    ConvertToLimitParam(target, frameContext.SoflanGroup, sample),
+                    fieldMinTGrid.TotalGrid,
+                    fieldMaxTGrid.TotalGrid);
             }
 
-            DrawFieldQuads(builder, limitParams, playFieldForegroundColor);
+            DrawFieldQuads(
+                builder,
+                limitParams,
+                playFieldForegroundColor,
+                fieldMinTGrid.TotalGrid,
+                fieldMaxTGrid.TotalGrid);
 
             DebugDrawSamples(target, builder, limitParams);
         }
@@ -586,13 +595,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// <summary>
         /// 合并屏幕坐标下左右边界都近似共线的中间采样截面。
         /// </summary>
-        private static void AddMergedLimitParam(IList<PlayFieldLimitParam> limitParams, PlayFieldLimitParam limitParam)
+        private static void AddMergedLimitParam(
+            IList<PlayFieldLimitParam> limitParams,
+            PlayFieldLimitParam limitParam,
+            int visibleMinTotalTGrid,
+            int visibleMaxTotalTGrid)
         {
             if (limitParams.Count >= 2)
             {
                 var curIndex = limitParams.Count - 1;
                 var prevIndex = curIndex - 1;
-                if (CanMergeLimitParam(limitParams[prevIndex], limitParams[curIndex], limitParam))
+                if (!IsVisibleRangeBoundary(limitParams[curIndex].TotalTGrid, visibleMinTotalTGrid, visibleMaxTotalTGrid)
+                    && CanMergeLimitParam(limitParams[prevIndex], limitParams[curIndex], limitParam))
                 {
                     limitParams[curIndex] = limitParam;
                     return;
@@ -601,6 +615,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             limitParams.Add(limitParam);
         }
+
+        /// <summary>
+        /// 当前可见范围边界不能被共线合并移除，否则上下文截面会被直接当作可见绘制范围。
+        /// </summary>
+        private static bool IsVisibleRangeBoundary(int totalTGrid, int visibleMinTotalTGrid, int visibleMaxTotalTGrid)
+            => totalTGrid == visibleMinTotalTGrid || totalTGrid == visibleMaxTotalTGrid;
 
         /// <summary>
         /// 判断中间截面是否可以由前后截面直接连接替代。
@@ -678,7 +698,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// <summary>
         /// 把相邻采样截面连接成三角形并提交绘制。
         /// </summary>
-        private static void DrawFieldQuads(IDrawCommandListBuilder builder, IList<PlayFieldLimitParam> limitParams, Vector4 playFieldForegroundColor)
+        private static void DrawFieldQuads(
+            IDrawCommandListBuilder builder,
+            IList<PlayFieldLimitParam> limitParams,
+            Vector4 playFieldForegroundColor,
+            int visibleMinTotalTGrid,
+            int visibleMaxTotalTGrid)
         {
             using var vertices = ObjectPool.GetPooledList<PolygonVertex>();
             for (var i = 0; i < limitParams.Count - 1; i++)
@@ -688,25 +713,71 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (!cur.IsValid || !next.IsValid)
                     continue;
 
-                if (Math.Abs(next.Y - cur.Y) < MinQuadScreenHeight)
+                var clippedFromTotalTGrid = Math.Max(cur.TotalTGrid, visibleMinTotalTGrid);
+                var clippedToTotalTGrid = Math.Min(next.TotalTGrid, visibleMaxTotalTGrid);
+                if (clippedToTotalTGrid <= clippedFromTotalTGrid)
                     continue;
 
-                if (cur.XNextL > cur.XNextR || next.XPrevL > next.XPrevR)
+                var fromL = cur.XNextL;
+                var fromR = cur.XNextR;
+                var fromY = cur.Y;
+                var toL = next.XPrevL;
+                var toR = next.XPrevR;
+                var toY = next.Y;
+
+                if (cur.TotalTGrid < clippedFromTotalTGrid)
+                {
+                    var rate = CalculateTotalTGridRate(cur.TotalTGrid, next.TotalTGrid, clippedFromTotalTGrid);
+                    fromL = Lerp(cur.XNextL, next.XPrevL, rate);
+                    fromR = Lerp(cur.XNextR, next.XPrevR, rate);
+                    fromY = Lerp(cur.Y, next.Y, rate);
+                }
+
+                if (clippedToTotalTGrid < next.TotalTGrid)
+                {
+                    var rate = CalculateTotalTGridRate(cur.TotalTGrid, next.TotalTGrid, clippedToTotalTGrid);
+                    toL = Lerp(cur.XNextL, next.XPrevL, rate);
+                    toR = Lerp(cur.XNextR, next.XPrevR, rate);
+                    toY = Lerp(cur.Y, next.Y, rate);
+                }
+
+                if (Math.Abs(toY - fromY) < MinQuadScreenHeight)
+                    continue;
+
+                if (fromL > fromR || toL > toR)
                     continue;
 
                 // 当前截面的 Next 连接到下一个截面的 Prev，组成一个四边形。
-                vertices.Add(new(new(cur.XNextL, cur.Y), playFieldForegroundColor));
-                vertices.Add(new(new(next.XPrevL, next.Y), playFieldForegroundColor));
-                vertices.Add(new(new(cur.XNextR, cur.Y), playFieldForegroundColor));
+                vertices.Add(new(new(fromL, fromY), playFieldForegroundColor));
+                vertices.Add(new(new(toL, toY), playFieldForegroundColor));
+                vertices.Add(new(new(fromR, fromY), playFieldForegroundColor));
 
-                vertices.Add(new(new(cur.XNextR, cur.Y), playFieldForegroundColor));
-                vertices.Add(new(new(next.XPrevL, next.Y), playFieldForegroundColor));
-                vertices.Add(new(new(next.XPrevR, next.Y), playFieldForegroundColor));
+                vertices.Add(new(new(fromR, fromY), playFieldForegroundColor));
+                vertices.Add(new(new(toL, toY), playFieldForegroundColor));
+                vertices.Add(new(new(toR, toY), playFieldForegroundColor));
             }
 
             if (vertices.Count > 0)
                 builder.DrawPolygon(Primitive.Triangles, vertices);
         }
+
+        /// <summary>
+        /// 计算一个 TGrid 在相邻采样截面之间的插值比例。
+        /// </summary>
+        private static float CalculateTotalTGridRate(int fromTotalTGrid, int toTotalTGrid, int targetTotalTGrid)
+        {
+            var span = toTotalTGrid - fromTotalTGrid;
+            if (span == 0)
+                return 0;
+
+            return (float)((targetTotalTGrid - fromTotalTGrid) / (double)span);
+        }
+
+        /// <summary>
+        /// 线性插值两个屏幕坐标值。
+        /// </summary>
+        private static float Lerp(float from, float to, float rate)
+            => from + (to - from) * rate;
 
         /// <summary>
         /// 判断数值是否可用于绘制计算。
