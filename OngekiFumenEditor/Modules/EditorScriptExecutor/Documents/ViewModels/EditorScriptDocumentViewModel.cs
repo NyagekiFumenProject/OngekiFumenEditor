@@ -3,6 +3,7 @@ using Gemini.Framework;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using OngekiFumenEditor.Kernel.RecentFiles;
+using OngekiFumenEditor.Modules.EditorScriptExecutor;
 using OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.Views;
 using OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -60,6 +61,8 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
         private FileSystemWatcher watcher;
         private string watchingCsFilePath;
         private string currentProjFilePath;
+        private string embeddedRecommendedScriptResourceName;
+        private bool IsEmbeddedRecommendedScript => !string.IsNullOrWhiteSpace(embeddedRecommendedScriptResourceName);
 
         public EditorScriptDocumentViewModel()
         {
@@ -159,6 +162,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
         protected override async Task DoLoad(string filePath)
         {
+            embeddedRecommendedScriptResourceName = default;
             ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
             Init();
             DisplayName = default;
@@ -167,6 +171,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
         protected override async Task DoNew()
         {
+            embeddedRecommendedScriptResourceName = default;
             Init();
             try
             {
@@ -196,12 +201,22 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
                 await File.WriteAllTextAsync(filePath, ScriptDocument.Text);
                 IsDirty = false;
                 DisplayName = default;
+                embeddedRecommendedScriptResourceName = default;
                 IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
             }
             catch (Exception e)
             {
                 MessageBox.Show($"{Resources.CantSaveScriptFile} {e.Message}");
             }
+        }
+
+        public async Task LoadEmbeddedRecommendedScript(string resourceName, string fileName, string content)
+        {
+            await New(fileName);
+            embeddedRecommendedScriptResourceName = resourceName;
+            ScriptDocument.Text = content;
+            DisplayName = string.Format(ScriptMenuResources.EmbeddedRecommendedScriptDocumentTitleFormat, fileName);
+            IsDirty = false;
         }
 
         public void OnTextChanged()
@@ -257,6 +272,9 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 
         public async void OnReloadFileButtonClicked()
         {
+            if (IsEmbeddedRecommendedScript)
+                return;
+
             if (File.Exists(FilePath))
                 await DoLoad(FilePath);
         }

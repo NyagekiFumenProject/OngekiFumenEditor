@@ -2598,4 +2598,79 @@
   <data name="SelectAndChangeBulletPalette" xml:space="preserve">
       <value>Select palette...</value>
   </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>Scripts (_S)</value>
+  </data>
+  <data name="NewScript" xml:space="preserve">
+    <value>New Script</value>
+  </data>
+  <data name="NewScriptToolTip" xml:space="preserve">
+    <value>Create a new editor script.</value>
+  </data>
+  <data name="RecommendedScripts" xml:space="preserve">
+    <value>Recommended Scripts</value>
+  </data>
+  <data name="RecommendedScriptsToolTip" xml:space="preserve">
+    <value>Open a built-in recommended script for review and editing.</value>
+  </data>
+  <data name="RecentScripts" xml:space="preserve">
+    <value>Recent Scripts</value>
+  </data>
+  <data name="RecentScriptsToolTip" xml:space="preserve">
+    <value>Open a recently used script.</value>
+  </data>
+  <data name="NoScriptsFound" xml:space="preserve">
+    <value>No scripts found</value>
+  </data>
+  <data name="OpenScript" xml:space="preserve">
+    <value>Open Script</value>
+  </data>
+  <data name="OpenScriptToolTip" xml:space="preserve">
+    <value>Open this script in the script editor.</value>
+  </data>
+  <data name="RunTo" xml:space="preserve">
+    <value>Run To...</value>
+  </data>
+  <data name="RunToToolTip" xml:space="preserve">
+    <value>Compile and run this script for the selected target.</value>
+  </data>
+  <data name="CurrentActivingEditor" xml:space="preserve">
+    <value>Current Activing Editor</value>
+  </data>
+  <data name="NoEditor" xml:space="preserve">
+    <value>No Editor</value>
+  </data>
+  <data name="NoOpenedEditors" xml:space="preserve">
+    <value>No opened editors</value>
+  </data>
+  <data name="UnnamedEditor" xml:space="preserve">
+    <value>Unnamed Editor</value>
+  </data>
+  <data name="ConfirmRunScriptFormat" xml:space="preserve">
+    <value>Run script '{0}' to '{1}'?</value>
+  </data>
+  <data name="ScriptExecutionResultFormat" xml:space="preserve">
+    <value>Script: {0}{1}Target: {2}{1}Result: {3}</value>
+  </data>
+  <data name="ScriptCompileFailedFormat" xml:space="preserve">
+    <value>Script compile failed: {0}{1}{2}</value>
+  </data>
+  <data name="ScriptExecutionTargetClosed" xml:space="preserve">
+    <value>The selected target editor is no longer open.</value>
+  </data>
+  <data name="ScriptExecutionSourceReadFailed" xml:space="preserve">
+    <value>Failed to read script source.</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptDocumentTitleFormat" xml:space="preserve">
+    <value>[Built-in/Read-only]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptRecentDisplayNameFormat" xml:space="preserve">
+    <value>[Built-in]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptNotFound" xml:space="preserve">
+    <value>Embedded recommended script not found.</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
+    <value>Failed to open embedded recommended script.</value>
+  </data>
 </root>

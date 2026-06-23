@@ -99,6 +99,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles
             set => Set(ref field, value);
         } = BulletSize.Normal;
 
+        /// <summary>
+        /// 是否受到变速影响
+        /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
         public BulletType TypeValue => BulletType.Circle;

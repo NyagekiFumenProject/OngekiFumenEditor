@@ -41,6 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 			if (fumenDeserializer is null)
 				throw new NotSupportedException($"{Resources.DeserializeFumenFileNotSupport}{projectData.FumenFilePath}");
 			var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
+			Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
 			projectData.Fumen = fumen;
 
 			ApplyBulletPalleteListEditorData(projectData);

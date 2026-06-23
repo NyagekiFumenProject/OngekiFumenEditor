@@ -75,11 +75,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private void DrawAudioDuration(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.Editor.TotalDurationHeight;
+            var y = (float)(target.Editor.TotalDurationHeight - target.CurrentDrawingTargetContext.ViewRelativeOriginY);
 
             var color = new Vector4(1, 0, 0, 1);
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
-            vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
+            vertices[1] = new(new(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, y), color, VertexDash.Solider);
 
             builder.DrawSimpleLines(vertices, 3);
         }
@@ -203,7 +203,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 void appendPoint2(IList<Vector2> list, float totalXGrid, float totalTGrid)
                 {
                     var px = (float)XGridCalculator.ConvertXGridToX(totalXGrid / XGrid.DEFAULT_RES_X, target.Editor);
-                    var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
+                    var py = (float)target.ConvertToViewRelativeY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
 
                     appendPoint3(list, px, py, list.Count);
                 }
@@ -347,7 +347,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
-                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualY);
+                    var actualWorldY = actualY + target.CurrentDrawingTargetContext.ViewRelativeOriginY;
+                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualWorldY);
 
                     isPickLane = false;
                     var pickables = tGrids.SelectMany(tGrid => fumen.Lanes
@@ -355,8 +356,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .Where(x => x.LaneType == type)
                             .Where(x =>
                             {
-                                var laneMinY = target.ConvertToY(x.MinTGrid, soflanGroup);
-                                var laneMaxY = target.ConvertToY(x.MaxTGrid, soflanGroup);
+                                var laneMinY = target.ConvertToViewRelativeY(x.MinTGrid, soflanGroup);
+                                var laneMaxY = target.ConvertToViewRelativeY(x.MaxTGrid, soflanGroup);
 
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
@@ -376,7 +377,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         {
                             var cur = itor.Current.pos;
 
-                            var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                            var curPy = (float)target.ConvertToViewRelativeY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                             if (/*cur.Y > tGrid.TotalGrid*/curPy > actualY)
                             {
@@ -388,7 +389,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                                    var prevPy = (float)target.ConvertToViewRelativeY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                                     var nowPy = actualY;
                                     var nowPx = (float)MathUtils.CalculateXFromTwoPointFormFormula(nowPy, prevPx, prevPy, curPx, curPy);
@@ -459,8 +460,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (fieldFlag.HasFlag(FieldRangeParam.LastRange) && currentTGrid <= maxTGrid)
                 {
-                    var maxY = (float)target.ConvertToY(maxTGrid, soflanGroup);
-                    var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
+                    var maxY = (float)target.ConvertToViewRelativeY(maxTGrid, soflanGroup);
+                    var actualMaxY = target.CurrentDrawingTargetContext.ViewRelativeRect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
                     IEnumerable<float> calcYArr = maxDiff > 0 ? [actualMaxY, maxY] : [maxY, actualMaxY];
@@ -474,8 +475,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (fieldFlag.HasFlag(FieldRangeParam.FirstRange) && minTGrid <= currentTGrid)
                 {
-                    var minY = (float)target.ConvertToY(minTGrid, soflanGroup);
-                    var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
+                    var minY = (float)target.ConvertToViewRelativeY(minTGrid, soflanGroup);
+                    var actualMinY = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
                     IEnumerable<float> calcYArr = minDiff > 0 ? [minY, actualMinY] : [actualMinY, minY];
@@ -1067,7 +1068,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         [Conditional("PLAYFIELD_DEBUG")]
         private void debugDrawIntersectionPoint(IDrawingContext target, IDrawCommandListBuilder builder, int leftIdx, int rightIdx, Vector2 intersectionPoint)
         {
-            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX*/true;
+            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.ViewRelativeRect.CenterX*/true;
             builder.DrawCircle(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
             builder.DrawString(
                 $"[{leftIdx}, {rightIdx}]",
@@ -1133,4 +1134,3 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
     }
 }
-

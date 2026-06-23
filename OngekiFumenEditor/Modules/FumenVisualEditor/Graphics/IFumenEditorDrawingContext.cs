@@ -24,5 +24,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
         double ConvertToY_DefaultSoflanGroup(double tGridUnit) => ConvertToY(tGridUnit, Editor.Fumen.SoflansMap.DefaultSoflanList);
         double ConvertToY(TGrid tGrid, SoflanList soflans) => ConvertToY(tGrid.TotalUnit, soflans);
         double ConvertToY(double tGridUnit, SoflanList soflans);
+
+        double ConvertToViewRelativeY_DefaultSoflanGroup(TGrid tGrid) => ConvertToViewRelativeY(tGrid.TotalUnit, Editor.Fumen.SoflansMap.DefaultSoflanList);
+        double ConvertToViewRelativeY_DefaultSoflanGroup(double tGridUnit) => ConvertToViewRelativeY(tGridUnit, Editor.Fumen.SoflansMap.DefaultSoflanList);
+        double ConvertToViewRelativeY(TGrid tGrid, SoflanList soflans) => ConvertToViewRelativeY(tGrid.TotalUnit, soflans);
+        double ConvertToViewRelativeY(double tGridUnit, SoflanList soflans)
+        {
+            var worldY = ConvertToY(tGridUnit, soflans);
+            return CurrentDrawingTargetContext is { } drawingTargetContext
+                ? worldY - drawingTargetContext.ViewRelativeOriginY
+                : worldY;
+        }
     }
 }

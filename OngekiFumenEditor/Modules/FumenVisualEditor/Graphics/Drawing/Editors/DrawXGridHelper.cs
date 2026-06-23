@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 builder.DrawString(
                     pair.XGridTotalUnitDisplay,
                     new(pair.X,
-                    target.Editor.RectInDesignMode.MaxY),
+                    target.CurrentDrawingTargetContext.ViewRelativeRect.MaxY),
                     Vector2.One,
                     12,
                     0,

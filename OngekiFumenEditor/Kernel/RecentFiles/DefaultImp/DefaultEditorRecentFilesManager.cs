@@ -55,7 +55,9 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.DefaultImp
 
 		public void PostRecord(RecentRecordInfo info)
 		{
-			var fileName = Path.GetFullPath(info.FileName);
+			var fileName = info.Type == RecentOpenType.OpenEmbeddedRecommendedScript
+				? info.FileName
+				: Path.GetFullPath(info.FileName);
 			info = info with { FileName = fileName, LastAccessTime = DateTime.Now };
 
 			if (info.FileName == recentRecordInfos.FirstOrDefault()?.FileName)
@@ -64,6 +66,18 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.DefaultImp
 
 			recentRecordInfos.Insert(0, info);
 			SaveRecordOpenedList();
+		}
+
+		public bool CheckValid(RecentRecordInfo info)
+		{
+			if (info is null || string.IsNullOrWhiteSpace(info.FileName))
+				return false;
+
+			return info.Type switch
+			{
+				RecentOpenType.OpenEmbeddedRecommendedScript => typeof(DefaultEditorRecentFilesManager).Assembly.GetManifestResourceInfo(info.FileName) is not null,
+				_ => File.Exists(info.FileName),
+			};
 		}
 
 		public void ClearAllRecords()

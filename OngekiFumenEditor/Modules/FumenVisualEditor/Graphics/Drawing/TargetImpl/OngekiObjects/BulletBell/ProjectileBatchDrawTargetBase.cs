@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private void DrawDesignMode(IFumenEditorDrawingContext target, T obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var toTime = target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
+            var toTime = target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid);
 
             var pos = new Vector2((float)toX, (float)toTime);
             DrawVisibleObject_DesignMode(target, obj, pos, 0, mainBuffer);
@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             var currentTGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var rect = target.CurrentDrawingTargetContext.Rect;
+            var rect = target.CurrentDrawingTargetContext.ViewRelativeRect;
             var rectMinX = rect.MinX;
             var rectMaxX = rect.MaxX;
             var rectMinY = rect.MinY;
@@ -182,7 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToY(TGrid tgrid, SoflanList soflans)
             {
-                return target.ConvertToY(tgrid, soflans);
+                return target.ConvertToViewRelativeY(tgrid, soflans);
             }
 
             var randomSeed = BulletPallete.RandomSeed;

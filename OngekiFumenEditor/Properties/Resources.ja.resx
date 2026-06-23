@@ -1903,4 +1903,79 @@
   <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
     <value>譜面を生成してゲームへ反映できませんでした: {0}</value>
   </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>スクリプト(_S)</value>
+  </data>
+  <data name="NewScript" xml:space="preserve">
+    <value>新規スクリプト</value>
+  </data>
+  <data name="NewScriptToolTip" xml:space="preserve">
+    <value>新しいエディタースクリプトを作成します。</value>
+  </data>
+  <data name="RecommendedScripts" xml:space="preserve">
+    <value>推奨スクリプト</value>
+  </data>
+  <data name="RecommendedScriptsToolTip" xml:space="preserve">
+    <value>組み込みの推奨スクリプトを確認・編集用に開きます。</value>
+  </data>
+  <data name="RecentScripts" xml:space="preserve">
+    <value>最近のスクリプト</value>
+  </data>
+  <data name="RecentScriptsToolTip" xml:space="preserve">
+    <value>最近使用したスクリプトを開きます。</value>
+  </data>
+  <data name="NoScriptsFound" xml:space="preserve">
+    <value>利用可能なスクリプトがありません</value>
+  </data>
+  <data name="OpenScript" xml:space="preserve">
+    <value>スクリプトを開く</value>
+  </data>
+  <data name="OpenScriptToolTip" xml:space="preserve">
+    <value>このスクリプトをスクリプトエディターで開きます。</value>
+  </data>
+  <data name="RunTo" xml:space="preserve">
+    <value>実行先...</value>
+  </data>
+  <data name="RunToToolTip" xml:space="preserve">
+    <value>このスクリプトをコンパイルして選択した対象へ実行します。</value>
+  </data>
+  <data name="CurrentActivingEditor" xml:space="preserve">
+    <value>現在アクティブなエディター</value>
+  </data>
+  <data name="NoEditor" xml:space="preserve">
+    <value>エディターなし</value>
+  </data>
+  <data name="NoOpenedEditors" xml:space="preserve">
+    <value>開いているエディターがありません</value>
+  </data>
+  <data name="UnnamedEditor" xml:space="preserve">
+    <value>名前なしエディター</value>
+  </data>
+  <data name="ConfirmRunScriptFormat" xml:space="preserve">
+    <value>スクリプト '{0}' を '{1}' に実行しますか？</value>
+  </data>
+  <data name="ScriptExecutionResultFormat" xml:space="preserve">
+    <value>スクリプト: {0}{1}対象: {2}{1}結果: {3}</value>
+  </data>
+  <data name="ScriptCompileFailedFormat" xml:space="preserve">
+    <value>スクリプトのコンパイルに失敗しました: {0}{1}{2}</value>
+  </data>
+  <data name="ScriptExecutionTargetClosed" xml:space="preserve">
+    <value>選択した対象エディターは既に閉じられています。</value>
+  </data>
+  <data name="ScriptExecutionSourceReadFailed" xml:space="preserve">
+    <value>スクリプトソースを読み取れませんでした。</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptDocumentTitleFormat" xml:space="preserve">
+    <value>[組み込み/読み取り専用]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptRecentDisplayNameFormat" xml:space="preserve">
+    <value>[組み込み]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptNotFound" xml:space="preserve">
+    <value>組み込み推奨スクリプトが見つかりません。</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
+    <value>組み込み推奨スクリプトを開けませんでした。</value>
+  </data>
 </root>

@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
@@ -1602,7 +1602,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (!drawingContexts.TryGetValue(0, out var drwaingContext))
                     return string.Empty;
                 var canvasX = pos.X;
-                var canvasY = drwaingContext.Rect.MaxY - pos.Y;
+                var canvasY = drwaingContext.WorldRect.MaxY - pos.Y;
                 CurrentCursorPosition = new(canvasX, canvasY);
 
                 var tGrid = default(TGrid);
@@ -1631,7 +1631,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 var canvasX = pos.X;
                 var persentY = pos.Y / ViewHeight;
-                var drwaingY = drawingTargetContext.Rect.MaxY - drawingTargetContext.Rect.Height * persentY;
+                var drwaingY = drawingTargetContext.WorldRect.MaxY - drawingTargetContext.WorldRect.Height * persentY;
 
                 var tGrid = default(TGrid);
                 if (IsDesignMode)
@@ -1702,7 +1702,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
         {
             //rect.Y = rect.Y - CurrentPlayTime;
-            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
+            var centerY = CurrentDrawingTargetContext is { } drawingTargetContext
+                ? centerPos.Y + drawingTargetContext.ViewRelativeOriginY
+                : centerPos.Y;
+            hits[obj] = new Rect(centerPos.X - size.X / 2, centerY - size.Y / 2, size.X, size.Y);
         }
 
         public void ScrollPage(int page)

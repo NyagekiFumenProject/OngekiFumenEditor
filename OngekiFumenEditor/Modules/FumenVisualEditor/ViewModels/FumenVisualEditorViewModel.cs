@@ -221,6 +221,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (fumenDeserializer is null)
                         throw new NotSupportedException($"{Resources.DeserializeFumenFileFail}{projectData.FumenFilePath}");
                     var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
+                    Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
                     projectData.Fumen = fumen;
                 }
                 EditorProjectData = dialogViewModel.EditorProjectData;

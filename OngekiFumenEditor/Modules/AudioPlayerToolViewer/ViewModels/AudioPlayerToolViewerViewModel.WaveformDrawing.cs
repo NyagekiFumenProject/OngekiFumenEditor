@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using FontStashSharp.RichText;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
@@ -252,7 +252,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             CurrentDrawingTargetContext.ViewMatrix = viewMatrix;
             CurrentDrawingTargetContext.ProjectionMatrix = projectionMatrix;
 
-            CurrentDrawingTargetContext.Rect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
+            CurrentDrawingTargetContext.ViewRelativeRect = new VisibleRect(new(0 + viewWidth, 0), new(0, 0 + viewHeight));
             CurrentDrawingTargetContext.ViewWidth = viewWidth;
             CurrentDrawingTargetContext.ViewHeight = viewHeight;
             CurrentDrawingTargetContext.RenderScaleX = renderScaleX;

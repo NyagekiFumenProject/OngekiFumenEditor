@@ -88,6 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             foreach ((var t, var y, var beatIndex, _, _) in timelines)
             {
+                var viewRelativeY = y - target.CurrentDrawingTargetContext.ViewRelativeOriginY;
                 var str = string.Empty;
                 if (displayAudioTime)
                 {
@@ -100,10 +101,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 drawLines.Add(new()
                 {
                     Display = str,
-                    Y = y
+                    Y = viewRelativeY
                 });
 
-                var fy = (float)y;
+                var fy = (float)viewRelativeY;
 
                 var maxAlpha = maxDispAlpha;
                 var minAlpha = minDispAlpha;

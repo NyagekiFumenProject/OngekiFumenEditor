@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Services;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -18,29 +19,43 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 	public class OpenRecentFileCommandHandler : ICommandListHandler<OpenRecentFileCommandListDefinition>
 	{
 		private readonly IEditorRecentFilesManager recentOpenedManager;
+		private readonly IEmbeddedRecommendedScriptService embeddedRecommendedScriptService;
 		private readonly IShell shell;
 		private readonly IEditorProvider[] editorProviders;
 
 		[ImportingConstructor]
-		public OpenRecentFileCommandHandler(IEditorRecentFilesManager recentOpenedManager, IShell shell, [ImportMany] IEditorProvider[] editorProviders)
+		public OpenRecentFileCommandHandler(
+			IEditorRecentFilesManager recentOpenedManager,
+			IEmbeddedRecommendedScriptService embeddedRecommendedScriptService,
+			IShell shell,
+			[ImportMany] IEditorProvider[] editorProviders)
 		{
 			this.recentOpenedManager = recentOpenedManager;
+			this.embeddedRecommendedScriptService = embeddedRecommendedScriptService;
 			this.shell = shell;
 			this.editorProviders = editorProviders;
 		}
 
 		public void Populate(Command command, List<Command> commands)
 		{
-			var recentOpened = recentOpenedManager.RecentRecordInfos;
+			var recentOpened = recentOpenedManager.RecentRecordInfos.ToArray();
+			var duplicatedDisplayNames = recentOpened
+				.Where(x => x.Type != RecentOpenType.OpenEmbeddedRecommendedScript)
+				.GroupBy(x => x.DisplayName, StringComparer.OrdinalIgnoreCase)
+				.Where(x => x.Count() > 1)
+				.Select(x => x.Key)
+				.ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-			for (var i = 0; i < recentOpened.Count(); i++)
+			for (var i = 0; i < recentOpened.Length; i++)
 			{
-				var item = recentOpened.ElementAtOrDefault(i);
+				var item = recentOpened[i];
 				commands.Add(new Command(command.CommandDefinition)
 				{
-					Text = $"_{i + 1} {item.DisplayName} ({item.FileName})",
+					Text = item.Type == RecentOpenType.OpenEmbeddedRecommendedScript
+						? item.DisplayName
+						: BuildRecentFileMenuText(i + 1, item, duplicatedDisplayNames),
 					Tag = item,
-					Enabled = File.Exists(item.FileName)
+					Enabled = recentOpenedManager.CheckValid(item)
 				});
 			}
 		}
@@ -57,6 +72,9 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 					break;
 				case RecentOpenType.CommandOpen:
 					await OpenRecentFileByCommandOpen(info);
+					break;
+				case RecentOpenType.OpenEmbeddedRecommendedScript:
+					await embeddedRecommendedScriptService.OpenScriptAsync(info.FileName);
 					break;
 				default:
 					break;
@@ -114,6 +132,17 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.Commands
 			};
 
 			await shell.OpenDocumentAsync(doc);
+		}
+
+		private static string BuildRecentFileMenuText(int index, RecentRecordInfo info, ISet<string> duplicatedDisplayNames)
+		{
+			var displayName = string.IsNullOrWhiteSpace(info.DisplayName)
+				? Path.GetFileName(info.FileName)
+				: info.DisplayName;
+
+			return duplicatedDisplayNames.Contains(info.DisplayName)
+				? $"_{index} {displayName} ({info.FileName})"
+				: $"_{index} {displayName}";
 		}
 	}
 }

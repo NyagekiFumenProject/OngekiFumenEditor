@@ -63,8 +63,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 colors = SelectAll;
             }
 
-            var topY = (float)selectionArea.Rect.Top;
-            var buttomY = (float)selectionArea.Rect.Bottom;
+            var originY = target.CurrentDrawingTargetContext?.ViewRelativeOriginY ?? 0;
+            var topY = (float)(selectionArea.Rect.Top - originY);
+            var buttomY = (float)(selectionArea.Rect.Bottom - originY);
             var rightX = (float)selectionArea.Rect.Right;
             var leftX = (float)selectionArea.Rect.Left;
             var centerX = (leftX + rightX) / 2;

@@ -177,6 +177,9 @@
                     <CheckBox IsChecked="{Binding EnableAssociateOgkr}">
                         <TextBlock Text=".ogkr" TextWrapping="Wrap" />
                     </CheckBox>
+                    <CheckBox Margin="10,0,0,0" IsChecked="{Binding EnableAssociateNyagekiScript}">
+                        <TextBlock Text=".nyagekiScript" TextWrapping="Wrap" />
+                    </CheckBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Button

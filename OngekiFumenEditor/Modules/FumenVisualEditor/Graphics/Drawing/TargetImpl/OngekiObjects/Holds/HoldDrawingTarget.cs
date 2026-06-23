@@ -85,7 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 Vector2 PostPoint2(double tGridUnit, double xGridUnit)
                 {
                     var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                    var y = (float)target.ConvertToY(tGridUnit, soflanList);
+                    var y = (float)target.ConvertToViewRelativeY(tGridUnit, soflanList);
 
                     return new(x, y);
                 }

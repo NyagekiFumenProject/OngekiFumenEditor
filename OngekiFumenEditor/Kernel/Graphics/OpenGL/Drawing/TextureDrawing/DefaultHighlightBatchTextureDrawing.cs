@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
@@ -177,7 +177,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 
             GL.BindVertexArray(vao);
             var MVP = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
-            var iResolution = new OpenTK.Mathematics.Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
+            var iResolution = new OpenTK.Mathematics.Vector2(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height);
             shader.PassUniform(shader.ViewProjectionLocation, MVP);
             shader.PassUniform(shader.ResolutionLocation, iResolution);
             shader.PassUniform(shader.DiffuseLocation, this.texture);

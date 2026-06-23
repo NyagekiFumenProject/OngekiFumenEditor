@@ -57,7 +57,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private bool showDebugInfo;
     private DrawJudgeLineHelper judgeLineHelper;
-    private DrawPlayableAreaHelper playableAreaHelper;
+    private DrawPlayableAreaHelper_new playableAreaHelper;
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
     private DrawHitObjectEffectHelper hitObjectEffectHelper;
     private DrawPlayerLocationHelper playerLocationHelper;
@@ -250,7 +250,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         selectingRangeHelper = new DrawSelectingRangeHelper();
         selectingRangeHelper.Initalize(renderImpl);
 
-        playableAreaHelper = new DrawPlayableAreaHelper();
+        playableAreaHelper = new DrawPlayableAreaHelper_new();
         playableAreaHelper.Initalize(renderImpl);
 
         playerLocationHelper = new DrawPlayerLocationHelper();
@@ -297,6 +297,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         hits.Clear();
 
         drawingContexts.Clear();
+        CurrentDrawingTargetContext = default;
 
         if (RenderContext is null || renderImpl is null)
             goto End;
@@ -337,7 +338,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         foreach (KeyValuePair<int, SoflanList> pair in soflanMap)
         {
             var curY = ConvertToY(tGrid.TotalUnit, pair.Value);
-            var minY = (float)(curY - Setting.JudgeLineOffsetY);
+            var minY = curY - Setting.JudgeLineOffsetY;
             var maxY = minY + ViewHeight;
 
             var visibleTGridRanges = new SortableCollection<(TGrid minTGrid, TGrid maxTGrid), TGrid>(x => x.minTGrid);
@@ -363,18 +364,19 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 visibleTGridRanges.Add((minTGrid, maxTGrid));
             }
 
-            var rect = new VisibleRect(new Vector2(ViewWidth, minY), new Vector2(0, minY + ViewHeight));
+            var worldRect = new VisibleRect(new Vector2(ViewWidth, (float)minY), new Vector2(0, (float)maxY));
+            var viewRelativeRect = new VisibleRect(new Vector2(ViewWidth, 0), new Vector2(0, ViewHeight));
 
-            var y = (float)curY;
-            var viewMatrix = Matrix4x4.CreateTranslation(new Vector3(-ViewWidth / 2,
-                -y - ViewHeight / 2 + (float)Setting.JudgeLineOffsetY, 0));
+            var viewMatrix = Matrix4x4.CreateTranslation(new Vector3(-ViewWidth / 2, -ViewHeight / 2, 0));
 
             var drawingContext = new DrawingTargetContext()
             {
                 CurrentSoflanList = pair.Value,
                 VisibleTGridRanges = visibleTGridRanges,
                 SoflanGroupId = pair.Key,
-                Rect = rect,
+                ViewRelativeRect = viewRelativeRect,
+                WorldRect = worldRect,
+                ViewRelativeOriginY = minY,
                 ViewMatrix = viewMatrix,
                 ProjectionMatrix = projectionMatrix,
                 ViewWidth = ViewWidth,
@@ -389,7 +391,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var defaultDrawingTargetContext = drawingContexts[0];
 
         if (IsDesignMode)
-            RectInDesignMode = defaultDrawingTargetContext.Rect;
+            RectInDesignMode = defaultDrawingTargetContext.WorldRect;
 
         #endregion
 
@@ -549,7 +551,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         #region Rendering
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
-        builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
+        builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
         builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
         builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -575,7 +577,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             prevOrder = order;
 
             CurrentDrawingTargetContext = defaultDrawingTargetContext;
-            builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
+            builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
             builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
             builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -584,7 +586,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 foreach (var soflanGroupDrawing in drawingObjs)
                 {
                     CurrentDrawingTargetContext = soflanGroupDrawing.Key;
-                    builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
+                    builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
                     builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
                     builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -602,7 +604,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         CurrentDrawingTargetContext = defaultDrawingTargetContext;
-        builder.SetCurrentRect(CurrentDrawingTargetContext.Rect);
+        builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
         builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
         builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
@@ -643,9 +645,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     }
 
     public double ConvertToY(double tGridUnit, SoflanList soflanList)
-    {
-        return convertToY(tGridUnit, this, soflanList);
-    }
+        => convertToY(tGridUnit, this, soflanList);
 
     public bool CheckVisible(TGrid tGrid)
     {
@@ -694,7 +694,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 if (ranges != null)
                 {
                     foreach (var tGridRange in ranges)
-                        stringBuilder.AppendLine($"*[{item.Key}]  {tGridRange.minTGrid}  -  {tGridRange.maxTGrid} -> {item.Value.Rect.MinY:F2} -  {item.Value.Rect.MaxY:F2}");
+                            stringBuilder.AppendLine($"*[{item.Key}]  {tGridRange.minTGrid}  -  {tGridRange.maxTGrid} -> {item.Value.WorldRect.MinY:F2} -  {item.Value.WorldRect.MaxY:F2}");
 
                 }
             }
@@ -707,7 +707,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     await view.Dispatcher.InvokeAsync(() =>
                     {
                         stringBuilder.AppendLine();
-                        if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - Mouse.GetPosition(view).Y is double mouseY)
+                        if (drawingContexts.ElementAtOrDefault(0).Value?.WorldRect.MaxY - Mouse.GetPosition(view).Y is double mouseY)
                         {
                             stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
                             foreach (var tGrid in ConvertYToTGrid_PreviewMode(mouseY))

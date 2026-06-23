@@ -152,6 +152,7 @@
 		<None Remove="Resources\Icons\search.png" />
 		<None Remove="Resources\Music.xml" />
 		<None Remove="Resources\MusicSource.xml" />
+		<None Remove="Resources\Scripts\EmbbedRecommended\**\*.nyagekiScript" />
 		<None Remove="Resources\ui_jacket_0666" />
 	</ItemGroup>
 
@@ -176,6 +177,7 @@
 		<EmbeddedResource Include="Resources\empty_ogkr_template.ogkr" />
 		<EmbeddedResource Include="Resources\Music.xml" />
 		<EmbeddedResource Include="Resources\MusicSource.xml" />
+		<EmbeddedResource Include="Resources\Scripts\EmbbedRecommended\**\*.nyagekiScript" />
 		<EmbeddedResource Include="Resources\suggestLayout.bin" />
 		<EmbeddedResource Include="Resources\ui_jacket_0666" />
 	</ItemGroup>
@@ -221,6 +223,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Tools\RecommendedScriptVerifier\RecommendedScriptVerifier.csproj" ReferenceOutputAssembly="false" OutputItemType="RecommendedScriptVerifierProject">
+			<PrivateAssets>all</PrivateAssets>
+		</ProjectReference>
 		<ProjectReference Include="..\Dependences\gemini\Dependences\Caliburn.Micro\src\Caliburn.Micro.Core\Caliburn.Micro.Core.csproj">
 			<PrivateAssets>all</PrivateAssets>
 		</ProjectReference>
@@ -777,5 +782,12 @@
 	<!--删除.xml文件-->
 	<Target Name="DeleteXmlFiles" AfterTargets="AfterBuild">
 		<Delete Files="$(OutputPath)/*.xml" />
+	</Target>
+
+	<Target Name="VerifyRecommendedScripts" AfterTargets="Build" Condition="'$(SkipRecommendedScriptVerification)' != 'true'">
+		<PropertyGroup>
+			<RecommendedScriptVerifierPath>..\Tools\RecommendedScriptVerifier\bin\$(Configuration)\net10.0-windows\RecommendedScriptVerifier.dll</RecommendedScriptVerifierPath>
+		</PropertyGroup>
+		<Exec Command="dotnet &quot;$(RecommendedScriptVerifierPath)&quot; --script-root &quot;$(MSBuildProjectDirectory)\Resources\Scripts\EmbbedRecommended&quot; --reference-dir &quot;$(TargetDir).&quot; --reference-file &quot;$(TargetPath)&quot;" StandardOutputImportance="High" StandardErrorImportance="High" />
 	</Target>
 </Project>

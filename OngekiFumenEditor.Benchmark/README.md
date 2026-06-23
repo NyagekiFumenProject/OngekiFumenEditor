@@ -9,6 +9,8 @@
 | `ParsingBenchmarks` | OGKR / Nyageki / 全部样本的反序列化 |
 | `DisplayableEnumerationBenchmarks` | `OngekiFumen.GetAllDisplayableObjects()`、范围内枚举、`ConnectableStartObject.GetDisplayableObjects()` |
 | `CollectionQueryBenchmarks` | `BinaryFindRange` / `GetVisibleStartObjects` / Soflan 区间查询 |
+| `DrawPlayableAreaHelperNewP1BoundaryBenchmarks` | new playfield helper P1: boundary 查询重复、候选墙轨缓存、LINQ/数组分配 |
+| `DrawPlayableAreaHelperNewP1SampleCollectionBenchmarks` | new playfield helper P1: 墙轨节点采样收集的全谱扫描与索引查询 |
 
 样本数据(`Data/FumenSamples/*.ogkr|*.nyageki`)以嵌入资源形式打进程序集,运行时不依赖磁盘上的样本目录。
 

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OpenTK.Graphics.OpenGL;
 using System;
 using System.Numerics;
@@ -82,14 +82,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing
             var texture = (DefaultOpenGLTexture)tex;
 
             {
-                var textureScaleY = target.CurrentDrawingTargetContext.Rect.Height / texture.Height;
+                var textureScaleY = target.CurrentDrawingTargetContext.ViewRelativeRect.Height / texture.Height;
 
                 var modelMatrix =
                     GetOverrideModelMatrix() *
                     (Matrix4x4.CreateScale(new Vector3(texture.Width, texture.Height, 1))
-                    * Matrix4x4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.CurrentDrawingTargetContext.Rect.Height * 2.0f / texture.Height, 1))) *
+                    * Matrix4x4.CreateScale(new Vector3(width * 1.0f / texture.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height * 2.0f / texture.Height, 1))) *
                     Matrix4x4.CreateRotationZ(rotate) *
-                    Matrix4x4.CreateTranslation(x, target.CurrentDrawingTargetContext.Rect.Height / 2 + target.CurrentDrawingTargetContext.Rect.MinY + judgeOffset / 2, 0);
+                    Matrix4x4.CreateTranslation(x, target.CurrentDrawingTargetContext.ViewRelativeRect.Height / 2 + target.CurrentDrawingTargetContext.ViewRelativeRect.MinY + judgeOffset / 2, 0);
 
                 shader.Begin();
                 {

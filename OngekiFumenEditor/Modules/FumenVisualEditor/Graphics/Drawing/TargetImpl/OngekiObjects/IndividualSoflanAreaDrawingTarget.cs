@@ -99,10 +99,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var maxTGrid = isf.EndIndicator.TGrid;
 
                 var leftX = (float)XGridCalculator.ConvertXGridToX(minXGrid, target.Editor);
-                var topY = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
+                var topY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(maxTGrid);
 
                 var rightX = (float)XGridCalculator.ConvertXGridToX(maxXGrid, target.Editor);
-                var bottomY = (float)target.ConvertToY_DefaultSoflanGroup(minTGrid);
+                var bottomY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(minTGrid);
 
                 lineVertex.Add(new LineVertex(lineVertex.Count > 0 ? lineVertex[lineVertex.Count - 1].Point : default, transparent, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), transparent, dash));
