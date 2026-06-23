@@ -74,19 +74,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private IAudioPlayer audioPlayer;
-        public IAudioPlayer AudioPlayer
+        public IAudioPlayer? AudioPlayer
         {
             get
             {
-                return audioPlayer;
+                return field;
             }
             set
             {
-                if (audioPlayer != value)
-                    audioPlayer?.Dispose();
+                if (field != value)
+                    field?.Dispose();
 
-                Set(ref audioPlayer, value);
+                Set(ref field, value);
             }
         }
 
@@ -359,9 +358,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Activation
 
-        protected override async Task OnActivateAsync(CancellationToken cancellationToken)
+        protected override async Task OnActivatedAsync(CancellationToken cancellationToken)
         {
-            await base.OnActivateAsync(cancellationToken);
+            await base.OnActivatedAsync(cancellationToken);
             await IoC.Get<ISchedulerManager>().AddScheduler(this);
             EditorManager.NotifyActivate(this);
         }
@@ -376,9 +375,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 DisposeRenderLoop();
         }
 
-        protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
+        protected override async Task OnInitializedAsync(CancellationToken cancellationToken)
         {
-            await base.OnInitializeAsync(cancellationToken);
+            await base.OnInitializedAsync(cancellationToken);
             EditorManager.NotifyCreate(this);
         }
 

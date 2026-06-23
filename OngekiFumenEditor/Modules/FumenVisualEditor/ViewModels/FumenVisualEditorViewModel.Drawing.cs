@@ -271,7 +271,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             OnEditorUpdate(ts);
 
         using (EnterRenderDataReadLock())
-            OnEditorRender(context,ts);
+            OnEditorRender(context, ts);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -694,7 +694,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 if (ranges != null)
                 {
                     foreach (var tGridRange in ranges)
-                            stringBuilder.AppendLine($"*[{item.Key}]  {tGridRange.minTGrid}  -  {tGridRange.maxTGrid} -> {item.Value.WorldRect.MinY:F2} -  {item.Value.WorldRect.MaxY:F2}");
+                        stringBuilder.AppendLine($"*[{item.Key}]  {tGridRange.minTGrid}  -  {tGridRange.maxTGrid} -> {item.Value.WorldRect.MinY:F2} -  {item.Value.WorldRect.MaxY:F2}");
 
                 }
             }
@@ -1029,6 +1029,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
     {
         var renderControl = sender as FrameworkElement;
+        if (renderControl is null)
+        {
+            Log.LogError($"RenderControl is null");
+            return;
+        }
+
         Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
         try
