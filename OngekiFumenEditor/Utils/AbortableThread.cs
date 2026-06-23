@@ -31,7 +31,18 @@ namespace OngekiFumenEditor.Utils
             CoreLog.LogDebug($"Begin to abort thread {Name}.");
             cancellationTokenSource.Cancel();
             if (waitForTask)
-                task?.Wait();
+            {
+                try
+                {
+                    task?.Wait();
+                }
+                catch (AggregateException e) when (IsCancellationException(e))
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
             CoreLog.LogDebug($"Aborted thread {Name}.");
         }
 
@@ -46,6 +57,16 @@ namespace OngekiFumenEditor.Utils
             }
             CoreLog.LogDebug($"Aborted thread {Name} (async).");
         }
+
+        private static bool IsCancellationException(AggregateException e)
+        {
+            foreach (var inner in e.Flatten().InnerExceptions)
+            {
+                if (inner is not OperationCanceledException)
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
-
