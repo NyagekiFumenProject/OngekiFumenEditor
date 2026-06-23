@@ -91,17 +91,67 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var minTotalGrid = minTGrid.TotalGrid;
                 var maxTotalGrid = maxTGrid.TotalGrid;
                 var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
+                var soflanPositionList = target.Editor.IsDesignMode
+                    ? target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList)
+                    : soflanList.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                using var supplementTotalGrids = ObjectPool.GetPooledList<int>();
+
+                void AddSupplementTotalGrid(int totalGrid)
+                {
+                    if (minTotalGrid < totalGrid && totalGrid < maxTotalGrid)
+                        supplementTotalGrids.Add(totalGrid);
+                }
+
+                foreach (var soflanPoint in soflanPositionList)
+                {
+                    var totalGrid = soflanPoint.TGrid.TotalGrid;
+                    if (totalGrid <= minTotalGrid)
+                        continue;
+                    if (totalGrid >= maxTotalGrid)
+                        break;
+
+                    AddSupplementTotalGrid(totalGrid);
+                }
+
+                if (target.Editor.GetViewportTGrid() is TGrid currentViewportTGrid)
+                    AddSupplementTotalGrid(currentViewportTGrid.TotalGrid);
+
+                supplementTotalGrids.Sort(Comparer<int>.Default);
+
+                void PostPointByTotalGrid(int totalGrid)
+                {
+                    var xGridTotalGridOpt = obj.CalulateXGridTotalGrid(totalGrid);
+                    if (xGridTotalGridOpt is double xGridTotalGrid)
+                        PostPointByXTGrid(xGridTotalGrid / XGrid.DEFAULT_RES_X, totalGrid * 1.0 / TGrid.DEFAULT_RES_T, soflanList);
+                }
+
+                void PostSupplementPoints()
+                {
+                    var prevTotalGrid = int.MinValue;
+                    foreach (var totalGrid in supplementTotalGrids)
+                    {
+                        if (totalGrid == prevTotalGrid)
+                            continue;
+
+                        PostPointByTotalGrid(totalGrid);
+                        prevTotalGrid = totalGrid;
+                    }
+                }
 
                 if (!obj.IsCurvePath)
                 {
                     //直线，优化
                     PostPointByTGrid(obj, minTGrid);
+                    PostSupplementPoints();
                     PostPointByTGrid(obj, maxTGrid);
                 }
                 else
                 {
                     using var list = ObjectPool.GetPooledList<Vector2>();
 
+                    list.Add(new(
+                        (float)(obj.CalulateXGridTotalGrid(minTotalGrid) ?? obj.PrevObject.XGrid.TotalGrid),
+                        minTotalGrid));
                     foreach ((var gridVec2, var isVaild) in obj.GetConnectionPaths().Where(x => x.pos.Y <= maxTotalGrid && x.pos.Y >= minTotalGrid))
                     {
                         if (!isVaild)
@@ -112,8 +162,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         }
                         list.Add(new(gridVec2.X, gridVec2.Y));
                     }
+                    foreach (var totalGrid in supplementTotalGrids)
+                    {
+                        if (obj.CalulateXGridTotalGrid(totalGrid) is double xGridTotalGrid)
+                            list.Add(new((float)xGridTotalGrid, totalGrid));
+                    }
+                    list.Add(new(
+                        (float)(obj.CalulateXGridTotalGrid(maxTotalGrid) ?? obj.XGrid.TotalGrid),
+                        maxTotalGrid));
+                    list.Sort(static (x, y) => x.Y.CompareTo(y.Y));
+
+                    var prevTotalGrid = double.NaN;
                     foreach (var gridVec2 in list)
+                    {
+                        if (gridVec2.Y == prevTotalGrid)
+                            continue;
                         PostPointByXTGrid(gridVec2.X / obj.XGrid.ResX, gridVec2.Y / obj.TGrid.ResT, soflanList);
+                        prevTotalGrid = gridVec2.Y;
+                    }
                 }
             }
 
