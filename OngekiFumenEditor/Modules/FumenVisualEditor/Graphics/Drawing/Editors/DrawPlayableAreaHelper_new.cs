@@ -21,40 +21,59 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
     {
         private const double DefaultLeftXGridUnit = -24;
         private const double DefaultRightXGridUnit = 24;
+
         private const double MaxSampleScreenDistance = 32;
         private const int MaxExtraSamplesPerSegment = 64;
+
+        // 中间采样点到合并后边界线的最大允许屏幕距离。
+        private const double MergeCollinearScreenDistance = 0.5;
+
+        // 过薄的四边形没有可见意义，也容易产生退化三角形。
         private const double MinQuadScreenHeight = 0.001;
         private Vector4 playFieldForegroundColor;
         private bool enablePlayFieldDrawing;
         private readonly LineVertex[] vertices = new LineVertex[2];
 
-        private readonly record struct FieldAreaSample(
+        /// <summary>
+        /// 谱面坐标中的一个时间采样截面。
+        /// Prev 用来连接上一段，Next 用来连接下一段。
+        /// </summary>
+        private readonly record struct PlayFieldAreaSample(
             int TotalTGrid,
-            double PlaceBefL,
-            double PlaceAftL,
-            double PlaceBefR,
-            double PlaceAftR,
+            double PlacePrevL,
+            double PlaceNextL,
+            double PlacePrevR,
+            double PlaceNextR,
             bool IsValid);
 
-        private readonly record struct FieldLimitParam(
+        /// <summary>
+        /// 转换到屏幕坐标后的采样截面。
+        /// </summary>
+        private readonly record struct PlayFieldLimitParam(
             int TotalTGrid,
-            float XBefL,
-            float XAftL,
-            float XBefR,
-            float XAftR,
+            float XPrevL,
+            float XNextL,
+            float XPrevR,
+            float XNextR,
             float Y,
             bool IsValid);
 
         private enum BoundaryEdge
         {
-            Bef,
-            Aft
+            Prev,
+            Next
         }
 
-        private readonly record struct BoundarySample(double Bef, double Aft);
+        private readonly record struct BoundarySample(double Prev, double Next);
 
+        /// <summary>
+        /// 单次绘制内共享的上下文，缓存本次可见范围内可能用到的墙轨。
+        /// </summary>
         private sealed class FieldAreaFrameContext : IDisposable
         {
+            /// <summary>
+            /// 创建本次绘制用的上下文，并缓存可见范围内的左右墙轨。
+            /// </summary>
             public FieldAreaFrameContext(IFumenEditorDrawingContext target, SoflanList soflanGroup, TGrid minTGrid, TGrid maxTGrid)
             {
                 Target = target;
@@ -85,6 +104,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             public IPooledList<LaneStartBase> LeftWallCandidates { get; }
             public IPooledList<LaneStartBase> RightWallCandidates { get; }
 
+            /// <summary>
+            /// 释放本次绘制租用的候选墙轨列表。
+            /// </summary>
             public void Dispose()
             {
                 LeftWallCandidates.Dispose();
@@ -92,12 +114,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
+        /// <summary>
+        /// 初始化设置缓存，并监听可击打区域相关设置变化。
+        /// </summary>
         public void Initalize(IRenderManagerImpl impl)
         {
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
         }
 
+        /// <summary>
+        /// 响应全局设置变化，刷新绘制开关和前景色。
+        /// </summary>
         private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -111,18 +139,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
+        /// <summary>
+        /// 从全局设置读取当前可击打区域绘制参数。
+        /// </summary>
         private void UpdateProps()
         {
             enablePlayFieldDrawing = Properties.EditorGlobalSetting.Default.EnablePlayFieldDrawing;
             playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         }
 
+        /// <summary>
+        /// 绘制 helper 的设计模式内容。
+        /// </summary>
         public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             if (target.Editor.IsDesignMode)
                 DrawAudioDuration(target, builder);
         }
 
+        /// <summary>
+        /// 在设计模式绘制音频结束线。
+        /// </summary>
         private void DrawAudioDuration(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             var y = (float)(target.Editor.TotalDurationHeight - target.CurrentDrawingTargetContext.ViewRelativeOriginY);
@@ -134,6 +171,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             builder.DrawSimpleLines(vertices, 3);
         }
 
+        /// <summary>
+        /// 在预览模式绘制当前可见时间范围内的可击打区域。
+        /// </summary>
         public void DrawPlayField(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
         {
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
@@ -142,6 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (fieldMinTGrid is null || fieldMaxTGrid is null || fieldMaxTGrid < fieldMinTGrid)
                 return;
 
+            // 主流程：收集采样点，计算每个截面的左右边界，再连接相邻截面。
             using var frameContext = new FieldAreaFrameContext(
                 target,
                 target.CurrentDrawingTargetContext.CurrentSoflanList,
@@ -159,11 +200,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             sortedTGrids.Sort(Comparer<int>.Default);
             AddScreenDistanceSamples(target, frameContext.SoflanGroup, sortedTGrids);
 
-            using var limitParams = ObjectPool.GetPooledList<FieldLimitParam>();
+            using var limitParams = ObjectPool.GetPooledList<PlayFieldLimitParam>();
             for (var i = 0; i < sortedTGrids.Count; i++)
             {
                 var sample = BuildAreaSample(frameContext, sortedTGrids[i]);
-                limitParams.Add(ConvertToLimitParam(target, frameContext.SoflanGroup, sample));
+                AddMergedLimitParam(limitParams, ConvertToLimitParam(target, frameContext.SoflanGroup, sample));
             }
 
             DrawFieldQuads(builder, limitParams, playFieldForegroundColor);
@@ -171,8 +212,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             DebugDrawSamples(target, builder, limitParams);
         }
 
+        /// <summary>
+        /// 收集用于计算区域边界的基础时间采样点。
+        /// </summary>
         private static void CollectBaseSampleTGrids(FieldAreaFrameContext context, ISet<int> result)
         {
+            // 采样点必须覆盖可见边界、当前视口、墙轨节点和 Soflan 节点。
             var minTotalTGrid = context.MinTotalTGrid;
             var maxTotalTGrid = context.MaxTotalTGrid;
             int? prevContextTotalTGrid = null;
@@ -232,6 +277,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 result.Add(nextContextTotalTGrid.Value);
         }
 
+        /// <summary>
+        /// 把墙轨起点、终点和子节点时间加入采样集合。
+        /// </summary>
         private static void AddWallCandidateSamples(
             IReadOnlyList<LaneStartBase> candidates,
             int minTotalTGrid,
@@ -252,6 +300,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
+        /// <summary>
+        /// 把 Soflan 节点时间加入采样集合。
+        /// </summary>
         private static void AddSoflanSamples(
             IList<SoflanList.SoflanPoint> soflanPoints,
             int minTotalTGrid,
@@ -274,6 +325,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
+        /// <summary>
+        /// 在 Soflan 节点列表中查找第一个不小于指定时间的位置。
+        /// </summary>
         private static int LowerBoundSoflanPoint(IList<SoflanList.SoflanPoint> soflanPoints, int totalTGrid)
         {
             var lo = 0;
@@ -289,6 +343,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             return lo;
         }
 
+        /// <summary>
+        /// 添加范围内采样点；范围外只记录最近的上下文点。
+        /// </summary>
         private static void AddSampleOrContext(
             int totalTGrid,
             int minTotalTGrid,
@@ -313,8 +370,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     : nextContextTotalTGrid;
         }
 
+        /// <summary>
+        /// 按屏幕距离在采样点之间补点，减少变速造成的形状误差。
+        /// </summary>
         private static void AddScreenDistanceSamples(IFumenEditorDrawingContext target, SoflanList soflanGroup, IList<int> sortedTGrids)
         {
+            // 时间间隔短不代表屏幕距离短，变速很快时需要按屏幕距离补采样。
             var i = 0;
             while (i < sortedTGrids.Count - 1)
             {
@@ -328,7 +389,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 var fromY = target.ConvertToViewRelativeY(TGrid.FromTotalGrid(from), soflanGroup);
                 var toY = target.ConvertToViewRelativeY(TGrid.FromTotalGrid(to), soflanGroup);
-                if (!IsFinite(fromY) || !IsFinite(toY))
+                if (!IsValueValid(fromY) || !IsValueValid(toY))
                 {
                     i++;
                     continue;
@@ -365,53 +426,68 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
-        private static FieldAreaSample BuildAreaSample(FieldAreaFrameContext context, int totalTGrid)
+        /// <summary>
+        /// 构造一个时间点上的左右墙轨边界采样。
+        /// </summary>
+        private static PlayFieldAreaSample BuildAreaSample(FieldAreaFrameContext context, int totalTGrid)
         {
             var tGrid = TGrid.FromTotalGrid(totalTGrid);
             var left = QueryBoundaryXGridUnit(context.LeftWallCandidates, LaneType.WallLeft, tGrid) ?? new(DefaultLeftXGridUnit, DefaultLeftXGridUnit);
             var right = QueryBoundaryXGridUnit(context.RightWallCandidates, LaneType.WallRight, tGrid) ?? new(DefaultRightXGridUnit, DefaultRightXGridUnit);
-            var isValid = IsFinite(left.Bef) && IsFinite(left.Aft) && IsFinite(right.Bef) && IsFinite(right.Aft);
+            var isValid = IsValueValid(left.Prev) && IsValueValid(left.Next) && IsValueValid(right.Prev) && IsValueValid(right.Next);
 
-            return new(totalTGrid, left.Bef, left.Aft, right.Bef, right.Aft, isValid);
+            return new(totalTGrid, left.Prev, left.Next, right.Prev, right.Next, isValid);
         }
 
+        /// <summary>
+        /// 查询指定墙侧在一个时间点上的 Prev/Next 边界。
+        /// </summary>
         private static BoundarySample? QueryBoundaryXGridUnit(IReadOnlyList<LaneStartBase> candidates, LaneType laneType, TGrid tGrid)
         {
-            double? bef = null;
-            double? aft = null;
+            // 同一时间可能有多条墙轨，左墙取最左，右墙取最右。
+            double? prev = null;
+            double? next = null;
             for (var i = 0; i < candidates.Count; i++)
             {
                 var lane = candidates[i];
-                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Bef)
-                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Bef) is double befValue)
+                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Prev)
+                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Prev) is double prevValue)
                 {
-                    bef = MergeBoundary(laneType, bef, befValue);
+                    prev = MergeBoundary(laneType, prev, prevValue);
                 }
 
-                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Aft)
-                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Aft) is double aftValue)
+                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Next)
+                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Next) is double nextValue)
                 {
-                    aft = MergeBoundary(laneType, aft, aftValue);
+                    next = MergeBoundary(laneType, next, nextValue);
                 }
             }
 
-            if (!bef.HasValue && !aft.HasValue)
+            if (!prev.HasValue && !next.HasValue)
                 return null;
 
             var defaultValue = laneType == LaneType.WallLeft ? DefaultLeftXGridUnit : DefaultRightXGridUnit;
-            return new(bef ?? defaultValue, aft ?? defaultValue);
+            return new(prev ?? defaultValue, next ?? defaultValue);
         }
 
+        /// <summary>
+        /// 判断墙轨在指定时间点是否参与 Prev 或 Next 边界。
+        /// </summary>
         private static bool IsActiveAtBoundaryEdge(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
         {
             var totalGrid = tGrid.TotalGrid;
-            return edge == BoundaryEdge.Bef
+            // Prev/Next 使用相反的开闭区间，避免在节点处重复连接同一段。
+            return edge == BoundaryEdge.Prev
                 ? lane.MinTGrid.TotalGrid < totalGrid && totalGrid <= lane.MaxTGrid.TotalGrid
                 : lane.MinTGrid.TotalGrid <= totalGrid && totalGrid < lane.MaxTGrid.TotalGrid;
         }
 
+        /// <summary>
+        /// 计算单条墙轨在指定时间点上的边界 XGrid。
+        /// </summary>
         private static double? CalculateBoundaryXGridUnit(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
         {
+            // 节点正好落在采样点上时，Prev 取前侧 child，Next 取后侧 child。
             var children = lane.GetChildObjectsFromTGrid(tGrid);
             var isPathValid = lane.IsPathVaild();
             var childCount = 0;
@@ -443,7 +519,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
             if (firstExactChild is not null && lastExactChild is not null)
             {
-                var child = edge == BoundaryEdge.Bef ? firstExactChild : lastExactChild;
+                var child = edge == BoundaryEdge.Prev ? firstExactChild : lastExactChild;
                 return child.XGrid.TotalUnit;
             }
 
@@ -453,6 +529,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             return bestValue;
         }
 
+        /// <summary>
+        /// 按墙侧合并两个边界值，保留外侧边界。
+        /// </summary>
         private static double MergeBoundary(LaneType laneType, double currentValue, double newValue)
         {
             return laneType == LaneType.WallLeft
@@ -460,6 +539,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 : Math.Max(currentValue, newValue);
         }
 
+        /// <summary>
+        /// 按墙侧合并可空边界值，空值时直接使用新值。
+        /// </summary>
         private static double MergeBoundary(LaneType laneType, double? currentValue, double newValue)
         {
             return currentValue.HasValue
@@ -467,35 +549,137 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 : newValue;
         }
 
-        private static FieldLimitParam ConvertToLimitParam(IFumenEditorDrawingContext target, SoflanList soflanGroup, FieldAreaSample sample)
+        /// <summary>
+        /// 把谱面坐标采样转换成屏幕坐标采样。
+        /// </summary>
+        private static PlayFieldLimitParam ConvertToLimitParam(IFumenEditorDrawingContext target, SoflanList soflanGroup, PlayFieldAreaSample sample)
         {
             var y = target.ConvertToViewRelativeY(TGrid.FromTotalGrid(sample.TotalTGrid), soflanGroup);
-            if (!sample.IsValid || !IsFinite(y))
+            if (!sample.IsValid || !IsValueValid(y))
                 return new(sample.TotalTGrid, 0, 0, 0, 0, 0, false);
 
-            var xBefL = XGridCalculator.ConvertXGridToX(sample.PlaceBefL, target.Editor);
-            var xAftL = XGridCalculator.ConvertXGridToX(sample.PlaceAftL, target.Editor);
-            var xBefR = XGridCalculator.ConvertXGridToX(sample.PlaceBefR, target.Editor);
-            var xAftR = XGridCalculator.ConvertXGridToX(sample.PlaceAftR, target.Editor);
+            var xPrevL = XGridCalculator.ConvertXGridToX(sample.PlacePrevL, target.Editor);
+            var xNextL = XGridCalculator.ConvertXGridToX(sample.PlaceNextL, target.Editor);
+            var xPrevR = XGridCalculator.ConvertXGridToX(sample.PlacePrevR, target.Editor);
+            var xNextR = XGridCalculator.ConvertXGridToX(sample.PlaceNextR, target.Editor);
 
-            var isValid = IsFinite(xBefL) && IsFinite(xAftL) && IsFinite(xBefR) && IsFinite(xAftR);
-            var normalizedBef = NormalizeBoundaryPair(xBefL, xBefR);
-            var normalizedAft = NormalizeBoundaryPair(xAftL, xAftR);
+            var isValid = IsValueValid(xPrevL) && IsValueValid(xNextL) && IsValueValid(xPrevR) && IsValueValid(xNextR);
+            var normalizedPrev = NormalizeBoundaryPair(xPrevL, xPrevR);
+            var normalizedNext = NormalizeBoundaryPair(xNextL, xNextR);
 
             return new(
                 sample.TotalTGrid,
-                (float)normalizedBef.Left,
-                (float)normalizedAft.Left,
-                (float)normalizedBef.Right,
-                (float)normalizedAft.Right,
+                (float)normalizedPrev.Left,
+                (float)normalizedNext.Left,
+                (float)normalizedPrev.Right,
+                (float)normalizedNext.Right,
                 (float)y,
                 isValid);
         }
 
+        /// <summary>
+        /// 把两个屏幕 X 坐标整理为实际左边界和右边界。
+        /// </summary>
         private static (double Left, double Right) NormalizeBoundaryPair(double x1, double x2)
             => x1 <= x2 ? (x1, x2) : (x2, x1);
 
-        private static void DrawFieldQuads(IDrawCommandListBuilder builder, IList<FieldLimitParam> limitParams, Vector4 playFieldForegroundColor)
+        /// <summary>
+        /// 合并屏幕坐标下左右边界都近似共线的中间采样截面。
+        /// </summary>
+        private static void AddMergedLimitParam(IList<PlayFieldLimitParam> limitParams, PlayFieldLimitParam limitParam)
+        {
+            limitParams.Add(limitParam);
+
+            if (limitParams.Count < 3)
+                return;
+
+            var nextIndex = limitParams.Count - 1;
+            var curIndex = nextIndex - 1;
+            var prevIndex = curIndex - 1;
+            if (CanMergeLimitParam(limitParams[prevIndex], limitParams[curIndex], limitParams[nextIndex]))
+            {
+                limitParams[curIndex] = limitParams[nextIndex];
+                limitParams.RemoveAt(nextIndex);
+            }
+        }
+
+        /// <summary>
+        /// 判断中间截面是否可以由前后截面直接连接替代。
+        /// </summary>
+        private static bool CanMergeLimitParam(PlayFieldLimitParam prev, PlayFieldLimitParam cur, PlayFieldLimitParam next)
+        {
+            if (!prev.IsValid || !cur.IsValid || !next.IsValid)
+                return false;
+
+            if (!IsBoundaryContinuous(cur.XPrevL, cur.XNextL) || !IsBoundaryContinuous(cur.XPrevR, cur.XNextR))
+                return false;
+
+            var curLeftX = (cur.XPrevL + cur.XNextL) * 0.5;
+            var curRightX = (cur.XPrevR + cur.XNextR) * 0.5;
+            var leftDistance = DistancePointToLine(
+                curLeftX,
+                cur.Y,
+                prev.XNextL,
+                prev.Y,
+                next.XPrevL,
+                next.Y);
+            if (leftDistance > MergeCollinearScreenDistance)
+                return false;
+
+            var rightDistance = DistancePointToLine(
+                curRightX,
+                cur.Y,
+                prev.XNextR,
+                prev.Y,
+                next.XPrevR,
+                next.Y);
+            return rightDistance <= MergeCollinearScreenDistance;
+        }
+
+        /// <summary>
+        /// 判断同一采样截面的 Prev/Next 边界是否可视为连续。
+        /// </summary>
+        private static bool IsBoundaryContinuous(double prevX, double nextX)
+            => Math.Abs(nextX - prevX) <= MergeCollinearScreenDistance;
+
+        /// <summary>
+        /// 计算点到线段的屏幕距离。
+        /// </summary>
+        private static double DistancePointToLine(double pointX, double pointY, double lineFromX, double lineFromY, double lineToX, double lineToY)
+        {
+            var lineX = lineToX - lineFromX;
+            var lineY = lineToY - lineFromY;
+            var lineLengthSquared = lineX * lineX + lineY * lineY;
+            if (lineLengthSquared <= double.Epsilon)
+            {
+                var offsetX = pointX - lineFromX;
+                var offsetY = pointY - lineFromY;
+                return Math.Sqrt(offsetX * offsetX + offsetY * offsetY);
+            }
+
+            var projectedRate = ((pointX - lineFromX) * lineX + (pointY - lineFromY) * lineY) / lineLengthSquared;
+            if (projectedRate <= 0)
+            {
+                var offsetX = pointX - lineFromX;
+                var offsetY = pointY - lineFromY;
+                return Math.Sqrt(offsetX * offsetX + offsetY * offsetY);
+            }
+
+            if (projectedRate >= 1)
+            {
+                var offsetX = pointX - lineToX;
+                var offsetY = pointY - lineToY;
+                return Math.Sqrt(offsetX * offsetX + offsetY * offsetY);
+            }
+
+            var cross = (pointX - lineFromX) * lineY - (pointY - lineFromY) * lineX;
+            return Math.Abs(cross) / Math.Sqrt(lineLengthSquared);
+        }
+
+        /// <summary>
+        /// 把相邻采样截面连接成三角形并提交绘制。
+        /// </summary>
+        private static void DrawFieldQuads(IDrawCommandListBuilder builder, IList<PlayFieldLimitParam> limitParams, Vector4 playFieldForegroundColor)
         {
             using var vertices = ObjectPool.GetPooledList<PolygonVertex>();
             for (var i = 0; i < limitParams.Count - 1; i++)
@@ -508,40 +692,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (Math.Abs(next.Y - cur.Y) < MinQuadScreenHeight)
                     continue;
 
-                if (cur.XAftL > cur.XAftR || next.XBefL > next.XBefR)
+                if (cur.XNextL > cur.XNextR || next.XPrevL > next.XPrevR)
                     continue;
 
-                vertices.Add(new(new(cur.XAftL, cur.Y), playFieldForegroundColor));
-                vertices.Add(new(new(next.XBefL, next.Y), playFieldForegroundColor));
-                vertices.Add(new(new(cur.XAftR, cur.Y), playFieldForegroundColor));
+                // 当前截面的 Next 连接到下一个截面的 Prev，组成一个四边形。
+                vertices.Add(new(new(cur.XNextL, cur.Y), playFieldForegroundColor));
+                vertices.Add(new(new(next.XPrevL, next.Y), playFieldForegroundColor));
+                vertices.Add(new(new(cur.XNextR, cur.Y), playFieldForegroundColor));
 
-                vertices.Add(new(new(cur.XAftR, cur.Y), playFieldForegroundColor));
-                vertices.Add(new(new(next.XBefL, next.Y), playFieldForegroundColor));
-                vertices.Add(new(new(next.XBefR, next.Y), playFieldForegroundColor));
+                vertices.Add(new(new(cur.XNextR, cur.Y), playFieldForegroundColor));
+                vertices.Add(new(new(next.XPrevL, next.Y), playFieldForegroundColor));
+                vertices.Add(new(new(next.XPrevR, next.Y), playFieldForegroundColor));
             }
 
             if (vertices.Count > 0)
                 builder.DrawPolygon(Primitive.Triangles, vertices);
         }
 
-        private static void AddTGrid(ISet<int> result, int totalTGrid, int minTotalTGrid, int maxTotalTGrid)
-        {
-            if (minTotalTGrid <= totalTGrid && totalTGrid <= maxTotalTGrid)
-                result.Add(totalTGrid);
-        }
-
-        private static bool IsFinite(double value)
+        /// <summary>
+        /// 判断数值是否可用于绘制计算。
+        /// </summary>
+        private static bool IsValueValid(double value)
             => !double.IsNaN(value) && !double.IsInfinity(value);
 
+        /// <summary>
+        /// 调试模式下绘制采样点位置。
+        /// </summary>
         [System.Diagnostics.Conditional("PLAYFIELD_DEBUG")]
-        private static void DebugDrawSamples(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IList<FieldLimitParam> limitParams)
+        private static void DebugDrawSamples(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IList<PlayFieldLimitParam> limitParams)
         {
             var validColor = new Vector4(1, 1, 0, 0.75f);
             var invalidColor = new Vector4(1, 0, 0, 0.75f);
             builder.DrawCircles(limitParams.SelectMany(x => new[]
             {
-                new CircleInstance(new(x.XAftL, x.Y), x.IsValid ? validColor : invalidColor, false, 6, 0),
-                new CircleInstance(new(x.XAftR, x.Y), x.IsValid ? validColor : invalidColor, false, 6, 0),
+                new CircleInstance(new(x.XNextL, x.Y), x.IsValid ? validColor : invalidColor, false, 6, 0),
+                new CircleInstance(new(x.XNextR, x.Y), x.IsValid ? validColor : invalidColor, false, 6, 0),
             }));
         }
     }
