@@ -332,7 +332,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 if (!(rectMinX <= timeX && timeX <= rectMaxX))
                     return;
 
-                var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
+                var rotate = (float)Math.Atan2(toX - fromX, height);
                 var pos = new Vector2((float)timeX, (float)timeY);
 
                 DrawVisibleObject_PreviewMode(target, obj, pos, rotate, buffer);

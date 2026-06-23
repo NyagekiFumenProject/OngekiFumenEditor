@@ -114,7 +114,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             ref readonly var info = ref spriteInfoTable[(int)obj.BulletDamageTypeValue, (int)obj.TypeValue, (int)obj.SizeValue];
 
-            var offsetPos = pos + info.OriginOffset;
+            var offsetPos = pos + Vector2.Transform(info.OriginOffset, Matrix3x2.CreateRotation(rotate));
             buffer.Normal[info.Texture].Add((info.Size, offsetPos, rotate, Vector4.One));
             if (obj.IsSelected)
                 buffer.Selected[info.Texture].Add((info.Size * 1.3f, offsetPos, rotate, Vector4.One));
