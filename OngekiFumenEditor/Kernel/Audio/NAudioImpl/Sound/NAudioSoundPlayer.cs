@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 			}
 			else
 			{
-				//todo warn
+				OngekiFumenEditor.Utils.Log.LogWarn($"Play loop sound ignored because loop id already exists: loopId={loopId}");
 			}
 		}
 
@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 			}
 			else
 			{
-				//todo warn
+				OngekiFumenEditor.Utils.Log.LogWarn($"Stop loop sound ignored because loop id does not exist: loopId={loopId}");
 			}
 		}
 	}

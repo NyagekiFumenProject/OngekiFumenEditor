@@ -218,6 +218,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     posMap[obj] = pos;
                 }
 
+                void WarnPasteFailed(string reason)
+                {
+                    Log.LogWarn($"Paste object failed: reason={reason}, object={copied.GetType().Name}, sourceEditor={sourceEditor?.DisplayName}, targetEditor={targetEditor?.DisplayName}, pasteOption={pasteOption}, sourceCanvasPos={sourceCanvasPos}");
+                }
+
 
                 switch (copied)
                 {
@@ -276,7 +281,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                     if (targetEditor.ConvertYToTGrid_DesignMode(newY) is not TGrid nt)
                     {
-                        //todo warn
+                        WarnPasteFailed($"convert target y to TGrid failed, y={newY}");
                         return;
                     }
                     updateY(timelineObject, newY, nt);
@@ -300,7 +305,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                             if (targetEditor.ConvertYToTGrid_DesignMode(newEndIndicatorY) is not TGrid newEndIndicatorTGrid)
                             {
-                                //todo warn
+                                WarnPasteFailed($"convert end indicator y to TGrid failed, y={newEndIndicatorY}");
                                 return;
                             }
 
@@ -319,7 +324,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                                 if (targetEditor.ConvertYToTGrid_DesignMode(newChildY) is not TGrid newChildTGrid)
                                 {
-                                    //todo warn
+                                    WarnPasteFailed($"convert child y to TGrid failed, child={child.GetType().Name}, y={newChildY}");
                                     return;
                                 }
 
@@ -335,7 +340,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                                     if (targetEditor.ConvertYToTGrid_DesignMode(newControlY) is not TGrid newControlTGrid)
                                     {
-                                        //todo warn
+                                        WarnPasteFailed($"convert path control y to TGrid failed, control={control.GetType().Name}, y={newControlY}");
                                         return;
                                     }
 
@@ -373,7 +378,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                     if (XGridCalculator.ConvertXToXGrid(newX, targetEditor) is not XGrid nx)
                     {
-                        //todo warn
+                        WarnPasteFailed($"convert target x to XGrid failed, x={newX}");
                         return;
                     }
                     updateX(horizonPositionObject, newX, nx);
@@ -393,7 +398,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                             if (XGridCalculator.ConvertXToXGrid(newChildX, targetEditor) is not XGrid newChildXGrid)
                             {
-                                //todo warn
+                                WarnPasteFailed($"convert child x to XGrid failed, child={child.GetType().Name}, x={newChildX}");
                                 return;
                             }
                             updateX(child, newChildX, newChildXGrid);
@@ -409,7 +414,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                                 if (XGridCalculator.ConvertXToXGrid(newControlX, targetEditor) is not XGrid newControlXGrid)
                                 {
-                                    //todo warn
+                                    WarnPasteFailed($"convert path control x to XGrid failed, control={control.GetType().Name}, x={newControlX}");
                                     return;
                                 }
                                 updateX(control, newControlX, newControlXGrid);

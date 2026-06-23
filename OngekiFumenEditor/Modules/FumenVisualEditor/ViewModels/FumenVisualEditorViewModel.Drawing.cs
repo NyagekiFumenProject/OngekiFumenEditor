@@ -439,7 +439,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 }
                 else
                 {
-                    //todo log it
+                    Log.LogWarn($"Soflan group drawing context not found: object={obj.GetType().Name}, objectId={obj.Id}, soflanGroup={soflanGroup}");
                 }
             }
         }
@@ -973,7 +973,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
     {
         if (executionContext.Source is not ContentControl contentControl)
-            return; //todo throw exception
+            throw new InvalidOperationException($"Fumen render control host source must be ContentControl, actual={executionContext.Source?.GetType().FullName}");
         if (renderImpl != null)
             return;
 

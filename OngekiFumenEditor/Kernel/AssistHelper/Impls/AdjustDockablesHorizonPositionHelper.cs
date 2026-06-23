@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -27,7 +28,7 @@ namespace OngekiFumenEditor.Kernel.AssistHelper.Impls
 					}
 					else
 					{
-						//todo report error.
+						Log.LogError($"Adjust dockable horizon position failed: object={o.GetType().Name}, tGrid={o.TGrid}, referenceLane={o.ReferenceLaneStart?.RecordId}");
 					}
 				}
 			}

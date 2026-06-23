@@ -13,7 +13,6 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 		{
 			var dataArr = args.GetDataArray<float>();
 
-			//todo add BeamTrack
 			beam.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
 			beam.XGrid = new XGrid(dataArr[4]);
 		}

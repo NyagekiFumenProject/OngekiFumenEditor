@@ -273,7 +273,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
         {
             if (executionContext.Source is not ContentControl contentControl)
-                return; //todo throw exception
+                throw new InvalidOperationException($"Waveform render control host source must be ContentControl, actual={executionContext.Source?.GetType().FullName}");
             //check render control is created and shown.
             if (renderImpl != null)
                 return;
