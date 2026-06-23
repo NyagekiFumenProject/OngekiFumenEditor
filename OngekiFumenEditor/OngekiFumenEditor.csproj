@@ -787,9 +787,6 @@
 		<PropertyGroup>
 			<RecommendedScriptVerifierPath>..\Tools\RecommendedScriptVerifier\bin\$(Configuration)\net10.0-windows\RecommendedScriptVerifier.dll</RecommendedScriptVerifierPath>
 		</PropertyGroup>
-		<Exec
-			Command="dotnet &quot;$(RecommendedScriptVerifierPath)&quot; --script-root &quot;$(MSBuildProjectDirectory)\Resources\Scripts\EmbbedRecommended&quot; --reference-dir &quot;$(TargetDir).&quot; --reference-file &quot;$(TargetPath)&quot;"
-			StandardOutputImportance="High"
-			StandardErrorImportance="High" />
+		<Exec Command="dotnet &quot;$(RecommendedScriptVerifierPath)&quot; --script-root &quot;$(MSBuildProjectDirectory)\Resources\Scripts\EmbbedRecommended&quot; --reference-dir &quot;$(TargetDir).&quot; --reference-file &quot;$(TargetPath)&quot;" StandardOutputImportance="High" StandardErrorImportance="High" />
 	</Target>
 </Project>

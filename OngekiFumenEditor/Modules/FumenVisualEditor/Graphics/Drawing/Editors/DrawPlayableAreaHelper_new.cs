@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
@@ -52,6 +53,45 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private readonly record struct BoundarySample(double Bef, double Aft);
 
+        private sealed class FieldAreaFrameContext : IDisposable
+        {
+            public FieldAreaFrameContext(IFumenEditorDrawingContext target, SoflanList soflanGroup, TGrid minTGrid, TGrid maxTGrid)
+            {
+                Target = target;
+                SoflanGroup = soflanGroup;
+                MinTotalTGrid = minTGrid.TotalGrid;
+                MaxTotalTGrid = maxTGrid.TotalGrid;
+                LeftWallCandidates = ObjectPool.GetPooledList<LaneStartBase>();
+                RightWallCandidates = ObjectPool.GetPooledList<LaneStartBase>();
+
+                foreach (var lane in target.Editor.Fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid))
+                {
+                    switch (lane.LaneType)
+                    {
+                        case LaneType.WallLeft:
+                            LeftWallCandidates.Add(lane);
+                            break;
+                        case LaneType.WallRight:
+                            RightWallCandidates.Add(lane);
+                            break;
+                    }
+                }
+            }
+
+            public IFumenEditorDrawingContext Target { get; }
+            public SoflanList SoflanGroup { get; }
+            public int MinTotalTGrid { get; }
+            public int MaxTotalTGrid { get; }
+            public IPooledList<LaneStartBase> LeftWallCandidates { get; }
+            public IPooledList<LaneStartBase> RightWallCandidates { get; }
+
+            public void Dispose()
+            {
+                LeftWallCandidates.Dispose();
+                RightWallCandidates.Dispose();
+            }
+        }
+
         public void Initalize(IRenderManagerImpl impl)
         {
             UpdateProps();
@@ -102,9 +142,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             if (fieldMinTGrid is null || fieldMaxTGrid is null || fieldMaxTGrid < fieldMinTGrid)
                 return;
 
-            var soflanGroup = target.CurrentDrawingTargetContext.CurrentSoflanList;
+            using var frameContext = new FieldAreaFrameContext(
+                target,
+                target.CurrentDrawingTargetContext.CurrentSoflanList,
+                fieldMinTGrid,
+                fieldMaxTGrid);
+
             using var sampleTGrids = ObjectPool.GetPooledSet<int>();
-            CollectBaseSampleTGrids(target, fieldMinTGrid, fieldMaxTGrid, soflanGroup, sampleTGrids);
+            CollectBaseSampleTGrids(frameContext, sampleTGrids);
 
             if (sampleTGrids.Count < 2)
                 return;
@@ -112,13 +157,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             using var sortedTGrids = ObjectPool.GetPooledList<int>();
             sortedTGrids.AddRange(sampleTGrids);
             sortedTGrids.Sort(Comparer<int>.Default);
-            AddScreenDistanceSamples(target, soflanGroup, sortedTGrids);
+            AddScreenDistanceSamples(target, frameContext.SoflanGroup, sortedTGrids);
 
             using var limitParams = ObjectPool.GetPooledList<FieldLimitParam>();
             for (var i = 0; i < sortedTGrids.Count; i++)
             {
-                var sample = BuildAreaSample(target, sortedTGrids[i]);
-                limitParams.Add(ConvertToLimitParam(target, soflanGroup, sample));
+                var sample = BuildAreaSample(frameContext, sortedTGrids[i]);
+                limitParams.Add(ConvertToLimitParam(target, frameContext.SoflanGroup, sample));
             }
 
             DrawFieldQuads(builder, limitParams, playFieldForegroundColor);
@@ -126,56 +171,146 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             DebugDrawSamples(target, builder, limitParams);
         }
 
-        private static void CollectBaseSampleTGrids(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, SoflanList soflanGroup, ISet<int> result)
+        private static void CollectBaseSampleTGrids(FieldAreaFrameContext context, ISet<int> result)
         {
-            var minTotalTGrid = minTGrid.TotalGrid;
-            var maxTotalTGrid = maxTGrid.TotalGrid;
+            var minTotalTGrid = context.MinTotalTGrid;
+            var maxTotalTGrid = context.MaxTotalTGrid;
             int? prevContextTotalTGrid = null;
             int? nextContextTotalTGrid = null;
 
-            void addSampleOrContext(int totalTGrid)
-            {
-                if (minTotalTGrid <= totalTGrid && totalTGrid <= maxTotalTGrid)
-                {
-                    result.Add(totalTGrid);
-                    return;
-                }
+            AddSampleOrContext(
+                minTotalTGrid,
+                minTotalTGrid,
+                maxTotalTGrid,
+                result,
+                ref prevContextTotalTGrid,
+                ref nextContextTotalTGrid);
+            AddSampleOrContext(
+                maxTotalTGrid,
+                minTotalTGrid,
+                maxTotalTGrid,
+                result,
+                ref prevContextTotalTGrid,
+                ref nextContextTotalTGrid);
 
-                if (totalTGrid < minTotalTGrid)
-                    prevContextTotalTGrid = !prevContextTotalTGrid.HasValue || totalTGrid > prevContextTotalTGrid.Value
-                        ? totalTGrid
-                        : prevContextTotalTGrid;
-                else
-                    nextContextTotalTGrid = !nextContextTotalTGrid.HasValue || totalTGrid < nextContextTotalTGrid.Value
-                        ? totalTGrid
-                        : nextContextTotalTGrid;
-            }
-
-            addSampleOrContext(minTotalTGrid);
-            addSampleOrContext(maxTotalTGrid);
-
-            var currentTGrid = target.Editor.GetViewportTGrid();
+            var currentTGrid = context.Target.Editor.GetViewportTGrid();
             if (currentTGrid is not null)
-                addSampleOrContext(currentTGrid.TotalGrid);
+                AddSampleOrContext(
+                    currentTGrid.TotalGrid,
+                    minTotalTGrid,
+                    maxTotalTGrid,
+                    result,
+                    ref prevContextTotalTGrid,
+                    ref nextContextTotalTGrid);
 
-            var fumen = target.Editor.Fumen;
-            foreach (var lane in fumen.Lanes.Where(x => x.LaneType is LaneType.WallLeft or LaneType.WallRight))
-            {
-                addSampleOrContext(lane.MinTGrid.TotalGrid);
-                addSampleOrContext(lane.MaxTGrid.TotalGrid);
-                addSampleOrContext(lane.TGrid.TotalGrid);
+            AddWallCandidateSamples(
+                context.LeftWallCandidates,
+                minTotalTGrid,
+                maxTotalTGrid,
+                result,
+                ref prevContextTotalTGrid,
+                ref nextContextTotalTGrid);
+            AddWallCandidateSamples(
+                context.RightWallCandidates,
+                minTotalTGrid,
+                maxTotalTGrid,
+                result,
+                ref prevContextTotalTGrid,
+                ref nextContextTotalTGrid);
 
-                foreach (var child in lane.Children)
-                    addSampleOrContext(child.TGrid.TotalGrid);
-            }
-
-            foreach (var point in soflanGroup.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList))
-                addSampleOrContext(point.TGrid.TotalGrid);
+            AddSoflanSamples(
+                context.SoflanGroup.GetCachedSoflanPositionList_PreviewMode(context.Target.Editor.Fumen.BpmList),
+                minTotalTGrid,
+                maxTotalTGrid,
+                result,
+                ref prevContextTotalTGrid,
+                ref nextContextTotalTGrid);
 
             if (prevContextTotalTGrid.HasValue)
                 result.Add(prevContextTotalTGrid.Value);
             if (nextContextTotalTGrid.HasValue)
                 result.Add(nextContextTotalTGrid.Value);
+        }
+
+        private static void AddWallCandidateSamples(
+            IReadOnlyList<LaneStartBase> candidates,
+            int minTotalTGrid,
+            int maxTotalTGrid,
+            ISet<int> result,
+            ref int? prevContextTotalTGrid,
+            ref int? nextContextTotalTGrid)
+        {
+            for (var i = 0; i < candidates.Count; i++)
+            {
+                var lane = candidates[i];
+                AddSampleOrContext(lane.MinTGrid.TotalGrid, minTotalTGrid, maxTotalTGrid, result, ref prevContextTotalTGrid, ref nextContextTotalTGrid);
+                AddSampleOrContext(lane.MaxTGrid.TotalGrid, minTotalTGrid, maxTotalTGrid, result, ref prevContextTotalTGrid, ref nextContextTotalTGrid);
+                AddSampleOrContext(lane.TGrid.TotalGrid, minTotalTGrid, maxTotalTGrid, result, ref prevContextTotalTGrid, ref nextContextTotalTGrid);
+
+                foreach (var child in lane.Children)
+                    AddSampleOrContext(child.TGrid.TotalGrid, minTotalTGrid, maxTotalTGrid, result, ref prevContextTotalTGrid, ref nextContextTotalTGrid);
+            }
+        }
+
+        private static void AddSoflanSamples(
+            IList<SoflanList.SoflanPoint> soflanPoints,
+            int minTotalTGrid,
+            int maxTotalTGrid,
+            ISet<int> result,
+            ref int? prevContextTotalTGrid,
+            ref int? nextContextTotalTGrid)
+        {
+            var startIndex = LowerBoundSoflanPoint(soflanPoints, minTotalTGrid);
+            if (startIndex > 0)
+                AddSampleOrContext(soflanPoints[startIndex - 1].TGrid.TotalGrid, minTotalTGrid, maxTotalTGrid, result, ref prevContextTotalTGrid, ref nextContextTotalTGrid);
+
+            for (var i = startIndex; i < soflanPoints.Count; i++)
+            {
+                var totalTGrid = soflanPoints[i].TGrid.TotalGrid;
+                AddSampleOrContext(totalTGrid, minTotalTGrid, maxTotalTGrid, result, ref prevContextTotalTGrid, ref nextContextTotalTGrid);
+
+                if (totalTGrid > maxTotalTGrid)
+                    break;
+            }
+        }
+
+        private static int LowerBoundSoflanPoint(IList<SoflanList.SoflanPoint> soflanPoints, int totalTGrid)
+        {
+            var lo = 0;
+            var hi = soflanPoints.Count;
+            while (lo < hi)
+            {
+                var mid = lo + ((hi - lo) >> 1);
+                if (soflanPoints[mid].TGrid.TotalGrid < totalTGrid)
+                    lo = mid + 1;
+                else
+                    hi = mid;
+            }
+            return lo;
+        }
+
+        private static void AddSampleOrContext(
+            int totalTGrid,
+            int minTotalTGrid,
+            int maxTotalTGrid,
+            ISet<int> result,
+            ref int? prevContextTotalTGrid,
+            ref int? nextContextTotalTGrid)
+        {
+            if (minTotalTGrid <= totalTGrid && totalTGrid <= maxTotalTGrid)
+            {
+                result.Add(totalTGrid);
+                return;
+            }
+
+            if (totalTGrid < minTotalTGrid)
+                prevContextTotalTGrid = !prevContextTotalTGrid.HasValue || totalTGrid > prevContextTotalTGrid.Value
+                    ? totalTGrid
+                    : prevContextTotalTGrid;
+            else
+                nextContextTotalTGrid = !nextContextTotalTGrid.HasValue || totalTGrid < nextContextTotalTGrid.Value
+                    ? totalTGrid
+                    : nextContextTotalTGrid;
         }
 
         private static void AddScreenDistanceSamples(IFumenEditorDrawingContext target, SoflanList soflanGroup, IList<int> sortedTGrids)
@@ -230,47 +365,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
         }
 
-        private static FieldAreaSample BuildAreaSample(IFumenEditorDrawingContext target, int totalTGrid)
+        private static FieldAreaSample BuildAreaSample(FieldAreaFrameContext context, int totalTGrid)
         {
             var tGrid = TGrid.FromTotalGrid(totalTGrid);
-            var left = QueryBoundaryXGridUnit(target, LaneType.WallLeft, tGrid) ?? new(DefaultLeftXGridUnit, DefaultLeftXGridUnit);
-            var right = QueryBoundaryXGridUnit(target, LaneType.WallRight, tGrid) ?? new(DefaultRightXGridUnit, DefaultRightXGridUnit);
-            var isValid = IsFinite(left.Bef) && IsFinite(left.Aft) && IsFinite(right.Bef) && IsFinite(right.Aft)
-                && left.Bef <= right.Bef
-                && left.Aft <= right.Aft;
+            var left = QueryBoundaryXGridUnit(context.LeftWallCandidates, LaneType.WallLeft, tGrid) ?? new(DefaultLeftXGridUnit, DefaultLeftXGridUnit);
+            var right = QueryBoundaryXGridUnit(context.RightWallCandidates, LaneType.WallRight, tGrid) ?? new(DefaultRightXGridUnit, DefaultRightXGridUnit);
+            var isValid = IsFinite(left.Bef) && IsFinite(left.Aft) && IsFinite(right.Bef) && IsFinite(right.Aft);
 
             return new(totalTGrid, left.Bef, left.Aft, right.Bef, right.Aft, isValid);
         }
 
-        private static BoundarySample? QueryBoundaryXGridUnit(IFumenEditorDrawingContext target, LaneType laneType, TGrid tGrid)
+        private static BoundarySample? QueryBoundaryXGridUnit(IReadOnlyList<LaneStartBase> candidates, LaneType laneType, TGrid tGrid)
         {
-            var bef = QueryBoundaryXGridUnit(target, laneType, tGrid, BoundaryEdge.Bef);
-            var aft = QueryBoundaryXGridUnit(target, laneType, tGrid, BoundaryEdge.Aft);
+            double? bef = null;
+            double? aft = null;
+            for (var i = 0; i < candidates.Count; i++)
+            {
+                var lane = candidates[i];
+                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Bef)
+                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Bef) is double befValue)
+                {
+                    bef = MergeBoundary(laneType, bef, befValue);
+                }
+
+                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Aft)
+                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Aft) is double aftValue)
+                {
+                    aft = MergeBoundary(laneType, aft, aftValue);
+                }
+            }
+
             if (!bef.HasValue && !aft.HasValue)
                 return null;
 
             var defaultValue = laneType == LaneType.WallLeft ? DefaultLeftXGridUnit : DefaultRightXGridUnit;
             return new(bef ?? defaultValue, aft ?? defaultValue);
-        }
-
-        private static double? QueryBoundaryXGridUnit(IFumenEditorDrawingContext target, LaneType laneType, TGrid tGrid, BoundaryEdge edge)
-        {
-            var candidates = target.Editor.Fumen.Lanes
-                .GetVisibleStartObjects(tGrid, tGrid)
-                .Where(x => x.LaneType == laneType)
-                .Where(x => IsActiveAtBoundaryEdge(x, tGrid, edge))
-                .Select(x => CalculateBoundaryXGridUnit(x, tGrid, edge))
-                .Where(x => x.HasValue)
-                .Select(x => x.Value)
-                .ToArray();
-
-            if (candidates.Length == 0)
-                return null;
-
-            if (laneType == LaneType.WallLeft)
-                return candidates.Min();
-
-            return candidates.Max();
         }
 
         private static bool IsActiveAtBoundaryEdge(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
@@ -283,38 +412,59 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         private static double? CalculateBoundaryXGridUnit(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
         {
-            var children = lane.GetChildObjectsFromTGrid(tGrid).ToArray();
-            if (children.Length == 0)
+            var children = lane.GetChildObjectsFromTGrid(tGrid);
+            var isPathValid = lane.IsPathVaild();
+            var childCount = 0;
+            ConnectableChildObjectBase firstChild = null;
+            ConnectableChildObjectBase firstExactChild = null;
+            ConnectableChildObjectBase lastExactChild = null;
+            double? bestValue = null;
+
+            foreach (var child in children)
+            {
+                childCount++;
+                firstChild ??= child;
+
+                if (child.TGrid.TotalGrid == tGrid.TotalGrid)
+                {
+                    firstExactChild ??= child;
+                    lastExactChild = child;
+                }
+
+                if (!isPathValid && child.CalulateXGrid(tGrid)?.TotalUnit is double childValue)
+                    bestValue = MergeBoundary(lane.LaneType, bestValue, childValue);
+            }
+
+            if (childCount == 0)
             {
                 var x = lane.CalulateXGrid(tGrid)?.TotalUnit ?? lane.XGrid?.TotalUnit ?? double.NaN;
                 return double.IsNaN(x) ? null : x;
             }
 
-            var exactChildren = children
-                .Where(x => x.TGrid.TotalGrid == tGrid.TotalGrid)
-                .ToArray();
-            if (exactChildren.Length > 0)
+            if (firstExactChild is not null && lastExactChild is not null)
             {
-                return edge == BoundaryEdge.Bef
-                    ? exactChildren.First().XGrid.TotalUnit
-                    : exactChildren.Last().XGrid.TotalUnit;
+                var child = edge == BoundaryEdge.Bef ? firstExactChild : lastExactChild;
+                return child.XGrid.TotalUnit;
             }
 
-            if (lane.IsPathVaild())
-                return children.FirstOrDefault()?.CalulateXGrid(tGrid)?.TotalUnit;
+            if (isPathValid)
+                return firstChild?.CalulateXGrid(tGrid)?.TotalUnit;
 
-            var values = children
-                .Select(x => x.CalulateXGrid(tGrid)?.TotalUnit)
-                .Where(x => x.HasValue)
-                .Select(x => x.Value)
-                .ToArray();
+            return bestValue;
+        }
 
-            if (values.Length == 0)
-                return null;
+        private static double MergeBoundary(LaneType laneType, double currentValue, double newValue)
+        {
+            return laneType == LaneType.WallLeft
+                ? Math.Min(currentValue, newValue)
+                : Math.Max(currentValue, newValue);
+        }
 
-            return lane.LaneType == LaneType.WallLeft
-                ? values.Min()
-                : values.Max();
+        private static double MergeBoundary(LaneType laneType, double? currentValue, double newValue)
+        {
+            return currentValue.HasValue
+                ? MergeBoundary(laneType, currentValue.Value, newValue)
+                : newValue;
         }
 
         private static FieldLimitParam ConvertToLimitParam(IFumenEditorDrawingContext target, SoflanList soflanGroup, FieldAreaSample sample)
@@ -328,19 +478,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             var xBefR = XGridCalculator.ConvertXGridToX(sample.PlaceBefR, target.Editor);
             var xAftR = XGridCalculator.ConvertXGridToX(sample.PlaceAftR, target.Editor);
 
-            var isValid = IsFinite(xBefL) && IsFinite(xAftL) && IsFinite(xBefR) && IsFinite(xAftR)
-                && xBefL <= xBefR
-                && xAftL <= xAftR;
+            var isValid = IsFinite(xBefL) && IsFinite(xAftL) && IsFinite(xBefR) && IsFinite(xAftR);
+            var normalizedBef = NormalizeBoundaryPair(xBefL, xBefR);
+            var normalizedAft = NormalizeBoundaryPair(xAftL, xAftR);
 
             return new(
                 sample.TotalTGrid,
-                (float)xBefL,
-                (float)xAftL,
-                (float)xBefR,
-                (float)xAftR,
+                (float)normalizedBef.Left,
+                (float)normalizedAft.Left,
+                (float)normalizedBef.Right,
+                (float)normalizedAft.Right,
                 (float)y,
                 isValid);
         }
+
+        private static (double Left, double Right) NormalizeBoundaryPair(double x1, double x2)
+            => x1 <= x2 ? (x1, x2) : (x2, x1);
 
         private static void DrawFieldQuads(IDrawCommandListBuilder builder, IList<FieldLimitParam> limitParams, Vector4 playFieldForegroundColor)
         {
