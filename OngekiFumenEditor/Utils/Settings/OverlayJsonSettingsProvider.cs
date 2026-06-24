@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils.Json;
+using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -50,7 +51,7 @@ namespace OngekiFumenEditor.Utils.Settings
                 }
                 catch (Exception e)
                 {
-                    Log.LogWarn($"Load overlay json settings failed: {jsonFile}\n{e}");
+                    FileLogOutput.WriteLog($"Load overlay json settings failed: {jsonFile}\n{e}");
                 }
             }
         }
@@ -70,7 +71,7 @@ namespace OngekiFumenEditor.Utils.Settings
                 }
                 catch (Exception e)
                 {
-                    Log.LogError($"Save overlay json settings failed: {jsonFile}", e);
+                    FileLogOutput.WriteLog($"Save overlay json settings failed: {jsonFile}, message: {e.Message}");
                 }
             }
         }
@@ -99,7 +100,7 @@ namespace OngekiFumenEditor.Utils.Settings
                     }
                     catch (Exception e)
                     {
-                        Log.LogWarn($"Deserialize setting property failed: group={groupName}, property={property.Name}\n{e}");
+                        FileLogOutput.WriteLog($"Deserialize setting property failed: group={groupName}, property={property.Name}\n{e}");
                         value.PropertyValue = TypeConvertHelper.ConvertFromString(property.PropertyType, property.DefaultValue?.ToString());
                     }
                 }
