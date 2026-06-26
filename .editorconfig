@@ -9,3 +9,7 @@ insert_final_newline = true
 [*.cs]
 # CA1416: 验证平台兼容性
 dotnet_diagnostic.CA1416.severity = none
+
+# 花括号偏好:单行语句不加花括号,仅多行块才加。
+# 即"if 的 then 为单行语句且无注释修饰时不准用大括号包围"。
+csharp_prefer_braces = when_multiline:warning
