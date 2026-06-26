@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -10,21 +10,21 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.SplashScreen.Commands.ShowSplashScreen
 {
-	[CommandHandler]
-	public class ShowSplashScreenCommandHandler : CommandHandlerBase<ShowSplashScreenCommandDefinition>
-	{
-		private readonly IWindowManager windowManager;
+    [CommandHandler]
+    public class ShowSplashScreenCommandHandler : CommandHandlerBase<ShowSplashScreenCommandDefinition>
+    {
+        private readonly IWindowManager windowManager;
 
-		[ImportingConstructor]
-		public ShowSplashScreenCommandHandler(IWindowManager windowManager)
-		{
-			this.windowManager = windowManager;
-		}
+        [ImportingConstructor]
+        public ShowSplashScreenCommandHandler(IWindowManager windowManager)
+        {
+            this.windowManager = windowManager;
+        }
 
-		public override Task Run(Command command)
-		{
-			windowManager.ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
-			return TaskUtility.Completed;
-		}
-	}
+        public override Task Run(Command command)
+        {
+            windowManager.ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
+            return TaskUtility.Completed;
+        }
+    }
 }

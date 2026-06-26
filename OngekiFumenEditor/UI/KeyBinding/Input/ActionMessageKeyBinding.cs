@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Microsoft.Xaml.Behaviors;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using System;

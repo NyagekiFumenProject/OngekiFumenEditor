@@ -1,4 +1,4 @@
-﻿This folder is source codes from https://github.com/FontStashSharp/FontStashSharp/tree/main/samples/FontStashSharp.Samples.OpenTK
+This folder is source codes from https://github.com/FontStashSharp/FontStashSharp/tree/main/samples/FontStashSharp.Samples.OpenTK
 I copy and modify them so it could make my life easier.
 -----------------------------
 The zlib/libpng License

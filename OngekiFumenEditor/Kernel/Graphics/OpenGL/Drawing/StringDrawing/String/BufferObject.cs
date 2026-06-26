@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -6,50 +6,50 @@ using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String
 {
-	internal sealed class BufferObject<T> : IDisposable where T : unmanaged
-	{
-		private readonly int _handle;
-		private readonly BufferTarget _bufferType;
-		private readonly int _size;
+    internal sealed class BufferObject<T> : IDisposable where T : unmanaged
+    {
+        private readonly int _handle;
+        private readonly BufferTarget _bufferType;
+        private readonly int _size;
 
-		public unsafe BufferObject(int size, BufferTarget bufferType, bool isDynamic)
-		{
-			_bufferType = bufferType;
-			_size = size;
+        public unsafe BufferObject(int size, BufferTarget bufferType, bool isDynamic)
+        {
+            _bufferType = bufferType;
+            _size = size;
 
-			_handle = GL.GenBuffer();
-			GLUtility.CheckError();
+            _handle = GL.GenBuffer();
+            GLUtility.CheckError();
 
-			Bind();
+            Bind();
 
-			var elementSizeInBytes = Marshal.SizeOf<T>();
-			GL.BufferData(bufferType, size * elementSizeInBytes, IntPtr.Zero, isDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
-			GLUtility.CheckError();
-		}
+            var elementSizeInBytes = Marshal.SizeOf<T>();
+            GL.BufferData(bufferType, size * elementSizeInBytes, IntPtr.Zero, isDynamic ? BufferUsageHint.StreamDraw : BufferUsageHint.StaticDraw);
+            GLUtility.CheckError();
+        }
 
-		public void Bind()
-		{
-			GL.BindBuffer(_bufferType, _handle);
-			GLUtility.CheckError();
-		}
+        public void Bind()
+        {
+            GL.BindBuffer(_bufferType, _handle);
+            GLUtility.CheckError();
+        }
 
-		public void Dispose()
-		{
-			GL.DeleteBuffer(_handle);
-			GLUtility.CheckError();
-		}
+        public void Dispose()
+        {
+            GL.DeleteBuffer(_handle);
+            GLUtility.CheckError();
+        }
 
-		public unsafe void SetData(T[] data, int startIndex, int elementCount)
-		{
-			Bind();
+        public unsafe void SetData(T[] data, int startIndex, int elementCount)
+        {
+            Bind();
 
-			fixed (T* dataPtr = &data[startIndex])
-			{
-				var elementSizeInBytes = sizeof(T);
+            fixed (T* dataPtr = &data[startIndex])
+            {
+                var elementSizeInBytes = sizeof(T);
 
-				GL.BufferSubData(_bufferType, IntPtr.Zero, elementCount * elementSizeInBytes, new IntPtr(dataPtr));
-				GLUtility.CheckError();
-			}
-		}
-	}
+                GL.BufferSubData(_bufferType, IntPtr.Zero, elementCount * elementSizeInBytes, new IntPtr(dataPtr));
+                GLUtility.CheckError();
+            }
+        }
+    }
 }

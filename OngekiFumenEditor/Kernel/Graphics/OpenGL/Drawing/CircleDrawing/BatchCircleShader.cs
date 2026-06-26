@@ -1,18 +1,18 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
 {
     internal sealed class BatchCircleShader : DefaultOpenGLShader
-	{
-		private static BatchCircleShader _shared;
-		private int modelViewProjectionLocation = int.MinValue;
-		private int resolutionLocation = int.MinValue;
+    {
+        private static BatchCircleShader _shared;
+        private int modelViewProjectionLocation = int.MinValue;
+        private int resolutionLocation = int.MinValue;
 
-		public BatchCircleShader()
-		{
-			VertexProgram = @"
+        public BatchCircleShader()
+        {
+            VertexProgram = @"
                 #version 330
 
                 out vec2 pointPos;
@@ -33,7 +33,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
                     varying_radius = in_radius;
                     varying_lineWidth = in_lineWidth;
 
-	                gl_Position=ModelViewProjection * vec4(in_pos,0.0,1.0);
+                    gl_Position=ModelViewProjection * vec4(in_pos,0.0,1.0);
                     gl_PointSize = 900.0;
 
                     vec2 ndcPos = gl_Position.xy / gl_Position.w;
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
                 ";
 
 
-			FragmentProgram = @"
+            FragmentProgram = @"
                 #version 330
 
                 in vec2  pointPos;
@@ -55,18 +55,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
                 out vec4 out_color;
 
                 void main(){
-	                float dist = distance(pointPos, gl_FragCoord.xy);
+                    float dist = distance(pointPos, gl_FragCoord.xy);
 
 
                     if (dist > varying_radius)
                         discard;
 
                     float d = dist / varying_radius;
-                    
+
                     if (varying_lineWidth > 0.0) {
 
             float inner_radius = 1.0 - varying_lineWidth / varying_radius;
-            
+
             if (d < inner_radius) {
 
                 discard;
@@ -83,19 +83,19 @@ else{
 }
                 }
                 ";
-		}
+        }
 
-		public static BatchCircleShader Shared => _shared ??= _createShared();
+        public static BatchCircleShader Shared => _shared ??= _createShared();
 
-		public int ModelViewProjectionLocation => modelViewProjectionLocation == int.MinValue ? modelViewProjectionLocation = GetUniformLocation("ModelViewProjection") : modelViewProjectionLocation;
+        public int ModelViewProjectionLocation => modelViewProjectionLocation == int.MinValue ? modelViewProjectionLocation = GetUniformLocation("ModelViewProjection") : modelViewProjectionLocation;
 
-		public int ResolutionLocation => resolutionLocation == int.MinValue ? resolutionLocation = GetUniformLocation("uResolution") : resolutionLocation;
+        public int ResolutionLocation => resolutionLocation == int.MinValue ? resolutionLocation = GetUniformLocation("uResolution") : resolutionLocation;
 
-		private static BatchCircleShader _createShared()
-		{
-			var shader = new BatchCircleShader();
-			shader.Compile();
-			return shader;
-		}
-	}
+        private static BatchCircleShader _createShared()
+        {
+            var shader = new BatchCircleShader();
+            shader.Compile();
+            return shader;
+        }
+    }
 }

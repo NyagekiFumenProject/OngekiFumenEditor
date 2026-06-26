@@ -1,18 +1,18 @@
-﻿using Gemini.Framework.Commands;
+using Gemini.Framework.Commands;
 using OngekiFumenEditor.Properties;
 using System;
 
 namespace OngekiFumenEditor.Modules.SplashScreen.Commands.ShowSplashScreen
 {
-	[CommandDefinition]
-	public class ShowSplashScreenCommandDefinition : CommandDefinition
-	{
-		public override string Name => "Toolbar.ShowSplashScreen";
+    [CommandDefinition]
+    public class ShowSplashScreenCommandDefinition : CommandDefinition
+    {
+        public override string Name => "Toolbar.ShowSplashScreen";
 
-		public override string Text => Resources.ShowSplashScreenCommand;
+        public override string Text => Resources.ShowSplashScreenCommand;
 
-		public override string ToolTip => Resources.ShowSplashScreenCommand;
+        public override string ToolTip => Resources.ShowSplashScreenCommand;
 
-		public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/home.png");
-	}
+        public override Uri IconSource => new Uri("pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/home.png");
+    }
 }

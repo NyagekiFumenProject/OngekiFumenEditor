@@ -208,7 +208,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 .Where(x => target.CheckRangeVisible(x.MinTGrid, x.MaxTGrid))
                 .Where(x =>
                 {
-                    //Only apply for wall lanes which belongs default soflan group 
+                    //Only apply for wall lanes which belongs default soflan group
                     target.Editor._cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
                     return soflanGroup == 0;
                 })

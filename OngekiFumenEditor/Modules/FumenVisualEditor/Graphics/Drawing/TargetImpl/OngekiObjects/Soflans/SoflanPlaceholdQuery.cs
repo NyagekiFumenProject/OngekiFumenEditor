@@ -1,4 +1,4 @@
-﻿using NWaves.Transforms;
+using NWaves.Transforms;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;

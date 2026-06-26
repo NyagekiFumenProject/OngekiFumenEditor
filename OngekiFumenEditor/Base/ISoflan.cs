@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-	public interface ISoflan : ITimelineObject, INotifyPropertyChanged, IDisplayableObject
-	{
-		float Speed { get; set; }
-		bool ApplySpeedInDesignMode { get; set; }
+    public interface ISoflan : ITimelineObject, INotifyPropertyChanged, IDisplayableObject
+    {
+        float Speed { get; set; }
+        bool ApplySpeedInDesignMode { get; set; }
         int SoflanGroup { get; set; }
 
         float SpeedInEditor { get; }
 
-		TGrid EndTGrid { get; set; } // ¿¼ÂÇµ½SoflanListµÄ¼ä¸ôÊ÷Ê¹ÓÃ
+        TGrid EndTGrid { get; set; } // ï¿½ï¿½ï¿½Çµï¿½SoflanListï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½
     }
 }

@@ -11,16 +11,16 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectOperationImplement
 {
-	[Export(typeof(IOngekiObjectOperationGenerator))]
-	public class InterpolatableSoflanOperationGenerator : IOngekiObjectOperationGenerator
-	{
-		public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
-			typeof(InterpolatableSoflan),
-		};
+    [Export(typeof(IOngekiObjectOperationGenerator))]
+    public class InterpolatableSoflanOperationGenerator : IOngekiObjectOperationGenerator
+    {
+        public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
+            typeof(InterpolatableSoflan),
+        };
 
-		public UIElement Generate(OngekiObjectBase obj)
-		{
-			return ViewHelper.CreateViewByViewModelType(() => new InterpolatableSoflanOperationViewModel(obj as InterpolatableSoflan));
-		}
-	}
+        public UIElement Generate(OngekiObjectBase obj)
+        {
+            return ViewHelper.CreateViewByViewModelType(() => new InterpolatableSoflanOperationViewModel(obj as InterpolatableSoflan));
+        }
+    }
 }

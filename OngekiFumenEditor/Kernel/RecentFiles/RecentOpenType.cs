@@ -1,9 +1,9 @@
-﻿namespace OngekiFumenEditor.Kernel.RecentFiles
+namespace OngekiFumenEditor.Kernel.RecentFiles
 {
-	public enum RecentOpenType
-	{
-		NormalDocumentOpen,
-		CommandOpen,
-		OpenEmbeddedRecommendedScript,
-	}
+    public enum RecentOpenType
+    {
+        NormalDocumentOpen,
+        CommandOpen,
+        OpenEmbeddedRecommendedScript,
+    }
 }

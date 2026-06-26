@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Utils.Logs
+namespace OngekiFumenEditor.Utils.Logs
 {
     public interface ILogOutput
     {

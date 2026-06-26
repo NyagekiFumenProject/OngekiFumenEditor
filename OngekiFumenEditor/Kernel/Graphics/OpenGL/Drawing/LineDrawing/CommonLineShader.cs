@@ -1,18 +1,18 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-	public sealed class CommonLineShader : DefaultOpenGLShader
-	{
-		private static CommonLineShader _shared;
-		private int modelLocation = int.MinValue;
-		private int viewProjectionLocation = int.MinValue;
+    public sealed class CommonLineShader : DefaultOpenGLShader
+    {
+        private static CommonLineShader _shared;
+        private int modelLocation = int.MinValue;
+        private int viewProjectionLocation = int.MinValue;
 
-		public CommonLineShader()
-		{
-			VertexProgram = @"
+        public CommonLineShader()
+        {
+            VertexProgram = @"
                 #version 330
 
 out vec4 varying_color;
@@ -24,33 +24,33 @@ layout(location=0) in vec2 in_pos;
 layout(location=1) in vec4 in_color;
 
 void main(){
-	gl_Position = ViewProjection * Model * vec4(in_pos.x,in_pos.y,0.0,1.0);
-	varying_color=in_color;
+    gl_Position = ViewProjection * Model * vec4(in_pos.x,in_pos.y,0.0,1.0);
+    varying_color=in_color;
 }
                 ";
-			FragmentProgram = @"
+            FragmentProgram = @"
                 #version 330
 
 in vec4 varying_color;
 out vec4 out_color;
 
 void main(){
-	out_color = varying_color;
+    out_color = varying_color;
 }
                 ";
-		}
+        }
 
-		public static CommonLineShader Shared => _shared ??= _createShared();
+        public static CommonLineShader Shared => _shared ??= _createShared();
 
-		public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
+        public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
 
-		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
+        public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
 
-		private static CommonLineShader _createShared()
-		{
-			var shader = new CommonLineShader();
-			shader.Compile();
-			return shader;
-		}
-	}
+        private static CommonLineShader _createShared()
+        {
+            var shader = new CommonLineShader();
+            shader.Compile();
+            return shader;
+        }
+    }
 }

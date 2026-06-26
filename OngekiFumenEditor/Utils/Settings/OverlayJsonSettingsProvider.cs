@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils.Json;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;

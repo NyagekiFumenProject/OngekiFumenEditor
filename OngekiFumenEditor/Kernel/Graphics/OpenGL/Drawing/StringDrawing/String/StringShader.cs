@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;

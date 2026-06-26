@@ -14,78 +14,78 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions
 {
-	public class ConnectableObjectSplitDropAction : IEditorDropHandler
-	{
-		private readonly ConnectableStartObject startObject;
-		private readonly ConnectableStartObject nextStartObject;
-		private readonly ConnectableChildObjectBase prevEndObject;
-		private readonly Action callback;
+    public class ConnectableObjectSplitDropAction : IEditorDropHandler
+    {
+        private readonly ConnectableStartObject startObject;
+        private readonly ConnectableStartObject nextStartObject;
+        private readonly ConnectableChildObjectBase prevEndObject;
+        private readonly Action callback;
 
-		public ConnectableObjectSplitDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
-		{
-			this.startObject = startObject;
-			prevEndObject = CacheLambdaActivator.CreateInstance(childObject.GetType()) as ConnectableChildObjectBase;
-			nextStartObject = CacheLambdaActivator.CreateInstance(startObject.GetType()) as ConnectableStartObject;
-			this.callback = callback;
-		}
+        public ConnectableObjectSplitDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
+        {
+            this.startObject = startObject;
+            prevEndObject = CacheLambdaActivator.CreateInstance(childObject.GetType()) as ConnectableChildObjectBase;
+            nextStartObject = CacheLambdaActivator.CreateInstance(startObject.GetType()) as ConnectableStartObject;
+            this.callback = callback;
+        }
 
-		public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
-		{
+        public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
+        {
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(dragEndPoint))
                 return;
 
             var dragTGrid = editor.ConvertYToTGrid_DesignMode(dragEndPoint.Y);
-			var splitOutChildren = new List<ConnectableChildObjectBase>();
-			var affactedObjects = new HashSet<ILaneDockable>();
+            var splitOutChildren = new List<ConnectableChildObjectBase>();
+            var affactedObjects = new HashSet<ILaneDockable>();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SplitLane, () =>
-			{
-				//¼ÆËã³öÐèÒª±»»®·Ö³öÀ´µÄºó±ß×ÓÎï¼þ¼¯ºÏ
-				splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
-				affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
-					.Concat(editor.Fumen.Holds)
-					.Where(x => x.ReferenceLaneStart == startObject));
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SplitLane, () =>
+            {
+                //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½Ö³ï¿½ï¿½ï¿½ï¿½Äºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
+                affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
+                    .Concat(editor.Fumen.Holds)
+                    .Where(x => x.ReferenceLaneStart == startObject));
 
-				//±»»®·ÖµÄ×ÓÎï¼þÉ¾³ý³öÀ´
-				foreach (var item in splitOutChildren)
-				{
-					startObject.RemoveChildObject(item);
-					nextStartObject.InsertChildObject(item.TGrid, item);
-				}
+                //ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                foreach (var item in splitOutChildren)
+                {
+                    startObject.RemoveChildObject(item);
+                    nextStartObject.InsertChildObject(item.TGrid, item);
+                }
 
-				startObject.AddChildObject(prevEndObject);
-				editor.Fumen.AddObject(nextStartObject);
+                startObject.AddChildObject(prevEndObject);
+                editor.Fumen.AddObject(nextStartObject);
 
-				editor.MoveObjectTo(prevEndObject, dragEndPoint);
-				editor.MoveObjectTo(nextStartObject, dragEndPoint);
+                editor.MoveObjectTo(prevEndObject, dragEndPoint);
+                editor.MoveObjectTo(nextStartObject, dragEndPoint);
 
-				foreach (var affactedObj in affactedObjects)
-				{
-					var tGrid = affactedObj.TGrid;
-					affactedObj.ReferenceLaneStart = (tGrid >= startObject.MinTGrid && tGrid <= startObject.MaxTGrid ? startObject : nextStartObject) as LaneStartBase;
-				}
+                foreach (var affactedObj in affactedObjects)
+                {
+                    var tGrid = affactedObj.TGrid;
+                    affactedObj.ReferenceLaneStart = (tGrid >= startObject.MinTGrid && tGrid <= startObject.MaxTGrid ? startObject : nextStartObject) as LaneStartBase;
+                }
 
-				callback?.Invoke();
-			}, () =>
-			{
-				editor.RemoveObject(nextStartObject);
-				startObject.RemoveChildObject(prevEndObject);
+                callback?.Invoke();
+            }, () =>
+            {
+                editor.RemoveObject(nextStartObject);
+                startObject.RemoveChildObject(prevEndObject);
 
-				foreach (var item in splitOutChildren)
-				{
-					nextStartObject.RemoveChildObject(item);
-					startObject.InsertChildObject(item.TGrid, item);
-				}
+                foreach (var item in splitOutChildren)
+                {
+                    nextStartObject.RemoveChildObject(item);
+                    startObject.InsertChildObject(item.TGrid, item);
+                }
 
-				foreach (var affactedObj in affactedObjects)
-				{
-					affactedObj.ReferenceLaneStart = startObject as LaneStartBase;
-				}
+                foreach (var affactedObj in affactedObjects)
+                {
+                    affactedObj.ReferenceLaneStart = startObject as LaneStartBase;
+                }
 
-				splitOutChildren.Clear();
-				affactedObjects.Clear();
-				callback?.Invoke();
-			}));
-		}
-	}
+                splitOutChildren.Clear();
+                affactedObjects.Clear();
+                callback?.Invoke();
+            }));
+        }
+    }
 }

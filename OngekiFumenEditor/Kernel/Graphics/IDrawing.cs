@@ -3,11 +3,11 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
-	public interface IDrawing
-	{
-		void PushOverrideModelMatrix(Matrix4x4 modelMatrix);
-		Matrix4x4 GetOverrideModelMatrix();
-		bool PopOverrideModelMatrix(out Matrix4x4 modelMatrix);
+    public interface IDrawing
+    {
+        void PushOverrideModelMatrix(Matrix4x4 modelMatrix);
+        Matrix4x4 GetOverrideModelMatrix();
+        bool PopOverrideModelMatrix(out Matrix4x4 modelMatrix);
 
         void PushOverrideViewMatrix(Matrix4x4 viewMatrix);
         Matrix4x4 GetOverrideViewMatrixOrDefault(DrawingTargetContext ctx);
@@ -18,5 +18,5 @@ namespace OngekiFumenEditor.Kernel.Graphics
         bool PopOverrideProjectionMatrix(out Matrix4x4 modelMatrix);
 
         Matrix4x4 GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext ctx);
-	}
+    }
 }

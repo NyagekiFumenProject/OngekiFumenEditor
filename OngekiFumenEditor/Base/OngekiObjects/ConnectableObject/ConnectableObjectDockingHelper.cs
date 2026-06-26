@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
 using System.Linq;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject

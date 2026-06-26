@@ -16,8 +16,8 @@ namespace OngekiFumenEditor.UI.ListViewDragDropManager
     /// <summary>
     /// Manages the dragging and dropping of ListViewItems in a ListView.
     /// The ItemType type parameter indicates the type of the objects in
-    /// the ListView's items source.  The ListView's ItemsSource must be 
-    /// set to an instance of ObservableCollection of ItemType, or an 
+    /// the ListView's items source.  The ListView's ItemsSource must be
+    /// set to an instance of ObservableCollection of ItemType, or an
     /// Exception will be thrown.
     /// </summary>
     /// <typeparam name="ItemType">The type of the ListView's items.</typeparam>
@@ -306,7 +306,7 @@ namespace OngekiFumenEditor.UI.ListViewDragDropManager
         {
             if (this.dragAdorner != null && this.dragAdorner.Visibility != Visibility.Visible)
             {
-                // Update the location of the adorner and then show it.				
+                // Update the location of the adorner and then show it.
                 this.UpdateDragAdornerLocation();
                 this.dragAdorner.Visibility = Visibility.Visible;
             }
@@ -533,7 +533,7 @@ namespace OngekiFumenEditor.UI.ListViewDragDropManager
             // Create an element which displays the source item while it is dragged.
             this.dragAdorner = new DragAdorner(this.listView, itemToDrag.RenderSize, brush);
 
-            // Set the drag adorner's opacity.		
+            // Set the drag adorner's opacity.
             this.dragAdorner.Opacity = this.DragAdornerOpacity;
 
             AdornerLayer layer = AdornerLayer.GetAdornerLayer(this.listView);
@@ -704,7 +704,7 @@ namespace OngekiFumenEditor.UI.ListViewDragDropManager
         #region IsBeingDragged
 
         /// <summary>
-        /// Identifies the ListViewItemDragState's IsBeingDragged attached property.  
+        /// Identifies the ListViewItemDragState's IsBeingDragged attached property.
         /// This field is read-only.
         /// </summary>
         public static readonly DependencyProperty IsBeingDraggedProperty =
@@ -738,7 +738,7 @@ namespace OngekiFumenEditor.UI.ListViewDragDropManager
         #region IsUnderDragCursor
 
         /// <summary>
-        /// Identifies the ListViewItemDragState's IsUnderDragCursor attached property.  
+        /// Identifies the ListViewItemDragState's IsUnderDragCursor attached property.
         /// This field is read-only.
         /// </summary>
         public static readonly DependencyProperty IsUnderDragCursorProperty =
@@ -749,7 +749,7 @@ namespace OngekiFumenEditor.UI.ListViewDragDropManager
                 new UIPropertyMetadata(false));
 
         /// <summary>
-        /// Returns true if the specified ListViewItem is currently underneath the cursor 
+        /// Returns true if the specified ListViewItem is currently underneath the cursor
         /// during a drag-drop operation, else false.
         /// </summary>
         /// <param name="item">The ListViewItem to check.</param>

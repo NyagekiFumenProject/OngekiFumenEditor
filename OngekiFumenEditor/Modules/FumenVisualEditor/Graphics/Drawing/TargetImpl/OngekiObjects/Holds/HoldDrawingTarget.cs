@@ -99,11 +99,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     if (prev.Y == cur.Y && end.Y == cur.Y)
                     {
                         /*
-								   good                discard
-						o-----------x---------o----------x----------------
-						|           |         |          |
-						prevX     curX_1   endPosX     curX_2
-						 */
+                                   good                discard
+                        o-----------x---------o----------x----------------
+                        |           |         |          |
+                        prevX     curX_1   endPosX     curX_2
+                         */
                         var checkX = cur.X;
                         if (checkX < MathF.Min(prev.X, end.X) || checkX > MathF.Max(prev.X, end.X))
                             return true;

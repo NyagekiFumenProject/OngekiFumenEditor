@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
+using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;

@@ -80,8 +80,8 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
                 OutputFumenFilePath = OutputFumenFilePath
             };
 
-            OngekiFumen input = null;	
-            
+            OngekiFumen input = null;
+
             if (!IsUseInputFile) {
                 var editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
                 if (editor is not null) {
@@ -92,7 +92,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.ViewModels
                     return;
                 }
             }
-			
+
             var result = await FumenConverterWrapper.Generate(option, input);
             MessageBox.Show(result.IsSuccess ? Resources.ConvertSuccess : $"{Resources.ConvertFail} {result.Message}");
         }

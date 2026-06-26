@@ -13,49 +13,49 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions
 {
-	public class ConnectableObjectDropAction : IEditorDropHandler
-	{
-		private readonly ConnectableStartObject startObject;
-		private readonly OngekiObjectBase childObject;
-		private readonly Action callback;
+    public class ConnectableObjectDropAction : IEditorDropHandler
+    {
+        private readonly ConnectableStartObject startObject;
+        private readonly OngekiObjectBase childObject;
+        private readonly Action callback;
 
-		public ConnectableObjectDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
-		{
-			this.startObject = startObject;
-			this.childObject = childObject/*CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase*/;
-			this.callback = callback;
-		}
+        public ConnectableObjectDropAction(ConnectableStartObject startObject, ConnectableChildObjectBase childObject, Action callback = default)
+        {
+            this.startObject = startObject;
+            this.childObject = childObject/*CacheLambdaActivator.CreateInstance(childObject.GetType()) as OngekiObjectBase*/;
+            this.callback = callback;
+        }
 
-		public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
-		{
+        public void Drop(FumenVisualEditorViewModel editor, Point dragEndPoint)
+        {
 
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(dragEndPoint))
                 return;
 
             var dragTGrid = editor.ConvertYToTGrid_DesignMode(dragEndPoint.Y);
-			var lastObj = startObject.Children.LastOrDefault();
-			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
-			var isFirst = true;
+            var lastObj = startObject.Children.LastOrDefault();
+            var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
+            var isFirst = true;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddConnectableNextObject, () =>
-			{
-				if (isAppend)
-					startObject.AddChildObject(childObject as ConnectableChildObjectBase);
-				else
-					startObject.InsertChildObject(dragTGrid, childObject as ConnectableChildObjectBase);
-				editor.MoveObjectTo(childObject, dragEndPoint);
-				if (isFirst)
-				{
-					editor.NotifyObjectClicked(childObject);
-					isFirst = false;
-				}
-				callback?.Invoke();
-			}, () =>
-			{
-				//startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
-				editor.RemoveObject(childObject);
-				callback?.Invoke();
-			}));
-		}
-	}
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddConnectableNextObject, () =>
+            {
+                if (isAppend)
+                    startObject.AddChildObject(childObject as ConnectableChildObjectBase);
+                else
+                    startObject.InsertChildObject(dragTGrid, childObject as ConnectableChildObjectBase);
+                editor.MoveObjectTo(childObject, dragEndPoint);
+                if (isFirst)
+                {
+                    editor.NotifyObjectClicked(childObject);
+                    isFirst = false;
+                }
+                callback?.Invoke();
+            }, () =>
+            {
+                //startObject.RemoveChildObject(childViewModel as ConnectableChildObjectBase);
+                editor.RemoveObject(childObject);
+                callback?.Invoke();
+            }));
+        }
+    }
 }

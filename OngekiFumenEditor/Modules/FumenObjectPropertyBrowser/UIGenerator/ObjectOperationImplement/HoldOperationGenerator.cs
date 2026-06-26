@@ -10,16 +10,16 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectOperationImplement
 {
-	[Export(typeof(IOngekiObjectOperationGenerator))]
-	public class HoldOperationGenerator : IOngekiObjectOperationGenerator
-	{
-		public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
-			typeof(Hold),
-		};
+    [Export(typeof(IOngekiObjectOperationGenerator))]
+    public class HoldOperationGenerator : IOngekiObjectOperationGenerator
+    {
+        public IEnumerable<Type> SupportOngekiTypes { get; } = new[] {
+            typeof(Hold),
+        };
 
-		public UIElement Generate(OngekiObjectBase obj)
-		{
-			return ViewHelper.CreateViewByViewModelType(() => new HoldOperationViewModel(obj as Hold));
-		}
-	}
+        public UIElement Generate(OngekiObjectBase obj)
+        {
+            return ViewHelper.CreateViewByViewModelType(() => new HoldOperationViewModel(obj as Hold));
+        }
+    }
 }

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;

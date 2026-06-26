@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Menus;
+using Gemini.Framework.Menus;
 using OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Commands;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Commands;
 using System.ComponentModel.Composition;

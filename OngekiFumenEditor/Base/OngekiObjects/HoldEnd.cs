@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Utils;

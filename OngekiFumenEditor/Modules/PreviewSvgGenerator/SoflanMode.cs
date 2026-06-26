@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
+namespace OngekiFumenEditor.Modules.PreviewSvgGenerator
 {
     public enum SoflanMode
     {

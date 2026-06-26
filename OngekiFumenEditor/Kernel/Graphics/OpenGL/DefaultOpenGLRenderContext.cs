@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Wpf;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;

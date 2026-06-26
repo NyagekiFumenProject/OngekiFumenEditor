@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Audio;

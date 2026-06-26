@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

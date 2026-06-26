@@ -3,9 +3,9 @@ name: Build Program
 on:
   push:
   workflow_dispatch:
-    inputs: 
+    inputs:
       BuildBranch:
-        description: 'The branch you want to build.' 
+        description: 'The branch you want to build.'
         required: true
         default: 'master'
       BuildConfiguration:
@@ -13,12 +13,12 @@ on:
         required: true
         default: 'Release'
         type: choice
-        options: 
+        options:
           - Release
           - Debug
-    
+
 env:
-  Configuration: ${{ github.event.inputs.BuildConfiguration || 'Release' }} 
+  Configuration: ${{ github.event.inputs.BuildConfiguration || 'Release' }}
   Branch: ${{ github.event.inputs.BuildBranch || github.ref_name }}
 
 jobs:
@@ -68,4 +68,4 @@ jobs:
       with:
         name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
         path: C:\ogkrEditorBuild\
-    
+

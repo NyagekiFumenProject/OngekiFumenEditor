@@ -1,4 +1,4 @@
-﻿using FontStashSharp;
+using FontStashSharp;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Utils;

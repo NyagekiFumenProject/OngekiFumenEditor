@@ -1,4 +1,4 @@
-﻿using kRpc.Coroutines;
+using kRpc.Coroutines;
 using System;
 using System.Collections.Generic;
 using System.Text;

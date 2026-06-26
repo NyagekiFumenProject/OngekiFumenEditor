@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 

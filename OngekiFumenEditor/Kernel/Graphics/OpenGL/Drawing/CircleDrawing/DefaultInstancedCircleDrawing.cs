@@ -130,9 +130,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing
         {
 
             /*-----------------CURRENT VERSION------------------ -
-			*     color          position             radius      hollowLineWidth
-			*     vec4 (16)       vec2 (8)           float(4)        float(4)
-			*/
+            *     color          position             radius      hollowLineWidth
+            *     vec4 (16)       vec2 (8)           float(4)        float(4)
+            */
 
 
             var buffer = postData.AsSpan().Slice(currentPostBaseIndex / sizeof(float), VertexSize / sizeof(float));

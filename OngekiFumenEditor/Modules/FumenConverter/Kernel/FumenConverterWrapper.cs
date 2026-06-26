@@ -33,7 +33,7 @@ public static class FumenConverterWrapper
             fumen = inMemoryFumen;
         }
 
-        if (string.IsNullOrWhiteSpace(option.OutputFumenFilePath)) 
+        if (string.IsNullOrWhiteSpace(option.OutputFumenFilePath))
             return new(false, Resources.OutputFumenFileNotSelect);
 
         if (option.IsStandarizeFumen) {
@@ -48,7 +48,7 @@ public static class FumenConverterWrapper
 
             fumen = res.SerializedFumen;
         }
-        
+
         var converter = IoC.Get<IFumenConverter>();
         try {
             var output = await converter.ConvertFumenAsync(fumen, option.OutputFumenFilePath);

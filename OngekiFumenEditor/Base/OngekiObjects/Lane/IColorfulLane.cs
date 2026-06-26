@@ -1,8 +1,8 @@
 namespace OngekiFumenEditor.Base.OngekiObjects.Lane
 {
-	public interface IColorfulLane
-	{
-		ColorId ColorId { get; set; }
-		int Brightness { get; set; }
-	}
+    public interface IColorfulLane
+    {
+        ColorId ColorId { get; set; }
+        int Brightness { get; set; }
+    }
 }

@@ -5,9 +5,9 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-	[ToolboxItem(typeof(FumenVisualEditorViewModel), "Bell", "Ongeki Objects")]
-	public class BellToolboxGenerator : ToolboxGenerator<Bell>
-	{
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Bell", "Ongeki Objects")]
+    public class BellToolboxGenerator : ToolboxGenerator<Bell>
+    {
 
-	}
+    }
 }

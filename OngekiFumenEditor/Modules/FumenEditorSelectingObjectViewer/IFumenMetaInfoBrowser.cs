@@ -1,9 +1,9 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer
 {
-	public interface IFumenEditorSelectingObjectViewer : ITool
-	{
+    public interface IFumenEditorSelectingObjectViewer : ITool
+    {
 
-	}
+    }
 }

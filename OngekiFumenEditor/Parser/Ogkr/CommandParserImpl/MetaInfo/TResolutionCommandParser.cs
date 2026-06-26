@@ -3,14 +3,14 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
-	[Export(typeof(ICommandParser))]
-	class TResolutionCommandParser : MetaInfoCommandParserBase
-	{
-		public override string CommandLineHeader => "TRESOLUTION";
+    [Export(typeof(ICommandParser))]
+    class TResolutionCommandParser : MetaInfoCommandParserBase
+    {
+        public override string CommandLineHeader => "TRESOLUTION";
 
-		public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
-		{
-			fumen.MetaInfo.TRESOLUTION = args.GetData<int>(1);
-		}
-	}
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
+        {
+            fumen.MetaInfo.TRESOLUTION = args.GetData<int>(1);
+        }
+    }
 }

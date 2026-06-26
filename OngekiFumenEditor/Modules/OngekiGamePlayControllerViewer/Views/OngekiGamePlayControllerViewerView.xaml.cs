@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;

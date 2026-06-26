@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using ControlzEx.Standard;
 using NAudio.CoreAudioApi;
 using NAudio.Wave;
@@ -78,7 +78,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             {
                 if (EnableVarspeed)
                 {
-                    //we can able to change speed when all player is not playing 
+                    //we can able to change speed when all player is not playing
                     if (!ownAudioPlayerRefs.Any(x => x.TryGetTarget(out var player) ? player.IsPlaying : false))
                         speedProvider.PlaybackRate = value;
                 }
@@ -251,7 +251,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="input"></param>
         /// <param name="mixerRemove">mixer是否需要调用RemoveMixerInput()</param>

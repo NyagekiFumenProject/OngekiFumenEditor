@@ -1,4 +1,4 @@
-﻿using Gemini.Modules.Output;
+using Gemini.Modules.Output;
 using System.ComponentModel.Composition;
 using static OngekiFumenEditor.Utils.Logs.ILogOutput;
 

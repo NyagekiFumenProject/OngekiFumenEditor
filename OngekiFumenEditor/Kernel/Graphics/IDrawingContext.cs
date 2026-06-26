@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using System;
 using System.Windows;
 using System.Windows.Controls;

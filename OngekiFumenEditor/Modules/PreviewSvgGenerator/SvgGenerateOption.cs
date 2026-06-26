@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
+using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
 using OngekiFumenEditor.Properties;
 using System;
 

@@ -1,8 +1,8 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 
 namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer
 {
-	public interface IFumenEditorRenderControlViewer : ITool
-	{
-	}
+    public interface IFumenEditorRenderControlViewer : ITool
+    {
+    }
 }

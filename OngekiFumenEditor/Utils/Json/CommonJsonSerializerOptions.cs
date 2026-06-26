@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Utils.Json.Converters;
+using OngekiFumenEditor.Utils.Json.Converters;
 using System;
 using System.Collections.Generic;
 using System.Text;

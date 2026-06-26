@@ -163,13 +163,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
         {
             /*
-			 画游戏(黑色可移动)区域
-				1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
-				   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
-				2. 排列 point集合, 然后简化point和补全point
-				3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
-				4. 将左右所有的节点合并成一个多边形，渲染
-			 */
+             画游戏(黑色可移动)区域
+                1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
+                   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
+                2. 排列 point集合, 然后简化point和补全point
+                3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
+                4. 将左右所有的节点合并成一个多边形，渲染
+             */
 
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
@@ -889,7 +889,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 |
                                 |
                              ---x---
-                                | 
+                                |
                                 |
                          */
 

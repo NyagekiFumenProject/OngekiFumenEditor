@@ -1,4 +1,4 @@
-﻿using FontStashSharp;
+using FontStashSharp;
 using FontStashSharp.Interfaces;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -11,49 +11,49 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
     {
         private const string frag = @"
             #version 330
-			#ifdef GL_ES
-				#define LOWP lowp
-				precision mediump float;
-			#else
-				#define LOWP
-			#endif
+            #ifdef GL_ES
+                #define LOWP lowp
+                precision mediump float;
+            #else
+                #define LOWP
+            #endif
 
 
-			// Uniforms
-			uniform sampler2D TextureSampler;
+            // Uniforms
+            uniform sampler2D TextureSampler;
 
-			// Varyings
-			in vec4 v_color;
-			in vec2 v_texCoords;
+            // Varyings
+            in vec4 v_color;
+            in vec2 v_texCoords;
 
             out vec4 FragColor;
 
-			void main()
-			{
-				FragColor = v_color * texture2D(TextureSampler, v_texCoords);
-			}
-		";
+            void main()
+            {
+                FragColor = v_color * texture2D(TextureSampler, v_texCoords);
+            }
+        ";
         private const string vert = @"
             #version 330
             // Attributes
             in vec3 a_position;
-			in vec4 a_color;
-			in vec2 a_texCoords0;
+            in vec4 a_color;
+            in vec2 a_texCoords0;
 
-			// Uniforms
-			uniform mat4 MVP;
+            // Uniforms
+            uniform mat4 MVP;
 
-			// Varyings
-			out vec4 v_color;
-			out vec2 v_texCoords;
+            // Varyings
+            out vec4 v_color;
+            out vec2 v_texCoords;
 
-			void main()
-			{
-				v_color = a_color;
-				v_texCoords = a_texCoords0;
-				gl_Position = MVP * vec4(a_position, 1.0);
-			}
-		";
+            void main()
+            {
+                v_color = a_color;
+                v_texCoords = a_texCoords0;
+                gl_Position = MVP * vec4(a_position, 1.0);
+            }
+        ";
 
         private const int MAX_SPRITES = 2048;
         private const int MAX_VERTICES = MAX_SPRITES * 4;

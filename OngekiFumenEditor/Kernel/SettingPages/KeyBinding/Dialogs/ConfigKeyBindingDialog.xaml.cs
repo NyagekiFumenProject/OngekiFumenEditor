@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using MahApps.Metro.Controls;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Utils;

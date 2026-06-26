@@ -4,20 +4,20 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
-	[Export(typeof(ICommandParser))]
-	class MeterDefinitionCommandParser : MetaInfoCommandParserBase
-	{
-		public override string CommandLineHeader => "MET_DEF";
+    [Export(typeof(ICommandParser))]
+    class MeterDefinitionCommandParser : MetaInfoCommandParserBase
+    {
+        public override string CommandLineHeader => "MET_DEF";
 
-		public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
-		{
-			var dataArr = args.GetDataArray<int>();
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
+        {
+            var dataArr = args.GetDataArray<int>();
 
-			fumen.MetaInfo.MeterDefinition = new FumenMetaInfo.MetDef()
-			{
-				Bunshi = dataArr.ElementAtOrDefault(1),
-				Bunbo = dataArr.ElementAtOrDefault(2),
-			};
-		}
-	}
+            fumen.MetaInfo.MeterDefinition = new FumenMetaInfo.MetDef()
+            {
+                Bunshi = dataArr.ElementAtOrDefault(1),
+                Bunbo = dataArr.ElementAtOrDefault(2),
+            };
+        }
+    }
 }

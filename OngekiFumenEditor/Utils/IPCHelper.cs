@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Utils
         private static Mutex mutex = new Mutex(false, "OngekiFumenEditor_Mutex");
         private static EventWaitHandle ReadEvent = new(false, EventResetMode.AutoReset, "OngekiFumenEditor_ReadEvent");
 
-		internal class ArgsWrapper
+        internal class ArgsWrapper
         {
             public string[] Args { get; set; }
         }
@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Utils
                 //there are other editors registered
                 if (pid != 0)
                 {
-                    //check if host editor is dead or not 
+                    //check if host editor is dead or not
                     var process = Process.GetProcessById(pid);
                     if (process is not null)
                     {
@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Utils
             {
                 mutex.WaitOne();
                 var size = accessor.ReadInt32(sizeof(int));
-                //check if writable 
+                //check if writable
                 if (size > 0)
                 {
                     Thread.Sleep(0);

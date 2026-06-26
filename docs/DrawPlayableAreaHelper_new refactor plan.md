@@ -1,4 +1,4 @@
-﻿# DrawPlayableAreaHelper_new 重构计划
+# DrawPlayableAreaHelper_new 重构计划
 
 本文档用于记录 `DrawPlayableAreaHelper_new.cs` 的设计决策、问题追踪和实现约束。
 它以 `docs/DrawPlayableAreaHelper source analysis.md` 为当前实现行为基线，并结合

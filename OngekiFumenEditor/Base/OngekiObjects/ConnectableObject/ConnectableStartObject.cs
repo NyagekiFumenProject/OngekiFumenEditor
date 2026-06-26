@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Utils;
 using System;

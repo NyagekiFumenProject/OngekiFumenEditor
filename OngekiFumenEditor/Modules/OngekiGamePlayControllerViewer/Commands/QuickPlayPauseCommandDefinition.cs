@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Commands;
+using Gemini.Framework.Commands;
 using System.ComponentModel.Composition;
 using System.Windows.Input;
 

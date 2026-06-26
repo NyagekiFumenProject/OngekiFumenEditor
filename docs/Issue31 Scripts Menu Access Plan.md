@@ -1,4 +1,4 @@
-﻿# Issue 31 Scripts Menu Access Plan
+# Issue 31 Scripts Menu Access Plan
 
 ## Source
 

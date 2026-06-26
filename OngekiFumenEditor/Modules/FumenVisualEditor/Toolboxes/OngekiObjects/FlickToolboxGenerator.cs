@@ -4,9 +4,9 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-	[ToolboxItem(typeof(FumenVisualEditorViewModel), "Flick", "Ongeki Objects")]
-	public class FlickToolboxGenerator : ToolboxGenerator<Flick>
-	{
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Flick", "Ongeki Objects")]
+    public class FlickToolboxGenerator : ToolboxGenerator<Flick>
+    {
 
-	}
+    }
 }

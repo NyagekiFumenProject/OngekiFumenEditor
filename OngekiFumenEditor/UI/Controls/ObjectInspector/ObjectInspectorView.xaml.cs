@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
 using System.Windows;
 using System.Windows.Controls;
 

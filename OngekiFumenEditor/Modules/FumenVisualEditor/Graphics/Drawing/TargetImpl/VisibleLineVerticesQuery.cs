@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             PostObject(start, getNextIsVaild(start));
             var prevInvaild = true;
             var prevObj = start as ConnectableObjectBase;
-            
+
             var soflanPositionList = target.Editor.IsDesignMode ?
                 target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
                 target.Editor._cacheSoflanGroupRecorder.GetCache(start)?.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);

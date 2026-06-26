@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
 using OngekiFumenEditor.Utils;

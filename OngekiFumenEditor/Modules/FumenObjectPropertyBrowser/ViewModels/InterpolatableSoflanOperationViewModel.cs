@@ -13,32 +13,32 @@ using System.Windows.Input;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-	public class InterpolatableSoflanOperationViewModel : PropertyChangedBase
-	{
-		private InterpolatableSoflan soflan;
+    public class InterpolatableSoflanOperationViewModel : PropertyChangedBase
+    {
+        private InterpolatableSoflan soflan;
 
-		public InterpolatableSoflanOperationViewModel(InterpolatableSoflan obj)
-		{
-			soflan = obj;
-		}
+        public InterpolatableSoflanOperationViewModel(InterpolatableSoflan obj)
+        {
+            soflan = obj;
+        }
 
-		public void Interpolate(ActionExecutionContext e)
-		{
-			var list = soflan.GenerateKeyframeSoflans().OfType<OngekiObjectBase>().ToArray();
-			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+        public void Interpolate(ActionExecutionContext e)
+        {
+            var list = soflan.GenerateKeyframeSoflans().OfType<OngekiObjectBase>().ToArray();
+            var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 
-			if (editor == null)
-				return;
+            if (editor == null)
+                return;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.InterpolateDurationSoflan, () =>
-			{
-				editor.Fumen.AddObjects(list);
-				editor.Fumen.RemoveObject(soflan);
-			}, () =>
-			{
-				editor.Fumen.AddObject(soflan);
-				editor.Fumen.RemoveObjects(list);
-			}));
-		}
-	}
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.InterpolateDurationSoflan, () =>
+            {
+                editor.Fumen.AddObjects(list);
+                editor.Fumen.RemoveObject(soflan);
+            }, () =>
+            {
+                editor.Fumen.AddObject(soflan);
+                editor.Fumen.RemoveObjects(list);
+            }));
+        }
+    }
 }

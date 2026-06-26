@@ -18,177 +18,177 @@ using OngekiFumenEditor.Properties;
 
 namespace OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels
 {
-	[Export(typeof(IFumenEditorSelectingObjectViewer))]
-	public class FumenEditorSelectingObjectViewerViewModel : Tool, IFumenEditorSelectingObjectViewer
-	{
-		private FumenVisualEditorViewModel editor;
-		public FumenVisualEditorViewModel Editor
-		{
-			get => editor;
-			set
-			{
-				this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropChanged);
-				Set(ref editor, value);
-				OnRefresh();
-			}
-		}
+    [Export(typeof(IFumenEditorSelectingObjectViewer))]
+    public class FumenEditorSelectingObjectViewerViewModel : Tool, IFumenEditorSelectingObjectViewer
+    {
+        private FumenVisualEditorViewModel editor;
+        public FumenVisualEditorViewModel Editor
+        {
+            get => editor;
+            set
+            {
+                this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropChanged);
+                Set(ref editor, value);
+                OnRefresh();
+            }
+        }
 
-		private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
-		{
-			switch (e.PropertyName)
-			{
-				case nameof(FumenVisualEditorViewModel.SelectObjects):
-					OnRefresh();
-					break;
-				default:
-					break;
-			}
-		}
+        private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(FumenVisualEditorViewModel.SelectObjects):
+                    OnRefresh();
+                    break;
+                default:
+                    break;
+            }
+        }
 
-		public SelectionFilterViewModel SelectionFilter { get; }
+        public SelectionFilterViewModel SelectionFilter { get; }
 
-		public ObservableCollection<ISelectableObject> SelectedItems { get; } = new();
+        public ObservableCollection<ISelectableObject> SelectedItems { get; } = new();
 
-		public List<ISelectableObject> EditorSelectObjects { get; } = new();
+        public List<ISelectableObject> EditorSelectObjects { get; } = new();
 
-		public ICollectionView CollectionView => dataView;
-		private ICollectionView dataView;
+        public ICollectionView CollectionView => dataView;
+        private ICollectionView dataView;
 
-		private GridViewColumnHeader _lastHeaderClicked = null;
-		private ListSortDirection _lastDirection = ListSortDirection.Ascending;
+        private GridViewColumnHeader _lastHeaderClicked = null;
+        private ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
-		public override PaneLocation PreferredLocation => PaneLocation.Bottom;
+        public override PaneLocation PreferredLocation => PaneLocation.Bottom;
 
-		public bool IsFilterMenuVisible
-		{
-			get;
-			set
-			{
-				Set(ref field, value);
-				if (field) {
-					SelectionFilter.OnSelectedItemsRefreshed();
-				}
-			}
-		}
+        public bool IsFilterMenuVisible
+        {
+            get;
+            set
+            {
+                Set(ref field, value);
+                if (field) {
+                    SelectionFilter.OnSelectedItemsRefreshed();
+                }
+            }
+        }
 
-		public FumenEditorSelectingObjectViewerViewModel()
-		{
-			SelectionFilter = new SelectionFilterViewModel(this);
+        public FumenEditorSelectingObjectViewerViewModel()
+        {
+            SelectionFilter = new SelectionFilterViewModel(this);
 
-			DisplayName = Resources.FumenEditorSelectingObjectViewer;
-			IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
+            DisplayName = Resources.FumenEditorSelectingObjectViewer;
+            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
 
-			dataView = CollectionViewSource.GetDefaultView(EditorSelectObjects);
-			Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
-		}
+            dataView = CollectionViewSource.GetDefaultView(EditorSelectObjects);
+            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+        }
 
-		private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
-		{
-			Editor = @new;
-		}
+        private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
+        {
+            Editor = @new;
+        }
 
-		public void OnRefresh()
-		{
-			EditorSelectObjects.Clear();
-			EditorSelectObjects.AddRange(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
+        public void OnRefresh()
+        {
+            EditorSelectObjects.Clear();
+            EditorSelectObjects.AddRange(Editor?.SelectObjects ?? Enumerable.Empty<ISelectableObject>());
 
-			if (IsFilterMenuVisible)
-				SelectionFilter.OnSelectedItemsRefreshed();
+            if (IsFilterMenuVisible)
+                SelectionFilter.OnSelectedItemsRefreshed();
 
-			dataView.Refresh();
-		}
+            dataView.Refresh();
+        }
 
-		public void OnCancelItemSelectedObjects(ActionExecutionContext ctx)
-		{
-			foreach (var item in SelectedItems.ToArray())
-				item.IsSelected = false;
+        public void OnCancelItemSelectedObjects(ActionExecutionContext ctx)
+        {
+            foreach (var item in SelectedItems.ToArray())
+                item.IsSelected = false;
 
-			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
-		}
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+        }
 
-		public void OnItemSingleClick(OngekiObjectBase item)
-		{
-			if (Editor is null)
-				return;
+        public void OnItemSingleClick(OngekiObjectBase item)
+        {
+            if (Editor is null)
+                return;
 
-			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, item);
-		}
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, item);
+        }
 
-		public void OnItemDoubleClick(OngekiObjectBase item)
-		{
-			if (Editor is null)
-				return;
+        public void OnItemDoubleClick(OngekiObjectBase item)
+        {
+            if (Editor is null)
+                return;
 
-			if (item is ITimelineObject timelineObject)
-				Editor.ScrollTo(timelineObject.TGrid);
+            if (item is ITimelineObject timelineObject)
+                Editor.ScrollTo(timelineObject.TGrid);
 
-			Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
-			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
-		}
+            Editor.SelectObjects.Where(x => x != item).FilterNull().ForEach(x => x.IsSelected = false);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+        }
 
-		private void Sort(string sortBy, ListSortDirection direction)
-		{
-			dataView.SortDescriptions.Clear();
-			dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
-			dataView.Refresh();
-		}
+        private void Sort(string sortBy, ListSortDirection direction)
+        {
+            dataView.SortDescriptions.Clear();
+            dataView.SortDescriptions.Add(new SortDescription(sortBy, direction));
+            dataView.Refresh();
+        }
 
-		public void SortColumn(ActionExecutionContext ctx)
-		{
-			var e = ctx.EventArgs as RoutedEventArgs;
+        public void SortColumn(ActionExecutionContext ctx)
+        {
+            var e = ctx.EventArgs as RoutedEventArgs;
 
-			var headerClicked = e.OriginalSource as GridViewColumnHeader;
-			ListSortDirection direction;
+            var headerClicked = e.OriginalSource as GridViewColumnHeader;
+            ListSortDirection direction;
 
-			if (headerClicked != null)
-			{
-				if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
-				{
-					if (headerClicked != _lastHeaderClicked)
-					{
-						direction = ListSortDirection.Ascending;
-					}
-					else
-					{
-						if (_lastDirection == ListSortDirection.Ascending)
-						{
-							direction = ListSortDirection.Descending;
-						}
-						else
-						{
-							direction = ListSortDirection.Ascending;
-						}
-					}
+            if (headerClicked != null)
+            {
+                if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+                {
+                    if (headerClicked != _lastHeaderClicked)
+                    {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        if (_lastDirection == ListSortDirection.Ascending)
+                        {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else
+                        {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
 
-					var columnBinding = headerClicked.Column.DisplayMemberBinding as Binding;
-					var sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
+                    var columnBinding = headerClicked.Column.DisplayMemberBinding as Binding;
+                    var sortBy = columnBinding?.Path.Path ?? headerClicked.Column.Header as string;
 
-					Sort(sortBy, direction);
+                    Sort(sortBy, direction);
 
-					// Remove arrow from previously sorted header
-					if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
-					{
-						_lastHeaderClicked.Column.HeaderTemplate = null;
-					}
+                    // Remove arrow from previously sorted header
+                    if (_lastHeaderClicked != null && _lastHeaderClicked != headerClicked)
+                    {
+                        _lastHeaderClicked.Column.HeaderTemplate = null;
+                    }
 
-					_lastHeaderClicked = headerClicked;
-					_lastDirection = direction;
-				}
-			}
-		}
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
+            }
+        }
 
-		public void SelectOnlyItemsOfSelectedType()
-		{
-			var types = SelectedItems.Select(o => o.GetType()).Distinct().ToArray();
-			Editor.SelectObjects.Where(o => !types.Contains(o.GetType())).ForEach(o => o.IsSelected = false);
-			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
-		}
+        public void SelectOnlyItemsOfSelectedType()
+        {
+            var types = SelectedItems.Select(o => o.GetType()).Distinct().ToArray();
+            Editor.SelectObjects.Where(o => !types.Contains(o.GetType())).ForEach(o => o.IsSelected = false);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+        }
 
-		public void DeselectItemsOfSelectedType()
-		{
-			var types = SelectedItems.Select(o => o.GetType()).Distinct().ToArray();
-			Editor.SelectObjects.Where(o => types.Contains(o.GetType())).ForEach(o => o.IsSelected = false);
-			IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
-		}
-	}
+        public void DeselectItemsOfSelectedType()
+        {
+            var types = SelectedItems.Select(o => o.GetType()).Distinct().ToArray();
+            Editor.SelectObjects.Where(o => types.Contains(o.GetType())).ForEach(o => o.IsSelected = false);
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+        }
+    }
 }

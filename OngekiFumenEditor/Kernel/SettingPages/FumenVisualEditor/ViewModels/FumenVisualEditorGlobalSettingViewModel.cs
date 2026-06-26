@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Languages;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.RecentFiles;

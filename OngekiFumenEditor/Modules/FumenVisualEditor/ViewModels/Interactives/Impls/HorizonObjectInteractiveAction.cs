@@ -1,6 +1,6 @@
-﻿namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls
 {
-	internal class HorizonObjectInteractiveAction : DefaultObjectInteractiveAction
-	{
-	}
+    internal class HorizonObjectInteractiveAction : DefaultObjectInteractiveAction
+    {
+    }
 }

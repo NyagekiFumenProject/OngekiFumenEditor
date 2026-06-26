@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;

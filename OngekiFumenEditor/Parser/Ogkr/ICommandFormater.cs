@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.Ogkr
 {
-	public interface ICommandFormatter
-	{
-		public Type FormatTargetType { get; }
-		public string Section { get; }
-		public (string, int) Format(object command, OngekiFumen refFumen);
-	}
+    public interface ICommandFormatter
+    {
+        public Type FormatTargetType { get; }
+        public string Section { get; }
+        public (string, int) Format(object command, OngekiFumen refFumen);
+    }
 }

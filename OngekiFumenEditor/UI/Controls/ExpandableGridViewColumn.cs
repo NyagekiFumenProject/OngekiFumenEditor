@@ -1,19 +1,19 @@
-﻿//WPF is shit
+//WPF is shit
 using System.ComponentModel;
 using System.Windows.Controls;
 
 namespace OngekiFumenEditor.UI.Controls
 {
-	public class ExpandableGridViewColumn : GridViewColumn
-	{
-		public ExpandableGridViewColumn()
-		{
+    public class ExpandableGridViewColumn : GridViewColumn
+    {
+        public ExpandableGridViewColumn()
+        {
 
-		}
+        }
 
-		protected override void OnPropertyChanged(PropertyChangedEventArgs e)
-		{
-			base.OnPropertyChanged(e);
-		}
-	}
+        protected override void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            base.OnPropertyChanged(e);
+        }
+    }
 }

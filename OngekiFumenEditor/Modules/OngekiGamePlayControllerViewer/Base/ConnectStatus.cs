@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Base
+namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Base
 {
     public enum ConnectStatus
     {

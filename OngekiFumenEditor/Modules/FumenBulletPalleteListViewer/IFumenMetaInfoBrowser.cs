@@ -1,9 +1,9 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 
 namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer
 {
-	public interface IFumenBulletPalleteListViewer : ITool
-	{
+    public interface IFumenBulletPalleteListViewer : ITool
+    {
 
-	}
+    }
 }

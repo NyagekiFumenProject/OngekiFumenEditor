@@ -1,4 +1,4 @@
-﻿using SkiaSharp.Views.Desktop;
+using SkiaSharp.Views.Desktop;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;

@@ -1,20 +1,20 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-	public sealed class CommonSpriteShader : DefaultOpenGLShader
-	{
-		private static CommonSpriteShader _shared;
-		private int modelLocation = int.MinValue;
-		private int viewProjectionLocation = int.MinValue;
-		private int colorLocation = int.MinValue;
-		private int diffuseLocation = int.MinValue;
+    public sealed class CommonSpriteShader : DefaultOpenGLShader
+    {
+        private static CommonSpriteShader _shared;
+        private int modelLocation = int.MinValue;
+        private int viewProjectionLocation = int.MinValue;
+        private int colorLocation = int.MinValue;
+        private int diffuseLocation = int.MinValue;
 
-		public CommonSpriteShader()
-		{
-			VertexProgram = @"
+        public CommonSpriteShader()
+        {
+            VertexProgram = @"
                 #version 330
 out vec2 varying_texPos;
 
@@ -25,11 +25,11 @@ layout(location=0) in vec2 in_texPos;
 layout(location=1) in vec2 in_pos;
 
 void main(){
-	gl_Position = ViewProjection * Model * vec4(in_pos,0.0,1.0);
-	varying_texPos=in_texPos;
+    gl_Position = ViewProjection * Model * vec4(in_pos,0.0,1.0);
+    varying_texPos=in_texPos;
 }
                 ";
-			FragmentProgram = @"
+            FragmentProgram = @"
                 #version 330
 uniform sampler2D diffuse;
 uniform vec4 color;
@@ -37,26 +37,26 @@ in vec2 varying_texPos;
 out vec4 out_color;
 
 void main(){
-	out_color = texture(diffuse,varying_texPos) * color;
+    out_color = texture(diffuse,varying_texPos) * color;
 }
                 ";
-		}
+        }
 
-		public static CommonSpriteShader Shared => _shared ??= _createShared();
+        public static CommonSpriteShader Shared => _shared ??= _createShared();
 
-		public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
+        public int ModelLocation => modelLocation == int.MinValue ? modelLocation = GetUniformLocation("Model") : modelLocation;
 
-		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
+        public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
 
-		public int ColorLocation => colorLocation == int.MinValue ? colorLocation = GetUniformLocation("color") : colorLocation;
+        public int ColorLocation => colorLocation == int.MinValue ? colorLocation = GetUniformLocation("color") : colorLocation;
 
-		public int DiffuseLocation => diffuseLocation == int.MinValue ? diffuseLocation = GetUniformLocation("diffuse") : diffuseLocation;
+        public int DiffuseLocation => diffuseLocation == int.MinValue ? diffuseLocation = GetUniformLocation("diffuse") : diffuseLocation;
 
-		private static CommonSpriteShader _createShared()
-		{
-			var shader = new CommonSpriteShader();
-			shader.Compile();
-			return shader;
-		}
-	}
+        private static CommonSpriteShader _createShared()
+        {
+            var shader = new CommonSpriteShader();
+            shader.Compile();
+            return shader;
+        }
+    }
 }

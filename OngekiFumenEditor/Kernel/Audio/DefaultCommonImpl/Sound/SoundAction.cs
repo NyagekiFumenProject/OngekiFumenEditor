@@ -1,9 +1,9 @@
-﻿namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
+namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 {
-	public enum SoundAction
-	{
-		PlayOnce,
-		PlayLoop,
-		StopLoop
-	}
+    public enum SoundAction
+    {
+        PlayOnce,
+        PlayLoop,
+        StopLoop
+    }
 }

@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;

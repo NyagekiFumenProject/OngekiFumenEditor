@@ -1,12 +1,12 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
     internal sealed class InstancedLineShader : DefaultOpenGLShader
-	{
-		public InstancedLineShader()
-		{
-			VertexProgram = @"
+    {
+        public InstancedLineShader()
+        {
+            VertexProgram = @"
                     #version 330
                   layout(location = 0) in vec3 quad_pos;
                   layout(location = 1) in vec4 line_pos_width_a;
@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                   layout(location = 4) in vec4 line_col_b;
                   layout(location = 5) in float dashSize;
                   layout(location = 6) in float gapSize;
-      
+
                   uniform mat4 u_mvp;
                   uniform vec2 u_viewport_size;
                   uniform vec2 u_aa_radius;
@@ -82,7 +82,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                   }
 ";
 
-			FragmentProgram = @"
+            FragmentProgram = @"
                 #version 330
                 uniform vec2 u_aa_radius;
                 uniform vec2 u_viewport_size;
@@ -100,14 +100,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
               in vec3 vertPos;
 
               out vec4 frag_color;
-      
+
               void main()
               {
                 vec2  dir  = (vertPos.xy-startPos.xy) * u_viewport_size/2.0;
                 float dist = length(dir);
 
                 if (fract(dist / (v_dashSize + v_gapSize)) > v_dashSize/(v_dashSize + v_gapSize))
-                    discard; 
+                    discard;
 
                 float au = 1.0 - smoothstep( 1.0 - ((2.0*u_aa_radius[0]) / v_line_width),  1.0, abs( v_u / v_line_width ) );
                 float av = 1.0 - smoothstep( 1.0 - ((2.0*u_aa_radius[1]) / v_line_length), 1.0, abs( v_v / v_line_length ) );
@@ -115,6 +115,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
                 frag_color.a *= min(av, au);
               }
 ";
-		}
-	}
+        }
+    }
 }

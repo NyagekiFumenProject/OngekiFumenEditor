@@ -68,7 +68,7 @@ appendPoint3(result, a.X, a.Y, flag switch {
 
 若 `result.Count` 达到几百(长谱面 + 多 lane),`FirstRange` 路径每次插入都是 O(N)。
 
-**改进方向**: 用两段缓冲(`prepend` 端用反向 append 到独立 list,最后再 reverse + 
+**改进方向**: 用两段缓冲(`prepend` 端用反向 append 到独立 list,最后再 reverse +
 concat),或者整体改用 `List<Vector2>` 并在末尾构造、最后做一次 reverse;消除中间
 插入。
 
@@ -96,7 +96,7 @@ rightPoints.AddRange(tempLeft);
 - `Skip(li)`/`AddRange` 改为 `CopyTo` + `List<T>.RemoveRange` + `InsertRange`;
   或者干脆用两个 `Vector2` ring buffer 索引,避免反复 List 整体重排。
 - `intersectionPoints` 改为 `(int gridX, int gridY)` 量化键,或者把它从 set 改为
-  单帧累计的 list 并配合 `Vector2` 的相等(已有 `==`)直接线性比较 —— 浮点 hash 
+  单帧累计的 list 并配合 `Vector2` 的相等(已有 `==`)直接线性比较 —— 浮点 hash
   在 set 里其实只有微弱的去重,可能不抵 hashing 成本。
 
 ### 4. 同一谱面对象重复多次查询/解算
@@ -104,7 +104,7 @@ rightPoints.AddRange(tempLeft);
 - `EnumeratePoints` 顶部已经做了一次 `GetVisibleStartObjects(minTGrid, maxTGrid)`,
   但每个 `curRange` 还会再做一次 `GetVisibleStartObjects(curRange.Min, curRange.Max)`;
   两者结果集大概率高度重叠。
-- `calculateXGrid` 内部 `start.GetChildObjectsFromTGrid(calcTGrid)` + 
+- `calculateXGrid` 内部 `start.GetChildObjectsFromTGrid(calcTGrid)` +
   `Select(...CalulateXGrid(calcTGrid))` 在 segments 主循环以及 `interpolate()` 内都被
   反复调用,且 `interpolate()` 还会再次 `GenAllPath()`。
 - 一段 `DrawPlayField` 调用 `EnumeratePoints(false/true)` 两次,左右墙的"全局开销"

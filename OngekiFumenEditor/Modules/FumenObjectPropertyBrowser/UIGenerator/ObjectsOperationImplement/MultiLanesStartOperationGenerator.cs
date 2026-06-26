@@ -11,34 +11,34 @@ using System.Windows;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectsOperationImplement
 {
-	[Export(typeof(IOngekiMultiObjectsOperationGenerator))]
-	public class MultiLanesStartOperationGenerator : IOngekiMultiObjectsOperationGenerator
-	{
-		public UIElement Generate(OngekiObjectBase obj)
-		{
-			return ViewHelper.CreateViewByViewModelType(() => new LaneOperationViewModel(obj as ConnectableObjectBase));
-		}
+    [Export(typeof(IOngekiMultiObjectsOperationGenerator))]
+    public class MultiLanesStartOperationGenerator : IOngekiMultiObjectsOperationGenerator
+    {
+        public UIElement Generate(OngekiObjectBase obj)
+        {
+            return ViewHelper.CreateViewByViewModelType(() => new LaneOperationViewModel(obj as ConnectableObjectBase));
+        }
 
-		public bool TryGenerate(IEnumerable<OngekiObjectBase> objs, out UIElement uiElement)
-		{
-			uiElement = default;
-			if (!objs.AtCount(2))
-				return false;
+        public bool TryGenerate(IEnumerable<OngekiObjectBase> objs, out UIElement uiElement)
+        {
+            uiElement = default;
+            if (!objs.AtCount(2))
+                return false;
 
-			var a = objs.First() as ConnectableObjectBase;
-			var b = objs.Last() as ConnectableObjectBase;
+            var a = objs.First() as ConnectableObjectBase;
+            var b = objs.Last() as ConnectableObjectBase;
 
-			if (!((a is ConnectableChildObjectBase && b is LaneStartBase) || (b is ConnectableChildObjectBase && a is LaneStartBase)))
-				return false;
+            if (!((a is ConnectableChildObjectBase && b is LaneStartBase) || (b is ConnectableChildObjectBase && a is LaneStartBase)))
+                return false;
 
-			var next = a is LaneStartBase _a ? _a : b as LaneStartBase;
-			var prev = a is ConnectableChildObjectBase _a2 ? _a2 : b as ConnectableChildObjectBase;
+            var next = a is LaneStartBase _a ? _a : b as LaneStartBase;
+            var prev = a is ConnectableChildObjectBase _a2 ? _a2 : b as ConnectableChildObjectBase;
 
-			if (next.LaneType != (prev.ReferenceStartObject as LaneStartBase)?.LaneType)
-				return false;
+            if (next.LaneType != (prev.ReferenceStartObject as LaneStartBase)?.LaneType)
+                return false;
 
-			uiElement = ViewHelper.CreateViewByViewModelType(() => new MultiLanesOperationViewModel(prev, next));
-			return true;
-		}
-	}
+            uiElement = ViewHelper.CreateViewByViewModelType(() => new MultiLanesOperationViewModel(prev, next));
+            return true;
+        }
+    }
 }

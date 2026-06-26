@@ -6,15 +6,15 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane
 {
-	[Export(typeof(IFumenEditorDrawingTarget))]
-	public sealed class ColorfulLaneDrawTarget : NormalLaneDrawingTarget
-	{
-		public override Vector4 GetLanePointColor(ConnectableObjectBase obj)
-		{
-			var color = ((IColorfulLane)obj).ColorId.Color;
-			return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
-		}
+    [Export(typeof(IFumenEditorDrawingTarget))]
+    public sealed class ColorfulLaneDrawTarget : NormalLaneDrawingTarget
+    {
+        public override Vector4 GetLanePointColor(ConnectableObjectBase obj)
+        {
+            var color = ((IColorfulLane)obj).ColorId.Color;
+            return new(color.R / 255.0f, color.G / 255.0f, color.B / 255.0f, color.A / 255.0f);
+        }
 
-		public override IEnumerable<string> DrawTargetID { get; } = new[] { "CLS" };
-	}
+        public override IEnumerable<string> DrawTargetID { get; } = new[] { "CLS" };
+    }
 }

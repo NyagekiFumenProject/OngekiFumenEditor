@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Utils;
 using System;

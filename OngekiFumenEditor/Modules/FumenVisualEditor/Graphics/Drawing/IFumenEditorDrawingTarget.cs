@@ -5,11 +5,11 @@ using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
 {
-	public interface IFumenEditorDrawingTarget : IDrawingTarget
+    public interface IFumenEditorDrawingTarget : IDrawingTarget
     {
         IEnumerable<string> DrawTargetID { get; }
         DrawingVisible DefaultVisible { get; }
-		DrawingVisible Visible { get; set; }
+        DrawingVisible Visible { get; set; }
         int DefaultRenderOrder { get; }
         int CurrentRenderOrder { get; set; }
 

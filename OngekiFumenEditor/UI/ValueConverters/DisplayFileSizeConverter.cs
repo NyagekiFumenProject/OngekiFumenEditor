@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
 using SvgConverter;
 using System;
 using System.Collections.Generic;

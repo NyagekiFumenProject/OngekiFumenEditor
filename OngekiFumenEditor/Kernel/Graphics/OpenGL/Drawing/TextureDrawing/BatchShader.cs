@@ -1,15 +1,15 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-	internal class BatchShader : DefaultOpenGLShader
-	{
-		private int viewProjectionLocation = int.MinValue;
-		private int diffuseLocation = int.MinValue;
+    internal class BatchShader : DefaultOpenGLShader
+    {
+        private int viewProjectionLocation = int.MinValue;
+        private int diffuseLocation = int.MinValue;
 
-		public BatchShader()
-		{
-			VertexProgram = @"
+        public BatchShader()
+        {
+            VertexProgram = @"
                 #version 330
                 out vec4 varying_color;
                 out vec2 varying_texPos;
@@ -28,26 +28,26 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
                         scaledPos.x * c - scaledPos.y * s,
                         scaledPos.x * s + scaledPos.y * c
                     );
-	                gl_Position=ViewProjection * vec4(rotatedPos + in_position,0.0,1.0);
-	                varying_texPos=in_texPos;
+                    gl_Position=ViewProjection * vec4(rotatedPos + in_position,0.0,1.0);
+                    varying_texPos=in_texPos;
                     varying_color = in_color;
-                }   
+                }
                 ";
-			FragmentProgram = @"
+            FragmentProgram = @"
                 #version 330
                 uniform sampler2D diffuse;
                 in vec2 varying_texPos;
                 in vec4 varying_color;
                 out vec4 out_color;
                 void main(){
-	                vec4 texColor=texture(diffuse,varying_texPos);
-	                out_color=texColor * varying_color;
+                    vec4 texColor=texture(diffuse,varying_texPos);
+                    out_color=texColor * varying_color;
                 }
                 ";
-		}
+        }
 
-		public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
+        public int ViewProjectionLocation => viewProjectionLocation == int.MinValue ? viewProjectionLocation = GetUniformLocation("ViewProjection") : viewProjectionLocation;
 
-		public int DiffuseLocation => diffuseLocation == int.MinValue ? diffuseLocation = GetUniformLocation("diffuse") : diffuseLocation;
-	}
+        public int DiffuseLocation => diffuseLocation == int.MinValue ? diffuseLocation = GetUniformLocation("diffuse") : diffuseLocation;
+    }
 }

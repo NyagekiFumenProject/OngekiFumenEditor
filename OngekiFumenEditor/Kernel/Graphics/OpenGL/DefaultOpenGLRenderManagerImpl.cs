@@ -1,4 +1,4 @@
-﻿//#define OGL_LOG
+//#define OGL_LOG
 using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;

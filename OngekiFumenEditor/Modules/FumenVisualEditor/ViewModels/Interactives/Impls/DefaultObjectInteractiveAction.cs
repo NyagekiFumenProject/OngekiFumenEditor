@@ -11,178 +11,178 @@ using static OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editor
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls
 {
-	public class DefaultObjectInteractiveAction : ObjectInteractiveActionBase
-	{
-		private Dictionary<OngekiObjectBase, DragInfo> dragInfoMap = new();
+    public class DefaultObjectInteractiveAction : ObjectInteractiveActionBase
+    {
+        private Dictionary<OngekiObjectBase, DragInfo> dragInfoMap = new();
 
-		private struct DragInfo
-		{
-			public Point CanvasPoint { get; set; }
-			public Point Point { get; set; }
+        private struct DragInfo
+        {
+            public Point CanvasPoint { get; set; }
+            public Point Point { get; set; }
 
-			public XGrid XGrid { get; set; }
-			public TGrid TGrid { get; set; }
+            public XGrid XGrid { get; set; }
+            public TGrid TGrid { get; set; }
 
-			public LaneStartBase RefLane { get; set; }
-		}
+            public LaneStartBase RefLane { get; set; }
+        }
 
-		public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
-		{
-			if (dragInfoMap.TryGetValue(obj, out var info))
-				dragInfoMap.Remove(obj);
-			else
-				return;//²»Ó¦¸Ã×ßµ½Õâ
+        public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (dragInfoMap.TryGetValue(obj, out var info))
+                dragInfoMap.Remove(obj);
+            else
+                return;//ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½
 
-			var dragStartCanvasPoint = info.CanvasPoint;
-			var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
-			var y = obj is ITimelineObject timelineObject ? editor.ConvertTGridToY_DesignMode(timelineObject.TGrid) : 0;
+            var dragStartCanvasPoint = info.CanvasPoint;
+            var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
+            var y = obj is ITimelineObject timelineObject ? editor.ConvertTGridToY_DesignMode(timelineObject.TGrid) : 0;
 
-			OnDragMove(obj, point, editor);
-			var newPos = new Point(x, y);
+            OnDragMove(obj, point, editor);
+            var newPos = new Point(x, y);
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects,
-				() =>
-				{
-					OnMoveCanvas(obj, newPos, editor);
-				}, () =>
-				{
-					//²»Ö±½ÓmoveÁË£¬Ö±½ÓÉèÖÃÎ»ÖÃ¾ÍÐÐ
-					if (obj is IHorizonPositionObject horizonPositionObject)
-						horizonPositionObject.XGrid = info.XGrid;
-					if (obj is ITimelineObject timelineObject)
-						timelineObject.TGrid = info.TGrid;
-					if (obj is ILaneDockable dockable)
-						dockable.ReferenceLaneStart = info.RefLane;
-				}));
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects,
+                () =>
+                {
+                    OnMoveCanvas(obj, newPos, editor);
+                }, () =>
+                {
+                    //ï¿½ï¿½Ö±ï¿½ï¿½moveï¿½Ë£ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã¾ï¿½ï¿½ï¿½
+                    if (obj is IHorizonPositionObject horizonPositionObject)
+                        horizonPositionObject.XGrid = info.XGrid;
+                    if (obj is ITimelineObject timelineObject)
+                        timelineObject.TGrid = info.TGrid;
+                    if (obj is ILaneDockable dockable)
+                        dockable.ReferenceLaneStart = info.RefLane;
+                }));
 
-			//Log.LogDebug($"OnObjectDragEnd: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
-		}
+            //Log.LogDebug($"OnObjectDragEnd: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
+        }
 
-		public override void OnDragMove(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
-		{
-			if (!dragInfoMap.TryGetValue(obj, out var info))
-				return;//²»Ó¦¸Ã×ßµ½Õâ
+        public override void OnDragMove(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
+        {
+            if (!dragInfoMap.TryGetValue(obj, out var info))
+                return;//ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½
 
-			var dragStartCanvasPoint = info.CanvasPoint;
-			var dragStartPoint = info.Point;
+            var dragStartCanvasPoint = info.CanvasPoint;
+            var dragStartPoint = info.Point;
 
-			var movePoint = new Point(
-				dragStartCanvasPoint.X + (pos.X - dragStartPoint.X),
-				dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
-				);
+            var movePoint = new Point(
+                dragStartCanvasPoint.X + (pos.X - dragStartPoint.X),
+                dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
+                );
 
-			//ÕâÀïÏÞÖÆÒ»ÏÂ
-			//movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
-			movePoint.Y = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y));
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+            //movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
+            movePoint.Y = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y));
 
-			//Log.LogDebug($"OnObjectDragMoving: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
+            //Log.LogDebug($"OnObjectDragMoving: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
 
-			OnMoveCanvas(obj, movePoint, editor);
-		}
+            OnMoveCanvas(obj, movePoint, editor);
+        }
 
-		public override void OnDragStart(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
-		{
-			var info = new DragInfo();
+        public override void OnDragStart(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
+        {
+            var info = new DragInfo();
 
-			var x = 0d;
-			if (obj is IHorizonPositionObject horizonPositionObject)
-			{
-				x = XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor);
-				if (double.IsNaN(x))
-					x = default;
-				info.XGrid = horizonPositionObject.XGrid.CopyNew();
-			}
+            var x = 0d;
+            if (obj is IHorizonPositionObject horizonPositionObject)
+            {
+                x = XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor);
+                if (double.IsNaN(x))
+                    x = default;
+                info.XGrid = horizonPositionObject.XGrid.CopyNew();
+            }
 
-			var y = 0d;
-			if (obj is ITimelineObject timelineObject)
-			{
-				y = editor.ConvertTGridToY_DesignMode(timelineObject.TGrid);
-				if (double.IsNaN(y))
-					y = default;
-				info.TGrid = timelineObject.TGrid.CopyNew();
-			}
+            var y = 0d;
+            if (obj is ITimelineObject timelineObject)
+            {
+                y = editor.ConvertTGridToY_DesignMode(timelineObject.TGrid);
+                if (double.IsNaN(y))
+                    y = default;
+                info.TGrid = timelineObject.TGrid.CopyNew();
+            }
 
-			if (obj is ILaneDockable dockable)
-			{
-				info.RefLane = dockable.ReferenceLaneStart;
-			}
+            if (obj is ILaneDockable dockable)
+            {
+                info.RefLane = dockable.ReferenceLaneStart;
+            }
 
-			info.CanvasPoint = new Point(x, y);
-			info.Point = pos;
+            info.CanvasPoint = new Point(x, y);
+            info.Point = pos;
 
-			dragInfoMap[obj] = info;
+            dragInfoMap[obj] = info;
 
-			//Log.LogDebug($"OnObjectDragStart: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
-		}
+            //Log.LogDebug($"OnObjectDragStart: ({pos.X:F2},{pos.Y:F2}) -> ({x:F2},{y:F2})");
+        }
 
-		public override void OnMoveCanvas(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
-		{
-			if (obj is ITimelineObject timeObj)
-			{
-				var ry = CheckAndAdjustY(timeObj, point.Y, editor);
-				if (ry is double dry && editor.ConvertYToTGrid_DesignMode(dry) is TGrid tGrid)
-				{
-					timeObj.TGrid = tGrid;
-					//Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
-				}
-			}
+        public override void OnMoveCanvas(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (obj is ITimelineObject timeObj)
+            {
+                var ry = CheckAndAdjustY(timeObj, point.Y, editor);
+                if (ry is double dry && editor.ConvertYToTGrid_DesignMode(dry) is TGrid tGrid)
+                {
+                    timeObj.TGrid = tGrid;
+                    //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
+                }
+            }
 
-			if (obj is IHorizonPositionObject posObj)
-			{
-				var rx = CheckAndAdjustX(posObj, point.X, editor);
-				if (rx is double drx)
-				{
-					var xGrid = XGridCalculator.ConvertXToXGrid(drx, editor);
-					posObj.XGrid = xGrid;
-				}
+            if (obj is IHorizonPositionObject posObj)
+            {
+                var rx = CheckAndAdjustX(posObj, point.X, editor);
+                if (rx is double drx)
+                {
+                    var xGrid = XGridCalculator.ConvertXToXGrid(drx, editor);
+                    posObj.XGrid = xGrid;
+                }
 
-				//Log.LogDebug($"x : {rx:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, this)}");
-			}
-		}
+                //Log.LogDebug($"x : {rx:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, this)}");
+            }
+        }
 
-		public virtual double? CheckAndAdjustY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
-		{
-			var enableMagneticAdjust = !editor.Setting.DisableTGridMagneticDock;
-			if (!enableMagneticAdjust)
-				return y;
+        public virtual double? CheckAndAdjustY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
+        {
+            var enableMagneticAdjust = !editor.Setting.DisableTGridMagneticDock;
+            if (!enableMagneticAdjust)
+                return y;
 
-			var forceMagneticAdjust = editor.Setting.ForceMagneticDock;
-			var fin = forceMagneticAdjust ? editor.TryPickClosestBeatTime((float)y) : editor.TryPickMagneticBeatTime((float)y, 4);
-			var ry = fin.y;
-			if (fin.tGrid == null)
-				ry = y;
-			//Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
-			return ry;
-		}
+            var forceMagneticAdjust = editor.Setting.ForceMagneticDock;
+            var fin = forceMagneticAdjust ? editor.TryPickClosestBeatTime((float)y) : editor.TryPickMagneticBeatTime((float)y, 4);
+            var ry = fin.y;
+            if (fin.tGrid == null)
+                ry = y;
+            //Log.LogDebug($"before y={y:F2} ,select:({fin.tGrid}) ,fin:{ry:F2}");
+            return ry;
+        }
 
-		public virtual double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
-		{
-			var enableMagneticAdjust = !editor.Setting.DisableXGridMagneticDock;
-			var forceMagneticAdjust = editor.Setting.ForceMagneticDock || editor.Setting.ForceXGridMagneticDock;
-			var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
+        public virtual double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
+        {
+            var enableMagneticAdjust = !editor.Setting.DisableXGridMagneticDock;
+            var forceMagneticAdjust = editor.Setting.ForceMagneticDock || editor.Setting.ForceXGridMagneticDock;
+            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
 
-			IEnumerable<double> calc2()
-			{
-				var xOffset = (float)editor.Setting.XOffset;
+            IEnumerable<double> calc2()
+            {
+                var xOffset = (float)editor.Setting.XOffset;
 
-				var unitSize = (float)XGridCalculator.CalculateXUnitSize(editor);
-				var baseX = editor.RectInDesignMode.Width / 2 + xOffset;
+                var unitSize = (float)XGridCalculator.CalculateXUnitSize(editor);
+                var baseX = editor.RectInDesignMode.Width / 2 + xOffset;
 
-				var rX = x - baseX;
-				var sign = Math.Sign(rX);
+                var rX = x - baseX;
+                var sign = Math.Sign(rX);
 
-				var xpX = (int)(Math.Abs(rX) / unitSize);
+                var xpX = (int)(Math.Abs(rX) / unitSize);
 
-				yield return baseX + xpX * unitSize * sign;
-				yield return baseX + (xpX + 1) * unitSize * sign;
-			}
+                yield return baseX + xpX * unitSize * sign;
+                yield return baseX + (xpX + 1) * unitSize * sign;
+            }
 
-			var nearestUnitLine2 = (enableMagneticAdjust ? calc2().Select(z => (Math.Abs(z - x), z, true))
-				.Where(z => z.Item1 < dockableTriggerDistance).OrderBy(x => x.Item1)
-			: Enumerable.Empty<(double, double, bool)>()).FirstOrDefault();
-			var fin2 = nearestUnitLine2.Item3 ? nearestUnitLine2.Item2 : forceMagneticAdjust ? default(double?) : x;
+            var nearestUnitLine2 = (enableMagneticAdjust ? calc2().Select(z => (Math.Abs(z - x), z, true))
+                .Where(z => z.Item1 < dockableTriggerDistance).OrderBy(x => x.Item1)
+            : Enumerable.Empty<(double, double, bool)>()).FirstOrDefault();
+            var fin2 = nearestUnitLine2.Item3 ? nearestUnitLine2.Item2 : forceMagneticAdjust ? default(double?) : x;
 
-			return fin2;
-		}
-	}
+            return fin2;
+        }
+    }
 }

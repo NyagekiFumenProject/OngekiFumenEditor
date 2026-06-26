@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32.SafeHandles;
+using Microsoft.Win32.SafeHandles;
 using OngekiFumenEditor.Utils.Logs.DefaultImpls;
 using System;
 using System.Collections.Generic;

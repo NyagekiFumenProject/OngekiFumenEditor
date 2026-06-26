@@ -1,4 +1,4 @@
-﻿using AssocSupport;
+using AssocSupport;
 using AssocSupport.Models;
 using Caliburn.Micro;
 using Gemini.Modules.Settings;

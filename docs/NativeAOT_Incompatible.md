@@ -1,13 +1,13 @@
 # NativeAOT 不兼容代码清单
 
-> 本文档由静态扫描生成，针对的是 `F:/OngekiFumenEditor/OngekiFumenEditor/` 主项目（不含 Dependences/Benchmark/CommandLine/bin/obj 等子项目和产物）。  
+> 本文档由静态扫描生成，针对的是 `F:/OngekiFumenEditor/OngekiFumenEditor/` 主项目（不含 Dependences/Benchmark/CommandLine/bin/obj 等子项目和产物）。
 > 扫描方式：基于 ripgrep 的模式匹配 + 关键文件逐行审阅。所有行号均以最新源码为准。
 
 ---
 
 ## 摘要
 
-- **主项目 AOT 迁移结论：大量阻塞性问题，目前不可能直接迁移到 NativeAOT。**  
+- **主项目 AOT 迁移结论：大量阻塞性问题，目前不可能直接迁移到 NativeAOT。**
   即使忽略掉 WPF/Caliburn.Micro/MEF 这三个无法绕开的框架层级限制，单看项目自身的代码也存在 35+ 处明确的 AOT/Trim 不兼容点；其中至少 12 处属于 P0 级（依赖 `Expression.Compile`、反射元数据、动态加载程序集、`JsonSerializer` 默认反射模式、Roslyn 动态编译等）。
 - **已知前置限制（不在本项目代码之内，但已经决定 AOT 不可行）：**
   - **WPF 框架本身：** `net10.0-windows + UseWPF=true`。WPF 在 .NET 9/.NET 10 阶段仍然依赖大量 BAML/XAML 反射，未正式支持 NativeAOT。微软自己在 *Limitations of Native AOT deployment* 中明确列出。
@@ -48,12 +48,12 @@
 - **位置：** `OngekiFumenEditor/Kernel/CommandExecutor/DefaultCommandExecutor.cs:209-233`
 - **类型：** 反射 + `Type.MakeGenericType` + `Expression.Lambda.Compile` + `PropertyInfo.SetValue`
 - **AOT 警告代码：** IL3050（MakeGenericType / Expression.Compile）、IL2055（MakeGenericType）、IL2075（GetProperty）、IL2026
-- **问题：**  
-  - 第 211 行：`typeof(T).GetProperties()` 遍历 + `prop.GetCustomAttribute<...>()` 读取属性。  
-  - 第 215 行：`typeof(Func<,>).MakeGenericType(typeof(ArgumentResult), attrbuteBase.Type)`。  
-  - 第 218 行：`Expression.Lambda(funcType, valParam, arg)` 然后 `.Compile()`。  
-  - 第 221 行：`typeof(Option<>).MakeGenericType(attrbuteBase.Type)`。  
-  - 第 228 行：`optionType.GetProperty(nameof(Option<>.DefaultValueFactory)).SetValue(option, func)`。  
+- **问题：**
+  - 第 211 行：`typeof(T).GetProperties()` 遍历 + `prop.GetCustomAttribute<...>()` 读取属性。
+  - 第 215 行：`typeof(Func<,>).MakeGenericType(typeof(ArgumentResult), attrbuteBase.Type)`。
+  - 第 218 行：`Expression.Lambda(funcType, valParam, arg)` 然后 `.Compile()`。
+  - 第 221 行：`typeof(Option<>).MakeGenericType(attrbuteBase.Type)`。
+  - 第 228 行：`optionType.GetProperty(nameof(Option<>.DefaultValueFactory)).SetValue(option, func)`。
   - 第 248 行：`prop.SetValue(obj, val)` 通过反射写值。
 - **运行时风险：** NativeAOT 下 `Type.MakeGenericType` 触发的代码可能未编译；`Expression.Compile()` 直接报错。该路径关系到所有 CLI 命令行 `svg/convert/jacket/acb` 子命令解析，CLI 模式直接不可用。
 - **建议替换方案：** 使用 `System.CommandLine` 原生的 fluent API 手动注册每个 Option，移除属性扫描与泛型动态构造。
@@ -114,8 +114,8 @@
 - **类型：** `typeof(EqualityComparer<>).MakeGenericType(...).GetProperty("Default").GetValue(null)`、`objType.GetProperty(propertyName, BindingFlags...)`、`Activator.CreateInstance(propertyInfo.PropertyType)`
 - **AOT 警告代码：** IL3050（MakeGenericType）+ IL2070/IL2075（GetProperty）+ IL2072（PropertyType 通过 boxing 流失注解）
 - **问题：** 对象属性浏览器核心：先 `objType.GetProperty(propertyName)` 拿到 `PropertyInfo`，再为每种属性类型动态生成对应的 `EqualityComparer<T>.Default`，最后 `Activator.CreateInstance(propType)` 制造 default 值。该类作用于编辑器右侧属性面板，所有 OngekiObject 编辑均路径强相关。
-- **建议替换方案：**  
-  - 改用 `EqualityComparer<object>.Default` 配合包装；或对每个具体属性类型预注册 comparer。  
+- **建议替换方案：**
+  - 改用 `EqualityComparer<object>.Default` 配合包装；或对每个具体属性类型预注册 comparer。
   - 用 source generator 给每个 `OngekiObjectBase` 子类生成 `IDictionary<string, IPropertyAccessor>`，绕开 `PropertyInfo`。
 
 ### 11. `PropertyInfoWrapper` —— `PropertyInfo.GetValue/SetValue` + `TypeDescriptor.GetConverter` 全反射
@@ -144,8 +144,8 @@
 
 ### 14. `ParserUtils.GetDataArray<T>` & `Parser.Ogkr.CommandArgs.GetDataArray<T>` —— `TypeDescriptor.GetConverter(typeof(T))`
 
-- **位置：**  
-  - `OngekiFumenEditor/Parser/ParserUtils.cs:18-25`  
+- **位置：**
+  - `OngekiFumenEditor/Parser/ParserUtils.cs:18-25`
   - `OngekiFumenEditor/Parser/Ogkr/CommandArgs.cs:42-66`
 - **类型：** `TypeDescriptor.GetConverter` + 反射 `ConvertFromString`
 - **AOT 警告代码：** IL2026（`TypeDescriptor` 路径上的反射）
@@ -173,8 +173,8 @@
 
 ### 17. `MultiKeyGestureConverter` 与 `Configure` 中的运行期 `TypeConverter` 实例化
 
-- **位置：**  
-  - `OngekiFumenEditor/UI/KeyBinding/Input/MultiKeyGestureConverter.cs:16-126`  
+- **位置：**
+  - `OngekiFumenEditor/UI/KeyBinding/Input/MultiKeyGestureConverter.cs:16-126`
   - `OngekiFumenEditor/AppBootstrapper.cs:191`：`(MultiKeyGesture)new MultiKeyGestureConverter().ConvertFrom(splits[1])`
 - **类型：** `TypeConverter` 派生 + 显式调用 `ConvertFrom`，未通过 source generator
 - **AOT 警告代码：** IL2026
@@ -276,9 +276,9 @@
 
 ### 28. `Type.MakeGenericType` 直接出现共 3 处
 
-- **位置：**  
-  - `OngekiFumenEditor/Modules/FumenObjectPropertyBrowser/MultiObjectsPropertyInfoWrapper.cs:36`  
-  - `OngekiFumenEditor/Kernel/CommandExecutor/DefaultCommandExecutor.cs:215`  
+- **位置：**
+  - `OngekiFumenEditor/Modules/FumenObjectPropertyBrowser/MultiObjectsPropertyInfoWrapper.cs:36`
+  - `OngekiFumenEditor/Kernel/CommandExecutor/DefaultCommandExecutor.cs:215`
   - `OngekiFumenEditor/Kernel/CommandExecutor/DefaultCommandExecutor.cs:221`
 - **AOT 警告代码：** IL3050（`MakeGenericType` 是 NativeAOT 明确不能静态推断的 API）
 - **建议替换方案：** 改为预生成的 `Dictionary<Type, Func<object>>` 或 source generator。

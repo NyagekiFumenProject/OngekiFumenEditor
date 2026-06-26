@@ -1,9 +1,9 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditorSettings
 {
-	public interface IFumenVisualEditorSettings : ITool
-	{
+    public interface IFumenVisualEditorSettings : ITool
+    {
 
-	}
+    }
 }

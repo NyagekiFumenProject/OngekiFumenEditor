@@ -1,4 +1,4 @@
-﻿using Gemini.Modules.Output;
+using Gemini.Modules.Output;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;

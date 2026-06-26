@@ -329,7 +329,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             tGrid = TGridCalculator.ConvertAudioTimeToTGrid(actualMs, Fumen.BpmList);
         }
 
-        #region prepare drawing contexts' for every soflan groups 
+        #region prepare drawing contexts' for every soflan groups
 
         IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = Fumen.SoflansMap;
         //if (IsDesignMode)

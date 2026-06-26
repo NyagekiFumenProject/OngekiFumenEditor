@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Menus;
+using Gemini.Framework.Menus;
 using OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Commands;
 using System;
 using System.Collections.Generic;

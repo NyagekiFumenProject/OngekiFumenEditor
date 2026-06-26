@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;

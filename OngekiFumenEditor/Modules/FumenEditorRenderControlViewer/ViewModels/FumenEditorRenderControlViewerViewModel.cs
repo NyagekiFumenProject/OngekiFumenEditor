@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Microsoft.CodeAnalysis.Differencing;
@@ -197,7 +197,7 @@ namespace OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels
 
             UpdateRenderOrder();
 
-            // Set this to 'Move' so that the OnListViewDrop knows to 
+            // Set this to 'Move' so that the OnListViewDrop knows to
             // remove the item from the other ListView.
             e.Effects = DragDropEffects.Move;
         }

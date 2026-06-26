@@ -6,8 +6,8 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached
 {
-	public interface ICachedSvgRenderDataManager
-	{
-		public IReadOnlyList<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound);
-	}
+    public interface ICachedSvgRenderDataManager
+    {
+        public IReadOnlyList<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound);
+    }
 }

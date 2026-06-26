@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 using System;

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Utils
+namespace OngekiFumenEditor.Utils
 {
     public static class ObjectExtensionMethod
     {

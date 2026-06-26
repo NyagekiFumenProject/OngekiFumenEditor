@@ -3,14 +3,14 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
-	[Export(typeof(ICommandParser))]
-	class ClickDefinitionCommandParser : MetaInfoCommandParserBase
-	{
-		public override string CommandLineHeader => "CLK_DEF";
+    [Export(typeof(ICommandParser))]
+    class ClickDefinitionCommandParser : MetaInfoCommandParserBase
+    {
+        public override string CommandLineHeader => "CLK_DEF";
 
-		public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
-		{
-			fumen.MetaInfo.ClickDefinition = args.GetData<int>(1);
-		}
-	}
+        public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
+        {
+            fumen.MetaInfo.ClickDefinition = args.GetData<int>(1);
+        }
+    }
 }

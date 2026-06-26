@@ -5,8 +5,8 @@ using OngekiFumenEditor.Parser;
 
 namespace OngekiFumenEditor.Modules.FumenConverter
 {
-	public interface IFumenConverter
-	{
-		Task<byte[]> ConvertFumenAsync(OngekiFumen fumen, string savePathOrFormat);
-	}
+    public interface IFumenConverter
+    {
+        Task<byte[]> ConvertFumenAsync(OngekiFumen fumen, string savePathOrFormat);
+    }
 }

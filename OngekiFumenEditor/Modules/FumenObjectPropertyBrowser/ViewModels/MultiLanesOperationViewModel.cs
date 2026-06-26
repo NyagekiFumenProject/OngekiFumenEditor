@@ -12,87 +12,87 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-	[MapToView(ViewType = typeof(MultiLanesOperationView))]
-	public class MultiLanesOperationViewModel : PropertyChangedBase
-	{
-		private readonly ConnectableChildObjectBase frontChild;
-		private readonly ConnectableStartObject laterStart;
+    [MapToView(ViewType = typeof(MultiLanesOperationView))]
+    public class MultiLanesOperationViewModel : PropertyChangedBase
+    {
+        private readonly ConnectableChildObjectBase frontChild;
+        private readonly ConnectableStartObject laterStart;
 
-		private readonly List<ILaneDockable> RedockedObjects = new();
+        private readonly List<ILaneDockable> RedockedObjects = new();
 
-		/**
-		 合并前:
+        /**
+         锟较诧拷前:
             frontStart  frontChild
             o-----------o
 
                         o midChild
-                            
+
                         o--------o---------o
                         laterStart
 
-		合并后:
+        锟较诧拷锟斤拷:
             frontStart  frontChild
             o-----------o
-			            |
-                        | 
-                        |   
+                        |
+                        |
+                        |
                 o       o--------o---------o
-       laterStart       midChild 
+       laterStart       midChild
         */
 
-		public MultiLanesOperationViewModel(ConnectableChildObjectBase frontChild, ConnectableStartObject laterStart)
-		{
-			this.frontChild = frontChild;
-			this.laterStart = laterStart;
-		}
+        public MultiLanesOperationViewModel(ConnectableChildObjectBase frontChild, ConnectableStartObject laterStart)
+        {
+            this.frontChild = frontChild;
+            this.laterStart = laterStart;
+        }
 
-		public void OnClick(ActionExecutionContext e)
-		{
-			if (IoC.Get<IFumenObjectPropertyBrowser>().Editor is not FumenVisualEditorViewModel editor)
-				return;
+        public void OnClick(ActionExecutionContext e)
+        {
+            if (IoC.Get<IFumenObjectPropertyBrowser>().Editor is not FumenVisualEditorViewModel editor)
+                return;
 
-			var frontStart = frontChild.ReferenceStartObject;
-			var midChild = frontStart.CreateChildObject();
+            var frontStart = frontChild.ReferenceStartObject;
+            var midChild = frontStart.CreateChildObject();
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CombineLane, () =>
-			{
-				midChild.XGrid = laterStart.XGrid.CopyNew();
-				midChild.TGrid = laterStart.TGrid.CopyNew();
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.CombineLane, () =>
+            {
+                midChild.XGrid = laterStart.XGrid.CopyNew();
+                midChild.TGrid = laterStart.TGrid.CopyNew();
 
-				frontStart.AddChildObject(midChild);
+                frontStart.AddChildObject(midChild);
 
-				foreach (var laterChild in laterStart.Children.ToArray())
-				{
-					laterStart.RemoveChildObject(laterChild);
-					frontStart.AddChildObject(laterChild);
-				}
+                foreach (var laterChild in laterStart.Children.ToArray())
+                {
+                    laterStart.RemoveChildObject(laterChild);
+                    frontStart.AddChildObject(laterChild);
+                }
 
-				foreach (var dockable in editor.Fumen.Taps.Concat<ILaneDockable>(editor.Fumen.Holds)
-					         .Where(d => d.ReferenceLaneStart == laterStart)) {
-					dockable.ReferenceLaneStart = (LaneStartBase)frontStart;
-					RedockedObjects.Add(dockable);
-				}
+                foreach (var dockable in editor.Fumen.Taps.Concat<ILaneDockable>(editor.Fumen.Holds)
+                             .Where(d => d.ReferenceLaneStart == laterStart)) {
+                    dockable.ReferenceLaneStart = (LaneStartBase)frontStart;
+                    RedockedObjects.Add(dockable);
+                }
 
-				editor.Fumen.RemoveObject(laterStart);
-				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
-			}, () =>
-			{
-				var next = midChild.NextObject;
-				while (next != null)
-				{
-					frontStart.RemoveChildObject(next);
-					laterStart.AddChildObject(next);
-					next = next.NextObject;
-				}
-				frontStart.RemoveChildObject(midChild);
-				editor.Fumen.AddObject(laterStart);
+                editor.Fumen.RemoveObject(laterStart);
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
+            }, () =>
+            {
+                var next = midChild.NextObject;
+                while (next != null)
+                {
+                    frontStart.RemoveChildObject(next);
+                    laterStart.AddChildObject(next);
+                    next = next.NextObject;
+                }
+                frontStart.RemoveChildObject(midChild);
+                editor.Fumen.AddObject(laterStart);
 
-				foreach (var dockable in RedockedObjects) {
-					dockable.ReferenceLaneStart = (LaneStartBase)laterStart;
-				}
+                foreach (var dockable in RedockedObjects) {
+                    dockable.ReferenceLaneStart = (LaneStartBase)laterStart;
+                }
 
-				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
-			}));
-		}
-	}
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
+            }));
+        }
+    }
 }

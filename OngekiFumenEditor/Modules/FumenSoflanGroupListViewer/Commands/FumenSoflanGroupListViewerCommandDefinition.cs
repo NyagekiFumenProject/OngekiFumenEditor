@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Commands;
+using Gemini.Framework.Commands;
 using OngekiFumenEditor.Properties;
 using System.ComponentModel.Composition;
 using System.Windows.Input;

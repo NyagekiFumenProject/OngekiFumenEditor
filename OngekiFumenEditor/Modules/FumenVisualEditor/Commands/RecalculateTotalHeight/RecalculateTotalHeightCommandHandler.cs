@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Commands;
+using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;

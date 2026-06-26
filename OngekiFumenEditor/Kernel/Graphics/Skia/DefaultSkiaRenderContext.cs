@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Skia;
+using OngekiFumenEditor.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;

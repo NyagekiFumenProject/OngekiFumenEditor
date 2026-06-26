@@ -1,4 +1,4 @@
-﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -17,43 +17,43 @@ using System.Windows.Shapes;
 
 namespace OngekiFumenEditor.UI.Dialogs
 {
-	/// <summary>
-	/// ExceptionTermWindow.xaml 的交互逻辑
-	/// </summary>
-	public partial class ExceptionTermWindow : MetroWindow
-	{
-		public string ExceptionMessage { get; init; }
-		public string[] RescueFolderPaths { get; init; }
-		public string LogFile { get; init; }
-		public string DumpFile { get; init; }
+    /// <summary>
+    /// ExceptionTermWindow.xaml 的交互逻辑
+    /// </summary>
+    public partial class ExceptionTermWindow : MetroWindow
+    {
+        public string ExceptionMessage { get; init; }
+        public string[] RescueFolderPaths { get; init; }
+        public string LogFile { get; init; }
+        public string DumpFile { get; init; }
 
-		public string ProgramVersion => ThisAssembly.AssemblyInformationalVersion;
+        public string ProgramVersion => ThisAssembly.AssemblyInformationalVersion;
 
-		public ExceptionTermWindow(string exceptionMessage, string[] rescueFolderPaths, string logFile, string dumpFile)
-		{
-			ExceptionMessage = exceptionMessage;
-			RescueFolderPaths = rescueFolderPaths;
-			LogFile = logFile;
-			DumpFile = dumpFile;
+        public ExceptionTermWindow(string exceptionMessage, string[] rescueFolderPaths, string logFile, string dumpFile)
+        {
+            ExceptionMessage = exceptionMessage;
+            RescueFolderPaths = rescueFolderPaths;
+            LogFile = logFile;
+            DumpFile = dumpFile;
 
-			InitializeComponent();
-			DataContext = this;
-		}
+            InitializeComponent();
+            DataContext = this;
+        }
 
-		private void Button_Click(object sender, RoutedEventArgs e)
-		{
-			Close();
-		}
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
 
-		private void Hyperlink_Click(object sender, RoutedEventArgs e)
-		{
-			if ((sender switch
-			{
-				FrameworkElement f => f.DataContext,
-				FrameworkContentElement f => f.DataContext,
-				_ => default
-			}) is string path)
-				ProcessUtils.OpenExplorerToBrowser(path);
-		}
-	}
+        private void Hyperlink_Click(object sender, RoutedEventArgs e)
+        {
+            if ((sender switch
+            {
+                FrameworkElement f => f.DataContext,
+                FrameworkContentElement f => f.DataContext,
+                _ => default
+            }) is string path)
+                ProcessUtils.OpenExplorerToBrowser(path);
+        }
+    }
 }
