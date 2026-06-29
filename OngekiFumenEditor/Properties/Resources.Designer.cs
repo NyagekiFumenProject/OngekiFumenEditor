@@ -2924,11 +2924,20 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Port.
+        ///   Looks up a localized string similar to Address.
         /// </summary>
-        public static string GamePlayControllerPort {
+        public static string GamePlayControllerConnectAddress {
             get {
-                return ResourceManager.GetString("GamePlayControllerPort", resourceCulture);
+                return ResourceManager.GetString("GamePlayControllerConnectAddress", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Connect failed: {0}.
+        /// </summary>
+        public static string GamePlayControllerConnectFailedFormat {
+            get {
+                return ResourceManager.GetString("GamePlayControllerConnectFailedFormat", resourceCulture);
             }
         }
 

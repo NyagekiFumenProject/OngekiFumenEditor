@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer
         Task Reload();
         Task<bool> IsPlaying();
         Task<bool> UpdateCheckConnecting();
-        Task<bool> CheckVailed();
+        Task<bool> CheckValid();
         //Task<NotesManagerData?> GetNotesManagerData();
     }
 }

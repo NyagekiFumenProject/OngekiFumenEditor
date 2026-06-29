@@ -35,7 +35,7 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Orientation="Horizontal">
-                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerPort]}" />
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerConnectAddress]}" />
                         <TextBox
                             Width="100"
                             Margin="10,5,10,5"
@@ -97,7 +97,8 @@
                             Padding="2"
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            IsChecked="{Binding IsPlayGuideSEAfterPlay}">
+                            IsChecked="{Binding IsPlayGuideSEAfterPlay}"
+                            IsEnabled="False">
                             <TextBlock Text="{markup:Translate [GamePlayControllerPlayGuideSeAfterResume]}" TextWrapping="Wrap" />
                         </CheckBox>
                         <Button cal:Message.Attach="Play()" Content="{markup:Translate [GamePlayControllerPlay]}" IsEnabled="{Binding IsConnected}" />
@@ -117,7 +118,8 @@
                             Padding="2"
                             VerticalAlignment="Center"
                             VerticalContentAlignment="Center"
-                            IsChecked="{Binding IsPauseIfMissBellOrDamaged}">
+                            IsChecked="{Binding IsPauseIfMissBellOrDamaged}"
+                            IsEnabled="False">
                             <TextBlock Text="{markup:Translate [GamePlayControllerPauseOnDamageOrMissBell]}" TextWrapping="Wrap" />
                         </CheckBox>
                     </StackPanel>

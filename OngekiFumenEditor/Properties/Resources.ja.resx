@@ -1801,11 +1801,14 @@
   <data name="GamePlayControllerConnection" xml:space="preserve">
     <value>接続</value>
   </data>
-  <data name="GamePlayControllerPort" xml:space="preserve">
-    <value>ポート</value>
+  <data name="GamePlayControllerConnectAddress" xml:space="preserve">
+    <value>アドレス</value>
   </data>
   <data name="GamePlayControllerConnect" xml:space="preserve">
     <value>接続</value>
+  </data>
+  <data name="GamePlayControllerConnectFailedFormat" xml:space="preserve">
+    <value>接続に失敗しました：{0}</value>
   </data>
   <data name="GamePlayControllerStatus" xml:space="preserve">
     <value>状態:</value>

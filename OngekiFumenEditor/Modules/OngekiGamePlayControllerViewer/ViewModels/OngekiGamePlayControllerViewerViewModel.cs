@@ -177,36 +177,62 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public void Disconnect()
         {
-            client?.Dispose();
-            Clear();
+            DisposeClient();
             ConnectStatus = ConnectStatus.Disconnected;
         }
 
         public async void Connect()
         {
-            client = new WebsocketRpcClient(ConnectString, rpcClient =>
+            try
             {
-                //rpcClient.RegisterServiceType<MyGameStatusCallback, IGameStatusCallback>();
-                //rpcClient.RegisterServiceType<MyMusicSelectCallback, IMusicSelectCallback>();
-                //rpcClient.RegisterServiceType<MyPlayingCallback, IPlayingCallback>();
-                //rpcClient.RegisterServiceType<MyResultCallback, IResultCallback>();
+                // tear down any existing connection before reconnecting,
+                // otherwise the old client (and its OnDisconnected handler) would leak.
+                DisposeClient();
 
-                ConnectStatus = ConnectStatus.Connected;
-            });
-            client.OnDisconnected += OnClientDisconnected;
+                client = new WebsocketRpcClient(ConnectString, rpcClient =>
+                {
+                    //rpcClient.RegisterServiceType<MyGameStatusCallback, IGameStatusCallback>();
+                    //rpcClient.RegisterServiceType<MyMusicSelectCallback, IMusicSelectCallback>();
+                    //rpcClient.RegisterServiceType<MyPlayingCallback, IPlayingCallback>();
+                    //rpcClient.RegisterServiceType<MyResultCallback, IResultCallback>();
 
-            client.Start(requireHeartbeat: true);
+                    // the connected callback fires on the websocket thread,
+                    // marshal the status update back to the UI thread.
+                    Application.Current.Dispatcher.Invoke(() => ConnectStatus = ConnectStatus.Connected);
+                });
+                client.OnDisconnected += OnClientDisconnected;
+
+                client.Start(requireHeartbeat: true);
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController connect failed: {e}");
+                DisposeClient();
+                ConnectStatus = ConnectStatus.Disconnected;
+                MessageBox.Show(
+                    string.Format(Resources.GamePlayControllerConnectFailedFormat, e.Message),
+                    Resources.GamePlayControllerWindowTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
         }
 
         private void OnClientDisconnected()
         {
-            Disconnect();
+            // fires on the websocket thread; marshal the full teardown to the UI thread
+            // so the ConnectStatus change is performed on the dispatcher.
+            Application.Current.Dispatcher.Invoke(Disconnect);
         }
 
-        private void Clear()
+        private void DisposeClient()
         {
+            if (client is not null)
+            {
+                client.OnDisconnected -= OnClientDisconnected;
+                client.Dispose();
+                client = null;
+            }
             cacheRpcServices.Clear();
-            client = null;
         }
 
         private async Task<T> RequestRemoteService<T>() where T : class, IRpcService
@@ -295,6 +321,9 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public async void RefreshUI()
         {
+            if (ConnectStatus != ConnectStatus.Connected)
+                return;
+
             var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
 
             isAutoPlay = await playingRpcService.IsAutoPlay().StartValueTask();
@@ -377,10 +406,10 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
                 return false;
             }
             ConnectStatus = ConnectStatus.Connected;
-            return false;
+            return true;
         }
 
-        public Task<bool> CheckVailed()
+        public Task<bool> CheckValid()
         {
             if (ConnectStatus != ConnectStatus.Connected)
                 return Task.FromResult(false);

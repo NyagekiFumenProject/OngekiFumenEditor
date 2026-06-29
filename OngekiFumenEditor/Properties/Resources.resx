@@ -2490,11 +2490,14 @@
   <data name="GamePlayControllerConnection" xml:space="preserve">
     <value>Connection</value>
   </data>
-  <data name="GamePlayControllerPort" xml:space="preserve">
-    <value>Port</value>
+  <data name="GamePlayControllerConnectAddress" xml:space="preserve">
+    <value>Address</value>
   </data>
   <data name="GamePlayControllerConnect" xml:space="preserve">
     <value>Connect</value>
+  </data>
+  <data name="GamePlayControllerConnectFailedFormat" xml:space="preserve">
+    <value>Connect failed: {0}</value>
   </data>
   <data name="GamePlayControllerStatus" xml:space="preserve">
     <value>Status:</value>

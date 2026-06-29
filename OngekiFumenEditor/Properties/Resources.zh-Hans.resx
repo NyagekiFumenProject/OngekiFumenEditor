@@ -2463,11 +2463,14 @@
   <data name="GamePlayControllerConnection" xml:space="preserve">
     <value>连接</value>
   </data>
-  <data name="GamePlayControllerPort" xml:space="preserve">
-    <value>端口</value>
+  <data name="GamePlayControllerConnectAddress" xml:space="preserve">
+    <value>地址</value>
   </data>
   <data name="GamePlayControllerConnect" xml:space="preserve">
     <value>连接</value>
+  </data>
+  <data name="GamePlayControllerConnectFailedFormat" xml:space="preserve">
+    <value>连接失败：{0}</value>
   </data>
   <data name="GamePlayControllerStatus" xml:space="preserve">
     <value>状态:</value>
