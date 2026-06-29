@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Utils
                 var co = CoroutineMgr.Instance.StartCoroutine(enumerator);
                 while (!co.IsDone)
                     await Task.Delay(TimeSpan.FromMilliseconds(10));
-                return co.Return.GetValue();
+                return co.Return.GetValue<T>();
             });
         }
 

@@ -40,7 +40,7 @@
                             Width="100"
                             Margin="10,5,10,5"
                             VerticalAlignment="Center"
-                            Text="{Binding Port}">
+                            Text="{Binding ConnectString}">
                         </TextBox>
                         <Button cal:Message.Attach="Connect()" Content="{markup:Translate [GamePlayControllerConnect]}" />
                         <Label
@@ -173,7 +173,7 @@
                 <GroupBox.Header>
                     <Label Content="{markup:Translate [Other]}" />
                 </GroupBox.Header>
-                <StackPanel>
+                <StackPanel IsEnabled="False">
                     <StackPanel Orientation="Horizontal">
                         <Button cal:Message.Attach="PlayGuideSE()" Content="{markup:Translate [GamePlayControllerPlayGuideSe]}" IsEnabled="{Binding IsConnected}" />
                         <Button cal:Message.Attach="DumpUnfinishInfo()" Content="{markup:Translate [GamePlayControllerDumpUnfinishedInfo]}" IsEnabled="{Binding IsConnected}" />

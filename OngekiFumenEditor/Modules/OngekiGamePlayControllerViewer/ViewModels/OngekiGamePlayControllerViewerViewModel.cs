@@ -184,12 +184,14 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public async void Connect()
         {
-            client = new WebsocketRpcClient("ws://127.0.0.1:30001/nyageki", rpcClient =>
+            client = new WebsocketRpcClient(ConnectString, rpcClient =>
             {
                 //rpcClient.RegisterServiceType<MyGameStatusCallback, IGameStatusCallback>();
                 //rpcClient.RegisterServiceType<MyMusicSelectCallback, IMusicSelectCallback>();
                 //rpcClient.RegisterServiceType<MyPlayingCallback, IPlayingCallback>();
                 //rpcClient.RegisterServiceType<MyResultCallback, IResultCallback>();
+
+                ConnectStatus = ConnectStatus.Connected;
             });
             client.OnDisconnected += OnClientDisconnected;
 
@@ -226,7 +228,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
         {
             OgkrSavePath = FileDialogHelper.SaveFile(
                 Resources.GamePlayControllerSelectOgkrSavePathPrompt,
-                new[] { (".ogkr", Resources.GamePlayControllerOgkrFileType) }) ?? OgkrSavePath;
+                [(".ogkr", Resources.GamePlayControllerOgkrFileType)]) ?? OgkrSavePath;
         }
 
         public async void GetOgkrSavePathFromGamePlay()
@@ -293,12 +295,12 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public async void RefreshUI()
         {
-            //var data = await GetNotesManagerData();
+            var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
 
-            //isAutoPlay = (data)?.IsAutoPlay ?? false;
+            isAutoPlay = await playingRpcService.IsAutoPlay().StartValueTask();
             //isPauseIfMissBellOrDamaged = (data)?.IsPauseIfMissBellOrDamaged ?? false;
 
-            //NotifyOfPropertyChange(() => IsAutoPlay);
+            NotifyOfPropertyChange(() => IsAutoPlay);
             //NotifyOfPropertyChange(() => IsPauseIfMissBellOrDamaged);
         }
 
@@ -325,7 +327,8 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            //await SendMessageAsync(new AutoPlay() { isEnable = IsAutoPlay });
+            var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
+            await playingRpcService.SetAutoPlay(IsAutoPlay).StartValueTask();
             //await SendMessageAsync(new SetNoteManagerValue() { name = "isPauseIfMissBellOrDamaged", value = IsPauseIfMissBellOrDamaged.ToString() });
         }
 
@@ -381,7 +384,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
         {
             if (ConnectStatus != ConnectStatus.Connected)
                 return Task.FromResult(false);
-            //todo
+
             return Task.FromResult(true);
         }
 
@@ -398,8 +401,6 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
         {
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
-
-            //await SendMessageAsync<DumpUnfinishInfo>();
         }
 
         public async Task<bool> IsPlaying()
