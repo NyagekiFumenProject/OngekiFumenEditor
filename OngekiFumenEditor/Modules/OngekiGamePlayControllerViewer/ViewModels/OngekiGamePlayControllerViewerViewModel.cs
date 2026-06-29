@@ -22,6 +22,7 @@ using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.Attributes;
 using OngekiFumenEditor.Utils.Ogkr;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -150,12 +151,44 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         private string connectString = "ws://127.0.0.1:30001/nyageki";
         private WebsocketRpcClient client;
-        private Dictionary<Type, IRpcService> cacheRpcServices = new();
+        private readonly ConcurrentDictionary<Type, IRpcService> cacheRpcServices = new();
+        private int rpcInFlight;
 
         public string ConnectString
         {
             get => connectString;
             set => Set(ref connectString, value);
+        }
+
+        /// <summary>
+        /// True while an RPC operation is in flight. Used to disable the Connect
+        /// button so the underlying client cannot be torn down mid-send.
+        /// </summary>
+        public bool IsSending => Volatile.Read(ref rpcInFlight) > 0;
+
+        /// <summary>Whether the Connect button is currently interactive.</summary>
+        public bool CanConnect => !IsSending;
+
+        private void BeginRpc()
+        {
+            var wasSending = IsSending;
+            Interlocked.Increment(ref rpcInFlight);
+            if (!wasSending)
+                NotifySendingChanged();
+        }
+
+        private void EndRpc()
+        {
+            var wasSending = IsSending;
+            Interlocked.Decrement(ref rpcInFlight);
+            if (wasSending && !IsSending)
+                NotifySendingChanged();
+        }
+
+        private void NotifySendingChanged()
+        {
+            NotifyOfPropertyChange(() => IsSending);
+            NotifyOfPropertyChange(() => CanConnect);
         }
 
         protected override void OnViewLoaded(object view)
@@ -243,8 +276,14 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
                 return (T)service;
             }
 
+            // snapshot the client: it may be torn down on the websocket thread
+            // (OnClientDisconnected -> DisposeClient) while we await the call.
+            var currentClient = client;
+            if (currentClient is null)
+                throw new InvalidOperationException("AkariMindController client is not connected.");
+
             Log.LogDebug($"starting request rpc service for {typeof(T).Name}");
-            service = await client.GetRemoteServiceType<T>().StartValueTask();
+            service = await currentClient.GetRemoteServiceType<T>().StartValueTask();
             cacheRpcServices[typeof(T)] = service;
             Log.LogDebug($"saved rpc service for {typeof(T).Name}");
             return (T)service;
@@ -262,19 +301,36 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var musicSelect = await RequestRemoteService<IMusicSelectRpcService>();
-            var assets = await RequestRemoteService<IAssetsRpcService>();
+            BeginRpc();
+            try
+            {
+                var musicSelect = await RequestRemoteService<IMusicSelectRpcService>();
+                var assets = await RequestRemoteService<IAssetsRpcService>();
 
-            var fumenData = await musicSelect.GetCurrentFumenDataSelected().StartValueTask();
-            var musicData = await musicSelect.GetCurrentMusicDataSelected().StartValueTask();
+                var fumenData = await musicSelect.GetCurrentFumenDataSelected().StartValueTask();
+                var musicData = await musicSelect.GetCurrentMusicDataSelected().StartValueTask();
 
+                if (musicData is null || fumenData is null)
+                {
+                    Log.LogWarn("AkariMindController GetOgkrSavePath: music/fumen data is null");
+                    return;
+                }
 
-            OgkrSavePath = await assets.GetFumenFilePath(musicData.MusicId, fumenData.Difficulty).StartValueTask();
-            MessageBox.Show(
-                Resources.GamePlayControllerGetFumenPathSuccess,
-                Resources.GamePlayControllerWindowTitle,
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+                OgkrSavePath = await assets.GetFumenFilePath(musicData.MusicId, fumenData.Difficulty).StartValueTask();
+                MessageBox.Show(
+                    Resources.GamePlayControllerGetFumenPathSuccess,
+                    Resources.GamePlayControllerWindowTitle,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController GetOgkrSavePath failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public async Task Play()
@@ -282,8 +338,20 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            await play.SetPlayStatus(PlayStatus.Playing).StartValueTask();
+            BeginRpc();
+            try
+            {
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                await play.SetPlayStatus(PlayStatus.Playing).StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController Play failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public async Task Pause()
@@ -291,8 +359,20 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            await play.SetPlayStatus(PlayStatus.Paused).StartValueTask();
+            BeginRpc();
+            try
+            {
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                await play.SetPlayStatus(PlayStatus.Paused).StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController Pause failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public async Task Restart()
@@ -300,8 +380,20 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            await play.ForceRestart().StartValueTask();
+            BeginRpc();
+            try
+            {
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                await play.ForceRestart().StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController Restart failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public async Task SeekTo(TimeSpan time)
@@ -309,12 +401,24 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            Log.LogError($"akari seek to {time} , playAfterSeek : {IsPlayAfterSeek}");
-            if (IsReloadAfterSeek)
-                await Reload();
+            BeginRpc();
+            try
+            {
+                Log.LogInfo($"akari seek to {time} , playAfterSeek : {IsPlayAfterSeek}");
+                if (IsReloadAfterSeek)
+                    await Reload();
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            await play.SeekTo((int)time.TotalMilliseconds, IsPlayAfterSeek).StartValueTask();
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                await play.SeekTo((int)time.TotalMilliseconds, IsPlayAfterSeek).StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController SeekTo failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public Task SeekTo() => SeekTo(TimeSpan.FromMilliseconds(SeekTimeMsec));
@@ -324,13 +428,25 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
+            BeginRpc();
+            try
+            {
+                var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
 
-            isAutoPlay = await playingRpcService.IsAutoPlay().StartValueTask();
-            //isPauseIfMissBellOrDamaged = (data)?.IsPauseIfMissBellOrDamaged ?? false;
+                isAutoPlay = await playingRpcService.IsAutoPlay().StartValueTask();
+                //isPauseIfMissBellOrDamaged = (data)?.IsPauseIfMissBellOrDamaged ?? false;
 
-            NotifyOfPropertyChange(() => IsAutoPlay);
-            //NotifyOfPropertyChange(() => IsPauseIfMissBellOrDamaged);
+                NotifyOfPropertyChange(() => IsAutoPlay);
+                //NotifyOfPropertyChange(() => IsPauseIfMissBellOrDamaged);
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController RefreshUI failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public async Task Reload()
@@ -342,13 +458,25 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             //if ((await GetNotesManagerData()) is not NotesManagerData data)
             //    return;
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            await play.SetPlayStatus(PlayStatus.Paused).StartValueTask();
+            BeginRpc();
+            try
+            {
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                await play.SetPlayStatus(PlayStatus.Paused).StartValueTask();
 
-            var currentPlaytime = await play.GetCurrentPlayingTime().StartValueTask();
-            await GenerateOgkr(OgkrSavePath);
+                var currentPlaytime = await play.GetCurrentPlayingTime().StartValueTask();
+                await GenerateOgkr(OgkrSavePath);
 
-            await play.SeekTo(currentPlaytime, IsPlayAfterSeek).StartValueTask();
+                await play.SeekTo(currentPlaytime, IsPlayAfterSeek).StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController Reload failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         private async void MakeSureOptionsApplied()
@@ -356,9 +484,21 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
-            await playingRpcService.SetAutoPlay(IsAutoPlay).StartValueTask();
-            //await SendMessageAsync(new SetNoteManagerValue() { name = "isPauseIfMissBellOrDamaged", value = IsPauseIfMissBellOrDamaged.ToString() });
+            BeginRpc();
+            try
+            {
+                var playingRpcService = await RequestRemoteService<IPlayingRpcService>();
+                await playingRpcService.SetAutoPlay(IsAutoPlay).StartValueTask();
+                //await SendMessageAsync(new SetNoteManagerValue() { name = "isPauseIfMissBellOrDamaged", value = IsPauseIfMissBellOrDamaged.ToString() });
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController MakeSureOptionsApplied failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         private async Task GenerateOgkr(string ogkrSavePath)
@@ -380,7 +520,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             }
             else
             {
-                var errorMsg = result.Message;
+                var errorMsg = result?.Message;
                 Log.LogError($"AkariMindController can't generate fumen : {errorMsg}");
                 MessageBox.Show(
                     string.Format(Resources.GamePlayControllerGenerateOgkrFailedFormat, errorMsg),
@@ -392,6 +532,7 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
 
         public async Task<bool> UpdateCheckConnecting()
         {
+            BeginRpc();
             try
             {
                 var gameStatusRpcService = await RequestRemoteService<IGameStatusRpcService>();
@@ -404,6 +545,10 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
                     Log.LogWarn($"AkariMindController connection check failed: {e}");
                 ConnectStatus = ConnectStatus.Disconnected;
                 return false;
+            }
+            finally
+            {
+                EndRpc();
             }
             ConnectStatus = ConnectStatus.Connected;
             return true;
@@ -422,8 +567,20 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return;
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            await play.ForceEndPlay().StartValueTask();
+            BeginRpc();
+            try
+            {
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                await play.ForceEndPlay().StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController ForceEnd failed: {e}");
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         public async void DumpUnfinishInfo()
@@ -437,8 +594,21 @@ namespace OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels
             if (ConnectStatus != ConnectStatus.Connected)
                 return false;
 
-            var play = await RequestRemoteService<IPlayingRpcService>();
-            return PlayStatus.Playing == await play.GetPlayStatus().StartValueTask();
+            BeginRpc();
+            try
+            {
+                var play = await RequestRemoteService<IPlayingRpcService>();
+                return PlayStatus.Playing == await play.GetPlayStatus().StartValueTask();
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"AkariMindController IsPlaying failed: {e}");
+                return false;
+            }
+            finally
+            {
+                EndRpc();
+            }
         }
 
         //public async Task<NotesManagerData?> GetNotesManagerData()

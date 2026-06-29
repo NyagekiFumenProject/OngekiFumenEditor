@@ -42,7 +42,7 @@
                             VerticalAlignment="Center"
                             Text="{Binding ConnectString}">
                         </TextBox>
-                        <Button cal:Message.Attach="Connect()" Content="{markup:Translate [GamePlayControllerConnect]}" />
+                        <Button cal:Message.Attach="Connect()" Content="{markup:Translate [GamePlayControllerConnect]}" IsEnabled="{Binding CanConnect}" />
                         <Label
                             Margin="20,0,0,0"
                             VerticalAlignment="Center"
