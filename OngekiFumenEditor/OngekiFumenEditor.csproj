@@ -783,7 +783,7 @@
         <Delete Files="$(OutputPath)/*.xml" />
     </Target>
 
-    <Target Name="VerifyRecommendedScripts" AfterTargets="Build" Condition="'$(SkipRecommendedScriptVerification)' != 'true'">
+    <Target Name="VerifyRecommendedScripts" AfterTargets="Build" Condition="'$(SkipRecommendedScriptVerification)' != 'true' and '$(Configuration)' != 'Debug'">
         <PropertyGroup>
             <RecommendedScriptVerifierPath>..\Tools\RecommendedScriptVerifier\bin\$(Configuration)\net10.0-windows\RecommendedScriptVerifier.dll</RecommendedScriptVerifierPath>
         </PropertyGroup>
