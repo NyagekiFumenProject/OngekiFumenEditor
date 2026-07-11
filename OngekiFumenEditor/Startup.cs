@@ -19,6 +19,7 @@ namespace OngekiFumenEditor
         [STAThread]
         public static int Main(string[] args)
         {
+            Directory.SetCurrentDirectory(AppDirectoryHelper.ExecutableDirectory);
             ApplicationSettingsBaseInjector.EnsureInitializedAndInjectedProvider();
 
             IPCHelper.Init(args);

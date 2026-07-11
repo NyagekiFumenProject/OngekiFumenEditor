@@ -38,6 +38,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
     internal class DefaultProgramUpdater : PropertyChangedBase, IProgramUpdater, ISchedulable
     {
         private const string ApiEndPoint = "https://fumen.nageki-net.com";
+        private const int ParentProcessExitTimeoutMilliseconds = 30_000;
 
         public bool HasNewVersion
         {
@@ -213,7 +214,15 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 throw new Exception($"Downloaded wrong file, updater file is not found: {updaterFilePath}");
 
             var targetFolder = AppDirectoryHelper.ExecutableDirectory;
-            var args = new string[] { "updater", "-v", "--targetFolder", targetFolder, "--sourceFolder", sourceFolder, "--sourceVersion", ThisAssembly.AssemblyFileVersion };
+            var args = new string[]
+            {
+                "updater",
+                "-v",
+                "--targetFolder", targetFolder,
+                "--sourceFolder", sourceFolder,
+                "--sourceVersion", ThisAssembly.AssemblyFileVersion,
+                "--parentProcessId", Process.GetCurrentProcess().Id.ToString()
+            };
 
             Log.LogInfo($"updaterFilePath: {updaterFilePath}");
             Log.LogInfo($"targetFolder: {updaterFilePath}");
@@ -280,6 +289,25 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             }
 
             //setup enviorment
+            if (option.ParentProcessId > 0 && option.ParentProcessId != Process.GetCurrentProcess().Id)
+            {
+                try
+                {
+                    using var parentProcess = Process.GetProcessById(option.ParentProcessId);
+                    Log.LogInfo($"waiting for parent editor process to exit, pid: {option.ParentProcessId}");
+                    if (!parentProcess.WaitForExit(ParentProcessExitTimeoutMilliseconds))
+                    {
+                        Log.LogWarn($"parent editor process did not exit in time, force killing it, pid: {option.ParentProcessId}");
+                        parentProcess.Kill();
+                        parentProcess.WaitForExit();
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    Log.LogInfo($"parent editor process already exited, pid: {option.ParentProcessId}");
+                }
+            }
+
             //kill others editor processes
             var curPid = Process.GetCurrentProcess().Id;
             foreach (var process in Process.GetProcessesByName("OngekiFumenEditor").Where(x => curPid != x.Id))
@@ -355,7 +383,16 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
 
             //start program and notify user result
             var targetProgram = Path.Combine(targetFolder, "OngekiFumenEditor.exe");
-            Process.Start(targetProgram, ["--wait", "--notifySucess", "--sourceVersion", sourceVersion]);
+            var startInfo = new ProcessStartInfo(targetProgram)
+            {
+                WorkingDirectory = targetFolder,
+                UseShellExecute = false
+            };
+            startInfo.ArgumentList.Add("--wait");
+            startInfo.ArgumentList.Add("--notifySucess");
+            startInfo.ArgumentList.Add("--sourceVersion");
+            startInfo.ArgumentList.Add(sourceVersion);
+            Process.Start(startInfo);
 
             return (0, string.Empty);
         }

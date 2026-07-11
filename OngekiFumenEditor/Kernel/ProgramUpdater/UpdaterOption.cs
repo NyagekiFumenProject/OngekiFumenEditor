@@ -15,5 +15,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
         public string TargetFolder { get; set; }
         [OptionBindingAttrbute<string>("sourceVersion", "<INTERNAL>", null, Require = true)]
         public string SourceVersion { get; set; }
+        [OptionBindingAttrbute<int>("parentProcessId", "<INTERNAL>", 0)]
+        public int ParentProcessId { get; set; }
     }
 }
