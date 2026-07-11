@@ -1,12 +1,19 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 {
     public class EditorSetting : PropertyChangedBase, IDisposable
     {
+        public const int HoldBodyWidthMin = 1;
+        public const int HoldBodyWidthMax = 50;
+
+        public static int NormalizeHoldBodyWidth(int value)
+            => Math.Clamp(value, HoldBodyWidthMin, HoldBodyWidthMax);
+
         public EditorSetting()
         {
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -265,6 +272,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private int holdBodyWidth = NormalizeHoldBodyWidth(Properties.EditorGlobalSetting.Default.HoldBodyWidth);
+        [JsonIgnore]
+        public int HoldBodyWidth
+        {
+            get => holdBodyWidth;
+            set
+            {
+                holdBodyWidth = Properties.EditorGlobalSetting.Default.HoldBodyWidth = NormalizeHoldBodyWidth(value);
+                RequestSave();
+                NotifyOfPropertyChange(() => HoldBodyWidth);
+            }
+        }
+
         private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
@@ -322,6 +342,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.LoopPlayTiming):
                     loopPlayTiming = Properties.EditorGlobalSetting.Default.LoopPlayTiming;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.HoldBodyWidth):
+                    holdBodyWidth = NormalizeHoldBodyWidth(Properties.EditorGlobalSetting.Default.HoldBodyWidth);
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

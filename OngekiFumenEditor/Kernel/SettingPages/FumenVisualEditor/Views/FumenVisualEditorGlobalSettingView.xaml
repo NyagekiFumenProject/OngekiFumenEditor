@@ -119,6 +119,17 @@
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
             <StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [HoldBodyWidth]}" />
+                    <TextBox
+                        x:Name="HoldBodyWidthTextBox"
+                        Width="50"
+                        Margin="5,0"
+                        KeyDown="HoldBodyWidthTextBox_KeyDown"
+                        LostKeyboardFocus="HoldBodyWidthTextBox_LostKeyboardFocus"
+                        Text="{Binding HoldBodyWidthText, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock VerticalAlignment="Center" Text="px (1–50)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
                     <TextBlock Text="Limit FPS:" />
                     <TextBox
                         Width="50"

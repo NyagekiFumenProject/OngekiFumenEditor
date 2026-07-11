@@ -2685,4 +2685,7 @@
   <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
     <value>Failed to open embedded recommended script.</value>
   </data>
+  <data name="HoldBodyWidth" xml:space="preserve">
+    <value>Hold body width</value>
+  </data>
 </root>

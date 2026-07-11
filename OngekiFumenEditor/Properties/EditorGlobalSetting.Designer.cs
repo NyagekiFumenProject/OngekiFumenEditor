@@ -526,5 +526,17 @@ namespace OngekiFumenEditor.Properties {
                 this["EditorOffsetMs"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("13")]
+        public int HoldBodyWidth {
+            get {
+                return ((int)(this["HoldBodyWidth"]));
+            }
+            set {
+                this["HoldBodyWidth"] = value;
+            }
+        }
     }
 }

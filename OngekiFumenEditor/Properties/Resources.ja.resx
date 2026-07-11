@@ -1990,4 +1990,7 @@
   <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
     <value>組み込み推奨スクリプトを開けませんでした。</value>
   </data>
+  <data name="HoldBodyWidth" xml:space="preserve">
+    <value>Hold本体の幅：</value>
+  </data>
 </root>

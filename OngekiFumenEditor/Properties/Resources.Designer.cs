@@ -3293,6 +3293,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Hold body width.
+        /// </summary>
+        public static string HoldBodyWidth {
+            get {
+                return ResourceManager.GetString("HoldBodyWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Image file:.
         /// </summary>
         public static string ImageFile {

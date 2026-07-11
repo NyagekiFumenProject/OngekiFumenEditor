@@ -2652,4 +2652,7 @@
   <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
     <value>打开内置推荐脚本失败。</value>
   </data>
+  <data name="HoldBodyWidth" xml:space="preserve">
+    <value>Hold主体宽度:</value>
+  </data>
 </root>

@@ -147,13 +147,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         clippedList.Add(list[i]);
                     clippedList.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
 
-                    builder.DrawLines(clippedList, 13);
+                    builder.DrawLines(clippedList, target.Editor.Setting.HoldBodyWidth);
                 }
                 else
                 {
                     list.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
                     list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
-                    builder.DrawLines(list, 13);
+                    builder.DrawLines(list, target.Editor.Setting.HoldBodyWidth);
                 }
             }
         }

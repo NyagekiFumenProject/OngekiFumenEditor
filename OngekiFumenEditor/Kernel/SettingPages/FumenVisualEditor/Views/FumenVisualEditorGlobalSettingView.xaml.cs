@@ -1,4 +1,6 @@
 using System.Windows.Controls;
+using System.Windows.Input;
+using OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
 {
@@ -10,6 +12,23 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
         public FumenVisualEditorGlobalSettingView()
         {
             InitializeComponent();
+        }
+
+        private void HoldBodyWidthTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            CommitHoldBodyWidth();
+        }
+
+        private void HoldBodyWidthTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                CommitHoldBodyWidth();
+        }
+
+        private void CommitHoldBodyWidth()
+        {
+            if (DataContext is FumenVisualEditorGlobalSettingViewModel viewModel)
+                viewModel.CommitHoldBodyWidth();
         }
     }
 }
