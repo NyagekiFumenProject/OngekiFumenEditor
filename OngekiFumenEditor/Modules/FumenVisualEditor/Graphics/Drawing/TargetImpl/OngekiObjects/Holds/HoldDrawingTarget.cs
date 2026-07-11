@@ -27,15 +27,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector4 colorHoldRight;
         private Vector4 colorHoldWallLeft;
         private Vector4 colorHoldWallRight;
+        private int holdBodyWidth;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();
+            RebuildHoldBodyWidth();
         }
 
         private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.HoldBodyWidth))
+            {
+                RebuildHoldBodyWidth();
+                return;
+            }
+
             if (!e.PropertyName.StartsWith("ColorHold"))
                 return;
 
@@ -58,6 +66,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             build(ref colorHoldWallRight, Properties.EditorGlobalSetting.Default.ColorHoldWallRight);
 
             //Log.LogInfo($"hold color has been rebuild.");
+        }
+
+        private void RebuildHoldBodyWidth()
+        {
+            holdBodyWidth = Properties.EditorGlobalSetting.Default.HoldBodyWidth;
         }
 
         public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, Hold hold)
@@ -147,13 +160,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                         clippedList.Add(list[i]);
                     clippedList.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
 
-                    builder.DrawLines(clippedList, target.Editor.Setting.HoldBodyWidth);
+                    builder.DrawLines(clippedList, holdBodyWidth);
                 }
                 else
                 {
                     list.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
                     list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
-                    builder.DrawLines(list, target.Editor.Setting.HoldBodyWidth);
+                    builder.DrawLines(list, holdBodyWidth);
                 }
             }
         }

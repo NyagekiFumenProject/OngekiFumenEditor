@@ -2,10 +2,10 @@ using Caliburn.Micro;
 using Gemini.Framework.Languages;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.RecentFiles;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Dialogs;
 using OngekiFumenEditor.Utils;
+using System;
 using System.ComponentModel.Composition;
 using System.Globalization;
 using Xceed.Wpf.Toolkit;
@@ -16,6 +16,9 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class FumenVisualEditorGlobalSettingViewModel : PropertyChangedBase, ISettingsEditor
     {
+        private const int HoldBodyWidthMin = 1;
+        private const int HoldBodyWidthMax = 50;
+
         public EditorGlobalSetting Setting => EditorGlobalSetting.Default;
 
         private string holdBodyWidthText;
@@ -31,7 +34,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
         public FumenVisualEditorGlobalSettingViewModel()
         {
             EditorGlobalSetting.Default.PropertyChanged += SettingPropertyChanged;
-            RefreshHoldBodyWidthText(EditorSetting.NormalizeHoldBodyWidth(Setting.HoldBodyWidth));
+            RefreshHoldBodyWidthText(NormalizeHoldBodyWidth(Setting.HoldBodyWidth));
         }
 
         private void SettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -39,7 +42,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
             Log.LogDebug($"editor global setting property changed : {e.PropertyName}");
             if (e.PropertyName == nameof(EditorGlobalSetting.HoldBodyWidth))
             {
-                var normalized = EditorSetting.NormalizeHoldBodyWidth(Setting.HoldBodyWidth);
+                var normalized = NormalizeHoldBodyWidth(Setting.HoldBodyWidth);
                 if (Setting.HoldBodyWidth != normalized)
                 {
                     Setting.HoldBodyWidth = normalized;
@@ -62,7 +65,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
 
         public void BeginEdit()
         {
-            holdBodyWidthBeforeEdit = EditorSetting.NormalizeHoldBodyWidth(Setting.HoldBodyWidth);
+            holdBodyWidthBeforeEdit = NormalizeHoldBodyWidth(Setting.HoldBodyWidth);
             isEditing = true;
             SetHoldBodyWidth(holdBodyWidthBeforeEdit);
         }
@@ -80,12 +83,15 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels
         {
             if (!int.TryParse(HoldBodyWidthText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var value))
             {
-                RefreshHoldBodyWidthText(EditorSetting.NormalizeHoldBodyWidth(Setting.HoldBodyWidth));
+                RefreshHoldBodyWidthText(NormalizeHoldBodyWidth(Setting.HoldBodyWidth));
                 return;
             }
 
-            SetHoldBodyWidth(EditorSetting.NormalizeHoldBodyWidth(value));
+            SetHoldBodyWidth(NormalizeHoldBodyWidth(value));
         }
+
+        private static int NormalizeHoldBodyWidth(int value)
+            => Math.Clamp(value, HoldBodyWidthMin, HoldBodyWidthMax);
 
         private void SetHoldBodyWidth(int value)
         {
