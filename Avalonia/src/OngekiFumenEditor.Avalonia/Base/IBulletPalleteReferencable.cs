@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 
 namespace OngekiFumenEditor.Avalonia.Base
 {
@@ -7,3 +7,4 @@ namespace OngekiFumenEditor.Avalonia.Base
         BulletPallete ReferenceBulletPallete { get; set; }
     }
 }
+

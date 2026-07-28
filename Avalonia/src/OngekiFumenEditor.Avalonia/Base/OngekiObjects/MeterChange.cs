@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
 	public class MeterChange : OngekiTimelineObjectBase
 	{
@@ -44,3 +44,4 @@
 		public override string ToString() => $"{base.ToString()} Bunshi/Bunbo[{BunShi}/{Bunbo}]";
 	}
 }
+

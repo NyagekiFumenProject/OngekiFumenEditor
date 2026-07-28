@@ -1,0 +1,41 @@
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
+using System.Collections.Generic;
+using Injectio.Attributes;
+using System.Numerics;
+
+namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane
+{
+	public abstract class NormalLaneDrawingTarget : LaneDrawingTargetBase
+	{
+
+	}
+
+	[RegisterSingleton<IFumenEditorDrawingTarget>]
+	public class LeftLaneDrawTarget : NormalLaneDrawingTarget
+	{
+		public static Vector4 LaneColor { get; } = new(1, 0, 0, 1);
+
+		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "LLS" };
+	}
+
+	[RegisterSingleton<IFumenEditorDrawingTarget>]
+	public class CenterLaneDrawTarget : NormalLaneDrawingTarget
+	{
+		public static Vector4 LaneColor { get; } = new(0, 1, 0, 1);
+
+		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "LCS" };
+	}
+
+	[RegisterSingleton<IFumenEditorDrawingTarget>]
+	public class RightLaneDrawTarget : NormalLaneDrawingTarget
+	{
+		public static Vector4 LaneColor { get; } = new(0, 0, 1, 1);
+
+		public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => LaneColor;
+		public override IEnumerable<string> DrawTargetID { get; } = new[] { "LRS" };
+	}
+}
+
+

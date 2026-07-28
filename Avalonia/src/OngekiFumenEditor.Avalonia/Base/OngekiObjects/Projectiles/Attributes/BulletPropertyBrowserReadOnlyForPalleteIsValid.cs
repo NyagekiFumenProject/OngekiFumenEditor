@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.Attributes;
+using OngekiFumenEditor.Avalonia.Base.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Attributes
 {
@@ -11,3 +11,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Attributes
         }
     }
 }
+

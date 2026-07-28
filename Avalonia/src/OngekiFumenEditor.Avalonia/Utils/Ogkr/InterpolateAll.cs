@@ -1,5 +1,6 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater;
 
 namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
 {
@@ -33,3 +34,4 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
 		}
 	}
 }
+

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums
 {
     public enum BulletDamageType
     {
@@ -7,3 +7,4 @@
         Danger = 2
     }
 }
+

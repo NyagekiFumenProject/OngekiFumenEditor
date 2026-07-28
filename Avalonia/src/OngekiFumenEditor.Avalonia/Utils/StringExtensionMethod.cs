@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils
+namespace OngekiFumenEditor.Avalonia.Utils
 {
     public static class StringExtensionMethod
     {
@@ -22,3 +22,4 @@
         public static string Format(this string str, params object[] args) => string.Format(str, args);
     }
 }
+

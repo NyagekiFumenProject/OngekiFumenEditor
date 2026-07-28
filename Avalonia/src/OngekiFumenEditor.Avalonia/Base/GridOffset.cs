@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Avalonia.Base
 {
@@ -10,3 +10,4 @@ namespace OngekiFumenEditor.Avalonia.Base
 		public int TotalGrid(uint gridRadix) => (int)(Unit * gridRadix + Grid);
 	}
 }
+

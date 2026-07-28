@@ -1,4 +1,4 @@
-﻿using SimpleTypedLocalizer;
+using SimpleTypedLocalizer;
 
 namespace OngekiFumenEditor.Avalonia.Base.Attributes
 {
@@ -14,3 +14,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Attributes
 		public string TipText { get; set; }
 	}
 }
+

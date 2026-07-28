@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using System.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Base.Collections
@@ -195,3 +196,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
             => ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).Contains(obj);
     }
 }
+

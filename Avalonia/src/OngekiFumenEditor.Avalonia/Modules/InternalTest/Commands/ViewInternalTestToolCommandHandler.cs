@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia;
+using Gekimini.Avalonia;
 using Gekimini.Avalonia.Attributes;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Shell;
@@ -10,11 +10,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.InternalTest.Commands;
 [RegisterSingleton<ICommandHandler>]
 public partial class ViewInternalTestToolCommandHandler : CommandHandlerBase<ViewInternalTestToolCommandDefinition>
 {
-    [GetServiceLazy]
-    private partial IShell Shell { get; }
-
-    [GetServiceLazy]
-    private partial IServiceProvider ServiceProvider { get; }
+    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
+    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IServiceProvider>();
 
     public override Task Run(Command command)
     {

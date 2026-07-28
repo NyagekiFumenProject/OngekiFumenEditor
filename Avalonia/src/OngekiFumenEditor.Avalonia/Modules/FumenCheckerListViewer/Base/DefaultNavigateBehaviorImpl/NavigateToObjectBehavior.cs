@@ -1,0 +1,23 @@
+using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
+
+namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl
+{
+	public class NavigateToObjectBehavior : INavigateBehavior
+	{
+		private readonly OngekiTimelineObjectBase ongekiObject;
+
+		public NavigateToObjectBehavior(OngekiTimelineObjectBase ongekiObject)
+		{
+			this.ongekiObject = ongekiObject;
+		}
+
+		public void Navigate(FumenVisualEditorViewModel editor)
+		{
+			editor.ScrollTo(ongekiObject);
+			editor.NotifyObjectClicked(ongekiObject);
+		}
+	}
+}
+
+

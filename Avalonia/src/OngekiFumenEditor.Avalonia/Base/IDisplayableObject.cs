@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base
+namespace OngekiFumenEditor.Avalonia.Base
 {
     public interface IDisplayableObject
     {

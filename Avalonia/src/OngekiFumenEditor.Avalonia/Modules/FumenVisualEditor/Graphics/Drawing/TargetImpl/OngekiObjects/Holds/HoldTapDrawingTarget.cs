@@ -1,0 +1,43 @@
+﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using System.Collections.Generic;
+
+namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
+{
+    [Export(typeof(IFumenEditorDrawingTarget))]
+    internal class HoldTapDrawingTarget : CommonDrawTargetBase<Hold>
+    {
+        public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };
+
+        public override int DefaultRenderOrder => 1200;
+
+        private TapDrawingTarget tapDraw;
+
+        public override void Initialize(IRenderManagerImpl impl)
+        {
+            tapDraw = new TapDrawingTarget();
+            tapDraw.Initialize(impl);
+        }
+
+        public override void Draw(IFumenEditorDrawingContext target, Hold hold)
+        {
+            var start = hold.ReferenceLaneStart;
+            var holdEnd = hold.HoldEnd;
+            var laneType = start?.LaneType;
+            var soflanGroup = target.Editor._cacheSoflanGroupRecorder.GetCache(hold);
+
+            //draw taps
+            if (target.CheckDrawingVisible(tapDraw.Visible))
+            {
+                tapDraw.Begin(target);
+                tapDraw.Draw(target, laneType, hold, hold.IsCritical, soflanGroup);
+                if (holdEnd != null)
+                    tapDraw.Draw(target, laneType, holdEnd, false, soflanGroup);
+                tapDraw.End();
+            }
+        }
+    }
+}
+
+
+

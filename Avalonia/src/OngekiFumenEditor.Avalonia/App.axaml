@@ -1,0 +1,55 @@
+﻿<Application
+    x:Class="OngekiFumenEditor.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:converters1="clr-namespace:Gemini.Modules.MainMenu.Converters"
+    xmlns:gemini="http://schemas.timjones.io/gemini"
+    xmlns:local="clr-namespace:OngekiFumenEditor"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <converters:EnumToIntConverter x:Key="EnumToIntConverter">
+            </converters:EnumToIntConverter>
+            <valueconverters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter">
+            </valueconverters:BoolToVisibilityConverter>
+            <valueconverters:ReverseBoolToVisibilityConverter x:Key="ReverseBoolToVisibilityConverter">
+            </valueconverters:ReverseBoolToVisibilityConverter>
+            <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter">
+            </valueconverters:ReverseBoolConverter>
+            <converters:CurvePathControlVisibilityConverter x:Key="CurvePathControlVisibilityConverter">
+            </converters:CurvePathControlVisibilityConverter>
+            <valueconverters:EnumToStringConverter x:Key="EnumToStringConverter">
+            </valueconverters:EnumToStringConverter>
+            <valueconverters:CultureInfoNameConverter x:Key="CultureInfoNameConverter">
+            </valueconverters:CultureInfoNameConverter>
+            <valueconverters:NullToVisibilityConverter x:Key="NullToVisibilityConverter">
+            </valueconverters:NullToVisibilityConverter>
+            <valueconverters:LocalizeConverter x:Key="LocalizeConverter">
+            </valueconverters:LocalizeConverter>
+            <valueconverters:AsyncImageLoadConverter x:Key="AsyncImageLoadConverter">
+            </valueconverters:AsyncImageLoadConverter>
+            <valueconverters:NullToZeroConverter x:Key="NullToZeroConverter" />
+            <valueconverters:DisplayFileSizeConverter x:Key="DisplayFileSizeConverter">
+            </valueconverters:DisplayFileSizeConverter>
+            <valueconverters:ParamValueToBoolConverter x:Key="ParamValueToBoolConverter" />
+            <valueconverters:ParenthesizeTextConverter x:Key="ParenthesizeTextConverter" />
+            <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
+            <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
+            <valueconverters:SelectionLaneObjectsCheckConverter x:Key="SelectionLaneObjectsCheckConverter" />
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <local:AppBootstrapper x:Key="bootstrapper" />
+                </ResourceDictionary>
+
+                <ResourceDictionary Source="UI\Themes\TextBlock.xaml" />
+                <ResourceDictionary Source="UI\Themes\TabControl.xaml" />
+                <ResourceDictionary Source="UI\Themes\CheckComboBox.xaml" />
+
+                <!--  Theme setting  -->
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
+

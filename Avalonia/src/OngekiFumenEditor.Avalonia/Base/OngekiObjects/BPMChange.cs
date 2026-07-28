@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
 	public class BPMChange : OngekiTimelineObjectBase
 	{
@@ -40,3 +40,4 @@
 		}
 	}
 }
+

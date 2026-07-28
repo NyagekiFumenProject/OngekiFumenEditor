@@ -1,0 +1,31 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.MultiLanesOperationView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:MultiLanesOperationViewModel,
+                                     IsDesignTimeCreatable=False}"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    <StackPanel Margin="21,5,21,5">
+        <ContentControl>
+        </ContentControl>
+        <controls:CommonOperationButton
+            Width="150"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnClick($executionContext)];"
+            DecoratorBrush="DarkGray"
+            Text="{markup:Translate [CombineLanes]}" />
+    </StackPanel>
+</UserControl>
+
+
+

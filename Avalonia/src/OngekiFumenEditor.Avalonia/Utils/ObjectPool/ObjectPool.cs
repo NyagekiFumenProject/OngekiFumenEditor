@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
@@ -170,3 +170,4 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
             => ObjectPool<T>.GetWithUsingDisposable(out obj, out isNewObject);
     }
 }
+

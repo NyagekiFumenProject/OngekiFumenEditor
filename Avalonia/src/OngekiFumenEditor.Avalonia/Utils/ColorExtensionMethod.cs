@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Utils;

@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace OngekiFumenEditor.Avalonia.Utils
 {
@@ -12,3 +12,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
         public static string Encode(byte[] rawContent) => Convert.ToBase64String(rawContent);
     }
 }
+

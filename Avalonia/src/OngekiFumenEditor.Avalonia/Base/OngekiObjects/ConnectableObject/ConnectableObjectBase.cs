@@ -1,10 +1,12 @@
 ﻿using OngekiFumenEditor.Avalonia.Base.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 {
     public abstract class ConnectableObjectBase : OngekiMovableObjectBase
     {
-        [LocalizableObjectPropertyBrowserAlias(nameof(Resources.RecordId))]
+        [LocalizableObjectPropertyBrowserAlias(nameof(Lang.RecordId))]
         [ObjectPropertyBrowserReadOnly]
         public abstract int RecordId { get; set; }
 
@@ -81,3 +83,5 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
         }
     }
 }
+
+

@@ -1,0 +1,83 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views.FumenTimeSignatureListViewerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
+    xmlns:converters2="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Converters"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:FumenTimeSignatureListViewerViewModel}"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters1:IntToTimeDisplayConverter x:Key="IntToTimeDisplayConverter" />
+        <converters2:MeterDisplayConverter x:Key="MeterDisplayConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <ListView
+            Grid.Row="1"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding DisplayTimeSignatures}"
+            ScrollViewer.CanContentScroll="True"
+            SelectedValue="{Binding CurrentSelectTimeSignature}">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];[Event PreviewMouseDown]=[Action OnItemSingleClick($dataContext)];" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
+                        Header="{markup:Translate [AudioTime]}" />
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding StartTGrid}"
+                        Header="{markup:Translate [AudioTGrid]}" />
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding BPMChange.BPM}"
+                        Header="Bpm" />
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [TimeSignature]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding Meter.BunShi}" />
+                                    <Run Text="/" />
+                                    <Run Text="{Binding Meter.Bunbo}" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>
+
+
+

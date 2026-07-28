@@ -11,3 +11,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Attributes
         }
     }
 }
+

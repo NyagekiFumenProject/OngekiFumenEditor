@@ -3,6 +3,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <LangVersion>preview</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
 
@@ -19,28 +20,81 @@
         <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>
     </PropertyGroup>
     <ItemGroup>
-        <CompilerVisibleProperty Include="InjectioDuplicateStrategy"/>
+        <CompilerVisibleProperty Include="InjectioDuplicateStrategy" />
     </ItemGroup>
     <!---->
 
     <ItemGroup>
-        <AdditionalFiles Include="Assets\Languages\*.json"/>
-        <AdditionalFiles Include="Modules\InternalTest\Views\Documents\InternalTestDocumentView.axaml"/>
-        <AdditionalFiles Include="Modules\InternalTest\Views\Tools\InternalTestToolView.axaml"/>
-        <AdditionalFiles Include="Modules\InternalTest\Views\Windows\InternalTestWindowView.axaml"/>
+        <AdditionalFiles Include="Assets\Languages\*.json" />
+        <AdditionalFiles Include="**\*.axaml" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj"/>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj"/>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj"/>
-        <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj"/>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj"/>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj"/>
+        <Compile Remove="Kernel\Audio\NAudioImpl\**\*.cs" />
+        <Compile Remove="Kernel\Graphics\Skia\RenderControls\**\*.cs" />
+        <Compile Remove="Modules\EditorSvgObjectControlProvider\ViewModels\**\*.cs" />
+        <Compile Remove="Modules\AudioPlayerToolViewer\ViewModels\AudioPlayerToolViewerViewModel.WaveformDrawing.cs" />
+        <Compile Remove="UI\Behaviors\**\*.cs" />
+        <Compile Remove="UI\ListViewDragDropManager\**\*.cs" />
+        <Compile Remove="UI\Controls\AnimatedScrollViewer.cs" />
+        <Compile Remove="UI\Controls\ColumnExpandableListView.cs" />
+        <Compile Remove="UI\Controls\ExpandableGridViewColumn.cs" />
+        <Compile Remove="UI\Controls\ObjectPoolItemsControl.cs" />
+        <Compile Remove="UI\Controls\StoryboardWrapper.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Modules\"/>
+        <ProjectReference Include="..\..\..\Dependences\earcut.net\src\Earcut.csproj" />
+        <ProjectReference Include="..\..\..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
+        <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="DereTore.Common">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Common.dll</HintPath>
+        </Reference>
+        <Reference Include="DereTore.Common.StarlightStage">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Common.StarlightStage.dll</HintPath>
+        </Reference>
+        <Reference Include="DereTore.Exchange.Archive.ACB">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Exchange.Archive.ACB.dll</HintPath>
+        </Reference>
+        <Reference Include="DereTore.Exchange.Audio.HCA">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Exchange.Audio.HCA.dll</HintPath>
+        </Reference>
+        <Reference Include="DereTore.Interop.OS">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.ComponentModel.Composition" />
+        <PackageReference Include="Microsoft.Build" />
+        <PackageReference Include="Svg" />
+        <PackageReference Include="AssetsTools.NET" />
+        <PackageReference Include="System.CommandLine" />
+        <PackageReference Include="OpenTK" />
+        <PackageReference Include="FontStashSharp.PlatformAgnostic" />
+        <PackageReference Include="FontStashSharp.Rasterizers.FreeType" />
+        <PackageReference Include="SixLabors.Fonts" />
+        <PackageReference Include="SixLabors.ImageSharp" />
+        <PackageReference Include="Vortice.Direct3D11" />
+        <PackageReference Include="Vortice.Direct3D12" />
+        <PackageReference Include="Vortice.Direct3D9" />
+        <PackageReference Include="Vortice.DXGI" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\..\Dependences\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2D.CSharp\Polyline2DCSharp.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Modules\" />
     </ItemGroup>
 
 </Project>

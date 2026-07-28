@@ -1,0 +1,18 @@
+using OngekiFumenEditor.Avalonia.Base;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
+{
+	public interface ICommandFormatter
+	{
+		public Type FormatTargetType { get; }
+		public string Section { get; }
+		public (string, int) Format(object command, OngekiFumen refFumen);
+	}
+}
+
+

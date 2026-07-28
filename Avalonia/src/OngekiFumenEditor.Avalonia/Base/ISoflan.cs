@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.Base
 {
@@ -13,3 +13,4 @@ namespace OngekiFumenEditor.Avalonia.Base
 		TGrid EndTGrid { get; set; } // 考虑到SoflanList的间隔树使用
     }
 }
+

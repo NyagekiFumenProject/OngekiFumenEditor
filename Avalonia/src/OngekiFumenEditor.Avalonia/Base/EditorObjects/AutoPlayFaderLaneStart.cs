@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 
@@ -13,3 +13,4 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
 		public override ConnectableChildObjectBase CreateChildObject() => new AutoplayFaderLaneNext();
 	}
 }
+

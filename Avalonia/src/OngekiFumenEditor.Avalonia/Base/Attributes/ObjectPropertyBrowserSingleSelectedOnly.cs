@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.Attributes
+namespace OngekiFumenEditor.Avalonia.Base.Attributes
 {
 	/// <summary>
 	/// 只允许单个物件被选择时显示此属性
@@ -8,3 +8,4 @@
 	{
 	}
 }
+

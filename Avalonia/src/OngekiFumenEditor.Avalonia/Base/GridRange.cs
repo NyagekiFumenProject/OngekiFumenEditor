@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base
+namespace OngekiFumenEditor.Avalonia.Base
 {
 	public struct GridRange
 	{
@@ -24,3 +24,4 @@
 		public override string ToString() => $"{{{Min} ~ {Max}}}";
 	}
 }
+

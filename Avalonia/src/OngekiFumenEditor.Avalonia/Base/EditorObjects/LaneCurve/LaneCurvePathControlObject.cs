@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 
 namespace OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve
 {
@@ -28,3 +28,4 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve
 		}
 	}
 }
+

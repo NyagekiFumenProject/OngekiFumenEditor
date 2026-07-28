@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Text.Json;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -32,33 +32,19 @@ namespace OngekiFumenEditor.Avalonia.Modules.InternalTest.ViewModels.Documents;
 public partial class InternalTestDocumentViewModel : DocumentViewModelBase, IPersistedDocumentViewModel
 {
     private IStorageFile storageFile;
-
-    [GetServiceLazy]
-    private partial ILogger<InternalTestDocumentViewModel> Logger { get; }
-
-    [GetServiceLazy]
-    private partial IDragDropManager DragDropManager { get; }
-
-    [GetServiceLazy]
-    private partial IWindowManager WindowManager { get; }
-
-    [GetServiceLazy]
-    private partial IServiceProvider ServiceProvider { get; }
-
-    [GetServiceLazy]
-    private partial IEditorRecentFilesManager EditorRecentFilesManager { get; }
-
-    [GetServiceLazy]
-    private partial IShell Shell { get; }
+    private ILogger<InternalTestDocumentViewModel> Logger => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<ILogger<InternalTestDocumentViewModel>>();
+    private IDragDropManager DragDropManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IDragDropManager>();
+    private IWindowManager WindowManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IWindowManager>();
+    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IServiceProvider>();
+    private IEditorRecentFilesManager EditorRecentFilesManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IEditorRecentFilesManager>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
 
     [ObservableProperty]
     public partial int Value { get; set; }
 
     [ObservableProperty]
     public partial string FileName { get; set; }
-
-    [GetServiceLazy]
-    private partial IDialogManager DialogManager { get; }
+    private IDialogManager DialogManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IDialogManager>();
 
     [ObservableProperty]
     public partial bool IsDirty { get; set; }

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils
+namespace OngekiFumenEditor.Avalonia.Utils
 {
     internal static class CollectionHelper
     {
@@ -54,3 +54,4 @@
         }
     }
 }
+

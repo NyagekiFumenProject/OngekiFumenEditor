@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.Attributes;
+using OngekiFumenEditor.Avalonia.Base.Attributes;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;

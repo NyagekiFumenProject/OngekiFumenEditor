@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base
+namespace OngekiFumenEditor.Avalonia.Base
 {
 	public class RangeValue : ObservableObject
 	{
@@ -79,3 +79,4 @@
 		};
 	}
 }
+

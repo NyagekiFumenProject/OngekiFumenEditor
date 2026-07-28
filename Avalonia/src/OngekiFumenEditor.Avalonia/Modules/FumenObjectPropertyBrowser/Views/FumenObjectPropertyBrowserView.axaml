@@ -1,0 +1,38 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.FumenObjectPropertyBrowserView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ValueConverters"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
+    d:DesignHeight="800"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:PropertyGeneratorConverter x:Key="PropertyGeneratorConverter" />
+        <converters1:ObjectOperationGeneratorConverter x:Key="ObjectOperationGeneratorConverter" />
+        <converters1:MultiObjectsOperationGeneratorConverter x:Key="MultiObjectsOperationGeneratorConverter" />
+    </UserControl.Resources>
+    <ScrollViewer Name="HostContent" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
+                <ItemsControl.ItemTemplate>
+                    <ItemContainerTemplate>
+                        <ContentPresenter Margin="0,0,0,5" Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
+                        </ContentPresenter>
+                    </ItemContainerTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource ObjectOperationGeneratorConverter}}">
+            </ContentPresenter>
+            <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource MultiObjectsOperationGeneratorConverter}}">
+            </ContentPresenter>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
+
+

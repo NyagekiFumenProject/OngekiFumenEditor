@@ -2,9 +2,10 @@
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Utils;
 
-namespace OngekiFumenEditor.Avalonia;
+namespace OngekiFumenEditor.Avalonia.Avalonia;
 
 [CollectTypeForActivator(typeof(IToolViewModel))]
 public partial class ToolViewModelTypeCollectedActivator : ITypeCollectedActivator<IToolViewModel>
 {
 }
+

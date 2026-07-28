@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 
 namespace OngekiFumenEditor.Avalonia.Base.Collections
 {
@@ -28,3 +28,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 		}
 	}
 }
+

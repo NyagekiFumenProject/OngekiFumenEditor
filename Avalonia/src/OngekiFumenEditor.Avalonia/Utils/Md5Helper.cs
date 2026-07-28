@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace OngekiFumenEditor.Avalonia.Utils
@@ -14,3 +14,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
 		}
 	}
 }
+

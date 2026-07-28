@@ -1,9 +1,11 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Utils;
 
@@ -409,3 +411,4 @@ public static class MathUtils
         }
     }
 }
+

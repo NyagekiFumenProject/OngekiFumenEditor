@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
 	public class ClickSE : OngekiTimelineObjectBase
 	{
@@ -6,3 +6,4 @@
 		public override string IDShortName => CommandName;
 	}
 }
+

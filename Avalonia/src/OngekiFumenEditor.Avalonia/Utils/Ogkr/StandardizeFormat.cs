@@ -3,6 +3,10 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
+using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.OgkrImpl;
+using OngekiFumenEditor.Avalonia.Parser;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
 {
@@ -149,7 +153,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
                 var beforeLane = obj.ReferenceLaneStart;
 
                 (var afterLane, var afterXGrid) =
-                    //考虑到处理HoldEnd的refLane之前，已经被前者Hold处理过了
+                    //鑰冭檻鍒板鐞咹oldEnd鐨剅efLane涔嬪墠锛屽凡缁忚鍓嶈€匟old澶勭悊杩囦簡
                     (obj.ReferenceLaneStart is not null && laneMap.TryGetValue(obj.ReferenceLaneStart, out var genStarts) ? genStarts : Enumerable.Empty<ConnectableStartObject>())
                     .Where(x => tGrid >= x.MinTGrid && tGrid <= x.MaxTGrid)
                     .Select(x => (x, x.CalulateXGrid(tGrid)))
@@ -166,7 +170,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
             var checkRules = IoC.GetAll<IFumenCheckRule>().OfType<IOngekiFumenCheckRule>();
             if (checkRules.Any(x => x.CheckRule(fumen, null).Any(x => x.Severity == RuleSeverity.Error)))
             {
-                msg = Resources.FumenContainUngenerateError;
+                msg = Lang.FumenContainUngenerateError;
                 return false;
             }
 
@@ -180,3 +184,5 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
         }
     }
 }
+
+

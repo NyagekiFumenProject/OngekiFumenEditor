@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.Collections;
+using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using static OngekiFumenEditor.Avalonia.Base.Collections.SoflanList;
 
@@ -12,3 +12,5 @@ namespace OngekiFumenEditor.Avalonia.Base
         IEnumerable<KeyframeSoflan> GenerateKeyframeSoflans(BpmList bpmList);
     }
 }
+
+

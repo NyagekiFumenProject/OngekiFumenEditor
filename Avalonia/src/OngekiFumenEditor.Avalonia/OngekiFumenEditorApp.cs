@@ -2,7 +2,7 @@
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace OngekiFumenEditor.Avalonia;
+namespace OngekiFumenEditor.Avalonia.Avalonia;
 
 public abstract class OngekiFumenEditorApp : App
 {
@@ -17,3 +17,4 @@ public abstract class OngekiFumenEditorApp : App
         serviceCollection.AddTypeCollectedActivator(ToolViewModelTypeCollectedActivator.Default);
     }
 }
+

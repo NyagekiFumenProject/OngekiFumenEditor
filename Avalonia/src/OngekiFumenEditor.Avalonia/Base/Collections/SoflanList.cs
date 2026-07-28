@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
@@ -83,3 +83,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
         }
     }
 }
+

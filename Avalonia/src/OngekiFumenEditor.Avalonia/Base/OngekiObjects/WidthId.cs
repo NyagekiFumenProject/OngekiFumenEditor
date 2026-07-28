@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
     public record WidthId(int Id, int WidthJudge, int WidthDraw)
     {
@@ -9,3 +9,4 @@
         }
     }
 }
+

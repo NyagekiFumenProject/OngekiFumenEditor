@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree;
+using OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -601,3 +601,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
     #endregion
 }
+

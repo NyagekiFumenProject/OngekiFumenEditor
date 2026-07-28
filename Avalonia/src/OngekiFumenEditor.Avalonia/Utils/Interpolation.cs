@@ -1,4 +1,4 @@
-﻿// From https://github.com/ppy/osu-framework/blob/master/osu.Framework/MathUtils/Interpolation.cs
+// From https://github.com/ppy/osu-framework/blob/master/osu.Framework/MathUtils/Interpolation.cs
 /*
 Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
 

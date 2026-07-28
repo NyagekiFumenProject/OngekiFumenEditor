@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
+namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
 {
 	public class Comment : OngekiTimelineObjectBase
 	{
@@ -26,3 +26,4 @@
 		}
 	}
 }
+

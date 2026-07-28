@@ -92,3 +92,4 @@ namespace OngekiFumenEditor.Avalonia.Base
         }
     }
 }
+

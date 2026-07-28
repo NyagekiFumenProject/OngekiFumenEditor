@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 
 namespace OngekiFumenEditor.Avalonia.Utils
@@ -30,3 +30,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
 		}
 	}
 }
+

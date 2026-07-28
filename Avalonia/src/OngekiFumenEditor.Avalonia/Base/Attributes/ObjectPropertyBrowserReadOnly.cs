@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.Attributes
+namespace OngekiFumenEditor.Avalonia.Base.Attributes
 {
 	/// <summary>
 	/// 钦定此属性在属性查看栏为只读
@@ -8,3 +8,4 @@
 	{
 	}
 }
+

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
     public static class WidthIdConst
     {
@@ -17,3 +17,4 @@
         ];
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
 {
@@ -34,3 +34,4 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
         public abstract bool IsDisplayInPreviewMode { get; set; }
     }
 }
+

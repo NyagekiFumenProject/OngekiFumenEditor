@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,3 +38,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
+namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
 {
 	public interface ICacheCleanable
 	{
@@ -8,3 +8,4 @@
 		void OnAfterPutClean();
 	}
 }
+

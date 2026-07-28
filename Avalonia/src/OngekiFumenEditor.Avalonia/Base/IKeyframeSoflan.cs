@@ -1,7 +1,15 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace OngekiFumenEditor.Avalonia.Base
 {
 	public interface IKeyframeSoflan : ISoflan
 	{
 
 	}
 }
+

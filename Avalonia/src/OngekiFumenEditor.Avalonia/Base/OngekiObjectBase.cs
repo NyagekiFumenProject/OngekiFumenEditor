@@ -1,6 +1,8 @@
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Base
 {
@@ -9,7 +11,7 @@ namespace OngekiFumenEditor.Avalonia.Base
 		private static int ID_GEN = 0;
 
 		[ObjectPropertyBrowserReadOnly]
-		[LocalizableObjectPropertyBrowserAlias(nameof(Resources.ObjectId))]
+		[LocalizableObjectPropertyBrowserAlias(nameof(Lang.ObjectId))]
 		public int Id { get; init; } = ID_GEN++;
 
 		[ObjectPropertyBrowserHide]
@@ -32,9 +34,9 @@ namespace OngekiFumenEditor.Avalonia.Base
 		}
 
 		/// <summary>
-		/// 复制物件参数和内容
+		/// 婢跺秴鍩楅悧鈺€娆㈤崣鍌涙殶閸滃苯鍞寸€?
 		/// </summary>
-		/// <param name="fromObj">复制源，本对象的仿制目标</param>
+		/// <param name="fromObj">婢跺秴鍩楀┃鎰剁礉閺堫剙顕挒锛勬畱娴犲灝鍩楅惄顔界垼</param>
 		public abstract void Copy(OngekiObjectBase fromObj);
 
 		public OngekiObjectBase CopyNew()
@@ -45,3 +47,5 @@ namespace OngekiFumenEditor.Avalonia.Base
 		}
 	}
 }
+
+

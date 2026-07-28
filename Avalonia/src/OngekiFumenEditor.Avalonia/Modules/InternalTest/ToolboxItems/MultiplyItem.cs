@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Modules.InternalTest.ViewModels.Documents;
+using OngekiFumenEditor.Avalonia.Modules.InternalTest.ViewModels.Documents;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Modules.Toolbox.Models;
 using Gekimini.Avalonia.Utils.MethodExtensions;

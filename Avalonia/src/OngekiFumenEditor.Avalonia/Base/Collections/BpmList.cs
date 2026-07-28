@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base;
@@ -171,3 +171,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
             => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).Contains(obj);
     }
 }
+

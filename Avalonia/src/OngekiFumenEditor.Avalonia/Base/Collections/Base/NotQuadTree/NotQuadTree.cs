@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
@@ -329,3 +329,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
         }
     }
 }
+

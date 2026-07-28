@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization.Metadata;
+using System.Text.Json.Serialization.Metadata;
 using Gekimini.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.InternalTest.Models;

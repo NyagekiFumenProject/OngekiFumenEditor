@@ -1,0 +1,165 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Avalonia.Modules.AudioAdjustWindow.Views.AudioAdjustWindowView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels"
+    Title="{markup:Translate [CommandAudioAdjustWindow]}"
+    Width="500"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:AudioAdjustWindowViewModel}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    ResizeMode="NoResize"
+    SaveWindowPosition="True"
+    SizeToContent="WidthAndHeight"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <StackPanel>
+        <GroupBox
+            Margin="5"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="{markup:Translate [AudioFileSource]}">
+            <StackPanel>
+                <RadioButton
+                    Margin="0,5,0,5"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding IsUseInputFile, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Text="{markup:Translate [LoadFromFile]}">
+                        </TextBlock>
+                        <TextBlock
+                            Width="280"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Text="{Binding InputFumenFilePath}"
+                            ToolTip="{Binding InputFumenFilePath}">
+                        </TextBlock>
+                        <Button
+                            Margin="10,0,0,0"
+                            Padding="20,2,20,2"
+                            cal:Message.Attach="OnOpenSelectInputFileDialog()"
+                            Content="{markup:Translate [Browser]}"
+                            Foreground="{StaticResource EnvironmentToolWindowText}">
+                        </Button>
+                    </StackPanel>
+                </RadioButton>
+                <Rectangle
+                    Height="1"
+                    Margin="10,5,10,5"
+                    Stroke="LightGray">
+                </Rectangle>
+                <RadioButton
+                    Margin="0,5,0,5"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding IsCurrentEditorAsInputFumen, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Text="{markup:Translate [LoadFromCurrentEditor]}">
+                        </TextBlock>
+                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
+                        </TextBlock>
+                    </StackPanel>
+                </RadioButton>
+                <CheckBox
+                    Margin="20,0,10,0"
+                    VerticalAlignment="Center"
+                    Content="{markup:Translate [AllObjectApplyNewDelayAfterCalculated]}"
+                    IsChecked="{Binding IsRecalculateObjects}">
+                </CheckBox>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox Margin="5" Header="{markup:Translate [OffsetOption]}">
+            <StackPanel>
+                <RadioButton VerticalContentAlignment="Center" GroupName="2857">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{markup:Translate [ApplyOffsetBySecond]}">
+                        </Label>
+                        <TextBox
+                            Width="100"
+                            VerticalAlignment="Center"
+                            Text="{Binding Seconds}">
+                        </TextBox>
+                        <Label Content="{markup:Translate [Second]}">
+                        </Label>
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton
+                    VerticalContentAlignment="Center"
+                    GroupName="2857"
+                    IsChecked="{Binding IsUseGridOffset, Mode=OneWayToSource}">
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="{markup:Translate [ApplyOffsetByTGrid]}">
+                        </Label>
+                        <Label>Unit:</Label>
+                        <TextBox
+                            Width="50"
+                            VerticalAlignment="Center"
+                            Text="{Binding Unit}" />
+                        <Label>Grid:</Label>
+                        <TextBox
+                            Width="50"
+                            VerticalAlignment="Center"
+                            Text="{Binding Grid}" />
+                        <Label>Bpm:</Label>
+                        <TextBox
+                            Width="75"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding IsUseInputFile}"
+                            Text="{Binding Bpm}" />
+                    </StackPanel>
+                </RadioButton>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox
+            Margin="5"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="{markup:Translate [Output]}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Text="{markup:Translate [SaveToFile]}">
+                </TextBlock>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Text="{Binding OutputFumenFilePath}">
+                </TextBlock>
+                <Button
+                    Margin="10,0,0,0"
+                    Padding="20,2,20,2"
+                    cal:Message.Attach="OnOpenSelectOutputFileDialog()"
+                    Content="{markup:Translate [Browser]}"
+                    Foreground="{StaticResource EnvironmentToolWindowText}">
+                </Button>
+            </StackPanel>
+        </GroupBox>
+
+        <Button
+            Margin="5,10,5,5"
+            Padding="0,10,0,10"
+            cal:Message.Attach="OnExecuteConverter()"
+            Content="{markup:Translate [Process]}"
+            Foreground="{StaticResource EnvironmentToolWindowText}">
+        </Button>
+    </StackPanel>
+</mah:MetroWindow>
+
+
+

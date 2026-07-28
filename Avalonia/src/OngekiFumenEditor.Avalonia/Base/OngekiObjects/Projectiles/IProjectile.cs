@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
 {
@@ -21,3 +21,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
         bool IsEnableSoflan { get; }
     }
 }
+

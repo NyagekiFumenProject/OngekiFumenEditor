@@ -1,0 +1,110 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenConverter.Views.FumenConverterView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenConverter.ViewModels"
+    Title="{markup:Translate [FumenConverterWindow]}"
+    Width="500"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:FumenConverterViewModel}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    ResizeMode="NoResize"
+    SaveWindowPosition="True"
+    SizeToContent="WidthAndHeight"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <StackPanel>
+        <GroupBox
+            Margin="5"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="{markup:Translate [FumenSource]}">
+            <StackPanel>
+                <RadioButton
+                    Margin="0,5,0,5"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding IsUseInputFile, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Text="{markup:Translate [LoadFromFile]}">
+                        </TextBlock>
+                        <TextBlock
+                            Width="280"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Text="{Binding InputFumenFilePath}"
+                            ToolTip="{Binding InputFumenFilePath}">
+                        </TextBlock>
+                        <Button
+                            Margin="10,0,0,0"
+                            Padding="20,2,20,2"
+                            cal:Message.Attach="OnOpenSelectInputFileDialog()"
+                            Content="{markup:Translate [Browser]}"
+                            Foreground="{StaticResource EnvironmentToolWindowText}">
+
+                        </Button>
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton
+                    Margin="0,5,0,5"
+                    VerticalAlignment="Center"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding IsCurrentEditorAsInputFumen, Mode=TwoWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock
+                            Margin="0,0,10,0"
+                            VerticalAlignment="Center"
+                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Text="{markup:Translate [LoadFromCurrentEditor]}">
+                        </TextBlock>
+                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
+                        </TextBlock>
+                    </StackPanel>
+                </RadioButton>
+            </StackPanel>
+        </GroupBox>
+
+        <GroupBox
+            Margin="5"
+            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Header="{markup:Translate [Output]}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Text="{markup:Translate [SaveToFile]}">
+                </TextBlock>
+                <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding OutputFumenFilePath}">
+                </TextBlock>
+                <Button
+                    Margin="10,0,0,0"
+                    Padding="20,2,20,2"
+                    cal:Message.Attach="OnOpenSelectOutputFileDialog()"
+                    Content="{markup:Translate [Browser]}"
+                    Foreground="{StaticResource EnvironmentToolWindowText}">
+                </Button>
+            </StackPanel>
+        </GroupBox>
+
+        <Button
+            Margin="5,10,5,5"
+            Padding="0,10,0,10"
+            cal:Message.Attach="OnExecuteConverter()"
+            Content="{markup:Translate [Execute]}"
+            Foreground="{StaticResource EnvironmentToolWindowText}">
+        </Button>
+    </StackPanel>
+</mah:MetroWindow>
+
+
+

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
+namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
 {
 	internal interface IBinaryFindRangeEnumable<T, X> : IReadOnlyCollection<T> where X : IComparable<X>
 	{
@@ -6,3 +6,4 @@
 		IEnumerable<T> BinaryFindRange(X min, X max);
 	}
 }
+

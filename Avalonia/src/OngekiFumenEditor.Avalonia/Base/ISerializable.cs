@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base
+namespace OngekiFumenEditor.Avalonia.Base
 {
 	public interface ISerializable
 	{
@@ -10,3 +10,4 @@
 		public string Serialize();
 	}
 }
+

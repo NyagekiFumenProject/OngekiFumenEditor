@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
 	public class Flick : OngekiMovableObjectBase, ICriticalableObject
 	{
@@ -46,3 +46,4 @@
 		}
 	}
 }
+

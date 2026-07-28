@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 
@@ -103,3 +103,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
 
     }
 }
+

@@ -1,5 +1,6 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
 {
@@ -61,3 +62,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
 		}
 	}
 }
+

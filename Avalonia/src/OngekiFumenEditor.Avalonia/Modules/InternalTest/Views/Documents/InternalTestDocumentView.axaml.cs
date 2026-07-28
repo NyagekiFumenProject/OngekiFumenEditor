@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Views;
+using Gekimini.Avalonia.Views;
 
 namespace OngekiFumenEditor.Avalonia.Modules.InternalTest.Views.Documents;
 

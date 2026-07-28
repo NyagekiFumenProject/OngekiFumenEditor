@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
@@ -666,3 +666,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
         }
     }
 }
+

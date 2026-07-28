@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace OngekiFumenEditor.Avalonia.Utils
@@ -39,3 +39,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
 		}
 	}
 }
+

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree;
 
@@ -92,3 +92,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
 		public bool FastContains(TValue obj) => Contains(obj);
 	}
 }
+

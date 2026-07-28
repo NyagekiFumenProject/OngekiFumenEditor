@@ -1,0 +1,47 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.BeamOperationView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    d:Background="White"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter">
+        </BooleanToVisibilityConverter>
+    </UserControl.Resources>
+    <StackPanel Margin="21,5,0,0" Visibility="{Binding IsEnableDrag, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Border
+            x:Name="BeamNext"
+            Width="130"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove($executionContext)];     [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <TextBlock
+                Margin="5"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="Drag new BeamNext"
+                TextWrapping="Wrap" />
+        </Border>
+        <Border
+            Width="130"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Left"
+            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove2($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
+            BorderBrush="Black"
+            BorderThickness="1">
+            <TextBlock
+                Margin="5"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="Drag new BeamEnd" />
+        </Border>
+    </StackPanel>
+</UserControl>
+
+
+

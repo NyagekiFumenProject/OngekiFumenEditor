@@ -1,0 +1,203 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views.FumenBulletPalleteListViewerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:EnumValuesGenerator x:Key="EnumValuesGenerator">
+        </valueconverters:EnumValuesGenerator>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="5" Orientation="Horizontal">
+            <Button
+                Margin="0,0,5,0"
+                cal:Message.Attach="[Event Click] = [Action OnCreateNew()];"
+                Content="{markup:Translate [NewBulletPallete]}"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+            </Button>
+            <Button
+                cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
+                Content="{markup:Translate [DeleteSelectedPalletes]}"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+            </Button>
+
+            <TextBox
+                Width="150"
+                Margin="20,0,10,0"
+                Text="{Binding Filter}" />
+
+            <Button
+                cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];"
+                Content="{markup:Translate [Filter]}"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+            </Button>
+        </StackPanel>
+        <ListView
+            Grid.Row="1"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding DataView}"
+            ScrollViewer.CanContentScroll="True"
+            SelectionMode="Extended"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling">
+            <i:Interaction.Behaviors>
+                <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+            </i:Interaction.Behaviors>
+            <ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn
+                        Width="60"
+                        DisplayMemberBinding="{Binding StrID}"
+                        Header="{markup:Translate [BulletPaletteId]}" />
+                    <GridViewColumn Width="120" Header="{markup:Translate [Name]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding EditorName}">
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding PlaceOffset}">
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Speed}">
+                                </TextBox>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding RandomOffsetRange}" />
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <!--<GridViewColumn Width="80" Header="辅助线颜色">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnChangeEditorAxuiliaryLineColor($executionContext)];" Text="{Binding EditorAxuiliaryLineColor}">
+                                    <TextBlock.Background>
+                                        <SolidColorBrush Color="{Binding EditorAxuiliaryLineColor}">
+                                        </SolidColorBrush>
+                                    </TextBlock.Background>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>-->
+
+                    <GridViewColumn Width="240" Header="{markup:Translate [Action]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                        Cursor="Hand"
+                                        Text="{markup:Translate [BulletPaletteCreateBullet]}"
+                                        TextDecorations="Baseline"
+                                        ToolTip="{markup:Translate [DragToCreateBullet]}">
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
+                                        Cursor="Hand"
+                                        Text="{markup:Translate [BulletPaletteCreateBell]}"
+                                        TextDecorations="Baseline"
+                                        ToolTip="{markup:Translate [DragToCreateBell]}">
+                                    </TextBlock>
+                                    <TextBlock
+                                        Margin="10,0,0,0"
+                                        VerticalAlignment="Center"
+                                        cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
+                                        Text="{markup:Translate [ClonePallete]}"
+                                        TextDecorations="Baseline"
+                                        ToolTip="{markup:Translate [ClickToClonePalette]}">
+                                    </TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>
+
+
+

@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.Attributes
+namespace OngekiFumenEditor.Avalonia.Base.Attributes
 {
 	/// <summary>
 	/// 如果此属性只读，可以钦定此特性强制显示
@@ -8,3 +8,4 @@
 	{
 	}
 }
+

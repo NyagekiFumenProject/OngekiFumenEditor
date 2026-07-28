@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base;
@@ -135,3 +135,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
         }
     }
 }
+

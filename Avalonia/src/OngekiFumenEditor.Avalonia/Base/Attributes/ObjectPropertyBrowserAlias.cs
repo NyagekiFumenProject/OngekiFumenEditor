@@ -1,4 +1,4 @@
-﻿using SimpleTypedLocalizer;
+using SimpleTypedLocalizer;
 
 namespace OngekiFumenEditor.Avalonia.Base.Attributes
 {

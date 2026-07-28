@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
 {
@@ -22,3 +22,4 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
         TY CenterY => Y + HalfHeight;
     }
 }
+

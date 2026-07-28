@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
+using Avalonia.Media;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
@@ -24,7 +25,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 strID = value;
-                OnPropertyChanged(() => StrID);
+                OnPropertyChanged();
             }
         }
 
@@ -35,7 +36,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 editorName = value;
-                OnPropertyChanged(() => EditorName);
+                OnPropertyChanged();
             }
         }
 
@@ -46,7 +47,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 editorAxuiliaryLineColor = value;
-                OnPropertyChanged(() => EditorAxuiliaryLineColor);
+                OnPropertyChanged();
             }
         }
 
@@ -57,7 +58,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 shooterValue = value;
-                OnPropertyChanged(() => ShooterValue);
+                OnPropertyChanged();
             }
         }
 
@@ -68,7 +69,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 placeOffset = value;
-                OnPropertyChanged(() => PlaceOffset);
+                OnPropertyChanged();
             }
         }
 
@@ -79,7 +80,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 randomOffsetRange = value;
-                OnPropertyChanged(() => RandomOffsetRange);
+                OnPropertyChanged();
             }
         }
 
@@ -90,7 +91,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 targetValue = value;
-                OnPropertyChanged(() => TargetValue);
+                OnPropertyChanged();
             }
         }
 
@@ -115,7 +116,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 speed = value;
-                OnPropertyChanged(() => Speed);
+                OnPropertyChanged();
             }
         }
 
@@ -147,3 +148,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
         }
     }
 }
+

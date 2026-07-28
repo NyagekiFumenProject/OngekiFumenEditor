@@ -1,0 +1,21 @@
+﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
+
+namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
+{
+	public class WallOperationViewModel : ConnectableObjectOperationViewModel
+	{
+		public bool IsLeftWall => ConnectableObject.IDShortName[1] == 'L';
+
+		public WallOperationViewModel(ConnectableObjectBase obj) : base(obj)
+		{
+
+		}
+
+		public override ConnectableChildObjectBase GenerateChildObject(bool needNext)
+		{
+			return IsLeftWall ? new WallLeftNext() : new WallRightNext();
+		}
+	}
+}
+

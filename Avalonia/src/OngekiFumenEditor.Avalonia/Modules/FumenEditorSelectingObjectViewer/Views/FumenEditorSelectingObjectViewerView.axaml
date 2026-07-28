@@ -1,0 +1,114 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.FumenEditorSelectingObjectViewerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Views"
+    cal:Message.Attach="[Key Delete]=[Action OnCancelItemSelectedObjects($dataContext)];"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
+                                     Type=vm:FumenEditorSelectingObjectViewerViewModel}"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:GetObjectSoflanGroupConverter x:Key="GetObjectSoflanGroupConverter" />
+    </UserControl.Resources>
+    <TabControl>
+        <TabItem Header="Selection">
+
+        <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <ListView
+            x:Name="listView"
+            Grid.Row="1"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding CollectionView}"
+            ScrollViewer.CanContentScroll="True"
+            SelectionMode="Extended">
+            <i:Interaction.Behaviors>
+                <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
+            </i:Interaction.Behaviors>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem cal:Message.Attach="OnRefresh()" Header="{markup:Translate [Refresh]}" />
+                    <MenuItem cal:Message.Attach="OnCancelItemSelectedObjects($executionContext)" Header="{markup:Translate [CancelSelected]}" />
+                </ContextMenu>
+            </ListView.ContextMenu>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)]; [Event MouseDown]=[Action OnItemSingleClick($dataContext)];" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=Name}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate [Name]}">
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+
+                    <GridViewColumn Width="100" DisplayMemberBinding="{Binding Path=TGrid}">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="{markup:Translate [ObjectTime]}">
+                        </GridViewColumnHeader>
+                    </GridViewColumn>
+
+
+                    <GridViewColumn Width="100">
+                        <GridViewColumnHeader cal:Message.Attach="SortColumn($executionContext)" Content="SoflanGroup">
+                        </GridViewColumnHeader>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Label>
+                                    <Label.Content>
+                                        <MultiBinding Converter="{StaticResource GetObjectSoflanGroupConverter}">
+                                            <Binding Path="." />
+                                            <Binding ElementName="listView" Path="DataContext.Editor" />
+                                        </MultiBinding>
+                                    </Label.Content>
+                                </Label>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="550"
+                        DisplayMemberBinding="{Binding .}"
+                        Header="{markup:Translate [Description]}" />
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+        </TabItem>
+
+        <TabItem Header="Filter" IsSelected="{Binding IsFilterMenuVisible}">
+            <views:SelectionFilterView DataContext="{Binding SelectionFilter}" />
+        </TabItem>
+    </TabControl>
+</UserControl>
+
+
+

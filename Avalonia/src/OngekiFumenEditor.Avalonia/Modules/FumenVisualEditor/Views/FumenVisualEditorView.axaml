@@ -1,0 +1,180 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls1="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:kb="clr-namespace:OngekiFumenEditor.UI.KeyBinding.Input"
+    xmlns:kbDefs="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
+    cal:Message.Attach="[Event DragEnter] = [Action Grid_DragEnter($executionContext)];     [Event Drop] = [Action Grid_Drop($executionContext)];     [Event FocusableChanged] = [Action OnFocusableChanged($executionContext)];"
+    d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    AllowDrop="True"
+    Background="#101010"
+    Focusable="True"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
+            <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
+            <converters:BeatRhythmToBrushConverter x:Key="BeatRhythmToBrushConverter" />
+            <converters:TGridDisplayConverter x:Key="TGridDisplayConverter">
+            </converters:TGridDisplayConverter>
+            <converters:ReverseDoubleConverter x:Key="ReverseDoubleConverter" />
+            <converters:BeatRhythmToVisibleConverter x:Key="BeatRhythmToVisibleConverter" />
+            <valueconverters:ReverseBoolConverter x:Key="ReverseBoolConverter" />
+            <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
+            <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
+        </ResourceDictionary>
+    </UserControl.Resources>
+
+
+    <i:Interaction.Triggers>
+        <!--#region Key Bindings-->
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSetObjectIsCritical}" Message="KeyboardAction_FastSetObjectIsCritical($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToWallLeft}" Message="KeyboardAction_FastPlaceDockableObjectToWallLeft($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToWallRight}" Message="KeyboardAction_FastPlaceDockableObjectToWallRight($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToRight}" Message="KeyboardAction_FastPlaceDockableObjectToRight($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceNewHold}" Message="KeyboardAction_FastPlaceNewHold($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceNewTap}" Message="KeyboardAction_FastPlaceNewTap($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToCenter}" Message="KeyboardAction_FastPlaceDockableObjectToCenter($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToLeft}" Message="KeyboardAction_FastPlaceDockableObjectToLeft($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_DeleteSelectingObjects}" Message="KeyboardAction_DeleteSelectingObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_SelectAllObjects}" Message="KeyboardAction_SelectAllObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CancelSelectingObjects}" Message="KeyboardAction_CancelSelectingObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_HideOrShow}" Message="KeyboardAction_HideOrShow($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ToggleBatchMode}" Message="KeyboardAction_ToggleBatchMode($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastAddConnectableChild}" Message="KeyboardAction_FastAddConnectableChild($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSwitchFlickDirection}" Message="KeyboardAction_FastSwitchFlickDirection($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_CopySelectedObjects}" Message="MenuItemAction_CopySelectedObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_PasteCopiesObjects}" Message="KeyboardAction_PasteCopiesObjects($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ScrollPageDown}" Message="ScrollPage(-1)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ScrollPageUp}" Message="ScrollPage(1)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_ChangeDockableLaneType}" Message="KeyboardAction_ChangeDockableLaneType($executionContext)" />
+        <!--#endregion-->
+    </i:Interaction.Triggers>
+
+
+    <Grid Focusable="False">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid.ContextMenu>
+            <ContextMenu x:Name="EditorContextMenu">
+                <MenuItem Header="{markup:Translate [MenuSelecting]}">
+                    <MenuItem Header="Entire lane"
+                              cal:Message.Attach="MenuItemAction_SelectEntireLane($executionContext)"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
+                    <MenuItem Header="Attached curve points"
+                        cal:Message.Attach="MenuItemAction_SelectAttachedCurves($executionContext)"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
+                    <Separator />
+                    <MenuItem cal:Message.Attach="MenuItemAction_SelectAll($executionContext)" Header="{markup:Translate [SelectAllObjects]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_ReverseSelect($executionContext)" Header="{markup:Translate [ReverseSelectAllObjects]}" />
+                </MenuItem>
+                <MenuItem Header="{markup:Translate [ToSelectedObjects]}">
+                    <MenuItem cal:Message.Attach="KeyboardAction_DeleteSelectingObjects($executionContext)" Header="{markup:Translate [Delete]}" />
+                    <MenuItem cal:Message.Attach="MenuItemAction_CopySelectedObjects($executionContext)" Header="{markup:Translate [CopyCopiable]}" />
+                    <MenuItem Header="{markup:Translate [ControlTimeline]}">
+                        <MenuItem cal:Message.Attach="MenuItemAction_RememberSelectedObjectAudioTime($executionContext)" Header="{markup:Translate [RememberAudioTime]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_RecoverySelectedObjectToAudioTime($executionContext)" Header="{markup:Translate [RecoveryAudioTime]}" />
+                    </MenuItem>
+
+                    <Separator />
+
+                    <MenuItem
+                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGridZero($executionContext)"
+                        Header="{markup:Translate [MenuMirrorSelectionXGridZero]}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
+                    <MenuItem
+                        cal:Message.Attach="MenuItemAction_MirrorSelectionXGrid($executionContext)"
+                        Header="{markup:Translate [MenuMirrorSelectionXGrid]}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
+                    <MenuItem
+                        cal:Message.Attach="MenuItemAction_MirrorLaneColors($executionContext)"
+                        Header="{markup:Translate [MenuMirrorSelectionLaneColors]}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
+                </MenuItem>
+                <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
+                    <MenuItem Header="{markup:Translate [ToPaste]}">
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsDirectly($executionContext)" Header="{markup:Translate [PasteDirectly]}" />
+                        <!--<MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />-->
+                        <Separator />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror($executionContext)" Header="{markup:Translate [PasteForHorizonMirror]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror($executionContext)" Header="{markup:Translate [PasteForVerticalMirror]}" />
+                        <MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror($executionContext)" Header="{markup:Translate [PasteForZeroXGridMirror]}" />
+                    </MenuItem>
+                </MenuItem>
+                <Separator />
+                <MenuItem
+                    Header="{markup:Translate [ShowFPS]}"
+                    IsCheckable="True"
+                    IsChecked="{Binding IsDisplayFPS}" />
+            </ContextMenu>
+        </Grid.ContextMenu>
+
+        <ContentControl x:Name="renderControlHost" cal:Message.Attach="[Event Loaded]=[Action OnRenderControlHostLoaded($executionContext)];" />
+
+        <!--<opentkcontrol:GLWpfControl
+            x:Name="glView"
+            cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
+            Ready="glView_Ready"
+            SizeChanged="glView_SizeChanged" />-->
+
+        <views:BatchModeOverlayView DataContext="{Binding BatchModeBehavior}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+        <TextBlock
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            FontWeight="Bold"
+            Foreground="White"
+            IsHitTestVisible="False"
+            Opacity="0.25"
+            Text="{Binding DisplayFPS}"
+            Visibility="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <ScrollBar
+            Grid.Column="1"
+            Maximum="{Binding TotalDurationHeight}"
+            Minimum="0"
+            Orientation="Vertical"
+            Value="{Binding ReverseScrollViewerVerticalOffset}">
+        </ScrollBar>
+        <ScrollBar
+            Grid.Row="1"
+            Maximum="600"
+            Minimum="-600"
+            Orientation="Horizontal"
+            Visibility="{Binding Setting.ShowXOffsetScrollBar, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}"
+            Value="{Binding Setting.XOffset, Mode=TwoWay}">
+        </ScrollBar>
+        <StackPanel
+            Margin="0,0,0,50"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            IsHitTestVisible="False"
+            Orientation="Horizontal">
+            <controls1:Toast x:Name="mainToast">
+
+            </controls1:Toast>
+        </StackPanel>
+    </Grid>
+</UserControl>
+
+

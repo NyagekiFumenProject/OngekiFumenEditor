@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Framework.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace OngekiFumenEditor.Avalonia.Utils;

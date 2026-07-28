@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils
+namespace OngekiFumenEditor.Avalonia.Utils
 {
 	public class EqualsComparerWrapper<T> : IEqualityComparer<T>
 	{
@@ -11,3 +11,4 @@
 		public int GetHashCode(T obj) => obj?.GetHashCode() ?? 0;
 	}
 }
+

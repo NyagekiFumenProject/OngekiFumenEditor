@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia;
+using Gekimini.Avalonia;
 using Gekimini.Avalonia.Attributes;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.RecentFiles;
@@ -19,9 +19,7 @@ public partial class InternalDocumentEditorProvider : IEditorProvider
             MimeTypes = ["application/unknown"]
         }
     ];
-
-    [GetServiceLazy]
-    private partial IServiceProvider ServiceProvider { get; }
+    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IServiceProvider>();
 
     public IEnumerable<EditorFileType> FileTypes => SupportFileTypes;
 

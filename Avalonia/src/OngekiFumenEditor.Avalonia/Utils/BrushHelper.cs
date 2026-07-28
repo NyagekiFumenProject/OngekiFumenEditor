@@ -1,4 +1,4 @@
-﻿using Avalonia.Media;
+using Avalonia.Media;
 
 namespace OngekiFumenEditor.Avalonia.Utils
 {
@@ -11,3 +11,4 @@ namespace OngekiFumenEditor.Avalonia.Utils
 		}
 	}
 }
+

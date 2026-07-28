@@ -1,0 +1,104 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Views.KeyBindingSettingView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
+                                     Type=vm:KeyBindingSettingViewModel}"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:ShowKeybindExpressionValueConverter x:Key="ShowKeybindExpressionValueConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,5,15,0">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="15"
+                    Text="{markup:Translate [KeywordFilter],
+                                            StringFormat={}:}" />
+                <TextBox
+                    Width="200"
+                    Margin="10,0"
+                    Padding="0,4"
+                    Text="{Binding FilterKeywords}" />
+
+            </StackPanel>
+            <StackPanel Margin="0,5,0,5" Orientation="Horizontal">
+                <CheckBox
+                    VerticalAlignment="Center"
+                    Content="{markup:Translate [ShowNotAssignKeybindingOnly]}"
+                    IsChecked="{Binding IsShowNotAssignOnly}" />
+            </StackPanel>
+            <Grid Margin="0,0,0,10">
+                <Button
+                    Padding="10,4"
+                    HorizontalAlignment="Left"
+                    cal:Message.Attach="UpdateDisplayList()"
+                    Content="{markup:Translate [ApplyFilter]}" />
+                <Button
+                    Margin="0,0"
+                    Padding="10,5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    cal:Message.Attach="ResetAllDefinitions()"
+                    Content="{markup:Translate [ResetAllKeybindings]}" />
+            </Grid>
+            <Border Height="1" Background="Gray" />
+        </StackPanel>
+        <ItemsControl
+            Grid.Row="1"
+            ItemsSource="{Binding Definitions}"
+            ScrollViewer.CanContentScroll="True"
+            VirtualizingPanel.IsVirtualizing="True"
+            VirtualizingPanel.VirtualizationMode="Recycling">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{Binding DisplayName}"
+                            TextWrapping="WrapWithOverflow" />
+                        <Label
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            FontWeight="Black">
+                            <Label.Content>
+                                <MultiBinding Converter="{StaticResource ShowKeybindExpressionValueConverter}">
+                                    <Binding Path="Key" />
+                                    <Binding Path="Modifiers" />
+                                </MultiBinding>
+                            </Label.Content>
+                        </Label>
+                        <Button
+                            Grid.Column="2"
+                            Margin="30,3,3,3"
+                            Padding="10,5"
+                            cal:Message.Attach="ChangeKeybind($executionContext)"
+                            Content="{markup:Translate [Change]}" />
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </Grid>
+</UserControl>
+
+
+

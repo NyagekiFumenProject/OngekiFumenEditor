@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;

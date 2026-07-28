@@ -1,0 +1,171 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:gemini="http://schemas.timjones.io/gemini"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditorSettings.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=local:FumenVisualEditorSettingsViewModel}"
+    d:DesignHeight="800"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
+        </converters:UnitCloseSizeConverter>
+        <converters1:NullToVisibilityConverter x:Key="NullToVisibilityConverter">
+        </converters1:NullToVisibilityConverter>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="10,5,10,5" Visibility="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.DisableTGridMagneticDock}">
+                <TextBlock Text="{markup:Translate [DisableTGridMagneticDock]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.ForceXGridMagneticDock}">
+                <TextBlock Text="{markup:Translate [ForceXGridMagneticDock]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.DisableXGridMagneticDock}">
+                <TextBlock Text="{markup:Translate [DisableXGridMagneticDock]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.ForceTapHoldMagneticDockToLane}">
+                <TextBlock Text="{markup:Translate [ForceTapHoldMagneticDockToLane]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.ForceMagneticDock}">
+                <TextBlock Text="{markup:Translate [ForceMagneticDock]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.JudgeLineAlignBeat}">
+                <TextBlock Text="{markup:Translate [JudgeLineAlignBeat]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <CheckBox
+                Margin="0,2,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.AdjustPastedObjects}">
+                <TextBlock Text="{markup:Translate [AdjustPastedObjects]}" TextWrapping="Wrap" />
+            </CheckBox>
+            <Grid Margin="0,2,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Text="{markup:Translate [XGridUnitSpace]}"
+                    TextWrapping="Wrap">
+                </TextBlock>
+                <ComboBox
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding UnitCloseSizeValues}"
+                    SelectedIndex="4"
+                    SelectedValue="{Binding Setting.XGridUnitSpace}">
+                </ComboBox>
+
+            </Grid>
+            <StackPanel>
+                <controls:RangeValue
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.BeatSplit, Mode=TwoWay}"
+                    DisplayName="{markup:Translate [BeatSplit]}"
+                    MaxValue="16"
+                    MinValue="0"
+                    Step="1">
+                </controls:RangeValue>
+                <controls:RangeValue
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.XGridDisplayMaxUnit, Mode=TwoWay}"
+                    DisplayName="{markup:Translate [XGridDisplayMaxUnit]}"
+                    IsEnabled="{Binding Setting.EnableXOffset}"
+                    MaxValue="200"
+                    MinValue="0"
+                    Step="1" />
+                <controls:RangeValue
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}"
+                    DisplayName="{markup:Translate [JudgeLineOffsetY]}"
+                    MaxValue="500"
+                    MinValue="0"
+                    Step="1">
+                </controls:RangeValue>
+                <controls:RangeValue
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.XOffset, Mode=TwoWay}"
+                    DisplayName="{markup:Translate [XOffset]}"
+                    MaxValue="600"
+                    MinValue="-600"
+                    Step="1" />
+                <controls:RangeValue
+                    Padding="0,10,0,10"
+                    CurrentValue="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}"
+                    DisplayName="{markup:Translate [VerticalDisplayScale]}"
+                    MaxValue="3"
+                    MinValue="0.1"
+                    Step="0.1">
+                </controls:RangeValue>
+            </StackPanel>
+            <Grid Margin="0,2,0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <TextBlock
+                    Grid.Row="8"
+                    Margin="0,0,10,0"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Text="{markup:Translate [DisplayTimeFormat]}">
+                </TextBlock>
+                <ComboBox
+                    Grid.Row="8"
+                    Grid.Column="1"
+                    ItemsSource="{Binding SupportTimeFormats}"
+                    SelectedValue="{Binding Setting.DisplayTimeFormat, Converter={StaticResource EnumToStringConverter}}">
+                </ComboBox>
+            </Grid>
+            <CheckBox
+                Margin="0,10,0,2"
+                VerticalContentAlignment="Center"
+                IsChecked="{Binding Setting.LoopPlayTiming}">
+                <TextBlock Text="{markup:Translate [EnableLoopPlayTiming]}" TextWrapping="Wrap" />
+            </CheckBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
+
+

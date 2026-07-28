@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils
+namespace OngekiFumenEditor.Avalonia.Utils
 {
 	public static class TempFileHelper
 	{
@@ -45,3 +45,4 @@
 		}
 	}
 }
+

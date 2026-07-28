@@ -1,4 +1,6 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
+using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
+
+namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
 {
 	[Export(typeof(ISchedulable))]
 	[Export(typeof(ObjectPoolManager))]
@@ -40,3 +42,4 @@
 		}
 	}
 }
+

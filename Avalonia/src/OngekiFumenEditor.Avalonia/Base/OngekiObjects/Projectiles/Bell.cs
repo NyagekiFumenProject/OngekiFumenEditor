@@ -163,7 +163,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
         }
 
         /// <summary>
-        /// �Ƿ��ܵ�����Ӱ��
+        /// 锟角凤拷锟杰碉拷锟斤拷锟斤拷影锟斤拷
         /// </summary>
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
@@ -192,3 +192,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
         }
     }
 }
+

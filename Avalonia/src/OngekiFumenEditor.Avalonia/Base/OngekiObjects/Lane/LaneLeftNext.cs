@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
 {
@@ -7,3 +7,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
 		public override string IDShortName => IsEndObject ? "LLE" : "LLN";
 	}
 }
+

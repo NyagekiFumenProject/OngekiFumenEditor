@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
 {
 	public interface IColorfulLane
 	{

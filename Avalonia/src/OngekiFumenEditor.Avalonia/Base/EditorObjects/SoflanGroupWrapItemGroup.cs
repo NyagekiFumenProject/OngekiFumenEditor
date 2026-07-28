@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
 namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
@@ -221,3 +221,4 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
         }
     }
 }
+

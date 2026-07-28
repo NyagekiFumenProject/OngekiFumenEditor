@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.Base
@@ -110,3 +110,4 @@ namespace OngekiFumenEditor.Avalonia.Base
 		public float ProgJudgeBpm { get; set; } = 240;
 	}
 }
+

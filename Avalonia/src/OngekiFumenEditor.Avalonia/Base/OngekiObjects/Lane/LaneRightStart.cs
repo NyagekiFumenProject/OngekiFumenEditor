@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
@@ -11,3 +11,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane
 		public override ConnectableChildObjectBase CreateChildObject() => new LaneRightNext();
 	}
 }
+

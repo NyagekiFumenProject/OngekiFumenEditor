@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.EditorObjects;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
@@ -151,3 +151,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 		}
 	}
 }
+

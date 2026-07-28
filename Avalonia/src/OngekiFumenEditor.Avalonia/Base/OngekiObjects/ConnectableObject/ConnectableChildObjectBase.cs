@@ -1,6 +1,9 @@
 ﻿using System.Numerics;
 using OngekiFumenEditor.Avalonia.Base.Attributes;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 
@@ -14,7 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 
         private float curvePrecision = 0.025f;
 
-        [LocalizableObjectPropertyBrowserAlias(nameof(Resources.CurvePrecisionLabel))]
+        [LocalizableObjectPropertyBrowserAlias(nameof(Lang.CurvePrecisionLabel))]
         public float CurvePrecision
         {
             get => curvePrecision;
@@ -23,7 +26,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 
         private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
 
-        [LocalizableObjectPropertyBrowserAlias(nameof(Resources.CurveInterpolatorFactoryLabel))]
+        [LocalizableObjectPropertyBrowserAlias(nameof(Lang.CurveInterpolatorFactoryLabel))]
         public ICurveInterpolaterFactory CurveInterpolaterFactory
         {
             get => curveInterpolaterFactory;
@@ -94,7 +97,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
             controlObj.PropertyChanged += ControlObj_PropertyChanged;
             controlObj.RefCurveObject = this;
             NotifyRefreshPaths();
-            OnPropertyChanged(() => PathControls);
+            OnPropertyChanged(nameof(PathControls));
         }
 
         private void ControlObj_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -102,7 +105,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
             switch (e.PropertyName)
             {
                 case nameof(IsSelected):
-                    OnPropertyChanged(() => IsAnyControlSelecting);
+                    OnPropertyChanged(nameof(IsAnyControlSelecting));
                     break;
                 case nameof(TGrid):
                 case nameof(XGrid):
@@ -263,7 +266,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
             }
             else
             {
-                //就在当前[prev,cur]范围内，那么就插值计算咯
+                //灏卞湪褰撳墠[prev,cur]鑼冨洿鍐咃紝閭ｄ箞灏辨彃鍊艰绠楀挴
                 var xGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid, PrevObject.XGrid.TotalGrid, PrevObject.TGrid.TotalGrid, XGrid.TotalGrid, TGrid.TotalGrid);
                 return xGrid;
             }
@@ -339,3 +342,5 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
         }
     }
 }
+
+

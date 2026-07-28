@@ -18,6 +18,8 @@ internal class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        global::OngekiFumenEditor.Avalonia.Startup.Initialize(args);
+
 #if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
         {

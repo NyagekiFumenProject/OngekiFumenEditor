@@ -1,0 +1,229 @@
+﻿<views:ViewBase xmlns="https://github.com/avaloniaui"
+                xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.ViewModels"
+                xmlns:views="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
+                mc:Ignorable="d"
+                d:DesignWidth="300"
+                d:DesignHeight="800"
+                x:DataType="viewModels:FumenMetaInfoBrowserViewModel"
+                x:Class="OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.Views.FumenMetaInfoBrowserView">
+    <Design.DataContext>
+        <viewModels:FumenMetaInfoBrowserViewModel />
+    </Design.DataContext>
+
+    <Grid>
+        <ScrollViewer>
+            <StackPanel>
+                <StackPanel.Styles>
+                    <Style Selector="Border.metaCell">
+                        <Setter Property="BorderBrush" Value="Gray" />
+                        <Setter Property="Opacity" Value="0.3" />
+                        <Setter Property="BorderThickness" Value="1" />
+                    </Style>
+                    <Style Selector="Expander">
+                        <Setter Property="FontSize" Value="13" />
+                    </Style>
+                    <Style Selector="TextBlock">
+                        <Setter Property="FontSize" Value="13" />
+                        <Setter Property="Padding" Value="5,0,5,0" />
+                        <Setter Property="Margin" Value="5,2,5,2" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style>
+                    <Style Selector="TextBox">
+                        <Setter Property="Padding" Value="5" />
+                        <Setter Property="BorderBrush" Value="Transparent" />
+                        <Setter Property="VerticalAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                    </Style>
+                </StackPanel.Styles>
+
+                <Expander Header="Version">
+                    <Grid Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Border Classes="metaCell" />
+                        <Border Classes="metaCell" Grid.Column="1" />
+                        <TextBlock Text="Major" />
+                        <TextBox Grid.Column="1" Text="{Binding FumenProxy.VersionMajor}" />
+
+                        <Border Classes="metaCell" Grid.Row="1" />
+                        <Border Classes="metaCell" Grid.Row="1" Grid.Column="1" />
+                        <TextBlock Grid.Row="1" Text="Minor" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FumenProxy.VersionMinor}" />
+
+                        <Border Classes="metaCell" Grid.Row="2" />
+                        <Border Classes="metaCell" Grid.Row="2" Grid.Column="1" />
+                        <TextBlock Grid.Row="2" Text="Build" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FumenProxy.VersionBuild}" />
+                    </Grid>
+                </Expander>
+
+                <Expander Header="Bpm Definition">
+                    <Grid Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Border Classes="metaCell" />
+                        <Border Classes="metaCell" Grid.Column="1" />
+                        <TextBlock Text="First" />
+                        <TextBox Grid.Column="1" Text="{Binding FumenProxy.FirstBpm}" />
+
+                        <Border Classes="metaCell" Grid.Row="1" />
+                        <Border Classes="metaCell" Grid.Row="1" Grid.Column="1" />
+                        <TextBlock Grid.Row="1" Text="Common" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FumenProxy.CommonBpm}" />
+
+                        <Border Classes="metaCell" Grid.Row="2" />
+                        <Border Classes="metaCell" Grid.Row="2" Grid.Column="1" />
+                        <TextBlock Grid.Row="2" Text="Maximum" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FumenProxy.MaxBpm}" />
+
+                        <Border Classes="metaCell" Grid.Row="3" />
+                        <Border Classes="metaCell" Grid.Row="3" Grid.Column="1" />
+                        <TextBlock Grid.Row="3" Text="Minimum" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding FumenProxy.MinBpm}" />
+                    </Grid>
+                </Expander>
+
+                <Expander Header="Meter Definition">
+                    <Grid Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Border Classes="metaCell" />
+                        <Border Classes="metaCell" Grid.Column="1" />
+                        <TextBlock Text="Bunshi" />
+                        <TextBox Grid.Column="1" Text="{Binding FumenProxy.Bunshi}" />
+
+                        <Border Classes="metaCell" Grid.Row="1" />
+                        <Border Classes="metaCell" Grid.Row="1" Grid.Column="1" />
+                        <TextBlock Grid.Row="1" Text="Bunbo" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FumenProxy.Bunbo}" />
+                    </Grid>
+                </Expander>
+
+                <Expander Header="Damage Definition">
+                    <Grid Margin="0,5,0,5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <Border Classes="metaCell" />
+                        <Border Classes="metaCell" Grid.Column="1" />
+                        <TextBlock Text="Bullet" />
+                        <TextBox Grid.Column="1" Text="{Binding FumenProxy.BulletDamage}" />
+
+                        <Border Classes="metaCell" Grid.Row="1" />
+                        <Border Classes="metaCell" Grid.Row="1" Grid.Column="1" />
+                        <TextBlock Grid.Row="1" Text="HardBullet" />
+                        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FumenProxy.HardBulletDamage}" />
+
+                        <Border Classes="metaCell" Grid.Row="2" />
+                        <Border Classes="metaCell" Grid.Row="2" Grid.Column="1" />
+                        <TextBlock Grid.Row="2" Text="DangerBullet" />
+                        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FumenProxy.DangerBulletDamage}" />
+
+                        <Border Classes="metaCell" Grid.Row="3" />
+                        <Border Classes="metaCell" Grid.Row="3" Grid.Column="1" />
+                        <TextBlock Grid.Row="3" Text="Beam" />
+                        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding FumenProxy.BeamDamage}" />
+                    </Grid>
+                </Expander>
+
+                <Grid Margin="0,0,0,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <Border Classes="metaCell" />
+                    <Border Classes="metaCell" Grid.Column="1" />
+                    <TextBlock Text="Creator" />
+                    <TextBox Grid.Column="1" Text="{Binding FumenProxy.Creator}" />
+
+                    <Border Classes="metaCell" Grid.Row="1" />
+                    <Border Classes="metaCell" Grid.Row="1" Grid.Column="1" />
+                    <TextBlock Grid.Row="1" Text="TRESOLUTION" />
+                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding FumenProxy.TRESOLUTION}" />
+
+                    <Border Classes="metaCell" Grid.Row="2" />
+                    <Border Classes="metaCell" Grid.Row="2" Grid.Column="1" />
+                    <TextBlock Grid.Row="2" Text="XRESOLUTION" />
+                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding FumenProxy.XRESOLUTION}" />
+
+                    <Border Classes="metaCell" Grid.Row="3" />
+                    <Border Classes="metaCell" Grid.Row="3" Grid.Column="1" />
+                    <TextBlock Grid.Row="3" Text="ClickDefinition" />
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding FumenProxy.ClickDefinition}" />
+
+                    <Border Classes="metaCell" Grid.Row="4" />
+                    <Border Classes="metaCell" Grid.Row="4" Grid.Column="1" />
+                    <TextBlock Grid.Row="4" Text="Tutorial" />
+                    <CheckBox Grid.Row="4"
+                              Grid.Column="1"
+                              Margin="5,0,0,0"
+                              VerticalAlignment="Center"
+                              IsChecked="{Binding FumenProxy.Tutorial}" />
+
+                    <Border Classes="metaCell" Grid.Row="5" />
+                    <Border Classes="metaCell" Grid.Row="5" Grid.Column="1" />
+                    <TextBlock Grid.Row="5" Text="ProgJudgeBpm" />
+                    <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding FumenProxy.ProgJudgeBpm}" />
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border IsVisible="{Binding IsErrorVisible}" Background="#AA8B0000" />
+        <StackPanel IsVisible="{Binding IsErrorVisible}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    MaxWidth="280">
+            <TextBlock Padding="10,0,10,0" FontSize="30" Foreground="Wheat" Text="Error:" />
+            <TextBlock Padding="10,0,10,0"
+                       FontSize="20"
+                       Foreground="White"
+                       TextWrapping="Wrap"
+                       Text="{Binding ErrorMessage}" />
+        </StackPanel>
+    </Grid>
+</views:ViewBase>
+

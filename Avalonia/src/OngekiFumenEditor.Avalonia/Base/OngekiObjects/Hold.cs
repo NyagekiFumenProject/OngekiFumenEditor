@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.Attributes;
+using OngekiFumenEditor.Avalonia.Base.Attributes;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 
@@ -197,3 +197,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
         }
     }
 }
+

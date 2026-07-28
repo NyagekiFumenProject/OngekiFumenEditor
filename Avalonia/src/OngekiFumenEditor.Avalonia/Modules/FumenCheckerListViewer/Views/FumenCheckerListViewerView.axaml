@@ -1,0 +1,205 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views.FumenCheckerListViewerView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenCheckerListViewer.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+    d:DataContext="{d:DesignInstance Type=local:FumenCheckerListViewerViewModel}"
+    d:DesignHeight="300"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="128*" />
+            <RowDefinition Height="141*" />
+        </Grid.RowDefinitions>
+        <StackPanel Margin="5,5,5,5" Orientation="Horizontal">
+            <Button
+                Margin="0,0,5,0"
+                Padding="20,2,20,2"
+                cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
+                Content="{markup:Translate [Refresh]}"
+                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+            </Button>
+            <ToggleButton
+                Background="Transparent"
+                BorderBrush="Red"
+                IsChecked="{Binding EnableShowError}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Foreground="Red"
+                        Text="⮿">
+                    </TextBlock>
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        Padding="10,2,10,2"
+                        VerticalAlignment="Center">
+                        <Run Text="{markup:Translate [Error]}">
+                        </Run>
+                        <Run Text="{Binding ErrorCount, Mode=OneWay}" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EnableShowError}" Value="True">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EnableShowError}" Value="False">
+                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton
+                Margin="5,0,0,0"
+                Background="Transparent"
+                BorderBrush="LightGreen"
+                IsChecked="{Binding EnableShowProblem}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Foreground="LightGreen"
+                        Text="">
+                    </TextBlock>
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        Padding="10,2,10,2"
+                        VerticalAlignment="Center">
+                        <Run Text="{markup:Translate [Problem]}">
+                        </Run>
+                        <Run Text="{Binding ProblemCount, Mode=OneWay}" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EnableShowProblem}" Value="True">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
+                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </StackPanel>
+            </ToggleButton>
+            <ToggleButton
+                Margin="5,0,0,0"
+                Background="Transparent"
+                BorderBrush="SkyBlue"
+                IsChecked="{Binding EnableShowSuggest}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontFamily="Segoe UI Symbol"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Foreground="SkyBlue"
+                        Text="">
+                    </TextBlock>
+                    <TextBlock
+                        Margin="5,0,0,0"
+                        Padding="10,2,10,2"
+                        VerticalAlignment="Center">
+                        <Run Text="{markup:Translate [Advice]}">
+                        </Run>
+                        <Run Text="{Binding SuggestCount, Mode=OneWay}" />
+                        <Run>
+                            <Run.Style>
+                                <Style TargetType="Run">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding EnableShowSuggest}" Value="True">
+                                            <Setter Property="Text" Value="" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
+                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Run.Style>
+                        </Run>
+                    </TextBlock>
+                </StackPanel>
+            </ToggleButton>
+        </StackPanel>
+        <ListView
+            Grid.RowSpan="3"
+            Margin="0,31,0,0"
+            cal:Message.Attach="[Event Loaded]=[Action OnListViewLoaded($executionContext)]"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding CheckResults}"
+            ScrollViewer.CanContentScroll="True">
+            <ListView.Resources>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </ListView.Resources>
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+
+                    <GridViewColumn
+                        Width="120"
+                        DisplayMemberBinding="{Binding Severity}"
+                        Header="{markup:Translate [Severity]}">
+
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="100"
+                        DisplayMemberBinding="{Binding RuleName}"
+                        Header="{markup:Translate [RuleName]}">
+
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="400"
+                        DisplayMemberBinding="{Binding Description}"
+                        Header="{markup:Translate [Description]}">
+
+                    </GridViewColumn>
+
+                    <GridViewColumn
+                        Width="200"
+                        DisplayMemberBinding="{Binding LocationDescription}"
+                        Header="{markup:Translate [WrongLocation2]}">
+
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</UserControl>
+
+
+

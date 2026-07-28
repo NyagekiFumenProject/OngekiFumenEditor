@@ -1,0 +1,115 @@
+﻿<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.Dialogs"
+    xmlns:local2="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    Title="{markup:Translate [EditorProjectSetupDialog]}"
+    Width="600"
+    Height="600"
+    d:DataContext="{d:DesignInstance Type=local2:EditorProjectSetupDialogViewModel,
+                                     IsDesignTimeCreatable=True}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    SizeToContent="WidthAndHeight"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <Grid Focusable="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="5">
+                <GroupBox
+                    BorderBrush="Black"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Header="{markup:Translate [AudioOption]}">
+                    <StackPanel Margin="10,5,10,5">
+                        <Label Content="{markup:Translate [AudioFilePath]}">
+                        </Label>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding EditorProjectData.AudioFilePath}" ToolTip="{Binding EditorProjectData.AudioFilePath}">
+                            </TextBlock>
+                            <Button
+                                Grid.Column="1"
+                                Padding="10,5,10,5"
+                                cal:Message.Attach="[Event Click] = [Action OnSelectAudioFilePathButtonClicked()];"
+                                Content="{markup:Translate [Browser]}">
+                            </Button>
+                        </Grid>
+                        <TextBlock Foreground="{DynamicResource EnvironmentToolWindowText}">
+                            <Run Text="{markup:Translate [AudioDuration]}">
+                            </Run>
+                            <Run Text="{Binding EditorProjectData.AudioDuration, StringFormat={}{0}}">
+                            </Run>
+                        </TextBlock>
+                    </StackPanel>
+                </GroupBox>
+
+                <GroupBox
+                    BorderBrush="Black"
+                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Header="{markup:Translate [FumenInitOption]}">
+                    <StackPanel Margin="10,5,10,5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                Text="{markup:Translate [FirstBpm]}">
+                            </TextBlock>
+                            <TextBox
+                                Width="150"
+                                VerticalAlignment="Center"
+                                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                IsEnabled="{Binding EditorProjectData.FumenFilePath}"
+                                Text="{Binding EditorProjectData.BaseBPM}">
+                            </TextBox>
+                        </StackPanel>
+                        <Grid Margin="0,5,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,10,0"
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                    Text="{markup:Translate [OptionalFumenFile]}">
+                                </TextBlock>
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                    Text="{Binding EditorProjectData.FumenFilePath}" />
+                            </StackPanel>
+
+                            <Button
+                                Padding="10,5,10,5"
+                                HorizontalAlignment="Right"
+                                cal:Message.Attach="[Event Click] = [Action OnSelectFumenFilePathButtonClicked()];"
+                                Content="{markup:Translate [Browser]}">
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <Button
+            Grid.Row="1"
+            Height="50"
+            cal:Message.Attach="[Event Click] = [Action OnCreateButtonClicked()];"
+            Content="{markup:Translate [Create]}">
+        </Button>
+    </Grid>
+</mah:MetroWindow>
+
+
+

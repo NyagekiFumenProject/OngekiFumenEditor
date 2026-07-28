@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums
 {
 	public enum BulletType
 	{
@@ -16,3 +16,4 @@
 		Square = 2,
 	}
 }
+

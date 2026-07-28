@@ -1,4 +1,8 @@
-﻿using System.ComponentModel;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using OngekiFumenEditor.Avalonia.Utils;
+using System.ComponentModel;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 {
@@ -145,7 +149,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 
         private void NotifyWhenChildrenChanged()
         {
-            OnPropertyChanged(() => Children);
+            OnPropertyChanged(nameof(Children));
             NotifyRefreshMinMaxTGrid();
         }
 
@@ -229,8 +233,8 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
         {
             cachedMaxTGrid = default;
             cachedMinTGrid = default;
-            OnPropertyChanged(() => MinTGrid);
-            OnPropertyChanged(() => MaxTGrid);
+            OnPropertyChanged(nameof(MinTGrid));
+            OnPropertyChanged(nameof(MaxTGrid));
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
@@ -493,3 +497,4 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
         }
     }
 }
+

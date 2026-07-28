@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam
 {
 	public interface IBeamObject
 	{
@@ -6,3 +6,4 @@
 		XGrid ObliqueSourceXGridOffset { get; set; }
 	}
 }
+

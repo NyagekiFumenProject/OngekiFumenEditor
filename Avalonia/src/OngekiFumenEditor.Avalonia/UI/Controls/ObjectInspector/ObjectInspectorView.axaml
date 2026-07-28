@@ -1,0 +1,32 @@
+﻿<UserControl
+    x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ObjectInspectorView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
+    d:DesignHeight="800"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:PropertyGeneratorConverter x:Key="PropertyGeneratorConverter">
+        </valueconverters:PropertyGeneratorConverter>
+    </UserControl.Resources>
+    <ScrollViewer Name="HostContent" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <ItemsControl Name="itemsControl" ItemsSource="{Binding PropertyInfoWrappers}">
+                <ItemsControl.ItemTemplate>
+                    <ItemContainerTemplate>
+                        <Border Padding="5" HorizontalAlignment="Left">
+                            <ContentPresenter Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
+                            </ContentPresenter>
+                        </Border>
+                    </ItemContainerTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
+
+

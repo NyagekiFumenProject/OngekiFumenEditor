@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
+namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
 	public enum LaneType
 	{
@@ -15,3 +15,4 @@
         Undefined = 9999,
     }
 }
+

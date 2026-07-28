@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Avalonia.Utils
+namespace OngekiFumenEditor.Avalonia.Utils
 {
 	public class ComparerWrapper<T> : IComparer<T>
 	{
@@ -12,3 +12,4 @@
 		}
 	}
 }
+
