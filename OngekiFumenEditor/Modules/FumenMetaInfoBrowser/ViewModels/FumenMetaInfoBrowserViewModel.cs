@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
             {
                 errorMessage = value;
                 if (!string.IsNullOrWhiteSpace(value))
-                    Log.LogError("Current error message : " + value);
+                    Log.LogWarn("Current error message : " + value);
                 NotifyOfPropertyChange(() => ErrorMessage);
             }
         }

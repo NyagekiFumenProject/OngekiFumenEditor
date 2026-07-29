@@ -14,7 +14,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
@@ -82,8 +81,6 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
         }
 
         private List<IFumenCheckRule> checkRules;
-        private ListView listView;
-
         public FumenCheckerListViewerViewModel()
         {
             DisplayName = Resources.FumenCheckerListViewer;
@@ -126,12 +123,11 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.ViewModels
 
         public void OnListViewLoaded(ActionExecutionContext e)
         {
-            listView = e.Source as ListView;
-            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(listView.ItemsSource);
-            view.Filter = x => OnCheckResultsFilter(x as ICheckResult);
+            if (CollectionViewSource.GetDefaultView(CheckResults) is ICollectionView view)
+                view.Filter = x => x is ICheckResult checkResult && OnCheckResultsFilter(checkResult);
         }
 
-        public void RefreshFilter() => CollectionViewSource.GetDefaultView(listView.ItemsSource)?.Refresh();
+        public void RefreshFilter() => CollectionViewSource.GetDefaultView(CheckResults)?.Refresh();
 
         private bool OnCheckResultsFilter(ICheckResult checkResult)
         {
