@@ -2,7 +2,6 @@
 using Gekimini.Avalonia.Modules.Shell;
 using OngekiFumenEditor.Avalonia.Kernel.RecentFiles;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
-using OngekiFumenEditor.Avalonia.Modules.EditorScriptExecutor.Documents;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
@@ -26,7 +25,6 @@ internal static class DocumentOpenHelper
             var shouldShow = provider switch
             {
                 IFumenVisualEditorProvider fumenProvider => await fumenProvider.TryOpen(document, filePath),
-                IEditorScriptDocumentProvider scriptProvider => await scriptProvider.TryOpen(document, filePath),
                 _ => await provider.TryOpen(document)
             };
 

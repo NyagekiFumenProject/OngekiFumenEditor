@@ -9,7 +9,6 @@ namespace Gekimini.Avalonia.Utils;
 [JsonSerializable(typeof(DefaultWaveformSettings))]
 [JsonSerializable(typeof(EditorGlobalSetting))]
 [JsonSerializable(typeof(LogSetting))]
-[JsonSerializable(typeof(OptionGeneratorToolsSetting))]
 [JsonSerializable(typeof(KeyBindingSetting))]
 public partial class JsonSourceGenerateContext : JsonSerializerContext
 {

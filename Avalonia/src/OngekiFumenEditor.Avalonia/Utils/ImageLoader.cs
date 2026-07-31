@@ -1,7 +1,3 @@
-using OngekiFumenEditor.Avalonia.Modules.OptionGeneratorTools.Kernel;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Concurrent;
 using Injectio.Attributes;
@@ -18,7 +14,7 @@ namespace OngekiFumenEditor.Avalonia.Utils
     [RegisterSingleton<ImageLoader>]
     public class ImageLoader
     {
-        private readonly byte[] abMagic = "UnityFS"u8.ToArray();
+        private readonly byte[] assetBundleMagic = "UnityFS"u8.ToArray();
 
         private const int ParallelCount = 2;
         private readonly ConcurrentDictionary<string, WeakReference<byte[]>> cacheMap = new();
@@ -163,12 +159,12 @@ namespace OngekiFumenEditor.Avalonia.Utils
 
             var r = await GetRaw();
 
-            if (r.Length >= abMagic.Length)
+            if (r is not null && r.Length >= assetBundleMagic.Length)
             {
                 var isABFile = true;
-                for (var i = 0; i < abMagic.Length; i++)
+                for (var i = 0; i < assetBundleMagic.Length; i++)
                 {
-                    if (abMagic[i] != r[i])
+                    if (assetBundleMagic[i] != r[i])
                     {
                         isABFile = false;
                         break;
@@ -177,16 +173,8 @@ namespace OngekiFumenEditor.Avalonia.Utils
 
                 if (isABFile)
                 {
-                    var imgData = await JacketGenerateWrapper.GetMainImageDataAsync(r, path);
-                    if (imgData is null)
-                        return default;
-                    using var image = Image.LoadPixelData<Rgba32>(imgData.Data, imgData.Width, imgData.Height);
-                    var memoryStream = new MemoryStream();
-                    image.Mutate(i => i.Flip(FlipMode.Vertical));
-                    image.SaveAsPng(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-
-                    return memoryStream.ToArray();
+                    Log.LogWarn($"Unity asset bundle image loading is not supported: {path}");
+                    return default;
                 }
             }
 

@@ -36,7 +36,6 @@ public partial class ProgramSettingViewModel : ObservableObject
             AudioSetting.Default,
             EditorGlobalSetting.Default,
             LogSetting.Default,
-            OptionGeneratorToolsSetting.Default,
             ProgramSetting.Default,
             KeyBindingSetting.Default,
             DefaultWaveformSettings.Default,

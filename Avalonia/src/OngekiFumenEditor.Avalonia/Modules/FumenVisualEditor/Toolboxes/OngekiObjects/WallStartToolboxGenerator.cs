@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Modules.Toolbox;
+﻿using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -10,13 +10,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Toolboxes.OngekiO
 
 	}
 
-	[ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Left Start", "Ongeki Lanes")]
+	[RegisterTransient<IToolboxGenerator>]
 	public class WallLeftStartToolboxGenerator : WallStartToolboxGenerator<WallLeftStart>
 	{
 
 	}
 
-	[ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Right Start", "Ongeki Lanes")]
+	[RegisterTransient<IToolboxGenerator>]
 	public class WallRightStartToolboxGenerator : WallStartToolboxGenerator<WallRightStart>
 	{
 
