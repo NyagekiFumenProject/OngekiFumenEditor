@@ -67,7 +67,7 @@ internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing,
         font.Typeface = typeface;
         font.Size = fontSize;
 
-        font.MeasureText(text, out var bounds, paint);
+        font.MeasureText(System.Runtime.InteropServices.MemoryMarshal.Cast<char, ushort>(text.AsSpan()), out var bounds, paint);
         measureTextSize = new Vector2(bounds.Width, bounds.Height);
 
         var offsetPos = new SKPoint(origin.X * bounds.Width, bounds.Height - origin.Y * bounds.Height);

@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		{
 			if (string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath))
 			{
-				ShowMessage(Lang.AudioFileNotFound.ToLocalizedString().Text);
+				ShowMessage(Lang.AudioFileNotFound);
 				return;
 			}
 

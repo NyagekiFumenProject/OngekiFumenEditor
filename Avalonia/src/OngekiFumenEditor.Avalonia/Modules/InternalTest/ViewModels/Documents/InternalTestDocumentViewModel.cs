@@ -87,7 +87,7 @@ public partial class InternalTestDocumentViewModel : DocumentViewModelBase, IPer
 
     public async Task<bool> Load()
     {
-        storageFile = (await (App.Current as App).TopLevel.StorageProvider.OpenFilePickerAsync(
+        storageFile = (await (global::Avalonia.Application.Current as Gekimini.Avalonia.App).TopLevel.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions
             {
                 Title = Lang.InternalTestDocumentFileDialogTitle,
@@ -108,7 +108,7 @@ public partial class InternalTestDocumentViewModel : DocumentViewModelBase, IPer
     {
         //load from recent 
         var bookmark = EditorRecentFilesManager.ReadDataAsString(info);
-        storageFile = await (App.Current as App).TopLevel.StorageProvider.OpenFileBookmarkAsync(bookmark);
+        storageFile = await (global::Avalonia.Application.Current as Gekimini.Avalonia.App).TopLevel.StorageProvider.OpenFileBookmarkAsync(bookmark);
 
         if (storageFile is null)
         {
@@ -125,7 +125,7 @@ public partial class InternalTestDocumentViewModel : DocumentViewModelBase, IPer
 
     public async Task<bool> SaveAs()
     {
-        var newStorageFile = await (App.Current as App).TopLevel.StorageProvider.SaveFilePickerAsync(
+        var newStorageFile = await (global::Avalonia.Application.Current as Gekimini.Avalonia.App).TopLevel.StorageProvider.SaveFilePickerAsync(
             new FilePickerSaveOptions
             {
                 FileTypeChoices = InternalDocumentEditorProvider.SupportFileTypes.BuildFileTypeFilters()
@@ -144,7 +144,7 @@ public partial class InternalTestDocumentViewModel : DocumentViewModelBase, IPer
 
     public async Task<bool> Save()
     {
-        storageFile ??= await (App.Current as App).TopLevel.StorageProvider.SaveFilePickerAsync(
+        storageFile ??= await (global::Avalonia.Application.Current as Gekimini.Avalonia.App).TopLevel.StorageProvider.SaveFilePickerAsync(
             new FilePickerSaveOptions
             {
                 FileTypeChoices = InternalDocumentEditorProvider.SupportFileTypes.BuildFileTypeFilters()

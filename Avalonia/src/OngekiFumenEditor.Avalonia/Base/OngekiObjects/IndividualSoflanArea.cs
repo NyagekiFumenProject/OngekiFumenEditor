@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
                 set
                 {
                     base.XGrid = value;
-                    OnPropertyChanged(() => AreaWidth);
+                    OnPropertyChanged(nameof(AreaWidth));
                 }
             }
         }
@@ -74,7 +74,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 base.XGrid = value;
-                OnPropertyChanged(() => AreaWidth);
+                OnPropertyChanged(nameof(AreaWidth));
             }
         }
         public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;

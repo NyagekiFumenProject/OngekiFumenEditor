@@ -35,6 +35,20 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
 
     public IAudioPlayer AudioPlayer { get; set; }
 
+    private bool isShowCurveControlAlways = false;
+    public bool IsShowCurveControlAlways
+    {
+        get => isShowCurveControlAlways;
+        set
+        {
+            SetProperty(ref isShowCurveControlAlways, value);
+            ToastNotify($"ShowCurveControlAlways: {(IsShowCurveControlAlways ? "Enable" : "Disable")}");
+        }
+    }
+
+    private bool hideWallLaneWhenEnablePlayField;
+    public bool HideWallLaneWhenEnablePlayField => hideWallLaneWhenEnablePlayField;
+
     public Task<bool> New()
     {
         EditorProjectData = new EditorProjectDataModel
@@ -116,7 +130,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
 
     public void KeyboardAction_HideOrShow(object _)
     {
-        IsPreviewMode = !IsPreviewMode;
+        IsUserRequestHideEditorObject = !IsPreviewMode;
     }
 
     public void KeyboardAction_PlayOrPause(object _)

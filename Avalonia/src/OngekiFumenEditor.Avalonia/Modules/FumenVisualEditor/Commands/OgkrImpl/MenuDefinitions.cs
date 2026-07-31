@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework.Menus;
+using Gekimini.Avalonia.Framework.Menus;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.StandardizeFormat;
@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl
 	public static class MenuDefinitions
 	{
 		[RegisterStaticObject]
-		public static MenuDefinition OngekiFumenMenu = new MenuDefinition(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.MainMenuBar, 6, Lang.MenuOngeki);
+		public static MenuDefinition OngekiFumenMenu = new MenuDefinition(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.MainMenuBar, 6, Lang.MenuOngeki.ToLocalizedStringByRawText());
 
 		[RegisterStaticObject]
 		public static MenuItemGroupDefinition OngekiFumenMenuGroup = new MenuItemGroupDefinition(OngekiFumenMenu, 0);

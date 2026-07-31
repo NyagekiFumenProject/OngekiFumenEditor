@@ -14,7 +14,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
-using OngekiFumenEditor.Avalonia.UI.Controls;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using OpenTK.Mathematics;
@@ -866,7 +865,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     public void OnSizeChanged(ActionExecutionContext e)
     {
         Log.LogInfo("resize");
-        var scrollViewer = e.Source as AnimatedScrollViewer;
+        var scrollViewer = e.Source as ScrollViewer;
         scrollViewer?.InvalidateMeasure();
     }
 

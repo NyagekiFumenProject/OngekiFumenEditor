@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
             set
             {
                 SetProperty(ref localTargetValue, value);
-                OnPropertyChanged(() => IsEnableSoflan);
+                OnPropertyChanged(nameof(IsEnableSoflan));
                 if (ReferenceBulletPallete == null)
                 {
                     //auto set pallete to dummy if value is set and current pallete is null

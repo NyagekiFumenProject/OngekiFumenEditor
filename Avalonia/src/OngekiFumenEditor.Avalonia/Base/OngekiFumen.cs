@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Avalonia.Base
                     if (IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.FirstOrDefault(x => x.DisplayName == "default") is SoflanGroupWrapItemGroup defaultGroup)
                     {
                         defaultGroup.Add(item);
-                        IndividualSoflanAreaMap.OnPropertyChanged(nameof(IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot));
+                        IndividualSoflanAreaMap.NotifyOfPropertyChange(nameof(IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot));
                     }
                 }
             }

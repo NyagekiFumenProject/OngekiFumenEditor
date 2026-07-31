@@ -1,11 +1,12 @@
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Shell;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Commands;
 
 [RegisterSingleton<ICommandHandler>]
-public partial class ViewFumenMetaInfoBrowserCommandHandler : CommandHandlerBase<ViewFumenMetaInfoBrowserCommandDefinition>
+public partial class ViewFumenMetaInfoBrowserCommandHandler : CommandHandlerBase<ViewFumenEditorSelectingObjectViewerCommandDefinition>
 {
     private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
 

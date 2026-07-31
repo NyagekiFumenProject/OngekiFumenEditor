@@ -5,6 +5,9 @@ namespace OngekiFumenEditor.Avalonia.Utils;
 
 public static class CommandRouterHelper
 {
+    public static Task ExecuteCommand(Command command) =>
+        ExecuteCommand(IoC.Get<IServiceProvider>(), command);
+
     public static async Task ExecuteCommand(IServiceProvider serviceProvider, Command command)
     {
         var commandRouter = serviceProvider.GetService<ICommandRouter>();

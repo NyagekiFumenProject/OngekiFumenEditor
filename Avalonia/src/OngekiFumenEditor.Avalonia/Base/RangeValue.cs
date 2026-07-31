@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Avalonia.Base
 			set
 			{
 				SetProperty(ref currentValue, Math.Min(MaxValue, Math.Max(MinValue, value)));
-				OnPropertyChanged(() => ValuePercent);
+				OnPropertyChanged(nameof(ValuePercent));
 			}
 		}
 

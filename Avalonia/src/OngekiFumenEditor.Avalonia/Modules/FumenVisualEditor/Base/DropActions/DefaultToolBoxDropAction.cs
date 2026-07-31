@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Modules.Toolbox.Models;
+using Gekimini.Avalonia.Modules.Toolbox.Models;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -12,7 +12,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions
 
 		public DefaultToolBoxDropAction(ToolboxItem toolboxItem)
 		{
-			itemType = toolboxItem.ItemType;
+			itemType = Type.GetType(toolboxItem.ItemType);
 		}
 
 		protected override OngekiObjectBase GetDisplayObject()

@@ -16,3 +16,15 @@ public class InterpolateAllCommandDefinition : CommandDefinition
 
     public override LocalizedString ToolTip => Text;
 }
+
+[RegisterSingleton<CommandDefinitionBase>]
+public class InterpolateAllWithXGridLimitCommandDefinition : CommandDefinition
+{
+    public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll.InterpolateAllWithXGridLimitCommandDefinition";
+
+    public override string Name => CommandName;
+
+    public override LocalizedString Text { get; } = "InterpolateAllWithXGridLimitCommandDefinition".ToLocalizedStringByRawText();
+
+    public override LocalizedString ToolTip => Text;
+}

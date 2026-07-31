@@ -1,5 +1,6 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 

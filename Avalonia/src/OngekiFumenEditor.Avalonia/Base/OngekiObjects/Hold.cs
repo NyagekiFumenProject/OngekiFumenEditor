@@ -29,8 +29,8 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 referenceLaneStart = value;
-                OnPropertyChanged(() => ReferenceLaneStart);
-                OnPropertyChanged(() => ReferenceLaneStrId);
+                OnPropertyChanged(nameof(ReferenceLaneStart));
+                OnPropertyChanged(nameof(ReferenceLaneStrId));
 
                 HoldEnd?.RedockXGrid();
             }
@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 referenceLaneStrIdManualSet = value;
-                OnPropertyChanged(() => ReferenceLaneStrIdManualSet);
+                OnPropertyChanged(nameof(ReferenceLaneStrIdManualSet));
                 referenceLaneStrIdManualSet = default;
             }
         }

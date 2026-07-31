@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 
-public interface IObjectPropertyAccessProxy
+public interface IObjectPropertyAccessProxy : INotifyPropertyChanged
 {
     PropertyInfo PropertyInfo { get; }
     object ProxyValue { get; set; }

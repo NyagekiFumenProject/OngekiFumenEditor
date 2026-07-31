@@ -2,6 +2,7 @@ using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using System.IO;
 
@@ -14,7 +15,7 @@ internal partial class FumenVisualEditorProvider : IFumenVisualEditorProvider
     public const string FILE_EXTENSION_NAME = ".nyagekiProj";
     public static EditorFileType[] SupportFileTypes { get; } =
     [
-        new("FumenVisualEditorProject", "Fumen Visual Editor Project")
+        new("FumenVisualEditorProject", "Fumen Visual Editor Project".ToLocalizedStringByRawText())
         {
             Patterns = [$"*{FILE_EXTENSION_NAME}"],
             MimeTypes = ["application/octet-stream"]
@@ -28,7 +29,7 @@ internal partial class FumenVisualEditorProvider : IFumenVisualEditorProvider
 
     public IDocumentViewModel Create()
     {
-        return ServiceProvider.Resolve<FumenVisualEditorViewModel>();
+        return ServiceProvider.GetRequiredService<FumenVisualEditorViewModel>();
     }
 
     public async Task<bool> TryNew(IDocumentViewModel document)

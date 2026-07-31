@@ -24,7 +24,7 @@ public partial class OpenRecentFileCommandHandler : CommandListHandlerBase<OpenR
             i++;
             commands.Add(new Command(command.CommandDefinition)
             {
-                Text = $"_{i} {item.DisplayName} ({item.FileName})",
+                Text = $"_{i} {item.DisplayName} ({item.FileName})".ToLocalizedStringByRawText(),
                 Tag = item,
                 Enabled = File.Exists(item.FileName)
             });

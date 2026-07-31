@@ -31,8 +31,10 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing
                 target.CurrentDrawingTargetContext.ViewWidth / 2,
                 target.CurrentDrawingTargetContext.ViewHeight / 2,
                 0);
-            using var mvpWithFlip = mvp * flip;
-            using var adjustMVP = mvpWithFlip * translation;
+            using var mvpWithFlip = new SKMatrix44();
+            mvpWithFlip.SetConcat(mvp, flip);
+            using var adjustMVP = new SKMatrix44();
+            adjustMVP.SetConcat(mvpWithFlip, translation);
 
             // The leased canvas already contains Avalonia's visual offset, clip and
             // DPI transform. Compose the editor matrix on top of that state instead

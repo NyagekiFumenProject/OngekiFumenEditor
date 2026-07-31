@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -75,26 +75,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 			var list = ObjectPool<List<LineVertex>>.Get();
 			list.Clear();
 
-			var segments = svgPrefab.GenerateLineSegments();
-
-			foreach (var seg in segments)
-			{
-				var color = new Vector4(seg.Color.R / 255.0f, seg.Color.G / 255.0f, seg.Color.B / 255.0f, seg.Color.A / 255.0f);
-
-				var itor = seg.RelativePoints.GetEnumerator();
-				if (itor.MoveNext())
-				{
-					var point = itor.Current;
-					list.Add(new(point, Vector4.Zero, VertexDash.Solider));
-					list.Add(new(point, color, VertexDash.Solider));
-					while (itor.MoveNext())
-					{
-						point = itor.Current;
-						list.Add(new(point, color, VertexDash.Solider));
-					}
-					list.Add(new(point, Vector4.Zero, VertexDash.Solider));
-				}
-			}
+			// SVG rendering pipeline is intentionally downgraded during migration (see SvgPrefabBase),
+			// so no line segments are generated here yet.
 
 			return list;
 		}
@@ -120,7 +102,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingDrawingGroup?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
 				cachedItem.GeneratedPoints = genData;
 				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
-				cachedItem.Bound = svgPrefab.ProcessingDrawingGroup?.Bounds ?? default;
+				cachedItem.Bound = default;
 				isCached = false;
 			}
 

@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.InternalTest.Models;
 public class InternalTestRecentInfoData
 {
     public static JsonTypeInfo<InternalTestRecentInfoData> JsonTypeInfo =>
-        JsonSourceGenerateContext.Default.InternalTestRecentInfoData;
+        InternalTestJsonSourceGenerateContext.Default.InternalTestRecentInfoData;
 
     public string Bookmark { get; set; }
 }

@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Gekimini.Avalonia.Modules.Window.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.SplashScreen
 {
 	public interface ISplashScreenWindow
 	{
+		WindowViewModelBase WindowViewModel { get; }
 	}
 }
-
-

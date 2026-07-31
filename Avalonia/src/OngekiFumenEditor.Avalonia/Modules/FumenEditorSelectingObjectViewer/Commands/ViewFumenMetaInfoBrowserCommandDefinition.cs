@@ -6,13 +6,13 @@ using Injectio.Attributes;
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Commands;
 
 [RegisterSingleton<CommandDefinitionBase>]
-public class ViewFumenMetaInfoBrowserCommandDefinition : CommandDefinition
+public class ViewFumenEditorSelectingObjectViewerCommandDefinition : CommandDefinition
 {
-    public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Commands.ViewFumenMetaInfoBrowserCommandDefinition";
+    public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Commands.ViewFumenEditorSelectingObjectViewerCommandDefinition";
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = "ViewFumenMetaInfoBrowserCommandDefinition".ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = "ViewFumenEditorSelectingObjectViewerCommandDefinition".ToLocalizedStringByRawText();
 
     public override LocalizedString ToolTip => Text;
 }

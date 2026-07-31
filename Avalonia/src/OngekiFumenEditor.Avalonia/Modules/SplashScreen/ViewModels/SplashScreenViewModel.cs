@@ -8,9 +8,4 @@ namespace OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels;
 public class SplashScreenViewModel : WindowViewModelBase, ISplashScreenWindow
 {
     public WindowViewModelBase WindowViewModel => this;
-
-    public SplashScreenViewModel()
-    {
-        Title = LocalizedString.CreateFromRawText("Splash");
-    }
 }

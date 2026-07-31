@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
             set
             {
                 SetProperty(ref parent, value);
-                Refresh();
+                OnPropertyChanged(string.Empty);
             }
         }
 

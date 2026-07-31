@@ -181,7 +181,7 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
                         if (beforeValue != newValue)
                         {
                             isDisplayInPreviewMode = newValue;
-                            OnPropertyChanged(() => IsDisplayInPreviewMode);
+                            OnPropertyChanged(nameof(IsDisplayInPreviewMode));
                         }
                     }
                     break;
@@ -193,7 +193,7 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
                         if (beforeValue != newValue)
                         {
                             isDisplayInDesignMode = newValue;
-                            OnPropertyChanged(() => IsDisplayInDesignMode);
+                            OnPropertyChanged(nameof(IsDisplayInDesignMode));
                         }
                     }
                     break;

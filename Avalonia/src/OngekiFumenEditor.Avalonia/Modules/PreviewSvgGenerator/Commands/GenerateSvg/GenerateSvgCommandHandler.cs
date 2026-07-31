@@ -27,7 +27,7 @@ public partial class GenerateSvgCommandHandler : CommandHandlerBase<GenerateSvgC
     {
         if (!TryGetActiveFumen(Shell.ActiveDocument, out var fumen, out var duration))
         {
-            await DialogManager.ShowMessageDialog("No active fumen document found.", DialogMessageType.Warning);
+            await DialogManager.ShowMessageDialog("No active fumen document found.");
             return;
         }
 

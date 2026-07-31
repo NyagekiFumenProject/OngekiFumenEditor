@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -7,6 +8,12 @@ namespace OngekiFumenEditor.Avalonia.Utils
 {
     public static class PropertyChangedBaseExtensionMethod
     {
+        private static readonly MethodInfo OnPropertyChangedMethod =
+            typeof(ObservableObject).GetMethod("OnPropertyChanged", BindingFlags.Instance | BindingFlags.NonPublic, [typeof(string)]);
+
+        public static void NotifyOfPropertyChange(this ObservableObject t, string propertyName)
+            => OnPropertyChangedMethod.Invoke(t, [propertyName]);
+
         static ConcurrentDictionary<int, WeakReference<PropertyChangedEventHandler>> savedMethod = new();
 
         public static void RegisterOrUnregisterPropertyChangeEvent<T>(this ObservableObject t, T oldValue, T newValue, PropertyChangedEventHandler handler) where T : INotifyPropertyChanged

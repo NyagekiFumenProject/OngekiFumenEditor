@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
             set
             {
                 bulletDamageTypeValue = value;
-                OnPropertyChanged(() => BulletDamageTypeValue);
+                OnPropertyChanged(nameof(BulletDamageTypeValue));
             }
         }
 
@@ -109,7 +109,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
             set
             {
                 SetProperty(ref localTargetValue, value);
-                OnPropertyChanged(() => IsEnableSoflan);
+                OnPropertyChanged(nameof(IsEnableSoflan));
             }
         }
 

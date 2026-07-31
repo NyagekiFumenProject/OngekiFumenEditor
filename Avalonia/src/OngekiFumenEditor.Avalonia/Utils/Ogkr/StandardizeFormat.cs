@@ -1,8 +1,9 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.OgkrImpl;
 using OngekiFumenEditor.Avalonia.Parser;

@@ -1,4 +1,5 @@
-﻿using DereTore.Common;
+using DereTore.Common;
+using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Modules.Toolbox.Models;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
@@ -256,7 +257,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
 
             var func = () => MirrorObjectsXGrid(selection, true);
-            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.MirrorSelectionXGridZero, func, func));
+            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.MirrorSelectionXGridZero.ToLocalizedStringByRawText(), func, func));
         }
 
         public void MenuItemAction_MirrorSelectionXGrid(ActionExecutionContext ctx)
@@ -268,7 +269,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
 
             var func = () => MirrorObjectsXGrid(selection, false);
-            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.MirrorSelectionXGrid, func, func));
+            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.MirrorSelectionXGrid.ToLocalizedStringByRawText(), func, func));
         }
 
         private void MirrorObjectsXGrid(IList<OngekiMovableObjectBase> objects, bool zeroCenter)
@@ -341,7 +342,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 laneObjects.ForEach(SelectLaneObjects);
             };
 
-            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.MirrorSelectionLaneColors, executeOrRedo, undo));
+            UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.MirrorSelectionLaneColors.ToLocalizedStringByRawText(), executeOrRedo, undo));
         }
 
         private IEnumerable<ConnectableStartObject> MirrorLaneColors(List<ConnectableStartObject> laneObjects)
@@ -610,7 +611,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         {
             var tap = new T();
             var isFirst = true;
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Add {0}".Format(typeof(T).Name), () =>
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Add {0}".Format(typeof(T).Name).ToLocalizedStringByRawText(), () =>
             {
                 MoveObjectTo(tap, position);
                 Fumen.AddObject(tap);
@@ -687,7 +688,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.FastPlaceObjectToLane.ToLocalizedString().Format(dockable.GetType().Name, targetType), () =>
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.FastPlaceObjectToLane.ToFormatLocalizedString(dockable.GetType().Name, targetType), () =>
             {
                 dockable.ReferenceLaneStart = pickLane;
                 if (dockable.ReferenceLaneStart is not null)
@@ -969,13 +970,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 dropAction.Drop(this, newPos);
                 genChildren.Add(genChild);
             }
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(string.Empty, () =>
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(string.Empty.ToLocalizedStringByRawText(), () =>
             {
                 TryCancelAllObjectSelecting();
                 genChildren.ForEach(x => x.IsSelected = true);
                 IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
             }, () => { }));
-            var combinedAction = UndoRedoManager.EndCombineAction(Lang.FastAddObjectsToLanes);
+            var combinedAction = UndoRedoManager.EndCombineAction(Lang.FastAddObjectsToLanes.ToLocalizedStringByRawText());
             UndoRedoManager.ExecuteAction(combinedAction);
         }
 

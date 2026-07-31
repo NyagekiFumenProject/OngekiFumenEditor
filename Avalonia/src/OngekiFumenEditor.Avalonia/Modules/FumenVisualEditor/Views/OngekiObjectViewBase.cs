@@ -9,7 +9,8 @@ public partial class OngekiObjectViewBase : UserControl
 {
     private static readonly DropShadowEffect SelectEffect = new()
     {
-        ShadowDepth = 0,
+        OffsetX = 0,
+        OffsetY = 0,
         Color = Colors.Yellow,
         BlurRadius = 25
     };

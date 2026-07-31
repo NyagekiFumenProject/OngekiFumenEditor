@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.PolygonDrawing
                 (byte)(Color.Y * 255),
                 (byte)(Color.Z * 255),
                 (byte)(Color.W * 255)));
-            points.Add(Point);
+            points.Add(new SKPoint(Point.X, Point.Y));
         }
     }
 }

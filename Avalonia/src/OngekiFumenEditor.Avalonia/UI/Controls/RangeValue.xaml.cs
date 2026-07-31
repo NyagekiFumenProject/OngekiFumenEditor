@@ -61,7 +61,7 @@ public partial class RangeValue : UserControl, INotifyPropertyChanged
 
     public RangeValue()
     {
-        GetObservable(CurrentValueProperty).Subscribe(_ =>
+        this.GetObservable(CurrentValueProperty).Subscribe(_ =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentIntValue))));
     }
 }
