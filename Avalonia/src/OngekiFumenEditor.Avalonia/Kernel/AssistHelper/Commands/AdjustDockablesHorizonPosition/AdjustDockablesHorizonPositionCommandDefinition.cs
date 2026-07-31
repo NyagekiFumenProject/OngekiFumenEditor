@@ -13,7 +13,7 @@ public class AdjustDockablesHorizonPositionCommandDefinition : CommandDefinition
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = Lang.CommandAdjustDockablesHorizonPosition.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandAdjustDockablesHorizonPosition.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
 }

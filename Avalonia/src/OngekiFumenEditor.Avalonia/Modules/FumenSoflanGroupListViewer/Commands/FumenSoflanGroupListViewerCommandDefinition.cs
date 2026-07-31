@@ -17,6 +17,6 @@ public class FumenSoflanGroupListViewerCommandDefinition : CommandDefinition
         new KeyGesture(Key.F, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.SoflanGroupListViewer.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.SoflanGroupListViewer.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }

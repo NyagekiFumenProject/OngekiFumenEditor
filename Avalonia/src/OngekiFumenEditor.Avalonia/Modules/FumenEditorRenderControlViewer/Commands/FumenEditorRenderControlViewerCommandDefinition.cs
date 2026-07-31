@@ -17,7 +17,7 @@ public class FumenEditorRenderControlViewerCommandDefinition : CommandDefinition
         new KeyGesture(Key.R, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.FumenEditorRenderControlViewer.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.FumenEditorRenderControlViewer.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }
 

@@ -1,5 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using OngekiFumenEditor.Avalonia.Kernel.RecentFiles;
+using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 
@@ -17,11 +16,6 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ObservableObject
     public void ApplyChanges()
     {
         EditorGlobalSetting.Default.Save();
-    }
-
-    public void ClearRecentOpen()
-    {
-        IoC.Get<IEditorRecentFilesManager>().ClearAllRecords();
     }
 }
 

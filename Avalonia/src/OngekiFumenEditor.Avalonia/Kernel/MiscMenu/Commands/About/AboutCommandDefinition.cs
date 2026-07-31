@@ -13,7 +13,7 @@ public class AboutCommandDefinition : CommandDefinition
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = Lang.CommandAbout.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandAbout.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
 }

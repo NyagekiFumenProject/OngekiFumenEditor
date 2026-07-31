@@ -19,7 +19,7 @@ public abstract class OpenUrlCommonCommandDefinition : CommandDefinition
 public class UsageWikiCommandDefinition : OpenUrlCommonCommandDefinition
 {
     public override string NameOverride => "UsageWiki";
-    public override LocalizedString Text { get; } = Lang.TutorialAndDocument.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.TutorialAndDocument.ToLocalizedString();
     public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki";
 }
 
@@ -27,7 +27,7 @@ public class UsageWikiCommandDefinition : OpenUrlCommonCommandDefinition
 public class OpenProjectUrlCommandDefinition : OpenUrlCommonCommandDefinition
 {
     public override string NameOverride => "OpenProjectUrl";
-    public override LocalizedString Text { get; } = Lang.CommandOpenProjectUrl.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandOpenProjectUrl.ToLocalizedString();
     public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor";
 }
 
@@ -35,7 +35,7 @@ public class OpenProjectUrlCommandDefinition : OpenUrlCommonCommandDefinition
 public class RequestIssueHelpCommandDefinition : OpenUrlCommonCommandDefinition
 {
     public override string NameOverride => "RequestIssueHelp";
-    public override LocalizedString Text { get; } = Lang.CommandRequestIssueHelp.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandRequestIssueHelp.ToLocalizedString();
     public override string Url => "https://docs.microsoft.com/en-us/visualstudio/get-started/csharp/tutorial-debugger?view=vs-2022";
 }
 
@@ -43,7 +43,7 @@ public class RequestIssueHelpCommandDefinition : OpenUrlCommonCommandDefinition
 public class PostSuggestCommandDefinition : OpenUrlCommonCommandDefinition
 {
     public override string NameOverride => "PostSuggest";
-    public override LocalizedString Text { get; } = Lang.CommandPostSuggest.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandPostSuggest.ToLocalizedString();
     public override string Url => "https://github.com/NyagekiFumenProject/OngekiFumenEditor/pulls";
 }
 

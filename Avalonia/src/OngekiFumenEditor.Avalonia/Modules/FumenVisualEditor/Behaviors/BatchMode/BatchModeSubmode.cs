@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,14 +31,14 @@ public abstract class BatchModeSubmode : CommandDefinition
     public abstract KeyBindingDefinition KeyBinding { get; }
     public abstract string ResourceKey { get; }
 
-    public string HelperText => $"{DisplayName} ({KeyBindingDefinition.FormatToExpression(KeyBinding)})";
-    public string DisplayName => Lang.LocalizerManager.GetLocalizedText(ResourceKey);
+    public LocalizedString HelperText => field ??= LocalizedString.CreateFromTemplateFunc(() => $"{DisplayName} ({KeyBindingDefinition.FormatToExpression(KeyBinding)})");
+    public LocalizedString DisplayName => field ??= Lang.LocalizerManager.GetLocalizedTextSource(ResourceKey).ToLocalizedString();
 
     public override string Name => $"BatchMode.{GetType().Name}";
     public override Uri IconSource =>
         new Uri($"pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/Batch/{ResourceKey}.png");
 
-    public override LocalizedString Text => DisplayName.ToLocalizedStringByRawText();
+    public override LocalizedString Text => DisplayName;
 }
 
 /// <summary>
@@ -46,13 +46,13 @@ public abstract class BatchModeSubmode : CommandDefinition
 /// </summary>
 public abstract class BatchModeFilterSubmode : BatchModeSubmode
 {
-    public sealed override LocalizedString ToolTip => Lang.BatchModeFilterTooltipFormat.Format(HelperText).ToLocalizedStringByRawText();
+    public sealed override LocalizedString ToolTip => field ??= Lang.B.BatchModeFilterTooltipFormat.ToFormatLocalizedString(HelperText.Text);
     public abstract Func<OngekiObjectBase, bool> FilterFunction { get; }
 }
 
 public abstract class BatchModeInputSubmode : BatchModeSubmode
 {
-    public override LocalizedString ToolTip => HelperText.ToLocalizedStringByRawText();
+    public override LocalizedString ToolTip => HelperText;
 
     public abstract IEnumerable<OngekiTimelineObjectBase> GenerateObject();
     public virtual bool AutoSelect => false;

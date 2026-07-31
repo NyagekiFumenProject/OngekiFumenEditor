@@ -565,7 +565,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
             undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
 
-            targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.CopyAndPaste.ToLocalizedStringByRawText(), redo, undo));
+            targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.CopyAndPaste.ToLocalizedString(), redo, undo));
         }
 
         private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteOption mirrorOption)

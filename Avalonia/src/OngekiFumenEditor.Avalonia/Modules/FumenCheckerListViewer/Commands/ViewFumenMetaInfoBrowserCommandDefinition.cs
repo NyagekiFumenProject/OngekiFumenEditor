@@ -17,6 +17,6 @@ public class ViewFumenCheckerListViewerCommandDefinition : CommandDefinition
         new KeyGesture(Key.C, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.FumenCheckerListViewer.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.FumenCheckerListViewer.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }

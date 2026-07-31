@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.View
 [RegisterSingleton<IFumenEditorRenderControlViewer>]
 public class FumenEditorRenderControlViewerViewModel : ToolViewModelBase, IFumenEditorRenderControlViewer
 {
-    public FumenEditorRenderControlViewerViewModel() : base(Lang.FumenEditorRenderControlViewer.ToLocalizedStringByRawText())
+    public FumenEditorRenderControlViewerViewModel() : base(Lang.B.FumenEditorRenderControlViewer.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Right;
     }

@@ -13,7 +13,7 @@ public class ApplySuggestEditorLayoutCommandDefinition : CommandDefinition
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = Lang.ApplySuggestedEditorLayout.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.ApplySuggestedEditorLayout.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
 }

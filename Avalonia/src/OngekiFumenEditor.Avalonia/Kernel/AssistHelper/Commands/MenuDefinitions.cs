@@ -11,7 +11,7 @@ public static class MenuDefinitions
 {
     [RegisterStaticObject]
     public static MenuDefinition AssistMenu =
-        new(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.MainMenuBar, 7, Lang.MenuAssist.ToLocalizedStringByRawText());
+        new(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.MainMenuBar, 7, Lang.B.MenuAssist.ToLocalizedString());
 
     [RegisterStaticObject]
     public static MenuItemGroupDefinition AssistMenuGroup = new(AssistMenu, 0);

@@ -1,6 +1,5 @@
-﻿using Gekimini.Avalonia.Framework;
+using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Modules.Shell;
-using OngekiFumenEditor.Avalonia.Kernel.RecentFiles;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -59,7 +58,6 @@ internal static class DocumentOpenHelper
             vm.DisplayName = docName;
 
         await IoC.Get<IShell>().OpenDocumentAsync(editor);
-        IoC.Get<IEditorRecentFilesManager>().PostRecord(new RecentRecordInfo(ogkrFilePath, docName, RecentOpenType.CommandOpen));
         return true;
     }
 

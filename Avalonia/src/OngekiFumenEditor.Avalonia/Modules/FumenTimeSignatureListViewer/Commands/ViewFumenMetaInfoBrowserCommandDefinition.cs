@@ -17,6 +17,6 @@ public class ViewFumenTimeSignatureListViewerCommandDefinition : CommandDefiniti
         new KeyGesture(Key.T, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.FumenTimeSignatureListViewer.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.FumenTimeSignatureListViewer.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }

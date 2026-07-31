@@ -17,6 +17,6 @@ public class ViewAudioPlayerToolViewerCommandDefinition : CommandDefinition
         new KeyGesture(Key.A, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.AudioPlayerToolViewer.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.AudioPlayerToolViewer.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }

@@ -11,6 +11,6 @@ public class ViewAudioAdjustWindowCommandDefinition : CommandDefinition
 {
     public const string CommandName = "View.AudioAdjustWindow";
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.CommandAudioAdjustWindow.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandAudioAdjustWindow.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }

@@ -17,7 +17,7 @@ public class ViewFumenBulletPalleteListViewerCommandDefinition : CommandDefiniti
         new KeyGesture(Key.B, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.FumenBulletPalleteListViewer.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.FumenBulletPalleteListViewer.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }
 

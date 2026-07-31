@@ -68,7 +68,7 @@ public class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerL
         }
     }
 
-    public FumenCheckerListViewerViewModel() : base(Lang.FumenCheckerListViewer.ToLocalizedStringByRawText())
+    public FumenCheckerListViewerViewModel() : base(Lang.B.FumenCheckerListViewer.ToLocalizedString())
     {
         Dock = DockMode.Bottom;
         editorDocumentManager = IoC.Get<IEditorDocumentManager>();

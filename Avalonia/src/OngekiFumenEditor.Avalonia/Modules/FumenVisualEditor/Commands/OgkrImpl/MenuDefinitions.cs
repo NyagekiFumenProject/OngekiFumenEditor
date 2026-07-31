@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl
 	public static class MenuDefinitions
 	{
 		[RegisterStaticObject]
-		public static MenuDefinition OngekiFumenMenu = new MenuDefinition(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.MainMenuBar, 6, Lang.MenuOngeki.ToLocalizedStringByRawText());
+		public static MenuDefinition OngekiFumenMenu = new MenuDefinition(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.MainMenuBar, 6, Lang.B.MenuOngeki.ToLocalizedString());
 
 		[RegisterStaticObject]
 		public static MenuItemGroupDefinition OngekiFumenMenuGroup = new MenuItemGroupDefinition(OngekiFumenMenu, 0);

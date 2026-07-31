@@ -44,7 +44,7 @@ public class BatchModeSubmodeNameConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return ((BatchModeSubmode)value)?.DisplayName ?? string.Empty;
+        return ((BatchModeSubmode)value)?.DisplayName?.Text ?? string.Empty;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

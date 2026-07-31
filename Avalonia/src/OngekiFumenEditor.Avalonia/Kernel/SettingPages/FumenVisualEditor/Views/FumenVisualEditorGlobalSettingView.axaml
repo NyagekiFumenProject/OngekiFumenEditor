@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -206,15 +206,6 @@
                         </CheckBox>
                     </StackPanel>
                 </GroupBox>
-            </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [Other]}">
-            <StackPanel Margin="10">
-                <Button
-                    Padding="10,5,10,5"
-                    HorizontalAlignment="Left"
-                    cal:Message.Attach="ClearRecentOpen()"
-                    Content="{markup:Translate [CleanRecentFilesRecords]}" />
             </StackPanel>
         </GroupBox>
     </StackPanel>

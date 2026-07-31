@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.ViewMo
 [RegisterSingleton<IFumenBulletPalleteListViewer>]
 public class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, IFumenBulletPalleteListViewer
 {
-    public FumenBulletPalleteListViewerViewModel() : base(Lang.FumenBulletPalleteListViewer.ToLocalizedStringByRawText())
+    public FumenBulletPalleteListViewerViewModel() : base(Lang.B.FumenBulletPalleteListViewer.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Bottom;
     }

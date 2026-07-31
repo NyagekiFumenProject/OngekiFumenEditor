@@ -11,6 +11,6 @@ public class ViewFumenConverterCommandDefinition : CommandDefinition
 {
     public const string CommandName = "View.FumenConverter";
     public override string Name => CommandName;
-    public override LocalizedString Text { get; } = Lang.FumenConverter.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.FumenConverter.ToLocalizedString();
     public override LocalizedString ToolTip => Text;
 }

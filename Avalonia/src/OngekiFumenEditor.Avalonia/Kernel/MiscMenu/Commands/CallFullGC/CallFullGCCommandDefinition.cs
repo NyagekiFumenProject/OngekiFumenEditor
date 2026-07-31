@@ -13,7 +13,7 @@ public class CallFullGCCommandDefinition : CommandDefinition
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = Lang.CommandCallFullGC.ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.CommandCallFullGC.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
 }

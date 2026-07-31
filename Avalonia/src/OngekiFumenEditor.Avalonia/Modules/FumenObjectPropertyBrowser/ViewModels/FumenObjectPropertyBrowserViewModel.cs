@@ -100,7 +100,8 @@ public class FumenObjectPropertyBrowserViewModel : ToolViewModelBase, IFumenObje
     private void UpdateDisplayName()
     {
         var singleObj = selectedObjects.Count == 1 ? selectedObjects.First() : null;
-        Title = (Lang.ObjectProperty + (singleObj is null ? string.Empty : $" - {((OngekiObjectBase)singleObj).Name}")).ToLocalizedStringByRawText();
+        Title = LocalizedString.CreateFromTemplateFunc(() =>
+            Lang.ObjectProperty + (singleObj is null ? string.Empty : $" - {((OngekiObjectBase)singleObj).Name}"));
     }
 
     public void RefreshSelected(IEnumerable<ISelectableObject> objects, FumenVisualEditorViewModel referenceEditor)
