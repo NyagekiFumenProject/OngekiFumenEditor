@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
@@ -73,7 +73,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 
 			//这里限制一下
 			//movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
-			movePoint.Y = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y));
+			movePoint = new Point(movePoint.X, Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y)));
 
 			//Log.LogDebug($"OnObjectDragMoving: ({pos.X:F2},{pos.Y:F2}) -> ({movePoint.X:F2},{movePoint.Y:F2})");
 

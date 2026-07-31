@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
@@ -187,7 +187,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             var offset = (Point)(targetPoint - fixedCenterPos);
 
             if (pasteOption == PasteOption.XGridZeroMirror)
-                offset.X = 0;
+                offset = new Point(0, offset.Y);
 
             var redo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
             var undo = new System.Action(() => targetEditor.TryCancelAllObjectSelecting());
@@ -205,7 +205,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 void updateY(object obj, double y, TGrid tGrid)
                 {
                     var pos = posMap.TryGetValue(obj, out var p) ? p : default;
-                    pos.pos.Y = y;
+                    pos.pos = new Point(pos.pos.X, y);
                     pos.tGrid = tGrid;
                     posMap[obj] = pos;
                 }
@@ -213,7 +213,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 void updateX(object obj, double x, XGrid xGrid)
                 {
                     var pos = posMap.TryGetValue(obj, out var p) ? p : default;
-                    pos.pos.X = x;
+                    pos.pos = new Point(x, pos.pos.Y);
                     pos.xGrid = xGrid;
                     posMap[obj] = pos;
                 }
@@ -565,7 +565,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
             undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
 
-            targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.CopyAndPaste, redo, undo));
+            targetEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.CopyAndPaste.ToLocalizedString(), redo, undo));
         }
 
         private double? CalculateYMirror(IEnumerable<OngekiObjectBase> objects, PasteOption mirrorOption)

@@ -106,7 +106,8 @@ namespace OngekiFumenEditor.Avalonia.Kernel.CommandExecutor
                 }
                 else
                 {
-                    //鍙兘閫氳繃璋遍潰鏉ヨ绠?                    var maxTGrid = fumen.GetAllDisplayableObjects().OfType<ITimelineObject>().Max(x => x.TGrid);
+                    //只能通过谱面来计算
+                    var maxTGrid = fumen.GetAllDisplayableObjects().OfType<ITimelineObject>().Max(x => x.TGrid);
                     maxTGrid += new GridOffset(5, 0);
                     var duration = TGridCalculator.ConvertTGridToAudioTime(maxTGrid, fumen.BpmList);
                     opt.Duration = duration;

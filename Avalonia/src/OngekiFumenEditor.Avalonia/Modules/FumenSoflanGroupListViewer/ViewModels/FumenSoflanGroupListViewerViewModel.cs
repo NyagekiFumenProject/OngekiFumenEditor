@@ -11,7 +11,7 @@ public class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IFumenSofl
 {
     public FumenSoflanGroupListViewerViewModel() : base("Soflan Groups".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Bottom;
+        Dock = global::Dock.Model.Core.DockMode.Bottom;
     }
 
     public SoflanGroupWrapItem CurrentSelectedSoflanGroupWrapItem => null;

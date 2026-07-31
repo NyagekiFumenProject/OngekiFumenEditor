@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 			set
 			{
 				bpm = value;
-				OnPropertyChanged(() => BPM);
+				OnPropertyChanged(nameof(BPM));
 			}
 		}
 

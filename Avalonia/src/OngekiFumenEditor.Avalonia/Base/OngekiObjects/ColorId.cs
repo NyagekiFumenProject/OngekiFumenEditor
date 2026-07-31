@@ -1,5 +1,5 @@
-using Avalonia.Media;
 using System.Numerics;
+using Avalonia.Media;
 
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 

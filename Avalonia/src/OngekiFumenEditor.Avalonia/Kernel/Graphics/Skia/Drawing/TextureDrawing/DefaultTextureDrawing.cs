@@ -1,16 +1,10 @@
-using OngekiFumenEditor.Avalonia.Kernel.Graphics.OpenGL;
-using OngekiFumenEditor.Avalonia.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Base;
-using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Avalonia.Utils;
-using OpenTK.Graphics.OpenGL;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using Injectio.Attributes;
 using System.Numerics;
 using Vector2 = System.Numerics.Vector2;
-using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.TextureDrawing
 {

@@ -1,7 +1,7 @@
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Utils;
-using OpenTK.Mathematics;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.DefaultImpl.Enumerator;
 

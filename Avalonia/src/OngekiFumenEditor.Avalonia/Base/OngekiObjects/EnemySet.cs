@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 			set
 			{
 				tagTblValue = value;
-				OnPropertyChanged(() => TagTblValue);
+				OnPropertyChanged(nameof(TagTblValue));
 			}
 		}
 

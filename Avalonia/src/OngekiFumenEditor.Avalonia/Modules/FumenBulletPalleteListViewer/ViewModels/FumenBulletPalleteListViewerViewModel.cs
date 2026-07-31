@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework.Languages;
+using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
@@ -11,7 +11,7 @@ public class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, IFumenBu
 {
     public FumenBulletPalleteListViewerViewModel() : base(Lang.FumenBulletPalleteListViewer.ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Bottom;
+        Dock = global::Dock.Model.Core.DockMode.Bottom;
     }
 }
 

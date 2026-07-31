@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
                 set
                 {
                     RefIndividualSoflanArea.SoflanGroup = value;
-                    OnPropertyChanged(() => SoflanGroup);
+                    OnPropertyChanged(nameof(SoflanGroup));
                 }
             }
 

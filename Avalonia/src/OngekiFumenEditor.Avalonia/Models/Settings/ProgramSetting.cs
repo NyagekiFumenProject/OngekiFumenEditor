@@ -25,15 +25,6 @@ public partial class ProgramSetting : SettingModelBase<ProgramSetting>
     public partial bool UpgradeProcessPriority { get; set; } = false;
 
     [ObservableProperty]
-    public partial bool GraphicsCompatability { get; set; } = false;
-
-    [ObservableProperty]
-    public partial bool OutputGraphicsLog { get; set; } = false;
-
-    [ObservableProperty]
-    public partial bool GraphicsLogSynchronous { get; set; } = true;
-
-    [ObservableProperty]
     public partial bool DisableShowSplashScreenAfterBoot { get; set; } = false;
 
     [ObservableProperty]
@@ -56,12 +47,6 @@ public partial class ProgramSetting : SettingModelBase<ProgramSetting>
 
     [ObservableProperty]
     public partial bool DisableStringRendererAntialiasing { get; set; } = false;
-
-    [ObservableProperty]
-    public partial string DefaultRenderManagerImplementName { get; set; } = "OpenGL";
-
-    [ObservableProperty]
-    public partial string SkiaRenderBackend { get; set; } = "CPU";
 
     [ObservableProperty]
     public partial bool __NeedUpgradeSetting { get; set; } = true;

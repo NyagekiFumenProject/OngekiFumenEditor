@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 				if (((obj as HoldEnd)?.RefHold)?.ReferenceLaneStart is LaneStartBase start)
 				{
 					var x = CalculateConnectableObjectCurrentRelativeX(start, tGrid, editor) ?? relativePoint.X;
-					relativePoint.X = x;
+					relativePoint = new Point(x, relativePoint.Y);
 					//Log.LogDebug($"auto lock to lane x: {x}");
 				}
 			}

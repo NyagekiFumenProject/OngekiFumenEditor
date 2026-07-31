@@ -1,3 +1,5 @@
+using Avalonia.Media;
+
 namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 {
 	public static class ColorIdConst

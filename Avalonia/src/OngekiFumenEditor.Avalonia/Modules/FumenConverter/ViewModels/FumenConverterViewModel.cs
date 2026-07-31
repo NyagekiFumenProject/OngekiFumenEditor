@@ -10,6 +10,6 @@ public class FumenConverterViewModel : ToolViewModelBase, IFumenConverterWindow
 {
     public FumenConverterViewModel() : base("Fumen Converter".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Bottom;
+        Dock = global::Dock.Model.Core.DockMode.Bottom;
     }
 }

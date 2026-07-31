@@ -146,7 +146,7 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
         protected void NotifyItemSourceChanged()
         {
             cachedDisplayableItemSource = default;
-            OnPropertyChanged(new(nameof(DisplayableItemSource)));
+            OnPropertyChanged(nameof(DisplayableItemSource));
             Parent?.NotifyItemSourceChanged();
         }
 

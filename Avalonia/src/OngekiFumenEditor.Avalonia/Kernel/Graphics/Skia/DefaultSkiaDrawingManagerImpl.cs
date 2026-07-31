@@ -13,7 +13,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 {
     private readonly TaskCompletionSource initTaskSource = new();
-    private readonly Dictionary<Control, IRenderContext> cachedRenderControlMap = [];
 
     public string Name { get; } = "Skia";
 
@@ -33,10 +32,10 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     {
         CircleDrawing = new DefaultSkiaCircleDrawing(this);
         LineDrawing = new DefaultSkiaLineDrawing(this);
-        SimpleLineDrawing = new NoopSimpleLineDrawing();
-        StaticVBODrawing = new NoopStaticVBODrawing();
+        SimpleLineDrawing = new DefaultSkiaLineDrawing(this);
+        StaticVBODrawing = (IStaticVBODrawing)SimpleLineDrawing;
         StringDrawing = new DefaultSkiaStringDrawing(this);
-        SvgDrawing = new NoopSvgDrawing();
+        SvgDrawing = new UnsupportedSkiaSvgDrawing();
         TextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
         BatchTextureDrawing = (IBatchTextureDrawing)TextureDrawing;
         HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
@@ -51,15 +50,19 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 
     public Task InitializeRenderControl(Control renderControl, CancellationToken cancellation = default)
     {
+        if (renderControl is not AvaloniaSkiaRenderControl)
+            throw new ArgumentException("The render control must be an Avalonia Skia render control.", nameof(renderControl));
+
         initTaskSource.TrySetResult();
         return Task.CompletedTask;
     }
 
     public Task<IRenderContext> GetRenderContext(Control renderControl, CancellationToken cancellation = default)
     {
-        if (!cachedRenderControlMap.TryGetValue(renderControl, out var renderContext))
-            renderContext = cachedRenderControlMap[renderControl] = new DefaultSkiaRenderContext();
-        return Task.FromResult(renderContext);
+        if (renderControl is not AvaloniaSkiaRenderControl skiaRenderControl)
+            throw new ArgumentException("The render control must be an Avalonia Skia render control.", nameof(renderControl));
+
+        return Task.FromResult<IRenderContext>(skiaRenderControl.RenderContext);
     }
 
     public IImage LoadImageFromStream(Stream stream)
@@ -70,6 +73,17 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 
     public Control CreateRenderControl()
     {
-        return new Panel();
+        return new AvaloniaSkiaRenderControl();
+    }
+
+    private sealed class UnsupportedSkiaSvgDrawing : CommonDrawingBase, ISvgDrawing
+    {
+        public void Draw(
+            IDrawingContext target,
+            OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg.SvgPrefabBase svg,
+            System.Numerics.Vector2 position)
+        {
+            throw new NotSupportedException("Direct SVG drawing is not supported by the Avalonia.Skia renderer.");
+        }
     }
 }

@@ -1,5 +1,4 @@
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics;
 
@@ -18,7 +17,9 @@ internal class DefaultRenderManager : IRenderManager
 
     public IEnumerable<string> GetAvaliableRenderManagerImplNames()
     {
-        return implments.Select(x => x.Name);
+        return implments
+            .Where(x => x.Name.Equals("Skia", StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.Name);
     }
 
     public IRenderManagerImpl GetCurrentRenderManagerImpl()
@@ -26,16 +27,17 @@ internal class DefaultRenderManager : IRenderManager
         if (currentImpl is not null)
             return currentImpl;
 
-        var defaultName = Properties.ProgramSetting.Default.DefaultRenderManagerImplementName;
-        if (implments.FirstOrDefault(x => x.Name.Equals(defaultName, StringComparison.InvariantCultureIgnoreCase)) is IRenderManagerImpl impl)
+        if (implments.FirstOrDefault(x => x.Name.Equals("Skia", StringComparison.OrdinalIgnoreCase)) is IRenderManagerImpl impl)
             return currentImpl = impl;
 
-        return currentImpl = implments.FirstOrDefault();
+        throw new InvalidOperationException("The Avalonia.Skia render manager is not registered.");
     }
 
     public void SetRenderManagerImpl(string implName)
     {
-        Properties.ProgramSetting.Default.DefaultRenderManagerImplementName = implName;
-        Properties.ProgramSetting.Default.Save();
+        if (!string.Equals(implName, "Skia", StringComparison.OrdinalIgnoreCase))
+            throw new NotSupportedException($"Only the Skia render manager is supported: {implName}");
+
+        currentImpl = GetCurrentRenderManagerImpl();
     }
 }

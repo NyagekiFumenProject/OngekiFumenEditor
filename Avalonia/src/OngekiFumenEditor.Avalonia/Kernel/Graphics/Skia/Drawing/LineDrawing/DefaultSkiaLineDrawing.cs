@@ -161,19 +161,37 @@ internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISi
         target.PerfomenceMonitor.CountDrawCall(this);
     }
 
-    private sealed class NoopVboHandle : IStaticVBODrawing.IVBOHandle
+    private sealed class SkiaLineVboHandle : IStaticVBODrawing.IVBOHandle
     {
+        public LineVertex[] Points { get; private set; }
+
+        public float LineWidth { get; }
+
+        public SkiaLineVboHandle(IEnumerable<LineVertex> points, float lineWidth)
+        {
+            Points = points.ToArray();
+            LineWidth = lineWidth;
+        }
+
         public void Dispose()
         {
+            Points = null;
         }
     }
 
     public IStaticVBODrawing.IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> points, float lineWidth)
     {
-        return new NoopVboHandle();
+        ArgumentNullException.ThrowIfNull(points);
+        return new SkiaLineVboHandle(points, lineWidth);
     }
 
     public void DrawVBO(IDrawingContext target, IStaticVBODrawing.IVBOHandle vbo)
     {
+        if (vbo is not SkiaLineVboHandle handle)
+            throw new ArgumentException("The VBO handle was not created by the Skia line drawing implementation.", nameof(vbo));
+        if (handle.Points is null)
+            throw new ObjectDisposedException(nameof(vbo));
+
+        Draw(target, handle.Points, handle.LineWidth);
     }
 }

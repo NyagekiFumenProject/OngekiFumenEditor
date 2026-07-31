@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 			set
 			{
 				bunShi = value;
-				OnPropertyChanged(() => BunShi);
+				OnPropertyChanged(nameof(BunShi));
 			}
 		}
 

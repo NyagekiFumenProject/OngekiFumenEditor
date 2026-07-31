@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 			set
 			{
 				direction = value;
-				OnPropertyChanged(() => Direction);
+				OnPropertyChanged(nameof(Direction));
 			}
 		}
 

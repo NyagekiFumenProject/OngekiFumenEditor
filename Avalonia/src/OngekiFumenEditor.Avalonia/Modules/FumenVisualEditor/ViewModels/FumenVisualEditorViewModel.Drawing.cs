@@ -1,4 +1,5 @@
-﻿using Gekimini.Avalonia.Framework;
+using Gekimini.Avalonia.Framework;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base;
@@ -204,11 +205,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     public void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl renderImpl)
     {
-        var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-        var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
-
-        ViewWidth = (float)renderControl.ActualWidth;
-        ViewHeight = (float)renderControl.ActualHeight;
+        ViewWidth = (float)renderControl.Bounds.Width;
+        ViewHeight = (float)renderControl.Bounds.Height;
 
         playFieldBackgroundColor = Color.FromArgb(EditorGlobalSetting.Default.PlayFieldBackgroundColor).ToVector4();
         enablePlayFieldDrawing = EditorGlobalSetting.Default.EnablePlayFieldDrawing;
@@ -695,9 +693,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         }
     }
 
-    protected override void OnViewLoaded(object v)
+    public override void OnViewAfterLoaded(IView view)
     {
-        base.OnViewLoaded(v);
+        base.OnViewAfterLoaded(view);
         InitExtraMenuItems();
     }
 
@@ -930,11 +928,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        var renderControl = sender as FrameworkElement;
-        Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
-
-        var dpiX = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleX;
-        var dpiY = VisualTreeHelper.GetDpi(Application.Current.MainWindow).DpiScaleY;
+        Log.LogDebug($"renderControl new size: {e.NewSize}");
 
         ViewWidth = (float)e.NewSize.Width;
         ViewHeight = (float)e.NewSize.Height;

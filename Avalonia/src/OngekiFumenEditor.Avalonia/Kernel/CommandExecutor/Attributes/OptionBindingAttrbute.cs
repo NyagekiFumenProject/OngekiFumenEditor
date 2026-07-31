@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Reflection;
 
@@ -44,11 +44,11 @@ public class LocalizableOptionBindingAttribute<T> : OptionBindingAttrbute<T>
 
     private static string GetResourceText(string resourceKey)
     {
-        var field = typeof(Resources).GetField(resourceKey, BindingFlags.Public | BindingFlags.Static);
+        var field = typeof(Lang).GetField(resourceKey, BindingFlags.Public | BindingFlags.Static);
         if (field is not null)
             return field.GetValue(null)?.ToString() ?? resourceKey;
 
-        var prop = typeof(Resources).GetProperty(resourceKey, BindingFlags.Public | BindingFlags.Static);
+        var prop = typeof(Lang).GetProperty(resourceKey, BindingFlags.Public | BindingFlags.Static);
         return prop?.GetValue(null)?.ToString() ?? resourceKey;
     }
 }

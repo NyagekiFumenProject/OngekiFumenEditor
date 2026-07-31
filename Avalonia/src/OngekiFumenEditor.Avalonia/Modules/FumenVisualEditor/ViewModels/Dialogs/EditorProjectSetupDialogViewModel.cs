@@ -1,4 +1,6 @@
-﻿using Microsoft.Win32;
+using Gekimini.Avalonia.Framework.Dialogs;
+using Gekimini.Avalonia.Modules.Window.ViewModels;
+using Gekimini.Avalonia.Utils.MethodExtensions;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
@@ -6,11 +8,10 @@ using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using System;
 using System.IO;
-using Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs
 {
-	public class EditorProjectSetupDialogViewModel : Screen
+	public class EditorProjectSetupDialogViewModel : WindowViewModelBase
 	{
 		private EditorProjectDataModel editorProjectData = new();
 		public EditorProjectDataModel EditorProjectData
@@ -19,40 +20,41 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 			set => SetProperty(ref editorProjectData, value);
 		}
 
+		private void ShowMessage(string content)
+		{
+			_ = IoC.Get<IDialogManager>().ShowMessageDialog(content);
+		}
+
 		public async void OnSelectAudioFilePathButtonClicked()
 		{
-			var dialog = new OpenFileDialog();
-			dialog.Multiselect = false;
-			dialog.Filter = FileDialogHelper.GetSupportAudioFileExtensionFilter();
-			if (dialog.ShowDialog() == true)
-			{
-				EditorProjectData.AudioFilePath = dialog.FileName;
-				using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(EditorProjectData.AudioFilePath);
-				var durationMs = audio.Duration;
-				EditorProjectData.AudioDuration = durationMs;
-			}
+			var filePath = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportAudioFileExtensionFilterList());
+			if (string.IsNullOrWhiteSpace(filePath))
+				return;
+
+			EditorProjectData.AudioFilePath = filePath;
+			using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(EditorProjectData.AudioFilePath);
+			var durationMs = audio.Duration;
+			EditorProjectData.AudioDuration = durationMs;
 		}
 
 		public async void OnSelectFumenFilePathButtonClicked()
 		{
-			var dialog = new OpenFileDialog();
-			dialog.Multiselect = false;
-			dialog.Filter = FileDialogHelper.GetSupportFumenFileExtensionFilter();
-			if (dialog.ShowDialog() == true)
-			{
-				try
-				{
-					using var fs = File.OpenRead(dialog.FileName);
-					var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(dialog.FileName).DeserializeAsync(fs);
+			var filePath = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportFumenFileExtensionFilterList());
+			if (string.IsNullOrWhiteSpace(filePath))
+				return;
 
-					EditorProjectData.FumenFilePath = dialog.FileName;
-					EditorProjectData.BaseBPM = fumen.MetaInfo.BpmDefinition.First;
-					EditorProjectData.Fumen = fumen;
-				}
-				catch (Exception e)
-				{
-					MessageBox.Show($"{Lang.CantLoadFumen}{e.Message}");
-				}
+			try
+			{
+				using var fs = File.OpenRead(filePath);
+				var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(filePath).DeserializeAsync(fs);
+
+				EditorProjectData.FumenFilePath = filePath;
+				EditorProjectData.BaseBPM = fumen.MetaInfo.BpmDefinition.First;
+				EditorProjectData.Fumen = fumen;
+			}
+			catch (Exception e)
+			{
+				ShowMessage($"{Lang.CantLoadFumen}{e.Message}");
 			}
 		}
 
@@ -60,7 +62,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		{
 			if (string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath))
 			{
-				MessageBox.Show(Lang.AudioFileNotFound);
+				ShowMessage(Lang.AudioFileNotFound.ToLocalizedString().Text);
 				return;
 			}
 
@@ -68,7 +70,3 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		}
 	}
 }
-
-
-
-

@@ -21,14 +21,25 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing
 
             target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
+            var renderContext = (DefaultSkiaRenderContext)target.RenderContext;
+            canvas = renderContext.Canvas;
             canvas.Save();
 
-            var mvp = (GetOverrideModelMatrix() * GetOverrideViewMatrixOrDefault(target.CurrentDrawingTargetContext)).ToSkiaMatrix44();
+            using var mvp = (GetOverrideModelMatrix() * GetOverrideViewMatrixOrDefault(target.CurrentDrawingTargetContext)).ToSkiaMatrix44();
+            using var flip = SKMatrix44.CreateScale(1, -1, 1);
+            using var translation = SKMatrix44.CreateTranslation(
+                target.CurrentDrawingTargetContext.ViewWidth / 2,
+                target.CurrentDrawingTargetContext.ViewHeight / 2,
+                0);
+            using var mvpWithFlip = mvp * flip;
+            using var adjustMVP = mvpWithFlip * translation;
 
-            var adjustMVP = mvp * SKMatrix44.CreateScale(1, -1, 1) * SKMatrix44.CreateTranslation(target.CurrentDrawingTargetContext.ViewWidth / 2, target.CurrentDrawingTargetContext.ViewHeight / 2, 0);
-
-            canvas.SetMatrix(adjustMVP);
+            // The leased canvas already contains Avalonia's visual offset, clip and
+            // DPI transform. Compose the editor matrix on top of that state instead
+            // of replacing it with SetMatrix, which would move the control to the
+            // surface origin and apply DPI twice.
+            var adjustMatrix = adjustMVP.Matrix;
+            canvas.Concat(ref adjustMatrix);
         }
 
 

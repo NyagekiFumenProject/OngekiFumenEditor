@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework.Languages;
+using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
@@ -31,7 +31,7 @@ public class FumenObjectPropertyBrowserViewModel : ToolViewModelBase, IFumenObje
 
     public FumenObjectPropertyBrowserViewModel() : base("Object Properties".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Right;
+        Dock = global::Dock.Model.Core.DockMode.Right;
 
         UpdateDisplayName();
         supportTypes = IoC.GetAll<ITypeUIGenerator>().SelectMany(x => x.SupportTypes).ToHashSet();

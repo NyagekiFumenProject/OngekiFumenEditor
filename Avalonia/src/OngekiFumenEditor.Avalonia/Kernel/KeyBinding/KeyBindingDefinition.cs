@@ -1,4 +1,4 @@
-﻿using Avalonia.Input;
+using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using System.Text.RegularExpressions;
@@ -32,7 +32,6 @@ public partial class KeyBindingDefinition : ObservableObject
         Layer = layer;
     }
 
-    [ObservableProperty]
     private Key? key;
 
     public Key Key
@@ -41,7 +40,6 @@ public partial class KeyBindingDefinition : ObservableObject
         set => SetProperty(ref key, value);
     }
 
-    [ObservableProperty]
     private KeyModifiers? modifiers;
 
     public KeyModifiers Modifiers

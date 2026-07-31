@@ -107,10 +107,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
 
     public void ScrollTo(OngekiTimelineObjectBase ongekiObject)
     {
-    }
-
-    public void ScrollTo(TGrid tGrid)
-    {
+        ScrollTo((ITimelineObject)ongekiObject);
     }
 
     public void NotifyObjectClicked(OngekiTimelineObjectBase ongekiObject)

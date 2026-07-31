@@ -32,10 +32,10 @@ namespace OngekiFumenEditor.Avalonia.Base
 			set
 			{
 				SetProperty(ref isLimitInt, value);
-				OnPropertyChanged(() => MinValue);
-				OnPropertyChanged(() => MaxValue);
-				OnPropertyChanged(() => CurrentValue);
-				OnPropertyChanged(() => ValuePercent);
+				OnPropertyChanged(nameof(MinValue));
+				OnPropertyChanged(nameof(MaxValue));
+				OnPropertyChanged(nameof(CurrentValue));
+				OnPropertyChanged(nameof(ValuePercent));
 			}
 		}
 

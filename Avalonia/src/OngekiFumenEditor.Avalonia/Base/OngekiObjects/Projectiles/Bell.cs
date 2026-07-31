@@ -31,13 +31,13 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
                 this.RegisterOrUnregisterPropertyChangeEvent(referenceBulletPallete, value, ReferenceBulletPallete_PropertyChanged);
                 SetProperty(ref referenceBulletPallete, value);
 
-                OnPropertyChanged(() => Speed);
-                OnPropertyChanged(() => PlaceOffset);
-                OnPropertyChanged(() => TargetValue);
-                OnPropertyChanged(() => ShooterValue);
-                OnPropertyChanged(() => RandomOffsetRange);
-                OnPropertyChanged(() => SizeValue);
-                OnPropertyChanged(() => IsEnableSoflan);
+                OnPropertyChanged(nameof(Speed));
+                OnPropertyChanged(nameof(PlaceOffset));
+                OnPropertyChanged(nameof(TargetValue));
+                OnPropertyChanged(nameof(ShooterValue));
+                OnPropertyChanged(nameof(RandomOffsetRange));
+                OnPropertyChanged(nameof(SizeValue));
+                OnPropertyChanged(nameof(IsEnableSoflan));
             }
         }
 

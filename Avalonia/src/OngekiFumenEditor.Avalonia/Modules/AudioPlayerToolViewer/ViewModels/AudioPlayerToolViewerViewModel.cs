@@ -12,7 +12,7 @@ public class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioPlayerToo
 {
     public AudioPlayerToolViewerViewModel() : base("Audio Player".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Bottom;
+        Dock = global::Dock.Model.Core.DockMode.Bottom;
     }
 
     public IAudioPlayer AudioPlayer => null;

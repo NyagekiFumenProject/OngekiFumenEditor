@@ -10,6 +10,6 @@ public class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, IFumenTi
 {
     public FumenTimeSignatureListViewerViewModel() : base("Time Signatures".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Bottom;
+        Dock = global::Dock.Model.Core.DockMode.Bottom;
     }
 }

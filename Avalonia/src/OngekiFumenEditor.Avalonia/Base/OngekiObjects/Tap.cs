@@ -16,8 +16,8 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             set
             {
                 isCritical = value;
-                OnPropertyChanged(() => IDShortName);
-                OnPropertyChanged(() => IsCritical);
+                OnPropertyChanged(nameof(IDShortName));
+                OnPropertyChanged(nameof(IsCritical));
             }
         }
 

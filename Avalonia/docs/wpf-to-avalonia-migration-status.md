@@ -3,10 +3,10 @@
 - **检查日期**：2026-07-31
 - **文档更新日期**：2026-07-31
 - **检查基线提交**：`32909b6b`（分支 `avalonia`）
-- **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -m:1 -v:minimal`
-- **构建结果**：失败，`8` 个错误、`20` 个警告（整套解决方案当前复验）
+- **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal`
+- **构建结果**：失败，`5` 个错误、`45` 个警告（整套解决方案完整重建）
 - **检查范围**：当前工作区中的旧 WPF 项目、Avalonia 解决方案、应用源码、XAML、构建结果和测试资产
-- **检查性质**：在只读审查基础上进行了定向迁移清理，移除了两个暂不纳入 Avalonia 的模块引用
+- **检查性质**：在只读审查基础上进行了定向迁移清理，移除了两个暂不纳入 Avalonia 的模块引用，并将渲染路径固定为 Avalonia.Skia
 
 > 本报告刻意区分“源码已搬运”与“能构建、能启动、功能等价”。文件层面的高覆盖率不代表功能完成度；当前工作树包含大量未提交或未跟踪的迁移文件，此快照尚不能由分支稳定复现。
 
@@ -23,9 +23,9 @@
 | 项目与应用外壳 | 部分完成 | 已建立 Core、Desktop、Browser 项目，以及 Gekimini Shell 和 DI 启动结构 |
 | C# 文件搬运 | 较高 | 旧项目 969 个 C# 文件中有 888 个同路径对应，覆盖率约 91.6% |
 | XAML 文件搬运 | 较高 | 旧项目 65 个 WPF XAML 中有 58 个对应 AXAML，覆盖率约 89.2% |
-| Debug 构建 | 阻断 | 全解决方案构建失败，当前 8 个错误、20 个警告（此前快照为 83/53） |
+| Debug 构建 | 阻断 | 全解决方案构建失败，当前 5 个错误、45 个警告（此前快照为 83/53；增量构建会少报依赖项目警告） |
 | Avalonia XAML | 阻断 | 存在旧 CLR namespace、WPF Trigger、Storyboard 和 pack URI；绝大多数视图未加载 XAML |
-| 谱面渲染 | 不可用 | RenderControl、OpenGL 和部分 Skia 绘制仍为 `Panel`、`Noop*` 或空方法 |
+| 谱面渲染 | 已接入、待运行验证 | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译 |
 | 音频 | 不可用 | NAudio 后端被排除编译，保留实现明确标记为未迁移 |
 | 功能模块 | 不完整 | 3 个完整模块尚未迁移，另有少量模块文件缺失 |
 | 自动化验证 | 未开始 | 应用源码中没有测试项目或测试文件 |
@@ -47,40 +47,36 @@
 ### 构建命令
 
 ```powershell
-dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -m:1 -v:minimal
+dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal
 ```
 
-当前复验结果：构建失败，共 8 个错误和 20 个警告。依赖项目已完成编译，错误仍发生在核心 `OngekiFumenEditor.Avalonia` 项目，因此 Desktop 和 Browser 入口尚未进入有效验收阶段。
+当前完整重建结果：构建失败，共 5 个错误和 45 个警告。依赖项目可以完成编译，错误仍发生在核心 `OngekiFumenEditor.Avalonia` 项目，因此 Desktop 和 Browser 入口尚未进入有效验收阶段；仅重跑增量构建时，已编译依赖项目的警告不会重复输出。
 
 此前只读审查快照记录的是 83 个错误和 53 个警告；本次清理后，`EditorScriptExecutor` 和 `OptionGeneratorTools` 相关错误已不再出现。
 
-历史文件 [`migration_gap_report.txt`](../../migration_gap_report.txt) 在 2026-03-15 记录了 126 个错误。此前审查快照已降至 83 个错误，本次定向清理后当前为 8 个错误，但构建门槛仍未通过。
+历史文件 [`migration_gap_report.txt`](../../migration_gap_report.txt) 在 2026-03-15 记录了 126 个错误。此前审查快照已降至 83 个错误，本次定向清理及渲染后端收敛后当前为 5 个错误，但构建门槛仍未通过。
 
 ## 当前编译阻塞
 
-当前 8 个唯一错误的主要构成如下：
+当前 5 个唯一错误的主要构成如下：
 
 | 根因 | 数量 | 说明 |
 | --- | ---: | --- |
-| Skia D3D 类型缺失 | 3 | `GRD3DBackendContext`、`GRD3DTextureResourceInfo` 等 API 与实际依赖图不匹配 |
 | 源生成属性重复 | 2 | `KeyBindingDefinition` 同时声明 `[ObservableProperty]` 字段和同名显式属性 |
 | `Screen` 类型缺失 | 1 | `EditorProjectSetupDialogViewModel` 仍使用未映射的屏幕类型 |
 | 重复 `ScrollTo` | 1 | `FumenVisualEditorViewModel` 的分部类中存在相同签名 |
 | 无效 `OnViewLoaded` override | 1 | 当前基类没有可重写的同名生命周期方法 |
 
-此前审查中的 `ActionExecutionContext`、`ToolboxItem` 和两个暂不纳入模块引用错误，本次构建输出中均已不再出现。
+此前审查中的 Skia D3D、`ActionExecutionContext`、`ToolboxItem` 和两个暂不纳入模块引用错误，本次构建输出中均已不再出现。Skia D3D 错误是通过明确取消该 backend 的编译支持消除的，不代表相关 Vortice 代码已迁移。
 
 重点文件：
 
 - [`KeyBindingDefinition.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/KeyBinding/KeyBindingDefinition.cs)
-- [`GRVorticeD3DBackendContext.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/D3dContexts/GRVorticeD3DBackendContext.cs)
-- [`GRVorticeD3DTextureResourceInfo.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/D3dContexts/GRVorticeD3DTextureResourceInfo.cs)
-- [`VorticeDirect3DContext.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/D3dContexts/VorticeDirect3DContext.cs)
 - [`EditorProjectSetupDialogViewModel.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/Dialogs/EditorProjectSetupDialogViewModel.cs)
 - [`FumenVisualEditorViewModel.Drawing.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs)
 - [`FumenVisualEditorViewModel.ScrollViewer.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ScrollViewer.cs)
 
-历史审查中的 `ActionExecutionContext` 风险仍记录在迁移背景中，但不计入本次 8 个编译错误。若后续重新启用相关未编译文件，不应通过复制 WPF/Caliburn 内部模型来恢复；应按实际交互迁移为 Avalonia 的 `PointerEventArgs`、`PointerPressedEventArgs`、命令参数、显式 `KeyBinding` 或视图事件适配层。
+历史审查中的 `ActionExecutionContext` 风险仍记录在迁移背景中，但不计入本次 5 个编译错误。若后续重新启用相关未编译文件，不应通过复制 WPF/Caliburn 内部模型来恢复；应按实际交互迁移为 Avalonia 的 `PointerEventArgs`、`PointerPressedEventArgs`、命令参数、显式 `KeyBinding` 或视图事件适配层。
 
 ## XAML、资源和绑定
 
@@ -170,27 +166,29 @@ AXAML 中约有 503 个普通 `{Binding ...}`，但只有 4 处 `x:DataType`，�
 
 ## 渲染状态
 
-渲染是当前最重要的架构阻塞之一。
+渲染后端已按产品决策收敛为单一路径：Avalonia 负责控件和渲染表面，编辑器在 Avalonia 提供的 Skia lease 生命周期内使用 `SkiaSharp.SKCanvas` 绘制。
 
 ### Skia
 
-[`DefaultSkiaDrawingManagerImpl.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/DefaultSkiaDrawingManagerImpl.cs) 当前：
+[`DefaultSkiaDrawingManagerImpl.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/DefaultSkiaDrawingManagerImpl.cs) 与 [`AvaloniaSkiaRenderControl.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/AvaloniaSkiaRenderControl.cs) 当前：
 
-- `CreateRenderControl()` 返回普通 `Panel`；
-- `SimpleLineDrawing`、`StaticVBODrawing` 和 `SvgDrawing` 使用 `Noop*`；
-- Beam 和 Circle 绘制类保留空方法；
-- RenderContext 的 `BeforeRender`、`AfterRender` 和 `CleanRender` 为空；
-- 渲染循环运行于 `Task.Run`，尚未与 Avalonia 渲染线程或 compositor 生命周期形成明确契约。
+- `CreateRenderControl()` 返回专用 `Control`，通过 `DrawingContext.Custom(ICustomDrawOperation)` 接入 Avalonia 渲染树；
+- `ICustomDrawOperation.Render(ImmediateDrawingContext)` 使用 `TryGetFeature(typeof(ISkiaSharpApiLeaseFeature))` 获取 `ISkiaSharpApiLeaseFeature`，调用 `Lease()` 后只在 lease 有效期间访问 `lease.SkCanvas`；
+- 帧循环不再使用 `Task.Run`，由 `InvalidateVisual()` 驱动 Avalonia 渲染调度，帧间隔使用 `Stopwatch` 计算；
+- `BeforeRender`/`AfterRender` 对画布执行 `Save`/`Restore`，`CleanRender` 使用 Skia 清屏；
+- Circle、Beam、Line、Texture、Highlight、Polygon、String 及 CPU-side 缓存形式的静态线条句柄均通过该画布路径绘制（不是独立 CPU Skia backend）；
+- 独立的 `ISvgDrawing` 已明确抛出“不支持”；当前 SVG 编辑器绘制目标实际使用缓存线条与纹理路径，后续仍需单独验收 SVG 显示一致性；
+- custom draw operation 边界按 `RenderScaling` 转换为物理像素；编辑器布局与输入继续使用 Avalonia 逻辑像素，绘制时保留 lease 画布已有的控件偏移、裁剪和 DPI 变换，再叠加编辑器投影矩阵，避免高 DPI 下重复缩放或控件位置丢失；
+- 该实现参考了 [`ReOsuStoryboardPlayer.Avalonia` 的 Skia lease 示例](https://github.com/MikiraSora/ReOsuStoryboardPlayer.Avalonia/blob/master/ReOsuStoryboardPlayer.Avalonia/UI/Controls/StoryboardPlayer.axaml.cs#L379-L421)。
 
-### OpenGL
+### 不支持的 backend
 
-[`DefaultOpenGLRenderManagerImpl.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/OpenGL/DefaultOpenGLRenderManagerImpl.cs) 的全部绘制接口均使用 `Noop*`，`CreateRenderControl()` 同样返回普通 `Panel`。
+- `Kernel/Graphics/OpenGL`、Skia D3D/GL context、旧 Skia RenderControls、CPU/OpenGL/DirectX backend 枚举均通过主项目 `Compile Remove` 排除；
+- 主项目不再引用 Vortice Direct3D/DXGI 包，程序设置页也不再暴露 render manager 或 Skia backend 选择；
+- 旧 backend 源码保留在工作区以保留迁移历史和注释，但不属于当前 Avalonia 构建产物，也不应作为运行时 fallback；
+- 当前核心项目的依赖图为 `Avalonia.Skia 11.3.10` + `SkiaSharp 2.88.9`。Gekimini 依赖项目仍解析到 `SkiaSharp 2.88.3` 并产生独立漏洞警告，后续需要单独统一依赖版本。
 
-### 被排除的旧后端
-
-主项目通过 `Compile Remove` 排除了旧 Skia RenderControls。当前工作区中这些文件仍包含 WPF `FrameworkElement`、Win32 和 DirectX 假设，不能直接重新纳入编译。
-
-迁移时应优先确定一个可工作的 Avalonia 渲染路径，例如基于 `Control.Render`、`DrawingContext.Custom`、`ICustomDrawOperation` 或 Avalonia/Skia lease 的实现。完成一条路径并验证画面后，再决定是否保留多后端抽象。
+当前仍缺少桌面启动后的人工渲染冒烟验证；由于核心项目尚有 5 个非渲染编译错误，暂不能把画面显示标记为已验收。
 
 ## 音频状态
 
@@ -210,25 +208,29 @@ AXAML 中约有 503 个普通 `{Binding ...}`，但只有 4 处 `x:DataType`，�
 
 ## 显式排除的源码
 
-[`OngekiFumenEditor.Avalonia.csproj`](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia.csproj) 当前通过 `Compile Remove` 排除了至少 39 个 C# 文件：
+[`OngekiFumenEditor.Avalonia.csproj`](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia.csproj) 当前通过 `Compile Remove` 排除了 82 个 C# 文件：
 
 | 功能区域 | 文件数 |
 | --- | ---: |
 | NAudio 后端 | 19 |
+| OpenGL 后端 | 29 |
+| Skia D3D context | 3 |
+| Skia GL context | 10 |
 | Skia RenderControls | 5 |
+| Skia backend 枚举 | 1 |
 | SVG 属性编辑 ViewModel | 4 |
 | 音频波形绘制 | 1 |
 | UI Behaviors | 2 |
 | ListView 拖放 | 3 |
 | 特定 WPF 控件 | 5 |
 
-这些排除项应逐项标记为以下三类之一：
+这些排除项应逐项标记为以下三类之一；本次新增的 OpenGL、D3D、GL、CPU/DirectX 路径属于产品决定取消，不是待自动 fallback 的实现：
 
 1. 已由 Avalonia 实现替代，可以删除旧文件；
 2. 尚未迁移，需要进入路线图；
 3. 产品决定取消，需要记录功能差异。
 
-目前项目文件只表达了“不要编译”，没有表达替代关系或产品决定。
+渲染相关排除项已经由项目注释和本报告记录为“由 Avalonia.Skia 单一路径替代”；其他排除项仍需继续补充替代关系或取消原因。
 
 ## 缺失模块（按当前决策不纳入 Avalonia 编译）
 
@@ -265,7 +267,7 @@ AXAML 中约有 503 个普通 `{Binding ...}`，但只有 4 处 `x:DataType`，�
 
 ### NuGet 风险
 
-构建报告实际依赖图解析到 `SkiaSharp 2.88.3`，并产生 `NU1903` 高严重性漏洞警告。中央包配置中声明的 `SkiaSharp 3.119.1` 没有自动改写该传递依赖。处理该问题时需要同时核对 Avalonia、SkiaSharp 和当前渲染代码的 API 兼容性。
+核心项目通过直接引用 `Avalonia.Skia 11.3.10` 解析到 `SkiaSharp 2.88.9`。但依赖项目 Gekimini 仍单独解析到 `SkiaSharp 2.88.3` 并产生 `NU1903` 高严重性漏洞警告；Desktop 项目另有 `Tmds.DBus.Protocol 0.21.2` 的 `NU1903`。后续需要在依赖项目层统一版本并重新验证 Avalonia/SkiaSharp API 兼容性。
 
 ## 仓库状态
 
@@ -288,7 +290,7 @@ AXAML 中约有 503 个普通 `{Binding ...}`，但只有 4 处 `x:DataType`，�
 ### 构建解决方案
 
 ```powershell
-dotnet build '.\OngekiFumenEditor.Avalonia.sln' --no-restore -m:1 -v:minimal
+dotnet build '.\OngekiFumenEditor.Avalonia.sln' --no-restore -t:Rebuild -m:1 -v:minimal
 ```
 
 ### 按错误码归并核心项目编译错误
@@ -377,12 +379,12 @@ git status --porcelain=v1 -uall -- .
 
 ### P1：恢复 Debug 编译
 
-1. 按事件类型替换 `ActionExecutionContext`。
-2. 将 Toolbox 注册迁移到当前 Gekimini 模型。
-3. 修复 KeyBinding 源生成重复定义。
-4. 统一 SkiaSharp 版本和 D3D API。
-5. 清理已删除模块的编译期引用（本次已完成）。
-6. 删除迁移过程中保留的重复空壳方法。
+1. 修复 KeyBinding 源生成重复定义。
+2. 将 `EditorProjectSetupDialogViewModel` 的 `Screen` 迁移到 Avalonia 窗口/屏幕模型。
+3. 合并重复的 `ScrollTo` 实现。
+4. 将无效的 `OnViewLoaded` override 接入当前 Gekimini 生命周期。
+5. 统一 Gekimini 与核心项目的 SkiaSharp 版本。
+6. 清理已删除模块的编译期引用（本次已完成）。
 
 验收条件：核心、Desktop 和 Browser 项目 Debug 构建均为 0 错误。
 
@@ -398,7 +400,7 @@ git status --porcelain=v1 -uall -- .
 
 ### P3：打通核心编辑闭环
 
-1. 实现一个真实可工作的 Avalonia 渲染后端。
+1. 对已接入的 Avalonia.Skia 渲染路径执行桌面人工冒烟、DPI、缩放和资源释放验证。
 2. 实现并注册可用的音频后端。
 3. 验证谱面打开、渲染、编辑、撤销和保存。
 4. 验证选中、拖放、滚动、缩放、键盘命令和剪贴板。

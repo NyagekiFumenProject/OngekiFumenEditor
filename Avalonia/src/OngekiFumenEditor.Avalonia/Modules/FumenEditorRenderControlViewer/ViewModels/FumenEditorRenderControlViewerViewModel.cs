@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework.Languages;
+using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
@@ -11,7 +11,7 @@ public class FumenEditorRenderControlViewerViewModel : ToolViewModelBase, IFumen
 {
     public FumenEditorRenderControlViewerViewModel() : base(Lang.FumenEditorRenderControlViewer.ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Right;
+        Dock = global::Dock.Model.Core.DockMode.Right;
     }
 }
 

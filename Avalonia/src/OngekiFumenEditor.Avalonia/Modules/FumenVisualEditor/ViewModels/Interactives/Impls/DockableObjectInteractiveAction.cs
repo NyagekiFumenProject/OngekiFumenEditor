@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 					if (closestLaneObject?.Item1 < magneticDockDistance || //可能拖动到另一条线上
 						closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
 					{
-						relativePoint.X = closestLaneObject?.Value ?? default;
+						relativePoint = new Point(closestLaneObject?.Value ?? default, relativePoint.Y);
 						dockable.ReferenceLaneStart = closestLaneObject?.startObject;
 						//Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
 						enableMoveTo = true;

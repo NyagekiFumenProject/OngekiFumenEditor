@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Avalonia.Base
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(xGrid, value);
                 xGrid = value;
-                OnPropertyChanged(() => XGrid);
+                OnPropertyChanged(nameof(XGrid));
             }
         }
 

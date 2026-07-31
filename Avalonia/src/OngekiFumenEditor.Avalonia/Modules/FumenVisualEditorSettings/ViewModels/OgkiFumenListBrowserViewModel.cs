@@ -10,6 +10,6 @@ public class OgkiFumenListBrowserViewModel : ToolViewModelBase, IFumenVisualEdit
 {
     public OgkiFumenListBrowserViewModel() : base("Editor Settings".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Right;
+        Dock = global::Dock.Model.Core.DockMode.Right;
     }
 }

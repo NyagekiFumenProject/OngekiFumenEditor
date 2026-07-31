@@ -26,7 +26,7 @@ public partial class FumenMetaInfoBrowserViewModel : ToolViewModelBase, IFumenMe
 
     public FumenMetaInfoBrowserViewModel() : base("Fumen Meta Info Browser".ToLocalizedStringByRawText())
     {
-        Dock = Dock.Model.Core.DockMode.Right;
+        Dock = global::Dock.Model.Core.DockMode.Right;
     }
 
     public OngekiFumen Fumen
