@@ -672,11 +672,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
             if (IsPreviewMode)
             {
-                var view = GetView() as FrameworkElement;
-                await view.Dispatcher.InvokeAsync(() =>
+                await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     stringBuilder.AppendLine();
-                    if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - Mouse.GetPosition(view).Y is double mouseY)
+                    if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - lastPointerViewPosition.Y is double mouseY)
                     {
                         stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
                         foreach (var tGrid in TGridCalculator.ConvertYToTGrid_PreviewMode(mouseY, this))
@@ -902,6 +901,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         return false;
     }
 
+    private ActionExecutionContext CreateExecutionContext(object source, object eventArgs)
+        => new() { Source = source, EventArgs = eventArgs, View = View };
+
     public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
     {
         if (executionContext.Source is not ContentControl contentControl)
@@ -918,7 +920,13 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         renderControl.Unloaded += RenderControl_UnLoaded;
         renderControl.SizeChanged += RenderControl_SizeChanged;
 
-        Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
+        renderControl.PointerWheelChanged += (s, e) => OnMouseWheel(CreateExecutionContext(s, e));
+        renderControl.SizeChanged += (s, e) => OnSizeChanged(CreateExecutionContext(s, e));
+        renderControl.Loaded += (s, e) => OnLoaded(CreateExecutionContext(s, e));
+        renderControl.PointerPressed += (s, e) => OnMouseDown(CreateExecutionContext(s, e));
+        renderControl.PointerMoved += (s, e) => OnMouseMove(CreateExecutionContext(s, e));
+        renderControl.PointerReleased += (s, e) => OnMouseUp(CreateExecutionContext(s, e));
+        renderControl.PointerExited += (s, e) => OnMouseLeave(CreateExecutionContext(s, e));
 
         contentControl.Content = renderControl;
 

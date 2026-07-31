@@ -75,7 +75,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor
         //[Gesture Ctrl+A] = [Action KeyboardAction_SelectAllObjects];
         public static KeyBindingDefinition KBD_SelectAllObjects = new KeyBindingDefinition(
             "kbd_editor_SelectAllObjects",
-            ModifierKeys.Control, Key.A);
+            KeyModifiers.Control, Key.A);
 
         [RegisterStaticObject]
         //[Key Escape] = [Action KeyboardAction_CancelSelectingObjects];
@@ -91,7 +91,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor
 
         [RegisterStaticObject] public static KeyBindingDefinition KBD_ToggleBatchMode = new KeyBindingDefinition(
             nameof(Lang.BatchModeToggle),
-            ModifierKeys.Alt,
+            KeyModifiers.Alt,
             Key.B,
             layer: KeyBindingLayer.Global);
 
@@ -111,14 +111,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor
         //        [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects];
         public static KeyBindingDefinition KBD_CopySelectedObjects = new KeyBindingDefinition(
             "kbd_editor_CopySelectedObjects",
-             ModifierKeys.Control, Key.C,
+             KeyModifiers.Control, Key.C,
             layer: KeyBindingLayer.Global);
 
         [RegisterStaticObject]
         //        [Gesture Ctrl+V]=[Action MenuItemAction_PasteCopiesObjects];    "
         public static KeyBindingDefinition KBD_PasteCopiesObjects = new KeyBindingDefinition(
             "kbd_editor_PasteCopiesObjects",
-             ModifierKeys.Control, Key.V,
+             KeyModifiers.Control, Key.V,
             layer: KeyBindingLayer.Global);
 
         [RegisterStaticObject]

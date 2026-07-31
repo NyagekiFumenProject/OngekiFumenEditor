@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
             var dragTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
 			var lastObj = startObject.Children.LastOrDefault();
-			var isAppend = Keyboard.IsKeyDown(Key.LeftAlt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
+			var isAppend = editor.CurrentKeyModifiers.HasFlag(KeyModifiers.Alt) || (lastObj is not null && lastObj.TGrid < dragTGrid);
 			var isFirst = true;
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.AddConnectableNextObject.ToLocalizedString(), () =>

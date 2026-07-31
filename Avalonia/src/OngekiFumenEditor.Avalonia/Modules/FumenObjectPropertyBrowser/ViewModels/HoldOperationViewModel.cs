@@ -1,4 +1,6 @@
 using Gekimini.Avalonia.Modules.Toolbox;
+using Gekimini.Avalonia.Framework.DragDrops;
+using Gekimini.Avalonia.Framework.DragDrops.Behaviors;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions;
@@ -55,32 +57,32 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			if (!_draggingItem)
 				return;
 
-			var arg = e.EventArgs as MouseEventArgs;
+			var arg = e.EventArgs as PointerEventArgs;
 
 			Point mousePosition = arg.GetPosition(null);
 			Vector diff = _mouseStartPosition - mousePosition;
 
-			if (arg.LeftButton == MouseButtonState.Pressed &&
-				(Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-				Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
+			if (arg.Properties.IsLeftButtonPressed &&
+				(Math.Abs(diff.X) > DragDataContextOutBehavior.MinimumHorizontalDragDistance ||
+				Math.Abs(diff.Y) > DragDataContextOutBehavior.MinimumVerticalDragDistance))
 			{
-				var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
+				var dropParam = new OngekiObjectDropParam(() =>
 				{
 					var genWallChild = new HoldEnd();
 					ConnectableObject.SetHoldEnd(genWallChild);
 					CheckEnableDrag();
 					return genWallChild;
-				}));
-				DragDrop.DoDragDrop(e.Source, dragData, DragDropEffects.Move);
+				});
+				_ = IoC.Get<IDragDropManager>().StartDragDropEvent(arg, dropParam, DragDropEffects.Move);
 				_draggingItem = false;
 			}
 		}
 
 		public void Border_MouseLeftButtonDown(ActionExecutionContext e)
 		{
-			var arg = e.EventArgs as MouseEventArgs;
+			var arg = e.EventArgs as PointerEventArgs;
 
-			if (arg.LeftButton != MouseButtonState.Pressed)
+			if (!arg.Properties.IsLeftButtonPressed)
 				return;
 
 			_mouseStartPosition = arg.GetPosition(null);

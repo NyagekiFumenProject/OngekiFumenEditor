@@ -4,13 +4,13 @@
 - **文档更新日期**：2026-07-31（第二次更新）
 - **检查基线提交**：`32909b6b`（分支 `avalonia`）
 - **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal`
-- **构建结果**：失败，`77` 个唯一错误、`73` 个警告（整套解决方案完整重建）
+- **构建结果**：失败。C# 编译已 **0 错误**；完整重建在 Avalonia XAML 编译阶段暴露 `2190` 个唯一 AVLN 错误、`67` 个警告（此前被 C# 错误掩盖，属 XAML/资源加载链阶段）
 - **检查范围**：当前工作区中的旧 WPF 项目、Avalonia 解决方案、应用源码、XAML、构建结果和测试资产
 - **检查性质**：在只读审查基础上进行了定向迁移清理，移除了两个暂不纳入 Avalonia 的模块引用，将渲染路径固定为 Avalonia.Skia；本次又集中清理了核心项目的非 shim 类编译错误
 
 > 本报告刻意区分“源码已搬运”与“能构建、能启动、功能等价”。文件层面的高覆盖率不代表功能完成度；当前工作树包含大量未提交或未跟踪的迁移文件，此快照尚不能由分支稳定复现。
 >
-> **重要更正**：上一版记录的“5 个错误、45 个警告”是增量构建跳过了核心项目完整编译造成的假象。核心项目当时的真实唯一错误数约 361 个（编译输出 722 行）。本轮已将其消减到 77 个，剩余错误全部属于明确暂缓的 WPF 兼容 shim 类（见“当前编译阻塞”）。
+> **重要更正**：上一版记录的“5 个错误、45 个警告”是增量构建跳过了核心项目完整编译造成的假象。核心项目当时的真实唯一错误数约 361 个（编译输出 722 行）。本轮已将其全部消减到 0（含 WPF 兼容 shim 批次）。C# 清零后，完整重建进入 Avalonia XAML 编译阶段，暴露出一直存在但被 C# 错误掩盖的 XAML 迁移错误（见“当前编译阻塞”）。
 
 ## 结论
 
@@ -25,7 +25,7 @@
 | 项目与应用外壳 | 部分完成 | 已建立 Core、Desktop、Browser 项目，以及 Gekimini Shell 和 DI 启动结构 |
 | C# 文件搬运 | 较高 | 旧项目 969 个 C# 文件中有 888 个同路径对应，覆盖率约 91.6% |
 | XAML 文件搬运 | 较高 | 旧项目 65 个 WPF XAML 中有 58 个对应 AXAML，覆盖率约 89.2% |
-| Debug 构建 | 阻断 | 全解决方案构建失败，当前 77 个唯一错误、73 个警告；错误全部集中在核心项目的 7 个 WPF 兼容 shim 类文件中 |
+| Debug 构建 | 阻断 | 全解决方案构建失败：C# 0 错误，XAML 编译阶段 2190 个唯一 AVLN 错误、67 个警告，集中在核心项目的 40+ 个 .axaml 文件 |
 | Avalonia XAML | 阻断 | 存在旧 CLR namespace、WPF Trigger、Storyboard 和 pack URI；绝大多数视图未加载 XAML |
 | 谱面渲染 | 已接入、待运行验证 | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译 |
 | 音频 | 不可用 | NAudio 后端被排除编译，保留实现明确标记为未迁移 |
@@ -52,11 +52,11 @@
 dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal
 ```
 
-当前完整重建结果：构建失败，共 77 个唯一错误和 73 个警告。依赖项目可以完成编译，错误仍发生在核心 `OngekiFumenEditor.Avalonia` 项目，因此 Desktop 和 Browser 入口尚未进入有效验收阶段；仅重跑增量构建时，已编译依赖项目的警告不会重复输出。
+当前完整重建结果：构建失败。C# 编译（含核心 `OngekiFumenEditor.Avalonia`）已 0 错误；失败发生在核心项目的 Avalonia XAML 编译（CompileAvaloniaXaml）阶段，共 2190 个唯一 AVLN 错误和 67 个警告。Desktop 和 Browser 入口尚未进入有效验收阶段；仅重跑增量构建时，XAML 编译可能被跳过而显示“生成成功”，需以 `-t:Rebuild` 全量重建为准。
 
-此前只读审查快照记录的是 83 个错误和 53 个警告；上一版本节记录的“5 个错误”经本轮验证为增量构建假象，核心项目当时真实唯一错误约 361 个。本轮集中修复后降至 77 个，且剩余错误全部属于按当前决策暂缓处理的 WPF 兼容 shim 类。其中最后 8 个非 shim 错误为：`LambdaUndoAction`/`EndCombineAction` 的 `LocalizedString` 参数改用 `ToLocalizedStringByRawText()`/`ToFormatLocalizedString()`（6 处）、`IoC.Get<IShell>()` 补 `Gekimini.Avalonia.Modules.Shell` using（1 处）、`CommandRouterHelper` 补单参数 `ExecuteCommand(Command)` 重载（1 处）。
+此前只读审查快照记录的是 83 个错误和 53 个警告；上一版本节记录的“5 个错误”经本轮验证为增量构建假象，核心项目当时真实唯一错误约 361 个。本轮集中修复后 C# 降至 0（含 WPF 兼容 shim 批次：交互系统、`MessageBox`、拖放、`Visibility`），剩余构建错误全部属于 XAML 迁移范畴。其中最后 8 个非 shim 错误为：`LambdaUndoAction`/`EndCombineAction` 的 `LocalizedString` 参数改用 `ToLocalizedStringByRawText()`/`ToFormatLocalizedString()`（6 处）、`IoC.Get<IShell>()` 补 `Gekimini.Avalonia.Modules.Shell` using（1 处）、`CommandRouterHelper` 补单参数 `ExecuteCommand(Command)` 重载（1 处）。
 
-历史文件 [`migration_gap_report.txt`](../../migration_gap_report.txt) 在 2026-03-15 记录了 126 个错误。错误数变化轨迹：126 → 83 → （虚报 5，实际约 361）→ 77。构建门槛仍未通过。
+历史文件 [`migration_gap_report.txt`](../../migration_gap_report.txt) 在 2026-03-15 记录了 126 个错误。错误数变化轨迹：126 → 83 → （虚报 5，实际约 361）→ 77 → 17 → C# 0（但 XAML 编译阶段暴露 2190 个 AVLN 错误）。构建门槛仍未通过。
 
 ## 当前编译阻塞
 
@@ -70,17 +70,16 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 - SkiaSharp 3.x API 适配：`SKMatrix44.SetConcat`、`SKPoint` 显式构造、`SKFont.MeasureText` 的 UTF-16 span 重载；
 - `string` → `LocalizedString` 转换（`ToLocalizedStringByRawText`）、`DropShadowEffect`、Avalonia 只读 `Point` 赋值等散点修复。
 
-当前剩余 77 个唯一错误的构成：**全部是 WPF 兼容 shim 类，按当前决策暂缓处理**，集中在这 7 个文件：
+**C# 编译已 0 错误**（WPF 兼容 shim 批次全部完成：交互系统改 `PointerEventArgs` 事件流 + VM 缓存输入状态，`GetView()` 改 View 回注，`Message.SetAttach` 改显式事件订阅，`MessageBox` 改 `IDialogManager`，拖放改 Gekimini `IDragDropManager`，`Visibility` converter 改 bool）。此前记录的 shim 修复方案明细已全部落地，不再赘述。
 
-| 文件 | 主要缺失名 |
-| --- | --- |
-| `FumenVisualEditorViewModel.UserInteractionActions.cs` | `Mouse`、`Keyboard`、`ModifierKeys`、`ToolboxDragDrop`、`GetView`、`isSelectRangeDragging`、`EnableDragging`、`IShell`、WPF 拖放 API、`Point` 赋值、`Vector` 运算 |
-| `ConnectableObjectOperationViewModel.cs` / `HoldOperationViewModel.cs` / `ConnectableObjectDropAction.cs` | `MessageBox`、`SystemParameters`、`ToolboxDragDrop`、`MouseEventArgs`、WPF `DataObject` |
-| `KeyBindingDefinitions.cs` | `ModifierKeys`、键位参数映射 |
-| `BatchModeBehavior.cs` | `Visibility` |
-| `FumenVisualEditorViewModel.Drawing.cs`（3 处） | `GetView`、`Control.Dispatcher`（#if DEBUG 块）、`Message.SetAttach` 事件接线 |
+当前完整重建的 2190 个唯一错误全部是 **Avalonia XAML 编译错误**，遍布核心项目 40+ 个 .axaml 文件，构成：
 
-暂缓范围内的典型处理方案（后续 shim 批次执行）：`MessageBox` → `IDialogManager.ShowMessageDialog`；`ToolboxDragDrop.DataFormat` → 自定义常量；`SystemParameters.Minimum*DragDistance` → 常量；`Mouse`/`Keyboard`/`ModifierKeys` → Avalonia `PointerEventArgs`/`KeyModifiers` 事件参数流；`Message.SetAttach` → 显式事件订阅（同文件已有 `Loaded`/`SizeChanged` 的直接订阅先例）。
+- AVLN2000（约 2143 个）：无法解析类型。主要是 WPF 残留命名空间（`clr-namespace:OngekiFumenEditor.*` 未改为 `.Avalonia`）、WPF 扩展控件命名空间（`schemas.timjones.io/gemini` 的 `SliderEx`、`schemas.xceed.com` 的 `CheckComboBox`）、`OngekiFumenEditor.UI.Markup` 的 `Translate` 标记扩展未迁移、根节点旧 `x:Class`（如 `OngekiFumenEditor.App`）；单个根类型解析失败会级联出全文件错误（多个文件各报约 200 条即为此形态）。
+- AVLN2200（约 32 个）：`Setter` 目标类型无法确定（上级 `Style`/`ControlTheme` 目标类型解析失败的级联）。
+- AVLN2005（约 18 个）：值解析失败，如 WPF 写法 `GridLength` 字符串带空格。
+- AVLN3000（约 12 个）：属性赋值器不匹配，如 WPF 的 `Click="handler"` 字符串事件写法。
+
+这些错误在 C# 编译失败期间被掩盖（Avalonia XAML IL 编译在 C# 编译成功后才执行），属于 XAML/资源/视图加载链阶段（见下文 P2），不是本轮 C# 修复引入的回归。
 
 此前审查中的 Skia D3D、`ActionExecutionContext`、`ToolboxItem` 和两个暂不纳入模块引用错误，本次构建输出中均已不再出现。Skia D3D 错误是通过明确取消该 backend 的编译支持消除的，不代表相关 Vortice 代码已迁移。
 
@@ -90,7 +89,7 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 - [`ConnectableObjectOperationViewModel.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/ConnectableObjectOperationViewModel.cs)
 - [`FumenVisualEditorViewModel.Drawing.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs)
 
-历史审查中的 `ActionExecutionContext` 风险仍记录在迁移背景中，但不计入当前 77 个编译错误。若后续重新启用相关未编译文件，不应通过复制 WPF/Caliburn 内部模型来恢复；应按实际交互迁移为 Avalonia 的 `PointerEventArgs`、`PointerPressedEventArgs`、命令参数、显式 `KeyBinding` 或视图事件适配层。
+历史审查中的 `ActionExecutionContext` 风险仍记录在迁移背景中，但不计入当前 17 个编译错误。若后续重新启用相关未编译文件，不应通过复制 WPF/Caliburn 内部模型来恢复；应按实际交互迁移为 Avalonia 的 `PointerEventArgs`、`PointerPressedEventArgs`、命令参数、显式 `KeyBinding` 或视图事件适配层。
 
 ## XAML、资源和绑定
 
@@ -202,7 +201,7 @@ AXAML 中约有 503 个普通 `{Binding ...}`，但只有 4 处 `x:DataType`，�
 - 旧 backend 源码保留在工作区以保留迁移历史和注释，但不属于当前 Avalonia 构建产物，也不应作为运行时 fallback；
 - 当前核心项目的依赖图为 `Avalonia.Skia 11.3.10` + `SkiaSharp 2.88.9`。Gekimini 依赖项目仍解析到 `SkiaSharp 2.88.3` 并产生独立漏洞警告，后续需要单独统一依赖版本。
 
-当前仍缺少桌面启动后的人工渲染冒烟验证；由于核心项目尚余 77 个唯一编译错误（全部属于已决定暂缓的 WPF 兼容 shim 范畴，非 shim 类错误已清零），暂不能把画面显示标记为已验收。
+当前仍缺少桌面启动后的人工渲染冒烟验证；C# 编译虽已清零，但核心项目 XAML 编译阶段尚有 2190 个唯一 AVLN 错误，且缺少桌面启动后的人工渲染冒烟验证，暂不能把画面显示标记为已验收。
 
 ## 音频状态
 
@@ -399,15 +398,9 @@ git status --porcelain=v1 -uall -- .
 4. ~~将无效的 `OnViewLoaded` override 接入当前 Gekimini 生命周期。~~（已完成）
 5. 统一 Gekimini 与核心项目的 SkiaSharp 版本。（未完成）
 6. ~~清理已删除模块的编译期引用~~（已完成）。
-7. 完成 WPF 兼容 shim 批次：非 shim 类错误已清零，剩余 77 个唯一错误集中在 7 个文件，全部属于暂缓的 WPF 语义残留。处理方案：
-   - `MessageBox` → `IoC.Get<IDialogManager>().ShowMessageDialog`；
-   - `ToolboxDragDrop.DataFormat` → 自定义常量字符串；
-   - `SystemParameters` → 固定常量（如边框宽 4）；
-   - `Mouse`/`Keyboard`/`ModifierKeys` → `PointerEventArgs`/`KeyModifiers`；
-   - `Message.SetAttach` → 显式事件订阅；
-   - `IDataObject.GetDataPresent`/`DragEventArgs.Effects` → Avalonia 拖放 API。
+7. ~~完成 WPF 兼容 shim 批次~~（已完成：交互系统改 `PointerEventArgs` 事件流 + VM 缓存输入状态，`GetView()` 改 View 回注，`Message.SetAttach` 改显式事件订阅，`MessageBox` 改 `IDialogManager`，拖放改 Gekimini `IDragDropManager`，`Visibility` converter 改 bool）。
 
-验收条件：核心、Desktop 和 Browser 项目 Debug 构建均为 0 错误（当前 77 错误 / 73 警告，全部在核心项目且为上述 shim 暂缓类）。
+验收条件：核心、Desktop 和 Browser 项目 Debug 构建均为 0 错误（当前 C# 0 错误已达成；完整重建在 XAML 编译阶段 2190 错误 / 67 警告，转入 P2）。
 
 ### P2：重建资源和视图加载链
 

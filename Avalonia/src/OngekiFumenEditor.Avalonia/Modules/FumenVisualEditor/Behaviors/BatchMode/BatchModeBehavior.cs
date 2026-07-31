@@ -59,9 +59,7 @@ public class IsInstanceOfToVisibilityConverter : IValueConverter
     {
         Log.LogInfo($"{parameter}");
         Log.LogInfo($"{parameter}");
-        return value?.GetType().IsSubclassOf((Type)parameter!) ?? false
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        return value?.GetType().IsSubclassOf((Type)parameter!) ?? false;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

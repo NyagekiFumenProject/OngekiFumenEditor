@@ -1,5 +1,6 @@
 using DereTore.Common;
 using Gekimini.Avalonia.Modules.Shell;
+using Gekimini.Avalonia.Framework.DragDrops;
 using Gekimini.Avalonia.Modules.Toolbox.Models;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
@@ -130,7 +131,22 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         private MouseButtonState prevRightButtonState;
         private Point contextMenuPosition;
 
-        public Toast Toast => (GetView() as FumenVisualEditorView)?.mainToast;
+        /// <summary>由 View 回注，替代 Caliburn 的 GetView()。</summary>
+        public FumenVisualEditorView View { get; set; }
+
+        private Point lastPointerViewPosition;
+        private bool isLeftButtonPressed;
+
+        /// <summary>最近一次输入事件携带的修饰键状态，替代 WPF 的 Keyboard.Modifiers 全局查询。</summary>
+        public KeyModifiers CurrentKeyModifiers { get; private set; }
+
+        private bool isSelectRangeDragging;
+
+        public bool EnableDragging => !IsBatchMode || (CurrentKeyModifiers.HasFlag(KeyModifiers.Alt) &&
+                                                       !CurrentKeyModifiers.HasFlag(KeyModifiers.Control) &&
+                                                       !CurrentKeyModifiers.HasFlag(KeyModifiers.Shift));
+
+        public Toast Toast => View?.FindControl<Toast>("mainToast");
 
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
 
@@ -140,7 +156,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void InitExtraMenuItems()
         {
-            var ctxMenu = (GetView() as FumenVisualEditorView).EditorContextMenu;
+            var ctxMenu = View.EditorContextMenu;
 
             var extMenuItems = IoC.Get<IEditorExtraContextMenuBuilder>().BuildMenuItems(IoC.GetAll<IFumenVisualEditorExtraMenuItemHandler>(), this);
             foreach (var extMenuItem in extMenuItems)
@@ -210,8 +226,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_PasteCopiesObjects(ActionExecutionContext e)
         {
-            var placePos = Mouse.GetPosition(GetView() as FrameworkElement);
-            placePos.Y = RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY;
+            var placePos = lastPointerViewPosition;
+            placePos = placePos.WithY(RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY);
             PasteCopiesObjects(PasteOption.None, placePos);
         }
 
@@ -230,7 +246,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         public void PasteCopiesObjects(PasteOption mirrorOption, ActionExecutionContext ctx)
         {
             var placePos = contextMenuPosition;
-            placePos.Y = RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY;
+            placePos = placePos.WithY(RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY);
             PasteCopiesObjects(mirrorOption, placePos);
         }
 
@@ -515,16 +531,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastPlaceNewTap(ActionExecutionContext e)
         {
-            var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
+            var position = lastPointerViewPosition;
+            position = position.WithY(RectInDesignMode.Height - position.Y + RectInDesignMode.MinY);
 
             KeyboardAction_FastPlaceNewObject<Tap>(position);
         }
 
         public void KeyboardAction_FastPlaceNewHold(ActionExecutionContext e)
         {
-            var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
+            var position = lastPointerViewPosition;
+            position = position.WithY(RectInDesignMode.Height - position.Y + RectInDesignMode.MinY);
 
             KeyboardAction_FastPlaceNewObject<Hold>(position);
         }
@@ -809,8 +825,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         {
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
-            var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
+            var position = lastPointerViewPosition;
+            position = position.WithY(RectInDesignMode.Height - position.Y + RectInDesignMode.MinY);
 
             if (propertyBrowser.SelectedObjects.IsOnlyOne())
             {
@@ -924,8 +940,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 return;
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
-            var position = Mouse.GetPosition(e.View as FrameworkElement);
-            position.Y = RectInDesignMode.Height - position.Y + RectInDesignMode.MinY;
+            var position = lastPointerViewPosition;
+            position = position.WithY(RectInDesignMode.Height - position.Y + RectInDesignMode.MinY);
 
             if (propertyBrowser.SelectedObjects.IsOnlyOne() && propertyBrowser.SelectedObjects.FirstOrDefault() is Hold hold)
             {
@@ -963,7 +979,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             foreach ((var start, var i) in starts.WithIndex())
             {
                 var newPos = position;
-                newPos.X = position.X + xOffsetMap[i];
+                newPos = newPos.WithX(position.X + xOffsetMap[i]);
 
                 var genChild = start.CreateChildObject();
                 var dropAction = new ConnectableObjectDropAction(start, genChild, () => { });
@@ -1023,7 +1039,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 (tUnit, editor, soflans) => TGridCalculator.ConvertTGridUnitToY_PreviewMode(tUnit, soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
-            var mousePos = Mouse.GetPosition(GetView() as FrameworkElement);
+            var mousePos = lastPointerViewPosition;
             UpdateCurrentCursorPosition(mousePos);
 
             RebuildObjectSoflanGroupRecord();
@@ -1114,7 +1130,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseUp(ActionExecutionContext e)
         {
-            var arg = e.EventArgs as MouseButtonEventArgs;
+            var arg = e.EventArgs as PointerReleasedEventArgs;
             if (arg is null || arg.Handled)
             {
                 return;
@@ -1125,18 +1141,22 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
+            if (e.Source is not Visual source)
                 return;
 
-            var pos = arg.GetPosition(parent);
+            var pos = arg.GetPosition(source);
+            lastPointerViewPosition = pos;
+            isLeftButtonPressed = arg.Properties.IsLeftButtonPressed;
+            CurrentKeyModifiers = arg.KeyModifiers;
 
-            if (arg.RightButton == MouseButtonState.Released || prevRightButtonState == MouseButtonState.Pressed)
+            var rightButtonState = arg.Properties.IsRightButtonPressed ? MouseButtonState.Pressed : MouseButtonState.Released;
+            if (rightButtonState == MouseButtonState.Released || prevRightButtonState == MouseButtonState.Pressed)
                 contextMenuPosition = pos;
-            prevRightButtonState = arg.RightButton;
+            prevRightButtonState = rightButtonState;
 
             if (IsDesignMode)
             {
-                if (arg.ChangedButton == MouseButton.Left)
+                if (arg.InitialPressMouseButton == MouseButton.Left)
                 {
                     if (SelectionArea.IsActive && !SelectionArea.IsClick())
                     {
@@ -1147,7 +1167,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                         if (isSelectRangeDragging)
                         {
                             var cp = pos;
-                            cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
+                            cp = cp.WithY(RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY);
                             UndoRedoManager.BeginCombineAction();
                             SelectObjects.ToArray().ForEach(x =>
                             {
@@ -1192,7 +1212,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     }
                 }
 
-                if (arg.ChangedButton == MouseButton.Middle)
+                if (arg.InitialPressMouseButton == MouseButton.Middle)
                 {
                     isCanvasDragging = false;
                     isMiddleMouseDown = false;
@@ -1210,25 +1230,26 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseDown(ActionExecutionContext e)
         {
-            if (e.EventArgs is not MouseButtonEventArgs arg || arg.Handled)
+            if (e.EventArgs is not PointerPressedEventArgs arg || arg.Handled)
             {
                 return;
             }
             Log.LogInfo("Visual mousedown");
 
-            prevRightButtonState = arg.RightButton;
+            prevRightButtonState = arg.Properties.IsRightButtonPressed ? MouseButtonState.Pressed : MouseButtonState.Released;
+            isLeftButtonPressed = arg.Properties.IsLeftButtonPressed;
+            CurrentKeyModifiers = arg.KeyModifiers;
 
-            var view = e.View as FrameworkElement;
-            var position = arg.GetPosition(e.Source);
+            var position = arg.GetPosition(e.Source as Visual);
 
             if (IsDesignMode)
             {
                 if (IsLocked)
                     return;
 
-                if (arg.ChangedButton == MouseButton.Left)
+                if (arg.Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed)
                 {
-                    position.Y = Math.Max(0, RectInDesignMode.MaxY - position.Y);
+                    position = position.WithY(Math.Max(0, RectInDesignMode.MaxY - position.Y));
 
                     isSelectRangeDragging = false;
 
@@ -1293,7 +1314,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 #endif
                 }
 
-                if (arg.ChangedButton == MouseButton.Middle)
+                if (arg.Properties.PointerUpdateKind == PointerUpdateKind.MiddleButtonPressed)
                 {
                     mouseCanvasStartPosition = position;
                     startXOffset = Setting.XOffset;
@@ -1305,7 +1326,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
             else
             {
-                if (arg.ChangedButton == MouseButton.Left && EditorGlobalSetting.Default.EnableShowPlayerLocation)
+                if (arg.Properties.PointerUpdateKind == PointerUpdateKind.LeftButtonPressed && EditorGlobalSetting.Default.EnableShowPlayerLocation)
                 {
                     //check if is dragging playerlocation
 
@@ -1333,7 +1354,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             if ((position ?? CurrentCursorPosition) is not Point cursor)
                 return;
 
-            if (!Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+            if (!CurrentKeyModifiers.HasFlag(KeyModifiers.Shift))
             {
                 TryCancelAllObjectSelecting();
             }
@@ -1347,15 +1368,19 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseMove(ActionExecutionContext e)
         {
-            if (e.EventArgs is not MouseEventArgs args || args.Handled)
+            if (e.EventArgs is not PointerEventArgs args || args.Handled)
             {
                 return;
             }
 
-            if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
+            if (e.Source is not Visual source)
                 return;
             currentDraggingActionId = int.MaxValue;
-            OnMouseMove(args.GetPosition(parent));
+            var pos = args.GetPosition(source);
+            lastPointerViewPosition = pos;
+            isLeftButtonPressed = args.Properties.IsLeftButtonPressed;
+            CurrentKeyModifiers = args.KeyModifiers;
+            OnMouseMove(pos);
         }
 
         public async void OnMouseMove(Point pos)
@@ -1418,11 +1443,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
                     //鎷夋
                     var p = pos;
-                    p.Y = Math.Min(TotalDurationHeight, Math.Max(0, RectInDesignMode.MaxY - p.Y + offsetY));
+                    p = p.WithY(Math.Min(TotalDurationHeight, Math.Max(0, RectInDesignMode.MaxY - p.Y + offsetY)));
                     SelectionArea.EndPoint = p;
                 }
 
-                if (Mouse.LeftButton == MouseButtonState.Pressed)
+                if (isLeftButtonPressed)
                 {
                     var r = isSelectRangeDragging;
                     isSelectRangeDragging = true;
@@ -1466,7 +1491,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     {
                         //鎷栧姩宸查€夌墿浠?
                         var cp = pos;
-                        cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
+                        cp = cp.WithY(RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY);
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
                         SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
                     }
@@ -1546,7 +1571,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             expects = expects ?? new ISelectableObject[0];
 
-            if (!(Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
+            if (!(CurrentKeyModifiers.HasFlag(KeyModifiers.Shift) || IsRangeSelecting || IsPreventMutualExclusionSelecting))
             {
                 foreach (var o in SelectObjects.Where(x => !expects.Contains(x)))
                     o.IsSelected = false;
@@ -1650,8 +1675,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
 
             var arg = e.EventArgs as DragEventArgs;
-            if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
-                arg.Effects = DragDropEffects.None;
+            if (!IoC.Get<IDragDropManager>().TryGetDragData(arg, out _))
+                arg.DragEffects = DragDropEffects.None;
         }
 
         public void Grid_Drop(ActionExecutionContext e)
@@ -1668,12 +1693,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
 
             var arg = e.EventArgs as DragEventArgs;
-            if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+            var dragDropManager = IoC.Get<IDragDropManager>();
+            if (dragDropManager.TryGetDragData(arg, out var dragData))
             {
                 var mousePosition = arg.GetPosition(e.View as FrameworkElement);
-                mousePosition.Y = RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY;
+                mousePosition = mousePosition.WithY(RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY);
 
-                switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
+                switch (dragData)
                 {
                     case ToolboxItem toolboxItem:
                         new DefaultToolBoxDropAction(toolboxItem).Drop(this, mousePosition);
@@ -1682,6 +1708,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                         dropHandler.Drop(this, mousePosition);
                         break;
                 }
+
+                dragDropManager.EndDragDropEvent(arg);
             }
         }
 
@@ -1734,7 +1762,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
-                var result = arg.Delta > 0 ? nextFirst : downFirst;
+                var result = arg.Delta.Y > 0 ? nextFirst : downFirst;
                 if (result.tGrid is not null)
                 {
                     var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(result.y, this);
@@ -1748,7 +1776,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 {
                     var audioTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
                     var offset = TimeSpan.FromMilliseconds(Setting.MouseWheelLength);
-                    if (Math.Sign(arg.Delta) > 0)
+                    if (Math.Sign(arg.Delta.Y) > 0)
                         audioTime += offset;
                     else
                         audioTime -= offset;
@@ -1756,7 +1784,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    var y = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
+                    var y = ScrollViewerVerticalOffset + Math.Sign(arg.Delta.Y) * Setting.MouseWheelLength;
                     y = Math.Max(Math.Min(y, TotalDurationHeight), 0);
                     var audioTime = TGridCalculator.ConvertYToAudioTime_DesignMode(y, this);
                     ScrollTo(audioTime);
@@ -1772,12 +1800,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
+            CurrentKeyModifiers = arg.KeyModifiers;
 
-            if (Keyboard.IsKeyDown(Key.LeftAlt))
+            if (arg.KeyModifiers.HasFlag(KeyModifiers.Alt))
                 OnWheelBeatSplit(arg);
-            else if (Keyboard.IsKeyDown(Key.LeftShift))
+            else if (arg.KeyModifiers.HasFlag(KeyModifiers.Shift))
                 OnWheelXGridUnit(arg);
-            else if (Keyboard.IsKeyDown(Key.LeftCtrl))
+            else if (arg.KeyModifiers.HasFlag(KeyModifiers.Control))
                 OnWheelVerticalScale(arg);
             else
                 OnWheelScrollViewer(arg);
@@ -1793,7 +1822,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         private readonly static int[] xGridUnitDownJumpTable = new[] { 0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, 0, 0 };
         private void OnWheelXGridUnit(MouseWheelEventArgs arg)
         {
-            var jump = (arg.Delta > 0 ? xGridUnitUpJumpTable : xGridUnitDownJumpTable).ElementAtOrDefault((int)Setting.XGridUnitSpace);
+            var jump = (arg.Delta.Y > 0 ? xGridUnitUpJumpTable : xGridUnitDownJumpTable).ElementAtOrDefault((int)Setting.XGridUnitSpace);
             if (jump == 0)
                 return;
 
@@ -1813,7 +1842,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         private readonly static int[] beatSplitDownJumpTable = new[] { 0, 0, -1, 0, -2, 0, -3, 0, -4, -3, -5, 0, -3, 0, -7, -5 };
         private void OnWheelBeatSplit(MouseWheelEventArgs arg)
         {
-            var jump = (arg.Delta > 0 ? beatSplitUpJumpTable : beatSplitDownJumpTable).ElementAtOrDefault(Setting.BeatSplit);
+            var jump = (arg.Delta.Y > 0 ? beatSplitUpJumpTable : beatSplitDownJumpTable).ElementAtOrDefault(Setting.BeatSplit);
             if (jump == 0)
                 return;
 
@@ -1830,7 +1859,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 <= 1 => 0.15,
                 _ => 0.3
             };
-            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta) * change, 0.1, 3);
+            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta.Y) * change, 0.1, 3);
         }
 
         private bool isDraggingPlayerLocation = false;

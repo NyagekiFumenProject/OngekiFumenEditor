@@ -21,6 +21,9 @@ using Gekimini.Avalonia.ViewModels;
 using OngekiFumenEditor.Avalonia.Avalonia;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.Platforms.Services.Window;
+using Gekimini.Avalonia.Framework.Dialogs;
+using Gekimini.Avalonia.Framework.DragDrops;
+using Gekimini.Avalonia.Framework.DragDrops.Behaviors;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
@@ -98,7 +101,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		{
 			if (RefStartObject.Children.IsEmpty())
 			{
-				MessageBox.Show(Lang.DisableInterpolateByNoConnectableChildren);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.DisableInterpolateByNoConnectableChildren);
 				return;
 			}
 
@@ -125,14 +128,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			if ((!_draggingItem) || RefStartObject is null)
 				return;
 
-			var arg = e.EventArgs as MouseEventArgs;
+			var arg = e.EventArgs as PointerEventArgs;
 
 			Point mousePosition = arg.GetPosition(null);
 			Vector diff = _mouseStartPosition - mousePosition;
 
-			if (arg.LeftButton == MouseButtonState.Pressed &&
-				(Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
-				Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
+			if (arg.Properties.IsLeftButtonPressed &&
+				(Math.Abs(diff.X) > DragDataContextOutBehavior.MinimumHorizontalDragDistance ||
+				Math.Abs(diff.Y) > DragDataContextOutBehavior.MinimumVerticalDragDistance))
 			{
 				//ConnectableObjectDropAction
 				var genChildLazy = new Lazy<ConnectableChildObjectBase>(() => GenerateChildObject(actionType == DragActionType.DropNext));
@@ -144,16 +147,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 					_ => default
 				};
 
-				DragDrop.DoDragDrop(e.Source, new DataObject(ToolboxDragDrop.DataFormat, dropAction), DragDropEffects.Move);
+				_ = IoC.Get<IDragDropManager>().StartDragDropEvent(arg, dropAction, DragDropEffects.Move);
 				_draggingItem = false;
 			}
 		}
 
 		public void Border_MouseLeftButtonDown(ActionExecutionContext e)
 		{
-			var arg = e.EventArgs as MouseEventArgs;
+			var arg = e.EventArgs as PointerEventArgs;
 
-			if (arg.LeftButton != MouseButtonState.Pressed)
+			if (!arg.Properties.IsLeftButtonPressed)
 				return;
 
 			_mouseStartPosition = arg.GetPosition(null);
@@ -167,7 +170,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 			if (RefStartObject?.IsPathVaild() != true)
 			{
-				MessageBox.Show(Lang.LaneContainInvalidPath);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.LaneContainInvalidPath);
 				return;
 			}
 
@@ -175,19 +178,19 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 			if (copiedObjects.Count() > 1)
 			{
-				MessageBox.Show(Lang.DisableUseBrushByMoreObjects);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.DisableUseBrushByMoreObjects);
 				return;
 			}
 
 			if (!editor.IsDesignMode)
 			{
-				MessageBox.Show(Lang.EditorMustBeDesignMode);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.EditorMustBeDesignMode);
 				return;
 			}
 
 			if (copiedObjects.Count() < 1)
 			{
-				MessageBox.Show(Lang.CopyOneObjectOnceBeforeUsingBrush);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.CopyOneObjectOnceBeforeUsingBrush);
 				return;
 			}
 
@@ -195,7 +198,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 			if (copiedObjectViewModel?.CopyNew() is null)
 			{
-				MessageBox.Show(Lang.ObjectNotSupportedInBatchMode);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.ObjectNotSupportedInBatchMode);
 				return;
 			}
 
@@ -260,7 +263,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 			if (!childObj.CheckCurveVaild())
 			{
-				MessageBox.Show(Lang.DisableInterpolatePartByInvaild);
+				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.DisableInterpolatePartByInvaild);
 				return;
 			}
 
