@@ -23,8 +23,8 @@
 
     <StackPanel Background="{DynamicResource EnvironmentWindowBackground}">
         <StackPanel Orientation="Horizontal">
-            <Image IsVisible="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeInputSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png" />
-            <Image IsVisible="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeFilterSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-selection-16.png" />
+            <Image IsVisible="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeInputSubmode}}" Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/icons8-paint-brush-16.png" />
+            <Image IsVisible="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeFilterSubmode}}" Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/icons8-selection-16.png" />
             <Label Content="{Binding CurrentSubmode, Converter={StaticResource NameConverter}}" FontStyle="Normal" FontWeight="Bold" />
         </StackPanel>
 

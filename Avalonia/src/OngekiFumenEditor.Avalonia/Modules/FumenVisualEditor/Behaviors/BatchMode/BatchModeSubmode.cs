@@ -36,7 +36,7 @@ public abstract class BatchModeSubmode : CommandDefinition
 
     public override string Name => $"BatchMode.{GetType().Name}";
     public override Uri IconSource =>
-        new Uri($"pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/Batch/{ResourceKey}.png");
+        new Uri($"avares://OngekiFumenEditor.Avalonia/Resources/Icons/Batch/{ResourceKey}.png");
 
     public override LocalizedString Text => DisplayName;
 }
