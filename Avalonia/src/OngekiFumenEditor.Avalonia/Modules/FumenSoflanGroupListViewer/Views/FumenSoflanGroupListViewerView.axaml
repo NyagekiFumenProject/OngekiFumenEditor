@@ -1,15 +1,20 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Views.FumenSoflanGroupListViewerView"
+    x:Name="Root"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:reorderBehaviors="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Behaviors"
+    xmlns:editorObjects="clr-namespace:OngekiFumenEditor.Avalonia.Base.EditorObjects"
     xmlns:toolBar="clr-namespace:Avalonia.Controls.ToolBar.Controls;assembly=Avalonia.Controls.ToolBar"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.ViewModels"
+    x:DataType="vm:FumenSoflanGroupListViewerViewModel"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -37,11 +42,7 @@
                     Width="100"
                     Margin="10,0,10,0"
                     Text="{Binding CreateNewGroupName}" />
-                <Button Content="{markup:Translate [NewItemGroup]}">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Click" MethodName="CreateNewGroup" />
-                    </Interaction.Behaviors>
-                </Button>
+                <Button Command="{Binding CreateNewGroupCommand}" Content="{markup:Translate [NewItemGroup]}" />
             </toolBar:ToolBar>
         </StackPanel>
 
@@ -49,19 +50,20 @@
             Grid.Row="1"
             Grid.Column="0"
             Background="Transparent"
+            CanUserSortColumns="False"
             ItemsSource="{Binding DisplaySoflanGroupItemGroupRoot.DisplayableItemSource}"
-            SelectionMode="Single">
+            SelectionMode="Extended">
             <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnListLoaded" PassMode="Source" />
+                <reorderBehaviors:SoflanGroupRowReorderBehavior IndicatorBrush="{DynamicResource EditorInteractionAccentBrush}" />
             </Interaction.Behaviors>
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="ToggleButton#Expander">
                     <Setter Property="Focusable" Value="False" />
@@ -112,78 +114,82 @@
             <DataGrid.Columns>
                 <DataGridTemplateColumn Width="220" Header="Name">
                     <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
-                                    <ToggleButton
-                                        x:Name="Expander"
-                                        ClickMode="Press"
-                                        IsChecked="{Binding IsExpanded}">
-                                        <Interaction.Behaviors>
-                                            <DataTriggerBehavior
-                                                Binding="{Binding HasChildren}"
-                                                ComparisonCondition="Equal"
-                                                Value="False">
-                                                <ChangePropertyAction PropertyName="IsVisible" Value="False" />
-                                            </DataTriggerBehavior>
-                                        </Interaction.Behaviors>
-                                    </ToggleButton>
-
-                                    <RadioButton
-                                        Margin="5,0"
-                                        GroupName="ILOVE2857IsSelected"
-                                        IsChecked="{Binding IsSelected}">
-                                        <Interaction.Behaviors>
-                                            <behaviors:EventMethodBehavior EventName="Checked" MethodName="OnItemChecked" PassMode="DataContext" />
-                                        </Interaction.Behaviors>
-                                    </RadioButton>
-
-                                    <TextBlock Text="{Binding DisplayName}">
-                                        <Interaction.Behaviors>
-                                            <DataTriggerBehavior
-                                                Binding="{Binding HasChildren}"
-                                                ComparisonCondition="Equal"
-                                                Value="True">
-                                                <ChangePropertyAction PropertyName="FontWeight" Value="Bold" />
-                                            </DataTriggerBehavior>
-                                        </Interaction.Behaviors>
-                                    </TextBlock>
-                                </StackPanel>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
+                            <ContentControl Content="{Binding .}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="editorObjects:SoflanGroupWrapItemGroup" x:DataType="editorObjects:SoflanGroupWrapItemGroup">
+                                        <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
+                                            <ToggleButton
+                                                x:Name="Expander"
+                                                ClickMode="Press"
+                                                IsChecked="{Binding IsExpanded}">
+                                                <Interaction.Behaviors>
+                                                    <DataTriggerBehavior
+                                                        Binding="{Binding HasChildren}"
+                                                        ComparisonCondition="Equal"
+                                                        Value="False">
+                                                        <ChangePropertyAction PropertyName="IsVisible" Value="False" />
+                                                    </DataTriggerBehavior>
+                                                </Interaction.Behaviors>
+                                            </ToggleButton>
+                                            <TextBlock FontWeight="Bold" Text="{Binding DisplayName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                    <DataTemplate DataType="editorObjects:SoflanGroupWrapItem" x:DataType="editorObjects:SoflanGroupWrapItem">
+                                        <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
+                                            <Border Width="19" />
+                                            <RadioButton
+                                                Margin="5,0"
+                                                Checked="OnItemChecked"
+                                                GroupName="ILOVE2857IsSelected"
+                                                IsChecked="{Binding IsSelected}" />
+                                            <TextBlock Text="{Binding DisplayName}" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Design">
                     <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="2,5,2,5"
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding IsDisplayInDesignMode}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
+                            <CheckBox
+                                Margin="2,5,2,5"
+                                HorizontalAlignment="Center"
+                                IsChecked="{Binding IsDisplayInDesignMode}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Preview">
                     <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="2,5,2,5"
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding IsDisplayInPreviewMode}" />
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
+                            <CheckBox
+                                Margin="2,5,2,5"
+                                HorizontalAlignment="Center"
+                                IsChecked="{Binding IsDisplayInPreviewMode}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Soflans">
                     <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <RadioButton
-                                    Margin="2,5,2,5"
-                                    GroupName="ILOVE2857IsDisplaySoflanDesignMode"
-                                    IsChecked="{Binding IsDisplaySoflanDesignMode}">
-                                    <Interaction.Behaviors>
-                                        <behaviors:EventMethodBehavior EventName="Checked" MethodName="OnItemChecked_IsDisplaySoflanDesignMode" PassMode="DataContext" />
-                                    </Interaction.Behaviors>
-                                </RadioButton>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
+                            <ContentControl Content="{Binding .}">
+                                <ContentControl.DataTemplates>
+                                    <DataTemplate DataType="editorObjects:SoflanGroupWrapItemGroup" x:DataType="editorObjects:SoflanGroupWrapItemGroup">
+                                        <Border />
+                                    </DataTemplate>
+                                    <DataTemplate DataType="editorObjects:SoflanGroupWrapItem" x:DataType="editorObjects:SoflanGroupWrapItem">
+                                        <RadioButton
+                                            Margin="2,5,2,5"
+                                            Checked="OnDisplaySoflanItemChecked"
+                                            GroupName="ILOVE2857IsDisplaySoflanDesignMode"
+                                            IsChecked="{Binding IsDisplaySoflanDesignMode}" />
+                                    </DataTemplate>
+                                </ContentControl.DataTemplates>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
@@ -192,18 +198,9 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center">
-                <TextBlock.Text>
-                    <MultiBinding Converter="{StaticResource LocalizeConverter}">
-                        <markup:Translate>
-                            <x:Arguments>
-                                <x:String>[CurrentDisplaySelectedSoflanPointList]</x:String>
-                            </x:Arguments>
-                        </markup:Translate>
-                        <Binding Path="CurrentSelectedSoflanGroupWrapItem.DisplayName" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
+            <TextBlock
+                VerticalAlignment="Center"
+                Text="{Binding CurrentSelectedSoflanGroupWrapItem.DisplayName, StringFormat={markup:Translate [CurrentDisplaySelectedSoflanPointList]}}" />
 
             <!--  not support yet  -->
             <CheckBox
@@ -219,45 +216,49 @@
             Grid.Row="1"
             Grid.Column="1"
             Background="Transparent"
+            DoubleTapped="OnSoflanPointDoubleTapped"
             ItemsSource="{Binding DisplaySoflanPointList}"
             SelectionMode="Single">
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
-                    <Setter Property="Interaction.Behaviors">
-                        <BehaviorCollectionTemplate>
-                            <BehaviorCollection>
-                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
-                            </BehaviorCollection>
-                        </BehaviorCollectionTemplate>
-                    </Setter>
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
-                <DataGridTextColumn
-                    Width="150"
-                    Binding="{Binding Y}"
-                    Header="Y" />
-                <DataGridTextColumn
-                    Width="90"
-                    Binding="{Binding TGrid}"
-                    Header="TGrid" />
-                <DataGridTextColumn
-                    Width="90"
-                    Binding="{Binding Bpm.BPM}"
-                    Header="Bpm" />
-                <DataGridTextColumn
-                    Width="150"
-                    Binding="{Binding Speed}"
-                    Header="Speed" />
+                <DataGridTemplateColumn Width="150" Header="Y">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SoflanPointRow">
+                            <TextBlock Text="{Binding Y}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="90" Header="TGrid">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SoflanPointRow">
+                            <TextBlock Text="{Binding TGrid}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="90" Header="Bpm">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SoflanPointRow">
+                            <TextBlock Text="{Binding Bpm}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="150" Header="Speed">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SoflanPointRow">
+                            <TextBlock Text="{Binding Speed}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
 </UserControl>
-
-
-

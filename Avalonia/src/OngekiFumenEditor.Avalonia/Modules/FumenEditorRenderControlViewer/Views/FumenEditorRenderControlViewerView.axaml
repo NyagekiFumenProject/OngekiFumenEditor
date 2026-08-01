@@ -1,15 +1,17 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views.FumenEditorRenderControlViewerView"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:reorderBehaviors="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Behaviors"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.ViewModels"
+    x:DataType="vm:FumenEditorRenderControlViewerViewModel"
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -19,45 +21,40 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <Button Content="{markup:Translate [ResetDefault]}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetDefault" />
-                </Interaction.Behaviors>
-            </Button>
+            <Button Command="{Binding ResetDefaultCommand}" Content="{markup:Translate [ResetDefault]}" />
             <Button
                 Margin="5,0"
-                Content="{markup:Translate [Save]}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="Save" />
-                </Interaction.Behaviors>
-            </Button>
+                Command="{Binding SaveCommand}"
+                Content="{markup:Translate [Save]}" />
         </StackPanel>
         <DataGrid
             Grid.Row="1"
             Background="Transparent"
+            CanUserSortColumns="False"
             ItemsSource="{Binding ControlItems}"
-            SelectionMode="Single">
+            SelectionMode="Extended">
             <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnListLoaded" PassMode="Source" />
+                <reorderBehaviors:RenderControlRowReorderBehavior IndicatorBrush="{DynamicResource EditorInteractionAccentBrush}" />
             </Interaction.Behaviors>
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
                 <DataGridTextColumn
+                    x:DataType="vm:RenderControlItem"
                     Width="30"
                     Binding="{Binding RenderOrder}"
                     Header="{markup:Translate [RenderOrder]}" />
                 <DataGridTemplateColumn Header="Design">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:RenderControlItem">
                             <CheckBox
                                 Margin="2,5,2,5"
                                 HorizontalAlignment="Center"
@@ -67,7 +64,7 @@
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Preview">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:RenderControlItem">
                             <CheckBox
                                 Margin="2,5,2,5"
                                 HorizontalAlignment="Center"
@@ -75,11 +72,11 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding Name}" Header="{markup:Translate [Name]}" />
+                <DataGridTextColumn
+                    x:DataType="vm:RenderControlItem"
+                    Binding="{Binding Name}"
+                    Header="{markup:Translate [Name]}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
 </UserControl>
-
-
-

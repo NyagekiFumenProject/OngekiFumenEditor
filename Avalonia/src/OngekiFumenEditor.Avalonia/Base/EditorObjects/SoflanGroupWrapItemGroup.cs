@@ -136,6 +136,9 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
                         NotifyItemSourceChanged();
                     }
                     break;
+                case NotifyCollectionChangedAction.Move:
+                    NotifyItemSourceChanged();
+                    break;
                 default:
                     break;
             }
@@ -162,6 +165,30 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
             if (item == null) return;
             if (children.Contains(item))
                 children.Remove(item);
+        }
+
+        public int IndexOf(SoflanGroupDisplayItemListViewBase item)
+        {
+            return children.IndexOf(item);
+        }
+
+        public void Insert(int index, SoflanGroupDisplayItemListViewBase item)
+        {
+            if (item == null || children.Contains(item))
+                return;
+
+            children.Insert(Math.Clamp(index, 0, children.Count), item);
+        }
+
+        public void Move(SoflanGroupDisplayItemListViewBase item, int index)
+        {
+            var oldIndex = children.IndexOf(item);
+            if (oldIndex < 0)
+                return;
+
+            var newIndex = Math.Clamp(index, 0, children.Count - 1);
+            if (oldIndex != newIndex)
+                children.Move(oldIndex, newIndex);
         }
 
         public override string ToString()
@@ -217,8 +244,7 @@ namespace OngekiFumenEditor.Avalonia.Base.EditorObjects
             if (index < 0)
                 throw new Exception($"Children not contains insertBefore");
 
-            children.Insert(index, item);
+            Insert(index, item);
         }
     }
 }
-
