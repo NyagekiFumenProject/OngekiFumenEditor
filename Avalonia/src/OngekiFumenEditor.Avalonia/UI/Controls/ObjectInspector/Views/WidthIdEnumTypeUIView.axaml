@@ -1,17 +1,17 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.WidthIdEnumTypeUIView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
-    mc:Ignorable="d">
-    <GroupBox
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
+    <controls:GroupBox
         Margin="5,0,5,0"
         BorderBrush="DarkGray"
         Foreground="{DynamicResource EnvironmentToolWindowText}"
         Header="{Binding PropertyInfo.DisplayPropertyName}"
-        ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
+        ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
         <StackPanel>
             <Grid Name="MainPanel" Margin="5,0,5,0">
                 <Grid.ColumnDefinitions>
@@ -24,15 +24,20 @@
                     VerticalAlignment="Center"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
                     Text="{Binding PropertyInfo.DisplayPropertyName}"
-                    ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
+                    ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
                 </TextBlock>
                 <ComboBox
                     Grid.Column="1"
                     HorizontalContentAlignment="Stretch"
                     VerticalContentAlignment="Center"
-                    DisplayMemberPath="Id"
                     ItemsSource="{Binding EnumValues}"
-                    SelectedValue="{Binding PropertyInfo.ProxyValue}" />
+                    SelectedValue="{Binding PropertyInfo.ProxyValue}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Id}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
             </Grid>
             <Grid Margin="5,0,5,0">
                 <Grid.ColumnDefinitions>
@@ -75,7 +80,7 @@
                 </TextBlock>
             </Grid>
         </StackPanel>
-    </GroupBox>
+    </controls:GroupBox>
 </UserControl>
 
 

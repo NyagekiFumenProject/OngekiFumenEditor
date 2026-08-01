@@ -1,23 +1,23 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.FileInfoTypeUIView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewModels="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels"
+    xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=viewModels:FileInfoTypeUIViewModel}"
-    mc:Ignorable="d">
-    <GroupBox
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
+    <controls:GroupBox
         Margin="5,0,5,0"
         BorderBrush="DarkGray"
         Foreground="{DynamicResource EnvironmentToolWindowText}"
         Header="{Binding PropertyInfo.DisplayPropertyName}"
-        ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
+        ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -31,19 +31,21 @@
                 Grid.Row="0"
                 Grid.Column="1"
                 Padding="10,2,10,2"
-                cal:Message.Attach="OnSelectDialogOpen()"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
                 Content="{markup:Translate [SelectFile]}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnSelectDialogOpen" />
+                </Interaction.Behaviors>
             </Button>
             <TextBlock
                 Grid.Row="1"
                 Grid.ColumnSpan="2"
                 HorizontalAlignment="Left"
                 Text="{Binding File.Name}"
-                ToolTip="{Binding File.FullName}">
+                ToolTip.Tip="{Binding File.FullName}">
             </TextBlock>
         </Grid>
-    </GroupBox>
+    </controls:GroupBox>
 </UserControl>
 
 

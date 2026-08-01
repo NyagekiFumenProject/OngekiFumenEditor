@@ -1,20 +1,16 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.UI.Dialogs.ExceptionTermWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="{markup:Translate [ExceptionTermWindowTitle]}"
     Width="600"
     MaxHeight="500"
     Background="{DynamicResource EnvironmentWindowBackground}"
-    ResizeMode="NoResize"
-    SaveWindowPosition="True"
-    ShowCloseButton="False"
+    CanResize="False"
     SizeToContent="Height"
-    Style="{DynamicResource MainWindowStyle}"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -37,17 +33,15 @@
                 <ItemsControl Margin="10,0" ItemsSource="{Binding RescueFolderPaths}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock>
-                                <Hyperlink
-                                    Click="Hyperlink_Click"
-                                    DataContext="{Binding .}"
-                                    TextDecorations="None">
-                                    <TextBlock
-                                        Margin="0,2"
-                                        Text="{Binding .}"
-                                        TextWrapping="Wrap" />
-                                </Hyperlink>
-                            </TextBlock>
+                            <TextBlock
+                                x:Name="RescuePathLink"
+                                Margin="0,2"
+                                Cursor="Hand"
+                                DataContext="{Binding .}"
+                                Foreground="DodgerBlue"
+                                Text="{Binding .}"
+                                TextDecorations="Underline"
+                                TextWrapping="Wrap" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -57,28 +51,30 @@
                     VerticalAlignment="Center"
                     FontWeight="Bold"
                     Text="{markup:Translate [LogFileSaveTo]}" />
-                <TextBlock Margin="10,0" TextWrapping="Wrap">
-                    <Hyperlink
-                        Click="Hyperlink_Click"
-                        DataContext="{Binding LogFile}"
-                        TextDecorations="None">
-                        <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
-                    </Hyperlink>
-                </TextBlock>
+                <TextBlock
+                    x:Name="LogFileLink"
+                    Margin="10,0"
+                    Cursor="Hand"
+                    DataContext="{Binding LogFile}"
+                    Foreground="DodgerBlue"
+                    Text="{Binding .}"
+                    TextDecorations="Underline"
+                    TextWrapping="Wrap" />
             </StackPanel>
             <StackPanel Margin="0,10,0,0">
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
                     Text="{markup:Translate [DumpFileSaveTo]}" />
-                <TextBlock Margin="10,0" TextWrapping="Wrap">
-                    <Hyperlink
-                        Click="Hyperlink_Click"
-                        DataContext="{Binding DumpFile}"
-                        TextDecorations="None">
-                        <TextBlock Text="{Binding .}" TextWrapping="Wrap" />
-                    </Hyperlink>
-                </TextBlock>
+                <TextBlock
+                    x:Name="DumpFileLink"
+                    Margin="10,0"
+                    Cursor="Hand"
+                    DataContext="{Binding DumpFile}"
+                    Foreground="DodgerBlue"
+                    Text="{Binding .}"
+                    TextDecorations="Underline"
+                    TextWrapping="Wrap" />
             </StackPanel>
 
             <Rectangle
@@ -112,13 +108,13 @@
                 Content="{markup:Translate [ComfirmClose]}"
                 FontWeight="Bold" />
             <Button
+                x:Name="CloseButton"
                 Padding="0,10,0,10"
-                Click="Button_Click"
                 Content="{markup:Translate [CloseProgram]}"
                 IsEnabled="{Binding ElementName=Comfirm, Path=IsChecked}" />
         </StackPanel>
     </ScrollViewer>
-</mah:MetroWindow>
+</Window>
 
 
 

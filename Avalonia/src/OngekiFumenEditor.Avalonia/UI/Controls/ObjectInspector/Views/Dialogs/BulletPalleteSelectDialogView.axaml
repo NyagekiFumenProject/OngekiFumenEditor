@@ -1,70 +1,67 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.Dialogs.BulletPalleteSelectDialogView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:dialog="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels.Dialogs"
-    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views.Dialogs"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:dialog="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels.Dialogs"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.Dialogs"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters"
     Title="{markup:Translate [BulletPalleteSelectDialogTitle]}"
     Width="400"
     Height="300"
     d:DataContext="{d:DesignInstance Type=dialog:BulletPalleteSelectDialogViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
-    SaveWindowPosition="True"
     SizeToContent="Width"
-    Style="{StaticResource MainWindowStyle}"
     mc:Ignorable="d">
-    <mah:MetroWindow.Resources>
+    <Window.Resources>
         <valueconverters:HideIfDummyPalleteConverter x:Key="HideIfDummyPalleteConverter" />
-    </mah:MetroWindow.Resources>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ListView
+        <DataGrid
             Grid.Row="0"
             Background="Transparent"
             BorderBrush="Transparent"
+            CanUserReorderColumns="True"
             ItemsSource="{Binding BulletPalleteList}"
-            ScrollViewer.CanContentScroll="True"
             SelectedItem="{Binding SelectedPallete}"
-            SelectionMode="Single"
-            VirtualizingPanel.IsVirtualizing="True"
-            VirtualizingPanel.VirtualizationMode="Recycling">
-            <ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+            SelectionMode="Single">
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Interaction.Behaviors">
+                        <BehaviorCollectionTemplate>
+                            <BehaviorCollection>
+                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
+                            </BehaviorCollection>
+                        </BehaviorCollectionTemplate>
+                    </Setter>
                 </Style>
-            </ListView.Resources>
-            <ListView.View>
-                <GridView AllowsColumnReorder="True">
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="GridViewColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                        </Style>
-                    </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                    <DataGridTextColumn
                         Width="60"
-                        DisplayMemberBinding="{Binding StrID}"
+                        Binding="{Binding StrID}"
                         Header="{markup:Translate [BulletPaletteId]}" />
-                    <GridViewColumn
+                    <DataGridTextColumn
                         Width="120"
-                        DisplayMemberBinding="{Binding EditorName}"
+                        Binding="{Binding EditorName}"
                         Header="{markup:Translate [Name]}">
-                    </GridViewColumn>
+                    </DataGridTextColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -75,11 +72,11 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -90,11 +87,11 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -105,11 +102,11 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -120,11 +117,11 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -135,11 +132,11 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [BulletType]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -150,11 +147,11 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock HorizontalAlignment="Center">
                                     <TextBlock.Text>
@@ -165,11 +162,10 @@
                                     </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
@@ -178,19 +174,23 @@
             <Button
                 Margin="10"
                 Padding="10,5,10,5"
-                cal:Message.Attach="[Event Click] = [Action OnComfirmButtonClicked()];"
                 Content="{markup:Translate [Confirm]}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnComfirmButtonClicked" />
+                </Interaction.Behaviors>
             </Button>
             <Button
                 Grid.Column="1"
                 Margin="10"
                 Padding="10,5,10,5"
-                cal:Message.Attach="[Event Click] = [Action OnCancelButtonClicked()];"
                 Content="{markup:Translate [Cancel]}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCancelButtonClicked" />
+                </Interaction.Behaviors>
             </Button>
         </Grid>
     </Grid>
-</mah:MetroWindow>
+</Window>
 
 
 

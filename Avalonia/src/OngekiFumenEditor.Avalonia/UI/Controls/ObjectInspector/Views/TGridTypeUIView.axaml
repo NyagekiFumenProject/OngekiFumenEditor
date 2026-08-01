@@ -1,19 +1,19 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.TGridTypeUIView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:Background="White"
-    mc:Ignorable="d">
-    <GroupBox
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
+    <controls:GroupBox
         Margin="5,0,5,0"
         BorderBrush="DarkGray"
         Foreground="{DynamicResource EnvironmentToolWindowText}"
         Header="{Binding PropertyInfo.DisplayPropertyName}"
-        ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
+        ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
         <StackPanel>
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -65,14 +65,16 @@
                 </Grid.ColumnDefinitions>
                 <Button
                     Grid.Column="0"
-                    cal:Message.Attach="SetNull()"
                     Background="LightGray"
-                    Visibility="{Binding PropertyInfo.IsAllowSetNull, Converter={StaticResource BoolToVisibilityConverter}}">
+                    IsVisible="{Binding PropertyInfo.IsAllowSetNull, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Click" MethodName="SetNull" />
+                    </Interaction.Behaviors>
                     Set Null
                 </Button>
             </Grid>
         </StackPanel>
-    </GroupBox>
+    </controls:GroupBox>
 </UserControl>
 
 

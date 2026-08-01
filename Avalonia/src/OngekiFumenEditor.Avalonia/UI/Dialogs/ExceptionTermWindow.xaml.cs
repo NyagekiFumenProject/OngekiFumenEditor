@@ -1,4 +1,6 @@
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Diagnostics;
 
@@ -20,7 +22,9 @@ public partial class ExceptionTermWindow : Window
         LogFile = logFile;
         DumpFile = dumpFile;
 
+        InitializeComponent();
         DataContext = this;
+        WireUpEvents();
     }
 
     public ExceptionTermWindow()
@@ -29,7 +33,10 @@ public partial class ExceptionTermWindow : Window
         RescueFolderPaths = [];
         LogFile = string.Empty;
         DumpFile = string.Empty;
+
+        InitializeComponent();
         DataContext = this;
+        WireUpEvents();
     }
 
     public void OpenPath(string path)
@@ -37,5 +44,28 @@ public partial class ExceptionTermWindow : Window
         if (string.IsNullOrWhiteSpace(path))
             return;
         ProcessUtils.OpenExplorerToBrowser(path);
+    }
+
+    private void WireUpEvents()
+    {
+        CloseButton.Click += OnCloseButtonClick;
+        // 救援目录链接在 ItemsControl 的 DataTemplate 里，构造函数中按 x:Name 找不到实例，
+        // 三个链接统一用窗口层的 PointerPressed 冒泡事件按 x:Name 过滤（对应 WPF 的 Hyperlink_Click）。
+        AddHandler(InputElement.PointerPressedEvent, OnPathLinkPointerPressed, RoutingStrategies.Bubble);
+    }
+
+    private void OnCloseButtonClick(object sender, RoutedEventArgs e)
+    {
+        Close();
+    }
+
+    private void OnPathLinkPointerPressed(object sender, PointerPressedEventArgs e)
+    {
+        if (e.Source is not TextBlock { DataContext: string path } link)
+            return;
+        if (link.Name is not ("RescuePathLink" or "LogFileLink" or "DumpFileLink"))
+            return;
+        OpenPath(path);
+        e.Handled = true;
     }
 }

@@ -1,5 +1,6 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -35,6 +36,12 @@ public partial class ConfigKeyBindingDialog : Window, INotifyPropertyChanged
         Definition = definition;
         key = definition.Key;
         modifier = definition.Modifiers;
+
+        InitializeComponent();
+
+        ConfirmButton.Click += OnConfirmButtonClick;
+        ClearButton.Click += OnClearButtonClick;
+        ResetButton.Click += OnResetButtonClick;
 
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
@@ -126,6 +133,22 @@ public partial class ConfigKeyBindingDialog : Window, INotifyPropertyChanged
         key = Key.None;
         modifier = KeyModifiers.None;
         UpdateExpression();
+    }
+
+    private void OnConfirmButtonClick(object sender, RoutedEventArgs e)
+    {
+        if (TryApply())
+            Close(true);
+    }
+
+    private void OnClearButtonClick(object sender, RoutedEventArgs e)
+    {
+        Clear();
+    }
+
+    private void OnResetButtonClick(object sender, RoutedEventArgs e)
+    {
+        ApplyDefault();
     }
 
     public void ApplyDefault()

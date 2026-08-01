@@ -1,22 +1,18 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater.Dialogs.Views.ShowNewVersionDialogView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.Views"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater.Dialogs.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater.Dialogs.ViewModels"
     Title="{markup:Translate [ShowNewVersionTitle]}"
     d:DataContext="{d:DesignInstance Type=vm:ShowNewVersionDialogViewModel}"
     Background="{DynamicResource EnvironmentWindowBackground}"
-    ResizeMode="NoResize"
-    ShowMaxRestoreButton="False"
-    ShowMinButton="False"
+    CanResize="False"
     SizeToContent="WidthAndHeight"
-    Style="{DynamicResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel>
         <Grid Margin="10,15,10,15">
@@ -119,11 +115,14 @@
         <Button
             Margin="5,10,5,5"
             Padding="10"
-            cal:Message.Attach="StartUpdate()"
             Content="{markup:Translate [UpdateStart]}"
-            IsEnabled="{Binding IsReady}" />
+            IsEnabled="{Binding IsReady}">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="Click" MethodName="StartUpdate" />
+            </Interaction.Behaviors>
+        </Button>
     </StackPanel>
-</mah:MetroWindow>
+</Window>
 
 
 

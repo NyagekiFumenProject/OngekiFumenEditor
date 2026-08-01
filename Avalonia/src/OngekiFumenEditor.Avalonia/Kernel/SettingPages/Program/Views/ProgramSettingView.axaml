@@ -1,21 +1,21 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.Views.ProgramSettingView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:ProgramSettingViewModel}"
     d:DesignHeight="800"
     d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <StackPanel>
-        <GroupBox Margin="5" Header="{markup:Translate [Setup]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate [Setup]}">
             <StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
@@ -34,8 +34,8 @@
                     Content="Show console window"
                     IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">
             <StackPanel>
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
@@ -53,9 +53,10 @@
                     <Button
                         Grid.Column="2"
                         Padding="20,2,20,2"
-                        cal:Message.Attach="OnDumpFolderPathButtonClick()"
                         Content="{markup:Translate [Browser]}">
-
+                        <Interaction.Behaviors>
+                            <behaviors:EventMethodBehavior EventName="Click" MethodName="OnDumpFolderPathButtonClick" />
+                        </Interaction.Behaviors>
                     </Button>
                 </Grid>
                 <CheckBox
@@ -74,12 +75,14 @@
                     Margin="10,0,10,10"
                     Padding="20,2,20,2"
                     HorizontalAlignment="Left"
-                    cal:Message.Attach="ThrowException()"
                     Content="{markup:Translate [TestDump]}">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Click" MethodName="ThrowException" />
+                    </Interaction.Behaviors>
                 </Button>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">
             <StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <CheckBox IsChecked="{Binding EnableAssociateNyagekiProj}">
@@ -96,20 +99,26 @@
                     <Button
                         Padding="10,5"
                         HorizontalAlignment="Left"
-                        cal:Message.Attach="RegisterNyagekiAssociations()"
                         Content="{markup:Translate [FileAssociationRegister]}"
-                        IsEnabled="{Binding EnableAssociate}" />
+                        IsEnabled="{Binding EnableAssociate}">
+                        <Interaction.Behaviors>
+                            <behaviors:EventMethodBehavior EventName="Click" MethodName="RegisterNyagekiAssociations" />
+                        </Interaction.Behaviors>
+                    </Button>
                     <Button
                         Margin="10,0,0,0"
                         Padding="10,5"
                         HorizontalAlignment="Left"
-                        cal:Message.Attach="UnRegisterNyagekiAssociations()"
                         Content="{markup:Translate [FileAssociationUnregister]}"
-                        IsEnabled="{Binding EnableAssociate, Converter={StaticResource ReverseBoolConverter}}" />
+                        IsEnabled="{Binding EnableAssociate, Converter={StaticResource ReverseBoolConverter}}">
+                        <Interaction.Behaviors>
+                            <behaviors:EventMethodBehavior EventName="Click" MethodName="UnRegisterNyagekiAssociations" />
+                        </Interaction.Behaviors>
+                    </Button>
                 </StackPanel>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [ProgramUpdates]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [ProgramUpdates]}">
             <StackPanel>
                 <CheckBox
                     Margin="10,10,10,10"
@@ -130,16 +139,21 @@
                         Padding="10,5"
                         HorizontalAlignment="Left"
                         VerticalAlignment="Center"
-                        cal:Message.Attach="CheckUpdate($executioncontext)"
-                        Content="{markup:Translate [CheckUpdates]}" />
+                        Content="{markup:Translate [CheckUpdates]}">
+                        <Interaction.Behaviors>
+                            <behaviors:EventMethodBehavior EventName="Click" MethodName="CheckUpdate" PassMode="ExecutionContext" />
+                        </Interaction.Behaviors>
+                    </Button>
                     <TextBlock
                         Margin="5,0"
                         VerticalAlignment="Center"
-                        cal:Message.Attach="[Event MouseLeftButtonDown]=[OpenShowNewVersionDialog($executioncontext)]"
                         Cursor="Hand"
                         FontWeight="Bold"
-                        Foreground="{StaticResource MahApps.Brushes.Highlight}"
-                        Visibility="{Binding ProgramUpdater.HasNewVersion, Converter={StaticResource BoolToVisibilityConverter}}">
+                        Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                        IsVisible="{Binding ProgramUpdater.HasNewVersion, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Interaction.Behaviors>
+                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenShowNewVersionDialog" PassMode="ExecutionContext" />
+                        </Interaction.Behaviors>
                         <TextBlock.Text>
                             <MultiBinding Converter="{StaticResource LocalizeConverter}">
                                 <markup:Translate Path="[SettingHasNewVersion]" />
@@ -150,18 +164,21 @@
                     </TextBlock>
                 </StackPanel>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [Other]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [Other]}">
             <StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Button
                         Padding="10,5"
                         HorizontalAlignment="Left"
-                        cal:Message.Attach="ResetAllSettings()"
-                        Content="{markup:Translate [ResetAllSettings]}" />
+                        Content="{markup:Translate [ResetAllSettings]}">
+                        <Interaction.Behaviors>
+                            <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetAllSettings" />
+                        </Interaction.Behaviors>
+                    </Button>
                 </StackPanel>
             </StackPanel>
-        </GroupBox>
+        </controls:GroupBox>
     </StackPanel>
 </UserControl>
 

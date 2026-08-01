@@ -1,20 +1,18 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.CurveInterpolaterFactoryTypeUIView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
     mc:Ignorable="d">
     <UserControl.Resources>
         <valueconverters:ContrastingColorsConverter x:Key="ContrastingColorsConverter" />
     </UserControl.Resources>
     <Grid Name="MainPanel" Margin="5,0,5,0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition>
-            </ColumnDefinition>
-            <ColumnDefinition>
-            </ColumnDefinition>
+            <ColumnDefinition />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <TextBlock
             Margin="0,0,15,0"
@@ -28,7 +26,7 @@
             VerticalContentAlignment="Center"
             ItemsSource="{Binding EnumValues}"
             SelectedValue="{Binding ProxyValue, StringFormat={}{Name}}"
-            ToolTip="{Binding PropertyInfo.ProxyValue.Name}">
+            ToolTip.Tip="{Binding PropertyInfo.ProxyValue.Name}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}">

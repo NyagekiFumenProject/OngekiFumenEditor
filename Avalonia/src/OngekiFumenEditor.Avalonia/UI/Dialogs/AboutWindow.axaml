@@ -1,18 +1,16 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.UI.Dialogs.AboutWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Dialogs"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Dialogs"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     Title="{markup:Translate [AboutWindow]}"
     Width="300"
     Background="{DynamicResource EnvironmentWindowBackground}"
     SizeToContent="WidthAndHeight"
-    Style="{DynamicResource MainWindowStyle}"
     mc:Ignorable="d">
     <StackPanel Margin="0,0,0,20">
         <Label
@@ -45,7 +43,7 @@
 
             <Label VerticalAlignment="Center" FontSize="15">Product Version</Label>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <StackPanel Orientation="Horizontal" Visibility="{Binding IsNotifyUpdateSuccess, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsNotifyUpdateSuccess, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
                     <Label
                         VerticalAlignment="Center"
                         d:Content="1.5.0"
@@ -134,7 +132,7 @@
             </Label>
         </Grid>
     </StackPanel>
-</mah:MetroWindow>
+</Window>
 
 
 

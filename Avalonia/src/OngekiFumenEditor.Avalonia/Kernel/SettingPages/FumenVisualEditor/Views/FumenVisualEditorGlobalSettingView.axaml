@@ -2,24 +2,23 @@
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ValueConverters"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.ViewModels"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:FumenVisualEditorGlobalSettingViewModel}"
     d:DesignWidth="800"
-    mc:Ignorable="d">
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <UserControl.Resources>
         <valueconverters:IntToSolidBrush x:Key="IntToSolidBrush" />
     </UserControl.Resources>
     <StackPanel>
-        <GroupBox Margin="5" Header="{markup:Translate [AutoSave]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate [AutoSave]}">
             <StackPanel Margin="10">
                 <CheckBox Content="{markup:Translate [EnableAutoSave]}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
                 <StackPanel
@@ -35,8 +34,8 @@
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [TimesPerMin]}" />
                 </StackPanel>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [UndoRedo]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [UndoRedo]}">
             <StackPanel Margin="10">
                 <CheckBox VerticalContentAlignment="Center" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">
                     <TextBlock Text="{markup:Translate [RememberUndoPlace]}" TextWrapping="Wrap" />
@@ -60,8 +59,8 @@
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SaveMaxCount_Part2]}" />
                 </StackPanel>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [UserInteraction]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [UserInteraction]}">
             <StackPanel Margin="10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -105,8 +104,8 @@
                     <TextBlock Text="{markup:Translate [ReturnStartTimeAfterPause]}" TextWrapping="Wrap" />
                 </CheckBox>
             </StackPanel>
-        </GroupBox>
-        <GroupBox Margin="5" Header="{markup:Translate [Render]}">
+        </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate [Render]}">
             <StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
                     <TextBlock Text="Limit FPS:" />
@@ -115,33 +114,29 @@
                         Margin="5,0"
                         Text="{Binding Setting.LimitFPS}" />
                     <TextBlock x:Name="noLimitText" Text="{markup:Translate [NoLimit]}">
-                        <Behaviors:Interaction.Triggers>
-                            <Behaviors:DataTrigger
+                        <Interaction.Behaviors>
+                            <DataTriggerBehavior
                                 Binding="{Binding Setting.LimitFPS}"
-                                Comparison="LessThanOrEqual"
+                                ComparisonCondition="LessThanOrEqual"
                                 Value="0">
-                                <Behaviors:DataTrigger.Actions>
-                                    <Behaviors:ChangePropertyAction
-                                        PropertyName="Visibility"
-                                        TargetObject="{Binding ElementName=noLimitText}"
-                                        Value="Visible" />
-                                </Behaviors:DataTrigger.Actions>
-                            </Behaviors:DataTrigger>
-                            <Behaviors:DataTrigger
+                                <ChangePropertyAction
+                                    PropertyName="IsVisible"
+                                    TargetObject="{Binding #noLimitText}"
+                                    Value="True" />
+                            </DataTriggerBehavior>
+                            <DataTriggerBehavior
                                 Binding="{Binding Setting.LimitFPS}"
-                                Comparison="GreaterThan"
+                                ComparisonCondition="GreaterThan"
                                 Value="0">
-                                <Behaviors:DataTrigger.Actions>
-                                    <Behaviors:ChangePropertyAction
-                                        PropertyName="Visibility"
-                                        TargetObject="{Binding ElementName=noLimitText}"
-                                        Value="Hidden" />
-                                </Behaviors:DataTrigger.Actions>
-                            </Behaviors:DataTrigger>
-                        </Behaviors:Interaction.Triggers>
+                                <ChangePropertyAction
+                                    PropertyName="IsVisible"
+                                    TargetObject="{Binding #noLimitText}"
+                                    Value="False" />
+                            </DataTriggerBehavior>
+                        </Interaction.Behaviors>
                     </TextBlock>
                 </StackPanel>
-                <GroupBox Margin="5,0,5,5" Header="{markup:Translate [PreviewMode]}">
+                <controls:GroupBox Margin="5,0,5,5" Header="{markup:Translate [PreviewMode]}">
                     <StackPanel Margin="10">
                         <WrapPanel Orientation="Horizontal">
                             <TextBlock
@@ -168,12 +163,14 @@
                                 Width="60"
                                 Height="18"
                                 Margin="10,0"
-                                cal:Message.Attach="[Event MouseDown] = [Action OnSelectBackgroundColor($executionContext)]"
                                 Background="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}}"
                                 BorderBrush="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
                                 BorderThickness="1"
                                 CornerRadius="7"
                                 Cursor="Hand">
+                                <Interaction.Behaviors>
+                                    <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnSelectBackgroundColor" PassMode="ExecutionContext" />
+                                </Interaction.Behaviors>
                             </Border>
                         </StackPanel>
                         <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
@@ -186,12 +183,14 @@
                                     Width="60"
                                     Height="18"
                                     Margin="10,0"
-                                    cal:Message.Attach="[Event MouseDown] = [Action OnSelectForegroundColor($executionContext)]"
                                     Background="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}}"
                                     BorderBrush="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
                                     BorderThickness="1"
                                     CornerRadius="7"
                                     Cursor="Hand">
+                                    <Interaction.Behaviors>
+                                        <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnSelectForegroundColor" PassMode="ExecutionContext" />
+                                    </Interaction.Behaviors>
                                 </Border>
                             </StackPanel>
                             <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.HideWallLaneWhenEnablePlayField}">
@@ -205,9 +204,9 @@
                             <TextBlock Text="{markup:Translate [ShowHitObjectEffectInPreviewMode]}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
                     </StackPanel>
-                </GroupBox>
+                </controls:GroupBox>
             </StackPanel>
-        </GroupBox>
+        </controls:GroupBox>
     </StackPanel>
 </UserControl>
 

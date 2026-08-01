@@ -1,14 +1,14 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Views.KeyBindingSettingView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ValueConverters"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.SettingPages.KeyBinding.ViewModels"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:KeyBindingSettingViewModel}"
@@ -46,24 +46,27 @@
                 <Button
                     Padding="10,4"
                     HorizontalAlignment="Left"
-                    cal:Message.Attach="UpdateDisplayList()"
-                    Content="{markup:Translate [ApplyFilter]}" />
+                    Content="{markup:Translate [ApplyFilter]}">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Click" MethodName="UpdateDisplayList" />
+                    </Interaction.Behaviors>
+                </Button>
                 <Button
                     Margin="0,0"
                     Padding="10,5"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    cal:Message.Attach="ResetAllDefinitions()"
-                    Content="{markup:Translate [ResetAllKeybindings]}" />
+                    Content="{markup:Translate [ResetAllKeybindings]}">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetAllDefinitions" />
+                    </Interaction.Behaviors>
+                </Button>
             </Grid>
             <Border Height="1" Background="Gray" />
         </StackPanel>
         <ItemsControl
             Grid.Row="1"
-            ItemsSource="{Binding Definitions}"
-            ScrollViewer.CanContentScroll="True"
-            VirtualizingPanel.IsVirtualizing="True"
-            VirtualizingPanel.VirtualizationMode="Recycling">
+            ItemsSource="{Binding Definitions}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Grid Margin="5">
@@ -91,8 +94,11 @@
                             Grid.Column="2"
                             Margin="30,3,3,3"
                             Padding="10,5"
-                            cal:Message.Attach="ChangeKeybind($executionContext)"
-                            Content="{markup:Translate [Change]}" />
+                            Content="{markup:Translate [Change]}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="Click" MethodName="ChangeKeybind" PassMode="ExecutionContext" />
+                            </Interaction.Behaviors>
+                        </Button>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

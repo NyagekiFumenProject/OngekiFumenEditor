@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Avalonia.Media;
 using System.ComponentModel;
 
@@ -25,6 +26,7 @@ public partial class CommonColorPicker : Window, INotifyPropertyChanged
     {
         this.getter = getter;
         this.setter = setter;
+        InitializeComponent();
         DataContext = this;
         Title = title;
     }
@@ -33,6 +35,13 @@ public partial class CommonColorPicker : Window, INotifyPropertyChanged
     {
         getter = () => Colors.White;
         setter = _ => { };
+        InitializeComponent();
         DataContext = this;
+    }
+
+    private void OnColorButtonClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Background: SolidColorBrush brush })
+            CurrentColor = brush.Color;
     }
 }

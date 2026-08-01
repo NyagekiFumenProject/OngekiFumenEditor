@@ -1,10 +1,9 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.RangeValue"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -35,20 +34,19 @@
             Margin="0,0,15,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            HorizontalContentAlignment="Right"
+            TextAlignment="Right"
             Foreground="{DynamicResource EnvironmentToolWindowText}"
             Text="{Binding CurrentValue, StringFormat={}{0:N2}}">
         </TextBox>
-        <gemini:SliderEx
+        <Slider
             x:Name="mySlider"
             Grid.Row="1"
             Grid.ColumnSpan="2"
-            IsSnapToTickEnabled="True"
             Maximum="{Binding MaxValue}"
             Minimum="{Binding MinValue}"
             TickFrequency="{Binding Step}"
             Value="{Binding CurrentValue}">
-        </gemini:SliderEx>
+        </Slider>
         <TextBlock
             Grid.Row="2"
             Margin="15,0,0,0"

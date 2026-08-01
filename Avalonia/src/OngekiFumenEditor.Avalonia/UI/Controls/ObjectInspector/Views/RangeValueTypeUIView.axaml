@@ -1,13 +1,12 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.RangeValueTypeUIView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.Views"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewModels="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels"
+    xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=viewModels:RangeValueTypeUIViewModel}"
     mc:Ignorable="d">
@@ -27,7 +26,7 @@
             VerticalAlignment="Center"
             Foreground="{DynamicResource EnvironmentToolWindowText}"
             Text="{Binding PropertyInfo.DisplayPropertyName}"
-            ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}">
+            ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
         </TextBlock>
         <TextBox
             x:Name="Editbox"
@@ -39,13 +38,13 @@
             Foreground="{DynamicResource EnvironmentToolWindowText}"
             Text="{Binding CurrentValue}">
         </TextBox>
-        <gemini:SliderEx
+        <Slider
             Grid.Row="1"
             Grid.ColumnSpan="2"
             Maximum="{Binding MaxValue}"
             Minimum="{Binding MinValue}"
             Value="{Binding CurrentValue}">
-        </gemini:SliderEx>
+        </Slider>
         <TextBlock
             Grid.Row="2"
             Margin="15,0,0,0"
