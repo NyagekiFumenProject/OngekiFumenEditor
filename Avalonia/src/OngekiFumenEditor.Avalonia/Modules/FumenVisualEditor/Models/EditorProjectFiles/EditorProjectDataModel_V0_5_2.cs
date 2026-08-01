@@ -44,8 +44,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProj
 		public string FumenFilePath
 		{
 			get => fumenFilePath;
-			set => SetProperty(ref fumenFilePath, value);
+			set
+			{
+				if (SetProperty(ref fumenFilePath, value))
+					OnPropertyChanged(nameof(CanEditBaseBpm));
+			}
 		}
+
+		[JsonIgnore]
+		public bool CanEditBaseBpm => string.IsNullOrWhiteSpace(FumenFilePath);
 
 		private TimeSpan rememberLastDisplayTime = TimeSpan.FromMilliseconds(0);
 		[JsonInclude]

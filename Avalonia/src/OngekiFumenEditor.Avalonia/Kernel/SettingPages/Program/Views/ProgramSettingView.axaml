@@ -1,8 +1,8 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.Views.ProgramSettingView"
+    x:DataType="vm:ProgramSettingViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -53,11 +53,8 @@
                     <Button
                         Grid.Column="2"
                         Padding="20,2,20,2"
-                        Content="{markup:Translate [Browser]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="OnDumpFolderPathButtonClick" />
-                        </Interaction.Behaviors>
-                    </Button>
+                        Command="{Binding SelectDumpFolderCommand}"
+                        Content="{markup:Translate [Browser]}" />
                 </Grid>
                 <CheckBox
                     Margin="10,0,10,10"
@@ -75,94 +72,8 @@
                     Margin="10,0,10,10"
                     Padding="20,2,20,2"
                     HorizontalAlignment="Left"
-                    Content="{markup:Translate [TestDump]}">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Click" MethodName="ThrowException" />
-                    </Interaction.Behaviors>
-                </Button>
-            </StackPanel>
-        </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">
-            <StackPanel>
-                <StackPanel Margin="5" Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding EnableAssociateNyagekiProj}">
-                        <TextBlock Text=".nyagekiProj" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox Margin="10,0" IsChecked="{Binding EnableAssociateNyageki}">
-                        <TextBlock Text=".nyageki" TextWrapping="Wrap" />
-                    </CheckBox>
-                    <CheckBox IsChecked="{Binding EnableAssociateOgkr}">
-                        <TextBlock Text=".ogkr" TextWrapping="Wrap" />
-                    </CheckBox>
-                </StackPanel>
-                <StackPanel Margin="5" Orientation="Horizontal">
-                    <Button
-                        Padding="10,5"
-                        HorizontalAlignment="Left"
-                        Content="{markup:Translate [FileAssociationRegister]}"
-                        IsEnabled="{Binding EnableAssociate}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="RegisterNyagekiAssociations" />
-                        </Interaction.Behaviors>
-                    </Button>
-                    <Button
-                        Margin="10,0,0,0"
-                        Padding="10,5"
-                        HorizontalAlignment="Left"
-                        Content="{markup:Translate [FileAssociationUnregister]}"
-                        IsEnabled="{Binding EnableAssociate, Converter={StaticResource ReverseBoolConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="UnRegisterNyagekiAssociations" />
-                        </Interaction.Behaviors>
-                    </Button>
-                </StackPanel>
-            </StackPanel>
-        </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [ProgramUpdates]}">
-            <StackPanel>
-                <CheckBox
-                    Margin="10,10,10,10"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.EnableUpdateCheck}">
-                    <TextBlock Text="{markup:Translate [EnableUpdateCheck]}" TextWrapping="Wrap" />
-                </CheckBox>
-                <CheckBox
-                    Margin="30,0,10,5"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.UpdaterCheckMasterBranchOnly}"
-                    IsEnabled="{Binding Setting.EnableUpdateCheck}">
-                    <TextBlock Text="{markup:Translate [UpdaterCheckMasterBranchOnly]}" TextWrapping="Wrap" />
-                </CheckBox>
-                <StackPanel Orientation="Horizontal">
-                    <Button
-                        Margin="5,5,5,5"
-                        Padding="10,5"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Center"
-                        Content="{markup:Translate [CheckUpdates]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="CheckUpdate" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </Button>
-                    <TextBlock
-                        Margin="5,0"
-                        VerticalAlignment="Center"
-                        Cursor="Hand"
-                        FontWeight="Bold"
-                        Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
-                        IsVisible="{Binding ProgramUpdater.HasNewVersion, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenShowNewVersionDialog" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                        <TextBlock.Text>
-                            <MultiBinding Converter="{StaticResource LocalizeConverter}">
-                                <markup:Translate Path="[SettingHasNewVersion]" />
-                                <Binding Path="ProgramUpdater.RemoteVersionInfo.Version" />
-                                <Binding Path="ProgramUpdater.RemoteVersionInfo.Branch" />
-                            </MultiBinding>
-                        </TextBlock.Text>
-                    </TextBlock>
-                </StackPanel>
+                    Command="{Binding ThrowExceptionCommand}"
+                    Content="{markup:Translate [TestDump]}" />
             </StackPanel>
         </controls:GroupBox>
         <controls:GroupBox Margin="5" Header="{markup:Translate [Other]}">
@@ -171,11 +82,8 @@
                     <Button
                         Padding="10,5"
                         HorizontalAlignment="Left"
-                        Content="{markup:Translate [ResetAllSettings]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetAllSettings" />
-                        </Interaction.Behaviors>
-                    </Button>
+                        Command="{Binding ResetAllSettingsCommand}"
+                        Content="{markup:Translate [ResetAllSettings]}" />
                 </StackPanel>
             </StackPanel>
         </controls:GroupBox>

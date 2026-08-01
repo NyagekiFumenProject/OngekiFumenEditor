@@ -1,4 +1,3 @@
-using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OpenTK.Mathematics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics

@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using Gekimini.Avalonia.Platforms.Services.Window;
-using OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater;
-using OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater.Dialogs.ViewModels;
+using CommunityToolkit.Mvvm.Input;
+using Gekimini.Avalonia.Framework.Dialogs;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 
@@ -10,15 +9,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 public partial class ProgramSettingViewModel : ObservableObject
 {
     public ProgramSetting Setting => ProgramSetting.Default;
-
-    [ObservableProperty]
-    public partial bool EnableAssociateNyagekiProj { get; set; } = true;
-
-    [ObservableProperty]
-    public partial bool EnableAssociateNyageki { get; set; } = true;
-
-    [ObservableProperty]
-    public partial bool EnableAssociateOgkr { get; set; } = true;
 
     public ProgramSettingViewModel()
     {
@@ -30,8 +20,12 @@ public partial class ProgramSettingViewModel : ObservableObject
         Setting.Save();
     }
 
-    public void ResetAllSettings()
+    [RelayCommand]
+    private async Task ResetAllSettingsAsync()
     {
+        if (!await IoC.Get<IDialogManager>().ShowComfirmDialog(Lang.ResetAllSettingComfirm, Lang.Warning))
+            return;
+
         var settingList = new ISettingModel[]
         {
             AudioPlayerToolViewerSetting.Default,
@@ -48,18 +42,26 @@ public partial class ProgramSettingViewModel : ObservableObject
             setting.Reset();
             setting.Save();
         }
+
+        await IoC.Get<IDialogManager>().ShowMessageDialog(Lang.ResetCompleted);
     }
 
-    public async Task CheckUpdate()
+    [RelayCommand]
+    private async Task SelectDumpFolderAsync()
     {
-        await IoC.Get<IProgramUpdater>().CheckUpdatable();
+        var folderPath = await FileDialogHelper.OpenDirectoryAsync(Lang.CrashDumpFileOutput);
+        if (string.IsNullOrWhiteSpace(folderPath))
+            return;
+
+        Setting.DumpFileDirPath = folderPath;
+        ApplyChanges();
     }
 
-    public IProgramUpdater ProgramUpdater => IoC.Get<IProgramUpdater>();
-
-    public void OpenShowNewVersionDialog()
+    [RelayCommand]
+    private void ThrowException()
     {
-        IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
+        _ = Task.Run(() => throw new Exception("Crash dump test exception."));
     }
+
 }
 

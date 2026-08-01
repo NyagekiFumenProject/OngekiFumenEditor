@@ -21,7 +21,6 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     public ISimpleLineDrawing SimpleLineDrawing { get; }
     public IStaticVBODrawing StaticVBODrawing { get; }
     public IStringDrawing StringDrawing { get; }
-    public ISvgDrawing SvgDrawing { get; }
     public ITextureDrawing TextureDrawing { get; }
     public IBatchTextureDrawing BatchTextureDrawing { get; }
     public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }
@@ -35,7 +34,6 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         SimpleLineDrawing = new DefaultSkiaLineDrawing(this);
         StaticVBODrawing = (IStaticVBODrawing)SimpleLineDrawing;
         StringDrawing = new DefaultSkiaStringDrawing(this);
-        SvgDrawing = new UnsupportedSkiaSvgDrawing();
         TextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
         BatchTextureDrawing = (IBatchTextureDrawing)TextureDrawing;
         HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
@@ -76,14 +74,4 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         return new AvaloniaSkiaRenderControl();
     }
 
-    private sealed class UnsupportedSkiaSvgDrawing : CommonDrawingBase, ISvgDrawing
-    {
-        public void Draw(
-            IDrawingContext target,
-            OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg.SvgPrefabBase svg,
-            System.Numerics.Vector2 position)
-        {
-            throw new NotSupportedException("Direct SVG drawing is not supported by the Avalonia.Skia renderer.");
-        }
-    }
 }

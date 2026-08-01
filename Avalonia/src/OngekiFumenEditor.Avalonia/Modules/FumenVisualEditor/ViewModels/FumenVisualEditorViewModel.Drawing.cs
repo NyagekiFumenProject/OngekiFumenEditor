@@ -747,7 +747,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                 .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.EnemySets.BinaryFindRange(min, max))
                 .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
-                .Concat(fumen.SvgPrefabs)
                 .Concat(playableDurationObjects)
                 .Concat(playableObjects);
 
@@ -912,10 +911,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     private ActionExecutionContext CreateExecutionContext(object source, object eventArgs)
         => new() { Source = source, EventArgs = eventArgs, View = View };
 
-    public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
+    public async Task InitializeRenderControlAsync(ContentControl contentControl)
     {
-        if (executionContext.Source is not ContentControl contentControl)
-            return; //todo throw exception
         if (renderImpl != null)
             return;
 

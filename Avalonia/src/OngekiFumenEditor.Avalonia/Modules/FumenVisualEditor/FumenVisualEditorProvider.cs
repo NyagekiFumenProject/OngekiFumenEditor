@@ -1,3 +1,4 @@
+using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Utils.MethodExtensions;
@@ -29,7 +30,7 @@ internal partial class FumenVisualEditorProvider : IFumenVisualEditorProvider
 
     public IDocumentViewModel Create()
     {
-        return ServiceProvider.GetRequiredService<FumenVisualEditorViewModel>();
+        return ServiceProvider.Resolve<FumenVisualEditorViewModel>();
     }
 
     public async Task<bool> TryNew(IDocumentViewModel document)

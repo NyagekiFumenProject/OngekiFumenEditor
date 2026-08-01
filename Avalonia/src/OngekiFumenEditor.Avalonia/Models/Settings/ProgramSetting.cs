@@ -37,12 +37,6 @@ public partial class ProgramSetting : SettingModelBase<ProgramSetting>
     public partial string WindowSizePositionLastTime { get; set; } = string.Empty;
 
     [ObservableProperty]
-    public partial bool UpdaterCheckMasterBranchOnly { get; set; } = true;
-
-    [ObservableProperty]
-    public partial bool EnableUpdateCheck { get; set; } = true;
-
-    [ObservableProperty]
     public partial bool ShowConsoleWindowInGUIMode { get; set; } = false;
 
     [ObservableProperty]

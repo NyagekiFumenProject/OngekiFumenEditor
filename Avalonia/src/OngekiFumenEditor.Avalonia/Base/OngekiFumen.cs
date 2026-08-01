@@ -3,7 +3,6 @@ using System.Runtime.CompilerServices;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -38,7 +37,6 @@ namespace OngekiFumenEditor.Avalonia.Base
         public TGridSortList<Comment> Comments { get; } = new();
         public TGridSortList<EnemySet> EnemySets { get; } = new();
         public BeamList Beams { get; } = new();
-        public List<SvgPrefabBase> SvgPrefabs { get; } = new();
         public SoflanListMap SoflansMap { get; } = new();
         public IndividualSoflanAreaListMap IndividualSoflanAreaMap { get; } = new();
         public LaneBlockAreaList LaneBlocks { get; } = new();
@@ -216,10 +214,6 @@ namespace OngekiFumenEditor.Avalonia.Base
             {
                 LaneBlocks.Add(laneBlock);
             }
-            else if (obj is SvgPrefabBase prefab)
-            {
-                SvgPrefabs.Add(prefab);
-            }
             else if (obj switch
             {
                 LaneStartBase or LaneNextBase => obj,
@@ -308,10 +302,6 @@ namespace OngekiFumenEditor.Avalonia.Base
                 holdEnd.CacheRecoveryHoldObjectID = holdEnd.RefHold?.Id;
                 holdEnd.RefHold?.SetHoldEnd(null);
                 holdEnd.RefHold = null;
-            }
-            else if (obj is SvgPrefabBase prefab)
-            {
-                SvgPrefabs.Remove(prefab);
             }
             else if (obj is LaneCurvePathControlObject pathControl)
             {
@@ -404,7 +394,6 @@ namespace OngekiFumenEditor.Avalonia.Base
                    .Concat(Lanes.GetVisibleStartObjects(min, max))
                    .Concat(Taps.BinaryFindRange(min, max))
                    .Concat(Holds.GetVisibleStartObjects(min, max))
-                   .Concat(SvgPrefabs)
                    .Concat(Beams)
                    .Distinct();
 

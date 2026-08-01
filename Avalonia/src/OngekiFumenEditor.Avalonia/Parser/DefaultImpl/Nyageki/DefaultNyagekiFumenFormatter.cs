@@ -2,7 +2,6 @@ using Injectio.Attributes;
 using DereTore.Common;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
-using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -52,8 +51,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 
             ProcessCURVE(fumen, writer);
 
-            ProcessSvgPrefabs(fumen, writer);
-
             ProcessComments(fumen, writer);
 
             await writer.FlushAsync();
@@ -67,67 +64,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
             foreach (var comment in fumen.Comments.OrderBy(x => x.TGrid))
                 sb.WriteLine($"Comment\t:\t{Base64.Encode(comment.Content)}\t:\tT[{comment.TGrid.Unit},{comment.TGrid.Grid}]");
             sb.WriteLine();
-        }
-
-        private void ProcessSvgPrefabs(OngekiFumen fumen, StreamWriter writer)
-        {
-            foreach (var svgPrefab in fumen.SvgPrefabs)
-            {
-                writer.Write($"SvgPrefab\t:\t");
-                writer.Write($"Type[{svgPrefab.IDShortName}]");
-                writer.Write(", ");
-                writer.Write($"ColorSimilar[{svgPrefab.ColorSimilar.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"Rotation[{svgPrefab.Rotation.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"EnableColorfulLaneSimilar[{svgPrefab.EnableColorfulLaneSimilar}]");
-                writer.Write(", ");
-                writer.Write($"OffsetX[{svgPrefab.OffsetX.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"OffsetY[{svgPrefab.OffsetY.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"ShowOriginColor[{svgPrefab.ShowOriginColor}]");
-                writer.Write(", ");
-                writer.Write($"Opacity[{svgPrefab.Opacity.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"Brightness[{svgPrefab.ColorfulLaneBrightness.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"Scale[{svgPrefab.Scale}]");
-                writer.Write(", ");
-                writer.Write($"Tolerance[{svgPrefab.Tolerance.CurrentValue}]");
-                writer.Write(", ");
-                writer.Write($"T[{svgPrefab.TGrid.Unit},{svgPrefab.TGrid.Grid}]");
-                writer.Write(", ");
-                writer.Write($"X[{svgPrefab.XGrid.Unit},{svgPrefab.XGrid.Grid}]");
-                writer.Write(", ");
-                switch (svgPrefab)
-                {
-                    case SvgImageFilePrefab svgImageFilePrefab:
-                        /*if (string.IsNullOrWhiteSpace(svgImageFilePrefab.SvgFile?.FullName))
-                            throw new Exception($"at {svgPrefab.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
-                        */
-                        writer.Write($"FilePathBase64[{Convert.ToBase64String(Encoding.UTF8.GetBytes(svgImageFilePrefab.SvgFile?.FullName ?? ""))}]");
-                        break;
-                    case SvgStringPrefab stringPrefab:
-                        /*if (string.IsNullOrWhiteSpace(stringPrefab.Content) || string.IsNullOrWhiteSpace(stringPrefab.TypefaceName))
-                            throw new Exception($"at {svgPrefab.TGrid}, SvgStringPrefab.Content/TypefaceName is empty or null");*/
-                        writer.Write($"Content[{Convert.ToBase64String(Encoding.UTF8.GetBytes(stringPrefab.Content))}]");
-                        writer.Write(", ");
-                        writer.Write($"FontSize[{stringPrefab.FontSize}]");
-                        writer.Write(", ");
-                        writer.Write($"TypefaceName[{stringPrefab.TypefaceName}]");
-                        writer.Write(", ");
-                        writer.Write($"FontColorId[{stringPrefab.ColorfulLaneColor.Id}]");
-                        writer.Write(", ");
-                        writer.Write($"ContentFlowDirection[{stringPrefab.ContentFlowDirection}]");
-                        writer.Write(", ");
-                        writer.Write($"ContentLineHeight[{stringPrefab.ContentLineHeight}]");
-                        break;
-                    default:
-                        break;
-                }
-                writer.WriteLine();
-            }
         }
 
         private void ProcessCURVE(OngekiFumen fumen, StreamWriter writer)

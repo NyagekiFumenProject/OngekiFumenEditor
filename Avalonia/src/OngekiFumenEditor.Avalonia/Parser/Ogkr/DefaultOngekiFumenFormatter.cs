@@ -1,7 +1,6 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
-using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 
@@ -65,9 +64,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             ProcessComment(fumen, sb);
             sb.AppendLine();
 
-            ProcessSVG(fumen, sb);
-            sb.AppendLine();
-
             ProcessSoflanGroupWrapItem(fumen, sb);
             sb.AppendLine();
 
@@ -78,10 +74,48 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
         {
             sb.AppendLine("[SoflanGroupWrapItem]");
 
-            var maps = fumen.IndividualSoflanAreaMap.Keys.GroupBy(x => fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _).Parent?.DisplayName ?? "default");
+            var remainingIds = fumen.IndividualSoflanAreaMap.Keys.ToHashSet();
+            var maps = new List<(string Name, List<int> Ids)>();
 
-            foreach (var o in maps)
-                sb.AppendLine($"[SGWI]\t{o.Key}\t{string.Join("\t", o.Select(x => x.ToString()))}");
+            List<int> GetOrCreateGroup(string name)
+            {
+                var existing = maps.FirstOrDefault(x => x.Name == name).Ids;
+                if (existing is not null)
+                    return existing;
+
+                var ids = new List<int>();
+                maps.Add((name, ids));
+                return ids;
+            }
+
+            static IEnumerable<SoflanGroupWrapItemGroup> VisitGroups(SoflanGroupWrapItemGroup parent)
+            {
+                foreach (var group in parent.Children.OfType<SoflanGroupWrapItemGroup>())
+                {
+                    yield return group;
+                    foreach (var childGroup in VisitGroups(group))
+                        yield return childGroup;
+                }
+            }
+
+            foreach (var group in VisitGroups(fumen.IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot))
+            {
+                var ids = GetOrCreateGroup(group.DisplayName);
+                foreach (var item in group.Children.OfType<SoflanGroupWrapItem>())
+                {
+                    if (remainingIds.Remove(item.SoflanGroupId))
+                        ids.Add(item.SoflanGroupId);
+                }
+            }
+
+            foreach (var id in remainingIds)
+            {
+                var item = fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(id, out _);
+                GetOrCreateGroup(item.Parent?.DisplayName ?? "default").Add(id);
+            }
+
+            foreach (var (name, ids) in maps.Where(x => x.Ids.Count > 0))
+                sb.AppendLine($"[SGWI]\t{name}\t{string.Join("\t", ids)}");
             sb.AppendLine();
         }
 
@@ -92,31 +126,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             foreach (var o in fumen.Comments.OrderBy(x => x.TGrid))
                 sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{Base64.Encode(o.Content)}");
             sb.AppendLine();
-        }
-
-        private void ProcessSVG(OngekiFumen fumen, StringBuilder sb)
-        {
-            foreach (var svgPrefab in fumen.SvgPrefabs)
-            {
-                sb.Append(svgPrefab.IDShortName);
-                sb.Append($"\t{svgPrefab.ColorSimilar.CurrentValue}\t{svgPrefab.Rotation.CurrentValue}\t{svgPrefab.EnableColorfulLaneSimilar}\t{svgPrefab.OffsetX.CurrentValue}\t{svgPrefab.OffsetY.CurrentValue}\t{svgPrefab.ShowOriginColor}\t{svgPrefab.Opacity.CurrentValue}\t{svgPrefab.Scale}\t{svgPrefab.Tolerance.CurrentValue}\t{svgPrefab.TGrid.Unit}\t{svgPrefab.TGrid.Grid}\t{svgPrefab.XGrid.Unit}\t{svgPrefab.XGrid.Grid}\t{svgPrefab.ColorfulLaneBrightness.CurrentValue}\t{svgPrefab.IsForceColorful}\t{svgPrefab.ColorfulLaneColor.Id}");
-                switch (svgPrefab)
-                {
-                    case SvgImageFilePrefab svgImageFilePrefab:
-                        if (string.IsNullOrWhiteSpace(svgImageFilePrefab.SvgFile?.FullName))
-                            throw new Exception($"at {svgPrefab.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
-                        sb.Append($"\t{Base64.Encode(svgImageFilePrefab.SvgFile?.FullName)}");
-                        break;
-                    case SvgStringPrefab svgStringPrefab:
-                        if (string.IsNullOrWhiteSpace(svgStringPrefab.Content) || string.IsNullOrWhiteSpace(svgStringPrefab.TypefaceName))
-                            throw new Exception($"at {svgPrefab.TGrid}, SvgStringPrefab.Content/TypefaceName is empty or null");
-                        sb.Append($"\t{Base64.Encode(svgStringPrefab.Content)}\t{svgStringPrefab.FontSize}\t{Base64.Encode(svgStringPrefab.TypefaceName)}\t{svgStringPrefab.ContentFlowDirection}\t{svgStringPrefab.ContentLineHeight}");
-                        break;
-                    default:
-                        break;
-                }
-                sb.AppendLine();
-            }
         }
 
         private void ProcessCURVE(OngekiFumen fumen, StringBuilder sb)
