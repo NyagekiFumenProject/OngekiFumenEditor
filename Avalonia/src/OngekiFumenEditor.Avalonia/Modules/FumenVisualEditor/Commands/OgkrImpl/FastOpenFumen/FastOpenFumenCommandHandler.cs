@@ -1,5 +1,7 @@
 using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Framework.Dialogs;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
@@ -9,12 +11,30 @@ public class FastOpenFumenCommandHandler : CommandHandlerBase<FastOpenFumenComma
 {
     public override async Task Run(Command command)
     {
-        if (command.Tag is string filePath && File.Exists(filePath))
+        var filePath = command.Tag as string;
+        if (string.IsNullOrWhiteSpace(filePath))
         {
-            _ = await DocumentOpenHelper.TryOpenAsDocument(filePath);
-            return;
+            filePath = await FileDialogHelper.OpenFileAsync(
+                Lang.FastOpenOgkrFumen,
+                [(".ogkr", Lang.OngekiFumen), (".nyageki", Lang.OngekiFumen)]);
         }
 
-        Log.LogWarning("FastOpenFumen requires command.Tag as existing file path.");
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            return;
+
+        try
+        {
+            if (!await DocumentOpenHelper.TryOpenAsDocument(filePath))
+                await IoC.Get<IDialogManager>().ShowMessageDialog(
+                    Lang.CantFastOpenFumen,
+                    DialogMessageType.Error);
+        }
+        catch (Exception exception)
+        {
+            Log.LogError("Fast open failed.", exception);
+            await IoC.Get<IDialogManager>().ShowMessageDialog(
+                $"{Lang.CantFastOpenFumen}{exception.Message}",
+                DialogMessageType.Error);
+        }
     }
 }

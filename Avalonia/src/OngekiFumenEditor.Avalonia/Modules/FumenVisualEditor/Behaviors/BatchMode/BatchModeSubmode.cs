@@ -87,13 +87,13 @@ public abstract class BatchModeSingleInputSubmode : BatchModeInputSubmode
 }
 
 public abstract class BatchModeInputSubmode<T> : BatchModeSingleInputSubmode
-    where T : OngekiTimelineObjectBase
+    where T : OngekiTimelineObjectBase, new()
 {
     public override Type ObjectType => typeof(T);
 
     public override IEnumerable<OngekiTimelineObjectBase> GenerateObject()
     {
-        yield return Activator.CreateInstance<T>();
+        yield return new T();
     }
 }
 
@@ -146,7 +146,7 @@ public class BatchModeInputLaneColorful : BatchModeInputLane<ColorfulLaneStart>
 }
 
 public abstract class BatchModeInputHitSubmode<T> : BatchModeInputSubmode<T>
-    where T : OngekiTimelineObjectBase, ICriticalableObject
+    where T : OngekiTimelineObjectBase, ICriticalableObject, new()
 {
     public override BatchModeObjectModificationAction ModifyObjectCtrl { get; } = new(CritObject, Lang.BatchModeModifierSetCritical);
 
@@ -236,7 +236,6 @@ public class BatchModeObjectModificationAction(Action<OngekiObjectBase>? modifie
     public string Description { get; } = description;
     public Action<OngekiObjectBase>? Function { get; } = modifier;
 }
-
 
 
 

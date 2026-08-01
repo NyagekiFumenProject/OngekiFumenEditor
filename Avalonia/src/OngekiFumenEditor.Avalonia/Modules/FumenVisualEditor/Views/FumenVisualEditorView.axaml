@@ -1,8 +1,9 @@
 <UserControl
+    x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:controls1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
@@ -13,6 +14,7 @@
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
     xmlns:viewmodels="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels"
     xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views"
+    x:DataType="viewmodels:FumenVisualEditorViewModel"
     d:DataContext="{d:DesignInstance Type=viewmodels:FumenVisualEditorViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -35,12 +37,6 @@
         </ResourceDictionary>
     </UserControl.Resources>
 
-    <Interaction.Behaviors>
-        <behaviors:EventMethodBehavior EventName="DragEnter" MethodName="Grid_DragEnter" PassMode="ExecutionContext" />
-        <behaviors:EventMethodBehavior EventName="Drop" MethodName="Grid_Drop" PassMode="ExecutionContext" />
-        <behaviors:EventMethodBehavior EventName="FocusableChanged" MethodName="OnFocusableChanged" PassMode="ExecutionContext" />
-    </Interaction.Behaviors>
-
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -55,101 +51,46 @@
             <ContextMenu x:Name="EditorContextMenu">
                 <MenuItem Header="{markup:Translate [MenuSelecting]}">
                     <MenuItem Header="Entire lane"
-                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_SelectEntireLane" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                              Command="{Binding MenuItemAction_SelectEntireLaneCommand}"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
                     <MenuItem Header="Attached curve points"
-                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_SelectAttachedCurves" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                        Command="{Binding MenuItemAction_SelectAttachedCurvesCommand}"
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
                     <Separator />
-                    <MenuItem Header="{markup:Translate [SelectAllObjects]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_SelectAll" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
-                    <MenuItem Header="{markup:Translate [ReverseSelectAllObjects]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_ReverseSelect" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                    <MenuItem Command="{Binding MenuItemAction_SelectAllCommand}" Header="{markup:Translate [SelectAllObjects]}" />
+                    <MenuItem Command="{Binding MenuItemAction_ReverseSelectCommand}" Header="{markup:Translate [ReverseSelectAllObjects]}" />
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToSelectedObjects]}">
-                    <MenuItem Header="{markup:Translate [Delete]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="KeyboardAction_DeleteSelectingObjects" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
-                    <MenuItem Header="{markup:Translate [CopyCopiable]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_CopySelectedObjects" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                    <MenuItem Command="{Binding KeyboardAction_DeleteSelectingObjectsCommand}" Header="{markup:Translate [Delete]}" />
+                    <MenuItem Command="{Binding MenuItemAction_CopySelectedObjectsCommand}" Header="{markup:Translate [CopyCopiable]}" />
                     <MenuItem Header="{markup:Translate [ControlTimeline]}">
-                        <MenuItem Header="{markup:Translate [RememberAudioTime]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_RememberSelectedObjectAudioTime" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </MenuItem>
-                        <MenuItem Header="{markup:Translate [RecoveryAudioTime]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_RecoverySelectedObjectToAudioTime" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </MenuItem>
+                        <MenuItem Command="{Binding MenuItemAction_RememberSelectedObjectAudioTimeCommand}" Header="{markup:Translate [RememberAudioTime]}" />
+                        <MenuItem Command="{Binding MenuItemAction_RecoverySelectedObjectToAudioTimeCommand}" Header="{markup:Translate [RecoveryAudioTime]}" />
                     </MenuItem>
 
                     <Separator />
 
                     <MenuItem
+                        Command="{Binding MenuItemAction_MirrorSelectionXGridZeroCommand}"
                         Header="{markup:Translate [MenuMirrorSelectionXGridZero]}"
-                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_MirrorSelectionXGridZero" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
                     <MenuItem
+                        Command="{Binding MenuItemAction_MirrorSelectionXGridCommand}"
                         Header="{markup:Translate [MenuMirrorSelectionXGrid]}"
-                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_MirrorSelectionXGrid" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
                     <MenuItem
+                        Command="{Binding MenuItemAction_MirrorLaneColorsCommand}"
                         Header="{markup:Translate [MenuMirrorSelectionLaneColors]}"
-                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_MirrorLaneColors" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
                 </MenuItem>
                 <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
                     <MenuItem Header="{markup:Translate [ToPaste]}">
-                        <MenuItem Header="{markup:Translate [PasteDirectly]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_PasteCopiesObjectsDirectly" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </MenuItem>
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsDirectlyCommand}" Header="{markup:Translate [PasteDirectly]}" />
                         <!--<MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />-->
                         <Separator />
-                        <MenuItem Header="{markup:Translate [PasteForHorizonMirror]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </MenuItem>
-                        <MenuItem Header="{markup:Translate [PasteForVerticalMirror]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </MenuItem>
-                        <MenuItem Header="{markup:Translate [PasteForZeroXGridMirror]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </MenuItem>
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirrorCommand}" Header="{markup:Translate [PasteForHorizonMirror]}" />
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirrorCommand}" Header="{markup:Translate [PasteForVerticalMirror]}" />
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsXGridZeroMirrorCommand}" Header="{markup:Translate [PasteForZeroXGridMirror]}" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />
@@ -160,11 +101,7 @@
             </ContextMenu>
         </Grid.ContextMenu>
 
-        <ContentControl x:Name="renderControlHost">
-            <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnRenderControlHostLoaded" PassMode="ExecutionContext" />
-            </Interaction.Behaviors>
-        </ContentControl>
+        <ContentControl x:Name="renderControlHost" Loaded="OnRenderControlHostLoaded" />
 
         <!--<opentkcontrol:GLWpfControl
             x:Name="glView"
@@ -172,7 +109,9 @@
             Ready="glView_Ready"
             SizeChanged="glView_SizeChanged" />-->
 
-        <views:BatchModeOverlayView DataContext="{Binding BatchModeBehavior}" IsVisible="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
+        <views:BatchModeOverlayView
+            DataContext="{Binding BatchModeBehavior}"
+            IsVisible="{Binding $parent[views:FumenVisualEditorView].((viewmodels:FumenVisualEditorViewModel)DataContext).IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
 
         <TextBlock
             HorizontalAlignment="Left"

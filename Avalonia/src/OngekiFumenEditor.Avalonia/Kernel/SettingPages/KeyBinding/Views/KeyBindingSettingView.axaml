@@ -1,14 +1,18 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Views.KeyBindingSettingView"
+    x:CompileBindings="True"
+    x:Name="Root"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:keybinding="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.KeyBinding"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Views"
+    x:DataType="vm:KeyBindingSettingViewModel"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:KeyBindingSettingViewModel}"
@@ -46,21 +50,15 @@
                 <Button
                     Padding="10,4"
                     HorizontalAlignment="Left"
-                    Content="{markup:Translate [ApplyFilter]}">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Click" MethodName="UpdateDisplayList" />
-                    </Interaction.Behaviors>
-                </Button>
+                    Command="{Binding UpdateDisplayListCommand}"
+                    Content="{markup:Translate [ApplyFilter]}" />
                 <Button
                     Margin="0,0"
                     Padding="10,5"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Content="{markup:Translate [ResetAllKeybindings]}">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetAllDefinitions" />
-                    </Interaction.Behaviors>
-                </Button>
+                    Command="{Binding ResetAllDefinitionsCommand}"
+                    Content="{markup:Translate [ResetAllKeybindings]}" />
             </Grid>
             <Border Height="1" Background="Gray" />
         </StackPanel>
@@ -68,7 +66,7 @@
             Grid.Row="1"
             ItemsSource="{Binding Definitions}">
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate x:DataType="keybinding:KeyBindingDefinition">
                     <Grid Margin="5">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -94,11 +92,9 @@
                             Grid.Column="2"
                             Margin="30,3,3,3"
                             Padding="10,5"
-                            Content="{markup:Translate [Change]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="ChangeKeybind" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </Button>
+                            Command="{Binding $parent[views:KeyBindingSettingView].((vm:KeyBindingSettingViewModel)DataContext).ChangeKeybindCommand}"
+                            CommandParameter="{Binding}"
+                            Content="{markup:Translate [Change]}" />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

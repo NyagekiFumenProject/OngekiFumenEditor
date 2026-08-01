@@ -62,24 +62,37 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
 
         #region Sugar~
 
+        private static readonly ConcurrentBag<AutoDisposable> autoDisposableCache = new();
+
         private class AutoDisposable : IDisposable
         {
             public T RefObject { get; set; }
+            private bool isActive;
+
+            public void Initialize(T refObject)
+            {
+                RefObject = refObject;
+                isActive = true;
+            }
 
             public void Dispose()
             {
-                if (RefObject is not null)
-                    Return(RefObject);
+                if (!isActive)
+                    return;
+
+                isActive = false;
+                Return(RefObject);
                 RefObject = default;
-                ObjectPool<AutoDisposable>.Return(this);
+                autoDisposableCache.Add(this);
             }
         }
 
         public static IDisposable GetWithUsingDisposable(out T obj, out bool isNewObject)
         {
             isNewObject = Get(out obj);
-            var d = ObjectPool<AutoDisposable>.Get();
-            d.RefObject = obj;
+            if (!autoDisposableCache.TryTake(out var d))
+                d = new AutoDisposable();
+            d.Initialize(obj);
             return d;
         }
 

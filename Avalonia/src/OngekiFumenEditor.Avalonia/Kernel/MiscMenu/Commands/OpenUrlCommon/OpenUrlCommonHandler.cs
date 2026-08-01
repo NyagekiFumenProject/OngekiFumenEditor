@@ -1,3 +1,4 @@
+using Avalonia;
 using Gekimini.Avalonia.Framework.Commands;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -6,11 +7,15 @@ namespace OngekiFumenEditor.Avalonia.Kernel.MiscMenu.Commands.OpenUrlCommon;
 
 public class OpenUrlCommonHandler<T> : CommandHandlerBase<T> where T : OpenUrlCommonCommandDefinition
 {
-    public override Task Run(Command command)
+    public override async Task Run(Command command)
     {
-        if (command.CommandDefinition is T def)
-            ProcessUtils.OpenUrl(def.Url);
-        return Task.CompletedTask;
+        if (command.CommandDefinition is not T definition ||
+            Application.Current is not global::Gekimini.Avalonia.App app)
+            return;
+
+        var launched = await app.TopLevel.Launcher.LaunchUriAsync(new Uri(definition.Url));
+        if (!launched)
+            Log.LogWarning($"Unable to launch URL: {definition.Url}");
     }
 }
 

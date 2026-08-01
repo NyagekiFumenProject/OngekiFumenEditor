@@ -1,3 +1,4 @@
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 
 namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
@@ -5,6 +6,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
 	[Export(typeof(ISchedulable))]
 	[Export(typeof(ObjectPoolManager))]
 	[PartCreationPolicy(CreationPolicy.Shared)]
+	[RegisterSingleton<ObjectPoolManager>]
 	public class ObjectPoolManager : ISchedulable
 	{
 		public string SchedulerName => "Object Pool Maintenance Scheduler";

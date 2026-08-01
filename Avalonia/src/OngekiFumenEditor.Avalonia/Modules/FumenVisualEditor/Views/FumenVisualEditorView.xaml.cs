@@ -1,4 +1,7 @@
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views;
 
@@ -7,5 +10,25 @@ public partial class FumenVisualEditorView : UserControl
     public FumenVisualEditorView()
     {
         InitializeComponent();
+        AddHandler(DragDrop.DragEnterEvent, OnDragEnter);
+        AddHandler(DragDrop.DropEvent, OnDrop);
+    }
+
+    private void OnDragEnter(object sender, DragEventArgs e)
+    {
+        if (DataContext is FumenVisualEditorViewModel viewModel)
+            viewModel.OnDragEnter(e);
+    }
+
+    private void OnDrop(object sender, DragEventArgs e)
+    {
+        if (DataContext is FumenVisualEditorViewModel viewModel)
+            viewModel.OnDrop(e, e.GetPosition(this));
+    }
+
+    private async void OnRenderControlHostLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is ContentControl contentControl && DataContext is FumenVisualEditorViewModel viewModel)
+            await viewModel.InitializeRenderControlAsync(contentControl);
     }
 }

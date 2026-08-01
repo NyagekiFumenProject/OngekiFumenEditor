@@ -2,6 +2,7 @@ using Avalonia.Input;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 
@@ -9,11 +10,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 internal class DefaultKeyBindingManager : IKeyBindingManager
 {
     private readonly string jsonConfigFilePath;
-
-    private class Config
-    {
-        public Dictionary<string, string> KeyBindings { get; set; } = [];
-    }
 
     public IEnumerable<KeyBindingDefinition> KeyBindingDefinations => definitionMap.Values;
 
@@ -24,10 +20,12 @@ internal class DefaultKeyBindingManager : IKeyBindingManager
         WriteIndented = true,
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
+    private readonly KeyBindingJsonSourceGenerationContext serializerContext;
 
     public DefaultKeyBindingManager(IEnumerable<KeyBindingDefinition> definations)
     {
         definitionMap = definations.ToDictionary(x => x.ConfigKey, x => x);
+        serializerContext = new KeyBindingJsonSourceGenerationContext(serializerOptions);
 
         jsonConfigFilePath = Path.GetFullPath("./keybind.json");
         Log.LogInfo($"jsonConfigFilePath: {jsonConfigFilePath}");
@@ -38,10 +36,10 @@ internal class DefaultKeyBindingManager : IKeyBindingManager
     public void SaveConfig()
     {
         var json = JsonSerializer.Serialize(
-            new Config
+            new KeyBindingConfig
             {
                 KeyBindings = definitionMap.ToDictionary(x => x.Key, x => KeyBindingDefinition.FormatToExpression(x.Value.Key, x.Value.Modifiers))
-            }, serializerOptions);
+            }, serializerContext.KeyBindingConfig);
         File.WriteAllText(jsonConfigFilePath, json);
 
         Log.LogInfo("Saved.");
@@ -54,7 +52,7 @@ internal class DefaultKeyBindingManager : IKeyBindingManager
             try
             {
                 var json = File.ReadAllText(jsonConfigFilePath);
-                var strMap = JsonSerializer.Deserialize<Config>(json)?.KeyBindings ?? [];
+                var strMap = JsonSerializer.Deserialize(json, serializerContext.KeyBindingConfig)?.KeyBindings ?? [];
 
                 foreach (var item in strMap)
                 {
@@ -133,4 +131,14 @@ internal class DefaultKeyBindingManager : IKeyBindingManager
             modifier == x.Modifiers &&
             (x.Layer == KeyBindingLayer.Global || layer == KeyBindingLayer.Global || x.Layer == layer));
     }
+}
+
+internal sealed class KeyBindingConfig
+{
+    public Dictionary<string, string> KeyBindings { get; set; } = [];
+}
+
+[JsonSerializable(typeof(KeyBindingConfig))]
+internal partial class KeyBindingJsonSourceGenerationContext : JsonSerializerContext
+{
 }

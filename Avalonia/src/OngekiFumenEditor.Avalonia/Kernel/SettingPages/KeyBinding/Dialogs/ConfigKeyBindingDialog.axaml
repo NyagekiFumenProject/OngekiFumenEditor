@@ -1,35 +1,25 @@
-<Window
+<views:WindowViewBase
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs.ConfigKeyBindingDialog"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs"
+    x:DataType="local:ConfigKeyBindingDialog"
     Title="{markup:Translate [AssignKeybind]}"
     Width="300"
-    Background="{DynamicResource EnvironmentWindowBackground}"
+    Background="{DynamicResource EditorWindowBackgroundBrush}"
     SizeToContent="WidthAndHeight"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
-    <Window.DataContext>
-        <Binding RelativeSource="{RelativeSource Self}">
-        </Binding>
-    </Window.DataContext>
     <StackPanel Margin="10">
         <TextBlock
             HorizontalAlignment="Center"
-            FontSize="16" >
-            <TextBlock.Text>
-                <MultiBinding Converter="{StaticResource LocalizeConverter}">
-                    <markup:Translate>
-                        <x:Arguments>
-                            <x:String>[AssignKeyBinding]</x:String>
-                        </x:Arguments>
-                    </markup:Translate>
-                    <Binding Path="Definition.Name"/>
-                </MultiBinding>
-            </TextBlock.Text>
-        </TextBlock>
+            FontSize="16"
+            Text="{Binding Definition.Name, StringFormat={markup:Translate [AssignKeyBinding]}}" />
         <TextBlock
             Margin="0,15"
             HorizontalAlignment="Center"
@@ -42,18 +32,8 @@
             FontSize="16"
             IsVisible="{Binding ConflictDefinition,Converter={StaticResource NullToVisibilityConverter} }"
             Foreground="OrangeRed"
-            FontWeight="Bold" >
-            <TextBlock.Text>
-                <MultiBinding Converter="{StaticResource LocalizeConverter}">
-                    <markup:Translate>
-                        <x:Arguments>
-                            <x:String>[KeyBindingConflictDetect]</x:String>
-                        </x:Arguments>
-                    </markup:Translate>
-                    <Binding Path="ConflictDefinition.Name"/>
-                </MultiBinding>
-            </TextBlock.Text>
-        </TextBlock>
+            FontWeight="Bold"
+            Text="{Binding ConflictDefinition.Name, StringFormat={markup:Translate [KeyBindingConflictDetect]}}" />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
@@ -87,7 +67,7 @@
             </Button>
         </Grid>
     </StackPanel>
-</Window>
+</views:WindowViewBase>
 
 
 

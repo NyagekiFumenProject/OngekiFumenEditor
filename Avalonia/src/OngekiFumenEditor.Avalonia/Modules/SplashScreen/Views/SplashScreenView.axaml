@@ -1,31 +1,40 @@
 ﻿<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenView"
+    x:DataType="vm:SplashScreenViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:rec="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.RecentFiles"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels"
     Title="Welcome"
     Width="1000"
     Height="700"
     BorderThickness="0"
     d:DataContext="{d:DesignInstance Type=vm:SplashScreenViewModel}"
-    Background="{StaticResource EnvironmentWindowBackground}"
+    Background="{StaticResource EditorWindowBackgroundBrush}"
     CanResize="False"
     mc:Ignorable="d">
     <views:WindowViewBase.Styles>
-        <Style Selector="Border.BorderStyle">
+        <Style Selector="Button.ActionCard">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="Background" Value="{DynamicResource Button.Static.Background}" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
         </Style>
-        <Style Selector="Border.BorderStyle:pointerover">
+        <Style Selector="Button.ActionCard:pointerover">
+            <Setter Property="BorderBrush" Value="LightBlue" />
+        </Style>
+        <Style Selector="Button.RecentFile">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Button.RecentFile:pointerover">
             <Setter Property="BorderBrush" Value="LightBlue" />
         </Style>
     </views:WindowViewBase.Styles>
@@ -48,7 +57,7 @@
                 Margin="0,0,5,0"
                 HorizontalAlignment="Right"
                 Text="{markup:Translate [RequestRestartProgram]}"
-                IsVisible="{Binding IsRequestRestartProgram, Converter={StaticResource BoolToVisibilityConverter}}">
+                IsVisible="{CompiledBinding IsRequestRestartProgram}">
             </TextBlock>
             <StackPanel
                 Grid.Column="1"
@@ -63,14 +72,8 @@
                     Height="25"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    ItemsSource="{Binding Languages}"
-                    SelectedItem="{Binding SelectedLanguage}">
-                    <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Converter={StaticResource CultureInfoNameConverter}, Mode=OneWay}" />
-                        </DataTemplate>
-                    </ComboBox.ItemTemplate>
-                </ComboBox>
+                    ItemsSource="{CompiledBinding Languages}"
+                    SelectedItem="{CompiledBinding SelectedLanguage, Mode=TwoWay}" />
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
@@ -111,26 +114,16 @@
                     <ItemsControl
                         Background="Transparent"
                         BorderBrush="Transparent"
-                        ItemsSource="{Binding GroupedItems}">
+                        ItemsSource="{CompiledBinding GroupedItems}">
                         <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Expander Header="{Binding Name}" IsExpanded="True">
-                                    <ItemsControl Margin="10,5,10,5" ItemsSource="{Binding Recents}">
+                            <DataTemplate x:DataType="vm:GroupedItem">
+                                <Expander Header="{CompiledBinding Name}" IsExpanded="True">
+                                    <ItemsControl Margin="10,5,10,5" ItemsSource="{CompiledBinding Recents}">
                                         <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <Border>
-                                                    <Interaction.Behaviors>
-                                                        <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenRecent" PassMode="DataContext" />
-                                                    </Interaction.Behaviors>
-                                                    <Border.Styles>
-                                                        <Style Selector="Border">
-                                                            <Setter Property="Cursor" Value="Hand" />
-                                                            <Setter Property="BorderThickness" Value="1" />
-                                                        </Style>
-                                                        <Style Selector="Border:pointerover">
-                                                            <Setter Property="BorderBrush" Value="LightBlue" />
-                                                        </Style>
-                                                    </Border.Styles>
+                                            <DataTemplate x:DataType="vm:RecentFileItemViewModel">
+                                                <Button
+                                                    Classes="RecentFile"
+                                                    Command="{CompiledBinding OpenCommand}">
                                                     <Grid Margin="2,5">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="Auto" />
@@ -142,8 +135,8 @@
                                                         </Border>
 
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <Label Content="{Binding DisplayName}" />
-                                                            <Label Content="{Binding FileName}" />
+                                                            <Label Content="{CompiledBinding Name}" />
+                                                            <Label Content="{CompiledBinding LocationDescription}" />
                                                         </StackPanel>
 
                                                         <TextBlock
@@ -151,9 +144,9 @@
                                                             Width="100"
                                                             Margin="5,0,0,0"
                                                             VerticalAlignment="Center"
-                                                            Text="{Binding Path=LastAccessTime}" />
+                                                            Text="{CompiledBinding LastAccessTimeText}" />
                                                     </Grid>
-                                                </Border>
+                                                </Button>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
@@ -174,15 +167,12 @@
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel Width="350">
 
-                        <ContentControl
+                        <Button
+                            Classes="ActionCard"
+                            Command="{CompiledBinding CreateNewProjectCommand}"
                             Margin="0,5,0,5"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            Cursor="Hand">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="CreateNewProject" />
-                            </Interaction.Behaviors>
-                            <Border Classes="BorderStyle">
+                            HorizontalAlignment="Stretch">
+                            <Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -208,16 +198,13 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </ContentControl>
-                        <ContentControl
+                        </Button>
+                        <Button
+                            Classes="ActionCard"
+                            Command="{CompiledBinding OpenProjectCommand}"
                             Margin="0,0,0,5"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            Cursor="Hand">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenProject" />
-                            </Interaction.Behaviors>
-                            <Border Classes="BorderStyle">
+                            HorizontalAlignment="Stretch">
+                            <Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -243,16 +230,13 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </ContentControl>
-                        <ContentControl
+                        </Button>
+                        <Button
+                            Classes="ActionCard"
+                            Command="{CompiledBinding FastOpenCommand}"
                             Margin="0,0,0,5"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            Cursor="Hand">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="FastOpen" />
-                            </Interaction.Behaviors>
-                            <Border Classes="BorderStyle">
+                            HorizontalAlignment="Stretch">
+                            <Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -278,20 +262,17 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </ContentControl>
+                        </Button>
                         <Rectangle
                             Height="2"
                             Margin="10,0,10,5"
                             Fill="LightGray" />
-                        <ContentControl
+                        <Button
+                            Classes="ActionCard"
+                            Command="{CompiledBinding OpenTutorialCommand}"
                             Margin="0,0,0,5"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Stretch"
-                            Cursor="Hand">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenTutorial" />
-                            </Interaction.Behaviors>
-                            <Border Classes="BorderStyle">
+                            HorizontalAlignment="Stretch">
+                            <Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -320,20 +301,17 @@
                                     </StackPanel>
                                 </Grid>
                             </Border>
-                        </ContentControl>
+                        </Button>
                     </StackPanel>
                 </ScrollViewer>
                 <CheckBox
                     Grid.Row="2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    IsChecked="{Binding DisableShowSplashScreenAfterBoot}">
+                    IsChecked="{CompiledBinding DisableShowSplashScreenAfterBoot, Mode=TwoWay}">
                     <TextBlock FontSize="15" Text="{markup:Translate [NotShowAnymore]}" />
                 </CheckBox>
             </Grid>
         </Grid>
     </Grid>
 </views:WindowViewBase>
-
-
-

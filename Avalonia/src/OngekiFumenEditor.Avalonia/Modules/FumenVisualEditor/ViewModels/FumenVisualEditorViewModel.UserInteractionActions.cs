@@ -1,4 +1,5 @@
 using DereTore.Common;
+using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Framework.DragDrops;
 using Gekimini.Avalonia.Modules.Toolbox.Models;
@@ -167,7 +168,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         #region Selection Actions
 
-        public void MenuItemAction_SelectAll(ActionExecutionContext e)
+        [RelayCommand]
+        public void MenuItemAction_SelectAll()
         {
             IsPreventMutualExclusionSelecting = true;
 
@@ -177,7 +179,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = false;
         }
 
-        public void MenuItemAction_ReverseSelect(ActionExecutionContext e)
+        [RelayCommand]
+        public void MenuItemAction_ReverseSelect()
         {
             IsPreventMutualExclusionSelecting = true;
 
@@ -187,12 +190,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             IsPreventMutualExclusionSelecting = false;
         }
 
-        public async void MenuItemAction_CopySelectedObjects(ActionExecutionContext e)
-        {
-            await IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
-        }
+        [RelayCommand]
+        public Task MenuItemAction_CopySelectedObjects()
+            => IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
 
-        public void MenuItemAction_SelectEntireLane(ActionExecutionContext e)
+        [RelayCommand]
+        public void MenuItemAction_SelectEntireLane()
         {
             foreach (var connectable in SelectObjects.OfType<ConnectableObjectBase>().Select(c => c.ReferenceStartObject).Distinct()) {
                 foreach (var child in connectable.Children) {
@@ -202,7 +205,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
         }
 
-        public void MenuItemAction_SelectAttachedCurves(ActionExecutionContext e)
+        [RelayCommand]
+        public void MenuItemAction_SelectAttachedCurves()
         {
             foreach (var connectable in SelectObjects.OfType<ConnectableChildObjectBase>()) {
                 foreach (var curve in connectable.PathControls) {
@@ -221,36 +225,40 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             None
         }
 
-        public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
+        public Task MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
             => KeyboardAction_PasteCopiesObjects(ctx);
 
-        public void KeyboardAction_PasteCopiesObjects(ActionExecutionContext e)
+        public Task KeyboardAction_PasteCopiesObjects(ActionExecutionContext e)
         {
             var placePos = lastPointerViewPosition;
             placePos = placePos.WithY(RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY);
-            PasteCopiesObjects(PasteOption.None, placePos);
+            return PasteCopiesObjects(PasteOption.None, placePos);
         }
 
-        public void MenuItemAction_PasteCopiesObjectsDirectly(ActionExecutionContext ctx)
-        {
-            PasteCopiesObjects(PasteOption.Direct, default(Point));
-        }
+        [RelayCommand]
+        public Task MenuItemAction_PasteCopiesObjectsDirectly()
+            => PasteCopiesObjects(PasteOption.Direct, default(Point));
 
-        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror(ActionExecutionContext ctx)
-            => PasteCopiesObjects(PasteOption.SelectedRangeCenterXGridMirror, ctx);
-        public void MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror(ActionExecutionContext ctx)
-            => PasteCopiesObjects(PasteOption.SelectedRangeCenterTGridMirror, ctx);
-        public void MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror(ActionExecutionContext ctx)
-            => PasteCopiesObjects(PasteOption.XGridZeroMirror, ctx);
+        [RelayCommand]
+        public Task MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirror()
+            => PasteCopiesObjectsAtContextMenu(PasteOption.SelectedRangeCenterXGridMirror);
 
-        public void PasteCopiesObjects(PasteOption mirrorOption, ActionExecutionContext ctx)
+        [RelayCommand]
+        public Task MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirror()
+            => PasteCopiesObjectsAtContextMenu(PasteOption.SelectedRangeCenterTGridMirror);
+
+        [RelayCommand]
+        public Task MenuItemAction_PasteCopiesObjectsAsXGridZeroMirror()
+            => PasteCopiesObjectsAtContextMenu(PasteOption.XGridZeroMirror);
+
+        private Task PasteCopiesObjectsAtContextMenu(PasteOption mirrorOption)
         {
             var placePos = contextMenuPosition;
             placePos = placePos.WithY(RectInDesignMode.Height - placePos.Y + RectInDesignMode.MinY);
-            PasteCopiesObjects(mirrorOption, placePos);
+            return PasteCopiesObjects(mirrorOption, placePos);
         }
 
-        public async void PasteCopiesObjects(PasteOption mirrorOption, Point? placePoint = default)
+        public async Task PasteCopiesObjects(PasteOption mirrorOption, Point? placePoint = default)
         {
             if (IsLocked)
                 return;
@@ -264,7 +272,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             await IoC.Get<IFumenEditorClipboard>().PasteObjects(this, mirrorOption, placePoint);
         }
 
-        public void MenuItemAction_MirrorSelectionXGridZero(ActionExecutionContext ctx)
+        [RelayCommand]
+        public void MenuItemAction_MirrorSelectionXGridZero()
         {
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
@@ -276,7 +285,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(new LambdaUndoAction(Lang.B.MirrorSelectionXGridZero.ToLocalizedString(), func, func));
         }
 
-        public void MenuItemAction_MirrorSelectionXGrid(ActionExecutionContext ctx)
+        [RelayCommand]
+        public void MenuItemAction_MirrorSelectionXGrid()
         {
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
@@ -324,7 +334,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public void MenuItemAction_MirrorLaneColors(ActionExecutionContext ctx)
+        [RelayCommand]
+        public void MenuItemAction_MirrorLaneColors()
         {
             var laneObjects = SelectObjects.OfType<ConnectableStartObject>()
                 .Where(o => o.IsDockableLane)
@@ -433,7 +444,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         private bool dragOutBound;
         private int currentDraggingActionId;
 
-        public void MenuItemAction_RememberSelectedObjectAudioTime(ActionExecutionContext e)
+        [RelayCommand]
+        public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
             if (!IsDesignMode)
             {
@@ -453,7 +465,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             ToastNotify(Lang.RememberObjects.Format(cacheObjectAudioTime.Count));
         }
 
-        public void MenuItemAction_RecoverySelectedObjectToAudioTime(ActionExecutionContext e)
+        [RelayCommand]
+        public void MenuItemAction_RecoverySelectedObjectToAudioTime()
         {
             if (!IsDesignMode)
             {
@@ -488,11 +501,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         }
 
         #endregion
-
-        public void OnFocusableChanged(ActionExecutionContext e)
-        {
-            Log.LogInfo($"OnFocusableChanged {e.EventArgs}");
-        }
 
         public void OnTimeSignatureListChanged()
         {
@@ -729,7 +737,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }));
         }
 
-        public void KeyboardAction_DeleteSelectingObjects(ActionExecutionContext e)
+        [RelayCommand]
+        public void KeyboardAction_DeleteSelectingObjects()
         {
             DeleteSelection();
         }
@@ -1666,7 +1675,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             IoC.Get<CommonStatusBar>().SubLeftContentViewModel.Message = updateLeft();
         }
 
-        public void Grid_DragEnter(ActionExecutionContext e)
+        public void OnDragEnter(DragEventArgs arg)
         {
             if (IsLocked)
             {
@@ -1674,12 +1683,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
-            var arg = e.EventArgs as DragEventArgs;
             if (!IoC.Get<IDragDropManager>().TryGetDragData(arg, out _))
                 arg.DragEffects = DragDropEffects.None;
         }
 
-        public void Grid_Drop(ActionExecutionContext e)
+        public void OnDrop(DragEventArgs arg, Point mousePosition)
         {
             if (IsLocked)
             {
@@ -1692,11 +1700,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
-            var arg = e.EventArgs as DragEventArgs;
             var dragDropManager = IoC.Get<IDragDropManager>();
             if (dragDropManager.TryGetDragData(arg, out var dragData))
             {
-                var mousePosition = arg.GetPosition(e.View as FrameworkElement);
                 mousePosition = mousePosition.WithY(RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY);
 
                 switch (dragData)
@@ -1954,9 +1960,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         #endregion
     }
 }
-
-
-
 
 
 

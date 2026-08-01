@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Gekimini.Avalonia.Modules.Window.Views;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -8,7 +9,7 @@ using System.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs;
 
-public partial class ConfigKeyBindingDialog : Window, INotifyPropertyChanged
+public partial class ConfigKeyBindingDialog : WindowViewBase, INotifyPropertyChanged
 {
     public KeyBindingDefinition Definition { get; }
 
@@ -37,6 +38,7 @@ public partial class ConfigKeyBindingDialog : Window, INotifyPropertyChanged
         key = definition.Key;
         modifier = definition.Modifiers;
 
+        DataContext = this;
         InitializeComponent();
 
         ConfirmButton.Click += OnConfirmButtonClick;

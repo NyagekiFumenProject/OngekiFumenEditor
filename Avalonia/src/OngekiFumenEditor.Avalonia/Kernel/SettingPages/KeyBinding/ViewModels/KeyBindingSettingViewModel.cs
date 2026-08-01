@@ -1,6 +1,11 @@
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Gekimini.Avalonia.Framework.Dialogs;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels;
 
@@ -24,6 +29,7 @@ public partial class KeyBindingSettingViewModel : ObservableObject
         UpdateDisplayList();
     }
 
+    [RelayCommand]
     public void UpdateDisplayList()
     {
         Definitions.Clear();
@@ -43,9 +49,25 @@ public partial class KeyBindingSettingViewModel : ObservableObject
         keybindingManager.SaveConfig();
     }
 
-    public void ResetAllDefinitions()
+    [RelayCommand]
+    private async Task ChangeKeybindAsync(KeyBindingDefinition definition)
     {
-        foreach (var definition in Definitions)
+        if (definition is null)
+            return;
+
+        await IoC.Get<IWindowManager>().ShowDialogAsync(new ConfigKeyBindingDialog(definition));
+        UpdateDisplayList();
+    }
+
+    [RelayCommand]
+    private async Task ResetAllDefinitionsAsync()
+    {
+        if (!await IoC.Get<IDialogManager>().ShowComfirmDialog(
+                Lang.ComfirmResetAllKeybindingDefinitions,
+                Lang.Warning))
+            return;
+
+        foreach (var definition in definitions)
             keybindingManager.DefaultKeyBinding(definition);
         UpdateDisplayList();
     }
