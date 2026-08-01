@@ -1,0 +1,7 @@
+Kernel\SettingPages\FumenVisualEditor\Models\ColorPropertyWrapper.cs:9: using System.Windows.Media;
+Kernel\SettingPages\FumenVisualEditor\Models\ColorPropertyWrapper.cs:32: cachedReverseColorBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(color.A, (byte)(255 - color.R), (byte)(255 - color.G), (byte)(255 - color.B)));
+Modules\FumenVisualEditor\Kernel\IFumenEditorClipboard.cs:5: using System.Windows;
+Modules\FumenVisualEditor\Kernel\DefaultImpl\DefaultEditorDocumentManager.cs:13: using System.Windows.Threading;
+Modules\FumenVisualEditor\Kernel\DefaultImpl\DefaultFumenEditorClipboard.cs:17: using System.Windows;
+Modules\FumenVisualEditor\Models\EditorProjectFiles\EditorProjectDataModel_V0_5_2.cs:5: using System.Windows.Media;
+Modules\PreviewSvgGenerator\Kernel\DefaultPreviewSvgGenerator.LegacyCommented.cs:23: * 2) Replace WPF/System.Windows-dependent color/text parts.

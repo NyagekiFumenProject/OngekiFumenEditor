@@ -1,0 +1,149 @@
+﻿OngekiFumenEditor Avalonia Migration Gap Report
+Generated: 2026-03-15 03:41:41
+Build Log: _build_propertychangedbase1.txt
+
+[A] Compile Errors Summary
+- Raw error lines: 256
+- Unique error lines: 128
+- Files with errors: 46
+
+[A1] Top files by unique error count
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.UserInteractionActions.cs | errors=49
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Toolboxes\OngekiObjects\LaneStartToolboxGenerator.cs | errors=10
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenObjectPropertyBrowser\ViewModels\ConnectableObjectOperationViewModel.cs | errors=7
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.Drawing.cs | errors=5
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Toolboxes\OngekiObjects\WallStartToolboxGenerator.cs | errors=4
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\Editors\DrawPlayableAreaHelper.cs | errors=3
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\Soflans\DurationSoflanDrawingTarget.cs | errors=3
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\IndividualSoflanAreaDrawingTarget.cs | errors=3
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Kernel\DefaultImpl\DefaultEditorUndoManager.cs | errors=3
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenObjectPropertyBrowser\ViewModels\HoldOperationViewModel.cs | errors=2
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\Dialogs\EditorProjectSetupDialogViewModel.cs | errors=2
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Toolboxes\OngekiObjects\TapToolboxGenerator.cs | errors=2
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\obj\Debug\net10.0\CommunityToolkit.Mvvm.SourceGenerators\CommunityToolkit.Mvvm.SourceGenerators.ObservablePropertyGenerator\OngekiFumenEditor.Avalonia.Kernel.KeyBinding.KeyBindingDefinition.g.cs | errors=2
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\Editors\DrawPlayerLocationHelper.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenObjectPropertyBrowser\ViewModels\MultiLanesOperationViewModel.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\Editors\DrawTimeSignatureHelper.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenObjectPropertyBrowser\ViewModels\InterpolatableSoflanOperationViewModel.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\CommonLinesDrawTargetBase.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Models\EditorProjectFiles\EditorProjectDataModel_V0_5_2.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\Editors\DrawXGridHelper.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\DrawingTargetContext.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\D3dContexts\GRVorticeD3DBackendContext.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Kernel\DefaultImpl\DefaultEditorDocumentManager.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\EditorObjects\SVG\Cached\DefaultImpl\CachedSvgRenderDataManager.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\EditorObjects\Lane\CommonLaneEditorObjectDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Utils\ImageLoader.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\Holds\HoldDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\Editors\DrawJudgeLineHelper.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\Editors\DrawSelectingRangeHelper.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Utils\DocumentOpenHelper.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\EditorObjects\LaneCurvePathControlDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Behaviors\BatchMode\BatchModeToolbar.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\BulletBell\ProjectileBatchDrawTargetBase.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\Holds\HoldTapDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\Beam\BeamLazerDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\Soflans\SoflanPlaceholdQuery.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\D3dContexts\GRVorticeD3DTextureResourceInfo.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditorSettings\IFumenVisualEditorSettings.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\EditorObjects\SVG\SvgObjectDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\SplashScreen\ISplashScreenWindow.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\CommonHorizonalDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.ScrollViewer.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\LaneBlockerDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\FlickDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\OngekiObjects\TapDrawingTarget.cs | errors=1
+- F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\D3dContexts\VorticeDirect3DContext.cs | errors=1
+
+[A2] Missing symbols/types (CS0246/CS0234)
+- ActionExecutionContext x56
+- Caliburn x25
+- ToolboxItem x8
+- ToolboxItemAttribute x8
+- Microsoft.CodeAnalysis x4
+- NAudio x3
+- OngekiFumenEditor.Avalonia.Modules x2
+- Visibility x2
+- GRD3DBackendContext x2
+- MouseButtonState x1
+- Screen x1
+- Gekimini.Avalonia.Framework x1
+- ITool x1
+- NWaves x1
+- IObservableCollection<> x1
+- Xv2CoreLib x1
+- System.Windows x1
+- GRD3DTextureResourceInfo x1
+- EarcutNet x1
+- Color x1
+
+[B] Interface Definition Exists But No Implementation Found (best-effort)
+- Count: 7
+- IBulletLineButtomPointConverter | Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Converters\IBulletLineButtomPointConverter.cs:6:	public interface IBulletLineButtomPointConverter
+- ICacheCleanable | Avalonia/src/OngekiFumenEditor.Avalonia\Utils\ObjectPool\ICacheCleanable.cs:3:	public interface ICacheCleanable
+- IEditorDisplayableViewModel | Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Base\IEditorDisplayableViewModel.cs:6:	public interface IEditorDisplayableViewModel
+- IFumenEditorSelectingObjectViewer | Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenEditorSelectingObjectViewer\IFumenMetaInfoBrowser.cs:5:	public interface IFumenEditorSelectingObjectViewer : IToolViewModel
+- IFumenVisualEditorExtraMenuItemHandler | Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Base\IFumenVisualEditorExtraMenuItemHandler.cs:6:	public interface IFumenVisualEditorExtraMenuItemHandler
+- ISoflanQueryable | Avalonia/src/OngekiFumenEditor.Avalonia\Base\ISoflanQueryable.cs:7:    public interface ISoflanQueryable
+- ITGridCalculatorToolViewer | Avalonia/src/OngekiFumenEditor.Avalonia\Modules\TGridCalculatorToolViewer\IFumenMetaInfoBrowser.cs:6:	public interface ITGridCalculatorToolViewer : IToolViewModel
+
+[C] Placeholder / Incomplete markers
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\AudioAdjustWindow\ViewModels\AudioAdjustWindowViewModel.cs:37:                return (false, "Audio offset is not implemented in Avalonia migration yet.");
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\GlContexts\Wgl\WglContext.cs:42:				// HACK: This call seems to cause deadlocks on some systems.
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Converters\IsStringEmptyConverter.cs:16:			throw new NotImplementedException();
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Behaviors\BatchMode\BatchModeBehavior.cs:52:        throw new NotImplementedException();
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Behaviors\BatchMode\BatchModeBehavior.cs:69:        throw new NotImplementedException();
+
+[D] Empty Public Method Bodies (best-effort)
+- Count: 50
+- Avalonia/src/OngekiFumenEditor.Avalonia\Utils\TaskExtensionMethod.cs:24 | public static void NoWait(this Task t) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Utils\ObjectPool\ObjectPoolManager.cs:28 | public void OnSchedulerTerm() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Parser\Ogkr\CommandParserBase.cs:9 | public virtual void AfterParse(OngekiObjectBase obj, OngekiFumen fumen) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Parser\Ogkr\CommandParserImpl\Editor\SvgPrefabCommand.cs:16 | public void AfterParse(OngekiObjectBase obj, OngekiFumen fumen) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\Music\DefaultMusicPlayer.cs:24 | public void Stop() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\Music\DefaultMusicPlayer.cs:28 | public void Pause() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\Music\DefaultMusicPlayer.cs:32 | public void Seek(TimeSpan timeSpan, bool pause) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\Music\DefaultMusicPlayer.cs:41 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\NAudioManager.cs:43 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\Sound\NAudioSoundPlayer.cs:22 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\TextureDrawing\DefaultTextureDrawing.cs:24 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\StringDrawing\DefaultSkiaStringDrawing.cs:110 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:38 | public void Clear() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:42 | public void CountDrawCall(IDrawing drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:46 | public void FormatStatistics(StringBuilder builder) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:65 | public void OnAfterDrawing(IDrawing drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:69 | public void OnAfterRender() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:73 | public void OnAfterTargetDrawing(IDrawingTarget drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:77 | public void OnBeforeRender() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:81 | public void OnBeginDrawing(IDrawing drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:85 | public void OnBeginTargetDrawing(IDrawingTarget drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DummyPerformenceMonitor.cs:89 | public void PostUIRenderTime(TimeSpan ts) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DefaultReleasePerfomenceMonitor.cs:29 | public void Clear() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DefaultReleasePerfomenceMonitor.cs:60 | public void OnAfterDrawing(IDrawing drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DefaultReleasePerfomenceMonitor.cs:74 | public void OnAfterTargetDrawing(IDrawingTarget drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DefaultReleasePerfomenceMonitor.cs:88 | public void OnBeginDrawing(IDrawing drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Performence\DefaultReleasePerfomenceMonitor.cs:94 | public void OnBeginTargetDrawing(IDrawingTarget drawing) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\BeamDrawing\DefaultSkiaBeamDrawing.cs:12 | public void Draw(IDrawingContext target, IImage tex, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\DefaultSkiaRenderContext.cs:16 | public void AfterRender(IDrawingContext context) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\DefaultSkiaRenderContext.cs:20 | public void BeforeRender(IDrawingContext context) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\DefaultSkiaRenderContext.cs:24 | public void CleanRender(IDrawingContext context, Vector4 cleanColor) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\LineDrawing\DefaultSkiaLineDrawing.cs:166 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\LineDrawing\DefaultSkiaLineDrawing.cs:176 | public void DrawVBO(IDrawingContext target, IStaticVBODrawing.IVBOHandle vbo) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\CircleDrawing\DefaultSkiaCircleDrawing.cs:12 | public void Begin(IDrawingContext target) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\CircleDrawing\DefaultSkiaCircleDrawing.cs:16 | public void Post(Vector2 point, Vector4 color, bool isSolid, float radius, float hollowLineWidth) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\Skia\Drawing\CircleDrawing\DefaultSkiaCircleDrawing.cs:20 | public void End() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\OpenGL\Drawing\SvgDrawing\DefaultSvgDrawing.cs:15 | public void Draw(IDrawingContext target, SvgPrefabBase svg, Vector2 position) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\ProgramUpdater\DefaultProgramUpdater.cs:250 | public void OnSchedulerTerm() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\AudioPlayerToolViewer\ViewModels\AudioPlayerToolViewerViewModel.cs:22 | public void RequestPlayOrPause() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\AudioPlayerToolViewer\ViewModels\AudioPlayerToolViewerViewModel.cs:26 | public void Dispose() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\OpenGL\DefaultOpenGLRenderContext.cs:11 | public void AfterRender(IDrawingContext context) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\OpenGL\DefaultOpenGLRenderContext.cs:15 | public void BeforeRender(IDrawingContext context) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Kernel\Graphics\OpenGL\DefaultOpenGLRenderContext.cs:19 | public void CleanRender(IDrawingContext context, System.Numerics.Vector4 cleanColor) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.cs:107 | public void ScrollTo(OngekiTimelineObjectBase ongekiObject) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.cs:111 | public void ScrollTo(TGrid tGrid) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.cs:115 | public void NotifyObjectClicked(OngekiTimelineObjectBase ongekiObject) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.cs:134 | public void RecalculateTotalDurationHeight() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.Drawing.cs:650 | public void OnSchedulerTerm() { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\ViewModels\FumenVisualEditorViewModel.Drawing.cs:812 | public void OnLoaded(ActionExecutionContext e) { }
+- Avalonia/src/OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Graphics\Drawing\TargetImpl\EditorObjects\SVG\Cached\DefaultImpl\CachedSvgRenderDataManager.cs:69 | public void OnSchedulerTerm() { }
+

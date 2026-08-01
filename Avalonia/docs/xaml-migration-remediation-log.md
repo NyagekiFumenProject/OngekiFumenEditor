@@ -659,8 +659,8 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 
 **当前状态：** `AudioPlayerToolViewerView` 仍显示 150 像素的波形宿主、缩放/采样参数、启用开关和波形选项；但负责创建渲染控件、采样并绘制波形的 `AudioPlayerToolViewerViewModel.WaveformDrawing.cs` 仍被 `<Compile Remove>` 排除，当前主 ViewModel 只保留设置属性，实际宿主不会接入绘制内容。
 
-- **18A：使用现有 Avalonia.Skia lease 路径重新实现波形宿主。推荐。** 不直接启用依赖旧渲染上下文的排除文件；把采样、取消、尺寸更新和生命周期迁到新的强类型 Avalonia 控件/行为，并增加非空像素与卸载测试。
-- **18B：暂时隐藏波形宿主、波形选项和全局可视化设置。** 保留音乐与音效播放，避免向用户展示空白功能。
+- **18A：使用现有 Avalonia.Skia lease 路径重新实现波形宿主。长期完整迁移推荐。** 不直接启用依赖旧渲染上下文的排除文件；把采样、取消、尺寸更新和生命周期迁到新的强类型 Avalonia 控件/行为，并增加非空像素与卸载测试。
+- **18B：暂时隐藏波形宿主、波形选项和全局可视化设置。当前延期范围推荐。** 保留音乐与音效播放，避免向用户展示空白功能；以后实施 18A 时再恢复入口。
 - **18C：维持当前可见空白宿主。** 不推荐；与 11C 的“可见功能必须达到门槛”原则冲突。
 
 #### 19. 非零音频偏移
@@ -673,7 +673,7 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 
 #### 20. Native AOT、ASIO 与平台能力展示
 
-**当前状态：** 普通 Desktop/JIT 构建可创建 ASIO；`win-x64-aot` 中 NAudio ASIO 仍依赖运行时生成委托，所以选择 ASIO 会直接回退 WASAPI。共享音频设置页仍向 Browser 展示 `WaveOut`/`WASAPI`/`ASIO`，并展示只在 Windows x64 生效的 SoundTouch 变速设置；Browser 的变速滑块写入后实际播放速率仍为 1。
+**当前状态：** 普通 Desktop/JIT 构建可创建 ASIO；`win-x64-aot` 中 NAudio ASIO 仍依赖运行时生成委托，所以选择 ASIO 会直接回退 WASAPI。共享音频设置页仍向 Browser 展示 `WaveOut`/`WASAPI`/`ASIO`，并展示只在 Windows x64 生效的 SoundTouch 变速设置；Browser 的变速滑块写入后实际播放速率仍为 1。Browser 文件读取目前只支持 `.wav`/`.aif`/`.aiff`，其中 WAV 仅接受 PCM/IEEE-float，MP3、ACB 和压缩 WAV 不支持；当前音乐播放器还会把解码后的整首音频驻留内存。
 
 - **20A：只发布 AOT/WASAPI Desktop，并按平台能力隐藏无效设置。** 单产物最简单，但明确放弃 AOT 包中的 ASIO。
 - **20B：AOT/WASAPI 作为主包，同时提供 JIT/ASIO 专用包；两端都使用能力服务控制设置 UI。推荐。** 同时满足 Native AOT 首发与原项目 ASIO 用户，不让 Browser 或 AOT 用户选择无效选项。
@@ -696,7 +696,7 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 | 自更新 | 12C 已删除 | 不恢复旧自覆盖更新器；若需要更新提醒，推荐只做版本检查和 HTTPS 下载页跳转（原 12B） |
 | `IFileAssociationService` | UI 和服务均暂时移除 | 等安装包/分发策略确定后再做 Desktop 平台服务；Browser 不提供该能力 |
 | `IPCHelper` / 单实例 | 源码参考保留但排除编译 | 先决定是否允许多实例及第二实例参数/`--wait` 协议；需要时使用 Desktop 平台服务，Windows 采用互斥体/命名管道，其他系统独立实现 |
-| Linux/macOS Desktop | 5A 只要求保留架构边界，不要求本轮功能对等 | 当前继续以 Windows Desktop + Browser 为发布范围；若要宣称 Linux/macOS 支持，必须新增对应音频输出工厂并做平台构建/运行验证 |
+| Linux/macOS Desktop | 5A 只要求保留架构边界，不要求本轮功能对等；当前普通 Desktop TFM 为 `net10.0-windows10.0.19041.0`，输出固定使用 WASAPI/ASIO，解码依赖 Windows 能力，并携带 win-x64 SoundTouch DLL | 当前明确以 Windows Desktop + Browser 为发布范围；若要宣称 Linux/macOS 支持，必须拆出对应入口项目，新增输出、解码和变速实现并做平台构建/运行验证 |
 
 ### 不需要产品选择但仍需执行的验证与治理
 
@@ -708,7 +708,9 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 
 ### 当前推荐优先级
 
-1. 先决定 **18、19、20、21**，因为它们直接决定用户可见功能与旧谱面数据是否完整。
+1. 先决定 **18、19、20、21**，因为它们直接决定用户可见功能与旧谱面数据是否完整。当前建议组合为 **`18B（短期，后续 18A）+ 19A + 20B + 21B`**。
 2. 随后执行 **16C 第一批**，清理已被验证替代的旧图形和旧控件源码。
 3. 发布前完成真实设备、真实浏览器、Native AOT 工作流与依赖安全验证。
 4. 自更新、文件关联、IPC、InternalTest 和 Linux/macOS 功能对等继续维持当前延期，不必阻塞上述工作。
+
+> 2026-08-02 03:13 +08:00 音频实现协作者完成只读闭环审计：复核结果与第 18～20 项一致，并额外确认 Browser 格式/内存边界及 Linux/macOS 尚无可运行 Desktop 实现；未修改或构建任何文件。

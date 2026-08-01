@@ -1,0 +1,540 @@
+UI/Themes/TabControl.axaml (88 unique)
+  L27 AVLN2000 Unable to resolve type TabPanel Line 27, position 26.
+  L147 AVLN2000 Unable to resolve type SystemColors Line 147, position 97.
+  L158 AVLN2000 Unable to resolve type IFrameworkInputElement Line 158, position 24.
+  L165 AVLN2000 Unable to resolve type SystemColors Line 165, position 37.
+  L3 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L14 AVLN2000 Unable to resolve suitable regular or attached property SnapsToDevicePixels on type Avalonia.Controls:Avalonia
+  L20 AVLN2000 Unable to resolve suitable regular or attached property Name on type Avalonia.Controls:Avalonia.Controls.Colum
+  L21 AVLN2000 Unable to resolve suitable regular or attached property Name on type Avalonia.Controls:Avalonia.Controls.Colum
+  L24 AVLN2000 Unable to resolve suitable regular or attached property Name on type Avalonia.Controls:Avalonia.Controls.RowDe
+  L25 AVLN2000 Unable to resolve suitable regular or attached property Name on type Avalonia.Controls:Avalonia.Controls.RowDe
+  L27 AVLN2000 Unable to resolve suitable regular or attached property Name on type :.{Unknown type} Line 27, position 26.
+  L27 AVLN2000 Unable to resolve suitable regular or attached property Row on type Avalonia.Controls:Avalonia.Controls.Grid L
+  L27 AVLN2000 Unable to resolve suitable regular or attached property Column on type Avalonia.Controls:Avalonia.Controls.Gri
+  L27 AVLN2000 Unable to resolve suitable regular or attached property Margin on type :.{Unknown type} Line 27, position 26.
+  L27 AVLN2000 Unable to resolve suitable regular or attached property ZIndex on type Avalonia.Controls:Avalonia.Controls.Pan
+  L27 AVLN2000 Unable to resolve suitable regular or attached property Background on type :.{Unknown type} Line 27, position 
+  L27 AVLN2000 Unable to resolve suitable regular or attached property IsItemsHost on type :.{Unknown type} Line 27, position
+  L27 AVLN2000 Unable to resolve suitable regular or attached property TabIndex on type Avalonia.Base:Avalonia.Input.Keyboard
+  L36 AVLN2000 Unable to resolve suitable regular or attached property DirectionalNavigation on type Avalonia.Base:Avalonia.I
+  L46 AVLN2000 Unable to resolve suitable regular or attached property ContentSource on type Avalonia.Controls:Avalonia.Contr
+  L46 AVLN2000 Unable to resolve suitable regular or attached property ContentStringFormat on type Avalonia.Controls:Avalonia
+  L46 AVLN2000 Unable to resolve suitable regular or attached property SnapsToDevicePixels on type Avalonia.Controls:Avalonia
+  L13 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Markup.Xaml:Avalonia.Markup.
+  L57 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L57 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L58 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L59 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L60 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L67 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L74 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L76 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L76 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L77 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L78 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L79 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L80 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L81 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L88 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L95 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L102 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L109 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L111 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L111 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L112 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L113 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L114 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L115 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L116 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L123 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L130 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L137 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L144 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L146 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L146 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L147 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L155 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L158 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L162 AVLN2000 Unable to resolve suitable regular or attached property SnapsToDevicePixels on type Avalonia.Controls:Avalonia
+  L184 AVLN2000 Unable to resolve suitable regular or attached property SnapsToDevicePixels on type Avalonia.Controls:Avalonia
+  L199 AVLN2000 Unable to resolve suitable regular or attached property ContentSource on type Avalonia.Controls:Avalonia.Contr
+  L199 AVLN2000 Unable to resolve suitable regular or attached property ContentStringFormat on type Avalonia.Controls:Avalonia
+  L199 AVLN2000 Unable to resolve suitable regular or attached property SnapsToDevicePixels on type Avalonia.Controls:Avalonia
+  L183 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Markup.Xaml:Avalonia.Markup.
+  L218 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L219 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L220 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L221 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L228 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L229 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L230 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L231 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L238 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L239 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L240 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L241 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L248 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L249 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L250 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L251 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L258 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L259 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L260 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L261 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L262 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L269 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L270 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L271 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L272 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+Modules/FumenVisualEditor/Views/UI/Toast.axaml (33 unique)
+  L13 AVLN2000 Unable to resolve type Storyboard Line 13, position 10.
+  L14 AVLN2000 Unable to resolve type DoubleAnimation Line 14, position 14.
+  L14 AVLN2000 Unable to resolve type Storyboard Line 14, position 14.
+  L23 AVLN2000 Unable to resolve type DoubleAnimation Line 23, position 14.
+  L23 AVLN2000 Unable to resolve type Storyboard Line 23, position 14.
+  L32 AVLN2000 Unable to resolve type CircleEase Line 32, position 22.
+  L36 AVLN2000 Unable to resolve type DoubleAnimation Line 36, position 14.
+  L36 AVLN2000 Unable to resolve type Storyboard Line 36, position 14.
+  L14 AVLN2000 Unable to resolve suitable regular or attached property BeginTime on type :.{Unknown type} Line 14, position 1
+  L14 AVLN2000 Unable to resolve suitable regular or attached property DecelerationRatio on type :.{Unknown type} Line 14, po
+  L14 AVLN2000 Unable to resolve suitable regular or attached property Target on type :.{Unknown type} Line 14, position 14.
+  L14 AVLN2000 Unable to resolve suitable regular or attached property TargetProperty on type :.{Unknown type} Line 14, posit
+  L14 AVLN2000 Unable to resolve suitable regular or attached property From on type :.{Unknown type} Line 14, position 14.
+  L14 AVLN2000 Unable to resolve suitable regular or attached property To on type :.{Unknown type} Line 14, position 14.
+  L14 AVLN2000 Unable to resolve suitable regular or attached property Duration on type :.{Unknown type} Line 14, position 14
+  L23 AVLN2000 Unable to resolve suitable regular or attached property BeginTime on type :.{Unknown type} Line 23, position 1
+  L23 AVLN2000 Unable to resolve suitable regular or attached property DecelerationRatio on type :.{Unknown type} Line 23, po
+  L23 AVLN2000 Unable to resolve suitable regular or attached property Target on type :.{Unknown type} Line 23, position 14.
+  L23 AVLN2000 Unable to resolve suitable regular or attached property TargetProperty on type :.{Unknown type} Line 23, posit
+  L23 AVLN2000 Unable to resolve suitable regular or attached property From on type :.{Unknown type} Line 23, position 14.
+  L23 AVLN2000 Unable to resolve suitable regular or attached property To on type :.{Unknown type} Line 23, position 14.
+  L23 AVLN2000 Unable to resolve suitable regular or attached property Duration on type :.{Unknown type} Line 23, position 14
+  L23 AVLN2000 Unable to resolve suitable regular or attached property EasingFunction on type :.{Unknown type} Line 23, posit
+  L32 AVLN2000 Unable to resolve suitable regular or attached property EasingMode on type :.{Unknown type} Line 32, position 
+  L36 AVLN2000 Unable to resolve suitable regular or attached property Name on type :.{Unknown type} Line 36, position 14.
+  L36 AVLN2000 Unable to resolve suitable regular or attached property BeginTime on type :.{Unknown type} Line 36, position 1
+  L36 AVLN2000 Unable to resolve suitable regular or attached property DecelerationRatio on type :.{Unknown type} Line 36, po
+  L36 AVLN2000 Unable to resolve suitable regular or attached property Target on type :.{Unknown type} Line 36, position 14.
+  L36 AVLN2000 Unable to resolve suitable regular or attached property TargetProperty on type :.{Unknown type} Line 36, posit
+  L36 AVLN2000 Unable to resolve suitable regular or attached property From on type :.{Unknown type} Line 36, position 14.
+  L36 AVLN2000 Unable to resolve suitable regular or attached property To on type :.{Unknown type} Line 36, position 14.
+  L36 AVLN2000 Unable to resolve suitable regular or attached property Duration on type :.{Unknown type} Line 36, position 14
+  L13 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+Modules/AudioPlayerToolViewer/Views/AudioPlayerToolViewerView.axaml (30 unique)
+  L246 AVLN2000 Unable to resolve type Interaction Line 246, position 30.
+  L248 AVLN2000 Unable to resolve type DataTrigger Line 248, position 38.
+  L253 AVLN2000 Unable to resolve type ChangePropertyAction Line 253, position 46.
+  L259 AVLN2000 Unable to resolve type DataTrigger Line 259, position 38.
+  L264 AVLN2000 Unable to resolve type ChangePropertyAction Line 264, position 46.
+  L37 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L117 AVLN2000 Unable to resolve suitable regular or attached property ItemsPanel on type OngekiFumenEditor.Avalonia:OngekiFu
+  L162 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L205 AVLN2000 Unable to resolve suitable regular or attached property VerticalContentAlignment on type Avalonia.Controls:Ava
+  L246 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type :.{Unknown type} Line 246, position 3
+  L248 AVLN2000 Unable to resolve suitable regular or attached property Binding on type :.{Unknown type} Line 248, position 38
+  L248 AVLN2000 Unable to resolve suitable regular or attached property Comparison on type :.{Unknown type} Line 248, position
+  L248 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 248, position 38.
+  L248 AVLN2000 Unable to resolve suitable regular or attached property Actions on type :.{Unknown type} Line 248, position 38
+  L253 AVLN2000 Unable to resolve suitable regular or attached property PropertyName on type :.{Unknown type} Line 253, positi
+  L253 AVLN2000 Unable to resolve suitable regular or attached property TargetObject on type :.{Unknown type} Line 253, positi
+  L253 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 253, position 46.
+  L259 AVLN2000 Unable to resolve suitable regular or attached property Binding on type :.{Unknown type} Line 259, position 38
+  L259 AVLN2000 Unable to resolve suitable regular or attached property Comparison on type :.{Unknown type} Line 259, position
+  L259 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 259, position 38.
+  L259 AVLN2000 Unable to resolve suitable regular or attached property Actions on type :.{Unknown type} Line 259, position 38
+  L264 AVLN2000 Unable to resolve suitable regular or attached property PropertyName on type :.{Unknown type} Line 264, positi
+  L264 AVLN2000 Unable to resolve suitable regular or attached property TargetObject on type :.{Unknown type} Line 264, positi
+  L264 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 264, position 46.
+  L299 AVLN2000 Unable to resolve suitable regular or attached property VerticalContentAlignment on type Avalonia.Controls:Ava
+  L317 AVLN2000 Unable to resolve suitable regular or attached property VerticalContentAlignment on type Avalonia.Controls:Ava
+  L172 AVLN2000 Unable to resolve suitable regular or attached property Foreground on type Avalonia.Controls:Avalonia.Controls
+  L162 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L162 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L162 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 162, position 34.
+Kernel/SettingPages/FumenVisualEditor/Views/FumenVisualEditorGlobalSettingView.axaml (20 unique)
+  L117 AVLN2000 Unable to resolve type Interaction Line 117, position 22.
+  L119 AVLN2000 Unable to resolve type DataTrigger Line 119, position 30.
+  L124 AVLN2000 Unable to resolve type ChangePropertyAction Line 124, position 38.
+  L130 AVLN2000 Unable to resolve type DataTrigger Line 130, position 30.
+  L135 AVLN2000 Unable to resolve type ChangePropertyAction Line 135, position 38.
+  L117 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type :.{Unknown type} Line 117, position 2
+  L119 AVLN2000 Unable to resolve suitable regular or attached property Binding on type :.{Unknown type} Line 119, position 30
+  L119 AVLN2000 Unable to resolve suitable regular or attached property Comparison on type :.{Unknown type} Line 119, position
+  L119 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 119, position 30.
+  L119 AVLN2000 Unable to resolve suitable regular or attached property Actions on type :.{Unknown type} Line 119, position 30
+  L124 AVLN2000 Unable to resolve suitable regular or attached property PropertyName on type :.{Unknown type} Line 124, positi
+  L124 AVLN2000 Unable to resolve suitable regular or attached property TargetObject on type :.{Unknown type} Line 124, positi
+  L124 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 124, position 38.
+  L130 AVLN2000 Unable to resolve suitable regular or attached property Binding on type :.{Unknown type} Line 130, position 30
+  L130 AVLN2000 Unable to resolve suitable regular or attached property Comparison on type :.{Unknown type} Line 130, position
+  L130 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 130, position 30.
+  L130 AVLN2000 Unable to resolve suitable regular or attached property Actions on type :.{Unknown type} Line 130, position 30
+  L135 AVLN2000 Unable to resolve suitable regular or attached property PropertyName on type :.{Unknown type} Line 135, positi
+  L135 AVLN2000 Unable to resolve suitable regular or attached property TargetObject on type :.{Unknown type} Line 135, positi
+  L135 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 135, position 38.
+Modules/FumenSoflanGroupListViewer/Views/FumenSoflanGroupListViewerView.axaml (43 unique)
+  L35 AVLN2000 Unable to resolve type ToolBar Line 35, position 14.
+  L58 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L70 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L70 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L73 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L73 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L89 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Prim
+  L94 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L94 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L113 AVLN2000 Unable to resolve suitable regular or attached property SnapsToDevicePixels on type Avalonia.Controls:Avalonia
+  L108 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Markup.Xaml:Avalonia.Markup.
+  L153 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L153 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L154 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L159 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L160 AVLN2000 Unable to resolve suitable regular or attached property TargetName on type Avalonia.Base:Avalonia.Styling.Sett
+  L176 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Radi
+  L184 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L184 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L194 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Text
+  L196 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L196 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L235 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Radi
+  L243 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L243 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L265 AVLN2000 Unable to resolve suitable regular or attached property Path on type OngekiFumenEditor.Avalonia:OngekiFumenEdi
+  L97 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L97 AVLN2200 Unable to convert property value to :.{Unknown type} Line 97, position 87.
+  L100 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L100 AVLN2200 Unable to convert property value to :.{Unknown type} Line 100, position 87.
+  L159 AVLN2000 Unable to resolve suitable regular or attached property Fill on type Avalonia.Controls:Avalonia.Controls.Primi
+  L160 AVLN2000 Unable to resolve suitable regular or attached property Stroke on type Avalonia.Controls:Avalonia.Controls.Pri
+  L187 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L187 AVLN2200 Unable to convert property value to :.{Unknown type} Line 187, position 87.
+  L246 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L246 AVLN2200 Unable to convert property value to :.{Unknown type} Line 246, position 83.
+  L35 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L58 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L58 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L58 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 58, position 18.
+  L288 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L288 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L288 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 288, position 18.
+Modules/FumenEditorSelectingObjectViewer/Views/SelectionFilterView.axaml (35 unique)
+  L19 AVLN2000 Unable to resolve type WideModeToVisibilityConverter Line 19, position 10.
+  L20 AVLN2000 Unable to resolve type WideModeToVisibilityConverter Line 20, position 10.
+  L194 AVLN2000 Unable to resolve type ExpanderEx Line 194, position 30.
+  L195 AVLN2000 Unable to resolve type Interaction Line 195, position 34.
+  L202 AVLN2000 Unable to resolve type BubbleScrollWheelEventBehavior Line 202, position 42.
+  L219 AVLN2000 Unable to resolve type Interaction Line 219, position 30.
+  L226 AVLN2000 Unable to resolve type BubbleScrollWheelEventBehavior Line 226, position 38.
+  L253 AVLN2000 Unable to resolve type ExpanderEx Line 253, position 30.
+  L20 AVLN2000 Unable to resolve suitable regular or attached property IsInverse on type :.{Unknown type} Line 20, position 1
+  L25 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L25 AVLN2000 Unable to resolve suitable regular or attached property BasedOn on type Avalonia.Base:Avalonia.Styling.Style L
+  L31 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L31 AVLN2000 Unable to resolve suitable regular or attached property BasedOn on type Avalonia.Base:Avalonia.Styling.Style L
+  L41 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L41 AVLN2000 Unable to resolve suitable regular or attached property BasedOn on type Avalonia.Base:Avalonia.Styling.Style L
+  L91 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L108 AVLN2000 Unable to resolve suitable regular or attached property DisplayMemberPath on type Avalonia.Controls:Avalonia.C
+  L108 AVLN2000 Unable to resolve suitable regular or attached property SelectedValuePath on type Avalonia.Controls:Avalonia.C
+  L115 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L131 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L147 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L185 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L194 AVLN2000 Unable to resolve suitable regular or attached property Header on type :.{Unknown type} Line 194, position 30.
+  L195 AVLN2000 Unable to resolve suitable regular or attached property Behaviors on type :.{Unknown type} Line 195, position 
+  L210 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L219 AVLN2000 Unable to resolve suitable regular or attached property Behaviors on type :.{Unknown type} Line 219, position 
+  L249 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L253 AVLN2000 Unable to resolve suitable regular or attached property Header on type :.{Unknown type} Line 253, position 30.
+  L262 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L284 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Chec
+  L284 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Ch
+  L284 AVLN2000 Unable to resolve suitable regular or attached property InitialShowDelay on type Avalonia.Controls:Avalonia.Co
+  L194 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L253 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L220 AVLN1000 The input string 'Auto' was not in a correct format. Line 220, position 47.
+UI/Dialogs/ExceptionTermWindow.axaml (21 unique)
+  L41 AVLN2000 Unable to resolve type Hyperlink Line 41, position 34.
+  L61 AVLN2000 Unable to resolve type Hyperlink Line 61, position 22.
+  L75 AVLN2000 Unable to resolve type Hyperlink Line 75, position 22.
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ResizeMode on type OngekiFumenEditor.Avalonia:OngekiFu
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ShowCloseButton on type OngekiFumenEditor.Avalonia:Ong
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L41 AVLN2000 Unable to resolve suitable regular or attached property Click on type :.{Unknown type} Line 41, position 34.
+  L41 AVLN2000 Unable to resolve suitable regular or attached property DataContext on type :.{Unknown type} Line 41, position
+  L41 AVLN2000 Unable to resolve suitable regular or attached property TextDecorations on type :.{Unknown type} Line 41, posi
+  L61 AVLN2000 Unable to resolve suitable regular or attached property Click on type :.{Unknown type} Line 61, position 22.
+  L61 AVLN2000 Unable to resolve suitable regular or attached property DataContext on type :.{Unknown type} Line 61, position
+  L61 AVLN2000 Unable to resolve suitable regular or attached property TextDecorations on type :.{Unknown type} Line 61, posi
+  L75 AVLN2000 Unable to resolve suitable regular or attached property Click on type :.{Unknown type} Line 75, position 22.
+  L75 AVLN2000 Unable to resolve suitable regular or attached property DataContext on type :.{Unknown type} Line 75, position
+  L75 AVLN2000 Unable to resolve suitable regular or attached property TextDecorations on type :.{Unknown type} Line 75, posi
+  L41 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L61 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L75 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L116 AVLN3000 Unable to find suitable setter or adder for property Click of type Avalonia.Controls:Avalonia.Controls.Button 
+  L116 AVLN3000 System.EventHandler`1<Avalonia.Interactivity.RoutedEventArgs> Line 116, position 17.
+UI/Controls/RangeValue.axaml (9 unique)
+  L42 AVLN2000 Unable to resolve type SliderEx Line 42, position 10.
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Name on type :.{Unknown type} Line 42, position 10.
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Row on type Avalonia.Controls:Avalonia.Controls.Grid L
+  L42 AVLN2000 Unable to resolve suitable regular or attached property ColumnSpan on type Avalonia.Controls:Avalonia.Controls
+  L42 AVLN2000 Unable to resolve suitable regular or attached property IsSnapToTickEnabled on type :.{Unknown type} Line 42, 
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Maximum on type :.{Unknown type} Line 42, position 10.
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Minimum on type :.{Unknown type} Line 42, position 10.
+  L42 AVLN2000 Unable to resolve suitable regular or attached property TickFrequency on type :.{Unknown type} Line 42, positi
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 42, position 10.
+Modules/SplashScreen/Views/SplashScreenView.axaml (16 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property WindowTitleBrush on type OngekiFumenEditor.Avalonia:On
+  L1 AVLN2000 Unable to resolve suitable regular or attached property GlowBrush on type OngekiFumenEditor.Avalonia:OngekiFum
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ResizeMode on type OngekiFumenEditor.Avalonia:OngekiFu
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L26 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L26 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L51 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L94 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L126 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Bord
+  L131 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L131 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L192 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Bord
+  L227 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Bord
+  L262 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Bord
+  L301 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Bord
+Modules/FumenEditorSelectingObjectViewer/Views/FumenEditorSelectingObjectViewerView.axaml (13 unique)
+  L38 AVLN2000 Unable to resolve type Interaction Line 38, position 10.
+  L47 AVLN2000 Unable to resolve type ListViewMultiSelectionBehavior Line 47, position 18.
+  L83 AVLN2000 Unable to resolve type Message Line 83, position 18.
+  L89 AVLN2000 Unable to resolve type Message Line 89, position 18.
+  L96 AVLN2000 Unable to resolve type Message Line 96, position 18.
+  L38 AVLN2000 Unable to resolve suitable regular or attached property Behaviors on type :.{Unknown type} Line 38, position 1
+  L47 AVLN2000 Unable to resolve suitable regular or attached property SelectedItems on type :.{Unknown type} Line 47, positi
+  L83 AVLN2000 Unable to resolve suitable regular or attached property Attach on type :.{Unknown type} Line 83, position 18.
+  L89 AVLN2000 Unable to resolve suitable regular or attached property Attach on type :.{Unknown type} Line 89, position 18.
+  L96 AVLN2000 Unable to resolve suitable regular or attached property Attach on type :.{Unknown type} Line 96, position 18.
+  L64 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L64 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L64 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 64, position 18.
+UI/Controls/ObjectInspector/Views/RangeValueTypeUIView.axaml (7 unique)
+  L42 AVLN2000 Unable to resolve type SliderEx Line 42, position 10.
+  L24 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Row on type Avalonia.Controls:Avalonia.Controls.Grid L
+  L42 AVLN2000 Unable to resolve suitable regular or attached property ColumnSpan on type Avalonia.Controls:Avalonia.Controls
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Maximum on type :.{Unknown type} Line 42, position 10.
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Minimum on type :.{Unknown type} Line 42, position 10.
+  L42 AVLN2000 Unable to resolve suitable regular or attached property Value on type :.{Unknown type} Line 42, position 10.
+Kernel/SettingPages/KeyBinding/Dialogs/ConfigKeyBindingDialog.axaml (13 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ShowMaxRestoreButton on type OngekiFumenEditor.Avaloni
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ShowMinButton on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L29 AVLN2000 Unable to resolve suitable regular or attached property Path on type OngekiFumenEditor.Avalonia:OngekiFumenEdi
+  L41 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L49 AVLN2000 Unable to resolve suitable regular or attached property Path on type OngekiFumenEditor.Avalonia:OngekiFumenEdi
+  L63 AVLN3000 Unable to find suitable setter or adder for property Click of type Avalonia.Controls:Avalonia.Controls.Button 
+  L63 AVLN3000 System.EventHandler`1<Avalonia.Interactivity.RoutedEventArgs> Line 63, position 17.
+  L72 AVLN3000 Unable to find suitable setter or adder for property Click of type Avalonia.Controls:Avalonia.Controls.Button 
+  L72 AVLN3000 System.EventHandler`1<Avalonia.Interactivity.RoutedEventArgs> Line 72, position 17.
+  L81 AVLN3000 Unable to find suitable setter or adder for property Click of type Avalonia.Controls:Avalonia.Controls.Button 
+  L81 AVLN3000 System.EventHandler`1<Avalonia.Interactivity.RoutedEventArgs> Line 81, position 17.
+Modules/FumenBulletPalleteListViewer/Views/FumenBulletPalleteListViewerView.axaml (10 unique)
+  L57 AVLN2000 Unable to resolve type Interaction Line 57, position 10.
+  L65 AVLN2000 Unable to resolve type ListViewMultiSelectionBehavior Line 65, position 18.
+  L57 AVLN2000 Unable to resolve suitable regular or attached property Behaviors on type :.{Unknown type} Line 57, position 1
+  L65 AVLN2000 Unable to resolve suitable regular or attached property SelectedItems on type :.{Unknown type} Line 65, positi
+  L172 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L183 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L195 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L68 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L68 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L68 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 68, position 18.
+Modules/FumenCheckerListViewer/Views/FumenCheckerListViewerView.axaml (12 unique)
+  L55 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Docu
+  L57 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L57 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L93 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Docu
+  L95 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L95 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L131 AVLN2000 Unable to resolve suitable regular or attached property Style on type Avalonia.Controls:Avalonia.Controls.Docu
+  L133 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L133 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L158 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L158 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L158 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 158, position 18.
+Modules/FumenObjectPropertyBrowser/Views/ConnectableObjectOperationView.axaml (11 unique)
+  L16 AVLN2000 Unable to resolve type BooleanToVisibilityConverter Line 16, position 10.
+  L19 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L44 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L57 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L57 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type OngekiFumenEditor.Avalonia:OngekiFu
+  L71 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L71 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type OngekiFumenEditor.Avalonia:OngekiFu
+  L83 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L83 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type OngekiFumenEditor.Avalonia:OngekiFu
+  L95 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L95 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type OngekiFumenEditor.Avalonia:OngekiFu
+Modules/FumenEditorRenderControlViewer/Views/FumenEditorRenderControlViewerView.axaml (10 unique)
+  L23 AVLN2000 Unable to resolve type ToolBar Line 23, position 14.
+  L47 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type Avalonia.Base:Avalonia.Styling.Style 
+  L59 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L59 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L62 AVLN2000 Unable to resolve suitable regular or attached property Property on type Xaml.Behaviors:Avalonia.Xaml.Interact
+  L62 AVLN2000 Unable to resolve suitable regular or attached property Value on type Xaml.Behaviors:Avalonia.Xaml.Interactivi
+  L23 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+  L47 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L47 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L47 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 47, position 18.
+UI/Controls/ObjectInspector/Views/ColorIdEnumTypeUIView.axaml (7 unique)
+  L19 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L26 AVLN2000 Unable to resolve suitable regular or attached property ItemContainerStyle on type Avalonia.Controls:Avalonia.
+  L33 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L14 AVLN2005 Unable to parse "
+  L14 AVLN2005             " as a grid length
+  L16 AVLN2005 Unable to parse "
+  L16 AVLN2005             " as a grid length
+UI/Controls/ObjectInspector/Views/Dialogs/BulletPalleteSelectDialogView.axaml (7 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SizeToContent on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L40 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L40 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L40 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 40, position 18.
+UI/Themes/TextBlock.axaml (7 unique)
+  L2 AVLN2000 Unable to resolve suitable regular or attached property TargetType on type Avalonia.Base:Avalonia.Styling.Styl
+  L3 AVLN2200 Could not determine target type of Setter Line 3, position 10.
+  L4 AVLN2200 Could not determine target type of Setter Line 4, position 10.
+  L5 AVLN2200 Could not determine target type of Setter Line 5, position 10.
+  L6 AVLN2200 Could not determine target type of Setter Line 6, position 10.
+  L2 AVLN3000 Unable to find suitable setter or adder for property Content of type Avalonia.Base:Avalonia.Controls.ResourceD
+  L2 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 2, position 6.
+Kernel/ProgramUpdater/Dialogs/Views/ShowNewVersionDialogView.axaml (6 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ResizeMode on type OngekiFumenEditor.Avalonia:OngekiFu
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ShowMaxRestoreButton on type OngekiFumenEditor.Avaloni
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ShowMinButton on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SizeToContent on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+Modules/AudioAdjustWindow/Views/AudioAdjustWindowView.axaml (6 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ResizeMode on type OngekiFumenEditor.Avalonia:OngekiFu
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SizeToContent on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L39 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+Modules/FumenConverter/Views/FumenConverterView.axaml (6 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property ResizeMode on type OngekiFumenEditor.Avalonia:OngekiFu
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SizeToContent on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L40 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+Modules/FumenVisualEditor/Views/FumenVisualEditorView.axaml (6 unique)
+  L1 AVLN2000 Unable to resolve type Interaction Line 1, position 2.
+  L1 AVLN2000 Unable to resolve suitable regular or attached property AllowDrop on type OngekiFumenEditor.Avalonia:OngekiFum
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Triggers on type :.{Unknown type} Line 1, position 2.
+  L185 AVLN2000 Unable to resolve suitable regular or attached property IsCheckable on type Avalonia.Controls:Avalonia.Control
+  L204 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type OngekiFumenEditor.Avalonia:OngekiFu
+  L206 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+UI/Controls/ObjectInspector/Views/BaseValueTypeUIView.axaml (5 unique)
+  L16 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L11 AVLN2005 Unable to parse "
+  L11 AVLN2005             " as a grid length
+  L13 AVLN2005 Unable to parse "
+  L13 AVLN2005             " as a grid length
+UI/Controls/ObjectInspector/Views/CurveInterpolaterFactoryTypeUIView.axaml (5 unique)
+  L25 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Co
+  L14 AVLN2005 Unable to parse "
+  L14 AVLN2005             " as a grid length
+  L16 AVLN2005 Unable to parse "
+  L16 AVLN2005             " as a grid length
+UI/Controls/ObjectInspector/Views/EnumValueTypeUIView.axaml (5 unique)
+  L17 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L12 AVLN2005 Unable to parse "
+  L12 AVLN2005             " as a grid length
+  L14 AVLN2005 Unable to parse "
+  L14 AVLN2005             " as a grid length
+UI/Dialogs/CommonColorPicker.axaml (3 unique)
+  L17 AVLN2000 Unable to resolve type StandardColorPicker Line 17, position 10.
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L17 AVLN2000 Unable to resolve suitable regular or attached property SelectedColor on type :.{Unknown type} Line 17, positi
+Kernel/SettingPages/KeyBinding/Views/KeyBindingSettingView.axaml (4 unique)
+  L30 AVLN2000 Unable to resolve suitable regular or attached property StringFormat on type OngekiFumenEditor.Avalonia:Ongeki
+  L67 AVLN2000 Unable to resolve suitable regular or attached property CanContentScroll on type Avalonia.Controls:Avalonia.Co
+  L67 AVLN2000 Unable to resolve suitable regular or attached property IsVirtualizing on type Avalonia.Controls:Avalonia.Cont
+  L67 AVLN2000 Unable to resolve suitable regular or attached property VirtualizationMode on type Avalonia.Controls:Avalonia.
+Modules/FumenObjectPropertyBrowser/Views/Dialog/BrushTGridRangeDialogView.axaml (4 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SaveWindowPosition on type OngekiFumenEditor.Avalonia:
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SizeToContent on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+Modules/FumenVisualEditor/Views/Dialogs/EditorProjectSetupDialogView.axaml (4 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Title on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L1 AVLN2000 Unable to resolve suitable regular or attached property SizeToContent on type OngekiFumenEditor.Avalonia:Ongek
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L41 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+Kernel/SettingPages/FumenVisualEditor/Views/FumenVisualEditorColorSettingView.axaml (3 unique)
+  L17 AVLN2000 Unable to resolve suitable regular or attached property CanContentScroll on type Avalonia.Controls:Avalonia.Co
+  L17 AVLN2000 Unable to resolve suitable regular or attached property IsVirtualizing on type Avalonia.Controls:Avalonia.Cont
+  L17 AVLN2000 Unable to resolve suitable regular or attached property VirtualizationMode on type Avalonia.Controls:Avalonia.
+Modules/FumenObjectPropertyBrowser/Views/HoldOperationView.axaml (3 unique)
+  L13 AVLN2000 Unable to resolve type BooleanToVisibilityConverter Line 13, position 10.
+  L16 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L26 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+Modules/FumenTimeSignatureListViewer/Views/FumenTimeSignatureListViewerView.axaml (3 unique)
+  L36 AVLN3000 Unable to find suitable setter or adder for property Resources of type Avalonia.Base:Avalonia.StyledElement fo
+  L36 AVLN3000 Avalonia.Controls.IResourceDictionary
+  L36 AVLN3000 System.Collections.Generic.KeyValuePair`2<System.Object,System.Object> Line 36, position 18.
+UI/Controls/ObjectInspector/Views/BoolValueTypeUIView.axaml (3 unique)
+  L15 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L12 AVLN2005 Unable to parse "
+  L12 AVLN2005             " as a grid length
+UI/Controls/ObjectInspector/Views/WidthIdEnumTypeUIView.axaml (3 unique)
+  L9 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L22 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+  L29 AVLN2000 Unable to resolve suitable regular or attached property DisplayMemberPath on type Avalonia.Controls:Avalonia.C
+Kernel/SettingPages/Program/Views/ProgramSettingView.axaml (2 unique)
+  L147 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L159 AVLN2000 Unable to resolve suitable regular or attached property Path on type OngekiFumenEditor.Avalonia:OngekiFumenEdi
+Modules/FumenObjectPropertyBrowser/Views/BeamOperationView.axaml (2 unique)
+  L14 AVLN2000 Unable to resolve type BooleanToVisibilityConverter Line 14, position 10.
+  L17 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+Modules/FumenObjectPropertyBrowser/Views/FumenObjectPropertyBrowserView.axaml (2 unique)
+  L23 AVLN2000 Unable to resolve type ItemContainerTemplate Line 23, position 22.
+  L23 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+Modules/FumenObjectPropertyBrowser/Views/WallOperationView.axaml (2 unique)
+  L13 AVLN2000 Unable to resolve type BooleanToVisibilityConverter Line 13, position 10.
+  L16 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+Modules/FumenVisualEditor/Views/BatchModeOverlayView.axaml (2 unique)
+  L26 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+  L27 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+UI/Controls/ObjectInspector/ObjectInspectorView.axaml (2 unique)
+  L19 AVLN2000 Unable to resolve type ItemContainerTemplate Line 19, position 22.
+  L19 AVLN2000 Internal compiler error: Index was out of range. Must be non-negative and less than the size of the collection
+UI/Controls/ObjectInspector/Views/FileInfoTypeUIView.axaml (2 unique)
+  L15 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L40 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type Avalonia.Controls:Avalonia.Controls.Te
+UI/Controls/ObjectInspector/Views/TGridTypeUIView.axaml (2 unique)
+  L11 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L66 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+UI/Controls/ObjectInspector/Views/XGridTypeUIView.axaml (2 unique)
+  L11 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+  L66 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+UI/Dialogs/AboutWindow.axaml (2 unique)
+  L1 AVLN2000 Unable to resolve suitable regular or attached property Style on type OngekiFumenEditor.Avalonia:OngekiFumenEd
+  L48 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+App.axaml (1 unique)
+  L1 AVLN2000 Unable to find type `OngekiFumenEditor.Avalonia.App` Line 1, position 2.
+Modules/EditorSvgObjectControlProvider/Views/ObjectProperty/Operation/SvgPrefabOperationView.axaml (1 unique)
+  L16 AVLN2000 Unable to resolve type BooleanToVisibilityConverter Line 16, position 10.
+Modules/FumenObjectPropertyBrowser/Views/InterpolatableSoflanOperationView.axaml (1 unique)
+  L13 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen
+Modules/FumenObjectPropertyBrowser/Views/MultiLanesOperationView.axaml (1 unique)
+  L16 AVLN2000 Unable to resolve type BooleanToVisibilityConverter Line 16, position 10.
+Modules/FumenVisualEditorSettings/Views/FumenVisualEditorSettingsView.axaml (1 unique)
+  L28 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+Modules/TGridCalculatorToolViewer/Views/TGridCalculatorToolViewerView.axaml (1 unique)
+  L82 AVLN2000 Unable to resolve suitable regular or attached property Visibility on type Avalonia.Controls:Avalonia.Controls
+UI/Controls/ObjectInspector/Views/BulletPalleteTypeUIView.axaml (1 unique)
+  L13 AVLN2000 Unable to resolve suitable regular or attached property ToolTip on type OngekiFumenEditor.Avalonia:OngekiFumen

@@ -1,0 +1,15 @@
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\AppBootstrapper.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Base\EditorObjects\Svg\SvgImageFilePrefab.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Base\EditorObjects\Svg\SvgPrefabBase.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Base\EditorObjects\Svg\SvgStringPrefab.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\Music\DefaultMusicPlayer.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Kernel\Audio\NAudioImpl\NAudioManager.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\EditorScriptExecutor\Documents\EditorScriptDocumentProvider.cs; Flags=placeholder,alwaysFalse}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenTimeSignatureListViewer\Converters\MeterDisplayConverter.cs; Flags=NotImplemented}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Modules\FumenVisualEditor\Kernel\EditorProjectFile\Migrations\Migration_V0_5_2_To_Latest.cs; Flags=NotImplemented}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Parser\Ogkr\CommandParserImpl\BulletCommandParser.cs; Flags=NotImplemented}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Parser\Ogkr\CommandParserImpl\BulletPalleteCommandParser.cs; Flags=NotImplemented}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Parser\Ogkr\CommandParserImpl\CustomBellCommandParser.cs; Flags=NotImplemented}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Parser\Ogkr\CommandParserImpl\CustomBulletCommandParser.cs; Flags=NotImplemented}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Startup.cs; Flags=placeholder}
+@{File=F:\Source\OngekiFumenEditor\Avalonia\src\OngekiFumenEditor.Avalonia\Utils\DocumentOpenHelper.cs; Flags=alwaysFalse}
