@@ -1,18 +1,16 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views.FumenBulletPalleteListViewerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ValueConverters"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.ValueConverters"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -28,14 +26,18 @@
         <StackPanel Margin="5" Orientation="Horizontal">
             <Button
                 Margin="0,0,5,0"
-                cal:Message.Attach="[Event Click] = [Action OnCreateNew()];"
                 Content="{markup:Translate [NewBulletPallete]}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCreateNew" />
+                </Interaction.Behaviors>
             </Button>
             <Button
-                cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
                 Content="{markup:Translate [DeleteSelectedPalletes]}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnDeleteSelecting" PassMode="View" />
+                </Interaction.Behaviors>
             </Button>
 
             <TextBox
@@ -44,108 +46,110 @@
                 Text="{Binding Filter}" />
 
             <Button
-                cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];"
                 Content="{markup:Translate [Filter]}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnRefreshFilter" />
+                </Interaction.Behaviors>
             </Button>
         </StackPanel>
-        <ListView
+        <DataGrid
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
+            CanUserReorderColumns="True"
             ItemsSource="{Binding DataView}"
-            ScrollViewer.CanContentScroll="True"
-            SelectionMode="Extended"
-            VirtualizingPanel.IsVirtualizing="True"
-            VirtualizingPanel.VirtualizationMode="Recycling">
-            <i:Interaction.Behaviors>
+            SelectionMode="Extended">
+            <Interaction.Behaviors>
                 <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
-            </i:Interaction.Behaviors>
-            <ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+            </Interaction.Behaviors>
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Interaction.Behaviors">
+                        <BehaviorCollectionTemplate>
+                            <BehaviorCollection>
+                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
+                            </BehaviorCollection>
+                        </BehaviorCollectionTemplate>
+                    </Setter>
                 </Style>
-            </ListView.Resources>
-            <ListView.View>
-                <GridView AllowsColumnReorder="True">
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="GridViewColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                        </Style>
-                    </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                    <DataGridTextColumn
                         Width="60"
-                        DisplayMemberBinding="{Binding StrID}"
+                        Binding="{Binding StrID}"
                         Header="{markup:Translate [BulletPaletteId]}" />
-                    <GridViewColumn Width="120" Header="{markup:Translate [Name]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="120" Header="{markup:Translate [Name]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding EditorName}">
                                 </TextBox>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding PlaceOffset}">
                                 </TextBox>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding Speed}">
                                 </TextBox>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [BulletType]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding RandomOffsetRange}" />
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
                     <!--<GridViewColumn Width="80" Header="辅助线颜色">
                         <GridViewColumn.CellTemplate>
@@ -160,42 +164,49 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
 
-                    <GridViewColumn Width="240" Header="{markup:Translate [Action]}">
-                        <GridViewColumn.CellTemplate>
+                    <DataGridTemplateColumn Width="240" Header="{markup:Translate [Action]}">
+                        <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock
                                         VerticalAlignment="Center"
-                                        cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBullet($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
                                         Cursor="Hand"
                                         Text="{markup:Translate [BulletPaletteCreateBullet]}"
                                         TextDecorations="Baseline"
-                                        ToolTip="{markup:Translate [DragToCreateBullet]}">
+                                        ToolTip.Tip="{markup:Translate [DragToCreateBullet]}">
+                                        <Interaction.Behaviors>
+                                            <behaviors:EventMethodBehavior EventName="PointerMoved" MethodName="OnMouseMoveAndDragNewBullet" PassMode="ExecutionContext" />
+                                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnMouseLeftButtonDown" PassMode="ExecutionContext" />
+                                        </Interaction.Behaviors>
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
-                                        cal:Message.Attach="[Event MouseMove] = [Action OnMouseMoveAndDragNewBell($executionContext)]; [Event MouseLeftButtonDown] = [Action OnMouseLeftButtonDown($executionContext)];"
                                         Cursor="Hand"
                                         Text="{markup:Translate [BulletPaletteCreateBell]}"
                                         TextDecorations="Baseline"
-                                        ToolTip="{markup:Translate [DragToCreateBell]}">
+                                        ToolTip.Tip="{markup:Translate [DragToCreateBell]}">
+                                        <Interaction.Behaviors>
+                                            <behaviors:EventMethodBehavior EventName="PointerMoved" MethodName="OnMouseMoveAndDragNewBell" PassMode="ExecutionContext" />
+                                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnMouseLeftButtonDown" PassMode="ExecutionContext" />
+                                        </Interaction.Behaviors>
                                     </TextBlock>
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
-                                        cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnCopyNewBPL($executionContext)];"
                                         Text="{markup:Translate [ClonePallete]}"
                                         TextDecorations="Baseline"
-                                        ToolTip="{markup:Translate [ClickToClonePalette]}">
+                                        ToolTip.Tip="{markup:Translate [ClickToClonePalette]}">
+                                        <Interaction.Behaviors>
+                                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnCopyNewBPL" PassMode="ExecutionContext" />
+                                        </Interaction.Behaviors>
                                     </TextBlock>
                                 </StackPanel>
                             </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>
 

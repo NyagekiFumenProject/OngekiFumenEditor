@@ -1,13 +1,13 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.FumenObjectPropertyBrowserView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
-    xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ValueConverters"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ValueConverters"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector.ValueConverters"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters"
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -20,10 +20,10 @@
         <StackPanel>
             <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
                 <ItemsControl.ItemTemplate>
-                    <ItemContainerTemplate>
+                    <DataTemplate>
                         <ContentPresenter Margin="0,0,0,5" Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
                         </ContentPresenter>
-                    </ItemContainerTemplate>
+                    </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
             <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource ObjectOperationGeneratorConverter}}">

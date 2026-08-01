@@ -1,39 +1,33 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.SplashScreen.Views"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:rec="clr-namespace:OngekiFumenEditor.Kernel.RecentFiles"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.SplashScreen.ViewModels"
+    xmlns:rec="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.RecentFiles"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels"
     Title="Welcome"
-    WindowTitleBrush="Transparent"
     Width="1000"
     Height="700"
     BorderThickness="0"
-    GlowBrush="Black"
     d:DataContext="{d:DesignInstance Type=vm:SplashScreenViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
-    ResizeMode="NoResize"
-    SaveWindowPosition="True"
+    CanResize="False"
     mc:Ignorable="d">
-    <mah:MetroWindow.Resources>
-        <Style x:Key="BorderStyle" TargetType="Border">
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True">
-                    <Setter Property="BorderBrush" Value="LightBlue" />
-                </DataTrigger>
-            </Style.Triggers>
+    <Window.Styles>
+        <Style Selector="Border.BorderStyle">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="Background" Value="{DynamicResource Button.Static.Background}" />
         </Style>
-    </mah:MetroWindow.Resources>
+        <Style Selector="Border.BorderStyle:pointerover">
+            <Setter Property="BorderBrush" Value="LightBlue" />
+        </Style>
+    </Window.Styles>
     <Grid Margin="20,25">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -53,7 +47,7 @@
                 Margin="0,0,5,0"
                 HorizontalAlignment="Right"
                 Text="{markup:Translate [RequestRestartProgram]}"
-                Visibility="{Binding IsRequestRestartProgram, Converter={StaticResource BoolToVisibilityConverter}}">
+                IsVisible="{Binding IsRequestRestartProgram, Converter={StaticResource BoolToVisibilityConverter}}">
             </TextBlock>
             <StackPanel
                 Grid.Column="1"
@@ -94,7 +88,7 @@
                     <StackPanel
                         Margin="0,5"
                         Orientation="Horizontal"
-                        Visibility="Collapsed">
+                        IsVisible="False">
                         <TextBox
                             Width="300"
                             Height="25"
@@ -123,18 +117,19 @@
                                     <ItemsControl Margin="10,5,10,5" ItemsSource="{Binding Recents}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
-                                                <Border cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OpenRecent($dataContext)]">
-                                                    <Border.Style>
-                                                        <Style TargetType="Border">
-                                                            <Style.Triggers>
-                                                                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True">
-                                                                    <Setter Property="BorderBrush" Value="LightBlue" />
-                                                                </DataTrigger>
-                                                            </Style.Triggers>
+                                                <Border>
+                                                    <Interaction.Behaviors>
+                                                        <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenRecent" PassMode="DataContext" />
+                                                    </Interaction.Behaviors>
+                                                    <Border.Styles>
+                                                        <Style Selector="Border">
                                                             <Setter Property="Cursor" Value="Hand" />
                                                             <Setter Property="BorderThickness" Value="1" />
                                                         </Style>
-                                                    </Border.Style>
+                                                        <Style Selector="Border:pointerover">
+                                                            <Setter Property="BorderBrush" Value="LightBlue" />
+                                                        </Style>
+                                                    </Border.Styles>
                                                     <Grid Margin="2,5">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="Auto" />
@@ -182,9 +177,11 @@
                             Margin="0,5,0,5"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action CreateNewProject()]"
                             Cursor="Hand">
-                            <Border Style="{StaticResource BorderStyle}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="CreateNewProject" />
+                            </Interaction.Behaviors>
+                            <Border Classes="BorderStyle">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -215,9 +212,11 @@
                             Margin="0,0,0,5"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OpenProject()]"
                             Cursor="Hand">
-                            <Border Style="{StaticResource BorderStyle}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenProject" />
+                            </Interaction.Behaviors>
+                            <Border Classes="BorderStyle">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -248,9 +247,11 @@
                             Margin="0,0,0,5"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action FastOpen()]"
                             Cursor="Hand">
-                            <Border Style="{StaticResource BorderStyle}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="FastOpen" />
+                            </Interaction.Behaviors>
+                            <Border Classes="BorderStyle">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -285,9 +286,11 @@
                             Margin="0,0,0,5"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Stretch"
-                            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OpenTutorial()]"
                             Cursor="Hand">
-                            <Border Style="{StaticResource BorderStyle}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OpenTutorial" />
+                            </Interaction.Behaviors>
+                            <Border Classes="BorderStyle">
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -329,7 +332,7 @@
             </Grid>
         </Grid>
     </Grid>
-</mah:MetroWindow>
+</Window>
 
 
 

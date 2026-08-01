@@ -1,25 +1,22 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.Modules.AudioAdjustWindow.Views.AudioAdjustWindowView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioAdjustWindow.ViewModels"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioAdjustWindow.ViewModels"
     Title="{markup:Translate [CommandAudioAdjustWindow]}"
     Width="500"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioAdjustWindowViewModel}"
     Background="{StaticResource EnvironmentWindowBackground}"
-    ResizeMode="NoResize"
-    SaveWindowPosition="True"
+    CanResize="False"
     SizeToContent="WidthAndHeight"
-    Style="{StaticResource MainWindowStyle}"
-    mc:Ignorable="d">
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <StackPanel>
-        <GroupBox
+        <controls:GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
             Header="{markup:Translate [AudioFileSource]}">
@@ -41,14 +38,16 @@
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EnvironmentToolWindowText}"
                             Text="{Binding InputFumenFilePath}"
-                            ToolTip="{Binding InputFumenFilePath}">
+                            ToolTip.Tip="{Binding InputFumenFilePath}">
                         </TextBlock>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
-                            cal:Message.Attach="OnOpenSelectInputFileDialog()"
                             Content="{markup:Translate [Browser]}"
                             Foreground="{StaticResource EnvironmentToolWindowText}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnOpenSelectInputFileDialog" />
+                            </Interaction.Behaviors>
                         </Button>
                     </StackPanel>
                 </RadioButton>
@@ -80,9 +79,9 @@
                     IsChecked="{Binding IsRecalculateObjects}">
                 </CheckBox>
             </StackPanel>
-        </GroupBox>
+        </controls:GroupBox>
 
-        <GroupBox Margin="5" Header="{markup:Translate [OffsetOption]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate [OffsetOption]}">
             <StackPanel>
                 <RadioButton VerticalContentAlignment="Center" GroupName="2857">
                     <StackPanel Orientation="Horizontal">
@@ -123,9 +122,9 @@
                     </StackPanel>
                 </RadioButton>
             </StackPanel>
-        </GroupBox>
+        </controls:GroupBox>
 
-        <GroupBox
+        <controls:GroupBox
             Margin="5"
             Foreground="{StaticResource EnvironmentToolWindowText}"
             Header="{markup:Translate [Output]}">
@@ -144,22 +143,26 @@
                 <Button
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
-                    cal:Message.Attach="OnOpenSelectOutputFileDialog()"
                     Content="{markup:Translate [Browser]}"
                     Foreground="{StaticResource EnvironmentToolWindowText}">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Click" MethodName="OnOpenSelectOutputFileDialog" />
+                    </Interaction.Behaviors>
                 </Button>
             </StackPanel>
-        </GroupBox>
+        </controls:GroupBox>
 
         <Button
             Margin="5,10,5,5"
             Padding="0,10,0,10"
-            cal:Message.Attach="OnExecuteConverter()"
             Content="{markup:Translate [Process]}"
             Foreground="{StaticResource EnvironmentToolWindowText}">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnExecuteConverter" />
+            </Interaction.Behaviors>
         </Button>
     </StackPanel>
-</mah:MetroWindow>
+</Window>
 
 
 

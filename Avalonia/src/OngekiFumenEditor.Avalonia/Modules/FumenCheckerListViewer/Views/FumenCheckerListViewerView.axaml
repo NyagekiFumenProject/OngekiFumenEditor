@@ -1,19 +1,25 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views.FumenCheckerListViewerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenCheckerListViewer.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ValueConverters"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     d:DataContext="{d:DesignInstance Type=local:FumenCheckerListViewerViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <converters:BoolToNotShowTextConverter x:Key="BoolToNotShowTextConverter" />
+    </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -25,9 +31,11 @@
             <Button
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
-                cal:Message.Attach="[Event Click] = [Action RefreshCurrentFumen()];"
                 Content="{markup:Translate [Refresh]}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="RefreshCurrentFumen" />
+                </Interaction.Behaviors>
             </Button>
             <ToggleButton
                 Background="Transparent"
@@ -49,20 +57,7 @@
                         <Run Text="{markup:Translate [Error]}">
                         </Run>
                         <Run Text="{Binding ErrorCount, Mode=OneWay}" />
-                        <Run>
-                            <Run.Style>
-                                <Style TargetType="Run">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding EnableShowError}" Value="True">
-                                            <Setter Property="Text" Value="" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding EnableShowError}" Value="False">
-                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Run.Style>
-                        </Run>
+                        <Run Text="{Binding EnableShowError, Mode=OneWay, Converter={StaticResource BoolToNotShowTextConverter}}" />
                     </TextBlock>
                 </StackPanel>
             </ToggleButton>
@@ -87,20 +82,7 @@
                         <Run Text="{markup:Translate [Problem]}">
                         </Run>
                         <Run Text="{Binding ProblemCount, Mode=OneWay}" />
-                        <Run>
-                            <Run.Style>
-                                <Style TargetType="Run">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding EnableShowProblem}" Value="True">
-                                            <Setter Property="Text" Value="" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding EnableShowProblem}" Value="False">
-                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Run.Style>
-                        </Run>
+                        <Run Text="{Binding EnableShowProblem, Mode=OneWay, Converter={StaticResource BoolToNotShowTextConverter}}" />
                     </TextBlock>
                 </StackPanel>
             </ToggleButton>
@@ -125,79 +107,67 @@
                         <Run Text="{markup:Translate [Advice]}">
                         </Run>
                         <Run Text="{Binding SuggestCount, Mode=OneWay}" />
-                        <Run>
-                            <Run.Style>
-                                <Style TargetType="Run">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding EnableShowSuggest}" Value="True">
-                                            <Setter Property="Text" Value="" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding EnableShowSuggest}" Value="False">
-                                            <Setter Property="Text" Value="{markup:Translate [NotShow]}" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Run.Style>
-                        </Run>
+                        <Run Text="{Binding EnableShowSuggest, Mode=OneWay, Converter={StaticResource BoolToNotShowTextConverter}}" />
                     </TextBlock>
                 </StackPanel>
             </ToggleButton>
         </StackPanel>
-        <ListView
+        <DataGrid
             Grid.RowSpan="3"
             Margin="0,31,0,0"
-            cal:Message.Attach="[Event Loaded]=[Action OnListViewLoaded($executionContext)]"
-            Background="Transparent"
-            BorderBrush="Transparent"
-            ItemsSource="{Binding CheckResults}"
-            ScrollViewer.CanContentScroll="True">
-            <ListView.Resources>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+            CanUserReorderColumns="True"
+            ItemsSource="{Binding CheckResults}">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnListViewLoaded" PassMode="ExecutionContext" />
+            </Interaction.Behaviors>
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Interaction.Behaviors">
+                        <BehaviorCollectionTemplate>
+                            <BehaviorCollection>
+                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
+                            </BehaviorCollection>
+                        </BehaviorCollectionTemplate>
+                    </Setter>
                     <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                 </Style>
-            </ListView.Resources>
-            <ListView.View>
-                <GridView AllowsColumnReorder="True">
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="GridViewColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                        </Style>
-                    </GridView.ColumnHeaderContainerStyle>
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
 
-                    <GridViewColumn
-                        Width="120"
-                        DisplayMemberBinding="{Binding Severity}"
-                        Header="{markup:Translate [Severity]}">
+                <DataGridTextColumn
+                    Width="120"
+                    Binding="{Binding Severity}"
+                    Header="{markup:Translate [Severity]}">
 
-                    </GridViewColumn>
+                </DataGridTextColumn>
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding RuleName}"
-                        Header="{markup:Translate [RuleName]}">
+                <DataGridTextColumn
+                    Width="100"
+                    Binding="{Binding RuleName}"
+                    Header="{markup:Translate [RuleName]}">
 
-                    </GridViewColumn>
+                </DataGridTextColumn>
 
-                    <GridViewColumn
-                        Width="400"
-                        DisplayMemberBinding="{Binding Description}"
-                        Header="{markup:Translate [Description]}">
+                <DataGridTextColumn
+                    Width="400"
+                    Binding="{Binding Description}"
+                    Header="{markup:Translate [Description]}">
 
-                    </GridViewColumn>
+                </DataGridTextColumn>
 
-                    <GridViewColumn
-                        Width="200"
-                        DisplayMemberBinding="{Binding LocationDescription}"
-                        Header="{markup:Translate [WrongLocation2]}">
+                <DataGridTextColumn
+                    Width="200"
+                    Binding="{Binding LocationDescription}"
+                    Header="{markup:Translate [WrongLocation2]}">
 
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                </DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>
 

@@ -1,100 +1,83 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views.FumenEditorRenderControlViewerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:jas="clr-namespace:OngekiFumenEditor.UI.ListViewDragDropManager"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorRenderControlViewer.ViewModels"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.ViewModels"
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <Style x:Key="ItemContStyle" TargetType="ListViewItem">
-            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Style.Resources>
-                <LinearGradientBrush x:Key="MouseOverBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
-                    <GradientStop Offset="0" Color="#22000000" />
-                    <GradientStop Offset="0.4" Color="#44000000" />
-                    <GradientStop Offset="0.6" Color="#55000000" />
-                    <GradientStop Offset="0.9" Color="#33000000" />
-                    <GradientStop Offset="1" Color="#22000000" />
-                </LinearGradientBrush>
-            </Style.Resources>
-            <Style.Triggers>
-                <Trigger Property="jas:ListViewItemDragState.IsBeingDragged" Value="True">
-                    <Setter Property="FontWeight" Value="DemiBold" />
-                </Trigger>
-                <Trigger Property="jas:ListViewItemDragState.IsUnderDragCursor" Value="True">
-                    <Setter Property="Background" Value="{StaticResource MouseOverBrush}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <ToolBar>
-                <Button cal:Message.Attach="[Event Click] = [Action ResetDefault()]" Content="{markup:Translate [ResetDefault]}" />
-                <Button
-                    Margin="5,0"
-                    cal:Message.Attach="[Event Click] = [Action Save()]"
-                    Content="{markup:Translate [Save]}" />
-            </ToolBar>
+            <Button Content="{markup:Translate [ResetDefault]}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetDefault" />
+                </Interaction.Behaviors>
+            </Button>
+            <Button
+                Margin="5,0"
+                Content="{markup:Translate [Save]}">
+                <Interaction.Behaviors>
+                    <behaviors:EventMethodBehavior EventName="Click" MethodName="Save" />
+                </Interaction.Behaviors>
+            </Button>
         </StackPanel>
-        <ListView
+        <DataGrid
             Grid.Row="1"
-            cal:Message.Attach="[Event Loaded] = [Action OnListLoaded($source)];"
             Background="Transparent"
-            ItemContainerStyle="{StaticResource ItemContStyle}"
             ItemsSource="{Binding ControlItems}"
             SelectionMode="Single">
-            <ListView.View>
-                <GridView>
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="GridViewColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                        </Style>
-                    </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn
-                        Width="30"
-                        DisplayMemberBinding="{Binding RenderOrder}"
-                        Header="{markup:Translate [RenderOrder]}" />
-                    <GridViewColumn Header="Design">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="2,5,2,5"
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding IsDesignEnable}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn Header="Preview">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="2,5,2,5"
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding IsPreviewEnable}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="{markup:Translate [Name]}" />
-                </GridView>
-            </ListView.View>
-        </ListView>
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnListLoaded" PassMode="Source" />
+            </Interaction.Behaviors>
+            <DataGrid.Styles>
+                <Style Selector="DataGridRow">
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Width="30"
+                    Binding="{Binding RenderOrder}"
+                    Header="{markup:Translate [RenderOrder]}" />
+                <DataGridTemplateColumn Header="Design">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox
+                                Margin="2,5,2,5"
+                                HorizontalAlignment="Center"
+                                IsChecked="{Binding IsDesignEnable}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Preview">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox
+                                Margin="2,5,2,5"
+                                HorizontalAlignment="Center"
+                                IsChecked="{Binding IsPreviewEnable}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Binding="{Binding Name}" Header="{markup:Translate [Name]}" />
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>
 

@@ -1,31 +1,30 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.HoldOperationView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     d:Background="White"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter">
-        </BooleanToVisibilityConverter>
-    </UserControl.Resources>
-    <StackPanel Margin="21,5,0,0" Visibility="{Binding IsEnableDrag, Converter={StaticResource BooleanToVisibilityConverter}}">
+    <StackPanel Margin="21,5,0,0" IsVisible="{Binding IsEnableDrag, Converter={StaticResource BoolToVisibilityConverter}}">
         <Border
             Width="130"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseMove] = [Action Border_MouseMove2($executionContext)]; [Event MouseLeftButtonDown] = [Action Border_MouseLeftButtonDown($executionContext)];"
             BorderBrush="Black"
             BorderThickness="1">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="PointerMoved" MethodName="Border_MouseMove2" PassMode="ExecutionContext" />
+                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="Border_MouseLeftButtonDown" PassMode="ExecutionContext" />
+            </Interaction.Behaviors>
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
                 Cursor="Hand"
                 Text="{markup:Translate [DragToCreateHoldEnd]}"
-                ToolTip="{markup:Translate [DragToCreateHoldEndTipText]}"
+                ToolTip.Tip="{markup:Translate [DragToCreateHoldEndTipText]}"
                 TextWrapping="Wrap" />
         </Border>
     </StackPanel>

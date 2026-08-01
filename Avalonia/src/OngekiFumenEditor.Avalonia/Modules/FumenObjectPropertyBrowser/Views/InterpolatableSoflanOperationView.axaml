@@ -1,12 +1,12 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.InterpolatableSoflanOperationView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     d:Background="White"
     mc:Ignorable="d">
     <StackPanel Margin="21,5,0,0">
@@ -14,10 +14,13 @@
             Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action Interpolate($executionContext)];"
             DecoratorBrush="DarkSalmon"
             Text="{markup:Translate [InterpolateToCreateKeyframeSoflans]}"
-            ToolTip="{markup:Translate [InterpolateToCreateKeyframeSoflansTipText]}" />
+            ToolTip.Tip="{markup:Translate [InterpolateToCreateKeyframeSoflansTipText]}">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="Interpolate" PassMode="ExecutionContext" />
+            </Interaction.Behaviors>
+        </controls:CommonOperationButton>
     </StackPanel>
 </UserControl>
 

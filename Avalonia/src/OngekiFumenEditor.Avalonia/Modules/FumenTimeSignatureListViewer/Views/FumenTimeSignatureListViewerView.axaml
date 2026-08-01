@@ -1,16 +1,16 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views.FumenTimeSignatureListViewerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
-    xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
-    xmlns:converters2="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.Converters"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Converters"
+    xmlns:converters2="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenTimeSignatureListViewer.ViewModels"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:FumenTimeSignatureListViewerViewModel}"
     d:DesignHeight="300"
@@ -25,57 +25,60 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <ListView
+        <DataGrid
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
             ItemsSource="{Binding DisplayTimeSignatures}"
-            ScrollViewer.CanContentScroll="True"
-            SelectedValue="{Binding CurrentSelectTimeSignature}">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListViewItem}">
-                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];[Event PreviewMouseDown]=[Action OnItemSingleClick($dataContext)];" />
+            CanUserReorderColumns="True"
+            SelectedItem="{Binding CurrentSelectTimeSignature}">
+            <DataGrid.Styles>
+                <Style Selector="DataGridColumnHeader">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
                     <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                 </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView AllowsColumnReorder="True">
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="GridViewColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                        </Style>
-                    </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
-                        Header="{markup:Translate [AudioTime]}" />
+                <Style Selector="DataGridRow">
+                    <Setter Property="Interaction.Behaviors">
+                        <BehaviorCollectionTemplate>
+                            <BehaviorCollection>
+                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
+                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnItemSingleClick" PassMode="DataContext" />
+                            </BehaviorCollection>
+                        </BehaviorCollectionTemplate>
+                    </Setter>
+                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                </Style>
+            </DataGrid.Styles>
+            <DataGrid.Columns>
+                <DataGridTextColumn
+                    Width="100"
+                    Binding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
+                    Header="{markup:Translate [AudioTime]}" />
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding StartTGrid}"
-                        Header="{markup:Translate [AudioTGrid]}" />
+                <DataGridTextColumn
+                    Width="100"
+                    Binding="{Binding StartTGrid}"
+                    Header="{markup:Translate [AudioTGrid]}" />
 
-                    <GridViewColumn
-                        Width="100"
-                        DisplayMemberBinding="{Binding BPMChange.BPM}"
-                        Header="Bpm" />
+                <DataGridTextColumn
+                    Width="100"
+                    Binding="{Binding BPMChange.BPM}"
+                    Header="Bpm" />
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [TimeSignature]}">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock>
-                                    <Run Text="{Binding Meter.BunShi}" />
-                                    <Run Text="/" />
-                                    <Run Text="{Binding Meter.Bunbo}" />
-                                </TextBlock>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+                <DataGridTemplateColumn Width="100" Header="{markup:Translate [TimeSignature]}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <Run Text="{Binding Meter.BunShi}" />
+                                <Run Text="/" />
+                                <Run Text="{Binding Meter.Bunbo}" />
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
     </Grid>
 </UserControl>
 

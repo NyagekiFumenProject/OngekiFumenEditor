@@ -10,6 +10,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
@@ -694,7 +695,14 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     public override void OnViewAfterLoaded(IView view)
     {
         base.OnViewAfterLoaded(view);
+        View = view as FumenVisualEditorView;
         InitExtraMenuItems();
+    }
+
+    public override void OnViewBeforeUnload(IView view)
+    {
+        View = null;
+        base.OnViewBeforeUnload(view);
     }
 
     private void ResortRenderOrder()

@@ -1,17 +1,17 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
-    xmlns:converters1="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditorSettings.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=local:FumenVisualEditorSettingsViewModel}"
     d:DesignHeight="800"
@@ -25,7 +25,7 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="10,5,10,5" Visibility="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
+        <StackPanel Margin="10,5,10,5" IsVisible="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"

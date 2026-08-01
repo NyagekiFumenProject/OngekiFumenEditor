@@ -131,8 +131,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         private MouseButtonState prevRightButtonState;
         private Point contextMenuPosition;
 
-        /// <summary>由 View 回注，替代 Caliburn 的 GetView()。</summary>
-        public FumenVisualEditorView View { get; set; }
+        /// <summary>由 <see cref="OnViewAfterLoaded"/> 回注，替代 Caliburn 的 GetView()。</summary>
+        public FumenVisualEditorView View { get; private set; }
 
         private Point lastPointerViewPosition;
         private bool isLeftButtonPressed;

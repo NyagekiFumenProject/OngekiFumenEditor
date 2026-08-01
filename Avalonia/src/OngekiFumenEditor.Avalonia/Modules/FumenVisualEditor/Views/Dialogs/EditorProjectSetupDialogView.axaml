@@ -1,14 +1,13 @@
-﻿<mah:MetroWindow
+<Window
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views.Dialogs"
-    xmlns:local2="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs"
+    xmlns:local2="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     Title="{markup:Translate [EditorProjectSetupDialog]}"
     Width="600"
     Height="600"
@@ -16,8 +15,7 @@
                                      IsDesignTimeCreatable=True}"
     Background="{StaticResource EnvironmentWindowBackground}"
     SizeToContent="WidthAndHeight"
-    Style="{StaticResource MainWindowStyle}"
-    mc:Ignorable="d">
+    mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <Grid Focusable="False">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -26,7 +24,7 @@
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="5">
-                <GroupBox
+                <controls:GroupBox
                     BorderBrush="Black"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
                     Header="{markup:Translate [AudioOption]}">
@@ -38,13 +36,15 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding EditorProjectData.AudioFilePath}" ToolTip="{Binding EditorProjectData.AudioFilePath}">
+                            <TextBlock Text="{Binding EditorProjectData.AudioFilePath}" ToolTip.Tip="{Binding EditorProjectData.AudioFilePath}">
                             </TextBlock>
                             <Button
                                 Grid.Column="1"
                                 Padding="10,5,10,5"
-                                cal:Message.Attach="[Event Click] = [Action OnSelectAudioFilePathButtonClicked()];"
                                 Content="{markup:Translate [Browser]}">
+                                <Interaction.Behaviors>
+                                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnSelectAudioFilePathButtonClicked" />
+                                </Interaction.Behaviors>
                             </Button>
                         </Grid>
                         <TextBlock Foreground="{DynamicResource EnvironmentToolWindowText}">
@@ -54,9 +54,9 @@
                             </Run>
                         </TextBlock>
                     </StackPanel>
-                </GroupBox>
+                </controls:GroupBox>
 
-                <GroupBox
+                <controls:GroupBox
                     BorderBrush="Black"
                     Foreground="{DynamicResource EnvironmentToolWindowText}"
                     Header="{markup:Translate [FumenInitOption]}">
@@ -92,12 +92,14 @@
                             <Button
                                 Padding="10,5,10,5"
                                 HorizontalAlignment="Right"
-                                cal:Message.Attach="[Event Click] = [Action OnSelectFumenFilePathButtonClicked()];"
                                 Content="{markup:Translate [Browser]}">
+                                <Interaction.Behaviors>
+                                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnSelectFumenFilePathButtonClicked" />
+                                </Interaction.Behaviors>
                             </Button>
                         </Grid>
                     </StackPanel>
-                </GroupBox>
+                </controls:GroupBox>
 
             </StackPanel>
         </ScrollViewer>
@@ -105,11 +107,13 @@
         <Button
             Grid.Row="1"
             Height="50"
-            cal:Message.Attach="[Event Click] = [Action OnCreateButtonClicked()];"
             Content="{markup:Translate [Create]}">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCreateButtonClicked" />
+            </Interaction.Behaviors>
         </Button>
     </Grid>
-</mah:MetroWindow>
+</Window>
 
 
 

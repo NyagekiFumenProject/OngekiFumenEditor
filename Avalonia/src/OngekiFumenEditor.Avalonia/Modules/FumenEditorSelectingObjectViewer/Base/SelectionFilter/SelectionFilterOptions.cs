@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -224,6 +224,20 @@ public abstract class EnumSpecificationOption : SelectionFilterOption
     public abstract int SelectedOptionMatchCount { get; set; }
     public abstract object Value { get; set; }
 
+    /// <summary>
+    /// Exposes <see cref="Value"/> as a <see cref="SelectionsText"/> entry so that an Avalonia ComboBox
+    /// (which has no SelectedValuePath) can bind SelectedItem directly.
+    /// </summary>
+    public KeyValuePair<object, string> SelectedPair
+    {
+        get => SelectionsText.FirstOrDefault(kv => Equals(kv.Key, Value));
+        set
+        {
+            if (value.Key is not null)
+                Value = value.Key;
+        }
+    }
+
     protected EnumSpecificationOption(string text, Type enumType, Dictionary<object, string>? selectionsText) : base(text)
     {
         SelectionsText = selectionsText ?? Enum.GetValues(enumType).Cast<object>().ToDictionary(x => x, x => x.ToString()!);
@@ -252,6 +266,7 @@ public class EnumSpecificationOption<T> : EnumSpecificationOption where T : Enum
             if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(new PropertyChangedEventArgs(nameof(Value)));
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(SelectedPair)));
                 NotifyOptionValueChanged();
             }
         }

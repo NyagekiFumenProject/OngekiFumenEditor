@@ -1,58 +1,29 @@
-﻿<UserControl x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.SelectionFilterView"
+<UserControl x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.SelectionFilterView"
              xmlns="https://github.com/avaloniaui"
-             xmlns:cal="http://caliburnmicro.com"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="https://github.com/avaloniaui/design"
-             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-             xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
-             xmlns:controls="http://schemas.timjones.io/gemini"
-             xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.ViewModels"
+             xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+             xmlns:ctl="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
+             xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
+             xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
-             xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Modules.FumenEditorSelectingObjectViewer.Base.SelectionFilter"
-             xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:behaviors="clr-namespace:OngekiFumenEditor.UI.Behaviors"
+             xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Base.SelectionFilter"
+             xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
              mc:Ignorable="d"
              Padding="3"
              Background="Transparent"
              d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:SelectionFilterViewModel}">
     <UserControl.Resources>
-        <vm:WideModeToVisibilityConverter x:Key="WideModeToVisibilityConverter" />
-        <vm:WideModeToVisibilityConverter x:Key="InverseWideModeToVisibilityConverter" IsInverse="true" />
+        <valueconverters:WideModeToVisibilityConverter x:Key="WideModeToVisibilityConverter" />
+        <valueconverters:InverseWideModeToVisibilityConverter x:Key="InverseWideModeToVisibilityConverter" />
         <system:Boolean x:Key="True">True</system:Boolean>
         <system:Boolean x:Key="False">False</system:Boolean>
-
-        <!-- STYLES -->
-        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Margin" Value="5 0" />
-        </Style>
-
-        <Style x:Key="WrappedTextCheckBox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
-            <Setter Property="ContentTemplate">
-                <Setter.Value>
-                    <DataTemplate>
-                        <TextBlock Text="{TemplateBinding Content}" TextWrapping="Wrap" />
-                    </DataTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Margin" Value="4 0" />
-        </Style>
-
-        <Style TargetType="xctk:CheckListBox" BasedOn="{StaticResource {x:Type xctk:CheckListBox}}">
-            <Setter Property="Background" Value="{DynamicResource TreeView.Static.Background}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource TreeView.Static.Border}" />
-        </Style>
-
+    </UserControl.Resources>
+    <UserControl.DataTemplates>
         <!-- FILTER OPTIONS -->
 
-        <DataTemplate DataType="{x:Type selectionFilter:BooleanOption}">
+        <DataTemplate DataType="selectionFilter:BooleanOption">
             <WrapPanel Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
                 <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsEnabled}">
@@ -74,7 +45,7 @@
             </WrapPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type selectionFilter:TextWithRegexOption}">
+        <DataTemplate DataType="selectionFilter:TextWithRegexOption">
             <Grid Margin="3 5">
                 <Grid.RowDefinitions>
                     <RowDefinition />
@@ -92,11 +63,11 @@
                 <Label Grid.Row="1" Grid.Column="1"
                            Content="{Binding MatchCount, Converter={StaticResource ParenthesizeTextConverter}}"
                            FontStyle="Italic" VerticalContentAlignment="Center"
-                           Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=true}" />
+                           IsVisible="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=true}" />
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type selectionFilter:EnumSpecificationOption}">
+        <DataTemplate DataType="selectionFilter:EnumSpecificationOption">
             <Grid Margin="3 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -107,54 +78,82 @@
                 <CheckBox Grid.Column="0"
                           IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
                 <ComboBox Grid.Column="1"
-                          SelectedValue="{Binding Value, Mode=TwoWay}"
+                          SelectedItem="{Binding SelectedPair, Mode=TwoWay}"
                           ItemsSource="{Binding SelectionsText}"
-                          DisplayMemberPath="Value"
-                          SelectedValuePath="Key"
                           HorizontalAlignment="Stretch"
-                          IsEnabled="{Binding IsEnabled}" />
+                          IsEnabled="{Binding IsEnabled}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Value}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Label Grid.Column="2"
                        Content="{Binding SelectedOptionMatchCount, Converter={StaticResource ParenthesizeTextConverter}}"
                        FontStyle="Italic" VerticalContentAlignment="Center"
-                       Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+                       IsVisible="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type selectionFilter:BulletPaletteFilterOption}">
+        <DataTemplate DataType="selectionFilter:BulletPaletteFilterOption">
             <StackPanel Orientation="Horizontal" Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
-                <xctk:CheckComboBox ItemsSource="{Binding Items}"
-                                    SelectedMemberPath="IsSelected"
-                                    DisplayMemberPath="Text"
-                                    IsEnabled="{Binding IsEnabled}"
-                                    Width="200"
-                                    IsSelectAllActive="True"
-                                    Closed="BulletPaletteCheckList_SetText"
-                                    Loaded="BulletPaletteCheckList_SetText"
-                                    ItemSelectionChanged="BulletPaletteCheckList_SetText" />
+                <ctl:CheckComboBox ItemsSource="{Binding Items}"
+                                   SelectedMemberPath="IsSelected"
+                                   DisplayMemberPath="Text"
+                                   IsEnabled="{Binding IsEnabled}"
+                                   Width="200"
+                                   IsSelectAllActive="True" />
                 <Label Content="{Binding FilterMatches, Converter={StaticResource ParenthesizeTextConverter}}"
-                       Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                       IsVisible="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
                        FontStyle="Italic" VerticalContentAlignment="Center" />
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="{x:Type selectionFilter:DockableObjectLaneFilterOption}">
+        <DataTemplate DataType="selectionFilter:DockableObjectLaneFilterOption">
             <StackPanel Orientation="Horizontal" Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
-                <xctk:CheckComboBox ItemsSource="{Binding Values}"
-                                    SelectedMemberPath="IsSelected"
-                                    DisplayMemberPath="Text"
-                                    ValueMemberPath="DockLane"
-                                    Width="250"
-                                    HorizontalAlignment="Left"
-                                    IsSelectAllActive="True"
-                                    IsEnabled="{Binding IsEnabled}" />
+                <ctl:CheckComboBox ItemsSource="{Binding Values}"
+                                   SelectedMemberPath="IsSelected"
+                                   DisplayMemberPath="Text"
+                                   Width="250"
+                                   HorizontalAlignment="Left"
+                                   IsSelectAllActive="True"
+                                   IsEnabled="{Binding IsEnabled}" />
                 <Label Content="{Binding FilterMatches, Converter={StaticResource ParenthesizeTextConverter}}"
-                       Visibility="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+                       IsVisible="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
                        FontStyle="Italic" VerticalContentAlignment="Center" />
             </StackPanel>
         </DataTemplate>
-    </UserControl.Resources>
+    </UserControl.DataTemplates>
+    <UserControl.Styles>
+        <Style Selector="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="5 0" />
+        </Style>
+
+        <Style Selector="CheckBox.WrappedTextCheckBox">
+            <Setter Property="ContentTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style Selector="RadioButton">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="4 0" />
+        </Style>
+
+        <Style Selector="ctl|CheckListBox">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColorBrush}" />
+        </Style>
+    </UserControl.Styles>
 
     <!-- PAGE LAYOUT -->
 
@@ -174,59 +173,53 @@
 
                     <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderObjectType]}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
-                                cal:Message.Attach="SelectAllObjectTypes()" />
-                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}"
-                                cal:Message.Attach="ResetSelectedObjectTypes()" />
+                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="Click" MethodName="SelectAllObjectTypes" />
+                            </Interaction.Behaviors>
+                        </Button>
+                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetSelectedObjectTypes" />
+                            </Interaction.Behaviors>
+                        </Button>
                     </StackPanel>
                 </Grid>
 
                 <ItemsControl ItemsSource="{Binding FilterTypeCategories}"
-                              Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
+                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type selectionFilter:FilterObjectTypeCategory}">
-                            <controls:ExpanderEx Header="{Binding CategoryNameDisplayCheckCount}">
-                                <xctk:CheckListBox ItemsSource="{Binding Items}"
-                                                   HorizontalContentAlignment="Stretch"
-                                                   Height="Auto"
-                                                   IsSelectAllActive="True"
-                                                   DisplayMemberPath="Display"
-                                                   SelectedMemberPath="IsSelected"
-                                                   SelectAllContent="{Binding CategoryNameDisplay}">
-                                    <b:Interaction.Behaviors>
-                                        <behaviors:BubbleScrollWheelEventBehavior />
-                                    </b:Interaction.Behaviors>
-                                </xctk:CheckListBox>
-                            </controls:ExpanderEx>
+                        <DataTemplate DataType="selectionFilter:FilterObjectTypeCategory">
+                            <Expander Header="{Binding CategoryNameDisplayCheckCount}">
+                                <ctl:CheckListBox ItemsSource="{Binding Items}"
+                                                  IsSelectAllActive="True"
+                                                  DisplayMemberPath="Display"
+                                                  SelectedMemberPath="IsSelected"
+                                                  SelectAllContent="{Binding CategoryNameDisplay}" />
+                            </Expander>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <ItemsControl ItemsSource="{Binding FilterTypeCategories}"
-                              Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
+                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type selectionFilter:FilterObjectTypeCategory}">
-                            <xctk:CheckListBox ItemsSource="{Binding Items}"
-                                               HorizontalContentAlignment="Stretch"
-                                               Height="Auto"
-                                               IsSelectAllActive="True"
-                                               DisplayMemberPath="Display"
-                                               SelectedMemberPath="IsSelected"
-                                               SelectAllContent="{Binding CategoryNameDisplay}">
-                                <b:Interaction.Behaviors>
-                                    <behaviors:BubbleScrollWheelEventBehavior />
-                                </b:Interaction.Behaviors>
-                            </xctk:CheckListBox>
+                        <DataTemplate DataType="selectionFilter:FilterObjectTypeCategory">
+                            <ctl:CheckListBox ItemsSource="{Binding Items}"
+                                              IsSelectAllActive="True"
+                                              DisplayMemberPath="Display"
+                                              SelectedMemberPath="IsSelected"
+                                              SelectAllContent="{Binding CategoryNameDisplay}" />
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -239,33 +232,36 @@
 
                     <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}"
-                                cal:Message.Attach="ResetFilterOptions()" />
+                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}">
+                            <Interaction.Behaviors>
+                                <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetFilterOptions" />
+                            </Interaction.Behaviors>
+                        </Button>
                     </StackPanel>
                 </Grid>
 
                 <ItemsControl ItemsSource="{Binding OptionCategories}"
-                              Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
+                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type selectionFilter:OptionCategory}">
-                            <controls:ExpanderEx Header="{Binding DisplayName}">
+                        <DataTemplate DataType="selectionFilter:OptionCategory">
+                            <Expander Header="{Binding DisplayName}">
                                 <StackPanel Orientation="Vertical">
                                     <ItemsControl ItemsSource="{Binding Options}" />
                                 </StackPanel>
-                            </controls:ExpanderEx>
+                            </Expander>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <TabControl ItemsSource="{Binding OptionCategories}"
-                            Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
+                            IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
                     <TabControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type selectionFilter:OptionCategory}">
+                        <DataTemplate DataType="selectionFilter:OptionCategory">
                             <TextBlock Text="{Binding DisplayName}" />
                         </DataTemplate>
                     </TabControl.ItemTemplate>
                     <TabControl.ContentTemplate>
-                        <DataTemplate DataType="{x:Type selectionFilter:OptionCategory}">
+                        <DataTemplate DataType="selectionFilter:OptionCategory">
                             <StackPanel Orientation="Vertical">
                                 <ItemsControl ItemsSource="{Binding Options}" />
                             </StackPanel>
@@ -280,16 +276,20 @@
 
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
                 <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelInvertFilter]}"
-                          Style="{StaticResource WrappedTextCheckBox}"
+                          Classes="WrappedTextCheckBox"
                           IsChecked="{Binding IsInvertFilter, Mode=TwoWay}"
-                          ToolTip="{markup:Translate [SelectionFilter_OptionLabelInvertFilterTooltip]}"
-                          ToolTipService.InitialShowDelay="100" />
+                          ToolTip.Tip="{markup:Translate [SelectionFilter_OptionLabelInvertFilterTooltip]}"
+                          ToolTip.ShowDelay="100" />
             </StackPanel>
 
             <TextBlock Text="{Binding FilterOutcomeText}" Margin="5" />
 
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button cal:Message.Attach="ApplyFilterToSelection()" Content="{markup:Translate [ApplyFilter]}" />
+                <Button Content="{markup:Translate [ApplyFilter]}">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Click" MethodName="ApplyFilterToSelection" />
+                    </Interaction.Behaviors>
+                </Button>
             </StackPanel>
         </StackPanel>
     </Grid>

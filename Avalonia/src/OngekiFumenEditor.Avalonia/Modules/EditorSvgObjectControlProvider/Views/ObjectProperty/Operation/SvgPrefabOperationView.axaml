@@ -1,29 +1,29 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.EditorSvgObjectControlProvider.Views.ObjectProperty.Operation.SvgPrefabOperationView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.UI.Controls"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:SvgPrefabOperationViewModel,
                                      IsDesignTimeCreatable=False}"
     mc:Ignorable="d">
-    <UserControl.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-    </UserControl.Resources>
     <StackPanel Margin="21,5,0,0">
         <ContentControl>
         </ContentControl>
         <controls:CommonOperationButton
             Width="150"
             HorizontalAlignment="Left"
-            cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnGenerateLaneToEditor()];"
             DecoratorBrush="Green"
-            Text="{markup:Translate [GenerateLaneObjects]}" />
+            Text="{markup:Translate [GenerateLaneObjects]}">
+            <Interaction.Behaviors>
+                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnGenerateLaneToEditor" />
+            </Interaction.Behaviors>
+        </controls:CommonOperationButton>
     </StackPanel>
 </UserControl>
 

@@ -4,8 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Views"
-    xmlns:viewModels="clr-namespace:OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels"
+    xmlns:ongekiobjects="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views"
+    xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.Modules.EditorSvgObjectControlProvider.ViewModels"
     mc:Ignorable="d">
     <Canvas>
         <Rectangle

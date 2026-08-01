@@ -1,21 +1,19 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Views.AudioPlayerToolViewerView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
-    xmlns:converters1="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Converters"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
+    xmlns:converters1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.Views"
-    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Views"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:objectinspector="clr-namespace:OngekiFumenEditor.UI.Controls.ObjectInspector"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Properties"
+    xmlns:objectinspector="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.ViewModels"
     xmlns:wpf="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioPlayerToolViewerViewModel,
@@ -37,14 +35,17 @@
             <StackPanel
                 Margin="10"
                 IsEnabled="{Binding IsAudioButtonEnabled}"
-                Visibility="{Binding IsShowWaveform, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}">
+                IsVisible="{Binding IsShowWaveform, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}">
                 <Line Height="2" Stroke="Red">
                 </Line>
 
                 <ContentControl
                     x:Name="renderControlHost"
-                    Height="150"
-                    cal:Message.Attach="[Event Loaded]=[Action OnRenderControlHostLoaded($executionContext)];" />
+                    Height="150">
+                    <Interaction.Behaviors>
+                        <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnRenderControlHostLoaded" PassMode="ExecutionContext" />
+                    </Interaction.Behaviors>
+                </ContentControl>
 
                 <!--<wpf:GLWpfControl
                     x:Name="glView"
@@ -55,7 +56,7 @@
                 </wpf:GLWpfControl>-->
 
                 <StackPanel Margin="0,5,0,5">
-                    <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [VisualizerRenderOption]}">
+                    <controls:GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [VisualizerRenderOption]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -109,32 +110,30 @@
                                     MinValue="0.01"
                                     Step="0.01" />
                             </Grid>
-                            <GroupBox Header="{markup:Translate [VisualizerSpecialOption]}">
+                            <controls:GroupBox Header="{markup:Translate [VisualizerSpecialOption]}">
                                 <StackPanel>
-                                    <objectinspector:ObjectInspectorView Margin="5" InspectObject="{Binding WaveformDrawing.Options}">
-                                        <objectinspector:ObjectInspectorView.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel Margin="5,0" Orientation="Horizontal" />
-                                            </ItemsPanelTemplate>
-                                        </objectinspector:ObjectInspectorView.ItemsPanel>
-                                    </objectinspector:ObjectInspectorView>
+                                    <objectinspector:ObjectInspectorView Margin="5" InspectObject="{Binding WaveformDrawing.Options}" />
                                     <StackPanel Orientation="Horizontal">
                                         <Button
                                             Padding="5,2,5,2"
-                                            cal:Message.Attach="OnWaveformOptionReset()"
                                             Content="{markup:Translate [ResetDefault]}">
+                                            <Interaction.Behaviors>
+                                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnWaveformOptionReset" />
+                                            </Interaction.Behaviors>
                                         </Button>
                                         <Button
                                             Margin="5,0"
                                             Padding="5,2,5,2"
-                                            cal:Message.Attach="OnWaveformOptionSave()"
                                             Content="{markup:Translate [Save]}">
+                                            <Interaction.Behaviors>
+                                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnWaveformOptionSave" />
+                                            </Interaction.Behaviors>
                                         </Button>
                                     </StackPanel>
                                 </StackPanel>
-                            </GroupBox>
+                            </controls:GroupBox>
                         </StackPanel>
-                    </GroupBox>
+                    </controls:GroupBox>
                 </StackPanel>
             </StackPanel>
 
@@ -148,17 +147,24 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [SoundSwitchControl]}">
+                <controls:GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [SoundSwitchControl]}">
                     <StackPanel>
                         <WrapPanel>
-                            <WrapPanel.Resources>
-                                <Style TargetType="CheckBox">
+                            <WrapPanel.Styles>
+                                <Style Selector="CheckBox">
                                     <Setter Property="Margin" Value="5" />
-                                    <Setter Property="cal:Message.Attach" Value="[Event Checked] = [Action OnSoundControlSwitchChanged($source)];[Event Unchecked] = [Action OnSoundControlSwitchChanged($source)];" />
+                                    <Setter Property="Interaction.Behaviors">
+                                        <BehaviorCollectionTemplate>
+                                            <BehaviorCollection>
+                                                <behaviors:EventMethodBehavior EventName="Checked" MethodName="OnSoundControlSwitchChanged" PassMode="Source" />
+                                                <behaviors:EventMethodBehavior EventName="Unchecked" MethodName="OnSoundControlSwitchChanged" PassMode="Source" />
+                                            </BehaviorCollection>
+                                        </BehaviorCollectionTemplate>
+                                    </Setter>
                                     <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}">
                                     </Setter>
                                 </Style>
-                            </WrapPanel.Resources>
+                            </WrapPanel.Styles>
                             <CheckBox Content="Tap" IsChecked="{Binding SoundControls[0]}" />
                             <CheckBox Content="CriticalTap" IsChecked="{Binding SoundControls[1]}" />
                             <CheckBox Content="Hold" IsChecked="{Binding SoundControls[2]}" />
@@ -192,7 +198,6 @@
                                             Width="150"
                                             Margin="5,0,0,0"
                                             VerticalAlignment="Center"
-                                            VerticalContentAlignment="Center"
                                             LargeChange="0.2"
                                             Maximum="1"
                                             SmallChange="0.02"
@@ -208,14 +213,16 @@
                             Orientation="Horizontal">
                             <Button
                                 Padding="5,2,5,2"
-                                cal:Message.Attach="OnReloadSoundFiles()"
                                 Content="{markup:Translate [ReloadSoundFile]}">
+                                <Interaction.Behaviors>
+                                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnReloadSoundFiles" />
+                                </Interaction.Behaviors>
                             </Button>
                         </StackPanel>
                     </StackPanel>
-                </GroupBox>
+                </controls:GroupBox>
 
-                <GroupBox
+                <controls:GroupBox
                     Grid.Column="1"
                     Margin="10"
                     Foreground="{StaticResource EnvironmentToolWindowText}"
@@ -228,30 +235,26 @@
                                 Margin="5,0"
                                 Text="{Binding LimitFPS}" />
                             <TextBlock x:Name="noLimitText" Text="{markup:Translate [NoLimit]}">
-                                <Behaviors:Interaction.Triggers>
-                                    <Behaviors:DataTrigger
+                                <Interaction.Behaviors>
+                                    <DataTriggerBehavior
                                         Binding="{Binding LimitFPS}"
-                                        Comparison="LessThanOrEqual"
+                                        ComparisonCondition="LessThanOrEqual"
                                         Value="0">
-                                        <Behaviors:DataTrigger.Actions>
-                                            <Behaviors:ChangePropertyAction
-                                                PropertyName="Visibility"
-                                                TargetObject="{Binding ElementName=noLimitText}"
-                                                Value="Visible" />
-                                        </Behaviors:DataTrigger.Actions>
-                                    </Behaviors:DataTrigger>
-                                    <Behaviors:DataTrigger
+                                        <ChangePropertyAction
+                                            PropertyName="IsVisible"
+                                            TargetObject="{Binding #noLimitText}"
+                                            Value="True" />
+                                    </DataTriggerBehavior>
+                                    <DataTriggerBehavior
                                         Binding="{Binding LimitFPS}"
-                                        Comparison="GreaterThan"
+                                        ComparisonCondition="GreaterThan"
                                         Value="0">
-                                        <Behaviors:DataTrigger.Actions>
-                                            <Behaviors:ChangePropertyAction
-                                                PropertyName="Visibility"
-                                                TargetObject="{Binding ElementName=noLimitText}"
-                                                Value="Hidden" />
-                                        </Behaviors:DataTrigger.Actions>
-                                    </Behaviors:DataTrigger>
-                                </Behaviors:Interaction.Triggers>
+                                        <ChangePropertyAction
+                                            PropertyName="IsVisible"
+                                            TargetObject="{Binding #noLimitText}"
+                                            Value="False" />
+                                    </DataTriggerBehavior>
+                                </Interaction.Behaviors>
                             </TextBlock>
                         </StackPanel>
                         <CheckBox
@@ -284,7 +287,6 @@
                                 Width="150"
                                 Margin="5,0,0,0"
                                 VerticalAlignment="Stretch"
-                                VerticalContentAlignment="Center"
                                 IsEnabled="{Binding AudioPlayer.IsAvaliable}"
                                 LargeChange="0.2"
                                 Maximum="1"
@@ -302,7 +304,6 @@
                                 Width="150"
                                 Margin="5,0,0,0"
                                 VerticalAlignment="Center"
-                                VerticalContentAlignment="Center"
                                 LargeChange="0.2"
                                 Maximum="1"
                                 SmallChange="0.2"
@@ -310,7 +311,7 @@
                             </Slider>
                         </StackPanel>
                     </StackPanel>
-                </GroupBox>
+                </controls:GroupBox>
             </Grid>
 
             <StackPanel Grid.Row="2">

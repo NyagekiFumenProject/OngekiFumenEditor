@@ -1,10 +1,10 @@
-﻿<UserControl x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.BatchModeOverlayView"
+<UserControl x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.BatchModeOverlayView"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="https://github.com/avaloniaui/design"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
-             xmlns:batchMode="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode"
+             xmlns:batchMode="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Behaviors.BatchMode"
              mc:Ignorable="d"
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
@@ -23,8 +23,8 @@
 
     <StackPanel Background="{DynamicResource EnvironmentWindowBackground}">
         <StackPanel Orientation="Horizontal">
-            <Image Visibility="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeInputSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png" />
-            <Image Visibility="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeFilterSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-selection-16.png" />
+            <Image IsVisible="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeInputSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-paint-brush-16.png" />
+            <Image IsVisible="{Binding CurrentSubmode, Converter={StaticResource InstanceOfToVisibilityConverter}, ConverterParameter={x:Type batchMode:BatchModeFilterSubmode}}" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/icons8-selection-16.png" />
             <Label Content="{Binding CurrentSubmode, Converter={StaticResource NameConverter}}" FontStyle="Normal" FontWeight="Bold" />
         </StackPanel>
 
