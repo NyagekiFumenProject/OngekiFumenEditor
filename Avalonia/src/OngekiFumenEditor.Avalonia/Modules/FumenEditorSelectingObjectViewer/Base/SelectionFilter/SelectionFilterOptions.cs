@@ -220,27 +220,29 @@ public class BooleanOption : SelectionFilterOption<bool>
 
 public abstract class EnumSpecificationOption : SelectionFilterOption
 {
-    public Dictionary<object, string> SelectionsText { get; }
+    public IReadOnlyList<EnumSelectionItem> Selections { get; }
     public abstract int SelectedOptionMatchCount { get; set; }
     public abstract object Value { get; set; }
 
     /// <summary>
-    /// Exposes <see cref="Value"/> as a <see cref="SelectionsText"/> entry so that an Avalonia ComboBox
-    /// (which has no SelectedValuePath) can bind SelectedItem directly.
+    /// Exposes <see cref="Value"/> as a strongly typed selection row so that an Avalonia ComboBox
+    /// can use a compiled item template and bind SelectedItem directly.
     /// </summary>
-    public KeyValuePair<object, string> SelectedPair
+    public EnumSelectionItem? SelectedItem
     {
-        get => SelectionsText.FirstOrDefault(kv => Equals(kv.Key, Value));
+        get => Selections.FirstOrDefault(item => Equals(item.Value, Value));
         set
         {
-            if (value.Key is not null)
-                Value = value.Key;
+            if (value is not null)
+                Value = value.Value;
         }
     }
 
     protected EnumSpecificationOption(string text, Type enumType, Dictionary<object, string>? selectionsText) : base(text)
     {
-        SelectionsText = selectionsText ?? Enum.GetValues(enumType).Cast<object>().ToDictionary(x => x, x => x.ToString()!);
+        Selections = (selectionsText ?? Enum.GetValues(enumType).Cast<object>().ToDictionary(x => x, x => x.ToString()!))
+            .Select(pair => new EnumSelectionItem(pair.Key, pair.Value))
+            .ToArray();
     }
 }
 
@@ -266,7 +268,7 @@ public class EnumSpecificationOption<T> : EnumSpecificationOption where T : Enum
             if (SetProperty(ref field, value))
             {
                 OnPropertyChanged(new PropertyChangedEventArgs(nameof(Value)));
-                OnPropertyChanged(new PropertyChangedEventArgs(nameof(SelectedPair)));
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(SelectedItem)));
                 NotifyOptionValueChanged();
             }
         }
@@ -318,6 +320,8 @@ public class EnumSpecificationOption<T> : EnumSpecificationOption where T : Enum
         return Predicate(obj, TypedValue);
     }
 }
+
+public sealed record EnumSelectionItem(object Value, string Text);
 
 public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption<HeadTailSpecification>
     where THead : OngekiObjectBase, ISelectableObject
@@ -409,9 +413,9 @@ public sealed class LaneNodeSpecificationOption(string text)
 
 public sealed class BulletPaletteFilterOption : SelectionFilterOption
 {
-    public ObservableCollection<Item> Items { get; } = [];
-    private Dictionary<BulletPallete, Item> paletteTable = new();
-    private Item nullPaletteItem;
+    public ObservableCollection<BulletPaletteFilterItem> Items { get; } = [];
+    private Dictionary<BulletPallete, BulletPaletteFilterItem> paletteTable = new();
+    private BulletPaletteFilterItem nullPaletteItem;
 
     public int FilterMatches
     {
@@ -425,19 +429,28 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
         PropertyChangedEventHandler handler = (_, propChange) =>
         {
-            if (propChange.PropertyName == nameof(Item.IsSelected))
+            if (propChange.PropertyName == nameof(BulletPaletteFilterItem.IsSelected))
                 NotifyOptionValueChanged();
+
+            if (propChange.PropertyName is nameof(BulletPaletteFilterItem.IsSelected) or nameof(BulletPaletteFilterItem.Text))
+            {
+                OnPropertyChanged(nameof(IsAllSelected));
+                OnPropertyChanged(nameof(SelectionSummary));
+            }
         };
 
         Items.CollectionChanged += (_, e) =>
         {
-            foreach (var i in e.NewItems?.Cast<Item>() ?? [])
+            foreach (var i in e.NewItems?.Cast<BulletPaletteFilterItem>() ?? [])
                 i.PropertyChanged += handler;
-            foreach (var i in e.OldItems?.Cast<Item>() ?? [])
+            foreach (var i in e.OldItems?.Cast<BulletPaletteFilterItem>() ?? [])
                 i.PropertyChanged -= handler;
+
+            OnPropertyChanged(nameof(IsAllSelected));
+            OnPropertyChanged(nameof(SelectionSummary));
         };
 
-        nullPaletteItem = new Item(null);
+        nullPaletteItem = new BulletPaletteFilterItem(null);
     }
 
     public void FumenLoaded(OngekiFumen fumen)
@@ -455,11 +468,11 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
     {
         Items.Clear();
 
-        nullPaletteItem = new Item(null);
+        nullPaletteItem = new BulletPaletteFilterItem(null);
         Items.Add(nullPaletteItem);
-        Items.Add(new Item(BulletPallete.DummyCustomPallete));
+        Items.Add(new BulletPaletteFilterItem(BulletPallete.DummyCustomPallete));
         foreach (var p in paletteList)
-            Items.Add(new Item(p));
+            Items.Add(new BulletPaletteFilterItem(p));
 
         paletteTable = Items.Where(i => i != nullPaletteItem && i.Palette is not null).ToDictionary(i => i.Palette!, i => i);
     }
@@ -513,54 +526,70 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         FilterMatches = Items.Where(i => i.IsSelected).Sum(i => i.BulletCount + i.BellCount);
     }
 
-    public class Item(BulletPallete? palette) : ObservableObject
+    public bool IsAllSelected
     {
-        public BulletPallete? Palette { get; } = palette;
-
-        public bool IsSelected
+        get => Items.Count > 0 && Items.All(item => item.IsSelected);
+        set
         {
-            get => field;
-            set => SetProperty(ref field, value);
+            foreach (var item in Items)
+                item.IsSelected = value;
+
+            OnPropertyChanged();
         }
+    }
 
-        public int BulletCount
+    public string SelectionSummary => string.Join(", ", Items.Where(item => item.IsSelected).Select(item => item.Text)) is { Length: > 0 } summary
+        ? summary
+        : "...";
+}
+
+public sealed class BulletPaletteFilterItem(BulletPallete? palette) : ObservableObject
+{
+    public BulletPallete? Palette { get; } = palette;
+
+    public bool IsSelected
+    {
+        get => field;
+        set => SetProperty(ref field, value);
+    }
+
+    public int BulletCount
+    {
+        get => field;
+        set
         {
-            get => field;
-            set
-            {
-                if (SetProperty(ref field, value))
-                    OnPropertyChanged(new PropertyChangedEventArgs(nameof(Text)));
-            }
+            if (SetProperty(ref field, value))
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Text)));
         }
+    }
 
-        public int BellCount
+    public int BellCount
+    {
+        get => field;
+        set
         {
-            get => field;
-            set
-            {
-                if (SetProperty(ref field, value))
-                    OnPropertyChanged(new PropertyChangedEventArgs(nameof(Text)));
-            }
+            if (SetProperty(ref field, value))
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Text)));
         }
+    }
 
-        public string Text
+    public string Text
+    {
+        get
         {
-            get
-            {
-                var baseText = Palette is null
-                    ? Lang.NoBulletPalette
-                    : Palette == BulletPallete.DummyCustomPallete
-                        ? Palette.EditorName
-                        : $"{Palette.StrID} {Palette.EditorName}";
-                return $"{baseText} ({BulletCount} | {BellCount})";
-            }
+            var baseText = Palette is null
+                ? Lang.NoBulletPalette
+                : Palette == BulletPallete.DummyCustomPallete
+                    ? Palette.EditorName
+                    : $"{Palette.StrID} {Palette.EditorName}";
+            return $"{baseText} ({BulletCount} | {BellCount})";
         }
     }
 }
 
 public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
 {
-    public ObservableCollection<Item> Values { get; } = [];
+    public ObservableCollection<DockableObjectLaneFilterItem> Values { get; } = [];
 
     public int FilterMatches
     {
@@ -571,17 +600,21 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
     public DockableObjectLaneFilterOption(string text) : base(text)
     {
         foreach (var d in Enum.GetValues<DockableTargetSpecification>())
-            Values.Add(new Item(d));
+            Values.Add(new DockableObjectLaneFilterItem(d));
 
         foreach (var v in Values)
         {
             v.PropertyChanged += (_, args) =>
             {
-                if (args.PropertyName == nameof(Item.IsSelected))
+                if (args.PropertyName == nameof(DockableObjectLaneFilterItem.IsSelected))
                 {
                     NotifyOptionValueChanged();
                     UpdateFilterMatches();
+                    OnPropertyChanged(nameof(IsAllSelected));
+                    OnPropertyChanged(nameof(SelectionSummary));
                 }
+                else if (args.PropertyName == nameof(DockableObjectLaneFilterItem.Text))
+                    OnPropertyChanged(nameof(SelectionSummary));
             };
         }
     }
@@ -611,7 +644,7 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
         FilterMatches = Values.Where(i => i.IsSelected).Sum(i => i.MatchCount);
     }
 
-    private Item? GetItemFromObject(ILaneDockable dockable)
+    private DockableObjectLaneFilterItem? GetItemFromObject(ILaneDockable dockable)
     {
         return Values.SingleOrDefault(i =>
             i.DockLane == (dockable.ReferenceLaneStart?.LaneType ?? LaneType.Undefined).GetDockableTargetSpecification());
@@ -624,33 +657,44 @@ public sealed class DockableObjectLaneFilterOption : SelectionFilterOption
         FilterMatches = 0;
     }
 
-    public class Item : ObservableObject
+    public bool IsAllSelected
     {
-        public DockableTargetSpecification DockLane { get; }
-
-        public int MatchCount
+        get => Values.Count > 0 && Values.All(item => item.IsSelected);
+        set
         {
-            get => field;
-            set
-            {
-                if (SetProperty(ref field, value))
-                    OnPropertyChanged(new PropertyChangedEventArgs(nameof(Text)));
-            }
-        }
+            foreach (var item in Values)
+                item.IsSelected = value;
 
-        public bool IsSelected
-        {
-            get => field;
-            set => SetProperty(ref field, value);
+            OnPropertyChanged();
         }
-
-        public Item(DockableTargetSpecification dockLane)
-        {
-            DockLane = dockLane;
-        }
-
-        public string Text => $"{DockLane.ToResourceName()} ({MatchCount})";
     }
+
+    public string SelectionSummary => string.Join(", ", Values.Where(item => item.IsSelected).Select(item => item.Text)) is { Length: > 0 } summary
+        ? summary
+        : "...";
+}
+
+public sealed class DockableObjectLaneFilterItem(DockableTargetSpecification dockLane) : ObservableObject
+{
+    public DockableTargetSpecification DockLane { get; } = dockLane;
+
+    public int MatchCount
+    {
+        get => field;
+        set
+        {
+            if (SetProperty(ref field, value))
+                OnPropertyChanged(new PropertyChangedEventArgs(nameof(Text)));
+        }
+    }
+
+    public bool IsSelected
+    {
+        get => field;
+        set => SetProperty(ref field, value);
+    }
+
+    public string Text => $"{DockLane.ToResourceName()} ({MatchCount})";
 }
 
 public enum HeadTailSpecification

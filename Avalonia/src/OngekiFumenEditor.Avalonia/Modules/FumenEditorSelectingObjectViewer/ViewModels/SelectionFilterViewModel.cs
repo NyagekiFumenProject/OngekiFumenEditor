@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
@@ -12,7 +13,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 
-public class SelectionFilterViewModel : ObservableObject
+public partial class SelectionFilterViewModel : ObservableObject
 {
     public FumenEditorSelectingObjectViewerViewModel SelectionViewerTool { get; }
     public OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel? Editor => SelectionViewerTool.Editor;
@@ -205,6 +206,7 @@ public class SelectionFilterViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
     public void ApplyFilterToSelection()
     {
         if (Editor is null)
@@ -225,6 +227,7 @@ public class SelectionFilterViewModel : ObservableObject
         UpdateFilterOutcomeText();
     }
 
+    [RelayCommand]
     public void SelectAllObjectTypes()
     {
         var allSelected = true;
@@ -250,6 +253,7 @@ public class SelectionFilterViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
     public void ResetSelectedObjectTypes()
     {
         foreach (var category in FilterTypeCategories)
@@ -268,6 +272,7 @@ public class SelectionFilterViewModel : ObservableObject
         }
     }
 
+    [RelayCommand]
     public void ResetFilterOptions()
     {
         foreach (var opt in OptionCategories.SelectMany(c => c.Options))

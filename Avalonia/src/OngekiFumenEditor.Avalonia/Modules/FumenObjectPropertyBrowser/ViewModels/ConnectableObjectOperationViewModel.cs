@@ -22,13 +22,12 @@ using OngekiFumenEditor.Avalonia.Avalonia;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Framework.Dialogs;
-using Gekimini.Avalonia.Framework.DragDrops;
-using Gekimini.Avalonia.Framework.DragDrops.Behaviors;
+using CommunityToolkit.Mvvm.Input;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
 	[MapToView(ViewType = typeof(ConnectableObjectOperationView))]
-	public abstract class ConnectableObjectOperationViewModel : ViewModelBase
+	public abstract partial class ConnectableObjectOperationViewModel : ViewModelBase
 	{
 		public enum DragActionType
 		{
@@ -37,9 +36,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			DropCurvePathControl,
 			Split
 		}
-
-		private bool _draggingItem;
-		private Point _mouseStartPosition;
 
 		private ConnectableObjectBase connectableObject;
 		public ConnectableObjectBase ConnectableObject
@@ -77,27 +73,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			ConnectableObject = obj;
 		}
 
-		public void Border_MouseMove(ActionExecutionContext e)
-		{
-			ProcessDragStart(e, DragActionType.DropNext);
-		}
-
-		public void Border_MouseMove4(ActionExecutionContext e)
-		{
-			ProcessDragStart(e, DragActionType.DropCurvePathControl);
-		}
-
-		public void Border_MouseMove2(ActionExecutionContext e)
-		{
-			ProcessDragStart(e, DragActionType.DropEnd);
-		}
-
-		public void Border_MouseMove3(ActionExecutionContext e)
-		{
-			ProcessDragStart(e, DragActionType.Split);
-		}
-
-		public void Interpolate(ActionExecutionContext e)
+		[RelayCommand]
+		private void Interpolate()
 		{
 			if (RefStartObject.Children.IsEmpty())
 			{
@@ -123,47 +100,24 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 		public abstract ConnectableChildObjectBase GenerateChildObject(bool needNext);
 
-		private void ProcessDragStart(ActionExecutionContext e, DragActionType actionType)
+		public IEditorDropHandler CreateDropAction(DragActionType actionType)
 		{
-			if ((!_draggingItem) || RefStartObject is null)
-				return;
+			if (RefStartObject is null)
+				return default;
 
-			var arg = e.EventArgs as PointerEventArgs;
-
-			Point mousePosition = arg.GetPosition(null);
-			Vector diff = _mouseStartPosition - mousePosition;
-
-			if (arg.Properties.IsLeftButtonPressed &&
-				(Math.Abs(diff.X) > DragDataContextOutBehavior.MinimumHorizontalDragDistance ||
-				Math.Abs(diff.Y) > DragDataContextOutBehavior.MinimumVerticalDragDistance))
+			//ConnectableObjectDropAction
+			var genChildLazy = new Lazy<ConnectableChildObjectBase>(() => GenerateChildObject(actionType == DragActionType.DropNext));
+			return actionType switch
 			{
-				//ConnectableObjectDropAction
-				var genChildLazy = new Lazy<ConnectableChildObjectBase>(() => GenerateChildObject(actionType == DragActionType.DropNext));
-				IEditorDropHandler dropAction = actionType switch
-				{
-					DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
-					DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
-					DragActionType.DropCurvePathControl => new AddLaneCurvePathControlDropAction(ConnectableObject as ConnectableChildObjectBase),
-					_ => default
-				};
-
-				_ = IoC.Get<IDragDropManager>().StartDragDropEvent(arg, dropAction, DragDropEffects.Move);
-				_draggingItem = false;
-			}
+				DragActionType.DropNext or DragActionType.DropEnd => new ConnectableObjectDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
+				DragActionType.Split => new ConnectableObjectSplitDropAction(RefStartObject, genChildLazy.Value, () => CheckEnable()),
+				DragActionType.DropCurvePathControl => new AddLaneCurvePathControlDropAction(ConnectableObject as ConnectableChildObjectBase),
+				_ => default
+			};
 		}
 
-		public void Border_MouseLeftButtonDown(ActionExecutionContext e)
-		{
-			var arg = e.EventArgs as PointerEventArgs;
-
-			if (!arg.Properties.IsLeftButtonPressed)
-				return;
-
-			_mouseStartPosition = arg.GetPosition(null);
-			_draggingItem = true;
-		}
-
-		public async void OnBrushButtonClick()
+		[RelayCommand]
+		private async Task BrushAlongLaneAsync()
 		{
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 			var fumen = editor.Fumen;
@@ -252,12 +206,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.ObjectBatchBrush.ToLocalizedString(), redoAction, undoAction));
 		}
 
-		public void OnPartChildCurveInterpolateClick()
-		{
-			PartChildCurveInterpolate();
-		}
-
-		public void PartChildCurveInterpolate()
+		[RelayCommand]
+		private void InterpolatePart()
 		{
 			var childObj = ConnectableObject as ConnectableChildObjectBase;
 
@@ -300,7 +250,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		}
 	}
 }
-
 
 
 

@@ -1,14 +1,18 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorColorSettingView"
+    x:CompileBindings="True"
+    x:Name="Root"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Models"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views"
+    x:DataType="vm:FumenVisualEditorColorSettingViewModel"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:FumenVisualEditorColorSettingViewModel}"
@@ -17,7 +21,7 @@
     <ItemsControl
         ItemsSource="{Binding ColorsProperties}">
         <ItemsControl.ItemTemplate>
-            <DataTemplate>
+            <DataTemplate x:DataType="models:ColorPropertyWrapper">
                 <Grid Margin="5">
                     <Label VerticalAlignment="Center" Content="{Binding Name}" />
                     <StackPanel
@@ -33,11 +37,9 @@
                         <Button
                             Margin="5,0"
                             Padding="10,2"
-                            Content="{markup:Translate [Change]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnSelectColor" PassMode="ExecutionContext" />
-                            </Interaction.Behaviors>
-                        </Button>
+                            Command="{Binding $parent[views:FumenVisualEditorColorSettingView].((vm:FumenVisualEditorColorSettingViewModel)DataContext).SelectColorCommand}"
+                            CommandParameter="{Binding}"
+                            Content="{markup:Translate [Change]}" />
                     </StackPanel>
                 </Grid>
             </DataTemplate>

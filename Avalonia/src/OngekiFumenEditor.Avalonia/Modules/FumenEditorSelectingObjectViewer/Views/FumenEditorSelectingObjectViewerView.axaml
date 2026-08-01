@@ -1,5 +1,7 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.FumenEditorSelectingObjectViewerView"
+    x:Name="Root"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
@@ -12,15 +14,16 @@
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels"
     xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views"
+    x:DataType="vm:FumenEditorSelectingObjectViewerViewModel"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True,
                                      Type=vm:FumenEditorSelectingObjectViewerViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <Interaction.Behaviors>
-        <behaviors:EventMethodBehavior EventName="KeyGesture" Gesture="Delete" MethodName="OnCancelItemSelectedObjects" PassMode="DataContext" />
-    </Interaction.Behaviors>
+    <UserControl.KeyBindings>
+        <KeyBinding Command="{Binding CancelSelectedObjectsCommand}" Gesture="Delete" />
+    </UserControl.KeyBindings>
     <UserControl.Resources>
         <valueconverters:GetObjectSoflanGroupConverter x:Key="GetObjectSoflanGroupConverter" />
     </UserControl.Resources>
@@ -38,65 +41,57 @@
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
-            ItemsSource="{Binding CollectionView}"
+            ItemsSource="{Binding EditorSelectObjects}"
             CanUserReorderColumns="True"
+            DoubleTapped="OnRowDoubleTapped"
+            PointerPressed="OnRowPointerPressed"
             SelectionMode="Extended">
             <Interaction.Behaviors>
                 <behaviors:ListViewMultiSelectionBehavior SelectedItems="{Binding SelectedItems}" />
             </Interaction.Behaviors>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="{markup:Translate [Refresh]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="OnRefresh" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
-                    <MenuItem Header="{markup:Translate [CancelSelected]}">
-                        <Interaction.Behaviors>
-                            <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCancelItemSelectedObjects" PassMode="ExecutionContext" />
-                        </Interaction.Behaviors>
-                    </MenuItem>
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).RefreshCommand}" Header="{markup:Translate [Refresh]}" />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).CancelSelectedObjectsCommand}" Header="{markup:Translate [CancelSelected]}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
-                    <Setter Property="Interaction.Behaviors">
-                        <BehaviorCollectionTemplate>
-                            <BehaviorCollection>
-                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
-                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnItemSingleClick" PassMode="DataContext" />
-                            </BehaviorCollection>
-                        </BehaviorCollectionTemplate>
-                    </Setter>
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
 
-                <DataGridTextColumn
-                    Width="100"
-                    Binding="{Binding Name}"
-                    Header="{markup:Translate [Name]}" />
+                <DataGridTemplateColumn Width="100" Header="{markup:Translate [Name]}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SelectedObjectRow">
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
-                <DataGridTextColumn
-                    Width="100"
-                    Binding="{Binding TGrid}"
-                    Header="{markup:Translate [ObjectTime]}" />
+                <DataGridTemplateColumn Width="100" Header="{markup:Translate [ObjectTime]}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SelectedObjectRow">
+                            <TextBlock Text="{Binding TGrid}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
 
 
                 <DataGridTemplateColumn Width="100" Header="SoflanGroup">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <Label>
                                 <Label.Content>
                                     <MultiBinding Converter="{StaticResource GetObjectSoflanGroupConverter}">
-                                        <Binding Path="." />
-                                        <Binding ElementName="listView" Path="DataContext.Editor" />
+                                        <Binding Path="Object" />
+                                        <Binding ElementName="Root" Path="((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).Editor" />
                                     </MultiBinding>
                                 </Label.Content>
                             </Label>
@@ -104,10 +99,13 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTextColumn
-                    Width="550"
-                    Binding="{Binding .}"
-                    Header="{markup:Translate [Description]}" />
+                <DataGridTemplateColumn Width="550" Header="{markup:Translate [Description]}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SelectedObjectRow">
+                            <TextBlock Text="{Binding Description}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

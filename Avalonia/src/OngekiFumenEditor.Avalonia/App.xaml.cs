@@ -20,7 +20,8 @@ public abstract class App : Gekimini.Avalonia.App
         AvaloniaXamlLoader.Load(this);
 
 #if DEBUG
-        this.AttachDeveloperTools();
+        if (IsGUIMode)
+            this.AttachDeveloperTools();
 #endif
     }
 }

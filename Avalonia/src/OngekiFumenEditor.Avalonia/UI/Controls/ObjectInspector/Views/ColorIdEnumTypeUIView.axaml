@@ -1,10 +1,14 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.ColorIdEnumTypeUIView"
+    x:CompileBindings="True"
+    x:DataType="vm:ColorIdEnumTypeUIViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:objects="clr-namespace:OngekiFumenEditor.Avalonia.Base.OngekiObjects"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels"
     mc:Ignorable="d">
     <UserControl.Resources>
         <valueconverters:ContrastingColorsConverter x:Key="ContrastingColorsConverter" />
@@ -17,7 +21,7 @@
         <TextBlock
             Margin="0,0,15,0"
             VerticalAlignment="Center"
-            Foreground="{DynamicResource EnvironmentToolWindowText}"
+            Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
             Text="{Binding PropertyInfo.DisplayPropertyName}"
             ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
         </TextBlock>
@@ -28,7 +32,7 @@
             ItemsSource="{Binding EnumValues}"
             SelectedValue="{Binding PropertyInfo.ProxyValue}">
             <ComboBox.Styles>
-                <Style Selector="ComboBoxItem">
+                <Style x:DataType="objects:ColorId" Selector="ComboBoxItem">
                     <Setter Property="Foreground">
                         <Setter.Value>
                             <SolidColorBrush Color="{Binding Color, Converter={StaticResource ContrastingColorsConverter}}" />
@@ -44,6 +48,3 @@
         </ComboBox>
     </Grid>
 </UserControl>
-
-
-

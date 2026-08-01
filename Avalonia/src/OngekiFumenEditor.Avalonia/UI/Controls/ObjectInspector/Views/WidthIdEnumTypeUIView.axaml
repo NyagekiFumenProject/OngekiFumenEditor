@@ -1,15 +1,19 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.WidthIdEnumTypeUIView"
+    x:CompileBindings="True"
+    x:DataType="vm:WidthIdEnumTypeUIViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:objects="clr-namespace:OngekiFumenEditor.Avalonia.Base.OngekiObjects"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels"
     mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <controls:GroupBox
         Margin="5,0,5,0"
         BorderBrush="DarkGray"
-        Foreground="{DynamicResource EnvironmentToolWindowText}"
+        Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
         Header="{Binding PropertyInfo.DisplayPropertyName}"
         ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
         <StackPanel>
@@ -22,7 +26,7 @@
                 <TextBlock
                     Margin="0,0,15,0"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                     Text="{Binding PropertyInfo.DisplayPropertyName}"
                     ToolTip.Tip="{Binding PropertyInfo.DisplayPropertyTipText}">
                 </TextBlock>
@@ -31,9 +35,9 @@
                     HorizontalContentAlignment="Stretch"
                     VerticalContentAlignment="Center"
                     ItemsSource="{Binding EnumValues}"
-                    SelectedValue="{Binding PropertyInfo.ProxyValue}">
+                    SelectedItem="{Binding Value}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="objects:WidthId">
                             <TextBlock Text="{Binding Id}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
@@ -52,7 +56,7 @@
                     Grid.Row="0"
                     Margin="0,0,15,0"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                     Text="WidthDraw" />
                 <TextBlock
                     Grid.Row="0"
@@ -60,14 +64,14 @@
                     Margin="0,0,15,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Text="{Binding PropertyInfo.ProxyValue.WidthDraw}">
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+                    Text="{Binding Value.WidthDraw}">
                 </TextBlock>
                 <TextBlock
                     Grid.Row="1"
                     Margin="0,0,15,0"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                     Text="WidthJudge" />
                 <TextBlock
                     Grid.Row="1"
@@ -75,8 +79,8 @@
                     Margin="0,0,15,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
-                    Text="{Binding PropertyInfo.ProxyValue.WidthJudge}">
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+                    Text="{Binding Value.WidthJudge}">
                 </TextBlock>
             </Grid>
         </StackPanel>

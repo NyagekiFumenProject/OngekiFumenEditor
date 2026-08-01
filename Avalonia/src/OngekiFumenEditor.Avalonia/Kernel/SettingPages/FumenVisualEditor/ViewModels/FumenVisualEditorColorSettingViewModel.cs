@@ -1,6 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Models;
+using CommunityToolkit.Mvvm.Input;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.UI.Dialogs;
+using OngekiFumenEditor.Avalonia.Utils;
 using System.Reflection;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
@@ -23,6 +27,20 @@ public partial class FumenVisualEditorColorSettingViewModel : ObservableObject
     public void ApplyChanges()
     {
         EditorGlobalSetting.Default.Save();
+    }
+
+    [RelayCommand]
+    private Task SelectColorAsync(ColorPropertyWrapper colorProperty)
+    {
+        if (colorProperty is null)
+            return Task.CompletedTask;
+
+        var dialog = new CommonColorPicker(
+            () => colorProperty.Color.ToMediaColor(),
+            color => colorProperty.Color = color.ToDrawingColor(),
+            Lang.NamedColorChangeTitle.Format(colorProperty.Name));
+
+        return IoC.Get<IWindowManager>().ShowWindowAsync(dialog);
     }
 }
 

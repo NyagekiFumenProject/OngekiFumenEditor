@@ -1,5 +1,7 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.FumenObjectPropertyBrowserView"
+    x:CompileBindings="True"
+    x:DataType="vm:FumenObjectPropertyBrowserViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
@@ -7,7 +9,9 @@
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:propertyInspector="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
@@ -20,7 +24,7 @@
         <StackPanel>
             <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="propertyInspector:IObjectPropertyAccessProxy">
                         <ContentPresenter Margin="0,0,0,5" Content="{Binding ., Converter={StaticResource PropertyGeneratorConverter}}">
                         </ContentPresenter>
                     </DataTemplate>

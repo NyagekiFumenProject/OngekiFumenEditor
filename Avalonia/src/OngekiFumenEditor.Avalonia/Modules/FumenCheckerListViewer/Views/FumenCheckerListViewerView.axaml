@@ -1,9 +1,12 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views.FumenCheckerListViewerView"
+    x:Name="Root"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"
     xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+    xmlns:base="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base"
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ValueConverters"
@@ -12,7 +15,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    d:DataContext="{d:DesignInstance Type=local:FumenCheckerListViewerViewModel}"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ViewModels"
+    x:DataType="vm:FumenCheckerListViewerViewModel"
+    d:DataContext="{d:DesignInstance Type=vm:FumenCheckerListViewerViewModel}"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -31,12 +36,9 @@
             <Button
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
+                Command="{Binding RefreshCurrentFumenCommand}"
                 Content="{markup:Translate [Refresh]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="RefreshCurrentFumen" />
-                </Interaction.Behaviors>
-            </Button>
+                IsEnabled="{Binding IsEnable, Mode=OneWay}" />
             <ToggleButton
                 Background="Transparent"
                 BorderBrush="Red"
@@ -116,30 +118,31 @@
             Grid.RowSpan="3"
             Margin="0,31,0,0"
             CanUserReorderColumns="True"
+            Loaded="OnCheckResultGridLoaded"
             ItemsSource="{Binding CheckResults}">
-            <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnListViewLoaded" PassMode="ExecutionContext" />
-            </Interaction.Behaviors>
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
                     <Setter Property="Interaction.Behaviors">
-                        <BehaviorCollectionTemplate>
+                        <BehaviorCollectionTemplate x:DataType="base:ICheckResult">
                             <BehaviorCollection>
-                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
+                                <behaviors:DoubleTappedCommandBehavior
+                                    Command="{Binding $parent[local:FumenCheckerListViewerView].((vm:FumenCheckerListViewerViewModel)DataContext).NavigateToResultCommand}"
+                                    CommandParameter="{Binding}" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
 
                 <DataGridTextColumn
+                    x:DataType="base:ICheckResult"
                     Width="120"
                     Binding="{Binding Severity}"
                     Header="{markup:Translate [Severity]}">
@@ -147,6 +150,7 @@
                 </DataGridTextColumn>
 
                 <DataGridTextColumn
+                    x:DataType="base:ICheckResult"
                     Width="100"
                     Binding="{Binding RuleName}"
                     Header="{markup:Translate [RuleName]}">
@@ -154,6 +158,7 @@
                 </DataGridTextColumn>
 
                 <DataGridTextColumn
+                    x:DataType="base:ICheckResult"
                     Width="400"
                     Binding="{Binding Description}"
                     Header="{markup:Translate [Description]}">
@@ -161,6 +166,7 @@
                 </DataGridTextColumn>
 
                 <DataGridTextColumn
+                    x:DataType="base:ICheckResult"
                     Width="200"
                     Binding="{Binding LocationDescription}"
                     Header="{markup:Translate [WrongLocation2]}">
@@ -170,6 +176,3 @@
         </DataGrid>
     </Grid>
 </UserControl>
-
-
-

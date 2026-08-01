@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Core;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
@@ -15,7 +16,7 @@ using OngekiFumenEditor.Avalonia.Avalonia;
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ViewModels;
 
 [RegisterSingleton<IFumenCheckerListViewer>]
-public class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerListViewer
+public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerListViewer
 {
     private readonly IEditorDocumentManager editorDocumentManager;
     private readonly List<IFumenCheckRule> checkRules;
@@ -26,6 +27,7 @@ public class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerL
     public int ErrorCount => allCheckResults.Count(x => x.Severity == RuleSeverity.Error);
     public int ProblemCount => allCheckResults.Count(x => x.Severity == RuleSeverity.Problem);
     public int SuggestCount => allCheckResults.Count(x => x.Severity == RuleSeverity.Suggest);
+    public bool IsEnable => Editor?.Fumen is not null;
 
     public bool EnableShowError
     {
@@ -64,7 +66,10 @@ public class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerL
         {
             this.RegisterOrUnregisterPropertyChangeEvent(field, value, OnEditorPropChanged);
             if (SetProperty(ref field, value))
+            {
                 RefreshCurrentFumen();
+                OnPropertyChanged(nameof(IsEnable));
+            }
         }
     }
 
@@ -86,14 +91,19 @@ public class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerL
     private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+        {
             RefreshCurrentFumen();
+            OnPropertyChanged(nameof(IsEnable));
+        }
     }
 
-    public void OnItemDoubleClick(ICheckResult checkResult)
+    [RelayCommand]
+    private void NavigateToResult(ICheckResult checkResult)
     {
         checkResult?.NavigateBehavior?.Navigate(Editor);
     }
 
+    [RelayCommand]
     public void RefreshCurrentFumen()
     {
         allCheckResults.Clear();
@@ -116,11 +126,6 @@ public class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumenCheckerL
         OnPropertyChanged(nameof(ErrorCount));
         OnPropertyChanged(nameof(ProblemCount));
         OnPropertyChanged(nameof(SuggestCount));
-    }
-
-    public void OnListViewLoaded(object _)
-    {
-        RefreshFilter();
     }
 
     public void RefreshFilter()

@@ -1,5 +1,6 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Objects;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 			using var reader = new StreamReader(stream);
 
 			var fumen = new OngekiFumen();
+			var replacedImplicitDefaultSoflan = false;
 
 			while (!reader.EndOfStream)
 			{
@@ -36,7 +38,17 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 				var commandName = seg[0].ToLower().Trim();
 
 				if (commandParsers.TryGetValue(commandName, out var commandParser))
+				{
+					// A new fumen contains one timing sentinel. Explicit file entries replace it instead of accumulating beside it.
+					if (!replacedImplicitDefaultSoflan && commandParser is SoflanCommandParser)
+					{
+						foreach (var implicitSoflan in fumen.SoflansMap.DefaultSoflanList.ToArray())
+							fumen.SoflansMap.Remove(implicitSoflan);
+						replacedImplicitDefaultSoflan = true;
+					}
+
 					commandParser.ParseAndApply(fumen, seg);
+				}
 			}
 
 			fumen.Setup();

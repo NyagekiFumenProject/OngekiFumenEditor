@@ -1,9 +1,10 @@
 ﻿using Gekimini.Avalonia.Modules.Window.ViewModels;
 using OngekiFumenEditor.Avalonia.Base;
+using CommunityToolkit.Mvvm.Input;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog
 {
-	public class BrushTGridRangeDialogViewModel : WindowViewModelBase
+	public partial class BrushTGridRangeDialogViewModel : WindowViewModelBase
     {
 		private TGrid beginTGrid = new TGrid();
 		private TGrid endTGrid = new TGrid();
@@ -20,14 +21,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			set => SetProperty(ref endTGrid, value);
 		}
 
-		public void OnCancelButtonClicked()
+		[RelayCommand]
+		private async Task CancelAsync()
 		{
-			this.TryCloseAsync(false);
+			await TryCloseAsync(false);
 		}
 
-		public void OnComfirmButtonClicked()
+		[RelayCommand]
+		private async Task ConfirmAsync()
 		{
-			this.TryCloseAsync(true);
+			await TryCloseAsync(true);
 		}
 	}
 }

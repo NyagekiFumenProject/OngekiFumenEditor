@@ -3,9 +3,28 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
+    xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Avalonia"
+    xmlns:status="https://github.com/xiyaowong/StatusBar.Avalonia"
+    xmlns:windowManager="clr-namespace:Iciclecreek.Avalonia.WindowManager;assembly=Iciclecreek.Avalonia.WindowManager"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters">
     <Application.Styles>
+        <!-- Application XAML resources are not inherited from Gekimini.Avalonia.App. -->
+        <dialogHostAvalonia:DialogHostStyles />
+        <DockFluentTheme />
+        <status:StatusBarTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.ToolBar/Themes/Avalonia.Controls.ToolBar.axaml" />
+        <windowManager:WindowManagerTheme />
+
+        <Style Selector="Button.DialogButton">
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="FontWeight" Value="Bold" />
+        </Style>
+
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
         <StyleInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/TextBlock.axaml" />
     </Application.Styles>
@@ -39,13 +58,27 @@
             <valueconverters:SelectionMovableItemsCheckConverter x:Key="SelectionMovableItemsCheckConverter" />
             <valueconverters:SelectionFullLaneCheckConverter x:Key="SelectionFullLaneCheckConverter" />
             <valueconverters:SelectionLaneObjectsCheckConverter x:Key="SelectionLaneObjectsCheckConverter" />
+
+            <SolidColorBrush x:Key="ContainerBackgroundBrush" Color="{DynamicResource SystemRegionColor}" />
+            <SolidColorBrush x:Key="ContainerTitleForegroundBrush" Color="{DynamicResource SystemAltHighColor}" />
+
+            <SolidColorBrush x:Key="ManagedWindow_BackgroundBrush" Color="{DynamicResource SystemRegionColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_ForegroundBrush" Color="{DynamicResource SystemBaseHighColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_Active_TitleBarForegroundBrush" Color="{DynamicResource SystemAltHighColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_TitleBarForegroundBrush" Color="{DynamicResource SystemAltHighColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_Active_TitleBarBackgroundBrush" Color="{DynamicResource SystemAccentColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_TitleBarBackgroundBrush" Color="{DynamicResource SystemChromeGrayColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_Active_BorderBrush" Color="{DynamicResource SystemAccentColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_BorderBrush" Color="{DynamicResource SystemChromeGrayColor}" />
+            <SolidColorBrush x:Key="ManagedWindow_ModalBackgroundBrush" Color="#A0FFFFFF" />
+
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary>
                     <local:AppBootstrapper x:Key="bootstrapper" />
                 </ResourceDictionary>
 
+                <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/EditorThemeResources.axaml" />
                 <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/GroupBox.axaml" />
-                <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/CheckListBox.axaml" />
                 <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/TabControl.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

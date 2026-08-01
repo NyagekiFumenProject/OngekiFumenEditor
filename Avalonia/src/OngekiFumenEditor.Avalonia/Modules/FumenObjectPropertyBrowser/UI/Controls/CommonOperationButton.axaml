@@ -1,21 +1,24 @@
 ﻿<UserControl
+    x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls.CommonOperationButton"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DataType="local:CommonOperationButton"
     mc:Ignorable="d">
     <Border
         x:Name="Board"
-        Width="{Binding Width}"
+        Width="{Binding #Root.Width}"
         HorizontalAlignment="Left"
-        BorderBrush="{Binding DecoratorBrush}"
+        BorderBrush="{Binding #Root.DecoratorBrush}"
         BorderThickness="1,1,25,1">
         <TextBlock
             Margin="5"
-            Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding Text}"
+            Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+            Text="{Binding #Root.Text}"
             TextWrapping="Wrap" />
     </Border>
 </UserControl>

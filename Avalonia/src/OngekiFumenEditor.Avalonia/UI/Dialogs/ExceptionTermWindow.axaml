@@ -1,14 +1,18 @@
 <Window
     x:Class="OngekiFumenEditor.Avalonia.UI.Dialogs.ExceptionTermWindow"
+    x:CompileBindings="True"
+    x:Name="Root"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Dialogs"
+    x:DataType="local:ExceptionTermWindow"
     Title="{markup:Translate [ExceptionTermWindowTitle]}"
     Width="600"
     MaxHeight="500"
-    Background="{DynamicResource EnvironmentWindowBackground}"
+    Background="{DynamicResource EditorWindowBackgroundBrush}"
     CanResize="False"
     SizeToContent="Height"
     WindowStartupLocation="CenterScreen"
@@ -32,14 +36,13 @@
                     Text="{markup:Translate [RescueFolderPathSaveTo]}" />
                 <ItemsControl Margin="10,0" ItemsSource="{Binding RescueFolderPaths}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="x:String">
                             <TextBlock
                                 x:Name="RescuePathLink"
                                 Margin="0,2"
                                 Cursor="Hand"
-                                DataContext="{Binding .}"
                                 Foreground="DodgerBlue"
-                                Text="{Binding .}"
+                                Text="{Binding}"
                                 TextDecorations="Underline"
                                 TextWrapping="Wrap" />
                         </DataTemplate>
@@ -55,9 +58,8 @@
                     x:Name="LogFileLink"
                     Margin="10,0"
                     Cursor="Hand"
-                    DataContext="{Binding LogFile}"
                     Foreground="DodgerBlue"
-                    Text="{Binding .}"
+                    Text="{Binding LogFile}"
                     TextDecorations="Underline"
                     TextWrapping="Wrap" />
             </StackPanel>
@@ -70,9 +72,8 @@
                     x:Name="DumpFileLink"
                     Margin="10,0"
                     Cursor="Hand"
-                    DataContext="{Binding DumpFile}"
                     Foreground="DodgerBlue"
-                    Text="{Binding .}"
+                    Text="{Binding DumpFile}"
                     TextDecorations="Underline"
                     TextWrapping="Wrap" />
             </StackPanel>
@@ -111,7 +112,7 @@
                 x:Name="CloseButton"
                 Padding="0,10,0,10"
                 Content="{markup:Translate [CloseProgram]}"
-                IsEnabled="{Binding ElementName=Comfirm, Path=IsChecked}" />
+                IsEnabled="{Binding #Comfirm.IsChecked}" />
         </StackPanel>
     </ScrollViewer>
 </Window>

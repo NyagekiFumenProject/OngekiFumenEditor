@@ -1,10 +1,11 @@
 using Dock.Model.Core;
+using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser;
+using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -13,13 +14,13 @@ using System.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 
-[RegisterSingleton<IFumenMetaInfoBrowser>]
-public class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBase, IFumenMetaInfoBrowser
+[RegisterSingleton<IFumenEditorSelectingObjectViewer>]
+public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBase, IFumenEditorSelectingObjectViewer
 {
     private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IEditorDocumentManager>();
 
-    public ObservableCollection<ISelectableObject> SelectedItems { get; } = [];
-    public ObservableCollection<ISelectableObject> EditorSelectObjects { get; } = [];
+    public ObservableCollection<SelectedObjectRow> SelectedItems { get; } = [];
+    public ObservableCollection<SelectedObjectRow> EditorSelectObjects { get; } = [];
 
     public SelectionFilterViewModel SelectionFilter { get; }
 
@@ -30,7 +31,7 @@ public class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBase, IFum
         {
             this.RegisterOrUnregisterPropertyChangeEvent(field, value, OnEditorPropChanged);
             if (SetProperty(ref field, value))
-                OnRefresh();
+                Refresh();
         }
     }
 
@@ -61,22 +62,59 @@ public class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBase, IFum
     private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(FumenVisualEditorViewModel.SelectObjects))
-            OnRefresh();
+            Refresh();
     }
 
-    public void OnRefresh()
+    [RelayCommand]
+    private void Refresh()
     {
         EditorSelectObjects.Clear();
         foreach (var item in Editor?.SelectObjects ?? [])
-            EditorSelectObjects.Add(item);
+            EditorSelectObjects.Add(new SelectedObjectRow(item));
 
         if (IsFilterMenuVisible)
             SelectionFilter.OnSelectedItemsRefreshed();
     }
 
-    public void OnCancelItemSelectedObjects()
+    [RelayCommand]
+    private void CancelSelectedObjects()
     {
         foreach (var item in SelectedItems.ToArray())
-            item.IsSelected = false;
+            item.Object.IsSelected = false;
+
+        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
     }
+
+    public void OnItemSingleClick(ISelectableObject item)
+    {
+        if (Editor is null || item is null)
+            return;
+
+        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor, item);
+    }
+
+    [RelayCommand]
+    private void FocusItem(ISelectableObject item)
+    {
+        if (Editor is null || item is null)
+            return;
+
+        if (item is ITimelineObject timelineObject)
+            Editor.ScrollTo(timelineObject.TGrid);
+
+        foreach (var selected in Editor.SelectObjects.Where(x => x != item).ToArray())
+            selected.IsSelected = false;
+
+        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+    }
+}
+
+public sealed class SelectedObjectRow(ISelectableObject selectableObject)
+{
+    public ISelectableObject Object { get; } = selectableObject;
+    public string Name => Object is OngekiObjectBase ongekiObject
+        ? ongekiObject.Name
+        : Object.GetType().Name;
+    public TGrid TGrid => (Object as ITimelineObject)?.TGrid;
+    public string Description => Object.ToString() ?? string.Empty;
 }

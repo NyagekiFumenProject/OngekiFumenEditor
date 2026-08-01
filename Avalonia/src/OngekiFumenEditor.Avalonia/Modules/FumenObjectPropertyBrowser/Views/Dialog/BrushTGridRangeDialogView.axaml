@@ -1,9 +1,10 @@
 ﻿<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.Dialog.BrushTGridRangeDialogView"
+    x:CompileBindings="True"
+    x:DataType="dialog:BrushTGridRangeDialogViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:dialog="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.Dialog"
@@ -12,7 +13,7 @@
     Title="{markup:Translate [BrushTGridRangeDialog]}"
     Width="220"
     d:DataContext="{d:DesignInstance Type=dialog:BrushTGridRangeDialogViewModel}"
-    Background="{StaticResource EnvironmentWindowBackground}"
+    Background="{StaticResource EditorWindowBackgroundBrush}"
     SizeToContent="WidthAndHeight"
     mc:Ignorable="d">
     <Grid>
@@ -74,23 +75,14 @@
             <Button
                 Margin="10"
                 Padding="10,5,10,5"
-                Content="{markup:Translate [Confirm]}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnComfirmButtonClicked" />
-                </Interaction.Behaviors>
-            </Button>
+                Command="{Binding ConfirmCommand}"
+                Content="{markup:Translate [Confirm]}" />
             <Button
                 Grid.Column="1"
                 Margin="10"
                 Padding="10,5,10,5"
-                Content="{markup:Translate [Cancel]}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCancelButtonClicked" />
-                </Interaction.Behaviors>
-            </Button>
+                Command="{Binding CancelCommand}"
+                Content="{markup:Translate [Cancel]}" />
         </Grid>
     </Grid>
 </views:WindowViewBase>
-
-
-

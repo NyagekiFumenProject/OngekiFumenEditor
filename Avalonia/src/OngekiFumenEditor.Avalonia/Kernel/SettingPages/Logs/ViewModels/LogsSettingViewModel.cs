@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.ViewModels;
@@ -16,6 +17,17 @@ public partial class LogsSettingViewModel : ObservableObject
     public void ApplyChanges()
     {
         Setting.Save();
+    }
+
+    [RelayCommand]
+    private async Task SelectLogsFolderAsync()
+    {
+        var folderPath = await FileDialogHelper.OpenDirectoryAsync(Lang.LoggerFolder);
+        if (string.IsNullOrWhiteSpace(folderPath))
+            return;
+
+        Setting.LogFileDirPath = folderPath;
+        ApplyChanges();
     }
 }
 

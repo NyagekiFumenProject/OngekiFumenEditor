@@ -61,10 +61,19 @@ public partial class ExceptionTermWindow : Window
 
     private void OnPathLinkPointerPressed(object sender, PointerPressedEventArgs e)
     {
-        if (e.Source is not TextBlock { DataContext: string path } link)
+        if (e.Source is not TextBlock link)
             return;
-        if (link.Name is not ("RescuePathLink" or "LogFileLink" or "DumpFileLink"))
+
+        var path = link.Name switch
+        {
+            "RescuePathLink" => link.DataContext as string,
+            "LogFileLink" => LogFile,
+            "DumpFileLink" => DumpFile,
+            _ => null
+        };
+        if (string.IsNullOrWhiteSpace(path))
             return;
+
         OpenPath(path);
         e.Handled = true;
     }

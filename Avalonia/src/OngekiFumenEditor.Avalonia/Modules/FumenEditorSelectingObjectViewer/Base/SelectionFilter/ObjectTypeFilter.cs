@@ -41,6 +41,7 @@ public sealed class FilterObjectTypeCategory : ObservableObject
                         {
                             filter.OnTypeFilterEnabledChanged(item);
                             UpdateCategoryNameDisplay();
+                            OnPropertyChanged(nameof(IsAllSelected));
                         }
                     };
                 }
@@ -58,6 +59,18 @@ public sealed class FilterObjectTypeCategory : ObservableObject
         var matches = Items.Sum(i => i.MatchingObjects.Count);
         CategoryNameDisplay = $"{categoryName} ({matches})";
         CategoryNameDisplayCheckCount = $"{categoryName} ({Items.Count(i => i.IsSelected)} / {Items.Count})";
+    }
+
+    public bool IsAllSelected
+    {
+        get => Items.Count > 0 && Items.All(item => item.IsSelected);
+        set
+        {
+            foreach (var item in Items)
+                item.IsSelected = value;
+
+            OnPropertyChanged();
+        }
     }
 }
 

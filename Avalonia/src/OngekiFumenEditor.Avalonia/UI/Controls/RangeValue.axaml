@@ -1,10 +1,13 @@
 <UserControl
+    x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.RangeValue"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
     xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DataType="local:RangeValue"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -22,8 +25,8 @@
             Grid.Row="0"
             Margin="0,0,5,0"
             VerticalAlignment="Center"
-            Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding DisplayName}"
+            Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+            Text="{Binding #Root.DisplayName}"
             TextWrapping="Wrap">
         </TextBlock>
         <TextBox
@@ -35,24 +38,24 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
             TextAlignment="Right"
-            Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding CurrentValue, StringFormat={}{0:N2}}">
+            Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+            Text="{Binding #Root.CurrentValue, StringFormat={}{0:N2}}">
         </TextBox>
         <Slider
             x:Name="mySlider"
             Grid.Row="1"
             Grid.ColumnSpan="2"
-            Maximum="{Binding MaxValue}"
-            Minimum="{Binding MinValue}"
-            TickFrequency="{Binding Step}"
-            Value="{Binding CurrentValue}">
+            Maximum="{Binding #Root.MaxValue}"
+            Minimum="{Binding #Root.MinValue}"
+            TickFrequency="{Binding #Root.Step}"
+            Value="{Binding #Root.CurrentValue}">
         </Slider>
         <TextBlock
             Grid.Row="2"
             Margin="15,0,0,0"
             VerticalAlignment="Center"
-            Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding MinValue}">
+            Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+            Text="{Binding #Root.MinValue}">
         </TextBlock>
         <TextBlock
             Grid.Row="2"
@@ -60,8 +63,8 @@
             Margin="0,0,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Foreground="{DynamicResource EnvironmentToolWindowText}"
-            Text="{Binding MaxValue}">
+            Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+            Text="{Binding #Root.MaxValue}">
         </TextBlock>
     </Grid>
 </UserControl>

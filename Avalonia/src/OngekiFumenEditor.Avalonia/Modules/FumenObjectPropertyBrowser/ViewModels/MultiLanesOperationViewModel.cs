@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
@@ -14,7 +15,7 @@ using OngekiFumenEditor.Avalonia.Avalonia;
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
 	[MapToView(ViewType = typeof(MultiLanesOperationView))]
-	public class MultiLanesOperationViewModel : ObservableObject
+	public partial class MultiLanesOperationViewModel : ObservableObject
 	{
 		private readonly ConnectableChildObjectBase frontChild;
 		private readonly ConnectableStartObject laterStart;
@@ -47,7 +48,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			this.laterStart = laterStart;
 		}
 
-		public void OnClick(ActionExecutionContext e)
+		[RelayCommand]
+		private void CombineLanes()
 		{
 			if (IoC.Get<IFumenObjectPropertyBrowser>().Editor is not FumenVisualEditorViewModel editor)
 				return;

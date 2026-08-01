@@ -1,26 +1,31 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.InterpolatableSoflanOperationView"
+    x:DataType="vm:InterpolatableSoflanOperationViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
     mc:Ignorable="d">
     <StackPanel Margin="21,5,0,0">
-        <controls:CommonOperationButton
+        <Button
             Width="150"
             Margin="0,10,0,0"
             HorizontalAlignment="Left"
-            DecoratorBrush="DarkSalmon"
-            Text="{markup:Translate [InterpolateToCreateKeyframeSoflans]}"
+            HorizontalContentAlignment="Left"
+            Padding="5"
+            Background="Transparent"
+            BorderBrush="DarkSalmon"
+            BorderThickness="1,1,25,1"
+            Command="{CompiledBinding InterpolateCommand}"
             ToolTip.Tip="{markup:Translate [InterpolateToCreateKeyframeSoflansTipText]}">
-            <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="Interpolate" PassMode="ExecutionContext" />
-            </Interaction.Behaviors>
-        </controls:CommonOperationButton>
+            <TextBlock
+                Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+                Text="{markup:Translate [InterpolateToCreateKeyframeSoflans]}"
+                TextWrapping="Wrap" />
+        </Button>
     </StackPanel>
 </UserControl>
 

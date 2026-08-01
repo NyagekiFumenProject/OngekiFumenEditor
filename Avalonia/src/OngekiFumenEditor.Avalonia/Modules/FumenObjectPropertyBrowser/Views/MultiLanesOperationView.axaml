@@ -1,12 +1,11 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.MultiLanesOperationView"
+    x:DataType="vm:MultiLanesOperationViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
-    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:MultiLanesOperationViewModel,
@@ -15,15 +14,20 @@
     <StackPanel Margin="21,5,21,5">
         <ContentControl>
         </ContentControl>
-        <controls:CommonOperationButton
+        <Button
             Width="150"
             HorizontalAlignment="Left"
-            DecoratorBrush="DarkGray"
-            Text="{markup:Translate [CombineLanes]}">
-            <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnClick" PassMode="ExecutionContext" />
-            </Interaction.Behaviors>
-        </controls:CommonOperationButton>
+            HorizontalContentAlignment="Left"
+            Padding="5"
+            Background="Transparent"
+            BorderBrush="DarkGray"
+            BorderThickness="1,1,25,1"
+            Command="{CompiledBinding CombineLanesCommand}">
+            <TextBlock
+                Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+                Text="{markup:Translate [CombineLanes]}"
+                TextWrapping="Wrap" />
+        </Button>
     </StackPanel>
 </UserControl>
 

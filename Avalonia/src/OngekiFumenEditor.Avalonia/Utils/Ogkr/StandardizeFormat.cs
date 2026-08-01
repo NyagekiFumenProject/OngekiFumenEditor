@@ -37,7 +37,6 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
             var fumen = await CopyFumenObject(currentFumen);
 
             //directly removes objects which not belong to ongeki.
-            fumen.SvgPrefabs.Clear();
             fumen.Comments.Clear();
 
             //check if fumen is serializable or user must fix it first.

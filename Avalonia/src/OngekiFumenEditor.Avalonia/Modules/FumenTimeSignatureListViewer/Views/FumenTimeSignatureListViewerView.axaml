@@ -1,5 +1,7 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views.FumenTimeSignatureListViewerView"
+    x:Name="Root"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
@@ -11,6 +13,8 @@
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.ViewModels"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views"
+    x:DataType="vm:FumenTimeSignatureListViewerViewModel"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:FumenTimeSignatureListViewerViewModel}"
     d:DesignHeight="300"
@@ -31,44 +35,49 @@
             BorderBrush="Transparent"
             ItemsSource="{Binding DisplayTimeSignatures}"
             CanUserReorderColumns="True"
+            PointerPressed="OnRowPointerPressed"
             SelectedItem="{Binding CurrentSelectTimeSignature}">
             <DataGrid.Styles>
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
                 <Style Selector="DataGridRow">
                     <Setter Property="Interaction.Behaviors">
-                        <BehaviorCollectionTemplate>
+                        <BehaviorCollectionTemplate x:DataType="vm:DisplayTimeSignatureItem">
                             <BehaviorCollection>
-                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
-                                <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnItemSingleClick" PassMode="DataContext" />
+                                <behaviors:DoubleTappedCommandBehavior
+                                    Command="{Binding $parent[views:FumenTimeSignatureListViewerView].((vm:FumenTimeSignatureListViewerViewModel)DataContext).NavigateToTimeSignatureCommand}"
+                                    CommandParameter="{Binding}" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
                 <DataGridTextColumn
+                    x:DataType="vm:DisplayTimeSignatureItem"
                     Width="100"
                     Binding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
                     Header="{markup:Translate [AudioTime]}" />
 
                 <DataGridTextColumn
+                    x:DataType="vm:DisplayTimeSignatureItem"
                     Width="100"
                     Binding="{Binding StartTGrid}"
                     Header="{markup:Translate [AudioTGrid]}" />
 
                 <DataGridTextColumn
+                    x:DataType="vm:DisplayTimeSignatureItem"
                     Width="100"
                     Binding="{Binding BPMChange.BPM}"
                     Header="Bpm" />
 
                 <DataGridTemplateColumn Width="100" Header="{markup:Translate [TimeSignature]}">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="vm:DisplayTimeSignatureItem">
                             <TextBlock>
                                 <Run Text="{Binding Meter.BunShi}" />
                                 <Run Text="/" />
@@ -81,6 +90,3 @@
         </DataGrid>
     </Grid>
 </UserControl>
-
-
-

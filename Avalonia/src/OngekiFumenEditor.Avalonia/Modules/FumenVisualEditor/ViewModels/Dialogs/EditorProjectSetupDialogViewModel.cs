@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
 using Gekimini.Avalonia.Utils.MethodExtensions;
@@ -11,7 +12,7 @@ using System.IO;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs
 {
-	public class EditorProjectSetupDialogViewModel : WindowViewModelBase
+	public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase
 	{
 		private EditorProjectDataModel editorProjectData = new();
 		public EditorProjectDataModel EditorProjectData
@@ -20,12 +21,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 			set => SetProperty(ref editorProjectData, value);
 		}
 
-		private void ShowMessage(string content)
+		private Task ShowMessageAsync(string content)
 		{
-			_ = IoC.Get<IDialogManager>().ShowMessageDialog(content);
+			return IoC.Get<IDialogManager>().ShowMessageDialog(content);
 		}
 
-		public async void OnSelectAudioFilePathButtonClicked()
+		[RelayCommand]
+		private async Task SelectAudioFilePathAsync()
 		{
 			var filePath = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportAudioFileExtensionFilterList());
 			if (string.IsNullOrWhiteSpace(filePath))
@@ -37,7 +39,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 			EditorProjectData.AudioDuration = durationMs;
 		}
 
-		public async void OnSelectFumenFilePathButtonClicked()
+		[RelayCommand]
+		private async Task SelectFumenFilePathAsync()
 		{
 			var filePath = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportFumenFileExtensionFilterList());
 			if (string.IsNullOrWhiteSpace(filePath))
@@ -54,15 +57,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 			}
 			catch (Exception e)
 			{
-				ShowMessage($"{Lang.CantLoadFumen}{e.Message}");
+				await ShowMessageAsync($"{Lang.CantLoadFumen}{e.Message}");
 			}
 		}
 
-		public async void OnCreateButtonClicked()
+		[RelayCommand]
+		private async Task CreateAsync()
 		{
 			if (string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath))
 			{
-				ShowMessage(Lang.AudioFileNotFound);
+				await ShowMessageAsync(Lang.AudioFileNotFound);
 				return;
 			}
 

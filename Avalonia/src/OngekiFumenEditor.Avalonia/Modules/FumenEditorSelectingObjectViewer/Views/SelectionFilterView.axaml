@@ -1,15 +1,15 @@
 <UserControl x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.SelectionFilterView"
+             x:CompileBindings="True"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="https://github.com/avaloniaui/design"
              xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
-             xmlns:ctl="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
              xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
              xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
              xmlns:selectionFilter="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Base.SelectionFilter"
-             xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
+             x:DataType="vm:SelectionFilterViewModel"
              mc:Ignorable="d"
              Padding="3"
              Background="Transparent"
@@ -23,7 +23,7 @@
     <UserControl.DataTemplates>
         <!-- FILTER OPTIONS -->
 
-        <DataTemplate DataType="selectionFilter:BooleanOption">
+        <DataTemplate DataType="selectionFilter:BooleanOption" x:DataType="selectionFilter:BooleanOption">
             <WrapPanel Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
                 <StackPanel Orientation="Horizontal" IsEnabled="{Binding IsEnabled}">
@@ -45,7 +45,7 @@
             </WrapPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="selectionFilter:TextWithRegexOption">
+        <DataTemplate DataType="selectionFilter:TextWithRegexOption" x:DataType="selectionFilter:TextWithRegexOption">
             <Grid Margin="3 5">
                 <Grid.RowDefinitions>
                     <RowDefinition />
@@ -67,7 +67,7 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="selectionFilter:EnumSpecificationOption">
+        <DataTemplate DataType="selectionFilter:EnumSpecificationOption" x:DataType="selectionFilter:EnumSpecificationOption">
             <Grid Margin="3 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -78,13 +78,13 @@
                 <CheckBox Grid.Column="0"
                           IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
                 <ComboBox Grid.Column="1"
-                          SelectedItem="{Binding SelectedPair, Mode=TwoWay}"
-                          ItemsSource="{Binding SelectionsText}"
+                          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                          ItemsSource="{Binding Selections}"
                           HorizontalAlignment="Stretch"
                           IsEnabled="{Binding IsEnabled}">
                     <ComboBox.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Value}" />
+                        <DataTemplate x:DataType="selectionFilter:EnumSelectionItem">
+                            <TextBlock Text="{Binding Text}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
@@ -95,35 +95,68 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate DataType="selectionFilter:BulletPaletteFilterOption">
+        <DataTemplate DataType="selectionFilter:BulletPaletteFilterOption" x:DataType="selectionFilter:BulletPaletteFilterOption">
             <StackPanel Orientation="Horizontal" Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
-                <ctl:CheckComboBox ItemsSource="{Binding Items}"
-                                   SelectedMemberPath="IsSelected"
-                                   DisplayMemberPath="Text"
-                                   IsEnabled="{Binding IsEnabled}"
-                                   Width="200"
-                                   IsSelectAllActive="True" />
+                <DropDownButton IsEnabled="{Binding IsEnabled}" Width="200">
+                    <DropDownButton.Content>
+                        <TextBlock MaxWidth="175" Text="{Binding SelectionSummary}" TextTrimming="CharacterEllipsis" />
+                    </DropDownButton.Content>
+                    <DropDownButton.Flyout>
+                        <Flyout>
+                            <StackPanel x:DataType="selectionFilter:BulletPaletteFilterOption" MinWidth="200">
+                                <CheckBox Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
+                                          IsChecked="{Binding IsAllSelected, Mode=TwoWay}" />
+                                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="selectionFilter:BulletPaletteFilterItem">
+                                                <CheckBox Content="{Binding Text}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </StackPanel>
+                        </Flyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
                 <Label Content="{Binding FilterMatches, Converter={StaticResource ParenthesizeTextConverter}}"
                        IsVisible="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
                        FontStyle="Italic" VerticalContentAlignment="Center" />
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate DataType="selectionFilter:DockableObjectLaneFilterOption">
+        <DataTemplate DataType="selectionFilter:DockableObjectLaneFilterOption" x:DataType="selectionFilter:DockableObjectLaneFilterOption">
             <StackPanel Orientation="Horizontal" Margin="3 5">
                 <CheckBox IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
-                <ctl:CheckComboBox ItemsSource="{Binding Values}"
-                                   SelectedMemberPath="IsSelected"
-                                   DisplayMemberPath="Text"
-                                   Width="250"
-                                   HorizontalAlignment="Left"
-                                   IsSelectAllActive="True"
-                                   IsEnabled="{Binding IsEnabled}" />
+                <DropDownButton HorizontalAlignment="Left" IsEnabled="{Binding IsEnabled}" Width="250">
+                    <DropDownButton.Content>
+                        <TextBlock MaxWidth="225" Text="{Binding SelectionSummary}" TextTrimming="CharacterEllipsis" />
+                    </DropDownButton.Content>
+                    <DropDownButton.Flyout>
+                        <Flyout>
+                            <StackPanel x:DataType="selectionFilter:DockableObjectLaneFilterOption" MinWidth="250">
+                                <CheckBox Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
+                                          IsChecked="{Binding IsAllSelected, Mode=TwoWay}" />
+                                <ItemsControl ItemsSource="{Binding Values}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="selectionFilter:DockableObjectLaneFilterItem">
+                                            <CheckBox Content="{Binding Text}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Flyout>
+                    </DropDownButton.Flyout>
+                </DropDownButton>
                 <Label Content="{Binding FilterMatches, Converter={StaticResource ParenthesizeTextConverter}}"
                        IsVisible="{Binding IsEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
                        FontStyle="Italic" VerticalContentAlignment="Center" />
             </StackPanel>
+        </DataTemplate>
+
+        <DataTemplate DataType="selectionFilter:FilterObjectTypesItem" x:DataType="selectionFilter:FilterObjectTypesItem">
+            <CheckBox Content="{Binding Display}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
         </DataTemplate>
     </UserControl.DataTemplates>
     <UserControl.Styles>
@@ -136,7 +169,7 @@
         <Style Selector="CheckBox.WrappedTextCheckBox">
             <Setter Property="ContentTemplate">
                 <Setter.Value>
-                    <DataTemplate>
+                    <DataTemplate x:DataType="system:String">
                         <TextBlock Text="{Binding}" TextWrapping="Wrap" />
                     </DataTemplate>
                 </Setter.Value>
@@ -149,10 +182,6 @@
             <Setter Property="Margin" Value="4 0" />
         </Style>
 
-        <Style Selector="ctl|CheckListBox">
-            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColorBrush}" />
-        </Style>
     </UserControl.Styles>
 
     <!-- PAGE LAYOUT -->
@@ -173,53 +202,45 @@
 
                     <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderObjectType]}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="SelectAllObjectTypes" />
-                            </Interaction.Behaviors>
-                        </Button>
-                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetSelectedObjectTypes" />
-                            </Interaction.Behaviors>
-                        </Button>
+                        <Button Command="{Binding SelectAllObjectTypesCommand}" Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}" />
+                        <Button Command="{Binding ResetSelectedObjectTypesCommand}" Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}" />
                     </StackPanel>
                 </Grid>
 
                 <ItemsControl ItemsSource="{Binding FilterTypeCategories}"
-                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
+                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=Bounds.Width, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Vertical" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="selectionFilter:FilterObjectTypeCategory">
+                        <DataTemplate DataType="selectionFilter:FilterObjectTypeCategory" x:DataType="selectionFilter:FilterObjectTypeCategory">
                             <Expander Header="{Binding CategoryNameDisplayCheckCount}">
-                                <ctl:CheckListBox ItemsSource="{Binding Items}"
-                                                  IsSelectAllActive="True"
-                                                  DisplayMemberPath="Display"
-                                                  SelectedMemberPath="IsSelected"
-                                                  SelectAllContent="{Binding CategoryNameDisplay}" />
+                                <StackPanel>
+                                    <CheckBox Content="{Binding CategoryNameDisplay}"
+                                              IsChecked="{Binding IsAllSelected, Mode=TwoWay}" />
+                                    <ItemsControl ItemsSource="{Binding Items}" />
+                                </StackPanel>
                             </Expander>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
 
                 <ItemsControl ItemsSource="{Binding FilterTypeCategories}"
-                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
+                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=Bounds.Width, Converter={StaticResource WideModeToVisibilityConverter}}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="selectionFilter:FilterObjectTypeCategory">
-                            <ctl:CheckListBox ItemsSource="{Binding Items}"
-                                              IsSelectAllActive="True"
-                                              DisplayMemberPath="Display"
-                                              SelectedMemberPath="IsSelected"
-                                              SelectAllContent="{Binding CategoryNameDisplay}" />
+                        <DataTemplate DataType="selectionFilter:FilterObjectTypeCategory" x:DataType="selectionFilter:FilterObjectTypeCategory">
+                            <StackPanel>
+                                <CheckBox Content="{Binding CategoryNameDisplay}"
+                                          IsChecked="{Binding IsAllSelected, Mode=TwoWay}" />
+                                <ItemsControl ItemsSource="{Binding Items}" />
+                            </StackPanel>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
@@ -232,18 +253,14 @@
 
                     <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Button Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="ResetFilterOptions" />
-                            </Interaction.Behaviors>
-                        </Button>
+                        <Button Command="{Binding ResetFilterOptionsCommand}" Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}" />
                     </StackPanel>
                 </Grid>
 
                 <ItemsControl ItemsSource="{Binding OptionCategories}"
-                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
+                              IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=Bounds.Width, Converter={StaticResource InverseWideModeToVisibilityConverter}}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="selectionFilter:OptionCategory">
+                        <DataTemplate DataType="selectionFilter:OptionCategory" x:DataType="selectionFilter:OptionCategory">
                             <Expander Header="{Binding DisplayName}">
                                 <StackPanel Orientation="Vertical">
                                     <ItemsControl ItemsSource="{Binding Options}" />
@@ -254,14 +271,14 @@
                 </ItemsControl>
 
                 <TabControl ItemsSource="{Binding OptionCategories}"
-                            IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=ActualWidth, Converter={StaticResource WideModeToVisibilityConverter}}">
+                            IsVisible="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=Panel}, Path=Bounds.Width, Converter={StaticResource WideModeToVisibilityConverter}}">
                     <TabControl.ItemTemplate>
-                        <DataTemplate DataType="selectionFilter:OptionCategory">
+                        <DataTemplate DataType="selectionFilter:OptionCategory" x:DataType="selectionFilter:OptionCategory">
                             <TextBlock Text="{Binding DisplayName}" />
                         </DataTemplate>
                     </TabControl.ItemTemplate>
                     <TabControl.ContentTemplate>
-                        <DataTemplate DataType="selectionFilter:OptionCategory">
+                        <DataTemplate DataType="selectionFilter:OptionCategory" x:DataType="selectionFilter:OptionCategory">
                             <StackPanel Orientation="Vertical">
                                 <ItemsControl ItemsSource="{Binding Options}" />
                             </StackPanel>
@@ -285,14 +302,8 @@
             <TextBlock Text="{Binding FilterOutcomeText}" Margin="5" />
 
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Content="{markup:Translate [ApplyFilter]}">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Click" MethodName="ApplyFilterToSelection" />
-                    </Interaction.Behaviors>
-                </Button>
+                <Button Command="{Binding ApplyFilterToSelectionCommand}" Content="{markup:Translate [ApplyFilter]}" />
             </StackPanel>
         </StackPanel>
     </Grid>
 </UserControl>
-
-

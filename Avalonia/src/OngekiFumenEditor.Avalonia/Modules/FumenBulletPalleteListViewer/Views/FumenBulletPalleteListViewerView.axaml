@@ -1,16 +1,21 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views.FumenBulletPalleteListViewerView"
+    x:Name="Root"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.Views"
+    xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:objects="clr-namespace:OngekiFumenEditor.Avalonia.Base.OngekiObjects"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.ViewModels"
+    x:DataType="vm:FumenBulletPalleteListViewerViewModel"
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -26,19 +31,13 @@
         <StackPanel Margin="5" Orientation="Horizontal">
             <Button
                 Margin="0,0,5,0"
+                Command="{Binding CreateNewCommand}"
                 Content="{markup:Translate [NewBulletPallete]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCreateNew" />
-                </Interaction.Behaviors>
-            </Button>
+                IsEnabled="{Binding IsEnable, Mode=OneWay}" />
             <Button
+                Command="{Binding DeleteSelectedCommand}"
                 Content="{markup:Translate [DeleteSelectedPalletes]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnDeleteSelecting" PassMode="View" />
-                </Interaction.Behaviors>
-            </Button>
+                IsEnabled="{Binding IsEnable, Mode=OneWay}" />
 
             <TextBox
                 Width="150"
@@ -46,12 +45,9 @@
                 Text="{Binding Filter}" />
 
             <Button
+                Command="{Binding RefreshFilterCommand}"
                 Content="{markup:Translate [Filter]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
-                <Interaction.Behaviors>
-                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnRefreshFilter" />
-                </Interaction.Behaviors>
-            </Button>
+                IsEnabled="{Binding IsEnable, Mode=OneWay}" />
         </StackPanel>
         <DataGrid
             Grid.Row="1"
@@ -66,9 +62,11 @@
             <DataGrid.Styles>
                 <Style Selector="DataGridRow">
                     <Setter Property="Interaction.Behaviors">
-                        <BehaviorCollectionTemplate>
+                        <BehaviorCollectionTemplate x:DataType="objects:BulletPallete">
                             <BehaviorCollection>
-                                <behaviors:EventMethodBehavior EventName="DoubleTapped" MethodName="OnItemDoubleClick" PassMode="DataContext" />
+                                <behaviors:DoubleTappedCommandBehavior
+                                    Command="{Binding $parent[views:FumenBulletPalleteListViewerView].((vm:FumenBulletPalleteListViewerViewModel)DataContext).SelectReferencesCommand}"
+                                    CommandParameter="{Binding}" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>
@@ -76,17 +74,18 @@
                 <Style Selector="DataGridColumnHeader">
                     <Setter Property="Background" Value="Transparent" />
                     <Setter Property="BorderBrush" Value="Transparent" />
-                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
+                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}" />
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
                     <DataGridTextColumn
+                        x:DataType="objects:BulletPallete"
                         Width="60"
                         Binding="{Binding StrID}"
                         Header="{markup:Translate [BulletPaletteId]}" />
                     <DataGridTemplateColumn Width="120" Header="{markup:Translate [Name]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding EditorName}">
                                 </TextBox>
                             </DataTemplate>
@@ -95,7 +94,7 @@
 
                     <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootSource]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -103,7 +102,7 @@
 
                     <DataGridTemplateColumn Width="80" Header="{markup:Translate [ShootOffset]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding PlaceOffset}">
                                 </TextBox>
                             </DataTemplate>
@@ -112,7 +111,7 @@
 
                     <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootTarget]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -120,7 +119,7 @@
 
                     <DataGridTemplateColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding Speed}">
                                 </TextBox>
                             </DataTemplate>
@@ -129,7 +128,7 @@
 
                     <DataGridTemplateColumn Width="100" Header="{markup:Translate [BulletSize]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -137,7 +136,7 @@
 
                     <DataGridTemplateColumn Width="75" Header="{markup:Translate [BulletType]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -145,7 +144,7 @@
 
                     <DataGridTemplateColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding RandomOffsetRange}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -153,7 +152,7 @@
 
                     <!--<GridViewColumn Width="80" Header="辅助线颜色">
                         <GridViewColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock cal:Message.Attach="[Event MouseLeftButtonDown] = [Action OnChangeEditorAxuiliaryLineColor($executionContext)];" Text="{Binding EditorAxuiliaryLineColor}">
                                     <TextBlock.Background>
                                         <SolidColorBrush Color="{Binding EditorAxuiliaryLineColor}">
@@ -166,41 +165,35 @@
 
                     <DataGridTemplateColumn Width="240" Header="{markup:Translate [Action]}">
                         <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
+                            <DataTemplate x:DataType="objects:BulletPallete">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock
                                         VerticalAlignment="Center"
                                         Cursor="Hand"
+                                        PointerMoved="OnCreateBulletPointerMoved"
+                                        PointerPressed="OnCreateObjectPointerPressed"
                                         Text="{markup:Translate [BulletPaletteCreateBullet]}"
                                         TextDecorations="Baseline"
-                                        ToolTip.Tip="{markup:Translate [DragToCreateBullet]}">
-                                        <Interaction.Behaviors>
-                                            <behaviors:EventMethodBehavior EventName="PointerMoved" MethodName="OnMouseMoveAndDragNewBullet" PassMode="ExecutionContext" />
-                                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnMouseLeftButtonDown" PassMode="ExecutionContext" />
-                                        </Interaction.Behaviors>
-                                    </TextBlock>
+                                        ToolTip.Tip="{markup:Translate [DragToCreateBullet]}" />
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         Cursor="Hand"
+                                        PointerMoved="OnCreateBellPointerMoved"
+                                        PointerPressed="OnCreateObjectPointerPressed"
                                         Text="{markup:Translate [BulletPaletteCreateBell]}"
                                         TextDecorations="Baseline"
-                                        ToolTip.Tip="{markup:Translate [DragToCreateBell]}">
-                                        <Interaction.Behaviors>
-                                            <behaviors:EventMethodBehavior EventName="PointerMoved" MethodName="OnMouseMoveAndDragNewBell" PassMode="ExecutionContext" />
-                                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnMouseLeftButtonDown" PassMode="ExecutionContext" />
-                                        </Interaction.Behaviors>
-                                    </TextBlock>
-                                    <TextBlock
+                                        ToolTip.Tip="{markup:Translate [DragToCreateBell]}" />
+                                    <Button
                                         Margin="10,0,0,0"
+                                        Padding="0"
                                         VerticalAlignment="Center"
-                                        Text="{markup:Translate [ClonePallete]}"
-                                        TextDecorations="Baseline"
-                                        ToolTip.Tip="{markup:Translate [ClickToClonePalette]}">
-                                        <Interaction.Behaviors>
-                                            <behaviors:EventMethodBehavior EventName="PointerPressed" MethodName="OnCopyNewBPL" PassMode="ExecutionContext" />
-                                        </Interaction.Behaviors>
-                                    </TextBlock>
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Command="{Binding $parent[views:FumenBulletPalleteListViewerView].((vm:FumenBulletPalleteListViewerViewModel)DataContext).ClonePaletteCommand}"
+                                        CommandParameter="{Binding}"
+                                        Content="{markup:Translate [ClonePallete]}"
+                                        ToolTip.Tip="{markup:Translate [ClickToClonePalette]}" />
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -209,6 +202,3 @@
         </DataGrid>
     </Grid>
 </UserControl>
-
-
-

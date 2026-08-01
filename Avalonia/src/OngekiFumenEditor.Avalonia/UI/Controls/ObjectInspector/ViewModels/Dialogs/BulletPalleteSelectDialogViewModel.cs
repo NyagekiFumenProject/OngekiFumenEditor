@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 
@@ -17,18 +18,21 @@ public partial class BulletPalleteSelectDialogViewModel : WindowViewModelBase
         SelectedPallete = initSelectedPallete;
     }
 
-    public async void OnItemDoubleClick(BulletPallete bulletPallete)
+    [RelayCommand]
+    private async Task SelectAndConfirmAsync(BulletPallete bulletPallete)
     {
         SelectedPallete = bulletPallete;
         await TryCloseAsync(true);
     }
 
-    public async void OnComfirmButtonClicked()
+    [RelayCommand]
+    private async Task ConfirmAsync()
     {
         await TryCloseAsync(true);
     }
 
-    public async void OnCancelButtonClicked()
+    [RelayCommand]
+    private async Task CancelAsync()
     {
         await TryCloseAsync(false);
     }

@@ -1,10 +1,13 @@
 <UserControl
+    x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI.Toast"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:DataType="local:Toast"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
@@ -17,8 +20,8 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             FontSize="16"
-            Foreground="{Binding TextColor}"
-            Text="{Binding Message}">
+            Foreground="{Binding #Root.TextColor}"
+            Text="{Binding #Root.Message}">
         </TextBlock>
         <Grid.RenderTransform>
             <TranslateTransform>

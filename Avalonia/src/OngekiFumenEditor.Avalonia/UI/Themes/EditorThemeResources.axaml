@@ -1,0 +1,36 @@
+<ResourceDictionary
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Default">
+            <Color x:Key="EditorWindowBackgroundColor">#FFF7F7F7</Color>
+            <Color x:Key="EditorToolWindowForegroundColor">#FF1A1A1A</Color>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <Color x:Key="EditorWindowBackgroundColor">#FFF7F7F7</Color>
+            <Color x:Key="EditorToolWindowForegroundColor">#FF1A1A1A</Color>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <Color x:Key="EditorWindowBackgroundColor">#FF202020</Color>
+            <Color x:Key="EditorToolWindowForegroundColor">#FFF5F5F5</Color>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <SolidColorBrush
+        x:Key="EditorWindowBackgroundBrush"
+        Color="{DynamicResource EditorWindowBackgroundColor}" />
+    <SolidColorBrush
+        x:Key="EditorToolWindowForegroundBrush"
+        Color="{DynamicResource EditorToolWindowForegroundColor}" />
+    <SolidColorBrush
+        x:Key="EditorInteractionAccentBrush"
+        Color="{DynamicResource SystemAccentColor}" />
+
+    <!-- Compatibility keys for views or extensions that still use the former Gemini names. -->
+    <SolidColorBrush
+        x:Key="EnvironmentWindowBackground"
+        Color="{DynamicResource EditorWindowBackgroundColor}" />
+    <SolidColorBrush
+        x:Key="EnvironmentToolWindowText"
+        Color="{DynamicResource EditorToolWindowForegroundColor}" />
+</ResourceDictionary>

@@ -1,12 +1,13 @@
 ﻿<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs"
     xmlns:local2="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs"
+    x:DataType="local2:EditorProjectSetupDialogViewModel"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     Title="{markup:Translate [EditorProjectSetupDialog]}"
@@ -14,7 +15,7 @@
     Height="600"
     d:DataContext="{d:DesignInstance Type=local2:EditorProjectSetupDialogViewModel,
                                      IsDesignTimeCreatable=True}"
-    Background="{StaticResource EnvironmentWindowBackground}"
+    Background="{StaticResource EditorWindowBackgroundBrush}"
     SizeToContent="WidthAndHeight"
     mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <Grid Focusable="False">
@@ -27,7 +28,7 @@
             <StackPanel Margin="5">
                 <controls:GroupBox
                     BorderBrush="Black"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                     Header="{markup:Translate [AudioOption]}">
                     <StackPanel Margin="10,5,10,5">
                         <Label Content="{markup:Translate [AudioFilePath]}">
@@ -42,13 +43,10 @@
                             <Button
                                 Grid.Column="1"
                                 Padding="10,5,10,5"
-                                Content="{markup:Translate [Browser]}">
-                                <Interaction.Behaviors>
-                                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnSelectAudioFilePathButtonClicked" />
-                                </Interaction.Behaviors>
-                            </Button>
+                                Command="{Binding SelectAudioFilePathCommand}"
+                                Content="{markup:Translate [Browser]}" />
                         </Grid>
-                        <TextBlock Foreground="{DynamicResource EnvironmentToolWindowText}">
+                        <TextBlock Foreground="{DynamicResource EditorToolWindowForegroundBrush}">
                             <Run Text="{markup:Translate [AudioDuration]}">
                             </Run>
                             <Run Text="{Binding EditorProjectData.AudioDuration, StringFormat={}{0}}">
@@ -59,7 +57,7 @@
 
                 <controls:GroupBox
                     BorderBrush="Black"
-                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                     Header="{markup:Translate [FumenInitOption]}">
                     <StackPanel Margin="10,5,10,5">
                         <StackPanel Orientation="Horizontal">
@@ -71,8 +69,8 @@
                             <TextBox
                                 Width="150"
                                 VerticalAlignment="Center"
-                                Foreground="{DynamicResource EnvironmentToolWindowText}"
-                                IsEnabled="{Binding EditorProjectData.FumenFilePath}"
+                                Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+                                IsEnabled="{Binding EditorProjectData.CanEditBaseBpm}"
                                 Text="{Binding EditorProjectData.BaseBPM}">
                             </TextBox>
                         </StackPanel>
@@ -81,23 +79,20 @@
                                 <TextBlock
                                     Margin="0,0,10,0"
                                     VerticalAlignment="Center"
-                                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                                     Text="{markup:Translate [OptionalFumenFile]}">
                                 </TextBlock>
                                 <TextBlock
                                     VerticalAlignment="Center"
-                                    Foreground="{DynamicResource EnvironmentToolWindowText}"
+                                    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                                     Text="{Binding EditorProjectData.FumenFilePath}" />
                             </StackPanel>
 
                             <Button
                                 Padding="10,5,10,5"
                                 HorizontalAlignment="Right"
-                                Content="{markup:Translate [Browser]}">
-                                <Interaction.Behaviors>
-                                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnSelectFumenFilePathButtonClicked" />
-                                </Interaction.Behaviors>
-                            </Button>
+                                Command="{Binding SelectFumenFilePathCommand}"
+                                Content="{markup:Translate [Browser]}" />
                         </Grid>
                     </StackPanel>
                 </controls:GroupBox>
@@ -108,13 +103,7 @@
         <Button
             Grid.Row="1"
             Height="50"
-            Content="{markup:Translate [Create]}">
-            <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnCreateButtonClicked" />
-            </Interaction.Behaviors>
-        </Button>
+            Command="{Binding CreateCommand}"
+            Content="{markup:Translate [Create]}" />
     </Grid>
 </views:WindowViewBase>
-
-
-

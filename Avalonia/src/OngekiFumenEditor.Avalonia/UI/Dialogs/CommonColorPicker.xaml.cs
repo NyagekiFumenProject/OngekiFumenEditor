@@ -1,11 +1,12 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Gekimini.Avalonia.Modules.Window.Views;
 using System.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.UI.Dialogs;
 
-public partial class CommonColorPicker : Window, INotifyPropertyChanged
+public partial class CommonColorPicker : WindowViewBase, INotifyPropertyChanged
 {
     private readonly Func<Color> getter;
     private readonly Action<Color> setter;

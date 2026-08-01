@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
@@ -7,7 +8,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
-public class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<BulletPallete>
+public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<BulletPallete>
 {
     private string cacheStrId = string.Empty;
 
@@ -48,7 +49,8 @@ public class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<BulletPallete>
         OnPropertyChanged(nameof(StrId));
     }
 
-    public async void OpenSelectList()
+    [RelayCommand]
+    private async Task OpenSelectListAsync()
     {
         var editor = IoC.Get<IEditorDocumentManager>()?.CurrentActivatedEditor;
         if (editor is null)
@@ -63,7 +65,8 @@ public class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<BulletPallete>
         OnPropertyChanged(nameof(StrId));
     }
 
-    public void SetNull()
+    [RelayCommand]
+    private void SetNull()
     {
         var rollback = TypedProxyValue;
         try

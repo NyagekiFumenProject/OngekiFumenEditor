@@ -1,10 +1,11 @@
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
+using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
-public class TGridTypeUIViewModel : CommonUIViewModelBase<TGrid>
+public partial class TGridTypeUIViewModel : CommonUIViewModelBase<TGrid>
 {
     private object cacheGrid;
     public object Grid
@@ -58,7 +59,8 @@ public class TGridTypeUIViewModel : CommonUIViewModelBase<TGrid>
     {
     }
 
-    public void SetNull()
+    [RelayCommand]
+    private void SetNull()
     {
         var rollback = TypedProxyValue;
         try
