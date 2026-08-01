@@ -73,10 +73,6 @@
             <SolidColorBrush x:Key="ManagedWindow_ModalBackgroundBrush" Color="#A0FFFFFF" />
 
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary>
-                    <local:AppBootstrapper x:Key="bootstrapper" />
-                </ResourceDictionary>
-
                 <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/EditorThemeResources.axaml" />
                 <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/GroupBox.axaml" />
                 <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/TabControl.axaml" />

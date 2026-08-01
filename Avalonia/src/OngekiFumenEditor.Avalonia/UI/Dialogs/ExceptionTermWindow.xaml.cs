@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using OngekiFumenEditor.Avalonia.Avalonia;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Diagnostics;
 
@@ -13,7 +14,7 @@ public partial class ExceptionTermWindow : Window
     public string LogFile { get; init; }
     public string DumpFile { get; init; }
 
-    public string ProgramVersion => FileVersionInfo.GetVersionInfo(typeof(AppBootstrapper).Assembly.Location).ProductVersion;
+    public string ProgramVersion => FileVersionInfo.GetVersionInfo(typeof(App).Assembly.Location).ProductVersion;
 
     public ExceptionTermWindow(string exceptionMessage, string[] rescueFolderPaths, string logFile, string dumpFile)
     {

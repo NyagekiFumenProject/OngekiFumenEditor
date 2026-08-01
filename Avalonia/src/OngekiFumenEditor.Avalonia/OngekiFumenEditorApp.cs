@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia;
+using Gekimini.Avalonia;
 using Avalonia.Threading;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Platforms.Services.Window;
@@ -15,6 +15,11 @@ namespace OngekiFumenEditor.Avalonia.Avalonia;
 
 public abstract class OngekiFumenEditorApp : App
 {
+    protected OngekiFumenEditorApp(bool isGUIMode = true)
+        : base(isGUIMode)
+    {
+    }
+
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
         base.RegisterServices(serviceCollection);

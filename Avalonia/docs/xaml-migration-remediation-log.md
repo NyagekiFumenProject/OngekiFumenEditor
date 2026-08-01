@@ -784,3 +784,38 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 - WAV 偏移必须覆盖正、负、零偏移、非帧对齐时的取整策略、过量负偏移、无效/不支持格式，以及失败不污染目标文件。
 - 两个 Windows 发布配置都必须能构建；AOT 图不得包含 ASIO，JIT 包必须保留 ASIO 依赖。真实 ASIO 驱动和真实 WASAPI 设备仍需要平台人工验证。
 - `SvgPrefab` 必须覆盖强类型解析、格式化往返、Skia 非空绘制、视图构造/编译绑定和真实 ramen 语料；不得继续把它列为预期排除命令。
+
+## 2026-08-02 AppBootstrapper 残桩丢弃与 IsGUIMode 职责移交 Desktop
+
+> 决策时间：2026-08-02 06:33 +08:00
+> 本节为第七轮收尾后的独立小批次，由 kimi-code 在同一接管会话内完成。
+
+### 决策
+
+- 迁移版核心库 `AppBootstrapper.cs` 是 10 行残桩，全项目仅 `ExceptionTermWindow.xaml.cs` 用它取程序集版本号，直接丢弃，不再迁移原 WPF `AppBootstrapper` 的其余功能。
+- 原 WPF 的 IsGUIMode 职责（GUI/CMD 双模式启动判断、启动参数处理接线）移交 **Desktop 项目**负责并实现。
+- CMD 模式范围：**迁移模式判断与接线，CMD 先占位**——无窗口入口显式提示暂无可用命令并以退出码 1 结束；原 `DefaultCommandExecutor`（约 260 行反射方案）本轮不移植。
+- 核心库 `App.IsGUIMode` 被动标志保留（`App.Initialize` 的 DEBUG 开发工具与 `TestApplication(isGUIMode: false)` 在用），取值由 Desktop 入口决定。
+
+### 实施
+
+- 删除 `src/OngekiFumenEditor.Avalonia/AppBootstrapper.cs`；`ExceptionTermWindow.xaml.cs` 改用 `typeof(App).Assembly`；`App.axaml` 移除未被引用的 `<local:AppBootstrapper>` 资源（构建时 AVLN2000 暴露的遗漏，同批修复）。
+- 核心库新增纯静态 `Kernel/ArgProcesser/StartupModeParser`：`--cmd`（大小写不敏感）优先判为 Cmd；单个存在文件路径作为待打开文件；其余为 Gui。不依赖 Avalonia，AOT 无裁剪风险。
+- `Utils/ConsoleWindowHelper` 由 internal 改 public（Desktop 是 WinExe，CMD 分支需 `AttachConsole()` 才能向父控制台输出）。
+- Desktop `Program.Main` 改为 `int` 返回：开头解析模式，Cmd 分支不启动 Avalonia 生命周期、AttachConsole 输出提示并以退出码 1 结束；Gui 分支维持原启动并把参数存入 `Program.StartupArgs`/`Program.Options`。
+- `OngekiFumenEditorApp` 新增透传构造函数 `protected OngekiFumenEditorApp(bool isGUIMode = true) : base(isGUIMode)`；`OngekiFumenEditorDesktopApp` 按解析结果向基类传值（GUI 分支恒 true），并在 `OnFrameworkInitializationCompleted` 经 `Dispatcher.UIThread.Post` 异步调用 `IProgramArgProcessManager.ProcessArgs(Program.StartupArgs)`，补上"双击 .ogkr 打开"的断线，失败仅记日志不阻塞启动。
+- 新增 `tests/.../Kernel/StartupModeParserTests.cs` 8 个用例（无参数、`--cmd` 大小写、存在/不存在文件、`--cmd` 与文件混合优先级）。
+
+### 验证证据
+
+- 全量测试 152/152、0 跳过（含 ramen 语料环境变量，含 8 个新用例）。
+- solution Release `--no-incremental` 构建退出码 0、0 error。
+- Debug JIT exe：`--cmd` 退出码 1 且输出提示文本；无参 GUI 10 秒存活并完成启动初始化；带存在文件路径启动日志出现 `arg.filePath: ...`。
+- `win-x64-aot` 重新发布成功；AOT EXE `--cmd` 退出码 1 且输出提示文本；无参 GUI 10 秒存活。
+- 验证过程中发现并纠正一处验证方法错误：`bin/Debug/net10.0/` 下的 exe 是早前 AOT profile 构建的过期产物，Debug JIT 真实输出在 `bin/Debug/net10.0-windows10.0.19041.0/`（普通 Desktop TFM 见第六节平台边界表）。
+
+### 明确不做（维持延期）
+
+- 不移植 `DefaultCommandExecutor`/`OptionBindingAttrbute` 命令发现机制；CMD 模式当前只有占位提示。
+- 不恢复 IPC/单实例（第 16 项继续延期）、自更新（12C）、插件系统；`DefaultArgProcessManager` 的 `--notifySucess` 残留分支保持不动。
+- 不改动 Browser 项目与核心 `App.IsGUIMode` 的现有消费方。

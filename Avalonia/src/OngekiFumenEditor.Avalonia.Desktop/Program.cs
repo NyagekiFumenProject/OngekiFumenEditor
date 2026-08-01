@@ -6,6 +6,8 @@ using Gekimini.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
+using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Desktop;
 
@@ -17,8 +19,13 @@ internal class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args)
+    public static int Main(string[] args)
     {
+        StartupArgs = args ?? [];
+        Options = StartupModeParser.Parse(StartupArgs);
+        if (Options.Mode is StartupMode.Cmd)
+            return RunPlaceholderCmdMode();
+
 #if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
         {
@@ -32,6 +39,20 @@ internal class Program
 #endif
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
+        return 0;
+    }
+
+    internal static string[] StartupArgs { get; private set; } = [];
+
+    internal static StartupOptions Options { get; private set; }
+
+    private static int RunPlaceholderCmdMode()
+    {
+        // WinExe has no console of its own; attach to the parent console so the message stays
+        // visible when launched from a terminal. The command executor itself is not migrated yet.
+        ConsoleWindowHelper.AttachConsole();
+        Console.WriteLine("CMD mode: no commands are available yet (the command executor has not been migrated).");
+        return 1;
     }
 
     private static void ProcessException(object sender, Exception exception, string trigSource)

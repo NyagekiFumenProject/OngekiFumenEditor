@@ -4,7 +4,7 @@ using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 
 namespace OngekiFumenEditor.Avalonia.Utils
 {
-    internal static partial class ConsoleWindowHelper
+    public static partial class ConsoleWindowHelper
     {
         [LibraryImport("Kernel32.dll")]
         private static partial IntPtr GetConsoleWindow();

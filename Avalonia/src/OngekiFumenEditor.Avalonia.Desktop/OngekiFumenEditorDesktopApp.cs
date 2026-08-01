@@ -1,7 +1,10 @@
 using System;
+using System.Threading.Tasks;
+using Avalonia.Threading;
 using Gekimini.Avalonia;
 using OngekiFumenEditor.Avalonia.Avalonia;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
+using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,6 +14,12 @@ namespace OngekiFumenEditor.Avalonia.Desktop;
 public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 {
     private ILogger<OngekiFumenEditorDesktopApp> logger;
+
+    // The desktop entry point owns the GUI/CMD mode decision; the base App only consumes it.
+    public OngekiFumenEditorDesktopApp()
+        : base(Program.Options.Mode is StartupMode.Gui)
+    {
+    }
 
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
@@ -36,6 +45,23 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         base.OnFrameworkInitializationCompleted();
 
         logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorDesktopApp>>();
+
+        Dispatcher.UIThread.Post(
+            () => _ = ProcessStartupArgsAsync(),
+            DispatcherPriority.Background);
+    }
+
+    private async Task ProcessStartupArgsAsync()
+    {
+        try
+        {
+            await ServiceProvider.GetRequiredService<IProgramArgProcessManager>()
+                .ProcessArgs(Program.StartupArgs);
+        }
+        catch (Exception exception)
+        {
+            logger?.LogError(exception, "Failed to process the startup arguments.");
+        }
     }
 
     protected override void DoExit(int exitCode = 0)
