@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 
 public partial class EditorGlobalSetting : SettingModelBase<EditorGlobalSetting>
 {
-    public static JsonTypeInfo<EditorGlobalSetting> JsonTypeInfo => JsonSourceGenerateContext.Default.EditorGlobalSetting;
+    public static JsonTypeInfo<EditorGlobalSetting> JsonTypeInfo => OngekiJsonSourceGenerateContext.Default.EditorGlobalSetting;
 
     private static readonly Lazy<EditorGlobalSetting> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static EditorGlobalSetting Default => defaultInstance.Value;

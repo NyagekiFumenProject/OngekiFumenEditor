@@ -5,7 +5,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 
 public partial class ProgramSetting : SettingModelBase<ProgramSetting>
 {
-    public static JsonTypeInfo<ProgramSetting> JsonTypeInfo => JsonSourceGenerateContext.Default.ProgramSetting;
+    public static JsonTypeInfo<ProgramSetting> JsonTypeInfo => OngekiJsonSourceGenerateContext.Default.ProgramSetting;
 
     private static readonly Lazy<ProgramSetting> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static ProgramSetting Default => defaultInstance.Value;

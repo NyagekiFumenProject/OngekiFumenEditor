@@ -10,6 +10,6 @@ namespace Gekimini.Avalonia.Utils;
 [JsonSerializable(typeof(EditorGlobalSetting))]
 [JsonSerializable(typeof(LogSetting))]
 [JsonSerializable(typeof(KeyBindingSetting))]
-public partial class JsonSourceGenerateContext : JsonSerializerContext
+public partial class OngekiJsonSourceGenerateContext : JsonSerializerContext
 {
 }

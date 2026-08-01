@@ -1,6 +1,6 @@
-﻿namespace OngekiFumenEditor.Avalonia.Avalonia;
+namespace OngekiFumenEditor.Avalonia.Avalonia;
 
-internal static class Startup
+public static class Startup
 {
     public static void Initialize(string[] args)
     {

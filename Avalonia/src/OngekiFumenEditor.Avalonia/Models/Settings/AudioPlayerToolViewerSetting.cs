@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 public partial class AudioPlayerToolViewerSetting : SettingModelBase<AudioPlayerToolViewerSetting>
 {
     public static JsonTypeInfo<AudioPlayerToolViewerSetting> JsonTypeInfo =>
-        JsonSourceGenerateContext.Default.AudioPlayerToolViewerSetting;
+        OngekiJsonSourceGenerateContext.Default.AudioPlayerToolViewerSetting;
 
     private static readonly Lazy<AudioPlayerToolViewerSetting> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static AudioPlayerToolViewerSetting Default => defaultInstance.Value;

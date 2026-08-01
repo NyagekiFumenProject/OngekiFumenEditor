@@ -4,7 +4,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 
 public partial class AudioSetting : SettingModelBase<AudioSetting>
 {
-    public static JsonTypeInfo<AudioSetting> JsonTypeInfo => JsonSourceGenerateContext.Default.AudioSetting;
+    public static JsonTypeInfo<AudioSetting> JsonTypeInfo => OngekiJsonSourceGenerateContext.Default.AudioSetting;
 
     private static readonly Lazy<AudioSetting> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static AudioSetting Default => defaultInstance.Value;

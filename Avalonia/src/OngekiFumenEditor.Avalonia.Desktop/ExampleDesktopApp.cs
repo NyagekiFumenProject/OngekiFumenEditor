@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using Gekimini.Avalonia;
+using OngekiFumenEditor.Avalonia.Avalonia;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.DependencyInjection;

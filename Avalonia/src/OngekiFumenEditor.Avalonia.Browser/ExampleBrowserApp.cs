@@ -1,10 +1,11 @@
-﻿using Gekimini.Avalonia;
+using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.Documents;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OngekiFumenEditor.Avalonia.Avalonia;
 using OngekiFumenEditor.Avalonia.Browser.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 

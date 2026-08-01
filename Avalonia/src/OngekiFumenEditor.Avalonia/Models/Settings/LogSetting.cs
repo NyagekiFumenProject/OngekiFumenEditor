@@ -5,7 +5,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 
 public partial class LogSetting : SettingModelBase<LogSetting>
 {
-    public static JsonTypeInfo<LogSetting> JsonTypeInfo => JsonSourceGenerateContext.Default.LogSetting;
+    public static JsonTypeInfo<LogSetting> JsonTypeInfo => OngekiJsonSourceGenerateContext.Default.LogSetting;
 
     private static readonly Lazy<LogSetting> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static LogSetting Default => defaultInstance.Value;

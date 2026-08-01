@@ -5,7 +5,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 
 public partial class KeyBindingSetting : SettingModelBase<KeyBindingSetting>
 {
-    public static JsonTypeInfo<KeyBindingSetting> JsonTypeInfo => JsonSourceGenerateContext.Default.KeyBindingSetting;
+    public static JsonTypeInfo<KeyBindingSetting> JsonTypeInfo => OngekiJsonSourceGenerateContext.Default.KeyBindingSetting;
 
     private static readonly Lazy<KeyBindingSetting> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static KeyBindingSetting Default => defaultInstance.Value;

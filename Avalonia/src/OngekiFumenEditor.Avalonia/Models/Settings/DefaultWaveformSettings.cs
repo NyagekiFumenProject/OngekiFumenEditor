@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.Avalonia.Models.Settings;
 public partial class DefaultWaveformSettings : SettingModelBase<DefaultWaveformSettings>
 {
     public static JsonTypeInfo<DefaultWaveformSettings> JsonTypeInfo =>
-        JsonSourceGenerateContext.Default.DefaultWaveformSettings;
+        OngekiJsonSourceGenerateContext.Default.DefaultWaveformSettings;
 
     private static readonly Lazy<DefaultWaveformSettings> defaultInstance = new(() => LoadDefault(JsonTypeInfo));
     public static DefaultWaveformSettings Default => defaultInstance.Value;
