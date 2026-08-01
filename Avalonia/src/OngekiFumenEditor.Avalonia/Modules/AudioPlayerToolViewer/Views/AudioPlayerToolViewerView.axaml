@@ -1,8 +1,8 @@
 <UserControl
     x:Class="OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Views.AudioPlayerToolViewerView"
+    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:converters1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
@@ -10,11 +10,12 @@
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Models"
     xmlns:objectinspector="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.ViewModels"
-    xmlns:wpf="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
+    x:DataType="vm:AudioPlayerToolViewerViewModel"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioPlayerToolViewerViewModel,
                                      IsDesignTimeCreatable=True}"
@@ -42,9 +43,6 @@
                 <ContentControl
                     x:Name="renderControlHost"
                     Height="150">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Loaded" MethodName="OnRenderControlHostLoaded" PassMode="ExecutionContext" />
-                    </Interaction.Behaviors>
                 </ContentControl>
 
                 <!--<wpf:GLWpfControl
@@ -56,7 +54,7 @@
                 </wpf:GLWpfControl>-->
 
                 <StackPanel Margin="0,5,0,5">
-                    <controls:GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [VisualizerRenderOption]}">
+                    <controls:GroupBox Foreground="{StaticResource EditorToolWindowForegroundBrush}" Header="{markup:Translate [VisualizerRenderOption]}">
                         <StackPanel>
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -75,7 +73,7 @@
                                     Padding="0,5,0,5"
                                     CurrentValue="{Binding CurrentTimeXOffset, Mode=TwoWay}"
                                     DisplayName="{markup:Translate [CurrentTimeOffset]}"
-                                    MaxValue="{Binding ElementName=glView, Path=ActualWidth}"
+                                    MaxValue="{Binding #renderControlHost.Bounds.Width}"
                                     MinValue="0"
                                     Step="1">
                                 </controls:RangeValue>
@@ -116,19 +114,13 @@
                                     <StackPanel Orientation="Horizontal">
                                         <Button
                                             Padding="5,2,5,2"
-                                            Content="{markup:Translate [ResetDefault]}">
-                                            <Interaction.Behaviors>
-                                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnWaveformOptionReset" />
-                                            </Interaction.Behaviors>
-                                        </Button>
+                                            Command="{Binding ResetWaveformOptionsCommand}"
+                                            Content="{markup:Translate [ResetDefault]}" />
                                         <Button
                                             Margin="5,0"
                                             Padding="5,2,5,2"
-                                            Content="{markup:Translate [Save]}">
-                                            <Interaction.Behaviors>
-                                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnWaveformOptionSave" />
-                                            </Interaction.Behaviors>
-                                        </Button>
+                                            Command="{Binding SaveWaveformOptionsCommand}"
+                                            Content="{markup:Translate [Save]}" />
                                     </StackPanel>
                                 </StackPanel>
                             </controls:GroupBox>
@@ -147,21 +139,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <controls:GroupBox Foreground="{StaticResource EnvironmentToolWindowText}" Header="{markup:Translate [SoundSwitchControl]}">
+                <controls:GroupBox Foreground="{StaticResource EditorToolWindowForegroundBrush}" Header="{markup:Translate [SoundSwitchControl]}">
                     <StackPanel>
-                        <WrapPanel>
+                        <WrapPanel x:Name="SoundControlSwitches">
                             <WrapPanel.Styles>
                                 <Style Selector="CheckBox">
                                     <Setter Property="Margin" Value="5" />
-                                    <Setter Property="Interaction.Behaviors">
-                                        <BehaviorCollectionTemplate>
-                                            <BehaviorCollection>
-                                                <behaviors:EventMethodBehavior EventName="Checked" MethodName="OnSoundControlSwitchChanged" PassMode="Source" />
-                                                <behaviors:EventMethodBehavior EventName="Unchecked" MethodName="OnSoundControlSwitchChanged" PassMode="Source" />
-                                            </BehaviorCollection>
-                                        </BehaviorCollectionTemplate>
-                                    </Setter>
-                                    <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}">
+                                    <Setter Property="Foreground" Value="{StaticResource EditorToolWindowForegroundBrush}">
                                     </Setter>
                                 </Style>
                             </WrapPanel.Styles>
@@ -187,7 +171,7 @@
                         </WrapPanel>
                         <ItemsControl ItemsSource="{Binding SoundVolumes}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate>
+                                <DataTemplate x:DataType="models:SoundVolumeProxy">
                                     <StackPanel Margin="5" Orientation="Horizontal">
                                         <TextBlock
                                             Width="70"
@@ -213,11 +197,8 @@
                             Orientation="Horizontal">
                             <Button
                                 Padding="5,2,5,2"
-                                Content="{markup:Translate [ReloadSoundFile]}">
-                                <Interaction.Behaviors>
-                                    <behaviors:EventMethodBehavior EventName="Click" MethodName="OnReloadSoundFiles" />
-                                </Interaction.Behaviors>
-                            </Button>
+                                Command="{Binding ReloadSoundFilesCommand}"
+                                Content="{markup:Translate [ReloadSoundFile]}" />
                         </StackPanel>
                     </StackPanel>
                 </controls:GroupBox>
@@ -225,7 +206,7 @@
                 <controls:GroupBox
                     Grid.Column="1"
                     Margin="10"
-                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                     Header="{markup:Translate [SwitchControl]}">
                     <StackPanel>
                         <StackPanel Margin="5" Orientation="Horizontal">
@@ -319,6 +300,3 @@
         </Grid>
     </ScrollViewer>
 </UserControl>
-
-
-

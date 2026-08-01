@@ -3,7 +3,8 @@
         <OutputType>WinExe</OutputType>
         <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
     One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">net10.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' ">net10.0-windows10.0.19041.0</TargetFramework>
         <ApplicationManifest>app.manifest</ApplicationManifest>
     </PropertyGroup>
 
@@ -15,10 +16,27 @@
         <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">
+        <!-- NAudio 3 WASAPI is Native-AOT compatible; its ASIO backend still requires runtime code generation. -->
+        <DefineConstants>$(DefineConstants);NATIVE_AOT</DefineConstants>
+    </PropertyGroup>
+
     <ItemGroup>
         <PackageReference Include="Avalonia.Desktop"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Console"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
+        <PackageReference Include="NAudio.Wasapi"/>
+        <PackageReference Include="NAudio.Asio"
+                          Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' "/>
+        <PackageReference Include="NAudio.WinMM"
+                          Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' "/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\SoundTouch.dll"
+                 Link="SoundTouch.dll"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

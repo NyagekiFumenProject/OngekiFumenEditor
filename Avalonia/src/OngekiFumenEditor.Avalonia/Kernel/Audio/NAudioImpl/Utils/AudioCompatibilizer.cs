@@ -28,12 +28,12 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils
 
 			private int position = 0;
 
-			public int Read(float[] buffer, int offset, int count)
+			public int Read(Span<float> buffer)
 			{
-				var beforePosition = position;
-				for (int i = 0; i < count && position < this.buffer.Length; i++)
-					buffer[offset + i] = this.buffer[position++];
-				return position - beforePosition;
+				var count = Math.Min(buffer.Length, this.buffer.Length - position);
+				this.buffer.AsSpan(position, count).CopyTo(buffer);
+				position += count;
+				return count;
 			}
 		}
 

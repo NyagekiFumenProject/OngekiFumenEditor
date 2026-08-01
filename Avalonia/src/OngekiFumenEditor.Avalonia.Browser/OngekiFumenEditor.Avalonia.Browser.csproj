@@ -26,6 +26,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj"/>
+        <ProjectReference Include="..\..\Dependencies\NAudio.BrowserAudioWorklet\src\NAudio.BrowserAudioWorklet\NAudio.BrowserAudioWorklet.csproj" />
 
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj"/>
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj"/>

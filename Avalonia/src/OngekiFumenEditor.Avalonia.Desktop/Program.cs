@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Gekimini.Avalonia;
@@ -18,8 +19,6 @@ internal class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        global::OngekiFumenEditor.Avalonia.Avalonia.Startup.Initialize(args);
-
 #if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
         {

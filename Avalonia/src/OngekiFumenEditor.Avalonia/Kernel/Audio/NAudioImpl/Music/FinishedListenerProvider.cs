@@ -27,16 +27,16 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Music
 			enableEventFire = false;
 		}
 
-		public int Read(float[] buffer, int offset, int count)
+		public int Read(Span<float> buffer)
 		{
-			var read = Provider.Read(buffer, offset, count);
-			if (read < count && enableEventFire)
+			var read = Provider.Read(buffer);
+			if (read < buffer.Length && enableEventFire)
 				OnReturnEmptySamples?.Invoke();
 
-			if (read < count)
-				Array.Clear(buffer, offset + read, count - read);
+			if (read < buffer.Length)
+				buffer[read..].Clear();
 
-			read = count;
+			read = buffer.Length;
 			return read;
 		}
 	}

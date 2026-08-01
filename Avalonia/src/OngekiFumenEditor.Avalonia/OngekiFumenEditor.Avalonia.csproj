@@ -8,7 +8,7 @@
 
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-        <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
@@ -21,6 +21,9 @@
     </PropertyGroup>
     <ItemGroup>
         <CompilerVisibleProperty Include="InjectioDuplicateStrategy" />
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>OngekiFumenEditor.Avalonia.Tests</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
     <!---->
 
@@ -32,14 +35,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Kernel\Audio\NAudioImpl\**\*.cs" />
+        <!-- Single-instance IPC and command-line forwarding are deferred for this migration round. -->
+        <Compile Remove="Startup.cs" />
+        <Compile Remove="Utils\IPCHelper.cs" />
         <!-- Rendering is provided exclusively through Avalonia.Skia's leased SKCanvas. -->
         <Compile Remove="Kernel\Graphics\OpenGL\**\*.cs" />
         <Compile Remove="Kernel\Graphics\Skia\D3dContexts\**\*.cs" />
         <Compile Remove="Kernel\Graphics\Skia\GlContexts\**\*.cs" />
         <Compile Remove="Kernel\Graphics\Skia\RenderBackendType.cs" />
         <Compile Remove="Kernel\Graphics\Skia\RenderControls\**\*.cs" />
-        <Compile Remove="Modules\EditorSvgObjectControlProvider\ViewModels\**\*.cs" />
         <Compile Remove="Modules\AudioPlayerToolViewer\ViewModels\AudioPlayerToolViewerViewModel.WaveformDrawing.cs" />
         <Compile Remove="UI\ListViewDragDropManager\**\*.cs" />
         <Compile Remove="UI\Controls\AnimatedScrollViewer.cs" />
@@ -84,9 +88,9 @@
         <PackageReference Include="Xaml.Behaviors" />
         <PackageReference Include="System.ComponentModel.Composition" />
         <PackageReference Include="Microsoft.Build" />
+        <PackageReference Include="NAudio.Core" />
         <PackageReference Include="Svg" />
         <PackageReference Include="AssetsTools.NET" />
-        <PackageReference Include="System.CommandLine" />
         <PackageReference Include="OpenTK" />
         <PackageReference Include="FontStashSharp.PlatformAgnostic" />
         <PackageReference Include="FontStashSharp.Rasterizers.FreeType" />

@@ -28,27 +28,30 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl
 			source = default;
 		}
 
-		public int Read(float[] buffer, int offset, int count)
+		public int Read(Span<float> buffer)
 		{
-			var read = ReadInternal(buffer, offset, count);
-			if (count != read && MakeSureBufferWriten)
+			var totalRead = 0;
+			do
 			{
-				var newCount = count - read;
-				var newOffset = offset + read;
+				var read = ReadInternal(buffer[totalRead..]);
+				if (read <= 0)
+					break;
 
-				return read + Read(buffer, newOffset, newCount);
+				totalRead += read;
 			}
-			return read;
+			while (MakeSureBufferWriten && totalRead < buffer.Length);
+
+			return totalRead;
 		}
 
-		private int ReadInternal(float[] buffer, int offset, int count)
+		private int ReadInternal(Span<float> buffer)
 		{
 			if (source is null)
 				return 0;
 
 			if (!isCached)
 			{
-				var read = source.Read(buffer, offset, count);
+				var read = source.Read(buffer);
 				if (read <= 0)
 				{
 					isCached = true;
@@ -56,27 +59,29 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl
 					readBuffer = bufferStream.ToArray();
 					position = 0;
 					bufferStream = null;
-					return Read(buffer, offset, count);
+					return readBuffer.Length == 0 ? 0 : Read(buffer);
 				}
 				else
 				{
-					var span = buffer.AsSpan(offset, read);
-					var byteSpan = MemoryMarshal.AsBytes(span);
+					var byteSpan = MemoryMarshal.AsBytes(buffer[..read]);
 					bufferStream.Write(byteSpan);
 				}
 				return read;
 			}
 			else
 			{
+				if (readBuffer.Length == 0)
+					return 0;
+
 				var read = 0;
-				var refByteBuf = MemoryMarshal.AsBytes(buffer.AsSpan(offset, count));
+				var refByteBuf = MemoryMarshal.AsBytes(buffer);
 				foreach (ref var p in refByteBuf)
 				{
 					p = readBuffer[position++];
 					position = position % readBuffer.Length;
 					read++;
 				}
-				return count;
+				return buffer.Length;
 			}
 		}
 	}

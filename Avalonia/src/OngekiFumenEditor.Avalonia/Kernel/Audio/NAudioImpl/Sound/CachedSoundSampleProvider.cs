@@ -15,13 +15,13 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Sound
 			this.cachedSound = cachedSound;
 		}
 
-		public int Read(float[] buffer, int offset, int count)
+		public int Read(Span<float> buffer)
 		{
 			var availableSamples = cachedSound.AudioData.Length - position;
-			var samplesToCopy = Math.Min(availableSamples, count);
-			Array.Copy(cachedSound.AudioData, position, buffer, offset, samplesToCopy);
+			var samplesToCopy = (int)Math.Min(availableSamples, buffer.Length);
+			cachedSound.AudioData.AsSpan((int)position, samplesToCopy).CopyTo(buffer);
 			position += samplesToCopy;
-			return (int)samplesToCopy;
+			return samplesToCopy;
 		}
 	}
 }

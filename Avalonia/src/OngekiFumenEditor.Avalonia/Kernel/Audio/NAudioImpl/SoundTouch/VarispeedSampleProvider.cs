@@ -32,15 +32,12 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.SoundTouch
             soundTouchReadBuffer = new float[sourceReadBuffer.Length * 10]; // support down to 0.1 speed
         }
 
-        public int Read(float[] buffer, int offset, int count)
+        public int Read(Span<float> buffer)
         {
             if (playbackRate == 0) // play silence
             {
-                for (int n = 0; n < count; n++)
-                {
-                    buffer[offset++] = 0;
-                }
-                return count;
+                buffer.Clear();
+                return buffer.Length;
             }
 
             if (repositionRequested)
@@ -51,11 +48,11 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.SoundTouch
 
             int samplesRead = 0;
             bool reachedEndOfSource = false;
-            while (samplesRead < count)
+            while (samplesRead < buffer.Length)
             {
                 if (soundTouch.NumberOfSamplesAvailable == 0)
                 {
-                    var readFromSource = sourceProvider.Read(sourceReadBuffer, 0, sourceReadBuffer.Length);
+                    var readFromSource = sourceProvider.Read(sourceReadBuffer);
                     if (readFromSource > 0)
                     {
                         soundTouch.PutSamples(sourceReadBuffer, readFromSource / channelCount);
@@ -67,14 +64,11 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.SoundTouch
                         soundTouch.Flush();
                     }
                 }
-                var desiredSampleFrames = (count - samplesRead) / channelCount;
+                var desiredSampleFrames = (buffer.Length - samplesRead) / channelCount;
 
                 var received = soundTouch.ReceiveSamples(soundTouchReadBuffer, desiredSampleFrames) * channelCount;
-                // use loop instead of Array.Copy due to WaveBuffer
-                for (int n = 0; n < received; n++)
-                {
-                    buffer[offset + samplesRead++] = soundTouchReadBuffer[n];
-                }
+                soundTouchReadBuffer.AsSpan(0, received).CopyTo(buffer[samplesRead..]);
+                samplesRead += received;
                 if (received == 0 && reachedEndOfSource) break;
             }
             return samplesRead;

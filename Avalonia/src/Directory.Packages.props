@@ -3,9 +3,9 @@
     <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Packages.props, $(MSBuildThisFileDirectory)..))" />
     <PropertyGroup>
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <NAudioPackageVersion>3.0.0-preview.19</NAudioPackageVersion>
     </PropertyGroup>
     <ItemGroup>
-        <PackageVersion Include="System.CommandLine" Version="2.0.0" />
         <PackageVersion Include="OpenTK" Version="4.8.2" />
         <PackageVersion Include="Caliburn.Micro" Version="5.0.221" />
         <PackageVersion Include="System.ComponentModel.Composition" Version="10.0.0" />
@@ -13,6 +13,10 @@
         <PackageVersion Include="Microsoft.Build" Version="17.7.2" />
         <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
         <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" />
+        <PackageVersion Include="NAudio.Core" Version="$(NAudioPackageVersion)" />
+        <PackageVersion Include="NAudio.Asio" Version="$(NAudioPackageVersion)" />
+        <PackageVersion Include="NAudio.Wasapi" Version="$(NAudioPackageVersion)" />
+        <PackageVersion Include="NAudio.WinMM" Version="$(NAudioPackageVersion)" />
         <PackageVersion Include="AvalonEdit" Version="6.3.1.120" />
         <PackageVersion Include="Svg" Version="3.4.7" />
         <PackageVersion Include="AssetsTools.NET" Version="2.0.12" />

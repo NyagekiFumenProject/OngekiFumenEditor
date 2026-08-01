@@ -1,9 +1,10 @@
 ﻿<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.AudioAdjustWindow.Views.AudioAdjustWindowView"
+    x:CompileBindings="True"
+    x:DataType="vm:AudioAdjustWindowViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
@@ -12,14 +13,14 @@
     Width="500"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:AudioAdjustWindowViewModel}"
-    Background="{StaticResource EnvironmentWindowBackground}"
+    Background="{StaticResource EditorWindowBackgroundBrush}"
     CanResize="False"
     SizeToContent="WidthAndHeight"
     mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <StackPanel>
         <controls:GroupBox
             Margin="5"
-            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Foreground="{StaticResource EditorToolWindowForegroundBrush}"
             Header="{markup:Translate [AudioFileSource]}">
             <StackPanel>
                 <RadioButton
@@ -31,25 +32,22 @@
                         <TextBlock
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
-                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                             Text="{markup:Translate [LoadFromFile]}">
                         </TextBlock>
                         <TextBlock
                             Width="280"
                             VerticalAlignment="Center"
-                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                             Text="{Binding InputFumenFilePath}"
                             ToolTip.Tip="{Binding InputFumenFilePath}">
                         </TextBlock>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
+                            Command="{Binding OpenSelectInputFileCommand}"
                             Content="{markup:Translate [Browser]}"
-                            Foreground="{StaticResource EnvironmentToolWindowText}">
-                            <Interaction.Behaviors>
-                                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnOpenSelectInputFileDialog" />
-                            </Interaction.Behaviors>
-                        </Button>
+                            Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
                     </StackPanel>
                 </RadioButton>
                 <Rectangle
@@ -66,10 +64,10 @@
                         <TextBlock
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
-                            Foreground="{StaticResource EnvironmentToolWindowText}"
+                            Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                             Text="{markup:Translate [LoadFromCurrentEditor]}">
                         </TextBlock>
-                        <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}" Text="{Binding CurrentEditorName}">
+                        <TextBlock Foreground="{StaticResource EditorToolWindowForegroundBrush}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
                     </StackPanel>
                 </RadioButton>
@@ -127,43 +125,34 @@
 
         <controls:GroupBox
             Margin="5"
-            Foreground="{StaticResource EnvironmentToolWindowText}"
+            Foreground="{StaticResource EditorToolWindowForegroundBrush}"
             Header="{markup:Translate [Output]}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
-                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                     Text="{markup:Translate [SaveToFile]}">
                 </TextBlock>
                 <TextBlock
                     VerticalAlignment="Center"
-                    Foreground="{StaticResource EnvironmentToolWindowText}"
+                    Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                     Text="{Binding OutputFumenFilePath}">
                 </TextBlock>
                 <Button
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
+                    Command="{Binding OpenSelectOutputFileCommand}"
                     Content="{markup:Translate [Browser]}"
-                    Foreground="{StaticResource EnvironmentToolWindowText}">
-                    <Interaction.Behaviors>
-                        <behaviors:EventMethodBehavior EventName="Click" MethodName="OnOpenSelectOutputFileDialog" />
-                    </Interaction.Behaviors>
-                </Button>
+                    Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
             </StackPanel>
         </controls:GroupBox>
 
         <Button
             Margin="5,10,5,5"
             Padding="0,10,0,10"
+            Command="{Binding ExecuteConverterCommand}"
             Content="{markup:Translate [Process]}"
-            Foreground="{StaticResource EnvironmentToolWindowText}">
-            <Interaction.Behaviors>
-                <behaviors:EventMethodBehavior EventName="Click" MethodName="OnExecuteConverter" />
-            </Interaction.Behaviors>
-        </Button>
+            Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
     </StackPanel>
 </views:WindowViewBase>
-
-
-

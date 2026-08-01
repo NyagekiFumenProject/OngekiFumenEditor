@@ -6,8 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using VGAudio.Formats;
-
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils
 {
 	internal static class MethodExtensions
@@ -19,7 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils
 
 			while (true)
 			{
-				var read = sampleProvider.Read(buffer, 0, buffer.Length);
+				var read = sampleProvider.Read(buffer);
 				if (read == 0)
 					break;
 
@@ -49,7 +47,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils
 
 			while (true)
 			{
-				var read = waveProvider.Read(buffer, 0, buffer.Length);
+				var read = waveProvider.Read(buffer);
 				if (read == 0)
 					break;
 
@@ -77,8 +75,8 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils
 		{
 			var buffer = ArrayPool<byte>.Shared.Rent(1024_000);
 			int read;
-			while ((read = waveProvider.Read(buffer, 0, buffer.Length)) > 0)
-				await stream.WriteAsync(buffer, 0, read);
+			while ((read = waveProvider.Read(buffer)) > 0)
+				await stream.WriteAsync(buffer.AsMemory(0, read));
 		}
 
 		public static Task CopyToAsync(this ISampleProvider waveProvider, Stream stream)

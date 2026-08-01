@@ -18,10 +18,10 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl
 
 		public WaveFormat WaveFormat => format;
 
-		public int Read(float[] buffer, int offset, int count)
+		public int Read(Span<float> buffer)
 		{
-			Array.Clear(buffer, offset, count);
-			return count;
+			buffer.Clear();
+			return buffer.Length;
 		}
 	}
 }

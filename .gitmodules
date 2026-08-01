@@ -16,3 +16,6 @@
 [submodule "Avalonia/Dependencies/Gekimini.Avalonia"]
 	path = Avalonia/Dependencies/Gekimini.Avalonia
 	url = https://github.com/MikiraSora/Gekimini.Avalonia
+[submodule "Avalonia/Dependencies/NAudio.BrowserAudioWorklet"]
+	path = Avalonia/Dependencies/NAudio.BrowserAudioWorklet
+	url = https://github.com/MikiraSora/NAudio.BrowserAudioWorklet.git

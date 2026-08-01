@@ -21,14 +21,18 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Music
 		public override long Position { get; set; } = 0;
 
 		public override int Read(byte[] buffer, int offset, int count)
+			=> Read(buffer.AsSpan(offset, count));
+
+		public override int Read(Span<byte> buffer)
 		{
-			var beforePosition = Position;
-			for (int i = 0; i < count && Position < waveBuffer.Length; i++)
-				buffer[offset + i] = waveBuffer[Position++];
-			return (int)(Position - beforePosition);
+			var available = waveBuffer.Length - (int)Position;
+			var count = Math.Min(available, buffer.Length);
+			waveBuffer.AsSpan((int)Position, count).CopyTo(buffer);
+			Position += count;
+			return count;
 		}
 
-		public int Read(float[] buffer, int offset, int count)
+		public int Read(Span<float> buffer)
 		{
 			var floatBuffer = MemoryMarshal.Cast<byte, float>(waveBuffer);
 
@@ -36,8 +40,9 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Music
 			var floatLength = waveBuffer.Length / sizeof(float);
 
 			var beforePosition = floatPosition;
-			for (int i = 0; i < count && floatPosition < floatLength; i++)
-				buffer[offset + i] = floatBuffer[floatPosition++];
+			var count = Math.Min(buffer.Length, floatLength - floatPosition);
+			floatBuffer.Slice(floatPosition, count).CopyTo(buffer);
+			floatPosition += count;
 			var read = floatPosition - beforePosition;
 			Position = floatPosition * sizeof(float);
 			return read;

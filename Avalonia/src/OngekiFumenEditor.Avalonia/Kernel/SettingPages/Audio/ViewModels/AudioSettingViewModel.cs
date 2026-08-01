@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
+using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 
@@ -21,6 +22,17 @@ public partial class AudioSettingViewModel : ObservableObject
     {
         Setting.Save();
         PlayerSetting.Save();
+    }
+
+    [RelayCommand]
+    private async Task SelectSoundFolderAsync()
+    {
+        var folderPath = await FileDialogHelper.OpenDirectoryAsync(Lang.SoundFolderPath);
+        if (string.IsNullOrWhiteSpace(folderPath))
+            return;
+
+        Setting.SoundFolderPath = folderPath;
+        ApplyChanges();
     }
 }
 

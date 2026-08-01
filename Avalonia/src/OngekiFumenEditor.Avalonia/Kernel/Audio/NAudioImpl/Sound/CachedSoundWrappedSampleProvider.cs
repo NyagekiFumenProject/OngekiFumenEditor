@@ -15,12 +15,12 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Sound
 
 		private int position = 0;
 
-		public int Read(float[] buffer, int offset, int count)
+		public int Read(Span<float> buffer)
 		{
-			var beforePosition = position;
-			for (int i = 0; i < count && position < cachedSound.AudioData.Length; i++)
-				buffer[offset + i] = cachedSound.AudioData[position++];
-			return position - beforePosition;
+			var count = Math.Min(buffer.Length, cachedSound.AudioData.Length - position);
+			cachedSound.AudioData.AsSpan(position, count).CopyTo(buffer);
+			position += count;
+			return count;
 		}
 	}
 }
