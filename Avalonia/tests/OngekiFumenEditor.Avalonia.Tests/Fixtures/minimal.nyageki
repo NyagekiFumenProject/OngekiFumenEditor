@@ -1,0 +1,22 @@
+Header.Version : 1.0.0
+Header.Creator : Avalonia migration test
+Header.FirstBpm : 120
+Header.CommonBpm : 120
+Header.MaximumBpm : 120
+Header.MinimumBpm : 120
+Header.Meter : 4 / 4
+Header.TRESOLUTION : 1920
+Header.XRESOLUTION : 4096
+Header.ClickDefinition : 1920
+Header.Tutorial : False
+Header.BeamDamage : 2
+Header.HardBulletDamage : 2
+Header.DangerBulletDamage : 4
+Header.BulletDamage : 1
+Header.ProgJudgeBpm : 120
+
+EnemySet : Wave1 : T[0,0]
+
+Lane : 1 : (Type[LCS], X[0,0], T[0,0]) -> (Type[LCE], X[0,0], T[4,0])
+
+Tap : 1 : X[0,0], T[1,0], C[False]

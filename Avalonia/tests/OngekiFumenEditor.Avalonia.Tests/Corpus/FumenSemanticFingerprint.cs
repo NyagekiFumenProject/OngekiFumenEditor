@@ -1,0 +1,114 @@
+using System.Linq;
+using OngekiFumenEditor.Avalonia.Base;
+
+namespace OngekiFumenEditor.Avalonia.Tests.Corpus;
+
+internal sealed record FumenSemanticFingerprint(
+    string Version,
+    string Creator,
+    double FirstBpm,
+    double CommonBpm,
+    double MinimumBpm,
+    double MaximumBpm,
+    int MeterNumerator,
+    int MeterDenominator,
+    int TResolution,
+    int XResolution,
+    int ClickDefinition,
+    bool Tutorial,
+    double BeamDamage,
+    double HardBulletDamage,
+    double DangerBulletDamage,
+    double BulletDamage,
+    float ProgJudgeBpm,
+    int BulletPalettes,
+    string BulletPaletteIds,
+    int Bpms,
+    int Lanes,
+    int UniqueLaneRecordIds,
+    int MinimumLaneRecordId,
+    int MaximumLaneRecordId,
+    string LaneRecordIds,
+    int LaneChildren,
+    int CurveSegments,
+    int CurvePathControls,
+    int Beams,
+    int BeamChildren,
+    int Bells,
+    int BellsWithPaletteReference,
+    int Bullets,
+    int BulletsWithPaletteReference,
+    int Flicks,
+    int ClickSEs,
+    int MeterChanges,
+    int Comments,
+    int EnemySets,
+    int Soflans,
+    int IndividualSoflans,
+    int LaneBlocks,
+    int Taps,
+    int TapsWithLaneReference,
+    int Holds,
+    int HoldsWithLaneReference,
+    int HoldsWithEnd)
+{
+    public static FumenSemanticFingerprint Capture(OngekiFumen fumen)
+    {
+        var lanes = fumen.Lanes.ToArray();
+        var laneChildren = lanes.SelectMany(x => x.Children).ToArray();
+        var beams = fumen.Beams.ToArray();
+        var beamChildren = beams.SelectMany(x => x.Children).ToArray();
+        var curveSegments = laneChildren.Concat(beamChildren).Where(x => x.IsCurvePath).ToArray();
+        var laneRecordIds = lanes.Select(x => x.RecordId).OrderBy(x => x).ToArray();
+        var meta = fumen.MetaInfo;
+
+        return new FumenSemanticFingerprint(
+            meta.Version.ToString(),
+            meta.Creator,
+            meta.BpmDefinition.First,
+            meta.BpmDefinition.Common,
+            meta.BpmDefinition.Minimum,
+            meta.BpmDefinition.Maximum,
+            meta.MeterDefinition.Bunshi,
+            meta.MeterDefinition.Bunbo,
+            meta.TRESOLUTION,
+            meta.XRESOLUTION,
+            meta.ClickDefinition,
+            meta.Tutorial,
+            meta.BeamDamage,
+            meta.HardBulletDamage,
+            meta.DangerBulletDamage,
+            meta.BulletDamage,
+            meta.ProgJudgeBpm,
+            fumen.BulletPalleteList.Count,
+            string.Join(",", fumen.BulletPalleteList.Select(x => x.StrID).OrderBy(x => x, System.StringComparer.Ordinal)),
+            fumen.BpmList.Count(),
+            lanes.Length,
+            laneRecordIds.Distinct().Count(),
+            laneRecordIds.Length == 0 ? -1 : laneRecordIds[0],
+            laneRecordIds.Length == 0 ? -1 : laneRecordIds[^1],
+            string.Join(",", laneRecordIds),
+            laneChildren.Length,
+            curveSegments.Length,
+            curveSegments.Sum(x => x.PathControls.Count),
+            beams.Length,
+            beamChildren.Length,
+            fumen.Bells.Count,
+            fumen.Bells.Count(x => x.ReferenceBulletPallete is not null),
+            fumen.Bullets.Count,
+            fumen.Bullets.Count(x => x.ReferenceBulletPallete is not null),
+            fumen.Flicks.Count,
+            fumen.ClickSEs.Count,
+            fumen.MeterChanges.Count,
+            fumen.Comments.Count,
+            fumen.EnemySets.Count,
+            fumen.SoflansMap.Values.Sum(x => x.Count),
+            fumen.IndividualSoflanAreaMap.Values.Sum(x => x.Count),
+            fumen.LaneBlocks.Count,
+            fumen.Taps.Count,
+            fumen.Taps.Count(x => x.ReferenceLaneStart is not null),
+            fumen.Holds.Count,
+            fumen.Holds.Count(x => x.ReferenceLaneStart is not null),
+            fumen.Holds.Count(x => x.HoldEnd is not null));
+    }
+}
