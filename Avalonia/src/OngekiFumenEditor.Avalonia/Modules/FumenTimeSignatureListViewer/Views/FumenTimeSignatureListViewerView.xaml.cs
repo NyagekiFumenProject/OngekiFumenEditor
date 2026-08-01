@@ -6,5 +6,6 @@ public partial class FumenTimeSignatureListViewerView : UserControl
 {
     public FumenTimeSignatureListViewerView()
     {
+        InitializeComponent();
     }
 }

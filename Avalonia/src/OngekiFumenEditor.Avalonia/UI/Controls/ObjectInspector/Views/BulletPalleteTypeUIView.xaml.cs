@@ -6,5 +6,6 @@ public partial class BulletPalleteTypeUIView : UserControl
 {
     public BulletPalleteTypeUIView()
     {
+        InitializeComponent();
     }
 }

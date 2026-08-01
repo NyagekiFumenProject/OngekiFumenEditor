@@ -6,5 +6,6 @@ public partial class HoldOperationView : UserControl
 {
     public HoldOperationView()
     {
+        InitializeComponent();
     }
 }

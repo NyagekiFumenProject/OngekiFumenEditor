@@ -6,5 +6,6 @@ public partial class BatchModeOverlayView : UserControl
 {
     public BatchModeOverlayView()
     {
+        InitializeComponent();
     }
 }

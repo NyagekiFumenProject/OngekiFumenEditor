@@ -6,5 +6,6 @@ public partial class LogsSettingView : UserControl
 {
     public LogsSettingView()
     {
+        InitializeComponent();
     }
 }

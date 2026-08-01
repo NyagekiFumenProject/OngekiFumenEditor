@@ -17,6 +17,7 @@ public partial class ObjectInspectorView : UserControl
 
     public ObjectInspectorView()
     {
+        InitializeComponent();
         DataContext = new ObjectInspectorViewModel();
     }
 }

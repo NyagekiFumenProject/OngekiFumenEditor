@@ -6,5 +6,6 @@ public partial class FileInfoTypeUIView : UserControl
 {
     public FileInfoTypeUIView()
     {
+        InitializeComponent();
     }
 }

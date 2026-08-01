@@ -6,5 +6,6 @@ public partial class FumenCheckerListViewerView : UserControl
 {
     public FumenCheckerListViewerView()
     {
+        InitializeComponent();
     }
 }

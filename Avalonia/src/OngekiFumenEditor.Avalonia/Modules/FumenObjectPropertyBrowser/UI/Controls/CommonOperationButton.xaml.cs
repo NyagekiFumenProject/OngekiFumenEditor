@@ -26,5 +26,6 @@ public partial class CommonOperationButton : UserControl
 
     public CommonOperationButton()
     {
+        InitializeComponent();
     }
 }

@@ -6,5 +6,6 @@ public partial class ProgramSettingView : UserControl
 {
     public ProgramSettingView()
     {
+        InitializeComponent();
     }
 }

@@ -6,5 +6,6 @@ public partial class WallOperationView : UserControl
 {
     public WallOperationView()
     {
+        InitializeComponent();
     }
 }

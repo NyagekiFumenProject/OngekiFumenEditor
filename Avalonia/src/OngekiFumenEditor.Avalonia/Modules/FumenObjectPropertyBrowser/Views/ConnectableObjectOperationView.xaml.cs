@@ -6,5 +6,6 @@ public partial class ConnectableObjectOperationView : UserControl
 {
     public ConnectableObjectOperationView()
     {
+        InitializeComponent();
     }
 }

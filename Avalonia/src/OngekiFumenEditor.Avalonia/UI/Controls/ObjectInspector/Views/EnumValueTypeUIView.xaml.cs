@@ -6,5 +6,6 @@ public partial class EnumValueTypeUIView : UserControl
 {
     public EnumValueTypeUIView()
     {
+        InitializeComponent();
     }
 }

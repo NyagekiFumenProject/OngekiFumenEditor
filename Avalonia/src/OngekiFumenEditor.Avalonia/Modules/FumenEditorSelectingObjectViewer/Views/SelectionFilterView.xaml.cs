@@ -6,5 +6,6 @@ public partial class SelectionFilterView : UserControl
 {
     public SelectionFilterView()
     {
+        InitializeComponent();
     }
 }

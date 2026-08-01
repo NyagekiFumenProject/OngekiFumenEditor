@@ -6,5 +6,6 @@ public partial class SvgPrefabView : UserControl
 {
     public SvgPrefabView()
     {
+        InitializeComponent();
     }
 }

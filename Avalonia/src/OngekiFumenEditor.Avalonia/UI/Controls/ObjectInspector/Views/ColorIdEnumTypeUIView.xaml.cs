@@ -6,5 +6,6 @@ public partial class ColorIdEnumTypeUIView : UserControl
 {
     public ColorIdEnumTypeUIView()
     {
+        InitializeComponent();
     }
 }

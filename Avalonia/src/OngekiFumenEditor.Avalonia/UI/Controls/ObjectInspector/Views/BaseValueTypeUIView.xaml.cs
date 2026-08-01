@@ -6,5 +6,6 @@ public partial class BaseValueTypeUIView : UserControl
 {
     public BaseValueTypeUIView()
     {
+        InitializeComponent();
     }
 }

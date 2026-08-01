@@ -6,5 +6,6 @@ public partial class MultiLanesOperationView : UserControl
 {
     public MultiLanesOperationView()
     {
+        InitializeComponent();
     }
 }

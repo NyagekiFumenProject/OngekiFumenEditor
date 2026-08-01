@@ -6,5 +6,6 @@ public partial class AudioPlayerToolViewerView : UserControl
 {
     public AudioPlayerToolViewerView()
     {
+        InitializeComponent();
     }
 }

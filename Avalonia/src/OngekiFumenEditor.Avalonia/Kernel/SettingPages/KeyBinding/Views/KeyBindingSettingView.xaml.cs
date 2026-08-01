@@ -6,5 +6,6 @@ public partial class KeyBindingSettingView : UserControl
 {
     public KeyBindingSettingView()
     {
+        InitializeComponent();
     }
 }

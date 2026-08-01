@@ -6,5 +6,6 @@ public partial class FumenVisualEditorGlobalSettingView : UserControl
 {
     public FumenVisualEditorGlobalSettingView()
     {
+        InitializeComponent();
     }
 }

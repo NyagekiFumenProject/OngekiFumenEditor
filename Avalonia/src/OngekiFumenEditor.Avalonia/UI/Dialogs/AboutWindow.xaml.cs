@@ -18,6 +18,7 @@ public partial class AboutWindow : Window
 
     public AboutWindow(bool isNotifyUpdateSuccess = false, global::System.Version sourceVersion = null)
     {
+        InitializeComponent();
         IsNotifyUpdateSuccess = isNotifyUpdateSuccess;
         SourceVersion = sourceVersion?.ToString();
 

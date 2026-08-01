@@ -6,5 +6,6 @@ public partial class InterpolatableSoflanOperationView : UserControl
 {
     public InterpolatableSoflanOperationView()
     {
+        InitializeComponent();
     }
 }

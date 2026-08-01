@@ -6,5 +6,6 @@ public partial class CurveInterpolaterFactoryTypeUIView : UserControl
 {
     public CurveInterpolaterFactoryTypeUIView()
     {
+        InitializeComponent();
     }
 }

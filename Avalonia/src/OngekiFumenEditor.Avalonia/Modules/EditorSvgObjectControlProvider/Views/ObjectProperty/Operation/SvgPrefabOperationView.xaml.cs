@@ -6,5 +6,6 @@ public partial class SvgPrefabOperationView : UserControl
 {
     public SvgPrefabOperationView()
     {
+        InitializeComponent();
     }
 }

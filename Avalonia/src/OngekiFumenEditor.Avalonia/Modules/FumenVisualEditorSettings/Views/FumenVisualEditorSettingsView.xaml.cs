@@ -6,5 +6,6 @@ public partial class FumenVisualEditorSettingsView : UserControl
 {
     public FumenVisualEditorSettingsView()
     {
+        InitializeComponent();
     }
 }

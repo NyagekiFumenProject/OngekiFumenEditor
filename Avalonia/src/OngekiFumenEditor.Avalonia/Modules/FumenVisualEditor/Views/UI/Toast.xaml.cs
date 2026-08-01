@@ -42,6 +42,7 @@ public partial class Toast : UserControl
 
     public Toast()
     {
+        InitializeComponent();
     }
 
     public void ShowMessage(string message, MessageType messageType = MessageType.Notify, uint showTime = 2000)

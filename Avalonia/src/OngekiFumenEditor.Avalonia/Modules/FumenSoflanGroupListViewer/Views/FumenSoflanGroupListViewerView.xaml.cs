@@ -6,5 +6,6 @@ public partial class FumenSoflanGroupListViewerView : UserControl
 {
     public FumenSoflanGroupListViewerView()
     {
+        InitializeComponent();
     }
 }

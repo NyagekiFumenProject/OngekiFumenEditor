@@ -6,5 +6,6 @@ public partial class TGridTypeUIView : UserControl
 {
     public TGridTypeUIView()
     {
+        InitializeComponent();
     }
 }

@@ -6,5 +6,6 @@ public partial class TGridCalculatorToolViewerView : UserControl
 {
     public TGridCalculatorToolViewerView()
     {
+        InitializeComponent();
     }
 }

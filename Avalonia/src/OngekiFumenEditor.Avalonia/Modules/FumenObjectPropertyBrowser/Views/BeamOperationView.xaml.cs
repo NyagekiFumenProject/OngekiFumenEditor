@@ -6,5 +6,6 @@ public partial class BeamOperationView : UserControl
 {
     public BeamOperationView()
     {
+        InitializeComponent();
     }
 }

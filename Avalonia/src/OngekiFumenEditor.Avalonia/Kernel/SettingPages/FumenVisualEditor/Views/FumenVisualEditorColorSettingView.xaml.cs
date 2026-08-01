@@ -6,5 +6,6 @@ public partial class FumenVisualEditorColorSettingView : UserControl
 {
     public FumenVisualEditorColorSettingView()
     {
+        InitializeComponent();
     }
 }

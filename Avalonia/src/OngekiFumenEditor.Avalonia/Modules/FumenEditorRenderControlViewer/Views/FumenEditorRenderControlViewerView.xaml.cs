@@ -6,5 +6,6 @@ public partial class FumenEditorRenderControlViewerView : UserControl
 {
     public FumenEditorRenderControlViewerView()
     {
+        InitializeComponent();
     }
 }

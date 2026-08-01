@@ -6,5 +6,6 @@ public partial class FumenBulletPalleteListViewerView : UserControl
 {
     public FumenBulletPalleteListViewerView()
     {
+        InitializeComponent();
     }
 }

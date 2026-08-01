@@ -6,5 +6,6 @@ public partial class FumenObjectPropertyBrowserView : UserControl
 {
     public FumenObjectPropertyBrowserView()
     {
+        InitializeComponent();
     }
 }
