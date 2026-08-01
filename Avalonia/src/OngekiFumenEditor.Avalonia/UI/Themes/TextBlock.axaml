@@ -1,8 +1,5 @@
-﻿<ResourceDictionary xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Style TargetType="{x:Type TextBlock}">
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Style Selector="TextBlock">
         <Setter Property="KeyboardNavigation.TabNavigation" Value="None" />
-        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst" />
-        <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
     </Style>
-</ResourceDictionary>
+</Styles>

@@ -1,12 +1,14 @@
-﻿<Application
-    x:Class="OngekiFumenEditor.App"
+<Application
+    x:Class="OngekiFumenEditor.Avalonia.Avalonia.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
-    xmlns:converters1="clr-namespace:Gemini.Modules.MainMenu.Converters"
-    xmlns:gemini="http://schemas.timjones.io/gemini"
-    xmlns:local="clr-namespace:OngekiFumenEditor"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters">
+    xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Avalonia"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters">
+    <Application.Styles>
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+        <StyleInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/TextBlock.axaml" />
+    </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
             <converters:EnumToIntConverter x:Key="EnumToIntConverter">
@@ -42,12 +44,9 @@
                     <local:AppBootstrapper x:Key="bootstrapper" />
                 </ResourceDictionary>
 
-                <ResourceDictionary Source="UI\Themes\TextBlock.xaml" />
-                <ResourceDictionary Source="UI\Themes\TabControl.xaml" />
-                <ResourceDictionary Source="UI\Themes\CheckComboBox.xaml" />
-
-                <!--  Theme setting  -->
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Themes/Light.Blue.xaml" />
+                <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/GroupBox.axaml" />
+                <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/CheckListBox.axaml" />
+                <ResourceInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/TabControl.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

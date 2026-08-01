@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
+    <ControlTheme x:Key="{x:Type controls:GroupBox}" TargetType="controls:GroupBox">
+        <Setter Property="BorderBrush" Value="{DynamicResource SystemBaseMediumLowColorBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border
+                    Margin="0,8,0,0"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="2">
+                    <Grid RowDefinitions="Auto,*">
+                        <ContentPresenter
+                            Margin="8,0,0,4"
+                            Content="{TemplateBinding Header}"
+                            FontWeight="Bold" />
+                        <ContentPresenter
+                            Grid.Row="1"
+                            Margin="{TemplateBinding Padding}"
+                            Content="{TemplateBinding Content}" />
+                    </Grid>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+</ResourceDictionary>

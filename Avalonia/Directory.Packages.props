@@ -16,6 +16,7 @@
     <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Skia" Version="$(AvaloniaVersion)" />
     <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+    <PackageVersion Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
 
     <PackageVersion Include="AvaloniaControlsToolBar" Version="11.3.6" />
     <PackageVersion Include="AvaloniaDialogs" Version="3.7.0" />
