@@ -30,7 +30,7 @@
 | C# 文件搬运 | 较高 | 旧项目 969 个 C# 文件中有 888 个同路径对应，覆盖率约 91.6% |
 | XAML 文件搬运 | 较高 | 旧项目 65 个 WPF XAML 中有 58 个对应 AXAML，覆盖率约 89.2% |
 | Debug 构建 | **通过** | 全解决方案 `-t:Rebuild` 0 错误、87 警告（首次） |
-| Avalonia XAML | **编译通过、运行未验** | 0 AVLN 错误；Trigger/Storyboard 残留清零；`pack://` URI 残留 2 文件 8 处（运行时失效） |
+| Avalonia XAML | **编译通过、运行未验** | 0 AVLN 错误；Trigger/Storyboard/pack URI 残留清零；58 个 code-behind 已全部接入 `InitializeComponent` |
 | 谱面渲染 | 已接入、待运行验证 | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译 |
 | 音频 | 不可用 | NAudio 后端被排除编译，保留实现明确标记为未迁移 |
 | 功能模块 | 不完整 | 3 个完整模块尚未迁移，另有少量模块文件缺失 |
@@ -75,33 +75,33 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 
 ## 编译清零后的已知问题（功能损失与运行时风险）
 
-以下问题不影响编译，但会在运行或功能层面暴露，按优先级排序：
+以下问题不影响编译，但会在运行或功能层面暴露，按优先级排序。
+
+**P2 运行时接线已于 2026-08-01 完成**：58 个 code-behind 全部接入 `InitializeComponent`；8 处 `pack://` 图片 URI 改 `avares://`（旧 WPF 项目 `Resources/Icons` 32 个文件复制进核心项目并登记 `AvaloniaResource`）；窗口接线按 Gekimini `IWindowManager` 语义修正——`WindowViewModelBase` 经 `ShowWindowAsync`/`ShowDialogAsync` 展示的视图必须是 `WindowViewBase` 子类（SplashScreen、ShowNewVersionDialog、AudioAdjustWindow、BrushTGridRangeDialog、BulletPalleteSelectDialog、EditorProjectSetupDialog 共 6 个视图已换基类）；`FumenConverterView` 实为 `shell.ShowTool` 的停靠工具，从 `Window` 回退为 `UserControl`；`AudioAdjustWindow` 菜单命令原本静默空转，已改为 `IWindowManager.ShowWindowAsync`；`ProgramSettingViewModel` 补上 `ProgramUpdater` 属性和 `OpenShowNewVersionDialog` 方法（XAML 行为引用的方法此前不存在）。
 
 ### 运行时必炸或必失效
 
-1. **视图 XAML 加载**：58 个 code-behind 中仅 9 个调用 `InitializeComponent`/`AvaloniaXamlLoader.Load`。Gekimini `ViewLocator` 只创建控件和设 `DataContext`，不代替加载 XAML——未接线的视图实例化后是空白。这是最优先的运行时阻塞。
-2. **`pack://application` 图片 URI**：残留 2 文件 8 处（[`BatchModeOverlayView.axaml`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/BatchModeOverlayView.axaml)、[`SplashScreenView.axaml`](../src/OngekiFumenEditor.Avalonia/Modules/SplashScreen/Views/SplashScreenView.axaml)），编译期是普通字符串，运行时图片不显示，需改 `avares://` 并确认资源项。
-3. **窗口实例化接线**：SplashScreen、FumenConverter、EditorProjectSetupDialog 等从 `UserControl` 改 `Window` 后，由谁创建、`Show`/`ShowDialog` 的调用方尚未接线核对。
-4. **音频后端**：`IAudioManager` 无可用注册，涉及音频的流程必然失败（见“音频状态”）。
+1. **音频后端**：`IAudioManager` 无可用注册，涉及音频的流程必然失败（见“音频状态”）。
+2. **文档新建/打开/保存未迁移**：`FumenVisualEditorViewModel` 没有 `DoNew`/`DoOpen`/`DoSave`，`EditorProjectSetupDialogViewModel` 因此没有调用方；谱面项目的创建和加载流程整体缺失（属 P3 范围）。
+3. **主题资源键悬空**：各视图引用的 `EnvironmentWindowBackground`/`EnvironmentToolWindowText` 等资源键来自旧 Gemini 主题，Gekimini 源码中不存在定义（11 处），运行时按 Avalonia 缺资源行为回退（不保证美观，部分场景可能影响可读性）。
 
 ### 功能放弃或降级（需要产品决策或后续恢复）
 
-5. **FumenVisualEditorView 编辑器快捷键**：`kb:ActionMessageKeyBinding` 块整体删除，约 20 个编辑器快捷键失效，需要写宿主层（KeyBinding/热键管理）恢复。
-6. **FumenEditorSelectingObjectViewerView 列头排序**：DataGrid 列头 `SortColumn` 三处放弃。
-7. **拖拽高亮**：jas 拖拽触发器全删，拖入时的高亮反馈消失（拖拽本身走 Gekimini `IDragDropManager`）。
-8. **Toast 入场动画**：Storyboard 删除，现为定时器直接显隐。
-9. **TabControl 自定义主题**：清空为最小字典，回退 Fluent 默认外观。
-10. **CheckComboBox**：`ValueMemberPath` 语义未迁移；SelectionFilterView 显示文本为占位实现。
-11. **ToolBar**：FumenEditorRenderControlViewerView 的 ToolBar 降级为 `StackPanel`；SoflanGroupListViewerView 改用 `Avalonia.Controls.ToolBar` 包前缀。
-12. **CommonColorPicker**：Xceed `StandardColorPicker` 改为占位色板，标准色选择功能降级。
-13. **ExceptionTermWindow**：MahApps 隐藏关闭按钮的语义在迁移中丢失。
-14. **语言切换刷新**：FumenCheckerListViewer 的 `NotShow` 后缀文案在语言切换后不自动刷新。
+4. **FumenVisualEditorView 编辑器快捷键**：`kb:ActionMessageKeyBinding` 块整体删除，约 20 个编辑器快捷键失效，需要写宿主层（KeyBinding/热键管理）恢复。
+5. **FumenEditorSelectingObjectViewerView 列头排序**：DataGrid 列头 `SortColumn` 三处放弃。
+6. **拖拽高亮**：jas 拖拽触发器全删，拖入时的高亮反馈消失（拖拽本身走 Gekimini `IDragDropManager`）。
+7. **Toast 入场动画**：Storyboard 删除，现为定时器直接显隐。
+8. **TabControl 自定义主题**：清空为最小字典，回退 Fluent 默认外观。
+9. **CheckComboBox**：`ValueMemberPath` 语义未迁移；SelectionFilterView 显示文本为占位实现。
+10. **ToolBar**：FumenEditorRenderControlViewerView 的 ToolBar 降级为 `StackPanel`；SoflanGroupListViewerView 改用 `Avalonia.Controls.ToolBar` 包前缀。
+11. **CommonColorPicker**：Xceed `StandardColorPicker` 改为占位色板，标准色选择功能降级。
+12. **ExceptionTermWindow**：MahApps 隐藏关闭按钮的语义在迁移中丢失。
+13. **语言切换刷新**：FumenCheckerListViewer 的 `NotShow` 后缀文案在语言切换后不自动刷新。
 
 ### 需要单独验收
 
-15. **编译绑定**：AXAML 中约 503 个普通 `{Binding}`，仅 4 处 `x:DataType`。主项目 Release 启用 `AvaloniaUseCompiledBindingsByDefault=true` 和 `IsAotCompatible=true`，在补齐 `x:DataType` 前 Release/AOT 不可用。
-16. **NuGet 漏洞**：Gekimini 的 SkiaSharp 2.88.3（NU1903 高危）与 Desktop 的 Tmds.DBus.Protocol 0.21.2 需统一升级。
-17. **Gekimini 资源可见性**：各视图引用的 `EnvironmentToolWindowText`/`EnvironmentWindowBackground` 等资源键假定由 Gekimini 主题提供，需启动后确认。
+14. **编译绑定**：AXAML 中约 503 个普通 `{Binding}`，仅 4 处 `x:DataType`。主项目 Release 启用 `AvaloniaUseCompiledBindingsByDefault=true` 和 `IsAotCompatible=true`，在补齐 `x:DataType` 前 Release/AOT 不可用。
+15. **NuGet 漏洞**：Gekimini 的 SkiaSharp 2.88.3（NU1903 高危）与 Desktop 的 Tmds.DBus.Protocol 0.21.2 需统一升级。
 
 ## 渲染状态
 
@@ -249,7 +249,7 @@ $withLoader = @(
 "WITHOUT_XAML_LOAD=$($codeBehind.Count - $withLoader.Count)"
 ```
 
-当前读数：`CODE_BEHIND=58`、`WITH_XAML_LOAD=9`、`WITHOUT_XAML_LOAD=49`。
+当前读数：`CODE_BEHIND=58`、`WITH_XAML_LOAD=58`、`WITHOUT_XAML_LOAD=0`。
 
 ### 统计 AXAML 中的 WPF 语义残留
 
@@ -273,7 +273,7 @@ foreach ($entry in $patterns.GetEnumerator()) {
 }
 ```
 
-当前读数：Trigger/Storyboard 全部 0；`PackUri=8`（2 个文件）。
+当前读数：Trigger/Storyboard/PackUri 全部 0。
 
 ### 检查旧 CLR namespace 和仓库状态
 
@@ -305,16 +305,16 @@ git status --porcelain=v1 -uall -- .
 
 验收条件：核心、Desktop 和 Browser 项目 Debug 构建均为 0 错误。**已达成（0 错误 / 87 警告）。**
 
-### P2：重建资源和视图加载链（编译部分完成，运行时部分待办）
+### P2：重建资源和视图加载链（已完成，运行效果待冒烟）
 
 1. ~~修复 `App.axaml` 类型、主题和资源入口。~~
 2. ~~统一全部 AXAML CLR namespace。~~
-3. **为剩余 49 个 code-behind 接入 `InitializeComponent` 或明确的 loader**（未做，运行时阻塞）。
-4. 将 8 处 pack URI 转换为 `avares://`（未做）。
+3. ~~为剩余 49 个 code-behind 接入 `InitializeComponent` 或明确的 loader~~（已完成，58/58）。
+4. ~~将 8 处 pack URI 转换为 `avares://`~~（已完成，含 `Resources/Icons` 资源复制与 `AvaloniaResource` 登记）。
 5. ~~用 Avalonia selector、pseudo-class、class 和 transition 替代 WPF Trigger/Storyboard~~（编译层面完成；部分功能以放弃处理，见已知问题清单）。
-6. 核对窗口类视图的实例化与 `Show`/`ShowDialog` 接线（未做）。
+6. ~~核对窗口类视图的实例化与 `Show`/`ShowDialog` 接线~~（已完成：6 个窗口视图换 `WindowViewBase` 基类、`FumenConverterView` 回退 `UserControl`、`AudioAdjustWindow` 命令改为 `IWindowManager` 展示、`ProgramSettingViewModel` 补 `OpenShowNewVersionDialog`；`EditorProjectSetupDialog` 的调用方随文档新建流程一并属 P3）。
 
-验收条件：应用 AXAML 编译为 0 个 AVLN 错误（**已达成**）；主 Shell 和主要工具视图可以显示（未达成，依赖 3、4、6）。
+验收条件：应用 AXAML 编译为 0 个 AVLN 错误（**已达成**）；主 Shell 和主要工具视图可以显示（**接线已就绪，待启动冒烟确认**）。
 
 ### P3：打通核心编辑闭环
 
