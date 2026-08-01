@@ -83,3 +83,24 @@ Research、Plan、Implement 和 Verify 已完成。当前工作树的本项目�
 | Desktop Native AOT smoke | `win-x64-aot` 发布成功；43,757,056 字节 EXE 存活 8 秒 |
 | Browser Native AOT/assets | 402 秒发布成功；干净发布目录只有当前运行时与 NAudio 两份哈希 WASM、无旧哈希副本；AudioWorklet JS/processor 原始及 br/gz 资源齐全 |
 | corpus discovery/parse/format | 内置 fixture + 本机 ramen；真实语料 5/5，完整 solution 101/101；`SvgPrefab: 1` 显式排除 |
+
+## 第七轮状态（2026-08-02 03:31 +08:00）
+
+当前阶段重新进入 Implement。第六轮“`SvgPrefab: 1` 显式排除”结论已由用户第 21 项覆盖，不能再作为最终通过证据；本轮完成后必须替换为解析、格式化、绘制及真实语料保真证据。
+
+- [x] 登记 18 Skia 完整波形、19A、20B、21 Svg* 完整迁移。
+- [x] 读取 .NET 测试扩展，确认现有 xUnit 项目已引用核心程序集及所需 Headless/Skia/NAudio 包。
+- [x] 完成 Release 非增量基线：0 error、117 个既有 warning。
+- [x] 完成波形产品实现与测试（Release 窄测 11/11）。
+- [x] 完成 WAV 偏移服务、ViewModel 接线与测试（Release 窄测 12/12）。
+- [x] 完成音频能力矩阵、编译绑定 UI 和双 Windows publish profile。
+- [x] 完成 Svg* 领域/格式/UI/Skia 功能链与真实语料测试。
+- [x] 完成 solution 测试、三端构建、AOT/JIT 发布和质量复核。
+
+2026-08-02 04:00 合并态阶段验证：18、19A、20B 产品代码及其测试源码均已落盘；共享核心执行 Release 非增量构建为 0 error、110 个 warning。该结果只证明当前接口、DI 生成和 AXAML 编译绑定可共同编译，尚未替代新增测试执行、Desktop 两种发布、Browser 构建及第 21 项 Svg* 验收。
+
+2026-08-02 04:10 动态验证：波形首轮 27 项合并窄测中 26 项通过，非空像素用例捕获到回调执行但产品截帧全黑；修正为 lease 内 Skia 直接绘制后波形组 11/11 通过。WAV 偏移/事务组随后 12/12 通过，包含新增 DI 单例解析。该失败未通过放宽断言规避。
+
+2026-08-02 04:15 平台阶段验证：`win-x64-jit` 首轮因平台入口缺少显式 `System` using 失败，修复后发布成功，产物含 ASIO/WinMM/WASAPI/SoundTouch；Browser Release 非增量构建 0 error、117 warning。20B 仍待最终 AOT/WASAPI 发布、AOT 产物排除 ASIO、两个 Windows 包启动及 Svg* 合并后重验，因此清单暂不标完成。
+
+2026-08-02 06:05 第七轮收尾（kimi-code 接管 codex 会话 019fbc61 完成最终验证）：变异恢复后三项定向测试 3/3 回绿，含 ramen 语料全量 143/143；solution Release 非增量复建 0 error。`win-x64-aot` 最终冒烟暴露真实启动回归：`ToolViewModelTypeCollectedActivator` 因源生成器对跨文件 partial 的 `AudioPlayerToolViewerViewModel` 重复收集而在静态构造抛出重复键异常；此前全量测试未覆盖该路径（`TestApplication` 直接继承 `App`，不经过 `OngekiFumenEditorApp.RegisterServices`）。修复生成器按 `FullClassName` 去重，并新增 `ToolViewModelTypeCollectedActivatorTests`（修复前红、修复后绿）。最终证据：全量 144/144、0 跳过；`win-x64-aot` EXE 53,153,792 字节 10 秒存活（完整启动）；`win-x64-jit` 产物含 ASIO/WinMM/WASAPI/SoundTouch 且 EXE 10 秒存活；Browser AOT 发布成功，`dotnet.js` 仅引用本次 56,496,934 字节原生 WASM，AudioWorklet 主脚本/processor 原始及 br/gz 齐全。第七轮四项决策均有行为测试与构建/发布证据，清单标记完成；真实音频设备/ASIO 与真实浏览器 AudioContext 仍维持平台人工验收边界。

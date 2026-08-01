@@ -679,6 +679,25 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 - **20B：AOT/WASAPI 作为主包，同时提供 JIT/ASIO 专用包；两端都使用能力服务控制设置 UI。推荐。** 同时满足 Native AOT 首发与原项目 ASIO 用户，不让 Browser 或 AOT 用户选择无效选项。
 - **20C：自行实现 AOT 安全的 ASIO 互操作，并补 Browser/非 Windows 的可移植变速。** 单一功能矩阵最完整，但成本和原生测试面最大。
 
+##### 第 20 项具体运行矩阵（2026-08-02 03:22 +08:00）
+
+| 运行目标 | 实际输出后端 | 选择 ASIO 时 | 变速 | 当前 UI/配置问题 |
+| --- | --- | --- | --- | --- |
+| Windows Desktop 普通 JIT | WASAPI 或 NAudio ASIO；旧 `WaveOut` 值也回退 WASAPI | 真正创建 `AsioOut` | Windows x64 可使用 SoundTouch | 基本符合旧项目，但仍需真实设备/驱动验证 |
+| Windows Desktop Native AOT | 只打包 NAudio WASAPI；项目定义 `NATIVE_AOT` 并排除 `NAudio.Asio`/`NAudio.WinMM` | `CreateAsioPlayer()` 直接返回 WASAPI，目前没有用户提示 | win-x64 SoundTouch 路径仍需实际工作流验证 | 下拉框仍显示 ASIO，用户选择与实际后端不一致 |
+| Browser WASM/AOT | 工厂无条件创建 `BrowserAudioWorkletPlayer(Interactive)`，不读取 `AudioOutputType` | 选择值完全不影响输出 | `NAudioManager` 因非 Windows 不创建变速 provider，读取速度恒为 1 | 设置页仍显示 WaveOut/WASAPI/ASIO 和 EnableVarspeed，播放器仍显示速度滑块 |
+| Linux/macOS Desktop | 当前没有对应项目与音频工厂；普通 Desktop TFM 本身是 Windows TFM | 不适用 | 现有 SoundTouch DLL 为 win-x64 | 只能称为预留抽象边界，不能称为可运行支持 |
+
+这不表示 Native AOT 或 Browser AudioWorklet 构建失败：两者已经成功发布。问题是**能力声明不真实**。当前代码为了让 AOT 可启动，选择了“ASIO 不可用时静默使用 WASAPI”；Browser 则始终使用 Worklet，却复用了 Windows 设置页。
+
+无论最终选择 20A、20B 还是 20C，都应增加一个共享可读取、平台项目实现的音频能力契约，至少提供：有效输出类型、是否支持变速、支持的输入格式，以及请求后端与实际后端。设置页和播放器只展示有效能力；旧配置请求不可用后端时应记录并向用户明确说明回退，不能静默改变含义。
+
+- 选择 **20A** 时只维护一个 Windows AOT 包：包体和测试矩阵最简单，但正式承诺中必须写明“不支持 ASIO”。
+- 选择 **20B** 时维护两个 Windows 包：AOT/WASAPI 是默认包，JIT/ASIO 是有 ASIO 驱动用户的兼容包；发布、下载说明和设备测试翻倍，但同时满足本轮的 Native AOT 要求和旧项目 ASIO 能力。
+- 选择 **20C** 时需要替换或重写 NAudio ASIO 的动态委托互操作，并分别解决 Browser、Linux、macOS 的解码和变速；它不是当前 XAML/DI 修补能够顺带完成的工作。
+
+**推荐判断：** 如果 ASIO 是必须保留的正式功能，选择 **20B**；如果首发只要求低延迟 WASAPI，选择 **20A** 更稳。当前记录推荐 20B，是因为用户第 17 项明确要求 Desktop 延续原项目的 WASAPI/ASIO 选择，同时第 5 项又要求 Native AOT。
+
 #### 21. `SvgPrefab` 旧谱面兼容
 
 **当前状态：** 11C 已删除创建/属性编辑 UI、领域类型、解析器和写出器；本机 ramen 语料确认有 1 条 `SvgPrefab`，当前 round-trip 会按已决策排除边界丢弃它。
@@ -714,3 +733,54 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 4. 自更新、文件关联、IPC、InternalTest 和 Linux/macOS 功能对等继续维持当前延期，不必阻塞上述工作。
 
 > 2026-08-02 03:13 +08:00 音频实现协作者完成只读闭环审计：复核结果与第 18～20 项一致，并额外确认 Browser 格式/内存边界及 Linux/macOS 尚无可运行 Desktop 实现；未修改或构建任何文件。
+
+## 2026-08-02 第七轮决策与实施记录
+
+> 决策时间：2026-08-02 03:31 +08:00
+> 本节覆盖第六轮对 18、19、20、21 的推荐，但保留旧记录作为决策历史。第 16 项其余排除源码仍延期；其中波形与 `Svg*` 相关范围分别由新的第 18、21 项明确解冻并重新迁移。
+
+### 本轮最终决策
+
+| 编号 | 用户决策 | 实施口径 |
+| --- | --- | --- |
+| 18 | 使用 Skia 完全迁移和实现 | 以 Avalonia Skia lease 和强类型控件生命周期恢复真实波形采样、缩放、限帧、取消和绘制；不重新启用旧 OpenGL 宿主。 |
+| 19 | 19A | 新增平台中立 WAV 帧偏移服务：正偏移补静音帧、负偏移裁剪整帧，支持 PCM/IEEE-float，临时文件成功后再替换目标，并保持谱面 TGrid 重算与撤销语义。 |
+| 20 | 20B | Windows 默认发行 `win-x64-aot`（WASAPI），另发 JIT/ASIO 兼容包；共享能力服务决定可见后端、变速和格式能力，旧配置不可用时给出明确回退信息。Browser 只显示其真实 Worklet 能力。 |
+| 21 | 开始重新迁移实现 `Svg*` 物件相关功能 | 恢复领域模型、Nyageki/OGKR 解析写出、创建/属性编辑 UI 和 Skia 绘制链；保留原源码注释并改为 Avalonia、编译绑定、AOT 友好的实现，不恢复旧 OpenGL 后端。 |
+
+### 第七轮实时进度
+
+| 时间 | 批次 | 状态 | 结果 |
+| --- | --- | --- | --- |
+| 2026-08-02 03:31 +08:00 | 决策登记 | 完成 | 已冻结 18、19A、20B、21 的实施口径；`SvgPrefab` 不再是允许丢弃的兼容边界，真实 ramen 语料中的 1 条命令必须解析并在 round-trip 后保留。 |
+| 2026-08-02 03:31 +08:00 | 实施前基线 | 完成 | `dotnet build .\OngekiFumenEditor.Avalonia.sln -c Release --no-incremental -v:minimal` 退出码 0、0 error、117 个既有 warning，用作本轮回归基线；不把既有依赖漏洞、裁剪和反射序列化警告记为本轮新增成功条件。 |
+| 2026-08-02 03:31 +08:00 | 四线实施 | 进行中 | 波形、WAV 偏移、音频能力/双发行、Svg* 功能链并行研究与实现；完成一项即在本表追加构建、测试和残余平台边界。 |
+| 2026-08-02 04:00 +08:00 | 18 Skia 波形实现 | 已落地，待动态测试 | 已恢复强类型 Skia 渲染宿主、渲染会话生命周期、采样峰值准备、单/双声道几何、缩放和限帧，并增加卸载取消与几何测试；没有重新启用旧 OpenGL 波形 partial。 |
+| 2026-08-02 04:00 +08:00 | 19A WAV 偏移 | 已落地，待动态测试 | 已新增 `IWavAudioOffsetService` 及平台中立 WAV 实现，并通过事务层接回音频调整窗口；正偏移补整帧静音，负偏移裁剪整帧，临时文件成功后再替换目标，相关正负零偏移和失败原子性测试已写入。 |
+| 2026-08-02 04:00 +08:00 | 20B 能力模型与双发行 | 已落地，待平台发布验证 | 已新增共享音频能力契约和 Desktop/Browser 实现；设置页与播放器按真实能力隐藏无效后端及变速，配置回退会给出原因；新增 `win-x64-jit` profile，AOT 工厂不再静默接受 ASIO。 |
+| 2026-08-02 04:00 +08:00 | 合并态核心 Release 构建 | 通过 | 三条音频改动共同存在时，核心项目 `Release --no-incremental` 为 0 error、110 个 warning；警告仍含既有 NuGet 安全公告、第三方空值分析、裁剪/AOT 和 JSON 反射序列化问题。Svg* 迁移此时尚未并入，因此该构建不能替代第 21 项最终验证。 |
+| 2026-08-02 04:00 +08:00 | 21 Svg* 完整迁移 | 进行中 | 已确定采用 `Svg.Skia` 的 Skia 原生路线，恢复领域、Nyageki/OGKR、工具箱/属性编辑、编辑器绘制和真实 ramen 往返；明确不复制 WPF `DrawingGroup`、SharpVectors 或旧 OpenGL 绘制实现。 |
+| 2026-08-02 04:10 +08:00 | 18 Skia 波形动态验证 | 完成 | 首轮像素测试真实捕获到“回调已执行但截帧全黑”，据此将独立波形宿主改为在 Avalonia Skia lease 内直接绘制 `SKPath`/覆盖层；修正后波形组 11/11 通过，包含真实波形颜色像素、单/双声道几何、重采样、限帧、卸载停止和异步取消。 |
+| 2026-08-02 04:10 +08:00 | 19A WAV 偏移动态验证 | 完成 | WAV 服务与事务组 12/12 通过；覆盖正/负/零偏移、整帧量化、8-bit PCM 静音、float 双声道、过量裁剪、RIFF chunk/padding 保留、不支持格式、失败不污染目标，以及源码生成 DI 单例解析。 |
+| 2026-08-02 04:13 +08:00 | 20B JIT/ASIO 伴随包 | 通过，中间态 | 首次发布发现 Desktop 平台文件缺少显式 `System` 导入并已修复；随后 `win-x64-jit` 发布成功，产物包含 `NAudio.Asio.dll`、`NAudio.WinMM.dll`、`NAudio.Wasapi.dll` 与 `SoundTouch.dll`。该结果证明 ASIO 依赖未被 AOT 条件误裁，但仍需在 Svg* 合并后最终重发。 |
+| 2026-08-02 04:15 +08:00 | 20B Browser 能力闭环 | 通过，中间态 | Browser Release 非增量构建为 0 error、117 个 warning，固定 AudioWorklet 能力服务、新工厂构造注入和共享能力 UI 均可编译；保留 `NU1507`、SkiaSharp 安全公告、并行编译器文件锁 warning、第三方裁剪/AOT 和 WASM P/Invoke 收集 warning。 |
+| 2026-08-02 04:25 +08:00 | 21 Svg.Skia 依赖闭环 | 完成，中间态 | 实测旧 `Svg 3.x` 与 `Svg.Skia 5.1.1` 会因重复 `SvgElement` 类型产生 `CS0433`，因此移除旧包并统一到 `Svg.Skia 5.1.1`；同时将 SkiaSharp 对齐到 `3.119.2`、HarfBuzzSharp 对齐到 `8.3.1.3`，并按新版 `SKMatrix44.Concat` API 保持既有矩阵组合顺序。Svg 领域模型已经开始恢复，完整解析、绘制、UI 与真实语料验收尚未完成，不能据此把第 21 项标记为完成。 |
+| 2026-08-02 04:31 +08:00 | 21 核心中间构建 | 失败，已定位 | 核心 Debug 非增量构建已越过 SkiaSharp 3.119.2 的矩阵 API 变更，仅剩正在并行写入的 `SvgPrefabCommandParser.cs:21` 一个 `CS8506`（switch 表达式共同类型未显式声明）；该错误属于未完成的格式层，已定位为把结果显式声明为 `SvgPrefabBase`，修复后再复建。本次 57 个 warning 仍含既有依赖与源码分析项。 |
+| 2026-08-02 04:38 +08:00 | 21 真实语料测试设计复核 | 完成，待实现 | ramen 的 29 类命令必须全部有唯一 parser，唯一 `SvgPrefab` 必须解析为 `[SVG_STR]`，并精确保留颜色相似度、旋转、偏移、透明度、亮度、缩放、容差、T/X 网格、`ま`、字体、颜色 ID 1021、流向和行高；首次规范化会把原文件缺省的 `IsForceColorful=False`、`ColorfulLaneColorId=1021`、曲线工厂显式写出。语义指纹需新增 Svg 数量，原始对象和 reparse 对象都要执行字段断言；另用确定性合成图形覆盖 `[SVG_IMG]`、OGKR 和非空 Skia 像素，避免平台字体差异。已登记剩余格式风险：相对图片路径目前会绝对化、含 `]`/逗号的未转义字段、未知未来字段写回丢失。 |
+| 2026-08-02 04:42 +08:00 | 21 格式层修复复建 | 通过，中间态 | 将 Nyageki 类型分派结果显式声明为 `SvgPrefabBase` 后，同一核心 Debug 非增量构建为 0 error、57 个 warning；`Svg.Skia`、SkiaSharp 3.119.2、领域集合及当前 Nyageki/OGKR 格式层能够共同编译。Skia 编辑器绘制、Svg→Lane 操作 UI 和完整测试此时尚未并入，21 仍为进行中。 |
+| 2026-08-02 04:51 +08:00 | 20B 回退语义与发布链复核 | 完成，待最终发布 | 独立审查发现 Browser 会把旧 ASIO/WaveOut/WASAPI 配置静默映射为 Worklet，且 AOT 固定后端设置页会在保存其他选项时覆写 JIT/ASIO 偏好；现已改为显式 `UnsupportedBackend → BrowserAudioWorklet` 回退并记录 warning，只有真正可选后端的 JIT profile 才写回请求值。能力与设置语义测试 8/8 通过。仓库 Release workflow 已新增 `AOT_WASAPI_PRIMARY` 与 `JIT_ASIO_COMPANION` 两个 artifact，分别断言排除 ASIO/WinMM 与包含 ASIO/WASAPI/WinMM。真实 ASIO 驱动枚举、格式编码级能力描述仍作为低风险后续边界，不在本轮扩展。 |
+| 2026-08-02 05:00 +08:00 | 21 Svg 首轮自动化 | 通过，中间态 | 已加入领域集合/深拷贝、Nyageki 与 OGKR 全字段往返、Unicode 缺失图片路径、Skia 非空像素、矢量段、文本和强类型操作视图测试。首轮 6/7，唯一失败为普通 `[Fact]` 未初始化 parser 所需应用 IoC；Nyageki/OGKR 两项改用 `[AvaloniaFact]` 消除顺序依赖后 7/7 通过。同时复核并恢复旧加权 RGB 距离（避免默认阈值把所有颜色误映射），Skia `Conic` 改用实际权重的有理二次公式；仍待直接验证颜色阈值和 Svg→Lane。 |
+| 2026-08-02 05:10 +08:00 | 21 Browser WASM 原生链闭环 | 通过，中间态 | Browser 项目显式对齐 `HarfBuzzSharp.NativeAssets.WebAssembly 8.3.1.3` 与 `SkiaSharp.NativeAssets.WebAssembly 3.119.2`，消除 Avalonia 11 旧传递原生资产 `2.88.9` 与 Svg.Skia/SkiaSharp `3.119.2` 托管 ABI 的符号冲突；Release/AOT WASM 原生链接已成功。Svg、真实 ramen 语料和 AXAML 定向验证合计 67/67，通过后仍安排一次合并态全量测试与最终发布复验。 |
+| 2026-08-02 05:13 +08:00 | 21 SVG 专用颜色兼容边界 | 已修正，待回归 | Git 历史确认 1020/1021/1022 是 2022 年为 SVG→左/中/右轨加入、2024 年随 SVG 收缩从全局 `AllColors` 删除的编辑器专用 ID。现保留稳定 ID 并新增 `SvgPrefabColors` 专用集合供 SVG 解析、颜色匹配和转轨使用，但不重新放入普通彩色轨解析、检查器和全局颜色下拉；这样既能精确读写 ramen 的 `ColorfulLaneColorId[1021]`，又不扩大普通谱面格式的有效颜色域。全量测试最后一个失败已定位为 JIT 设置测试未使用 Avalonia/IoC 宿主，测试已改为 `AvaloniaFact`，产品日志路径保持不变。 |
+| 2026-08-02 05:30 +08:00 | 变异恢复回归（kimi-code 接管 codex 会话 019fbc61 继续） | 通过 | 三处伪变异（加权颜色阈值、越界 Svg→Lane 防护、AOT 保留 ASIO 偏好）恢复源码后，对应三项定向测试 3/3 回绿；含 ramen 语料的全量测试 143/143、0 跳过，确认工作树恢复绿色状态。 |
+| 2026-08-02 05:34 +08:00 | solution Release 非增量复建 | 通过 | 完整 solution 非增量 Release 构建退出码 0、0 error（仍为既有警告集）。 |
+| 2026-08-02 05:36 +08:00 | AOT 最终冒烟 | 失败，已定位修复 | `win-x64-aot` 发布成功但 EXE 启动即崩：`TypeInitializationException`，`ToolViewModelTypeCollectedActivator` 静态构造抛出 `ArgumentException: 相同键 AudioPlayerToolViewerViewModel`。根因：Gekimini 源生成器 `TypeCollectedActivatorGenerator` 对 partial 类的每个语法声明各收集一次，第 18 项将该 VM 拆为两文件后产出重复字典键；Debug/Release 生成产物均可复现（计数=2），但测试宿主 `TestApplication` 直接继承 `App`、不经过 `OngekiFumenEditorApp.RegisterServices`，导致全量测试此前未覆盖该激活器初始化路径。修复：生成器按 `FullClassName` 去重；新增 `ToolViewModelTypeCollectedActivatorTests` 回归测试，修复前红（与 AOT 相同异常）、修复后绿。 |
+| 2026-08-02 05:51 +08:00 | 修复后全量与双 Windows 发布 | 通过 | 含新回归测试的全量 144/144、0 跳过；`win-x64-aot` 重发成功，53,153,792 字节 EXE 10 秒存活并完成完整启动（主题/语言/布局/键位路由均初始化）；`win-x64-jit` 发布产物包含 `NAudio.Asio.dll`、`NAudio.WinMM.dll`、`NAudio.Wasapi.dll`、`SoundTouch.dll`，EXE 10 秒存活。 |
+| 2026-08-02 06:02 +08:00 | Browser AOT 最终发布 | 通过 | 修复后 Browser Release/AOT 发布成功（约 570 秒）；`dotnet.js` 仅引用本次构建的 56,496,934 字节 `dotnet.native.baujsjs5ui.wasm`，无旧哈希 WASM 被引用（增量目录中的旧文件不影响清单）；AudioWorklet 主脚本与 processor 的原始/br/gz 资源齐全。第七轮 18/19A/20B/21 全部验收边界均已具备对应测试或发布证据。 |
+
+### 本轮验收边界
+
+- 波形必须走产品中的 Avalonia/Skia 渲染路径，并以非空像素、尺寸更新、停止/卸载后不继续渲染作为自动化证据。
+- WAV 偏移必须覆盖正、负、零偏移、非帧对齐时的取整策略、过量负偏移、无效/不支持格式，以及失败不污染目标文件。
+- 两个 Windows 发布配置都必须能构建；AOT 图不得包含 ASIO，JIT 包必须保留 ASIO 依赖。真实 ASIO 驱动和真实 WASAPI 设备仍需要平台人工验证。
+- `SvgPrefab` 必须覆盖强类型解析、格式化往返、Skia 非空绘制、视图构造/编译绑定和真实 ramen 语料；不得继续把它列为预期排除命令。

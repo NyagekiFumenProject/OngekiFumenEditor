@@ -160,3 +160,41 @@
 ## 执行结果（2026-08-02 02:22 +08:00）
 
 计划已全部执行。实现阶段根据动态测试补充了 `LocalizeConverter` 行为测试和键位冲突日志分支断言；外部语料 round-trip 采用“语义指纹 + 完整序列化行多集合”，允许同一 TGrid 的无语义顺序变化但不允许字段丢失、重复或值变化。最终 solution 展开 101 例并全部通过；NAudio 3 覆盖配置的上游测试 91/91 通过；Core/Desktop/Browser 常规矩阵、Desktop Native AOT 启动和 Browser AOT 资源发布均完成。真实 Desktop 音频设备/ASIO 与真实 Browser AudioContext 保留为明确平台集成边界，不属于未完成单元测试。
+
+## 第七轮增量实施计划（2026-08-02 03:31 +08:00）
+
+### 阶段 A：Skia 波形
+
+- 将旧波形采样算法与渲染宿主分离，接入现有 Avalonia Skia lease 生命周期。
+- 测试峰值到路径/像素映射、空数据、缩放参数、非空帧和停止释放；不得以独立测试用 `SKSurface` 冒充产品控件路径。
+
+### 阶段 B：跨平台 WAV 偏移
+
+- 新增纯流式服务并由音频调整 ViewModel 注入；以块解析/写出保持未知但合法的 WAV chunk，按 `BlockAlign` 处理数据。
+- 测试正、负、零、过量负偏移，PCM 16/24/32 与 IEEE float，奇数 chunk padding、无效头、失败时目标不变。
+
+### 阶段 C：20B 双发行与能力 UI
+
+- 新增共享强类型音频平台能力，Desktop AOT/JIT 与 Browser 分别注册；设置页和播放器使用编译绑定控制选项及变速可见性。
+- 增加 `win-x64-jit` publish profile；验证 AOT profile 只含 WASAPI、JIT profile 含 ASIO，并对不可用旧配置做可观察回退。
+- 单元测试能力矩阵与归一化；真实设备初始化保留为人工平台验收。
+
+### 阶段 D：Svg* 完整迁移
+
+- 从原项目/受版本控制历史恢复注释与领域语义，迁移 Nyageki/OGKR 解析写出、属性编辑、创建入口和 Skia 绘制，不恢复旧 OpenGL 文件。
+- 测试字符串/文件 prefab 往返、路径/颜色/偏移/缩放等关键字段、Skia 非空绘制、视图构造，以及真实 ramen 中 `SvgPrefab` 的保真。
+
+### 阶段 E：集成验证
+
+1. 构建并运行产品测试项目的非 ExternalCorpus 集合。
+2. 以 `C:\Users\mikir\Desktop\音寄谱\拉面` 运行 ExternalCorpus，要求 0 skip 且 SvgPrefab 不在排除列表。
+3. 运行 solution 级发现和全量测试，确认新增测试可见。
+4. 非增量构建完整 solution；分别发布 Windows AOT/WASAPI、JIT/ASIO 和 Browser AOT。
+5. 运行 test-gap-analysis 与 assertion-quality，修复存活分支或弱断言，并把精确结果写入 `status.md`。
+
+### 第七轮完成条件
+
+- 四项用户原话均能映射到至少一个行为测试和一个产品构建/发布证据。
+- 活动 AXAML 保持编译绑定，不新增 `ReflectionBinding`、字符串成员路径或反射事件接线。
+- Native AOT 新路径不新增无法解释的裁剪/AOT 警告，不用警告抑制替代修复。
+- 既有 101 项不回归；真实语料中原先被排除的 `SvgPrefab: 1` 改为成功解析与往返保留。

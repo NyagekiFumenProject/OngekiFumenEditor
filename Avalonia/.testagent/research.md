@@ -161,3 +161,16 @@ Native AOT 可执行文件启动烟测必须与 publish 分开记录：启动后
 - 同一 TGrid 对象在解析/格式化后可能改变相对输出顺序；采用排序后的完整行集合和语义指纹双重比较，可忽略该无语义顺序而继续捕获字段变化、丢失与重复。
 - `NAudio.BrowserAudioWorklet` 的原始 91 项测试在 NAudio 2.3 下通过并不足以证明主仓覆盖层。测试项目和生产项目统一 NAudio 3、加入主仓可追踪的 Span/数组测试兼容层后，91/91 在实际配置下通过，且子模块仍为干净固定提交。
 - Browser AOT 产物包含托管程序集 AOT 分片、约 48.17 MB 原生 runtime WASM，以及 AudioWorklet 主脚本/processor。fake bridge 状态机与真实浏览器 AudioContext 是不同层级，后者仍需浏览器集成测试。
+
+## 第七轮增量研究：18、19A、20B、21（2026-08-02 03:31 +08:00）
+
+本轮复用既有 broad 源码扫描结果（950 个产品源文件、当时 0 个产品测试）和现有 101 项 solution 测试，不重复运行未测试源扫描。Release 非增量基线为 0 error、117 个既有 warning。
+
+| 范围 | 已知实现缺口 | 需要的动态证据 |
+| --- | --- | --- |
+| Skia 波形 | 波形设置与 150px 宿主仍可见，但旧 `WaveformDrawing` partial 被编译排除且依赖旧渲染上下文 | 产品 Skia lease 输出非空像素；峰值映射、缩放和空音频边界；卸载/停止后取消工作 |
+| WAV 偏移 | 零偏移仅复制，非零偏移固定失败 | PCM/IEEE-float 多声道帧边界；正补静音、负裁剪、过量裁剪；错误格式和目标原子性 |
+| 20B 能力矩阵 | AOT 对 ASIO 静默回退；Browser 仍显示 Windows 后端和无效变速 | AOT/JIT/Browser 三组纯能力断言；旧配置归一化及显式回退；两个 publish profile 的依赖图和构建 |
+| Svg* | 11C 删除了领域、解析写出、编辑 UI 与绘制链；真实语料含 1 条 `SvgPrefab` | 字符串/文件 prefab 强类型往返；Skia 绘制非空像素；相关视图构造；ramen 不再报告排除命令 |
+
+现有测试项目 `tests/OngekiFumenEditor.Avalonia.Tests` 使用 xUnit、目标 `net10.0`，已通过 `ProjectReference` 引用核心项目，并具备 Avalonia Headless、Avalonia.Skia、SkiaSharp 与 NAudio.Core 依赖。平台入口实现若不能被核心测试直接引用，优先把能力选择提取为核心纯模型，再用项目构建和发布图验证平台接线；不通过反射绕过可见性或 AOT 约束。
