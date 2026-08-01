@@ -18,14 +18,23 @@
     <StackPanel>
         <controls:GroupBox Margin="5" Header="{markup:Translate [Output]}">
             <StackPanel Margin="10">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel IsVisible="{Binding CanSelectAudioOutput}" Orientation="Horizontal">
                     <Label Content="{markup:Translate [OutputMethod]}" />
                     <ComboBox
                         Width="100"
                         VerticalAlignment="Center"
                         ItemsSource="{Binding AudioOutputTypeValues}"
-                        SelectedIndex="{Binding Setting.AudioOutputType}" />
+                        SelectedItem="{Binding SelectedAudioOutputType, Mode=TwoWay}" />
                 </StackPanel>
+                <TextBlock
+                    IsVisible="{Binding HasFixedAudioOutput}"
+                    Text="{Binding FixedAudioOutputDescription}" />
+                <TextBlock
+                    Margin="0,5,0,0"
+                    Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
+                    IsVisible="{Binding HasAudioOutputFallback}"
+                    Text="{Binding AudioOutputFallbackMessage}"
+                    TextWrapping="Wrap" />
                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                     <Label Content="{markup:Translate [SampleRates]}" />
                     <TextBox
@@ -35,7 +44,10 @@
                 </StackPanel>
             </StackPanel>
         </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [Music]}">
+        <controls:GroupBox
+            Margin="5"
+            Header="{markup:Translate [Music]}"
+            IsVisible="{Binding SupportsVarspeed}">
             <StackPanel Margin="10">
                 <CheckBox
                     VerticalContentAlignment="Center"

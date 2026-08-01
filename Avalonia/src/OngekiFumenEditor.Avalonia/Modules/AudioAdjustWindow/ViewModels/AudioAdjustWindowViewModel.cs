@@ -11,6 +11,7 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -22,6 +23,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
 {
     private static readonly (string ext, string desc)[] WavFileFilter = [(".wav", ".wav Audio File")];
     private readonly IEditorDocumentManager editorDocumentManager;
+    private readonly IWavAudioOffsetService wavAudioOffsetService;
 
     private string inputFumenFilePath = string.Empty;
     public string InputFumenFilePath
@@ -104,9 +106,12 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
         set => SetProperty(ref isRecalculateObjects, value);
     }
 
-    public AudioAdjustWindowViewModel(IEditorDocumentManager editorDocumentManager)
+    public AudioAdjustWindowViewModel(
+        IEditorDocumentManager editorDocumentManager,
+        IWavAudioOffsetService wavAudioOffsetService)
     {
         this.editorDocumentManager = editorDocumentManager;
+        this.wavAudioOffsetService = wavAudioOffsetService;
         editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
     }
 
@@ -190,27 +195,29 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
             }
         }
 
-        var result = await OffsetAudioFile(audioFilePath, OutputFumenFilePath, timeOffset);
+        var result = await AudioAdjustmentTransaction.ExecuteAsync(
+            wavAudioOffsetService,
+            audioFilePath,
+            OutputFumenFilePath,
+            timeOffset,
+            recalculateMap is null
+                ? null
+                : () => currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
+                    Lang.B.ApplyAudioAdjust.ToLocalizedString(),
+                    () =>
+                    {
+                        foreach (var item in recalculateMap)
+                            item.Key.TGrid = item.Value.after.CopyNew();
+                    },
+                    () =>
+                    {
+                        foreach (var item in recalculateMap)
+                            item.Key.TGrid = item.Value.before.CopyNew();
+                    })));
         if (!result.isSuccess)
         {
             await ShowMessageAsync($"{Lang.ApplyAudioAdjustFail}{result.msg}", DialogMessageType.Error);
             return;
-        }
-
-        if (recalculateMap is not null)
-        {
-            currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
-                Lang.B.ApplyAudioAdjust.ToLocalizedString(),
-                () =>
-                {
-                    foreach (var item in recalculateMap)
-                        item.Key.TGrid = item.Value.after.CopyNew();
-                },
-                () =>
-                {
-                    foreach (var item in recalculateMap)
-                        item.Key.TGrid = item.Value.before.CopyNew();
-                }));
         }
 
         await ShowMessageAsync(IsCurrentEditorAsInputFumen
@@ -225,30 +232,12 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
 
     public Task<(bool isSuccess, string msg)> OffsetAudioFile(string inputWavFilePath, string saveWavFilePath, TimeSpan offset)
     {
-        return Task.Run<(bool isSuccess, string msg)>(() =>
-        {
-            try
-            {
-                if (!File.Exists(inputWavFilePath))
-                    return (false, $"Input audio file not found: {inputWavFilePath}");
-
-                var outputDirectory = Path.GetDirectoryName(saveWavFilePath);
-                if (!string.IsNullOrWhiteSpace(outputDirectory))
-                    Directory.CreateDirectory(outputDirectory);
-
-                // Temporary migration fallback: keep original bytes when no offset is requested.
-                if (offset == TimeSpan.Zero)
-                {
-                    File.Copy(inputWavFilePath, saveWavFilePath, overwrite: true);
-                    return (true, string.Empty);
-                }
-
-                return (false, "Audio offset is not implemented in Avalonia migration yet.");
-            }
-            catch (Exception e)
-            {
-                return (false, e.Message);
-            }
-        });
+        // The temporary migration fallback kept original bytes only when no offset was requested.
+        // The platform-neutral service preserves that byte-exact path and handles frame-aligned offsets.
+        return AudioAdjustmentTransaction.ExecuteAsync(
+            wavAudioOffsetService,
+            inputWavFilePath,
+            saveWavFilePath,
+            offset);
     }
 }

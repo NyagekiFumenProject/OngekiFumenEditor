@@ -42,7 +42,9 @@
 
                 <ContentControl
                     x:Name="renderControlHost"
-                    Height="150">
+                    Height="150"
+                    Loaded="OnWaveformHostLoaded"
+                    Unloaded="OnWaveformHostUnloaded">
                 </ContentControl>
 
                 <!--<wpf:GLWpfControl
@@ -247,7 +249,8 @@
                         <Grid
                             Margin="5"
                             HorizontalAlignment="Stretch"
-                            IsEnabled="{Binding AudioPlayer.IsPlaying, Converter={StaticResource ReverseBoolConverter}}">
+                            IsEnabled="{Binding AudioPlayer.IsPlaying, Converter={StaticResource ReverseBoolConverter}}"
+                            IsVisible="{Binding CanAdjustMusicSpeed}">
                             <controls:RangeValue
                                 Grid.ColumnSpan="2"
                                 Padding="0,5,0,5"

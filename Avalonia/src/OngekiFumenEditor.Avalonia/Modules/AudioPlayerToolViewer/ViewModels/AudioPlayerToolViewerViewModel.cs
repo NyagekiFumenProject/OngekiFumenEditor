@@ -68,6 +68,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
             if (audioPlayer is not null)
                 audioPlayer.OnPlaybackFinished += OnPlaybackFinished;
 
+            OnWaveformAudioPlayerChanged(audioPlayer);
             OnPropertyChanged(nameof(IsAudioButtonEnabled));
         }
     }
@@ -146,6 +147,8 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
 
     public bool IsAudioButtonEnabled => AudioPlayer is not null;
 
+    public bool CanAdjustMusicSpeed => audioManager?.EnableVarspeed == true;
+
     private IWaveformDrawing waveformDrawing;
     public IWaveformDrawing WaveformDrawing
     {
@@ -162,6 +165,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
             if (!SetProperty(ref resampleSize, value))
                 return;
 
+            OnWaveformResampleSizeChanged();
             AudioPlayerToolViewerSetting.Default.ResampleSize = value;
             AudioPlayerToolViewerSetting.Default.Save();
         }
@@ -431,5 +435,6 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
 
         FumenSoundPlayer?.Stop();
         _ = CleanSoundPlayerAsync();
+        DisposeWaveformRendering();
     }
 }

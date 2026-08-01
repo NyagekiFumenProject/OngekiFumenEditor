@@ -37,9 +37,21 @@ public class DefaultWaveformOption : WaveformDrawingOptionBase
         }
     }
 
-    public DefaultWaveformOption()
+    public DefaultWaveformOption() : this(loadSettings: true)
     {
-        SyncFromSettings();
+    }
+
+    internal DefaultWaveformOption(bool loadSettings)
+    {
+        if (loadSettings)
+        {
+            SyncFromSettings();
+            return;
+        }
+
+        showWaveform = true;
+        showObjectPlaceLine = false;
+        showTimingLine = false;
     }
 
     private void SyncFromSettings()

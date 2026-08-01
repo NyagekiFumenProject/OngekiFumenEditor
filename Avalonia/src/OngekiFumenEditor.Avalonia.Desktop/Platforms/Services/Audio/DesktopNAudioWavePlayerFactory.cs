@@ -2,6 +2,8 @@ using Injectio.Attributes;
 using NAudio.Wave;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Models.Settings;
+using OngekiFumenEditor.Avalonia.Utils;
+using System;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Audio;
@@ -9,15 +11,30 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Audio;
 [RegisterSingleton<INAudioWavePlayerFactory>]
 internal sealed class DesktopNAudioWavePlayerFactory : INAudioWavePlayerFactory
 {
+    private readonly IAudioPlatformCapabilities platformCapabilities;
+
+    public DesktopNAudioWavePlayerFactory(IAudioPlatformCapabilities platformCapabilities)
+    {
+        this.platformCapabilities = platformCapabilities;
+    }
+
     public async Task<IWavePlayer> CreateDefaultWavePlayer()
     {
         var outputType = (AudioOutputType)AudioSetting.Default.AudioOutputType;
-        return outputType switch
+        var resolution = platformCapabilities.ResolveOutput(outputType);
+        if (resolution.IsFallback)
         {
-            AudioOutputType.Asio => await CreateAsioPlayer(),
-            AudioOutputType.Wasapi => await CreateWasapiPlayer(),
-            // WaveOut is kept as a persisted legacy value. WASAPI is the supported desktop fallback.
-            AudioOutputType.WaveOut or _ => await CreateWasapiPlayer()
+            Log.LogWarning(
+                $"Requested audio backend {resolution.RequestedOutput} is unavailable for " +
+                $"{platformCapabilities.Profile}; using {resolution.EffectiveBackend}.");
+        }
+
+        return resolution.EffectiveBackend switch
+        {
+            AudioBackendKind.Asio => await CreateAsioPlayer(),
+            AudioBackendKind.Wasapi => await CreateWasapiPlayer(),
+            _ => throw new PlatformNotSupportedException(
+                $"No desktop audio output is available for {platformCapabilities.Profile}.")
         };
     }
 
@@ -33,9 +50,8 @@ internal sealed class DesktopNAudioWavePlayerFactory : INAudioWavePlayerFactory
     private static Task<IWavePlayer> CreateAsioPlayer()
     {
 #if NATIVE_AOT
-        // NAudio.Asio still uses runtime-generated delegates. Keep Native-AOT builds usable by
-        // falling back to the source-generated-COM WASAPI backend.
-        return CreateWasapiPlayer();
+        throw new PlatformNotSupportedException(
+            "ASIO is not included in the Native-AOT distribution. Use the JIT/ASIO distribution instead.");
 #else
         return Task.FromResult<IWavePlayer>(new AsioOut { AutoStop = false });
 #endif

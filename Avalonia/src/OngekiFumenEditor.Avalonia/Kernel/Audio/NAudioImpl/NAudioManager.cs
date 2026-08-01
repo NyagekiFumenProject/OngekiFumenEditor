@@ -9,7 +9,6 @@ using OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
-using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl;
 
@@ -85,7 +84,8 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
     public NAudioManager(
         INAudioWavePlayerFactory wavePlayerFactory,
         INAudioFileReaderFactory audioFileReaderFactory,
-        ISchedulerManager schedulerManager)
+        ISchedulerManager schedulerManager,
+        IAudioPlatformCapabilities platformCapabilities)
     {
         this.wavePlayerFactory = wavePlayerFactory;
         this.audioFileReaderFactory = audioFileReaderFactory;
@@ -94,16 +94,21 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         var requestedVarspeed = AudioSetting.Default.EnableVarspeed;
         enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
         targetSampleRate = AudioSetting.Default.AudioSampleRate;
-        var enableVarspeed = requestedVarspeed &&
-                             OperatingSystem.IsWindows() &&
-                             RuntimeInformation.ProcessArchitecture == Architecture.X64;
+        var enableVarspeed = requestedVarspeed && platformCapabilities.SupportsVarspeed;
         SpeedCostDelayMs = enableVarspeed ? AudioSetting.Default.VarspeedReadDurationMs : 0;
 
         if (requestedVarspeed && !enableVarspeed)
-            Log.LogWarning("SoundTouch varispeed is only available in the Windows x64 desktop build.");
+        {
+            Log.LogWarning(
+                $"SoundTouch varispeed is unavailable for audio profile {platformCapabilities.Profile}.");
+        }
 
         Log.LogDebug($"targetSampleRate: {targetSampleRate}");
-        Log.LogDebug($"audioOutputType: {(AudioOutputType)AudioSetting.Default.AudioOutputType}");
+        var requestedOutput = (AudioOutputType)AudioSetting.Default.AudioOutputType;
+        var outputResolution = platformCapabilities.ResolveOutput(requestedOutput);
+        Log.LogDebug(
+            $"audioOutputType: requested={requestedOutput}, " +
+            $"effective={outputResolution.EffectiveBackend}, profile={platformCapabilities.Profile}");
         Log.LogDebug($"enableSoundMultiPlay: {enableSoundMultiPlay}");
         Log.LogDebug($"enableVarspeed: {enableVarspeed}");
         Log.LogDebug($"SpeedCostDelayMs: {SpeedCostDelayMs}");

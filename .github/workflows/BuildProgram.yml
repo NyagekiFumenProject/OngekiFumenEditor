@@ -70,4 +70,58 @@ jobs:
       with:
         name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
         path: C:\ogkrEditorBuild\
+
+    - name: Publish Avalonia Native AOT (primary WASAPI package)
+      if: env.Configuration == 'Release'
+      run: >-
+        dotnet publish
+        .\Avalonia\src\OngekiFumenEditor.Avalonia.Desktop\OngekiFumenEditor.Avalonia.Desktop.csproj
+        -p:PublishProfile=win-x64-aot
+        -p:PublishDir=C:\ongekiAvaloniaAotBuild\
+        -v:minimal
+    - name: Validate Avalonia Native AOT package
+      if: env.Configuration == 'Release'
+      shell: pwsh
+      run: |
+        $publishPath = "C:\ongekiAvaloniaAotBuild"
+        if (-not (Get-ChildItem -LiteralPath $publishPath -Filter "*.exe" -File)) {
+          throw "The Native AOT package contains no executable."
+        }
+        foreach ($forbiddenFile in @("NAudio.Asio.dll", "NAudio.WinMM.dll")) {
+          if (Test-Path -LiteralPath (Join-Path $publishPath $forbiddenFile)) {
+            throw "The Native AOT package must not contain $forbiddenFile."
+          }
+        }
+    - uses: actions/upload-artifact@v4
+      if: env.Configuration == 'Release'
+      with:
+        name: OngekiFumenEditor_Avalonia_win-x64_AOT_WASAPI_PRIMARY_${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}
+        path: C:\ongekiAvaloniaAotBuild\
+
+    - name: Publish Avalonia JIT (ASIO companion package)
+      if: env.Configuration == 'Release'
+      run: >-
+        dotnet publish
+        .\Avalonia\src\OngekiFumenEditor.Avalonia.Desktop\OngekiFumenEditor.Avalonia.Desktop.csproj
+        -p:PublishProfile=win-x64-jit
+        -p:PublishDir=C:\ongekiAvaloniaJitBuild\
+        -v:minimal
+    - name: Validate Avalonia JIT package
+      if: env.Configuration == 'Release'
+      shell: pwsh
+      run: |
+        $publishPath = "C:\ongekiAvaloniaJitBuild"
+        if (-not (Get-ChildItem -LiteralPath $publishPath -Filter "*.exe" -File)) {
+          throw "The JIT package contains no executable."
+        }
+        foreach ($requiredFile in @("NAudio.Asio.dll", "NAudio.Wasapi.dll", "NAudio.WinMM.dll")) {
+          if (-not (Test-Path -LiteralPath (Join-Path $publishPath $requiredFile))) {
+            throw "The JIT/ASIO package is missing $requiredFile."
+          }
+        }
+    - uses: actions/upload-artifact@v4
+      if: env.Configuration == 'Release'
+      with:
+        name: OngekiFumenEditor_Avalonia_win-x64_JIT_ASIO_COMPANION_${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}
+        path: C:\ongekiAvaloniaJitBuild\
     
