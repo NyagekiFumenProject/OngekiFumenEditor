@@ -1,5 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater;
+using OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 
@@ -51,6 +53,13 @@ public partial class ProgramSettingViewModel : ObservableObject
     public async Task CheckUpdate()
     {
         await IoC.Get<IProgramUpdater>().CheckUpdatable();
+    }
+
+    public IProgramUpdater ProgramUpdater => IoC.Get<IProgramUpdater>();
+
+    public void OpenShowNewVersionDialog()
+    {
+        IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
     }
 }
 

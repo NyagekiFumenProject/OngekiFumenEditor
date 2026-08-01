@@ -1,9 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.Modules.Window.ViewModels;
 using System.Reflection;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.ProgramUpdater.Dialogs.ViewModels;
 
-public partial class ShowNewVersionDialogViewModel : ObservableObject
+public partial class ShowNewVersionDialogViewModel : WindowViewModelBase
 {
     private readonly IProgramUpdater programUpdater;
 

@@ -1,4 +1,5 @@
-<Window
+﻿<views:WindowViewBase
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -18,7 +19,7 @@
     Background="{StaticResource EnvironmentWindowBackground}"
     CanResize="False"
     mc:Ignorable="d">
-    <Window.Styles>
+    <views:WindowViewBase.Styles>
         <Style Selector="Border.BorderStyle">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="BorderThickness" Value="2" />
@@ -27,7 +28,7 @@
         <Style Selector="Border.BorderStyle:pointerover">
             <Setter Property="BorderBrush" Value="LightBlue" />
         </Style>
-    </Window.Styles>
+    </views:WindowViewBase.Styles>
     <Grid Margin="20,25">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -98,7 +99,7 @@
                             Padding="5"
                             Background="Transparent"
                             BorderBrush="Transparent">
-                            <Image Height="20" Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/search.png">
+                            <Image Height="20" Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/search.png">
                             </Image>
                         </Button>
                     </StackPanel>
@@ -137,7 +138,7 @@
                                                             <ColumnDefinition Width="Auto" />
                                                         </Grid.ColumnDefinitions>
                                                         <Border Width="40" Height="40">
-                                                            <Image Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/file.png" />
+                                                            <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/file.png" />
                                                         </Border>
 
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -192,7 +193,7 @@
                                         Width="40"
                                         Height="40"
                                         Margin="10,10,0,10">
-                                        <Image Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/add-folder.png" />
+                                        <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/add-folder.png" />
                                     </Border>
 
                                     <StackPanel
@@ -227,7 +228,7 @@
                                         Width="40"
                                         Height="40"
                                         Margin="10,10,0,10">
-                                        <Image Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/open-folder.png" />
+                                        <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/open-folder.png" />
                                     </Border>
 
                                     <StackPanel
@@ -262,7 +263,7 @@
                                         Width="40"
                                         Height="40"
                                         Margin="10,10,0,10">
-                                        <Image Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/document.png" />
+                                        <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/document.png" />
                                     </Border>
 
                                     <StackPanel
@@ -301,7 +302,7 @@
                                         Width="40"
                                         Height="40"
                                         Margin="10,10,0,10">
-                                        <Image Source="pack://application:,,,/OngekiFumenEditor;component/Resources/Icons/book.png" />
+                                        <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/book.png" />
                                     </Border>
 
                                     <StackPanel
@@ -332,7 +333,7 @@
             </Grid>
         </Grid>
     </Grid>
-</Window>
+</views:WindowViewBase>
 
 
 

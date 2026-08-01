@@ -1,4 +1,5 @@
-<Window
+﻿<views:WindowViewBase
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -113,7 +114,7 @@
             </Interaction.Behaviors>
         </Button>
     </Grid>
-</Window>
+</views:WindowViewBase>
 
 
 
