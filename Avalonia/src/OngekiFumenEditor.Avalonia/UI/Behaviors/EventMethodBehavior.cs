@@ -56,7 +56,7 @@ public class EventMethodBehavior : Behavior<Control>
     public static readonly StyledProperty<string> GestureProperty =
         AvaloniaProperty.Register<EventMethodBehavior, string>(nameof(Gesture));
 
-    private static readonly ConcurrentDictionary<Type, MethodInfo> methodCache = new();
+    private static readonly ConcurrentDictionary<(Type TargetType, string MethodName), MethodInfo> methodCache = new();
 
     private EventInfo subscribedEvent;
     private Delegate subscribedDelegate;
@@ -210,9 +210,16 @@ public class EventMethodBehavior : Behavior<Control>
         if (target is null)
             return;
 
-        var method = methodCache.GetOrAdd(target.GetType(), t => t
-            .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-            .FirstOrDefault(m => m.Name == MethodName));
+        var methodCacheKey = (target.GetType(), MethodName);
+        if (!methodCache.TryGetValue(methodCacheKey, out var method))
+        {
+            method = methodCacheKey.Item1
+                .GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                .FirstOrDefault(m => m.Name == methodCacheKey.MethodName);
+            if (method is not null)
+                methodCache.TryAdd(methodCacheKey, method);
+        }
+
         if (method is null)
         {
             Debug.WriteLine($"[EventMethodBehavior] 在 {target.GetType().Name} 上找不到方法 {MethodName}");

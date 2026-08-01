@@ -67,7 +67,7 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 1. **DataGrid**：引入 `Avalonia.Controls.DataGrid 11.3.10`（`Directory.Packages.props` + 核心项目引用 + App.axaml 引入 Fluent 主题），7 个 AXAML 的 `ListView`/`GridView`/`GridViewColumn` 改为 `DataGrid`/`DataGridTextColumn`/`DataGridTemplateColumn`。
 2. **GroupBox**：自写 [`UI/Controls/GroupBox.cs`](../src/OngekiFumenEditor.Avalonia/UI/Controls/GroupBox.cs)（继承 `HeaderedContentControl`）+ [`UI/Themes/GroupBox.axaml`](../src/OngekiFumenEditor.Avalonia/UI/Themes/GroupBox.axaml) ControlTheme，14 个文件替换。
 3. **CheckComboBox/CheckListBox**：自写 [`UI/Controls/CheckListBox.cs`](../src/OngekiFumenEditor.Avalonia/UI/Controls/CheckListBox.cs)（`SelectedMemberPath`/`DisplayMemberPath`/全选）和 [`UI/Controls/CheckComboBox.cs`](../src/OngekiFumenEditor.Avalonia/UI/Controls/CheckComboBox.cs)（DropDownButton + Flyout），替代 Xceed 控件。
-4. **cal:Message.Attach**：自写 [`UI/Behaviors/EventMethodBehavior.cs`](../src/OngekiFumenEditor.Avalonia/UI/Behaviors/EventMethodBehavior.cs)（基于 `Xaml.Behaviors`，支持事件名/方法名/PassMode/按键手势/DragEnter·Drop 附加事件/属性观察兜底），34 个文件 114 处替换；事件映射如 `MouseLeftButtonDown→PointerPressed`、`MouseDoubleClick→DoubleTapped`、`MouseWheel→PointerWheelChanged`。
+4. **cal:Message.Attach**：自写 [`UI/Behaviors/EventMethodBehavior.cs`](../src/OngekiFumenEditor.Avalonia/UI/Behaviors/EventMethodBehavior.cs)（基于 `Xaml.Behaviors`，支持事件名/方法名/PassMode/按键手势/DragEnter·Drop 附加事件/属性观察兜底），34 个文件 114 处替换；事件映射如 `MouseLeftButtonDown→PointerPressed`、`MouseDoubleClick→DoubleTapped`、`MouseWheel→PointerWheelChanged`；方法反射缓存按 ViewModel 类型和方法名共同索引，避免同一视图的多个行为错误复用首个方法。
 5. **散件批**：`Visibility→IsVisible`（31）、`ToolTip→ToolTip.Tip`（28）、删 `SnapsToDevicePixels`、多行 GridLength 折叠（171）、WPF DataTrigger/ChangePropertyAction → `Xaml.Behaviors` 等价物、新增 `WideModeToVisibilityConverter`/`BoolToNotShowTextConverter`、`ListViewMultiSelectionBehavior` 重写为 DataGrid 双向同步、`BubbleScrollWheelEventBehavior` 删除（Avalonia 滚轮天然冒泡）、`SliderEx→Slider`、`ExpanderEx→Expander`、`BooleanToVisibilityConverter` 统一为全局 `BoolToVisibilityConverter`、`TranslateExtension` 补 `Path`/`StringFormat`、Toast 删 Storyboard、TabControl 自定义主题清空回退默认、CommonColorPicker 的 Xceed 色板改占位、FumenVisualEditorView 快捷键块删除。
 6. **mah:MetroWindow**：13 个窗口根改 `Window`（`ResizeMode=NoResize→CanResize=False`，删除 MahApps 专有属性），多个 code-behind 基类 `UserControl→Window`。
 7. **收尾批**：纯 Style 的 `.Resources` 改 `.Styles`（10 处）、空 `<ColumnDefinition>` 折叠（10 处，空白内容会被 Avalonia 当 GridLength 解析）、`App.axaml` 合并字典改 `ResourceInclude` + `avares://`、TextBlock 主题改 `Styles` 根 + `StyleInclude`、`ComboBox.ItemContainerStyle` 改 `ComboBox.Styles`、隐式 `DataTemplate` 从 `Resources` 移入 `UserControl.DataTemplates`（Avalonia 的 Resources 不支持无键模板）、`DataType="{x:Type ...}"` 改 `DataType="ns:Type"`、`App.Initialize()` 显式 `AvaloniaXamlLoader.Load(this)`（消除 AVLN3000；Gekimini 基类本就有同样调用，重写保持一致避免重复加载）、`JsonSourceGenerateContext` 跨程序集同名冲突重命名为 `OngekiJsonSourceGenerateContext`、`Startup` 改 public 并修正入口项目引用、入口项目补 using。
@@ -77,7 +77,7 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 
 以下问题不影响编译，但会在运行或功能层面暴露，按优先级排序。
 
-**P2 运行时接线已于 2026-08-01 完成**：58 个 code-behind 全部接入 `InitializeComponent`；8 处 `pack://` 图片 URI 改 `avares://`（旧 WPF 项目 `Resources/Icons` 32 个文件复制进核心项目并登记 `AvaloniaResource`）；窗口接线按 Gekimini `IWindowManager` 语义修正——`WindowViewModelBase` 经 `ShowWindowAsync`/`ShowDialogAsync` 展示的视图必须是 `WindowViewBase` 子类（SplashScreen、ShowNewVersionDialog、AudioAdjustWindow、BrushTGridRangeDialog、BulletPalleteSelectDialog、EditorProjectSetupDialog 共 6 个视图已换基类）；`FumenConverterView` 实为 `shell.ShowTool` 的停靠工具，从 `Window` 回退为 `UserControl`；`AudioAdjustWindow` 菜单命令原本静默空转，已改为 `IWindowManager.ShowWindowAsync`；`ProgramSettingViewModel` 补上 `ProgramUpdater` 属性和 `OpenShowNewVersionDialog` 方法（XAML 行为引用的方法此前不存在）。
+**P2 运行时接线已于 2026-08-01 完成**：58 个 code-behind 全部接入 `InitializeComponent`；8 处 `pack://` 图片 URI 改 `avares://`（旧 WPF 项目 `Resources/Icons` 32 个文件复制进核心项目并登记 `AvaloniaResource`）；窗口接线按 Gekimini `IWindowManager` 语义修正——`WindowViewModelBase` 经 `ShowWindowAsync`/`ShowDialogAsync` 展示的视图必须是 `WindowViewBase` 子类（SplashScreen、ShowNewVersionDialog、AudioAdjustWindow、FumenConverter、BrushTGridRangeDialog、BulletPalleteSelectDialog、EditorProjectSetupDialog 共 7 个视图已换基类）；`FumenConverter` 菜单命令恢复为 `IWindowManager.ShowWindowAsync`，并移植缺失的转换包装器及文件选择/当前编辑器输入/执行转换逻辑；`AudioAdjustWindow` 菜单命令原本静默空转，已改为 `IWindowManager.ShowWindowAsync`；`ProgramSettingViewModel` 补上 `ProgramUpdater` 属性和 `OpenShowNewVersionDialog` 方法（XAML 行为引用的方法此前不存在）。
 
 ### 运行时必炸或必失效
 
@@ -169,7 +169,7 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 | `EditorScriptExecutor` | 18 | 1 | 编辑器脚本执行与文档 |
 | `OgkiFumenListBrowser` | 9 | 1 | 谱面列表浏览 |
 
-此外，`FumenVisualEditor` 仍缺少 3 个同路径 C# 文件，`FumenConverter` 缺少 1 个。
+此外，`FumenVisualEditor` 仍缺少 3 个同路径 C# 文件；`FumenConverter` 原缺失的转换包装器已补齐。
 
 ## 测试、诊断和依赖风险
 
@@ -190,13 +190,19 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 - 选择、拖放、撤销/重做和剪贴板；
 - 设置、语言和布局持久化。
 
+### 构建配置差异
+
+- Debug 全解决方案 Rebuild：0 错误 / 87 警告。
+- 默认 Release 全解决方案构建：374 个 AVLN 错误；核心项目在 Release 开启了 `AvaloniaUseCompiledBindingsByDefault`，但大量迁移 AXAML 尚未声明 `x:DataType`。本轮 `FumenConverterView` 已使用显式 `x:DataType` 和 `CompiledBinding`，不在该错误列表中。
+- Release 核心项目在临时覆盖 `AvaloniaUseCompiledBindingsByDefault=false` 后：0 错误 / 50 警告；同一覆盖下继续构建全解决方案时，Desktop 项目还会因 `Program.cs` 缺少 `System.Threading.Tasks` 而无法解析 `TaskScheduler`。这两项属于全局 Release 基线问题。
+
 ### NuGet 风险
 
 核心项目通过直接引用 `Avalonia.Skia 11.3.10` 解析到 `SkiaSharp 2.88.9`。但依赖项目 Gekimini 仍单独解析到 `SkiaSharp 2.88.3` 并产生 `NU1903` 高严重性漏洞警告；Desktop 项目另有 `Tmds.DBus.Protocol 0.21.2` 的 `NU1903`。后续需要在依赖项目层统一版本并重新验证 Avalonia/SkiaSharp API 兼容性。
 
 ## 仓库状态
 
-XAML 清零批次①~⑦涉及数百个文件（含新增控件、行为、主题和大量 AXAML/C# 修改），**全部处于未提交状态**。在形成可复现检查点前，其他开发机或 CI 无法仅通过当前分支还原本报告所检查的源码状态。建议尽快将当前快照拆分为可审查的提交（至少按批次①~⑦分组）并推送。
+XAML 清零批次①~⑦及 P2 运行时接线已按功能分组签入 `avalonia` 分支，报告所检查的源码状态可从分支提交历史还原。工作区中的迁移审计 `.txt` 文件不属于应用构建输入。
 
 ## 可复现的检查方法
 
@@ -312,7 +318,7 @@ git status --porcelain=v1 -uall -- .
 3. ~~为剩余 49 个 code-behind 接入 `InitializeComponent` 或明确的 loader~~（已完成，58/58）。
 4. ~~将 8 处 pack URI 转换为 `avares://`~~（已完成，含 `Resources/Icons` 资源复制与 `AvaloniaResource` 登记）。
 5. ~~用 Avalonia selector、pseudo-class、class 和 transition 替代 WPF Trigger/Storyboard~~（编译层面完成；部分功能以放弃处理，见已知问题清单）。
-6. ~~核对窗口类视图的实例化与 `Show`/`ShowDialog` 接线~~（已完成：6 个窗口视图换 `WindowViewBase` 基类、`FumenConverterView` 回退 `UserControl`、`AudioAdjustWindow` 命令改为 `IWindowManager` 展示、`ProgramSettingViewModel` 补 `OpenShowNewVersionDialog`；`EditorProjectSetupDialog` 的调用方随文档新建流程一并属 P3）。
+6. ~~核对窗口类视图的实例化与 `Show`/`ShowDialog` 接线~~（已完成：7 个窗口视图换 `WindowViewBase` 基类，`FumenConverter` 与 `AudioAdjustWindow` 命令改为 `IWindowManager` 展示，`FumenConverter` 补齐转换包装器和 ViewModel 操作，`ProgramSettingViewModel` 补 `OpenShowNewVersionDialog`；`EditorProjectSetupDialog` 的调用方随文档新建流程一并属 P3）。
 
 验收条件：应用 AXAML 编译为 0 个 AVLN 错误（**已达成**）；主 Shell 和主要工具视图可以显示（**接线已就绪，待启动冒烟确认**）。
 
