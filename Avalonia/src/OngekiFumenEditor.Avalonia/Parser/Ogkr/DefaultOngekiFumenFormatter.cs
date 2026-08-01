@@ -1,6 +1,7 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 
@@ -64,6 +65,9 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             ProcessComment(fumen, sb);
             sb.AppendLine();
 
+            ProcessSVG(fumen, sb);
+            sb.AppendLine();
+
             ProcessSoflanGroupWrapItem(fumen, sb);
             sb.AppendLine();
 
@@ -117,6 +121,60 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             foreach (var (name, ids) in maps.Where(x => x.Ids.Count > 0))
                 sb.AppendLine($"[SGWI]\t{name}\t{string.Join("\t", ids)}");
             sb.AppendLine();
+        }
+
+        private static void ProcessSVG(OngekiFumen fumen, StringBuilder sb)
+        {
+            foreach (var svg in fumen.SvgPrefabs.OrderBy(x => x.TGrid))
+            {
+                var fields = new List<string>
+                {
+                    svg.IDShortName,
+                    SvgPrefabFormatUtils.Format(svg.ColorSimilar.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.Rotation.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.EnableColorfulLaneSimilar),
+                    SvgPrefabFormatUtils.Format(svg.OffsetX.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.OffsetY.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.ShowOriginColor),
+                    SvgPrefabFormatUtils.Format(svg.Opacity.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.Scale),
+                    SvgPrefabFormatUtils.Format(svg.Tolerance.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.TGrid.Unit),
+                    SvgPrefabFormatUtils.Format(svg.TGrid.Grid),
+                    SvgPrefabFormatUtils.Format(svg.XGrid.Unit),
+                    SvgPrefabFormatUtils.Format(svg.XGrid.Grid),
+                    SvgPrefabFormatUtils.Format(svg.ColorfulLaneBrightness.CurrentValue),
+                    SvgPrefabFormatUtils.Format(svg.IsForceColorful),
+                    SvgPrefabFormatUtils.Format(svg.ColorfulLaneColor.Id)
+                };
+
+                switch (svg)
+                {
+                    case SvgImageFilePrefab image:
+                        if (string.IsNullOrWhiteSpace(image.SvgFile?.FullName))
+                            throw new InvalidOperationException(
+                                $"at {svg.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
+                        fields.Add(Base64.Encode(image.SvgFile?.FullName ?? string.Empty));
+                        break;
+                    case SvgStringPrefab text:
+                        if (string.IsNullOrWhiteSpace(text.Content) || string.IsNullOrWhiteSpace(text.TypefaceName))
+                            throw new InvalidOperationException(
+                                $"at {svg.TGrid}, SvgStringPrefab.Content/TypefaceName is empty or null");
+                        fields.Add(Base64.Encode(text.Content));
+                        fields.Add(SvgPrefabFormatUtils.Format(text.FontSize));
+                        fields.Add(Base64.Encode(text.TypefaceName));
+                        fields.Add(text.ContentFlowDirection.ToString());
+                        fields.Add(SvgPrefabFormatUtils.Format(text.ContentLineHeight));
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unsupported SVG prefab type '{svg.GetType().FullName}'.");
+                }
+
+                // Keep the legacy positional fields intact and append new metadata
+                // so existing OGKR files and readers retain their original layout.
+                fields.Add(Base64.Encode(svg.CurveInterpolaterFactory.Name));
+                sb.AppendLine(string.Join('\t', fields));
+            }
         }
 
         private void ProcessComment(OngekiFumen fumen, StringBuilder sb)

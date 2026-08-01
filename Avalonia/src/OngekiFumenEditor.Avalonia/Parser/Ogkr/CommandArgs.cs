@@ -36,6 +36,16 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 			return GetDataArray<T>().ElementAtOrDefault(index);
 		}
 
+		public string GetRawData(int index)
+		{
+			return GetRawDataArray().ElementAtOrDefault(index);
+		}
+
+		public string[] GetRawDataArray()
+		{
+			return line.Trim().Split(SplitEmptyCharArray);
+		}
+
 		public T[] GetDataArray<T>()
 		{
 			var type = typeof(T);

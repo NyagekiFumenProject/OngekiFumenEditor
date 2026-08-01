@@ -2,6 +2,7 @@ using Injectio.Attributes;
 using DereTore.Common;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -51,12 +52,65 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 
             ProcessCURVE(fumen, writer);
 
+            ProcessSvgPrefabs(fumen, writer);
+
             ProcessComments(fumen, writer);
 
             await writer.FlushAsync();
             await memory.FlushAsync();
 
             return memory.ToArray();
+        }
+
+        private static void ProcessSvgPrefabs(OngekiFumen fumen, StreamWriter writer)
+        {
+            foreach (var svg in fumen.SvgPrefabs.OrderBy(x => x.TGrid))
+            {
+                var fields = new List<string>
+                {
+                    $"Type[{svg.IDShortName}]",
+                    $"ColorSimilar[{SvgPrefabFormatUtils.Format(svg.ColorSimilar.CurrentValue)}]",
+                    $"Rotation[{SvgPrefabFormatUtils.Format(svg.Rotation.CurrentValue)}]",
+                    $"EnableColorfulLaneSimilar[{SvgPrefabFormatUtils.Format(svg.EnableColorfulLaneSimilar)}]",
+                    $"OffsetX[{SvgPrefabFormatUtils.Format(svg.OffsetX.CurrentValue)}]",
+                    $"OffsetY[{SvgPrefabFormatUtils.Format(svg.OffsetY.CurrentValue)}]",
+                    $"ShowOriginColor[{SvgPrefabFormatUtils.Format(svg.ShowOriginColor)}]",
+                    $"Opacity[{SvgPrefabFormatUtils.Format(svg.Opacity.CurrentValue)}]",
+                    $"Brightness[{SvgPrefabFormatUtils.Format(svg.ColorfulLaneBrightness.CurrentValue)}]",
+                    $"Scale[{SvgPrefabFormatUtils.Format(svg.Scale)}]",
+                    $"Tolerance[{SvgPrefabFormatUtils.Format(svg.Tolerance.CurrentValue)}]",
+                    $"T[{SvgPrefabFormatUtils.Format(svg.TGrid.Unit)},{SvgPrefabFormatUtils.Format(svg.TGrid.Grid)}]",
+                    $"X[{SvgPrefabFormatUtils.Format(svg.XGrid.Unit)},{SvgPrefabFormatUtils.Format(svg.XGrid.Grid)}]",
+                    $"IsForceColorful[{SvgPrefabFormatUtils.Format(svg.IsForceColorful)}]",
+                    $"ColorfulLaneColorId[{SvgPrefabFormatUtils.Format(svg.ColorfulLaneColor.Id)}]",
+                    $"CurveInterpolaterFactory[{svg.CurveInterpolaterFactory.Name}]"
+                };
+
+                switch (svg)
+                {
+                    case SvgImageFilePrefab image:
+                        /*if (string.IsNullOrWhiteSpace(image.SvgFile?.FullName))
+                            throw new Exception($"at {svg.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
+                        */
+                        fields.Add($"FilePathBase64[{Base64.Encode(image.SvgFile?.FullName ?? string.Empty)}]");
+                        break;
+                    case SvgStringPrefab text:
+                        /*if (string.IsNullOrWhiteSpace(text.Content) || string.IsNullOrWhiteSpace(text.TypefaceName))
+                            throw new Exception($"at {svg.TGrid}, SvgStringPrefab.Content/TypefaceName is empty or null");*/
+                        fields.Add($"Content[{Base64.Encode(text.Content)}]");
+                        fields.Add($"FontSize[{SvgPrefabFormatUtils.Format(text.FontSize)}]");
+                        fields.Add($"TypefaceName[{text.TypefaceName}]");
+                        fields.Add($"FontColorId[{SvgPrefabFormatUtils.Format(text.ColorfulLaneColor.Id)}]");
+                        fields.Add($"ContentFlowDirection[{text.ContentFlowDirection}]");
+                        fields.Add($"ContentLineHeight[{SvgPrefabFormatUtils.Format(text.ContentLineHeight)}]");
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Unsupported SVG prefab type '{svg.GetType().FullName}'.");
+                }
+
+                writer.WriteLine($"SvgPrefab\t:\t{string.Join(", ", fields)}");
+            }
+            writer.WriteLine();
         }
 
         private void ProcessComments(OngekiFumen fumen, StreamWriter sb)

@@ -89,7 +89,7 @@
         <PackageReference Include="System.ComponentModel.Composition" />
         <PackageReference Include="Microsoft.Build" />
         <PackageReference Include="NAudio.Core" />
-        <PackageReference Include="Svg" />
+        <PackageReference Include="Svg.Skia" />
         <PackageReference Include="AssetsTools.NET" />
         <PackageReference Include="OpenTK" />
         <PackageReference Include="FontStashSharp.PlatformAgnostic" />

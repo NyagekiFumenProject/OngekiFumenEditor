@@ -2,8 +2,8 @@
     <PropertyGroup>
         <AvaloniaVersion>11.3.10</AvaloniaVersion>
         <LLVMVersion>10.0.0-preview.2.25455.1</LLVMVersion>
-        <HarfBuzzSharpVersion>8.3.1.2</HarfBuzzSharpVersion>
-        <SkiaSharpVersion>3.119.1</SkiaSharpVersion>
+        <HarfBuzzSharpVersion>8.3.1.3</HarfBuzzSharpVersion>
+        <SkiaSharpVersion>3.119.2</SkiaSharpVersion>
         <MsExtVersion>10.0.1</MsExtVersion>
         <SystemVersion>10.0.1</SystemVersion>
     </PropertyGroup>

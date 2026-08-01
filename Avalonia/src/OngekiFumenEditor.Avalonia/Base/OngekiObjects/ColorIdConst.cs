@@ -144,6 +144,29 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
 			Color = Color.FromArgb(255, 71, 145, 255)
 		};
 
+		// Editor-only lane colors used by SVG prefabs. These IDs are part of the
+		// persisted Nyageki/OGKR representation and must remain stable.
+		public static ColorId LaneRed { get; } = new ColorId()
+		{
+			Id = 1020,
+			Name = nameof(LaneRed),
+			Color = Color.FromArgb(255, 255, 0, 0)
+		};
+
+		public static ColorId LaneGreen { get; } = new ColorId()
+		{
+			Id = 1021,
+			Name = nameof(LaneGreen),
+			Color = Color.FromArgb(255, 0, 255, 0)
+		};
+
+		public static ColorId LaneBlue { get; } = new ColorId()
+		{
+			Id = 1022,
+			Name = nameof(LaneBlue),
+			Color = Color.FromArgb(255, 0, 0, 255)
+		};
+
 		public static IEnumerable<ColorId> AllColors { get; } = new[]
 		{
 			Akari,
@@ -167,6 +190,9 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
             LaneG,
             Aoi,
 		};
+
+		public static IEnumerable<ColorId> SvgPrefabColors { get; } =
+			AllColors.Concat([LaneRed, LaneGreen, LaneBlue]);
 	}
 }
 

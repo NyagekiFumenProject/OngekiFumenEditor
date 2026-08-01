@@ -20,7 +20,9 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia.Browser" />
+        <PackageReference Include="HarfBuzzSharp.NativeAssets.WebAssembly" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
+        <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" />
     </ItemGroup>
 
 

@@ -5,6 +5,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.LineDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.StringDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.TextureDrawing;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.SvgDrawing;
 using SkiaSharp;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
@@ -26,6 +27,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }
     public IPolygonDrawing PolygonDrawing { get; }
     public IBeamDrawing BeamDrawing { get; }
+    public ISvgDrawing SvgDrawing { get; }
 
     public DefaultSkiaDrawingManagerImpl()
     {
@@ -39,6 +41,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
         PolygonDrawing = new Drawing.PolygonDrawing.DefaultSkiaPolygonDrawing(this);
         BeamDrawing = new DefaultSkiaBeamDrawing(this);
+        SvgDrawing = new DefaultSkiaSvgDrawing(this);
     }
 
     public Task WaitForInitializationIsDone(CancellationToken cancellation = default)

@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -42,6 +43,7 @@ namespace OngekiFumenEditor.Avalonia.Base
         public LaneBlockAreaList LaneBlocks { get; } = new();
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
+        public TGridSortList<SvgPrefabBase> SvgPrefabs { get; } = new();
 
         public OngekiFumen()
         {
@@ -214,6 +216,10 @@ namespace OngekiFumenEditor.Avalonia.Base
             {
                 LaneBlocks.Add(laneBlock);
             }
+            else if (obj is SvgPrefabBase svgPrefab)
+            {
+                SvgPrefabs.Add(svgPrefab);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneNextBase => obj,
@@ -311,6 +317,10 @@ namespace OngekiFumenEditor.Avalonia.Base
             {
                 LaneBlocks.Remove(laneBlock);
             }
+            else if (obj is SvgPrefabBase svgPrefab)
+            {
+                SvgPrefabs.Remove(svgPrefab);
+            }
             else if (obj switch
             {
                 LaneStartBase or LaneNextBase => obj,
@@ -394,6 +404,7 @@ namespace OngekiFumenEditor.Avalonia.Base
                    .Concat(Lanes.GetVisibleStartObjects(min, max))
                    .Concat(Taps.BinaryFindRange(min, max))
                    .Concat(Holds.GetVisibleStartObjects(min, max))
+                   .Concat(SvgPrefabs.BinaryFindRange(min, max))
                    .Concat(Beams)
                    .Distinct();
 

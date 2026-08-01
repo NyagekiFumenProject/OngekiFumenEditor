@@ -23,4 +23,5 @@ public interface IRenderManagerImpl
     IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }
     IPolygonDrawing PolygonDrawing { get; }
     IBeamDrawing BeamDrawing { get; }
+    ISvgDrawing SvgDrawing { get; }
 }

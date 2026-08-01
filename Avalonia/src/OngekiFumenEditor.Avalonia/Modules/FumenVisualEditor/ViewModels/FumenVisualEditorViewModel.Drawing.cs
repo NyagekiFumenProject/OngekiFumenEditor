@@ -746,6 +746,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                 .Concat(fumen.SoflansMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.EnemySets.BinaryFindRange(min, max))
+                .Concat(fumen.SvgPrefabs.BinaryFindRange(min, max))
                 .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
                 .Concat(playableDurationObjects)
                 .Concat(playableObjects);

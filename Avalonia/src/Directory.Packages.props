@@ -18,7 +18,7 @@
         <PackageVersion Include="NAudio.Wasapi" Version="$(NAudioPackageVersion)" />
         <PackageVersion Include="NAudio.WinMM" Version="$(NAudioPackageVersion)" />
         <PackageVersion Include="AvalonEdit" Version="6.3.1.120" />
-        <PackageVersion Include="Svg" Version="3.4.7" />
+        <PackageVersion Include="Svg.Skia" Version="5.1.1" />
         <PackageVersion Include="AssetsTools.NET" Version="2.0.12" />
         <PackageVersion Include="FontStashSharp.PlatformAgnostic" Version="1.5.1" />
         <PackageVersion Include="FontStashSharp.Rasterizers.FreeType" Version="1.2.2" />

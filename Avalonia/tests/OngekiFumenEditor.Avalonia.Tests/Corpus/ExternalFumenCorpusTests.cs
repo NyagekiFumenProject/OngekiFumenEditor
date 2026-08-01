@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Headless.XUnit;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using Xunit;
 using Xunit.Sdk;
 
@@ -62,6 +63,7 @@ public sealed class ExternalFumenCorpusTests
         Assert.Equal(0, fingerprint.ClickSEs);
         Assert.Equal(12, fingerprint.MeterChanges);
         Assert.Equal(0, fingerprint.Comments);
+        Assert.Equal(1, fingerprint.SvgPrefabs);
         Assert.Equal(2, fingerprint.EnemySets);
         Assert.Equal(11, fingerprint.Soflans);
         Assert.Equal(0, fingerprint.IndividualSoflans);
@@ -71,10 +73,12 @@ public sealed class ExternalFumenCorpusTests
         Assert.Equal(148, fingerprint.Holds);
         Assert.Equal(148, fingerprint.HoldsWithLaneReference);
         Assert.Equal(148, fingerprint.HoldsWithEnd);
+
+        AssertRamenSvgPrefab(fumen);
     }
 
     [Fact]
-    public void ExternalCorpus_RamenChart_ReportsOnlyDecisionExcludedSvgPrefabCommand()
+    public void ExternalCorpus_RamenChart_RecognizesEveryCommandExactlyOnce()
     {
         var inventory = DiscoverRequiredCorpus();
         var chartPath = RequireSingleNamedFile(inventory.Charts, "ramen.nyageki");
@@ -94,9 +98,10 @@ public sealed class ExternalFumenCorpusTests
 
         Assert.Empty(duplicateParsers);
         Assert.Equal(29, commandCounts.Count);
-        var excludedCommand = Assert.Single(unknownCommands);
-        Assert.Equal("SvgPrefab", excludedCommand.Key, ignoreCase: true);
-        Assert.Equal(1, excludedCommand.Value);
+        Assert.Empty(unknownCommands);
+        Assert.Equal(1, commandCounts["SvgPrefab"]);
+        Assert.Single(harness.CommandParsers, x =>
+            string.Equals(x.CommandName, "SvgPrefab", StringComparison.OrdinalIgnoreCase));
     }
 
     [AvaloniaFact]
@@ -115,9 +120,13 @@ public sealed class ExternalFumenCorpusTests
         var secondNormalizedBytes = await harness.Formatter.SerializeAsync(reparsed);
 
         Assert.NotEmpty(normalizedBytes);
-        Assert.False(
-            normalizedText.Contains("SvgPrefab", StringComparison.OrdinalIgnoreCase),
-            "SvgPrefab is intentionally excluded by migration decision 11C and must not be claimed as preserved.");
+        AssertRamenSvgPrefab(original);
+        AssertRamenSvgPrefab(reparsed);
+        Assert.Equal(
+            "SvgPrefab\t:\tType[[SVG_STR]], ColorSimilar[600], Rotation[0], EnableColorfulLaneSimilar[True], OffsetX[0.5], OffsetY[0.5], ShowOriginColor[False], Opacity[1], Brightness[0], Scale[8], Tolerance[20], T[64,1560], X[0,0], IsForceColorful[False], ColorfulLaneColorId[1021], CurveInterpolaterFactory[XGrid.Unit limited], Content[44G+], FontSize[32], TypefaceName[Tahoma], FontColorId[1021], ContentFlowDirection[LeftToRight], ContentLineHeight[16]",
+            normalizedText.ReplaceLineEndings("\n")
+                .Split('\n')
+                .Single(x => x.StartsWith("SvgPrefab\t:", StringComparison.Ordinal)));
         Assert.Equal(originalFingerprint, reparsedFingerprint);
         Assert.Equal(
             GetOrderIndependentSerializedLines(normalizedText),
@@ -234,6 +243,36 @@ public sealed class ExternalFumenCorpusTests
         FileShare.ReadWrite | FileShare.Delete,
         4096,
         FileOptions.Asynchronous | FileOptions.SequentialScan);
+
+    private static void AssertRamenSvgPrefab(OngekiFumenEditor.Avalonia.Base.OngekiFumen fumen)
+    {
+        var svg = Assert.IsType<SvgStringPrefab>(Assert.Single(fumen.SvgPrefabs));
+
+        Assert.Equal("[SVG_STR]", svg.IDShortName);
+        Assert.Equal(600f, svg.ColorSimilar.CurrentValue);
+        Assert.Equal(0f, svg.Rotation.CurrentValue);
+        Assert.True(svg.EnableColorfulLaneSimilar);
+        Assert.Equal(0.5f, svg.OffsetX.CurrentValue);
+        Assert.Equal(0.5f, svg.OffsetY.CurrentValue);
+        Assert.False(svg.ShowOriginColor);
+        Assert.Equal(1f, svg.Opacity.CurrentValue);
+        Assert.Equal(0f, svg.ColorfulLaneBrightness.CurrentValue);
+        Assert.Equal(8f, svg.Scale);
+        Assert.Equal(20f, svg.Tolerance.CurrentValue);
+        Assert.Equal(64f, svg.TGrid.Unit);
+        Assert.Equal(1560, svg.TGrid.Grid);
+        Assert.Equal(0f, svg.XGrid.Unit);
+        Assert.Equal(0, svg.XGrid.Grid);
+        Assert.False(svg.IsForceColorful);
+        Assert.Equal(1021, svg.ColorfulLaneColor.Id);
+        Assert.Equal("XGrid.Unit limited", svg.CurveInterpolaterFactory.Name);
+        Assert.Equal("ま", svg.Content);
+        Assert.Equal(32d, svg.FontSize);
+        Assert.Equal("Tahoma", svg.TypefaceName);
+        Assert.Equal(SvgStringPrefab.FlowDirection.LeftToRight, svg.ContentFlowDirection);
+        Assert.Equal(16d, svg.ContentLineHeight);
+        Assert.NotNull(svg.Picture);
+    }
 
     private static string[] GetOrderIndependentSerializedLines(string text) =>
         text.ReplaceLineEndings("\n")
