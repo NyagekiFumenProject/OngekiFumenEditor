@@ -8,6 +8,7 @@ using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using XamlMcp.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Desktop;
 
@@ -43,6 +44,10 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
+
+#if DEBUG
+        this.AttachXamlMcp();
+#endif
 
         logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorDesktopApp>>();
 

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "xamlmcp": {
+      "type": "stdio",
+      "command": "xamlmcp",
+      "args": []
+    }
+  }
+}
