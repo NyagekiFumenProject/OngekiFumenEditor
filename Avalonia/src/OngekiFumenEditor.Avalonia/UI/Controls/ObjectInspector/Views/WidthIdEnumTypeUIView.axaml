@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.WidthIdEnumTypeUIView"
     x:CompileBindings="True"
     x:DataType="vm:WidthIdEnumTypeUIViewModel"
@@ -85,7 +86,7 @@
             </Grid>
         </StackPanel>
     </controls:GroupBox>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

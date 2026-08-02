@@ -1,8 +1,9 @@
+using Gekimini.Avalonia.Views;
 using Avalonia.Controls;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views;
 
-public partial class SelectionFilterView : UserControl
+public partial class SelectionFilterView : ViewBase
 {
     public SelectionFilterView()
     {

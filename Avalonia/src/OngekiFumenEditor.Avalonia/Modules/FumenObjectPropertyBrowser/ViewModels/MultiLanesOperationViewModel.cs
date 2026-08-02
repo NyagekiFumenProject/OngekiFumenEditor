@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using Gekimini.Avalonia.ViewModels;
+using System.Collections.Generic;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -15,7 +16,7 @@ using OngekiFumenEditor.Avalonia.Avalonia;
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
 	[MapToView(ViewType = typeof(MultiLanesOperationView))]
-	public partial class MultiLanesOperationViewModel : ObservableObject
+	public partial class MultiLanesOperationViewModel : ViewModelBase
 	{
 		private readonly ConnectableChildObjectBase frontChild;
 		private readonly ConnectableStartObject laterStart;

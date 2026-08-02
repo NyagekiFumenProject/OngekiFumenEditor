@@ -1,3 +1,4 @@
+using Gekimini.Avalonia.ViewModels;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,7 +10,7 @@ using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels;
 
-public partial class KeyBindingSettingViewModel : ObservableObject
+public partial class KeyBindingSettingViewModel : ViewModelBase
 {
     private readonly IKeyBindingManager keybindingManager;
     private KeyBindingDefinition[] definitions;

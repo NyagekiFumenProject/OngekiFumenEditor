@@ -1,12 +1,13 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Views;
 
-public partial class FumenSoflanGroupListViewerView : UserControl
+public partial class FumenSoflanGroupListViewerView : ViewBase
 {
     public FumenSoflanGroupListViewerView()
     {

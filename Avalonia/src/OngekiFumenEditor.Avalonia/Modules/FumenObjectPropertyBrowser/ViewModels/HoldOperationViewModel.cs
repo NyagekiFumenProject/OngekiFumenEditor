@@ -1,10 +1,11 @@
+using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-	public class HoldOperationViewModel : ObservableObject
+	public class HoldOperationViewModel : ViewModelBase
 	{
 		private Hold connectableObject;
 		public Hold ConnectableObject

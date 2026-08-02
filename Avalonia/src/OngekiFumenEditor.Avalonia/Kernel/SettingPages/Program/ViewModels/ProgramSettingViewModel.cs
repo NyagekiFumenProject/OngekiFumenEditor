@@ -1,3 +1,4 @@
+using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
@@ -6,7 +7,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 
-public partial class ProgramSettingViewModel : ObservableObject
+public partial class ProgramSettingViewModel : ViewModelBase
 {
     public ProgramSetting Setting => ProgramSetting.Default;
 

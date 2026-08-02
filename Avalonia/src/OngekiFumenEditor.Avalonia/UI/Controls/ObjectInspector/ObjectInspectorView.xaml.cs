@@ -1,10 +1,11 @@
+using Gekimini.Avalonia.Views;
 using Avalonia;
 using Avalonia.Controls;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector;
 
-public partial class ObjectInspectorView : UserControl
+public partial class ObjectInspectorView : ViewBase
 {
     public static readonly StyledProperty<object> InspectObjectProperty =
         AvaloniaProperty.Register<ObjectInspectorView, object>(nameof(InspectObject));

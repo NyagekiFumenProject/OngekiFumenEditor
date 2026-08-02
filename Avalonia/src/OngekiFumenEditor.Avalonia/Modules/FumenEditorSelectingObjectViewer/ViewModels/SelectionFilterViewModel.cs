@@ -1,4 +1,5 @@
-﻿#nullable enable
+#nullable enable
+using Gekimini.Avalonia.ViewModels;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,7 +14,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 
-public partial class SelectionFilterViewModel : ObservableObject
+public partial class SelectionFilterViewModel : ViewModelBase
 {
     public FumenEditorSelectingObjectViewerViewModel SelectionViewerTool { get; }
     public OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel? Editor => SelectionViewerTool.Editor;

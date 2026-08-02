@@ -1,8 +1,9 @@
+using Gekimini.Avalonia.Views;
 using Avalonia.Controls;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.Views;
 
-public partial class AudioSettingView : UserControl
+public partial class AudioSettingView : ViewBase
 {
     public AudioSettingView()
     {

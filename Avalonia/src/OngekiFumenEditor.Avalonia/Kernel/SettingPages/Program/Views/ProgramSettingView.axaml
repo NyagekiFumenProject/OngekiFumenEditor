@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.Views.ProgramSettingView"
     x:DataType="vm:ProgramSettingViewModel"
     xmlns="https://github.com/avaloniaui"
@@ -88,7 +89,7 @@
             </StackPanel>
         </controls:GroupBox>
     </StackPanel>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

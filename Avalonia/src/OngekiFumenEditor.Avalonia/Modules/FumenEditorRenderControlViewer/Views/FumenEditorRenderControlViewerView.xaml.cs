@@ -1,8 +1,8 @@
-using Avalonia.Controls;
+using Gekimini.Avalonia.Views;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views;
 
-public partial class FumenEditorRenderControlViewerView : UserControl
+public partial class FumenEditorRenderControlViewerView : ViewBase
 {
     public FumenEditorRenderControlViewerView()
     {

@@ -1,10 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views;
 
-public partial class FumenBulletPalleteListViewerView : UserControl
+public partial class FumenBulletPalleteListViewerView : ViewBase
 {
     public FumenBulletPalleteListViewerView()
     {

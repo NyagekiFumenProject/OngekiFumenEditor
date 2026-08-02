@@ -1,3 +1,4 @@
+using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Attributes;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
@@ -7,7 +8,7 @@ using System.Reflection;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
-public partial class ObjectInspectorViewModel : ObservableObject
+public partial class ObjectInspectorViewModel : ViewModelBase
 {
     [ObservableProperty]
     private object inspectObject;

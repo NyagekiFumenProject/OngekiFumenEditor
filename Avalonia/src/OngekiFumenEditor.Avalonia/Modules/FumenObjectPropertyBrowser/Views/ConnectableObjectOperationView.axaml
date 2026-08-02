@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.ConnectableObjectOperationView"
     x:CompileBindings="True"
     x:DataType="vm:ConnectableObjectOperationViewModel"
@@ -109,7 +110,7 @@
                 TextWrapping="Wrap" />
         </Button>
     </StackPanel>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

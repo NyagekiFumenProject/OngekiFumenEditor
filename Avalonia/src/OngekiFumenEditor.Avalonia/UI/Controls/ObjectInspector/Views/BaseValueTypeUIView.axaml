@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.BaseValueTypeUIView"
     x:CompileBindings="True"
     x:DataType="viewModels:BaseValueTypeUIViewModel"
@@ -32,4 +33,4 @@
             Text="{Binding PropertyInfo.ProxyValue}">
         </TextBox>
     </Grid>
-</UserControl>
+</gekViews:ViewBase>

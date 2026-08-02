@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views.FumenBulletPalleteListViewerView"
     x:Name="Root"
     x:CompileBindings="True"
@@ -19,10 +20,10 @@
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <valueconverters:EnumValuesGenerator x:Key="EnumValuesGenerator">
         </valueconverters:EnumValuesGenerator>
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -201,4 +202,4 @@
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
-</UserControl>
+</gekViews:ViewBase>

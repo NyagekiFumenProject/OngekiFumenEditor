@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.FumenEditorSelectingObjectViewerView"
     x:Name="Root"
     x:CompileBindings="True"
@@ -21,12 +22,12 @@
     d:DesignHeight="300"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.KeyBindings>
+    <gekViews:ViewBase.KeyBindings>
         <KeyBinding Command="{Binding CancelSelectedObjectsCommand}" Gesture="Delete" />
-    </UserControl.KeyBindings>
-    <UserControl.Resources>
+    </gekViews:ViewBase.KeyBindings>
+    <gekViews:ViewBase.Resources>
         <valueconverters:GetObjectSoflanGroupConverter x:Key="GetObjectSoflanGroupConverter" />
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
     <TabControl>
         <TabItem Header="Selection">
 
@@ -115,7 +116,7 @@
             <views:SelectionFilterView DataContext="{Binding SelectionFilter}" />
         </TabItem>
     </TabControl>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

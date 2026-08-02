@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.MultiLanesOperationView"
     x:DataType="vm:MultiLanesOperationViewModel"
     xmlns="https://github.com/avaloniaui"
@@ -29,7 +30,7 @@
                 TextWrapping="Wrap" />
         </Button>
     </StackPanel>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

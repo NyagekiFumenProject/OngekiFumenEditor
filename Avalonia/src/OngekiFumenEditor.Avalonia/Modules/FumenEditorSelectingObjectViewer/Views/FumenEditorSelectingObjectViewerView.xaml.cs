@@ -1,11 +1,12 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views;
 
-public partial class FumenEditorSelectingObjectViewerView : UserControl
+public partial class FumenEditorSelectingObjectViewerView : ViewBase
 {
     public FumenEditorSelectingObjectViewerView()
     {

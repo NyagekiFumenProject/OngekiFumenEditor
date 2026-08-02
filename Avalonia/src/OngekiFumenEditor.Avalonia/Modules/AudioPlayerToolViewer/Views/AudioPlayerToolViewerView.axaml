@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Views.AudioPlayerToolViewerView"
     x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
@@ -21,10 +22,10 @@
                                      IsDesignTimeCreatable=True}"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <converters1:IntToTimeDisplayConverter x:Key="IntToTimeDisplayConverter">
         </converters1:IntToTimeDisplayConverter>
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
     <ScrollViewer>
         <Grid>
             <Grid.RowDefinitions>
@@ -302,4 +303,4 @@
             </StackPanel>
         </Grid>
     </ScrollViewer>
-</UserControl>
+</gekViews:ViewBase>

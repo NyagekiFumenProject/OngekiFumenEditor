@@ -1,10 +1,11 @@
+using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using System.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
-public abstract class CommonUIViewModelBase : ObservableObject
+public abstract class CommonUIViewModelBase : ViewModelBase
 {
     private IObjectPropertyAccessProxy propertyInfo;
 

@@ -1,3 +1,4 @@
+using Gekimini.Avalonia.Views;
 using System;
 using Avalonia;
 using Avalonia.Controls;
@@ -9,7 +10,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views;
 
-public partial class ConnectableObjectOperationView : UserControl
+public partial class ConnectableObjectOperationView : ViewBase
 {
     private readonly PointerDragSession dragSession = new();
 

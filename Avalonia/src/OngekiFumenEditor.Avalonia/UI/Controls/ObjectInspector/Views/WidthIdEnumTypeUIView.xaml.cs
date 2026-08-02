@@ -1,8 +1,9 @@
+using Gekimini.Avalonia.Views;
 using Avalonia.Controls;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views;
 
-public partial class WidthIdEnumTypeUIView : UserControl
+public partial class WidthIdEnumTypeUIView : ViewBase
 {
     public WidthIdEnumTypeUIView()
     {

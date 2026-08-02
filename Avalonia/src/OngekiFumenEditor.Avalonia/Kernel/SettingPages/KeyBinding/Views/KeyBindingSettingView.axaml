@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Views.KeyBindingSettingView"
     x:CompileBindings="True"
     x:Name="Root"
@@ -18,9 +19,9 @@
                                      Type=vm:KeyBindingSettingViewModel}"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <valueconverters:ShowKeybindExpressionValueConverter x:Key="ShowKeybindExpressionValueConverter" />
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -100,7 +101,7 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
     </Grid>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

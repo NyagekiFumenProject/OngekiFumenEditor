@@ -1,11 +1,12 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Views;
 
-public partial class AudioPlayerToolViewerView : UserControl
+public partial class AudioPlayerToolViewerView : ViewBase
 {
     private CancellationTokenSource waveformHostCancellationSource;
     private AudioPlayerToolViewerViewModel attachedWaveformViewModel;

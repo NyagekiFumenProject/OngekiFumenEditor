@@ -1,4 +1,5 @@
-<UserControl x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.SelectionFilterView"
+<gekViews:ViewBase x:Class="OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views.SelectionFilterView"
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
              x:CompileBindings="True"
              xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -14,13 +15,13 @@
              Padding="3"
              Background="Transparent"
              d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=vm:SelectionFilterViewModel}">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <valueconverters:WideModeToVisibilityConverter x:Key="WideModeToVisibilityConverter" />
         <valueconverters:InverseWideModeToVisibilityConverter x:Key="InverseWideModeToVisibilityConverter" />
         <system:Boolean x:Key="True">True</system:Boolean>
         <system:Boolean x:Key="False">False</system:Boolean>
-    </UserControl.Resources>
-    <UserControl.DataTemplates>
+    </gekViews:ViewBase.Resources>
+    <gekViews:ViewBase.DataTemplates>
         <!-- FILTER OPTIONS -->
 
         <DataTemplate DataType="selectionFilter:BooleanOption" x:DataType="selectionFilter:BooleanOption">
@@ -158,8 +159,8 @@
         <DataTemplate DataType="selectionFilter:FilterObjectTypesItem" x:DataType="selectionFilter:FilterObjectTypesItem">
             <CheckBox Content="{Binding Display}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
         </DataTemplate>
-    </UserControl.DataTemplates>
-    <UserControl.Styles>
+    </gekViews:ViewBase.DataTemplates>
+    <gekViews:ViewBase.Styles>
         <Style Selector="CheckBox">
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -182,7 +183,7 @@
             <Setter Property="Margin" Value="4 0" />
         </Style>
 
-    </UserControl.Styles>
+    </gekViews:ViewBase.Styles>
 
     <!-- PAGE LAYOUT -->
 
@@ -306,4 +307,4 @@
             </StackPanel>
         </StackPanel>
     </Grid>
-</UserControl>
+</gekViews:ViewBase>

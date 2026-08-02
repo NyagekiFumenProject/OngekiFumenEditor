@@ -1,3 +1,4 @@
+using Gekimini.Avalonia.Views;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Gekimini.Avalonia.Framework.DragDrops;
@@ -6,7 +7,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views;
 
-public partial class WallOperationView : UserControl
+public partial class WallOperationView : ViewBase
 {
     private readonly PointerDragSession dragSession = new();
 

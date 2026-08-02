@@ -1,3 +1,4 @@
+using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Platforms.Services.Window;
@@ -7,7 +8,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
 
-public partial class FumenVisualEditorGlobalSettingViewModel : ObservableObject
+public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase
 {
     public EditorGlobalSetting Setting => EditorGlobalSetting.Default;
 

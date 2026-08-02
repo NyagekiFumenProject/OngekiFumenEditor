@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
@@ -6,7 +7,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 
-public partial class AudioSettingViewModel : ObservableObject
+public partial class AudioSettingViewModel : ViewModelBase
 {
     private readonly IAudioPlatformCapabilities platformCapabilities;
     private readonly AudioSetting setting;

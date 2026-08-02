@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView"
     x:CompileBindings="True"
@@ -22,7 +23,7 @@
     Background="#101010"
     Focusable="True"
     mc:Ignorable="d">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <ResourceDictionary>
             <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter" />
             <converters:JudgeLineConverter x:Key="JudgeLineConverter" />
@@ -35,7 +36,7 @@
             <converters:BoolToScrollBarVisibleConverter x:Key="BoolToScrollBarVisibleConverter" />
             <converters:IsStringEmptyConverter x:Key="IsStringEmptyConverter" />
         </ResourceDictionary>
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
 
     <Grid Focusable="False">
         <Grid.ColumnDefinitions>
@@ -148,6 +149,6 @@
             </controls1:Toast>
         </StackPanel>
     </Grid>
-</UserControl>
+</gekViews:ViewBase>
 
 

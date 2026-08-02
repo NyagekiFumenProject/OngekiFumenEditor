@@ -1,11 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.ViewModels;
 
-public partial class LogsSettingViewModel : ObservableObject
+public partial class LogsSettingViewModel : ViewModelBase
 {
     public LogSetting Setting => LogSetting.Default;
 

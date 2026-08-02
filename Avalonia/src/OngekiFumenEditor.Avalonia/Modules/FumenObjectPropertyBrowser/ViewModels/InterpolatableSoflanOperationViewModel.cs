@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Modules.Toolbox;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Base;
@@ -16,7 +17,7 @@ using Gekimini.Avalonia.Utils.MethodExtensions;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
-	public partial class InterpolatableSoflanOperationViewModel : ObservableObject
+	public partial class InterpolatableSoflanOperationViewModel : ViewModelBase
 	{
 		private InterpolatableSoflan soflan;
 

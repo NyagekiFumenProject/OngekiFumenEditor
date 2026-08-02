@@ -1,10 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views;
 
-public partial class FumenTimeSignatureListViewerView : UserControl
+public partial class FumenTimeSignatureListViewerView : ViewBase
 {
     public FumenTimeSignatureListViewerView()
     {

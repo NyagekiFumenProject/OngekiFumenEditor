@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.FumenObjectPropertyBrowserView"
     x:CompileBindings="True"
     x:DataType="vm:FumenObjectPropertyBrowserViewModel"
@@ -15,11 +16,11 @@
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <valueconverters:PropertyGeneratorConverter x:Key="PropertyGeneratorConverter" />
         <converters1:ObjectOperationGeneratorConverter x:Key="ObjectOperationGeneratorConverter" />
         <converters1:MultiObjectsOperationGeneratorConverter x:Key="MultiObjectsOperationGeneratorConverter" />
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
     <ScrollViewer Name="HostContent" VerticalScrollBarVisibility="Auto">
         <StackPanel>
             <ItemsControl ItemsSource="{Binding PropertyInfoWrappers}">
@@ -36,7 +37,7 @@
             </ContentPresenter>
         </StackPanel>
     </ScrollViewer>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

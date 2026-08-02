@@ -1,4 +1,5 @@
-<UserControl
+<gekViews:ViewBase
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView"
     x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
@@ -19,12 +20,12 @@
     d:DesignHeight="800"
     d:DesignWidth="300"
     mc:Ignorable="d">
-    <UserControl.Resources>
+    <gekViews:ViewBase.Resources>
         <converters:UnitCloseSizeConverter x:Key="UnitCloseSizeConverter">
         </converters:UnitCloseSizeConverter>
         <converters1:NullToVisibilityConverter x:Key="NullToVisibilityConverter">
         </converters1:NullToVisibilityConverter>
-    </UserControl.Resources>
+    </gekViews:ViewBase.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="10,5,10,5" IsVisible="{Binding Setting, Converter={StaticResource NullToVisibilityConverter}}">
@@ -167,7 +168,7 @@
             </CheckBox>
         </StackPanel>
     </ScrollViewer>
-</UserControl>
+</gekViews:ViewBase>
 
 
 

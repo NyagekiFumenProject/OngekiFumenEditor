@@ -1,10 +1,11 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views;
 
-public partial class FumenCheckerListViewerView : UserControl
+public partial class FumenCheckerListViewerView : ViewBase
 {
     public FumenCheckerListViewerView()
     {
