@@ -1,11 +1,11 @@
-using OngekiFumenEditor.Avalonia.CommandLine;
-using OngekiFumenEditor.Avalonia.CommandLine.Commands.Convert;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
 
 public sealed class ConvertCommandLineDefinitionTests
 {

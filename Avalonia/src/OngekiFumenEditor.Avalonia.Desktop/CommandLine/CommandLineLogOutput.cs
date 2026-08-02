@@ -1,7 +1,7 @@
 using OngekiFumenEditor.Avalonia.Utils.Logs;
 using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 
-namespace OngekiFumenEditor.Avalonia.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 
 internal sealed class CommandLineLogOutput : ILogOutput
 {

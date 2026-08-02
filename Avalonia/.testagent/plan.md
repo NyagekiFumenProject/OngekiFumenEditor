@@ -229,3 +229,198 @@
 - 发布 JIT 与 `win-x64-aot`，分别运行根帮助、版本、`convert --help`、未知命令、成功转换和错误转换。
 - 记录每组退出码、stdout、stderr 和输出文件状态；成功产物需重新解析而不是只检查存在。
 - 本轮不修改 CI，占位校验与新行为不一致的问题仅记录在统一跟踪文档。
+
+## CommandLine 迁移到 Desktop Broad-scope 测试计划（2026-08-02）
+
+### 阶段 0：测试项目重组
+
+计划建立 `tests/OngekiFumenEditor.Avalonia.Desktop.Tests/OngekiFumenEditor.Avalonia.Desktop.Tests.csproj`：
+
+- 目标 `net10.0-windows10.0.19041.0`，引用 Desktop，不直接引用 CommandLine。
+- 沿用 `tests/Directory.Packages.props` 中的 xUnit/VSTest 版本；需要生命周期测试时加入与产品一致的 `Avalonia.Headless.XUnit`。
+- 添加 `[assembly: CollectionBehavior(DisableTestParallelization = true)]`，避免 Avalonia 和进程环境相互污染。
+- Desktop 通过 `InternalsVisibleTo("OngekiFumenEditor.Avalonia.Desktop.Tests")` 暴露 internal Definition/Handler/测试 seam。
+- 将现有 `tests/...Avalonia.Tests/CommandLine` 四个文件迁到新项目；`Fixtures/minimal.nyageki` 保留单一源文件，由 Desktop.Tests 以 link + `CopyToOutputDirectory` 使用。
+- Core 测试项目删除 CommandLine `ProjectReference`，最终只引用 Core；solution 同时发现 Core.Tests 和 Desktop.Tests。
+
+项目结构测试/证据：
+
+- `CoreTestProject_ReferencesOnlyCoreProductProject`（若使用 MSBuild/XML 审核测试）或在最终项目 diff 中直接证明。
+- `DesktopTestProject_TargetsWindowsAndReferencesDesktop`（同上）。
+- `dotnet test ...Desktop.Tests.csproj --list-tests` 必须仍列出迁移前 18 个展开用例。
+
+### 阶段 1：生命周期、宿主与命令框架
+
+计划文件：
+
+- `Lifecycle/CommandLineApplicationLifecycleTests.cs`
+- `Lifecycle/DesktopCommandLineHostProcessTests.cs`
+- `CommandLine/DefaultCommandExecutorTests.cs`（迁移并扩展）
+- `CommandLine/CommandLineRegistrationTests.cs`
+
+计划测试：
+
+- `CommandLineMode_FrameworkInitialization_LoadsXamlLanguageThemeCoreDesktopDiAndLogging`
+- `CommandLineMode_FrameworkInitialization_DoesNotResolveMainViewCreateWindowOrInitializeStatusBar`
+- `CommandLineMode_PrepareExit_DoesNotRestoreOrSaveWindowState`
+- `CommandLineMode_CoreApp_DoesNotAttachKeyBindingsOrShowSplash`
+- `CommandLineMode_DesktopApp_DoesNotAttachXamlMcpOrProcessGuiStartupArgs`
+- `DesktopCommandLineHost_CommandCompletion_ShutsDownExplicitlyWithExecutorExitCode`
+- `RootHelp_ListsConvertSvgJacketUpdaterAndOmitsAcb`
+- `CommandHelp_EachRegisteredCommand_ListsItsOptionsWithoutInvokingHandler`
+- `Constructor_DuplicateCommandNamesIgnoringCase_Throws`
+- `ExecuteAsync_VerbosityAliasAfterSubcommand_InvokesCommand`（`--verbose`/`-v` 两行）
+- `UnknownCommand_DoesNotInvokeAnyRegisteredCommand`
+- `AddOngekiFumenEditorCommandLine_RegistersFourDefinitionHandlerPairsAsSingletons`
+- `AddOngekiFumenEditorCommandLine_ResolvesOnlyDefaultFumenParserManager`
+
+生命周期 fake 必须把 `IMainView`、`IStatusBar`、`IPlatformMainWindow`、窗口设置读写、快捷键路由、Splash 和 GUI 参数处理做成一旦解析/调用就记录或失败的依赖。正向断言同时检查 `Application.Current`、XAML 资源、`ILanguageManager`/`IThemeManager` 初始化、Core parser、Desktop command executor 和 `ILoggerFactory` 可用，避免只证明“没有窗口”。
+
+`DesktopCommandLineHost` 的进程级测试使用一个返回非零哨兵码的测试命令或真实相对路径错误，断言 Classic Desktop lifetime 在超时内退出且 `Process.ExitCode` 与命令返回完全一致。`ShutdownMode.OnExplicitShutdown` 应有直接状态断言；子进程无挂起只作为第二证据。
+
+### 阶段 2：convert 基线迁移
+
+计划文件保持原四个类名：
+
+- `CommandLine/ConvertCommandLineDefinitionTests.cs`
+- `CommandLine/ConvertCommandLineHandlerTests.cs`
+- `CommandLine/ConvertCommandIntegrationTests.cs`
+
+保留全部现有测试名和 18 项展开基线。注册测试按四命令新现实改写，不能继续断言只有一个 Definition。额外检查：
+
+- 相对 input 和相对 output 分别返回 `-3`，服务调用次数为 0。
+- 失败结果和异常均返回 `-4`，错误文字包含业务原因。
+- `ConvertFixture_ToOgkr_ProducesReparseableChartWithPreservedContent` 继续覆盖 `standardize=false/true`，比较语义指纹和临时文件清理。
+- 取消仍保留既有目标，不能因代码搬家退化。
+
+### 阶段 3：svg
+
+计划文件：
+
+- `CommandLine/SvgCommandLineDefinitionTests.cs`
+- `CommandLine/SvgCommandLineHandlerTests.cs`
+- `CommandLine/SvgCommandIntegrationTests.cs`
+- `CommandLine/PngStructureAssertions.cs`
+
+计划测试：
+
+- `Invoke_AllOptions_BindsSvgOptionsAndCallsInjectedHandler`
+- `Invoke_DefaultOptions_UsesLegacySvgDefaults`
+- `Invoke_MissingEachRequiredSvgPath_DoesNotCallHandler`（三个数据行）
+- `HandleAsync_AnyRelativeSvgPath_ReturnsMinusOneWithoutCallingDependencies`（input/output/audio 三个数据行）
+- `HandleAsync_ExistingAudio_UsesExactAudioDuration`
+- `HandleAsync_MissingAudio_UsesChartTailPlusFiveGrids`
+- `HandleAsync_GeneratorOrRasterizerFailure_ReturnsMinusTwoAndWritesError`
+- `SvgFixture_NoAudio_ProducesWellFormedSvgWithDeclaredPositiveDimensions`
+- `SvgFixture_ExistingAudio_UsesAudioDurationRatherThanChartTail`
+- `SvgFixture_Png_EndsAtIendAndImageSharpDecodesDeclaredDimensions`
+
+默认值测试必须一次组合断言 `XGridDisplayMaxUnit=40`、`ViewWidth=800`、`VerticalScale=1`、`SoflanMode.Soflan`、`RenderAsPng=false`。无音频测试构造至少一个明确位于非零 TGrid 的 displayable timeline object，捕获传给 Core generator 的公开 `Duration`，并用 `TGridCalculator` 计算精确期望；不能只断言 duration 大于零。
+
+PNG 测试同时断言 8 字节签名、IHDR 宽高、最后一个 chunk 为 IEND、IEND 后无字节，以及 `Image.Load` 后尺寸等于 SVG 根元素声明尺寸。这样可杀死旧版把 SVG bytes 追加到 PNG 的缺陷。
+
+### 阶段 4：jacket
+
+计划文件：
+
+- `CommandLine/JacketCommandLineDefinitionTests.cs`
+- `CommandLine/JacketCommandLineHandlerTests.cs`
+- `CommandLine/JacketGenerateServiceIntegrationTests.cs`
+- `CommandLine/AssetBytesAssertions.cs`
+
+计划测试：
+
+- `Invoke_DefaultOptions_Uses520And220JacketDimensions`
+- `Invoke_DistinctSmallWidthAndHeight_BindsToCorrectProperties`
+- `Invoke_MissingEachRequiredJacketOption_DoesNotCallHandler`
+- `HandleAsync_AnyRelativeJacketPath_ReturnsMinusFiveWithoutCallingService`
+- `HandleAsync_ServiceFailureOrException_ReturnsMinusSixAndWritesReason`
+- `HandleAsync_ServiceSuccess_ReturnsZeroWithoutError`
+- `Generate_RealTemplate_ProducesNormalAndSmallBundlesWithRequestedTextureDimensions`
+- `Generate_UpdateAssetBytes_PreservesExistingRecordAndAppendsBothJacketNames`
+- `DesktopOutput_ContainsJacketTemplateAndAllNativeDependencies`
+
+反向绑定回归测试必须给 `--outputWidthSmall` 和 `--outputHeightSmall` 不同值，例如 321 和 123，并精确断言 `WidthSmall=321`、`HeightSmall=123`。真实集成使用临时 PNG、music id 666 和真实 `ui_jacket_0666`，解析两份 bundle 内纹理而不是只看文件大小；`assets.bytes` 先写入一个带 dependency 的既有记录，生成后断言 count、id/name/dependencies 原样保留并新增 `ui_jacket_0666`、`ui_jacket_0666_s`。
+
+资源输出测试精确检查 `ui_jacket_0666`、`TexturePlugin.dll`、`TexToolWrap.dll`、`PVRTexLib.dll`、`ispc_texcomp.dll`，并在 JIT/AOT publish 目录各重复一次。若某原生库无法加载，测试失败并作为 AOT 阻塞报告，不能 Skip。
+
+### 阶段 5：updater
+
+计划文件：
+
+- `CommandLine/UpdaterCommandLineDefinitionTests.cs`
+- `CommandLine/UpdaterCommandLineHandlerTests.cs`
+- `CommandLine/ProgramUpdateServiceTests.cs`
+- `CommandLine/UpdaterExecutableSmokeTests.cs`
+
+计划测试：
+
+- `Invoke_AllRequiredUpdaterOptions_BindsAndCallsInjectedHandler`
+- `Invoke_MissingEachRequiredUpdaterOption_DoesNotCallHandler`
+- `HandleAsync_PropagatesProgramUpdateResultAndWritesOnlyFailures`
+- `Update_Success_RecursivelyCopiesIncludedFilesExcludesThreeExtensionsAndRestartsDesktop`
+- `Update_KillFails_ReturnsMinusOneBeforeAnyFileMutation`
+- `Update_BackupFails_ReturnsMinusTwoAndRestoresEarlierBackups`
+- `Update_CopyFails_ReturnsMinusThreeAndPreservesLegacyPartialRollbackState`
+- `Update_BackupCleanupFails_StillReturnsSuccessAndRestartsDesktop`
+- `Update_Success_KillsOnlyOtherDesktopProcessesAndUsesLegacyNotifyArguments`
+- `UpdaterExecutable_TemporaryFoldersAndHarmlessDesktopStub_CompletesWithoutTouchingWorkspace`
+
+成功 fixture 至少包含根文件、嵌套文件、三个被排除扩展、目标中已有文件和一个新文件。断言进程查询名为 `OngekiFumenEditor.Avalonia.Desktop`，当前 PID 不被 kill，其他实例被 kill；备份名匹配 `.bak_*`；成功后备份删除；启动路径为 `OngekiFumenEditor.Avalonia.Desktop.exe`，参数精确为 `--wait --notifySucess --sourceVersion <version>`。
+
+复制失败测试刻意让前一目标已完成复制、后一目标抛错。按旧实现的无覆盖 `File.Move`，前一目标应保持新内容且旧内容留在 `.bak_*`，后一目标从 backup 恢复；这项看似不理想的状态是用户要求保留的旧版行为。测试名和注释必须明确是 legacy contract，不能顺手修成完整事务。
+
+实际 EXE smoke 在专用临时根生成/放置一个无害的 `OngekiFumenEditor.Avalonia.Desktop.exe` stub（只记录参数后退出），source/target 均在该根下。等待 stub marker 和 updater 退出后清理，禁止使用真实安装目录、当前构建输出目录或正在运行的 Desktop。
+
+### 阶段 6：JIT/AOT 与最终验证
+
+验证矩阵：
+
+| 产物 | 构建/发布 | 冒烟要求 |
+| --- | --- | --- |
+| CommandLine JIT | Windows TFM、self-contained win-x64 | 根帮助、四命令帮助、未知参数、convert 成功/-3/-4、svg SVG/PNG、jacket、临时 updater |
+| CommandLine AOT | `PublishAot=true`/win-x64 | 与 JIT 同组，比较退出码和关键产物语义 |
+| Desktop JIT | `win-x64-jit` profile | 有限时 GUI 启动无立即崩溃；供 CommandLine host 引用的程序集和 jacket 资源齐全 |
+| Desktop AOT | `win-x64-aot` profile | 有限时启动；无新增无法解释的 AOT/trim 错误；jacket 原生依赖齐全 |
+
+命令行模式的无窗口证据由两层组成：生命周期单测断言 `MainWindow`/窗口列表为空且窗口服务未解析；JIT/AOT 子进程在较长命令运行期间枚举属于该 PID 的顶层窗口，始终为零。每个进程设置硬超时并记录 stdout、stderr、`Process.ExitCode` 和产物状态。
+
+计划验证命令（实施阶段执行，研究阶段未执行）：
+
+```powershell
+dotnet test .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.Avalonia.Desktop.Tests.csproj -c Debug -v:minimal
+dotnet test .\tests\OngekiFumenEditor.Avalonia.Tests\OngekiFumenEditor.Avalonia.Tests.csproj -c Debug -v:minimal
+dotnet build .\OngekiFumenEditor.Avalonia.sln -c Release --no-incremental -v:minimal
+dotnet test .\OngekiFumenEditor.Avalonia.sln -c Release --no-build -v:minimal
+dotnet publish .\src\OngekiFumenEditor.Avalonia.Desktop\OngekiFumenEditor.Avalonia.Desktop.csproj -p:PublishProfile=win-x64-jit -v:minimal
+dotnet publish .\src\OngekiFumenEditor.Avalonia.Desktop\OngekiFumenEditor.Avalonia.Desktop.csproj -p:PublishProfile=win-x64-aot -v:minimal
+dotnet publish .\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=false -v:minimal
+dotnet publish .\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj -c Release -r win-x64 --self-contained true -p:PublishAot=true -v:minimal
+git diff --check
+```
+
+完成测试实现后必须调用 `test-gap-analysis` 和 `assertion-quality`，把发现、修复、最终精确通过数和 publish/smoke 结果写入 `.testagent/status.md`。CI workflow 的旧占位输出校验必须记录为已知失败，不运行后宣称通过。
+
+### 需求映射
+
+| 清单 | 计划测试或证据 |
+| --- | --- |
+| `CLD-01` 薄启动器 | CommandLine csproj/Program 结构审核；CommandLine JIT/AOT 子进程均通过 `DesktopCommandLineHost` 得到业务退出码 |
+| `CLD-02` 所有命令归 Desktop、领域服务留 Core | Desktop.Tests 编译引用关系；Core.Tests 只引用 Core；四类 Definition/Handler 的程序集断言 |
+| `CLD-03` 初始化完整但无 GUI | `CommandLineMode_FrameworkInitialization_LoadsXamlLanguageThemeCoreDesktopDiAndLogging`; `CommandLineMode_FrameworkInitialization_DoesNotResolveMainViewCreateWindowOrInitializeStatusBar`; `CommandLineMode_PrepareExit_DoesNotRestoreOrSaveWindowState` |
+| `CLD-04` 跳过 GUI 专属启动 | `CommandLineMode_CoreApp_DoesNotAttachKeyBindingsOrShowSplash`; `CommandLineMode_DesktopApp_DoesNotAttachXamlMcpOrProcessGuiStartupArgs` |
+| `CLD-05` Classic Desktop/显式关闭/退出码 | `DesktopCommandLineHost_CommandCompletion_ShutsDownExplicitlyWithExecutorExitCode`；JIT/AOT process smoke |
+| `CLD-06` 包、Injectio、可见性、TFM | 两个 csproj 的 MSBuild/结构审核；Desktop.Tests 能直接编译 internal 命令测试；四产物 build/publish |
+| `CLD-07` parser/Duration | `AddOngekiFumenEditorCommandLine_ResolvesOnlyDefaultFumenParserManager`; `HandleAsync_ExistingAudio_UsesExactAudioDuration`; `HandleAsync_MissingAudio_UsesChartTailPlusFiveGrids` |
+| `CLD-08` convert | 迁移的 18 项基线，尤其 `HandleAsync_RelativePath_ReturnsLegacyPathExitCodeWithoutCallingService`、失败/异常两项和 `ConvertFixture_ToOgkr_ProducesReparseableChartWithPreservedContent` |
+| `CLD-09` SVG 必填路径与时长分支 | `Invoke_MissingEachRequiredSvgPath_DoesNotCallHandler`; `HandleAsync_AnyRelativeSvgPath_ReturnsMinusOneWithoutCallingDependencies`; 两项 Duration 测试 |
+| `CLD-10` SVG 默认/PNG/-2 | `Invoke_DefaultOptions_UsesLegacySvgDefaults`; `HandleAsync_GeneratorOrRasterizerFailure_ReturnsMinusTwoAndWritesError`; `SvgFixture_Png_EndsAtIendAndImageSharpDecodesDeclaredDimensions` |
+| `CLD-11` jacket 绑定/退出码 | `Invoke_DefaultOptions_Uses520And220JacketDimensions`; `Invoke_DistinctSmallWidthAndHeight_BindsToCorrectProperties`; Jacket Handler 三组测试 |
+| `CLD-12` jacket 真模板与资源 | `Generate_RealTemplate_ProducesNormalAndSmallBundlesWithRequestedTextureDimensions`; `Generate_UpdateAssetBytes_PreservesExistingRecordAndAppendsBothJacketNames`; `DesktopOutput_ContainsJacketTemplateAndAllNativeDependencies` |
+| `CLD-13` updater 行为/-1/-2/-3 | `Update_Success_RecursivelyCopiesIncludedFilesExcludesThreeExtensionsAndRestartsDesktop`; 三项失败测试；`Update_CopyFails_ReturnsMinusThreeAndPreservesLegacyPartialRollbackState` |
+| `CLD-14` updater 重启参数与安全 EXE smoke | `Update_Success_KillsOnlyOtherDesktopProcessesAndUsesLegacyNotifyArguments`; `UpdaterExecutable_TemporaryFoldersAndHarmlessDesktopStub_CompletesWithoutTouchingWorkspace` |
+| `CLD-15` 不注册 acb | `RootHelp_ListsConvertSvgJacketUpdaterAndOmitsAcb`; 精确四 Definition DI 断言；迁移跟踪文档审核 |
+| `CLD-16` Desktop.Tests/18 项/Core-only | `--list-tests` 展开数审核、两个测试 csproj 引用审核、solution 发现 |
+| `CLD-17` 框架覆盖 | `DefaultCommandExecutorTests`、四个 Definition 测试类、`CommandLineRegistrationTests` 和全部 Handler 退出码测试 |
+| `CLD-18` JIT/AOT/无窗口/退出码 | 阶段 6 四产物矩阵、生命周期无窗口单测、CommandLine 两种产物的有符号退出码对照 |
+| `CLD-19` 最终验证和 CI 已知失败 | solution build/test、`git diff --check`、`.testagent/status.md` 和 `docs/command-line-migration-tracking.md`；不得列 CI 占位检查为成功证据 |

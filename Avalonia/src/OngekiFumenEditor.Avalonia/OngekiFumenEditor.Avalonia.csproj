@@ -24,6 +24,9 @@
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>OngekiFumenEditor.Avalonia.Tests</_Parameter1>
         </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>OngekiFumenEditor.Avalonia.Desktop.Tests</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
     <!---->
 

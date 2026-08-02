@@ -32,9 +32,8 @@ internal class Program
             e.SetObserved();
         };
 #endif
-        BuildAvaloniaApp()
+        return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
-        return 0;
     }
 
     internal static string[] StartupArgs { get; private set; } = [];
@@ -83,8 +82,11 @@ internal class Program
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
+        => BuildAvaloniaApp(static () => new OngekiFumenEditorDesktopApp());
+
+    internal static AppBuilder BuildAvaloniaApp(Func<OngekiFumenEditorDesktopApp> appFactory)
     {
-        return AppBuilder.Configure<OngekiFumenEditorDesktopApp>()
+        return AppBuilder.Configure(appFactory)
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();

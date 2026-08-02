@@ -1,23 +1,22 @@
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.CommandLine;
-using OngekiFumenEditor.Avalonia.CommandLine.Commands.Convert;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using OngekiFumenEditor.Avalonia.Parser;
-using OngekiFumenEditor.Avalonia.Tests.Corpus;
 using OngekiFumenEditor.Avalonia.Utils;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
 
 public sealed class ConvertCommandIntegrationTests
 {
     [Fact]
-    public void AddOngekiFumenEditorCommandLine_RegistersDefinitionHandlerAndExecutorAsSingletons()
+    public void AddOngekiFumenEditorDesktopCommandLine_RegistersDefinitionHandlerAndExecutorAsSingletons()
     {
         var services = new ServiceCollection();
-        services.AddOngekiFumenEditorCommandLine();
+        services.AddOngekiFumenEditorDesktopCommandLine();
 
         using var provider = services.BuildServiceProvider();
         var definition = Assert.Single(provider.GetServices<ICommandLineDefinition>());
@@ -64,14 +63,12 @@ public sealed class ConvertCommandIntegrationTests
             parserManager.GetDeserializer(outputPath));
         await using var stream = File.OpenRead(outputPath);
         var converted = await deserializer.DeserializeAsync(stream);
-        var fingerprint = FumenSemanticFingerprint.Capture(converted);
-
-        Assert.Equal("1.7.0", fingerprint.Version);
-        Assert.Equal("Avalonia migration test", fingerprint.Creator);
-        Assert.Equal(1, fingerprint.Lanes);
-        Assert.Equal(1, fingerprint.Taps);
-        Assert.Equal(1, fingerprint.TapsWithLaneReference);
-        Assert.Equal(1, fingerprint.EnemySets);
+        Assert.Equal("1.7.0", converted.MetaInfo.Version.ToString());
+        Assert.Equal("Avalonia migration test", converted.MetaInfo.Creator);
+        Assert.Single(converted.Lanes);
+        Assert.Single(converted.Taps);
+        Assert.Single(converted.Taps, x => x.ReferenceLaneStart is not null);
+        Assert.Single(converted.EnemySets);
     }
 
     [Fact]
@@ -127,7 +124,7 @@ public sealed class ConvertCommandIntegrationTests
     private static ServiceProvider CreateProvider(ICommandLineOutput? output = null)
     {
         var services = new ServiceCollection();
-        services.AddOngekiFumenEditorCommandLine();
+        services.AddOngekiFumenEditorDesktopCommandLine();
         if (output is not null)
             services.AddSingleton(output);
         return services.BuildServiceProvider();

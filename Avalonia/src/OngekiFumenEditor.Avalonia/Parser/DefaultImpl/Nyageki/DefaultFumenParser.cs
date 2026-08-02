@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Injectio.Attributes;
 using System.Linq;
 
 namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 {
-	[RegisterSingleton<IFumenParserManager>]
 	internal class DefaultFumenParserManager : IFumenParserManager
 	{
 		

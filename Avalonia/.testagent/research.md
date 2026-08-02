@@ -203,3 +203,98 @@ Native AOT 可执行文件启动烟测必须与 publish 分开记录：启动后
 - `FumenConverterWrapper`、`DefaultFumenConverter`、OGKR `CommandArgs` 和 `StandardizeFormat` 的现有路径包含静态 `IoC`；真实 headless convert 必须给这些路径增加显式依赖入口。
 - GUI 兼容入口和已有注释保留；CLI 不创建 `Avalonia.Application`，不启动窗口或 Dispatcher。
 - CI 工作流本轮不修改。
+
+## CommandLine 迁移到 Desktop 增量研究（2026-08-02）
+
+### 本轮边界与仓库快照
+
+本轮测试范围是把 CommandLine 框架和平台命令迁入 Desktop 后的完整行为，不恢复 `acb`，也不改变 updater 的旧版高风险覆盖模型。研究期间主代理已开始并行迁移，因此以下内容区分两类事实：
+
+- 迁移前基线：CommandLine 项目拥有框架和 `convert`，现有 Core 测试项目直接引用 CommandLine。
+- 迁移目标：CommandLine 只保留调用 `DesktopCommandLineHost.Run(args)` 的薄入口；命令类型、DI 和平台实现由 Desktop 拥有。
+
+当前测试基础如下：
+
+| 项目 | 研究结果 |
+| --- | --- |
+| 测试框架 | xUnit `2.9.3`、`xunit.runner.visualstudio 3.1.5`、`Microsoft.NET.Test.Sdk 18.0.1` |
+| Core 测试项目 | `tests/OngekiFumenEditor.Avalonia.Tests`，目标 `net10.0`，当前同时引用 Core 和 CommandLine |
+| Avalonia 测试 | `Avalonia.Headless.XUnit 11.3.18`，程序集级禁用并行，Headless 使用 Skia |
+| 断言/替身习惯 | 直接使用 xUnit `Assert`；不使用 Moq/FluentAssertions；用小型显式 fake、record 结果和独立临时目录 |
+| 命名 | `Method_Condition_ExpectedResult`；测试类 `public sealed class ...Tests`；同步/异步按真实 API 选择 |
+| 文件测试 | 使用 `Path.GetTempPath()` + GUID，`IDisposable` 清理；断言内容、状态和副作用，不只断言文件存在 |
+| 当前 Avalonia | `11.3.18`；Desktop 普通 TFM 为 `net10.0-windows10.0.19041.0`，AOT 条件为 `net10.0` |
+
+研究阶段按 broad-scope 要求执行了一次静态未测试源扫描。仓库没有根级 `global.json`，本机最高 SDK 为 .NET 10，无法满足 Roslyn 文件应用脚本的 .NET 11 前提，因此使用技能允许的 polyglot C# 分析器并启用 paired 输出。结果为 2,100 个源文件、161 个测试文件、425 个静态配对源、1,675 个未配对源、21 个 orphan 测试。该数字包含 `Dependencies`，仅是语法符号/名称启发式，不是行或分支覆盖率。
+
+CommandLine 的 `DefaultCommandExecutor`、四个接口、convert Definition/Handler 被现有 CommandLine 测试静态配对。`CommandLineLogOutput`、`ConsoleCommandLineOutput`、注册扩展和 `OngekiFumenEditorDesktopApp` 未配对；扩展方法以实例语法调用会造成静态扫描假阴性。迁移后的实际测试位置必须遵循用户指定的新 Desktop 测试项目，而不是 polyglot 分析器给出的源码旁置 fallback 路径。
+
+### 现有 18 项 CommandLine 基线
+
+现有代码共有 15 个测试方法；三个 `[Theory]` 各有两个数据行，因此 VSTest 展开为 18 项。这 18 项必须迁入 Desktop 测试项目并保持或加强行为断言。
+
+| 文件/方法 | 展开数 | 当前行为证据 |
+| --- | ---: | --- |
+| `DefaultCommandExecutorTests.RootHelp_ListsEveryRegisteredCommand` | 1 | 根帮助列出注册命令且 stderr 为空 |
+| `DefaultCommandExecutorTests.Constructor_DuplicateCommandNamesIgnoringCase_Throws` | 1 | 命令名大小写不敏感去重 |
+| `DefaultCommandExecutorTests.ExecuteAsync_VerbosityAliasAfterSubcommand_InvokesCommand` | 2 | `--verbose`、`-v` 均可递归解析并调用命令 |
+| `DefaultCommandExecutorTests.UnknownCommand_DoesNotInvokeAnyRegisteredCommand` | 1 | 未知命令非零且不进入 Handler |
+| `ConvertCommandLineDefinitionTests.Invoke_AllOptions_BindsStronglyTypedOptionsAndCallsInjectedHandler` | 1 | 路径和 `--standardize` 强类型绑定，Handler 返回码穿透 |
+| `ConvertCommandLineDefinitionTests.Invoke_MissingRequiredOption_DoesNotCallHandler` | 2 | 分别缺少 input/output 时解析层拒绝 |
+| `ConvertCommandLineDefinitionTests.Invoke_UnknownOption_DoesNotCallHandler` | 1 | 未知参数不进入 Handler |
+| `ConvertCommandLineHandlerTests.HandleAsync_RelativePath_ReturnsLegacyPathExitCodeWithoutCallingService` | 1 | 相对路径 `-3`，业务服务零调用 |
+| `ConvertCommandLineHandlerTests.HandleAsync_ServiceFailure_ReturnsLegacyConversionExitCodeAndWritesError` | 1 | 失败结果 `-4` 且 stderr 包含服务消息 |
+| `ConvertCommandLineHandlerTests.HandleAsync_ServiceThrows_ReturnsLegacyConversionExitCodeAndWritesExceptionMessage` | 1 | 异常映射 `-4` 且输出异常消息 |
+| `ConvertCommandLineHandlerTests.HandleAsync_ServiceSuccess_ReturnsZeroWithoutWritingError` | 1 | 成功为 0 且无错误输出 |
+| `ConvertCommandIntegrationTests.AddOngekiFumenEditorCommandLine_RegistersDefinitionHandlerAndExecutorAsSingletons` | 1 | Injectio/DI 注册与 singleton 生命周期 |
+| `ConvertCommandIntegrationTests.ConvertFixture_ToOgkr_ProducesReparseableChartWithPreservedContent` | 2 | 标准化开/关的真实 Nyageki -> OGKR 语义往返 |
+| `ConvertCommandIntegrationTests.ConvertFixture_UnsupportedOutputFormat_ReturnsFailureWithoutCreatingOutput` | 1 | 不支持格式不创建输出或临时文件 |
+| `ConvertCommandIntegrationTests.GenerateAsync_CancellationAfterConversion_PreservesExistingTargetAndRemovesTemporaryFile` | 1 | 取消保留旧目标并清理临时文件 |
+| **合计** | **18** | **迁移后不得减少** |
+
+DI 测试迁入 Desktop 后不能继续 `Assert.Single(definitions)`，因为完成范围应恰好发现 `convert`、`svg`、`jacket`、`updater` 四个 Definition。它应改为断言精确命令集合、四个闭合泛型 Handler 映射、单一 `DefaultFumenParserManager`，并明确断言没有 `acb`。
+
+### 验收清单
+
+以下清单直接来自交接计划；每项在 `plan.md` 中必须映射到具体测试或非行为验证证据。
+
+- [ ] `CLD-01`：`OngekiFumenEditor.Avalonia.CommandLine` 保留为薄启动器，只引用 Desktop 并转发参数。
+- [ ] `CLD-02`：命令框架、Definition、Handler 及平台命令实现全部迁移到 Desktop；Core 继续保留可复用领域服务。
+- [ ] `CLD-03`：Gekimini App 增加可重写的 `ShouldCreateMainView`；命令行模式初始化 Avalonia、XAML、语言、主题、Core/Desktop DI 和日志，但不创建 `IMainView`、窗口、状态栏，不恢复/保存窗口状态。
+- [ ] `CLD-04`：Core App 和 Desktop App 根据 `IsGUIMode` 跳过快捷键、Splash、XamlMcp、GUI 启动参数等逻辑。
+- [ ] `CLD-05`：`DesktopCommandLineHost.Run(string[] args)` 使用完整 Classic Desktop 生命周期和 `ShutdownMode.OnExplicitShutdown`，命令完成后以命令退出码关闭。
+- [ ] `CLD-06`：Desktop 接管 `System.CommandLine`、Injectio 注册和测试可见性；CommandLine 移除相关包和生成器，普通/AOT TFM 条件与 Desktop 保持一致。
+- [ ] `CLD-07`：移除旧 Nyageki parser manager 的重复 Injectio 注册，统一解析到 `DefaultFumenParserManager`；`SvgGenerateOption.Duration` 可由 Desktop Handler 设置。
+- [ ] `CLD-08`：`convert` 保持参数和实现；绝对路径错误 `-3`，转换失败 `-4`，并执行真实谱面 round-trip。
+- [ ] `CLD-09`：`svg` 的 `--inputFile`、`--outputFile`、`--audioFile` 均为必填绝对路径；音频存在时用音频时长，否则按谱面末尾加 5 格计算。
+- [ ] `CLD-10`：`svg` 默认值为 `40/800/1/Soflan/false`；`--png` 按 SVG 声明尺寸生成无尾随 SVG 数据、可由 ImageSharp 解码的 PNG；路径错误 `-1`，生成失败 `-2`。
+- [ ] `CLD-11`：`jacket` 默认尺寸 `520x520` 和 `220x220`；`--outputWidthSmall`/`--outputHeightSmall` 正确绑定；路径错误 `-5`，生成失败 `-6`。
+- [ ] `CLD-12`：jacket 使用真实模板生成大小两份 AssetBundle，更新并保留 `assets.bytes` 既有记录；模板和四个 DLL 由 Desktop 复制到 build/publish 输出。
+- [ ] `CLD-13`：updater 使用可替换文件/进程环境，递归复制并排除 `.log/.xml/.dmp`，按 Desktop 进程名终止实例，使用 `.bak_*`，覆盖成功、`-1/-2/-3` 和旧版回滚行为。
+- [ ] `CLD-14`：updater 成功后启动 `OngekiFumenEditor.Avalonia.Desktop.exe`，保留 `--notifySucess` 与 `--sourceVersion`，实际 EXE 冒烟只操作临时目录和无害 Desktop stub。
+- [ ] `CLD-15`：本轮不注册 `acb`；旧 DLL、AOT 风险和恢复条件只记录在迁移文档。
+- [ ] `CLD-16`：新增 Windows TFM Desktop 测试项目并迁移现有 18 项；原 Core 测试项目恢复为只引用 Core。
+- [ ] `CLD-17`：覆盖命令发现、重复命令、帮助、未知参数、`--verbose`、必填参数、默认值、Handler 映射和退出码。
+- [ ] `CLD-18`：分别构建并冒烟 CommandLine JIT/AOT、Desktop JIT/AOT，确认命令行模式不创建窗口且退出码穿透生命周期。
+- [ ] `CLD-19`：执行全量测试与 `git diff --check`；CI 仍检查占位输出是已知失败，不能记录为通过。
+
+### 可测试入口与所需 seam
+
+| 范围 | 首选入口 | 强断言/替身 |
+| --- | --- | --- |
+| 生命周期 | `ShouldCreateMainView`、命令行 App、`DesktopCommandLineHost.Run` | 注册“被解析即失败”的 `IMainView`/状态栏/窗口设置 fake；记录语言、主题、Core/Desktop 服务和日志已初始化；子进程验证退出码 |
+| 命令框架 | `DefaultCommandExecutor.RootCommand`、Desktop DI 扩展 | 捕获 stdout/stderr；精确比较四命令集合；每个闭合泛型 Handler 单独解析 |
+| convert | `ConvertCommandLineDefinition/Handler`、`IFumenConvertService` | 迁移既有 fake 和 fixture；保留 18 项现有证据 |
+| svg | SVG Definition/Handler、`IFumenParserManager`、音频时长 seam、`IPreviewSvgGenerator`、Desktop rasterizer | 捕获传入的 `Duration`；构造有明确尾部 TGrid 的谱面；解析 SVG XML；检查 PNG chunks、IEND 结束位置和 ImageSharp 尺寸 |
+| jacket | Jacket Definition/Handler、`IJacketGenerateService` | 使用 ImageSharp 创建非退化临时图；用不同 small width/height 杀死反向绑定；读取两份 bundle 的纹理尺寸和 `assets.bytes` 二进制记录 |
+| updater | Updater Definition/Handler、`IProgramUpdateService`、文件/进程环境接口 | fake 进程与可按操作序号抛错的文件环境；精确断言 kill/move/copy/delete/start 调用序列及遗留文件状态 |
+| 发布/EXE | JIT/AOT publish 目录中的两个 EXE | 每个子进程设置超时，捕获 stdout/stderr/有符号退出码；枚举窗口；所有输入输出位于独立临时根 |
+
+### 风险与实施约束
+
+- Avalonia `Application.Current`、Dispatcher 和 Classic Desktop lifetime 是进程级状态；生命周期测试必须串行，真实 `DesktopCommandLineHost.Run` 最稳妥的自动化边界是子进程，不能在同一 xUnit 进程反复启动。
+- updater 的复制失败回滚必须锁定旧行为：已复制且原先有目标的文件会阻止无覆盖 `File.Move(backup, target)`，因此可能留下新目标与 `.bak_*`。用户明确不授权事务增强，测试不能把理想化原子回滚写成预期。
+- jacket 依赖 Windows x64 原生 DLL。真实集成测试和 AOT 冒烟需在 `win-x64` 执行；非 x64 环境应由测试项目 TFM/RID 约束，而不是静默 Skip。
+- PNG 解码成功不足以排除旧版“PNG 后追加 SVG”缺陷；必须解析 PNG chunk 长度并断言 `IEND` 结束偏移等于文件长度。
+- `Process.ExitCode` 应按有符号 `Int32` 比较 `-1..-6`；Shell 的 `$LASTEXITCODE`/CI 展示可能把负值映射成无符号值，记录时必须说明采集方式。
+- CommandLine 薄项目的包/生成器移除、TFM 条件一致、资源复制和 CI 不改属于结构/发布证据，不应伪装成行为单元测试。

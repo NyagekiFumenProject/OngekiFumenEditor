@@ -38,6 +38,9 @@ public abstract class OngekiFumenEditorApp : App
     {
         base.OnFrameworkInitializationCompleted();
 
+        if (!IsGUIMode)
+            return;
+
         Dispatcher.UIThread.Post(
             AttachEditorKeyBindingRouter,
             DispatcherPriority.Background);

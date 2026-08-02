@@ -1,10 +1,10 @@
-using OngekiFumenEditor.Avalonia.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
 
 public sealed class DefaultCommandExecutorTests
 {

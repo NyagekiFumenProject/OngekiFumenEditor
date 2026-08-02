@@ -2,31 +2,15 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <!-- The companion is console-only and has no Windows API dependency. -->
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">net10.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' ">net10.0-windows10.0.19041.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsAotCompatible>true</IsAotCompatible>
-        <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>
     </PropertyGroup>
 
     <ItemGroup>
-        <CompilerVisibleProperty Include="InjectioDuplicateStrategy" />
-        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-            <_Parameter1>OngekiFumenEditor.Avalonia.Tests</_Parameter1>
-        </AssemblyAttribute>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
-        <PackageReference Include="Microsoft.Extensions.Logging" />
-        <PackageReference Include="System.CommandLine" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj" />
-        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
-        <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
+        <ProjectReference Include="..\OngekiFumenEditor.Avalonia.Desktop\OngekiFumenEditor.Avalonia.Desktop.csproj" />
     </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.Logs;
 using System.CommandLine;
 
-namespace OngekiFumenEditor.Avalonia.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 
 [RegisterSingleton<ICommandExecutor>]
 internal sealed class DefaultCommandExecutor : ICommandExecutor

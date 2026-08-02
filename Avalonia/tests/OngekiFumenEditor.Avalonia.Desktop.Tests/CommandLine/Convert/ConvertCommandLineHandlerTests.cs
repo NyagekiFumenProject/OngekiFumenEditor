@@ -1,11 +1,11 @@
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.CommandLine;
-using OngekiFumenEditor.Avalonia.CommandLine.Commands.Convert;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
 
 public sealed class ConvertCommandLineHandlerTests
 {

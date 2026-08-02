@@ -1,9 +1,10 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 
-namespace OngekiFumenEditor.Avalonia.CommandLine.Commands.Convert;
+namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 
 [RegisterSingleton<ICommandLineHandler<FumenConvertOption>>]
 internal sealed class ConvertCommandLineHandler : ICommandLineHandler<FumenConvertOption>

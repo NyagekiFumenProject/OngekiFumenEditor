@@ -1,9 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
-using OngekiFumenEditor.Avalonia.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop;
 
-var services = new ServiceCollection();
-services.AddOngekiFumenEditorCommandLine();
+namespace OngekiFumenEditor.Avalonia.CommandLine;
 
-using var serviceProvider = services.BuildServiceProvider();
-var executor = serviceProvider.GetRequiredService<ICommandExecutor>();
-return await executor.ExecuteAsync(args);
+internal static class Program
+{
+    [STAThread]
+    public static int Main(string[] args) => DesktopCommandLineHost.Run(args);
+}

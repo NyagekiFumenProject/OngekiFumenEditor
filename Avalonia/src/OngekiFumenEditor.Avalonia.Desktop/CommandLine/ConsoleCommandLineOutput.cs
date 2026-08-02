@@ -1,6 +1,6 @@
 using Injectio.Attributes;
 
-namespace OngekiFumenEditor.Avalonia.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 
 [RegisterSingleton<ICommandLineOutput>]
 internal sealed class ConsoleCommandLineOutput : ICommandLineOutput
