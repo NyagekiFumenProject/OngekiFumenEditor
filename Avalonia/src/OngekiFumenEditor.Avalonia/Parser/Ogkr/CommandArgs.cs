@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 
 namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
@@ -11,11 +10,28 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
 		private string line = string.Empty;
 		private Dictionary<Type, Array> cacheDataArray = new Dictionary<Type, Array>();
-		private Dictionary<Type, IArgValueConverter> converters = new Dictionary<Type, IArgValueConverter>();
+		private readonly Dictionary<Type, IArgValueConverter> converters;
 
 		public CommandArgs()
+			: this(CreateDefaultConverters())
 		{
-			converters = IoC.GetAll<IArgValueConverter>().ToDictionary(x => x.ConvertType);
+		}
+
+		internal static IReadOnlyList<IArgValueConverter> CreateDefaultConverters() =>
+		[
+			new ArgStringValueConverter(),
+			new ArgSingleValueConverter(),
+			new ArgDoubleValueConverter(),
+			new ArgBoolValueConverter(),
+			new ArgIntValueConverter(),
+			new ArgLongValueConverter()
+		];
+
+		public CommandArgs(IEnumerable<IArgValueConverter> argValueConverters)
+		{
+			converters = argValueConverters
+				.GroupBy(x => x.ConvertType)
+				.ToDictionary(x => x.Key, x => x.First());
 		}
 
 		public string Line
@@ -55,20 +71,10 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 			T[] arr = default;
 			var inputs = line.Trim().Split(SplitEmptyCharArray);
 
-			if (converters.TryGetValue(type, out var argConverter))
-			{
-				arr = argConverter.Parser(inputs).OfType<T>().ToArray();
-			}
-			else
-			{
-				var converter = TypeDescriptor.GetConverter(type);
-				arr = inputs.Select(x =>
-				{
-					if (converter.IsValid(x))
-						return (T)converter.ConvertFromString(x);
-					return default;
-				}).ToArray();
-			}
+			if (!converters.TryGetValue(type, out var argConverter))
+				throw new InvalidOperationException($"No OGKR argument converter is registered for '{type.FullName}'.");
+
+			arr = argConverter.Parser(inputs).OfType<T>().ToArray();
 
 			cacheDataArray[type] = arr;
 			return arr;

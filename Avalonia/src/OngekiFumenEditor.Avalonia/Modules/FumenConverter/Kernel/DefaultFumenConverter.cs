@@ -9,10 +9,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 [RegisterSingleton<IFumenConverter>]
 public class DefaultFumenConverter : IFumenConverter
 {
+    private readonly IFumenParserManager parserManager;
+
+    public DefaultFumenConverter(IFumenParserManager parserManager)
+    {
+        this.parserManager = parserManager;
+    }
+
     public async Task<byte[]> ConvertFumenAsync(OngekiFumen fumen, string savePathOrFormat = "ogkr")
     {
-        var parserManager = IoC.Get<IFumenParserManager>();
-
         if (parserManager.GetSerializer(savePathOrFormat) is not IFumenSerializable serializable)
             throw new FumenConvertException(Lang.OutputFumenNotSupport);
 

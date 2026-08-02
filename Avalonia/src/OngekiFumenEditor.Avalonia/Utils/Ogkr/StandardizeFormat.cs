@@ -20,27 +20,41 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
         }
 
         public static async Task<OngekiFumen> CopyFumenObject(OngekiFumen fumen)
-        {
-            var tmpFilePath = Path.GetTempFileName() + ".ogkr";
-            var serializer = IoC.Get<IFumenParserManager>().GetSerializer(tmpFilePath);
-            var deserializer = IoC.Get<IFumenParserManager>().GetDeserializer(tmpFilePath);
+            => await CopyFumenObject(fumen, IoC.Get<IFumenParserManager>());
 
-            await File.WriteAllBytesAsync(tmpFilePath, await serializer.SerializeAsync(fumen));
-            using var stream = File.OpenRead(tmpFilePath);
+        public static async Task<OngekiFumen> CopyFumenObject(
+            OngekiFumen fumen,
+            IFumenParserManager parserManager)
+        {
+            const string format = ".ogkr";
+            var serializer = parserManager.GetSerializer(format);
+            var deserializer = parserManager.GetDeserializer(format);
+
+            var serialized = await serializer.SerializeAsync(fumen);
+            using var stream = new MemoryStream(serialized, writable: false);
             var newFumen = await deserializer.DeserializeAsync(stream);
 
             return newFumen;
         }
 
         public static async Task<ProcessTask> Process(OngekiFumen currentFumen)
+            => await Process(
+                currentFumen,
+                IoC.Get<IFumenParserManager>(),
+                IoC.GetAll<IFumenCheckRule>());
+
+        public static async Task<ProcessTask> Process(
+            OngekiFumen currentFumen,
+            IFumenParserManager parserManager,
+            IEnumerable<IFumenCheckRule> checkRules)
         {
-            var fumen = await CopyFumenObject(currentFumen);
+            var fumen = await CopyFumenObject(currentFumen, parserManager);
 
             //directly removes objects which not belong to ongeki.
             fumen.Comments.Clear();
 
             //check if fumen is serializable or user must fix it first.
-            if (!CheckFumenIsSerializable(fumen, out var msg))
+            if (!CheckFumenIsSerializable(fumen, checkRules, out var msg))
                 return new(false) { Message = msg };
 
             InterpolateSoflans(fumen);
@@ -166,9 +180,15 @@ namespace OngekiFumenEditor.Avalonia.Utils.Ogkr
         }
 
         public static bool CheckFumenIsSerializable(OngekiFumen fumen, out string msg)
+            => CheckFumenIsSerializable(fumen, IoC.GetAll<IFumenCheckRule>(), out msg);
+
+        public static bool CheckFumenIsSerializable(
+            OngekiFumen fumen,
+            IEnumerable<IFumenCheckRule> checkRules,
+            out string msg)
         {
-            var checkRules = IoC.GetAll<IFumenCheckRule>().OfType<IOngekiFumenCheckRule>();
-            if (checkRules.Any(x => x.CheckRule(fumen, null).Any(x => x.Severity == RuleSeverity.Error)))
+            var ongekiCheckRules = checkRules.OfType<IOngekiFumenCheckRule>();
+            if (ongekiCheckRules.Any(x => x.CheckRule(fumen, null).Any(x => x.Severity == RuleSeverity.Error)))
             {
                 msg = Lang.FumenContainUngenerateError;
                 return false;

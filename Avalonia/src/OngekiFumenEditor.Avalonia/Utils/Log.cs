@@ -27,6 +27,15 @@ public class Log
     private IEnumerable<ILogOutput> LogOutputs => outputs;
     public static Log Instance => cacheInstance ??= IoC.Get<Log>();
 
+    /// <summary>
+    /// Configures logging for hosts that do not expose services through Avalonia Application.Current.
+    /// </summary>
+    public static void Initialize(Log instance)
+    {
+        ArgumentNullException.ThrowIfNull(instance);
+        cacheInstance = instance;
+    }
+
     public void RemoveOutput<T>() where T : ILogOutput
     {
         outputs.RemoveAll(x => x is T);

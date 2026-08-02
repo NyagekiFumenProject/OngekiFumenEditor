@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
                 if (instance == null)
                 {
                     instance = new ObjectPool<T>();
-                    IoC.Get<ObjectPoolManager>().RegisterNewObjectPool(instance);
+                    ObjectPoolManager.RegisterObjectPool(instance);
                 }
 
                 return instance;

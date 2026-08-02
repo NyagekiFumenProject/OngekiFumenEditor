@@ -1,6 +1,5 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,6 +11,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 	public class DefaultOngekiFumenParser : IFumenDeserializable
 	{
 		public Dictionary<string, ICommandParser> CommandParsers { get; } = new();
+		private readonly IReadOnlyList<IArgValueConverter> argValueConverters;
 
 		public static readonly string[] FumenFileExtensions = new[] { ".ogkr" };
 
@@ -21,12 +21,21 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
 		public string FileFormatName => FormatName;
 
-				public DefaultOngekiFumenParser(IEnumerable<ICommandParser> commandParsers)
+		public DefaultOngekiFumenParser(IEnumerable<ICommandParser> commandParsers)
+			: this(commandParsers, CommandArgs.CreateDefaultConverters())
+		{
+		}
+
+		public DefaultOngekiFumenParser(
+			IEnumerable<ICommandParser> commandParsers,
+			IEnumerable<IArgValueConverter> argValueConverters)
 		{
 			foreach (var pair in commandParsers.GroupBy(x => x.CommandLineHeader))
 			{
 				CommandParsers[pair.Key] = pair.FirstOrDefault();
 			}
+
+			this.argValueConverters = argValueConverters.ToArray();
 		}
 
 		public async Task<OngekiFumen> DeserializeAsync(Stream stream)
@@ -35,7 +44,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 			var genObjList = new List<(OngekiObjectBase obj, ICommandParser parser)>();
 			var fumen = new OngekiFumen();
 
-			var commandArg = ObjectPool<CommandArgs>.Get();
+			var commandArg = new CommandArgs(argValueConverters);
 
 			while (!reader.EndOfStream)
 			{
@@ -52,8 +61,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 					}
 				}
 			}
-
-			ObjectPool<CommandArgs>.Return(commandArg);
 
 			foreach (var pair in genObjList)
 			{
