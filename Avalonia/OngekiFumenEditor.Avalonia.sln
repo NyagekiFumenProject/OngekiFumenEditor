@@ -67,6 +67,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia.Tests", "tests\OngekiFumenEditor.Avalonia.Tests\OngekiFumenEditor.Avalonia.Tests.csproj", "{1325AF8C-6092-4F87-9540-7605889030E1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia.CommandLine", "src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj", "{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -377,6 +379,18 @@ Global
 		{1325AF8C-6092-4F87-9540-7605889030E1}.Release|x64.Build.0 = Release|Any CPU
 		{1325AF8C-6092-4F87-9540-7605889030E1}.Release|x86.ActiveCfg = Release|Any CPU
 		{1325AF8C-6092-4F87-9540-7605889030E1}.Release|x86.Build.0 = Release|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Debug|x64.Build.0 = Debug|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Debug|x86.Build.0 = Debug|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Release|x64.ActiveCfg = Release|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Release|x64.Build.0 = Release|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Release|x86.ActiveCfg = Release|Any CPU
+		{C032BBEA-3641-41EE-8B90-5F68A5C5ADBC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

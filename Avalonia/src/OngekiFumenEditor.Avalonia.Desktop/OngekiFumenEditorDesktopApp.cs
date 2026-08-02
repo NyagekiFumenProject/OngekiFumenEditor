@@ -16,12 +16,6 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 {
     private ILogger<OngekiFumenEditorDesktopApp> logger;
 
-    // The desktop entry point owns the GUI/CMD mode decision; the base App only consumes it.
-    public OngekiFumenEditorDesktopApp()
-        : base(Program.Options.Mode is StartupMode.Gui)
-    {
-    }
-
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
         base.RegisterServices(serviceCollection);
