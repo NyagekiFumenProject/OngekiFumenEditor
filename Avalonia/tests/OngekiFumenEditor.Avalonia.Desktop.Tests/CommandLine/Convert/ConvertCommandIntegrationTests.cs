@@ -19,7 +19,8 @@ public sealed class ConvertCommandIntegrationTests
         services.AddOngekiFumenEditorDesktopCommandLine();
 
         using var provider = services.BuildServiceProvider();
-        var definition = Assert.Single(provider.GetServices<ICommandLineDefinition>());
+        var definition = Assert.Single(
+            provider.GetServices<ICommandLineDefinition>().OfType<ConvertCommandLineDefinition>());
         var handler = provider.GetRequiredService<ICommandLineHandler<FumenConvertOption>>();
         var firstExecutor = provider.GetRequiredService<ICommandExecutor>();
         var secondExecutor = provider.GetRequiredService<ICommandExecutor>();

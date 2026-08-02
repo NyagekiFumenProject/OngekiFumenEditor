@@ -36,6 +36,8 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Console"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
         <PackageReference Include="NAudio.Wasapi"/>
+        <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="Svg.Skia" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="NAudio.Asio"
                           Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' "/>

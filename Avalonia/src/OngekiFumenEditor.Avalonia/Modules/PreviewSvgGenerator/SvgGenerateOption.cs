@@ -14,6 +14,6 @@ public class SvgGenerateOption
 
     public bool RenderAsPng { get; set; } = false;
 
-    internal TimeSpan Duration { get; set; }
+    public TimeSpan Duration { get; set; }
 }
 

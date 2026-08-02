@@ -9,6 +9,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils.Ogkr;
 
 namespace OngekiFumenEditor.Avalonia.Modules.PreviewSvgGenerator.Kernel;
@@ -16,9 +17,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.PreviewSvgGenerator.Kernel;
 [RegisterSingleton<IPreviewSvgGenerator>]
 public class DefaultPreviewSvgGenerator : IPreviewSvgGenerator
 {
+    private readonly IFumenParserManager parserManager;
+
+    public DefaultPreviewSvgGenerator(IFumenParserManager parserManager)
+    {
+        this.parserManager = parserManager;
+    }
+
     public async Task<byte[]> GenerateSvgAsync(OngekiFumen rawFumen, SvgGenerateOption option)
     {
-        var fumen = await StandardizeFormat.CopyFumenObject(rawFumen);
+        var fumen = await StandardizeFormat.CopyFumenObject(rawFumen, parserManager);
         if (option.SoflanMode == SoflanMode.AbsSoflan)
         {
             foreach (var sfl in fumen.SoflansMap.Values.SelectMany(x => x))
