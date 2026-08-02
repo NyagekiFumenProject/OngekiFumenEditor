@@ -71,6 +71,15 @@ jobs:
         name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
         path: C:\ogkrEditorBuild\
 
+    - name: Publish Avalonia CommandLine Native AOT companion
+      if: env.Configuration == 'Release'
+      run: >-
+        dotnet publish
+        .\Avalonia\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj
+        -p:PublishProfile=win-x64-aot
+        -p:PublishDir=C:\ongekiAvaloniaCmdBuild\
+        -v:minimal
+
     - name: Publish Avalonia Native AOT (primary WASAPI package)
       if: env.Configuration == 'Release'
       run: >-
@@ -79,13 +88,25 @@ jobs:
         -p:PublishProfile=win-x64-aot
         -p:PublishDir=C:\ongekiAvaloniaAotBuild\
         -v:minimal
+    - name: Combine Avalonia CommandLine into AOT package
+      if: env.Configuration == 'Release'
+      run: xcopy "C:\ongekiAvaloniaCmdBuild\" "C:\ongekiAvaloniaAotBuild\" /E /Y /I
     - name: Validate Avalonia Native AOT package
       if: env.Configuration == 'Release'
       shell: pwsh
       run: |
         $publishPath = "C:\ongekiAvaloniaAotBuild"
-        if (-not (Get-ChildItem -LiteralPath $publishPath -Filter "*.exe" -File)) {
-          throw "The Native AOT package contains no executable."
+        $desktopExecutable = Join-Path $publishPath "OngekiFumenEditor.Avalonia.Desktop.exe"
+        if (-not (Test-Path -LiteralPath $desktopExecutable)) {
+          throw "The Native AOT package is missing the Desktop executable."
+        }
+        $commandLineExecutable = Join-Path $publishPath "OngekiFumenEditor.Avalonia.CommandLine.exe"
+        if (-not (Test-Path -LiteralPath $commandLineExecutable)) {
+          throw "The Native AOT package is missing the CommandLine executable."
+        }
+        $commandLineOutput = & $commandLineExecutable 2>&1
+        if ($LASTEXITCODE -ne 1 -or $commandLineOutput -notmatch "no commands are available yet") {
+          throw "The CommandLine companion did not report its placeholder contract."
         }
         foreach ($forbiddenFile in @("NAudio.Asio.dll", "NAudio.WinMM.dll")) {
           if (Test-Path -LiteralPath (Join-Path $publishPath $forbiddenFile)) {
@@ -106,15 +127,15 @@ jobs:
         -p:PublishProfile=win-x64-jit
         -p:PublishDir=C:\ongekiAvaloniaJitBuild\
         -v:minimal
+    - name: Combine Avalonia CommandLine into JIT package
+      if: env.Configuration == 'Release'
+      run: xcopy "C:\ongekiAvaloniaCmdBuild\" "C:\ongekiAvaloniaJitBuild\" /E /Y /I
     - name: Validate Avalonia JIT package
       if: env.Configuration == 'Release'
       shell: pwsh
       run: |
         $publishPath = "C:\ongekiAvaloniaJitBuild"
-        if (-not (Get-ChildItem -LiteralPath $publishPath -Filter "*.exe" -File)) {
-          throw "The JIT package contains no executable."
-        }
-        foreach ($requiredFile in @("NAudio.Asio.dll", "NAudio.Wasapi.dll", "NAudio.WinMM.dll")) {
+        foreach ($requiredFile in @("OngekiFumenEditor.Avalonia.Desktop.exe", "NAudio.Asio.dll", "NAudio.Wasapi.dll", "NAudio.WinMM.dll", "OngekiFumenEditor.Avalonia.CommandLine.exe")) {
           if (-not (Test-Path -LiteralPath (Join-Path $publishPath $requiredFile))) {
             throw "The JIT/ASIO package is missing $requiredFile."
           }

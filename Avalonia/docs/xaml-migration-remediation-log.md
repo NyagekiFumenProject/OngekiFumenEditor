@@ -819,3 +819,12 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -c Release -t:Rebuild
 - 不移植 `DefaultCommandExecutor`/`OptionBindingAttrbute` 命令发现机制；CMD 模式当前只有占位提示。
 - 不恢复 IPC/单实例（第 16 项继续延期）、自更新（12C）、插件系统；`DefaultArgProcessManager` 的 `--notifySucess` 残留分支保持不动。
 - 不改动 Browser 项目与核心 `App.IsGUIMode` 的现有消费方。
+
+## 2026-08-02 Avalonia 命令行伴随程序拆分
+
+> 本节记录第七轮收尾后对发布入口的整理，不扩大延期的命令执行器范围。
+
+- `OngekiFumenEditor.Avalonia.CommandLine` 是独立的 `net10.0` 控制台项目。它暂时只输出“命令执行器尚未迁移”的提示并返回退出码 1，明确表示当前没有可执行命令；Windows 发行使用 `win-x64-aot` profile 生成自包含原生 EXE。
+- Desktop 入口不再解释 `--cmd`；GUI 程序只负责窗口生命周期和打开文件参数。需要调用命令行入口时使用同包内的 `OngekiFumenEditor.Avalonia.CommandLine.exe`。
+- Release workflow 先发布一次 Native AOT 命令行伴随程序，再将其复制到 Native AOT/WASAPI 和 JIT/ASIO 两个 Windows 包。校验会按精确文件名确认 Desktop 与 CommandLine 两个 EXE，实际运行 CommandLine 并检查退出码/提示文本；命令行程序不引用 Windows SDK，也不要求目标机器预装 .NET。
+- 本地验收通过：solution Release 构建 0 error，全量测试 144/144；命令行 profile 生成并运行 Native AOT EXE；AOT/WASAPI 与 JIT/ASIO 两个完整包中的 Desktop EXE 均持续启动 8 秒，前者不含 ASIO/WinMM，后者包含 ASIO/WASAPI/WinMM，两个包内的 CommandLine EXE 均通过退出码与提示文本校验。
