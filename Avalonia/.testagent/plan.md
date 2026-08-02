@@ -198,3 +198,34 @@
 - 活动 AXAML 保持编译绑定，不新增 `ReflectionBinding`、字符串成员路径或反射事件接线。
 - Native AOT 新路径不新增无法解释的裁剪/AOT 警告，不用警告抑制替代修复。
 - 既有 101 项不回归；真实语料中原先被排除的 `SvgPrefab: 1` 改为成功解析与往返保留。
+
+## CommandLine 第一阶段实施计划（2026-08-02）
+
+### A. 命令框架与宿主
+
+- 在 CPM 加入 `System.CommandLine 2.0.0`，CLI 引用核心项目、Injectio 和必要的 DI/日志包。
+- 实现 `ICommandExecutor`、`DefaultCommandExecutor`、`ICommandLineDefinition`、非泛型标记接口 `ICommandLineHandler` 和 `ICommandLineHandler<TOptions>`。
+- `DefaultCommandExecutor` 只聚合 `IEnumerable<ICommandLineDefinition>`，检查重复命令名，并提供根帮助和递归 `--verbose/-v`。
+- `Program.Main` 只创建 headless 服务容器、解析参数并返回执行码。
+
+### B. convert 业务链
+
+- `ConvertCommandLineDefinition` 显式声明 `--inputFile`、`--outputFile`、`--standardize`，将 `ParseResult` 映射为 `FumenConvertOption`。
+- Definition 构造函数注入 `ICommandLineHandler<FumenConvertOption>`；`ConvertCommandLineHandler` 只做绝对路径校验、调用转换服务、输出错误和映射旧版 `-3/-4` 退出码。
+- 将转换包装器改成可注入服务；解析器管理器、转换器和标准化规则均由构造函数传入。
+- 输出先写同目录临时文件再原子替换；取消或失败清理临时文件，避免半写目标。
+- OGKR `CommandArgs` 从 parser 显式获得值转换器，保证 `.ogkr` 输入也不访问 Avalonia 全局 `IoC`。
+
+### C. 自动化测试
+
+- 命令执行器：根帮助包含 `convert`、重复命令名拒绝、未知命令不进入 Handler、`--verbose/-v` 均可解析。
+- Definition：三个参数正确绑定；缺失必填参数不调用 Handler。
+- Handler：相对路径返回 `-3`；服务失败返回 `-4` 且写 stderr；成功返回 0。
+- 集成：用 `Fixtures/minimal.nyageki` 在纯 DI 宿主转换到 OGKR，重新解析并断言关键语义；覆盖不支持格式和取消/失败不留临时输出。
+- 运行全部现有测试，确保 144 项基线不回归。
+
+### D. EXE 验收
+
+- 发布 JIT 与 `win-x64-aot`，分别运行根帮助、版本、`convert --help`、未知命令、成功转换和错误转换。
+- 记录每组退出码、stdout、stderr 和输出文件状态；成功产物需重新解析而不是只检查存在。
+- 本轮不修改 CI，占位校验与新行为不一致的问题仅记录在统一跟踪文档。

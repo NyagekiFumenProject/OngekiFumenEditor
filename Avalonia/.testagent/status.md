@@ -104,3 +104,39 @@ Research、Plan、Implement 和 Verify 已完成。当前工作树的本项目�
 2026-08-02 04:15 平台阶段验证：`win-x64-jit` 首轮因平台入口缺少显式 `System` using 失败，修复后发布成功，产物含 ASIO/WinMM/WASAPI/SoundTouch；Browser Release 非增量构建 0 error、117 warning。20B 仍待最终 AOT/WASAPI 发布、AOT 产物排除 ASIO、两个 Windows 包启动及 Svg* 合并后重验，因此清单暂不标完成。
 
 2026-08-02 06:05 第七轮收尾（kimi-code 接管 codex 会话 019fbc61 完成最终验证）：变异恢复后三项定向测试 3/3 回绿，含 ramen 语料全量 143/143；solution Release 非增量复建 0 error。`win-x64-aot` 最终冒烟暴露真实启动回归：`ToolViewModelTypeCollectedActivator` 因源生成器对跨文件 partial 的 `AudioPlayerToolViewerViewModel` 重复收集而在静态构造抛出重复键异常；此前全量测试未覆盖该路径（`TestApplication` 直接继承 `App`，不经过 `OngekiFumenEditorApp.RegisterServices`）。修复生成器按 `FullClassName` 去重，并新增 `ToolViewModelTypeCollectedActivatorTests`（修复前红、修复后绿）。最终证据：全量 144/144、0 跳过；`win-x64-aot` EXE 53,153,792 字节 10 秒存活（完整启动）；`win-x64-jit` 产物含 ASIO/WinMM/WASAPI/SoundTouch 且 EXE 10 秒存活；Browser AOT 发布成功，`dotnet.js` 仅引用本次 56,496,934 字节原生 WASM，AudioWorklet 主脚本/processor 原始及 br/gz 齐全。第七轮四项决策均有行为测试与构建/发布证据，清单标记完成；真实音频设备/ASIO 与真实浏览器 AudioContext 仍维持平台人工验收边界。
+
+## CommandLine 第一阶段状态（2026-08-02）
+
+Research、Plan、Implement 和 Verify 已完成。实现采用 `System.CommandLine 2.0.0`、
+Injectio 编译期集合注册和强类型 Definition/Handler 配对；`Program.Main` 不包含具体命令逻辑。
+
+- [x] 实现 `ICommandExecutor`、`DefaultCommandExecutor`、`ICommandLineDefinition`、
+  `ICommandLineHandler` 与 `ICommandLineHandler<TOptions>`。
+- [x] `ConvertCommandLineDefinition` 构造函数注入
+  `ICommandLineHandler<FumenConvertOption>`，显式完成选项绑定。
+- [x] 提取可注入的 `IFumenConvertService`，保留 GUI 静态兼容入口。
+- [x] 移除 OGKR 解析、日志和对象池在 CLI 路径上对 Avalonia 全局 IoC 的依赖。
+- [x] 转换输出采用同目录临时文件和原子替换；失败、取消均清理临时文件。
+- [x] 新增 18 项 CommandLine 单元/集成测试；Release 全量 162/162 通过，0 失败、0 跳过。
+- [x] JIT self-contained 与 Native AOT 发布成功。
+- [x] 两种 EXE 各执行 10 组真实参数，共 20/20 组结果符合预期。
+- [x] 本轮未修改 CI 工作流。
+
+真实 EXE 冒烟覆盖：根帮助、版本、`convert --help`、未知命令、缺失必填参数、相对路径、
+Nyageki→OGKR、OGKR→Nyageki、`--standardize` 和不支持输出格式。JIT/AOT 分别生成一致的
+635 字节 OGKR、762 字节 Nyageki 与 609 字节规范化 OGKR；无 `.tmp` 残留，失败用例不创建目标文件。
+
+| Requirement（用户原话） | Evidence |
+|---|---|
+| `需要参考原项目的形式,是否能直接使用System.CommandLine进行迁移` | 使用旧项目相同的 `System.CommandLine 2.0.0`，保留 `convert` 参数、根 verbose 与旧版业务退出码；JIT/AOT 均通过 |
+| `架构需要和DefaultCommandExecutor相似，避免写死命令逻辑过程` | 根执行器只聚合 `IEnumerable<ICommandLineDefinition>`；`Program.Main` 不出现具体命令名；重复命令名有测试 |
+| `也便于后面添加其他命令和代码` | 新命令只需增加 Definition、闭合泛型 Handler 与业务服务，Injectio 自动加入集合；无需修改入口和执行器 |
+| `ICommandModule改名成ICommandLineDefinition` | 已使用 `ICommandLineDefinition`，仓库没有新增 `ICommandModule` |
+| `对应Handler就是ICommandLineHandler` | 已实现非泛型标记接口与 `ICommandLineHandler<TOptions>`，Handler 不依赖 `ParseResult` |
+| `ConvertCommandLineDefinition怎么获取它对应的Handler?` | 构造函数直接注入 `ICommandLineHandler<FumenConvertOption>`；编译期类型映射和 DI 单例解析均有测试 |
+| `测试和检查commandline.exe和它的命令功能是否全部正常, 允许冒烟测试` | Release 全量 162/162；JIT/AOT 发布成功；两种真实 EXE 共 20/20 次冒烟通过 |
+| `5暂时不考虑` | `.github/workflows/BuildProgram.yml` 未改动 |
+
+剩余风险：CommandLine 宿主不启动 Avalonia UI，但当前复用完整的
+`AddOngekiFumenEditorAvalonia()` 注册，扩大了 Native AOT 可达面并保留共享核心既有裁剪警告。
+后续用 Injectio tags 或独立编译期注册模块缩小服务集合；下一业务阶段为 `svg`。

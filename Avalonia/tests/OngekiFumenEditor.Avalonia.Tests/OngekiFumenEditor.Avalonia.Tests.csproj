@@ -26,6 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj" />
         <ProjectReference Include="..\..\src\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
     </ItemGroup>
 

@@ -174,3 +174,32 @@ Native AOT 可执行文件启动烟测必须与 publish 分开记录：启动后
 | Svg* | 11C 删除了领域、解析写出、编辑 UI 与绘制链；真实语料含 1 条 `SvgPrefab` | 字符串/文件 prefab 强类型往返；Skia 绘制非空像素；相关视图构造；ramen 不再报告排除命令 |
 
 现有测试项目 `tests/OngekiFumenEditor.Avalonia.Tests` 使用 xUnit、目标 `net10.0`，已通过 `ProjectReference` 引用核心项目，并具备 Avalonia Headless、Avalonia.Skia、SkiaSharp 与 NAudio.Core 依赖。平台入口实现若不能被核心测试直接引用，优先把能力选择提取为核心纯模型，再用项目构建和发布图验证平台接线；不通过反射绕过可见性或 AOT 约束。
+
+## CommandLine 迁移增量研究（2026-08-02）
+
+### 用户验收要求（原话）
+
+- `1同意，但需要参考原项目的形式,是否能直接使用System.CommandLine进行迁移`
+- `2同意，但大概架构需要和DefaultCommandExecutor相似，避免写死命令逻辑过程，也便于后面添加其他命令和代码`
+- `3同意`
+- `4同意`
+- `5暂时不考虑`
+- `ICommandModule改名成ICommandLineDefinition，对应Handler就是ICommandLineHandler`
+- `ConvertCommandLineDefinition怎么获取它对应的Handler?`
+- 对“Definition 通过构造函数注入 `ICommandLineHandler<FumenConvertOption>`”的结论：`同意，开始实现`
+
+### 仓库与测试基线
+
+- 旧项目直接引用 `System.CommandLine 2.0.0`，其 `DefaultCommandExecutor` 创建根命令、五个子命令和全局 `--verbose/-v`。
+- Avalonia CLI 当前只是固定返回 1 的占位程序；现有全量 xUnit/VSTest 基线为 144/144。
+- 当前 SDK 为 .NET 10.0.302；测试项目使用 `Microsoft.NET.Test.Sdk`、xUnit 和 Visual Studio runner，按 VSTest 执行。
+- 已按测试流程执行一次静态未测试源扫描：2108 个源文件、166 个测试文件、1797 个未测试源、311 个配对源；该结果是命名/路径启发式，不是覆盖率数据。
+- 本轮属于 broad、多文件改动，测试至少覆盖命令聚合、参数绑定、Definition/Handler 配对、业务退出码、真实转换和 JIT/AOT EXE。
+
+### 实现约束
+
+- `ConvertCommandLineDefinition` 仅持有 `System.CommandLine` 的命令/选项定义，并通过构造函数接收闭合泛型处理器；Handler 不接触 `ParseResult`。
+- CLI 通过 `AddOngekiFumenEditorAvalonia()` 复用 Injectio 生成的核心注册，并提供自己的编译期注册扩展，不做程序集反射扫描。
+- `FumenConverterWrapper`、`DefaultFumenConverter`、OGKR `CommandArgs` 和 `StandardizeFormat` 的现有路径包含静态 `IoC`；真实 headless convert 必须给这些路径增加显式依赖入口。
+- GUI 兼容入口和已有注释保留；CLI 不创建 `Avalonia.Application`，不启动窗口或 Dispatcher。
+- CI 工作流本轮不修改。
