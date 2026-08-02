@@ -31,12 +31,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AssetsTools.NET" />
         <PackageReference Include="Avalonia.Desktop"/>
         <PackageReference Include="XamlMcp.Avalonia" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console"/>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
         <PackageReference Include="NAudio.Wasapi"/>
         <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="SixLabors.ImageSharp" />
         <PackageReference Include="Svg.Skia" />
         <PackageReference Include="System.CommandLine" />
         <PackageReference Include="NAudio.Asio"
@@ -46,6 +48,33 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="TexturePlugin">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\JacketGenerator\TexturePlugin.dll</HintPath>
+            <Private>true</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="..\..\..\OngekiFumenEditor\Resources\ui_jacket_0666"
+                 Link="ui_jacket_0666"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\TexToolWrap.dll"
+                 Link="TexToolWrap.dll"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\crnlib.dll"
+                 Link="crnlib.dll"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\PVRTexLib.dll"
+                 Link="PVRTexLib.dll"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\ispc_texcomp.dll"
+                 Link="ispc_texcomp.dll"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="PreserveNewest" />
         <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\SoundTouch.dll"
                  Link="SoundTouch.dll"
                  CopyToOutputDirectory="PreserveNewest"
