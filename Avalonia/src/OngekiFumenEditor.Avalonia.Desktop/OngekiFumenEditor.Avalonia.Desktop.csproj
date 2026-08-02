@@ -59,6 +59,11 @@
                  Link="ui_jacket_0666"
                  CopyToOutputDirectory="PreserveNewest"
                  CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="..\..\..\OngekiFumenEditor\Dependencies\JacketGenerator\TexturePlugin.dll"
+                 Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' "
+                 Link="TexturePlugin.dll"
+                 CopyToOutputDirectory="PreserveNewest"
+                 CopyToPublishDirectory="Always" />
         <Content Include="..\..\..\OngekiFumenEditor\costura-win-x64\TexToolWrap.dll"
                  Link="TexToolWrap.dll"
                  CopyToOutputDirectory="PreserveNewest"

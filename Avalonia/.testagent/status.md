@@ -140,3 +140,53 @@ Nyageki→OGKR、OGKR→Nyageki、`--standardize` 和不支持输出格式。JIT
 剩余风险：CommandLine 宿主不启动 Avalonia UI，但当前复用完整的
 `AddOngekiFumenEditorAvalonia()` 注册，扩大了 Native AOT 可达面并保留共享核心既有裁剪警告。
 后续用 Injectio tags 或独立编译期注册模块缩小服务集合；下一业务阶段为 `svg`。
+
+## CommandLine 迁移到 Desktop 最终状态（2026-08-03）
+
+本节覆盖上方“第一阶段/下一阶段为 svg”的旧状态。Research、Plan、Implement、Verify 已完成；
+CommandLine 现在通过完整 Avalonia Classic Desktop 生命周期运行，但 `ShouldCreateMainView=false`，
+因此仍初始化 XAML、主题、语言、Core/Desktop DI 与日志，同时不创建 GUI。
+
+- [x] CommandLine 变为只引用 Desktop 并转发参数的薄启动器。
+- [x] Desktop 接管命令框架、Injectio、`System.CommandLine`、测试可见性和四个命令。
+- [x] 完成 `convert`、`svg`、`jacket`、`updater`；根命令明确不注册 `acb`。
+- [x] Core 测试恢复为只引用 Core；新增 Windows TFM Desktop 测试和 Updater Stub。
+- [x] Stub 加入 solution，Release solution 构建不依赖旧的 Release 产物。
+- [x] CommandLine/Desktop 的 JIT 与 Native AOT 全部发布并冒烟。
+- [x] CI workflow 未修改；旧占位检查明确记录为已知失败，未误记为通过。
+
+### 最终动态验证
+
+- Desktop CommandLine 测试：74/74，0 失败、0 跳过。
+- Core 测试：144/144，0 失败、0 跳过。
+- Release solution：218/218，0 失败、0 跳过；Stub 明确构建到 Release。
+- CommandLine JIT/AOT：各 7 组最终冒烟，共 14/14；帮助、`-3`、convert、SVG、PNG、
+  Jacket、Updater 均符合预期，全部未创建独立 GUI 窗口。
+- Desktop JIT/AOT：分别存活 8 秒并创建主窗口，随后只终止本轮启动的精确 PID。
+- 四种 publish 均包含 Jacket 模板和依赖；AOT `TexturePlugin.dll` 与源 DLL SHA-256 一致。
+
+### test-gap-analysis
+
+对迁移范围实证注入 10 个高风险变异。首轮 8 个被杀死，2 个存活：
+
+1. Updater 过滤测试创建了排除文件，但 fake 枚举未返回这些文件。
+2. Desktop 进程名断言与生产常量自引用。
+
+修复 fixture 和字面量契约断言后重新注入，最终 10/10 全部被杀死。每个变异均立即恢复；
+最终全量测试为绿，工作树没有残留变异。
+
+### assertion-quality
+
+- 18 个测试文件，53 个源测试方法，74 个展开用例。
+- 277 个 `Assert.*` 调用，平均 5.23 个/源测试方法。
+- 零断言、仅平凡断言、自引用/恒真断言均为 0。
+- 28 个方法含负向断言，2 个含异常断言，28 个含结构/深层断言。
+- 使用 12 类断言中的 11 类；仅缺不适用于当前精确整数尺寸/退出码契约的 Approximate。
+
+### 最终剩余边界
+
+- Updater 的目录覆盖和旧版部分回滚状态是用户明确要求保留的兼容风险。
+- `acb` 等待旧二进制的源码/许可、.NET 10、裁剪和 Native AOT 证据。
+- `NU1903`、`NU1507` 和共享 Core/Avalonia 的裁剪/AOT 告警仍存在，不宣称零警告。
+- 普通/AOT TFM 共用 `obj/project.assets.json`；切换后使用 `--no-restore` 可能触发 NETSDK1005，
+  需恢复对应 TFM。本轮最终 solution 已重新 restore 普通 TFM。

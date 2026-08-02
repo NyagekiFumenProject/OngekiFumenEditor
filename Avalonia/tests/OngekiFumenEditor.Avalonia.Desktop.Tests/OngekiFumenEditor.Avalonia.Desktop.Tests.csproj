@@ -24,6 +24,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\OngekiFumenEditor.Avalonia.Desktop\OngekiFumenEditor.Avalonia.Desktop.csproj" />
+        <ProjectReference Include="..\..\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj"
+                          ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\OngekiFumenEditor.Avalonia.UpdaterStub\OngekiFumenEditor.Avalonia.UpdaterStub.csproj"
+                          ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>

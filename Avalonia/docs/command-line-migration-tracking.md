@@ -1,341 +1,234 @@
 # Avalonia CommandLine 迁移跟踪
 
 > 建立时间：2026-08-02
-> 状态：第一阶段（CLI 框架与 `convert`）已完成并通过验证
-> 作用：本文件是 Avalonia CommandLine 后续设计、范围、实施进度、测试证据和结论的统一跟踪入口。
+> 最后更新：2026-08-03
+> 状态：Desktop 迁移完成，`convert`、`svg`、`jacket`、`updater` 已实现；`acb` 延期
 
-## 1. 目标
+## 1. 最终范围
 
-将旧版 `OngekiFumenEditor.CommandLine.exe` 的命令能力迁移到独立的
-`OngekiFumenEditor.Avalonia.CommandLine.exe`，同时满足以下要求：
+- `OngekiFumenEditor.Avalonia.CommandLine` 是薄启动器，只引用 Desktop 并调用
+  `DesktopCommandLineHost.Run(args)`。
+- 命令框架、Definition、Handler、平台服务、`System.CommandLine` 和 Injectio 注册均由 Desktop
+  拥有。
+- Core 保留 `IFumenConvertService`、`IPreviewSvgGenerator`、`IFumenParserManager` 等可复用领域服务。
+- 本轮注册 `convert`、`svg`、`jacket`、`updater`；根命令不注册 `acb`。
+- 本轮不修改 Desktop/CommandLine 合包流程和 CI workflow。
+- Updater 按已确认决策保留旧版高风险覆盖模型，不增加目录边界或事务增强。
 
-- 参考原项目 `DefaultCommandExecutor` 的组织形式和命令契约。
-- 使用 `System.CommandLine` 负责命令树、选项、帮助、解析错误和调用分派。
-- 命令定义与业务执行解耦，根入口不写死每个命令的处理过程。
-- 新增命令时不需要修改 `Program.Main` 或复制一套分派逻辑。
-- JIT 与 Native AOT 发行行为一致。
-- 为参数解析、业务处理和真实 EXE 建立自动化测试。
-- CI 发布契约的调整暂不纳入当前阶段。
+## 2. 最终架构
 
-## 2. 已确认决策
+### 2.1 应用生命周期
 
-### 2.1 命令行库
+Gekimini App 增加可重写的 `ShouldCreateMainView`。Core App 用 `IsGUIMode` 实现该开关：
 
-- 同意直接使用 `System.CommandLine` 迁移。
-- 实现必须参考原项目的命令名称、选项名称、默认值、必填规则、帮助文本和退出行为。
-- 旧项目与 Avalonia 解决方案均采用 `System.CommandLine 2.0.0`。
-- 版本已在 `Directory.Packages.props` 中集中管理；JIT 与 Native AOT 发布及真实 EXE
-  冒烟均已通过。
+- GUI 模式创建 `IMainView`、主窗口和状态栏，恢复并在退出前保存窗口状态。
+- 命令行模式仍执行 Avalonia/XAML 初始化、主题和语言初始化、Core/Desktop DI 与日志初始化。
+- 命令行模式不解析 `IMainView`，不创建主窗口或状态栏，不恢复或保存窗口状态。
+- Core App 在命令行模式跳过编辑器快捷键路由和 Splash。
+- Desktop App 在命令行模式跳过 XamlMcp 与 GUI 启动参数处理。
 
-### 2.2 总体架构
+`DesktopCommandLineHost.Run(string[] args)` 使用完整 Classic Desktop 生命周期和
+`ShutdownMode.OnExplicitShutdown`。命令在 UI Dispatcher 初始化后执行，完成时调用
+`desktop.Shutdown(exitCode)`，因此 Handler 的有符号退出码会穿透应用生命周期。
 
-- 架构应与旧 `DefaultCommandExecutor` 相似：一个根执行器聚合多个命令行定义，各定义拥有自己的选项和处理器。
-- 禁止在 `Program.Main` 中使用 `switch`/`if` 写死 `svg`、`convert`、`jacket`、`acb`、`updater` 的业务过程。
-- 命令定义统一抽象为 `ICommandLineDefinition`，通过 DI 以集合形式注入根执行器；根执行器只负责组装命令树和执行解析结果。
-- 命令处理器统一抽象为 `ICommandLineHandler`；每个命令行定义与对应处理器配对。
-- 优先沿用项目现有的 Injectio 编译期注册方式，避免运行时程序集扫描。
-- 允许保留类似旧版选项模型的强类型参数对象，但不直接搬运旧版的运行时反射绑定实现。
-
-### 2.3 命令迁移顺序
-
-1. 建立 CLI 宿主、命令框架和 `convert`。
-2. 迁移 `svg`。
-3. 迁移 `jacket` 与 `acb`。
-4. 最后迁移具有目录写入/覆盖风险的 `updater`。
-
-### 2.4 测试
-
-- 同意增加参数解析单元测试。
-- 同意增加业务命令集成测试。
-- 同意对 JIT 与 Native AOT EXE 执行真实冒烟测试。
-- 所有会修改文件的测试必须使用独立临时目录，不接触用户数据。
-
-### 2.5 暂不实施
-
-- 暂不修改 `.github/workflows/BuildProgram.yml` 的占位契约。
-- 在命令实现完成前，CI 仍只验证伴随 EXE 被正确打包并返回当前占位结果。
-- 完成命令迁移后需要重新评估该延期项，避免 CI 长期把“没有命令”判定为成功。
-
-## 3. 可行性结论：可以直接使用 System.CommandLine
-
-`System.CommandLine` 可以直接承担以下职责：
-
-- `RootCommand` 和子命令树。
-- `Command`、`Option<T>`、别名、必填规则和默认值。
-- `--help`、`--version`、未知命令及解析错误输出。
-- 从解析结果构造强类型选项，并调用异步处理器。
-- 统一取消、标准输出、标准错误和退出码处理。
-
-需要避免的不是 `System.CommandLine` 本身，而是旧 `DefaultCommandExecutor` 中的动态绑定方式：
-
-- `typeof(T).GetProperties()` 扫描选项属性。
-- `MakeGenericType` 动态构造 `Option<T>`。
-- `Expression.Compile()` 动态生成委托。
-- 依赖运行时反射发现所有命令。
-
-这些做法会增加裁剪和 Native AOT 风险。第一版应由每个命令行定义显式创建强类型
-`Option<T>` 并显式绑定到选项模型。若后续确认属性声明更适合维护，应增加编译期源生成器，
-而不是恢复运行时反射。
-
-## 4. 建议架构
+### 2.2 命令框架
 
 ```text
-Program.Main(args)
-    -> CommandLineHost
-        -> ICommandExecutor / DefaultCommandExecutor
-            -> RootCommand
-            -> IEnumerable<ICommandLineDefinition>
-                -> ConvertCommandLineDefinition -> ICommandLineHandler<FumenConvertOption>
-                -> SvgCommandLineDefinition     -> ICommandLineHandler<SvgGenerateOption>
-                -> JacketCommandLineDefinition  -> ICommandLineHandler<JacketGenerateOption>
-                -> AcbCommandLineDefinition     -> ICommandLineHandler<AcbGenerateOption>
-                -> UpdaterCommandLineDefinition -> ICommandLineHandler<UpdaterOption>
-                    -> 可复用的核心业务服务
+CommandLine Program.Main(args)
+    -> DesktopCommandLineHost.Run(args)
+        -> OngekiFumenEditorDesktopApp(isGUIMode: false)
+            -> ICommandExecutor / DefaultCommandExecutor
+                -> IEnumerable<ICommandLineDefinition>
+                    -> Definition
+                        -> ICommandLineHandler<TOptions>
+                            -> 领域或平台服务
 ```
 
-### 4.1 责任边界
+- `DefaultCommandExecutor` 只聚合 Definition、检查重复命令名并执行 `RootCommand`。
+- `--verbose/-v` 是递归全局选项。
+- Definition 显式创建 `Option<T>`，构造函数注入对应的闭合泛型 Handler。
+- Handler 只接收强类型选项，不接触 `ParseResult`。
+- Desktop DI 中恰好发现四个 Definition、四个闭合泛型 Handler 和一个
+  `DefaultFumenParserManager`。
+- CommandLine 项目没有 `System.CommandLine`、Injectio 或独立服务容器。
+- CommandLine 的普通/AOT TFM 条件与 Desktop 完全一致。
 
-`Program.Main`：
+## 3. 命令契约
 
-- 创建 CommandLine 服务容器，不启动 Avalonia 应用生命周期。
-- 调用 `ICommandExecutor.ExecuteAsync(args, cancellationToken)`。
-- 返回执行器给出的退出码。
-- 不包含具体命令名称和业务逻辑。
+### 3.1 `convert`
 
-`DefaultCommandExecutor`：
+| 项目 | 契约 |
+| --- | --- |
+| 必填 | `--inputFile`、`--outputFile` |
+| 可选 | `--standardize`，默认 `false` |
+| 路径 | 输入和输出均必须为完全限定路径 |
+| 成功 | 返回 `0`；真实 Nyageki 到 OGKR 可重新解析并保留关键语义 |
+| 失败 | 路径错误 `-3`；转换失败、格式不支持或异常 `-4` |
 
-- 创建根命令及全局选项，例如 `--verbose/-v`。
-- 从 DI 获取全部 `ICommandLineDefinition` 并加入根命令。
-- 检查重复命令名，错误时立即失败。
-- 调用 `System.CommandLine` 执行命令树。
-- 统一处理未捕获异常、日志和退出码。
+### 3.2 `svg`
 
-`ICommandLineDefinition`：
+| 项目 | 契约 |
+| --- | --- |
+| 必填 | `--inputFile`、`--outputFile`、`--audioFile`，三者均必须为完全限定路径 |
+| 默认值 | `maxXGrid=40`、`viewWidth=800`、`verticalScale=1`、`soflanMode=Soflan`、`png=false` |
+| 时长 | 音频存在时使用音频时长；否则使用谱面末尾 TGrid 加 5 格 |
+| SVG | 输出可解析 XML，根元素为 `svg`，声明正数宽高 |
+| PNG | 按 SVG 声明尺寸栅格化；PNG 在 IEND 结束，无尾随 SVG 数据，可由 ImageSharp 解码 |
+| 失败 | 路径错误 `-1`；解析、生成或栅格化失败 `-2` |
 
-- 声明一个顶层命令的名称和描述。
-- 创建该命令所需的强类型选项。
-- 将解析结果转换为命令选项模型。
-- 将解析结果绑定为强类型选项后，转发给对应的 `ICommandLineHandler`。
-- 不直接初始化全局应用或 UI。
+### 3.3 `jacket`
 
-`ICommandLineHandler`：
+| 项目 | 契约 |
+| --- | --- |
+| 必填 | `--musicId`、`--outputFolder`、`--inputFile` |
+| 默认值 | 大图 `520x520`，小图 `220x220`，`updateAssetBytesFile=true` |
+| 绑定 | `--outputWidthSmall` 绑定小图宽，`--outputHeightSmall` 绑定小图高 |
+| 输出 | 生成 `ui_jacket_NNNN` 和 `ui_jacket_NNNN_s` 两份 AssetBundle |
+| 清单 | 更新 `assets.bytes` 时保留既有记录，并只追加缺失的两条记录 |
+| 失败 | 路径错误 `-5`；图片、模板、编码或 AssetBundle 生成失败 `-6` |
 
-- 只接收已经验证的强类型选项和 `CancellationToken`。
-- 调用可复用业务服务。
-- 返回统一的命令结果/退出码。
-- 业务失败写入 stderr；正常结果写入 stdout。
-- 不直接依赖 `System.CommandLine.ParseResult`；解析库边界由命令行定义负责。
+Desktop 管理并复制以下 Jacket 资源：
 
-### 4.2 DI 与命令发现
+- `ui_jacket_0666`
+- `TexturePlugin.dll`
+- `TexToolWrap.dll`
+- `PVRTexLib.dll`
+- `ispc_texcomp.dll`
+- `crnlib.dll`
 
-每个命令行定义使用 Injectio 注册为 `ICommandLineDefinition`。根执行器构造函数接收
-`IEnumerable<ICommandLineDefinition>`，这样新增命令时只需要增加新的定义、处理器和业务服务，
-根执行器与 `Program.Main` 无需修改。Injectio 在编译期生成注册代码，比运行时程序集扫描更适合
-Native AOT。
+计划最初列出四个 DLL；实际检查 `TexToolWrap.dll` 导入表后确认还依赖 `crnlib.dll`，因此必须随包。
+JIT 使用 ReadyToRun 处理 `TexturePlugin.dll`；Native AOT 额外以 `CopyToPublishDirectory=Always`
+保留原 DLL，最终 AOT 文件与源文件 SHA-256 一致。
 
-`ICommandLineHandler` 保留为所有命令行处理器的统一基接口；使用闭合泛型接口建立定义和处理器的
-编译期映射：
+### 3.4 `updater`
 
-```csharp
-public interface ICommandLineHandler
-{
-}
+必填内部参数：`--sourceFolder`、`--targetFolder`、`--sourceVersion`。
 
-public interface ICommandLineHandler<in TOptions> : ICommandLineHandler
-{
-    Task<int> HandleAsync(TOptions options, CancellationToken cancellationToken);
-}
+保留的旧版行为：
 
-[RegisterSingleton<ICommandLineDefinition>]
-internal sealed class ConvertCommandLineDefinition(
-    ICommandLineHandler<FumenConvertOption> handler) : ICommandLineDefinition
-{
-    // Definition 创建 Option<T>，将 ParseResult 绑定成 FumenConvertOption，
-    // 再调用 handler.HandleAsync(options, cancellationToken)。
-}
+1. 递归枚举源目录文件，大小写不敏感地排除 `.log`、`.xml`、`.dmp`。
+2. 按进程名 `OngekiFumenEditor.Avalonia.Desktop` 终止除当前 PID 外的实例。
+3. 将既有目标移动为随机 `.bak_*` 备份。
+4. 以不覆盖方式复制新文件。
+5. 备份或复制失败时执行旧版回滚；复制失败可能保留新目标和 `.bak_*`，这是被测试锁定的旧行为。
+6. 成功后删除备份；删除失败只记录日志，仍返回成功。
+7. 启动 `OngekiFumenEditor.Avalonia.Desktop.exe`，参数固定为
+   `--wait --notifySucess --sourceVersion <version>`。
 
-[RegisterSingleton<ICommandLineHandler<FumenConvertOption>>]
-internal sealed class ConvertCommandLineHandler : ICommandLineHandler<FumenConvertOption>
-{
-    public async Task<int> HandleAsync(
-        FumenConvertOption options,
-        CancellationToken cancellationToken)
-    {
-        var result = await convertService.GenerateAsync(
-            options,
-            cancellationToken: cancellationToken);
-        return result.IsSuccess ? 0 : -4;
-    }
-}
+退出码：终止进程失败 `-1`、备份失败 `-2`、复制失败 `-3`、成功 `0`。
+
+风险边界：Updater 没有源/目标目录隔离、目标根保护或完整事务。调用者传入错误目录时可能覆盖任意
+可写文件；这是本轮明确保留的旧版模型，不应在文档或 UI 中描述为安全更新器。
+
+## 4. `acb` 延期
+
+本轮没有 `AcbCommandLineDefinition`，根帮助明确不出现 `acb`。旧版契约为：
+
+- 必填 `--musicId`、`--inputFile`、`--outputFolder`。
+- `--previewBegin` 默认 `60000` 毫秒，`--previewEnd` 默认 `80000` 毫秒。
+- 路径错误 `-7`，生成失败 `-8`。
+- 输出 ACB/AWB 和由嵌入 `MusicSource.xml` 改写的音乐源 XML。
+
+延期原因：旧实现直接依赖没有当前源码项目的 `AcbGeneratorFuck.dll`（1,622,528 字节）、
+`VGAudio.Cli.Options`，以及五个 DereTore 二进制 DLL：
+
+- `DereTore.Common.dll`
+- `DereTore.Common.StarlightStage.dll`
+- `DereTore.Exchange.Archive.ACB.dll`
+- `DereTore.Exchange.Audio.HCA.dll`
+- `DereTore.Interop.OS.dll`
+
+这些二进制的 .NET 10、裁剪、Native AOT 和再分发状态尚未取得证据。恢复 `acb` 的条件：
+
+1. 获得可维护源码或受支持的 .NET 10 包，并确认许可证/再分发边界。
+2. 将生成逻辑封装为可注入服务，不恢复旧版反射选项绑定或全局 IoC。
+3. JIT 和 Native AOT 均完成发布，并运行真实 WAV 到 ACB/AWB/XML 的成功与失败测试。
+4. 校验 ACB/AWB 可被现有读取链重新打开，预览区间和音乐 ID 正确。
+5. 满足以上条件后才注册 Definition；不能只复制旧 DLL 并把命令加入根帮助。
+
+## 5. 自动化测试
+
+新增 Windows TFM 的 `OngekiFumenEditor.Avalonia.Desktop.Tests`，Core 测试项目只引用 Core。
+Updater 使用独立、无害的 Desktop Stub；Stub 已加入 solution，保证 Release 干净构建可复现。
+
+| 范围 | 展开测试数 | 主要证据 |
+| --- | ---: | --- |
+| 框架与 `convert` | 18 | 帮助、重复命令、未知参数、verbose、Definition/Handler、真实 round-trip |
+| `svg` | 15 | 必填/默认值、两种时长、SVG XML、PNG chunks/IEND、ImageSharp 解码 |
+| `jacket` | 13 | 默认值/绑定、退出码、真实模板双 Bundle、纹理尺寸、`assets.bytes` |
+| `updater` | 15 | 成功、`-1/-2/-3`、旧回滚、过滤、参数、真实 EXE+Stub |
+| 注册、结构、生命周期 | 13 | 四命令/无 `acb`、DI 映射、TFM/引用、无窗口、退出码、主视图开关 |
+| **Desktop 合计** | **74** | **0 失败、0 跳过** |
+
+Release solution 最终结果：Core 144/144，Desktop 74/74，共 218/218，0 失败、0 跳过。
+
+### 5.1 测试质量
+
+- 静态未测试源扫描：2,120 个源文件、170 个测试文件、326 个名称配对源、1,794 个未配对源。
+  该结果包含 Dependencies，仅是启发式名称配对，不是覆盖率。
+- 对迁移高风险逻辑实证注入 10 个伪变异：路径 OR/AND、SVG 音频分支、尾部 `+5`、Jacket
+  小图宽高、Updater 过滤/大小写/当前 PID/退出码/进程名和 Definition 注册。
+- 首轮 8 个被杀死，2 个存活：过滤测试没有把排除文件交给 fake 枚举；进程名断言与生产常量
+  自引用。修复后复注入，最终 10/10 全部被杀死，生产代码已恢复并全量回绿。
+- 18 个文件包含 53 个源测试方法、74 个展开用例、277 个 `Assert.*` 调用，平均 5.23 个；
+  零断言、仅平凡断言和自引用断言均为 0。使用 12 类中的 11 类断言，仅没有当前不需要的
+  Approximate。
+
+## 6. 发布与冒烟
+
+所有发布均为 `win-x64`、Release、self-contained。
+
+| 产物 | 模式 | EXE 字节数 | 结果 |
+| --- | --- | ---: | --- |
+| CommandLine | JIT + ReadyToRun | 162,816 | 发布成功 |
+| CommandLine | Native AOT | 57,269,248 | 发布成功，保留既有裁剪/AOT 警告 |
+| Desktop | JIT + ReadyToRun | 163,328 | 发布成功，启动 8 秒并创建主窗口 |
+| Desktop | Native AOT | 57,268,224 | 发布成功，启动 8 秒并创建主窗口 |
+
+CommandLine JIT/AOT 各执行 7 组最终冒烟，共 14/14：
+
+- 根帮助：只列出 `convert/svg/jacket/updater`，返回 0。
+- 相对路径 convert：返回有符号 `-3`，不创建输出。
+- convert：真实 fixture 生成 635 字节 OGKR。
+- svg：生成可解析 XML。
+- svg PNG：签名 `89-50-4E-47-0D-0A-1A-0A`。
+- jacket：生成 5,261/4,685 字节双 Bundle；最终 AOT 资源修正后再次运行返回 0。
+- updater：只操作隔离目录和无害 Stub，重启参数完全匹配旧拼写。
+
+全部 14 次命令行调用均未创建独立 GUI 窗口。四个 publish 目录均包含 Jacket 模板及所需 DLL。
+
+构建顺序注意：普通 TFM 与 AOT TFM 共用项目 `obj/project.assets.json`。AOT 发布后直接对普通 TFM
+使用 `--no-restore` 会出现 NETSDK1005；重新 restore 对应 TFM 即可。本轮最终 solution 测试已执行
+普通 TFM restore，不存在残留失败状态。
+
+## 7. 提交记录
+
+| 批次 | 提交 | 内容 |
+| --- | --- | --- |
+| Gekimini 子模块 | `47338df` | 增加 service-only 启动与 `ShouldCreateMainView` |
+| 1 | `bfbe4c72` | 生命周期、薄启动器、框架迁移与 `convert` |
+| 2 | `853b85ea` | `svg`、音频时长与真实 PNG 栅格化 |
+| 3 | `79451f96` | `jacket`、真实模板和原生资源 |
+| 4 | 当前提交 `add updater command line and finalize migration` | `updater`、跨命令测试、发布修正和最终文档 |
+
+## 8. CI 已知失败
+
+本轮按边界没有修改 `../.github/workflows/BuildProgram.yml`。该 workflow 的 Native AOT 检查仍要求：
+
+```text
+exit code == 1
+output matches "no commands are available yet"
 ```
 
-该方案的映射关系由选项类型确定：
+当前 CommandLine 已有四个命令，空参数会显示根帮助而不是占位文本，因此该检查现在是确定的已知
+失败项。本轮没有运行或记录该检查为通过；后续 CI 修改应把它替换为根帮助命令集合和至少一条真实
+命令冒烟。
 
-- `ConvertCommandLineDefinition` 只能获得 `ICommandLineHandler<FumenConvertOption>`。
-- DI 不需要在多个 `ICommandLineHandler` 中按命令名查找。
-- Definition 保留 `System.CommandLine` 依赖；Handler 保持强类型且不依赖解析库。
-- 每个命令应拥有自己的选项类型，避免两个 Definition 争用同一个闭合泛型 Handler 注册。
+## 9. 剩余风险
 
-不推荐让 Definition 注入 `IEnumerable<ICommandLineHandler>` 后按字符串、类型名或属性筛选。这会把
-重复注册和缺失注册推迟到运行时，也会丢失编译期类型检查。若最终不采用泛型接口，次选方案是让
-Definition 直接注入具体的 `ConvertCommandLineHandler`，仍不进行运行时查找。
-
-该映射已经按上述方案实现：`ConvertCommandLineDefinition` 的构造函数直接注入
-`ICommandLineHandler<FumenConvertOption>`，Injectio 生成定义集合和闭合泛型 Handler 注册。
-未使用 `Assembly.GetTypes()` 或按命令名查找 Handler。
-
-### 4.3 Definition 与 Handler 的配对规则
-
-- 一个 `ICommandLineDefinition` 对应一个闭合的 `ICommandLineHandler<TOptions>`。
-- Definition 负责命令名称、帮助、`Option<T>`、解析验证和选项模型构造。
-- Handler 负责业务验证、业务服务调用、输出和业务退出码。
-- `ParseResult`、`Command`、`Option<T>` 不得传入 Handler。
-- `TOptions` 应为只承载命令输入的强类型对象，不持有 DI 服务或 UI 对象。
-- 处理器生命周期默认使用 singleton；若后续处理器持有单次执行状态，应改用 transient，并将状态限制在
-  `HandleAsync` 调用内。
-
-### 4.4 无 UI 宿主
-
-当前已通过 `AddOngekiFumenEditorCommandLine()` 建立独立宿主。CLI 不创建
-`Avalonia.Application`，不启动 Dispatcher、Shell、窗口或启动画面；`convert` 调用路径使用
-构造函数注入的 `IFumenConvertService`、解析器、转换器和检查规则，不再依赖
-`Avalonia.Application.Current` 才能工作。日志与对象池也增加了无 UI 初始化路径。
-
-第一阶段为了复用既有 Injectio 生成结果，`AddOngekiFumenEditorCommandLine()` 当前仍调用完整的
-`AddOngekiFumenEditorAvalonia()` 注册扩展。UI 服务只被注册而没有被 CLI 实例化，但这些服务描述符
-会扩大 Native AOT 的可达面并产生已有共享核心裁剪警告。后续应使用 Injectio tags 或独立的编译期
-核心注册模块，只注册解析、格式转换、SVG 和资源生成所需服务；在完成该拆分前，不把现状描述为
-“只注册无 UI 服务”。
-
-## 5. 命令迁移矩阵
-
-| 命令 | 旧版实现 | Avalonia 当前基础 | 当前结论 |
-|---|---|---|---|
-| `convert` | `FumenConverterWrapper` | 已提取 `IFumenConvertService` 并实现强类型 Definition/Handler | 第一阶段完成；JIT/AOT 行为已验证 |
-| `svg` | `IPreviewSvgGenerator` | SVG 生成器和选项模型已存在 | 第二优先；需补无 UI 调用、时长和 PNG 语义检查 |
-| `jacket` | `JacketGenerateWrapper` | 未发现已迁移命令实现 | 需要移植生成服务及 AssetsTools 依赖边界 |
-| `acb` | `AcbGeneratorFuckWrapper` | 有底层 ACB/音频依赖，但未发现命令生成实现 | 需要移植生成服务并验证原生依赖/AOT |
-| `updater` | `IProgramUpdater.CommandExecuteUpdate` | 未发现已迁移命令实现 | 最后处理；必须增加路径和覆盖保护 |
-
-旧版全局选项：
-
-- `--verbose` / `-v`
-
-旧版命令参数应以原项目源码为基线逐项登记；除非另有决策，不擅自改名或删除参数。
-
-## 6. 第一阶段实施范围
-
-### 6.1 CLI 基础设施
-
-- [x] 在 Central Package Management 中加入 `System.CommandLine 2.0.0`。
-- [x] CommandLine 项目引用核心项目及必要的 DI/日志包。
-- [x] 新增不启动 UI 的 CommandLine 服务注册入口。
-- [x] 新增 `ICommandExecutor`、`DefaultCommandExecutor`、`ICommandLineDefinition` 和 `ICommandLineHandler`。
-- [x] 根帮助、版本、未知命令和全局 verbose 正常工作。
-- [x] 定义并测试 stdout/stderr 和首个业务命令退出码约定。
-- [x] 删除当前“所有调用都返回占位文本”的 `Program.Main` 实现。
-- [ ] 将完整核心 Injectio 注册拆成按 CLI 能力选择的 headless 注册集合。
-
-### 6.2 convert 命令
-
-- [x] 保留 `--inputFile`、`--outputFile`、`--standardize`。
-- [x] 必需参数在业务处理前由解析层拒绝。
-- [x] 输入/输出路径要求为完全限定路径，不依赖当前工作目录的隐式行为。
-- [x] 转换服务改用构造函数注入。
-- [x] 成功时原子写入目标文件并返回 0。
-- [x] 不支持格式、无效输入、输出失败返回稳定非零退出码并写 stderr。
-- [x] 支持取消且不留下半写入目标文件或 `.tmp` 文件。
-
-第一阶段退出码：
-
-| 退出码 | 含义 | 输出 |
-|---:|---|---|
-| `0` | 成功 | 默认无输出；`--verbose/-v` 输出日志 |
-| `1` | `System.CommandLine` 解析错误、未知命令或未知选项 | 帮助/错误信息 |
-| `-3` | 输入或输出路径不是完全限定路径 | stderr |
-| `-4` | 格式不支持、转换失败或业务异常 | stderr |
-
-## 7. 测试与验收
-
-### 7.1 单元测试（已完成）
-
-- 根帮助列出全部已注册命令。
-- 重复命令名构建失败。
-- `--verbose/-v` 行为一致。
-- 每个必填选项缺失时返回解析错误。
-- 布尔值和路径参数绑定正确；当前 `convert` 没有枚举参数。
-- 未知命令/未知选项不会进入业务处理器。
-
-### 7.2 集成测试（`convert` 已完成）
-
-- 使用仓库 fixture 执行真实 `convert` 输入到输出。
-- 比较关键语义或规范化输出，不只检查文件存在。
-- 覆盖不支持格式、处理器异常和取消场景；取消时保留既有目标且不残留临时文件。
-- 后续按命令增加 SVG 内容、图片尺寸、ACB 资源和 updater 临时目录断言。
-
-### 7.3 EXE 冒烟测试（第一阶段已完成）
-
-- JIT 与 Native AOT 均运行根帮助和版本。
-- 每个命令运行 `--help`。
-- 每个已完成命令至少执行一条成功路径和一条错误路径。
-- 校验退出码、stdout、stderr 和输出文件。
-- updater 只能操作专用临时目录。
-
-## 8. 当前验证基线
-
-2026-08-02 迁移前检查结果：
-
-- Avalonia 全量测试：144/144 通过，0 跳过。
-- CommandLine JIT 与 Native AOT 各执行 15 组参数，共 30 次。
-- 两种 EXE 均无崩溃、无挂起、stderr 为空。
-- 30 次调用全部返回退出码 1 和同一条“命令执行器尚未迁移”提示。
-- `--help`、`--version`、未知命令及五个旧版命令均未被识别。
-- Native AOT EXE 为 1,110,016 字节，无 runtimeconfig，发布本身正常。
-- 当前测试项目没有 CommandLine 相关自动化测试。
-
-该基线只证明伴随 EXE 的占位契约稳定，不能证明任何业务命令可用。
-
-2026-08-02 第一阶段实现后验证结果：
-
-- Avalonia Release 全量测试：162/162 通过，0 失败，0 跳过；其中新增 CommandLine 测试 18 项。
-- JIT self-contained 与 Native AOT 均发布成功。
-- 两种 EXE 各执行 10 组真实参数，共 20 次；全部得到预期退出码、stdout、stderr 和文件结果。
-- 每套冒烟覆盖根帮助、版本、`convert --help`、未知命令、缺失必填参数、相对路径、
-  Nyageki→OGKR、OGKR→Nyageki、`--standardize` 和不支持的输出格式。
-- JIT 与 AOT 生成的 OGKR、Nyageki 和规范化 OGKR 大小分别一致为 635、762、609 字节。
-- 所有成功转换均无 `.tmp` 残留；失败转换没有创建目标文件。
-- JIT 启动 EXE 为 162,816 字节；Native AOT EXE 为 24,012,800 字节。
-- AOT 发布仍报告共享核心中既有的反射/裁剪警告，主要来自设置、本地化、属性浏览器和 SVG；
-  `CommandArgs` 的运行时 `TypeDescriptor` 回退已删除，因此其 AOT 警告已消除。
-
-## 9. 待确认事项
-
-- [x] `System.CommandLine` 采用 `2.0.0` 及其正式 API。
-- [x] 采用 `ICommandLineHandler<TOptions> : ICommandLineHandler` 的强类型处理器签名。
-- [ ] 是否完全保持旧版帮助文本本地化，还是第一阶段先固定一种语言。
-- [x] `convert` 第一阶段保留旧版 `-3`、`-4`；新增命令前再决定通用退出码体系。
-- [ ] 使用 Injectio tags 或独立生成模块缩小 CommandLine 的核心服务注册与 AOT 可达面。
-- [ ] `svg --png` 在当前 Avalonia SVG 实现中的准确语义。
-- [ ] SVG 的 `--audioFile` 是否继续必填；无音频时旧业务代码实际存在按谱面估算时长的分支。
-- [ ] jacket/acb 所需外部工具和原生依赖是否允许进入 Native AOT 包。
-- [ ] updater 是否仍需要作为公开命令保留，以及允许覆盖的目录边界。
-
-## 10. 决策与进度日志
-
-| 日期 | 类型 | 内容 | 状态 |
-|---|---|---|---|
-| 2026-08-02 | 决策 | 使用 `System.CommandLine`，参考旧项目形式迁移 | 已确认 |
-| 2026-08-02 | 决策 | 保留类似 `DefaultCommandExecutor` 的可扩展模块架构，不在入口写死命令过程 | 已确认 |
-| 2026-08-02 | 命名 | 命令定义统一命名为 `ICommandLineDefinition`，对应处理器统一命名为 `ICommandLineHandler` | 已确认 |
-| 2026-08-02 | 方案 | Definition 通过构造函数注入闭合的 `ICommandLineHandler<TOptions>`，非泛型接口作为统一基接口 | 已实现 |
-| 2026-08-02 | 决策 | 按 convert、svg、jacket/acb、updater 顺序迁移 | 已确认 |
-| 2026-08-02 | 决策 | 增加单元、集成和 JIT/AOT EXE 冒烟测试 | 已确认 |
-| 2026-08-02 | 延期 | 暂不修改 CI 占位校验 | 已确认 |
-| 2026-08-02 | 调研 | convert/svg 基础已存在；jacket/acb/updater 命令实现尚未迁移 | 已完成 |
-| 2026-08-02 | 实现 | 完成可扩展 CLI 框架、无 UI 启动入口、`convert` Definition/Handler 与可复用转换服务 | 已完成 |
-| 2026-08-02 | 测试 | 新增 18 项 CommandLine 测试，全量 162/162 通过 | 已完成 |
-| 2026-08-02 | 发布 | JIT self-contained 与 Native AOT 发布成功，两种 EXE 共 20 次真实冒烟全部通过 | 已完成 |
-| 2026-08-02 | 风险 | CLI 暂时复用完整核心 Injectio 注册；后续按能力拆分以缩小 AOT 可达面 | 待处理 |
-| 2026-08-02 | 后续 | 第二阶段迁移 `svg`，继续沿用 Definition/Handler/业务服务边界 | 待开始 |
-
-后续讨论形成的新约束、范围变化、测试结果和实现结论均应更新本文件，并在本日志追加记录。
+- Updater 的高风险目录覆盖模型是有意保留的兼容行为。
+- `acb` 尚未迁移，旧二进制兼容性和再分发状态未确认。
+- Native AOT 仍报告共享 Core/Avalonia/Dock/SVG/DereTore 的既有裁剪和动态代码警告。
+- Gekimini 引用的 SkiaSharp 2.88.3 仍报告 `NU1903` 高严重性漏洞告警。
+- Browser restore 仍报告双包源 `NU1507`；与本轮 CommandLine 行为无关。
+- Desktop/CommandLine 合包逻辑和 CI workflow 仍需单独更新。
