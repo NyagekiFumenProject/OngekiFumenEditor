@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Acb;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Jacket;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Svg;
@@ -17,7 +18,7 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
 public sealed class CommandLineRegistrationTests
 {
     [Fact]
-    public async Task DesktopRegistration_RootHelpDiscoversFourCommandsAndOmitsAcb()
+    public async Task DesktopRegistration_RootHelpDiscoversFiveCommandsIncludingAcb()
     {
         await using var serviceProvider = CreateServiceProvider();
         var executor = Assert.IsType<DefaultCommandExecutor>(
@@ -29,16 +30,16 @@ public sealed class CommandLineRegistrationTests
             .ToArray();
         var result = await InvokeAsync(executor.RootCommand, "--help");
 
-        Assert.Equal(new[] { "convert", "jacket", "svg", "updater" }, commandNames);
+        Assert.Equal(new[] { "acb", "convert", "jacket", "svg", "updater" }, commandNames);
         Assert.Equal(0, result.ExitCode);
         Assert.All(commandNames, commandName =>
             Assert.Contains(commandName, result.Output, StringComparison.Ordinal));
-        Assert.DoesNotContain("acb", commandNames, StringComparer.OrdinalIgnoreCase);
         Assert.Equal(string.Empty, result.Error);
     }
 
     public static TheoryData<string, string[]> CommandHelpCases => new()
     {
+        { "acb", ["--musicId", "--inputFile", "--outputFolder", "--previewBegin", "--previewEnd"] },
         { "convert", ["--inputFile", "--outputFile", "--standardize"] },
         { "svg", ["--inputFile", "--outputFile", "--audioFile", "--png"] },
         { "jacket", ["--musicId", "--outputFolder", "--outputWidthSmall", "--outputHeightSmall"] },
@@ -76,12 +77,14 @@ public sealed class CommandLineRegistrationTests
         Assert.Equal(
             new[]
             {
+                typeof(AcbCommandLineDefinition),
                 typeof(ConvertCommandLineDefinition),
                 typeof(JacketCommandLineDefinition),
                 typeof(SvgCommandLineDefinition),
                 typeof(UpdaterCommandLineDefinition)
             }.OrderBy(type => type.FullName, StringComparer.Ordinal),
             definitionTypes);
+        AssertSingletonHandler<AcbGenerateOption, AcbCommandLineHandler>(serviceProvider);
         AssertSingletonHandler<FumenConvertOption, ConvertCommandLineHandler>(serviceProvider);
         AssertSingletonHandler<SvgGenerateOption, SvgCommandLineHandler>(serviceProvider);
         AssertSingletonHandler<JacketGenerateOption, JacketCommandLineHandler>(serviceProvider);

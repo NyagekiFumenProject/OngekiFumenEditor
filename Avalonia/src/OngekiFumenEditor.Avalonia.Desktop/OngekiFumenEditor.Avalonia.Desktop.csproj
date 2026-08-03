@@ -55,6 +55,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <EmbeddedResource Include="..\..\..\OngekiFumenEditor\Resources\MusicSource.xml"
+                          Link="Resources\MusicSource.xml"
+                          LogicalName="OngekiFumenEditor.Avalonia.Desktop.Resources.MusicSource.xml" />
         <Content Include="..\..\..\OngekiFumenEditor\Resources\ui_jacket_0666"
                  Link="ui_jacket_0666"
                  CopyToOutputDirectory="PreserveNewest"
@@ -87,6 +90,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\Dependencies\AcbGeneratorFuck\src\AcbGeneratorFuck\AcbGeneratorFuck.csproj"/>
         <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj"/>
 
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj"/>

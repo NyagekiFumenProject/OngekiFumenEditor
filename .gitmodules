@@ -19,3 +19,6 @@
 [submodule "Avalonia/Dependencies/NAudio.BrowserAudioWorklet"]
 	path = Avalonia/Dependencies/NAudio.BrowserAudioWorklet
 	url = https://github.com/MikiraSora/NAudio.BrowserAudioWorklet.git
+[submodule "Avalonia/Dependencies/AcbGeneratorFuck"]
+	path = Avalonia/Dependencies/AcbGeneratorFuck
+	url = https://github.com/NyagekiFumenProject/AcbGeneratorFuck
