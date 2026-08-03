@@ -2,7 +2,7 @@
 
 > 建立时间：2026-08-02
 > 最后更新：2026-08-03
-> 状态：Desktop 迁移完成，`convert`、`svg`、`jacket`、`updater` 已实现；`acb` 延期
+> 状态：Desktop 迁移完成，`convert`、`svg`、`jacket`、`updater`、`acb` 已实现
 
 ## 1. 最终范围
 
@@ -11,8 +11,8 @@
 - 命令框架、Definition、Handler、平台服务、`System.CommandLine` 和 Injectio 注册均由 Desktop
   拥有。
 - Core 保留 `IFumenConvertService`、`IPreviewSvgGenerator`、`IFumenParserManager` 等可复用领域服务。
-- 本轮注册 `convert`、`svg`、`jacket`、`updater`；根命令不注册 `acb`。
-- 本轮不修改 Desktop/CommandLine 合包流程和 CI workflow。
+- 本轮注册 `convert`、`svg`、`jacket`、`updater`、`acb`。
+- CI 分别发布并合入 CommandLine JIT/AOT 产物，运行全量测试及两种最终包的命令发现冒烟。
 - Updater 按已确认决策保留旧版高风险覆盖模型，不增加目录边界或事务增强。
 
 ## 2. 最终架构
@@ -48,7 +48,7 @@ CommandLine Program.Main(args)
 - `--verbose/-v` 是递归全局选项。
 - Definition 显式创建 `Option<T>`，构造函数注入对应的闭合泛型 Handler。
 - Handler 只接收强类型选项，不接触 `ParseResult`。
-- Desktop DI 中恰好发现四个 Definition、四个闭合泛型 Handler 和一个
+- Desktop DI 中恰好发现五个 Definition、五个闭合泛型 Handler 和一个
   `DefaultFumenParserManager`。
 - CommandLine 项目没有 `System.CommandLine`、Injectio 或独立服务容器。
 - CommandLine 的普通/AOT TFM 条件与 Desktop 完全一致。
@@ -120,31 +120,46 @@ JIT 使用 ReadyToRun 处理 `TexturePlugin.dll`；Native AOT 额外以 `CopyToP
 风险边界：Updater 没有源/目标目录隔离、目标根保护或完整事务。调用者传入错误目录时可能覆盖任意
 可写文件；这是本轮明确保留的旧版模型，不应在文档或 UI 中描述为安全更新器。
 
-## 4. `acb` 延期
+## 4. `acb`
 
-本轮没有 `AcbCommandLineDefinition`，根帮助明确不出现 `acb`。旧版契约为：
+| 项目 | 契约 |
+| --- | --- |
+| 必填 | `--musicId`、`--inputFile`、`--outputFolder` |
+| 默认值 | `previewBegin=60000` 毫秒、`previewEnd=80000` 毫秒 |
+| 路径 | 输入文件和输出目录均必须为完全限定路径 |
+| 输出 | `musicNNNN.acb`、`musicNNNN.awb`、由嵌入 `MusicSource.xml` 改写的 XML |
+| 编码 | HCA 比特率固定为 `192 * 1024`，保留旧版非归一化行为 |
+| 失败 | 路径错误 `-7`；生成、复制或 XML 处理失败 `-8` |
 
-- 必填 `--musicId`、`--inputFile`、`--outputFolder`。
-- `--previewBegin` 默认 `60000` 毫秒，`--previewEnd` 默认 `80000` 毫秒。
-- 路径错误 `-7`，生成失败 `-8`。
-- 输出 ACB/AWB 和由嵌入 `MusicSource.xml` 改写的音乐源 XML。
+Desktop 新增 `IAcbGenerateService`、`DefaultAcbGenerateService`、独立 Definition/Handler，并把
+`MusicSource.xml` 作为 Desktop 嵌入资源。生成器以官方仓库子模块接入：
 
-延期原因：旧实现直接依赖没有当前源码项目的 `AcbGeneratorFuck.dll`（1,622,528 字节）、
-`VGAudio.Cli.Options`，以及五个 DereTore 二进制 DLL：
+- `.gitmodules` 固定 `Avalonia/Dependencies/AcbGeneratorFuck` 到
+  `https://github.com/NyagekiFumenProject/AcbGeneratorFuck`；当前 gitlink 为 `d00e636c`。
+- Desktop 无条件 `ProjectReference` 子模块的
+  `src/AcbGeneratorFuck/AcbGeneratorFuck.csproj`，JIT 与 AOT 都直接调用 `Generator.Generate`。
+- JIT 从子模块源码构建托管程序集并随发布输出；Native AOT 把可达生成代码直接链接进主 EXE，
+  CommandLine/Desktop AOT 发布目录均没有 `AcbGeneratorFuck*.dll`。
+- 已移除 Desktop 的预编译普通 DLL `<Reference>`、AOT DLL `<Content>`、`LibraryImport` 桥接和
+  `AcbGeneratorFuck.aot.dll` 仓库文件。CI 已启用 `submodules: recursive`，依赖检出无需新增步骤。
 
-- `DereTore.Common.dll`
-- `DereTore.Common.StarlightStage.dll`
-- `DereTore.Exchange.Archive.ACB.dll`
-- `DereTore.Exchange.Audio.HCA.dll`
-- `DereTore.Interop.OS.dll`
+为使实际 `Generator.Generate` 闭包可 NativeAOT，外部源码完成以下修改：
 
-这些二进制的 .NET 10、裁剪、Native AOT 和再分发状态尚未取得证据。恢复 `acb` 的条件：
+- `FormatHelper` 用 `XDocument` 显式解析配置，移除运行时 `XmlSerializer`。
+- `ArrayUnpacker` 改为有限泛型类型分派并正确循环读取 Deflate 数据，移除
+  `MakeArrayType`、`Array.CreateInstance`、`Marshal.SizeOf(Type)` 等动态路径。
+- ACB 替换轨道新增无 Undo/反射路径，并为仍需扫描表类型的位置补充成员保留标注。
+- `UndoableProperty<T>` 补充成员保留标注；`Generator.Generate` 使用新的直接替换路径。
 
-1. 获得可维护源码或受支持的 .NET 10 包，并确认许可证/再分发边界。
-2. 将生成逻辑封装为可注入服务，不恢复旧版反射选项绑定或全局 IoC。
-3. JIT 和 Native AOT 均完成发布，并运行真实 WAV 到 ACB/AWB/XML 的成功与失败测试。
-4. 校验 ACB/AWB 可被现有读取链重新打开，预览区间和音乐 ID 正确。
-5. 满足以上条件后才注册 Definition；不能只复制旧 DLL 并把命令加入根帮助。
+验证证据：真实 48 kHz PCM WAV 在 JIT 服务中生成的 ACB/AWB 可由现有 DereTore 读取链重新
+打开；音乐 ID、XML 路径和两个预览时间均有断言。Native AOT CommandLine 使用含中文的输出路径
+实跑成功，生成 6,752 字节 ACB、24,192 字节 AWB 和 XML，退出码为 0。
+
+边界：NativeAOT 发布实证只覆盖 `Generator.Generate` 的可达闭包，并不表示子模块全部旧 API 均可
+安全调用。`ObjectExtensions` 仍使用 `BinaryFormatter`，设置/编辑器辅助代码仍按运行时类型枚举属性，
+通用数组辅助代码仍包含动态类型路径；当前命令不引用这些 API，AOT 链接器会移除不可达代码。官方
+仓库当前没有统一许可证文件，且源码含 LGPL/BSD 等第三方代码注释，正式再分发前仍需完成许可证
+清单和通知文件审核。
 
 ## 5. 自动化测试
 
@@ -157,10 +172,11 @@ Updater 使用独立、无害的 Desktop Stub；Stub 已加入 solution，保证
 | `svg` | 15 | 必填/默认值、两种时长、SVG XML、PNG chunks/IEND、ImageSharp 解码 |
 | `jacket` | 13 | 默认值/绑定、退出码、真实模板双 Bundle、纹理尺寸、`assets.bytes` |
 | `updater` | 15 | 成功、`-1/-2/-3`、旧回滚、过滤、参数、真实 EXE+Stub |
-| 注册、结构、生命周期 | 13 | 四命令/无 `acb`、DI 映射、TFM/引用、无窗口、退出码、主视图开关 |
-| **Desktop 合计** | **74** | **0 失败、0 跳过** |
+| `acb` | 22 | 必填/默认值、`-7/-8`、DI、官方子模块/项目引用、真实 WAV、ACB/AWB 重开 |
+| 注册、结构、生命周期 | 13 | 五命令、DI 映射、TFM/引用、无窗口、退出码、主视图开关 |
+| **Desktop 合计** | **96** | **0 失败、0 跳过** |
 
-Release solution 最终结果：Core 144/144，Desktop 74/74，共 218/218，0 失败、0 跳过。
+Debug solution 最终结果：Core 144/144，Desktop 96/96，共 240/240，0 失败、0 跳过。
 
 ### 5.1 测试质量
 
@@ -170,7 +186,7 @@ Release solution 最终结果：Core 144/144，Desktop 74/74，共 218/218，0 �
   小图宽高、Updater 过滤/大小写/当前 PID/退出码/进程名和 Definition 注册。
 - 首轮 8 个被杀死，2 个存活：过滤测试没有把排除文件交给 fake 枚举；进程名断言与生产常量
   自引用。修复后复注入，最终 10/10 全部被杀死，生产代码已恢复并全量回绿。
-- 18 个文件包含 53 个源测试方法、74 个展开用例、277 个 `Assert.*` 调用，平均 5.23 个；
+- 26 个文件包含 68 个源测试方法、96 个展开用例；
   零断言、仅平凡断言和自引用断言均为 0。使用 12 类中的 11 类断言，仅没有当前不需要的
   Approximate。
 
@@ -181,21 +197,23 @@ Release solution 最终结果：Core 144/144，Desktop 74/74，共 218/218，0 �
 | 产物 | 模式 | EXE 字节数 | 结果 |
 | --- | --- | ---: | --- |
 | CommandLine | JIT + ReadyToRun | 162,816 | 发布成功 |
-| CommandLine | Native AOT | 57,269,248 | 发布成功，保留既有裁剪/AOT 警告 |
+| CommandLine | Native AOT | 60,039,680 | 项目源码直接链接；发布目录无 ACB DLL |
 | Desktop | JIT + ReadyToRun | 163,328 | 发布成功，启动 8 秒并创建主窗口 |
-| Desktop | Native AOT | 57,268,224 | 发布成功，启动 8 秒并创建主窗口 |
+| Desktop | Native AOT | 60,038,144 | 项目源码直接链接；发布目录无 ACB DLL |
 
-CommandLine JIT/AOT 各执行 7 组最终冒烟，共 14/14：
+原迁移批次的 CommandLine JIT/AOT 各执行 7 组冒烟；本轮新增第 8 组 `acb` 冒烟：
 
-- 根帮助：只列出 `convert/svg/jacket/updater`，返回 0。
+- 根帮助：列出 `convert/svg/jacket/updater/acb`，返回 0。
 - 相对路径 convert：返回有符号 `-3`，不创建输出。
 - convert：真实 fixture 生成 635 字节 OGKR。
 - svg：生成可解析 XML。
 - svg PNG：签名 `89-50-4E-47-0D-0A-1A-0A`。
 - jacket：生成 5,261/4,685 字节双 Bundle；最终 AOT 资源修正后再次运行返回 0。
 - updater：只操作隔离目录和无害 Stub，重启参数完全匹配旧拼写。
+- acb：JIT 与 Native AOT 均使用真实 WAV 和中文目录执行完整命令，生成 ACB/AWB/XML 并
+  返回 0；JIT 的托管程序集由子模块源码构建，AOT 发布目录不包含 ACB DLL。
 
-全部 14 次命令行调用均未创建独立 GUI 窗口。四个 publish 目录均包含 Jacket 模板及所需 DLL。
+全部命令行调用均未创建独立 GUI 窗口。四个 publish 目录均包含 Jacket 模板及所需依赖。
 
 构建顺序注意：普通 TFM 与 AOT TFM 共用项目 `obj/project.assets.json`。AOT 发布后直接对普通 TFM
 使用 `--no-restore` 会出现 NETSDK1005；重新 restore 对应 TFM 即可。本轮最终 solution 测试已执行
@@ -211,24 +229,33 @@ CommandLine JIT/AOT 各执行 7 组最终冒烟，共 14/14：
 | 3 | `79451f96` | `jacket`、真实模板和原生资源 |
 | 4 | 当前提交 `add updater command line and finalize migration` | `updater`、跨命令测试、发布修正和最终文档 |
 
-## 8. CI 已知失败
+## 8. CI 验证
 
-本轮按边界没有修改 `../.github/workflows/BuildProgram.yml`。该 workflow 的 Native AOT 检查仍要求：
+`../.github/workflows/BuildProgram.yml` 已移除“没有可用命令”的旧占位契约，并增加以下验证：
 
-```text
-exit code == 1
-output matches "no commands are available yet"
-```
+- 运行 `OngekiFumenEditor.Avalonia.sln` 全量测试。
+- CommandLine 使用独立的 `win-x64-jit` 与 `win-x64-aot` profile 发布，分别合入对应 Desktop 包，
+  不再把 AOT CommandLine 复制进 JIT 包。
+- 两种最终包都运行根 `--help`，要求发现 `acb`、`convert`、`jacket`、`svg`、`updater`。
+- 两种最终包都运行 `convert --help` 与 `acb --help`，验证实际子命令和关键选项可用。
+- AOT 包继续排除 ASIO/WinMM，并明确排除普通及旧 AOT ACB DLL；JIT 包要求包含 ASIO、WASAPI、
+  WinMM 以及由项目引用现场构建的 `AcbGeneratorFuck.dll`，同时排除旧 `AcbGeneratorFuck.aot.dll`。
 
-当前 CommandLine 已有四个命令，空参数会显示根帮助而不是占位文本，因此该检查现在是确定的已知
-失败项。本轮没有运行或记录该检查为通过；后续 CI 修改应把它替换为根帮助命令集合和至少一条真实
-命令冒烟。
+包检查由 `.github/scripts/Test-AvaloniaPackage.ps1` 实现，workflow 与本地复现使用同一脚本。
+
+本地按 workflow 顺序完成 Release 全量测试和四次发布：Core 144/144、Desktop 96/96；AOT/JIT
+最终合包均通过脚本验证。AOT 包包含 60,038,656 字节 Desktop EXE 和 60,039,680 字节
+CommandLine EXE，不含 ACB DLL；JIT 包包含 163,328 字节 Desktop EXE、162,816 字节
+CommandLine EXE 和由项目引用构建的 4,726,784 字节 `AcbGeneratorFuck.dll`。验证脚本的负向检查
+也确认空包会被拒绝。
 
 ## 9. 剩余风险
 
 - Updater 的高风险目录覆盖模型是有意保留的兼容行为。
-- `acb` 尚未迁移，旧二进制兼容性和再分发状态未确认。
+- `acb` 已改为官方源码子模块并完成 JIT/AOT 实跑，但子模块的统一许可证/通知清单仍未确认。
+- ACB 不再有单独的 win-x64 原生 DLL 边界；平台范围跟随 Desktop/CommandLine，目前产品发布
+  profile 仍只有 win-x64。未被命令调用的旧 API 没有扩大为 AOT 支持范围。
 - Native AOT 仍报告共享 Core/Avalonia/Dock/SVG/DereTore 的既有裁剪和动态代码警告。
 - Gekimini 引用的 SkiaSharp 2.88.3 仍报告 `NU1903` 高严重性漏洞告警。
 - Browser restore 仍报告双包源 `NU1507`；与本轮 CommandLine 行为无关。
-- Desktop/CommandLine 合包逻辑和 CI workflow 仍需单独更新。
+- GitHub-hosted runner 尚需由实际 workflow 运行确认；同一发布和验证命令已在本地 Windows 环境复现。

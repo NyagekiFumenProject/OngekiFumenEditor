@@ -298,3 +298,64 @@ DI 测试迁入 Desktop 后不能继续 `Assert.Single(definitions)`，因为完
 - PNG 解码成功不足以排除旧版“PNG 后追加 SVG”缺陷；必须解析 PNG chunk 长度并断言 `IEND` 结束偏移等于文件长度。
 - `Process.ExitCode` 应按有符号 `Int32` 比较 `-1..-6`；Shell 的 `$LASTEXITCODE`/CI 展示可能把负值映射成无符号值，记录时必须说明采集方式。
 - CommandLine 薄项目的包/生成器移除、TFM 条件一致、资源复制和 CI 不改属于结构/发布证据，不应伪装成行为单元测试。
+
+## Desktop acb 命令增量研究（2026-08-03）
+
+### 有界目标与当前状态
+
+本轮只为 Desktop `acb` 命令生成测试，允许写入 `.testagent` 和
+`tests/OngekiFumenEditor.Avalonia.Desktop.Tests/CommandLine/Acb/`。生产代码、测试 csproj 和既有
+CommandLine 测试均不在写入范围。
+
+研究时工作树干净，Desktop 已有 Convert/Svg/Jacket/Updater 的 xUnit 测试约定，但新的 acb 生产 API
+尚未出现。按 broad-scope 流程执行一次 polyglot C# 静态配对扫描：2,124 个源文件、178 个测试文件、
+452 个静态配对源、1,672 个未配对源、24 个 orphan 测试。唯一命中 acb 的产品源是
+`src/OngekiFumenEditor.Avalonia/Kernel/Audio/AcbConverter.cs`，当前未配对。该结果是包含 Dependencies 的
+静态标识符启发式，不是行或分支覆盖率。
+
+旧项目提供以下契约基线：
+
+- 命令名 `acb`。
+- 必填选项 `--musicId`、`--inputFile`、`--outputFolder`。
+- `--previewBegin` 默认 60000，`--previewEnd` 默认 80000，单位毫秒。
+- 相对输入/输出路径返回 `-7`；生成失败或异常返回 `-8`。
+- music id 以四位补零，生成 `musicNNNN.acb`、`musicNNNN.awb` 和 `MusicSource.xml`；XML 中
+  `Name/id`、`Name/str`、`dataName`、`acbFile/path`、`awbFile/path` 必须同步。
+- `DereTore.Exchange.Archive.ACB.AcbFile` 可重新解析 ACB 并定位外置 AWB；`Afs2Archive` 可独立验证 AWB
+  的 AFS2 结构和文件记录。
+
+根据现有 Desktop 命名模式，预期生产类型位于
+`OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Acb`：
+`AcbGenerateOption`、`AcbCommandLineDefinition`、`AcbCommandLineHandler`、`IAcbGenerateService`、
+`DefaultAcbGenerateService` 和结果模型。若最终名称或签名不同，测试只做机械适配，不降低行为断言。
+
+### acb 验收清单（用户原话）
+
+- [x] `ACB-01`：`命令注册/帮助`。
+- [x] `ACB-02`：`必填参数与默认 previewBegin=60000/previewEnd=80000`。
+- [x] `ACB-03`：`路径错误 -7`。
+- [x] `ACB-04`：`生成失败 -8`。
+- [x] `ACB-05`：`Handler 到可注入 IAcbGenerateService 映射`。
+- [x] `ACB-06`：`真实临时 48k PCM WAV 生成 ACB/AWB/MusicSource.xml，并验证 XML musicId/文件名及 ACB/AWB 能由可用解析链重新打开`。
+- [x] `ACB-07`：`Desktop引用项目https://github.com/NyagekiFumenProject/AcbGeneratorFuck, 不需要dll依赖`。
+
+### 测试约定与强断言
+
+- 沿用 xUnit、`public sealed class ...Tests`、`Method_Condition_ExpectedResult` 和显式 fake；不引入 mock 包。
+- Definition 测试用 `RootCommand` + `InvocationConfiguration` 捕获 stdout/stderr，并验证 Handler 返回码穿透。
+- Handler fake 必须记录收到的 option 对象、`CancellationToken` 和调用次数；路径失败断言 service 零调用。
+- 真实 WAV 手工写 RIFF/WAVE、PCM 16-bit、双声道、48000 Hz 和非零正弦样本，避免只给空音频头。
+- 真实生成断言三份文件存在且非空，并解析 XML 的全部关联字段；不能只断言文件名。
+- ACB 用 `AcbFile.FromStream` 解析并断言 format/cue/external AWB/data stream；AWB 另用
+  `Afs2Archive.Initialize()` 解析并断言至少一个有效 file record。
+- JIT/AOT 依赖测试解析 Desktop csproj：两种模式都必须无条件引用官方子模块中的
+  `src/AcbGeneratorFuck/AcbGeneratorFuck.csproj`，并明确不存在预编译 ACB `<Reference>`/`<Content>`
+  或 Native Interop 源码。另检查 `.gitmodules` 的官方 URL，避免退回本机绝对路径或二进制文件。
+
+### 风险
+
+- 官方子模块当前固定到 `d00e636c`；测试需同时核对 gitlink 项目存在、URL 正确、项目引用无条件，
+  以及旧 `AcbGeneratorFuck.aot.dll`/Interop 文件已从工作区移除。
+- 旧生成器把 preview 时间直接写入模板，测试音频无需达到 80 秒；使用短而非退化的 48 kHz WAV 控制测试耗时。
+- `AcbFile.FromFile` 的旧 API 对底层流所有权不直观；测试使用显式 `FileStream` + `FromStream`，确保临时目录可清理。
+- 真实 HCA 编码可能较慢，集成测试只生成一段短音频并设置合理测试命令超时，不依赖真实音频设备或网络。

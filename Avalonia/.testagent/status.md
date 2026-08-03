@@ -190,3 +190,81 @@ CommandLine 现在通过完整 Avalonia Classic Desktop 生命周期运行，但
 - `NU1903`、`NU1507` 和共享 Core/Avalonia 的裁剪/AOT 告警仍存在，不宣称零警告。
 - 普通/AOT TFM 共用 `obj/project.assets.json`；切换后使用 `--no-restore` 可能触发 NETSDK1005，
   需恢复对应 TFM。本轮最终 solution 已重新 restore 普通 TFM。
+
+## Desktop acb 命令测试状态（2026-08-03 04:20 +08:00）
+
+本节覆盖上方“`acb` 等待旧二进制”的旧边界。Acb 命令测试的 Research、Plan、Implement 和 Verify
+均已完成；本轮只修改 `.testagent` 与 `tests/OngekiFumenEditor.Avalonia.Desktop.Tests/CommandLine/Acb/`。
+
+### 实施内容
+
+- 6 个 Acb 测试文件，15 个源测试方法、21 个展开用例；另有既有根注册测试共同覆盖五命令集合。
+- Definition 覆盖帮助、三项必填参数、默认 `60000/80000`、显式预览值和 Handler 返回码穿透。
+- Handler 覆盖输入/输出相对路径分别返回 `-7` 且 service 零调用，业务失败和异常均返回 `-8`，
+  成功映射同一 options/token，并透传已取消的 `OperationCanceledException`。
+- 默认 service 额外覆盖缺失输入、负 musicId、空输出目录及预取消，不生成部分 ACB/AWB/XML。
+- 集成测试手工写入 48 kHz、16-bit、双声道、非零正弦 PCM WAV，真实生成 `music0427.acb`、
+  `music0427.awb`、`MusicSource.xml`；精确验证 XML 关联字段，并通过运行时携带的 DereTore
+  `AcbFile`/`Afs2Archive` 解析链重新打开两个容器和 HCA 数据流。
+- 项目图测试验证官方 `AcbGeneratorFuck` 子模块 URL、Desktop 无条件 `<ProjectReference>`、
+  不存在预编译 ACB `<Reference>`/`<Content>`，并确认 service 不再包含原生 Interop 分支。
+
+### 动态验证
+
+- `dotnet test ...Desktop.Tests.csproj -c Debug --filter "FullyQualifiedName~Acb" -v:minimal`：22/22，
+  其中 Acb 目录 21 项，既有根注册用例 1 项。
+- `dotnet test ...Desktop.Tests.csproj -c Debug -v:minimal`：96/96。
+- `dotnet test .\OngekiFumenEditor.Avalonia.sln -c Debug -v:minimal`：Core 144/144、Desktop 96/96，
+  合计 240/240，0 失败、0 跳过。
+- CommandLine JIT 与 NativeAOT EXE 均使用真实 48 kHz WAV 和中文输出目录执行 `acb`，分别生成
+  ACB/AWB/XML 并返回 0；两条路径都直接调用子模块源码中的 `Generator.Generate`。
+- CommandLine 与 Desktop 的 win-x64 NativeAOT 发布均成功，生成代码直接链接进主 EXE，发布目录
+  没有 `AcbGeneratorFuck*.dll`。JIT 发布中的托管程序集由同一子模块项目现场构建。
+- 仍有既有 `NU1903`（SkiaSharp）与 `NU1507`（多包源）告警；本轮未把它们误记为通过或新增问题。
+
+### test-gap-analysis
+
+用户明确禁止修改生产代码，因此没有临时注入生产变异，也不报告伪造的实证 mutation score。
+静态伪变异复核促成三项补强：service 三条前置校验的精确结果/无产物断言、Handler 取消透传、
+以及官方子模块 URL/无条件项目引用/无 DLL binding 的精确断言。验收关键点（必填、默认值、
+`-7/-8` 字面量、service 零/一次调用、options/token 映射、XML 字段和容器可解析性）均有直接断言。
+
+Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT EXE 完成发布与命令冒烟，证明
+项目引用的可达生成闭包可以直接 AOT 链接。剩余静态边界是硬编码旧生成器的“返回 false/生成不足
+三文件/复制中途失败”内部支路不可替换；Handler 的统一 `-8` 映射已由可注入 fake 覆盖。
+
+### assertion-quality
+
+- 104 个源码 `Assert.*` 调用点，平均 6.93 个/源测试方法；辅助断言按源码调用点计一次。
+- 零断言、仅平凡断言、自引用/恒真断言均为 0；取消路径有 2 个显式异常断言。
+- 使用 12 类断言中的 11 类：Equality、Boolean、Null、Exception、Type、String、Collection、
+  Comparison、Negative、State/Side-effect、Structural/Deep；仅缺不适用于精确整数/文件格式契约的 Approximate。
+- 真实集成用例同时约束成功标志、文件存在/长度、XML 深层字段、ACB/AWB 结构、HCA 数据流长度和文件范围，
+  不是只检查“文件存在”的浅层烟测。
+
+### Requirement | Evidence
+
+| Requirement（用户原话） | Evidence |
+| --- | --- |
+| `命令注册/帮助` | `DesktopRegistration_RootAndCommandHelpDiscoverAcbWithExpectedOptions`; 根五命令注册测试 |
+| `必填参数与默认 previewBegin=60000/previewEnd=80000` | `Invoke_MissingEachRequiredAcbOption_DoesNotCallHandler`; `Invoke_DefaultOptions_UsesLegacyPreviewRange` |
+| `路径错误 -7` | `HandleAsync_AnyRelativeAcbPath_ReturnsMinusSevenWithoutCallingService` 两组路径 |
+| `生成失败 -8` | `HandleAsync_ServiceFailureOrException_ReturnsMinusEightAndWritesReason` 两组失败形态 |
+| `Handler 到可注入 IAcbGenerateService 映射` | 成功 options/token 映射、失败/异常、取消透传及 DI singleton 测试 |
+| `真实临时 48k PCM WAV 生成 ACB/AWB/MusicSource.xml，并验证 XML musicId/文件名及 ACB/AWB 能由可用解析链重新打开` | `Generate_48KhzPcmWave_CreatesAcbAwbAndMusicSourceThatReopen` |
+| `Desktop引用项目https://github.com/NyagekiFumenProject/AcbGeneratorFuck, 不需要dll依赖` | `DesktopProject_ReferencesAcbGeneratorProjectWithoutDllBindings`; `AcbGeneratorSubmodule_UsesOfficialRepository`; `AcbGenerateService_UsesManagedProjectWithoutNativeInterop` |
+
+## CommandLine CI 验证状态（2026-08-03）
+
+- `.github/workflows/BuildProgram.yml` 已运行 Avalonia solution 测试，不再保留“没有可用命令”的
+  占位断言。
+- CommandLine 新增独立 `win-x64-jit` profile；workflow 不再把 AOT CommandLine 复制进 JIT 包。
+- `.github/scripts/Test-AvaloniaPackage.ps1` 对两种最终包检查必需/禁止文件，并运行根帮助、
+  `convert --help`、`acb --help`。
+- Release solution 本地复现为 Core 144/144、Desktop 96/96；CommandLine/Desktop JIT 与 NativeAOT
+  四次发布成功，AOT/JIT 合包验证均通过。
+- 验证脚本负向复测确认空包会失败；workflow YAML 已由 YamlDotNet 成功解析。
+
+| Requirement（用户原话） | Evidence |
+| --- | --- |
+| `处理CI` | `BuildProgram.yml` 的全量测试、独立 JIT/AOT CommandLine 发布与两次 `Test-AvaloniaPackage.ps1`；本地 Release 240/240、AOT/JIT 最终包验证通过 |

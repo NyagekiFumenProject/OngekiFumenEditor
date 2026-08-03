@@ -424,3 +424,111 @@ git diff --check
 | `CLD-17` 框架覆盖 | `DefaultCommandExecutorTests`、四个 Definition 测试类、`CommandLineRegistrationTests` 和全部 Handler 退出码测试 |
 | `CLD-18` JIT/AOT/无窗口/退出码 | 阶段 6 四产物矩阵、生命周期无窗口单测、CommandLine 两种产物的有符号退出码对照 |
 | `CLD-19` 最终验证和 CI 已知失败 | solution build/test、`git diff --check`、`.testagent/status.md` 和 `docs/command-line-migration-tracking.md`；不得列 CI 占位检查为成功证据 |
+
+## Desktop acb 命令 Broad-scope 测试计划（2026-08-03）
+
+### 阶段 A：注册与 Definition
+
+计划文件：
+
+- `CommandLine/Acb/AcbCommandRegistrationTests.cs`
+- `CommandLine/Acb/AcbCommandLineDefinitionTests.cs`
+
+计划测试：
+
+- `DesktopRegistration_RootAndCommandHelpDiscoverAcbWithExpectedOptions`
+- `DesktopRegistration_ResolvesAcbDefinitionHandlerAndServiceAsSingletons`
+- `Invoke_DefaultOptions_UsesLegacyPreviewRange`
+- `Invoke_AllOptions_BindsAcbOptionsAndReturnsHandlerExitCode`
+- `Invoke_MissingEachRequiredAcbOption_DoesNotCallHandler`
+
+根帮助测试断言 `acb` 位于实际 `DefaultCommandExecutor.RootCommand.Subcommands` 且 `--help` 输出含命令名；
+`acb --help` 必须同时列出 `--musicId`、`--inputFile`、`--outputFolder`、`--previewBegin`、
+`--previewEnd`。DI 测试直接解析闭合的 `ICommandLineHandler<AcbGenerateOption>` 和
+`IAcbGenerateService`，断言具体类型及 singleton 身份。
+
+默认值测试在同一次调用中断言 `PreviewBeginTime=60000` 与 `PreviewEndTime=80000`。必填参数测试用三个
+数据行分别移除 musicId/input/output，并断言解析失败、错误文本包含缺失选项、Handler 未调用。
+
+### 阶段 B：Handler
+
+计划文件：`CommandLine/Acb/AcbCommandLineHandlerTests.cs`
+
+计划测试：
+
+- `HandleAsync_AnyRelativeAcbPath_ReturnsMinusSevenWithoutCallingService`
+- `HandleAsync_ServiceFailureOrException_ReturnsMinusEightAndWritesReason`
+- `HandleAsync_AbsolutePaths_ForwardsSameOptionsAndCancellationTokenToInjectedService`
+
+路径测试分别覆盖 input/output，相对路径时断言 `-7`、service 零调用和唯一错误输出。失败测试以数据行覆盖
+service 返回失败与抛异常，两者都必须为 `-8` 且保留具体原因。成功映射测试使用可取消 token，断言
+service 收到同一个 option 实例和完全相等的 token，返回 0 且 stderr 为空。
+
+### 阶段 C：真实 48 kHz 生成与解析
+
+计划文件：`CommandLine/Acb/AcbGenerateServiceIntegrationTests.cs`
+
+计划测试：
+
+- `Generate_48KhzPcmWave_CreatesAcbAwbAndMusicSourceThatReopen`
+
+测试步骤：
+
+1. 在 GUID 临时目录写入 RIFF/WAVE PCM fixture：48000 Hz、16-bit、stereo、至少 0.25 秒非零正弦样本。
+2. 使用非对称 music id（例如 427）和明确 preview 值调用 `DefaultAcbGenerateService`。
+3. 断言结果成功，并检查 `music0427.acb`、`music0427.awb`、`MusicSource.xml` 均非空。
+4. 解析 XML，精确断言 `Name/id=0427`、`Name/str=0427`、`dataName=musicsource0427`、
+   `acbFile/path=music0427.acb`、`awbFile/path=music0427.awb`。
+5. 通过 `AcbFile.FromStream` 打开 ACB，断言 `FormatVersion>0`、cue 非空、外置 AWB 非空、文件名非空，
+   并从首个 cue 打开非空 HCA data stream。
+6. 用独立 FileStream 构造 `Afs2Archive` 打开 AWB，调用 `Initialize()`，断言版本、对齐和 file records 合法。
+7. 测试结束释放所有流并递归删除临时目录。
+
+### 阶段 D：官方源码项目引用
+
+计划文件：`CommandLine/Acb/AcbProjectReferenceTests.cs`
+
+计划测试：
+
+- `DesktopProject_ReferencesAcbGeneratorProjectWithoutDllBindings`
+- `AcbGeneratorSubmodule_UsesOfficialRepository`
+- `AcbGenerateService_UsesManagedProjectWithoutNativeInterop`
+
+从 `AppContext.BaseDirectory` 向上定位 solution，加载 Desktop csproj 和仓库 `.gitmodules`，断言：
+
+- 只有一个指向 `Dependencies/AcbGeneratorFuck/src/AcbGeneratorFuck/AcbGeneratorFuck.csproj` 的无条件
+  `ProjectReference`，对应项目文件存在。
+- Desktop csproj 不含任何 ACB `Reference` 或 `Content` 二进制 binding。
+- `.gitmodules` 路径为 `Avalonia/Dependencies/AcbGeneratorFuck`，URL 精确匹配官方仓库。
+- service 直接调用 `AcbGeneratorFuck.Generator.Generate`，不存在 `NativeAcbGeneratorInterop`、
+  `#if NATIVE_AOT` 或旧 `.aot.dll` 文件。
+
+### 阶段 E：构建、测试与质量复核
+
+1. 生产 API 落地后先运行仅 acb 过滤：
+   `dotnet test ...Desktop.Tests.csproj -c Debug --filter FullyQualifiedName~Acb -v:minimal`。
+2. 修复仅限允许的 acb 测试目录；生产 API 不匹配时报告明确 blocker，不修改生产代码/csproj。
+3. 运行完整 Desktop.Tests，确认新增注册断言与既有“仅四命令/omits acb”测试是否已由生产变更同步更新；若旧测试失败且不在写入范围，报告给主代理处理。
+4. 运行 solution 全量测试一次。
+5. 调用 `test-gap-analysis` 与 `assertion-quality`，把结果和最终命令写入 `.testagent/status.md`。
+6. 对允许路径执行 `git diff --check`，并严格复核每项需求对应的具体测试名。
+
+### acb 需求映射
+
+| Requirement | Planned evidence |
+| --- | --- |
+| `命令注册/帮助` | `DesktopRegistration_RootAndCommandHelpDiscoverAcbWithExpectedOptions`; `DesktopRegistration_ResolvesAcbDefinitionHandlerAndServiceAsSingletons` |
+| `必填参数与默认 previewBegin=60000/previewEnd=80000` | `Invoke_DefaultOptions_UsesLegacyPreviewRange`; `Invoke_MissingEachRequiredAcbOption_DoesNotCallHandler` |
+| `路径错误 -7` | `HandleAsync_AnyRelativeAcbPath_ReturnsMinusSevenWithoutCallingService` |
+| `生成失败 -8` | `HandleAsync_ServiceFailureOrException_ReturnsMinusEightAndWritesReason` |
+| `Handler 到可注入 IAcbGenerateService 映射` | `HandleAsync_AbsolutePaths_ForwardsSameOptionsAndCancellationTokenToInjectedService`; DI singleton 测试 |
+| `真实临时 48k PCM WAV 生成 ACB/AWB/MusicSource.xml，并验证 XML musicId/文件名及 ACB/AWB 能由可用解析链重新打开` | `Generate_48KhzPcmWave_CreatesAcbAwbAndMusicSourceThatReopen` |
+| `Desktop引用项目https://github.com/NyagekiFumenProject/AcbGeneratorFuck, 不需要dll依赖` | `DesktopProject_ReferencesAcbGeneratorProjectWithoutDllBindings`; `AcbGeneratorSubmodule_UsesOfficialRepository`; `AcbGenerateService_UsesManagedProjectWithoutNativeInterop` |
+
+### Desktop acb 执行结果（2026-08-03）
+
+- [x] 阶段 A：Definition、必填参数、默认值、显式值和 Handler 退出码穿透。
+- [x] 阶段 B：路径 `-7`、失败/异常 `-8`、注入映射及取消透传。
+- [x] 阶段 C：真实 48 kHz PCM WAV 生成三份产物，解析 XML，并由 DereTore ACB/AWB 解析链重新打开。
+- [x] 阶段 D：官方子模块、无条件 ProjectReference、无预编译 DLL binding 和无 Native Interop。
+- [x] 阶段 E：Acb 筛选、Desktop.Tests、solution 回归、test-gap-analysis、assertion-quality、编码与 diff 检查。
