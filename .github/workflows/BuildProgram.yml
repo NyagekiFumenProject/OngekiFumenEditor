@@ -51,6 +51,8 @@ jobs:
         path: .\OngekiFumenEditor\version.json
     - name: Restore dependencies
       run: dotnet restore
+    - name: Test Avalonia
+      run: dotnet test .\Avalonia\OngekiFumenEditor.Avalonia.sln -c ${{env.Configuration}} --nologo -v:minimal
     - name: Publish OngekiFumenEditor
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o C:\ogkrEditorBuild\
     - name: Publish OngekiFumenEditor.CommandLine
@@ -77,7 +79,7 @@ jobs:
         dotnet publish
         .\Avalonia\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj
         -p:PublishProfile=win-x64-aot
-        -p:PublishDir=C:\ongekiAvaloniaCmdBuild\
+        -p:PublishDir=C:\ongekiAvaloniaCmdAotBuild\
         -v:minimal
 
     - name: Publish Avalonia Native AOT (primary WASAPI package)
@@ -90,35 +92,25 @@ jobs:
         -v:minimal
     - name: Combine Avalonia CommandLine into AOT package
       if: env.Configuration == 'Release'
-      run: xcopy "C:\ongekiAvaloniaCmdBuild\" "C:\ongekiAvaloniaAotBuild\" /E /Y /I
+      run: xcopy "C:\ongekiAvaloniaCmdAotBuild\" "C:\ongekiAvaloniaAotBuild\" /E /Y /I
     - name: Validate Avalonia Native AOT package
       if: env.Configuration == 'Release'
       shell: pwsh
-      run: |
-        $publishPath = "C:\ongekiAvaloniaAotBuild"
-        $desktopExecutable = Join-Path $publishPath "OngekiFumenEditor.Avalonia.Desktop.exe"
-        if (-not (Test-Path -LiteralPath $desktopExecutable)) {
-          throw "The Native AOT package is missing the Desktop executable."
-        }
-        $commandLineExecutable = Join-Path $publishPath "OngekiFumenEditor.Avalonia.CommandLine.exe"
-        if (-not (Test-Path -LiteralPath $commandLineExecutable)) {
-          throw "The Native AOT package is missing the CommandLine executable."
-        }
-        $commandLineOutput = & $commandLineExecutable 2>&1
-        if ($LASTEXITCODE -ne 1 -or $commandLineOutput -notmatch "no commands are available yet") {
-          throw "The CommandLine companion did not report its placeholder contract."
-        }
-        foreach ($forbiddenFile in @("NAudio.Asio.dll", "NAudio.WinMM.dll")) {
-          if (Test-Path -LiteralPath (Join-Path $publishPath $forbiddenFile)) {
-            throw "The Native AOT package must not contain $forbiddenFile."
-          }
-        }
+      run: .\.github\scripts\Test-AvaloniaPackage.ps1 -PackageKind NativeAot -PublishPath C:\ongekiAvaloniaAotBuild\
     - uses: actions/upload-artifact@v4
       if: env.Configuration == 'Release'
       with:
         name: OngekiFumenEditor_Avalonia_win-x64_AOT_WASAPI_PRIMARY_${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}
         path: C:\ongekiAvaloniaAotBuild\
 
+    - name: Publish Avalonia CommandLine JIT companion
+      if: env.Configuration == 'Release'
+      run: >-
+        dotnet publish
+        .\Avalonia\src\OngekiFumenEditor.Avalonia.CommandLine\OngekiFumenEditor.Avalonia.CommandLine.csproj
+        -p:PublishProfile=win-x64-jit
+        -p:PublishDir=C:\ongekiAvaloniaCmdJitBuild\
+        -v:minimal
     - name: Publish Avalonia JIT (ASIO companion package)
       if: env.Configuration == 'Release'
       run: >-
@@ -129,17 +121,11 @@ jobs:
         -v:minimal
     - name: Combine Avalonia CommandLine into JIT package
       if: env.Configuration == 'Release'
-      run: xcopy "C:\ongekiAvaloniaCmdBuild\" "C:\ongekiAvaloniaJitBuild\" /E /Y /I
+      run: xcopy "C:\ongekiAvaloniaCmdJitBuild\" "C:\ongekiAvaloniaJitBuild\" /E /Y /I
     - name: Validate Avalonia JIT package
       if: env.Configuration == 'Release'
       shell: pwsh
-      run: |
-        $publishPath = "C:\ongekiAvaloniaJitBuild"
-        foreach ($requiredFile in @("OngekiFumenEditor.Avalonia.Desktop.exe", "NAudio.Asio.dll", "NAudio.Wasapi.dll", "NAudio.WinMM.dll", "OngekiFumenEditor.Avalonia.CommandLine.exe")) {
-          if (-not (Test-Path -LiteralPath (Join-Path $publishPath $requiredFile))) {
-            throw "The JIT/ASIO package is missing $requiredFile."
-          }
-        }
+      run: .\.github\scripts\Test-AvaloniaPackage.ps1 -PackageKind Jit -PublishPath C:\ongekiAvaloniaJitBuild\
     - uses: actions/upload-artifact@v4
       if: env.Configuration == 'Release'
       with:
