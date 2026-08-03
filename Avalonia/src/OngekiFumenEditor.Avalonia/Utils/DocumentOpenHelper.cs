@@ -7,6 +7,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -311,7 +312,8 @@ internal static class DocumentOpenHelper
 
     private static async Task<TimeSpan> CalcAudioDuration(string audioFilePath)
     {
-        using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFilePath);
+        using var audioFile = new LocalSimpleFile(audioFilePath);
+        using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFile);
         return audio.Duration;
     }
 

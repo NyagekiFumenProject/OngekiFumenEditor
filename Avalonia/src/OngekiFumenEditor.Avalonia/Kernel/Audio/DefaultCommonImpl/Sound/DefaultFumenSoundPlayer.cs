@@ -7,6 +7,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.DefaultCommonImpl.Sound;
@@ -70,7 +71,8 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
             var fixFilePath = Path.Combine(soundFolderPath, fileName);
             try
             {
-                cacheSounds[sound] = await audioManager.LoadSoundAsync(fixFilePath);
+                using var file = new LocalSimpleFile(fixFilePath);
+                cacheSounds[sound] = await audioManager.LoadSoundAsync(file);
             }
             catch (Exception e)
             {

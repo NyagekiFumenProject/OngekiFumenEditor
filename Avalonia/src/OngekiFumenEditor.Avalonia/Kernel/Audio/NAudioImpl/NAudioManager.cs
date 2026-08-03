@@ -247,7 +247,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         }
     }
 
-    public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
+    private async Task<IAudioPlayer> LoadAudioFromLocalPathAsync(string filePath)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return null;
@@ -292,14 +292,14 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
                     "ACB audio requires a local file path and access to its associated AWB file.");
             }
 
-            return await LoadAudioAsync(file.LocalPath);
+            return await LoadAudioFromLocalPathAsync(file.LocalPath);
         }
 
         if (extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase) &&
             !string.IsNullOrWhiteSpace(file.LocalPath))
         {
             // The current Desktop decoder is Media Foundation, whose API accepts paths only.
-            return await LoadAudioAsync(file.LocalPath);
+            return await LoadAudioFromLocalPathAsync(file.LocalPath);
         }
 
         await EnsureAudioOutputInitializedAsync();
@@ -313,13 +313,31 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         return player;
     }
 
-    public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
+    public async Task<ISoundPlayer> LoadSoundAsync(ISimpleFile file)
     {
+        if (file is null)
+            return null;
+
         await EnsureAudioOutputInitializedAsync();
 
-        using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(filePath);
-        Log.LogInfo($"Load sound file: {filePath}");
+        var extension = Path.GetExtension(file.FileName);
+        Log.LogInfo($"Load sound file: {file.FullPath}");
 
+        if ((extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase) ||
+             extension.Equals(".acb", StringComparison.OrdinalIgnoreCase)) &&
+            !string.IsNullOrWhiteSpace(file.LocalPath))
+        {
+            using var localAudioFileReader = audioFileReaderFactory.CreateAudioFileReader(file.LocalPath);
+            return await CreateSoundPlayerAsync(localAudioFileReader);
+        }
+
+        await using var sourceStream = await file.OpenRead();
+        using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(sourceStream, file.FileName);
+        return await CreateSoundPlayerAsync(audioFileReader);
+    }
+
+    private async Task<ISoundPlayer> CreateSoundPlayerAsync(WaveStream audioFileReader)
+    {
         var provider = await AudioCompatibilizer.CheckCompatible(
             audioFileReader.ToSampleProvider(),
             targetSampleRate);
