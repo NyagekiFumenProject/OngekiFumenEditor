@@ -2,7 +2,7 @@ using System.Buffers.Binary;
 using System.Text;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Svg;
 
 internal static class PngStructureAssertions
 {

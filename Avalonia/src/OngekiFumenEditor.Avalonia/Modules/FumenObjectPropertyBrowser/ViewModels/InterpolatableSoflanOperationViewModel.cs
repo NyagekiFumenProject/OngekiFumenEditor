@@ -12,7 +12,7 @@ using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Input;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels

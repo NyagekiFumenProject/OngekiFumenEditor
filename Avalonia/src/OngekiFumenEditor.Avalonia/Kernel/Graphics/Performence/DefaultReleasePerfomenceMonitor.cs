@@ -10,9 +10,8 @@ using static OngekiFumenEditor.Avalonia.Kernel.Graphics.IPerfomenceMonitor;
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 {
 #if !DEBUG
-    [RegisterSingleton<IPerfomenceMonitor>]
+    [RegisterTransient<IPerfomenceMonitor>]
 #endif
-	[PartCreationPolicy(CreationPolicy.NonShared)]
 	public class DefaultReleasePerfomenceMonitor : IPerfomenceMonitor
 	{
 		const int RECORD_LENGTH = 10;

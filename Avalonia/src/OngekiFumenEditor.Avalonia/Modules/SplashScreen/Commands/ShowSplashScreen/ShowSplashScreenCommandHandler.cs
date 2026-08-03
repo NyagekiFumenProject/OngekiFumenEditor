@@ -7,8 +7,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.SplashScreen.Commands.ShowSplashScr
 [RegisterSingleton<ICommandHandler>]
 public partial class ShowSplashScreenCommandHandler : CommandHandlerBase<ShowSplashScreenCommandDefinition>
 {
-    private IWindowManager WindowManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IWindowManager>();
-    private ISplashScreenWindow SplashScreenWindow => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<ISplashScreenWindow>();
+    private IWindowManager WindowManager => OngekiFumenEditor.Avalonia.IoC.Get<IWindowManager>();
+    private ISplashScreenWindow SplashScreenWindow => OngekiFumenEditor.Avalonia.IoC.Get<ISplashScreenWindow>();
 
     public override async Task Run(Command command)
     {

@@ -7,7 +7,7 @@ using Gekimini.Avalonia.Views;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views;
 using Xunit;
-using AppViewTypeCollectedActivator = OngekiFumenEditor.Avalonia.Avalonia.ViewTypeCollectedActivator;
+using AppViewTypeCollectedActivator = OngekiFumenEditor.Avalonia.ViewTypeCollectedActivator;
 
 namespace OngekiFumenEditor.Avalonia.Tests.UI;
 

@@ -9,7 +9,7 @@ using System.Text;
 using System.Xml.Linq;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Svg;
 
 public sealed class SvgCommandIntegrationTests
 {

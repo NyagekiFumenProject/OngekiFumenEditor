@@ -22,7 +22,7 @@ internal partial class FumenVisualEditorProvider : IFumenVisualEditorProvider
             MimeTypes = ["application/octet-stream"]
         }
     ];
-    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IServiceProvider>();
+    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.IoC.Get<IServiceProvider>();
 
     public IEnumerable<EditorFileType> FileTypes => SupportFileTypes;
 

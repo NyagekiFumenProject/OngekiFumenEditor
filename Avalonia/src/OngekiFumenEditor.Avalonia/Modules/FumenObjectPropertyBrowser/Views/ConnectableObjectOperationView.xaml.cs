@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Gekimini.Avalonia.Framework.DragDrops;
 using Gekimini.Avalonia.Framework.DragDrops.Behaviors;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views;

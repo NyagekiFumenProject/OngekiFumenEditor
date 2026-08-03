@@ -1,7 +1,7 @@
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Shell;
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Commands;
 

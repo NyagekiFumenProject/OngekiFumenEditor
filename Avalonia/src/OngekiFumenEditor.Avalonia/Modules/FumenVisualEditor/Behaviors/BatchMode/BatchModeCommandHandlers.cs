@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Avalonia.Input;
 using Gekimini.Avalonia.Framework.Commands;
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Utils;

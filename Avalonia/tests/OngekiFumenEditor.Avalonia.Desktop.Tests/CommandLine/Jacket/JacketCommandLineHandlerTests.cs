@@ -2,7 +2,7 @@ using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Jacket;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Jacket;
 
 public sealed class JacketCommandLineHandlerTests
 {

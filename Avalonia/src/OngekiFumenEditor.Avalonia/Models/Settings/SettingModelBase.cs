@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Platforms.Services.Settings;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Models.Settings;
 

@@ -4,7 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Gekimini.Avalonia;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using Gekimini.Avalonia.Utils;

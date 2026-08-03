@@ -4,7 +4,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Jacket;
 
 public sealed class JacketGenerateServiceIntegrationTests
 {

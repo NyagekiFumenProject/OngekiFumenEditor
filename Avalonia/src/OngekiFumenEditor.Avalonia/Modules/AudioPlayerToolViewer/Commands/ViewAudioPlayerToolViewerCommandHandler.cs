@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Commands;
 [RegisterSingleton<ICommandHandler>]
 public partial class ViewAudioPlayerToolViewerCommandHandler : CommandHandlerBase<ViewAudioPlayerToolViewerCommandDefinition>
 {
-    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
 
     public override Task Run(Command command)
     {

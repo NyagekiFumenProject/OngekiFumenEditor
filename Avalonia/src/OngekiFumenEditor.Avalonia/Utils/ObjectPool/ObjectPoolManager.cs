@@ -3,10 +3,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 
 namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
 {
-	[Export(typeof(ISchedulable))]
-	[Export(typeof(ObjectPoolManager))]
-	[PartCreationPolicy(CreationPolicy.Shared)]
-	[RegisterSingleton<ObjectPoolManager>]
+	[RegisterSingleton(Registration = RegistrationStrategy.SelfWithProxyFactory)]
 	public class ObjectPoolManager : ISchedulable
 	{
 		private static readonly object RegistryLock = new();

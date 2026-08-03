@@ -1,4 +1,4 @@
-namespace OngekiFumenEditor.Avalonia.Avalonia;
+namespace OngekiFumenEditor.Avalonia;
 
 public static class Startup
 {

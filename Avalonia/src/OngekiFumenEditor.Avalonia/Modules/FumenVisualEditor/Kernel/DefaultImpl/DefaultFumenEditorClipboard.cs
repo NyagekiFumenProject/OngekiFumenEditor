@@ -17,7 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Avalonia.Base.OngekiObjects.Flick;
 using static OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {

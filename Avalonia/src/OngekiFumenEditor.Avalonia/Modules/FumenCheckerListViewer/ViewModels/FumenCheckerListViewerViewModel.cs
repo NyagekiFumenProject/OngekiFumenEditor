@@ -11,7 +11,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ViewModels;
 

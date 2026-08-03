@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Comm
 [RegisterSingleton<ICommandHandler>]
 public partial class FumenEditorRenderControlViewerCommandHandler : CommandHandlerBase<FumenEditorRenderControlViewerCommandDefinition>
 {
-    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
 
     public override Task Run(Command command)
     {

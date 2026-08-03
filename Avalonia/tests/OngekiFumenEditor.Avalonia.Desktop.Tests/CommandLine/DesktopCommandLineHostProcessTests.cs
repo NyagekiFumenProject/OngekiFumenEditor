@@ -12,11 +12,11 @@ public sealed class DesktopCommandLineHostProcessTests
 
         Assert.Equal(0, result.ExitCode);
         Assert.False(result.SawWindow);
+        Assert.Contains("acb", result.StandardOutput, StringComparison.Ordinal);
         Assert.Contains("convert", result.StandardOutput, StringComparison.Ordinal);
         Assert.Contains("svg", result.StandardOutput, StringComparison.Ordinal);
         Assert.Contains("jacket", result.StandardOutput, StringComparison.Ordinal);
         Assert.Contains("updater", result.StandardOutput, StringComparison.Ordinal);
-        Assert.DoesNotContain("acb", result.StandardOutput, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(string.Empty, result.StandardError);
     }
 

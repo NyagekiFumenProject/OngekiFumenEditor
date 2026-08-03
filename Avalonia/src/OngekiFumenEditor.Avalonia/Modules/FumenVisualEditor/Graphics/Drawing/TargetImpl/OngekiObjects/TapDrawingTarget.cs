@@ -3,6 +3,7 @@ using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -10,7 +11,7 @@ using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };

@@ -5,6 +5,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ using static OngekiFumenEditor.Avalonia.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Soflans
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     public class DurationSoflanDrawingTarget : CommonBatchDrawTargetBase<OngekiObjectBase>
     {
         private IStringDrawing stringDrawing;

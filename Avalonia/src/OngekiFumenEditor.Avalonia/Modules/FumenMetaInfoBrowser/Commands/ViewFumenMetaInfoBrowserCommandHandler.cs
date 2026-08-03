@@ -11,8 +11,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.Commands;
 public partial class ViewFumenMetaInfoBrowserCommandHandler :
     CommandHandlerBase<ViewFumenMetaInfoBrowserCommandDefinition>
 {
-    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
-    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IServiceProvider>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
+    private IServiceProvider ServiceProvider => OngekiFumenEditor.Avalonia.IoC.Get<IServiceProvider>();
 
     public override Task Run(Command command)
     {

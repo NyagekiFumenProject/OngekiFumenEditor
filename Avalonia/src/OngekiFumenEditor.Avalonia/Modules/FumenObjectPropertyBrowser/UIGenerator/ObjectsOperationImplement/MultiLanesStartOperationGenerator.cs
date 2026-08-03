@@ -4,13 +4,14 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectsOperationImplement
 {
-	[Export(typeof(IOngekiMultiObjectsOperationGenerator))]
+	[RegisterSingleton<IOngekiMultiObjectsOperationGenerator>]
 	public class MultiLanesStartOperationGenerator : IOngekiMultiObjectsOperationGenerator
 	{
 		public UIElement Generate(OngekiObjectBase obj)

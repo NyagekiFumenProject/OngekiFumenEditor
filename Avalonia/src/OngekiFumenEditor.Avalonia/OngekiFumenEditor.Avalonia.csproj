@@ -89,7 +89,6 @@
         <PackageReference Include="Avalonia.Skia" />
         <PackageReference Include="Avalonia.Controls.DataGrid" />
         <PackageReference Include="Xaml.Behaviors" />
-        <PackageReference Include="System.ComponentModel.Composition" />
         <PackageReference Include="Microsoft.Build" />
         <PackageReference Include="NAudio.Core" />
         <PackageReference Include="Svg.Skia" />

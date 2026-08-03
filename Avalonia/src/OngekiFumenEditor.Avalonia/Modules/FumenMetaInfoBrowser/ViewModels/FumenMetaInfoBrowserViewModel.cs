@@ -21,8 +21,8 @@ public partial class FumenMetaInfoBrowserViewModel : ToolViewModelBase, IFumenMe
     private OngekiFumen fumen;
     private string errorMessage;
     private OngekiFumenModelProxy fumenProxy;
-    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
-    private ILogger<FumenMetaInfoBrowserViewModel> Logger => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<ILogger<FumenMetaInfoBrowserViewModel>>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
+    private ILogger<FumenMetaInfoBrowserViewModel> Logger => OngekiFumenEditor.Avalonia.IoC.Get<ILogger<FumenMetaInfoBrowserViewModel>>();
 
     public FumenMetaInfoBrowserViewModel() : base("Fumen Meta Info Browser".ToLocalizedStringByRawText())
     {

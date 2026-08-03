@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,7 +11,7 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
         private IBeamDrawing lazerDrawing;

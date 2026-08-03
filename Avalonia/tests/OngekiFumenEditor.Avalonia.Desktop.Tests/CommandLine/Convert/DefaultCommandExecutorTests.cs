@@ -4,7 +4,7 @@ using System.CommandLine.Invocation;
 using System.CommandLine.Parsing;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Convert;
 
 public sealed class DefaultCommandExecutorTests
 {

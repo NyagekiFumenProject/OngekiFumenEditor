@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Commands;
 [RegisterSingleton<ICommandHandler>]
 public partial class ViewFumenMetaInfoBrowserCommandHandler : CommandHandlerBase<ViewFumenCheckerListViewerCommandDefinition>
 {
-    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
 
     public override Task Run(Command command)
     {

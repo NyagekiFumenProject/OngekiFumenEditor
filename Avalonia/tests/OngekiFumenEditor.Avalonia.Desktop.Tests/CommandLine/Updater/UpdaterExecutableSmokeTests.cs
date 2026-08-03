@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Updater;
 
 public sealed class UpdaterExecutableSmokeTests
 {

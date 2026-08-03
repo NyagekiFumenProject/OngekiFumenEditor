@@ -3,6 +3,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ using static OngekiFumenEditor.Avalonia.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     public class HoldDrawingTarget : CommonDrawTargetBase<Hold>
     {
         public override IEnumerable<string> DrawTargetID { get; } = new string[] { "HLD", "CHD", "XHD" };

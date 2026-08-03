@@ -3,6 +3,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ using static OngekiFumenEditor.Avalonia.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     internal class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
         private IStringDrawing stringDrawing;

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace OngekiFumenEditor.Avalonia.Tests;
 
-public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.Avalonia.App
+public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
 {
     private static readonly FieldInfo ServiceProviderField = typeof(global::Gekimini.Avalonia.App)
         .GetField("serviceProvider", BindingFlags.Instance | BindingFlags.NonPublic)

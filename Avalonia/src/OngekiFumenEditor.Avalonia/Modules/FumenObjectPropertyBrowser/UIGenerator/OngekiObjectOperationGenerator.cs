@@ -3,7 +3,7 @@ using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using System;
 using System.Linq;
 using Avalonia;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator
 {

@@ -6,12 +6,10 @@ using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Models.Settings;
-using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.SplashScreen;
-using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 
-namespace OngekiFumenEditor.Avalonia.Avalonia;
+namespace OngekiFumenEditor.Avalonia;
 
 public abstract class OngekiFumenEditorApp : App
 {
@@ -25,9 +23,6 @@ public abstract class OngekiFumenEditorApp : App
         base.RegisterServices(serviceCollection);
 
         serviceCollection.AddOngekiFumenEditorAvalonia();
-
-        serviceCollection.AddSingleton<ISchedulable>(provider =>
-            provider.GetRequiredService<ObjectPoolManager>());
 
         serviceCollection.AddTypeCollectedActivator(ViewTypeCollectedActivator.Default);
 

@@ -7,7 +7,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl
 [RegisterSingleton<ICommandHandler>]
 public partial class InterpolateAllCommandHandler : CommandHandlerBase<InterpolateAllCommandDefinition>
 {
-    private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IEditorDocumentManager>();
+    private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
 
     public override void Update(Command command)
     {

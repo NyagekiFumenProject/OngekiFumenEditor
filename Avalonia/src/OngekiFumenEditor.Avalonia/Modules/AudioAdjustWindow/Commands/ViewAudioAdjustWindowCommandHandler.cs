@@ -2,7 +2,7 @@ using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.AudioAdjustWindow.Commands;
 

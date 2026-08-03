@@ -4,6 +4,7 @@ using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -11,7 +12,7 @@ using static OngekiFumenEditor.Avalonia.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     public class CommonHorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
     {
         public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);

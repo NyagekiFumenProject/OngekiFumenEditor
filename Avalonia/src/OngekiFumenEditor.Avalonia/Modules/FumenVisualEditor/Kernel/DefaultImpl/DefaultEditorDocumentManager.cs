@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.IEditorDocumentManager;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {

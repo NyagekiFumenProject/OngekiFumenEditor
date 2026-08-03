@@ -5,7 +5,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Convert;
 
 public sealed class ConvertCommandLineHandlerTests
 {

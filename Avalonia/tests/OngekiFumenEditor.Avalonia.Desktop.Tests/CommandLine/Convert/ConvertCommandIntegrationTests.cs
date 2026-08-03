@@ -8,7 +8,7 @@ using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Convert;
 
 public sealed class ConvertCommandIntegrationTests
 {

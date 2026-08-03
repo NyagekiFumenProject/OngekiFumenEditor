@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Avalonia;
 using Gekimini.Avalonia.Framework;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Assets.Languages;

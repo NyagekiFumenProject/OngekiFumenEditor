@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Vi
 [RegisterSingleton<IFumenEditorSelectingObjectViewer>]
 public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBase, IFumenEditorSelectingObjectViewer
 {
-    private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IEditorDocumentManager>();
+    private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
 
     public ObservableCollection<SelectedObjectRow> SelectedItems { get; } = [];
     public ObservableCollection<SelectedObjectRow> EditorSelectObjects { get; } = [];

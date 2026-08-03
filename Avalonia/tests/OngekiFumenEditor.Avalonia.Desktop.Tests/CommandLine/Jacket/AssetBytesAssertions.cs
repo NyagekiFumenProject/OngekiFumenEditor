@@ -1,6 +1,6 @@
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Jacket;
 
 internal static class AssetBytesAssertions
 {

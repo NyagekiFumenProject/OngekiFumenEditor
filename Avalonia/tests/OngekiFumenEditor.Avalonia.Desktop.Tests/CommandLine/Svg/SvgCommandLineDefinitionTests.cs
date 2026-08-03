@@ -5,7 +5,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Svg;
 
 public sealed class SvgCommandLineDefinitionTests
 {

@@ -1,4 +1,5 @@
 using Avalonia;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
@@ -7,7 +8,7 @@ using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectOperationImplement;
 
-[Export(typeof(IOngekiObjectOperationGenerator))]
+[RegisterSingleton<IOngekiObjectOperationGenerator>]
 public sealed class SvgPrefabOperationGenerator : IOngekiObjectOperationGenerator
 {
     public IEnumerable<Type> SupportOngekiTypes { get; } = [typeof(SvgPrefabBase)];

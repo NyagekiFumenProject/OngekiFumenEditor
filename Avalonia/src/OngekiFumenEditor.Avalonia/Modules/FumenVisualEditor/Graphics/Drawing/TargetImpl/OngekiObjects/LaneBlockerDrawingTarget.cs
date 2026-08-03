@@ -7,13 +7,14 @@ using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
+using Injectio.Attributes;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     internal class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
     {
         private IPolygonDrawing polygonDrawing;

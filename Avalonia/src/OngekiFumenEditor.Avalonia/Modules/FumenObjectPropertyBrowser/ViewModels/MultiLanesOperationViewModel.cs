@@ -11,7 +11,7 @@ using OngekiFumenEditor.Avalonia.Utils.Attributes;
 using System.Linq;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {

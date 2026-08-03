@@ -2,13 +2,14 @@
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
-    [Export(typeof(IFumenEditorDrawingTarget))]
+    [RegisterSingleton<IFumenEditorDrawingTarget>]
     public class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
     {
         public override int DefaultRenderOrder => 1000;

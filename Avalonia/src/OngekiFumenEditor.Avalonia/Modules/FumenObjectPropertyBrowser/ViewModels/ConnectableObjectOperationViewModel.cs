@@ -18,7 +18,7 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Input;
 using Gekimini.Avalonia.ViewModels;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Framework.Dialogs;

@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
 
-namespace OngekiFumenEditor.Avalonia.Avalonia;
+namespace OngekiFumenEditor.Avalonia;
 
 public abstract class App : Gekimini.Avalonia.App
 {

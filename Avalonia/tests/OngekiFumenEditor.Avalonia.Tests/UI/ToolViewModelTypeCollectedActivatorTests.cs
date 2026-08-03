@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Reflection;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.ViewModels;
 using Xunit;
 

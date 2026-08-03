@@ -2,7 +2,7 @@ using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Updater;
 using Xunit;
 
-namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine;
+namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Updater;
 
 public sealed class UpdaterCommandLineHandlerTests
 {

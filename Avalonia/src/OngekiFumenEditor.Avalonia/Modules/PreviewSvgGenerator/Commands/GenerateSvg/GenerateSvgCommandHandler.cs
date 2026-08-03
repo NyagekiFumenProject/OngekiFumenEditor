@@ -13,9 +13,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.PreviewSvgGenerator.Commands.Genera
 [RegisterSingleton<ICommandHandler>]
 public partial class GenerateSvgCommandHandler : CommandHandlerBase<GenerateSvgCommandDefinition>
 {
-    private IShell Shell => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IShell>();
-    private IPreviewSvgGenerator PreviewSvgGenerator => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IPreviewSvgGenerator>();
-    private IDialogManager DialogManager => OngekiFumenEditor.Avalonia.Avalonia.IoC.Get<IDialogManager>();
+    private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
+    private IPreviewSvgGenerator PreviewSvgGenerator => OngekiFumenEditor.Avalonia.IoC.Get<IPreviewSvgGenerator>();
+    private IDialogManager DialogManager => OngekiFumenEditor.Avalonia.IoC.Get<IDialogManager>();
 
     public override void Update(Command command)
     {

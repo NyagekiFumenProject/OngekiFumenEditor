@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using Avalonia.Controls;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
-	[Export(typeof(IEditorExtraContextMenuBuilder))]
+	[RegisterSingleton<IEditorExtraContextMenuBuilder>]
 	public class DefaultEditorExtraContextMenuBuilder : IEditorExtraContextMenuBuilder
 	{
 		public IEnumerable<FrameworkElement> BuildMenuItems(IEnumerable<IFumenVisualEditorExtraMenuItemHandler> registerHandlers, FumenVisualEditorViewModel targetEditor)

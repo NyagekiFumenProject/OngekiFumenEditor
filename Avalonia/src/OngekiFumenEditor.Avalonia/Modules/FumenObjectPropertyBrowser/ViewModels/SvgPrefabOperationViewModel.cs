@@ -5,7 +5,7 @@ using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
-using OngekiFumenEditor.Avalonia.Avalonia;
+using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace OngekiFumenEditor.Avalonia.Avalonia;
+namespace OngekiFumenEditor.Avalonia;
 
 public static class IoC
 {
