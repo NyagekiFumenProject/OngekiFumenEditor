@@ -1,9 +1,10 @@
 ﻿using Avalonia;
 using Avalonia.Platform.Storage;
-using Avalonia.Threading;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 
 namespace OngekiFumenEditor.Avalonia.Utils;
 
@@ -59,7 +60,7 @@ public static class FileDialogHelper
     public static IEnumerable<(string ext, string desc)> GetSupportAudioFileExtensionFilterList()
         => IoC.Get<IAudioManager>().SupportAudioFileExtensionList;
 
-    public static async Task<string> OpenFileAsync(string title, IEnumerable<(string ext, string desc)> extParams)
+    public static async Task<ISimpleFile> OpenFileAsync(string title, IEnumerable<(string ext, string desc)> extParams)
     {
         var topLevel = GetTopLevel();
         if (topLevel is null)
@@ -68,17 +69,30 @@ public static class FileDialogHelper
             return default;
         }
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var storageProvider = topLevel.StorageProvider;
+        if (!storageProvider.CanOpen)
+        {
+            Log.LogWarn($"OpenFileAsync('{title}') is not supported by the current storage provider.");
+            return default;
+        }
+
+        var files = await storageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
             AllowMultiple = false,
             FileTypeFilter = BuildPickerFilters(extParams)
         });
 
-        return files.FirstOrDefault()?.TryGetLocalPath();
+        if (files.Count == 0)
+            return default;
+
+        for (var i = 1; i < files.Count; i++)
+            files[i].Dispose();
+
+        return await AvaloniaStorageProviderFileSystemBuilder.LoadFromAvaloniaStorageFile(files[0]);
     }
 
-    public static async Task<string> SaveFileAsync(string title, IEnumerable<(string ext, string desc)> extParams)
+    public static async Task<ISimpleFile> SaveFileAsync(string title, IEnumerable<(string ext, string desc)> extParams)
     {
         var topLevel = GetTopLevel();
         if (topLevel is null)
@@ -87,16 +101,25 @@ public static class FileDialogHelper
             return default;
         }
 
-        var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        var storageProvider = topLevel.StorageProvider;
+        if (!storageProvider.CanSave)
+        {
+            Log.LogWarn($"SaveFileAsync('{title}') is not supported by the current storage provider.");
+            return default;
+        }
+
+        var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = title,
             FileTypeChoices = BuildPickerFilters(extParams)
         });
 
-        return file?.TryGetLocalPath();
+        return file is null
+            ? default
+            : await AvaloniaStorageProviderFileSystemBuilder.LoadFromAvaloniaStorageFile(file);
     }
 
-    public static async Task<string> OpenDirectoryAsync(string title)
+    public static async Task<ISimpleDirectory> OpenDirectoryAsync(string title)
     {
         var topLevel = GetTopLevel();
         if (topLevel is null)
@@ -105,13 +128,26 @@ public static class FileDialogHelper
             return default;
         }
 
-        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var storageProvider = topLevel.StorageProvider;
+        if (!storageProvider.CanPickFolder)
+        {
+            Log.LogWarn($"OpenDirectoryAsync('{title}') is not supported by the current storage provider.");
+            return default;
+        }
+
+        var folders = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = title,
             AllowMultiple = false
         });
 
-        return folders.FirstOrDefault()?.TryGetLocalPath();
+        if (folders.Count == 0)
+            return default;
+
+        for (var i = 1; i < folders.Count; i++)
+            folders[i].Dispose();
+
+        return AvaloniaStorageProviderFileSystemBuilder.LoadRootFromAvaloniaStorageFolder(folders[0]);
     }
 }
 

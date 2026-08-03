@@ -7,6 +7,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.DefaultCommonImpl.Wave;
 
@@ -40,6 +41,52 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
     }
 
     public async Task OffsetAsync(
+        ISimpleFile inputWavFile,
+        ISimpleFile outputWavFile,
+        TimeSpan offset,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(inputWavFile);
+        ArgumentNullException.ThrowIfNull(outputWavFile);
+
+        if (RefersToSameFile(inputWavFile, outputWavFile))
+        {
+            await using var stagedOutput = await RenderToMemoryAsync(
+                inputWavFile,
+                offset,
+                cancellationToken);
+            await CommitStagedOutputAsync(stagedOutput, outputWavFile, cancellationToken);
+            return;
+        }
+
+        await using var input = await inputWavFile.OpenRead();
+        await OffsetToStorageFileAsync(input, outputWavFile, offset, cancellationToken);
+    }
+
+    public async Task OffsetAsync(
+        string inputWavFilePath,
+        ISimpleFile outputWavFile,
+        TimeSpan offset,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(inputWavFilePath);
+        ArgumentNullException.ThrowIfNull(outputWavFile);
+
+        if (RefersToSameFile(inputWavFilePath, outputWavFile))
+        {
+            await using var stagedOutput = await RenderToMemoryAsync(
+                inputWavFilePath,
+                offset,
+                cancellationToken);
+            await CommitStagedOutputAsync(stagedOutput, outputWavFile, cancellationToken);
+            return;
+        }
+
+        await using var input = OpenInput(Path.GetFullPath(inputWavFilePath));
+        await OffsetToStorageFileAsync(input, outputWavFile, offset, cancellationToken);
+    }
+
+    public async Task OffsetAsync(
         string inputWavFilePath,
         string outputWavFilePath,
         TimeSpan offset,
@@ -57,22 +104,13 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         {
             await using (var input = OpenInput(inputPath))
             {
-                var layout = await ReadLayoutAsync(input, cancellationToken);
-                var adjustment = CalculateAdjustment(layout, offset);
+                var operation = await PrepareOffsetAsync(input, offset, cancellationToken);
                 var outputDirectory = Path.GetDirectoryName(outputPath)!;
                 Directory.CreateDirectory(outputDirectory);
 
                 await using (var output = CreateTemporaryOutput(outputPath, out temporaryPath))
                 {
-                    if (adjustment.IsByteExactCopy)
-                    {
-                        input.Position = 0;
-                        await CopyExactlyAsync(input, output, layout.FileLength, cancellationToken);
-                    }
-                    else
-                    {
-                        await WriteAdjustedWaveAsync(input, output, layout, adjustment, cancellationToken);
-                    }
+                    await WriteOffsetAsync(input, output, operation, cancellationToken);
 
                     await output.FlushAsync(cancellationToken);
                     output.Flush(flushToDisk: true);
@@ -87,6 +125,138 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         {
             if (!isCommitted && temporaryPath is not null)
                 TryDeleteTemporaryFile(temporaryPath);
+        }
+    }
+
+    private static async Task OffsetToStorageFileAsync(
+        Stream input,
+        ISimpleFile outputWavFile,
+        TimeSpan offset,
+        CancellationToken cancellationToken)
+    {
+        var operation = await PrepareOffsetAsync(input, offset, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        await outputWavFile.WriteAsync(
+            (output, token) => WriteOffsetAsync(input, output, operation, token),
+            cancellationToken);
+    }
+
+    private static async Task<MemoryStream> RenderToMemoryAsync(
+        ISimpleFile inputWavFile,
+        TimeSpan offset,
+        CancellationToken cancellationToken)
+    {
+        await using var input = await inputWavFile.OpenRead();
+        return await RenderToMemoryAsync(input, offset, cancellationToken);
+    }
+
+    private static async Task<MemoryStream> RenderToMemoryAsync(
+        string inputWavFilePath,
+        TimeSpan offset,
+        CancellationToken cancellationToken)
+    {
+        await using var input = OpenInput(Path.GetFullPath(inputWavFilePath));
+        return await RenderToMemoryAsync(input, offset, cancellationToken);
+    }
+
+    private static async Task<MemoryStream> RenderToMemoryAsync(
+        Stream input,
+        TimeSpan offset,
+        CancellationToken cancellationToken)
+    {
+        var stagedOutput = new MemoryStream();
+        try
+        {
+            var operation = await PrepareOffsetAsync(input, offset, cancellationToken);
+            await WriteOffsetAsync(input, stagedOutput, operation, cancellationToken);
+            stagedOutput.Position = 0;
+            return stagedOutput;
+        }
+        catch
+        {
+            await stagedOutput.DisposeAsync();
+            throw;
+        }
+    }
+
+    private static async Task CommitStagedOutputAsync(
+        Stream stagedOutput,
+        ISimpleFile outputWavFile,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await outputWavFile.WriteAsync(
+            (output, token) => stagedOutput.CopyToAsync(output, token),
+            cancellationToken);
+    }
+
+    private static bool RefersToSameFile(ISimpleFile inputFile, ISimpleFile outputFile)
+    {
+        if (ReferenceEquals(inputFile, outputFile))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(inputFile.LocalPath) &&
+            !string.IsNullOrWhiteSpace(outputFile.LocalPath))
+        {
+            return PathsEqual(inputFile.LocalPath, outputFile.LocalPath);
+        }
+
+        return string.IsNullOrWhiteSpace(inputFile.LocalPath) &&
+               string.IsNullOrWhiteSpace(outputFile.LocalPath) &&
+               string.Equals(inputFile.FullPath, outputFile.FullPath, StringComparison.Ordinal);
+    }
+
+    private static bool RefersToSameFile(string inputFilePath, ISimpleFile outputFile)
+    {
+        return !string.IsNullOrWhiteSpace(outputFile.LocalPath) &&
+               PathsEqual(inputFilePath, outputFile.LocalPath);
+    }
+
+    private static bool PathsEqual(string left, string right)
+    {
+        var comparison = OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), comparison);
+    }
+
+    private static async Task<OffsetOperation> PrepareOffsetAsync(
+        Stream input,
+        TimeSpan offset,
+        CancellationToken cancellationToken)
+    {
+        if (!input.CanRead)
+            throw new ArgumentException("The input WAV stream must be readable.", nameof(input));
+        if (!input.CanSeek)
+            throw new ArgumentException("The input WAV stream must be seekable.", nameof(input));
+
+        var layout = await ReadLayoutAsync(input, cancellationToken);
+        return new OffsetOperation(layout, CalculateAdjustment(layout, offset));
+    }
+
+    private static async Task WriteOffsetAsync(
+        Stream input,
+        Stream output,
+        OffsetOperation operation,
+        CancellationToken cancellationToken)
+    {
+        if (!output.CanWrite)
+            throw new ArgumentException("The output WAV stream must be writable.", nameof(output));
+
+        if (operation.Adjustment.IsByteExactCopy)
+        {
+            input.Position = 0;
+            await CopyExactlyAsync(input, output, operation.Layout.FileLength, cancellationToken);
+        }
+        else
+        {
+            await WriteAdjustedWaveAsync(
+                input,
+                output,
+                operation.Layout,
+                operation.Adjustment,
+                cancellationToken);
         }
     }
 
@@ -147,7 +317,7 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         }
     }
 
-    private static async Task<WaveLayout> ReadLayoutAsync(FileStream input, CancellationToken cancellationToken)
+    private static async Task<WaveLayout> ReadLayoutAsync(Stream input, CancellationToken cancellationToken)
     {
         if (input.Length < 12)
             throw new InvalidDataException("The file is too short to contain a RIFF/WAVE header.");
@@ -217,7 +387,7 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
     }
 
     private static async Task<WaveFormatInfo> ReadFormatAsync(
-        FileStream input,
+        Stream input,
         long formatOffset,
         uint formatSize,
         CancellationToken cancellationToken)
@@ -323,8 +493,8 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
     }
 
     private static async Task WriteAdjustedWaveAsync(
-        FileStream input,
-        FileStream output,
+        Stream input,
+        Stream output,
         WaveLayout layout,
         DataAdjustment adjustment,
         CancellationToken cancellationToken)
@@ -464,6 +634,10 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         uint RiffSize,
         WaveFormatInfo Format,
         DataChunkInfo DataChunk);
+
+    private readonly record struct OffsetOperation(
+        WaveLayout Layout,
+        DataAdjustment Adjustment);
 
     private readonly record struct DataAdjustment(
         uint BytesToPrepend,

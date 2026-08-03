@@ -3,6 +3,7 @@ using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Avalonia.Parser;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.Ogkr;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
@@ -35,14 +36,17 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
         OngekiFumen fumen;
         if (inMemoryFumen is null)
         {
-            if (string.IsNullOrWhiteSpace(option.InputFumenFilePath))
+            var inputFileName = option.InputFumenFile?.FileName ?? option.InputFumenFilePath;
+            if (string.IsNullOrWhiteSpace(inputFileName))
                 return new(false, Lang.NoFumenInput);
 
-            if (parserManager.GetDeserializer(option.InputFumenFilePath) is not { } deserializable)
+            if (parserManager.GetDeserializer(inputFileName) is not { } deserializable)
                 return new(false, Lang.FumenFileDeserializeNotSupport);
 
-            await using var inputFile = File.OpenRead(option.InputFumenFilePath);
-            fumen = await deserializable.DeserializeAsync(inputFile);
+            await using var inputStream = option.InputFumenFile is null
+                ? File.OpenRead(option.InputFumenFilePath)
+                : await option.InputFumenFile.OpenRead();
+            fumen = await deserializable.DeserializeAsync(inputStream);
             cancellationToken.ThrowIfCancellationRequested();
         }
         else
@@ -50,12 +54,13 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
             fumen = inMemoryFumen;
         }
 
-        if (string.IsNullOrWhiteSpace(option.OutputFumenFilePath))
+        var outputFileName = option.OutputFumenFile?.FileName ?? option.OutputFumenFilePath;
+        if (string.IsNullOrWhiteSpace(outputFileName))
             return new(false, Lang.OutputFumenFileNotSelect);
 
         if (option.IsStandarizeFumen)
         {
-            if (!string.Equals(Path.GetExtension(option.OutputFumenFilePath), ".ogkr",
+            if (!string.Equals(Path.GetExtension(outputFileName), ".ogkr",
                     StringComparison.OrdinalIgnoreCase))
                 return new(false, Lang.OutputFumenStandardizeFormatNotSupported);
 
@@ -69,8 +74,11 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
 
         try
         {
-            var output = await converter.ConvertFumenAsync(fumen, option.OutputFumenFilePath);
-            await WriteAtomicallyAsync(option.OutputFumenFilePath, output, cancellationToken);
+            var output = await converter.ConvertFumenAsync(fumen, outputFileName);
+            if (option.OutputFumenFile is null)
+                await WriteAtomicallyAsync(option.OutputFumenFilePath, output, cancellationToken);
+            else
+                await WriteToSimpleFileAsync(option.OutputFumenFile, output, cancellationToken);
         }
         catch (FumenConvertException exception)
         {
@@ -78,6 +86,16 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
         }
 
         return new(true);
+    }
+
+    private static async Task WriteToSimpleFileAsync(
+        ISimpleFile outputFile,
+        ReadOnlyMemory<byte> output,
+        CancellationToken cancellationToken)
+    {
+        await outputFile.WriteAsync(
+            (outputStream, token) => outputStream.WriteAsync(output, token).AsTask(),
+            cancellationToken);
     }
 
     private static async Task WriteAtomicallyAsync(

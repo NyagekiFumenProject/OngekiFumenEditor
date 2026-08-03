@@ -27,9 +27,32 @@ internal sealed class DesktopNAudioFileReaderFactory : INAudioFileReaderFactory
             _ => new MediaFoundationReader(filePath)
         };
 
+    public WaveStream CreateAudioFileReader(Stream stream, string fileName)
+        => Path.GetExtension(fileName).ToLowerInvariant() switch
+        {
+            ".wav" => CreateWaveFileReader(stream),
+            ".aif" or ".aiff" => new AiffFileReader(stream),
+            ".mp3" => throw new PlatformNotSupportedException(
+                "MP3 decoding through Media Foundation requires a local file path."),
+            ".acb" => throw new PlatformNotSupportedException(
+                "ACB audio requires a local file path and its associated AWB file."),
+            _ => throw new NotSupportedException($"Unsupported audio file format: {fileName}")
+        };
+
     private static WaveStream CreateWaveFileReader(string filePath)
     {
         WaveStream reader = new WaveFileReader(filePath);
+        return EnsureSupportedWaveFormat(reader);
+    }
+
+    private static WaveStream CreateWaveFileReader(Stream stream)
+    {
+        WaveStream reader = new WaveFileReader(stream);
+        return EnsureSupportedWaveFormat(reader);
+    }
+
+    private static WaveStream EnsureSupportedWaveFormat(WaveStream reader)
+    {
         var format = reader.WaveFormat.AsStandardWaveFormat();
         if (format.Encoding is WaveFormatEncoding.Pcm or WaveFormatEncoding.IeeeFloat)
             return reader;

@@ -1,3 +1,5 @@
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio;
 
 public partial interface IAudioManager : IDisposable
@@ -10,6 +12,7 @@ public partial interface IAudioManager : IDisposable
 
     Task<ISoundPlayer> LoadSoundAsync(string filePath);
     Task<IAudioPlayer> LoadAudioAsync(string filePath);
+    Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file);
 
     IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }
 }

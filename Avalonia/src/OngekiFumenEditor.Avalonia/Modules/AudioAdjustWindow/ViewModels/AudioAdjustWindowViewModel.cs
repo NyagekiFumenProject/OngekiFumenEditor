@@ -15,15 +15,18 @@ using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Modules.AudioAdjustWindow.ViewModels;
 
 [RegisterSingleton<IAudioAdjustWindow>]
-public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdjustWindow
+public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdjustWindow, IDisposable
 {
     private static readonly (string ext, string desc)[] WavFileFilter = [(".wav", ".wav Audio File")];
     private readonly IEditorDocumentManager editorDocumentManager;
     private readonly IWavAudioOffsetService wavAudioOffsetService;
+    private ISimpleFile inputWavFile;
+    private ISimpleFile outputWavFile;
 
     private string inputFumenFilePath = string.Empty;
     public string InputFumenFilePath
@@ -127,43 +130,47 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     [RelayCommand]
     private async Task OpenSelectInputFileAsync()
     {
-        var path = await FileDialogHelper.OpenFileAsync(Lang.SelectAudioFile, WavFileFilter);
-        if (string.IsNullOrWhiteSpace(path))
+        var file = await FileDialogHelper.OpenFileAsync(Lang.SelectAudioFile, WavFileFilter);
+        if (file is null)
             return;
 
-        InputFumenFilePath = path;
+        ReplaceSelectedFile(ref inputWavFile, file);
+        InputFumenFilePath = GetDisplayPath(file);
         IsUseInputFile = true;
     }
 
     [RelayCommand]
     private async Task OpenSelectOutputFileAsync()
     {
-        var path = await FileDialogHelper.SaveFileAsync(Lang.SaveNewAudioFile, WavFileFilter);
-        if (!string.IsNullOrWhiteSpace(path))
-            OutputFumenFilePath = path;
+        var file = await FileDialogHelper.SaveFileAsync(Lang.SaveNewAudioFile, WavFileFilter);
+        if (file is null)
+            return;
+
+        ReplaceSelectedFile(ref outputWavFile, file);
+        OutputFumenFilePath = GetDisplayPath(file);
     }
 
     [RelayCommand]
     private async Task ExecuteConverterAsync()
     {
         var currentEditor = editorDocumentManager.CurrentActivatedEditor;
-        var audioFilePath = IsUseInputFile
-            ? InputFumenFilePath
-            : currentEditor?.EditorProjectData?.AudioFilePath;
+        var currentEditorProject = currentEditor?.EditorProjectData;
+        var currentEditorAudioFile = currentEditorProject?.AudioFile;
+        var currentEditorAudioFilePath = currentEditorProject?.AudioFilePath;
 
-        if (IsUseInputFile && !File.Exists(InputFumenFilePath))
+        if (IsUseInputFile && inputWavFile is null)
         {
             await ShowMessageAsync(Lang.ErrorProcessFumenFileNotSelect, DialogMessageType.Error);
             return;
         }
 
-        if (!File.Exists(audioFilePath))
+        if (!IsUseInputFile && currentEditorAudioFile is null && !File.Exists(currentEditorAudioFilePath))
         {
             await ShowMessageAsync(Lang.ErrorProcessAudioNotFound, DialogMessageType.Error);
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(OutputFumenFilePath))
+        if (outputWavFile is null)
         {
             await ShowMessageAsync(Lang.ErrorSaveAudioFileNotSelect, DialogMessageType.Error);
             return;
@@ -195,14 +202,9 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
             }
         }
 
-        var result = await AudioAdjustmentTransaction.ExecuteAsync(
-            wavAudioOffsetService,
-            audioFilePath,
-            OutputFumenFilePath,
-            timeOffset,
-            recalculateMap is null
-                ? null
-                : () => currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
+        Action commitOnSuccess = recalculateMap is null
+            ? null
+            : () => currentEditor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
                     Lang.B.ApplyAudioAdjust.ToLocalizedString(),
                     () =>
                     {
@@ -213,7 +215,38 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
                     {
                         foreach (var item in recalculateMap)
                             item.Key.TGrid = item.Value.before.CopyNew();
-                    })));
+                    }));
+
+        Task<(bool isSuccess, string msg)> transactionTask;
+        if (IsUseInputFile)
+        {
+            transactionTask = AudioAdjustmentTransaction.ExecuteAsync(
+                wavAudioOffsetService,
+                inputWavFile,
+                outputWavFile,
+                timeOffset,
+                commitOnSuccess);
+        }
+        else if (currentEditorAudioFile is not null)
+        {
+            transactionTask = AudioAdjustmentTransaction.ExecuteAsync(
+                wavAudioOffsetService,
+                currentEditorAudioFile,
+                outputWavFile,
+                timeOffset,
+                commitOnSuccess);
+        }
+        else
+        {
+            transactionTask = AudioAdjustmentTransaction.ExecuteAsync(
+                wavAudioOffsetService,
+                currentEditorAudioFilePath,
+                outputWavFile,
+                timeOffset,
+                commitOnSuccess);
+        }
+
+        var result = await transactionTask;
         if (!result.isSuccess)
         {
             await ShowMessageAsync($"{Lang.ApplyAudioAdjustFail}{result.msg}", DialogMessageType.Error);
@@ -228,6 +261,35 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     private static Task ShowMessageAsync(string message, DialogMessageType messageType = DialogMessageType.Info)
     {
         return IoC.Get<IDialogManager>().ShowMessageDialog(message, messageType);
+    }
+
+    private static string GetDisplayPath(ISimpleFile file)
+    {
+        if (!string.IsNullOrWhiteSpace(file.LocalPath))
+            return file.LocalPath;
+        if (!string.IsNullOrWhiteSpace(file.FullPath))
+            return file.FullPath;
+        return file.FileName;
+    }
+
+    private static void ReplaceSelectedFile(ref ISimpleFile target, ISimpleFile replacement)
+    {
+        if (ReferenceEquals(target, replacement))
+            return;
+
+        var previous = target;
+        target = replacement;
+        previous?.Dispose();
+    }
+
+    public void Dispose()
+    {
+        editorDocumentManager.OnActivateEditorChanged -= OnActivateEditorChanged;
+        inputWavFile?.Dispose();
+        outputWavFile?.Dispose();
+        inputWavFile = null;
+        outputWavFile = null;
+        GC.SuppressFinalize(this);
     }
 
     public Task<(bool isSuccess, string msg)> OffsetAudioFile(string inputWavFilePath, string saveWavFilePath, TimeSpan offset)

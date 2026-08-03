@@ -12,19 +12,28 @@ public class FastOpenFumenCommandHandler : CommandHandlerBase<FastOpenFumenComma
     public override async Task Run(Command command)
     {
         var filePath = command.Tag as string;
-        if (string.IsNullOrWhiteSpace(filePath))
-        {
-            filePath = await FileDialogHelper.OpenFileAsync(
-                Lang.FastOpenOgkrFumen,
-                [(".ogkr", Lang.OngekiFumen), (".nyageki", Lang.OngekiFumen)]);
-        }
-
-        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
-            return;
-
         try
         {
-            if (!await DocumentOpenHelper.TryOpenAsDocument(filePath))
+            bool opened;
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                var file = await FileDialogHelper.OpenFileAsync(
+                    Lang.FastOpenOgkrFumen,
+                    [(".ogkr", Lang.OngekiFumen), (".nyageki", Lang.OngekiFumen)]);
+                if (file is null)
+                    return;
+
+                opened = await DocumentOpenHelper.TryOpenAsDocument(file);
+            }
+            else
+            {
+                if (!File.Exists(filePath))
+                    return;
+
+                opened = await DocumentOpenHelper.TryOpenAsDocument(filePath);
+            }
+
+            if (!opened)
                 await IoC.Get<IDialogManager>().ShowMessageDialog(
                     Lang.CantFastOpenFumen,
                     DialogMessageType.Error);

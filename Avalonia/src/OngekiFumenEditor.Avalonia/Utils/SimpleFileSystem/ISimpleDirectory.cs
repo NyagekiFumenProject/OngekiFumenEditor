@@ -10,7 +10,15 @@ public interface ISimpleDirectory : IDisposable
 
     ISimpleFile[] ChildFiles { get; }
 
+    /// <summary>
+    ///     The virtual path within the simple file system; this is not necessarily a local path.
+    /// </summary>
     string FullPath { get; }
+
+    /// <summary>
+    ///     The local file-system path when the backing provider exposes one.
+    /// </summary>
+    string? LocalPath { get; }
 
     /// <summary>
     ///     A directory name such as "MyFolderA".

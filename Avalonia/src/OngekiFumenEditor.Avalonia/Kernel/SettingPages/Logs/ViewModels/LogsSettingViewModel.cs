@@ -23,11 +23,11 @@ public partial class LogsSettingViewModel : ViewModelBase
     [RelayCommand]
     private async Task SelectLogsFolderAsync()
     {
-        var folderPath = await FileDialogHelper.OpenDirectoryAsync(Lang.LoggerFolder);
-        if (string.IsNullOrWhiteSpace(folderPath))
+        using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.LoggerFolder);
+        if (string.IsNullOrWhiteSpace(folder?.LocalPath))
             return;
 
-        Setting.LogFileDirPath = folderPath;
+        Setting.LogFileDirPath = folder.LocalPath;
         ApplyChanges();
     }
 }

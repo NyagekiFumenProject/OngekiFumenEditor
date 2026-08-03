@@ -50,11 +50,11 @@ public partial class ProgramSettingViewModel : ViewModelBase
     [RelayCommand]
     private async Task SelectDumpFolderAsync()
     {
-        var folderPath = await FileDialogHelper.OpenDirectoryAsync(Lang.CrashDumpFileOutput);
-        if (string.IsNullOrWhiteSpace(folderPath))
+        using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.CrashDumpFileOutput);
+        if (string.IsNullOrWhiteSpace(folder?.LocalPath))
             return;
 
-        Setting.DumpFileDirPath = folderPath;
+        Setting.DumpFileDirPath = folder.LocalPath;
         ApplyChanges();
     }
 

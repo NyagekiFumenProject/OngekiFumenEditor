@@ -268,3 +268,41 @@ Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT 
 | Requirement（用户原话） | Evidence |
 | --- | --- |
 | `处理CI` | `BuildProgram.yml` 的全量测试、独立 JIT/AOT CommandLine 发布与两次 `Test-AvaloniaPackage.ps1`；本地 Release 240/240、AOT/JIT 最终包验证通过 |
+
+## FileDialog/SimpleFileSystem 用户读写迁移状态（2026-08-03）
+
+本轮实现完成，范围按用户补充要求限定为文件/目录 picker 产生的用户读写。其他 CLI、项目 JSON、
+日志/缓存、自动扫描及只接受本地路径的第三方 I/O 未做全仓迁移。
+
+### 动态验证
+
+- Core 聚焦测试：42/42，通过 SimpleFileSystem、WAV、事务和 SVG 往返用例。
+- Core 全量测试：174/174；首次全量运行有一个未改动的路径版 WAV `File.Move` 瞬时
+  `UnauthorizedAccessException`，单测立即复现通过，随后全量重跑 174/174。
+- Desktop 全量测试：97/97；非本地谱面转换事务写入并重新解析用例单独 1/1。
+- Browser Debug 构建：0 error；保留既有 `NU1507`、`NU1903`、nullable/WASM 警告。
+- `dotnet build OngekiFumenEditor.Avalonia.sln -c Debug --no-incremental --no-restore`：0 error，
+  83 个既有警告。
+- `git diff --check`：通过。
+
+### test-gap-analysis
+
+对 5 个高风险点逐一注入真实变异并运行最窄覆盖测试：standalone provider 身份退化、删除本地原子
+提交、转换器退回 `OpenWrite`、WAV 仅按同名判同文件、Nyageki 丢弃非本地 SVG 内容。5/5 均被测试
+杀死；每个变异均立即恢复，最终全量测试和 diff 检查为绿色。未对范围外 I/O 注入或修改。
+
+### assertion-quality
+
+- 新增 17 个测试方法，69 个直接 `Assert.*` 调用，平均 4.06 个/测试方法。
+- 零断言、仅平凡断言、自引用/恒真断言均为 0。
+- 11/12 类断言得到使用；仅 Approximate 不适用于本轮精确字节、路径和文件格式契约。
+- 用例同时验证输出内容、重新解析、缓存/长度、异常/取消后原文件、临时文件清理、流关闭时序和所有权，
+  不是仅检查“调用成功”的浅层烟测。
+
+### Requirement | Evidence
+
+| Requirement（用户原话） | Evidence |
+| --- | --- |
+| `FileDialogHelper的OpenFileAsync返回对象改成Task<ISimpleFile>, 同理其他接口也是` | 三个公开签名、取消语义、storage item 所有权和 12 个 SimpleFileSystem 测试 |
+| `然后那些使用这些方法的内容也全都改造成SimpleFileSystem相关API操作。` | 13 个 picker 调用点；谱面/WAV/SVG/目录设置使用 `ISimpleFile`/`ISimpleDirectory`；Core 174/174、Desktop 97/97 |
+| `对于改造仅限于用户读写相关范畴，其他读写操作不要改动` | CLI、项目 JSON、日志/缓存、自动关联扫描及第三方本地路径边界保留；静态审计未发现 picker `FullPath` 回流到 `File.*` |

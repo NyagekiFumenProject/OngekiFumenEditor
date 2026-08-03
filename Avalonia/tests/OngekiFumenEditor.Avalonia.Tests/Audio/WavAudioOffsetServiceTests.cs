@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Kernel.Audio.DefaultCommonImpl.Wave;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Audio;
@@ -51,6 +52,102 @@ public sealed class WavAudioOffsetServiceTests
         Assert.Equal((byte)0x7E, junkChunk.PaddingByte);
         Assert.Equal(0, dataChunk.Data.Length % 2);
         Assert.Equal((uint)(output.Length - 8), BinaryPrimitives.ReadUInt32LittleEndian(output.AsSpan(4)));
+    }
+
+    [Fact]
+    public async Task OffsetAsync_SimpleFiles_UsesStorageStreamsAndWritesAdjustedWave()
+    {
+        var sourceFrames = new byte[] { 0x11, 0x12, 0x21, 0x22 };
+        using var input = new MemorySimpleFile(
+            "input.wav",
+            CreateWave(1, 1, 4, 16, sourceFrames));
+        using var output = new MemorySimpleFile("output.wav", [0xDE, 0xAD]);
+
+        var service = new DefaultWavAudioOffsetService();
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(250));
+
+        var data = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data").Data;
+        Assert.Equal(new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 }, data);
+        Assert.Equal(1, input.OpenReadCount);
+        Assert.Equal(1, output.OpenWriteCount);
+        Assert.Null(input.LocalPath);
+        Assert.Null(output.LocalPath);
+    }
+
+    [Fact]
+    public async Task OffsetAsync_SameSimpleFile_StagesOutputUntilInputStreamIsClosed()
+    {
+        using var file = new MemorySimpleFile(
+            "same.wav",
+            CreateWave(1, 1, 4, 16, [0x11, 0x12, 0x21, 0x22]));
+
+        var service = new DefaultWavAudioOffsetService();
+        await service.OffsetAsync(file, file, TimeSpan.FromMilliseconds(250));
+
+        var data = Assert.Single(ReadChunks(file.Content), chunk => chunk.Id == "data").Data;
+        Assert.Equal(new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 }, data);
+        Assert.Equal(1, file.OpenReadCount);
+        Assert.Equal(1, file.OpenWriteCount);
+    }
+
+    [Fact]
+    public async Task OffsetAsync_DifferentNonLocalFilesWithSameName_StreamWithoutStaging()
+    {
+        using var input = new MemorySimpleFile(
+            "same.wav",
+            CreateWave(1, 1, 4, 16, [0x11, 0x12, 0x21, 0x22]),
+            "provider://input/same.wav");
+        using var output = new MemorySimpleFile(
+            "same.wav",
+            [],
+            "provider://output/same.wav",
+            () => input.HasActiveRead);
+
+        var service = new DefaultWavAudioOffsetService();
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(250));
+
+        Assert.True(output.WasWriteOpenedWhileProbeWasTrue);
+        var data = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data").Data;
+        Assert.Equal(new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 }, data);
+    }
+
+    [Fact]
+    public async Task OffsetAsync_LocalInputAndSimpleOutput_WritesToStorageStream()
+    {
+        using var directory = new TemporaryDirectory();
+        var inputPath = directory.File("input.wav");
+        await File.WriteAllBytesAsync(inputPath, CreateWave(
+            1,
+            1,
+            4,
+            16,
+            [0x11, 0x12, 0x21, 0x22, 0x31, 0x32]));
+        using var output = new MemorySimpleFile("output.wav", []);
+
+        var service = new DefaultWavAudioOffsetService();
+        await service.OffsetAsync(inputPath, output, TimeSpan.FromMilliseconds(-250));
+
+        var data = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data").Data;
+        Assert.Equal(new byte[] { 0x21, 0x22, 0x31, 0x32 }, data);
+        Assert.Equal(1, output.OpenWriteCount);
+    }
+
+    [Fact]
+    public async Task OffsetAsync_InvalidSimpleInput_DoesNotOpenOrOverwriteStorageOutput()
+    {
+        using var input = new MemorySimpleFile(
+            "invalid.wav",
+            CreateWave(1, 1, 4, 16, [0x01, 0x02, 0x03]));
+        var originalTarget = new byte[] { 0xCA, 0xFE, 0xBA, 0xBE };
+        using var output = new MemorySimpleFile("existing.wav", originalTarget);
+
+        var service = new DefaultWavAudioOffsetService();
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            service.OffsetAsync(input, output, TimeSpan.FromSeconds(1)));
+
+        Assert.Contains("BlockAlign", exception.Message, StringComparison.Ordinal);
+        Assert.Equal(0, output.OpenWriteCount);
+        Assert.Equal(originalTarget, output.Content);
     }
 
     [Fact]
@@ -309,6 +406,91 @@ public sealed class WavAudioOffsetServiceTests
     private sealed record TestChunk(string Id, byte[] Data, byte PaddingByte = 0);
 
     private sealed record ParsedChunk(string Id, byte[] Data, byte? PaddingByte);
+
+    private sealed class MemorySimpleFile(
+        string fileName,
+        byte[] initialContent,
+        string? fullPath = null,
+        Func<bool>? writeProbe = null) : ISimpleFile
+    {
+        private byte[] content = initialContent.ToArray();
+        private int activeReadCount;
+
+        public ISimpleDirectory? ParentDictionary => null;
+        public string FullPath => fullPath ?? $"virtual/{fileName}";
+        public string? LocalPath => null;
+        public string FileName => fileName;
+        public long FileLength => content.LongLength;
+        public byte[] Content => content.ToArray();
+        public int OpenReadCount { get; private set; }
+        public int OpenWriteCount { get; private set; }
+        public bool HasActiveRead => activeReadCount != 0;
+        public bool WasWriteOpenedWhileProbeWasTrue { get; private set; }
+
+        public ValueTask<string[]> ReadAllLines()
+        {
+            return ValueTask.FromResult(
+                Encoding.UTF8.GetString(content).Split(["\r\n", "\n"], StringSplitOptions.None));
+        }
+
+        public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Content);
+
+        public Task<Stream> OpenRead()
+        {
+            OpenReadCount++;
+            activeReadCount++;
+            return Task.FromResult<Stream>(new TrackingReadStream(
+                content,
+                () => activeReadCount--));
+        }
+
+        public Task<Stream> OpenWrite()
+        {
+            if (activeReadCount != 0)
+                throw new IOException("The backing file cannot be opened for writing while it is being read.");
+
+            OpenWriteCount++;
+            WasWriteOpenedWhileProbeWasTrue = writeProbe?.Invoke() ?? false;
+            return Task.FromResult<Stream>(new CommitMemoryStream(bytes => content = bytes));
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    private sealed class TrackingReadStream(byte[] content, Action onDispose)
+        : MemoryStream(content, writable: false)
+    {
+        private bool isDisposed;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !isDisposed)
+            {
+                isDisposed = true;
+                onDispose();
+            }
+
+            base.Dispose(disposing);
+        }
+    }
+
+    private sealed class CommitMemoryStream(Action<byte[]> commit) : MemoryStream
+    {
+        private bool isCommitted;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && !isCommitted)
+            {
+                isCommitted = true;
+                commit(ToArray());
+            }
+
+            base.Dispose(disposing);
+        }
+    }
 
     private sealed class TemporaryDirectory : IDisposable
     {

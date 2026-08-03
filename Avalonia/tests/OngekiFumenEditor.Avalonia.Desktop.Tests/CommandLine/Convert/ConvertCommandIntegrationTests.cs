@@ -6,6 +6,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Convert;
@@ -70,6 +71,41 @@ public sealed class ConvertCommandIntegrationTests
         Assert.Single(converted.Taps);
         Assert.Single(converted.Taps, x => x.ReferenceLaneStart is not null);
         Assert.Single(converted.EnemySets);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_NonLocalSimpleFiles_UsesTransactionalWriteAndRoundTrips()
+    {
+        Log.Initialize(new Log([]));
+        using var provider = CreateProvider();
+        var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "minimal.nyageki");
+        using var input = new MemorySimpleFile(
+            "minimal.nyageki",
+            "picker/minimal.nyageki",
+            await File.ReadAllBytesAsync(fixturePath));
+        using var output = new WritableMemorySimpleFile("converted.ogkr");
+        var options = new FumenConvertOption
+        {
+            InputFumenFile = input,
+            OutputFumenFile = output
+        };
+
+        var result = await provider.GetRequiredService<IFumenConvertService>().GenerateAsync(options);
+
+        Assert.True(result.IsSuccess, result.Message);
+        Assert.Null(input.LocalPath);
+        Assert.Null(output.LocalPath);
+        Assert.Equal(1, output.WriteAsyncCount);
+        Assert.True(output.Content.Length > 100);
+
+        var parserManager = provider.GetRequiredService<IFumenParserManager>();
+        var deserializer = Assert.IsAssignableFrom<IFumenDeserializable>(
+            parserManager.GetDeserializer(output.FileName));
+        await using var stream = await output.OpenRead();
+        var converted = await deserializer.DeserializeAsync(stream);
+        Assert.Equal("Avalonia migration test", converted.MetaInfo.Creator);
+        Assert.Single(converted.Lanes);
+        Assert.Single(converted.Taps);
     }
 
     [Fact]
@@ -157,6 +193,41 @@ public sealed class ConvertCommandIntegrationTests
         public IFumenDeserializable GetDeserializer(string loadFilePath) => null!;
         public IEnumerable<(string desc, string[] fileFormat)> GetSerializerDescriptions() => [];
         public IEnumerable<(string desc, string[] fileFormat)> GetDeserializerDescriptions() => [];
+    }
+
+    private sealed class WritableMemorySimpleFile(string fileName) : ISimpleFile
+    {
+        private byte[] content = [];
+
+        public ISimpleDirectory? ParentDictionary => null;
+        public string FullPath => $"picker/{fileName}";
+        public string? LocalPath => null;
+        public string FileName => fileName;
+        public long FileLength => content.LongLength;
+        public byte[] Content => content.ToArray();
+        public int WriteAsyncCount { get; private set; }
+
+        public ValueTask<string[]> ReadAllLines() => throw new NotSupportedException();
+        public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Content);
+        public Task<Stream> OpenRead() =>
+            Task.FromResult<Stream>(new MemoryStream(content, writable: false));
+
+        public Task<Stream> OpenWrite() =>
+            throw new InvalidOperationException("The conversion service must use WriteAsync.");
+
+        public async Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default)
+        {
+            WriteAsyncCount++;
+            await using var stream = new MemoryStream();
+            await writer(stream, cancellationToken);
+            content = stream.ToArray();
+        }
+
+        public void Dispose()
+        {
+        }
     }
 
     private sealed class TemporaryDirectory : IDisposable

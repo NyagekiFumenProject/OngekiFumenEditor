@@ -4,6 +4,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System;
 using System.IO;
 using System.Threading.Tasks;
@@ -135,6 +136,30 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
+		public static async Task<Result> TrySaveFumenFileAsync(ISimpleFile fumenFile, EditorProjectDataModel editorProject)
+		{
+			try
+			{
+				ArgumentNullException.ThrowIfNull(fumenFile);
+
+				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.FileName);
+				Log.LogDebug($"serializer = {serializer}");
+				if (serializer is null)
+					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
+
+				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
+				await fumenFile.WriteAsync(
+					(stream, cancellationToken) => stream.WriteAsync(fumenBuffer, cancellationToken).AsTask());
+
+				return new(true, "");
+			}
+			catch (Exception e)
+			{
+				var msg = $"{Lang.CantSaveFumenProject} {e.Message}{Environment.NewLine}{e.StackTrace}";
+				return new(false, msg);
+			}
+		}
+
 		public static async Task<Result> TrySaveEditorAsync(string projFilePath, EditorProjectDataModel editorProject)
 		{
 			try
@@ -156,19 +181,32 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				if (!saveProjTaskResult.IsSuccess)
 					throw new Exception(saveProjTaskResult.ErrorMessage);
 
-				//save fumen to tmp file
-				var fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath));
-				var tmpFumenFilePath = TempFileHelper.GetTempFilePath(extension: Path.GetExtension(fumenFullPath));
+				string fumenFullPath = null;
+				string tmpFumenFilePath = null;
+				Result saveFumenTaskResult;
+				if (editorProject.FumenFile is null)
+				{
+					// Keep the local-path branch atomic by serializing to a temporary file first.
+					fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath));
+					tmpFumenFilePath = TempFileHelper.GetTempFilePath(extension: Path.GetExtension(fumenFullPath));
+					saveFumenTaskResult = await TrySaveFumenFileAsync(tmpFumenFilePath, cloneProj);
+				}
+				else
+				{
+					saveFumenTaskResult = await TrySaveFumenFileAsync(editorProject.FumenFile, cloneProj);
+				}
 
-				var saveFumenTaskResult = await TrySaveFumenFileAsync(tmpFumenFilePath, cloneProj);
 				if (!saveFumenTaskResult.IsSuccess)
 					throw new Exception(saveFumenTaskResult.ErrorMessage);
 
 				//tmp files cover to real files.
 				Log.LogDebug($"Copy tmpProjFilePath '{tmpProjFilePath}' to '{projFilePath}'");
 				File.Copy(tmpProjFilePath, projFilePath, true);
-				Log.LogDebug($"Copy tmpFumenFilePath '{tmpFumenFilePath}' to '{fumenFullPath}'");
-				File.Copy(tmpFumenFilePath, fumenFullPath, true);
+				if (tmpFumenFilePath is not null)
+				{
+					Log.LogDebug($"Copy tmpFumenFilePath '{tmpFumenFilePath}' to '{fumenFullPath}'");
+					File.Copy(tmpFumenFilePath, fumenFullPath, true);
+				}
 
 				return new(true, "");
 			}

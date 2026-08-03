@@ -25,7 +25,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
         public string FileFormatName => DefaultOngekiFumenParser.FormatName;
         public string[] SupportFumenFileExtensions => DefaultOngekiFumenParser.FumenFileExtensions;
 
-        public Task<byte[]> SerializeAsync(OngekiFumen fumen)
+        public async Task<byte[]> SerializeAsync(OngekiFumen fumen)
         {
             var sb = new StringBuilder();
 
@@ -65,13 +65,13 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             ProcessComment(fumen, sb);
             sb.AppendLine();
 
-            ProcessSVG(fumen, sb);
+            await ProcessSVG(fumen, sb);
             sb.AppendLine();
 
             ProcessSoflanGroupWrapItem(fumen, sb);
             sb.AppendLine();
 
-            return Task.FromResult(Encoding.UTF8.GetBytes(sb.ToString()));
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
 
         private void ProcessSoflanGroupWrapItem(OngekiFumen fumen, StringBuilder sb)
@@ -123,7 +123,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             sb.AppendLine();
         }
 
-        private static void ProcessSVG(OngekiFumen fumen, StringBuilder sb)
+        private static async Task ProcessSVG(OngekiFumen fumen, StringBuilder sb)
         {
             foreach (var svg in fumen.SvgPrefabs.OrderBy(x => x.TGrid))
             {
@@ -148,13 +148,16 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
                     SvgPrefabFormatUtils.Format(svg.ColorfulLaneColor.Id)
                 };
 
+                string embeddedSvgContent = null;
                 switch (svg)
                 {
                     case SvgImageFilePrefab image:
-                        if (string.IsNullOrWhiteSpace(image.SvgFile?.FullName))
+                        if (string.IsNullOrWhiteSpace(image.SvgFile?.FullPath))
                             throw new InvalidOperationException(
                                 $"at {svg.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
-                        fields.Add(Base64.Encode(image.SvgFile?.FullName ?? string.Empty));
+                        fields.Add(Base64.Encode(image.SvgFile.LocalPath ?? image.SvgFile.FullPath));
+                        if (string.IsNullOrWhiteSpace(image.SvgFile.LocalPath))
+                            embeddedSvgContent = Base64.Encode(await image.SvgFile.ReadAllBytes());
                         break;
                     case SvgStringPrefab text:
                         if (string.IsNullOrWhiteSpace(text.Content) || string.IsNullOrWhiteSpace(text.TypefaceName))
@@ -173,6 +176,8 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
                 // Keep the legacy positional fields intact and append new metadata
                 // so existing OGKR files and readers retain their original layout.
                 fields.Add(Base64.Encode(svg.CurveInterpolaterFactory.Name));
+                if (embeddedSvgContent is not null)
+                    fields.Add(embeddedSvgContent);
                 sb.AppendLine(string.Join('\t', fields));
             }
         }

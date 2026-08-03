@@ -26,6 +26,7 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
         ArgumentNullException.ThrowIfNull(name);
         ParentDictionary = parent;
         DirectoryName = name;
+        LocalPath = storageFolder?.TryGetLocalPath();
         this.storageFolder = storageFolder;
     }
 
@@ -36,6 +37,8 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
     public ISimpleFile[] ChildFiles => [.. files.Values];
 
     public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, DirectoryName);
+
+    public string? LocalPath { get; }
 
     public string DirectoryName { get; set; }
 

@@ -6,14 +6,20 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenConverter.ViewModels;
 
 [RegisterSingleton<IFumenConverterWindow>]
-public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConverterWindow
+public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConverterWindow, IDisposable
 {
+    private readonly IEditorDocumentManager editorDocumentManager;
+    private ISimpleFile inputFumenFile;
+    private ISimpleFile outputFumenFile;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExecuteConverterCommand))]
     public partial string InputFumenFilePath { get; set; } = string.Empty;
@@ -32,16 +38,19 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
         set => IsUseInputFile = !value;
     }
 
-    public string CurrentEditorName => IoC.Get<IEditorDocumentManager>()?.CurrentActivatedEditor?.DisplayName;
+    public string CurrentEditorName => editorDocumentManager?.CurrentActivatedEditor?.DisplayName;
 
     public FumenConverterViewModel()
     {
-        IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(CurrentEditorName));
-            OnPropertyChanged(nameof(IsCurrentEditorAsInputFumen));
-            ExecuteConverterCommand.NotifyCanExecuteChanged();
-        };
+        editorDocumentManager = IoC.Get<IEditorDocumentManager>();
+        editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
+    }
+
+    private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
+    {
+        OnPropertyChanged(nameof(CurrentEditorName));
+        OnPropertyChanged(nameof(IsCurrentEditorAsInputFumen));
+        ExecuteConverterCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnIsUseInputFileChanged(bool value)
@@ -58,44 +67,48 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
     [RelayCommand]
     private async Task OpenSelectInputFileAsync()
     {
-        var path = await FileDialogHelper.OpenFileAsync(string.Empty,
+        var file = await FileDialogHelper.OpenFileAsync(string.Empty,
             FileDialogHelper.GetSupportFumenFileExtensionFilterList());
-        if (string.IsNullOrWhiteSpace(path))
+        if (file is null)
             return;
 
-        InputFumenFilePath = path;
+        inputFumenFile?.Dispose();
+        inputFumenFile = file;
+        InputFumenFilePath = file.FullPath;
         IsUseInputFile = true;
     }
 
     [RelayCommand]
     private async Task OpenSelectOutputFileAsync()
     {
-        var path = await FileDialogHelper.SaveFileAsync(string.Empty,
+        var file = await FileDialogHelper.SaveFileAsync(string.Empty,
             FileDialogHelper.GetSupportFumenFileExtensionFilterList());
-        if (string.IsNullOrWhiteSpace(path))
+        if (file is null)
             return;
 
-        OutputFumenFilePath = path;
+        outputFumenFile?.Dispose();
+        outputFumenFile = file;
+        OutputFumenFilePath = file.FullPath;
     }
 
     private bool CanExecuteConverter() =>
-        !string.IsNullOrWhiteSpace(OutputFumenFilePath) &&
-        (IsUseInputFile ? !string.IsNullOrWhiteSpace(InputFumenFilePath) : CurrentEditorName is not null);
+        outputFumenFile is not null &&
+        (IsUseInputFile ? inputFumenFile is not null : CurrentEditorName is not null);
 
     [RelayCommand(CanExecute = nameof(CanExecuteConverter))]
     private async Task ExecuteConverterAsync()
     {
         var option = new FumenConvertOption
         {
-            InputFumenFilePath = IsUseInputFile ? InputFumenFilePath : string.Empty,
-            OutputFumenFilePath = OutputFumenFilePath
+            InputFumenFile = IsUseInputFile ? inputFumenFile : null,
+            OutputFumenFile = outputFumenFile
         };
 
         OngekiFumen input = null;
 
         if (!IsUseInputFile)
         {
-            var editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+            var editor = editorDocumentManager.CurrentActivatedEditor;
             if (editor is not null)
             {
                 input = editor.Fumen;
@@ -121,5 +134,15 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
             Log.LogError("Fumen conversion failed.", e);
             await dialogManager.ShowMessageDialog($"{Lang.ConvertFail} {e.Message}", DialogMessageType.Error);
         }
+    }
+
+    public void Dispose()
+    {
+        editorDocumentManager.OnActivateEditorChanged -= OnActivateEditorChanged;
+        inputFumenFile?.Dispose();
+        outputFumenFile?.Dispose();
+        inputFumenFile = null;
+        outputFumenFile = null;
+        GC.SuppressFinalize(this);
     }
 }

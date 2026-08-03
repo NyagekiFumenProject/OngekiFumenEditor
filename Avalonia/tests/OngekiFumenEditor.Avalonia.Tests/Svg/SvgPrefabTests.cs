@@ -18,6 +18,8 @@ using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki;
 using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Objects;
 using OngekiFumenEditor.Avalonia.Parser.Ogkr;
 using OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl.Editor;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using SkiaSharp;
 using Xunit;
 
@@ -130,7 +132,7 @@ public sealed class SvgPrefabTests
             Path.GetTempPath(),
             $"音寄-SVG-不存在-{Guid.NewGuid():N}",
             "车道图.svg"));
-        using var source = new SvgImageFilePrefab { SvgFile = new FileInfo(missingPath) };
+        using var source = new SvgImageFilePrefab { SvgFile = new LocalSimpleFile(missingPath) };
         ConfigureCommonFields(source);
         var fumen = new OngekiFumen();
         fumen.AddObject(source);
@@ -146,9 +148,45 @@ public sealed class SvgPrefabTests
 
         AssertCommonFields(source, actual);
         Assert.NotNull(actual.SvgFile);
-        Assert.Equal(missingPath, actual.SvgFile.FullName, ignoreCase: true);
-        Assert.False(actual.SvgFile.Exists);
+        Assert.Equal(missingPath, actual.SvgFile.FullPath, ignoreCase: true);
+        Assert.False(File.Exists(actual.SvgFile.LocalPath));
         Assert.Null(actual.Picture);
+    }
+
+    [AvaloniaFact]
+    public async Task NyagekiImage_NonLocalSimpleFile_EmbedsAndRestoresSvgContent()
+    {
+        using var source = CreateEmbeddedImagePrefab();
+        var fumen = new OngekiFumen();
+        fumen.AddObject(source);
+
+        var bytes = await new DefaultNyagekiFumenFormatter().SerializeAsync(fumen);
+        Assert.Contains("ContentBase64[", Encoding.UTF8.GetString(bytes), StringComparison.Ordinal);
+
+        var parser = new DefaultNyagekiFumenParser([new SvgPrefabCommandParser()]);
+        var reparsed = await parser.DeserializeAsync(new MemoryStream(bytes, writable: false));
+        using var actual = Assert.IsType<SvgImageFilePrefab>(Assert.Single(reparsed.SvgPrefabs));
+
+        await AssertEmbeddedSvg(actual);
+    }
+
+    [AvaloniaFact]
+    public async Task OgkrImage_NonLocalSimpleFile_EmbedsAndRestoresSvgContent()
+    {
+        using var source = CreateEmbeddedImagePrefab();
+        var fumen = new OngekiFumen();
+        fumen.AddObject(source);
+
+        var bytes = await new DefaultOngekiFumenFormatter().SerializeAsync(fumen);
+        var parser = new DefaultOngekiFumenParser(
+        [
+            new SvgImageFilePrefabCommand(),
+            new SvgStringPrefabCommand()
+        ]);
+        var reparsed = await parser.DeserializeAsync(new MemoryStream(bytes, writable: false));
+        using var actual = Assert.IsType<SvgImageFilePrefab>(Assert.Single(reparsed.SvgPrefabs));
+
+        await AssertEmbeddedSvg(actual);
     }
 
     [Fact]
@@ -160,7 +198,7 @@ public sealed class SvgPrefabTests
         {
             using var svg = new SvgImageFilePrefab
             {
-                SvgFile = new FileInfo(path),
+                SvgFile = new LocalSimpleFile(path),
                 ShowOriginColor = true
             };
 
@@ -240,7 +278,7 @@ public sealed class SvgPrefabTests
         {
             using var svg = new SvgImageFilePrefab
             {
-                SvgFile = new FileInfo(path),
+                SvgFile = new LocalSimpleFile(path),
                 EnableColorfulLaneSimilar = false,
                 ColorSimilar = { CurrentValue = 50 },
                 CurveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default,
@@ -296,6 +334,29 @@ public sealed class SvgPrefabTests
         };
         ConfigureCommonFields(svg);
         return svg;
+    }
+
+    private static SvgImageFilePrefab CreateEmbeddedImagePrefab()
+    {
+        var svg = new SvgImageFilePrefab
+        {
+            SvgFile = new MemorySimpleFile(
+                "embedded.svg",
+                "picker/embedded.svg",
+                Encoding.UTF8.GetBytes(RectangleSvg)),
+            ShowOriginColor = true
+        };
+        ConfigureCommonFields(svg);
+        return svg;
+    }
+
+    private static async Task AssertEmbeddedSvg(SvgImageFilePrefab actual)
+    {
+        Assert.NotNull(actual.SvgFile);
+        Assert.Equal("embedded.svg", actual.SvgFile.FileName);
+        Assert.Null(actual.SvgFile.LocalPath);
+        Assert.Equal(RectangleSvg, Encoding.UTF8.GetString(await actual.SvgFile.ReadAllBytes()));
+        Assert.NotNull(actual.Picture);
     }
 
     private static void ConfigureCommonFields(SvgPrefabBase svg)

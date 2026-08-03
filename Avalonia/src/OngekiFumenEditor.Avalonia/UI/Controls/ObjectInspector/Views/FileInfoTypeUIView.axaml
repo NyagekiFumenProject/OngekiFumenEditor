@@ -40,8 +40,8 @@
                 Grid.Row="1"
                 Grid.ColumnSpan="2"
                 HorizontalAlignment="Left"
-                Text="{Binding File.Name}"
-                ToolTip.Tip="{Binding File.FullName}">
+                Text="{Binding File.FileName}"
+                ToolTip.Tip="{Binding File.FullPath}">
             </TextBlock>
         </Grid>
     </controls:GroupBox>

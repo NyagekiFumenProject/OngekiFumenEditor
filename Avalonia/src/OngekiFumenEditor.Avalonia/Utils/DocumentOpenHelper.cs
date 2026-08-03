@@ -6,6 +6,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -14,6 +15,20 @@ namespace OngekiFumenEditor.Avalonia.Utils;
 
 internal static class DocumentOpenHelper
 {
+    public static async Task<bool> TryOpenAsDocument(ISimpleFile file)
+    {
+        ArgumentNullException.ThrowIfNull(file);
+
+        if (file.FileName.EndsWith(".ogkr", StringComparison.OrdinalIgnoreCase) ||
+            file.FileName.EndsWith(".nyageki", StringComparison.OrdinalIgnoreCase))
+        {
+            return await TryOpenOgkrFileAsDocument(file);
+        }
+
+        file.Dispose();
+        return false;
+    }
+
     public static async Task<bool> TryOpenAsDocument(string filePath)
     {
         var provider = PickEditorProvider(filePath);
@@ -46,19 +61,65 @@ internal static class DocumentOpenHelper
         if (newProj is null)
             return false;
 
-        var docName = await TryFormatOpenFileName(ogkrFilePath);
+        var ownershipTransferred = false;
+        try
+        {
+            var docName = await TryFormatOpenFileName(ogkrFilePath);
+            var provider = IoC.Get<IFumenVisualEditorProvider>();
+            var editor = provider.Create();
+            var shouldShow = await provider.TryOpen(editor, newProj);
+            if (!shouldShow)
+                return false;
 
-        var provider = IoC.Get<IFumenVisualEditorProvider>();
-        var editor = provider.Create();
-        var shouldShow = await provider.TryOpen(editor, newProj);
-        if (!shouldShow)
-            return false;
+            if (editor is FumenVisualEditorViewModel vm)
+                vm.DisplayName = docName;
 
-        if (editor is FumenVisualEditorViewModel vm)
-            vm.DisplayName = docName;
+            await IoC.Get<IShell>().OpenDocumentAsync(editor);
+            ownershipTransferred = true;
+            return true;
+        }
+        finally
+        {
+            if (!ownershipTransferred)
+                newProj.DisposeRuntimeFiles();
+        }
+    }
 
-        await IoC.Get<IShell>().OpenDocumentAsync(editor);
-        return true;
+    public static async Task<bool> TryOpenOgkrFileAsDocument(ISimpleFile ogkrFile)
+    {
+        ArgumentNullException.ThrowIfNull(ogkrFile);
+
+        EditorProjectDataModel newProj = null;
+        var ownershipTransferred = false;
+        try
+        {
+            newProj = await TryCreateEditorProjectDataModel(ogkrFile);
+            if (newProj is null)
+                return false;
+
+            var provider = IoC.Get<IFumenVisualEditorProvider>();
+            var editor = provider.Create();
+            var shouldShow = await provider.TryOpen(editor, newProj);
+            if (!shouldShow)
+                return false;
+
+            if (editor is FumenVisualEditorViewModel vm)
+                vm.DisplayName = $"[{Lang.FastOpen}] {ogkrFile.FileName}";
+
+            await IoC.Get<IShell>().OpenDocumentAsync(editor);
+            ownershipTransferred = true;
+            return true;
+        }
+        finally
+        {
+            if (!ownershipTransferred)
+            {
+                if (newProj is null)
+                    ogkrFile.Dispose();
+                else
+                    newProj.DisposeRuntimeFiles();
+            }
+        }
     }
 
     public static async Task<bool> TryOpenProject(EditorProjectDataModel proj)
@@ -66,40 +127,115 @@ internal static class DocumentOpenHelper
         if (proj is null)
             return false;
 
-        var provider = IoC.Get<IFumenVisualEditorProvider>();
-        var editor = provider.Create();
-        var shouldShow = await provider.TryOpen(editor, proj);
-        if (!shouldShow)
-            return false;
-        await IoC.Get<IShell>().OpenDocumentAsync(editor);
-        return true;
+        var ownershipTransferred = false;
+        try
+        {
+            var provider = IoC.Get<IFumenVisualEditorProvider>();
+            var editor = provider.Create();
+            var shouldShow = await provider.TryOpen(editor, proj);
+            if (!shouldShow)
+                return false;
+
+            await IoC.Get<IShell>().OpenDocumentAsync(editor);
+            ownershipTransferred = true;
+            return true;
+        }
+        finally
+        {
+            if (!ownershipTransferred)
+                proj.DisposeRuntimeFiles();
+        }
     }
 
     public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath)
     {
-        (var audioFile, var audioDuration) = await GetAudioFilePath(ogkrFilePath);
-        if (!File.Exists(audioFile))
+        ISimpleFile selectedAudioFile = null;
+        try
         {
-            audioFile = await FileDialogHelper.OpenFileAsync(Lang.SelectAudioFileManually, IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
+            (var audioFile, var audioDuration) = await GetAudioFilePath(ogkrFilePath);
             if (!File.Exists(audioFile))
+            {
+                selectedAudioFile = await FileDialogHelper.OpenFileAsync(
+                    Lang.SelectAudioFileManually,
+                    IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
+                if (selectedAudioFile is null)
+                    return null;
+                audioDuration = await CalcAudioDuration(selectedAudioFile);
+                audioFile = selectedAudioFile.LocalPath ?? selectedAudioFile.FullPath;
+            }
+
+            using var fs = File.OpenRead(ogkrFilePath);
+            var parserManager = IoC.Get<IFumenParserManager>();
+            var deserializer = parserManager.GetDeserializer(ogkrFilePath);
+            if (deserializer is null)
                 return null;
-            audioDuration = await CalcAudioDuration(audioFile);
+            var fumen = await deserializer.DeserializeAsync(fs);
+
+            var model = new EditorProjectDataModel
+            {
+                FumenFilePath = ogkrFilePath,
+                Fumen = fumen,
+                AudioFilePath = audioFile,
+                AudioDuration = audioDuration,
+                AudioFile = selectedAudioFile
+            };
+            selectedAudioFile = null;
+            return model;
         }
-
-        using var fs = File.OpenRead(ogkrFilePath);
-        var parserManager = IoC.Get<IFumenParserManager>();
-        var deserializer = parserManager.GetDeserializer(ogkrFilePath);
-        if (deserializer is null)
-            return null;
-        var fumen = await deserializer.DeserializeAsync(fs);
-
-        return new EditorProjectDataModel
+        finally
         {
-            FumenFilePath = ogkrFilePath,
-            Fumen = fumen,
-            AudioFilePath = audioFile,
-            AudioDuration = audioDuration
-        };
+            selectedAudioFile?.Dispose();
+        }
+    }
+
+    public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(ISimpleFile ogkrFile)
+    {
+        ArgumentNullException.ThrowIfNull(ogkrFile);
+
+        ISimpleFile selectedAudioFile = null;
+        try
+        {
+            string audioFilePath = null;
+            TimeSpan audioDuration = default;
+
+            if (!string.IsNullOrWhiteSpace(ogkrFile.LocalPath))
+                (audioFilePath, audioDuration) = await GetAudioFilePath(ogkrFile.LocalPath);
+
+            if (string.IsNullOrWhiteSpace(audioFilePath) || !File.Exists(audioFilePath))
+            {
+                selectedAudioFile = await FileDialogHelper.OpenFileAsync(
+                    Lang.SelectAudioFileManually,
+                    IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
+                if (selectedAudioFile is null)
+                    return null;
+
+                audioDuration = await CalcAudioDuration(selectedAudioFile);
+                audioFilePath = selectedAudioFile.LocalPath ?? selectedAudioFile.FullPath;
+            }
+
+            var parserManager = IoC.Get<IFumenParserManager>();
+            var deserializer = parserManager.GetDeserializer(ogkrFile.FileName);
+            if (deserializer is null)
+                return null;
+
+            await using var fumenStream = await ogkrFile.OpenRead();
+            var fumen = await deserializer.DeserializeAsync(fumenStream);
+            var model = new EditorProjectDataModel
+            {
+                FumenFilePath = ogkrFile.LocalPath ?? ogkrFile.FullPath,
+                FumenFile = ogkrFile,
+                Fumen = fumen,
+                AudioFilePath = audioFilePath,
+                AudioDuration = audioDuration,
+                AudioFile = selectedAudioFile
+            };
+            selectedAudioFile = null;
+            return model;
+        }
+        finally
+        {
+            selectedAudioFile?.Dispose();
+        }
     }
 
     public static async Task<string> TryFormatOpenFileName(string ogkrFilePath)
@@ -176,6 +312,12 @@ internal static class DocumentOpenHelper
     private static async Task<TimeSpan> CalcAudioDuration(string audioFilePath)
     {
         using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFilePath);
+        return audio.Duration;
+    }
+
+    private static async Task<TimeSpan> CalcAudioDuration(ISimpleFile audioFile)
+    {
+        using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFile);
         return audio.Duration;
     }
 

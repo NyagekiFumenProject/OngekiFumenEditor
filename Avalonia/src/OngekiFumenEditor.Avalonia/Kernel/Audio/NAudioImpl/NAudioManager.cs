@@ -9,6 +9,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl;
 
@@ -274,6 +275,41 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
             audioFileReaderFactory);
         ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
         await player.Load(filePath, targetSampleRate);
+        return player;
+    }
+
+    public async Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file)
+    {
+        if (file is null)
+            return null;
+
+        var extension = Path.GetExtension(file.FileName);
+        if (extension.Equals(".acb", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(file.LocalPath))
+            {
+                throw new PlatformNotSupportedException(
+                    "ACB audio requires a local file path and access to its associated AWB file.");
+            }
+
+            return await LoadAudioAsync(file.LocalPath);
+        }
+
+        if (extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase) &&
+            !string.IsNullOrWhiteSpace(file.LocalPath))
+        {
+            // The current Desktop decoder is Media Foundation, whose API accepts paths only.
+            return await LoadAudioAsync(file.LocalPath);
+        }
+
+        await EnsureAudioOutputInitializedAsync();
+        var player = new DefaultMusicPlayer(
+            musicMixer,
+            this,
+            schedulerManager,
+            audioFileReaderFactory);
+        ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+        await player.Load(file, targetSampleRate);
         return player;
     }
 

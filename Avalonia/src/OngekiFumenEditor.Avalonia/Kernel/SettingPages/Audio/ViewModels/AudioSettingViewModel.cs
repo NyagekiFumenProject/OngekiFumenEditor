@@ -136,11 +136,11 @@ public partial class AudioSettingViewModel : ViewModelBase
     [RelayCommand]
     private async Task SelectSoundFolderAsync()
     {
-        var folderPath = await FileDialogHelper.OpenDirectoryAsync(Lang.SoundFolderPath);
-        if (string.IsNullOrWhiteSpace(folderPath))
+        using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.SoundFolderPath);
+        if (string.IsNullOrWhiteSpace(folder?.LocalPath))
             return;
 
-        Setting.SoundFolderPath = folderPath;
+        Setting.SoundFolderPath = folder.LocalPath;
         ApplyChanges();
     }
 }

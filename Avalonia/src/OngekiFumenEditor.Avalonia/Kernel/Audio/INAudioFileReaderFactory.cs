@@ -7,4 +7,6 @@ public interface INAudioFileReaderFactory
     IReadOnlyList<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }
 
     WaveStream CreateAudioFileReader(string filePath);
+
+    WaveStream CreateAudioFileReader(Stream stream, string fileName);
 }

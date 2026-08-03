@@ -532,3 +532,21 @@ service 收到同一个 option 实例和完全相等的 token，返回 0 且 std
 - [x] 阶段 C：真实 48 kHz PCM WAV 生成三份产物，解析 XML，并由 DereTore ACB/AWB 解析链重新打开。
 - [x] 阶段 D：官方子模块、无条件 ProjectReference、无预编译 DLL binding 和无 Native Interop。
 - [x] 阶段 E：Acb 筛选、Desktop.Tests、solution 回归、test-gap-analysis、assertion-quality、编码与 diff 检查。
+
+## FileDialog/SimpleFileSystem 迁移计划（2026-08-03）
+
+1. 覆盖 standalone storage file 的读取、覆盖写、缓存/长度刷新、取消和释放。
+2. 覆盖谱面转换与 WAV 调整的 `ISimpleFile` 流分支，同时保留现有 CLI 路径分支测试。
+3. 若 SVG 领域属性迁移，覆盖文件流加载与既有路径格式兼容。
+4. 先构建并运行 Core 聚焦测试，再构建 Desktop/Browser，最后执行 solution 非增量构建与全量测试。
+
+### FileDialog/SimpleFileSystem 完成清单（2026-08-03）
+
+- [x] `OpenFileAsync`/`SaveFileAsync`/`OpenDirectoryAsync` 分别返回 `Task<ISimpleFile>`、
+  `Task<ISimpleFile>`、`Task<ISimpleDirectory>`，取消仍返回空结果。
+- [x] 13 个 picker 调用点仅在用户读写范围内迁移；CLI、项目 JSON、日志/缓存、自动关联文件扫描等
+  既有路径 I/O 不做全仓替换。
+- [x] 用户选择的谱面、WAV、SVG 使用 SimpleFileSystem 读取；目录设置只从 `LocalPath` 持久化原生路径。
+- [x] picker 写入统一使用 `ISimpleFile.WriteAsync`；本地目标通过同目录临时文件提交，失败/取消保留原文件。
+- [x] 非本地 SVG 内容嵌入谱面格式；直接 picker 打开的谱面通过 `ISimpleFile` 自动保存。
+- [x] 完成 Core/Desktop 全量测试、Browser 构建、solution 非增量构建、断言质量和实证伪变异复核。

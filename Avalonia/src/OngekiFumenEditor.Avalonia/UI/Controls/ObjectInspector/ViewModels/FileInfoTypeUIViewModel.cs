@@ -2,13 +2,13 @@
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Utils;
-using System.IO;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
-public partial class FileInfoTypeUIViewModel : CommonUIViewModelBase<FileInfo>
+public partial class FileInfoTypeUIViewModel : CommonUIViewModelBase<ISimpleFile>
 {
-    public FileInfo File
+    public ISimpleFile File
     {
         get => TypedProxyValue;
         set
@@ -25,8 +25,23 @@ public partial class FileInfoTypeUIViewModel : CommonUIViewModelBase<FileInfo>
     [RelayCommand]
     private async Task SelectFileAsync()
     {
-        var filePath = await FileDialogHelper.OpenFileAsync(Lang.SelectSvgFile, [(".svg", "Svg鏂囦欢")]);
-        File = string.IsNullOrWhiteSpace(filePath) ? null : new FileInfo(filePath);
+        var selectedFile = await FileDialogHelper.OpenFileAsync(Lang.SelectSvgFile, [(".svg", "Svg鏂囦欢")]);
+        if (selectedFile is null)
+            return;
+
+        try
+        {
+            var data = await selectedFile.ReadAllBytes();
+            File = new MemorySimpleFile(
+                selectedFile.FileName,
+                selectedFile.FullPath,
+                data.ToArray(),
+                selectedFile.LocalPath);
+        }
+        finally
+        {
+            selectedFile.Dispose();
+        }
     }
 }
 

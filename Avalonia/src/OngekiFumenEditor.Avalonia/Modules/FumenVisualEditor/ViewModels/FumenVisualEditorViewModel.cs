@@ -81,7 +81,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
 
     public Task<bool> Load(EditorProjectDataModel project)
     {
-        return Load(project, project?.FumenFilePath);
+        var sourcePath = project?.FumenFile is null
+            ? project?.FumenFilePath
+            : null;
+        return Load(project, sourcePath);
     }
 
     private Task<bool> Load(EditorProjectDataModel project, string sourcePath)
@@ -92,7 +95,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
         EditorProjectData = project;
         Fumen = project.Fumen ?? new OngekiFumen();
         FilePath = sourcePath ?? string.Empty;
-        FileName = string.IsNullOrWhiteSpace(FilePath) ? "Untitled" : Path.GetFileName(FilePath);
+        FileName = project.FumenFile?.FileName ??
+            (string.IsNullOrWhiteSpace(FilePath) ? "Untitled" : Path.GetFileName(FilePath));
         DisplayName = FileName;
         UpdateTitle();
         LoadingFinished?.Invoke(this, EditorProjectData);
@@ -116,6 +120,22 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
         FileName = Path.GetFileName(projectFilePath);
         DisplayName = FileName;
         UpdateTitle();
+        return true;
+    }
+
+    public async Task<bool> SaveSelectedFumenFile()
+    {
+        if (EditorProjectData?.FumenFile is not { } fumenFile)
+            return false;
+
+        EditorProjectData.Fumen = Fumen;
+        var saveResult = await EditorProjectDataUtils.TrySaveFumenFileAsync(fumenFile, EditorProjectData);
+        if (!saveResult.IsSuccess)
+        {
+            Log.LogError(saveResult.ErrorMessage);
+            return false;
+        }
+
         return true;
     }
 

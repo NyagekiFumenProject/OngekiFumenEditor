@@ -78,7 +78,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             currentEditor.Remove(editor);
             if (CurrentActivatedEditor == editor)
                 NotifyDeactivate(editor);
-            OnNotifyDestoryed?.Invoke(editor);
+            try
+            {
+                OnNotifyDestoryed?.Invoke(editor);
+            }
+            finally
+            {
+                editor.EditorProjectData?.DisposeRuntimeFiles();
+            }
         }
 
         public void OnSchedulerTerm()
@@ -91,13 +98,24 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             if (!Properties.EditorGlobalSetting.Default.IsEnableAutoSave)
                 return;
 
-            if (CurrentActivatedEditor is null || string.IsNullOrWhiteSpace(CurrentActivatedEditor.FilePath))
+            if (CurrentActivatedEditor is null)
                 return;
 
             var editor = CurrentActivatedEditor;
+            var selectedFumenFile = editor.EditorProjectData?.FumenFile;
+            if (selectedFumenFile is null && string.IsNullOrWhiteSpace(editor.FilePath))
+                return;
+
             Log.LogInfo($"begin auto save current document: {editor.FileName}");
             //editor.LockAllUserInteraction();
-            await editor.Save(editor.FilePath);
+            if (selectedFumenFile is not null)
+            {
+                await editor.SaveSelectedFumenFile();
+            }
+            else
+            {
+                await editor.Save(editor.FilePath);
+            }
             //editor.UnlockAllUserInteraction();
             Log.LogInfo($"auto save done.");
         }

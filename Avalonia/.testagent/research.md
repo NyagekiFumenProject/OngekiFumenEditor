@@ -359,3 +359,38 @@ CommandLine 测试均不在写入范围。
 - 旧生成器把 preview 时间直接写入模板，测试音频无需达到 80 秒；使用短而非退化的 48 kHz WAV 控制测试耗时。
 - `AcbFile.FromFile` 的旧 API 对底层流所有权不直观；测试使用显式 `FileStream` + `FromStream`，确保临时目录可清理。
 - 真实 HCA 编码可能较慢，集成测试只生成一段短音频并设置合理测试命令超时，不依赖真实音频设备或网络。
+
+## FileDialog/SimpleFileSystem 迁移增量研究（2026-08-03）
+
+### 验收清单
+
+- [ ] `OpenFileAsync` 和 `SaveFileAsync` 返回 `Task<ISimpleFile>`；`OpenDirectoryAsync` 返回 `Task<ISimpleDirectory>`。
+- [ ] Picker 取消继续返回空结果，选中的 `IStorageItem` 所有权可确定释放。
+- [ ] Save 结果支持覆盖写，写后读取缓存和文件长度正确刷新。
+- [ ] 12 个直接 Picker 调用点改用 `ISimpleFile`/`ISimpleDirectory`；Picker 文件内容不再经 `File.*` 重开。
+- [ ] 命令行、项目 JSON、Win32 dump 和只接受本地路径的第三方 API 保留显式兼容边界。
+- [ ] Core、Desktop、Browser 均可编译，相关 xUnit 和 solution 回归通过。
+
+### 有界目标
+
+- SimpleFileSystem 增加单文件 StorageProvider 包装和写流。
+- 迁移谱面转换、WAV 调整、项目设置/快速打开、SVG 选择和三个目录设置。
+- 字符串路径只保留为显示、持久化或明确的本地平台能力，不作为 Picker 内容 I/O 入口。
+
+### FileDialog/SimpleFileSystem 最终边界与结论（2026-08-03）
+
+- 实际直接 picker 调用点为 13 个。所有 picker 文件内容均通过 `ISimpleFile` 的
+  `OpenRead`、`ReadAllBytes` 或事务式 `WriteAsync` 访问，没有把虚拟 `FullPath` 重新传入 `File.*`。
+- 用户明确将范围限定为用户读写。CLI 路径原子写、项目 JSON、日志/崩溃转储、相邻音频自动发现、
+  MP3/ACB 等只接受本地路径的第三方边界保持原实现；目录设置只接受可用的 `LocalPath`。
+- standalone storage file 的 `FullPath` 使用 provider URI，避免不同目录同名文件被误判为同一文件；
+  `FileName` 仅用于格式/扩展名选择。
+- `ISimpleFile.WriteAsync` 在本地路径上同目录暂存，writer 成功且流关闭后才替换目标；writer 异常或取消
+  会删除临时文件并保留目标。非本地 provider 无法由通用接口保证原子提交，但失败后会失效旧缓存并
+  尽力刷新长度，避免继续返回与 provider 实际状态不一致的旧内容。
+- runtime picker 文件由 ViewModel、项目模型或文档管理器明确持有；替换、取消、打开失败、窗口关闭和
+  文档销毁路径均释放或转交所有权。
+
+新增测试共 17 个方法、69 个直接 `Assert.*` 调用。断言覆盖 Equality、Boolean、Null、Exception、
+Type、String、Collection、Comparison、Negative、State/Side-effect、Structural/Deep；Approximate 对
+字节精确和格式契约不适用。零断言、仅平凡断言和自引用/恒真断言均为 0。

@@ -4,6 +4,7 @@ using NAudio.Wave.SampleProviders;
 using OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System.Diagnostics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Music;
@@ -89,30 +90,54 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         {
             Log.LogInfo($"Load audio file: {audioFile}");
             using var rawStream = audioFileReaderFactory.CreateAudioFileReader(audioFile);
-            duration = rawStream.TotalTime;
-            var processedProvider = await AudioCompatibilizer.CheckCompatible(
-                rawStream.ToSampleProvider(),
-                targetSampleRate);
-
-            samples = processedProvider.ToWaveProvider().ToArray();
-
-            audioFileReader = new BufferWaveStream(samples, processedProvider.WaveFormat);
-            audioFileReader.Seek(0, SeekOrigin.Begin);
-
-            finishProvider = new FinishedListenerProvider(audioFileReader);
-            finishProvider.StartListen();
-            finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
-
-            baseOffset = TimeSpan.Zero;
-            pauseTime = TimeSpan.Zero;
-            OnPropertyChanged(nameof(Duration));
-            IsAvaliable = true;
+            await LoadCore(rawStream, targetSampleRate);
         }
         catch (Exception e)
         {
             Log.LogError($"Load audio file ({audioFile}) failed : {e.Message}");
             Dispose();
         }
+    }
+
+    public async Task Load(ISimpleFile audioFile, int targetSampleRate)
+    {
+        ArgumentNullException.ThrowIfNull(audioFile);
+        Dispose();
+
+        try
+        {
+            Log.LogInfo($"Load audio file: {audioFile.FullPath}");
+            await using var sourceStream = await audioFile.OpenRead();
+            using var rawStream = audioFileReaderFactory.CreateAudioFileReader(sourceStream, audioFile.FileName);
+            await LoadCore(rawStream, targetSampleRate);
+        }
+        catch (Exception e)
+        {
+            Log.LogError($"Load audio file ({audioFile.FullPath}) failed : {e.Message}");
+            Dispose();
+        }
+    }
+
+    private async Task LoadCore(WaveStream rawStream, int targetSampleRate)
+    {
+        duration = rawStream.TotalTime;
+        var processedProvider = await AudioCompatibilizer.CheckCompatible(
+            rawStream.ToSampleProvider(),
+            targetSampleRate);
+
+        samples = processedProvider.ToWaveProvider().ToArray();
+
+        audioFileReader = new BufferWaveStream(samples, processedProvider.WaveFormat);
+        audioFileReader.Seek(0, SeekOrigin.Begin);
+
+        finishProvider = new FinishedListenerProvider(audioFileReader);
+        finishProvider.StartListen();
+        finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+
+        baseOffset = TimeSpan.Zero;
+        pauseTime = TimeSpan.Zero;
+        OnPropertyChanged(nameof(Duration));
+        IsAvaliable = true;
     }
 
     public void Seek(TimeSpan seekTime, bool pause)

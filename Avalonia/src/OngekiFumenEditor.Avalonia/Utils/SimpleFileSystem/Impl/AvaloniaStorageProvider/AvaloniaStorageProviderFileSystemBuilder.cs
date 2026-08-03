@@ -7,6 +7,56 @@ namespace OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorage
 public static class AvaloniaStorageProviderFileSystemBuilder
 {
     /// <summary>
+    /// Wraps only the selected folder. This is intended for path-oriented settings and avoids
+    /// recursively enumerating an arbitrarily large tree during the picker operation.
+    /// </summary>
+    public static ISimpleDirectory LoadRootFromAvaloniaStorageFolder(IStorageFolder storageFolder)
+    {
+        ArgumentNullException.ThrowIfNull(storageFolder);
+
+        try
+        {
+            var root = new AvaloniaStorageProviderSimpleDirectory(null, string.Empty, storageFolder);
+            return root;
+        }
+        catch
+        {
+            storageFolder.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Wraps a storage file and transfers ownership of it to the returned file.
+    /// </summary>
+    public static async Task<ISimpleFile> LoadFromAvaloniaStorageFile(
+        IStorageFile storageFile,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(storageFile);
+
+        try
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var properties = await storageFile.GetBasicPropertiesAsync().ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            var fileLength = properties.Size is { } size
+                ? checked((long)size)
+                : 0;
+            return new AvaloniaStorageProviderSimpleFile(
+                null,
+                storageFile.Name,
+                fileLength,
+                storageFile);
+        }
+        catch
+        {
+            storageFile.Dispose();
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Builds an in-memory directory index and transfers ownership of the storage folder tree
     /// to the returned root directory.
     /// </summary>

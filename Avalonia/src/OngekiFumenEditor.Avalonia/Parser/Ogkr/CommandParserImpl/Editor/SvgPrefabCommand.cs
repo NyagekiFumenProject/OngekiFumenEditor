@@ -2,6 +2,8 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl.Editor;
 
@@ -70,8 +72,20 @@ public sealed class SvgImageFilePrefabCommand : SvgPrefabCommandBase
     {
         var svg = new SvgImageFilePrefab();
         var path = Base64.Decode(Required(args, 17, "FilePathBase64"));
-        if (!string.IsNullOrWhiteSpace(path))
-            svg.SvgFile = new FileInfo(path);
+        if (args.GetRawData(19) is { Length: > 0 } encodedContent)
+        {
+            var fileName = Path.GetFileName(path);
+            if (string.IsNullOrWhiteSpace(fileName))
+                fileName = "embedded.svg";
+            svg.SvgFile = new MemorySimpleFile(
+                fileName,
+                string.IsNullOrWhiteSpace(path) ? fileName : path,
+                Convert.FromBase64String(encodedContent));
+        }
+        else if (!string.IsNullOrWhiteSpace(path))
+        {
+            svg.SvgFile = new LocalSimpleFile(path);
+        }
         return svg;
     }
 }
