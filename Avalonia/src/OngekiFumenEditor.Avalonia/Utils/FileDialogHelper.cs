@@ -78,17 +78,6 @@ public static class FileDialogHelper
         return files.FirstOrDefault()?.TryGetLocalPath();
     }
 
-    public static string OpenFile(string title, IEnumerable<(string ext, string desc)> extParams)
-    {
-        if (Dispatcher.UIThread.CheckAccess())
-        {
-            Log.LogWarn($"OpenFile('{title}') called on UI thread. Use OpenFileAsync() in Avalonia flow.");
-            return default;
-        }
-
-        return OpenFileAsync(title, extParams).GetAwaiter().GetResult();
-    }
-
     public static async Task<string> SaveFileAsync(string title, IEnumerable<(string ext, string desc)> extParams)
     {
         var topLevel = GetTopLevel();
@@ -107,17 +96,6 @@ public static class FileDialogHelper
         return file?.TryGetLocalPath();
     }
 
-    public static string SaveFile(string title, IEnumerable<(string ext, string desc)> extParams)
-    {
-        if (Dispatcher.UIThread.CheckAccess())
-        {
-            Log.LogWarn($"SaveFile('{title}') called on UI thread. Use SaveFileAsync() in Avalonia flow.");
-            return default;
-        }
-
-        return SaveFileAsync(title, extParams).GetAwaiter().GetResult();
-    }
-
     public static async Task<string> OpenDirectoryAsync(string title)
     {
         var topLevel = GetTopLevel();
@@ -134,19 +112,6 @@ public static class FileDialogHelper
         });
 
         return folders.FirstOrDefault()?.TryGetLocalPath();
-    }
-
-    public static bool OpenDirectory(string title, out string folderPath)
-    {
-        if (Dispatcher.UIThread.CheckAccess())
-        {
-            Log.LogWarn($"OpenDirectory('{title}') called on UI thread. Use OpenDirectoryAsync() in Avalonia flow.");
-            folderPath = default;
-            return false;
-        }
-
-        folderPath = OpenDirectoryAsync(title).GetAwaiter().GetResult();
-        return !string.IsNullOrWhiteSpace(folderPath);
     }
 }
 
