@@ -6,6 +6,6 @@ namespace OngekiFumenEditor.Avalonia.Platforms.Services.ResourceFolderProvider
 {
     public interface IResourceFolderProvider
     {
-
+        Task<Stream> OpenRead(string filePath);
     }
 }
