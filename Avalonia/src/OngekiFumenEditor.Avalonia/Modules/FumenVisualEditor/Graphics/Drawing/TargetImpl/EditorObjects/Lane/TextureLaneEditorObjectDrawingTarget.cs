@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public static IImage LoadTextrueFromDefaultResource(IRenderManagerImpl impl, string rPath)
         {
-            return ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + rPath);
+            return ResourceUtils.OpenReadTextureFromResource(impl, "editor/" + rPath);
         }
 
         public override IImage StartEditorTexture => startEditorTexture;

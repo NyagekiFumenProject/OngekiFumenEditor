@@ -12,9 +12,6 @@ namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Acb;
 [RegisterSingleton<IAcbGenerateService>]
 internal sealed class DefaultAcbGenerateService : IAcbGenerateService
 {
-    private const string MusicSourceResourceName =
-        "OngekiFumenEditor.Avalonia.Desktop.Resources.MusicSource.xml";
-
     public async Task<AcbGenerateResult> GenerateAsync(
         AcbGenerateOption option,
         CancellationToken cancellationToken = default)
@@ -89,10 +86,7 @@ internal sealed class DefaultAcbGenerateService : IAcbGenerateService
         int musicId,
         CancellationToken cancellationToken)
     {
-        await using var resourceStream = typeof(DefaultAcbGenerateService).Assembly
-            .GetManifestResourceStream(MusicSourceResourceName)
-            ?? throw new InvalidOperationException(
-                $"Embedded resource '{MusicSourceResourceName}' was not found.");
+        await using var resourceStream = ResourceUtils.OpenReadResourceStream("MusicSource.xml");
         var musicSourceXml = await XDocument.LoadAsync(
             resourceStream,
             LoadOptions.None,

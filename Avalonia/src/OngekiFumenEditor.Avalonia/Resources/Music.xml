@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MusicData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<dataName>music2858</dataName>
+	<Name>
+		<id>2858</id>
+		<str>GET ON WiTH FUNKOT</str>
+	</Name>
+	<ArtistName>
+		<id>4300</id>
+		<str>tkqn14 (COWBELL MASTER 心愛 -COCOA-) (movie : w)</str>
+	</ArtistName>
+	<MusicRightsName>
+		<id>0</id>
+		<str>-</str>
+	</MusicRightsName>
+	<MusicSourceName>
+		<id>2858</id>
+		<str>GET ON WiTH FUNKOT</str>
+	</MusicSourceName>
+	<Genre>
+		<id>4</id>
+		<str>VARIETY</str>
+	</Genre>
+	<FirstChapterName>
+		<id>1</id>
+		<str>マイリスト</str>
+	</FirstChapterName>
+	<FumenData>
+		<FumenData>
+			<FumenConstIntegerPart>0</FumenConstIntegerPart>
+			<FumenConstFractionalPart>0</FumenConstFractionalPart>
+			<FumenFile>
+				<path />
+			</FumenFile>
+		</FumenData>
+		<FumenData>
+			<FumenConstIntegerPart>0</FumenConstIntegerPart>
+			<FumenConstFractionalPart>0</FumenConstFractionalPart>
+			<FumenFile>
+				<path />
+			</FumenFile>
+		</FumenData>
+		<FumenData>
+			<FumenConstIntegerPart>0</FumenConstIntegerPart>
+			<FumenConstFractionalPart>0</FumenConstFractionalPart>
+			<FumenFile>
+				<path />
+			</FumenFile>
+		</FumenData>
+		<FumenData>
+			<FumenConstIntegerPart>0</FumenConstIntegerPart>
+			<FumenConstFractionalPart>0</FumenConstFractionalPart>
+			<FumenFile>
+				<path />
+			</FumenFile>
+		</FumenData>
+		<FumenData>
+			<FumenConstIntegerPart>12</FumenConstIntegerPart>
+			<FumenConstFractionalPart>8</FumenConstFractionalPart>
+			<FumenFile>
+				<path>2858_4.ogkr</path>
+			</FumenFile>
+		</FumenData>
+	</FumenData>
+	<IsLunatic>true</IsLunatic>
+	<BossCard>
+		<id>101347</id>
+		<str>【R】ココア[Is the order a rabbit?]</str>
+	</BossCard>
+	<BossLevel>45</BossLevel>
+	<WaveAttribute>
+		<AttributeType>Leaf</AttributeType>
+	</WaveAttribute>
+	<CostToUnlock>0</CostToUnlock>
+	<FinishBonus>2</FinishBonus>
+	<EpReleaseFlag>false</EpReleaseFlag>
+	<VersionID>
+		<id>1025</id>
+		<str>ver_1_25</str>
+	</VersionID>
+	<SortOrder>107600</SortOrder>
+	<StageID>
+		<id>10</id>
+		<str>ショッピングセンター_04_メイド喫茶</str>
+	</StageID>
+	<PossessingFromTheBeginning>true</PossessingFromTheBeginning>
+	<IsLockedAtTheBeginning>false</IsLockedAtTheBeginning>
+	<ReleaseVersion>2021-03-31T00:00:00</ReleaseVersion>
+	<NameForSort>GET ON WiTH FUNKOT</NameForSort>
+	<BossLockHpCoef>0</BossLockHpCoef>
+	<BossLockRewards />
+	<BossVoiceNo>1</BossVoiceNo>
+	<IsBonusTrack>false</IsBonusTrack>
+</MusicData>

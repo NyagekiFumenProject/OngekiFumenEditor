@@ -35,8 +35,7 @@ public abstract class BatchModeSubmode : CommandDefinition
     public LocalizedString DisplayName => field ??= Lang.LocalizerManager.GetLocalizedTextSource(ResourceKey).ToLocalizedString();
 
     public override string Name => $"BatchMode.{GetType().Name}";
-    public override Uri IconSource =>
-        new Uri($"avares://OngekiFumenEditor.Avalonia/Resources/Icons/Batch/{ResourceKey}.png");
+    public override Uri IconSource => ResourceUtils.GetResourceUri($"Icons/Batch/{ResourceKey}.png");
 
     public override LocalizedString Text => DisplayName;
 }
@@ -236,6 +235,5 @@ public class BatchModeObjectModificationAction(Action<OngekiObjectBase>? modifie
     public string Description { get; } = description;
     public Action<OngekiObjectBase>? Function { get; } = modifier;
 }
-
 
 

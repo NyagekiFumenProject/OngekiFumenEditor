@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     _spritesMap[k1] = dic;
                 }
 
-                var tex = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + rPath);
+                var tex = ResourceUtils.OpenReadTextureFromResource(impl, "editor/" + rPath);
                 dic[k2] = tex;
                 normalDrawList[tex] = new();
                 selectedDrawList[tex] = new();

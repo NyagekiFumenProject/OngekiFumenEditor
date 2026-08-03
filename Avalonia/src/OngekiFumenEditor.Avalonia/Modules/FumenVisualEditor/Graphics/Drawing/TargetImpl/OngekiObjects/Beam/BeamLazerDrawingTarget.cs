@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             lazerDrawing = impl.BeamDrawing;
 
-            IImage load(string name) => ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + name);
+            IImage load(string name) => ResourceUtils.OpenReadTextureFromResource(impl, "editor/" + name);
 
             textureBody = load("beamBody.png");
             textureBody.TextureWrapT = TextureWrapMode.Repeat;

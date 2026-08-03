@@ -33,8 +33,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\flick.png");
-            exFlickEffTexture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\exflickEffect.png");
+            texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/flick.png");
+            exFlickEffTexture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/exflickEffect.png");
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("flick", out var size, out _))
                 size = new Vector2(104, 69.333f);

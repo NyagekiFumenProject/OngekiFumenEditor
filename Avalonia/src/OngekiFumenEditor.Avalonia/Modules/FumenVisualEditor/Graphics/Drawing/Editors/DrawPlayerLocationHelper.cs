@@ -22,7 +22,7 @@ public class DrawPlayerLocationHelper
         textureDrawing = impl.TextureDrawing;
         arr[0].rotation = 0f;
 
-        texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\playerLoc.png");
+        texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/playerLoc.png");
         if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("playerLoc", out size, out _))
             size = new Vector2(48, 48);
 

@@ -248,7 +248,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.ViewModels
             //printCross(new(viewWidth / 2, viewHeight / 2), new(0, 0, 1, 1), 20);
 
             //var beamDrawing = IoC.Get<IRenderManager>().BeamDrawing;
-            //using var img = ResourceUtils.OpenReadTextureFromFile(@"C:\Users\mikir\Desktop\OngekiFumenEditor\Resources\editor\beamBody.png");
+            //using var img = ResourceUtils.OpenReadTextureFromResource(impl, "editor/beamBody.png");
             //beamDrawing.Draw(this, img, 26, viewWidth / 2, 1, Vector4.One, 0, 0);
 
             if (usingPeakData is not null)

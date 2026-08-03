@@ -27,10 +27,13 @@
 - `Platforms/Services/FileSystem/IFile.cs`；
 - `Platforms/Services/FileSystem/IDirectory.cs`；
 - `Platforms/Services/FileSystem/IOOperationCanceledByUserException.cs`；
-- `Platforms/Services/FileSystem/Providers/IResourceFolderProvider.cs`；
 - `Platforms/Services/FileSystem/Providers/ITemporaryFolderProvider.cs`。
 
 这些文件属于未提交工作树，设计及后续实现必须保留并增量修改，不得覆盖用户的并行变更。
+
+`IResourceFolderProvider` 已废除。Core 项目的 `Resources/**` 全部作为 `AvaloniaResource`
+内嵌；Desktop 可用 EXE 所在目录下的 `Resources` 按相对路径逐文件覆盖，缺失文件回退到内嵌资源，
+Browser 始终只读取内嵌资源。资源覆盖不属于 Storage API 文件系统抽象。
 
 ### 2.2 技术基线
 

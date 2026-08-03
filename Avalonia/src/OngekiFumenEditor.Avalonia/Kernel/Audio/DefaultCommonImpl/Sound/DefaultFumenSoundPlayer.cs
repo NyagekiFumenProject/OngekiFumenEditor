@@ -6,7 +6,9 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.Runtime.CompilerServices;
 
@@ -37,7 +39,6 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
     private static int loopIdGen;
 
-    public string SoundFolderPath { get; set; } = Path.Combine(AppContext.BaseDirectory, "Sound");
     public bool EnableLoopPlayTiming { get; set; } = true;
 
     public SoundControl SoundControl { get; set; } = SoundControl.All;
@@ -50,37 +51,36 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         InitSounds();
     }
 
-    private async void InitSounds()
-    {
-        var source = new TaskCompletionSource<bool>();
-        loadTask = source.Task;
-        var audioManager = IoC.Get<IAudioManager>();
+    private void InitSounds() => loadTask = LoadSoundsAsync();
 
-        var soundFolderPath = SoundFolderPath;
-        if (!Directory.Exists(soundFolderPath))
-        {
-            Log.LogError($"Sound folder not found: {soundFolderPath}");
-            source.SetResult(false);
-            return;
-        }
+    private async Task<bool> LoadSoundsAsync()
+    {
+        var audioManager = IoC.Get<IAudioManager>();
+        var soundFolderPath = AudioSetting.Default.SoundFolderPath;
 
         bool noError = true;
 
         async Task Load(SoundControl sound, string fileName)
         {
-            var fixFilePath = Path.Combine(soundFolderPath, fileName);
             try
             {
-                using var file = new LocalSimpleFile(fixFilePath);
+                using var file = await OpenSoundFileAsync(
+                    fileName,
+                    soundFolderPath,
+                    AppContext.BaseDirectory,
+                    Path.Combine(AppContext.BaseDirectory, "Resources"),
+                    allowLocalFiles: !OperatingSystem.IsBrowser());
                 cacheSounds[sound] = await audioManager.LoadSoundAsync(file);
             }
             catch (Exception e)
             {
-                Log.LogError($"Can't load {sound} sound file : {fixFilePath} , reason : {e.Message}");
+                Log.LogError($"Can't load {sound} sound file '{fileName}', reason: {e.Message}");
                 noError = false;
             }
         }
 
+        foreach (var sound in cacheSounds.Values)
+            sound.Dispose();
         cacheSounds.Clear();
         await Load(SoundControl.Tap, "tap.wav");
         await Load(SoundControl.Bell, "bell.wav");
@@ -103,7 +103,56 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         if (!noError)
             Log.LogWarning("Some sounds failed to load.");
 
-        source.SetResult(noError);
+        return noError;
+    }
+
+    internal static async Task<ISimpleFile> OpenSoundFileAsync(
+        string fileName,
+        string configuredSoundFolderPath,
+        string baseDirectory,
+        string resourceOverrideRootPath,
+        bool allowLocalFiles,
+        CancellationToken cancellationToken = default)
+    {
+        if (allowLocalFiles &&
+            TryGetConfiguredSoundFilePath(fileName, configuredSoundFolderPath, baseDirectory) is { } customFilePath)
+        {
+            return new LocalSimpleFile(customFilePath);
+        }
+
+        await using var stream = ResourceUtils.OpenReadResourceStream(
+            $"sounds/{fileName}",
+            resourceOverrideRootPath,
+            allowLocalFiles);
+        using var buffer = new MemoryStream();
+        await stream.CopyToAsync(buffer, cancellationToken);
+        return new MemorySimpleFile(
+            fileName,
+            ResourceUtils.GetResourceUri($"sounds/{fileName}").ToString(),
+            buffer.ToArray());
+    }
+
+    private static string TryGetConfiguredSoundFilePath(
+        string fileName,
+        string configuredSoundFolderPath,
+        string baseDirectory)
+    {
+        if (string.IsNullOrWhiteSpace(configuredSoundFolderPath))
+            return null;
+
+        try
+        {
+            var folderPath = Path.IsPathFullyQualified(configuredSoundFolderPath)
+                ? Path.GetFullPath(configuredSoundFolderPath)
+                : Path.GetFullPath(configuredSoundFolderPath, baseDirectory);
+            var filePath = Path.Combine(folderPath, fileName);
+            return File.Exists(filePath) ? filePath : null;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or NotSupportedException)
+        {
+            Log.LogWarning($"Invalid sound folder path '{configuredSoundFolderPath}': {exception.Message}");
+            return null;
+        }
     }
 
     public async Task Prepare(FumenVisualEditorViewModel editor, IAudioPlayer player)

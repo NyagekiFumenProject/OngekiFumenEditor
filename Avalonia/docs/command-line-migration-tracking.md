@@ -87,9 +87,9 @@ CommandLine Program.Main(args)
 | 清单 | 更新 `assets.bytes` 时保留既有记录，并只追加缺失的两条记录 |
 | 失败 | 路径错误 `-5`；图片、模板、编码或 AssetBundle 生成失败 `-6` |
 
-Desktop 管理并复制以下 Jacket 资源：
+封面模板 `ui_jacket_0666` 位于 Core 的 `Resources`，作为 `AvaloniaResource` 内嵌；Desktop 可通过
+EXE 旁的 `Resources/ui_jacket_0666` 覆盖它。Desktop 仅管理并复制以下 Jacket 原生依赖：
 
-- `ui_jacket_0666`
 - `TexturePlugin.dll`
 - `TexToolWrap.dll`
 - `PVRTexLib.dll`
@@ -131,8 +131,9 @@ JIT 使用 ReadyToRun 处理 `TexturePlugin.dll`；Native AOT 额外以 `CopyToP
 | 编码 | HCA 比特率固定为 `192 * 1024`，保留旧版非归一化行为 |
 | 失败 | 路径错误 `-7`；生成、复制或 XML 处理失败 `-8` |
 
-Desktop 新增 `IAcbGenerateService`、`DefaultAcbGenerateService`、独立 Definition/Handler，并把
-`MusicSource.xml` 作为 Desktop 嵌入资源。生成器以官方仓库子模块接入：
+Desktop 新增 `IAcbGenerateService`、`DefaultAcbGenerateService`、独立 Definition/Handler；
+`MusicSource.xml` 位于 Core 的 `Resources`，通过统一资源加载器读取，并允许 Desktop 的 EXE 旁
+`Resources/MusicSource.xml` 覆盖。生成器以官方仓库子模块接入：
 
 - `.gitmodules` 固定 `Avalonia/Dependencies/AcbGeneratorFuck` 到
   `https://github.com/NyagekiFumenProject/AcbGeneratorFuck`；当前 gitlink 为 `d00e636c`。

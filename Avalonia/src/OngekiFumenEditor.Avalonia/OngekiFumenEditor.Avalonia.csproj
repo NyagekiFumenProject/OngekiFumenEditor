@@ -33,8 +33,7 @@
     <ItemGroup>
         <AdditionalFiles Include="Assets\Languages\*.json" />
         <AdditionalFiles Include="**\*.axaml" />
-        <AvaloniaResource Include="Resources\**\*.png" />
-        <AvaloniaResource Include="Resources\**\*.ico" />
+        <AvaloniaResource Include="Resources\**" />
     </ItemGroup>
 
     <ItemGroup>

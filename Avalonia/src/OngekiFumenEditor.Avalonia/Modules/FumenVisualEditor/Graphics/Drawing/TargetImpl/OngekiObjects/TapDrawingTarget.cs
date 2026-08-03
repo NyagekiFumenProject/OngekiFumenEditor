@@ -44,7 +44,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             void init(ref IImage texture, string resourceName)
             {
-                texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\" + resourceName);
+                texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/" + resourceName);
 
                 normalList[texture] = new();
                 selectTapList[texture] = new();

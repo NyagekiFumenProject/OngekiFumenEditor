@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\commonCircle.png");
+            texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/commonCircle.png");
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
 

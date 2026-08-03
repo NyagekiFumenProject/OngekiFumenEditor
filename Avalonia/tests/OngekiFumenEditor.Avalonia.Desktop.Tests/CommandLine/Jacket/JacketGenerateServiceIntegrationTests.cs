@@ -8,9 +8,8 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Jacket;
 
 public sealed class JacketGenerateServiceIntegrationTests
 {
-    private static readonly string[] RequiredResourceNames =
+    private static readonly string[] RequiredNativeDependencyNames =
     [
-        "ui_jacket_0666",
         "TexturePlugin.dll",
         "TexToolWrap.dll",
         "crnlib.dll",
@@ -88,14 +87,15 @@ public sealed class JacketGenerateServiceIntegrationTests
     }
 
     [Fact]
-    public void DesktopOutput_ContainsJacketTemplateAndAllNativeDependencies()
+    public void DesktopOutput_ContainsAllNativeDependencies()
     {
-        foreach (var resourceName in RequiredResourceNames)
+        foreach (var resourceName in RequiredNativeDependencyNames)
         {
             var filePath = Path.Combine(AppContext.BaseDirectory, resourceName);
             Assert.True(File.Exists(filePath), $"Desktop resource was not copied: {filePath}");
             Assert.True(new FileInfo(filePath).Length > 0, $"Desktop resource is empty: {filePath}");
         }
+
     }
 
     private static DefaultJacketGenerateService CreateService()

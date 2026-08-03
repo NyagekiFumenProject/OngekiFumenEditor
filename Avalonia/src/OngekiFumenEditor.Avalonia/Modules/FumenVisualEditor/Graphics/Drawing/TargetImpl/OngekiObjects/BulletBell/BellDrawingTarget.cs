@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             base.Initialize(impl);
 
-            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\bell.png");
+            texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/bell.png");
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("bell", out var size, out _))
                 size = new Vector2(40, 40);

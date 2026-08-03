@@ -1,0 +1,41 @@
+﻿//学习本脚本语言: C# : https://dotnet.microsoft.com/en-us/learn/csharp
+//学习本脚本格式: C# Script : https://docs.microsoft.com/en-us/archive/msdn-magazine/2016/january/essential-net-csharp-scripting
+
+// 如何使用? 编写脚本代码 -> 编译脚本 -> 钦定目标编辑器 -> 执行脚本！
+
+using Caliburn.Micro;
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts;
+using System.Linq;
+using System.Collections.Generic;
+
+Log.LogInfo("这是脚本输出，你可以在质朴器程序的输出栏看到本消息");
+Log.LogDebug("这是调试消息输出，只能在日志文件中看到。");
+
+//获取编辑器目标对象
+var targetEditor = ScriptArgs.TargetEditor;
+if (targetEditor is null)
+{
+    Log.LogInfo($"当前没选择目标编辑器，跳过了~");
+    return;
+}
+
+Log.LogInfo($"编辑器的文件名: {targetEditor?.FileName}");
+
+var fumen = targetEditor.Fumen; // 谱面文件
+var setting = targetEditor.Setting; // 编辑器选项
+var nyagekiProj = targetEditor.EditorProjectData; // 编辑器项目文件
+
+//获取其他编辑器目标
+var editorManager = IoC.Get<IEditorDocumentManager>();
+Log.LogInfo("已打开的编辑器有:");
+foreach (var editor in editorManager.GetCurrentEditors())
+{
+    Log.LogInfo($"* {editor.FileName} ({editor.FilePath})");
+}
+
+Log.LogDebug("Powered by C# Script, Roslyn and MSBuild.");

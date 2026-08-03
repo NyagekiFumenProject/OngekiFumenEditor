@@ -1,11 +1,16 @@
 using System;
+using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform;
 using Gekimini.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Desktop;
 
@@ -88,7 +93,30 @@ internal class Program
     {
         return AppBuilder.Configure(appFactory)
             .UsePlatformDetect()
+            .AfterPlatformServicesSetup(_ => InstallResourceOverrideAssetLoader(
+                Path.Combine(AppContext.BaseDirectory, "Resources")))
             .WithInterFont()
             .LogToTrace();
+    }
+
+    [DynamicDependency(
+        DynamicallyAccessedMemberTypes.PublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicProperties |
+        DynamicallyAccessedMemberTypes.NonPublicFields,
+        typeof(AvaloniaLocator))]
+    internal static void InstallResourceOverrideAssetLoader(string overrideRootPath)
+    {
+        const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+        const BindingFlags instanceFlags = BindingFlags.NonPublic | BindingFlags.Instance;
+        var locatorType = typeof(AvaloniaLocator);
+        var currentMutable = locatorType.GetProperty("CurrentMutable", staticFlags)?.GetValue(null)
+            ?? throw new InvalidOperationException("Avalonia mutable service locator is unavailable.");
+        var registry = locatorType.GetField("_registry", instanceFlags)?.GetValue(currentMutable) as IDictionary
+            ?? throw new InvalidOperationException("Avalonia service registry is unavailable.");
+        var assetLoader = new ResourceOverrideAssetLoader(
+            new StandardAssetLoader(typeof(OngekiFumenEditorDesktopApp).Assembly),
+            overrideRootPath);
+
+        registry[typeof(IAssetLoader)] = (Func<object>)(() => assetLoader);
     }
 }

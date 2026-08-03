@@ -184,12 +184,13 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         Vector2? targetImgSize = null,
         CancellationToken cancellationToken = default)
     {
-        var templateFilePath = Path.Combine(AppContext.BaseDirectory, TemplateFileName);
-        await using var fs = File.OpenRead(templateFilePath);
+        await using var fs = ResourceUtils.OpenReadResourceStream(TemplateFileName);
 
         var assetManager = new AssetsManager();
 
-        var assetBundleFile = assetManager.LoadBundleFile(fs);
+        var assetBundleFile = assetManager.LoadBundleFile(
+            fs,
+            ResourceUtils.GetResourceUri(TemplateFileName).ToString());
         var assetsFile = assetManager.LoadAssetsFileFromBundle(assetBundleFile, 0);
         var assetsTable = assetsFile.table;
 

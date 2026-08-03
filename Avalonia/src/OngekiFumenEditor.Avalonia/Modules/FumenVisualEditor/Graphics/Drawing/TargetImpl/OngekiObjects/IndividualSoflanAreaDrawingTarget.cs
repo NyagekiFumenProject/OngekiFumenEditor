@@ -40,7 +40,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             polygonDrawing = impl.PolygonDrawing;
             highlightDrawing = impl.HighlightBatchTextureDrawing;
 
-            texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\tri.png");
+            texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/tri.png");
         }
 
         private static Dictionary<int, Vector4> cacheColor = new();
