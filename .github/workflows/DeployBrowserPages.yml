@@ -35,7 +35,7 @@ jobs:
         shell: bash
         run: |
           # AcbGeneratorFuck is only referenced by Desktop and requires separate repository access.
-          git submodule update --init --recursive --depth 1 \
+          git submodule update --init --recursive \
             Dependences/MigratableSerializer \
             Dependences/Polyline2D.CSharp \
             Dependences/earcut.net \
