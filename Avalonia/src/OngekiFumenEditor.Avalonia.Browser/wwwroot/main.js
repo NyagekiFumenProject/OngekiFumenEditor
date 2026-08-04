@@ -1,3 +1,7 @@
+import {initialize as initializeTemporaryFileSystem} from './temporaryFileSystem.js';
+
+await initializeTemporaryFileSystem();
+
 let dotnetModule;
 
 try {

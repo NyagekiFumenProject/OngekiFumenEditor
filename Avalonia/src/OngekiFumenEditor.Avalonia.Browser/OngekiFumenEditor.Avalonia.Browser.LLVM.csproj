@@ -31,7 +31,7 @@
         <WasmExtraFilesToDeploy Include="wwwroot\**" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\Dependencies\Avalonia.Browser\Avalonia.Browser.csproj" />
+        <PackageReference Include="Avalonia.Browser" />
         <PackageReference Include="Avalonia.Fonts.Inter" />
         <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" />
         <PackageReference Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true'"
@@ -41,19 +41,20 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
-        <ProjectReference Include="..\..\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj" />
+        <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj" />
+        <ProjectReference Include="..\..\Dependencies\NAudio.BrowserAudioWorklet\src\NAudio.BrowserAudioWorklet\NAudio.BrowserAudioWorklet.csproj" />
         <ProjectReference OutputItemType="Analyzer"
                           ReferenceOutputAssembly="true"
-                          Include="..\..\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj" />
+                          Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj" />
         <ProjectReference OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"
-                          Include="..\..\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
+                          Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
         <ProjectReference OutputItemType="Analyzer"
                           ReferenceOutputAssembly="true"
-                          Include="..\..\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj" />
+                          Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj" />
         <ProjectReference OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"
-                          Include="..\..\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
+                          Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
         <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
     </ItemGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
