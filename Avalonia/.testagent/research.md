@@ -394,3 +394,45 @@ CommandLine 测试均不在写入范围。
 新增测试共 17 个方法、69 个直接 `Assert.*` 调用。断言覆盖 Equality、Boolean、Null、Exception、
 Type、String、Collection、Comparison、Negative、State/Side-effect、Structural/Deep；Approximate 对
 字节精确和格式契约不适用。零断言、仅平凡断言和自引用/恒真断言均为 0。
+
+## 跨平台临时文件夹服务研究（2026-08-04）
+
+### 有界目标
+
+- Core：`Platforms/Services/FileSystem/Providers` 下的四个公共契约、名称校验、共享句柄与唯一命名、discard 后端。
+- Desktop：`%TEMP%/NagekiFumenEditorTempFolder` 后端、根目录包含性校验、同目录事务写和 Injectio 单例注册。
+- Browser：OPFS `temp` 根、启动前 JS 初始化、`Task<JSObject>` 字节解包、串行写及不可用时 discard 组合。
+- 消费者：图片缓存、文件日志、救援文件、工程保存、ACB 解码，以及 Desktop ACB/Jacket 命令行服务。
+- 文档与验证：更新 `docs/disk-io-audit.md`，删除 `TempFileHelper.cs`，完成 Core/Desktop 测试、Desktop AOT 与两种 Browser 发布/烟测。
+
+### 仓库与测试约定
+
+- 生产项目为 `net10.0`，Browser 为 `net10.0-browser`；现有 interop 已使用 `JSImport`、`Task<JSObject>`、`JSObject.GetPropertyAs*` 和同步 `MemoryView` 拷贝。
+- Core 与 Desktop 测试均使用 xUnit 2.9.3、`public sealed class ...Tests`、显式 fake/临时目录和行为式方法名，不引入 mock 框架。
+- Desktop 项目已通过 `InternalsVisibleTo` 暴露内部类型，可为后端注入隔离根目录；Browser 当前无测试项目，因此 JS 行为由发布后的 localhost 烟测覆盖。
+- 2026-08-04 已按 `find-untested-sources` Roslyn 流程静态扫描一次：2935 个生产源、201 个测试源、412 个静态配对源。该结果仅是符号配对启发式，不代表行/分支覆盖。
+
+### 验收清单
+
+- [x] 唯一文件返回前已占位；固定名称复用；嵌套目录、读取、只读流、事务覆盖、追加、删除与清理行为正确。
+- [x] writer 失败/取消保留旧内容，writer 成功后提交阶段忽略取消；所有名称逃逸与非法路径段被拒绝。
+- [x] discard 写回调会执行但数据丢弃，查找永远为空，读取按不存在处理，删除和清理为空操作。
+- [x] Desktop 默认根、`LocalPath`、跨实例保留、并发唯一命名、根包含性和清理不越界均有集成断言。
+- [x] 图片缓存命中/未命中、日志追加、救援/工程序列化，以及 Desktop ACB/Jacket 的本地临时路径迁移有消费者证据。
+- [x] Browser OPFS 创建、写入、读取、追加、删除及 `temp/logs/runtime` 日志通过独立 localhost origin 烟测。
+- [x] `rg TempFileHelper` 无生产结果，Core/Desktop 全量 xUnit 与目标发布均成功。
+
+### 风险与边界
+
+- OPFS 没有通用本地路径；第三方路径 API 必须通过 `LocalPath` 显式拒绝 Browser，不能把相对路径伪装成磁盘路径。
+- Browser 首版整文件缓冲，事务提交依赖 `FileSystemWritableFileStream.close()`；运行时配额和 I/O 错误必须继续上抛，只有初始化不可用才选择 discard。
+- OPFS 数据和 Desktop 临时根跨启动保留，不做自动清空、过期或容量淘汰；测试必须只清理由自身注入的隔离根。
+- `.testagent` 已含此前任务记录，本轮只追加独立章节，不覆盖旧内容。
+
+### 最终验证发现
+
+- Browser 的 OPFS 模块在 .NET 启动前初始化成功；标准 Release AOT 中覆盖、读取、追加、长度、删除和递归清理均通过独立 origin 烟测。
+- 既有应用启动信息使用 `Microsoft.Extensions.Logging`，而原 `FileLogOutputWrapper` 只实现旧 `ILogOutput`。Browser 增加日志提供程序适配器后，真实启动日志会写入 OPFS `temp/logs/runtime`。
+- 标准 Browser AOT 控制台没有应用 origin 的 JS 互操作错误；最终运行日志文件为 6447 字节，并包含设置、主题和 Shell 启动记录。
+- OPFS 初始化错误分类用 Node ESM 夹具验证：`SecurityError` 返回不可用并进入 discard，`QuotaExceededError` 保持上抛。
+- LLVM Browser 使用的 `Microsoft.DotNet.ILCompiler.LLVM 10.0.0-preview.2` 与当前 .NET 10/Avalonia JSExport 生成物不兼容。发布成功、OPFS JS 模块可独立读写，但应用启动在缺少 Avalonia JSExport wasm 导出时失败；该残余风险不归因于临时存储实现。

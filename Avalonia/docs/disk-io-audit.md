@@ -1,20 +1,20 @@
 # OngekiFumenEditor.Avalonia 磁盘 I/O 审计
 
-> 检查日期：2026-08-03
-> 检查对象：当前工作树中的 `src/OngekiFumenEditor.Avalonia` Core 项目
+> 检查日期：2026-08-04
+> 检查对象：当前工作树中的 `src/OngekiFumenEditor.Avalonia` Core 项目，以及跨平台临时文件夹服务的 Desktop/Browser 后端
 > 检查方式：静态调用扫描与调用链核对，未进行 ETW、Process Monitor 或运行时插桩
 > 结论状态：已完成静态审计
 
 ## 1. 范围与口径
 
-本次检查只覆盖 `src/OngekiFumenEditor.Avalonia`，即核心 UI、编辑器、解析器及公共服务。
+本次检查主体覆盖 `src/OngekiFumenEditor.Avalonia`，即核心 UI、编辑器、解析器及公共服务。为记录 Core 临时存储调用的实际落点，另对 Desktop 和 Browser 的 `ITemporaryFolderProvider` 后端作定向核对；这不扩展到两个平台项目的其他 I/O。
 
 以下内容明确排除：
 
-- `src/OngekiFumenEditor.Avalonia.Desktop`；
-- `src/OngekiFumenEditor.Avalonia.Browser`；
+- `src/OngekiFumenEditor.Avalonia.Desktop` 中除临时文件夹后端之外的代码；
+- `src/OngekiFumenEditor.Avalonia.Browser` 中除临时文件夹后端及其 OPFS JS 模块之外的代码；
 - `src/OngekiFumenEditor.Avalonia.CommandLine`；
-- Core 项目内的 `src/OngekiFumenEditor.Avalonia/Platforms` 平台适配目录；
+- Core 项目内除临时文件夹公共契约之外的 `src/OngekiFumenEditor.Avalonia/Platforms` 平台适配代码；
 - `tests` 和 `Dependencies` 内部实现。
 
 Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平台相关操作只记录调用边界，不沿调用链进入 Desktop 或 Browser，也不把宿主实现计入 Core 磁盘 I/O。
@@ -34,8 +34,8 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 
 | 范围 | 显式 `File.*` / `Directory.*` 调用行 | 涉及源文件 |
 | --- | ---: | ---: |
-| Core 源码（排除平台目录并剔除字符串误报） | 71 | 24 |
-| 其中参与当前 Core 编译的源码 | 69 | 23 |
+| Core 源码（排除平台目录并剔除字符串误报） | 63 | 25 |
+| 其中参与当前 Core 编译的源码 | 61 | 24 |
 
 源码口径包含已被项目文件排除编译的旧 OpenGL 字体实现，其中有 2 行、1 个文件；当前编译口径已扣除这部分。两种数字均不包含 `FileInfo.Open`、原生 Win32 API、NAudio、Skia 等间接 I/O，因此应视为显式调用下限，而不是完整的运行时系统调用次数。部分代码当前没有调用者，详见第 7 节。
 
@@ -58,13 +58,13 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 
 | 编号 | I/O 意图 | 具体操作与位置 | 生命周期结论 |
 | --- | --- | --- | --- |
-| A1 | 通用临时路径分配 | 在 `%TEMP%/NagekiFumenEditorTempFolder/<subfolder>/` 创建目录并检查候选路径是否占用；见 [`TempFileHelper.cs`](../src/OngekiFumenEditor.Avalonia/Utils/TempFileHelper.cs) | 只创建和分配，不统一回收 |
-| A2 | 工程、谱面保存暂存 | 将工程和谱面序列化到 `%TEMP%` 中间文件，再复制覆盖 B 类目标；见 [`EditorProjectDataUtils.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs) | 复制完成后仍可能残留中间文件 |
+| A1 | 跨平台临时存储 | Core 通过 [`ITemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia/Platforms/Services/FileSystem/Providers/ITemporaryFolderProvider.cs) 分配安全的相对路径句柄；Desktop 根为 `%TEMP%/NagekiFumenEditorTempFolder`，Browser 根为当前 origin 的 OPFS `temp` | 内容跨启动保留，只由显式 `ClearAsync` / 删除 API 清理 |
+| A2 | 工程、谱面保存暂存 | Desktop 将工程和谱面事务式写入临时句柄，再复制覆盖 B 类目标；Browser 救援写入可直接使用流式句柄；见 [`EditorProjectDataUtils.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs) | 复制完成后保留中间文件，除非显式清理 |
 | A3 | 谱面转换原子暂存 | 在目标文件同目录写入 `.<name>.<guid>.tmp`，成功后移动为 B 类输出，失败时删除；见 [`DefaultFumenConvertService.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenConverter/Kernel/DefaultFumenConvertService.cs) | 有完整提交和清理逻辑 |
 | A4 | WAV 调整原子暂存 | 在目标 WAV 同目录创建随机 `.tmp`，强制刷新后移动为 B 类输出，失败时删除；见 [`DefaultWavAudioOffsetService.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Audio/DefaultCommonImpl/Wave/DefaultWavAudioOffsetService.cs) | 有完整提交和失败清理逻辑 |
-| A5 | 网络图片磁盘缓存 | 将 HTTP 图片写入 `%TEMP%/NagekiFumenEditorTempFolder/images/*.img.cache`，后续优先读取；见 [`ImageLoader.cs`](../src/OngekiFumenEditor.Avalonia/Utils/ImageLoader.cs) | 无过期、容量限制或统一清理 |
-| A6 | ACB 播放解码缓存 | 将 B 类 `.acb` / `.awb` 解码为 `%TEMP%/NagekiFumenEditorTempFolder/decodeAcbFiles/*.wav`；见 [`AcbConverter.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Audio/AcbConverter.cs) | 成功缓存长期复用，失败输出会删除 |
-| A7 | 崩溃时工程救援副本 | 在 `%TEMP%/.../Rescue/` 自动保存当前工程和谱面副本；见 [`FumenRescue.cs`](../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs) | 当前没有外部调用者；设计上保留供人工恢复 |
+| A5 | 网络图片缓存 | 将 HTTP 图片写入临时根下的 `images/*.img.cache`，后续优先读取；见 [`ImageLoader.cs`](../src/OngekiFumenEditor.Avalonia/Utils/ImageLoader.cs) | 无过期或容量限制；显式清理临时根时删除 |
+| A6 | ACB 播放解码缓存 | Desktop 将 B 类 `.acb` / `.awb` 解码为临时根下的 `decodeAcbFiles/*.wav`；见 [`AcbConverter.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Audio/AcbConverter.cs) | 成功缓存长期复用，失败输出会删除；Browser 因没有本地路径而明确失败 |
+| A7 | 崩溃时工程救援副本 | 在临时根的 `Rescue/` 下通过句柄保存当前工程和谱面副本；见 [`FumenRescue.cs`](../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs) | 当前没有外部调用者；Desktop 与 OPFS 均设计为保留供人工恢复 |
 
 ### 3.3 B 类：用户数据
 
@@ -97,7 +97,7 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 | 编号 | I/O 意图 | 具体操作与位置 | 说明 |
 | --- | --- | --- | --- |
 | D1 | 快捷键配置 | 读取和同步覆盖当前工作目录 `keybind.json`；见 [`DefaultKeyBindingManager.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/KeyBinding/DefaultKeyBindingManager.cs) | 程序内部用户偏好 |
-| D2 | Core 诊断日志 | 在 `%TEMP%/.../logs/runtime/*.log` 创建并追加日志；见 [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) | 虽位于临时目录，主意图是诊断而非缓存 |
+| D2 | Core 诊断日志 | 在临时根的 `logs/runtime/*.log` 创建并顺序追加日志；见 [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) | Desktop 写入 `%TEMP%`，Browser 写入 OPFS；主意图仍是诊断 |
 | D3 | 崩溃转储 | 创建 `ProgramSetting.DumpFileDirPath/*.dmp` 并调用原生 `MiniDumpWriteDump`；见 [`DumpFileHelper.cs`](../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/DumpFileHelper.cs) | 当前未初始化、无活动调用者；工程救援副本另归 A7 |
 | D4 | 外部打开与资源管理器 | 检查文件或目录后启动 Explorer、默认程序或 URL；见 [`ProcessUtils.cs`](../src/OngekiFumenEditor.Avalonia/Utils/ProcessUtils.cs) | 本进程只做元数据检查和进程启动 |
 | D5 | 文件选择平台机制 | Core 中的 Avalonia StorageProvider 调用打开文件、保存文件和目录选择器 | 只记录 Core 调用；具体平台 Provider 不在范围内，选择目标按用途归入 B、C 或 D |
@@ -133,7 +133,7 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 | 通用谱面 API | `OpenRead` 后交给对应反序列化器 | `WriteAllBytesAsync` 写入对应序列化结果 | [`IFumenParserManager.cs`](../src/OngekiFumenEditor.Avalonia/Parser/IFumenParserManager.cs) |
 | 自动保存 | 读取当前工程状态 | 定时调用完整工程及谱面覆盖流程 | [`DefaultEditorDocumentManager.cs`](../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorDocumentManager.cs) |
 
-工程保存所使用的临时文件位于 `%TEMP%/NagekiFumenEditorTempFolder/`。当前保存流程复制完成后没有删除所有中间文件，因此会逐步积累临时文件。
+工程保存所使用的临时文件由 `ITemporaryFolderProvider` 分配。当前基于本地 `System.IO` 路径的原子保存只在 `LocalPath` 可用的 Desktop 后端执行；缺少本地路径时会明确失败，不会把 OPFS 相对路径伪装为系统路径。保存流程不会自动删除中间文件。
 
 ### 4.2 打开谱面与关联音频发现
 
@@ -188,10 +188,11 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 
 - 通过 `AcbFile.FromFile` 间接读取 `.acb`；
 - 必要时使用 `File.OpenRead` 读取外部 `.awb`；
-- 在 `%TEMP%/NagekiFumenEditorTempFolder/decodeAcbFiles/` 中缓存解码后的 WAV；
+- 在 Desktop 临时根的 `decodeAcbFiles/` 中缓存解码后的 WAV；
 - 写入 HCA 解码结果；
 - 解码失败时删除不完整输出；
-- 后续加载优先复用已经存在的缓存 WAV。
+- 后续加载优先复用已经存在的缓存 WAV；
+- Browser 后端没有 `LocalPath`，因此 ACB 本地路径解码会返回明确失败，不会构造虚假的 OPFS 路径。
 
 [`DefaultFumenSoundPlayer.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs) 检查 `AppContext.BaseDirectory/Sound`，随后通过音频工厂读取 17 个固定名称的 WAV 音效。
 
@@ -203,7 +204,9 @@ Core 设置模型通过 [`SettingModelBase.cs`](../src/OngekiFumenEditor.Avaloni
 
 ### 4.7 日志
 
-Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) 在 `%TEMP%/NagekiFumenEditorTempFolder/logs/runtime/{timestamp}.log` 创建日志，使用异步队列逐条调用 `File.AppendAllText`。
+Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) 在临时根的 `logs/runtime/{timestamp}.{guid}.log` 创建实际占位文件，并通过临时文件句柄串行追加 UTF-8 日志。Desktop 对应 `%TEMP%/NagekiFumenEditorTempFolder/logs/runtime/`，Browser 对应 OPFS `temp/logs/runtime/`。
+
+Browser 还通过 `TemporaryFileLoggerProvider` 将现有 `Microsoft.Extensions.Logging` 启动日志转发到同一个 `FileLogOutputWrapper`，因此设置、主题和 Shell 等真实运行日志会进入 OPFS `temp/logs/runtime/`，而不只覆盖旧 `ILogOutput` 调用点。
 
 `LogSetting.LogFileDirPath` 目前只被设置页面修改，Core `FileLogOutput` 未读取该设置。
 
@@ -213,8 +216,8 @@ Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultIm
 
 - 非 HTTP 路径通过 `File.ReadAllBytesAsync` 读取本地图片；
 - HTTP 图片先查询磁盘缓存，未命中后从网络下载；
-- 下载结果写入 `%TEMP%/NagekiFumenEditorTempFolder/images/*.img.cache`；
-- 缓存没有过期、容量限制或统一清理机制。
+- 下载结果写入临时根的 `images/*.img.cache`；
+- 缓存没有过期或容量限制，只在显式删除文件、目录或调用 `ClearAsync` 时清理。
 
 [`ResourceUtils.cs`](../src/OngekiFumenEditor.Avalonia/Utils/ResourceUtils.cs) 会：
 
@@ -227,7 +230,11 @@ Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultIm
 
 ### 4.9 临时目录和元数据探测
 
-[`TempFileHelper.cs`](../src/OngekiFumenEditor.Avalonia/Utils/TempFileHelper.cs) 在系统临时目录下创建 `NagekiFumenEditorTempFolder` 及其子目录，并通过存在性检查生成未占用路径。它只负责创建和分配路径，不负责统一回收。
+旧 `TempFileHelper` 已删除。公共句柄实现位于 [`Platforms/Services/FileSystem/Providers`](../src/OngekiFumenEditor.Avalonia/Platforms/Services/FileSystem/Providers/ITemporaryFolderProvider.cs)，统一执行单路径段校验、固定名称复用、唯一文件实际占位、递归删除及显式清理。写入回调只有成功结束才提交新内容；回调失败或取消时保留原内容，进入提交阶段后不再响应取消。
+
+Desktop [`DesktopTemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/FileSystem/Providers/DesktopTemporaryFolderProvider.cs) 使用 `%TEMP%/NagekiFumenEditorTempFolder`，通过同目录事务文件和原子替换提交，并对所有 `LocalPath` 做根目录包含性校验。Browser [`BrowserTemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/FileSystem/Providers/BrowserTemporaryFolderProvider.cs) 使用当前 origin 的 OPFS `temp` 目录，数据受 origin 隔离、浏览器配额和站点数据清理影响。
+
+两端均不在启动或退出时自动清空，也不做过期和容量淘汰。只有调用文件/目录删除 API 或 `ITemporaryFolderProvider.ClearAsync` 才会删除内容。Browser 如果在启动时因缺少 OPFS、安全上下文或权限而无法初始化，会切换到 discard 后端：`IsAvailable=false`，写入回调仍执行但数据被丢弃，查找始终未命中，直接读取按文件不存在处理；初始化成功后的配额耗尽等运行错误仍向调用者传播。
 
 [`FileHelper.cs`](../src/OngekiFumenEditor.Avalonia/Utils/FileHelper.cs) 通过 `FileShare.None` 独占打开文件来判断目标是否可写或被占用。
 
@@ -283,11 +290,11 @@ Core [项目文件](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia
 
 ### 8.1 Core 仍高度依赖本地路径
 
-工程、谱面、音频、图片、纹理、日志、快捷键、临时文件及导出流程均直接使用 `System.IO` 路径。Core 目前不是以存储流或文件系统抽象为边界的实现。
+工程、谱面、音频、图片、纹理、快捷键及导出流程仍有直接 `System.IO` 路径依赖。临时文件、图片缓存、日志与救援写入已改为平台无关句柄；工程原子覆盖和 ACB 解码等依赖第三方路径 API 的流程会显式要求 Desktop `LocalPath`。Core 尚未整体转换为存储流或文件系统抽象边界。
 
 ### 8.2 平台接口的具体 I/O 不属于本报告结论
 
-`ISettingManager`、`INAudioFileReaderFactory` 和 Avalonia StorageProvider 的具体实现位于平台项目。本报告只确认 Core 发起设置持久化、音频路径读取和文件选择请求，不对其实际存储介质、解码器或平台行为作结论。
+`ISettingManager`、`INAudioFileReaderFactory` 和 Avalonia StorageProvider 的具体实现位于平台项目。本报告只确认 Core 发起设置持久化、音频路径读取和文件选择请求，不对其实际存储介质、解码器或平台行为作结论。`ITemporaryFolderProvider` 是本报告的定向例外，其 Desktop、OPFS 和 discard 行为已在 4.9 节核对。
 
 ### 8.3 Core 项目的运行时资源输入不完整
 
@@ -301,20 +308,20 @@ Core [项目文件](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia
 
 设置页面可以修改 `LogSetting.LogFileDirPath`，但 Core `FileLogOutput` 不读取该值。用户选择的日志目录目前不会改变 Core 日志的实际落盘位置。
 
-### 8.5 临时文件生命周期不统一
+### 8.5 临时存储只支持显式生命周期管理
 
-WAV 偏移和谱面转换具备临时文件提交及失败清理逻辑；工程保存、远程图片缓存、ACB 解码和崩溃救援则会保留部分或全部临时文件。Core 尚无统一的缓存容量、过期或退出清理策略。
+跨平台临时存储已经统一事务写入、删除和根清理 API，但产品约束是不自动清空、不过期且不做容量淘汰。工程保存、远程图片缓存、ACB 解码、日志和崩溃救援会跨启动保留，直到显式删除、清理，或由操作系统/浏览器站点数据机制移除。
 
 ## 9. 默认路径汇总
 
 | 数据 | 分类 | 默认路径或来源 |
 | --- | --- | --- |
 | 快捷键 | D1 | 当前工作目录 `keybind.json` |
-| Core 日志 | D2 | `%TEMP%/NagekiFumenEditorTempFolder/logs/runtime/*.log` |
-| 通用临时文件 | A1 | `%TEMP%/NagekiFumenEditorTempFolder/<subfolder>/` |
-| 网络图片缓存 | A5 | `%TEMP%/NagekiFumenEditorTempFolder/images/*.img.cache` |
-| ACB 解码 WAV 缓存 | A6 | `%TEMP%/NagekiFumenEditorTempFolder/decodeAcbFiles/` |
-| 崩溃救援工程和谱面 | A7 | `%TEMP%/NagekiFumenEditorTempFolder/Rescue/` 下的自动恢复副本 |
+| Core 日志 | D2 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/logs/runtime/*.log`；Browser：OPFS `temp/logs/runtime/*.log` |
+| 通用临时文件 | A1 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/<subfolder>/`；Browser：OPFS `temp/<subfolder>/` |
+| 网络图片缓存 | A5 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/images/*.img.cache`；Browser：OPFS `temp/images/*.img.cache` |
+| ACB 解码 WAV 缓存 | A6 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/decodeAcbFiles/`；Browser 无本地路径，不执行该转换 |
+| 崩溃救援工程和谱面 | A7 | Desktop 临时根或 Browser OPFS `temp/Rescue/` 下的自动恢复副本 |
 | 崩溃转储 | D3 | `ProgramSetting.DumpFileDirPath`，默认 `./Dumps` |
 | 编辑器纹理 | C2 | 当前工作目录 `./Resources/editor/*.png` |
 | 纹理尺寸配置 | C3 | 当前工作目录 `./Resources/editor/textureSizeAnchor.ini` |

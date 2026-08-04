@@ -550,3 +550,54 @@ service 收到同一个 option 实例和完全相等的 token，返回 0 且 std
 - [x] picker 写入统一使用 `ISimpleFile.WriteAsync`；本地目标通过同目录临时文件提交，失败/取消保留原文件。
 - [x] 非本地 SVG 内容嵌入谱面格式；直接 picker 打开的谱面通过 `ISimpleFile` 自动保存。
 - [x] 完成 Core/Desktop 全量测试、Browser 构建、solution 非增量构建、断言质量和实证伪变异复核。
+
+## 跨平台临时文件夹服务测试计划（2026-08-04）
+
+### 阶段 A：Core 契约与 discard
+
+1. `TemporaryFolderProviderContractTests` 使用事务型内存后端覆盖固定名称复用、唯一占位/并发唯一、嵌套目录、长度/全部字节/只读流、覆盖、追加、幂等删除和 provider 清理。
+2. 同一测试类覆盖 writer 抛错、writer 取消、预取消，以及 writer 成功后触发取消仍提交。
+3. 参数化覆盖 rooted path、`/`、`\\`、`.`、`..`、控制字符、Windows 非法字符、结尾点/空格与保留设备名。
+4. `DiscardTemporaryFolderProviderTests` 覆盖 `IsAvailable=false`、writer 执行、查找为空、读取抛 `FileNotFoundException`、删除/清理不产生数据。
+
+### 阶段 B：Desktop 集成
+
+1. `DesktopTemporaryFolderProviderTests` 使用每例独立临时根，验证默认根常量、物理占位、`LocalPath` 根包含性、跨 provider 实例保留和并发唯一命名。
+2. 在隔离根旁放置哨兵文件，验证 `ClearAsync`/递归删除只影响根内内容；测试结束由测试自身回收隔离目录。
+3. DI 注册测试解析 `AddOngekiFumenEditorAvaloniaDesktop()`，断言 `ITemporaryFolderProvider` 为单例 Desktop 实现。
+
+### 阶段 C：消费者
+
+1. `ImageLoaderTemporaryCacheTests` 用可控下载函数与内存临时后端证明首次未命中下载并持久化、第二实例命中而不下载。
+2. `FileLogOutputTests` 写入两条日志并等待 flush，断言 `logs/runtime` 相对路径和精确追加内容。
+3. `EditorProjectFileManagerTemporaryFileTests` 通过临时句柄保存并重新加载工程模型，证明救援序列化不依赖 `System.IO` 路径。
+4. Desktop ACB/Jacket 既有单元/集成测试改为注入隔离 Desktop provider，并断言所用工作目录位于注入根；保留原产物内容断言。
+
+### 阶段 D：静态、构建与运行验证
+
+1. 运行 Core 与 Desktop 聚焦测试，修复后各自全量运行；最后执行 solution 非增量构建。
+2. 执行 `rg -n TempFileHelper src`、JS 语法检查和 `git diff --check`。
+3. 发布并短启动 Desktop Native AOT；发布 Browser Release AOT 与 LLVM Browser。
+4. 在独立 localhost origin 中运行 OPFS 与应用日志烟测，确认无 JS interop 错误。
+5. 对新增测试逐项复核断言；把最终测试计数、未执行项和残余风险写入 `.testagent/status.md`。
+
+### 需求映射
+
+| Requirement | Planned evidence |
+| --- | --- |
+| `公共契约测试：唯一占位、固定名称复用、嵌套目录、读写追加、失败写入回滚、取消、删除、清理和路径逃逸防护。` | `TemporaryFolderProviderContractTests` 中逐行为命名的测试 |
+| `discard 测试：写入不报错但不产生数据，TryGet 返回空，直接读取按不存在处理。` | `DiscardTemporaryFolderProviderTests` |
+| `Desktop 集成测试：可注入隔离根目录，验证默认根路径、LocalPath、跨实例保留、并发唯一命名及清理不越界。` | `DesktopTemporaryFolderProviderTests` |
+| `消费者测试：图片缓存命中/未命中、日志追加、救援序列化，以及 Desktop ACB/Jacket 临时路径迁移。` | 阶段 C 的四组测试及既有 ACB/Jacket 集成断言 |
+| `确认 rg TempFileHelper 无结果。` | 阶段 D 静态检查 |
+| `发布并短启动 Desktop Native AOT。` | 阶段 D Desktop AOT 命令与进程退出记录 |
+| `发布标准 Browser Release AOT 和 LLVM Browser；在独立 localhost origin 中执行 OPFS 创建、写入、读取、追加、删除烟测，并确认应用日志实际写入 temp/logs/runtime 且无 JS 互操作错误。` | 阶段 D 两种发布产物及 localhost 浏览器控制台/OPFS 结果 |
+
+### 执行结果（2026-08-04）
+
+- Core 全量 xUnit：219/219；Desktop 全量 xUnit：105/105；合计 324/324，0 失败、0 跳过。
+- Desktop Native AOT 发布成功，最终 EXE 为 69,832,704 字节；精确进程短启动存活 8 秒。
+- 标准 Browser Release AOT 发布成功；独立 `localhost:13048` origin 中 OPFS 读回 `[1,2,3]`，追加后 `[1,2,3,4,5]`，长度 5，文件与目录清理后均不存在。
+- 标准 Browser 真实启动日志写入 `temp/logs/runtime`，烟测时为 6447 字节；应用 origin 控制台无错误或警告。
+- Node ESM 初始化异常夹具确认 `SecurityError` 降级、`QuotaExceededError` 上抛。
+- LLVM Browser 发布成功，OPFS JS 模块读回 `[7,8,9]`；应用受既有 preview.2 LLVM/Avalonia JSExport 不兼容影响，启动时报缺少 `_Avalonia_Browser__GeneratedInitializer__Register_`，不能宣称运行烟测通过。

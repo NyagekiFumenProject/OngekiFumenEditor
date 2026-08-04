@@ -306,3 +306,35 @@ Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT 
 | `FileDialogHelper的OpenFileAsync返回对象改成Task<ISimpleFile>, 同理其他接口也是` | 三个公开签名、取消语义、storage item 所有权和 12 个 SimpleFileSystem 测试 |
 | `然后那些使用这些方法的内容也全都改造成SimpleFileSystem相关API操作。` | 13 个 picker 调用点；谱面/WAV/SVG/目录设置使用 `ISimpleFile`/`ISimpleDirectory`；Core 174/174、Desktop 97/97 |
 | `对于改造仅限于用户读写相关范畴，其他读写操作不要改动` | CLI、项目 JSON、日志/缓存、自动关联扫描及第三方本地路径边界保留；静态审计未发现 picker `FullPath` 回流到 `File.*` |
+
+## 跨平台临时文件夹服务状态（2026-08-04）
+
+### 动态验证
+
+- Core 全量：219/219；Desktop 全量：105/105；合计 324/324，0 失败、0 跳过。
+- Desktop 第一次 `--no-restore` 尝试因先前发布切换了共享 assets TFM 而触发 `NETSDK1005`；按 Desktop 测试项目重新还原后 105/105 通过，不属于测试用例失败。
+- Desktop win-x64 Native AOT 最终发布成功，EXE 69,832,704 字节；启动后精确进程存活 8 秒，再由测试清理。
+- 标准 Browser Release AOT 最终发布成功；独立 `localhost:13048` origin 的 OPFS 覆盖、读取、追加、长度、删除、递归清理全部通过。
+- Browser 实际启动日志写入 `temp/logs/runtime/20260804_140725...log`，烟测大小 6447 字节，包含应用设置/主题/Shell 日志；应用 origin 控制台无错误或警告。
+- Node ESM 初始化错误夹具通过：安全上下文 `SecurityError` 选择 discard，配额 `QuotaExceededError` 不被吞掉并继续上抛。
+- LLVM Browser 最终发布成功，OPFS JS 模块可读写并清理；当前 preview.2 LLVM 工具链缺少 Avalonia JSExport wasm 导出，.NET 应用无法启动，作为既有工具链残余风险保留。
+
+### 覆盖与质量
+
+- 公共契约测试覆盖唯一占位、固定复用、嵌套目录、全部读取/只读流、事务覆盖、追加、失败与取消回滚、提交后忽略取消、删除、清理及名称逃逸。
+- discard 测试覆盖生产回调执行后丢弃、查找为空、直接读取不存在、删除和清理为空操作。
+- Desktop 集成覆盖默认根、隔离根注入、`LocalPath`、跨实例保留、并发唯一、根包含性及清理不越界。
+- 消费者覆盖图片缓存命中/未命中、日志追加、救援工程序列化、ACB/Jacket 临时本地路径以及缺少 `LocalPath` 时的明确失败。
+- 保留既有 `NU1903`、`NU1507`、裁剪/AOT 分析告警；未把它们误记为本轮零警告。
+
+### Requirement | Evidence
+
+| Requirement（用户原话） | Evidence |
+| --- | --- |
+| `Desktop 使用 %TEMP%\NagekiFumenEditorTempFolder；Browser 使用 OPFS 根目录下的 temp。` | Desktop 后端集成测试；标准 Browser AOT 独立 origin OPFS 烟测 |
+| `内容跨启动保留，仅在显式调用清理 API 时删除。` | 跨 provider 实例保留测试、显式 `ClearAsync`/删除测试及审计文档 |
+| `删除 TempFileHelper，一次性迁移全部生产调用。` | 文件删除；`src/tests` C# 生产扫描无引用；图片、日志、救援、工程、ACB/Jacket 消费者测试 |
+| `写入回调失败或取消时保留原内容，回调成功后完成提交阶段不再响应取消。` | `TemporaryFolderProviderContractTests` 的失败、预取消、回调取消和提交阶段取消用例 |
+| `OPFS 缺失或初始化因安全上下文/权限失败时，切换到 discard 后端。` | `DiscardTemporaryFolderProviderTests` 与 Browser 组合提供程序实现 |
+| `发布并短启动 Desktop Native AOT。` | 最终 win-x64 AOT EXE 短启动存活 8 秒 |
+| `发布标准 Browser Release AOT 和 LLVM Browser` | 两种最终发布均成功；标准 AOT 全部运行烟测通过，LLVM 运行受明确记录的 preview 工具链 JSExport 缺陷阻断 |
