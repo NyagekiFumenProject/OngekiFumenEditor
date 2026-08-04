@@ -1,5 +1,6 @@
 using DereTore.Exchange.Archive.ACB;
 using DereTore.Exchange.Audio.HCA;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Buffers;
 
@@ -7,7 +8,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio;
 
 public static class AcbConverter
 {
-    private static readonly object locker = new();
+    private static readonly SemaphoreSlim locker = new(1, 1);
 
     private static async Task ProcessAllBinaries(uint acbFormatVersion, string extractFilePath, Afs2Archive archive, Stream dataStream)
     {
@@ -68,33 +69,48 @@ public static class AcbConverter
 
     public static async Task<string> ConvertAcbFileToWavFile(string filePath)
     {
-        string tempAwbFilePath;
-        lock (locker)
-        {
-            var tempFolder = TempFileHelper.GetTempFolderPath(prefix: "decodeAcbFiles", random: false);
-            tempAwbFilePath = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(filePath) + ".wav");
-            Log.LogInfo($"Extract .acb to .wav and load the later , acb file path : {tempAwbFilePath}");
-
-            if (File.Exists(tempAwbFilePath))
-            {
-                Log.LogInfo($"use cache file: {tempAwbFilePath}");
-                return tempAwbFilePath;
-            }
-        }
-
+        await locker.WaitAsync();
         try
         {
-            using var acb = AcbFile.FromFile(filePath);
-            var awb = acb.InternalAwb ?? acb.ExternalAwb;
-            using var awbStream = awb == acb.InternalAwb ? acb.Stream : File.OpenRead(awb.FileName);
-            await ProcessAllBinaries(acb.FormatVersion, tempAwbFilePath, awb, awbStream);
-            Log.LogInfo($"generate new: {tempAwbFilePath}");
-            return tempAwbFilePath;
+            var provider = IoC.Get<ITemporaryFolderProvider>();
+            var tempFolder = await provider.Root.GetOrCreateFolderAsync("decodeAcbFiles");
+            var fileName = Path.GetFileNameWithoutExtension(filePath) + ".wav";
+            var temporaryFile = await tempFolder.TryGetFileAsync(fileName);
+            if (temporaryFile is not null && await temporaryFile.GetLengthAsync() > 0)
+            {
+                var cachedPath = temporaryFile.GetRequiredLocalPath();
+                Log.LogInfo($"use cache file: {cachedPath}");
+                return cachedPath;
+            }
+
+            temporaryFile ??= await tempFolder.GetOrCreateFileAsync(fileName);
+            var tempAwbFilePath = temporaryFile.GetRequiredLocalPath();
+            Log.LogInfo($"Extract .acb to .wav and load the later , acb file path : {tempAwbFilePath}");
+
+            try
+            {
+                using var acb = AcbFile.FromFile(filePath);
+                var awb = acb.InternalAwb ?? acb.ExternalAwb;
+                using var awbStream = awb == acb.InternalAwb ? acb.Stream : File.OpenRead(awb.FileName);
+                await ProcessAllBinaries(acb.FormatVersion, tempAwbFilePath, awb, awbStream);
+                Log.LogInfo($"generate new: {tempAwbFilePath}");
+                return tempAwbFilePath;
+            }
+            catch (Exception e)
+            {
+                await temporaryFile.DeleteAsync();
+                Log.LogError($"Load acb file failed : {e.Message}");
+                return default;
+            }
         }
         catch (Exception e)
         {
-            Log.LogError($"Load acb file failed : {e.Message}");
+            Log.LogError($"Temporary ACB decode storage is unavailable : {e.Message}");
             return default;
+        }
+        finally
+        {
+            locker.Release();
         }
     }
 }

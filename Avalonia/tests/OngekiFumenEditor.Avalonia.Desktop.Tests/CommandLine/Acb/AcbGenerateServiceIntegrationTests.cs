@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Acb;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections;
 using System.Reflection;
@@ -17,7 +18,8 @@ public sealed class AcbGenerateServiceIntegrationTests
         using var directory = new TemporaryDirectory();
         var inputPath = directory.File("source.wav");
         WritePcmWave(inputPath, sampleRate: 48_000, duration: TimeSpan.FromMilliseconds(250));
-        var service = CreateService();
+        var temporaryRootPath = Path.Combine(directory.RootPath, "temp");
+        var service = CreateService(temporaryRootPath);
         var options = new AcbGenerateOption
         {
             MusicId = 427,
@@ -47,6 +49,7 @@ public sealed class AcbGenerateServiceIntegrationTests
 
         AssertAcbCanBeReopened(acbPath, awbPath);
         AssertAwbCanBeReopened(awbPath);
+        Assert.NotEmpty(Directory.EnumerateFiles(temporaryRootPath, "*", SearchOption.AllDirectories));
     }
 
     private static void AssertPreviewTime(string acbPath, byte[] marker, int expectedMilliseconds)
@@ -61,10 +64,10 @@ public sealed class AcbGenerateServiceIntegrationTests
             BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(timeOffset, sizeof(uint))));
     }
 
-    private static DefaultAcbGenerateService CreateService()
+    private static DefaultAcbGenerateService CreateService(string temporaryRootPath)
     {
         Log.Initialize(new Log([]));
-        return new DefaultAcbGenerateService();
+        return new DefaultAcbGenerateService(new DesktopTemporaryFolderProvider(temporaryRootPath));
     }
 
     private static void AssertAcbCanBeReopened(string acbPath, string awbPath)

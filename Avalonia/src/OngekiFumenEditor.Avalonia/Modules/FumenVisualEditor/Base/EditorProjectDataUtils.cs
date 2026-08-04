@@ -3,10 +3,12 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectF
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
@@ -80,21 +82,32 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		public static async Task<Result> TrySaveProjFileAsync(string projFileFullPath, EditorProjectDataModel editorProject)
+		public static async Task<Result> TrySaveProjFileAsync(
+			string projFileFullPath,
+			EditorProjectDataModel editorProject,
+			CancellationToken cancellationToken = default)
 		{
 			try
 			{
 				if (!FileHelper.IsPathWritable(projFileFullPath))
 					throw new IOException(Lang.CantWriteProjectFileByIoError);
 
-				var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFileFullPath), Path.GetExtension(projFileFullPath));
+				var tmpProjFile = await CreateTemporaryFileAsync(
+					"FumenProjFile",
+					"project",
+					Path.GetExtension(projFileFullPath),
+					cancellationToken);
 				StoreBulletPalleteListEditorData(editorProject);
 
-				await projFileManager.Save(tmpProjFilePath, editorProject);
+				await projFileManager.Save(tmpProjFile, editorProject, cancellationToken);
 
-				File.Copy(tmpProjFilePath, projFileFullPath, true);
+				File.Copy(tmpProjFile.GetRequiredLocalPath(), projFileFullPath, true);
 
 				return new(true, "");
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				throw;
 			}
 			catch (Exception e)
 			{
@@ -105,8 +118,34 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
+		public static async Task<Result> TrySaveProjFileAsync(
+			ITemporaryFile projectFile,
+			EditorProjectDataModel editorProject,
+			CancellationToken cancellationToken = default)
+		{
+			try
+			{
+				ArgumentNullException.ThrowIfNull(projectFile);
+				StoreBulletPalleteListEditorData(editorProject);
+				await projFileManager.Save(projectFile, editorProject, cancellationToken);
+				return new(true, "");
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				throw;
+			}
+			catch (Exception e)
+			{
+				var msg = $"{Lang.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
+				return new(false, msg);
+			}
+		}
 
-		public static async Task<Result> TrySaveFumenFileAsync(string fumenFileFullPath, EditorProjectDataModel editorProject)
+
+		public static async Task<Result> TrySaveFumenFileAsync(
+			string fumenFileFullPath,
+			EditorProjectDataModel editorProject,
+			CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -118,16 +157,21 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				if (serializer is null)
 					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{Path.GetFileName(fumenFileFullPath)}");
 
-				var tmpFumenFilePath = TempFileHelper.GetTempFilePath("FumenFile", Path.GetFileNameWithoutExtension(fumenFileFullPath), Path.GetExtension(fumenFileFullPath));
+				var tmpFumenFile = await CreateTemporaryFileAsync(
+					"FumenFile",
+					"fumen",
+					Path.GetExtension(fumenFileFullPath),
+					cancellationToken);
 				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
-				using var fs = File.OpenWrite(tmpFumenFilePath);
-				fs.Write(fumenBuffer);
-				fs.Flush();
-				fs.Close();
+				await tmpFumenFile.WriteAllBytesAsync(fumenBuffer, cancellationToken);
 
-				File.Copy(tmpFumenFilePath, fumenFileFullPath, true);
+				File.Copy(tmpFumenFile.GetRequiredLocalPath(), fumenFileFullPath, true);
 
 				return new(true, "");
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				throw;
 			}
 			catch (Exception e)
 			{
@@ -136,7 +180,38 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		public static async Task<Result> TrySaveFumenFileAsync(ISimpleFile fumenFile, EditorProjectDataModel editorProject)
+		public static async Task<Result> TrySaveFumenFileAsync(
+			ITemporaryFile fumenFile,
+			EditorProjectDataModel editorProject,
+			CancellationToken cancellationToken = default)
+		{
+			try
+			{
+				ArgumentNullException.ThrowIfNull(fumenFile);
+				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.Name);
+				Log.LogDebug($"serializer = {serializer}");
+				if (serializer is null)
+					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.Name}");
+
+				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
+				await fumenFile.WriteAllBytesAsync(fumenBuffer, cancellationToken);
+				return new(true, "");
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				throw;
+			}
+			catch (Exception e)
+			{
+				var msg = $"{Lang.CantSaveFumenProject} {e.Message}{Environment.NewLine}{e.StackTrace}";
+				return new(false, msg);
+			}
+		}
+
+		public static async Task<Result> TrySaveFumenFileAsync(
+			ISimpleFile fumenFile,
+			EditorProjectDataModel editorProject,
+			CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -149,9 +224,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
 				await fumenFile.WriteAsync(
-					(stream, cancellationToken) => stream.WriteAsync(fumenBuffer, cancellationToken).AsTask());
+					(stream, writerCancellationToken) =>
+						stream.WriteAsync(fumenBuffer, writerCancellationToken).AsTask(),
+					cancellationToken);
 
 				return new(true, "");
+			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				throw;
 			}
 			catch (Exception e)
 			{
@@ -160,13 +241,22 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		public static async Task<Result> TrySaveEditorAsync(string projFilePath, EditorProjectDataModel editorProject)
+		public static async Task<Result> TrySaveEditorAsync(
+			string projFilePath,
+			EditorProjectDataModel editorProject,
+			CancellationToken cancellationToken = default)
 		{
 			try
 			{
-				var tmpProjFilePath = TempFileHelper.GetTempFilePath();
+				var tmpProjFile = await CreateTemporaryFileAsync(
+					"misc",
+					"project",
+					".dat",
+					cancellationToken);
+				var tmpProjFilePath = tmpProjFile.GetRequiredLocalPath();
 
 				//clone new project object to modify
+				cancellationToken.ThrowIfCancellationRequested();
 				var cloneProj = await projFileManager.Clone(editorProject);
 				cloneProj.Fumen = editorProject.Fumen;
 
@@ -177,7 +267,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 					cloneProj.AudioFilePath = Path.GetRelativePath(fileFolder, cloneProj.AudioFilePath);
 
 				//save proj to tmp file
-				var saveProjTaskResult = await TrySaveProjFileAsync(tmpProjFilePath, cloneProj);
+				var saveProjTaskResult = await TrySaveProjFileAsync(tmpProjFile, cloneProj, cancellationToken);
 				if (!saveProjTaskResult.IsSuccess)
 					throw new Exception(saveProjTaskResult.ErrorMessage);
 
@@ -188,12 +278,20 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				{
 					// Keep the local-path branch atomic by serializing to a temporary file first.
 					fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath));
-					tmpFumenFilePath = TempFileHelper.GetTempFilePath(extension: Path.GetExtension(fumenFullPath));
-					saveFumenTaskResult = await TrySaveFumenFileAsync(tmpFumenFilePath, cloneProj);
+					var tmpFumenFile = await CreateTemporaryFileAsync(
+						"misc",
+						"fumen",
+						Path.GetExtension(fumenFullPath),
+						cancellationToken);
+					tmpFumenFilePath = tmpFumenFile.GetRequiredLocalPath();
+					saveFumenTaskResult = await TrySaveFumenFileAsync(tmpFumenFile, cloneProj, cancellationToken);
 				}
 				else
 				{
-					saveFumenTaskResult = await TrySaveFumenFileAsync(editorProject.FumenFile, cloneProj);
+					saveFumenTaskResult = await TrySaveFumenFileAsync(
+						editorProject.FumenFile,
+						cloneProj,
+						cancellationToken);
 				}
 
 				if (!saveFumenTaskResult.IsSuccess)
@@ -210,11 +308,30 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 				return new(true, "");
 			}
+			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+			{
+				throw;
+			}
 			catch (Exception e)
 			{
 				var msg = $"{Lang.CantSaveProjectTotally}{e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
+		}
+
+		private static async Task<ITemporaryFile> CreateTemporaryFileAsync(
+			string folderName,
+			string prefix,
+			string extension,
+			CancellationToken cancellationToken)
+		{
+			var provider = IoC.Get<ITemporaryFolderProvider>();
+			var folder = await provider.Root.GetOrCreateFolderAsync(folderName, cancellationToken);
+			return await provider.CreateUniqueFileAsync(
+				prefix,
+				extension ?? string.Empty,
+				folder,
+				cancellationToken);
 		}
 	}
 }

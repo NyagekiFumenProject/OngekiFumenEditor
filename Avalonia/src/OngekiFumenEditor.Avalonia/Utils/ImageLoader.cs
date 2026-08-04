@@ -2,12 +2,12 @@ using System;
 using System.Collections.Concurrent;
 using Injectio.Attributes;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
 namespace OngekiFumenEditor.Avalonia.Utils
 {
@@ -19,13 +19,35 @@ namespace OngekiFumenEditor.Avalonia.Utils
         private const int ParallelCount = 2;
         private readonly ConcurrentDictionary<string, WeakReference<byte[]>> cacheMap = new();
         private readonly ConcurrentStack<LoadTask> tasks = new();
+        private readonly Func<string, CancellationToken, Task<byte[]>> download;
+        private readonly ITemporaryFolderProvider temporaryFolderProvider;
 
         private volatile bool isProcessing = false;
 
+        public ImageLoader(ITemporaryFolderProvider temporaryFolderProvider)
+            : this(temporaryFolderProvider, DownloadAsync)
+        {
+        }
+
+        internal ImageLoader(
+            ITemporaryFolderProvider temporaryFolderProvider,
+            Func<string, CancellationToken, Task<byte[]>> download)
+        {
+            ArgumentNullException.ThrowIfNull(temporaryFolderProvider);
+            ArgumentNullException.ThrowIfNull(download);
+            this.temporaryFolderProvider = temporaryFolderProvider;
+            this.download = download;
+        }
+
         public Task<byte[]> LoadImage(string url, CancellationToken cancellationToken)
         {
-            var taskCompleteSource = new TaskCompletionSource<byte[]>();
-            tasks.Push(new LoadTask(taskCompleteSource, url));
+            ArgumentException.ThrowIfNullOrWhiteSpace(url);
+            if (cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled<byte[]>(cancellationToken);
+
+            var taskCompleteSource = new TaskCompletionSource<byte[]>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
+            tasks.Push(new LoadTask(taskCompleteSource, url, cancellationToken));
             PrcessQueue();
             return taskCompleteSource.Task;
         }
@@ -41,21 +63,32 @@ namespace OngekiFumenEditor.Avalonia.Utils
             {
                 if (currentTaskRunningCount >= ParallelCount)
                 {
-                    await Task.Delay(0);
+                    await Task.Yield();
                     continue;
                 }
                 Interlocked.Increment(ref currentTaskRunningCount);
 
                 if (tasks.TryPop(out var task))
                 {
-                    Task.Run(async () =>
+                    _ = Task.Run(async () =>
                     {
-                        var url = task.url;
-                        var taskSource = task.TaskSource;
-
-                        await ProcessTask(url, taskSource);
-                        Interlocked.Decrement(ref currentTaskRunningCount);
-                    }).NoWait();
+                        try
+                        {
+                            await ProcessTask(task.Url, task.TaskSource, task.CancellationToken);
+                        }
+                        catch (OperationCanceledException) when (task.CancellationToken.IsCancellationRequested)
+                        {
+                            task.TaskSource.TrySetCanceled(task.CancellationToken);
+                        }
+                        catch (Exception exception)
+                        {
+                            task.TaskSource.TrySetException(exception);
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref currentTaskRunningCount);
+                        }
+                    });
                 }
                 else
                 {
@@ -66,57 +99,67 @@ namespace OngekiFumenEditor.Avalonia.Utils
             isProcessing = false;
         }
 
-        private async ValueTask ProcessTask(string path, TaskCompletionSource<byte[]> taskSource)
+        private async ValueTask ProcessTask(
+            string path,
+            TaskCompletionSource<byte[]> taskSource,
+            CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             using var md5 = MD5.Create();
             var hash = Convert.ToHexString(md5.ComputeHash(Encoding.UTF8.GetBytes(path)));
 
             var isNetworkLoad = path.StartsWith("http", StringComparison.InvariantCultureIgnoreCase);
 
-            var data = await LoadFromInMemory(path);
+            var data = await LoadFromInMemory(hash);
             if (data != null)
             {
-                taskSource.SetResult(data);
+                taskSource.TrySetResult(data);
                 return;
             }
 
             if (isNetworkLoad)
             {
-                data = await LoadCache(hash);
+                data = await LoadCache(hash, cancellationToken);
                 if (data != null)
                 {
-                    taskSource.SetResult(data);
+                    taskSource.TrySetResult(data);
                     return;
                 }
             }
 
-            data = await Load(path, isNetworkLoad);
+            data = await Load(path, isNetworkLoad, cancellationToken);
             if (data == null)
             {
-                taskSource.SetResult(null);
+                taskSource.TrySetResult(null);
                 return;
             }
-            taskSource.SetResult(data);
 
             if (isNetworkLoad)
-                await SaveCache(hash, data);
+                await SaveCache(hash, data, cancellationToken);
             await SaveFromInMemory(hash, data);
+            taskSource.TrySetResult(data);
         }
 
-        private string GetCacheFile(string hash) => TempFileHelper.GetTempFilePath("images", hash, "img.cache", false);
-
-        private async Task SaveCache(string hash, byte[] data)
+        private async Task SaveCache(string hash, byte[] data, CancellationToken cancellationToken)
         {
-            var filePath = GetCacheFile(hash);
-            await File.WriteAllBytesAsync(filePath, data);
+            var cacheFolder = await temporaryFolderProvider.Root
+                .GetOrCreateFolderAsync("images", cancellationToken);
+            var cacheFile = await cacheFolder.GetOrCreateFileAsync(
+                $"{hash}.img.cache",
+                cancellationToken);
+            await cacheFile.WriteAllBytesAsync(data, cancellationToken);
         }
 
-        private async Task<byte[]> LoadCache(string hash)
+        private async Task<byte[]> LoadCache(string hash, CancellationToken cancellationToken)
         {
-            var filePath = GetCacheFile(hash);
-            if (File.Exists(filePath))
-                return await File.ReadAllBytesAsync(filePath);
-            return null;
+            var cacheFolder = await temporaryFolderProvider.Root
+                .GetOrCreateFolderAsync("images", cancellationToken);
+            var cacheFile = await cacheFolder.TryGetFileAsync(
+                $"{hash}.img.cache",
+                cancellationToken);
+            return cacheFile is null
+                ? null
+                : await cacheFile.ReadAllBytesAsync(cancellationToken);
         }
 
         private ValueTask SaveFromInMemory(string hash, byte[] data)
@@ -134,7 +177,10 @@ namespace OngekiFumenEditor.Avalonia.Utils
             return ValueTask.FromResult(default(byte[]));
         }
 
-        private async ValueTask<byte[]> Load(string path, bool isNetworkLoad)
+        private async ValueTask<byte[]> Load(
+            string path,
+            bool isNetworkLoad,
+            CancellationToken cancellationToken)
         {
             async ValueTask<byte[]> GetRaw()
             {
@@ -142,13 +188,16 @@ namespace OngekiFumenEditor.Avalonia.Utils
                 {
                     if (isNetworkLoad)
                     {
-                        using var httpClient = new HttpClient();
-                        return await httpClient.GetByteArrayAsync(path);
+                        return await download(path, cancellationToken);
                     }
                     else
                     {
-                        return await File.ReadAllBytesAsync(path);
+                        return await File.ReadAllBytesAsync(path, cancellationToken);
                     }
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
                 }
                 catch (Exception e)
                 {
@@ -181,9 +230,17 @@ namespace OngekiFumenEditor.Avalonia.Utils
             return r;
         }
 
-        private record LoadTask(TaskCompletionSource<byte[]> TaskSource, string url);
+        private static async Task<byte[]> DownloadAsync(
+            string url,
+            CancellationToken cancellationToken)
+        {
+            using var httpClient = new HttpClient();
+            return await httpClient.GetByteArrayAsync(url, cancellationToken);
+        }
 
+        private sealed record LoadTask(
+            TaskCompletionSource<byte[]> TaskSource,
+            string Url,
+            CancellationToken CancellationToken);
     }
 }
-
-

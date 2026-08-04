@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Acb;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using Xunit;
 
@@ -37,7 +38,7 @@ public sealed class DefaultAcbGenerateServiceTests
                 throw new ArgumentOutOfRangeException(nameof(scenario), scenario, null);
         }
 
-        var result = await CreateService().GenerateAsync(options);
+        var result = await CreateService(Path.Combine(directory.RootPath, "temp")).GenerateAsync(options);
 
         Assert.False(result.IsSuccess);
         Assert.Equal(expectedMessage, result.Message);
@@ -54,7 +55,7 @@ public sealed class DefaultAcbGenerateServiceTests
         cancellation.Cancel();
 
         var exception = await Assert.ThrowsAnyAsync<OperationCanceledException>(
-            () => CreateService().GenerateAsync(
+            () => CreateService(Path.Combine(directory.RootPath, "temp")).GenerateAsync(
                 CreateOptions(inputPath, directory.RootPath),
                 cancellation.Token));
 
@@ -62,10 +63,10 @@ public sealed class DefaultAcbGenerateServiceTests
         AssertGeneratedArtifactsDoNotExist(directory.RootPath);
     }
 
-    private static DefaultAcbGenerateService CreateService()
+    private static DefaultAcbGenerateService CreateService(string temporaryRootPath)
     {
         Log.Initialize(new Log([]));
-        return new DefaultAcbGenerateService();
+        return new DefaultAcbGenerateService(new DesktopTemporaryFolderProvider(temporaryRootPath));
     }
 
     private static AcbGenerateOption CreateOptions(string inputPath, string outputPath) => new()

@@ -102,7 +102,18 @@ public class Log
             return;
 
         isRunning = true;
-        _ = Task.Run(() =>
+        if (OperatingSystem.IsBrowser())
+        {
+            ProcessLogRecords();
+            return;
+        }
+
+        _ = Task.Run(ProcessLogRecords);
+    }
+
+    private void ProcessLogRecords()
+    {
+        try
         {
             while (logRecordQueue.TryDequeue(out var logRecord))
             {
@@ -115,9 +126,13 @@ public class Log
                 {
                 }
             }
-
+        }
+        finally
+        {
             isRunning = false;
-        });
+            if (!logRecordQueue.IsEmpty)
+                AwakeLogger();
+        }
     }
 
     public static void LogInfo(string message, bool newLine = true, bool time = true,

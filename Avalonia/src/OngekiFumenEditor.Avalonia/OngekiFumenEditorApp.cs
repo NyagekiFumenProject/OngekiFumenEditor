@@ -33,6 +33,9 @@ public abstract class OngekiFumenEditorApp : App
     {
         base.OnFrameworkInitializationCompleted();
 
+        global::OngekiFumenEditor.Avalonia.Utils.Log.Initialize(
+            ServiceProvider.GetRequiredService<global::OngekiFumenEditor.Avalonia.Utils.Log>());
+
         if (!IsGUIMode)
             return;
 

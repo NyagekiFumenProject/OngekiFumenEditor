@@ -1,5 +1,6 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Text;
 using System.Xml;
@@ -12,6 +13,14 @@ namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Acb;
 [RegisterSingleton<IAcbGenerateService>]
 internal sealed class DefaultAcbGenerateService : IAcbGenerateService
 {
+    private readonly ITemporaryFolderProvider temporaryFolderProvider;
+
+    public DefaultAcbGenerateService(ITemporaryFolderProvider temporaryFolderProvider)
+    {
+        ArgumentNullException.ThrowIfNull(temporaryFolderProvider);
+        this.temporaryFolderProvider = temporaryFolderProvider;
+    }
+
     public async Task<AcbGenerateResult> GenerateAsync(
         AcbGenerateOption option,
         CancellationToken cancellationToken = default)
@@ -31,7 +40,13 @@ internal sealed class DefaultAcbGenerateService : IAcbGenerateService
             cancellationToken.ThrowIfCancellationRequested();
             var musicIdStr = option.MusicId.ToString().PadLeft(4, '0');
             var musicSourceName = $"musicsource{musicIdStr}";
-            var tempFolder = TempFileHelper.GetTempFolderPath("AcbGen", musicSourceName);
+            var tempRoot = await temporaryFolderProvider.Root
+                .GetOrCreateFolderAsync("AcbGen", cancellationToken);
+            var tempFolderEntry = await temporaryFolderProvider.CreateUniqueFolderAsync(
+                musicSourceName,
+                tempRoot,
+                cancellationToken);
+            var tempFolder = tempFolderEntry.GetRequiredLocalPath();
             Log.LogDebug($"AcbGenerateProgram.Generate() tempFolder: {tempFolder}");
 
             var generated = await Task.Run(

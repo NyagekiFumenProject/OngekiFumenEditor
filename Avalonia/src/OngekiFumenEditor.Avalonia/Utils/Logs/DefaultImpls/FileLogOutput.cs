@@ -1,60 +1,90 @@
 using Injectio.Attributes;
-using System.Collections.Concurrent;
-using System.Threading;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using System.Text;
 using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 
 namespace OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 
 internal static class FileLogOutput
 {
-    private static readonly ConcurrentQueue<string> contents = [];
-    private static readonly object locker = new();
-    private static volatile bool isWriting;
-
-    private static readonly string filePath = Path.Combine(
-        TempFileHelper.GetTempFolderPath("logs", "runtime", random: false),
-        $"{DateTime.Now:yyyyMMdd_HHmmss}.log");
+    private static FileLogOutputWrapper current;
 
     public static void WaitForWriteDone()
     {
-        while (isWriting)
-            Thread.Sleep(0);
+        current?.FlushAsync().GetAwaiter().GetResult();
     }
 
-    public static Task WriteLog(string content)
+    public static Task WriteLog(string content) =>
+        current?.WriteLogAsync(content) ?? Task.CompletedTask;
+
+    public static string GetCurrentLogFile() =>
+        current?.GetCurrentLogFile() ?? string.Empty;
+
+    internal static void SetCurrent(FileLogOutputWrapper output)
     {
-        contents.Enqueue(content);
-        return NotifyWrite();
-    }
-
-    public static string GetCurrentLogFile() => filePath;
-
-    private static async Task NotifyWrite()
-    {
-        if (isWriting)
-            return;
-
-        lock (locker)
-        {
-            if (isWriting)
-                return;
-            isWriting = true;
-        }
-
-        await Task.Run(() =>
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-            while (contents.TryDequeue(out var msg))
-                File.AppendAllText(filePath, msg);
-            isWriting = false;
-        });
+        current = output;
     }
 }
 
 [RegisterSingleton<ILogOutput>]
-public class FileLogOutputWrapper : ILogOutput
+public sealed class FileLogOutputWrapper : ILogOutput
 {
-    public void WriteLog(Severity severity, string content) => FileLogOutput.WriteLog(content);
+    private readonly Lazy<Task<ITemporaryFile>> file;
+    private readonly object sync = new();
+    private Task pendingWrite = Task.CompletedTask;
+
+    public FileLogOutputWrapper(ITemporaryFolderProvider temporaryFolderProvider)
+    {
+        ArgumentNullException.ThrowIfNull(temporaryFolderProvider);
+        file = new Lazy<Task<ITemporaryFile>>(
+            async () =>
+            {
+                var logs = await temporaryFolderProvider.Root.GetOrCreateFolderAsync("logs");
+                var runtime = await logs.GetOrCreateFolderAsync("runtime");
+                return await temporaryFolderProvider.CreateUniqueFileAsync(
+                    DateTime.Now.ToString("yyyyMMdd_HHmmss"),
+                    ".log",
+                    runtime);
+            },
+            LazyThreadSafetyMode.ExecutionAndPublication);
+        FileLogOutput.SetCurrent(this);
+    }
+
+    public void WriteLog(Severity severity, string content)
+    {
+        _ = WriteLogAsync(content);
+    }
+
+    internal Task WriteLogAsync(string content)
+    {
+        ArgumentNullException.ThrowIfNull(content);
+        lock (sync)
+        {
+            pendingWrite = AppendAfterAsync(pendingWrite, content);
+            return pendingWrite;
+        }
+    }
+
+    internal Task FlushAsync()
+    {
+        lock (sync)
+        {
+            return pendingWrite;
+        }
+    }
+
+    internal string GetCurrentLogFile()
+    {
+        var currentFile = file.Value.GetAwaiter().GetResult();
+        return currentFile.LocalPath ?? currentFile.RelativePath;
+    }
+
+    internal Task<ITemporaryFile> GetCurrentFileAsync() => file.Value;
+
+    private async Task AppendAfterAsync(Task previousWrite, string content)
+    {
+        await previousWrite.ConfigureAwait(false);
+        var currentFile = await file.Value.ConfigureAwait(false);
+        await currentFile.AppendAsync(Encoding.UTF8.GetBytes(content)).ConfigureAwait(false);
+    }
 }
-
-

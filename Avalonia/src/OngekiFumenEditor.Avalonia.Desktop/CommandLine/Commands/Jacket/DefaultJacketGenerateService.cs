@@ -2,6 +2,7 @@ using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -18,6 +19,13 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
 {
     private const string CHARS = "abcdef1234567890";
     private const string TemplateFileName = "ui_jacket_0666";
+    private readonly ITemporaryFolderProvider temporaryFolderProvider;
+
+    public DefaultJacketGenerateService(ITemporaryFolderProvider temporaryFolderProvider)
+    {
+        ArgumentNullException.ThrowIfNull(temporaryFolderProvider);
+        this.temporaryFolderProvider = temporaryFolderProvider;
+    }
 
     public async Task<JacketGenerateResult> GenerateAsync(
         JacketGenerateOption option,
@@ -37,7 +45,13 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         {
             cancellationToken.ThrowIfCancellationRequested();
             var jacketName = $"ui_jacket_{option.MusicId.ToString().PadLeft(4, '0')}";
-            var tempFolder = TempFileHelper.GetTempFolderPath("JacketGen", jacketName);
+            var tempRoot = await temporaryFolderProvider.Root
+                .GetOrCreateFolderAsync("JacketGen", cancellationToken);
+            var tempFolderEntry = await temporaryFolderProvider.CreateUniqueFolderAsync(
+                jacketName,
+                tempRoot,
+                cancellationToken);
+            var tempFolder = tempFolderEntry.GetRequiredLocalPath();
             Log.LogDebug($"JacketGenerateWrapper.Generate() tempFolder: {tempFolder}");
 
             //generate normal
@@ -106,7 +120,7 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         }
     }
 
-    private static Task<JacketGenerateResult> UpdateAssetBytesFile(
+    private async Task<JacketGenerateResult> UpdateAssetBytesFile(
         string assetBytesFilePath,
         CancellationToken cancellationToken,
         params string[] names)
@@ -115,7 +129,14 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         var bundlesCount = 0;
         var bundlesList = new List<(int id, string name, int[] dependencies)>();
 
-        var tmpFile = TempFileHelper.GetTempFilePath("assets.bytes", "assets", ".bytes");
+        var tempRoot = await temporaryFolderProvider.Root
+            .GetOrCreateFolderAsync("assets.bytes", cancellationToken);
+        var tmpFileEntry = await temporaryFolderProvider.CreateUniqueFileAsync(
+            "assets",
+            ".bytes",
+            tempRoot,
+            cancellationToken);
+        var tmpFile = tmpFileEntry.GetRequiredLocalPath();
         using var dstFileStream = File.OpenWrite(tmpFile);
         using var writer = new BinaryWriter(dstFileStream);
 
@@ -173,7 +194,7 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         writer.Close();
 
         File.Copy(tmpFile, assetBytesFilePath, true);
-        return Task.FromResult(new JacketGenerateResult(true));
+        return new JacketGenerateResult(true);
     }
 
     private static async Task<string> GenerateJacketFileAsync(

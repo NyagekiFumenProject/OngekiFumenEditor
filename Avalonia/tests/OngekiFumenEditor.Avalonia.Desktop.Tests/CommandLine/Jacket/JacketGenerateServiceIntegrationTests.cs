@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Jacket;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -23,7 +24,8 @@ public sealed class JacketGenerateServiceIntegrationTests
         using var directory = new TemporaryDirectory();
         var inputPath = directory.File("jacket.png");
         await CreateInputImageAsync(inputPath);
-        var service = CreateService();
+        var temporaryRootPath = Path.Combine(directory.RootPath, "temp");
+        var service = CreateService(temporaryRootPath);
         var options = new JacketGenerateOption
         {
             MusicId = 666,
@@ -47,6 +49,7 @@ public sealed class JacketGenerateServiceIntegrationTests
         Assert.Equal(520 * 520 * 4, normalImage.Data.Length);
         Assert.Equal((220, 220), (smallImage.Width, smallImage.Height));
         Assert.Equal(220 * 220 * 4, smallImage.Data.Length);
+        Assert.NotEmpty(Directory.EnumerateFiles(temporaryRootPath, "*", SearchOption.AllDirectories));
     }
 
     [Fact]
@@ -61,7 +64,8 @@ public sealed class JacketGenerateServiceIntegrationTests
             "existing_bundle",
             [7, 9]);
         AssetBytesAssertions.Write(assetsBytesPath, originalRecord);
-        var service = CreateService();
+        var temporaryRootPath = Path.Combine(directory.RootPath, "temp");
+        var service = CreateService(temporaryRootPath);
         var options = new JacketGenerateOption
         {
             MusicId = 666,
@@ -84,6 +88,9 @@ public sealed class JacketGenerateServiceIntegrationTests
         Assert.Equal(originalRecord.Dependencies, records[0].Dependencies);
         Assert.Equal(new[] { "ui_jacket_0666", "ui_jacket_0666_s" }, records.Skip(1).Select(x => x.Name));
         Assert.All(records.Skip(1), record => Assert.Empty(record.Dependencies));
+        Assert.Contains(
+            Directory.EnumerateFiles(temporaryRootPath, "*.bytes", SearchOption.AllDirectories),
+            path => new FileInfo(path).Length > 0);
     }
 
     [Fact]
@@ -98,10 +105,10 @@ public sealed class JacketGenerateServiceIntegrationTests
 
     }
 
-    private static DefaultJacketGenerateService CreateService()
+    private static DefaultJacketGenerateService CreateService(string temporaryRootPath)
     {
         Log.Initialize(new Log([]));
-        return new DefaultJacketGenerateService();
+        return new DefaultJacketGenerateService(new DesktopTemporaryFolderProvider(temporaryRootPath));
     }
 
     private static async Task CreateInputImageAsync(string filePath)
