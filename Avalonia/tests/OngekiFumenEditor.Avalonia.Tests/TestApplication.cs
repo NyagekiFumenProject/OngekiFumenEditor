@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
 namespace OngekiFumenEditor.Avalonia.Tests;
 
@@ -22,6 +23,7 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
         var services = new ServiceCollection();
         RegisterServices(services);
         services.AddOngekiFumenEditorAvalonia();
+        services.AddSingleton<ITemporaryFolderProvider, DiscardTemporaryFolderProvider>();
         services.AddSingleton<ISettingManager, InMemorySettingManager>();
 
         // Gekimini owns this field privately; populate it for headless tests while intentionally skipping shell startup.
