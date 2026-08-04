@@ -79,9 +79,13 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
         private async void RefreshList()
         {
-            IsBusy = true;
             fumenSets.Clear();
             DisplayFumenSets.Clear();
+
+            if (!Directory.Exists(RootFolderPath))
+                return;
+
+            IsBusy = true;
 
             var folder = await SearchFumenSet(RootFolderPath);
 
