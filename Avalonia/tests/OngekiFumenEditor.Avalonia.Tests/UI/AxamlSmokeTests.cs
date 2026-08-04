@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Data.Converters;
 using Avalonia.Headless.XUnit;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
 using OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Behaviors;
@@ -10,6 +11,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Behaviors;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Avalonia.UI.ValueConverters;
 using Xunit;
 
@@ -126,6 +128,12 @@ public sealed class AxamlSmokeTests
             window.UpdateLayout();
 
             Assert.Same(window, control.GetVisualRoot());
+            if (control is Toast)
+            {
+                Assert.False(control.IsVisible);
+                return;
+            }
+
             Assert.True(control.Bounds.Width > 0, $"{viewType.FullName} measured to zero width.");
             Assert.True(control.Bounds.Height > 0, $"{viewType.FullName} measured to zero height.");
         }
@@ -140,6 +148,45 @@ public sealed class AxamlSmokeTests
     {
         AssertTypedReorderGrid<FumenEditorRenderControlViewerView, RenderControlRowReorderBehavior>();
         AssertTypedReorderGrid<FumenSoflanGroupListViewerView, SoflanGroupRowReorderBehavior>();
+    }
+
+    [AvaloniaFact]
+    public void Toast_StartsHiddenAndIgnoresEmptyMessages()
+    {
+        var toast = new Toast();
+
+        Assert.False(toast.IsVisible);
+        Assert.Empty(toast.Message);
+
+        toast.ShowMessage("   ");
+
+        Assert.False(toast.IsVisible);
+        Assert.Empty(toast.Message);
+    }
+
+    [AvaloniaFact]
+    public async Task Toast_NewerMessageOutlivesOlderHideTimer()
+    {
+        var toast = new Toast();
+
+        toast.ShowMessage("first", showTime: 50);
+        await Dispatcher.UIThread.InvokeAsync(static () => { });
+        Assert.True(toast.IsVisible);
+        Assert.Equal("first", toast.Message);
+
+        await Task.Delay(10);
+        toast.ShowMessage("second", showTime: 250);
+        await Dispatcher.UIThread.InvokeAsync(static () => { });
+
+        await Task.Delay(80);
+        await Dispatcher.UIThread.InvokeAsync(static () => { });
+        Assert.True(toast.IsVisible);
+        Assert.Equal("second", toast.Message);
+
+        await Task.Delay(220);
+        await Dispatcher.UIThread.InvokeAsync(static () => { });
+        Assert.False(toast.IsVisible);
+        Assert.Empty(toast.Message);
     }
 
     private static object GetRequiredResource(Application application, string key)

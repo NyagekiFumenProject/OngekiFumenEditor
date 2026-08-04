@@ -1,11 +1,15 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Framework.Documents;
 using Gekimini.Avalonia.Framework.Languages;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
@@ -49,19 +53,28 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
     private bool hideWallLaneWhenEnablePlayField;
     public bool HideWallLaneWhenEnablePlayField => hideWallLaneWhenEnablePlayField;
 
-    public Task<bool> New()
+    public async Task<bool> New()
     {
-        EditorProjectData = new EditorProjectDataModel
+        var dialogViewModel = new EditorProjectSetupDialogViewModel();
+        var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialogViewModel);
+        if (result != true)
         {
-            Fumen = new OngekiFumen()
-        };
-        Fumen = EditorProjectData.Fumen;
+            Log.LogInfo(Assets.Languages.Lang.CloseEditorByProjectSetupFail);
+            return false;
+        }
+
+        var project = dialogViewModel.EditorProjectData;
+        if (!await Load(project))
+        {
+            project.DisposeRuntimeFiles();
+            return false;
+        }
+
         FilePath = string.Empty;
         FileName = "Untitled";
         DisplayName = "[New] Untitled";
         UpdateTitle();
-        LoadingFinished?.Invoke(this, EditorProjectData);
-        return Task.FromResult(true);
+        return true;
     }
 
     public Task<bool> Load()
@@ -87,11 +100,18 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
         return Load(project, sourcePath);
     }
 
-    private Task<bool> Load(EditorProjectDataModel project, string sourcePath)
+    private async Task<bool> Load(EditorProjectDataModel project, string sourcePath)
     {
         if (project is null)
-            return Task.FromResult(false);
+            return false;
 
+        var audioFile = GetAudioFile(project);
+        if (audioFile is null)
+            return false;
+
+        var audioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFile);
+        AudioPlayer?.Dispose();
+        AudioPlayer = audioPlayer;
         EditorProjectData = project;
         Fumen = project.Fumen ?? new OngekiFumen();
         FilePath = sourcePath ?? string.Empty;
@@ -100,7 +120,19 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase
         DisplayName = FileName;
         UpdateTitle();
         LoadingFinished?.Invoke(this, EditorProjectData);
-        return Task.FromResult(true);
+        return true;
+    }
+
+    private static ISimpleFile GetAudioFile(EditorProjectDataModel project)
+    {
+        if (project.AudioFile is not null)
+            return project.AudioFile;
+
+        if (string.IsNullOrWhiteSpace(project.AudioFilePath) || !File.Exists(project.AudioFilePath))
+            return null;
+
+        project.AudioFile = new LocalSimpleFile(project.AudioFilePath);
+        return project.AudioFile;
     }
 
     public async Task<bool> Save(string projectFilePath)

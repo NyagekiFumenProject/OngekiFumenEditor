@@ -8,6 +8,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI;
 
 public partial class Toast : UserControl
 {
+    private int messageVersion;
+
     public enum MessageType
     {
         Error,
@@ -47,10 +49,14 @@ public partial class Toast : UserControl
 
     public void ShowMessage(string message, MessageType messageType = MessageType.Notify, uint showTime = 2000)
     {
-        _ = InternalShowMessage(message, messageType, showTime);
+        if (string.IsNullOrWhiteSpace(message))
+            return;
+
+        var version = Interlocked.Increment(ref messageVersion);
+        _ = InternalShowMessage(message, messageType, showTime, version);
     }
 
-    private async Task InternalShowMessage(string message, MessageType messageType, uint showTime)
+    private async Task InternalShowMessage(string message, MessageType messageType, uint showTime, int version)
     {
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
@@ -60,10 +66,13 @@ public partial class Toast : UserControl
             Log.LogDebug($"{messageType} {Message} ({showTime}ms)");
         });
 
-        await Task.Delay((int)showTime);
+        await Task.Delay(TimeSpan.FromMilliseconds(showTime));
 
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
+            if (version != Volatile.Read(ref messageVersion))
+                return;
+
             IsVisible = false;
             Message = string.Empty;
         });

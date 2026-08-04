@@ -13,6 +13,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.SvgDrawing;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectOperationImplement;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki;
 using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Objects;
@@ -284,12 +285,14 @@ public sealed class SvgPrefabTests
                 CurveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default,
                 TGrid = new TGrid(4)
             };
+            var project = new EditorProjectDataModel();
             var editor = new FumenVisualEditorViewModel
             {
+                EditorProjectData = project,
+                Fumen = project.Fumen,
                 ViewWidth = 800,
                 ViewHeight = 600
             };
-            await editor.New();
 
             var operation = new SvgPrefabOperationViewModel(svg);
             var generated = operation.GenerateLaneObjects(editor).ToArray();

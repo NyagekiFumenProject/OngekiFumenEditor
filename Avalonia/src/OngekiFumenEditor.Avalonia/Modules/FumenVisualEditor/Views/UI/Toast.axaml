@@ -8,6 +8,7 @@
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:DataType="local:Toast"
+    IsVisible="False"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">

@@ -77,7 +77,7 @@ internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing,
         canvas.Translate(adjustPos.X, adjustPos.Y);
         if (Math.Abs(rotate) > float.Epsilon)
             canvas.RotateRadians(rotate);
-        canvas.Scale(scale.X == 0 ? 1 : scale.X, scale.Y == 0 ? 1 : scale.Y);
+        canvas.Scale(scale.X == 0 ? 1 : scale.X, scale.Y == 0 ? -1 : -scale.Y);
         canvas.DrawText(text, 0, 0, font, paint);
         target.PerfomenceMonitor.CountDrawCall(this);
 

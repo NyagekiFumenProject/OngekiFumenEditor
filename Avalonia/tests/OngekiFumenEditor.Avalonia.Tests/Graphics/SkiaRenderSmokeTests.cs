@@ -5,9 +5,12 @@ using Avalonia.Headless;
 using Avalonia.Headless.XUnit;
 using Avalonia.Layout;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
 using SkiaSharp;
 using Xunit;
+using Matrix4 = OpenTK.Mathematics.Matrix4;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Graphics;
 
@@ -82,6 +85,108 @@ public sealed class SkiaRenderSmokeTests
             }
 
             window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public async Task SkiaStringDrawing_RendersAsymmetricGlyphUpright()
+    {
+        const int width = 96;
+        const int height = 96;
+        var manager = new DefaultSkiaDrawingManagerImpl();
+        var renderControl = manager.CreateRenderControl();
+        var window = new Window
+        {
+            Width = width,
+            Height = height,
+            Content = renderControl
+        };
+        IRenderContext? renderContext = null;
+        Action<TimeSpan>? renderFrame = null;
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            await manager.InitializeRenderControl(renderControl);
+            renderContext = await manager.GetRenderContext(renderControl);
+            var drawingContext = new TestDrawingContext(renderContext, width, height);
+            renderFrame = elapsed =>
+            {
+                renderContext.CleanRender(drawingContext, new Vector4(0, 0, 0, 1));
+                manager.StringDrawing.Draw(
+                    "F",
+                    new Vector2(-12, 0),
+                    Vector2.One,
+                    40,
+                    0,
+                    new Vector4(1, 1, 1, 1),
+                    new Vector2(0, 1),
+                    IStringDrawing.StringStyle.Normal,
+                    drawingContext,
+                    null!,
+                    out _);
+            };
+            renderContext.OnRender += renderFrame;
+            renderContext.StartRendering();
+
+            using var capturedFrame = window.CaptureRenderedFrame();
+            Assert.NotNull(capturedFrame);
+            using var encodedFrame = new MemoryStream();
+            capturedFrame!.Save(encodedFrame);
+            encodedFrame.Position = 0;
+            using var bitmap = SKBitmap.Decode(encodedFrame);
+            Assert.NotNull(bitmap);
+
+            var litPixels = Enumerable.Range(0, bitmap.Height)
+                .SelectMany(y => Enumerable.Range(0, bitmap.Width)
+                    .Where(x => bitmap.GetPixel(x, y).Red >= 128)
+                    .Select(x => (x, y)))
+                .ToArray();
+            Assert.NotEmpty(litPixels);
+
+            var minY = litPixels.Min(static pixel => pixel.y);
+            var maxY = litPixels.Max(static pixel => pixel.y);
+            var middleY = (minY + maxY) / 2d;
+            var upperPixels = litPixels.Count(pixel => pixel.y <= middleY);
+            var lowerPixels = litPixels.Count(pixel => pixel.y > middleY);
+
+            Assert.True(upperPixels > lowerPixels,
+                $"Expected an upright, top-heavy 'F', but upper/lower pixel counts were {upperPixels}/{lowerPixels}.");
+        }
+        finally
+        {
+            if (renderContext is not null)
+            {
+                renderContext.StopRendering();
+                if (renderFrame is not null)
+                    renderContext.OnRender -= renderFrame;
+            }
+
+            window.Close();
+        }
+    }
+
+    private sealed class TestDrawingContext : IDrawingContext
+    {
+        public TestDrawingContext(IRenderContext renderContext, float width, float height)
+        {
+            RenderContext = renderContext;
+            CurrentDrawingTargetContext = new DrawingTargetContext
+            {
+                ViewMatrix = Matrix4.Identity,
+                ProjectionMatrix = Matrix4.Identity,
+                ViewWidth = width,
+                ViewHeight = height
+            };
+        }
+
+        public DrawingTargetContext CurrentDrawingTargetContext { get; }
+        public IPerfomenceMonitor PerfomenceMonitor { get; } = new DummyPerformenceMonitor();
+        public IRenderContext RenderContext { get; }
+
+        public void Render(TimeSpan ts)
+        {
         }
     }
 }
