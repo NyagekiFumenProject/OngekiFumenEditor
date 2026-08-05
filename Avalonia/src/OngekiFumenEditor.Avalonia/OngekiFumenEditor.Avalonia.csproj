@@ -15,6 +15,29 @@
         <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <BuildDateTime>$([System.DateTimeOffset]::UtcNow.ToString("O"))</BuildDateTime>
+        <GitCommitDateFormat>%cI</GitCommitDateFormat>
+        <GitCommitDateFormat Condition="$([MSBuild]::IsOSPlatform('Windows'))">%%cI</GitCommitDateFormat>
+    </PropertyGroup>
+    <ItemGroup>
+        <AssemblyMetadata Include="BuildDateTime" Value="$(BuildDateTime)" />
+    </ItemGroup>
+    <Target Name="CollectGitCommitDate" BeforeTargets="GetAssemblyAttributes">
+        <Exec Command="git log -1 --format=&quot;$(GitCommitDateFormat)&quot;"
+              WorkingDirectory="$(MSBuildProjectDirectory)"
+              ConsoleToMSBuild="true"
+              IgnoreExitCode="true"
+              StandardOutputImportance="Low"
+              StandardErrorImportance="Low">
+            <Output TaskParameter="ConsoleOutput" PropertyName="GitCommitDate" />
+            <Output TaskParameter="ExitCode" PropertyName="GitCommitDateExitCode" />
+        </Exec>
+        <ItemGroup Condition="'$(GitCommitDateExitCode)' == '0' and '$(GitCommitDate)' != ''">
+            <AssemblyMetadata Include="GitCommitDate" Value="$(GitCommitDate)" />
+        </ItemGroup>
+    </Target>
+
     <!--For Injectio-->
     <PropertyGroup>
         <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>

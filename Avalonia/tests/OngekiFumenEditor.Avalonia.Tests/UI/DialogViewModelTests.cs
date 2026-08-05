@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Kernel.MiscMenu.Commands.About;
 using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.UI.Dialogs.Views;
+using System.Globalization;
+using System.Reflection;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.UI;
@@ -93,6 +95,40 @@ public sealed class DialogViewModelTests
         Assert.Equal("1.2.3.4", viewModel.SourceVersion);
         Assert.False(string.IsNullOrWhiteSpace(viewModel.Version));
         Assert.False(string.IsNullOrWhiteSpace(viewModel.ProductVersion));
+        Assert.Matches("^[0-9a-fA-F]{7}$", viewModel.CommitHash);
+        Assert.Contains($"+{viewModel.CommitHash}", viewModel.ProductVersion, StringComparison.OrdinalIgnoreCase);
+        Assert.Matches("^\\d{4}/\\d{1,2}/\\d{2} \\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}$", viewModel.CommitDate);
+        Assert.Matches("^\\d{4}/\\d{1,2}/\\d{2} \\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}$", viewModel.BuildTime);
+
+        var metadata = typeof(AboutWindowViewModel).Assembly
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .ToDictionary(x => x.Key, x => x.Value);
+        Assert.True(DateTimeOffset.TryParse(
+            metadata["GitCommitDate"],
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AllowWhiteSpaces,
+            out _));
+        Assert.True(DateTimeOffset.TryParse(
+            metadata["BuildDateTime"],
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AllowWhiteSpaces,
+            out _));
+    }
+
+    [Theory]
+    [InlineData("1.2.3+0123456789abcdef", "1.2.3+0123456", "0123456")]
+    [InlineData("1.2.3+0123456", "1.2.3+0123456", "0123456")]
+    [InlineData("1.2.3-preview.1+linux.0123456789abcdef.dirty", "1.2.3-preview.1+linux.0123456.dirty", "0123456")]
+    [InlineData("1.2.3+linux-x64", "1.2.3+linux-x64", "")]
+    public void AboutWindowViewModel_ShortenProductVersion_OnlyTruncatesCommitMetadata(
+        string informationalVersion,
+        string expectedProductVersion,
+        string expectedCommitHash)
+    {
+        var productVersion = AboutWindowViewModel.ShortenProductVersion(informationalVersion, out var commitHash);
+
+        Assert.Equal(expectedProductVersion, productVersion);
+        Assert.Equal(expectedCommitHash, commitHash);
     }
 
     [Fact]
