@@ -635,7 +635,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         {
             var tap = new T();
             var isFirst = true;
-            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Add {0}".Format(typeof(T).Name).ToLocalizedStringByRawText(), () =>
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.BatchModeAddObject.ToFormatLocalizedString(typeof(T).Name), () =>
             {
                 MoveObjectTo(tap, position);
                 Fumen.AddObject(tap);
@@ -1960,6 +1960,5 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         #endregion
     }
 }
-
 
 

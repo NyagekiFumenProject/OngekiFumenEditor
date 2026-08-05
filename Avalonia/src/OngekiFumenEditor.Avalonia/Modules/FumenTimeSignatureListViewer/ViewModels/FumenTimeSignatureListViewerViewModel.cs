@@ -5,6 +5,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
@@ -60,7 +61,7 @@ public partial class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, 
         set => SetProperty(ref field, value);
     }
 
-    public FumenTimeSignatureListViewerViewModel() : base("Time Signatures".ToLocalizedStringByRawText())
+    public FumenTimeSignatureListViewerViewModel() : base(Lang.B.FumenTimeSignatureListViewer.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Bottom;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (@new, _) => Editor = @new;

@@ -2,6 +2,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -47,10 +48,10 @@ public class FumenVisualEditorSettingsViewModel : ToolViewModelBase, IFumenVisua
             Setting = Editor?.Setting;
 
             if (Editor is null)
-                Title = "Editor Settings".ToLocalizedStringByRawText();
+                Title = Lang.B.FumenVisualEditorSettings.ToLocalizedString();
             else
-                Title = $"{"Editor Settings".ToLocalizedStringByRawText()} - {Editor.FileName}"
-                    .ToLocalizedStringByRawText();
+                Title = LocalizedString.CreateFromTemplateFunc(() =>
+                    $"{Lang.B.FumenVisualEditorSettings.Text} - {Editor.FileName}");
         }
     }
 
@@ -60,7 +61,7 @@ public class FumenVisualEditorSettingsViewModel : ToolViewModelBase, IFumenVisua
         set => SetProperty(ref field, value);
     }
 
-    public FumenVisualEditorSettingsViewModel() : base("Editor Settings".ToLocalizedStringByRawText())
+    public FumenVisualEditorSettingsViewModel() : base(Lang.B.FumenVisualEditorSettings.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Right;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;

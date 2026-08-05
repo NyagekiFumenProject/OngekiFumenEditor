@@ -9,6 +9,7 @@ using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.Views;
 using Microsoft.Extensions.Logging;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.ViewModels;
@@ -24,7 +25,7 @@ public partial class FumenMetaInfoBrowserViewModel : ToolViewModelBase, IFumenMe
     private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
     private ILogger<FumenMetaInfoBrowserViewModel> Logger => OngekiFumenEditor.Avalonia.IoC.Get<ILogger<FumenMetaInfoBrowserViewModel>>();
 
-    public FumenMetaInfoBrowserViewModel() : base("Fumen Meta Info Browser".ToLocalizedStringByRawText())
+    public FumenMetaInfoBrowserViewModel() : base(Lang.B.FumenMetaInfoBrowser.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Right;
     }

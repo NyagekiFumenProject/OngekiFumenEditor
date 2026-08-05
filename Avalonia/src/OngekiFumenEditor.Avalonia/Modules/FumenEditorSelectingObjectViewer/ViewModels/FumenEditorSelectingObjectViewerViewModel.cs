@@ -4,6 +4,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
@@ -45,7 +46,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         }
     }
 
-    public FumenEditorSelectingObjectViewerViewModel() : base("Selecting Objects".ToLocalizedStringByRawText())
+    public FumenEditorSelectingObjectViewerViewModel() : base(Lang.B.FumenEditorSelectingObjectViewer.ToLocalizedString())
     {
         Dock = DockMode.Right;
         SelectionFilter = new SelectionFilterViewModel(this);

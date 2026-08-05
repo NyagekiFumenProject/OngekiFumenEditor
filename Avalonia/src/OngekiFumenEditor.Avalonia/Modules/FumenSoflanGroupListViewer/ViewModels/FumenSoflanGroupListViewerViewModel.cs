@@ -4,6 +4,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
@@ -95,7 +96,7 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
         }
     }
 
-    public FumenSoflanGroupListViewerViewModel() : base("Soflan Groups".ToLocalizedStringByRawText())
+    public FumenSoflanGroupListViewerViewModel() : base(Lang.B.SoflanGroupListViewer.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Bottom;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;

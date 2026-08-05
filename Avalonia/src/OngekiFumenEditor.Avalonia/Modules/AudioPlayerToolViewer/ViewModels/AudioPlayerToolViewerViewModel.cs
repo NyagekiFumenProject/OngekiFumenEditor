@@ -234,7 +234,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
         set => SetProperty(ref isShowWaveform, value);
     }
 
-    public AudioPlayerToolViewerViewModel() : base("Audio Player".ToLocalizedStringByRawText())
+    public AudioPlayerToolViewerViewModel() : base(Lang.B.AudioPlayerToolViewer.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Bottom;
 

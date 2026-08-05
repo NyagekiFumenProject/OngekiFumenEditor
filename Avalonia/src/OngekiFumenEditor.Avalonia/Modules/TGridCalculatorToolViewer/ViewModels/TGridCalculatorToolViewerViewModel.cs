@@ -4,6 +4,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
@@ -90,7 +91,7 @@ public partial class TGridCalculatorToolViewerViewModel : ToolViewModelBase, ITG
     public bool IsEnabled => Editor is not null;
     public bool IsSelectedObject => TimelineObject is not null;
 
-    public TGridCalculatorToolViewerViewModel() : base("TGrid Calculator".ToLocalizedStringByRawText())
+    public TGridCalculatorToolViewerViewModel() : base(Lang.B.TGridCalculatorToolViewer.ToLocalizedString())
     {
         Dock = DockMode.Bottom;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;

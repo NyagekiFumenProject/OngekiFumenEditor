@@ -29,7 +29,7 @@ public class FumenObjectPropertyBrowserViewModel : ToolViewModelBase, IFumenObje
     public ObservableCollection<IObjectPropertyAccessProxy> PropertyInfoWrappers { get; } = [];
     public FumenVisualEditorViewModel Editor => referenceEditor;
 
-    public FumenObjectPropertyBrowserViewModel() : base("Object Properties".ToLocalizedStringByRawText())
+    public FumenObjectPropertyBrowserViewModel() : base(Lang.B.ObjectProperty.ToLocalizedString())
     {
         Dock = global::Dock.Model.Core.DockMode.Right;
 
