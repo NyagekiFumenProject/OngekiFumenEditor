@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.RecentFiles;
-using Gekimini.Avalonia.Framework.RecentFiles.Commands;
 using Gekimini.Avalonia.Models.Settings;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
@@ -25,6 +24,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
     private readonly ISettingManager settingManager;
     private readonly IEditorRecentFilesManager recentFilesManager;
     private readonly IFumenVisualEditorProvider editorProvider;
+    private readonly ICommandService commandService;
     private readonly IShell shell;
     private readonly string initialLanguage;
     private string selectedLanguage;
@@ -34,12 +34,14 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
         ISettingManager settingManager,
         IEditorRecentFilesManager recentFilesManager,
         IFumenVisualEditorProvider editorProvider,
+        ICommandService commandService,
         IShell shell)
     {
         this.languageManager = languageManager;
         this.settingManager = settingManager;
         this.recentFilesManager = recentFilesManager;
         this.editorProvider = editorProvider;
+        this.commandService = commandService;
         this.shell = shell;
 
         Languages = languageManager.GetAvaliableLanguageNames().ToArray();
@@ -105,7 +107,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
         {
             GroupedItems.Add(new GroupedItem(
                 group.Key,
-                group.Select(x => new RecentFileItemViewModel(x, OpenRecentAsync)).ToArray()));
+                group.Select(x => new RecentFileItemViewModel(x, commandService)).ToArray()));
         }
     }
 
@@ -126,14 +128,6 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
         if (elapsed < TimeSpan.FromDays(30))
             return Lang.WithinOneMonth;
         return Lang.Earlier;
-    }
-
-    private static Task OpenRecentAsync(RecentRecordInfo info)
-    {
-        return CommandRouterHelper.ExecuteCommand(new Command(new OpenRecentFileCommandListDefinition())
-        {
-            Tag = info
-        });
     }
 
     [RelayCommand]

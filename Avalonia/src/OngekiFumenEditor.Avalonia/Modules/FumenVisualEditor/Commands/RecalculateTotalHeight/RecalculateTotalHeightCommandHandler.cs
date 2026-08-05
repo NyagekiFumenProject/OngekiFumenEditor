@@ -9,9 +9,10 @@ public partial class RecalculateTotalHeightCommandHandler : CommandHandlerBase<R
 {
     private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
 
-    public override void Update(Command command)
+    public override Task Update(Command command)
     {
         command.Enabled = EditorDocumentManager.CurrentActivatedEditor?.AudioPlayer is not null;
+        return Task.CompletedTask;
     }
 
     public override Task Run(Command command)

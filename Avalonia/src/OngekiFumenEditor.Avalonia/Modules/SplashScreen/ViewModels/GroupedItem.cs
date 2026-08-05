@@ -1,5 +1,7 @@
-using CommunityToolkit.Mvvm.Input;
+using System.Windows.Input;
+using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.RecentFiles;
+using Gekimini.Avalonia.Framework.RecentFiles.Commands;
 
 namespace OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels;
 
@@ -7,15 +9,18 @@ public sealed record GroupedItem(string Name, IReadOnlyList<RecentFileItemViewMo
 
 public sealed class RecentFileItemViewModel
 {
-    public RecentFileItemViewModel(RecentRecordInfo record, Func<RecentRecordInfo, Task> openRecentAsync)
+    public RecentFileItemViewModel(RecentRecordInfo record, ICommandService commandService)
     {
         Record = record;
-        OpenCommand = new AsyncRelayCommand(() => openRecentAsync(record));
+        OpenCommand = commandService.GetTargetableCommand(new Command(new OpenRecentFileCommandListDefinition())
+        {
+            Tag = record
+        });
     }
 
     public RecentRecordInfo Record { get; }
     public string Name => Record.Name;
     public string LocationDescription => Record.LocationDescription;
     public string LastAccessTimeText => Record.LastAccessTime?.ToString("g") ?? string.Empty;
-    public IAsyncRelayCommand OpenCommand { get; }
+    public ICommand OpenCommand { get; }
 }

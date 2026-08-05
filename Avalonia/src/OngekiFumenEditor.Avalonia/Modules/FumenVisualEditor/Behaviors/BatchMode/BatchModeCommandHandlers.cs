@@ -23,10 +23,8 @@ public abstract class BatchModeSubmodeCommandHandler<TCommandDefinition> : Comma
         Submode = BatchModeBehavior.Submodes.OfType<TCommandDefinition>().Single();
     }
 
-    public override void Update(Command command)
+    public override Task Update(Command command)
     {
-        base.Update(command);
-
         if (Editor.CurrentActivatedEditor is not null && Editor.CurrentActivatedEditor.IsBatchMode) {
             command.Enabled = true;
             command.Checked = Editor.CurrentActivatedEditor.BatchModeBehavior.CurrentSubmode == Submode;
@@ -35,6 +33,8 @@ public abstract class BatchModeSubmodeCommandHandler<TCommandDefinition> : Comma
             command.Enabled = false;
             command.Checked = false;
         }
+
+        return base.Update(command);
     }
 
     public override Task Run(Command command)

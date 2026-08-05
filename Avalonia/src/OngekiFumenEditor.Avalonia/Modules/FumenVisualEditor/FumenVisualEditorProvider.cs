@@ -54,6 +54,12 @@ internal partial class FumenVisualEditorProvider : IFumenVisualEditorProvider
         return await editor.Load(recordInfo.LocationDescription);
     }
 
+    public Task<bool> CheckIsValid(RecentRecordInfo recordInfo)
+    {
+        return Task.FromResult(!string.IsNullOrWhiteSpace(recordInfo.LocationDescription) &&
+                               File.Exists(recordInfo.LocationDescription));
+    }
+
     public async Task<bool> TryOpen(IDocumentViewModel document, string projectFilePath)
     {
         if (document is not FumenVisualEditorViewModel editor || string.IsNullOrWhiteSpace(projectFilePath))

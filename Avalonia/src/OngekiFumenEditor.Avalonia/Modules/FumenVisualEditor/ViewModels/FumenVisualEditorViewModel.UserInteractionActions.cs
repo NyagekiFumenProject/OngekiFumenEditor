@@ -900,10 +900,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public void KeyboardAction_ToggleBatchMode(ActionExecutionContext ctx)
+        public async void KeyboardAction_ToggleBatchMode(ActionExecutionContext ctx)
         {
             var command = IoC.Get<ICommandService>().GetCommand(new BatchModeToggleCommandDefinition());
-            CommandRouterHelper.ExecuteCommand(command).Wait();
+            await CommandRouterHelper.ExecuteCommand(command);
         }
 
         public bool CheckAndNotifyIfPlaceBeyondDuration(Point placePoint)
@@ -1960,5 +1960,4 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         #endregion
     }
 }
-
 

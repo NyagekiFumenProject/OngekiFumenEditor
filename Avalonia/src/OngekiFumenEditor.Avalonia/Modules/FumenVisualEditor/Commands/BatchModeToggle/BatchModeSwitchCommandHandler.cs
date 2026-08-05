@@ -9,10 +9,11 @@ public partial class BatchModeSwitchCommandHandler : CommandHandlerBase<BatchMod
 {
     private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
 
-    public override void Update(Command command)
+    public override Task Update(Command command)
     {
         command.Enabled = EditorDocumentManager.CurrentActivatedEditor is not null;
         command.Checked = EditorDocumentManager.CurrentActivatedEditor?.IsBatchMode ?? false;
+        return Task.CompletedTask;
     }
 
     public override Task Run(Command command)

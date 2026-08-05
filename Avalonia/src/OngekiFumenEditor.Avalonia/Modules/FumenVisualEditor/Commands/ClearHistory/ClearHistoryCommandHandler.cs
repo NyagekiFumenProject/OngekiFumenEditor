@@ -9,10 +9,11 @@ public partial class ClearHistoryCommandHandler : CommandHandlerBase<ClearHistor
 {
     private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
 
-    public override void Update(Command command)
+    public override Task Update(Command command)
     {
         command.Enabled = EditorDocumentManager.CurrentActivatedEditor?.UndoRedoManager is { CanRedo: true } ||
                           EditorDocumentManager.CurrentActivatedEditor?.UndoRedoManager is { CanUndo: true };
+        return Task.CompletedTask;
     }
 
     public override Task Run(Command command)

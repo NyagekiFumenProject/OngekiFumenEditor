@@ -8,10 +8,10 @@ namespace OngekiFumenEditor.Avalonia.Kernel.AssistHelper.Commands.AdjustDockable
 [RegisterSingleton<ICommandHandler>]
 public class AdjustDockablesHorizonPositionCommandHandler : CommandHandlerBase<AdjustDockablesHorizonPositionCommandDefinition>
 {
-    public override void Update(Command command)
+    public override Task Update(Command command)
     {
         command.Enabled = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not null;
-        base.Update(command);
+        return base.Update(command);
     }
 
     public override Task Run(Command command)

@@ -17,10 +17,10 @@ public partial class GenerateSvgCommandHandler : CommandHandlerBase<GenerateSvgC
     private IPreviewSvgGenerator PreviewSvgGenerator => OngekiFumenEditor.Avalonia.IoC.Get<IPreviewSvgGenerator>();
     private IDialogManager DialogManager => OngekiFumenEditor.Avalonia.IoC.Get<IDialogManager>();
 
-    public override void Update(Command command)
+    public override Task Update(Command command)
     {
-        base.Update(command);
         command.Enabled = TryGetActiveFumen(Shell.ActiveDocument, out _, out _);
+        return base.Update(command);
     }
 
     public override async Task Run(Command command)

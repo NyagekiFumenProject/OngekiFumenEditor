@@ -12,7 +12,7 @@ public static class CommandRouterHelper
     {
         var commandRouter = serviceProvider.GetService<ICommandRouter>();
         var handler = commandRouter.GetCommandHandler(command.CommandDefinition);
-        handler.Update(command);
+        await handler.Update(command);
         if (command.Enabled)
             await handler.Run(command);
     }
