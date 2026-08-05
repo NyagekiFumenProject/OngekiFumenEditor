@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
+using Avalonia.Controls.ApplicationLifetimes;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
@@ -16,6 +17,12 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
 
     public TestApplication() : base(isGUIMode: false)
     {
+    }
+
+    public override void RegisterServices()
+    {
+        ApplicationLifetime ??= new ClassicDesktopStyleApplicationLifetime();
+        base.RegisterServices();
     }
 
     public override void OnFrameworkInitializationCompleted()
