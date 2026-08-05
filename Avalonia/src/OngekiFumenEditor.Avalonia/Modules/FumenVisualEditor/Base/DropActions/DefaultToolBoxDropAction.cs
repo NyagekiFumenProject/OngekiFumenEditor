@@ -8,19 +8,29 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions
 {
 	public class DefaultToolBoxDropAction : EditorAddObjectDropAction
 	{
-		private readonly Type itemType;
+		private readonly ToolboxItem toolboxItem;
 
 		public DefaultToolBoxDropAction(ToolboxItem toolboxItem)
 		{
-			itemType = Type.GetType(toolboxItem.ItemType);
+			this.toolboxItem = toolboxItem;
 		}
 
 		protected override OngekiObjectBase GetDisplayObject()
 		{
+			if (toolboxItem is IToolboxGenerator generator)
+				return generator.CreateDisplayObject();
+
+			if (string.IsNullOrWhiteSpace(toolboxItem.ItemType))
+				return default;
+
+			var itemType = Type.GetType(toolboxItem.ItemType);
+			if (itemType is null)
+				return default;
+
 			return CacheLambdaActivator.CreateInstance(itemType) switch
 			{
 				OngekiObjectBase o => o,
-				ToolboxGenerator generator => generator.CreateDisplayObject(),
+				IToolboxGenerator fallbackGenerator => fallbackGenerator.CreateDisplayObject(),
 				_ => default
 			};
 		}
