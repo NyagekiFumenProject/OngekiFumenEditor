@@ -2,6 +2,7 @@ using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
 
@@ -12,7 +13,7 @@ public class FastOpenFumenCommandDefinition : CommandDefinition
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = "FastOpenFumenCommandDefinition".ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.FastOpenFumen.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
 }

@@ -2,6 +2,7 @@ using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.ClearHistory;
 
@@ -12,7 +13,7 @@ public class ClearHistoryCommandDefinition : CommandDefinition
 
     public override string Name => CommandName;
 
-    public override LocalizedString Text { get; } = "ClearHistoryCommandDefinition".ToLocalizedStringByRawText();
+    public override LocalizedString Text { get; } = Lang.B.ClearHistory.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
 }
