@@ -11,7 +11,10 @@ public static class CommandRouterHelper
     public static async Task ExecuteCommand(IServiceProvider serviceProvider, Command command)
     {
         var commandRouter = serviceProvider.GetService<ICommandRouter>();
-        var handler = commandRouter.GetCommandHandler(command.CommandDefinition);
+        var handler = commandRouter?.GetCommandHandler(command.CommandDefinition);
+        if (handler is null)
+            return;
+
         await handler.Update(command);
         if (command.Enabled)
             await handler.Run(command);
