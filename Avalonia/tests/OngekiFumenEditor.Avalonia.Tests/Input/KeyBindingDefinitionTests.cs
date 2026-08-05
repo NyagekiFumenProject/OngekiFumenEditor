@@ -1,11 +1,29 @@
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ValueConverters;
+using System.Globalization;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Input;
 
 public sealed class KeyBindingDefinitionTests
 {
+    [Fact]
+    public void ShowKeybindExpressionValueConverter_MultiBindingContract_FormatsKeyAndModifiers()
+    {
+        var converter = new ShowKeybindExpressionValueConverter();
+        var multiValueConverter = Assert.IsAssignableFrom<IMultiValueConverter>(converter);
+
+        var result = multiValueConverter.Convert(
+            [Key.PageUp, KeyModifiers.Control],
+            typeof(string),
+            null!,
+            CultureInfo.InvariantCulture);
+
+        Assert.Equal("Ctrl + PageUp", result);
+    }
+
     [Theory]
     [InlineData(Key.A, KeyModifiers.None, "A")]
     [InlineData(Key.D1, KeyModifiers.Alt, "Alt + D1")]
