@@ -4,7 +4,7 @@ using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Models;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
-using OngekiFumenEditor.Avalonia.UI.Dialogs;
+using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Reflection;
 
@@ -36,7 +36,7 @@ public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase
         if (colorProperty is null)
             return Task.CompletedTask;
 
-        var dialog = new CommonColorPicker(
+        var dialog = new CommonColorPickerViewModel(
             () => colorProperty.Color.ToMediaColor(),
             color => colorProperty.Color = color.ToDrawingColor(),
             Lang.NamedColorChangeTitle.Format(colorProperty.Name));

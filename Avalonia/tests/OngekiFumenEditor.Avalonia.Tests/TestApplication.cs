@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
 using Avalonia.Controls.ApplicationLifetimes;
 using Gekimini.Avalonia.Platforms.Services.Settings;
+using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
@@ -30,6 +31,10 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
         var services = new ServiceCollection();
         RegisterServices(services);
         services.AddOngekiFumenEditorAvalonia();
+        services.AddTypeCollectedActivator(
+            global::OngekiFumenEditor.Avalonia.ViewTypeCollectedActivator.Default);
+        services.AddTypeCollectedActivator(
+            global::OngekiFumenEditor.Avalonia.ToolViewModelTypeCollectedActivator.Default);
         services.AddSingleton<ITemporaryFolderProvider, DiscardTemporaryFolderProvider>();
         services.AddSingleton<ISettingManager, InMemorySettingManager>();
 

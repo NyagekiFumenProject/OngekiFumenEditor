@@ -54,6 +54,10 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
     {
         base.OnFrameworkInitializationCompleted();
 
+#if !DEBUG
+        Program.InstallDispatcherExceptionHandler();
+#endif
+
         logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorDesktopApp>>();
 
         if (!IsGUIMode)

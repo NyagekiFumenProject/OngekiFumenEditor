@@ -1,10 +1,11 @@
-using Avalonia.Controls;
+using Gekimini.Avalonia.Modules.Window.ViewModels;
+using Gekimini.Avalonia.Platforms.Services.Miscellaneous;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Reflection;
 
-namespace OngekiFumenEditor.Avalonia.UI.Dialogs;
+namespace OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 
-public partial class AboutWindow : Window
+public partial class AboutWindowViewModel : WindowViewModelBase
 {
     public string CommitHash { get; }
     public string Version { get; }
@@ -16,17 +17,17 @@ public partial class AboutWindow : Window
     public bool IsNotifyUpdateSuccess { get; }
     public string SourceVersion { get; }
 
-    public AboutWindow() : this(false, null)
+    public AboutWindowViewModel()
+        : this(false, null)
     {
     }
 
-    public AboutWindow(bool isNotifyUpdateSuccess = false, global::System.Version sourceVersion = null)
+    public AboutWindowViewModel(bool isNotifyUpdateSuccess, global::System.Version sourceVersion)
     {
-        InitializeComponent();
         IsNotifyUpdateSuccess = isNotifyUpdateSuccess;
         SourceVersion = sourceVersion?.ToString();
 
-        var assembly = typeof(AboutWindow).Assembly;
+        var assembly = typeof(AboutWindowViewModel).Assembly;
         Version = assembly.GetName().Version?.ToString() ?? string.Empty;
         ProductVersion = assembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
@@ -41,14 +42,13 @@ public partial class AboutWindow : Window
 
         CommitHash = string.Empty;
         CommitDate = string.Empty;
-
-        DataContext = this;
     }
 
     public void OpenUrl(string url)
     {
         if (string.IsNullOrWhiteSpace(url))
             return;
-        ProcessUtils.OpenUrl(url);
+
+        IoC.Get<IMiscellaneousFeature>().OpenUrl(url);
     }
 }

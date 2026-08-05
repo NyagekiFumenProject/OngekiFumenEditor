@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
-using OngekiFumenEditor.Avalonia.UI.Dialogs;
+using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
@@ -39,7 +39,7 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase
         Action<global::Avalonia.Media.Color> setter,
         string title)
     {
-        return IoC.Get<IWindowManager>().ShowWindowAsync(new CommonColorPicker(getter, setter, title));
+        return IoC.Get<IWindowManager>().ShowWindowAsync(new CommonColorPickerViewModel(getter, setter, title));
     }
 }
 

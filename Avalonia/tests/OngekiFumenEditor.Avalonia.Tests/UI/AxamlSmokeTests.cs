@@ -70,9 +70,8 @@ public sealed class AxamlSmokeTests
         typeof(global::OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.WidthIdEnumTypeUIView),
         typeof(global::OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.XGridTypeUIView),
         typeof(global::OngekiFumenEditor.Avalonia.UI.Controls.RangeValue),
-        typeof(global::OngekiFumenEditor.Avalonia.UI.Dialogs.AboutWindow),
-        typeof(global::OngekiFumenEditor.Avalonia.UI.Dialogs.CommonColorPicker),
-        typeof(global::OngekiFumenEditor.Avalonia.UI.Dialogs.ExceptionTermWindow)
+        typeof(global::OngekiFumenEditor.Avalonia.UI.Dialogs.Views.AboutWindowView),
+        typeof(global::OngekiFumenEditor.Avalonia.UI.Dialogs.Views.CommonColorPickerView)
     ];
 
     public static IEnumerable<object[]> ViewTypes()
@@ -81,9 +80,9 @@ public sealed class AxamlSmokeTests
     }
 
     [Fact]
-    public void ViewInventory_ContainsAllFiftyTwoUniqueParameterlessTypes()
+    public void ViewInventory_ContainsAllFiftyOneUniqueParameterlessTypes()
     {
-        Assert.Equal(52, AllViewTypes.Length);
+        Assert.Equal(51, AllViewTypes.Length);
         Assert.Equal(AllViewTypes.Length, AllViewTypes.Distinct().Count());
         Assert.All(AllViewTypes, static type =>
         {

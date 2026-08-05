@@ -1,18 +1,20 @@
 using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Utils;
-using System.Reflection;
+using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.MiscMenu.Commands.About;
 
 [RegisterSingleton<ICommandHandler>]
 public class AboutCommandHandler : CommandHandlerBase<AboutCommandDefinition>
 {
-    public override Task Run(Command command)
+    private readonly IWindowManager windowManager;
+
+    public AboutCommandHandler(IWindowManager windowManager)
     {
-        var asm = Assembly.GetEntryAssembly() ?? typeof(AboutCommandHandler).Assembly;
-        var ver = asm.GetName().Version?.ToString() ?? "unknown";
-        Log.LogInfo($"OngekiFumenEditor.Avalonia version: {ver}");
-        return Task.CompletedTask;
+        this.windowManager = windowManager;
     }
+
+    public override async Task Run(Command command) =>
+        await windowManager.ShowDialogAsync(new AboutWindowViewModel());
 }
