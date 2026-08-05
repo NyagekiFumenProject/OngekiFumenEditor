@@ -19,6 +19,7 @@ using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki;
 using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Objects;
 using OngekiFumenEditor.Avalonia.Parser.Ogkr;
 using OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl.Editor;
+using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using SkiaSharp;
@@ -155,39 +156,70 @@ public sealed class SvgPrefabTests
     }
 
     [AvaloniaFact]
-    public async Task NyagekiImage_NonLocalSimpleFile_EmbedsAndRestoresSvgContent()
+    public void ImageCopy_SharesNonLocalFileWithoutReadingAllBytes()
     {
-        using var source = CreateEmbeddedImagePrefab();
+        var file = new TrackingNonLocalSvgFile(RectangleSvg);
+        var source = new SvgImageFilePrefab { SvgFile = file };
+        var copy = new SvgImageFilePrefab();
+        var sourceDisposed = false;
+        try
+        {
+            copy.Copy(source);
+
+            Assert.Same(source.SvgFile, copy.SvgFile);
+            Assert.Equal(2, file.OpenReadCount);
+            Assert.Equal(0, file.ReadAllBytesCount);
+            Assert.NotNull(copy.Picture);
+
+            source.Dispose();
+            sourceDisposed = true;
+
+            Assert.False(file.IsDisposed);
+            Assert.NotNull(copy.Picture);
+        }
+        finally
+        {
+            if (!sourceDisposed)
+                source.Dispose();
+            copy.Dispose();
+        }
+
+        Assert.True(file.IsDisposed);
+    }
+
+    [AvaloniaFact]
+    public async Task NyagekiImage_NonLocalSimpleFile_DoesNotEmbedSvgContent()
+    {
+        var file = new TrackingNonLocalSvgFile(RectangleSvg);
+        using var source = new SvgImageFilePrefab { SvgFile = file };
         var fumen = new OngekiFumen();
         fumen.AddObject(source);
 
         var bytes = await new DefaultNyagekiFumenFormatter().SerializeAsync(fumen);
-        Assert.Contains("ContentBase64[", Encoding.UTF8.GetString(bytes), StringComparison.Ordinal);
+        var text = Encoding.UTF8.GetString(bytes);
 
-        var parser = new DefaultNyagekiFumenParser([new SvgPrefabCommandParser()]);
-        var reparsed = await parser.DeserializeAsync(new MemoryStream(bytes, writable: false));
-        using var actual = Assert.IsType<SvgImageFilePrefab>(Assert.Single(reparsed.SvgPrefabs));
-
-        await AssertEmbeddedSvg(actual);
+        Assert.DoesNotContain("ContentBase64[", text, StringComparison.Ordinal);
+        Assert.Contains(Base64.Encode(file.FullPath), text, StringComparison.Ordinal);
+        Assert.Equal(0, file.ReadAllBytesCount);
     }
 
     [AvaloniaFact]
-    public async Task OgkrImage_NonLocalSimpleFile_EmbedsAndRestoresSvgContent()
+    public async Task OgkrImage_NonLocalSimpleFile_DoesNotAppendSvgContent()
     {
-        using var source = CreateEmbeddedImagePrefab();
+        var file = new TrackingNonLocalSvgFile(RectangleSvg);
+        using var source = new SvgImageFilePrefab { SvgFile = file };
         var fumen = new OngekiFumen();
         fumen.AddObject(source);
 
         var bytes = await new DefaultOngekiFumenFormatter().SerializeAsync(fumen);
-        var parser = new DefaultOngekiFumenParser(
-        [
-            new SvgImageFilePrefabCommand(),
-            new SvgStringPrefabCommand()
-        ]);
-        var reparsed = await parser.DeserializeAsync(new MemoryStream(bytes, writable: false));
-        using var actual = Assert.IsType<SvgImageFilePrefab>(Assert.Single(reparsed.SvgPrefabs));
+        var lines = Encoding.UTF8.GetString(bytes)
+            .Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries);
+        var svgLine = Assert.Single(
+            lines,
+            x => x.StartsWith(SvgImageFilePrefab.CommandName, StringComparison.Ordinal));
 
-        await AssertEmbeddedSvg(actual);
+        Assert.Equal(19, svgLine.Split('\t').Length);
+        Assert.Equal(0, file.ReadAllBytesCount);
     }
 
     [Fact]
@@ -339,27 +371,51 @@ public sealed class SvgPrefabTests
         return svg;
     }
 
-    private static SvgImageFilePrefab CreateEmbeddedImagePrefab()
+    private sealed class TrackingNonLocalSvgFile(string svgContent) : ISimpleFile
     {
-        var svg = new SvgImageFilePrefab
-        {
-            SvgFile = new MemorySimpleFile(
-                "embedded.svg",
-                "picker/embedded.svg",
-                Encoding.UTF8.GetBytes(RectangleSvg)),
-            ShowOriginColor = true
-        };
-        ConfigureCommonFields(svg);
-        return svg;
-    }
+        private readonly byte[] content = Encoding.UTF8.GetBytes(svgContent);
 
-    private static async Task AssertEmbeddedSvg(SvgImageFilePrefab actual)
-    {
-        Assert.NotNull(actual.SvgFile);
-        Assert.Equal("embedded.svg", actual.SvgFile.FileName);
-        Assert.Null(actual.SvgFile.LocalPath);
-        Assert.Equal(RectangleSvg, Encoding.UTF8.GetString(await actual.SvgFile.ReadAllBytes()));
-        Assert.NotNull(actual.Picture);
+        public ISimpleDirectory? ParentDictionary => null;
+        public string FullPath => "picker/embedded.svg";
+        public string? LocalPath => null;
+        public string FileName => "embedded.svg";
+        public long FileLength => content.LongLength;
+        public int OpenReadCount { get; private set; }
+        public int ReadAllBytesCount { get; private set; }
+        public bool IsDisposed { get; private set; }
+
+        public ValueTask<string[]> ReadAllLines()
+        {
+            ThrowIfDisposed();
+            return ValueTask.FromResult(
+                svgContent.Split(["\r\n", "\n"], StringSplitOptions.None));
+        }
+
+        public ValueTask<byte[]> ReadAllBytes()
+        {
+            ThrowIfDisposed();
+            ReadAllBytesCount++;
+            return ValueTask.FromResult(content.ToArray());
+        }
+
+        public Task<Stream> OpenRead()
+        {
+            ThrowIfDisposed();
+            OpenReadCount++;
+            return Task.FromResult<Stream>(new MemoryStream(content, writable: false));
+        }
+
+        public Task<Stream> OpenWrite() => throw new NotSupportedException();
+
+        public void Dispose()
+        {
+            IsDisposed = true;
+        }
+
+        private void ThrowIfDisposed()
+        {
+            ObjectDisposedException.ThrowIf(IsDisposed, this);
+        }
     }
 
     private static void ConfigureCommonFields(SvgPrefabBase svg)

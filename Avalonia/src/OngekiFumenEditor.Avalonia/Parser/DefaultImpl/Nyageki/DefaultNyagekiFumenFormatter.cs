@@ -52,7 +52,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 
             ProcessCURVE(fumen, writer);
 
-            await ProcessSvgPrefabs(fumen, writer);
+            ProcessSvgPrefabs(fumen, writer);
 
             ProcessComments(fumen, writer);
 
@@ -62,7 +62,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
             return memory.ToArray();
         }
 
-        private static async Task ProcessSvgPrefabs(OngekiFumen fumen, StreamWriter writer)
+        private static void ProcessSvgPrefabs(OngekiFumen fumen, StreamWriter writer)
         {
             foreach (var svg in fumen.SvgPrefabs.OrderBy(x => x.TGrid))
             {
@@ -94,11 +94,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
                         */
                         var locator = image.SvgFile?.LocalPath ?? image.SvgFile?.FullPath ?? string.Empty;
                         fields.Add($"FilePathBase64[{Base64.Encode(locator)}]");
-                        if (image.SvgFile is not null && string.IsNullOrWhiteSpace(image.SvgFile.LocalPath))
-                        {
-                            var content = await image.SvgFile.ReadAllBytes();
-                            fields.Add($"ContentBase64[{Base64.Encode(content)}]");
-                        }
                         break;
                     case SvgStringPrefab text:
                         /*if (string.IsNullOrWhiteSpace(text.Content) || string.IsNullOrWhiteSpace(text.TypefaceName))

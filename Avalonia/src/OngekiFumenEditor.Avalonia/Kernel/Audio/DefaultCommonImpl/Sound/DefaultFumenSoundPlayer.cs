@@ -8,8 +8,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.DefaultCommonImpl.Sound;
@@ -64,13 +62,13 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         {
             try
             {
-                using var file = await OpenSoundFileAsync(
+                await using var stream = OpenSoundStream(
                     fileName,
                     soundFolderPath,
                     AppContext.BaseDirectory,
                     Path.Combine(AppContext.BaseDirectory, "Resources"),
                     allowLocalFiles: !OperatingSystem.IsBrowser());
-                cacheSounds[sound] = await audioManager.LoadSoundAsync(file);
+                cacheSounds[sound] = await audioManager.LoadSoundAsync(stream, fileName);
             }
             catch (Exception e)
             {
@@ -106,30 +104,29 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         return noError;
     }
 
-    internal static async Task<ISimpleFile> OpenSoundFileAsync(
+    internal static Stream OpenSoundStream(
         string fileName,
         string configuredSoundFolderPath,
         string baseDirectory,
         string resourceOverrideRootPath,
-        bool allowLocalFiles,
-        CancellationToken cancellationToken = default)
+        bool allowLocalFiles)
     {
         if (allowLocalFiles &&
             TryGetConfiguredSoundFilePath(fileName, configuredSoundFolderPath, baseDirectory) is { } customFilePath)
         {
-            return new LocalSimpleFile(customFilePath);
+            return new FileStream(
+                customFilePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                81_920,
+                FileOptions.Asynchronous | FileOptions.SequentialScan);
         }
 
-        await using var stream = ResourceUtils.OpenReadResourceStream(
+        return ResourceUtils.OpenReadResourceStream(
             $"sounds/{fileName}",
             resourceOverrideRootPath,
             allowLocalFiles);
-        using var buffer = new MemoryStream();
-        await stream.CopyToAsync(buffer, cancellationToken);
-        return new MemorySimpleFile(
-            fileName,
-            ResourceUtils.GetResourceUri($"sounds/{fileName}").ToString(),
-            buffer.ToArray());
     }
 
     private static string TryGetConfiguredSoundFilePath(

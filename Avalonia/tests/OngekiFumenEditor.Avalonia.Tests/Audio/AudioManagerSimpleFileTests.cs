@@ -12,21 +12,29 @@ namespace OngekiFumenEditor.Avalonia.Tests.Audio;
 public sealed class AudioManagerSimpleFileTests
 {
     [Fact]
-    public void Interface_LoadMethods_AcceptOnlySimpleFiles()
+    public void Interface_LoadMethods_AcceptSimpleFilesAndSoundStreamsWithoutPathOnlyOverloads()
     {
         var methods = typeof(IAudioManager)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
         var loadAudio = Assert.Single(methods, x => x.Name == nameof(IAudioManager.LoadAudioAsync));
-        var loadSound = Assert.Single(methods, x => x.Name == nameof(IAudioManager.LoadSoundAsync));
+        var loadSounds = methods.Where(x => x.Name == nameof(IAudioManager.LoadSoundAsync)).ToArray();
+        var simpleFileSound = Assert.Single(loadSounds, x => x.GetParameters().Length == 1);
+        var streamSound = Assert.Single(loadSounds, x => x.GetParameters().Length == 2);
 
         Assert.Equal(typeof(Task<IAudioPlayer>), loadAudio.ReturnType);
         Assert.Equal(typeof(ISimpleFile), Assert.Single(loadAudio.GetParameters()).ParameterType);
-        Assert.Equal(typeof(Task<ISoundPlayer>), loadSound.ReturnType);
-        Assert.Equal(typeof(ISimpleFile), Assert.Single(loadSound.GetParameters()).ParameterType);
+        Assert.Equal(typeof(Task<ISoundPlayer>), simpleFileSound.ReturnType);
+        Assert.Equal(typeof(ISimpleFile), Assert.Single(simpleFileSound.GetParameters()).ParameterType);
+        Assert.Equal(typeof(Task<ISoundPlayer>), streamSound.ReturnType);
+        Assert.Collection(
+            streamSound.GetParameters(),
+            parameter => Assert.Equal(typeof(Stream), parameter.ParameterType),
+            parameter => Assert.Equal(typeof(string), parameter.ParameterType));
         Assert.DoesNotContain(
             methods,
-            x => x.GetParameters().Any(parameter => parameter.ParameterType == typeof(string)));
+            x => x.GetParameters() is [{ ParameterType: var parameterType }] &&
+                 parameterType == typeof(string));
     }
 
     [AvaloniaFact]
@@ -38,9 +46,9 @@ public sealed class AudioManagerSimpleFileTests
             readerFactory,
             new StubSchedulerManager(),
             AudioPlatformCapabilities.Unknown);
-        using var file = new MemorySimpleFile(
+        using var file = new StreamOnlyTestSimpleFile(
             "sound.wav",
-            "memory://audio/sound.wav",
+            "test://audio/sound.wav",
             CreateWaveFile());
 
         using var sound = await manager.LoadSoundAsync(file);
@@ -66,6 +74,27 @@ public sealed class AudioManagerSimpleFileTests
         }
 
         return stream.ToArray();
+    }
+
+    private sealed class StreamOnlyTestSimpleFile(
+        string fileName,
+        string fullPath,
+        byte[] content) : ISimpleFile
+    {
+        public ISimpleDirectory? ParentDictionary => null;
+        public string FullPath => fullPath;
+        public string? LocalPath => null;
+        public string FileName => fileName;
+        public long FileLength => content.LongLength;
+
+        public ValueTask<string[]> ReadAllLines() => throw new NotSupportedException();
+        public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(content.ToArray());
+        public Task<Stream> OpenRead() =>
+            Task.FromResult<Stream>(new MemoryStream(content, writable: false));
+        public Task<Stream> OpenWrite() => throw new NotSupportedException();
+        public void Dispose()
+        {
+        }
     }
 
     private sealed class TrackingAudioFileReaderFactory : INAudioFileReaderFactory

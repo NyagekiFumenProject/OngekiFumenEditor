@@ -58,10 +58,10 @@ public sealed class WavAudioOffsetServiceTests
     public async Task OffsetAsync_SimpleFiles_UsesStorageStreamsAndWritesAdjustedWave()
     {
         var sourceFrames = new byte[] { 0x11, 0x12, 0x21, 0x22 };
-        using var input = new MemorySimpleFile(
+        using var input = new TestSimpleFile(
             "input.wav",
             CreateWave(1, 1, 4, 16, sourceFrames));
-        using var output = new MemorySimpleFile("output.wav", [0xDE, 0xAD]);
+        using var output = new TestSimpleFile("output.wav", [0xDE, 0xAD]);
 
         var service = new DefaultWavAudioOffsetService();
         await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(250));
@@ -77,7 +77,7 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_SameSimpleFile_StagesOutputUntilInputStreamIsClosed()
     {
-        using var file = new MemorySimpleFile(
+        using var file = new TestSimpleFile(
             "same.wav",
             CreateWave(1, 1, 4, 16, [0x11, 0x12, 0x21, 0x22]));
 
@@ -93,11 +93,11 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_DifferentNonLocalFilesWithSameName_StreamWithoutStaging()
     {
-        using var input = new MemorySimpleFile(
+        using var input = new TestSimpleFile(
             "same.wav",
             CreateWave(1, 1, 4, 16, [0x11, 0x12, 0x21, 0x22]),
             "provider://input/same.wav");
-        using var output = new MemorySimpleFile(
+        using var output = new TestSimpleFile(
             "same.wav",
             [],
             "provider://output/same.wav",
@@ -122,7 +122,7 @@ public sealed class WavAudioOffsetServiceTests
             4,
             16,
             [0x11, 0x12, 0x21, 0x22, 0x31, 0x32]));
-        using var output = new MemorySimpleFile("output.wav", []);
+        using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
         await service.OffsetAsync(inputPath, output, TimeSpan.FromMilliseconds(-250));
@@ -135,11 +135,11 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_InvalidSimpleInput_DoesNotOpenOrOverwriteStorageOutput()
     {
-        using var input = new MemorySimpleFile(
+        using var input = new TestSimpleFile(
             "invalid.wav",
             CreateWave(1, 1, 4, 16, [0x01, 0x02, 0x03]));
         var originalTarget = new byte[] { 0xCA, 0xFE, 0xBA, 0xBE };
-        using var output = new MemorySimpleFile("existing.wav", originalTarget);
+        using var output = new TestSimpleFile("existing.wav", originalTarget);
 
         var service = new DefaultWavAudioOffsetService();
         var exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
@@ -407,7 +407,7 @@ public sealed class WavAudioOffsetServiceTests
 
     private sealed record ParsedChunk(string Id, byte[] Data, byte? PaddingByte);
 
-    private sealed class MemorySimpleFile(
+    private sealed class TestSimpleFile(
         string fileName,
         byte[] initialContent,
         string? fullPath = null,

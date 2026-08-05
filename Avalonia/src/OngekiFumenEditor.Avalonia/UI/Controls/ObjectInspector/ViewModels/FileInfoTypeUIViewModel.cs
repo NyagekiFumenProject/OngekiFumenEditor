@@ -29,19 +29,7 @@ public partial class FileInfoTypeUIViewModel : CommonUIViewModelBase<ISimpleFile
         if (selectedFile is null)
             return;
 
-        try
-        {
-            var data = await selectedFile.ReadAllBytes();
-            File = new MemorySimpleFile(
-                selectedFile.FileName,
-                selectedFile.FullPath,
-                data.ToArray(),
-                selectedFile.LocalPath);
-        }
-        finally
-        {
-            selectedFile.Dispose();
-        }
+        File = selectedFile;
     }
 }
 

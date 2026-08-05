@@ -318,8 +318,6 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         if (file is null)
             return null;
 
-        await EnsureAudioOutputInitializedAsync();
-
         var extension = Path.GetExtension(file.FileName);
         Log.LogInfo($"Load sound file: {file.FullPath}");
 
@@ -327,12 +325,23 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
              extension.Equals(".acb", StringComparison.OrdinalIgnoreCase)) &&
             !string.IsNullOrWhiteSpace(file.LocalPath))
         {
+            await EnsureAudioOutputInitializedAsync();
             using var localAudioFileReader = audioFileReaderFactory.CreateAudioFileReader(file.LocalPath);
             return await CreateSoundPlayerAsync(localAudioFileReader);
         }
 
         await using var sourceStream = await file.OpenRead();
-        using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(sourceStream, file.FileName);
+        return await LoadSoundAsync(sourceStream, file.FileName);
+    }
+
+    public async Task<ISoundPlayer> LoadSoundAsync(Stream stream, string fileName)
+    {
+        ArgumentNullException.ThrowIfNull(stream);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+
+        await EnsureAudioOutputInitializedAsync();
+        Log.LogInfo($"Load sound stream: {fileName}");
+        using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(stream, fileName);
         return await CreateSoundPlayerAsync(audioFileReader);
     }
 

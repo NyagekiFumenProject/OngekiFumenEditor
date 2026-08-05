@@ -79,11 +79,10 @@ public sealed class ConvertCommandIntegrationTests
         Log.Initialize(new Log([]));
         using var provider = CreateProvider();
         var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "minimal.nyageki");
-        using var input = new MemorySimpleFile(
+        using var input = new TestSimpleFile(
             "minimal.nyageki",
-            "picker/minimal.nyageki",
             await File.ReadAllBytesAsync(fixturePath));
-        using var output = new WritableMemorySimpleFile("converted.ogkr");
+        using var output = new TestSimpleFile("converted.ogkr");
         var options = new FumenConvertOption
         {
             InputFumenFile = input,
@@ -195,9 +194,9 @@ public sealed class ConvertCommandIntegrationTests
         public IEnumerable<(string desc, string[] fileFormat)> GetDeserializerDescriptions() => [];
     }
 
-    private sealed class WritableMemorySimpleFile(string fileName) : ISimpleFile
+    private sealed class TestSimpleFile(string fileName, byte[]? initialContent = null) : ISimpleFile
     {
-        private byte[] content = [];
+        private byte[] content = initialContent?.ToArray() ?? [];
 
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => $"picker/{fileName}";

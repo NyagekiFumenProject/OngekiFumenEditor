@@ -11,6 +11,7 @@ public partial interface IAudioManager : IDisposable
     float MusicSpeed { get; set; }
 
     Task<ISoundPlayer> LoadSoundAsync(ISimpleFile file);
+    Task<ISoundPlayer> LoadSoundAsync(Stream stream, string fileName);
     Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file);
 
     IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }

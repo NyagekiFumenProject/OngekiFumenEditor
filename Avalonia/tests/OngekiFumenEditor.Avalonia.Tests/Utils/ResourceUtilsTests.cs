@@ -3,7 +3,6 @@ using System.Text;
 using Avalonia.Platform;
 using OngekiFumenEditor.Avalonia.Kernel.Audio.DefaultCommonImpl.Sound;
 using OngekiFumenEditor.Avalonia.Utils;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Utils;
@@ -132,7 +131,7 @@ public sealed class ResourceUtilsTests
     }
 
     [Fact]
-    public async Task OpenSoundFileAsync_CustomThenExecutableThenEmbedded_UsesPerFilePriority()
+    public void OpenSoundStream_CustomThenExecutableThenEmbedded_UsesPerFilePriority()
     {
         using var directory = new TemporaryDirectory();
         var customFolder = directory.CreateDirectory("custom-sounds");
@@ -140,44 +139,41 @@ public sealed class ResourceUtilsTests
         var customPath = directory.Write("custom-sounds/tap.wav", "custom sound");
         var overridePath = directory.Write("Resources/sounds/tap.wav", "desktop sound");
 
-        using (var custom = await DefaultFumenSoundPlayer.OpenSoundFileAsync(
+        using (var custom = DefaultFumenSoundPlayer.OpenSoundStream(
                    "tap.wav",
                    customFolder,
                    directory.RootPath,
                    resourceRoot,
                    allowLocalFiles: true))
         {
-            Assert.IsType<LocalSimpleFile>(custom);
-            Assert.Equal(Path.GetFullPath(customPath), custom.LocalPath);
-            Assert.Equal("custom sound", Encoding.UTF8.GetString(await custom.ReadAllBytes()));
+            Assert.IsType<FileStream>(custom);
+            Assert.Equal("custom sound", Encoding.UTF8.GetString(ReadAllBytes(custom)));
         }
 
         File.Delete(customPath);
-        using (var executableOverride = await DefaultFumenSoundPlayer.OpenSoundFileAsync(
+        using (var executableOverride = DefaultFumenSoundPlayer.OpenSoundStream(
                    "tap.wav",
                    customFolder,
                    directory.RootPath,
                    resourceRoot,
                    allowLocalFiles: true))
         {
-            Assert.Null(executableOverride.LocalPath);
-            Assert.Equal("desktop sound", Encoding.UTF8.GetString(await executableOverride.ReadAllBytes()));
+            Assert.Equal("desktop sound", Encoding.UTF8.GetString(ReadAllBytes(executableOverride)));
         }
 
         File.Delete(overridePath);
         var expectedEmbeddedBytes = ReadEmbeddedBytes("sounds/tap.wav");
-        using var embedded = await DefaultFumenSoundPlayer.OpenSoundFileAsync(
+        using var embedded = DefaultFumenSoundPlayer.OpenSoundStream(
             "tap.wav",
             customFolder,
             directory.RootPath,
             resourceRoot,
             allowLocalFiles: true);
-        Assert.Null(embedded.LocalPath);
-        Assert.Equal(expectedEmbeddedBytes, await embedded.ReadAllBytes());
+        Assert.Equal(expectedEmbeddedBytes, ReadAllBytes(embedded));
     }
 
     [Fact]
-    public async Task OpenSoundFileAsync_LocalFilesDisabled_UsesEmbeddedResourceOnly()
+    public void OpenSoundStream_LocalFilesDisabled_UsesEmbeddedResourceOnly()
     {
         using var directory = new TemporaryDirectory();
         var customFolder = directory.CreateDirectory("custom-sounds");
@@ -186,15 +182,14 @@ public sealed class ResourceUtilsTests
         directory.Write("Resources/sounds/tap.wav", "desktop sound");
         var expectedEmbeddedBytes = ReadEmbeddedBytes("sounds/tap.wav");
 
-        using var file = await DefaultFumenSoundPlayer.OpenSoundFileAsync(
+        using var stream = DefaultFumenSoundPlayer.OpenSoundStream(
             "tap.wav",
             customFolder,
             directory.RootPath,
             resourceRoot,
             allowLocalFiles: false);
 
-        Assert.Null(file.LocalPath);
-        Assert.Equal(expectedEmbeddedBytes, await file.ReadAllBytes());
+        Assert.Equal(expectedEmbeddedBytes, ReadAllBytes(stream));
     }
 
     private static byte[] ReadEmbeddedBytes(string resourcePath)
