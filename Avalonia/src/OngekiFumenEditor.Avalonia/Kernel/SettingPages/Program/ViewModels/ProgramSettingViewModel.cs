@@ -2,14 +2,21 @@ using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
+using Gekimini.Avalonia.Modules.Settings;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 
-public partial class ProgramSettingViewModel : ViewModelBase
+[RegisterSingleton<ISettingsEditor>]
+public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
 {
     public ProgramSetting Setting => ProgramSetting.Default;
+
+    public string SettingsPageName => Lang.TabProgram;
+
+    public string SettingsPagePath => Lang.TabEnviorment;
 
     public ProgramSettingViewModel()
     {

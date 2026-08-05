@@ -1,5 +1,7 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.Modules.Settings;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
@@ -7,7 +9,8 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 
-public partial class AudioSettingViewModel : ViewModelBase
+[RegisterSingleton<ISettingsEditor>]
+public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
 {
     private readonly IAudioPlatformCapabilities platformCapabilities;
     private readonly AudioSetting setting;
@@ -18,6 +21,10 @@ public partial class AudioSettingViewModel : ViewModelBase
 
     public AudioSetting Setting => setting;
     public AudioPlayerToolViewerSetting PlayerSetting => playerSetting;
+
+    public string SettingsPageName => Lang.TabAudio;
+
+    public string SettingsPagePath => Lang.TabSound;
 
     public IReadOnlyList<AudioOutputType> AudioOutputTypeValues => platformCapabilities.SelectableOutputTypes;
 

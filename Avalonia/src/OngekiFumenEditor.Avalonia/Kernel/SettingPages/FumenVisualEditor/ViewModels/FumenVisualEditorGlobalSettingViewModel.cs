@@ -1,16 +1,23 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Gekimini.Avalonia.Modules.Settings;
 using Gekimini.Avalonia.Platforms.Services.Window;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
 
-public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase
+[RegisterSingleton<ISettingsEditor>]
+public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, ISettingsEditor
 {
     public EditorGlobalSetting Setting => EditorGlobalSetting.Default;
+
+    public string SettingsPageName => Lang.TabEditor;
+
+    public string SettingsPagePath => Lang.TabDocument;
 
     public FumenVisualEditorGlobalSettingViewModel()
     {

@@ -3,19 +3,26 @@ using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
+using Gekimini.Avalonia.Modules.Settings;
 using Gekimini.Avalonia.Platforms.Services.Window;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels;
 
-public partial class KeyBindingSettingViewModel : ViewModelBase
+[RegisterSingleton<ISettingsEditor>]
+public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
 {
     private readonly IKeyBindingManager keybindingManager;
     private KeyBindingDefinition[] definitions;
 
     public List<KeyBindingDefinition> Definitions { get; } = [];
+
+    public string SettingsPageName => Lang.KeyMap;
+
+    public string SettingsPagePath => Lang.TabDocument;
 
     [ObservableProperty]
     public partial bool IsShowNotAssignOnly { get; set; }

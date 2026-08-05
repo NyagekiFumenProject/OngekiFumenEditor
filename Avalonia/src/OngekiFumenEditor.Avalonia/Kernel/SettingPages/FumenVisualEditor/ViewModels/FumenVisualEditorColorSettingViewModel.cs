@@ -1,8 +1,10 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Gekimini.Avalonia.Modules.Settings;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Models;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Platforms.Services.Window;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -10,9 +12,14 @@ using System.Reflection;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
 
-public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase
+[RegisterSingleton<ISettingsEditor>]
+public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase, ISettingsEditor
 {
     public EditorGlobalSetting Setting => EditorGlobalSetting.Default;
+
+    public string SettingsPageName => Lang.VisualEditorLaneColorSettings;
+
+    public string SettingsPagePath => Lang.TabDocument + "\\" + Lang.TabEditor;
 
     public ColorPropertyWrapper[] ColorsProperties { get; }
 

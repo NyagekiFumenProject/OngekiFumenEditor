@@ -2,13 +2,20 @@ using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using CommunityToolkit.Mvvm.Input;
+using Gekimini.Avalonia.Modules.Settings;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.ViewModels;
 
-public partial class LogsSettingViewModel : ViewModelBase
+[RegisterSingleton<ISettingsEditor>]
+public partial class LogsSettingViewModel : ViewModelBase, ISettingsEditor
 {
     public LogSetting Setting => LogSetting.Default;
+
+    public string SettingsPageName => Lang.TabLogger;
+
+    public string SettingsPagePath => Lang.TabEnviorment;
 
     public LogsSettingViewModel()
     {
