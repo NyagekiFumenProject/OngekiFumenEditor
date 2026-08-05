@@ -8,7 +8,8 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:ConnectableObjectOperationViewModel,
@@ -22,8 +23,8 @@
             Cursor="Hand"
             PointerMoved="OnNextPointerMoved"
             PointerPressed="OnPointerPressed"
-            Text="{markup:Translate [DragToCreateNext]}"
-            ToolTip.Tip="{markup:Translate [DragToCreateNextToolTip]}" />
+            Text="{markup:Translate {x:Static languages:Lang+B.DragToCreateNext}}"
+            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.DragToCreateNextToolTip}}" />
         <!--<controls:CommonOperationButton
             Width="150"
             Margin="0,10,0,0"
@@ -45,8 +46,8 @@
             Cursor="Hand"
             PointerMoved="OnSplitPointerMoved"
             PointerPressed="OnPointerPressed"
-            Text="{markup:Translate [DragToSplit]}"
-            ToolTip.Tip="{markup:Translate [DragToSplitTipText]}" />
+            Text="{markup:Translate {x:Static languages:Lang+B.DragToSplit}}"
+            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.DragToSplitTipText}}" />
         <controls:CommonOperationButton
             Width="150"
             Margin="0,10,0,0"
@@ -55,8 +56,8 @@
             Cursor="Hand"
             PointerMoved="OnCurvePathControlPointerMoved"
             PointerPressed="OnPointerPressed"
-            Text="{markup:Translate [DragToCreateCurveControlPoint]}"
-            ToolTip.Tip="{markup:Translate [DragToCreateCurveControlPointTipText]}"
+            Text="{markup:Translate {x:Static languages:Lang+B.DragToCreateCurveControlPoint}}"
+            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.DragToCreateCurveControlPointTipText}}"
             IsVisible="{Binding IsEnableDragPathControl, Converter={StaticResource BoolToVisibilityConverter}}" />
         <Button
             Width="150"
@@ -68,11 +69,11 @@
             BorderBrush="DarkOrchid"
             BorderThickness="1,1,25,1"
             Command="{CompiledBinding InterpolateCommand}"
-            ToolTip.Tip="{markup:Translate [InterpolateLaneTipText]}"
+            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.InterpolateLaneTipText}}"
             IsVisible="{Binding IsStartObject, Converter={StaticResource BoolToVisibilityConverter}}">
             <TextBlock
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Text="{markup:Translate [InterpolateLane]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.InterpolateLane}}"
                 TextWrapping="Wrap" />
         </Button>
         <Button
@@ -85,11 +86,11 @@
             BorderBrush="Tomato"
             BorderThickness="1,1,25,1"
             Command="{CompiledBinding BrushAlongLaneCommand}"
-            ToolTip.Tip="{markup:Translate [BrushAlongLaneTipText]}"
+            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.BrushAlongLaneTipText}}"
             IsVisible="{Binding IsStartObject, Converter={StaticResource BoolToVisibilityConverter}}">
             <TextBlock
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Text="{markup:Translate [BrushAlongLane]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.BrushAlongLane}}"
                 TextWrapping="Wrap" />
         </Button>
         <Button
@@ -102,11 +103,11 @@
             BorderBrush="DarkGoldenrod"
             BorderThickness="1,1,25,1"
             Command="{CompiledBinding InterpolatePartCommand}"
-            ToolTip.Tip="{markup:Translate [InterpolatePartTipText]}"
+            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.InterpolatePartTipText}}"
             IsVisible="{Binding IsStartObject, Converter={StaticResource ReverseBoolToVisibilityConverter}}">
             <TextBlock
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Text="{markup:Translate [InterpolatePart]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.InterpolatePart}}"
                 TextWrapping="Wrap" />
         </Button>
     </StackPanel>

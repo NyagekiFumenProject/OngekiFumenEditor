@@ -6,10 +6,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Desktop.UI.Dialogs"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup;assembly=OngekiFumenEditor.Avalonia"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages;assembly=OngekiFumenEditor.Avalonia"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:DataType="local:ExceptionTermWindow"
-    Title="{markup:Translate [ExceptionTermWindowTitle]}"
+    Title="{markup:Translate {x:Static languages:Lang+B.ExceptionTermWindowTitle}}"
     Width="600"
     MaxHeight="500"
     Background="{DynamicResource EditorWindowBackgroundBrush}"
@@ -21,7 +22,7 @@
         <StackPanel Margin="10">
             <TextBlock
                 FontSize="15"
-                Text="{markup:Translate [ProgramThrowAndDump]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.ProgramThrowAndDump}}"
                 TextWrapping="Wrap" />
 
             <Rectangle
@@ -33,7 +34,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
-                    Text="{markup:Translate [RescueFolderPathSaveTo]}" />
+                    Text="{markup:Translate {x:Static languages:Lang+B.RescueFolderPathSaveTo}}" />
                 <ItemsControl Margin="10,0" ItemsSource="{Binding RescueFolderPaths}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="x:String">
@@ -53,7 +54,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
-                    Text="{markup:Translate [LogFileSaveTo]}" />
+                    Text="{markup:Translate {x:Static languages:Lang+B.LogFileSaveTo}}" />
                 <TextBlock
                     x:Name="LogFileLink"
                     Margin="10,0"
@@ -67,7 +68,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
-                    Text="{markup:Translate [DumpFileSaveTo]}" />
+                    Text="{markup:Translate {x:Static languages:Lang+B.DumpFileSaveTo}}" />
                 <TextBlock
                     x:Name="DumpFileLink"
                     Margin="10,0"
@@ -86,7 +87,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
-                    Text="{markup:Translate [InnerExceptionMessage]}" />
+                    Text="{markup:Translate {x:Static languages:Lang+B.InnerExceptionMessage}}" />
                 <TextBlock
                     Margin="10,5,10,0"
                     Text="{Binding ExceptionMessage}"
@@ -96,7 +97,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontWeight="Bold"
-                    Text="{markup:Translate [ApplicationVersion]}" />
+                    Text="{markup:Translate {x:Static languages:Lang+B.ApplicationVersion}}" />
                 <TextBlock
                     Margin="10,5,10,0"
                     Text="{Binding ProgramVersion}"
@@ -106,12 +107,12 @@
                 Name="Comfirm"
                 Margin="0,30,10,10"
                 HorizontalAlignment="Right"
-                Content="{markup:Translate [ComfirmClose]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.ComfirmClose}}"
                 FontWeight="Bold" />
             <Button
                 x:Name="CloseButton"
                 Padding="0,10,0,10"
-                Content="{markup:Translate [CloseProgram]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.CloseProgram}}"
                 IsEnabled="{Binding #Comfirm.IsChecked}" />
         </StackPanel>
     </ScrollViewer>

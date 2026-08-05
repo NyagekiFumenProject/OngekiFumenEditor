@@ -6,7 +6,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
@@ -22,7 +23,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Text="{markup:Translate [DragToCreateWallNext]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.DragToCreateWallNext}}"
                 TextWrapping="Wrap" />
         </Border>
         <Border
@@ -36,7 +37,7 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Text="{markup:Translate [DragToCreateWallEnd]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.DragToCreateWallEnd}}"
                 TextWrapping="Wrap" />
         </Border>
     </StackPanel>

@@ -8,7 +8,8 @@
     xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
@@ -52,8 +53,8 @@
             </Interaction.Behaviors>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).RefreshCommand}" Header="{markup:Translate [Refresh]}" />
-                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).CancelSelectedObjectsCommand}" Header="{markup:Translate [CancelSelected]}" />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).RefreshCommand}" Header="{markup:Translate {x:Static languages:Lang+B.Refresh}}" />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).CancelSelectedObjectsCommand}" Header="{markup:Translate {x:Static languages:Lang+B.CancelSelected}}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Styles>
@@ -68,7 +69,7 @@
             </DataGrid.Styles>
             <DataGrid.Columns>
 
-                <DataGridTemplateColumn Width="100" Header="{markup:Translate [Name]}">
+                <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.Name}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <TextBlock Text="{Binding Name}" />
@@ -76,7 +77,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="100" Header="{markup:Translate [ObjectTime]}">
+                <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ObjectTime}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <TextBlock Text="{Binding TGrid}" />
@@ -100,7 +101,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="550" Header="{markup:Translate [Description]}">
+                <DataGridTemplateColumn Width="550" Header="{markup:Translate {x:Static languages:Lang+B.Description}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <TextBlock Text="{Binding Description}" />

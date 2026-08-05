@@ -6,7 +6,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels"
     d:Background="White"
     mc:Ignorable="d">
@@ -23,7 +24,7 @@
             Command="{CompiledBinding GenerateLanesCommand}">
             <TextBlock
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Text="{markup:Translate [GenerateLaneObjects]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.GenerateLaneObjects}}"
                 TextWrapping="Wrap" />
         </Button>
     </StackPanel>

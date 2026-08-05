@@ -12,7 +12,8 @@
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.ValueConverters"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
@@ -38,7 +39,7 @@
                 Margin="0,0,5,0"
                 Padding="20,2,20,2"
                 Command="{Binding RefreshCurrentFumenCommand}"
-                Content="{markup:Translate [Refresh]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Refresh}}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}" />
             <ToggleButton
                 Background="Transparent"
@@ -57,7 +58,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{markup:Translate [Error]}">
+                        <Run Text="{markup:Translate {x:Static languages:Lang+B.Error}}">
                         </Run>
                         <Run Text="{Binding ErrorCount, Mode=OneWay}" />
                         <Run Text="{Binding EnableShowError, Mode=OneWay, Converter={StaticResource BoolToNotShowTextConverter}}" />
@@ -82,7 +83,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{markup:Translate [Problem]}">
+                        <Run Text="{markup:Translate {x:Static languages:Lang+B.Problem}}">
                         </Run>
                         <Run Text="{Binding ProblemCount, Mode=OneWay}" />
                         <Run Text="{Binding EnableShowProblem, Mode=OneWay, Converter={StaticResource BoolToNotShowTextConverter}}" />
@@ -107,7 +108,7 @@
                         Margin="5,0,0,0"
                         Padding="10,2,10,2"
                         VerticalAlignment="Center">
-                        <Run Text="{markup:Translate [Advice]}">
+                        <Run Text="{markup:Translate {x:Static languages:Lang+B.Advice}}">
                         </Run>
                         <Run Text="{Binding SuggestCount, Mode=OneWay}" />
                         <Run Text="{Binding EnableShowSuggest, Mode=OneWay, Converter={StaticResource BoolToNotShowTextConverter}}" />
@@ -146,7 +147,7 @@
                     x:DataType="base:ICheckResult"
                     Width="120"
                     Binding="{Binding Severity}"
-                    Header="{markup:Translate [Severity]}">
+                    Header="{markup:Translate {x:Static languages:Lang+B.Severity}}">
 
                 </DataGridTextColumn>
 
@@ -154,7 +155,7 @@
                     x:DataType="base:ICheckResult"
                     Width="100"
                     Binding="{Binding RuleName}"
-                    Header="{markup:Translate [RuleName]}">
+                    Header="{markup:Translate {x:Static languages:Lang+B.RuleName}}">
 
                 </DataGridTextColumn>
 
@@ -162,7 +163,7 @@
                     x:DataType="base:ICheckResult"
                     Width="400"
                     Binding="{Binding Description}"
-                    Header="{markup:Translate [Description]}">
+                    Header="{markup:Translate {x:Static languages:Lang+B.Description}}">
 
                 </DataGridTextColumn>
 
@@ -170,7 +171,7 @@
                     x:DataType="base:ICheckResult"
                     Width="200"
                     Binding="{Binding LocationDescription}"
-                    Header="{markup:Translate [WrongLocation2]}">
+                    Header="{markup:Translate {x:Static languages:Lang+B.WrongLocation2}}">
 
                 </DataGridTextColumn>
             </DataGrid.Columns>

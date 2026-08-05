@@ -6,7 +6,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ValueConverters"
@@ -20,49 +21,49 @@
         <valueconverters:IntToSolidBrush x:Key="IntToSolidBrush" />
     </gekViews:ViewBase.Resources>
     <StackPanel>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [AutoSave]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.AutoSave}}">
             <StackPanel Margin="10">
-                <CheckBox Content="{markup:Translate [EnableAutoSave]}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
+                <CheckBox Content="{markup:Translate {x:Static languages:Lang+B.EnableAutoSave}}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableAutoSave}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [AutoSaveInterval]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.AutoSaveInterval}}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.AutoSaveTimeInterval}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [TimesPerMin]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.TimesPerMin}}" />
                 </StackPanel>
             </StackPanel>
         </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [UndoRedo]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.UndoRedo}}">
             <StackPanel Margin="10">
                 <CheckBox VerticalContentAlignment="Center" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">
-                    <TextBlock Text="{markup:Translate [RememberUndoPlace]}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.RememberUndoPlace}}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">
-                    <TextBlock Text="{markup:Translate [LimitUndoCount]}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.LimitUndoCount}}" TextWrapping="Wrap" />
                 </CheckBox>
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SaveMaxCount_Part1]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SaveMaxCount_Part1}}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
                         Text="{Binding Setting.UndoActionSavingLimit}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SaveMaxCount_Part2]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SaveMaxCount_Part2}}" />
                 </StackPanel>
             </StackPanel>
         </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [UserInteraction]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.UserInteraction}}">
             <StackPanel Margin="10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -70,7 +71,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [EditorMouseWheelSpeed]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.EditorMouseWheelSpeed}}" />
                     <TextBox
                         Grid.Column="1"
                         Width="50"
@@ -81,33 +82,33 @@
                     <TextBlock
                         Grid.Column="2"
                         VerticalAlignment="Center"
-                        Text="{markup:Translate [EditorMouseWheelSpeed_Unit]}"
+                        Text="{markup:Translate {x:Static languages:Lang+B.EditorMouseWheelSpeed_Unit}}"
                         TextWrapping="Wrap" />
                 </Grid>
                 <CheckBox
                     Margin="0,10,0,0"
-                    Content="{markup:Translate [EnableHorizonScroll]}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.EnableHorizonScroll}}"
                     IsChecked="{Binding Setting.EnableXOffset}" />
                 <CheckBox
                     Margin="0,10,0,0"
-                    Content="{markup:Translate [EnableHorizonScrollBarDisplay]}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.EnableHorizonScrollBarDisplay}}"
                     IsChecked="{Binding Setting.ShowXOffsetScrollBar}"
                     IsEnabled="{Binding Setting.EnableXOffset}" />
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.EnablePlaceObjectBeyondAudioDuration}">
-                    <TextBlock Text="{markup:Translate [EnablePlaceObjectBeyondAudioDuration]}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.EnablePlaceObjectBeyondAudioDuration}}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.ReturnStartTimeAfterPause}">
-                    <TextBlock Text="{markup:Translate [ReturnStartTimeAfterPause]}" TextWrapping="Wrap" />
+                    <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.ReturnStartTimeAfterPause}}" TextWrapping="Wrap" />
                 </CheckBox>
             </StackPanel>
         </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [Render]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Render}}">
             <StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
                     <TextBlock Text="Limit FPS:" />
@@ -115,7 +116,7 @@
                         Width="50"
                         Margin="5,0"
                         Text="{Binding Setting.LimitFPS}" />
-                    <TextBlock x:Name="noLimitText" Text="{markup:Translate [NoLimit]}">
+                    <TextBlock x:Name="noLimitText" Text="{markup:Translate {x:Static languages:Lang+B.NoLimit}}">
                         <Interaction.Behaviors>
                             <DataTriggerBehavior
                                 Binding="{Binding Setting.LimitFPS}"
@@ -138,12 +139,12 @@
                         </Interaction.Behaviors>
                     </TextBlock>
                 </StackPanel>
-                <controls:GroupBox Margin="5,0,5,5" Header="{markup:Translate [PreviewMode]}">
+                <controls:GroupBox Margin="5,0,5,5" Header="{markup:Translate {x:Static languages:Lang+B.PreviewMode}}">
                     <StackPanel Margin="10">
                         <WrapPanel Orientation="Horizontal">
                             <TextBlock
                                 VerticalAlignment="Center"
-                                Text="{markup:Translate [BellBulletCountOverLimit_Part1]}"
+                                Text="{markup:Translate {x:Static languages:Lang+B.BellBulletCountOverLimit_Part1}}"
                                 TextWrapping="WrapWithOverflow" />
                             <StackPanel Orientation="Horizontal">
                                 <TextBox
@@ -151,16 +152,16 @@
                                     Margin="5,0,2,0"
                                     Text="{Binding Setting.ParallelCountLimit}">
                                 </TextBox>
-                                <TextBlock Text="{markup:Translate [BellBulletCountOverLimit_Sep]}">
+                                <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.BellBulletCountOverLimit_Sep}}">
                                 </TextBlock>
                             </StackPanel>
                             <TextBlock
                                 VerticalAlignment="Center"
-                                Text="{markup:Translate [BellBulletCountOverLimit_Part2]}"
+                                Text="{markup:Translate {x:Static languages:Lang+B.BellBulletCountOverLimit_Part2}}"
                                 TextWrapping="WrapWithOverflow" />
                         </WrapPanel>
                         <StackPanel Margin="0,10,0,5" Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate [BackgroundColor]}" />
+                            <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.BackgroundColor}}" />
                             <Button
                                 Width="60"
                                 Height="18"
@@ -173,11 +174,11 @@
                                 Cursor="Hand" />
                         </StackPanel>
                         <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
-                            <TextBlock Text="{markup:Translate [EnablePlayFieldDrawing]}" />
+                            <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.EnablePlayFieldDrawing}}" />
                         </CheckBox>
                         <StackPanel Margin="0,5,0,5" IsEnabled="{Binding Setting.EnablePlayFieldDrawing}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock VerticalAlignment="Center" Text="{markup:Translate [PlayFieldForegroundColor]}" />
+                                <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.PlayFieldForegroundColor}}" />
                                 <Button
                                     Width="60"
                                     Height="18"
@@ -190,14 +191,14 @@
                                     Cursor="Hand" />
                             </StackPanel>
                             <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.HideWallLaneWhenEnablePlayField}">
-                                <TextBlock Text="{markup:Translate [HideWallLaneWhenEnablePlayField]}" />
+                                <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.HideWallLaneWhenEnablePlayField}}" />
                             </CheckBox>
                         </StackPanel>
                         <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}">
-                            <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" TextWrapping="WrapWithOverflow" />
+                            <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.EnableShowPlayerLocation}}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
                         <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.ShowHitObjectEffectInPreviewMode}">
-                            <TextBlock Text="{markup:Translate [ShowHitObjectEffectInPreviewMode]}" TextWrapping="WrapWithOverflow" />
+                            <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.ShowHitObjectEffectInPreviewMode}}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
                     </StackPanel>
                 </controls:GroupBox>

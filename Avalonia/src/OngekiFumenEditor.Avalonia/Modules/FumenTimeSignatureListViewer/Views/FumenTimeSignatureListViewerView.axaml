@@ -11,7 +11,9 @@
     xmlns:converters2="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.ViewModels"
     xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views"
@@ -62,13 +64,13 @@
                     x:DataType="vm:DisplayTimeSignatureItem"
                     Width="100"
                     Binding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
-                    Header="{markup:Translate [AudioTime]}" />
+                    Header="{markup:Translate {x:Static languages:Lang+B.AudioTime}}" />
 
                 <DataGridTextColumn
                     x:DataType="vm:DisplayTimeSignatureItem"
                     Width="100"
                     Binding="{Binding StartTGrid}"
-                    Header="{markup:Translate [AudioTGrid]}" />
+                    Header="{markup:Translate {x:Static languages:Lang+B.AudioTGrid}}" />
 
                 <DataGridTextColumn
                     x:DataType="vm:DisplayTimeSignatureItem"
@@ -76,7 +78,7 @@
                     Binding="{Binding BPMChange.BPM}"
                     Header="Bpm" />
 
-                <DataGridTemplateColumn Width="100" Header="{markup:Translate [TimeSignature]}">
+                <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.TimeSignature}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:DisplayTimeSignatureItem">
                             <TextBlock>

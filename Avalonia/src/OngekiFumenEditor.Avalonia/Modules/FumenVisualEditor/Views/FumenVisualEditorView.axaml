@@ -8,7 +8,8 @@
     xmlns:controls1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI"
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:opentkcontrol="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -50,7 +51,7 @@
 
         <Grid.ContextMenu>
             <ContextMenu x:Name="EditorContextMenu">
-                <MenuItem Header="{markup:Translate [MenuSelecting]}">
+                <MenuItem Header="{markup:Translate {x:Static languages:Lang+B.MenuSelecting}}">
                     <MenuItem Header="Entire lane"
                               Command="{Binding MenuItemAction_SelectEntireLaneCommand}"
                               IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
@@ -58,45 +59,45 @@
                         Command="{Binding MenuItemAction_SelectAttachedCurvesCommand}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
                     <Separator />
-                    <MenuItem Command="{Binding MenuItemAction_SelectAllCommand}" Header="{markup:Translate [SelectAllObjects]}" />
-                    <MenuItem Command="{Binding MenuItemAction_ReverseSelectCommand}" Header="{markup:Translate [ReverseSelectAllObjects]}" />
+                    <MenuItem Command="{Binding MenuItemAction_SelectAllCommand}" Header="{markup:Translate {x:Static languages:Lang+B.SelectAllObjects}}" />
+                    <MenuItem Command="{Binding MenuItemAction_ReverseSelectCommand}" Header="{markup:Translate {x:Static languages:Lang+B.ReverseSelectAllObjects}}" />
                 </MenuItem>
-                <MenuItem Header="{markup:Translate [ToSelectedObjects]}">
-                    <MenuItem Command="{Binding KeyboardAction_DeleteSelectingObjectsCommand}" Header="{markup:Translate [Delete]}" />
-                    <MenuItem Command="{Binding MenuItemAction_CopySelectedObjectsCommand}" Header="{markup:Translate [CopyCopiable]}" />
-                    <MenuItem Header="{markup:Translate [ControlTimeline]}">
-                        <MenuItem Command="{Binding MenuItemAction_RememberSelectedObjectAudioTimeCommand}" Header="{markup:Translate [RememberAudioTime]}" />
-                        <MenuItem Command="{Binding MenuItemAction_RecoverySelectedObjectToAudioTimeCommand}" Header="{markup:Translate [RecoveryAudioTime]}" />
+                <MenuItem Header="{markup:Translate {x:Static languages:Lang+B.ToSelectedObjects}}">
+                    <MenuItem Command="{Binding KeyboardAction_DeleteSelectingObjectsCommand}" Header="{markup:Translate {x:Static languages:Lang+B.Delete}}" />
+                    <MenuItem Command="{Binding MenuItemAction_CopySelectedObjectsCommand}" Header="{markup:Translate {x:Static languages:Lang+B.CopyCopiable}}" />
+                    <MenuItem Header="{markup:Translate {x:Static languages:Lang+B.ControlTimeline}}">
+                        <MenuItem Command="{Binding MenuItemAction_RememberSelectedObjectAudioTimeCommand}" Header="{markup:Translate {x:Static languages:Lang+B.RememberAudioTime}}" />
+                        <MenuItem Command="{Binding MenuItemAction_RecoverySelectedObjectToAudioTimeCommand}" Header="{markup:Translate {x:Static languages:Lang+B.RecoveryAudioTime}}" />
                     </MenuItem>
 
                     <Separator />
 
                     <MenuItem
                         Command="{Binding MenuItemAction_MirrorSelectionXGridZeroCommand}"
-                        Header="{markup:Translate [MenuMirrorSelectionXGridZero]}"
+                        Header="{markup:Translate {x:Static languages:Lang+B.MenuMirrorSelectionXGridZero}}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
                     <MenuItem
                         Command="{Binding MenuItemAction_MirrorSelectionXGridCommand}"
-                        Header="{markup:Translate [MenuMirrorSelectionXGrid]}"
+                        Header="{markup:Translate {x:Static languages:Lang+B.MenuMirrorSelectionXGrid}}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionMovableItemsCheckConverter}}" />
                     <MenuItem
                         Command="{Binding MenuItemAction_MirrorLaneColorsCommand}"
-                        Header="{markup:Translate [MenuMirrorSelectionLaneColors]}"
+                        Header="{markup:Translate {x:Static languages:Lang+B.MenuMirrorSelectionLaneColors}}"
                         IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionFullLaneCheckConverter}}" />
                 </MenuItem>
-                <MenuItem Header="{markup:Translate [ToCopiedObjects]}">
-                    <MenuItem Header="{markup:Translate [ToPaste]}">
-                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsDirectlyCommand}" Header="{markup:Translate [PasteDirectly]}" />
-                        <!--<MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate [PasteToMouse]}" />-->
+                <MenuItem Header="{markup:Translate {x:Static languages:Lang+B.ToCopiedObjects}}">
+                    <MenuItem Header="{markup:Translate {x:Static languages:Lang+B.ToPaste}}">
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsDirectlyCommand}" Header="{markup:Translate {x:Static languages:Lang+B.PasteDirectly}}" />
+                        <!--<MenuItem cal:Message.Attach="MenuItemAction_PasteCopiesObjects($executionContext)" Header="{markup:Translate {x:Static languages:Lang+B.PasteToMouse}}" />-->
                         <Separator />
-                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirrorCommand}" Header="{markup:Translate [PasteForHorizonMirror]}" />
-                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirrorCommand}" Header="{markup:Translate [PasteForVerticalMirror]}" />
-                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsXGridZeroMirrorCommand}" Header="{markup:Translate [PasteForZeroXGridMirror]}" />
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterXGridMirrorCommand}" Header="{markup:Translate {x:Static languages:Lang+B.PasteForHorizonMirror}}" />
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsSelectedRangeCenterTGridMirrorCommand}" Header="{markup:Translate {x:Static languages:Lang+B.PasteForVerticalMirror}}" />
+                        <MenuItem Command="{Binding MenuItemAction_PasteCopiesObjectsAsXGridZeroMirrorCommand}" Header="{markup:Translate {x:Static languages:Lang+B.PasteForZeroXGridMirror}}" />
                     </MenuItem>
                 </MenuItem>
                 <Separator />
                 <MenuItem
-                    Header="{markup:Translate [ShowFPS]}"
+                    Header="{markup:Translate {x:Static languages:Lang+B.ShowFPS}}"
                     ToggleType="CheckBox"
                     IsChecked="{Binding IsDisplayFPS}" />
             </ContextMenu>

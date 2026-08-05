@@ -5,11 +5,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs"
     x:DataType="local:ConfigKeyBindingDialog"
-    Title="{markup:Translate [AssignKeybind]}"
+    Title="{markup:Translate {x:Static languages:Lang+B.AssignKeybind}}"
     Width="300"
     Background="{DynamicResource EditorWindowBackgroundBrush}"
     SizeToContent="WidthAndHeight"
@@ -18,8 +19,14 @@
     <StackPanel Margin="10">
         <TextBlock
             HorizontalAlignment="Center"
-            FontSize="16"
-            Text="{Binding Definition.Name, StringFormat={markup:Translate [AssignKeyBinding]}}" />
+            FontSize="16">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                    <Binding Path="Text" Source="{x:Static languages:Lang+B.AssignKeyBinding}" />
+                    <Binding Path="Definition.Name" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
         <TextBlock
             Margin="0,15"
             HorizontalAlignment="Center"
@@ -32,8 +39,14 @@
             FontSize="16"
             IsVisible="{Binding ConflictDefinition,Converter={StaticResource NullToVisibilityConverter} }"
             Foreground="OrangeRed"
-            FontWeight="Bold"
-            Text="{Binding ConflictDefinition.Name, StringFormat={markup:Translate [KeyBindingConflictDetect]}}" />
+            FontWeight="Bold">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                    <Binding Path="Text" Source="{x:Static languages:Lang+B.KeyBindingConflictDetect}" />
+                    <Binding Path="ConflictDefinition.Name" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
@@ -44,7 +57,7 @@
                 x:Name="ConfirmButton"
                 Margin="5"
                 Padding="10,5,10,5"
-                Content="{markup:Translate [Comfirm]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Comfirm}}"
                 FontSize="16">
             </Button>
 
@@ -53,7 +66,7 @@
                 Grid.Column="1"
                 Margin="5"
                 Padding="10,5,10,5"
-                Content="{markup:Translate [Clear]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Clear}}"
                 FontSize="16">
             </Button>
 
@@ -62,7 +75,7 @@
                 Grid.Column="2"
                 Margin="5"
                 Padding="10,5,10,5"
-                Content="{markup:Translate [Reset]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Reset}}"
                 FontSize="16">
             </Button>
         </Grid>

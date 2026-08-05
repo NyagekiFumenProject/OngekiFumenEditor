@@ -6,7 +6,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:keybinding="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.KeyBinding"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
@@ -32,8 +33,7 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     FontSize="15"
-                    Text="{markup:Translate [KeywordFilter],
-                                            StringFormat={}:}" />
+                    Text="{markup:Translate {x:Static languages:Lang+B.KeywordFilter}}" />
                 <TextBox
                     Width="200"
                     Margin="10,0"
@@ -44,7 +44,7 @@
             <StackPanel Margin="0,5,0,5" Orientation="Horizontal">
                 <CheckBox
                     VerticalAlignment="Center"
-                    Content="{markup:Translate [ShowNotAssignKeybindingOnly]}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.ShowNotAssignKeybindingOnly}}"
                     IsChecked="{Binding IsShowNotAssignOnly}" />
             </StackPanel>
             <Grid Margin="0,0,0,10">
@@ -52,14 +52,14 @@
                     Padding="10,4"
                     HorizontalAlignment="Left"
                     Command="{Binding UpdateDisplayListCommand}"
-                    Content="{markup:Translate [ApplyFilter]}" />
+                    Content="{markup:Translate {x:Static languages:Lang+B.ApplyFilter}}" />
                 <Button
                     Margin="0,0"
                     Padding="10,5"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Command="{Binding ResetAllDefinitionsCommand}"
-                    Content="{markup:Translate [ResetAllKeybindings]}" />
+                    Content="{markup:Translate {x:Static languages:Lang+B.ResetAllKeybindings}}" />
             </Grid>
             <Border Height="1" Background="Gray" />
         </StackPanel>
@@ -95,7 +95,7 @@
                             Padding="10,5"
                             Command="{Binding $parent[views:KeyBindingSettingView].((vm:KeyBindingSettingViewModel)DataContext).ChangeKeybindCommand}"
                             CommandParameter="{Binding}"
-                            Content="{markup:Translate [Change]}" />
+                            Content="{markup:Translate {x:Static languages:Lang+B.Change}}" />
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

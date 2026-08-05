@@ -1,11 +1,12 @@
-﻿<views:WindowViewBase
+<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenView"
     x:DataType="vm:SplashScreenViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels"
     Title="Welcome"
@@ -56,7 +57,7 @@
                 Grid.Column="1"
                 Margin="0,0,5,0"
                 HorizontalAlignment="Right"
-                Text="{markup:Translate [RequestRestartProgram]}"
+                Text="{markup:Translate {x:Static languages:Lang+B.RequestRestartProgram}}"
                 IsVisible="{CompiledBinding IsRequestRestartProgram}">
             </TextBlock>
             <StackPanel
@@ -65,7 +66,7 @@
                 Orientation="Horizontal">
                 <Label
                     VerticalAlignment="Center"
-                    Content="{markup:Translate [Languages]}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.Languages}}"
                     FontSize="20" />
                 <ComboBox
                     Width="250"
@@ -88,7 +89,7 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <Label Content="{markup:Translate [RecentFiles]}" FontSize="20" />
+                    <Label Content="{markup:Translate {x:Static languages:Lang+B.RecentFiles}}" FontSize="20" />
                     <StackPanel
                         Margin="0,5"
                         Orientation="Horizontal"
@@ -163,7 +164,7 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                <Label Content="{markup:Translate [Start]}" FontSize="20" />
+                <Label Content="{markup:Translate {x:Static languages:Lang+B.Start}}" FontSize="20" />
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel Width="350">
 
@@ -191,10 +192,10 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="{markup:Translate [CreateProject]}"
+                                            Content="{markup:Translate {x:Static languages:Lang+B.CreateProject}}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="{markup:Translate [CreateProjectTipText]}" FontSize="15" />
+                                        <Label Content="{markup:Translate {x:Static languages:Lang+B.CreateProjectTipText}}" FontSize="15" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -223,10 +224,10 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="{markup:Translate [OpenProject]}"
+                                            Content="{markup:Translate {x:Static languages:Lang+B.OpenProject}}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="{markup:Translate [OpenProjectTipText]}" FontSize="15" />
+                                        <Label Content="{markup:Translate {x:Static languages:Lang+B.OpenProjectTipText}}" FontSize="15" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -255,10 +256,10 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="{markup:Translate [FastOpen2]}"
+                                            Content="{markup:Translate {x:Static languages:Lang+B.FastOpen2}}"
                                             FontSize="20"
                                             FontWeight="Bold" />
-                                        <Label Content="{markup:Translate [FastOpen2TipText]}" FontSize="15" />
+                                        <Label Content="{markup:Translate {x:Static languages:Lang+B.FastOpen2TipText}}" FontSize="15" />
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -291,12 +292,12 @@
                                         Margin="10"
                                         VerticalAlignment="Center">
                                         <Label
-                                            Content="{markup:Translate [Tutorial]}"
+                                            Content="{markup:Translate {x:Static languages:Lang+B.Tutorial}}"
                                             FontSize="20"
                                             FontWeight="Bold" />
                                         <TextBlock
                                             FontSize="15"
-                                            Text="{markup:Translate [TutorialTipText]}"
+                                            Text="{markup:Translate {x:Static languages:Lang+B.TutorialTipText}}"
                                             TextWrapping="Wrap" />
                                     </StackPanel>
                                 </Grid>
@@ -309,7 +310,7 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     IsChecked="{CompiledBinding DisableShowSplashScreenAfterBoot, Mode=TwoWay}">
-                    <TextBlock FontSize="15" Text="{markup:Translate [NotShowAnymore]}" />
+                    <TextBlock FontSize="15" Text="{markup:Translate {x:Static languages:Lang+B.NotShowAnymore}}" />
                 </CheckBox>
             </Grid>
         </Grid>

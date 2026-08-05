@@ -1,4 +1,4 @@
-﻿<views:WindowViewBase
+<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.Dialog.BrushTGridRangeDialogView"
     x:CompileBindings="True"
@@ -9,8 +9,10 @@
     xmlns:dialog="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.Dialog"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
-    Title="{markup:Translate [BrushTGridRangeDialog]}"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
+    Title="{markup:Translate {x:Static languages:Lang+B.BrushTGridRangeDialog}}"
     Width="220"
     d:DataContext="{d:DesignInstance Type=dialog:BrushTGridRangeDialogViewModel}"
     Background="{StaticResource EditorWindowBackgroundBrush}"
@@ -76,13 +78,13 @@
                 Margin="10"
                 Padding="10,5,10,5"
                 Command="{Binding ConfirmCommand}"
-                Content="{markup:Translate [Confirm]}" />
+                Content="{markup:Translate {x:Static languages:Lang+B.Confirm}}" />
             <Button
                 Grid.Column="1"
                 Margin="10"
                 Padding="10,5,10,5"
                 Command="{Binding CancelCommand}"
-                Content="{markup:Translate [Cancel]}" />
+                Content="{markup:Translate {x:Static languages:Lang+B.Cancel}}" />
         </Grid>
     </Grid>
 </views:WindowViewBase>

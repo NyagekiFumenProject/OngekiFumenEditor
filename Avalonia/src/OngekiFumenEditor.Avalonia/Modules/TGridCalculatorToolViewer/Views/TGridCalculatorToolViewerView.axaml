@@ -9,7 +9,9 @@
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.TGridCalculatorToolViewer.ViewModels"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:TGridCalculatorToolViewerViewModel,
@@ -58,20 +60,20 @@
                 </StackPanel>
             </StackPanel>
 
-            <controls:GroupBox Header="{markup:Translate [Action]}">
+            <controls:GroupBox Header="{markup:Translate {x:Static languages:Lang+B.Action}}">
                 <StackPanel>
                     <Button
                         Margin="5,5,0,5"
                         Padding="2,5,2,5"
                         HorizontalAlignment="Stretch"
                         Command="{Binding ScrollEditorToTGridCommand}">
-                        <TextBlock Text="{markup:Translate [EditorJumpToSpecifyTGrid]}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.EditorJumpToSpecifyTGrid}}" TextWrapping="Wrap" />
                     </Button>
                     <CheckBox
                         Margin="10,0,0,0"
                         VerticalContentAlignment="Center"
                         IsChecked="{Binding IsAutoUpdateTimeIfSelectedObject}">
-                        <TextBlock Text="{markup:Translate [AutoUpdateCurrentObjectTime]}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.AutoUpdateCurrentObjectTime}}" TextWrapping="Wrap" />
                     </CheckBox>
                     <Button
                         Margin="5,5,0,5"
@@ -79,7 +81,7 @@
                         HorizontalAlignment="Stretch"
                         Command="{Binding ApplyTGridToObjectCommand}"
                         IsVisible="{Binding IsSelectedObject, Converter={StaticResource BoolToVisibilityConverter}}">
-                        <TextBlock Text="{markup:Translate [GiveTGridToSelectedObject]}" TextWrapping="Wrap" />
+                        <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.GiveTGridToSelectedObject}}" TextWrapping="Wrap" />
                     </Button>
                 </StackPanel>
             </controls:GroupBox>

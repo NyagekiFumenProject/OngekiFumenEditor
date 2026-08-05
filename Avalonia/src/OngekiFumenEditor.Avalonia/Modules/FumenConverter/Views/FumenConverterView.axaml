@@ -3,13 +3,14 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenConverter.ViewModels"
     x:DataType="vm:FumenConverterViewModel"
-    Title="{markup:Translate [FumenConverterWindow]}"
+    Title="{markup:Translate {x:Static languages:Lang+B.FumenConverterWindow}}"
     Width="500"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:FumenConverterViewModel}"
@@ -20,7 +21,7 @@
         <controls:GroupBox
             Margin="5"
             Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-            Header="{markup:Translate [FumenSource]}">
+            Header="{markup:Translate {x:Static languages:Lang+B.FumenSource}}">
             <StackPanel>
                 <RadioButton
                     Margin="0,5,0,5"
@@ -32,7 +33,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-                            Text="{markup:Translate [LoadFromFile]}">
+                            Text="{markup:Translate {x:Static languages:Lang+B.LoadFromFile}}">
                         </TextBlock>
                         <TextBlock
                             Width="280"
@@ -46,7 +47,7 @@
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
                             Command="{CompiledBinding OpenSelectInputFileCommand}"
-                            Content="{markup:Translate [Browser]}"
+                            Content="{markup:Translate {x:Static languages:Lang+B.Browser}}"
                             Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
                     </StackPanel>
                 </RadioButton>
@@ -60,7 +61,7 @@
                             Margin="0,0,10,0"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-                            Text="{markup:Translate [LoadFromCurrentEditor]}">
+                            Text="{markup:Translate {x:Static languages:Lang+B.LoadFromCurrentEditor}}">
                         </TextBlock>
                         <TextBlock Foreground="{StaticResource EditorToolWindowForegroundBrush}" Text="{CompiledBinding CurrentEditorName}">
                         </TextBlock>
@@ -72,13 +73,13 @@
         <controls:GroupBox
             Margin="5"
             Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-            Header="{markup:Translate [Output]}">
+            Header="{markup:Translate {x:Static languages:Lang+B.Output}}">
             <StackPanel Orientation="Horizontal">
                 <TextBlock
                     Margin="0,0,10,0"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-                    Text="{markup:Translate [SaveToFile]}">
+                    Text="{markup:Translate {x:Static languages:Lang+B.SaveToFile}}">
                 </TextBlock>
                 <TextBlock
                     Width="280"
@@ -92,7 +93,7 @@
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
                     Command="{CompiledBinding OpenSelectOutputFileCommand}"
-                    Content="{markup:Translate [Browser]}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.Browser}}"
                     Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
             </StackPanel>
         </controls:GroupBox>
@@ -101,7 +102,7 @@
             Margin="5,10,5,5"
             Padding="0,10,0,10"
             Command="{CompiledBinding ExecuteConverterCommand}"
-            Content="{markup:Translate [Execute]}"
+            Content="{markup:Translate {x:Static languages:Lang+B.Execute}}"
             Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
     </StackPanel>
 </views:WindowViewBase>

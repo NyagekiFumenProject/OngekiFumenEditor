@@ -7,7 +7,8 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:reorderBehaviors="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Behaviors"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
@@ -22,11 +23,11 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
-            <Button Command="{Binding ResetDefaultCommand}" Content="{markup:Translate [ResetDefault]}" />
+            <Button Command="{Binding ResetDefaultCommand}" Content="{markup:Translate {x:Static languages:Lang+B.ResetDefault}}" />
             <Button
                 Margin="5,0"
                 Command="{Binding SaveCommand}"
-                Content="{markup:Translate [Save]}" />
+                Content="{markup:Translate {x:Static languages:Lang+B.Save}}" />
         </StackPanel>
         <DataGrid
             Grid.Row="1"
@@ -52,7 +53,7 @@
                     x:DataType="vm:RenderControlItem"
                     Width="30"
                     Binding="{Binding RenderOrder}"
-                    Header="{markup:Translate [RenderOrder]}" />
+                    Header="{markup:Translate {x:Static languages:Lang+B.RenderOrder}}" />
                 <DataGridTemplateColumn Header="Design">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:RenderControlItem">
@@ -76,7 +77,7 @@
                 <DataGridTextColumn
                     x:DataType="vm:RenderControlItem"
                     Binding="{Binding Name}"
-                    Header="{markup:Translate [Name]}" />
+                    Header="{markup:Translate {x:Static languages:Lang+B.Name}}" />
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

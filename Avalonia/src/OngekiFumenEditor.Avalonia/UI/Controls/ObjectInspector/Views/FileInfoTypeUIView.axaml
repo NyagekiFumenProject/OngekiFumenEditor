@@ -8,7 +8,9 @@
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:gemini="http://schemas.timjones.io/gemini"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views"
-    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties" xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels"
     d:Background="White"
@@ -35,7 +37,7 @@
                 Padding="10,2,10,2"
                 Command="{Binding SelectFileCommand}"
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                Content="{markup:Translate [SelectFile]}" />
+                Content="{markup:Translate {x:Static languages:Lang+B.SelectFile}}" />
             <TextBlock
                 Grid.Row="1"
                 Grid.ColumnSpan="2"

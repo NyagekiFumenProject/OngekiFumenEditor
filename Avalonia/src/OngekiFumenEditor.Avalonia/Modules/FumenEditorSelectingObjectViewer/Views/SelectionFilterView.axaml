@@ -5,7 +5,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="https://github.com/avaloniaui/design"
-             xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+             xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
              xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters"
              xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels"
              xmlns:system="clr-namespace:System;assembly=System.Runtime"
@@ -60,7 +61,7 @@
                 <CheckBox Grid.Row="0" Grid.Column="0" IsChecked="{Binding IsEnabled, Mode=TwoWay}" Content="{Binding Text}" />
                 <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding InputText, Mode=TwoWay}" IsEnabled="{Binding IsEnabled}" />
                 <CheckBox Grid.Row="0" Grid.Column="2" IsChecked="{Binding IsRegex, Mode=TwoWay}" IsEnabled="{Binding IsEnabled}"
-                          Content="{markup:Translate [SelectionFilter_OptionLabelTagRegex]}" />
+                          Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_OptionLabelTagRegex}}" />
                 <Label Grid.Row="1" Grid.Column="1"
                            Content="{Binding MatchCount, Converter={StaticResource ParenthesizeTextConverter}}"
                            FontStyle="Italic" VerticalContentAlignment="Center"
@@ -106,7 +107,7 @@
                     <DropDownButton.Flyout>
                         <Flyout>
                             <StackPanel x:DataType="selectionFilter:BulletPaletteFilterOption" MinWidth="200">
-                                <CheckBox Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
+                                <CheckBox Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_ActionLabelSelectAll}}"
                                           IsChecked="{Binding IsAllSelected, Mode=TwoWay}" />
                                 <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto">
                                     <ItemsControl ItemsSource="{Binding Items}">
@@ -137,7 +138,7 @@
                     <DropDownButton.Flyout>
                         <Flyout>
                             <StackPanel x:DataType="selectionFilter:DockableObjectLaneFilterOption" MinWidth="250">
-                                <CheckBox Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}"
+                                <CheckBox Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_ActionLabelSelectAll}}"
                                           IsChecked="{Binding IsAllSelected, Mode=TwoWay}" />
                                 <ItemsControl ItemsSource="{Binding Values}">
                                     <ItemsControl.ItemTemplate>
@@ -201,10 +202,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderObjectType]}" />
+                    <Label Grid.Column="0" Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_HeaderObjectType}}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Button Command="{Binding SelectAllObjectTypesCommand}" Content="{markup:Translate [SelectionFilter_ActionLabelSelectAll]}" />
-                        <Button Command="{Binding ResetSelectedObjectTypesCommand}" Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}" />
+                        <Button Command="{Binding SelectAllObjectTypesCommand}" Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_ActionLabelSelectAll}}" />
+                        <Button Command="{Binding ResetSelectedObjectTypesCommand}" Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_ActionLabelResetSelection}}" />
                     </StackPanel>
                 </Grid>
 
@@ -252,9 +253,9 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Column="0" Content="{markup:Translate [SelectionFilter_HeaderOptions]}" />
+                    <Label Grid.Column="0" Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_HeaderOptions}}" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Stretch">
-                        <Button Command="{Binding ResetFilterOptionsCommand}" Content="{markup:Translate [SelectionFilter_ActionLabelResetSelection]}" />
+                        <Button Command="{Binding ResetFilterOptionsCommand}" Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_ActionLabelResetSelection}}" />
                     </StackPanel>
                 </Grid>
 
@@ -293,17 +294,17 @@
             <Separator />
 
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="5">
-                <CheckBox Content="{markup:Translate [SelectionFilter_OptionLabelInvertFilter]}"
+                <CheckBox Content="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_OptionLabelInvertFilter}}"
                           Classes="WrappedTextCheckBox"
                           IsChecked="{Binding IsInvertFilter, Mode=TwoWay}"
-                          ToolTip.Tip="{markup:Translate [SelectionFilter_OptionLabelInvertFilterTooltip]}"
+                          ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.SelectionFilter_OptionLabelInvertFilterTooltip}}"
                           ToolTip.ShowDelay="100" />
             </StackPanel>
 
             <TextBlock Text="{Binding FilterOutcomeText}" Margin="5" />
 
             <StackPanel Orientation="Horizontal" Margin="5">
-                <Button Command="{Binding ApplyFilterToSelectionCommand}" Content="{markup:Translate [ApplyFilter]}" />
+                <Button Command="{Binding ApplyFilterToSelectionCommand}" Content="{markup:Translate {x:Static languages:Lang+B.ApplyFilter}}" />
             </StackPanel>
         </StackPanel>
     </Grid>

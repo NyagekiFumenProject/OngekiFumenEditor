@@ -8,7 +8,8 @@
     xmlns:converters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Converters"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:reorderBehaviors="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Behaviors"
     xmlns:editorObjects="clr-namespace:OngekiFumenEditor.Avalonia.Base.EditorObjects"
@@ -43,7 +44,7 @@
                     Width="100"
                     Margin="10,0,10,0"
                     Text="{Binding CreateNewGroupName}" />
-                <Button Command="{Binding CreateNewGroupCommand}" Content="{markup:Translate [NewItemGroup]}" />
+                <Button Command="{Binding CreateNewGroupCommand}" Content="{markup:Translate {x:Static languages:Lang+B.NewItemGroup}}" />
             </toolBar:ToolBar>
         </StackPanel>
 
@@ -200,8 +201,14 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <TextBlock
-                VerticalAlignment="Center"
-                Text="{Binding CurrentSelectedSoflanGroupWrapItem.DisplayName, StringFormat={markup:Translate [CurrentDisplaySelectedSoflanPointList]}}" />
+                VerticalAlignment="Center">
+                <TextBlock.Text>
+                    <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                        <Binding Path="Text" Source="{x:Static languages:Lang+B.CurrentDisplaySelectedSoflanPointList}" />
+                        <Binding Path="CurrentSelectedSoflanGroupWrapItem.DisplayName" />
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
 
             <!--  not support yet  -->
             <CheckBox
@@ -210,7 +217,7 @@
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
                 IsEnabled="False">
-                <TextBlock Text="{markup:Translate [EditorShowSoflanPointList]}" />
+                <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.EditorShowSoflanPointList}}" />
             </CheckBox>
         </Grid>
         <DataGrid

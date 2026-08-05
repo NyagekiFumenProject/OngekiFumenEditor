@@ -1,4 +1,4 @@
-﻿<views:WindowViewBase
+<views:WindowViewBase
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.Dialogs.BulletPalleteSelectDialogView"
     x:Name="Root"
@@ -10,12 +10,13 @@
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:dialog="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels.Dialogs"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.Dialogs"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:objects="clr-namespace:OngekiFumenEditor.Avalonia.Base.OngekiObjects"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters"
-    Title="{markup:Translate [BulletPalleteSelectDialogTitle]}"
+    Title="{markup:Translate {x:Static languages:Lang+B.BulletPalleteSelectDialogTitle}}"
     Width="400"
     Height="300"
     d:DataContext="{d:DesignInstance Type=dialog:BulletPalleteSelectDialogViewModel}"
@@ -61,15 +62,15 @@
                         x:DataType="objects:BulletPallete"
                         Width="60"
                         Binding="{Binding StrID}"
-                        Header="{markup:Translate [BulletPaletteId]}" />
+                        Header="{markup:Translate {x:Static languages:Lang+B.BulletPaletteId}}" />
                     <DataGridTextColumn
                         x:DataType="objects:BulletPallete"
                         Width="120"
                         Binding="{Binding EditorName}"
-                        Header="{markup:Translate [Name]}">
+                        Header="{markup:Translate {x:Static languages:Lang+B.Name}}">
                     </DataGridTextColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootSource}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -84,7 +85,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                    <DataGridTemplateColumn Width="80" Header="{markup:Translate {x:Static languages:Lang+B.ShootOffset}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -99,7 +100,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootTarget}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -114,7 +115,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                    <DataGridTemplateColumn Width="60" Header="{markup:Translate {x:Static languages:Lang+B.BulletSpeed}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -129,7 +130,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.BulletSize}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -144,7 +145,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [BulletType]}">
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.BulletType}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -159,7 +160,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.RandomOffsetRange}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBlock HorizontalAlignment="Center">
@@ -184,13 +185,13 @@
                 Margin="10"
                 Padding="10,5,10,5"
                 Command="{Binding ConfirmCommand}"
-                Content="{markup:Translate [Confirm]}" />
+                Content="{markup:Translate {x:Static languages:Lang+B.Confirm}}" />
             <Button
                 Grid.Column="1"
                 Margin="10"
                 Padding="10,5,10,5"
                 Command="{Binding CancelCommand}"
-                Content="{markup:Translate [Cancel]}" />
+                Content="{markup:Translate {x:Static languages:Lang+B.Cancel}}" />
         </Grid>
     </Grid>
 </views:WindowViewBase>

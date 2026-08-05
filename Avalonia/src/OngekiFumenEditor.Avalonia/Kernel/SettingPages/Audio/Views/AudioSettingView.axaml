@@ -6,7 +6,8 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels"
@@ -17,10 +18,10 @@
     d:DesignWidth="800"
     mc:Ignorable="d" xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls">
     <StackPanel>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [Output]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Output}}">
             <StackPanel Margin="10">
                 <StackPanel IsVisible="{Binding CanSelectAudioOutput}" Orientation="Horizontal">
-                    <Label Content="{markup:Translate [OutputMethod]}" />
+                    <Label Content="{markup:Translate {x:Static languages:Lang+B.OutputMethod}}" />
                     <ComboBox
                         Width="100"
                         VerticalAlignment="Center"
@@ -37,7 +38,7 @@
                     Text="{Binding AudioOutputFallbackMessage}"
                     TextWrapping="Wrap" />
                 <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                    <Label Content="{markup:Translate [SampleRates]}" />
+                    <Label Content="{markup:Translate {x:Static languages:Lang+B.SampleRates}}" />
                     <TextBox
                         Width="75"
                         VerticalAlignment="Center"
@@ -47,29 +48,29 @@
         </controls:GroupBox>
         <controls:GroupBox
             Margin="5"
-            Header="{markup:Translate [Music]}"
+            Header="{markup:Translate {x:Static languages:Lang+B.Music}}"
             IsVisible="{Binding SupportsVarspeed}">
             <StackPanel Margin="10">
                 <CheckBox
                     VerticalContentAlignment="Center"
-                    Content="{markup:Translate [EnableVarspeed]}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.EnableVarspeed}}"
                     IsChecked="{Binding Setting.EnableVarspeed}" />
                 <StackPanel
                     Margin="20,10,0,0"
                     IsEnabled="{Binding Setting.EnableVarspeed}"
                     Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [VarspeedReadDurationMs]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.VarspeedReadDurationMs}}" />
                     <TextBox
                         Width="50"
                         Margin="5,0"
                         VerticalAlignment="Center"
                         Text="{Binding Setting.VarspeedReadDurationMs}">
                     </TextBox>
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Millisecond]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.Millisecond}}" />
                 </StackPanel>
             </StackPanel>
         </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [Sound]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Sound}}">
             <StackPanel Margin="10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -77,7 +78,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SoundFolderPath]}" />
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SoundFolderPath}}" />
                     <TextBox
                         Grid.Column="1"
                         Margin="10,0,10,0"
@@ -88,7 +89,7 @@
                         Grid.Column="2"
                         Padding="20,2,20,2"
                         Command="{Binding SelectSoundFolderCommand}"
-                        Content="{markup:Translate [Browser]}" />
+                        Content="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
                 </Grid>
 
                 <CheckBox
@@ -97,9 +98,9 @@
                     IsChecked="{Binding Setting.EnableSoundMultiPlay}" />
             </StackPanel>
         </controls:GroupBox>
-        <controls:GroupBox Margin="5" Header="{markup:Translate [Visualizer]}">
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Visualizer}}">
             <StackPanel Margin="10">
-                <CheckBox Content="{markup:Translate [EnableVisualizerDisplay]}" IsChecked="{Binding PlayerSetting.EnableWaveformDisplay}" />
+                <CheckBox Content="{markup:Translate {x:Static languages:Lang+B.EnableVisualizerDisplay}}" IsChecked="{Binding PlayerSetting.EnableWaveformDisplay}" />
             </StackPanel>
         </controls:GroupBox>
     </StackPanel>

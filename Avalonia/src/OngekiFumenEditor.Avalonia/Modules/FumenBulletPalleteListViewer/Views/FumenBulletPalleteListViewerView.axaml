@@ -9,7 +9,8 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views"
-    xmlns:markup="clr-namespace:OngekiFumenEditor.Avalonia.UI.Markup"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:objects="clr-namespace:OngekiFumenEditor.Avalonia.Base.OngekiObjects"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
@@ -33,11 +34,11 @@
             <Button
                 Margin="0,0,5,0"
                 Command="{Binding CreateNewCommand}"
-                Content="{markup:Translate [NewBulletPallete]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.NewBulletPallete}}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}" />
             <Button
                 Command="{Binding DeleteSelectedCommand}"
-                Content="{markup:Translate [DeleteSelectedPalletes]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.DeleteSelectedPalletes}}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}" />
 
             <TextBox
@@ -47,7 +48,7 @@
 
             <Button
                 Command="{Binding RefreshFilterCommand}"
-                Content="{markup:Translate [Filter]}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Filter}}"
                 IsEnabled="{Binding IsEnable, Mode=OneWay}" />
         </StackPanel>
         <DataGrid
@@ -83,8 +84,8 @@
                         x:DataType="objects:BulletPallete"
                         Width="60"
                         Binding="{Binding StrID}"
-                        Header="{markup:Translate [BulletPaletteId]}" />
-                    <DataGridTemplateColumn Width="120" Header="{markup:Translate [Name]}">
+                        Header="{markup:Translate {x:Static languages:Lang+B.BulletPaletteId}}" />
+                    <DataGridTemplateColumn Width="120" Header="{markup:Translate {x:Static languages:Lang+B.Name}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding EditorName}">
@@ -93,7 +94,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootSource}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
@@ -101,7 +102,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                    <DataGridTemplateColumn Width="80" Header="{markup:Translate {x:Static languages:Lang+B.ShootOffset}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding PlaceOffset}">
@@ -110,7 +111,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootTarget}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
@@ -118,7 +119,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                    <DataGridTemplateColumn Width="60" Header="{markup:Translate {x:Static languages:Lang+B.BulletSpeed}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding Speed}">
@@ -127,7 +128,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.BulletSize}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
@@ -135,7 +136,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [BulletType]}">
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.BulletType}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
@@ -143,7 +144,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                    <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.RandomOffsetRange}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding RandomOffsetRange}" />
@@ -164,7 +165,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
 
-                    <DataGridTemplateColumn Width="240" Header="{markup:Translate [Action]}">
+                    <DataGridTemplateColumn Width="240" Header="{markup:Translate {x:Static languages:Lang+B.Action}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <StackPanel Orientation="Horizontal">
@@ -173,18 +174,18 @@
                                         Cursor="Hand"
                                         PointerMoved="OnCreateBulletPointerMoved"
                                         PointerPressed="OnCreateObjectPointerPressed"
-                                        Text="{markup:Translate [BulletPaletteCreateBullet]}"
+                                        Text="{markup:Translate {x:Static languages:Lang+B.BulletPaletteCreateBullet}}"
                                         TextDecorations="Baseline"
-                                        ToolTip.Tip="{markup:Translate [DragToCreateBullet]}" />
+                                        ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.DragToCreateBullet}}" />
                                     <TextBlock
                                         Margin="10,0,0,0"
                                         VerticalAlignment="Center"
                                         Cursor="Hand"
                                         PointerMoved="OnCreateBellPointerMoved"
                                         PointerPressed="OnCreateObjectPointerPressed"
-                                        Text="{markup:Translate [BulletPaletteCreateBell]}"
+                                        Text="{markup:Translate {x:Static languages:Lang+B.BulletPaletteCreateBell}}"
                                         TextDecorations="Baseline"
-                                        ToolTip.Tip="{markup:Translate [DragToCreateBell]}" />
+                                        ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.DragToCreateBell}}" />
                                     <Button
                                         Margin="10,0,0,0"
                                         Padding="0"
@@ -193,8 +194,8 @@
                                         BorderThickness="0"
                                         Command="{Binding $parent[views:FumenBulletPalleteListViewerView].((vm:FumenBulletPalleteListViewerViewModel)DataContext).ClonePaletteCommand}"
                                         CommandParameter="{Binding}"
-                                        Content="{markup:Translate [ClonePallete]}"
-                                        ToolTip.Tip="{markup:Translate [ClickToClonePalette]}" />
+                                        Content="{markup:Translate {x:Static languages:Lang+B.ClonePallete}}"
+                                        ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.ClickToClonePalette}}" />
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
