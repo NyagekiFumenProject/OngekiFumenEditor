@@ -8,6 +8,7 @@ using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -42,6 +43,9 @@ public abstract class OngekiFumenEditorApp : App
 
         if (!IsGUIMode)
             return;
+
+        // 对齐 WPF AppBootstrapper：启动调度循环（性能统计/自动保存等任务依赖它）。
+        _ = ServiceProvider.GetRequiredService<ISchedulerManager>().Init();
 
         InitializeMainWindowTitleAndIcon();
 
@@ -94,6 +98,7 @@ public abstract class OngekiFumenEditorApp : App
         {
             var shell = ServiceProvider.GetRequiredService<IShell>();
             var documentManager = ServiceProvider.GetRequiredService<IEditorDocumentManager>();
+            var schedulerManager = ServiceProvider.GetRequiredService<ISchedulerManager>();
 
             // WPF 版由 FumenVisualEditorViewModel 的 Caliburn 生命周期钩子自行调用
             // NotifyCreate/NotifyActivate/NotifyDestory；Gekimini 没有等价钩子，
@@ -108,29 +113,63 @@ public abstract class OngekiFumenEditorApp : App
                 var previous = documentManager.CurrentActivatedEditor;
                 if (ReferenceEquals(previous, document))
                     return;
-                // 对齐 WPF OnDeactivateAsync：切走编辑器时暂停音频。
-                previous?.AudioPlayer?.Pause();
+                // 对齐 WPF OnDeactivateAsync：切走编辑器时暂停音频、摘除调度任务。
+                if (previous is not null)
+                {
+                    previous.AudioPlayer?.Pause();
+                    if (schedulerManager.Schedulers.Contains(previous))
+                        _ = schedulerManager.RemoveScheduler(previous);
+                }
+                // 对齐 WPF OnActivateAsync：激活编辑器时注册调度任务（性能统计等）。
                 if (document is FumenVisualEditorViewModel editor)
+                {
+                    _ = schedulerManager.AddScheduler(editor);
                     documentManager.NotifyActivate(editor);
+                }
                 else if (previous is not null)
                     documentManager.NotifyDeactivate(previous);
             };
             shell.DockableClosed += (_, dockable) =>
             {
                 if (dockable is FumenVisualEditorViewModel editor)
+                {
+                    if (schedulerManager.Schedulers.Contains(editor))
+                        _ = schedulerManager.RemoveScheduler(editor);
                     documentManager.NotifyDestory(editor);
+                }
             };
 
             // 桥接前已打开的文档（如布局恢复）补登记。
             foreach (var editor in shell.Documents.OfType<FumenVisualEditorViewModel>())
                 documentManager.NotifyCreate(editor);
             if (shell.ActiveDocument is FumenVisualEditorViewModel activeEditor)
+            {
+                _ = schedulerManager.AddScheduler(activeEditor);
                 documentManager.NotifyActivate(activeEditor);
+            }
         }
         catch (Exception exception)
         {
             ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>()
                 .LogError(exception, "Failed to attach the editor document manager bridge.");
+        }
+    }
+
+    protected override async Task PrepareExit()
+    {
+        await base.PrepareExit();
+
+        // 对齐 WPF AppBootstrapper.OnExit：退出前终止调度循环。
+        try
+        {
+            var schedulerManager = ServiceProvider.GetService<ISchedulerManager>();
+            if (schedulerManager is not null)
+                await schedulerManager.Term();
+        }
+        catch (Exception exception)
+        {
+            ServiceProvider.GetService<ILogger<OngekiFumenEditorApp>>()
+                ?.LogError(exception, "Failed to terminate the scheduler manager.");
         }
     }
 

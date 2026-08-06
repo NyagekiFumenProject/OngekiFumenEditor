@@ -99,7 +99,7 @@
                 <MenuItem
                     Header="{markup:Translate {x:Static languages:Lang+B.ShowFPS}}"
                     ToggleType="CheckBox"
-                    IsChecked="{Binding IsDisplayFPS}" />
+                    IsChecked="{Binding IsDisplayFPS, Mode=TwoWay}" />
             </ContextMenu>
         </Grid.ContextMenu>
 

@@ -166,6 +166,7 @@ public sealed class AudioManagerSimpleFileTests
 
     private sealed class StubSchedulerManager : ISchedulerManager
     {
+        public IEnumerable<ISchedulable> Schedulers => [];
         public Task Init() => Task.CompletedTask;
         public Task AddScheduler(ISchedulable s) => Task.CompletedTask;
         public Task RemoveScheduler(ISchedulable s) => Task.CompletedTask;

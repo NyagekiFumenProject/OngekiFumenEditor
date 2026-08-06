@@ -686,7 +686,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             }
 #endif
 
-            DisplayFPS = stringBuilder.ToString();
+            var displayText = stringBuilder.ToString();
+            // 调度器在后台线程运行，Avalonia 不会自动封送 INPC，回 UI 线程赋值。
+            Dispatcher.UIThread.Post(() => DisplayFPS = displayText);
 
             PerfomenceMonitor?.Clear();
         }
