@@ -58,6 +58,7 @@ public sealed class SvgStringPrefab : SvgPrefabBase
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {
         base.OnPropertyChanged(e);
+#if ENABLE_SVG_PREFAB_OBJECTS
         switch (e.PropertyName)
         {
             case nameof(Content):
@@ -69,11 +70,13 @@ public sealed class SvgStringPrefab : SvgPrefabBase
                 RebuildSvgContent();
                 break;
         }
+#endif
     }
 
     public void RebuildSvgContent()
     {
         CleanGeometry();
+#if ENABLE_SVG_PREFAB_OBJECTS
         if (string.IsNullOrWhiteSpace(Content) || !double.IsFinite(FontSize) || FontSize <= 0)
             return;
 
@@ -117,6 +120,7 @@ public sealed class SvgStringPrefab : SvgPrefabBase
             new XAttribute("viewBox", FormattableString.Invariant($"0 0 {width} {height}")),
             textElement));
         ApplySvgContent(document.ToString(SaveOptions.DisableFormatting));
+#endif
     }
 
     public override void Copy(OngekiObjectBase fromObj)

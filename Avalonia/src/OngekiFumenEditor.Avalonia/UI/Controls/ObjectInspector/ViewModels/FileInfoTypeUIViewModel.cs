@@ -3,6 +3,9 @@ using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using Gekimini.Avalonia.Framework.Dialogs;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 
@@ -23,13 +26,47 @@ public partial class FileInfoTypeUIViewModel : CommonUIViewModelBase<ISimpleFile
     }
 
     [RelayCommand]
-    private async Task SelectFileAsync()
+    private Task SelectFileAsync()
     {
-        var selectedFile = await FileDialogHelper.OpenFileAsync(Lang.SelectSvgFile, [(".svg", "Svg鏂囦欢")]);
+        // SVG prefab file selection/import is temporarily disabled with the prefab feature.
+        return Task.CompletedTask;
+
+        /*
+        var projectRoot = IoC.Get<IEditorDocumentManager>()
+            .CurrentActivatedEditor?
+            .EditorProjectData?
+            .ProjectRoot;
+        if (projectRoot is null)
+        {
+            await IoC.Get<IDialogManager>().ShowMessageDialog(
+                "Save or open a project folder before importing an SVG.",
+                DialogMessageType.Error);
+            return;
+        }
+
+        var selectedFile = await FileDialogHelper.OpenFileAsync(Lang.SelectSvgFile, [(".svg", "SVG")]);
         if (selectedFile is null)
             return;
 
-        File = selectedFile;
+        ISimpleFile importedFile = null;
+        try
+        {
+            importedFile = await SvgProjectFileImporter.ImportAsync(projectRoot, selectedFile);
+            File = importedFile;
+            importedFile = null;
+        }
+        catch (Exception exception)
+        {
+            await IoC.Get<IDialogManager>().ShowMessageDialog(
+                $"Unable to import SVG: {exception.Message}",
+                DialogMessageType.Error);
+        }
+        finally
+        {
+            importedFile?.Dispose();
+            selectedFile.Dispose();
+        }
+        */
     }
 }
 

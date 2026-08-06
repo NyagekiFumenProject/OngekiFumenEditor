@@ -8,7 +8,8 @@ using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectOperationImplement;
 
-[RegisterSingleton<IOngekiObjectOperationGenerator>]
+// SVG prefabs are temporarily disabled in FumenVisualEditor.
+// [RegisterSingleton<IOngekiObjectOperationGenerator>]
 public sealed class SvgPrefabOperationGenerator : IOngekiObjectOperationGenerator
 {
     public IEnumerable<Type> SupportOngekiTypes { get; } = [typeof(SvgPrefabBase)];

@@ -35,7 +35,7 @@ public sealed class SvgPrefabTests
         "</svg>";
 
     [Fact]
-    public void OngekiFumen_AddRemoveAndDisplayableRange_TracksSvgPrefab()
+    public void OngekiFumen_AddRemove_KeepsSvgPrefabOutOfDisplayableRangesWhileFeatureIsDisabled()
     {
         var fumen = new OngekiFumen();
         using var svg = new SvgStringPrefab
@@ -48,7 +48,7 @@ public sealed class SvgPrefabTests
         fumen.AddObject(svg);
 
         Assert.Same(svg, Assert.Single(fumen.SvgPrefabs));
-        Assert.Contains(svg, fumen.GetAllDisplayableObjects(new TGrid(8), new TGrid(9)));
+        Assert.DoesNotContain(svg, fumen.GetAllDisplayableObjects(new TGrid(8), new TGrid(9)));
         Assert.DoesNotContain(svg, fumen.GetAllDisplayableObjects(new TGrid(9), new TGrid(10)));
 
         fumen.RemoveObject(svg);
@@ -118,7 +118,7 @@ public sealed class SvgPrefabTests
             Assert.Equal(source.TypefaceName, actual.TypefaceName);
             Assert.Equal(source.ContentFlowDirection, actual.ContentFlowDirection);
             Assert.Equal(source.ContentLineHeight, actual.ContentLineHeight);
-            Assert.NotNull(actual.Picture);
+            Assert.Null(actual.Picture);
         }
         finally
         {
@@ -167,15 +167,15 @@ public sealed class SvgPrefabTests
             copy.Copy(source);
 
             Assert.Same(source.SvgFile, copy.SvgFile);
-            Assert.Equal(2, file.OpenReadCount);
+            Assert.Equal(0, file.OpenReadCount);
             Assert.Equal(0, file.ReadAllBytesCount);
-            Assert.NotNull(copy.Picture);
+            Assert.Null(copy.Picture);
 
             source.Dispose();
             sourceDisposed = true;
 
             Assert.False(file.IsDisposed);
-            Assert.NotNull(copy.Picture);
+            Assert.Null(copy.Picture);
         }
         finally
         {
@@ -223,7 +223,7 @@ public sealed class SvgPrefabTests
     }
 
     [Fact]
-    public async Task ImageSvg_ProducesVectorSegmentsAndNonTransparentDrawPixels()
+    public async Task ImageSvg_DoesNotBuildGeometryWhileFeatureIsDisabled()
     {
         var path = Path.Combine(Path.GetTempPath(), $"ongeki-svg-{Guid.NewGuid():N}.svg");
         await File.WriteAllTextAsync(path, RectangleSvg, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
@@ -235,19 +235,9 @@ public sealed class SvgPrefabTests
                 ShowOriginColor = true
             };
 
-            Assert.NotNull(svg.Picture);
-            Assert.NotNull(svg.ProcessingBitmap);
-            var segments = svg.GenerateLineSegments();
-            Assert.NotEmpty(segments);
-            Assert.All(segments, x => Assert.True(x.RelativePoints.Count >= 2));
-
-            using var bitmap = new SKBitmap(new SKImageInfo(96, 96, SKColorType.Rgba8888, SKAlphaType.Premul));
-            using var canvas = new SKCanvas(bitmap);
-            canvas.Clear(SKColors.Transparent);
-            DefaultSkiaSvgDrawing.DrawToCanvas(canvas, svg, new Vector2(48, 48));
-            canvas.Flush();
-
-            Assert.True(CountNonTransparentPixels(bitmap) > 0);
+            Assert.Null(svg.Picture);
+            Assert.Null(svg.ProcessingBitmap);
+            Assert.Empty(svg.GenerateLineSegments());
         }
         finally
         {
@@ -256,7 +246,7 @@ public sealed class SvgPrefabTests
     }
 
     [Fact]
-    public void StringSvg_ProducesPictureBitmapAndVectorTextSegments()
+    public void StringSvg_DoesNotBuildGeometryWhileFeatureIsDisabled()
     {
         using var svg = new SvgStringPrefab
         {
@@ -268,9 +258,9 @@ public sealed class SvgPrefabTests
             ShowOriginColor = true
         };
 
-        Assert.NotNull(svg.Picture);
-        Assert.NotNull(svg.ProcessingBitmap);
-        Assert.NotEmpty(svg.GenerateLineSegments());
+        Assert.Null(svg.Picture);
+        Assert.Null(svg.ProcessingBitmap);
+        Assert.Empty(svg.GenerateLineSegments());
     }
 
     [Fact]
@@ -303,7 +293,7 @@ public sealed class SvgPrefabTests
     }
 
     [AvaloniaFact]
-    public async Task GenerateLaneObjects_ConvertsRedSvgPathIntoEditableLeftLane()
+    public async Task GenerateLaneObjects_ReturnsNothingWhileSvgFeatureIsDisabled()
     {
         var path = Path.Combine(Path.GetTempPath(), $"ongeki-svg-lane-{Guid.NewGuid():N}.svg");
         await File.WriteAllTextAsync(path, RectangleSvg, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
@@ -329,13 +319,7 @@ public sealed class SvgPrefabTests
             var operation = new SvgPrefabOperationViewModel(svg);
             var generated = operation.GenerateLaneObjects(editor).ToArray();
 
-            Assert.NotEmpty(generated);
-            Assert.All(generated, lane =>
-            {
-                var leftLane = Assert.IsType<LaneLeftStart>(lane);
-                Assert.NotEmpty(leftLane.Children);
-                Assert.All(leftLane.Children, child => Assert.IsType<LaneLeftNext>(child));
-            });
+            Assert.Empty(generated);
 
             svg.TGrid = new TGrid(0);
             Assert.Empty(operation.GenerateLaneObjects(editor));

@@ -24,8 +24,6 @@ public sealed class ToolboxGeneratorRegistrationTests
         (typeof(CommentToolboxGenerator), "Comment", "Misc", typeof(Comment)),
         (typeof(InterpolatableSoflanToolboxGenerator), "Interpolatable Soflan", "Soflan", typeof(InterpolatableSoflan)),
         (typeof(KeyframeSoflanToolboxGenerator), "Keyframe Soflan", "Soflan", typeof(KeyframeSoflan)),
-        (typeof(SvgImageFilePrefabToolboxGenerator), "SvgPrefab(File)", "Misc", typeof(SvgImageFilePrefab)),
-        (typeof(SvgStringPrefabToolboxGenerator), "SvgPrefab(String)", "Misc", typeof(SvgStringPrefab)),
         (typeof(BeamStartToolboxGenerator), "Beam Start", "Ongeki Objects", typeof(BeamStart)),
         (typeof(BellToolboxGenerator), "Bell", "Ongeki Objects", typeof(Bell)),
         (typeof(BPMChangeToolboxGenerator), "BPM Change", "Ongeki Objects", typeof(BPMChange)),
@@ -92,6 +90,20 @@ public sealed class ToolboxGeneratorRegistrationTests
             Assert.Equal(expected.ObjectType, second.GetType());
             Assert.NotSame(first, second);
         }
+    }
+
+    [Fact]
+    public void AddOngekiFumenEditorAvalonia_DoesNotRegisterSvgPrefabToolboxItemsWhileFeatureIsDisabled()
+    {
+        var services = CreateServices();
+
+        var registeredTypes = services
+            .Where(service => service.ServiceType == typeof(ToolboxItem))
+            .Select(service => service.ImplementationType)
+            .ToArray();
+
+        Assert.DoesNotContain(typeof(SvgImageFilePrefabToolboxGenerator), registeredTypes);
+        Assert.DoesNotContain(typeof(SvgStringPrefabToolboxGenerator), registeredTypes);
     }
 
     [Fact]

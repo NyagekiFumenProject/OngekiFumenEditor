@@ -5,7 +5,8 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Toolboxes.EditorObjects;
 
-[RegisterSingleton<ToolboxItem>]
+// SVG prefabs are temporarily disabled in FumenVisualEditor.
+// [RegisterSingleton<ToolboxItem>]
 public sealed class SvgImageFilePrefabToolboxGenerator : ToolboxGenerator<SvgImageFilePrefab>
 {
     public SvgImageFilePrefabToolboxGenerator() : base("SvgPrefab(File)", "Misc")

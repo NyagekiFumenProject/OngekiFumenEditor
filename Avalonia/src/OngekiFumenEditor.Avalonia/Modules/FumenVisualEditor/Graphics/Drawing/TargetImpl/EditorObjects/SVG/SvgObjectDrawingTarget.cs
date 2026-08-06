@@ -6,7 +6,8 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG;
 
-[RegisterSingleton<IFumenEditorDrawingTarget>]
+// SVG prefabs are temporarily disabled in FumenVisualEditor.
+// [RegisterSingleton<IFumenEditorDrawingTarget>]
 public sealed class SvgObjectDrawingTarget : CommonDrawTargetBase<SvgPrefabBase>
 {
     private static readonly Vector2 MinimumSelectableSize = new(16, 16);

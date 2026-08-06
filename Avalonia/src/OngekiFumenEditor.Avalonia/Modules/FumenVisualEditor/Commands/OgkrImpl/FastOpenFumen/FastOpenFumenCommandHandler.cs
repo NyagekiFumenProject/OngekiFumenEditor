@@ -6,7 +6,8 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
 
-[RegisterSingleton<ICommandHandler>]
+// Fast-open is intentionally not registered by the cross-platform Core project.
+// [RegisterSingleton<ICommandHandler>]
 public class FastOpenFumenCommandHandler : CommandHandlerBase<FastOpenFumenCommandDefinition>
 {
     public override async Task Run(Command command)

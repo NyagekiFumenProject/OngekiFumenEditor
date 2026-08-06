@@ -2,7 +2,6 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Utils;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Objects;
 
@@ -36,7 +35,7 @@ public sealed class SvgPrefabCommandParser : INyagekiCommandParser
         var encodedPath = Required(fields, "FilePathBase64");
         var path = Base64.Decode(encodedPath);
         if (!string.IsNullOrWhiteSpace(path))
-            svg.SvgFile = new LocalSimpleFile(path);
+            svg.SvgFilePath = path;
         return svg;
     }
 

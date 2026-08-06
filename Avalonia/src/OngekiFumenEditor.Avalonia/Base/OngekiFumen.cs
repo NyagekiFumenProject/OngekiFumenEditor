@@ -404,7 +404,8 @@ namespace OngekiFumenEditor.Avalonia.Base
                    .Concat(Lanes.GetVisibleStartObjects(min, max))
                    .Concat(Taps.BinaryFindRange(min, max))
                    .Concat(Holds.GetVisibleStartObjects(min, max))
-                   .Concat(SvgPrefabs.BinaryFindRange(min, max))
+                   // SVG prefabs are retained for file-format compatibility but are not displayable while disabled.
+                   // .Concat(SvgPrefabs.BinaryFindRange(min, max))
                    .Concat(Beams)
                    .Distinct();
 

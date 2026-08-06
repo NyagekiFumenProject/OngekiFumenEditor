@@ -6,7 +6,8 @@ using OngekiFumenEditor.Avalonia.Assets.Languages;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
 
-[RegisterSingleton<CommandDefinitionBase>]
+// Fast-open is intentionally not registered by the cross-platform Core project.
+// [RegisterSingleton<CommandDefinitionBase>]
 public class FastOpenFumenCommandDefinition : CommandDefinition
 {
     public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen.FastOpenFumenCommandDefinition";
