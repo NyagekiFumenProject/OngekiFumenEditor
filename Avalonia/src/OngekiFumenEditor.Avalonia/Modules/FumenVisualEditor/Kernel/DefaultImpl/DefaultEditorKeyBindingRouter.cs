@@ -114,10 +114,7 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
             ? KeyBindingLayer.Batch
             : KeyBindingLayer.Normal;
 
-        var matches = keyBindingManager.KeyBindingDefinations
-            .Where(definition => definition.Layer == KeyBindingLayer.Global || definition.Layer == activeLayer)
-            .Where(definition => keyBindingManager.CheckKeyBinding(definition, e))
-            .ToArray();
+        var matches = MatchDefinitionsWithBatchShiftVariant(activeLayer, e);
 
         if (matches.Length == 0)
             return;
@@ -157,6 +154,35 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
         {
             logger.LogError(exception, "Editor key binding action {Definition} failed.", definition.ConfigKey);
         }
+    }
+
+    internal KeyBindingDefinition[] MatchDefinitionsWithBatchShiftVariant(KeyBindingLayer activeLayer, KeyEventArgs e)
+    {
+        var matches = MatchDefinitions(activeLayer, e);
+
+        // WPF BatchModeBehavior additionally registers a Shift variant for every sub-mode key,
+        // so users can still switch sub-modes while holding Shift to place objects.
+        if (matches.Length == 0 && activeLayer == KeyBindingLayer.Batch && e.KeyModifiers.HasFlag(KeyModifiers.Shift))
+        {
+            var retryArgs = new KeyEventArgs
+            {
+                RoutedEvent = e.RoutedEvent,
+                Source = e.Source,
+                Key = e.Key,
+                KeyModifiers = e.KeyModifiers & ~KeyModifiers.Shift
+            };
+            matches = MatchDefinitions(KeyBindingLayer.Batch, retryArgs);
+        }
+
+        return matches;
+    }
+
+    internal KeyBindingDefinition[] MatchDefinitions(KeyBindingLayer activeLayer, KeyEventArgs e)
+    {
+        return keyBindingManager.KeyBindingDefinations
+            .Where(definition => definition.Layer == KeyBindingLayer.Global || definition.Layer == activeLayer)
+            .Where(definition => keyBindingManager.CheckKeyBinding(definition, e))
+            .ToArray();
     }
 
     private static bool ShouldYieldToFocusedControl(object? eventSource)

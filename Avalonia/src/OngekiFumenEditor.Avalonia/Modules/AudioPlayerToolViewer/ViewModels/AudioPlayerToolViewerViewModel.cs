@@ -30,6 +30,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
 
     private readonly IEditorDocumentManager editorDocumentManager;
     private readonly IAudioManager audioManager;
+    private readonly DispatcherTimer playbackSyncTimer;
     private TimeSpan playStartTime;
     private bool isDisposed;
 
@@ -254,6 +255,22 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
             editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
             OnActivateEditorChanged(editorDocumentManager.CurrentActivatedEditor, null);
         }
+
+        // 对齐 WPF CompositionTarget.Rendering -> Process()：播放中把音频时间同步到编辑器时间轴。
+        playbackSyncTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(15) };
+        playbackSyncTimer.Tick += OnPlaybackSyncTick;
+        playbackSyncTimer.Start();
+    }
+
+    private void OnPlaybackSyncTick(object sender, EventArgs e)
+    {
+        var player = AudioPlayer;
+        var currentEditor = Editor;
+        if (player is null || currentEditor is null || !player.IsPlaying)
+            return;
+
+        var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(player.CurrentTime, currentEditor);
+        currentEditor.ScrollTo(tGrid);
     }
 
     private static T TryGetService<T>() where T : class
@@ -426,6 +443,8 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
             return;
 
         isDisposed = true;
+        playbackSyncTimer.Stop();
+        playbackSyncTimer.Tick -= OnPlaybackSyncTick;
         if (editorDocumentManager is not null)
             editorDocumentManager.OnActivateEditorChanged -= OnActivateEditorChanged;
         if (Editor is not null)

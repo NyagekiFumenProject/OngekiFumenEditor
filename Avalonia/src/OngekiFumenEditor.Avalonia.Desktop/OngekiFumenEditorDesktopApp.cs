@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Gekimini.Avalonia;
+using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
@@ -72,9 +73,33 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         this.AttachXamlMcp();
 #endif
 
+        ApplyAdminPermissionTitleSuffix();
+
         Dispatcher.UIThread.Post(
             () => _ = ProcessStartupArgsAsync(),
             DispatcherPriority.Background);
+    }
+
+    private void ApplyAdminPermissionTitleSuffix()
+    {
+        try
+        {
+            // 对齐 WPF AppBootstrapper：以管理员权限运行时窗口标题加后缀。
+            if (!OperatingSystem.IsWindows())
+                return;
+            using var identity = System.Security.Principal.WindowsIdentity.GetCurrent();
+            if (identity is null || !new System.Security.Principal.WindowsPrincipal(identity).IsInRole(
+                    System.Security.Principal.WindowsBuiltInRole.Administrator))
+                return;
+
+            logger?.LogWarning("Program is within admin permission.");
+            var mainWindow = ServiceProvider.GetRequiredService<IPlatformMainWindow>();
+            mainWindow.Title += "(以管理员权限运行)";
+        }
+        catch (Exception exception)
+        {
+            logger?.LogError(exception, "Failed to apply the admin permission title suffix.");
+        }
     }
 
     private async Task ProcessStartupArgsAsync()

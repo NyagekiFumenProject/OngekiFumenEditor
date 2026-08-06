@@ -12,12 +12,14 @@ public partial class ShowCurveControlAlwaysCommandHandler : CommandHandlerBase<S
     public override Task Update(Command command)
     {
         command.Enabled = EditorDocumentManager.CurrentActivatedEditor is not null;
+        command.Checked = EditorDocumentManager.CurrentActivatedEditor?.IsShowCurveControlAlways ?? false;
         return Task.CompletedTask;
     }
 
     public override Task Run(Command command)
     {
-        EditorDocumentManager.CurrentActivatedEditor?.ToastNotify("ShowCurveControlAlways is not migrated yet.");
+        if (EditorDocumentManager.CurrentActivatedEditor is { } editor)
+            editor.IsShowCurveControlAlways = !editor.IsShowCurveControlAlways;
         return Task.CompletedTask;
     }
 }

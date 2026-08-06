@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
@@ -10,6 +11,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.FastPlay
 public class FastPlayPauseCommandDefinition : CommandDefinition
 {
     public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.FastPlayPause.FastPlayPauseCommandDefinition";
+
+    [RegisterStaticObject<CommandKeyboardShortcut>]
+    public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<FastPlayPauseCommandDefinition>(
+        new KeyGesture(Key.Space));
 
     public override string Name => CommandName;
 

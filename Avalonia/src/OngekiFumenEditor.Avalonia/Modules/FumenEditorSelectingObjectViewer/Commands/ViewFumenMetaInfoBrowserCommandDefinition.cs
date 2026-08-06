@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
@@ -10,6 +11,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Co
 public class ViewFumenEditorSelectingObjectViewerCommandDefinition : CommandDefinition
 {
     public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Commands.ViewFumenEditorSelectingObjectViewerCommandDefinition";
+
+    [RegisterStaticObject<CommandKeyboardShortcut>]
+    public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<ViewFumenEditorSelectingObjectViewerCommandDefinition>(
+        new KeyGesture(Key.S, KeyModifiers.Alt | KeyModifiers.Shift));
 
     public override string Name => CommandName;
 

@@ -1,3 +1,4 @@
+using Avalonia.Input;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
@@ -10,6 +11,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.ShowCurv
 public class ShowCurveControlAlwaysCommandDefinition : CommandDefinition
 {
     public const string CommandName = "OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.ShowCurveControlAlways.ShowCurveControlAlwaysCommandDefinition";
+
+    [RegisterStaticObject<CommandKeyboardShortcut>]
+    public static CommandKeyboardShortcut KeyGesture = new CommandKeyboardShortcut<ShowCurveControlAlwaysCommandDefinition>(
+        new KeyGesture(Key.S, KeyModifiers.Alt));
 
     public override string Name => CommandName;
 

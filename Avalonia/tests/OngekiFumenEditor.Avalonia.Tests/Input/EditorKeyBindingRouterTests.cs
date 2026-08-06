@@ -168,6 +168,46 @@ public sealed class EditorKeyBindingRouterTests
         Assert.Equal(0, keyBindingManager.CheckCallCount);
     }
 
+    [Fact]
+    public void BatchLayer_ShiftHeld_RetriesBatchDefinitionsWithoutShift()
+    {
+        var definition = new KeyBindingDefinition("test-batch-shift", Key.S, KeyBindingLayer.Batch);
+        var keyBindingManager = new StubKeyBindingManager([definition]) { MatchRealistically = true };
+        var router = CreateRouter(keyBindingManager);
+        var eventArgs = new KeyEventArgs
+        {
+            RoutedEvent = InputElement.KeyDownEvent,
+            Source = new Border(),
+            Key = Key.S,
+            KeyModifiers = KeyModifiers.Shift
+        };
+
+        var matches = router.MatchDefinitionsWithBatchShiftVariant(KeyBindingLayer.Batch, eventArgs);
+
+        Assert.Same(definition, Assert.Single(matches));
+        Assert.Equal(KeyModifiers.Shift, eventArgs.KeyModifiers);
+    }
+
+    [Fact]
+    public void NormalLayer_ShiftHeld_DoesNotRetryWithoutShift()
+    {
+        var definition = new KeyBindingDefinition("test-normal-shift", Key.S);
+        var keyBindingManager = new StubKeyBindingManager([definition]) { MatchRealistically = true };
+        var router = CreateRouter(keyBindingManager);
+        var eventArgs = new KeyEventArgs
+        {
+            RoutedEvent = InputElement.KeyDownEvent,
+            Source = new Border(),
+            Key = Key.S,
+            KeyModifiers = KeyModifiers.Shift
+        };
+
+        var matches = router.MatchDefinitionsWithBatchShiftVariant(KeyBindingLayer.Normal, eventArgs);
+
+        Assert.Empty(matches);
+        Assert.Equal(KeyModifiers.Shift, eventArgs.KeyModifiers);
+    }
+
     private static DefaultEditorKeyBindingRouter CreateRouter(
         StubKeyBindingManager keyBindingManager,
         ILogger<DefaultEditorKeyBindingRouter>? logger = null)
@@ -200,6 +240,8 @@ public sealed class EditorKeyBindingRouterTests
 
         public bool MatchAll { get; init; }
 
+        public bool MatchRealistically { get; init; }
+
         public int CheckCallCount { get; private set; }
 
         public IEnumerable<KeyBindingDefinition> KeyBindingDefinations { get; }
@@ -207,7 +249,8 @@ public sealed class EditorKeyBindingRouterTests
         public bool CheckKeyBinding(KeyBindingDefinition defination, KeyEventArgs e)
         {
             CheckCallCount++;
-            return MatchAll;
+            return MatchAll ||
+                   (MatchRealistically && defination.Key == e.Key && defination.Modifiers == e.KeyModifiers);
         }
 
         public void ChangeKeyBinding(KeyBindingDefinition definition, Key newKey, KeyModifiers newModifier)

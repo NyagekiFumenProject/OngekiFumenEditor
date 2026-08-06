@@ -5,12 +5,15 @@ using OngekiFumenEditor.Avalonia.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using Injectio.Attributes;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using static OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.IEditorDocumentManager;
 using OngekiFumenEditor.Avalonia;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Avalonia.Utils.DeadHandler;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
@@ -40,7 +43,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 currentActivatedEditor = value;
                 OnActivateEditorChanged?.Invoke(value, old);
 
-                IoC.Get<WindowTitleHelper>().UpdateWindowTitleByEditor(value);
+                try
+                {
+                    // 对齐 WPF WindowTitleHelper：活动编辑器变化时刷新主窗口标题。
+                    IoC.Get<IPlatformMainWindow>().Title = "Ongeki Fumen Editor" +
+                        (value is not null ? $" - {value.DisplayName} " : string.Empty);
+                }
+                catch (InvalidOperationException)
+                {
+                    // 无 GUI 主窗口的环境（测试/命令行）下忽略窗口标题刷新。
+                }
             }
         }
 
@@ -55,13 +67,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
         public void NotifyDeactivate(FumenVisualEditorViewModel editor)
         {
             Log.LogDebug($"editor deactivated: {editor.GetHashCode()} {editor.DisplayName}");
-            var otherActive = currentEditor.Where(x => x != editor).FirstOrDefault(x => x.IsActive);
-            CurrentActivatedEditor = otherActive;
+            // Gekimini 下活动文档由 IShell 驱动，不再按 IsActive 自选替补；
+            // shell 的 ActiveDocumentChanged 会随后告知新的活动编辑器。
+            if (ReferenceEquals(CurrentActivatedEditor, editor))
+                CurrentActivatedEditor = null;
         }
 
         public void NotifyActivate(FumenVisualEditorViewModel editor)
         {
             Log.LogDebug($"editor activated: {editor.GetHashCode()} {editor.DisplayName}");
+            // shell 事件顺序不保证先 Opened 后 Activated，未登记时先按创建处理。
+            if (!currentEditor.Contains(editor))
+                NotifyCreate(editor);
             CurrentActivatedEditor = editor;
         }
 
@@ -82,10 +99,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             {
                 OnNotifyDestoryed?.Invoke(editor);
             }
-            finally
-            {
-                editor.EditorProjectData?.DisposeRuntimeFiles();
-            }
+			finally
+			{
+				editor.AudioPlayer?.Dispose();
+				editor.AudioPlayer = null;
+				editor.EditorProjectData?.DisposeRuntimeFiles();
+			}
         }
 
         public void OnSchedulerTerm()
@@ -102,22 +121,32 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 return;
 
             var editor = CurrentActivatedEditor;
-            var selectedFumenFile = editor.EditorProjectData?.FumenFile;
-            if (selectedFumenFile is null && string.IsNullOrWhiteSpace(editor.FilePath))
+            if (editor.EditorProjectData?.ProjectFile is null)
                 return;
 
-            Log.LogInfo($"begin auto save current document: {editor.FileName}");
-            //editor.LockAllUserInteraction();
-            if (selectedFumenFile is not null)
+            if (!EditorProjectIoGate.TryEnter(out var lease))
             {
-                await editor.SaveSelectedFumenFile();
+                Log.LogDebug($"Skip recovery snapshot for '{editor.FileName}' because project I/O is busy.");
+                return;
             }
-            else
+
+            using (lease)
             {
-                await editor.Save(editor.FilePath);
+                try
+                {
+                    var snapshot = await FumenRescue.SaveRecoverySnapshotAsync(editor, cancellationToken);
+                    if (snapshot is not null)
+                        Log.LogInfo($"Recovery snapshot updated for '{editor.FileName}'.");
+                }
+                catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    Log.LogWarn($"Unable to update recovery snapshot for '{editor.FileName}': {exception.Message}");
+                }
             }
-            //editor.UnlockAllUserInteraction();
-            Log.LogInfo($"auto save done.");
         }
 
         private void Default_PropertyChanged(object sender, PropertyChangedEventArgs e)
