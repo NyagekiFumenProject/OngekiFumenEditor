@@ -2,10 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Rendering.SceneGraph;
-using Avalonia.Skia;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
-using SkiaSharp;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 
@@ -23,11 +20,10 @@ internal sealed class AvaloniaSkiaRenderControl : Control
         RenderContext = new DefaultSkiaRenderContext(this);
         drawOperation = new SkiaDrawOperation(RenderContext);
         ClipToBounds = true;
+        Focusable = true;
     }
 
     public DefaultSkiaRenderContext RenderContext { get; }
-
-    internal double RenderScaling => this.GetVisualRoot()?.RenderScaling ?? 1;
 
     public override void Render(DrawingContext context)
     {
@@ -36,8 +32,7 @@ internal sealed class AvaloniaSkiaRenderControl : Control
         if (Bounds.Width <= 0 || Bounds.Height <= 0)
             return;
 
-        var scale = RenderScaling;
-        drawOperation.Bounds = new Rect(0, 0, Bounds.Width, Bounds.Height) * scale;
+        drawOperation.Bounds = new Rect(Bounds.Size);
         context.Custom(drawOperation);
 
         if (RenderContext.IsRendering)
@@ -66,7 +61,7 @@ internal sealed class AvaloniaSkiaRenderControl : Control
 
         public bool HitTest(Point p)
         {
-            return false;
+            return Bounds.Contains(p);
         }
 
         public void Render(ImmediateDrawingContext context)

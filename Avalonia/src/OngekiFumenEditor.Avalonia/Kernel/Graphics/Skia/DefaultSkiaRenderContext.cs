@@ -36,7 +36,9 @@ public class DefaultSkiaRenderContext : IRenderContext
 
     public void CleanRender(IDrawingContext context, Vector4 cleanColor)
     {
-        Canvas?.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
+        Canvas?.DrawColor(
+            new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W),
+            SKBlendMode.Src);
     }
 
     public void StartRendering()
@@ -69,10 +71,19 @@ public class DefaultSkiaRenderContext : IRenderContext
                 throw new NotSupportedException("The active Avalonia renderer does not expose the SkiaSharp lease feature.");
 
             using var lease = leaseFeature.Lease();
-            Canvas = lease.SkCanvas;
+            var canvas = lease.SkCanvas;
+            var saveCount = canvas.Save();
 
             try
             {
+                canvas.ClipRect(
+                    SKRect.Create(
+                        (float)renderControl.Bounds.Width,
+                        (float)renderControl.Bounds.Height),
+                    SKClipOperation.Intersect,
+                    antialias: false);
+                Canvas = canvas;
+
                 var timestamp = Stopwatch.GetTimestamp();
                 var elapsed = previousTimestamp == 0
                     ? TimeSpan.Zero
@@ -83,6 +94,7 @@ public class DefaultSkiaRenderContext : IRenderContext
             finally
             {
                 Canvas = null;
+                canvas.RestoreToCount(saveCount);
             }
         }
         finally

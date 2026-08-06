@@ -504,7 +504,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void OnTimeSignatureListChanged()
         {
-            //nothing but leave it empty.
+            // The original port left this handler empty; the Avalonia timeline depends on an explicit extent update.
+            RecalculateTotalDurationHeight();
         }
 
         public void ExecuteActionWithRememberCurrentTime(IUndoableAction action)
@@ -1960,4 +1961,3 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         #endregion
     }
 }
-

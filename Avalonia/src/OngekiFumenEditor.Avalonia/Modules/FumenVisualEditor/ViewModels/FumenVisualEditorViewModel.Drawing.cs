@@ -695,12 +695,14 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     public override void OnViewAfterLoaded(IView view)
     {
         base.OnViewAfterLoaded(view);
+        AttachRuntimeSubscriptions();
         View = view as FumenVisualEditorView;
         InitExtraMenuItems();
     }
 
     public override void OnViewBeforeUnload(IView view)
     {
+        DetachRuntimeSubscriptions();
         View = null;
         base.OnViewBeforeUnload(view);
     }
@@ -746,7 +748,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                 .Concat(fumen.SoflansMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
                 .Concat(fumen.EnemySets.BinaryFindRange(min, max))
-                .Concat(fumen.SvgPrefabs.BinaryFindRange(min, max))
+                // SVG prefabs are temporarily excluded from the editor drawing/object-selection pipeline.
+                // .Concat(fumen.SvgPrefabs.BinaryFindRange(min, max))
                 .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
                 .Concat(playableDurationObjects)
                 .Concat(playableObjects);
@@ -945,6 +948,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         ViewWidth = (float)e.NewSize.Width;
         ViewHeight = (float)e.NewSize.Height;
+        RecalculateTotalDurationHeight();
     }
 
     private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
