@@ -45,6 +45,7 @@
             x:Name="mySlider"
             Grid.Row="1"
             Grid.ColumnSpan="2"
+            IsSnapToTickEnabled="True"
             Maximum="{Binding #Root.MaxValue}"
             Minimum="{Binding #Root.MinValue}"
             TickFrequency="{Binding #Root.Step}"
