@@ -25,6 +25,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
     private readonly IEditorRecentFilesManager recentFilesManager;
     private readonly IFumenVisualEditorProvider editorProvider;
     private readonly ICommandService commandService;
+    private readonly IRecentRecordValidityCoordinator recentRecordValidityCoordinator;
     private readonly IShell shell;
     private readonly string initialLanguage;
     private string selectedLanguage;
@@ -33,6 +34,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
         ILanguageManager languageManager,
         ISettingManager settingManager,
         IEditorRecentFilesManager recentFilesManager,
+        IRecentRecordValidityCoordinator recentRecordValidityCoordinator,
         IFumenVisualEditorProvider editorProvider,
         ICommandService commandService,
         IShell shell)
@@ -40,6 +42,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
         this.languageManager = languageManager;
         this.settingManager = settingManager;
         this.recentFilesManager = recentFilesManager;
+        this.recentRecordValidityCoordinator = recentRecordValidityCoordinator;
         this.editorProvider = editorProvider;
         this.commandService = commandService;
         this.shell = shell;
@@ -99,6 +102,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
 
     private void RefreshRecentFiles()
     {
+        recentRecordValidityCoordinator.BeginValidationGeneration();
         GroupedItems.Clear();
 
         foreach (var group in recentFilesManager.RecentRecordInfos

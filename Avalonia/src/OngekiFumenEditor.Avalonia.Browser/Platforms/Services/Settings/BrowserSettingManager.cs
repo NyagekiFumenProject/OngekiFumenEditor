@@ -18,8 +18,9 @@ public class BrowserSettingManager : ISettingManager
     private readonly Dictionary<string, object> cacheObj = new();
     private readonly ILogger logger;
     private readonly IServiceProvider provider;
+    private readonly object locker = new();
 
-    public BrowserSettingManager(IServiceProvider provider, ILogger<__BrowserSettingManager> logger)
+    public BrowserSettingManager(IServiceProvider provider, ILogger<BrowserSettingManager> logger)
     {
         this.provider = provider;
         this.logger = logger;
@@ -37,42 +38,48 @@ public class BrowserSettingManager : ISettingManager
         if (obj is null)
             return;
 
-        var key = GetKey<T>();
-        var jsonContent = JsonSerializer.Serialize(obj, jsonTypeInfo);
-        SetLocalStorage(key, jsonContent);
-        cacheObj[key] = obj;
-        logger.LogDebugEx($"save/update cached {typeof(T).Name} object, hash = {obj.GetHashCode()}");
+        lock (locker)
+        {
+            var key = GetKey<T>();
+            var jsonContent = JsonSerializer.Serialize(obj, jsonTypeInfo);
+            SetLocalStorage(key, jsonContent);
+            cacheObj[key] = obj;
+            logger.LogDebugEx($"save/update cached {typeof(T).Name} object, hash = {obj.GetHashCode()}");
+        }
     }
 
     private T LoadInternal<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         T>(JsonTypeInfo<T> jsonTypeInfo) where T : new()
     {
-        var key = GetKey<T>();
-        var typeName = typeof(T).Name;
-
-        if (cacheObj.TryGetValue(key, out var obj))
+        lock (locker)
         {
-            logger.LogDebugEx($"return cached {typeName} object, hash = {obj.GetHashCode()}");
-            return (T) obj;
-        }
+            var key = GetKey<T>();
+            var typeName = typeof(T).Name;
 
-        var jsonContent = GetLocalStorage(key);
-        T cw;
-        if (!string.IsNullOrWhiteSpace(jsonContent))
-        {
-            cw = JsonSerializer.Deserialize(jsonContent, jsonTypeInfo);
-            logger.LogDebugEx($"create new {typeName} object from browser storage, hash = {cw.GetHashCode()}");
-        }
-        else
-        {
-            cw = provider.Resolve<T>();
-            logger.LogDebugEx(
-                $"create new {typeName} object from ActivatorUtilities.CreateInstance(), hash = {cw.GetHashCode()}");
-        }
+            if (cacheObj.TryGetValue(key, out var obj))
+            {
+                logger.LogDebugEx($"return cached {typeName} object, hash = {obj.GetHashCode()}");
+                return (T) obj;
+            }
 
-        cacheObj[key] = cw;
-        return cw;
+            var jsonContent = GetLocalStorage(key);
+            T cw;
+            if (!string.IsNullOrWhiteSpace(jsonContent))
+            {
+                cw = JsonSerializer.Deserialize(jsonContent, jsonTypeInfo);
+                logger.LogDebugEx($"create new {typeName} object from browser storage, hash = {cw.GetHashCode()}");
+            }
+            else
+            {
+                cw = provider.Resolve<T>();
+                logger.LogDebugEx(
+                    $"create new {typeName} object from ActivatorUtilities.CreateInstance(), hash = {cw.GetHashCode()}");
+            }
+
+            cacheObj[key] = cw;
+            return cw;
+        }
     }
 
     private string GetKey<T>()
@@ -83,14 +90,14 @@ public class BrowserSettingManager : ISettingManager
     private void SetLocalStorage(string key, string value)
     {
         LocalStorageInterop.Save(key, value);
-        logger.LogDebugEx($"setting from storage {key} = {value}");
+        logger.LogDebugEx($"saved setting '{key}', length = {value?.Length ?? 0}");
     }
 
     private string GetLocalStorage(string key)
     {
         var value = LocalStorageInterop.Load(key);
 
-        logger.LogDebugEx($"getting from storage {key} = {value}");
+        logger.LogDebugEx($"loaded setting '{key}', length = {value?.Length ?? 0}");
         return value;
     }
 }
