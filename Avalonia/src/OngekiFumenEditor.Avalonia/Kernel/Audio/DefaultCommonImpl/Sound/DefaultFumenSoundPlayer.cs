@@ -37,8 +37,6 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
     private static int loopIdGen;
 
-    public bool EnableLoopPlayTiming { get; set; } = true;
-
     public SoundControl SoundControl { get; set; } = SoundControl.All;
 
     private readonly Dictionary<SoundControl, ISoundPlayer> cacheSounds = [];
@@ -315,7 +313,7 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         itor = default;
 
         meterActions.Clear();
-        if (EnableLoopPlayTiming)
+        if (EditorGlobalSetting.Default.LoopPlayTiming)
         {
             var oneTGrid = new TGrid(1, 0);
             var timeSignatureList = fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(fumen.BpmList);
