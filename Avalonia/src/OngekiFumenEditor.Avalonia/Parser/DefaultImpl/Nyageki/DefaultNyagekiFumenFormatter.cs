@@ -92,7 +92,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
                         /*if (string.IsNullOrWhiteSpace(image.SvgFile?.FullPath))
                             throw new Exception($"at {svg.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
                         */
-                        var locator = image.SvgFile?.LocalPath ?? image.SvgFile?.FullPath ?? string.Empty;
+                        var locator = image.SvgFilePath;
                         fields.Add($"FilePathBase64[{Base64.Encode(locator)}]");
                         break;
                     case SvgStringPrefab text:

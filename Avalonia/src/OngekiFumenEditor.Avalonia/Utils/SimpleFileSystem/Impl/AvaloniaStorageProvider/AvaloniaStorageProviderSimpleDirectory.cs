@@ -6,10 +6,8 @@ namespace OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorage
 
 public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
 {
-    private readonly Dictionary<string, AvaloniaStorageProviderSimpleDirectory> directories =
-        new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, AvaloniaStorageProviderSimpleFile> files =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<AvaloniaStorageProviderSimpleDirectory> directories = [];
+    private readonly List<AvaloniaStorageProviderSimpleFile> files = [];
     private IStorageFolder? storageFolder;
     private bool isDisposed;
 
@@ -32,9 +30,9 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
 
     public ISimpleDirectory? ParentDictionary { get; }
 
-    public ISimpleDirectory[] ChildDictionaries => [.. directories.Values];
+    public ISimpleDirectory[] ChildDictionaries => [.. directories];
 
-    public ISimpleFile[] ChildFiles => [.. files.Values];
+    public ISimpleFile[] ChildFiles => [.. files];
 
     public string FullPath => Path.Combine(ParentDictionary?.FullPath ?? string.Empty, DirectoryName);
 
@@ -44,18 +42,80 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
 
     public bool ExistsDirectory(string dirName)
     {
-        return directories.ContainsKey(dirName);
+        return directories.Any(x => x.DirectoryName.Equals(dirName, StringComparison.OrdinalIgnoreCase));
     }
 
     public bool ExistsFile(string fileName)
     {
-        return files.ContainsKey(fileName);
+        return files.Any(x => x.FileName.Equals(fileName, StringComparison.OrdinalIgnoreCase));
     }
 
     public ISimpleFile[] GetFiles(string pattern = "*")
     {
         var regex = SimpleIO.WildcardToRegex(pattern);
-        return [.. files.Where(pair => regex.IsMatch(pair.Key)).Select(pair => pair.Value)];
+        return [.. files.Where(file => regex.IsMatch(file.FileName))];
+    }
+
+    public async Task<ISimpleDirectory> GetOrCreateDirectoryAsync(
+        string directoryName,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(isDisposed, this);
+        ArgumentException.ThrowIfNullOrWhiteSpace(directoryName);
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var matches = directories
+            .Where(x => x.DirectoryName.Equals(directoryName, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        if (matches.Length == 1)
+            return matches[0];
+        if (matches.Length > 1)
+            throw new IOException($"Directory '{directoryName}' has a case-insensitive name conflict.");
+
+        var folder = await GetStorageFolder().CreateFolderAsync(directoryName).ConfigureAwait(false)
+            ?? throw new IOException($"Unable to create directory '{directoryName}'.");
+        var directory = new AvaloniaStorageProviderSimpleDirectory(this, folder.Name, folder);
+        directories.Add(directory);
+        return directory;
+    }
+
+    public async Task<ISimpleFile> CreateFileAsync(
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(isDisposed, this);
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (files.Any(x => x.FileName.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
+            throw new IOException($"File '{fileName}' already exists.");
+
+        var storageFile = await GetStorageFolder().CreateFileAsync(fileName).ConfigureAwait(false)
+            ?? throw new IOException($"Unable to create file '{fileName}'.");
+        try
+        {
+            var properties = await storageFile.GetBasicPropertiesAsync().ConfigureAwait(false);
+            var file = new AvaloniaStorageProviderSimpleFile(
+                this,
+                storageFile.Name,
+                properties.Size is { } size ? checked((long)size) : 0,
+                storageFile);
+            files.Add(file);
+            return file;
+        }
+        catch
+        {
+            try
+            {
+                await storageFile.DeleteAsync().ConfigureAwait(false);
+            }
+            catch
+            {
+                // Preserve the metadata exception; the provider may not support deleting the new file.
+            }
+
+            storageFile.Dispose();
+            throw;
+        }
     }
 
     public void AddDirectory(AvaloniaStorageProviderSimpleDirectory directory)
@@ -63,13 +123,7 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
         ObjectDisposedException.ThrowIf(isDisposed, this);
         ArgumentNullException.ThrowIfNull(directory);
 
-        if (directories.TryGetValue(directory.DirectoryName, out var replaced) &&
-            !ReferenceEquals(replaced, directory))
-        {
-            replaced.Dispose();
-        }
-
-        directories[directory.DirectoryName] = directory;
+        directories.Add(directory);
     }
 
     public void AddFile(AvaloniaStorageProviderSimpleFile file)
@@ -77,13 +131,12 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
         ObjectDisposedException.ThrowIf(isDisposed, this);
         ArgumentNullException.ThrowIfNull(file);
 
-        if (files.TryGetValue(file.FileName, out var replaced) &&
-            !ReferenceEquals(replaced, file))
-        {
-            replaced.Dispose();
-        }
+        files.Add(file);
+    }
 
-        files[file.FileName] = file;
+    internal void RemoveFile(AvaloniaStorageProviderSimpleFile file)
+    {
+        files.Remove(file);
     }
 
     public void Dispose()
@@ -92,9 +145,9 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
             return;
 
         isDisposed = true;
-        foreach (var childDirectory in directories.Values)
+        foreach (var childDirectory in directories)
             childDirectory.Dispose();
-        foreach (var childFile in files.Values)
+        foreach (var childFile in files)
             childFile.Dispose();
 
         storageFolder?.Dispose();
@@ -104,5 +157,10 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
     public override string ToString()
     {
         return $"Directory: {FullPath}, ChildDirsCount: {directories.Count}, ChildFilesCount: {files.Count}";
+    }
+
+    private IStorageFolder GetStorageFolder()
+    {
+        return storageFolder ?? throw new ObjectDisposedException(nameof(AvaloniaStorageProviderSimpleDirectory));
     }
 }

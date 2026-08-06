@@ -10,6 +10,7 @@ using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl;
 
@@ -247,13 +248,16 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         }
     }
 
-    private async Task<IAudioPlayer> LoadAudioFromLocalPathAsync(string filePath)
+    private async Task<IAudioPlayer> LoadAudioFromLocalPathAsync(
+        string filePath,
+        string validatedExternalAwbPath = null)
     {
         if (string.IsNullOrWhiteSpace(filePath))
             return null;
 
         await EnsureAudioOutputInitializedAsync();
 
+        ITemporaryFile temporaryWavFile = null;
         if (filePath.EndsWith(".acb", StringComparison.OrdinalIgnoreCase))
         {
             if (!SupportAudioFileExtensionList.Any(x =>
@@ -263,9 +267,12 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
                     "ACB audio conversion is not available on this platform.");
             }
 
-            filePath = await AcbConverter.ConvertAcbFileToWavFile(filePath);
-            if (filePath is null)
-                return null;
+            temporaryWavFile = await AcbConverter.ConvertAcbFileToWavFile(
+                filePath,
+                validatedExternalAwbPath);
+            if (temporaryWavFile is null)
+                throw new InvalidDataException("The ACB audio could not be decoded.");
+            filePath = temporaryWavFile.GetRequiredLocalPath();
         }
 
         var player = new DefaultMusicPlayer(
@@ -274,11 +281,45 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
             schedulerManager,
             audioFileReaderFactory);
         ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-        await player.Load(filePath, targetSampleRate);
-        return player;
+        try
+        {
+            await player.Load(filePath, targetSampleRate);
+            if (!player.IsAvaliable)
+                throw new InvalidDataException("The selected audio could not be decoded.");
+            return player;
+        }
+        catch
+        {
+            player.Dispose();
+            throw;
+        }
+        finally
+        {
+            if (temporaryWavFile is not null)
+            {
+                try
+                {
+                    await temporaryWavFile.DeleteAsync(CancellationToken.None);
+                }
+                catch (Exception exception)
+                {
+                    Log.LogWarn($"Unable to delete a decoded ACB temporary file: {exception.Message}");
+                }
+            }
+        }
     }
 
-    public async Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file)
+    public Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file) =>
+        LoadAudioCoreAsync(file, null);
+
+    public Task<IAudioPlayer> LoadProjectAudioAsync(
+        ISimpleFile file,
+        ISimpleFile externalAwbFile) =>
+        LoadAudioCoreAsync(file, externalAwbFile);
+
+    private async Task<IAudioPlayer> LoadAudioCoreAsync(
+        ISimpleFile file,
+        ISimpleFile externalAwbFile)
     {
         if (file is null)
             return null;
@@ -292,7 +333,10 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
                     "ACB audio requires a local file path and access to its associated AWB file.");
             }
 
-            return await LoadAudioFromLocalPathAsync(file.LocalPath);
+            if (externalAwbFile is not null && string.IsNullOrWhiteSpace(externalAwbFile.LocalPath))
+                throw new PlatformNotSupportedException("The external AWB file does not expose a local path.");
+
+            return await LoadAudioFromLocalPathAsync(file.LocalPath, externalAwbFile?.LocalPath);
         }
 
         if (extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase) &&
@@ -310,6 +354,11 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
             audioFileReaderFactory);
         ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
         await player.Load(file, targetSampleRate);
+        if (!player.IsAvaliable)
+        {
+            player.Dispose();
+            throw new InvalidDataException("The selected audio could not be decoded.");
+        }
         return player;
     }
 

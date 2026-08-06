@@ -30,4 +30,12 @@ public interface ISimpleDirectory : IDisposable
     bool ExistsFile(string fileName);
 
     ISimpleFile[] GetFiles(string pattern = "*");
+
+    Task<ISimpleDirectory> GetOrCreateDirectoryAsync(
+        string directoryName,
+        CancellationToken cancellationToken = default);
+
+    Task<ISimpleFile> CreateFileAsync(
+        string fileName,
+        CancellationToken cancellationToken = default);
 }

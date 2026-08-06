@@ -117,6 +117,16 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile
         }
     }
 
+    public async Task DeleteAsync(CancellationToken cancellationToken = default)
+    {
+        var storageFile = GetStorageFile();
+        cancellationToken.ThrowIfCancellationRequested();
+        await storageFile.DeleteAsync().ConfigureAwait(false);
+        if (ParentDictionary is AvaloniaStorageProviderSimpleDirectory parent)
+            parent.RemoveFile(this);
+        Dispose();
+    }
+
     public async Task WriteAsync(
         Func<Stream, CancellationToken, Task> writer,
         CancellationToken cancellationToken = default)
@@ -128,7 +138,14 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile
         if (LocalPath is { } localPath)
         {
             fileLength = await SimpleFileWriteTransaction
-                .WriteLocalAsync(localPath, writer, cancellationToken)
+                .WriteLocalAsync(
+                    localPath,
+                    writer,
+                    cancellationToken,
+                    (temporaryPath, expectedLength) => CommitReplacementThroughProviderAsync(
+                        storageFile,
+                        temporaryPath,
+                        expectedLength))
                 .ConfigureAwait(false);
         }
         else
@@ -207,6 +224,31 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile
         return properties.Size is { } size
             ? checked((long)size)
             : fallback ?? 0;
+    }
+
+    private static async Task CommitReplacementThroughProviderAsync(
+        IStorageFile storageFile,
+        string temporaryPath,
+        long expectedLength)
+    {
+        await using var source = new FileStream(
+            temporaryPath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            81_920,
+            FileOptions.Asynchronous | FileOptions.SequentialScan);
+        await using var target = await storageFile.OpenWriteAsync().ConfigureAwait(false);
+        if (target.CanSeek)
+        {
+            target.Position = 0;
+            target.SetLength(0);
+        }
+
+        await source.CopyToAsync(target, CancellationToken.None).ConfigureAwait(false);
+        if (target.CanSeek)
+            target.SetLength(expectedLength);
+        await target.FlushAsync(CancellationToken.None).ConfigureAwait(false);
     }
 
     private static async Task<byte[]> ReadToEndAsync(Stream stream, long expectedLength)

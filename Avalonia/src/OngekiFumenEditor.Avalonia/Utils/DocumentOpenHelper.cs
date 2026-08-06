@@ -35,13 +35,12 @@ internal static class DocumentOpenHelper
         var provider = PickEditorProvider(filePath);
         if (provider is not null)
         {
+            if (provider is IFumenVisualEditorProvider)
+                return false;
+
             Log.LogInfo($"Open document by provider {provider.GetType().Name}: {filePath}");
             var document = provider.Create();
-            var shouldShow = provider switch
-            {
-                IFumenVisualEditorProvider fumenProvider => await fumenProvider.TryOpen(document, filePath),
-                _ => await provider.TryOpen(document)
-            };
+            var shouldShow = await provider.TryOpen(document);
 
             if (shouldShow)
             {
@@ -58,6 +57,7 @@ internal static class DocumentOpenHelper
 
     public static async Task<bool> TryOpenOgkrFileAsDocument(string ogkrFilePath)
     {
+#if ENABLE_CROSS_PLATFORM_FAST_OPEN
         var newProj = await TryCreateEditorProjectDataModel(ogkrFilePath);
         if (newProj is null)
             return false;
@@ -84,12 +84,17 @@ internal static class DocumentOpenHelper
             if (!ownershipTransferred)
                 newProj.DisposeRuntimeFiles();
         }
+#else
+        await Task.CompletedTask;
+        return false;
+#endif
     }
 
     public static async Task<bool> TryOpenOgkrFileAsDocument(ISimpleFile ogkrFile)
     {
         ArgumentNullException.ThrowIfNull(ogkrFile);
 
+#if ENABLE_CROSS_PLATFORM_FAST_OPEN
         EditorProjectDataModel newProj = null;
         var ownershipTransferred = false;
         try
@@ -121,6 +126,11 @@ internal static class DocumentOpenHelper
                     newProj.DisposeRuntimeFiles();
             }
         }
+#else
+        ogkrFile.Dispose();
+        await Task.CompletedTask;
+        return false;
+#endif
     }
 
     public static async Task<bool> TryOpenProject(EditorProjectDataModel proj)
@@ -128,6 +138,7 @@ internal static class DocumentOpenHelper
         if (proj is null)
             return false;
 
+#if ENABLE_CROSS_PLATFORM_FAST_OPEN
         var ownershipTransferred = false;
         try
         {
@@ -146,6 +157,11 @@ internal static class DocumentOpenHelper
             if (!ownershipTransferred)
                 proj.DisposeRuntimeFiles();
         }
+#else
+        proj.DisposeRuntimeFiles();
+        await Task.CompletedTask;
+        return false;
+#endif
     }
 
     public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath)

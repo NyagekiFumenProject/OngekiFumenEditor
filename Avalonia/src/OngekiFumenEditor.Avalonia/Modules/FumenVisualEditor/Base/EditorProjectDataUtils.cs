@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
+using OngekiFumenEditor.Avalonia.Base;
+// using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
@@ -10,6 +12,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using DereTore.Exchange.Archive.ACB;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 {
@@ -19,34 +22,180 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public record Result(bool IsSuccess, string ErrorMessage);
 
-		public static string GetDefaultFumenFilePathForAutoGenerate(string editorProjectFilePath)
-			=> Path.Combine(Path.GetDirectoryName(editorProjectFilePath), Path.GetFileNameWithoutExtension(editorProjectFilePath) + ".ogkr");
-
-		public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath)
+		public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(
+			ISimpleDirectory projectRoot,
+			ISimpleFile projectFile,
+			string projectFileLocator,
+			CancellationToken cancellationToken = default)
 		{
-			Log.LogDebug($"filePath = {filePath}");
-			var projectData = await projFileManager.Load(filePath);
+			ArgumentNullException.ThrowIfNull(projectRoot);
+			ArgumentNullException.ThrowIfNull(projectFile);
+			if (!EditorProjectPathResolver.TryNormalizeRootRelativeLocator(
+					projectFileLocator,
+					out var normalizedProjectLocator,
+					out var projectLocatorError))
+			{
+				throw new InvalidDataException(projectLocatorError);
+			}
 
-			projectData.FumenFilePath = projectData.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(filePath);
+			EditorProjectDataModel projectData;
+			await using (var projectStream = await projectFile.OpenRead())
+				projectData = await projFileManager.Load(projectStream, cancellationToken);
 
-			//always make full path
-			var fileFolder = Path.GetDirectoryName(filePath);
-			Log.LogDebug($"fileFolder = {fileFolder}");
-			projectData.FumenFilePath = Path.Combine(fileFolder, projectData.FumenFilePath);
-			Log.LogDebug($"projectData.FumenFilePath = {projectData.FumenFilePath}");
-			projectData.AudioFilePath = Path.GetFullPath(Path.Combine(fileFolder, projectData.AudioFilePath));
-			Log.LogDebug($"projectData.AudioFilePath = {projectData.AudioFilePath}");
+			var defaultFumenLocator = Path.GetFileNameWithoutExtension(projectFile.FileName) + ".ogkr";
+			var rawFumenLocator = string.IsNullOrWhiteSpace(projectData.FumenFilePath)
+				? defaultFumenLocator
+				: projectData.FumenFilePath;
 
-			using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
-			var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
-			Log.LogDebug($"fumenDeserializer = {fumenDeserializer}");
-			if (fumenDeserializer is null)
-				throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{projectData.FumenFilePath}");
-			var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
+			var errors = new List<string>();
+			if (!EditorProjectPathResolver.TryResolveDependency(
+					projectRoot,
+					normalizedProjectLocator,
+					rawFumenLocator,
+					out var fumenFile,
+					out _,
+					out var projectRelativeFumenLocator,
+					out var fumenError))
+			{
+				errors.Add($"Fumen '{rawFumenLocator}': {fumenError}");
+			}
+
+			if (!EditorProjectPathResolver.TryResolveDependency(
+					projectRoot,
+					normalizedProjectLocator,
+					projectData.AudioFilePath,
+					out var audioFile,
+					out var rootRelativeAudioLocator,
+					out var projectRelativeAudioLocator,
+					out var audioError))
+			{
+				errors.Add($"Audio '{projectData.AudioFilePath}': {audioError}");
+			}
+
+			ISimpleFile audioAwbFile = null;
+			if (audioFile is not null &&
+				Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+			{
+				if (string.IsNullOrWhiteSpace(audioFile.LocalPath))
+				{
+					errors.Add($"Audio '{projectData.AudioFilePath}': ACB decoding is not supported on this platform.");
+				}
+				else
+				{
+					try
+					{
+						await using var acbStream = await audioFile.OpenRead();
+						using var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false);
+						if (acb.InternalAwb is null)
+						{
+							var rawAwbLocator = acb.ExternalAwb?.FileName;
+							if (string.IsNullOrWhiteSpace(rawAwbLocator))
+							{
+								errors.Add($"Audio '{projectData.AudioFilePath}': the ACB has no usable AWB data.");
+							}
+							else if (!EditorProjectPathResolver.TryResolveDependency(
+								         projectRoot,
+								         rootRelativeAudioLocator,
+								         rawAwbLocator,
+								         out audioAwbFile,
+								         out _,
+								         out _,
+								         out var awbError))
+							{
+								errors.Add($"Audio AWB '{rawAwbLocator}': {awbError}");
+							}
+							else if (string.IsNullOrWhiteSpace(audioAwbFile?.LocalPath))
+							{
+								errors.Add($"Audio AWB '{rawAwbLocator}': external AWB decoding is not supported on this platform.");
+							}
+						}
+					}
+					catch (Exception exception)
+					{
+						errors.Add($"Audio '{projectData.AudioFilePath}': the ACB package cannot be inspected: {exception.Message}");
+					}
+				}
+			}
+
+			if (errors.Count > 0)
+				throw new InvalidDataException(string.Join(Environment.NewLine, errors));
+
+			OngekiFumen fumen;
+			await using (var fumenStream = await fumenFile!.OpenRead())
+			{
+				var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(fumenFile.FileName);
+				if (fumenDeserializer is null)
+					throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
+				fumen = await fumenDeserializer.DeserializeAsync(fumenStream);
+			}
+
+			/*
+			 * SVG prefab support is temporarily disabled. Keep the parser/formatter compatibility
+			 * layer, but do not resolve or read SVG dependencies while opening a project.
+			var svgBindings = new List<(SvgImageFilePrefab Svg, ISimpleFile File, string Locator)>();
+			foreach (var svg in fumen.SvgPrefabs.OfType<SvgImageFilePrefab>())
+			{
+				if (!EditorProjectPathResolver.TryResolveRootResource(
+						projectRoot,
+						svg.SvgFilePath,
+						out var svgFile,
+						out var svgLocator,
+						out var svgError))
+				{
+					errors.Add($"SVG '{svg.SvgFilePath}' at {svg.TGrid}: {svgError}");
+					continue;
+				}
+
+				svgBindings.Add((svg, svgFile!, svgLocator));
+			}
+
+			if (errors.Count > 0)
+			{
+				foreach (var svg in fumen.SvgPrefabs)
+					svg.Dispose();
+				throw new InvalidDataException(string.Join(Environment.NewLine, errors));
+			}
+
+			foreach (var binding in svgBindings)
+			{
+				try
+				{
+					await binding.Svg.BindProjectFileAsync(
+						binding.File,
+						binding.Locator,
+						cancellationToken);
+				}
+				catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+				{
+					foreach (var svg in fumen.SvgPrefabs)
+						svg.Dispose();
+					throw;
+				}
+				catch (Exception exception)
+				{
+					errors.Add(
+						$"SVG '{binding.Locator}' at {binding.Svg.TGrid} cannot be loaded: {exception.Message}");
+				}
+			}
+
+			if (errors.Count > 0)
+			{
+				foreach (var svg in fumen.SvgPrefabs)
+					svg.Dispose();
+				throw new InvalidDataException(string.Join(Environment.NewLine, errors));
+			}
+			*/
+
 			projectData.Fumen = fumen;
-
+			projectData.FumenFilePath = projectRelativeFumenLocator;
+			projectData.AudioFilePath = projectRelativeAudioLocator;
+			projectData.ProjectFileLocator = normalizedProjectLocator;
+			projectData.ProjectFile = projectFile;
+			projectData.FumenFile = fumenFile;
+			projectData.AudioFile = audioFile;
+			projectData.AudioAwbFile = audioAwbFile;
+			projectData.ProjectRoot = projectRoot;
 			ApplyBulletPalleteListEditorData(projectData);
-
 			return projectData;
 		}
 
@@ -83,42 +232,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 		}
 
 		public static async Task<Result> TrySaveProjFileAsync(
-			string projFileFullPath,
-			EditorProjectDataModel editorProject,
-			CancellationToken cancellationToken = default)
-		{
-			try
-			{
-				if (!FileHelper.IsPathWritable(projFileFullPath))
-					throw new IOException(Lang.CantWriteProjectFileByIoError);
-
-				var tmpProjFile = await CreateTemporaryFileAsync(
-					"FumenProjFile",
-					"project",
-					Path.GetExtension(projFileFullPath),
-					cancellationToken);
-				StoreBulletPalleteListEditorData(editorProject);
-
-				await projFileManager.Save(tmpProjFile, editorProject, cancellationToken);
-
-				File.Copy(tmpProjFile.GetRequiredLocalPath(), projFileFullPath, true);
-
-				return new(true, "");
-			}
-			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-			{
-				throw;
-			}
-			catch (Exception e)
-			{
-				var msg = $"{Lang.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
-				return new(false, msg);
-				//Log.LogError(msg);
-				//MessageBox.Show(msg);
-			}
-		}
-
-		public static async Task<Result> TrySaveProjFileAsync(
 			ITemporaryFile projectFile,
 			EditorProjectDataModel editorProject,
 			CancellationToken cancellationToken = default)
@@ -137,45 +250,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			catch (Exception e)
 			{
 				var msg = $"{Lang.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
-				return new(false, msg);
-			}
-		}
-
-
-		public static async Task<Result> TrySaveFumenFileAsync(
-			string fumenFileFullPath,
-			EditorProjectDataModel editorProject,
-			CancellationToken cancellationToken = default)
-		{
-			try
-			{
-				if (!FileHelper.IsPathWritable(fumenFileFullPath))
-					throw new IOException(Lang.CantWriteFumenFileByIoError);
-
-				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFileFullPath);
-				Log.LogDebug($"serializer = {serializer}");
-				if (serializer is null)
-					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{Path.GetFileName(fumenFileFullPath)}");
-
-				var tmpFumenFile = await CreateTemporaryFileAsync(
-					"FumenFile",
-					"fumen",
-					Path.GetExtension(fumenFileFullPath),
-					cancellationToken);
-				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
-				await tmpFumenFile.WriteAllBytesAsync(fumenBuffer, cancellationToken);
-
-				File.Copy(tmpFumenFile.GetRequiredLocalPath(), fumenFileFullPath, true);
-
-				return new(true, "");
-			}
-			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-			{
-				throw;
-			}
-			catch (Exception e)
-			{
-				var msg = $"{Lang.CantSaveFumenProject} {e.Message}{Environment.NewLine}{e.StackTrace}";
 				return new(false, msg);
 			}
 		}
@@ -242,95 +316,85 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 		}
 
 		public static async Task<Result> TrySaveEditorAsync(
-			string projFilePath,
+			ISimpleFile projectFile,
 			EditorProjectDataModel editorProject,
 			CancellationToken cancellationToken = default)
 		{
 			try
 			{
-				var tmpProjFile = await CreateTemporaryFileAsync(
-					"misc",
-					"project",
-					".dat",
-					cancellationToken);
-				var tmpProjFilePath = tmpProjFile.GetRequiredLocalPath();
+				ArgumentNullException.ThrowIfNull(projectFile);
+				ArgumentNullException.ThrowIfNull(editorProject);
+				if (editorProject.FumenFile is not { } fumenFile)
+					throw new InvalidOperationException("The project does not have a bound fumen file.");
 
-				//clone new project object to modify
 				cancellationToken.ThrowIfCancellationRequested();
-				var cloneProj = await projFileManager.Clone(editorProject);
-				cloneProj.Fumen = editorProject.Fumen;
+				var cloneProject = await projFileManager.Clone(editorProject);
+				cloneProject.Fumen = editorProject.Fumen;
+				StoreBulletPalleteListEditorData(cloneProject);
 
-				var fileFolder = Path.GetDirectoryName(projFilePath);
-				if (Path.IsPathFullyQualified(cloneProj.FumenFilePath))
-					cloneProj.FumenFilePath = Path.GetRelativePath(fileFolder, cloneProj.FumenFilePath);
-				if (Path.IsPathFullyQualified(cloneProj.AudioFilePath))
-					cloneProj.AudioFilePath = Path.GetRelativePath(fileFolder, cloneProj.AudioFilePath);
+				var fumenSerializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.FileName);
+				if (fumenSerializer is null)
+					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
+				var fumenBytes = await fumenSerializer.SerializeAsync(cloneProject.Fumen);
 
-				//save proj to tmp file
-				var saveProjTaskResult = await TrySaveProjFileAsync(tmpProjFile, cloneProj, cancellationToken);
-				if (!saveProjTaskResult.IsSuccess)
-					throw new Exception(saveProjTaskResult.ErrorMessage);
-
-				string fumenFullPath = null;
-				string tmpFumenFilePath = null;
-				Result saveFumenTaskResult;
-				if (editorProject.FumenFile is null)
+				byte[] projectBytes;
+				await using (var projectBuffer = new MemoryStream())
 				{
-					// Keep the local-path branch atomic by serializing to a temporary file first.
-					fumenFullPath = Path.Combine(fileFolder, cloneProj.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(projFilePath));
-					var tmpFumenFile = await CreateTemporaryFileAsync(
-						"misc",
-						"fumen",
-						Path.GetExtension(fumenFullPath),
-						cancellationToken);
-					tmpFumenFilePath = tmpFumenFile.GetRequiredLocalPath();
-					saveFumenTaskResult = await TrySaveFumenFileAsync(tmpFumenFile, cloneProj, cancellationToken);
-				}
-				else
-				{
-					saveFumenTaskResult = await TrySaveFumenFileAsync(
-						editorProject.FumenFile,
-						cloneProj,
-						cancellationToken);
+					await projFileManager.Save(projectBuffer, cloneProject, cancellationToken);
+					projectBytes = projectBuffer.ToArray();
 				}
 
-				if (!saveFumenTaskResult.IsSuccess)
-					throw new Exception(saveFumenTaskResult.ErrorMessage);
-
-				//tmp files cover to real files.
-				Log.LogDebug($"Copy tmpProjFilePath '{tmpProjFilePath}' to '{projFilePath}'");
-				File.Copy(tmpProjFilePath, projFilePath, true);
-				if (tmpFumenFilePath is not null)
+				var originalFumen = await fumenFile.ReadAllBytes();
+				var originalProject = await projectFile.ReadAllBytes();
+				try
 				{
-					Log.LogDebug($"Copy tmpFumenFilePath '{tmpFumenFilePath}' to '{fumenFullPath}'");
-					File.Copy(tmpFumenFilePath, fumenFullPath, true);
+					await WriteBytesAsync(fumenFile, fumenBytes, cancellationToken);
+					await WriteBytesAsync(projectFile, projectBytes, cancellationToken);
+				}
+				catch (Exception saveException)
+				{
+					var rollbackErrors = new List<Exception> { saveException };
+					try
+					{
+						await WriteBytesAsync(projectFile, originalProject, CancellationToken.None);
+					}
+					catch (Exception rollbackException)
+					{
+						rollbackErrors.Add(rollbackException);
+					}
+
+					try
+					{
+						await WriteBytesAsync(fumenFile, originalFumen, CancellationToken.None);
+					}
+					catch (Exception rollbackException)
+					{
+						rollbackErrors.Add(rollbackException);
+					}
+
+					throw new AggregateException("Project save failed; rollback was attempted.", rollbackErrors);
 				}
 
-				return new(true, "");
+				return new(true, string.Empty);
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
 			{
 				throw;
 			}
-			catch (Exception e)
+			catch (Exception exception)
 			{
-				var msg = $"{Lang.CantSaveProjectTotally}{e.Message}{Environment.NewLine}{e.StackTrace}";
-				return new(false, msg);
+				return new(false, $"{Lang.CantSaveProjectTotally}{exception.Message}{Environment.NewLine}{exception.StackTrace}");
 			}
 		}
 
-		private static async Task<ITemporaryFile> CreateTemporaryFileAsync(
-			string folderName,
-			string prefix,
-			string extension,
+		private static Task WriteBytesAsync(
+			ISimpleFile file,
+			byte[] data,
 			CancellationToken cancellationToken)
 		{
-			var provider = IoC.Get<ITemporaryFolderProvider>();
-			var folder = await provider.Root.GetOrCreateFolderAsync(folderName, cancellationToken);
-			return await provider.CreateUniqueFileAsync(
-				prefix,
-				extension ?? string.Empty,
-				folder,
+			return file.WriteAsync(
+				(stream, writerCancellationToken) =>
+					stream.WriteAsync(data, writerCancellationToken).AsTask(),
 				cancellationToken);
 		}
 	}

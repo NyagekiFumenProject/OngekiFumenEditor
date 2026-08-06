@@ -29,7 +29,8 @@ internal static class SimpleFileWriteTransaction
     public static async Task<long> WriteLocalAsync(
         string localPath,
         Func<Stream, CancellationToken, Task> writer,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        Func<string, long, Task>? accessDeniedCommitFallback = null)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(localPath);
         ArgumentNullException.ThrowIfNull(writer);
@@ -60,7 +61,15 @@ internal static class SimpleFileWriteTransaction
                 fileLength = stream.Length;
             }
 
-            File.Move(temporaryPath, targetPath, overwrite: true);
+            try
+            {
+                File.Move(temporaryPath, targetPath, overwrite: true);
+            }
+            catch (UnauthorizedAccessException) when (accessDeniedCommitFallback is not null)
+            {
+                await accessDeniedCommitFallback(temporaryPath, fileLength).ConfigureAwait(false);
+            }
+
             return fileLength;
         }
         finally

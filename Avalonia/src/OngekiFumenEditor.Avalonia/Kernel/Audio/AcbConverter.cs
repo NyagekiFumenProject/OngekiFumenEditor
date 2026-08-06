@@ -67,46 +67,47 @@ public static class AcbConverter
         }
     }
 
-    public static async Task<string> ConvertAcbFileToWavFile(string filePath)
+    public static async Task<ITemporaryFile> ConvertAcbFileToWavFile(
+        string filePath,
+        string validatedExternalAwbPath = null)
     {
         await locker.WaitAsync();
         try
         {
             var provider = IoC.Get<ITemporaryFolderProvider>();
             var tempFolder = await provider.Root.GetOrCreateFolderAsync("decodeAcbFiles");
-            var fileName = Path.GetFileNameWithoutExtension(filePath) + ".wav";
-            var temporaryFile = await tempFolder.TryGetFileAsync(fileName);
-            if (temporaryFile is not null && await temporaryFile.GetLengthAsync() > 0)
-            {
-                var cachedPath = temporaryFile.GetRequiredLocalPath();
-                Log.LogInfo($"use cache file: {cachedPath}");
-                return cachedPath;
-            }
-
-            temporaryFile ??= await tempFolder.GetOrCreateFileAsync(fileName);
+            var temporaryFile = await provider.CreateUniqueFileAsync(
+                "decoded",
+                ".wav",
+                tempFolder);
             var tempAwbFilePath = temporaryFile.GetRequiredLocalPath();
-            Log.LogInfo($"Extract .acb to .wav and load the later , acb file path : {tempAwbFilePath}");
+            Log.LogInfo("Decode ACB audio into a temporary WAV file.");
 
             try
             {
                 using var acb = AcbFile.FromFile(filePath);
-                var awb = acb.InternalAwb ?? acb.ExternalAwb;
-                using var awbStream = awb == acb.InternalAwb ? acb.Stream : File.OpenRead(awb.FileName);
+                var awb = acb.InternalAwb ?? acb.ExternalAwb
+                    ?? throw new InvalidDataException("The ACB file has no AWB data.");
+                using var awbStream = awb == acb.InternalAwb
+                    ? acb.Stream
+                    : File.OpenRead(validatedExternalAwbPath
+                        ?? throw new InvalidDataException("External AWB access was not validated by the project session."));
                 await ProcessAllBinaries(acb.FormatVersion, tempAwbFilePath, awb, awbStream);
-                Log.LogInfo($"generate new: {tempAwbFilePath}");
-                return tempAwbFilePath;
+                if (await temporaryFile.GetLengthAsync() <= 0)
+                    throw new InvalidDataException("The ACB file did not produce decodable audio.");
+                return temporaryFile;
             }
             catch (Exception e)
             {
                 await temporaryFile.DeleteAsync();
                 Log.LogError($"Load acb file failed : {e.Message}");
-                return default;
+                return null;
             }
         }
         catch (Exception e)
         {
             Log.LogError($"Temporary ACB decode storage is unavailable : {e.Message}");
-            return default;
+            return null;
         }
         finally
         {

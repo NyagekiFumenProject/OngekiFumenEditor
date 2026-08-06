@@ -13,6 +13,7 @@ public partial interface IAudioManager : IDisposable
     Task<ISoundPlayer> LoadSoundAsync(ISimpleFile file);
     Task<ISoundPlayer> LoadSoundAsync(Stream stream, string fileName);
     Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file);
+    Task<IAudioPlayer> LoadProjectAudioAsync(ISimpleFile file, ISimpleFile externalAwbFile);
 
     IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }
 }

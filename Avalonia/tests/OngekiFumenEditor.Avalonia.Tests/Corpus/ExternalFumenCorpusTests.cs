@@ -271,7 +271,7 @@ public sealed class ExternalFumenCorpusTests
         Assert.Equal("Tahoma", svg.TypefaceName);
         Assert.Equal(SvgStringPrefab.FlowDirection.LeftToRight, svg.ContentFlowDirection);
         Assert.Equal(16d, svg.ContentLineHeight);
-        Assert.NotNull(svg.Picture);
+        Assert.Null(svg.Picture);
     }
 
     private static string[] GetOrderIndependentSerializedLines(string text) =>

@@ -121,6 +121,14 @@ public static class FileDialogHelper
 
     public static async Task<ISimpleDirectory> OpenDirectoryAsync(string title)
     {
+        var folder = await OpenStorageFolderAsync(title);
+        return folder is null
+            ? default
+            : AvaloniaStorageProviderFileSystemBuilder.LoadRootFromAvaloniaStorageFolder(folder);
+    }
+
+    public static async Task<IStorageFolder> OpenStorageFolderAsync(string title)
+    {
         var topLevel = GetTopLevel();
         if (topLevel is null)
         {
@@ -147,7 +155,7 @@ public static class FileDialogHelper
         for (var i = 1; i < folders.Count; i++)
             folders[i].Dispose();
 
-        return AvaloniaStorageProviderFileSystemBuilder.LoadRootFromAvaloniaStorageFolder(folders[0]);
+        return folders[0];
     }
 }
 

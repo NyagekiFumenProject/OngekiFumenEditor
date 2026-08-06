@@ -5,6 +5,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectsOperationImplement;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds;
@@ -49,13 +50,25 @@ public sealed class MefMigrationRegistrationTests
             typeof(HoldOperationGenerator),
             typeof(InterpolatableSoflanOperationGenerator),
             typeof(LaneStartOperationGenerator),
-            typeof(SvgPrefabOperationGenerator),
             typeof(WallStartOperationGenerator));
 
         AssertRegistrations<IOngekiMultiObjectsOperationGenerator>(
             services,
             ServiceLifetime.Singleton,
             typeof(MultiLanesStartOperationGenerator));
+    }
+
+    [Fact]
+    public void AddOngekiFumenEditorAvalonia_DoesNotRegisterSvgPrefabEditorServicesWhileFeatureIsDisabled()
+    {
+        var services = CreateServices();
+
+        Assert.DoesNotContain(services, service =>
+            service.ServiceType == typeof(IFumenEditorDrawingTarget) &&
+            service.ImplementationType == typeof(SvgObjectDrawingTarget));
+        Assert.DoesNotContain(services, service =>
+            service.ServiceType == typeof(IOngekiObjectOperationGenerator) &&
+            service.ImplementationType == typeof(SvgPrefabOperationGenerator));
     }
 
     [Fact]

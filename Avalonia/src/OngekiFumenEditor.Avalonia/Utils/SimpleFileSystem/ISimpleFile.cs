@@ -34,6 +34,9 @@ public interface ISimpleFile : IDisposable
     /// </summary>
     Task<Stream> OpenWrite();
 
+    Task DeleteAsync(CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException($"Deleting '{FullPath}' is not supported by this file provider.");
+
     /// <summary>
     ///     Replaces the file content after <paramref name="writer"/> completes successfully.
     ///     Local files are committed atomically through a temporary file in the same directory.

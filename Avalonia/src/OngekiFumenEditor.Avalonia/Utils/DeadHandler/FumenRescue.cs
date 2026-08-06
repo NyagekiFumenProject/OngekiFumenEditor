@@ -6,11 +6,107 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 {
 	internal static class FumenRescue
 	{
+		private const string AutoSaveFolderName = "AutoSave";
+
+		public static async Task<ITemporaryFolder> SaveRecoverySnapshotAsync(
+			FumenVisualEditorViewModel editor,
+			CancellationToken cancellationToken = default)
+		{
+			ArgumentNullException.ThrowIfNull(editor);
+			if (editor.EditorProjectData is null)
+				return null;
+
+			var provider = IoC.Get<ITemporaryFolderProvider>();
+			if (!provider.IsAvailable)
+				return null;
+
+			var autoSaveRoot = await provider.Root.GetOrCreateFolderAsync(
+				AutoSaveFolderName,
+				cancellationToken);
+			var snapshotFolder = await autoSaveRoot.GetOrCreateFolderAsync(
+				editor.RecoverySnapshotId.ToString("N"),
+				cancellationToken);
+
+			try
+			{
+				editor.EditorProjectData.Fumen = editor.Fumen;
+				var projectFile = await snapshotFolder.GetOrCreateFileAsync(
+					"project.nyagekiProj",
+					cancellationToken);
+				var projectResult = await EditorProjectDataUtils.TrySaveProjFileAsync(
+					projectFile,
+					editor.EditorProjectData,
+					cancellationToken);
+				if (!projectResult.IsSuccess)
+					throw new IOException(projectResult.ErrorMessage);
+
+				var fumenExtension = Path.GetExtension(editor.EditorProjectData.FumenFile?.FileName);
+				if (string.IsNullOrWhiteSpace(fumenExtension))
+					fumenExtension = ".ogkr";
+				var fumenFile = await snapshotFolder.GetOrCreateFileAsync(
+					$"fumen{fumenExtension}",
+					cancellationToken);
+				var fumenResult = await EditorProjectDataUtils.TrySaveFumenFileAsync(
+					fumenFile,
+					editor.EditorProjectData,
+					cancellationToken);
+				if (!fumenResult.IsSuccess)
+					throw new IOException(fumenResult.ErrorMessage);
+
+				var locator = editor.EditorProjectData.ProjectFileLocator ?? string.Empty;
+				var metadata = string.Join(
+					Environment.NewLine,
+					"Version=1",
+					$"CreatedUtc={DateTimeOffset.UtcNow:O}",
+					$"ProjectFileLocatorBase64={Convert.ToBase64String(Encoding.UTF8.GetBytes(locator))}");
+				var metadataFile = await snapshotFolder.GetOrCreateFileAsync(
+					"metadata.txt",
+					cancellationToken);
+				await metadataFile.WriteAllBytesAsync(Encoding.UTF8.GetBytes(metadata), cancellationToken);
+				return snapshotFolder;
+			}
+			catch
+			{
+				try
+				{
+					await snapshotFolder.DeleteAsync(CancellationToken.None);
+				}
+				catch
+				{
+					// Preserve the snapshot creation error.
+				}
+
+				throw;
+			}
+		}
+
+		public static async Task DeleteRecoverySnapshotAsync(
+			FumenVisualEditorViewModel editor,
+			CancellationToken cancellationToken = default)
+		{
+			ArgumentNullException.ThrowIfNull(editor);
+			var provider = IoC.Get<ITemporaryFolderProvider>();
+			if (!provider.IsAvailable)
+				return;
+
+			var autoSaveRoot = await provider.Root.TryGetFolderAsync(
+				AutoSaveFolderName,
+				cancellationToken);
+			var snapshotFolder = autoSaveRoot is null
+				? null
+				: await autoSaveRoot.TryGetFolderAsync(
+					editor.RecoverySnapshotId.ToString("N"),
+					cancellationToken);
+			if (snapshotFolder is not null)
+				await snapshotFolder.DeleteAsync(cancellationToken);
+		}
+
 		public static async Task<string[]> Rescue(CancellationToken cancellationToken = default)
 		{
 			var list = new List<string>();

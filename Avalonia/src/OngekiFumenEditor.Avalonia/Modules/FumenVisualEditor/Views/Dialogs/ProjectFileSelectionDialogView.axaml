@@ -1,0 +1,45 @@
+<views:WindowViewBase
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
+    xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs"
+    x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.ProjectFileSelectionDialogView"
+    x:CompileBindings="True"
+    x:DataType="viewModels:ProjectFileSelectionDialogViewModel"
+    Title="Select project file"
+    Width="620"
+    Height="440"
+    MinWidth="420"
+    MinHeight="280"
+    Background="{DynamicResource EditorWindowBackgroundBrush}"
+    mc:Ignorable="d">
+    <Grid Margin="12" RowDefinitions="Auto,*,Auto">
+        <TextBlock
+            Margin="0,0,0,8"
+            FontSize="16"
+            Text="Select the project file to open" />
+
+        <ListBox
+            Grid.Row="1"
+            ItemsSource="{Binding ProjectLocators}"
+            SelectedItem="{Binding SelectedProjectLocator, Mode=TwoWay}" />
+
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="8">
+            <Button
+                MinWidth="88"
+                Command="{Binding CancelCommand}"
+                Content="Cancel" />
+            <Button
+                MinWidth="88"
+                Command="{Binding ConfirmCommand}"
+                Content="Open" />
+        </StackPanel>
+    </Grid>
+</views:WindowViewBase>

@@ -151,10 +151,11 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
                 switch (svg)
                 {
                     case SvgImageFilePrefab image:
-                        if (string.IsNullOrWhiteSpace(image.SvgFile?.FullPath))
+                        var locator = image.SvgFilePath;
+                        if (string.IsNullOrWhiteSpace(locator))
                         throw new InvalidOperationException(
                                 $"at {svg.TGrid}, SvgImageFilePrefab.SvgFile is empty or null");
-                        fields.Add(Base64.Encode(image.SvgFile.LocalPath ?? image.SvgFile.FullPath));
+                        fields.Add(Base64.Encode(locator));
                         break;
                     case SvgStringPrefab text:
                         if (string.IsNullOrWhiteSpace(text.Content) || string.IsNullOrWhiteSpace(text.TypefaceName))

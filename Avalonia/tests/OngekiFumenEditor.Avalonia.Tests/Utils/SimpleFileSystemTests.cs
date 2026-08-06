@@ -3,6 +3,12 @@ using System.Text;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Platform.Storage;
+using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
@@ -305,6 +311,206 @@ public sealed class SimpleFileSystemTests
 
         Assert.True(source.IsDisposed);
     }
+
+    [Theory]
+    [InlineData("charts/../audio/song.wav", "audio/song.wav")]
+    [InlineData(@"Charts\.\Song.ogkr", "Charts/Song.ogkr")]
+    public void NormalizeProjectLocator_InRootPath_ReturnsPortableLocator(
+        string input,
+        string expected)
+    {
+        var result = EditorProjectPathResolver.TryNormalizeRootRelativeLocator(
+            input,
+            out var normalized,
+            out var error);
+
+        Assert.True(result, error);
+        Assert.Equal(expected, normalized);
+    }
+
+    [Theory]
+    [InlineData("../outside.ogkr")]
+    [InlineData("/absolute/project.nyagekiProj")]
+    [InlineData(@"C:\absolute\project.nyagekiProj")]
+    [InlineData("folder/provider:item.ogkr")]
+    public void NormalizeProjectLocator_OutsideOrAbsolutePath_IsRejected(string input)
+    {
+        Assert.False(EditorProjectPathResolver.TryNormalizeRootRelativeLocator(
+            input,
+            out _,
+            out var error));
+        Assert.NotEmpty(error);
+    }
+
+    [AvaloniaFact]
+    public async Task ResolveDependency_NormalizesAgainstProjectDirectoryAndPreservesActualCase()
+    {
+        using var temporaryDirectory = new TemporaryDirectory();
+        temporaryDirectory.CreateDirectory(Path.Combine("Projects", "Nested"));
+        var chartsDirectory = temporaryDirectory.CreateDirectory("Charts");
+        await File.WriteAllTextAsync(
+            Path.Combine(temporaryDirectory.RootPath, "Projects", "Nested", "song.nyagekiProj"),
+            "project");
+        await File.WriteAllTextAsync(Path.Combine(chartsDirectory, "Map.ogkr"), "chart");
+
+        var storageRoot = await GetStorageFolder(temporaryDirectory.RootPath);
+        using var root = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFolder(storageRoot);
+
+        var result = EditorProjectPathResolver.TryResolveDependency(
+            root,
+            "Projects/Nested/song.nyagekiProj",
+            "../../charts/map.ogkr",
+            out var file,
+            out var rootLocator,
+            out var projectLocator,
+            out var error);
+
+        Assert.True(result, error);
+        Assert.Equal("Map.ogkr", file!.FileName);
+        Assert.Equal("Charts/Map.ogkr", rootLocator);
+        Assert.Equal("../../Charts/Map.ogkr", projectLocator);
+
+        Assert.False(EditorProjectPathResolver.TryResolveDependency(
+            root,
+            "Projects/Nested/song.nyagekiProj",
+            "../../../outside.ogkr",
+            out _,
+            out _,
+            out _,
+            out _));
+    }
+
+    [AvaloniaFact]
+    public async Task FindProjectFiles_RecursivelyReturnsStableRelativeOrder()
+    {
+        using var temporaryDirectory = new TemporaryDirectory();
+        var nested = temporaryDirectory.CreateDirectory("nested");
+        await File.WriteAllTextAsync(temporaryDirectory.File("z.nyagekiProj"), "z");
+        await File.WriteAllTextAsync(Path.Combine(nested, "A.nyagekiProj"), "a");
+        await File.WriteAllTextAsync(Path.Combine(nested, "ignored.txt"), "ignored");
+
+        var storageRoot = await GetStorageFolder(temporaryDirectory.RootPath);
+        using var root = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFolder(storageRoot);
+
+        Assert.Equal(
+            ["nested/A.nyagekiProj", "z.nyagekiProj"],
+            EditorProjectPathResolver
+                .FindProjectFiles(root, ".nyagekiProj")
+                .Select(x => x.Locator));
+    }
+
+    [AvaloniaFact]
+    public async Task LoadProject_MissingSvgDependency_DoesNotAccessSvgWhileFeatureIsDisabled()
+    {
+        using var temporaryDirectory = new TemporaryDirectory();
+        var projectPath = temporaryDirectory.File("project.nyagekiProj");
+        var fumenPath = temporaryDirectory.File("chart.nyageki");
+        var audioPath = temporaryDirectory.File("audio.wav");
+
+        var fumen = new OngekiFumen();
+        using (var svg = new SvgImageFilePrefab { SvgFilePath = "missing/image.svg" })
+        {
+            fumen.AddObject(svg);
+            await File.WriteAllBytesAsync(
+                fumenPath,
+                await new DefaultNyagekiFumenFormatter().SerializeAsync(fumen));
+        }
+
+        await File.WriteAllBytesAsync(audioPath, [0]);
+        await new EditorProjectFileManager().Save(
+            projectPath,
+            new EditorProjectDataModel
+            {
+                FumenFilePath = "chart.nyageki",
+                AudioFilePath = "audio.wav"
+            });
+
+        var storageRoot = await GetStorageFolder(temporaryDirectory.RootPath);
+        var root = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFolder(storageRoot);
+        EditorProjectDataModel? loaded = null;
+        try
+        {
+            var projectFile = Assert.Single(root.ChildFiles, file =>
+                file.FileName.Equals("project.nyagekiProj", StringComparison.OrdinalIgnoreCase));
+
+            loaded = await EditorProjectDataUtils.TryLoadFromFileAsync(
+                root,
+                projectFile,
+                "project.nyagekiProj");
+
+            var loadedSvg = Assert.IsType<SvgImageFilePrefab>(Assert.Single(loaded.Fumen.SvgPrefabs));
+            Assert.Equal("missing/image.svg", loadedSvg.SvgFilePath);
+            Assert.Null(loadedSvg.Picture);
+            Assert.False(File.Exists(temporaryDirectory.File("missing/image.svg")));
+        }
+        finally
+        {
+            if (loaded is null)
+                root.Dispose();
+            else
+                loaded.DisposeRuntimeFiles();
+        }
+    }
+
+#if ENABLE_SVG_PREFAB_OBJECTS
+    [AvaloniaFact]
+    public async Task ImportSvg_ExternalFilesWithSameContent_ReusesProjectCopy()
+    {
+        using var temporaryDirectory = new TemporaryDirectory();
+        var projectPath = temporaryDirectory.CreateDirectory("Project");
+        var externalPath = temporaryDirectory.CreateDirectory("External");
+        var svgContent = Encoding.UTF8.GetBytes(
+            "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"8\" height=\"8\"><rect width=\"8\" height=\"8\"/></svg>");
+        var firstSourcePath = Path.Combine(externalPath, "first.svg");
+        var secondSourcePath = Path.Combine(externalPath, "second.svg");
+        await File.WriteAllBytesAsync(firstSourcePath, svgContent);
+        await File.WriteAllBytesAsync(secondSourcePath, svgContent);
+
+        var storageRoot = await GetStorageFolder(projectPath);
+        using var root = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFolder(storageRoot);
+        using var firstSource = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFile(await GetStorageFile(firstSourcePath));
+        using var secondSource = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFile(await GetStorageFile(secondSourcePath));
+
+        using var firstImport = await SvgProjectFileImporter.ImportAsync(root, firstSource);
+        using var secondImport = await SvgProjectFileImporter.ImportAsync(root, secondSource);
+
+        Assert.Null(firstImport.LocalPath);
+        Assert.StartsWith("autoImport/svgFiles/first.", firstImport.FullPath, StringComparison.Ordinal);
+        Assert.EndsWith(".svg", firstImport.FullPath, StringComparison.Ordinal);
+        Assert.Equal(firstImport.FullPath, secondImport.FullPath);
+        Assert.Equal(svgContent, await firstImport.ReadAllBytes());
+        Assert.Single(Directory.GetFiles(
+            Path.Combine(projectPath, "autoImport", "svgFiles"),
+            "*.svg"));
+    }
+
+    [AvaloniaFact]
+    public async Task ImportSvg_InvalidSource_DoesNotCreateImportDirectory()
+    {
+        using var temporaryDirectory = new TemporaryDirectory();
+        var projectPath = temporaryDirectory.CreateDirectory("Project");
+        var sourcePath = temporaryDirectory.File("invalid.svg");
+        await File.WriteAllTextAsync(sourcePath, "this is not SVG");
+
+        var storageRoot = await GetStorageFolder(projectPath);
+        using var root = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFolder(storageRoot);
+        using var source = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFile(await GetStorageFile(sourcePath));
+
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            SvgProjectFileImporter.ImportAsync(root, source));
+
+        Assert.False(Directory.Exists(Path.Combine(projectPath, "autoImport")));
+        Assert.False(root.ExistsDirectory("autoImport"));
+    }
+#endif
 
     private static async Task<IStorageFolder> GetStorageFolder(string path)
     {

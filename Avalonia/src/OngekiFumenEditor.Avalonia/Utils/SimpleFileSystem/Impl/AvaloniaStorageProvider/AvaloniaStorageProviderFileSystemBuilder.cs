@@ -79,6 +79,9 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         var directory = new AvaloniaStorageProviderSimpleDirectory(parent, folder.Name, folder);
         try
         {
+            if (parent is null && IsLocalLink(folder))
+                throw new IOException("The selected project root cannot be a symbolic link, junction, or mount point.");
+
             cancellationToken.ThrowIfCancellationRequested();
             await foreach (var item in folder.GetItemsAsync().ConfigureAwait(false))
             {
@@ -86,6 +89,12 @@ public static class AvaloniaStorageProviderFileSystemBuilder
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    if (IsLocalLink(item))
+                    {
+                        Log.LogWarn($"Skip linked project entry '{item.Name}'.");
+                        continue;
+                    }
+
                     switch (item)
                     {
                         case IStorageFile childFile:
@@ -128,6 +137,22 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         {
             directory.Dispose();
             throw;
+        }
+    }
+
+    internal static bool IsLocalLink(IStorageItem item)
+    {
+        var localPath = item.TryGetLocalPath();
+        if (string.IsNullOrWhiteSpace(localPath))
+            return false;
+
+        try
+        {
+            return (File.GetAttributes(localPath) & FileAttributes.ReparsePoint) != 0;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            throw new IOException($"Unable to inspect project entry '{item.Name}' for file-system links.", exception);
         }
     }
 }
