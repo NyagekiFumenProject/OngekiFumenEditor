@@ -1,0 +1,1595 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>WPF 与 Avalonia 全量迁移差异审查（阶段性收尾版）</title>
+  <style>
+    :root {
+      --canvas: #f4f6f8;
+      --surface: #ffffff;
+      --surface-muted: #eef2f5;
+      --text: #20252b;
+      --muted: #5c6873;
+      --border: #cbd3da;
+      --accent: #0b5cab;
+      --accent-soft: #e6f0fa;
+      --warning: #8a4b00;
+      --warning-soft: #fff4e5;
+      --danger: #a32929;
+      --danger-soft: #fdecec;
+      --success: #1e6b45;
+      --success-soft: #e7f5ed;
+      --code: #f1f3f5;
+      --shadow: 0 8px 28px rgba(28, 39, 49, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--text);
+      font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      z-index: 10;
+      padding: .55rem .8rem;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 4px;
+    }
+    .skip-link:focus { top: 1rem; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+      gap: 1.5rem;
+      width: min(1500px, 100%);
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    aside {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      max-height: calc(100vh - 3rem);
+      overflow: auto;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+    }
+    .toc-title {
+      margin: 0 0 .7rem;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    #toc { display: grid; gap: .15rem; }
+    #toc a {
+      display: block;
+      padding: .28rem .45rem;
+      color: var(--muted);
+      font-size: .86rem;
+      line-height: 1.35;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    #toc a:hover, #toc a:focus-visible {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-left-color: var(--accent);
+      outline: none;
+    }
+    #toc a.level-3 { padding-left: 1rem; font-size: .8rem; }
+    main {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+    }
+    article { padding: clamp(1.25rem, 3vw, 3.25rem); }
+    h1, h2, h3, h4 { scroll-margin-top: 1rem; line-height: 1.25; }
+    h1 {
+      margin: 0 0 1.5rem;
+      padding-bottom: 1rem;
+      font-size: clamp(1.8rem, 3vw, 2.55rem);
+      border-bottom: 2px solid var(--accent);
+    }
+    h2 {
+      margin: 2.8rem 0 1rem;
+      padding-bottom: .35rem;
+      color: #263746;
+      font-size: 1.55rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 {
+      margin: 2rem 0 .75rem;
+      color: var(--accent);
+      font-size: 1.15rem;
+    }
+    p { margin: .7rem 0; }
+    a { color: var(--accent); }
+    blockquote {
+      margin: 1rem 0;
+      padding: .75rem 1rem;
+      color: #3c4a55;
+      background: var(--surface-muted);
+      border-left: 4px solid var(--accent);
+    }
+    code {
+      padding: .1em .3em;
+      color: #263746;
+      background: var(--code);
+      border: 1px solid #e1e6ea;
+      border-radius: 3px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: .9em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    pre {
+      overflow: auto;
+      padding: 1rem;
+      background: #1f2933;
+      color: #f4f7f9;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; border: 0; }
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table {
+      width: 100%;
+      min-width: 640px;
+      border-collapse: collapse;
+      font-size: .92rem;
+    }
+    th, td {
+      padding: .55rem .65rem;
+      vertical-align: top;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+    th { background: var(--surface-muted); font-weight: 700; }
+    tr:nth-child(even) td { background: #fbfcfd; }
+    ul, ol { padding-left: 1.5rem; }
+    li + li { margin-top: .25rem; }
+    hr { border: 0; border-top: 1px solid var(--border); }
+    input[type="checkbox"] { accent-color: var(--accent); }
+    @media (max-width: 900px) {
+      .layout { display: block; padding: .75rem; }
+      aside { position: static; max-height: none; margin-bottom: .75rem; }
+      #toc { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+      main { border-radius: 4px; }
+      article { padding: 1rem; }
+    }
+    @media print {
+      body { background: #fff; }
+      .layout { display: block; width: auto; padding: 0; }
+      aside { display: none; }
+      main { border: 0; box-shadow: none; }
+      article { padding: 0; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#document">跳到正文</a>
+  <div class="layout">
+    <aside aria-label="文档目录">
+      <p class="toc-title">审查目录</p>
+      <nav id="toc"></nav>
+    </aside>
+    <main id="document" tabindex="-1">
+      <article>
+<h1 id="wpf-avalonia">WPF 与 Avalonia 全量迁移差异审查（阶段性收尾版）</h1>
+<blockquote>
+<p>状态：本轮审查已冻结（已完成文件基线，以及设置、本地化、撤销/重做、最近文件、命令行、异常终止流程、窗口标题、选择筛选器、状态栏、编码、注册和项目文件夹 I/O 的首轮深查；当前登记 85 个差异条目）<br />
+首次建立：2026-08-07<br />
+本轮收尾：2026-08-07<br />
+当前代码基线：<code>286d33eb</code>（分支 <code>avalonia</code>）<br />
+原项目根：<code>OngekiFumenEditor/</code>、<code>OngekiFumenEditor.CommandLine/</code><br />
+移植项目根：<code>Avalonia/src/OngekiFumenEditor.Avalonia*/</code></p>
+</blockquote>
+<h2 id="section">1. 目的与分类口径</h2>
+<p>本文逐项比较原 WPF 项目和当前 <code>Avalonia.*</code> 项目的代码、界面、运行路径与平台行为。文件已经复制或项目能够编译，不自动等于功能已经迁移。每项差异只归入下列一个主分类；如果同时存在多个问题，以最能描述当前阻塞原因的分类为主，并在说明中交叉引用。</p>
+<ul>
+<li><strong>A：还没迁移的代码</strong>。原项目存在，Avalonia 项目没有等价源码、服务、视图或可达功能。</li>
+<li><strong>B：迁移但还没实现</strong>。已建立类型、命令、视图或接口，但主体为空、抛 <code>NotImplementedException</code>、仅提示“未迁移”、使用占位 UI，或关键分支固定失败。</li>
+<li><strong>C：已迁移但有较大改动</strong>。功能存在，但因架构、框架、平台抽象、数据模型或交互方式改变，不能视为直接逐行移植。</li>
+<li><strong>D：按用户要求暂时拖延</strong>。源码或项目注释有明确“本轮延期/暂时禁用”的证据；不能仅凭缺失推测用户意图。</li>
+<li><strong>E：因移植框架原因无法直接迁移</strong>。依赖 WPF、Windows、DirectX、MahApps、Caliburn/Gemini 等 Avalonia 不具备的机制，必须替代、降级或限定平台。E 表示“不能直接照搬”，不表示功能永远不能用其他方案实现。</li>
+</ul>
+<h3 id="classification-summary">1.1 当前条目统计</h3>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th style="text-align: right;">条目数</th>
+<th>当前含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A：还没迁移</td>
+<td style="text-align: right;">5</td>
+<td>没有等价源码、服务、视图或可达入口。</td>
+</tr>
+<tr>
+<td>B：迁移但未完成</td>
+<td style="text-align: right;">46</td>
+<td>存在迁移壳或替代实现，但仍有空行为、错误接线、占位控件、固定失败或未闭环工作流。</td>
+</tr>
+<tr>
+<td>C：大幅重写</td>
+<td style="text-align: right;">22</td>
+<td>功能已有新架构实现，需按新框架契约验收，不能只按文件同名判断。</td>
+</tr>
+<tr>
+<td>D：明确延期</td>
+<td style="text-align: right;">7</td>
+<td>有本轮暂缓、暂时禁用或设计文档延期证据。</td>
+</tr>
+<tr>
+<td>E：不能直接照搬</td>
+<td style="text-align: right;">5</td>
+<td>必须通过 Avalonia、平台能力或替代控件重新设计。</td>
+</tr>
+<tr>
+<th>合计</th>
+<th style="text-align: right;">85</th>
+<th>每个条目均附有至少一条“建议”；统计按本 HTML 的 A-E 条目标题生成。</th>
+</tr>
+</tbody>
+</table>
+<h2 id="section-1">2. 审查边界和证据规则</h2>
+<h3 id="section-2">2.1 纳入范围</h3>
+<ol>
+<li>原 WPF 主项目 <code>OngekiFumenEditor/OngekiFumenEditor.csproj</code> 的应用源码、XAML、资源声明和包/项目依赖。</li>
+<li>原命令行启动器 <code>OngekiFumenEditor.CommandLine/</code>。</li>
+<li>当前核心、桌面、浏览器和命令行项目：
+<ul>
+<li><code>OngekiFumenEditor.Avalonia</code></li>
+<li><code>OngekiFumenEditor.Avalonia.Desktop</code></li>
+<li><code>OngekiFumenEditor.Avalonia.Browser</code>（含 LLVM 项目）</li>
+<li><code>OngekiFumenEditor.Avalonia.CommandLine</code></li>
+</ul>
+</li>
+<li>与功能等价性直接相关的 <code>tests/</code>。</li>
+</ol>
+<p>第三方 <code>Dependencies/</code> 和原 <code>Dependences/</code> 只审查其作为应用依赖时造成的差异，不把第三方库内部源码逐文件计入应用迁移覆盖率。<code>bin/</code>、<code>obj/</code>、生成器输出和构建缓存不计入源码统计。</p>
+<h3 id="section-3">2.2 当前静态基线</h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th style="text-align: right;">原 WPF 主项目</th>
+<th style="text-align: right;">Avalonia 核心项目</th>
+<th>差值/说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C# 文件</td>
+<td style="text-align: right;">969</td>
+<td style="text-align: right;">940</td>
+<td>-29</td>
+</tr>
+<tr>
+<td>XAML/AXAML 文件</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">57</td>
+<td>-8</td>
+</tr>
+<tr>
+<td>C# 物理行</td>
+<td style="text-align: right;">74,064</td>
+<td style="text-align: right;">65,540</td>
+<td>-8,524</td>
+</tr>
+<tr>
+<td>旧文件按规范化相对路径可找到对应</td>
+<td style="text-align: right;">1,034 中 905</td>
+<td style="text-align: right;">-</td>
+<td>129 个旧文件没有同路径对应</td>
+</tr>
+<tr>
+<td>Avalonia 新增且无旧同路径文件</td>
+<td style="text-align: right;">-</td>
+<td style="text-align: right;">92</td>
+<td>包含平台抽象、设置模型、文件系统和新渲染路径</td>
+</tr>
+</tbody>
+</table>
+<p>说明：这里把旧 <code>.xaml</code> 与新 <code>.axaml</code> 视作同一规范化路径；<code>.xaml.cs</code> 仍按其实际文件名比较。路径覆盖率只是盘点入口，不代表内容或行为相同。目前 905 个有路径对应的文件均需继续做内容和可达性审查。</p>
+<h3 id="section-4">2.3 模块级文件数量</h3>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th style="text-align: right;">WPF 文件数</th>
+<th style="text-align: right;">Avalonia 文件数</th>
+<th>初步结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>EditorScriptExecutor</code></td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0</td>
+<td>A：整模块缺失</td>
+</tr>
+<tr>
+<td><code>OgkiFumenListBrowser</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td>A：整模块缺失</td>
+</tr>
+<tr>
+<td><code>OptionGeneratorTools</code></td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">0</td>
+<td>A：整模块缺失；部分生成能力在 Desktop 命令行以新实现出现，不能等同原 GUI 模块</td>
+</tr>
+<tr>
+<td><code>EditorSvgObjectControlProvider</code></td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0（原路径）</td>
+<td>C/D 待消歧：相关类型已搬到 <code>FumenVisualEditor</code> 与 <code>FumenObjectPropertyBrowser</code>，但项目资源型 SVG prefab 又被明确暂时禁用</td>
+</tr>
+<tr>
+<td>其余 16 个旧模块</td>
+<td style="text-align: right;">均有对应目录</td>
+<td style="text-align: right;">数量相近或增加</td>
+<td>仍需逐项检查实现，不据文件数判定完成</td>
+</tr>
+</tbody>
+</table>
+<h3 id="section-5">2.4 129 个旧文件无同路径对应的首轮归因</h3>
+<p>下表把 129 个旧文件全部纳入逻辑归因。这里的“已归因”只表示已经找到主分类或替代路径，不表示相关实现已经完成行为验收；尤其是 C 类仍需继续比较公开 API、事件、XAML 和运行结果。</p>
+<table>
+<thead>
+<tr>
+<th>旧文件组</th>
+<th style="text-align: right;">文件数</th>
+<th>首轮归因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Modules/OptionGeneratorTools/**</code></td>
+<td style="text-align: right;">44</td>
+<td>A-003：GUI 模块缺失；其中部分生成算法另见 C-006</td>
+</tr>
+<tr>
+<td><code>Modules/EditorScriptExecutor/**</code></td>
+<td style="text-align: right;">19</td>
+<td>A-001：整模块缺失</td>
+</tr>
+<tr>
+<td><code>Modules/OgkiFumenListBrowser/**</code></td>
+<td style="text-align: right;">10</td>
+<td>A-002：整模块缺失</td>
+</tr>
+<tr>
+<td><code>Modules/EditorSvgObjectControlProvider/**</code></td>
+<td style="text-align: right;">8</td>
+<td>C-005：拆分搬迁；工程资源型 prefab 另见 B-006/D-002</td>
+</tr>
+<tr>
+<td><code>Kernel/ProgramUpdater/**</code></td>
+<td style="text-align: right;">7</td>
+<td>A-004/D-004：GUI 检查、下载和提示链缺失/延期；覆盖安装执行器另见 C-009</td>
+</tr>
+<tr>
+<td><code>Kernel/RecentFiles/**</code></td>
+<td style="text-align: right;">9</td>
+<td>C-008：由 Gekimini 最近记录服务和工程 bookmark 数据替代</td>
+</tr>
+<tr>
+<td><code>Kernel/CommandExecutor/**</code></td>
+<td style="text-align: right;">3</td>
+<td>C-007/D-003：改为强类型命令定义，不保留旧反射扩展机制</td>
+</tr>
+<tr>
+<td><code>Kernel/Audio/NAudioImpl/AudioOutputType.cs</code></td>
+<td style="text-align: right;">1</td>
+<td>C-010：枚举移到共享音频目录并接入平台能力抽象</td>
+</tr>
+<tr>
+<td><code>Properties/*Setting.Designer.cs</code>、<code>Resources.Designer.cs</code></td>
+<td style="text-align: right;">9</td>
+<td>C-002/C-012：改为 JSON 设置模型和语言 JSON 源生成</td>
+</tr>
+<tr>
+<td><code>Modules/FumenVisualEditor/**</code> 的 5 个无同路径文件</td>
+<td style="text-align: right;">5</td>
+<td><code>LambdaUndoAction</code>/<code>DefaultEditorUndoManager</code> 见 C-011；SVG cache 见 C-004/D-002；数据模板选择器并入 Gekimini/Avalonia 模板体系</td>
+</tr>
+<tr>
+<td><code>Modules/FumenMetaInfoBrowser/Views/FumenMetaInfoBrowserView.xaml.cs</code></td>
+<td style="text-align: right;">1</td>
+<td>仅文件后缀重命名为 <code>.axaml.cs</code>，不是功能缺失</td>
+</tr>
+<tr>
+<td><code>UI/**</code> 的 9 个无同路径文件</td>
+<td style="text-align: right;">9</td>
+<td>About/异常窗口改为新 View/ViewModel 或 Desktop 窗口；颜色选择器见 B-003；翻译扩展见 C-012；Xceed 筛选控件与滚轮行为见 C-013；About/异常窗口细节见 C-014/C-016</td>
+</tr>
+<tr>
+<td><code>Utils/TempFileHelper.cs</code>、<code>Utils/WindowTitleHelper.cs</code></td>
+<td style="text-align: right;">2</td>
+<td>临时文件见 C-003 的平台文件系统；窗口标题见 C-015</td>
+</tr>
+<tr>
+<td><code>AppBootstrapper.cs</code>、根 <code>AssemblyInfo.cs</code></td>
+<td style="text-align: right;">2</td>
+<td>C-001：应用生命周期重写；程序集元数据改由 SDK/<code>Properties/AssemblyInfo.cs</code> 与构建属性提供</td>
+</tr>
+</tbody>
+</table>
+<p>合计：<code>44+19+10+8+7+9+3+1+9+5+1+9+2+2 = 129</code>。后续仍需把这些逻辑归因展开为逐文件证据表，并与 92 个 Avalonia 新文件建立双向映射。</p>
+<h2 id="a">3. A 类：还没迁移的代码</h2>
+<h3 id="a-001-editorscriptexecutor">A-001 <code>EditorScriptExecutor</code> 整模块缺失</h3>
+<ul>
+<li><strong>原代码</strong>：19 个文件，包括脚本文档提供器、AvalonEdit 文档视图、Roslyn 编译/补全上下文、执行结果模型与全局脚本参数。</li>
+<li><strong>Avalonia 状态</strong>：核心、Desktop、Browser 和 CommandLine 中均没有 <code>EditorScriptExecutor</code> 等价模块，也没有可达的脚本编辑、补全和执行入口。</li>
+<li><strong>用户功能损失</strong>：不能在编辑器内创建/编辑 C# 脚本文档，不能编译执行脚本，也没有原脚本上下文 API。</li>
+<li><strong>证据文件组</strong>：<code>OngekiFumenEditor/Modules/EditorScriptExecutor/**</code>；Avalonia 源树同名/等价服务搜索为空。</li>
+<li><strong>建议</strong>：先由产品明确脚本能力是否仍在迁移范围。若保留，应把 Roslyn 编译/补全、脚本上下文 API 和执行取消抽成不依赖 UI 的服务，Desktop 首期接入 Avalonia 兼容代码编辑器，并为脚本 API 做版本化、超时/取消、异常隔离和受信任边界；Browser 只有在明确沙箱模型后再开放。至少覆盖编译诊断、补全、运行结果、取消、重复执行和脚本访问当前文档的集成测试；若不保留，则应正式归入 D 并清理菜单、文档和扩展承诺。</li>
+</ul>
+<h3 id="a-002-ogkifumenlistbrowser">A-002 <code>OgkiFumenListBrowser</code> 整模块缺失</h3>
+<ul>
+<li><strong>原代码</strong>：10 个文件，包含谱面文件夹/集合模型、难度信息、列表浏览视图及打开元信息浏览器的菜单命令。</li>
+<li><strong>Avalonia 状态</strong>：没有同名模块、模型或视图。</li>
+<li><strong>用户功能损失</strong>：原谱面集合浏览面板和从列表跳转查看谱面元信息的工作流不存在。</li>
+<li><strong>证据文件组</strong>：<code>OngekiFumenEditor/Modules/OgkiFumenListBrowser/**</code>。</li>
+<li><strong>建议</strong>：先迁移独立的文件夹扫描、谱面元信息提取和难度模型，再用虚拟化 <code>DataGrid</code>/树列表恢复浏览与打开命令；扫描必须异步、可取消，并处理无权限、损坏谱面、重复文件和大目录。Desktop 使用文件夹选择器，Browser 使用授权目录与 bookmark；增加样例目录扫描、排序/筛选、取消和双击打开元信息浏览器的端到端测试。</li>
+</ul>
+<h3 id="a-003-optiongeneratortools-gui">A-003 <code>OptionGeneratorTools</code> GUI 整模块缺失</h3>
+<ul>
+<li><strong>原代码</strong>：44 个文件、5 个窗口/对话框，覆盖 ACB、封面、Music XML 生成，枚举数据选择和对应菜单命令。</li>
+<li><strong>Avalonia 状态</strong>：核心 UI 中没有该模块、窗口、设置页和菜单入口。</li>
+<li><strong>设置差异</strong>：原 <code>Properties/OptionGeneratorToolsSetting.settings</code> 的 <code>LastLoadedGameFolder</code> 没有迁入 <code>Models/Settings/</code>，JSON source context 也没有注册等价设置模型。因此即使 Desktop 命令行保留了部分生成能力，原 GUI 最近游戏目录状态也不会被读取或保存。</li>
+<li><strong>相似但不等价部分</strong>：Desktop 项目新增 <code>CommandLine/Commands/Acb</code>、<code>Jacket</code> 等服务，说明部分生成算法以命令行架构重写；它们没有恢复原 GUI、对话框、选择器和设置持久化，故本项仍按 GUI 功能缺失记录，命令行重写另归 C 类。</li>
+<li><strong>证据文件组</strong>：<code>OngekiFumenEditor/Modules/OptionGeneratorTools/**</code>；<code>Avalonia/src/OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/**</code>。</li>
+<li><strong>建议</strong>：不要把生成算法在 GUI 中再实现一遍；把现有 Desktop 命令行 handler 下沉为可注入的 ACB/Jacket/Music XML 核心服务，由 CLI 和 Avalonia Window ViewModel 共用。恢复 <code>LastLoadedGameFolder</code> 时改用平台设置和 StorageProvider bookmark，并让 GUI 提供参数校验、进度、取消、覆盖确认和结果定位。用同一输入 fixture 对 CLI/GUI 输出做字节或语义等价测试。</li>
+</ul>
+<h3 id="a-004-kernelprogramupdater-gui">A-004 原 <code>Kernel/ProgramUpdater</code> 的 GUI 版本检查/下载链缺失</h3>
+<ul>
+<li><strong>原代码</strong>：<code>DefaultProgramUpdater</code>、<code>IProgramUpdater</code>、<code>VersionInfo</code>、<code>ShowNewVersionDialogViewModel</code> 及对应窗口；包含版本查询、菜单通知按钮、下载 ZIP、启动更新器和 GUI 关闭。</li>
+<li><strong>Avalonia 状态</strong>：当前没有等价的共享 <code>IProgramUpdater</code>、版本查询服务或“新版本”对话框。Desktop 只有后来重写的 <code>updater</code> <strong>应用命令</strong>（负责覆盖安装），它不提供原 GUI 的 HTTP 检查、下载和提示 UI。</li>
+<li><strong>结论</strong>：GUI 版本检查/下载属于 A；其删除/后续重新设计的用户决策另记 D-004。不能因为存在 <code>CommandLine/Commands/Updater</code> 就判定原更新功能整体已迁移。</li>
+<li><strong>建议</strong>：在 D-004 决策撤销前保持 GUI 入口和设置彻底隐藏，不要把覆盖安装命令误暴露成完整更新器。若恢复，应拆成版本查询、包下载、签名/哈希验证、安装调度和 UI 五层，按安装渠道选择自更新或仅跳转发布页；Browser 不执行本地自覆盖。必须测试伪造清单、校验失败、下载中断、回滚、权限不足和跨版本升级。</li>
+</ul>
+<h3 id="a-005">A-005 主窗口拖入单个文件打开文档的入口缺失</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>AppBootstrapper.cs:288-289</code> 给主窗口设置 <code>AllowDrop</code> 并订阅 <code>MainWindow_Drop</code>；<code>AppBootstrapper.cs:393-407</code> 读取 <code>DataFormats.FileDrop</code>，当外部文件数恰为一个时调用 <code>DocumentOpenHelper.TryOpenAsDocument(filePath)</code>。</li>
+<li><strong>Avalonia 状态</strong>：没有在 Desktop 主窗口或 <code>TopLevel</code> 上找到接收外部 <code>StorageItems</code>/文件路径的拖放处理器。<code>FumenVisualEditorView.xaml.cs</code> 的 <code>DragEnter</code>/<code>Drop</code> 只把 Gekimini 内部拖放令牌转给编辑器 ViewModel；<code>DocumentOpenHelper.TryOpenAsDocument</code> 当前可达调用点只有快速打开命令和启动参数处理器。</li>
+<li><strong>影响</strong>：用户不能把一个工程/谱面文件从操作系统文件管理器直接拖到主窗口打开。DataGrid 行重排、工具箱对象拖放等内部拖放不等价于外部文件拖入。</li>
+<li><strong>平台边界</strong>：Desktop 可以用 Avalonia <code>DragEventArgs</code>/<code>StorageItems</code> 补回；Browser 需要浏览器文件拖入授权和 <code>StorageProvider</code> 语义，因此不能把 Desktop 修复直接推断为 Browser 等价。</li>
+<li><strong>建议</strong>：在应用 <code>TopLevel</code> 增加只处理外部 <code>StorageItems</code> 的 DragOver/Drop 协调器，验证单项、支持类型和权限后复用 <code>DocumentOpenHelper</code>；通过明确的数据格式排除工具箱与 DataGrid 内部拖放，并显示可接受/拒绝的拖入反馈。Desktop 和 Browser 分别做一个平台适配器，覆盖单文件、多文件、目录、不支持扩展、内部令牌和打开失败测试。</li>
+</ul>
+<h2 id="b">4. B 类：已迁移但还没实现或仅占位</h2>
+<h3 id="b-001-interpolateall">B-001 <code>InterpolateAll</code> 命令为显式未迁移实现</h3>
+<ul>
+<li><strong>Avalonia 代码</strong>：<code>InterpolateAllCommandHandler.Run()</code> 只显示 <code>InterpolateAll is not migrated yet.</code>，随后完成任务。</li>
+<li><strong>WPF 行为</strong>：确认后锁定编辑器，调用插值处理；另有带 XGrid 限制的命令处理器，两者都会执行同一个插值算法的不同工厂分支。</li>
+<li><strong>Avalonia 差集证据</strong>：<code>InterpolateAllWithXGridLimitCommandDefinition</code> 仍在 <code>Commands/OgkrImpl/MenuDefinitions.cs</code> 注册菜单，但源码中没有任何 <code>CommandHandlerBase&lt;InterpolateAllWithXGridLimitCommandDefinition&gt;</code> 或等价 <code>ICommandHandler</code> 注册；该菜单项没有可达处理器。普通命令则有处理器但只提示未迁移。</li>
+<li><strong>影响</strong>：普通菜单项可触发但不会修改谱面；带 XGrid 限制的菜单项还缺少处理器，不能依赖现有基类自动获得行为。</li>
+<li><strong>建议</strong>：把旧插值算法提取为可测试的纯业务服务，两个命令 handler 只负责确认、参数/XGrid 限制、编辑器锁定和一次性撤销事务；同时补齐受限命令的 DI 注册。覆盖无可插值对象、曲线节点、XGrid 边界、取消、异常解锁、撤销/重做和大谱面性能测试。</li>
+</ul>
+<h3 id="b-002-standardizeformat">B-002 <code>StandardizeFormat</code> 命令为显式未迁移实现</h3>
+<ul>
+<li><strong>Avalonia 代码</strong>：<code>StandardizeFormatCommandHandler.Run()</code> 只显示 <code>StandardizeFormat is not migrated yet.</code>。</li>
+<li><strong>WPF 行为</strong>：选择输出路径、执行标准化、序列化写盘，并可打开输出目录。</li>
+<li><strong>影响</strong>：用户可以触发命令，但不能得到标准化谱面文件。</li>
+<li><strong>建议</strong>：将标准化变换和序列化封装为共享服务，GUI handler 使用 StorageProvider 选择输出位置并处理覆盖/取消，Desktop 才提供“在文件管理器中显示”。用解析 -&gt; 标准化 -&gt; 序列化 -&gt; 再解析的 golden fixture 验证对象数量、时间/XGrid、引用关系和幂等性，失败时不得留下半写文件。</li>
+</ul>
+<h3 id="b-003-commoncolorpicker-12">B-003 <code>CommonColorPicker</code> 是固定 12 色占位实现</h3>
+<ul>
+<li><strong>Avalonia 代码</strong>：视图注释明确说明 Xceed <code>StandardColorPicker</code> 不可用，暂用固定色板占位。</li>
+<li><strong>WPF 行为</strong>：使用完整标准颜色选择控件。</li>
+<li><strong>影响</strong>：任意颜色编辑、精确颜色输入、色相/饱和度等原控件能力缺失；只有 12 个预设色可选。</li>
+<li><strong>建议</strong>：采用成熟的 Avalonia 颜色选择控件，或实现包含色相/饱和度/亮度、RGB/ARGB 文本输入、透明度、最近颜色和键盘可访问性的复合控件；固定 12 色可保留为快捷 swatch。增加格式解析、非法输入、alpha、取消/确认、颜色 round-trip 和高对比主题测试。</li>
+</ul>
+<h3 id="b-004">B-004 批量模式的核心交互行为未迁移</h3>
+<ul>
+<li><strong>Avalonia 代码</strong>：<code>BatchModeBehavior</code> 已退化为只保存 <code>CurrentSubmode</code> 的普通 <code>ObservableObject</code>；原 WPF <code>Behavior&lt;FumenVisualEditorView&gt;</code> 中的键盘接管、鼠标按下/抬起、批量刷入、删除、过滤选择、撤销动作和附加/拆卸清理均不存在。</li>
+<li><strong>注意</strong>：文件中的三个 <code>ConvertBack()</code> 抛异常不是主问题；真正的功能缺口是整个行为主体被移除。</li>
+<li><strong>影响</strong>：批量模式工具栏可存在，但原批量绘制与过滤交互不能按旧方式工作。</li>
+<li><strong>建议</strong>：把批量模式重建为独立的编辑器交互状态机/协调器，由集中快捷键路由和指针事件调用，而不是把全部逻辑塞回视图 behavior；每次手势形成单个可撤销事务，并明确 pointer capture、模式切换和 detach 清理。按 15 个子模式建立行为矩阵，覆盖普通/Shift、拖动、取消、删除、筛选、撤销和失焦中断。</li>
+</ul>
+<h3 id="b-005">B-005 新建空项目流程固定失败</h3>
+<ul>
+<li><strong>Avalonia 代码</strong>：<code>FumenVisualEditorViewModel.New()</code> 记录“不支持在没有现有项目文件夹时创建工程”并固定返回 <code>false</code>。</li>
+<li><strong>当前已实现部分</strong>：从文件夹加载 <code>.nyagekiProj</code>、多工程文件选择、最近项目 bookmark 恢复已有完整新路径。</li>
+<li><strong>入口侧影响</strong>：<code>FumenVisualEditorProvider.CanCreateNew</code> 同时被设为 <code>false</code>，因此 Gekimini 主菜单“新建”不会列出该 provider；Splash 的“新建工程”虽然绕过菜单直接调用 <code>TryNew()</code>，仍因上述固定返回值无提示地留在原窗口。打开已有工程已不再是旧报告所述的整体缺失，但“新建工程”仍没有完成。</li>
+<li><strong>建议</strong>：基于 Avalonia <code>StorageProvider</code> 实现“选择/创建工程目录 -&gt; 填写工程元数据 -&gt; 写入 <code>.nyagekiProj</code> -&gt; 初始化谱面/音频引用 -&gt; 建立 bookmark 与最近记录”的完整事务；成功前不要仅把 <code>CanCreateNew</code> 改成 <code>true</code>。过渡期应隐藏或禁用 Splash 的新建按钮并明确提示不可用。补充菜单可见性、取消、写入失败清理、同名文件、无 bookmark 平台和成功后打开文档的测试。</li>
+</ul>
+<h3 id="b-006-svg-prefab">B-006 SVG prefab 工程资源被明确暂时禁用</h3>
+<ul>
+<li><strong>Avalonia 代码</strong>：<code>SvgImageFilePrefab</code> 的工程资源访问路径抛出 <code>NotSupportedException(&quot;SVG prefab project resources are temporarily disabled.&quot;)</code>；<code>ProjectResourceSimpleFile</code> 受 <code>ENABLE_SVG_PREFAB_OBJECTS</code> 条件编译控制。</li>
+<li><strong>影响</strong>：SVG 字符串/文件工具与属性编辑类型虽已搬迁，但依赖工程内资源的 prefab 工作流并未完整可用。</li>
+<li><strong>分类交叉</strong>：明确“temporarily disabled”的决策证据同时满足 D；主功能表现先列 B，延期原因在 D 类登记。</li>
+<li><strong>建议</strong>：在重新启用前先定义工程资源的跨平台所有权、相对定位、复制/嵌入和释放语义，再恢复 <code>ProjectResourceSimpleFile</code> 及导入器；禁止把本地绝对路径直接写入可移植工程。功能开关关闭时应隐藏工具箱和属性入口而不是运行时抛异常。覆盖工程移动、资源缺失、同名冲突、Browser 授权丢失和保存/重开测试。</li>
+</ul>
+<h3 id="b-007-ui">B-007 撤销历史上限设置已保留在 UI/模型中，但没有接到当前撤销管理器</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorUndoManager.cs</code> 在构造时读取 <code>IsEnableUndoActionSavingLimit</code> 与 <code>UndoActionSavingLimit</code>，并监听设置变更，把结果写入 <code>UndoCountLimit</code>。</li>
+<li><strong>Avalonia 已迁移表面</strong>：<code>FumenVisualEditorGlobalSettingView.axaml:41-64</code> 仍显示“记住撤销位置”“限制撤销数量”和最大保存数量控件；<code>EditorGlobalSetting</code> 也完整保留三个属性。Gekimini 的 <code>DefaultUndoRedoManager</code> 本身仍提供 <code>UndoCountLimit</code>。</li>
+<li><strong>未实现接线</strong>：当前应用源码中没有找到任何 <code>UndoCountLimit = ...</code> 赋值；<code>FumenVisualEditorViewModel.OnSettingPropertyChanged()</code>（约 <code>326-353</code> 行）只处理缩放、颜色、游玩区域、玩家位置和 FPS，不处理两个撤销上限属性。</li>
+<li><strong>影响</strong>：用户可以修改并保存撤销数量设置，但当前撤销栈不会据此限长，设置属于可见但无运行效果的半迁移功能。</li>
+<li><strong>关联问题</strong>：<code>RecoveryCurrentTimeAfterExecuteAction</code> 同样没有找到当前消费者。旧 WPF 管理器虽然订阅该属性，但其构造的包装 action 没有回写到实际入栈变量，疑似旧版遗留缺陷；因此这里记录为“现版本仍无有效实现”，不把它误报成已确认的 Avalonia 独有回归。</li>
+<li><strong>建议</strong>：在编辑器/撤销管理器创建时把设置映射到 <code>UndoCountLimit</code>，订阅属性变化并在释放时退订；关闭限制时明确使用无限值，降低上限时立即按既定策略裁剪。为运行时开关、边界值、批次动作、裁剪后 undo/redo 和多文档隔离补测试；<code>RecoveryCurrentTimeAfterExecuteAction</code> 应单独确认产品语义，不能照搬旧缺陷。</li>
+</ul>
+<h3 id="b-008">B-008 编辑器布局流保留了接口，但忽略导入数据且没有应用推荐布局</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Kernel/EditorLayout/EditorLayoutManager.cs:44-71</code> 把输入流写入临时布局文件，经 <code>ILayoutItemStatePersister.LoadState</code> 恢复 Gemini shell，并重新打开首个文档；<code>SaveLayout(Stream)</code>（约 <code>74-94</code>）把实际布局文件复制到输出流；<code>ApplyDefaultSuggestEditorLayout()</code>（约 <code>97-100</code>）读取嵌入资源 <code>Resources/suggestLayout.bin</code> 后走同一导入路径。<code>AppBootstrapper.cs:309-320</code> 在首次启动提示用户是否应用推荐布局，并保存 <code>IsFirstTimeOpenEditor=false</code>。</li>
+<li><strong>Avalonia 状态</strong>：<code>Kernel/EditorLayout/EditorLayoutManager.cs:10-36</code> 的 <code>LoadLayout(Stream)</code> 只调用 Gekimini shell 自带 <code>LoadLayout()</code> 并记录“ignores stream payload”；<code>SaveLayout(Stream)</code> 只刷新输出流，不写入布局字节；<code>ApplyDefaultSuggestEditorLayout()</code> 也只调用当前 shell loader。虽然 <code>MenuDefinitions</code>/<code>ApplySuggestEditorLayoutCommandHandler</code> 和 <code>suggestLayout.bin</code> 仍存在，当前没有 <code>ShouldLoadSuggestLayout</code>、<code>LoadLayoutFailed</code> 或首次启动提示的消费者，<code>IsFirstTimeOpenEditor</code> 仅停留在设置模型。</li>
+<li><strong>边界</strong>：Gekimini shell 自己的已保存布局加载/保存仍可用，所以不是整个布局系统缺失；缺的是旧 API 的流载荷契约、嵌入推荐布局应用和首次启动分支。</li>
+<li><strong>影响</strong>：通过接口传入自定义布局会被静默忽略，导出得到空流；菜单“应用建议布局”不会读取 <code>suggestLayout.bin</code>，首次启动也不会询问用户。</li>
+<li><strong>建议</strong>：二选一并收紧契约：要么基于 Gekimini 的版本化布局 JSON 真正实现 <code>Stream</code> 导入/导出和嵌入推荐布局，要么删除/重命名会静默忽略流的 API 与菜单。恢复首次启动提示时记录一次性决策，并对未知版本、损坏数据、缺失工具、跨屏幕和回退默认布局做测试。</li>
+</ul>
+<h3 id="b-009">B-009 快捷键冲突检测存在，但确认覆盖冲突的分支被删掉</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Kernel/SettingPages/KeyBinding/Dialogs/ConfigKeyBindingDialog.xaml.cs:138-153</code> 检测冲突后弹出 <code>ConflictNotifyComfirm</code> 的 Yes/No 确认；<code>KeyBindingSettingViewModel.cs:89-96</code> 在确认后先把冲突定义清为 <code>None</code>，再写入新快捷键。</li>
+<li><strong>Avalonia 状态</strong>：<code>Kernel/SettingPages/KeyBinding/Dialogs/ConfigKeyBindingDialog.xaml.cs:143-154</code> 的 <code>TryApply()</code> 发现 <code>ConflictDefinition</code> 就记录日志并返回 <code>false</code>；确认按钮只有在 <code>TryApply()</code> 为真时才关闭窗口。<code>KeyBindingSettingViewModel.ChangeKeybindAsync()</code> 只显示窗口并刷新列表，没有清除冲突定义或二次确认。</li>
+<li><strong>保留部分</strong>：按键捕获、修饰键、清除和恢复默认操作仍在；缺口集中在“用户明确确认后覆盖旧绑定”这一关键分支。</li>
+<li><strong>影响</strong>：新快捷键与已有命令冲突时，界面会显示冲突但永远无法确认覆盖；用户只能取消或改用其他按键。</li>
+<li><strong>建议</strong>：在对话框返回明确确认后，由快捷键管理器原子地清除冲突项、写入新项并只持久化一次；取消或窗口关闭必须完全不改状态。增加冲突覆盖、取消、同命令重绑、多个冲突、防止保留重复绑定和保存失败回滚测试。</li>
+</ul>
+<h3 id="b-010">B-010 程序设置页保留了若干没有活动消费者的开关</h3>
+<ul>
+<li><strong>迁移后的可见表面</strong>：<code>Kernel/SettingPages/Program/Views/ProgramSettingView.axaml:22-43</code> 仍显示进程优先级、多实例、启动后不显示 Splash 和显示控制台四个开关；<code>Models/Settings/ProgramSetting.cs:25-40</code> 也保留对应属性。</li>
+<li><strong>当前消费者核对</strong>：<code>DisableShowSplashScreenAfterBoot</code> 由 <code>OngekiFumenEditorApp.ShowSplashScreenAfterBootAsync()</code> 使用，<code>DumpFileDirPath</code>/<code>IsFullDump</code> 由 dump 服务使用；但没有 Avalonia 代码消费 <code>UpgradeProcessPriority</code> 或 <code>ShowConsoleWindowInGUIMode</code>。<code>EnableMultiInstances</code> 的唯一新调用点位于 <code>Utils/IPCHelper.cs</code>，而该文件被 D-001 的 <code>Compile Remove</code> 排除，因此当前开关也不产生有效行为。</li>
+<li><strong>遗留项区分</strong>：<code>IsNotifyUserCrash</code> 在 WPF 也没有找到实际读取点，属于原有死选项，不应单独算作本轮回归；<code>IsFirstTimeOpenEditor</code> 的无消费者则与 B-008 的首次布局流程直接相关。<code>DisableStringRendererAntialiasing</code> 只被排除的旧 OpenGL 绘制代码读取，随 C-004/E-001 的后端替换而失效。</li>
+<li><strong>影响</strong>：用户可以修改并保存多个设置，但进程优先级、控制台可见性和当前构建中的多实例策略不会随设置变化；设置页与运行时能力不一致。</li>
+<li><strong>建议</strong>：为每个设置建立“可见控件 -&gt; 活动消费者 -&gt; 支持平台”的清单；短期隐藏或标注不可用的开关，长期通过 Desktop 能力服务实现进程优先级、控制台和单实例策略，Browser 不显示不适用项。为每个可见设置至少增加一个消费者测试；确认永久废弃后同步删除模型、资源和迁移代码。</li>
+</ul>
+<h3 id="b-011">B-011 沿轨道批量刷入会忽略范围对话框的取消结果</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Modules/FumenObjectPropertyBrowser/ViewModels/ConnectableObjectOperationViewModel.cs:199-204</code> 显示 <code>BrushTGridRangeDialogViewModel</code> 后检查 <code>ShowDialogAsync</code> 返回值；只要结果不是 <code>true</code> 就立即返回，不生成或写入任何对象。</li>
+<li><strong>Avalonia 状态</strong>：同名 ViewModel 的 <code>BrushAlongLaneAsync()</code> 在 <code>:159-167</code> 等待 <code>ShowDialogAsync(dialog)</code>，但取消判断被包在 <code>/* //todo fix this after implement dialog result */</code> 注释中，随后无条件读取起止 TGrid 并构造撤销动作。当前 <code>BrushTGridRangeDialogViewModel.CancelAsync()</code> 明确调用 <code>TryCloseAsync(false)</code>，<code>ConfirmAsync()</code> 调用 <code>TryCloseAsync(true)</code>，说明窗口管理器已经具备可用的布尔结果语义；项目文件选择对话框也在现代码中正确检查 <code>result == true</code>。</li>
+<li><strong>影响</strong>：用户点击“取消”仍会按对话框当前范围沿轨道批量添加复制对象，并把动作压入撤销栈。取消按钮只关闭窗口，没有取消操作。</li>
+<li><strong>分类理由</strong>：窗口、命令和刷入算法均已迁移，但关键确认分支被显式注释，属于可达的半实现行为。</li>
+<li><strong>建议</strong>：恢复 <code>result == true</code> 守卫，并在创建任何对象或撤销 action 前返回；把范围校验也放在确认之后。增加取消、关闭按钮、无效范围、确认生成数量和一次撤销完全回滚的测试。</li>
+</ul>
+<h3 id="b-012">B-012 弹幕调色板选择对话框取消后仍会应用当前选中项</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>UI/Controls/ObjectInspector/ViewModels/BulletPalleteTypeUIViewModel.cs:67-72</code> 只有在 <code>ShowDialogAsync(dialog)</code> 返回 <code>true</code> 时才把 <code>SelectedPallete</code> 写回属性；取消不会改变目标对象。</li>
+<li><strong>Avalonia 状态</strong>：同名 ViewModel 的 <code>OpenSelectListAsync()</code>（约 <code>59-65</code> 行）等待对话框后不检查返回值，只要 <code>dialog.SelectedPallete</code> 非空就写回。对话框构造时已经把当前属性值设为初始选中项，列表选择还会即时更新该字段；<code>CancelAsync()</code> 虽调用 <code>TryCloseAsync(false)</code>，结果没有被调用方使用。</li>
+<li><strong>影响</strong>：用户在列表中点选另一调色板后按“取消”，新选择仍会应用到正在编辑的对象；即使没有改选，取消也会执行一次不必要的属性回写。双击和确认路径本身仍正确返回 <code>true</code>。</li>
+<li><strong>测试缺口</strong>：需要覆盖“改选后取消”“窗口关闭按钮取消”“确认”和“双击确认”四条路径，验证属性值与撤销记录均符合预期。</li>
+<li><strong>建议</strong>：仅在 <code>ShowDialogAsync()</code> 返回 <code>true</code> 且选择实际变化时写回；对话框内部选择保持为临时状态，取消不触发目标属性或撤销记录。按上述四条路径增加 ViewModel 测试，并断言无变化确认也不产生冗余 action。</li>
+</ul>
+<h3 id="b-013">B-013 选中对象查看器丢失列头排序</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Modules/FumenEditorSelectingObjectViewer/ViewModels/FumenEditorSelectingObjectViewerViewModel.cs</code> 以 <code>ICollectionView</code> 作为 <code>ItemsSource</code>，<code>SortColumn()</code> 根据当前列的 <code>DisplayMemberBinding</code> 在 <code>Name</code>、<code>TGrid</code> 和 <code>SoflanGroup</code> 三个列头之间切换升/降序；<code>OnRefresh()</code> 在刷新集合后重新刷新视图。原 XAML 的三个 <code>GridViewColumnHeader</code> 都绑定到该方法。</li>
+<li><strong>Avalonia 状态</strong>：<code>Modules/FumenEditorSelectingObjectViewer/Views/FumenEditorSelectingObjectViewerView.axaml</code> 改用 <code>DataGridTemplateColumn</code>，但没有 <code>SortMemberPath</code>、列头 <code>Sorting</code> 事件或等价的集合视图排序代码；对应 ViewModel 只有 <code>ObservableCollection&lt;SelectedObjectRow&gt;</code> 和刷新逻辑。<code>SoflanGroup</code> 只通过 <code>GetObjectSoflanGroupConverter</code> 在模板中计算，<code>SelectedObjectRow</code> 没有可供 DataGrid 排序的该属性。</li>
+<li><strong>影响</strong>：用户点击 Name、ObjectTime 或 SoflanGroup 列头时不能再按旧版切换排序；其中 SoflanGroup 即使打开控件默认排序，也没有稳定的行数据字段可用。列的显示和重排仍在，但排序这一项不是直接迁移。</li>
+<li><strong>证据/边界</strong>：仓库中没有该视图的 <code>SortMemberPath</code>/<code>Sorting=</code> 或 ViewModel 排序实现；已有迁移状态报告也将三处 <code>SortColumn</code> 标为“放弃”。这是可达的功能缺口，不是因为 DataGrid 只是改变外观。</li>
+<li><strong>建议</strong>：把 SoflanGroup 计算结果加入 <code>SelectedObjectRow</code>，为三列设置明确的排序键，并在 ViewModel 或 DataGrid <code>Sorting</code> 事件中实现稳定升/降序；刷新后保留当前排序与选择。覆盖空值、相同键稳定性、刷新、对象变更和大选择集性能测试。</li>
+</ul>
+<h3 id="b-014-svg">B-014 预览 SVG 生成器只恢复了旧实现的基础子集</h3>
+<ul>
+<li><strong>WPF 覆盖</strong>：<code>Modules/PreviewSvgGenerator/Kernel/DefaultPreviewSvgGenerator.cs</code> 约 1,209 行，除轨道、Hold、Beam、Tap/Flick 和 Bell 外，还输出 Bullet、EnemySet、Soflan/BPM/拍号事件文字、LaneBlock 区域，并按 <code>IndividualSoflanAreaMap.QuerySoflanGroup()</code> 为 Hold、Tap、Flick、Bell/Bullet 和受影响轨道选择各自变速组；Hold 身体沿参考轨道曲线取点。Tap、Flick、Bell 与三种 Bullet/伤害等级还使用内嵌 PNG 精灵和 critical filter。</li>
+<li><strong>Avalonia 活动实现</strong>：同名文件缩为约 238 行，只调用 <code>SerializeEvents</code>、<code>SerializeLanes</code>、<code>SerializeHolds</code>、<code>SerializeBeams</code>、<code>SerializeTapAndFlick</code> 和 <code>SerializeBell</code>。源码没有访问 <code>Fumen.Bullets</code>、<code>EnemySets</code>、<code>LaneBlocks</code> 或 <code>IndividualSoflanAreaMap</code>；所有对象 Y 坐标都传入默认 Soflan 列表，Hold 只以起点到终点的直线输出，事件只剩无文字的 BPM/拍号水平线，素材精灵被圆形/多边形替代。</li>
+<li><strong>直接迁移证据</strong>：<code>DefaultPreviewSvgGenerator.LegacyCommented.cs</code> 处于 <code>#if false</code>，注释把旧 <code>Serialize*</code> 区块称为“restore guide”，并列出“逐步恢复几何/替换 WPF 依赖/重新启用输出”的迁移策略；说明当前基础实现不是旧功能的完整等价版本。</li>
+<li><strong>影响</strong>：生成命令和 Desktop <code>svg</code> 命令可以产出文件，但复杂谱面会静默缺少弹幕、敌人和 LaneBlock；个别变速组对象、曲线 Hold、事件标注与对象视觉语义也与编辑器/旧输出不一致。结果格式有效不代表预览内容完整。</li>
+<li><strong>测试缺口</strong>：现有 SVG 命令测试主要用记录型 <code>IPreviewSvgGenerator</code> 验证参数、时长、错误码和 PNG rasterizer 调用，没有对真实生成器的对象覆盖、坐标或 SVG 内容做断言。</li>
+<li><strong>建议</strong>：按对象类型分阶段恢复 serializer，并共用编辑器已有的曲线采样、Soflan 组查询和颜色/素材语义，避免形成第二套几何规则；未覆盖类型在过渡期应报告明确警告而非静默省略。建立包含每类对象、曲线、个别变速组和事件标签的 golden SVG fixture，同时校验 XML、关键坐标/元素数量和 PNG 栅格化结果。</li>
+</ul>
+<h3 id="b-015">B-015 属性浏览器的动态编辑控件和对象操作面板生成链已断开</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>PropertyGeneratorConverter.Convert()</code> 对 <code>IObjectPropertyAccessProxy</code> 调用 <code>PropertiesUIGenerator.GenerateUI()</code>；<code>ObjectOperationGeneratorConverter</code> 在单选时调用 <code>OngekiObjectOperationGenerator.GenerateUI()</code>；<code>MultiObjectsOperationGeneratorConverter</code> 在多选时调用 <code>OngekiMultiObjectsOperationGenerator.GenerateUI()</code>。<code>FumenObjectPropertyBrowserView.xaml</code> 的三个 <code>ContentPresenter</code> 依赖这些返回的实际控件。</li>
+<li><strong>Avalonia 表面</strong>：对应 <code>PropertiesUIGenerator</code>、11 类 <code>ITypeUIGenerator</code>、单对象/多对象 operation generator 以及具体操作 View/ViewModel 都已经搬入 Avalonia，ViewModel 也仍构造 <code>PropertyInfoWrappers</code>/<code>SelectedObjects</code>；这部分不能归 A。</li>
+<li><strong>未实现接线</strong>：三个 Avalonia converter 的 <code>Convert()</code>/<code>ConvertBack()</code> 均只 <code>return value</code>。活动 <code>FumenObjectPropertyBrowserView.axaml:26-37</code> 和 <code>ObjectInspectorView.axaml:22-28</code> 仍把它们用于 <code>ContentPresenter.Content</code>，但全仓没有其他 <code>PropertiesUIGenerator.GenerateUI()</code>、<code>OngekiObjectOperationGenerator.GenerateUI()</code> 或 <code>OngekiMultiObjectsOperationGenerator.GenerateUI()</code> 调用点，也没有为 <code>IObjectPropertyAccessProxy</code> 提供可替代的隐式 DataTemplate。</li>
+<li><strong>影响</strong>：选中对象后虽然能枚举属性包装器，界面得到的却是包装器/集合本身，而不是 Bool、数值、TGrid、XGrid、枚举、颜色、弹幕调色板等编辑控件；Lane/Hold/Beam/Soflan 和多轨道专用操作面板同样不会通过当前转换器生成。属性浏览器的核心编辑能力属于“类型和 generator 已迁移、展示接线仍是占位”。</li>
+<li><strong>测试缺口</strong>：现有 AXAML smoke test 只能证明视图可加载，没有断言选中任一对象后生成了可编辑控件、修改会建立撤销动作，或单选/多选操作面板类型正确。</li>
+<li><strong>建议</strong>：优先改用 Avalonia <code>DataTemplate</code>/ViewLocator 按 wrapper 和 operation ViewModel 类型选择视图，或让 converter 真正调用现有 generator；不要继续返回无法显示的业务对象。为 11 类属性编辑器及 Lane/Hold/Beam/Soflan、单选/多选操作建立参数化 UI 测试，断言控件类型、双向写回、校验和撤销 action。</li>
+</ul>
+<h3 id="b-016-axaml">B-016 多个仍被 AXAML 使用的值转换器只是恒等占位</h3>
+<p>以下转换器的 WPF 版本执行真实逻辑，Avalonia 版本的 <code>Convert()</code>/<code>ConvertBack()</code> 却都直接返回输入；它们并非仅保留未使用的兼容类型，而是仍处于活动绑定路径：</p>
+<table>
+<thead>
+<tr>
+<th>转换器</th>
+<th>旧行为</th>
+<th>当前活动绑定与影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ReverseBoolConverter</code></td>
+<td><code>!value</code></td>
+<td><code>AudioPlayerToolViewerView.axaml:254</code> 用它控制变速控件 <code>IsEnabled</code>；当前变为“播放时启用、停止时禁用”，与旧意图相反。</td>
+</tr>
+<tr>
+<td><code>ReverseBoolToVisibilityConverter</code></td>
+<td>布尔反转后转可见性</td>
+<td><code>ConnectableObjectOperationView.axaml:107</code> 的“插值部分”入口当前按 <code>IsStartObject</code> 原值显示，而不是仅对子节点显示。</td>
+</tr>
+<tr>
+<td><code>NullToVisibilityConverter</code></td>
+<td>非空可见、空隐藏</td>
+<td>快捷键冲突提示和编辑器设置面板把对象直接交给 <code>IsVisible</code>，不再得到判空布尔值；运行时会错误显示/隐藏或产生绑定转换错误。快捷键冲突分支另见 B-009。</td>
+</tr>
+<tr>
+<td><code>SelectionLaneObjectsCheckConverter</code>、<code>SelectionMovableItemsCheckConverter</code>、<code>SelectionFullLaneCheckConverter</code></td>
+<td>检查选择集中是否包含可连接对象、可移动对象或完整选中的 Lane</td>
+<td><code>FumenVisualEditorView.axaml:57-86</code> 的选择/镜像菜单把整个选择集合交给 <code>IsEnabled</code>，失去旧版按对象类型启停；处理方法多数会自行空返回，但菜单状态不再可信。</td>
+</tr>
+<tr>
+<td><code>ParamValueToBoolConverter</code></td>
+<td><code>value == parameter</code>，反向只在选中时写回 parameter</td>
+<td><code>SelectionFilterView.axaml:33-40</code> 的两个双向 RadioButton 现在同时接收同一个 <code>BooleanOption.Value</code>，且反向写回勾选布尔值；“True/False”两项不能再可靠表示互斥目标值。</td>
+</tr>
+<tr>
+<td><code>ParenthesizeTextConverter</code></td>
+<td>把匹配数格式化为 <code>(n)</code></td>
+<td>选择筛选器的多处计数退化为原始整数；属于显示降级，也证明转换器占位仍可达。</td>
+</tr>
+<tr>
+<td><code>EnumToStringConverter</code></td>
+<td>enum 与字符串双向转换</td>
+<td><code>FumenVisualEditorSettingsView.axaml:161</code> 的字符串 <code>SupportTimeFormats</code> 与 enum <code>Setting.DisplayTimeFormat</code> 不再可靠互选/回写。</td>
+</tr>
+<tr>
+<td><code>NullToZeroConverter</code></td>
+<td>空值返回 <code>0</code>，非空返回指定行高</td>
+<td><code>BatchModeOverlayView.axaml:41-42</code> 把修改控件对象本身交给 <code>RowDefinition.MaxHeight</code>；批量模式覆盖层的可选控制行高度失去原契约，并与 B-004 的主体缺失叠加。</td>
+</tr>
+<tr>
+<td><code>LevelToIndentConverter</code></td>
+<td><code>level -&gt; Thickness(15 * level, 0, 15, 0)</code></td>
+<td>Soflan 组树两种行模板把整数层级直接交给 <code>Margin</code>，层级缩进会丢失或触发类型转换失败。</td>
+</tr>
+<tr>
+<td><code>IntToSolidBrush</code></td>
+<td>ARGB int 转普通/反色 <code>SolidColorBrush</code></td>
+<td>编辑器全局设置的前景/背景色预览把 int 直接交给 <code>Background</code>/<code>BorderBrush</code>，颜色 swatch 无法按设置值显示。</td>
+</tr>
+<tr>
+<td><code>ContrastingColorsConverter</code></td>
+<td>生成 RGB 反色</td>
+<td>颜色/曲线类型编辑器的前景色变为与背景色相同，深浅对比提示丢失。</td>
+</tr>
+<tr>
+<td><code>GetObjectSoflanGroupConverter</code></td>
+<td><code>IMultiValueConverter</code> 从对象与编辑器缓存计算 SoflanGroup id</td>
+<td>当前类型退化为单值 <code>IValueConverter</code> 且原样返回输入，但选中对象列表仍以 <code>MultiBinding</code> 调用它；SoflanGroup 列无法得到组号，并进一步影响 B-013 的列展示/排序。</td>
+</tr>
+<tr>
+<td><code>HideIfDummyPalleteConverter</code></td>
+<td><code>IMultiValueConverter</code> 在 <code>BulletPallete.DummyCustomPallete</code> 时显示 <code>--</code>，否则显示第一项字符串</td>
+<td><code>BulletPalleteSelectDialogView.axaml:78-171</code> 仍有 7 个 <code>MultiBinding</code>，但当前类改成 <code>IValueConverter</code> 且恒等返回；dummy palette 的各字段不会按旧规则隐藏，且 <code>MultiBinding</code> 的转换器接口也不匹配。</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>不误报项</strong>：<code>BoolToVisibilityConverter</code> 在新 AXAML 中主要绑定到布尔型 <code>IsVisible</code>，恒等返回在这些位置可作为 WPF <code>Visibility</code> 到 Avalonia <code>bool</code> 的合理适配；只在资源字典声明、没有实际 <code>Converter=</code> 引用的 BeatRhythm/JudgeLine/TGrid 等旧 converter 也不据此单独记为用户可达缺陷。</li>
+<li><strong>测试缺口</strong>：测试目录没有上述活动 converter 的单元测试，也没有 UI 测试覆盖属性面板生成、筛选器 RadioButton 双向值、颜色预览、Soflan 层级缩进、上下文菜单启用状态或 dummy palette 字段显示。</li>
+<li><strong>建议</strong>：按表逐个恢复真实语义，并为 <code>MultiBinding</code> 场景改用正确的 <code>IMultiValueConverter</code>；对无法反向转换的单向 converter 返回 <code>BindingOperations.DoNothing</code>/合理 sentinel，而不是原值。每个活动 converter 建立输入类型、空值、参数、反向和错误类型单元测试，再用绑定诊断或 headless UI 测试确认 AXAML 没有类型转换错误；未使用的兼容 converter 应删除资源注册或明确标为遗留。</li>
+</ul>
+<h3 id="b-017-14-5">B-017 选择筛选器只恢复了 14 个选项过滤器中的 5 个</h3>
+<ul>
+<li><strong>WPF 选项集</strong>：<code>SelectionFilterViewModel.cs:217-295</code> 初始化 5 个选项页、14 个过滤器：标签；轨道节点类型、曲线前/后节点选中状态；Critical、Flick 方向、可停靠轨道、Hold 头尾；弹幕调色板、弹幕大小、弹幕类型；LaneBlock 方向/头尾、Soflan 头尾。<code>GenerateBulletPaletteOption()</code> 还会随编辑器加载/卸载更新当前谱面的调色板列表。</li>
+<li><strong>Avalonia 当前选项集</strong>：同文件 <code>148-199</code> 只初始化 3 页、5 项：标签、Critical、Flick 方向、弹幕大小、弹幕类型。缺少轨道节点、曲线相邻节点、可停靠轨道、Hold 头尾、弹幕调色板、LaneBlock 方向/头尾和 Soflan 头尾共 9 项。</li>
+<li><strong>“类存在”不是已接线</strong>：<code>SelectionFilterOptions.cs</code> 仍保留 <code>LaneNodeSpecificationOption</code>、<code>DockableObjectLaneFilterOption</code>、<code>BulletPaletteFilterOption</code>、<code>HeadTailSpecificationOption</code> 和 <code>SelectionStatusSpecification</code> 等实现；<code>SelectionFilterView.axaml</code> 甚至仍有 BulletPalette/DockableLane 的 DataTemplate。但全仓没有创建这些类型的活动调用点，因此这些模板不可达，旧动态调色板订阅链也没有恢复。</li>
+<li><strong>应用后刷新回归</strong>：旧 <code>ApplyFilterToSelection()</code> 在修改 <code>IsSelected</code> 后调用 <code>IFumenObjectPropertyBrowser.RefreshSelected(Editor)</code>；新实现删掉该调用，只重新计算筛选计数。编辑器对 <code>IsSelected</code> 属性变化不会自动通知 <code>SelectObjects</code>，而其他取消/聚焦路径仍显式调用 <code>RefreshSelected</code>，因此应用筛选后属性浏览器和选中对象列表可能继续显示旧选择，直到下一次显式刷新。</li>
+<li><strong>测试缺口</strong>：当前只把 <code>SelectionFilterView</code> 纳入 AXAML 加载 smoke test，没有断言选项数量、动态弹幕调色板/轨道列表、各类过滤结果或应用筛选后的属性浏览器同步。</li>
+<li><strong>建议</strong>：按旧 5 页/14 项清单恢复 9 个缺失实例及编辑器 load/unload 订阅，优先复用已迁移的 option 类和现存 DataTemplate；把选择变更收口为一个同时刷新 <code>SelectObjects</code>、属性浏览器和匹配计数的方法。用参数化测试覆盖每个过滤器的包含/排除语义，并增加切换谱面后动态调色板/轨道集合不残留旧对象的生命周期测试。</li>
+</ul>
+<h3 id="b-018-provider">B-018 主菜单“打开”会错误过滤掉当前唯一的编辑器 provider</h3>
+<ul>
+<li><strong>旧行为</strong>：WPF <code>FumenVisualEditorProvider.CanCreateNew</code> 为 <code>true</code>，Gemini 的文件菜单可通过该 provider 新建或打开 <code>.nyagekiProj</code>；Splash 也分别构造 New/Open 命令进入同一编辑器链路。</li>
+<li><strong>Avalonia 元数据</strong>：当前应用只注册了一个 <code>IEditorProvider</code>，即 <code>FumenVisualEditorProvider</code>，其 <code>CanCreateNew</code> 为 <code>false</code>。这对 B-005 的未完成新建流程本身合理，但不应代表“不能打开”。</li>
+<li><strong>Gekimini 缺陷</strong>：<code>OpenFileCommandListHandler.Populate()</code> 与 New handler 一样在 <code>!editorProvider.CanCreateNew</code> 时跳过 provider；而活动 <code>MenuDefinitions.FileOpenMenuItemList</code> 正是使用该 Open command list。因此主菜单“打开”得到空列表，尽管同一 provider 的 <code>TryOpen()</code> 已完整实现文件夹选择与加载。</li>
+<li><strong>可达性边界</strong>：Splash 的“打开工程”直接调用 <code>editorProvider.TryOpen()</code>，绕过了 command list，因此仍可打开已有工程；最近文件和 Fast Open 也有独立入口。Gekimini 工具栏的 Open 定义目前整段被注释，不能宣称工具栏存在同一运行时缺陷。</li>
+<li><strong>测试缺口</strong>：现有 <code>FumenVisualEditorProviderTests</code> 只验证 <code>TryNew/TryOpen</code> 委托，没有断言 provider 元数据或 New/Open command list 的枚举结果；Gekimini 侧也没有覆盖“可打开但不可新建”的 provider。</li>
+<li><strong>建议</strong>：删除 <code>OpenFileCommandListHandler</code> 对 <code>CanCreateNew</code> 的过滤，让所有声明了 <code>FileTypes</code> 的 provider 都能出现在“打开”列表；若未来确实存在只新建或只打开的 provider，应把接口拆成独立的 <code>CanCreateNew</code>/<code>CanOpen</code> 能力，而不是复用一个标志。增加集成测试：<code>CanCreateNew=false</code> 时 New 列表为空、Open 列表仍有一项且执行后调用 <code>TryOpen()</code>。</li>
+</ul>
+<h3 id="b-019">B-019 编辑器全局设置丢失“清除最近文件历史”入口</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>FumenVisualEditorGlobalSettingView.xaml:211-218</code> 的“Other”分组包含 <code>CleanRecentFilesRecords</code> 按钮，调用 ViewModel 的 <code>ClearRecentOpen()</code>；该方法通过旧 <code>IEditorRecentFilesManager.ClearAllRecords()</code> 清空最近记录。</li>
+<li><strong>Avalonia 状态</strong>：同名设置 ViewModel 只保留保存设置和前景/背景色选择命令，AXAML 在游玩区域设置后直接结束，没有“Other”分组或清理命令。三套 <code>ProgramLang*.json</code> 仍保留 <code>CleanRecentFilesRecords</code>，但全仓没有活动引用。</li>
+<li><strong>可用基础设施</strong>：Gekimini 的 <code>IEditorRecentFilesManager.ClearAllRecordsAndDatas()</code> 已完整实现，会原子清除记录列表、每条记录的扩展数据和无效标记，并重启有效性验证代次；因此缺的是用户入口和接线，不是最近文件底层能力。</li>
+<li><strong>影响</strong>：用户能在 Splash 和“最近打开”菜单看到历史，却无法再从设置页一次性清空；只能等待数量上限淘汰或逐条走其他尚未确认的入口。</li>
+<li><strong>测试缺口</strong>：现有测试没有覆盖设置页清理命令，也没有断言执行后记录、数据 map、invalid ids 和菜单/Splash 视图均不再显示旧项。</li>
+<li><strong>建议</strong>：在设置 ViewModel 增加 <code>ClearRecentFilesCommand</code>，先显示不可撤销确认，再调用 <code>ClearAllRecordsAndDatas()</code>；在 AXAML 恢复“Other”分组并复用现有语言键。增加取消不变、确认全清、空列表幂等、清理后重新添加记录和相关 UI 刷新的集成测试。</li>
+</ul>
+<h3 id="b-020">B-020 音频偏移工具的输入格式从 MP3/WAV 收缩为仅 WAV</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>AudioAdjustWindowViewModel.OnOpenSelectInputFileDialog()</code> 使用全局 <code>SupportAudioFileExtensionList</code>；旧 NAudio manager 至少公开 <code>.mp3</code>、<code>.wav</code>、<code>.acb</code>。实际 <code>AcbGeneratorFuck.Generator.LoadAsWavFile()</code> 对 MP3 有专门解码分支、对 WAV 直接解析，另有 OGG 解码代码但旧 picker 未正式列出 OGG。旧列表中的 ACB 与实际 loader 不匹配，属于原有问题，不据此要求恢复 ACB 偏移。</li>
+<li><strong>Avalonia 状态</strong>：新 ViewModel 将输入和输出 picker 都硬编码为 <code>WavFileFilter = [(&quot;.wav&quot;, ...)]</code>；<code>IWavAudioOffsetService</code>/<code>DefaultWavAudioOffsetService</code> 只接受 RIFF/WAVE，并在非 WAVE 头上返回错误。因此原本可用的 MP3 输入不再可选或处理。</li>
+<li><strong>平台能力证据</strong>：Desktop 的 <code>DesktopNAudioFileReaderFactory</code> 仍声明并能通过 Media Foundation 从本地路径读取 MP3；Browser 工厂只声明 WAV/AIFF。功能收缩不是所有 Avalonia 平台都绝对无法解码 MP3，而是当前偏移服务绕过了已有平台 reader/capability。</li>
+<li><strong>保留/改进部分</strong>：新 WAV 路径采用临时文件/StorageProvider 写入，支持同文件安全替换、帧对齐、RIFF 校验，并且只有音频输出成功后才提交谱面 TGrid 撤销 action；这些安全性改进应保留。</li>
+<li><strong>影响</strong>：Desktop 用户不能再直接选择 MP3 生成偏移后的 WAV，必须先用外部工具转换；项目当前通用音频选择器显示 MP3 可用，但音频偏移窗口的能力更窄且没有说明，造成同一应用内格式支持不一致。</li>
+<li><strong>测试缺口</strong>：现有 <code>WavAudioOffsetServiceTests</code> 深度覆盖 WAV 容器和事务，但没有 ViewModel 输入格式矩阵，也没有 MP3/平台 capability 场景。</li>
+<li><strong>建议</strong>：把工具输入改为 capability 驱动：WAV 继续走当前字节安全的 <code>IWavAudioOffsetService</code>，Desktop 的 MP3 等压缩格式通过 <code>INAudioFileReaderFactory</code> 解码后写为 PCM WAV；Browser 只显示其可从授权流解码的格式。若产品决定永久只支持 WAV，应将窗口文案、类型和错误提示明确改为“WAV 偏移”并记录破坏性变化。增加 Desktop MP3、WAV 原地替换、Browser 受限过滤、取消和解码失败测试。</li>
+</ul>
+<h3 id="b-021">B-021 单独谱面的“快速打开”入口和执行链均被停用</h3>
+<ul>
+<li><strong>WPF 行为</strong>：启动页提供可见的“快速打开”卡片，文件菜单注册 <code>FastOpenFumenMenuItem</code>，命令还声明 <code>Ctrl+F</code>；处理器选择 <code>.ogkr</code>/<code>.nyageki</code> 后调用 <code>DocumentOpenHelper.TryOpenOgkrFileAsDocument()</code>，在需要时补选音频并创建临时编辑器工程。</li>
+<li><strong>Avalonia 入口状态</strong>：<code>SplashScreenView.axaml:237-270</code> 将快速打开卡片整段注释；<code>Commands/OgkrImpl/MenuDefinitions.cs:27-29</code> 将菜单注册注释；命令定义和处理器上的 Injectio 注册也都被注释。保留的 <code>FastOpenCommand</code> 因没有活动命令定义/处理器而不可由正常 UI 到达。</li>
+<li><strong>核心逻辑状态</strong>：<code>DocumentOpenHelper</code> 的字符串、<code>ISimpleFile</code> 和临时工程三个快速打开分支均受 <code>ENABLE_CROSS_PLATFORM_FAST_OPEN</code> 条件保护；全仓没有定义该符号，当前构建只会执行返回 <code>false</code>（并释放输入资源）的禁用分支。</li>
+<li><strong>影响</strong>：用户只能打开已有项目文件夹，不能像旧版一样直接选择单个谱面并在缺少关联音频时完成补选；这与 A-005 的“从系统文件管理器拖入”是两个不同入口，不能互相覆盖。</li>
+<li><strong>测试缺口</strong>：没有测试断言启动页/菜单的功能可达性，也没有覆盖单独谱面、同目录自动发现音频、手动补选音频、取消、解析失败以及临时资源所有权。</li>
+<li><strong>建议</strong>：把快速打开重构为共享的“谱面文件 + 可选音频能力”会话创建服务，输入使用 <code>ISimpleFile</code>/<code>IStorageFile</code>，Desktop 可额外提供本地路径适配，Browser 只在获得文件授权后启用；成功后由编辑器持有临时文件，失败/取消统一释放。按平台能力恢复命令定义、处理器、菜单和启动页入口，不要依赖全局未定义编译常量。增加 Desktop/Browser 的入口注册测试，以及自动找音频、手动选择、取消、损坏谱面和关闭后清理的集成测试；若产品决定永久删除该工作流，则应正式归入 D 类并删除死命令、死语言键和不可达辅助代码。</li>
+</ul>
+<h3 id="b-022">B-022 “另存为”能力被显式过滤且实现固定失败</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>FumenVisualEditorViewModel.DoSave(string filePath)</code> 在没有目标工程路径时弹出项目保存对话框，并在谱面尚无保存位置时继续选择谱面目标；关闭未保存的新文档时也会进入 <code>DoSaveAs()</code>，因此旧版能够为工程建立新保存位置。</li>
+<li><strong>Avalonia 状态</strong>：当前 <code>Save()</code> 已能事务式写回会话绑定的项目和谱面，但 <code>SaveAs()</code> 只记录“project-folder-scoped destination flow”尚未实现并固定返回 <code>false</code>；<code>SupportCommandDefinitionTypes</code> 又主动过滤 <code>SaveFileAsCommandDefinition</code>，所以标准“另存为”命令不会对该编辑器启用。</li>
+<li><strong>影响</strong>：用户不能复制、迁移或以新名称保存已经打开的工程，也不能通过“另存为”改变工程根目录；B-005 解决新建空项目后仍不会自动恢复既有工程的另存为工作流。</li>
+<li><strong>平台边界</strong>：项目同时引用谱面、音频和可能的项目内资源，简单保存一个 JSON 文件会产生越界或断链；Browser 还必须在用户授权的目标目录能力内创建文件，不能沿用 WPF 的任意绝对路径对话框。</li>
+<li><strong>测试缺口</strong>：现有保存测试集中在原位置双文件写回、失败回滚和恢复快照，没有覆盖目标目录选择、重名、跨目录复制、相对定位符重写、取消与源工程保持不变。</li>
+<li><strong>建议</strong>：实现项目文件夹范围内的复制事务：先选择/创建目标目录和工程名，建立目标相对定位符，复制或重新授权谱面、音频及受支持资源，在临时目标完成序列化和预检后再提交；任何失败都不得修改当前会话或源工程。Desktop 与 Browser 分别提供目录能力适配，UI 明确提示哪些外部资源需要复制或重新选择。增加同目录改名、跨目录复制、目标已存在、只读/容量不足、取消、写入中断、回滚和成功后最近记录/标题切换测试。</li>
+</ul>
+<h3 id="b-023">B-023 新工程 I/O 与预览错误路径绕过本地化资源</h3>
+<ul>
+<li><strong>WPF 行为</strong>：工程创建、加载、保存及预览生成的用户错误和对话框标题主要通过 <code>Resources</code> 键取得，随当前语言切换。</li>
+<li><strong>Avalonia 状态</strong>：<code>FumenVisualEditorViewModel.ProjectIO.cs</code> 直接向用户显示 <code>Open project folder</code>、所选目录没有工程、工程打开失败、最近工程失效等英文字符串；<code>GenerateSvgCommandHandler</code> 的“没有活动谱面文档”提示同样是英文常量。另有 <code>FumenVisualEditorViewModel.IsShowCurveControlAlways</code> 把旧版的 <code>Resources.ShowCurveControlAlways/Enable/Disable</code> Toast 改成 <code>ShowCurveControlAlways: Enable/Disable</code> 硬编码。它们没有进入 <code>ProgramLang*.json</code>，也不会由 <code>SimpleTypedLocalizer</code> 处理。</li>
+<li><strong>成功反馈也被静默掉</strong>：旧版 <code>DoLoad</code>、<code>DoSave</code> 和 <code>RecalculateTotalHeightCommandHandler.Run</code> 分别发送 <code>Resources.LoadProjectFileAndFumenFile</code>、<code>Resources.SaveProjectFileAndFumenFile</code>、<code>Resources.RecaculatedSuccess</code> Toast；当前 <code>ProjectIO.Load/Save</code> 与重算处理器只返回或更新数据，不再发送对应成功提示，而这三个键仍存在于 <code>ProgramLang*.json</code> 且没有活动调用。这样既改变了操作反馈，也留下了无法由编译器发现的死语言键。</li>
+<li><strong>影响</strong>：简体中文或日文界面在打开目录失败、最近记录失效、无活动文档和切换曲线控制点显示等用户可见路径突然切换为英文；这不是缺少某个 fallback 翻译，而是文案完全绕过语言系统。</li>
+<li><strong>范围边界</strong>：日志中的英文诊断可以保留，但传给 <code>OpenStorageFolderAsync</code>、<code>ShowMessageDialog</code>、Toast、窗口标题或控件内容的文本属于用户界面，应使用类型化语言键和占位参数。</li>
+<li><strong>新增对话框文案</strong>：Avalonia 独有的 <code>Modules/FumenVisualEditor/Views/Dialogs/ProjectFileSelectionDialogView.axaml:11,22,38,42</code> 把 <code>Select project file</code>、说明文字以及 <code>Cancel/Open</code> 直接写在 AXAML 中；旧 WPF 没有同路径对话框，这些文本也没有对应 <code>Lang</code> 键。</li>
+<li><strong>测试缺口</strong>：当前语言键对比只检查 JSON 间集合和值，没有扫描用户可达 API 的字符串常量，也没有在三种语言下触发工程打开失败、最近记录失效、预览无文档和曲线控制点显示切换提示。</li>
+<li><strong>建议</strong>：为工程目录选择、目录无工程、普通/最近工程打开失败、最近权限失效、预览无活动文档和曲线控制点显示切换建立类型化语言键，用占位参数传递异常摘要；明确加载、保存、重算成功后的统一状态栏或 Toast 策略，恢复相应成功键或删除已确认无用的键；日志保留完整异常，用户提示只给稳定、可翻译且不泄露敏感书签的数据。增加静态规则禁止用户界面 API 直接接收非空字符串字面量，并在中英日三种语言下覆盖上述失败路径、成功/取消/失败反馈、开关 Toast 和占位符格式。</li>
+</ul>
+<h3 id="b-024-wpf-setting-import">B-024 旧 WPF 用户设置的升级与一次性导入没有迁移</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>App.xaml.cs:32</code> 在应用构造时调用 <code>CheckOrUpgradeAllSettings()</code>；<code>:42</code> 明确取得 <code>ConfigurationUserLevel.PerUserRoamingAndLocal</code> 的用户配置路径，<code>:44-84</code> 以 <code>__NeedUpgradeSetting</code> 为门槛，遍历设置类型执行 <code>Upgrade()</code>、<code>Reload()</code> 和 <code>Save()</code>。</li>
+<li><strong>Avalonia 状态</strong>：<code>Models/Settings/ProgramSetting.cs:46</code> 仍保留且默认启用 <code>__NeedUpgradeSetting</code>，但活动代码没有读取方；Desktop 只读取新的 <code>setting.json</code>，Browser 只读取新的 <code>localStorage</code> 键，没有定位、解析或标记旧 WPF 用户配置的导入器。</li>
+<li><strong>影响</strong>：现有用户首次运行 Avalonia 版时，音频、编辑器颜色/自动保存、日志、dump 和程序偏好会静默回到默认值；遗留布尔字段永久为真却不起作用，也无法证明迁移只执行一次。快捷键和最近文件另有独立存储断点，不能由该字段补救。</li>
+<li><strong>建议</strong>：在 Desktop 启动早期实现带 schema/version 的一次性导入器：只读定位旧 per-user 配置，备份原文件，把仍受支持的字段显式映射到新模型，校验后原子写入新仓库，最后再提交独立迁移标记；部分失败必须保留旧数据并给出可重试日志。Browser 明确不尝试读取本地 WPF 配置。用多个旧版本 fixture 覆盖完整导入、字段删除/改名、损坏 XML、重复启动幂等、写入失败回滚和用户已有新配置时的合并策略。</li>
+</ul>
+<h3 id="b-025-desktop-setting-location">B-025 Desktop 用户设置写在可执行目录而不是用户数据目录</h3>
+<ul>
+<li><strong>证据</strong>：<code>DesktopSettingManager.cs:36-37</code> 固定把仓库设为 <code>Path.Combine(AppContext.BaseDirectory, "setting.json")</code>，原子写入也在同目录创建临时文件；旧 WPF 设置则是 <code>UserScopedSetting</code> 并由 per-user roaming/local 配置提供程序保存。</li>
+<li><strong>影响</strong>：安装到 <code>Program Files</code>、只读目录或受控发布目录时，点击设置窗口 OK 可能因无写权限失败；便携目录被多账户共用时配置会串用，覆盖升级、重新解压或切换安装目录也会让设置消失。当前构造函数没有可替换路径，测试也没有覆盖只读目录与升级保留。</li>
+<li><strong>关联差异</strong>：普通设置写 <code>AppContext.BaseDirectory/setting.json</code>，快捷键却写当前工作目录的 <code>./keybind.json</code>，两者甚至不保证位于同一目录；Browser 再使用 <code>localStorage</code>，说明平台仓库边界尚未收口。</li>
+<li><strong>建议</strong>：引入可注入的应用数据路径/配置仓库策略，Desktop 默认使用 <code>LocalApplicationData</code> 下的产品与 schema 版本目录，只有显式 portable mode 才写程序旁目录；统一普通设置与快捷键的根目录，并在迁移期探测旧 <code>setting.json</code>/<code>keybind.json</code>。创建目录、文件权限、原子替换失败和备份恢复都应返回可诊断结果。增加 Program Files 等价只读目录、不同工作目录、覆盖升级、双进程竞争和自定义 portable 目录测试。</li>
+</ul>
+<h3 id="b-026-setting-corruption-recovery">B-026 新 JSON 设置仓库缺少按条目隔离的损坏恢复</h3>
+<ul>
+<li><strong>Desktop 状态</strong>：<code>DesktopSettingManager.EnsureSettingMapLoaded()</code> 只捕获最外层字典 JSON 损坏，并在报错后调用 <code>Environment.Exit(-1)</code>；具体设置对象在 <code>LoadInternal()</code> 中反序列化时没有捕获异常，返回 <code>null</code> 还会在日志的 <code>GetHashCode()</code> 处继续失败。</li>
+<li><strong>Browser 状态</strong>：活动的 <code>BrowserSettingManager.LoadInternal()</code> 直接反序列化每个 <code>localStorage</code> 值，没有损坏隔离、版本检查、备份或恢复入口；任一设置键被截断或格式不兼容都可能阻断相关服务乃至启动。带整体字典容错的 <code>__BrowserSettingManager</code> 没有注册，而且其实现本身也存在状态重置问题，不能作为有效 fallback。</li>
+<li><strong>测试缺口</strong>：现有 <code>SettingsEditorRegistrationTests</code> 只验证六个设置页的 DI、树结构和 ViewLocator，没有覆盖 Desktop/Browser 的真实持久化、损坏数据或写入异常。</li>
+<li><strong>建议</strong>：为每个设置值增加 schema/version 包装，并把读取失败限制在单个键：先把原始值转存为带时间戳的 quarantine/备份，再以该类型默认值继续启动，同时向用户提供可定位的恢复提示；外层仓库损坏也应保留原文件而不是只能退出。对 <code>null</code>、未知字段、数值类型变化和存储 API 异常作显式处理。增加外层 JSON 损坏、单项损坏、未来版本、截断写入、localStorage quota/禁用和恢复后再次保存的测试。</li>
+</ul>
+<h3 id="b-027-dirty-document-close-guard">B-027 菜单关闭文档绕过未保存检查，现有确认窗也缺少完整提示</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>FumenVisualEditorViewModel.CanCloseAsync()</code>（<code>:321-349</code>）在脏文档关闭前显示本地化的“是否保存”提示，并按“是/否/取消”分别保存后关闭、直接关闭或保留文档；Gemini 的 <code>ShellViewModel.CloseDocumentAsync()</code> 通过 <code>DeactivateItemAsync(..., close: true)</code> 进入 Caliburn 的 <code>IGuardClose</code> 链，因此菜单关闭也受该检查保护。</li>
+<li><strong>Avalonia 分叉路径</strong>：Gekimini 的 <code>CloseFileCommandHandler.cs:29</code> 仍调用 <code>IShell.CloseDocumentAsync()</code>，但 <code>ShellViewModel.cs:196-213</code> 直接执行 <code>Factory.RemoveDocument()</code> 并删除缓存映射，没有调用 <code>ShellDockFactory.CanCloseDocument()</code>。相反，标签页关闭在 <code>ShellDockFactory.cs:156-169</code> 会先检查脏文档，应用退出在 <code>ShellViewModel.cs:466-480</code> 也会检查，导致同一文档因关闭入口不同而具有不同的数据安全语义。</li>
+<li><strong>确认窗降级</strong>：真正走到 <code>CanCloseDocument()</code> 时，<code>SaveDirtyDocumentDialogView.axaml:14-22</code> 只显示文档标题，按钮文本固定为 <code>Yes</code>/<code>No</code>/<code>Cancel</code>；旧版使用的 <code>SaveBeforeClosingPrompt</code> 已存在于当前三套 Ongeki 语言资源中，却没有被该通用对话框消费。用户无法从窗口正文明确判断问题与三个选择的含义，中文/日文环境也会混入英文按钮。</li>
+<li><strong>影响</strong>：从“文件 → 关闭”关闭任何已修改谱面时会无提示地移除文档，随后 <code>DockableClosed</code> 链释放音频和工程运行时文件，未保存的内存修改直接丢失。自动恢复快照只在已持久化工程、启用自动保存且调度已运行时才可能存在，不能作为关闭确认的替代；新文档在受保护路径选择保存时还会命中 B-022 的 <code>Save()/SaveAs()</code> 固定失败。</li>
+<li><strong>测试缺口</strong>：当前没有测试同时覆盖菜单关闭、标签关闭和应用退出三条路径，也没有验证“是/否/取消”、保存失败保留文档、多个脏文档逐个处理、关闭后资源释放与恢复快照边界。</li>
+<li><strong>建议</strong>：把所有用户可达的关闭入口收口到单一异步 <code>TryCloseDocumentAsync</code>，先调用 <code>CanCloseDocument()</code>，仅在返回成功后执行实际移除；让未经检查的 <code>RemoveDocument</code> 只作为该流程内部步骤，菜单命令、标签按钮和退出流程共享同一实现。确认窗应显示本地化的 <code>SaveBeforeClosingPrompt</code>，按钮也使用本地化资源，并保证保存失败或取消时文档保持打开。增加三入口等价性、Yes/No/Cancel、保存异常、B-022 新文档、多个文档及 Desktop/Browser 对话框宿主测试。</li>
+</ul>
+<h3 id="b-028-startup-file-open-stub">B-028 启动参数的单文件打开链路存在固定失败分支</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Kernel/ArgProcesser/DefaultArgProcessManager.cs</code> 收到单个存在路径后调用 <code>DocumentOpenHelper.TryOpenAsDocument()</code>；旧 helper 对 <code>.nyagekiProj</code> 通过 <code>IEditorProvider.Handles()</code> 创建并打开文档，对 <code>.ogkr/.nyageki</code> 调用 <code>TryOpenOgkrFileAsDocument()</code>，因此从文件管理器传入的路径有可达打开结果。</li>
+<li><strong>Avalonia 状态</strong>：<code>Desktop/Program.cs</code> 和 <code>Kernel/ArgProcesser/DefaultArgProcessManager.cs</code> 已接收并记录参数，但 <code>Utils/DocumentOpenHelper.cs:35-57</code> 遇到 <code>IFumenVisualEditorProvider</code> 会直接 <code>return false</code>，所以唯一项目扩展名 <code>.nyagekiProj</code> 不会进入 provider 的 <code>TryOpen</code>。同文件 <code>:60-145</code> 的原始谱面打开逻辑包在 <code>#if ENABLE_CROSS_PLATFORM_FAST_OPEN</code> 中；当前项目没有定义该符号，实际编译结果是直接返回 <code>false</code>（或释放文件后返回 <code>false</code>）。</li>
+<li><strong>影响</strong>：用户以一个存在的 <code>.nyagekiProj</code>、<code>.ogkr</code> 或 <code>.nyageki</code> 路径启动桌面程序时，日志会出现 <code>arg.filePath</code>，但窗口不打开文档，也没有错误提示；文件关联若在 D-005 之后接入该启动入口，也会继承这个静默失败。<code>--notifySucess</code> 目前也只写日志，旧版的更新完成 About 提示则属于 D-004 的延期范围。另有启动时序回归：<code>OngekiFumenEditorApp.OnFrameworkInitializationCompleted()</code> 先投递 <code>ShowSplashScreenAfterBootAsync()</code>，<code>OngekiFumenEditorDesktopApp</code> 再投递 <code>ProcessStartupArgsAsync()</code>；旧版则在显示 Splash/主窗口前先处理参数。即使文件打开分支恢复，带路径启动也可能先闪出 Splash，或在工程加载时被启动页遮挡。</li>
+<li><strong>分类理由</strong>：启动参数接口、调用点和文件 helper 都存在，但关键扩展名分支被显式短路/条件编译掉，属于“迁移壳已建立、行为未实现”，不是单纯的 E 类平台限制。</li>
+<li><strong>测试缺口</strong>：当前没有针对启动参数的 Desktop 集成测试，既没有覆盖各扩展名的成功/失败结果，也没有断言“有有效启动文档时不显示 Splash、无参数时正常显示、慢加载期间不会被窗口遮挡”；<code>DefaultArgProcessManager</code> 只记录参数，没有成功原因或错误提示断言。</li>
+<li><strong>建议</strong>：为 provider 增加明确的“可由本地路径直接打开”能力，Desktop 使用本地文件系统加载 <code>.nyagekiProj</code> 并保留工程根目录语义，原始谱面则由 Desktop 能力实现快速打开或在禁用时显示本地化失败提示；Browser 不应伪装支持路径。让启动参数、最近文件、外部拖放和（未来）文件关联共用同一打开服务，返回成功/失败原因而不是裸 <code>false</code>。把启动参数处理纳入一个有序启动协调器：先完成参数打开并等待结果，再根据“是否已有文档”决定 Splash；若打开失败，显示本地化原因而不是静默返回。补充 Desktop 各扩展名、不存在路径、不支持扩展、缺音频、慢加载、Splash 抑制和 Browser 路径不可用的启动测试。</li>
+</ul>
+<h3 id="b-029-autosave-recovery-workflow">B-029 “自动保存”改成临时恢复快照，但没有可达的启动恢复流程</h3>
+<ul>
+<li><strong>WPF 行为</strong>：旧 <code>DefaultEditorDocumentManager.OnScheduleCall()</code> 在自动保存启用、存在活动编辑器和有效 <code>FilePath</code> 时直接调用 <code>editor.Save(editor.FilePath)</code>，定时写回当前工程及谱面；用户下次打开原工程即可看到最后一次自动保存结果。</li>
+<li><strong>Avalonia 状态</strong>：当前同名调度器不再调用文档 <code>Save()</code>，而是通过 <code>FumenRescue.SaveRecoverySnapshotAsync()</code> 向临时目录的 <code>AutoSave/&lt;RecoverySnapshotId&gt;/</code> 写入 <code>project.nyagekiProj</code>、谱面副本和 <code>metadata.txt</code>。手动保存成功后会删除本会话快照，但活动源码中没有枚举 <code>AutoSave</code>、在启动时提示、预览、恢复或丢弃快照的调用点；致命异常救援使用的又是独立 <code>Rescue</code> 目录。</li>
+<li><strong>影响</strong>：设置页仍把功能称为“自动保存”，用户会合理预期工程文件已落盘；实际上原工程没有被更新。遇到断电、进程强杀或来不及进入致命异常窗口时，临时快照可能存在却无法从 UI 找回，并可能在多次异常会话后累积。Browser 的临时目录不可用时该功能还会直接跳过，平台间语义进一步分叉。</li>
+<li><strong>分类理由</strong>：定时调度、快照写入和手动保存后的清理都已实现，因此不是整项缺失；但替代旧自动保存所必需的恢复消费端和准确用户语义尚未完成，属于“底层半迁移、用户工作流未闭环”。</li>
+<li><strong>测试缺口</strong>：现有测试覆盖快照写入与部分保存清理，但没有模拟异常终止后的下一次启动，也没有覆盖多文档、快照损坏/只写一半、原工程比快照更新、重复恢复、丢弃与保留策略、临时目录不可用和长期清理。</li>
+<li><strong>建议</strong>：先明确产品语义。若仍承诺“自动保存”，应恢复对用户工程的事务式定时写回，并只在脏文档、I/O 空闲且目标仍可写时执行；若采用更安全的“恢复快照”，则应重命名设置与提示，并在启动时提供恢复中心，扫描快照、显示原工程定位与时间、允许预览后恢复/另存/丢弃，同时设置版本、保留数量和过期清理。Desktop 与 Browser 通过 capability 明确显示可用性，不能静默假装已启用。增加硬终止后重启的端到端测试，以及完整、损坏、过期、重复和多平台快照矩阵。</li>
+</ul>
+<h3 id="b-030-object-navigation-selection-overload">B-030 对象导航命中了空的 <code>NotifyObjectClicked</code> 重载</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>FumenVisualEditorViewModel.UserInteractionActions.cs:1571-1596</code> 只有 <code>NotifyObjectClicked(OngekiObjectBase, OngekiObjectBase)</code> 实现。检查器的 <code>NavigateToObjectBehavior.Navigate()</code> 传入 <code>OngekiTimelineObjectBase</code> 时会进入该方法，切换对象选中状态、取消互斥选择、刷新属性浏览器并把编辑器设为活动布局项。</li>
+<li><strong>Avalonia 状态</strong>：完整选择逻辑仍保留在 <code>FumenVisualEditorViewModel.UserInteractionActions.cs:1592-1617</code>；但 <code>FumenVisualEditorViewModel.cs:216-218</code> 又新增了更具体的 <code>NotifyObjectClicked(OngekiTimelineObjectBase)</code> 空方法。<code>NavigateToObjectBehavior.cs:15-19</code> 的调用因此由重载解析命中空方法，而不会转发到已实现的基类参数重载。<code>FastPickLaneCommandHandler.cs:36-40</code> 也把目标保存为 <code>ConnectableObjectBase</code>（其继承链包含 <code>OngekiTimelineObjectBase</code>），所以快速选轨命令同样会命中这个空重载。静态扫描还确认 <code>UserInteractionActions.cs:105</code> 的 <code>AddToSelection(OngekiMovableObjectBase)</code>、<code>:620,628</code> 的换轨撤销/重做、<code>:938</code> 的曲线控制点、<code>:1022</code> 的 HoldEnd，以及 <code>AddLaneCurvePathControlDropAction.cs:36</code> 的曲线控制点拖放都会把已知的时间轴派生类型直接传入该重载；只有参数静态类型已经收窄为 <code>OngekiObjectBase</code> 的调用会落到完整实现。</li>
+<li><strong>影响</strong>：从谱面检查器等“定位到时间轴对象”的入口仍会执行 <code>ScrollTo()</code>，但目标对象不会成为当前选中项，属性浏览器不会刷新，编辑器焦点/活动状态也不会按旧版更新；用户看到的是“滚到了位置但没有选中对象”。快速选轨命令还会出现“定位到最近对象但选择状态/属性面板不变”；换轨撤销/重做、曲线控制点和 HoldEnd 的新增/拖放路径也可能完成数据修改却不把新对象交给选择器，导致后续属性编辑落到旧选中集合。任何静态类型为 <code>OngekiTimelineObjectBase</code>（包括由具体连接对象向上转换后的类型）的后续调用都会继承该陷阱。</li>
+<li><strong>分类理由</strong>：导航行为、调用点和真正的选择实现都已迁移，缺陷来自迁移时新增的可达空重载，属于明确的半实现而不是框架限制。</li>
+<li><strong>测试缺口</strong>：现有测试没有断言检查器导航后的 <code>IsSelected</code>、属性浏览器选中集合、编辑器激活状态和再次点击切换语义，也没有覆盖重载解析所造成的行为分叉；五个快速选轨命令（左右墙、左右轨和中央轨）及“优先选子对象/回退到轨道本身”的两条路径、换轨撤销/重做、曲线控制点与 HoldEnd 的添加/拖放、<code>AddToSelection</code> 入口均没有覆盖。</li>
+<li><strong>建议</strong>：删除该多余重载，或令其显式调用 <code>NotifyObjectClicked((OngekiObjectBase)ongekiObject)</code>；更稳妥的是把两个入口收口为一个命名明确的选择服务，返回实际选中的对象，并由导航、鼠标点击、快速选轨和撤销/重做共同调用。增加检查器单击/双击导航、已选/未选、多选互斥、属性浏览器刷新、编辑器激活和两个静态参数类型调用结果一致的回归测试。</li>
+</ul>
+<h3 id="b-031-selecting-viewer-command-service">B-031 选择对象工具命令解析成了元信息浏览器服务</h3>
+<ul>
+<li><strong>旧版入口</strong>：<code>ViewFumenEditorSelectingObjectViewerCommandHandler</code> 调用 <code>_shell.ShowTool&lt;IFumenEditorSelectingObjectViewer&gt;()</code>，打开选择对象工具。</li>
+<li><strong>Avalonia 状态</strong>：<code>Modules/FumenEditorSelectingObjectViewer/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs:4,9,15-17</code> 引入并解析的是另一个模块的 <code>IFumenMetaInfoBrowser</code>；当前选择对象工具真正注册的是 <code>FumenEditorSelectingObjectViewerViewModel.cs:18-19</code> 的 <code>IFumenEditorSelectingObjectViewer</code>。元信息浏览器没有该接口的 <code>RegisterSingleton</code>，其菜单处理器另行通过具体 ViewModel 创建实例。</li>
+<li><strong>影响</strong>：执行“选择对象查看器”菜单时会解析错误的工具，通常因 DI 中没有 <code>IFumenMetaInfoBrowser</code> 而直接失败；即使容器未来提供该接口，也会打开元信息页而不是当前选择列表，原菜单功能不可用。</li>
+<li><strong>分类理由</strong>：命令定义、视图和正确工具注册均已迁移，缺陷是处理器接线时跨模块复制了错误接口，属于可达的迁移半实现。</li>
+<li><strong>建议</strong>：将处理器改为解析 <code>IFumenEditorSelectingObjectViewer</code>，并保留 <code>IToolViewModel</code> 类型检查后调用 <code>Shell.ShowTool</code>；同时为命令增加容器解析和实际工具类型断言测试，覆盖重复打开、活动编辑器切换及无活动编辑器状态。</li>
+</ul>
+<h3 id="b-032-tgrid-viewer-command-service">B-032 TGrid 计算器命令解析成了元信息浏览器服务</h3>
+<ul>
+<li><strong>旧版入口</strong>：<code>ViewTGridCalculatorToolViewerCommandHandler</code> 调用 <code>_shell.ShowTool&lt;ITGridCalculatorToolViewer&gt;()</code>，打开 TGrid 计算器。</li>
+<li><strong>Avalonia 状态</strong>：<code>Modules/TGridCalculatorToolViewer/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs:4,9,15-17</code> 同样引入并解析了 <code>OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.IFumenMetaInfoBrowser</code>；正确的 <code>ITGridCalculatorToolViewer</code> 由 <code>TGridCalculatorToolViewerViewModel.cs:19-20</code> 注册。</li>
+<li><strong>影响</strong>：TGrid 计算器菜单不能打开正确工具，常规容器下会因元信息接口没有注册而抛解析异常；用户无法使用时间/TGrid 换算、定位和回写功能。</li>
+<li><strong>分类理由</strong>：计算器 ViewModel 和接口已经存在，故不是 A 类缺失；错误发生在 Avalonia 命令处理器的服务接线，属于 B 类可达半实现。</li>
+<li><strong>建议</strong>：把处理器改为解析 <code>ITGridCalculatorToolViewer</code>，并增加命令到具体工具接口的一一映射测试；测试打开后编辑器切换、选中对象自动同步、TGrid 滚动和回写按钮的 <code>CanExecute</code> 状态，防止复制处理器时再次串模块。</li>
+</ul>
+<h3 id="b-033-show-x-offset-scrollbar-setting">B-033 <code>ShowXOffsetScrollBar</code> 设置写入了错误字段（旧版遗留，迁移后未修复）</h3>
+<ul>
+<li><strong>旧版与 Avalonia 现状</strong>：两版 <code>EditorSetting</code> 的 <code>ShowXOffsetScrollBar</code> setter（旧版 <code>OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs:187-195</code>，当前 <code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorSetting.cs:187-195</code>）都执行 <code>Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value</code>，而不是写入同名的 <code>ShowXOffsetScrollBar</code>。当前全局设置模型同时定义了这两个独立属性，AXAML 又把滚动条可见性绑定到 <code>Setting.ShowXOffsetScrollBar</code>。</li>
+<li><strong>影响</strong>：用户切换“显示 X 偏移滚动条”时会意外改变 XGrid 强制吸附；真正的滚动条设置不会持久化，重载设置或重新打开编辑器后界面状态可能恢复为旧值。该问题不是 Avalonia 新增回归，而是旧 WPF 缺陷被原样带入，属于迁移后仍未修复的可见设置问题。</li>
+<li><strong>分类理由</strong>：设置页、模型和绑定均已迁移，但 setter 的实际行为不符合公开属性语义，因此按 B 记录；“旧版也存在”作为归因边界，不能把它算作 Avalonia 独有差异。</li>
+<li><strong>测试缺口</strong>：没有属性隔离测试证明改动 <code>ShowXOffsetScrollBar</code> 不会改变 <code>ForceXGridMagneticDock</code>，也没有保存后重载和实际滚动条可见性的回归测试。</li>
+<li><strong>建议</strong>：将 setter 改为 <code>showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar = value</code>，并决定是否同步修复旧分支以避免两套行为继续分叉。增加“分别切换两个开关、保存/Reload、跨编辑器实例、水平滚动条可见性和磁吸行为”测试；若设置迁移需兼容旧配置，先保留旧值并只在明确升级步骤中转换，不能用错误字段覆盖。</li>
+</ul>
+<h3 id="b-034-project-load-root-ownership-leak">B-034 项目加载失败时可能泄漏尚未转移所有权的目录树</h3>
+<ul>
+<li><strong>所有权转移点</strong>：<code>FumenVisualEditorViewModel.ProjectIO.cs:145-150</code> 在调用加载 helper 前把 <code>projectRoot</code> 置空，表示目录树所有权已交给 helper。<code>LoadProjectWithoutGateAsync():192-210</code> 的异常分支随后根据 <code>projectData is null</code> 决定释放对象。</li>
+<li><strong>泄漏路径</strong>：<code>EditorProjectDataUtils.TryLoadFromFileAsync():41-43</code> 成功解析工程文件后已经创建非空 <code>EditorProjectDataModel</code>；但 <code>ProjectRoot</code> 只有在完成谱面、音频、ACB/AWB 校验和谱面反序列化后的 <code>:189-197</code> 才赋值。此期间若路径校验失败、ACB 检查失败、缺少依赖或谱面解析抛异常，外层只调用 <code>projectData.DisposeRuntimeFiles()</code>，而该方法在 <code>EditorProjectDataModel.cs:95-108</code> 只能释放已经绑定的资源，无法释放尚未赋给 <code>ProjectRoot</code> 的目录树。</li>
+<li><strong>影响</strong>：一次损坏工程或反复打开失败的操作可能保留整棵 <code>IStorageFolder/IStorageFile</code> 包装和 Browser 授权句柄，导致内存/句柄持续增长、目录权限对象迟迟不释放，长会话中的后续打开和清理行为变得不可靠。</li>
+<li><strong>分类理由</strong>：这是 Avalonia 新增的“授权目录树 + 延迟所有权绑定”实现中的失败路径缺口；旧 WPF 直接按路径打开文件，没有对应的目录树所有权契约，不能归为 E 类框架限制。</li>
+<li><strong>测试缺口</strong>：现有测试覆盖成功加载和部分文件系统操作，但没有使用可计数的 fake directory/file 验证工程解析异常、缺少音频、ACB 外置 AWB 缺失、谱面解析异常和取消后的每个句柄都被释放。</li>
+<li><strong>建议</strong>：把所有权写成显式不变量：在 <code>TryLoadFromFileAsync</code> 内用 <code>try/finally</code> 持有 <code>projectRoot</code>，只有在 <code>projectData.ProjectRoot = projectRoot</code> 完成后才清除本地 owner；或让模型构造函数一次性接收并拥有 root。失败时同时释放已解析的谱面对象、<code>fumenFile</code>、<code>audioFile</code> 和 <code>audioAwbFile</code>，并保留原始异常。加入资源计数、重复失败和取消的生命周期测试，Desktop 与 Browser provider 各覆盖一次。</li>
+</ul>
+<h3 id="b-035-project-folder-scan-bounds">B-035 项目文件夹打开缺少取消、进度和资源预算</h3>
+<ul>
+<li><strong>旧版行为</strong>：WPF <code>FumenVisualEditorViewModel.DoLoad()</code>（<code>OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs:237-255</code>）由文件选择器直接得到一个 <code>.nyagekiProj</code> 路径，再只解析该工程及其声明的谱面/音频。</li>
+<li><strong>Avalonia 状态</strong>：当前 <code>Load()</code> 在 <code>FumenVisualEditorViewModel.ProjectIO.cs:30-66</code> 选择目录后调用 <code>LoadFromAvaloniaStorageFolder</code>；builder 的 <code>:63-140</code> 会递归枚举整个授权目录并为每个文件建立内存索引，<code>FindProjectFiles():11-37</code> 再遍历完整树寻找工程文件。调用点没有传入取消源、进度回调或文件数量/总字节/目录深度限制；工程加载还会把完整音频解码到内存。设计基线 <code>docs/fumen-visual-editor-project-folder-io-design.md:17-24,47-54</code> 已明确记录“无重扫、进度、用户取消、流式发现、资源上限”。</li>
+<li><strong>影响</strong>：用户误选大型游戏目录、网络目录或包含大量无关文件的目录时，打开过程可能长时间占用 UI 和全局 I/O 门，内存压力在显示错误前就已经发生；用户无法中途放弃，也没有已扫描数量/预计剩余时间或超限原因。完整音频缓冲还会把大型音频的峰值内存与目录索引叠加。</li>
+<li><strong>分类理由</strong>：目录授权和递归索引已经实现，但面向实际工作流的可取消、可观测和资源保护没有闭环，属于 B；Avalonia StorageProvider 已提供异步枚举和取消参数，因此不是无法直接迁移的 E 类。</li>
+<li><strong>测试缺口</strong>：没有大目录/深层目录/多工程候选、枚举中途取消、单项属性读取失败、超大音频和 Browser 慢 provider 的 UI 进度与释放测试。</li>
+<li><strong>建议</strong>：给目录扫描建立带 <code>CancellationToken</code>、进度报告和预算策略的服务，优先按候选扩展名或惰性索引，避免为无关文件长期持有句柄；在对话框显示阶段性计数并允许取消，超过文件数、深度或总字节预算时给出可重试错误。音频采用流式/受限解码或先做大小预检，取消和超限都必须释放已建立的目录树与授权句柄。为 Desktop、Browser 和无 GUI 单测分别加入取消、预算、慢枚举和内存峰值验收。</li>
+</ul>
+<h3 id="b-036-log-folder-setting-disconnected">B-036 日志目录设置仍可编辑，但实际日志输出完全忽略该设置</h3>
+<ul>
+<li><strong>旧版消费链路</strong>：<code>OngekiFumenEditor/Utils/Logs/DefaultImpls/FileLogOutput.cs:25-31</code> 读取 <code>LogSetting.Default.LogFileDirPath</code>，创建目录并在该目录生成当前日志文件；<code>Kernel/SettingPages/Logs/Views/LogsSettingView.xaml:29</code> 和旧 ViewModel 的保存逻辑共同构成“设置页到文件输出”的完整链路。</li>
+<li><strong>Avalonia 状态</strong>：当前仍保留 <code>Models/Settings/LogSetting.cs:16</code>、<code>Kernel/SettingPages/Logs/Views/LogsSettingView.axaml:33</code> 和 <code>LogsSettingViewModel.cs:37</code>，用户可以选择并保存目录；但 <code>Utils/Logs/DefaultImpls/FileLogOutput.cs:36-49</code> 只注入 <code>ITemporaryFolderProvider</code>，固定写入 <code>logs/runtime/&lt;timestamp&gt;.&lt;guid&gt;.log</code>，没有读取 <code>LogFileDirPath</code> 的活动消费者。Desktop 的临时根目录是 <code>%TEMP%/NagekiFumenEditorTempFolder</code>，Browser 则使用 OPFS 或丢弃型 provider。</li>
+<li><strong>影响</strong>：用户修改“日志目录”后设置表面上保存成功，但运行日志、崩溃窗口所显示的当前日志和后续诊断仍位于临时/OPFS 存储；Desktop 文件可能被系统临时目录清理，Browser 的本地路径字段更无法代表实际写入位置，形成误导性的可配置项。</li>
+<li><strong>分类理由</strong>：设置模型、界面和保存命令已迁移，但核心消费者断开，属于 B；Browser 的任意本地路径限制另见 E-004，不能用平台限制解释 Desktop 也忽略目录设置的事实。</li>
+<li><strong>测试缺口</strong>：现有测试覆盖设置编辑和 XAML 加载，但没有验证选择目录后新日志实际落在该目录，也没有覆盖目录不可写、设置变更后的日志轮换、崩溃窗口取当前日志以及 Browser 无 OPFS 时的反馈。</li>
+<li><strong>建议</strong>：把日志输出拆成带能力声明的平台 sink。Desktop 读取并校验配置目录，采用临时文件加原子创建、不可写时回退到明确的默认用户数据目录并显示状态；配置变更时规定“下次启动生效”或安全轮换当前文件。Browser 隐藏本地路径输入，改为下载/导出当前日志或 OPFS 书签，并在无持久化能力时明确提示。增加 configured/default/unwritable/Browser/crash-window 的端到端测试，确保 UI 文案只承诺真实可用的存储能力。</li>
+</ul>
+<h3 id="b-037-browser-sound-folder-setting">B-037 Browser 仍展示无法生效的自定义音效目录设置</h3>
+<ul>
+<li><strong>当前界面</strong>：共享 <code>Kernel/SettingPages/Audio/Views/AudioSettingView.axaml:81-91</code> 在所有宿主显示 <code>SoundFolderPath</code> 文本框和目录选择按钮；<code>AudioSettingViewModel.SelectSoundFolderAsync():144-151</code> 只有在所选目录存在非空 <code>LocalPath</code> 时才保存，因此 Browser 的授权目录没有本地路径时点击后静默返回。</li>
+<li><strong>实际播放链路</strong>：<code>Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs:55-68</code> 在 Browser 明确传入 <code>allowLocalFiles: !OperatingSystem.IsBrowser()</code>；<code>OpenSoundStream():107-127</code> 因而跳过 <code>TryGetConfiguredSoundFilePath</code>，只从打包的 <code>Resources/sounds</code> 读取。Desktop 可以使用该设置，Browser 则不能。</li>
+<li><strong>影响</strong>：Browser 用户看到并可能保存一个“音效文件夹路径”，但选择操作可能无反馈，保存值不会改变播放结果；重启或重新加载音效后仍使用内置音效，造成设置页与实际能力不一致。</li>
+<li><strong>分类理由</strong>：这是迁移后共享设置 UI 没有按宿主能力裁剪的半实现，属于 B；任意本地路径本身确实受 Browser 平台约束，交叉参见 E-004，但不能把一个仍可见且无效的控件当作已完成迁移。</li>
+<li><strong>测试缺口</strong>：已有音频能力测试覆盖输出后端和 Browser fallback，却没有验证 Browser 设置页是否隐藏/禁用该控件、目录选择取消与不支持的差异，也没有断言保存值不会被误认为已应用。</li>
+<li><strong>建议</strong>：增加 <code>SupportsCustomSoundFolder</code> 能力并让设置页按宿主裁剪；Browser 要么隐藏本地路径字段并提供“导入/打包音效”或逐文件授权流程，要么改用可持久化的 <code>ISimpleDirectory</code>/bookmark 而不是强制 <code>LocalPath</code>。不支持或取消时给出明确状态，不要静默返回；分别测试 Desktop 自定义文件、Browser 授权目录、无 OPFS/权限撤销和回退到内置音效的行为。</li>
+</ul>
+<h3 id="b-038-checker-rules-not-registered">B-038 谱面检查器规则类存在，但 DI 没有注册任何规则</h3>
+<ul>
+<li><strong>旧版注册</strong>：旧项目 <code>Modules/FumenCheckerListViewer</code> 下 16 个规则类均通过 MEF <code>[Export(typeof(IFumenCheckRule))]</code> 或 <code>[Export(typeof(IOngekiFumenCheckRule))]</code> 进入容器，<code>FumenCheckerListViewerViewModel</code> 再以 <code>IoC.GetAll&lt;IFumenCheckRule&gt;()</code> 执行。</li>
+<li><strong>Avalonia 状态</strong>：当前同目录仍有 16 个对应规则类，但源码中没有任何 <code>RegisterSingleton&lt;IFumenCheckRule&gt;</code>、<code>RegisterSingleton&lt;IOngekiFumenCheckRule&gt;</code> 或手工 <code>Add*CheckRule</code> 注册；已生成的 <code>obj/Debug/net10.0/generated/Injectio.Generators/.../Injectio.g.cs</code> 中对 <code>IFumenCheckRule</code> 的注册匹配数为 0。刷新逻辑 <code>FumenCheckerListViewerViewModel.cs:80,111-122</code> 直接消费该空集合。</li>
+<li><strong>影响</strong>：检查器工具可以打开、筛选和显示计数，但不会运行重叠、时间轴未对齐、缺失引用、颜色、Soflan、HoldEnd、Header 等任何规则；用户会得到“没有问题”的空结果，属于静默漏检而非明显报错。</li>
+<li><strong>分类理由</strong>：规则实现代码已经迁移，缺口发生在 Avalonia 的 DI 注册边界，属于 B；不是 A（类和算法并未消失），也不是 E（Injectio 支持多实现接口注册）。</li>
+<li><strong>测试缺口</strong>：现有测试检查查看器和 AXAML 能加载，但没有断言 <code>IoC.GetAll&lt;IFumenCheckRule&gt;()</code> 的最小数量、规则名称集合或一张包含已知错误的谱面能产生结果，因此空集合可以长期通过构建。</li>
+<li><strong>建议</strong>：给每个规则类补上明确的 <code>[RegisterSingleton&lt;IFumenCheckRule&gt;]</code>（实现 Ongeki 子接口的规则可同时注册到两个契约，或统一只注册基接口），并在启动/DI 快照测试中断言 16 个规则类型、规则名唯一且没有重复实例。增加一张最小 fixture 覆盖每类错误，并把规则集合为空视为启动配置错误而不是正常状态。</li>
+</ul>
+<h3 id="b-039-header-check-navigation-empty">B-039 Header 常量检查结果的导航行为仍是空实现</h3>
+<ul>
+<li><strong>旧版行为</strong>：<code>OngekiFumenEditor/Modules/FumenCheckerListViewer/Base/OgkrImpl/HeaderConstCheckRule.cs:13-20</code> 的 <code>NavigateMetaInfoViewBehavior.Navigate</code> 调用 <code>IoC.Get&lt;IShell&gt;().ShowTool&lt;IFumenMetaInfoBrowser&gt;()</code>，点击 X/T 分辨率或 Creator 错误会打开元信息工具。</li>
+<li><strong>Avalonia 状态</strong>：当前同文件 <code>HeaderConstCheckRule.cs:13-20</code> 只保留注释 <code>Pending actual tool wiring when FumenMetaInfoBrowser integration is finalized</code>，<code>Navigate</code> 方法体为空；虽然当前已有 <code>Modules/FumenMetaInfoBrowser</code>、<code>IFumenMetaInfoBrowser</code> 和独立命令处理器，但检查器结果不会调用它们。</li>
+<li><strong>影响</strong>：即使 Header 规则恢复注册，用户点击这三类错误也不会打开或聚焦可编辑的元信息面板，修复路径中断；与 B-038 叠加时表现为规则既不执行又无法定位。</li>
+<li><strong>分类理由</strong>：导航接口、规则结果和元信息工具均已迁移，只有该行为体未接线，属于 B；框架替换不妨碍通过当前 <code>IShell.ShowTool</code> 完成等价操作。</li>
+<li><strong>测试缺口</strong>：没有针对 Header 三种错误分别执行 <code>Navigate</code> 并断言 Shell 打开/激活 <code>FumenMetaInfoBrowserViewModel</code> 的测试，也没有验证工具随后绑定当前编辑器。</li>
+<li><strong>建议</strong>：将行为体改为注入或解析 <code>IShell</code>，调用 <code>ShowTool</code> 并在已有工具实例上刷新当前文档；若需要直接聚焦具体字段，扩展元信息工具的定位参数。先用 fake Shell 验证三类结果都触发一次，再做 Desktop/Browser UI 测试，避免只检查方法不抛异常。</li>
+</ul>
+<h3 id="b-040-property-browser-undo-disconnected">B-040 属性浏览器写回绕过撤销栈，保留的撤销 action 已无生产调用者</h3>
+<ul>
+<li><strong>旧版行为</strong>：<code>OngekiFumenEditor/Modules/FumenObjectPropertyBrowser/UIGenerator/UndoablePropertyInfoWrapper.cs:38-61</code> 在单属性和子属性写回时先捕获旧值，再调用 <code>referenceEditor.UndoRedoManager.ExecuteAction(new PropertySetAction(...))</code>；<code>UndoableMultiObjectPropertyInfoWrapper.cs:47-65</code> 使用 <code>LambdaUndoAction</code> 保存每个对象各自的旧值，撤销时逐项恢复。</li>
+<li><strong>Avalonia 状态</strong>：当前 <code>UndoablePropertyInfoWrapper.cs:35-51</code> 和 <code>UndoableMultiObjectPropertyInfoWrapper.cs:35-42</code> 虽仍接收并保存 <code>referenceEditor</code>，setter 却直接执行 <code>core.ProxyValue = value</code>，子属性也只调用 <code>setterAction(newValue)</code>；该编辑器引用从未使用。<code>UI/Controls/ObjectInspector/UIGenerator/PropertySetAction.cs</code> 仍实现 <code>IUndoableAction</code>，但全仓生产代码没有构造它。</li>
+<li><strong>附带编码缺陷</strong>：残留 <code>PropertySetAction.Name</code> 使用原始乱码文本 <code>鐗╀欢灞炴€?...</code> 再套入 <code>Lang.ObjectPropertyChanged</code>；即使重新接回 action，撤销历史仍会显示损坏的动作名称。</li>
+<li><strong>影响</strong>：属性浏览器恢复控件生成后，单对象、多对象以及 Range/TGrid/XGrid 等子字段修改都不会进入文档撤销历史；用户不能撤销/重做，批量编辑也无法恢复各对象原先不同的值，脏状态和关闭确认可能与实际修改脱节。该项与 B-015 的“控件生成链断开”相互独立，修复显示并不会自动修复撤销语义。</li>
+<li><strong>分类理由</strong>：包装器、action 类型和 Gekimini 撤销管理器均已迁移，缺的是写回调用链，属于 B；不是整个撤销框架缺失。</li>
+<li><strong>测试缺口</strong>：没有覆盖标量、允许空值、TGrid/XGrid/Range 子属性、多对象异构旧值、连续编辑合并、撤销/重做后 <code>IsDirty</code> 以及本地化动作名称的属性浏览器测试。</li>
+<li><strong>建议</strong>：恢复所有 setter 对 <code>UndoRedoManager.ExecuteAction</code> 的唯一入口，值未变化时不入栈；单对象和子属性使用类型安全的 <code>PropertySetAction&lt;T&gt;</code>，多对象 action 必须保存每个 wrapper 的独立旧值并在一次 undo 中完整恢复。动作名改用 Gekimini 的 <code>LocalizedString</code> 和现有语言键，不拼接乱码原文；补齐上述测试，并验证属性编辑会正确触发脏状态、保存清栈和关闭提示。</li>
+</ul>
+<h3 id="b-041-meta-info-duplicate-tool-instances">B-041 元信息菜单每次创建新工具实例，重复打开会破坏 Shell 的工具缓存</h3>
+<ul>
+<li><strong>旧版行为</strong>：旧 <code>ViewFumenMetaInfoBrowserCommandHandler</code> 调用 <code>_shell.ShowTool&lt;IFumenMetaInfoBrowser&gt;()</code>，<code>FumenMetaInfoBrowserViewModel</code> 以接口导出，由 Shell 聚焦已有的同类型工具。</li>
+<li><strong>Avalonia 状态</strong>：当前 <code>Modules/FumenMetaInfoBrowser/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs:15-21</code> 每次都执行 <code>ServiceProvider.Resolve&lt;FumenMetaInfoBrowserViewModel&gt;()</code> 后传给 <code>Shell.ShowTool(model)</code>；ViewModel 没有 <code>[RegisterSingleton&lt;IFumenMetaInfoBrowser&gt;]</code>。未注册的具体类型会被构造为新对象。</li>
+<li><strong>Shell 契约冲突</strong>：<code>Gekimini.Avalonia/Modules/Shell/ViewModels/ShellViewModel.cs:107-126</code> 的对象重载只用引用相等的 <code>Tools.Contains(model)</code> 防重；不同实例会生成相同的类型 ID，并覆盖 <code>cachedIdToToolContainerMap[id]</code>。泛型 <code>ShowTool&lt;TTool&gt;()</code> 才按类型检查已有工具。</li>
+<li><strong>影响</strong>：连续点击元信息菜单会出现多个同类型面板，而 ID 缓存只指向最后一个容器；后续隐藏、关闭、布局恢复或导航可能操作错误实例，旧面板仍留在界面且绑定状态分叉。B-031、B-032 和 B-039 修复后若复用当前具体类型写法，也会放大该问题。</li>
+<li><strong>测试缺口</strong>：没有断言重复执行命令只保留一个 tool/container，也没有覆盖活动编辑器切换、关闭后重开和布局序列化后的实例一致性。</li>
+<li><strong>建议</strong>：按旧契约注册单例 <code>IFumenMetaInfoBrowser</code>，处理器统一调用 <code>Shell.ShowTool&lt;IFumenMetaInfoBrowser&gt;()</code>；或者在 Shell 中按稳定 ID/类型查找并聚焦现有实例，禁止相同 ID 静默覆盖缓存。增加“两次执行只有一个实例”、关闭/重开、布局恢复及当前编辑器重新绑定测试，并让所有导航入口复用同一个打开服务。</li>
+</ul>
+<h3 id="b-042-editor-render-resource-lifecycle">B-042 关闭编辑器没有释放设置订阅、绘制辅助器和渲染控件资源（旧缺陷被迁移保留）</h3>
+<ul>
+<li><strong>当前所有权</strong>：每个 <code>FumenVisualEditorViewModel</code> 都创建一个实现 <code>IDisposable</code> 的 <code>EditorSetting</code>；其构造函数订阅全局 <code>EditorGlobalSetting.Default.PropertyChanged</code>，只有 <code>Dispose()</code> 才退订。<code>PrepareRenderLoop()</code> 还创建 <code>DrawPlayableAreaHelper</code>、<code>DrawPlayerLocationHelper</code> 和 <code>DrawHitObjectEffectHelper</code>，三者都订阅同一全局事件，且没有释放接口；其中播放器位置 helper 还持有可释放的 <code>IImage texture</code>。</li>
+<li><strong>关闭路径</strong>：<code>DefaultEditorDocumentManager.NotifyDestory():92-106</code> 只释放音频播放器和工程运行时文件；<code>FumenVisualEditorViewModel.OnViewBeforeUnload():705-711</code> 只拆除部分运行时订阅并清空 <code>View</code>。<code>InitializeRenderControlAsync():920-944</code> 为渲染控件注册具名和匿名事件处理器，但没有保存控件所有权或提供统一拆除方法，<code>renderImpl</code>、helper 和 drawing target 引用也一直保留。</li>
+<li><strong>归因边界</strong>：旧 WPF 代码已有相近的全局订阅和辅助器生命周期问题，因此这不是 Avalonia 独有回归；但移植后的关闭契约仍宣称销毁文档，并增加了 Skia/Browser 原生纹理、授权资源和 Avalonia 控件事件，不能继续依赖 GC 或视图卸载代替显式释放。</li>
+<li><strong>影响</strong>：反复打开、关闭谱面后，已关闭编辑器可能仍被全局设置事件和渲染控件引用，导致内存、纹理/GPU 资源及事件处理器累计；设置变更还会通知不可见旧实例。长会话、切换渲染后端和 Browser 内存受限环境风险更高。</li>
+<li><strong>测试缺口</strong>：没有重复打开/关闭、视图 attach/detach、全局事件订阅计数、弱引用可回收性、fake <code>IImage.Dispose</code> 或渲染循环停止次数的生命周期测试。</li>
+<li><strong>建议</strong>：给编辑器建立幂等的统一销毁路径，并由文档管理器在成功关闭后调用：先停止并退订 <code>RenderContext</code>，移除渲染控件的全部具名/匿名处理器并清空 Content，再释放实现 <code>IDisposable</code> 的 drawing target、helper 纹理和 <code>EditorSetting</code>，最后清除大对象引用。辅助器应实现 <code>IDisposable</code> 或使用可组合 subscription token；明确工程模型/clone 的资源所有者。以 Desktop 和 Browser/Skia 各执行多轮开关文档测试，断言订阅、纹理、上下文和对象存活数回到基线。</li>
+</ul>
+<h3 id="b-043-main-menu-auto-hide-no-op">B-043 “自动隐藏主菜单”设置可保存，但 Avalonia 菜单完全不消费它</h3>
+<ul>
+<li><strong>旧版行为</strong>：Gemini WPF 的 <code>MainMenuView.xaml:14</code> 把 <code>MenuEx.AutoHide</code> 绑定到 ViewModel；<code>MenuEx.cs:8-71</code> 在焦点和设置变化时切换菜单高度，<code>MainMenuViewModel</code> 还监听设置变更并实时更新。</li>
+<li><strong>Avalonia 状态</strong>：Gekimini 设置页仍显示并保存 <code>AutoHideMainMenu</code>，<code>MainMenuViewModel</code> 也读取该值且在属性上标注 <code>//todo not support</code>；但 <code>MainMenuView.axaml</code> 只实例化 <code>&lt;controls:MenuEx ItemsSource=... /&gt;</code>，没有绑定 <code>AutoHide</code>，当前 <code>MenuEx</code> 本身也未定义该属性或焦点折叠逻辑。设置保存后也没有把值推回已创建的主菜单 ViewModel。</li>
+<li><strong>影响</strong>：用户切换并应用“自动隐藏主菜单”后，JSON 值会变化，但当前会话和下次启动的菜单始终保持普通显示；这是一个会成功保存却完全无效果的可见设置。</li>
+<li><strong>分类理由</strong>：设置模型、设置页和 ViewModel 外壳都已迁移，只有控件行为与更新链未实现，属于 B；Avalonia 支持焦点、指针和可见性控制，不属于平台不可实现的 E 类。</li>
+<li><strong>测试缺口</strong>：没有覆盖设置应用后主菜单 ViewModel 更新、失焦折叠、Alt/键盘访问、鼠标唤醒、菜单打开期间保持可见、焦点返回内容区以及重启恢复的 UI 测试。</li>
+<li><strong>建议</strong>：若保留该功能，为 Avalonia <code>MenuEx</code> 增加可绑定的 <code>AutoHide</code> styled/direct property 和明确的键盘/焦点状态机，并让设置变更实时通知现有 <code>IMenu</code>；折叠后必须保留可发现的 Alt/菜单键入口和无障碍焦点语义。若不计划支持，应从设置页和模型中移除或禁用该选项并说明迁移策略，不能继续保存无消费者的值。补充 Desktop UI 自动化和 Browser 键盘/触摸降级测试。</li>
+</ul>
+<h3 id="b-044-status-bar-bridge-disconnected">B-044 状态栏桥接对象与实际 Gekimini 状态栏断开，状态消息没有可见更新链</h3>
+<ul>
+<li><strong>旧版链路</strong>：<code>OngekiFumenEditor/Utils/CommonStatusBar.cs:20-27</code> 注入 <code>Gemini.Modules.StatusBar.IStatusBar</code>，通过 <code>AddItem</code> 创建一个 Star 宽度主区域和两个 Auto 区域；<code>MainContentViewModel</code> 等属性直接返回实际状态栏集合中的可观察 item。</li>
+<li><strong>Avalonia 状态</strong>：当前 <code>src/OngekiFumenEditor.Avalonia/Utils/CommonStatusBar.cs:4-16</code> 自己声明了三个普通嵌套字符串对象，没有注入或引用 <code>Gekimini.Avalonia.Modules.StatusBar.IStatusBar</code>，对象也没有 <code>INotifyPropertyChanged</code>。与此同时 Gekimini <code>StatusBarViewModel.OnViewAfterLoaded():29-44</code> 自己创建并绑定另一组固定 item；<code>OngekiFumenEditorApp.cs</code> 写的是 Gekimini item，而编辑器 <code>OnMouseLeave/OnMouseUp</code> 和 <code>StatusBarHelper</code> 写的是断开的 <code>CommonStatusBar</code> 对象。</li>
+<li><strong>附带布局差异</strong>：旧版主 item 使用 <code>GridLength(1, Star)</code>，当前 Gekimini 三项都以 <code>GridLength.Auto</code> 创建，<code>StatusBarViewModel</code> 对 <code>Width</code> 变化也只留 <code>//todo: not support</code>，因此即使重新接线，长坐标/状态文本仍可能挤压或改变布局。</li>
+<li><strong>影响</strong>：加载、拖拽和指针坐标状态通常只改变不可见对象，用户看不到旧版应显示的主状态/左右辅助信息；启动时的“Application ready.”与编辑器状态分别落在两套 item 上，表现不一致。长文本没有 Star 区域时还会争抢状态栏空间。</li>
+<li><strong>分类理由</strong>：状态栏模块和应用 helper 都已建立，但迁移时缺少适配器且通知契约被削弱，属于 B；不是状态栏框架本身不存在。</li>
+<li><strong>测试缺口</strong>：没有从 <code>CommonStatusBar</code> 写入消息后断言真实 <code>StatusBarManager</code> 文本变化，也没有覆盖视图重载、线程切换、清空/恢复、宽度和长字符串布局。</li>
+<li><strong>建议</strong>：让 <code>CommonStatusBar</code> 注入并持有 Gekimini 实际 item，或把应用状态对象实现为可观察桥接并在 <code>OnViewAfterLoaded</code> 绑定/解绑；不要再维护平行字符串模型。恢复 Star/Auto 三段布局，定义宽度变更的支持或移除 <code>Width</code> API；所有后台状态更新统一投递 UI 线程。补充启动、加载、拖拽和状态栏 attach/detach 的可见性测试。</li>
+</ul>
+<h3 id="b-045-floating-window-taskbar-no-op">B-045 浮动窗口“显示在任务栏”契约回调为空</h3>
+<ul>
+<li><strong>旧版行为</strong>：Gemini <code>ShellView.xaml.cs:29-47</code> 在布局更新和设置变化时遍历 <code>Manager.FloatingWindows</code>，同步主窗口图标与每个浮动窗口的 <code>ShowInTaskbar</code>。</li>
+<li><strong>Avalonia 状态</strong>：<code>Gekimini.Avalonia.Modules.Shell.ViewModels.ShellViewModel.OnShowFloatingWindowsInTaskbarChanged():485-488</code> 调用 <code>IShellView.UpdateFloatingWindows(bool)</code>，但 <code>ShellView.axaml.cs:35-38</code> 只有注释 <code>//todo show other floating dock windows</code>，不会访问 Dock 的浮动窗口、图标或任务栏属性。接口已经公开，属性变更链也已存在，故不是不可达的死代码。</li>
+<li><strong>影响</strong>：宿主或用户设置一旦打开该开关，浮动工具窗口仍按平台默认行为显示，任务栏可见性和图标不会同步；多窗口工作区在 Desktop 上与旧版行为不一致。Browser 没有传统任务栏时应隐藏该能力，而不是让共享接口返回“已设置但无效”。</li>
+<li><strong>分类理由</strong>：窗口浮动与 Shell 已迁移，缺口集中在 Avalonia/Dock 适配实现，属于 B；若某平台无法提供任务栏语义，应另以能力声明归入 E，而不能保留空回调。</li>
+<li><strong>测试缺口</strong>：没有创建浮动 tool、切换开关并断言 Dock window 属性/图标，也没有覆盖布局更新后新建浮动窗口、关闭窗口、Browser 宿主和无主窗口状态。</li>
+<li><strong>建议</strong>：在 Desktop 实现 Dock 浮动窗口到 Avalonia <code>Window</code> 的能力适配，统一同步 icon、<code>ShowInTaskbar</code> 或等价属性，并在布局变化时重放；在 Browser 将属性标记为不支持并从设置/接口暴露中裁剪。增加窗口级 smoke test 和能力矩阵，避免静默 no-op。</li>
+</ul>
+<h3 id="b-046-migration-text-encoding-corruption">B-046 迁移源码仍有中文编码损坏，包含可执行日志和撤销历史文案</h3>
+<ul>
+<li><strong>扫描证据</strong>：当前核心源码中有 6 个文件、29 行匹配典型乱码序列；<code>Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs:489</code> 的恢复日志为 <code>寮€濮嬫仮澶嶇墿浠舵椂闂?..</code>，<code>UI/Controls/ObjectInspector/UIGenerator/PropertySetAction.cs:15</code> 的动作名包含 <code>鐗╀欢灞炴€?</code>。其余命中位于 <code>EditorSetting</code>、<code>Bell</code> 和检查规则的注释/文档。</li>
+<li><strong>对照结果</strong>：旧版相同文件中的对应可执行字符串和注释仍为正常中文（例如旧 <code>PropertySetAction.Name</code> 使用“物件属性({propName})变更”，旧恢复日志为“开始恢复物件时间...”）；这不是 PowerShell 显示编码差异，而是新文件字节内容本身已经被错误转码。</li>
+<li><strong>影响</strong>：撤销历史和日志诊断会向用户/开发者显示不可读文本；乱码注释还会降低后续维护、审查和故障定位的可靠性。当前没有统一规则阻止新提交继续引入同类损坏。</li>
+<li><strong>分类理由</strong>：文件和功能主体已经迁移，但迁移过程损坏了源文本，且至少两处进入运行时输出，属于 B 的迁移质量缺口；不把纯注释逐行拆成独立功能条目。</li>
+<li><strong>测试缺口</strong>：构建和现有测试没有检查 UTF-8 解码后的可疑替换字符/典型 mojibake 序列，也没有在三种语言下断言撤销动作名、恢复日志和检查结果摘要可读。</li>
+<li><strong>建议</strong>：以旧版 UTF-8 内容或人工校对为来源，逐文件恢复 29 行文本但保留原注释位置和语义；可执行字符串优先改为语言资源/结构化日志模板。加入 CI/预提交扫描，拒绝 BOM 之外的非法 UTF-8、替换字符和已知乱码模式，并补充动作名与日志快照测试，避免仅依赖编辑器显示结果。</li>
+</ul>
+<h2 id="c">5. C 类：已实现但经过较大重写</h2>
+<h3 id="c-001">C-001 应用外壳和依赖注入体系重写</h3>
+<ul>
+<li><strong>WPF</strong>：<code>AppBootstrapper</code> + Caliburn.Micro + Gemini WPF，单一 Windows <code>WinExe</code>。</li>
+<li><strong>Avalonia</strong>：抽象 <code>App</code>、<code>OngekiFumenEditorApp</code>、<code>IoC</code>、Injectio/Gekimini 源生成注册，并拆分 Core、Desktop、Browser、CommandLine 入口。</li>
+<li><strong>差异</strong>：启动生命周期、视图定位、窗口管理、命令注册和服务发现均不是逐行移植；需要分别验证 Desktop 与 Browser 的注册集合和主窗口初始化。</li>
+<li><strong>建议</strong>：为 Core、Desktop、Browser 和 CommandLine 生成可审查的服务/静态对象注册快照，并在启动测试中检查缺失、重复和错误平台注册；把平台服务放在各宿主边界，避免共享核心在静态初始化时触碰窗口或本地文件系统。补充 ViewLocator、首窗口、Splash、无 GUI 命令行和关闭释放顺序的集成测试。</li>
+</ul>
+<h3 id="c-002.settings-json">C-002 设置系统由 <code>.settings</code> 生成类改为 JSON 模型</h3>
+<ul>
+<li><strong>WPF</strong>：<code>Properties/*Setting.Designer.cs</code> 共 8 个设置生成类，加 <code>Resources.Designer.cs</code>。</li>
+<li><strong>Avalonia</strong>：<code>Models/Settings/</code> 下 10 个模型/基类/JSON source context，平台设置管理器负责持久化。</li>
+<li><strong>生命周期重写</strong>：<code>SettingModelBase&lt;TSelf&gt;</code> 通过 <code>ISettingManager.GetSetting/SaveSetting</code> 读取和保存 JSON；<code>Reload()</code> 用反射把已加载实例逐属性复制回当前 observable model，<code>Reset()</code> 则复制 <code>new TSelf()</code> 的代码默认值。它不再使用 <code>ApplicationSettingsBase.Upgrade/Save/Reload/Reset</code>。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>设置组</th>
+<th style="text-align: right;">WPF 属性数</th>
+<th style="text-align: right;">Avalonia 属性数</th>
+<th>首轮逐属性结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>AudioPlayerToolViewerSetting</code></td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">6</td>
+<td>属性名和默认值全部一致</td>
+</tr>
+<tr>
+<td><code>AudioSetting</code></td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+<td>属性名和默认值全部一致</td>
+</tr>
+<tr>
+<td><code>DefaultWaveformSettings</code></td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">3</td>
+<td>属性名和默认值全部一致</td>
+</tr>
+<tr>
+<td><code>EditorGlobalSetting</code></td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">41</td>
+<td>属性名和默认值全部一致；颜色类型从 <code>System.Drawing.Color</code> 改为 Avalonia/整数表示，但默认色值一致</td>
+</tr>
+<tr>
+<td><code>LogSetting</code></td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td>属性名和默认值一致</td>
+</tr>
+<tr>
+<td><code>KeyBindingSetting</code></td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td>旧 <code>.settings</code> 本身就是空集合；实际快捷键存储已改由 <code>DefaultKeyBindingManager</code> 写入独立 <code>keybind.json</code></td>
+</tr>
+<tr>
+<td><code>ProgramSetting</code></td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">11</td>
+<td>共同的 11 项名称和默认值一致；7 项未迁入，见下文</td>
+</tr>
+<tr>
+<td><code>OptionGeneratorToolsSetting</code></td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td><code>LastLoadedGameFolder</code> 随 A-003 的 GUI 模块一起缺失</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong><code>ProgramSetting</code> 未迁入的 7 项</strong>：<code>GraphicsCompatability</code>、<code>OutputGraphicsLog</code>、<code>GraphicsLogSynchronous</code>、<code>DefaultRenderManagerImplementName</code>、<code>SkiaRenderBackend</code> 随旧渲染后端/日志选择路径移除；<code>UpdaterCheckMasterBranchOnly</code>、<code>EnableUpdateCheck</code> 随 D-004 的 GUI 更新检查延期而移除。</li>
+<li><strong>保留但疑似失活的兼容字段</strong>：当前 <code>ProgramSetting.__NeedUpgradeSetting</code> 仍存在，但静态搜索没有找到读取方；<code>EditorGlobalSetting.RecentOpenedListStr</code> 也仍存在，但最近文件已经由 C-008 的 Gekimini 设置仓库存储。两项都需要在最终兼容性验收时决定迁移、消费或删除。</li>
+<li><strong>结论</strong>：基础编辑、音频、波形和日志设置具有较高数据相似性；程序级渲染/更新器设置、OptionGenerator 状态、快捷键和最近文件的存储格式则是明确的架构断点，不能仅凭属性类存在判定设置迁移完整。旧配置导入、Desktop 存储位置和损坏恢复分别见 B-024、B-025、B-026。</li>
+<li><strong>建议</strong>：为每个 JSON 设置模型增加显式 schema 版本和逐版本迁移器，保存采用临时文件加原子替换；首次升级先备份旧设置，并记录无法迁移的字段。测试默认值、Reload/Reset 通知、未知字段、损坏 JSON、并发保存、Desktop 文件仓库和 Browser store；对两个疑似失活字段作出“迁移一次后删除”或“恢复消费者”的明确决定，并以 B-024 至 B-026 的退出条件验收仓库层。</li>
+</ul>
+<h3 id="c-003-io">C-003 谱面工程 I/O 与最近项目路径重写</h3>
+<ul>
+<li><strong>WPF</strong>：以本地绝对路径、Windows 文件对话框和旧最近文件管理器为核心。</li>
+<li><strong>Avalonia</strong>：使用 <code>IStorageFolder</code>、bookmark、<code>ISimpleFile/ISimpleDirectory</code>、<code>EditorProjectIoGate</code>、<code>EditorProjectPathResolver</code> 和事务写入；可从目录发现多个 <code>.nyagekiProj</code> 并弹窗选择。</li>
+<li><strong>已确认相似功能</strong>：加载已有工程、反序列化工程模型、登记/恢复最近项目。</li>
+<li><strong>行为差异</strong>：新建空工程仍缺失；浏览器无本地路径，文件访问受用户授权和 bookmark 生命周期约束。</li>
+<li><strong>建议</strong>：继续以 capability、相对 locator 和事务写入为主契约，不退回到共享层绝对路径；把授权失效、bookmark 更新和资源释放统一收口。完成 B-005 后用同一套工程 fixture 覆盖 Desktop/Browser 的打开、保存、另存、多工程选择、移动目录、权限撤销、崩溃中断和恢复。</li>
+</ul>
+<h3 id="c-004-avalonia-skia-lease">C-004 渲染宿主改为 Avalonia Skia lease</h3>
+<ul>
+<li><strong>WPF</strong>：多后端路径包含 WPF DirectX 互操作、OpenGL 控件和自建 Skia backend/context。</li>
+<li><strong>Avalonia</strong>：活动构建只保留 Avalonia 渲染树中的 <code>AvaloniaSkiaRenderControl</code> 和 <code>ISkiaSharpApiLeaseFeature</code> 路径；旧 OpenGL、D3D context、GL context、RenderControls 被项目文件排除。</li>
+<li><strong>差异</strong>：渲染循环、DPI/坐标变换、资源生命周期和平台可用性均改变；旧后端源码仍在树中但不进入产物，不能算已迁移的 fallback。</li>
+<li><strong>建议</strong>：把 lease 获取、线程约束、DPI/坐标换算、失效调度和 SK 资源释放封装在单一渲染宿主契约内；任何后端不可用都应显示可诊断降级而非空白画面。增加缩放/高 DPI、窗口移动、设备/lease 丢失、重复 attach/detach、长时间播放和 Browser 软件/硬件路径测试；没有独立需求与维护人前不要重新启用旧排除后端。</li>
+</ul>
+<h3 id="c-005-editorsvgobjectcontrolprovider">C-005 原 <code>EditorSvgObjectControlProvider</code> 被拆分搬迁</h3>
+<ul>
+<li><strong>Avalonia 对应</strong>：SVG toolbox generator 搬到 <code>Modules/FumenVisualEditor/Toolboxes/EditorObjects/</code>；属性生成器、ViewModel 和视图搬到 <code>Modules/FumenObjectPropertyBrowser/</code>；格式解析新增 <code>Parser/SvgPrefabFormatUtils.cs</code>。</li>
+<li><strong>差异</strong>：原独立模块边界被取消，能力并入编辑器和属性浏览器；工程资源型 prefab 仍受 B-006/D-002 限制。</li>
+<li><strong>建议</strong>：为拆分后的 parser、toolbox 和 property UI 定义清晰所有权与单向依赖，避免同一 prefab 类型被多处注册或各自解析；用一个端到端测试从输入 SVG 创建对象、显示属性、保存并重开。工程资源能力关闭时由统一 feature capability 隐藏所有相关入口。</li>
+</ul>
+<h3 id="c-006-optiongeneratortools-desktop">C-006 原 <code>OptionGeneratorTools</code> 的部分算法转为 Desktop 命令行服务</h3>
+<ul>
+<li><strong>Avalonia 对应</strong>：Desktop 中出现 <code>CommandLine/Commands/Acb</code>、<code>Jacket</code>、<code>Svg</code> 等定义、handler 和服务，命令行项目直接引用 Desktop 启动宿主。</li>
+<li><strong>差异</strong>：从窗口驱动、设置对象和 WPF 对话框，改为 <code>System.CommandLine</code> 参数与服务；需在后续逐命令表核对 ACB/Jacket/Music XML 覆盖，其中原 Music XML GUI 当前尚未找到明确等价命令。</li>
+<li><strong>建议</strong>：建立旧 GUI 操作到新命令/服务的功能矩阵，明确 Music XML 是待补命令、仅 GUI 功能还是正式移除；把生成逻辑下沉到共享服务，让未来 GUI 复用。为每个命令固定输入输出 fixture、退出码、取消和覆盖策略，并避免 CommandLine 项目长期依赖整个 Desktop 启动宿主。</li>
+</ul>
+<h3 id="c-007-kernelcommandexecutor">C-007 原 <code>Kernel/CommandExecutor</code> 被重写为强类型命令行架构</h3>
+<ul>
+<li><strong>WPF</strong>：<code>DefaultCommandExecutor</code> 通过 <code>OptionBindingAttrbute</code>、反射和程序集扫描把参数绑定到命令对象；原命令行入口还会反射加载 GUI 程序集。</li>
+<li><strong>Avalonia</strong>：<code>Desktop/CommandLine/DefaultCommandExecutor</code> 聚合五个 <code>ICommandLineDefinition</code>，每个 Definition 创建 <code>System.CommandLine.Command</code>，再把强类型 options 交给注入的 handler；<code>Avalonia.CommandLine</code> 只是薄启动器。</li>
+<li><strong>已覆盖命令</strong>：<code>convert</code>、<code>svg</code>、<code>jacket</code>、<code>updater</code>、<code>acb</code>，并有 Desktop 测试和发布冒烟证据。</li>
+<li><strong>命令契约相似性</strong>：旧 <code>DefaultCommandExecutor</code> 已经使用 <code>System.CommandLine</code>，新实现继续保留同样五个根命令和递归全局 <code>--verbose/-v</code>；主要变化在命令发现、参数绑定和依赖注入，不是把命令集完全重做。</li>
+<li><strong>确认修复的旧缺陷</strong>：旧 <code>Modules/OptionGeneratorTools/Models/JacketGenerateOption.cs</code> 把 <code>WidthSmall</code> 标成 <code>outputHeightSmall</code>、把 <code>HeightSmall</code> 标成 <code>outputWidthSmall</code>。新 <code>JacketCommandLineDefinition</code> 正确把 <code>--outputWidthSmall</code> 绑定到宽、<code>--outputHeightSmall</code> 绑定到高，相关小图尺寸测试覆盖了该映射。</li>
+<li><strong>新增保护</strong>：新执行器显式检测重复命令名，把解析后的强类型值交给 handler，并传递取消令牌；日志初始化也以解析后的 <code>verbose</code> 结果为准。</li>
+<li><strong>不等价处</strong>：旧 <code>OptionBindingAttrbute</code>/通用反射发现机制没有保留；该差异不是 A，而是 C，并且旧通用机制的“不迁移”决策见 D-003。</li>
+<li><strong>建议</strong>：保留强类型注册方向，并把命令名、别名、默认值、必填项和退出码作为稳定外部契约；新增命令通过显式 DI 注册和唯一性测试接入。补齐 <code>--help</code> 快照、错误参数、取消、verbose、重复注册和旧参数兼容测试，并在发布说明中记录已取消的反射扩展点。</li>
+</ul>
+<h3 id="c-008-kernelrecentfiles-gekimini">C-008 原 <code>Kernel/RecentFiles</code> 被 Gekimini 最近记录服务替代</h3>
+<ul>
+<li><strong>Avalonia 对应</strong>：<code>IEditorRecentFilesManager</code>、<code>RecentRecordInfo</code>、<code>RecentFileItemViewModel</code> 和 Splash/Provider/工程 I/O 的记录接线来自 Gekimini，并新增 <code>FumenVisualEditorRecentRecordData</code> 保存 folder bookmark 与项目文件定位器。</li>
+<li><strong>已覆盖</strong>：列表分组、打开命令状态检查、无效记录标记、项目文件夹 bookmark 恢复、同一项目记录更新；对应基础设施和 Provider 测试已存在。</li>
+<li><strong>WPF 数据模型</strong>：最多 10 条记录，结构为 <code>FileName/DisplayName/RecentOpenType/LastAccessTime</code>；整个列表序列化为 JSON 后再 Base64 存入 <code>EditorGlobalSetting.RecentOpenedListStr</code>。<code>RecentOpenType</code> 可选择普通 provider 打开或 <code>DocumentOpenHelper</code> 的通用命令打开。</li>
+<li><strong>Avalonia 数据模型</strong>：记录改为 <code>EditorFileTypeId/Name/LocationDescription/LastAccessTime/RecordId</code>，并按 <code>RecordId</code> 保存独立 <code>byte[]</code> 扩展数据、无效记录集合和可配置数量上限。打开时先按 <code>EditorFileType.Id</code> 找 provider，再异步验证记录有效性。</li>
+<li><strong>明确不兼容旧记录</strong>：Gekimini <code>DefaultEditorRecentFilesManager.cs:25-46</code> 在版本不一致时重建设置，并注释 <code>V2 is an intentional direct cut</code>；旧版按 location key 保存的数据不能携带文件夹 capability，因此旧最近记录不会自动导入。</li>
+<li><strong>平台能力变化</strong>：Fumen 最近记录可保存 StorageProvider 文件夹 bookmark，适配 Browser 授权模型；代价是记录有效性受授权/bookmark 生命周期影响。旧通用 <code>CommandOpen</code> 分支不再存在，当前只打开已注册 <code>EditorFileType</code> 的 provider；过去使用该分支的脚本和 Ogki 浏览器本身也分别属于 A-001/A-002。</li>
+<li><strong>差异/风险</strong>：这是有意的数据迁移断点，而不是同格式替换。升级后最近列表清空、重复项语义、记录更新、权限失效和 Desktop/Browser 存储均需按新模型验收。</li>
+<li><strong>建议</strong>：把“升级后最近列表清空”明确显示一次并写入发布说明；若能可靠定位旧绝对路径，可在 Desktop 提供一次性重新授权导入，而不是静默伪造 bookmark。为去重、数量上限、过期清理、重新授权、记录数据损坏和跨页面重载建立测试，并允许用户手动移除失效记录。</li>
+</ul>
+<h3 id="c-009-desktop">C-009 原更新器“覆盖安装执行部分”被隔离为 Desktop 服务</h3>
+<ul>
+<li><strong>Avalonia 对应</strong>：<code>DefaultProgramUpdateService</code>、文件系统/进程环境接口、<code>updater</code> Definition/Handler。</li>
+<li><strong>保留行为</strong>：源目录过滤、随机 <code>.bak_*</code>、回滚、进程终止、目标程序重启和旧退出码均有实现/测试。</li>
+<li><strong>差异</strong>：执行器不再由共享核心 <code>IProgramUpdater</code> 调用，而是命令行服务；原 GUI 检查/下载部分仍为 A/D-004。</li>
+<li><strong>建议</strong>：维持 Desktop-only 边界，并把允许覆盖的目标根、包来源和待启动可执行文件做严格校验；更新包必须在调用此服务前完成签名/哈希验证。继续覆盖文件占用、权限不足、回滚失败、恶意相对路径、并发更新和重启失败，且在 D-004 恢复前不要将它包装成用户侧完整更新入口。</li>
+</ul>
+<h3 id="c-010">C-010 音频管理器和波形宿主完成平台化重写</h3>
+<ul>
+<li><strong>WPF</strong>：<code>NAudioManager</code> 构造时直接创建 <code>AsioOut</code>/<code>WasapiOut</code>/<code>WaveOut</code>，并通过 WPF render control 的旧渲染上下文绘制波形。</li>
+<li><strong>Avalonia</strong>：共享 <code>NAudioManager</code> 只依赖 <code>INAudioWavePlayerFactory</code>、<code>INAudioFileReaderFactory</code> 和 <code>IAudioPlatformCapabilities</code>；Desktop 使用 WASAPI/ASIO，Browser 使用 AudioWorklet；波形使用 <code>WaveformRenderSession</code> + Avalonia Skia lease。</li>
+<li><strong>差异</strong>：输出后端选择、格式支持、变速能力、异步取消、文件路径要求和渲染生命周期均改变；Desktop/Browser 的限制详见 E-004 和后续音频矩阵。</li>
+<li><strong>建议</strong>：形成可执行的平台能力矩阵，让 UI 只显示当前后端真实支持的设备、格式和变速选项，并在设备丢失时自动停止或可解释降级。分别测试 Desktop WASAPI/ASIO fallback、Browser AudioWorklet 初始化/重载、播放切换、seek、变速、取消、资源释放、长音频波形和无音频设备场景。</li>
+</ul>
+<h3 id="c-011-gekimini-action">C-011 应用内撤销管理器搬到 Gekimini，并改用本地化 action 名称</h3>
+<ul>
+<li><strong>WPF</strong>：每个编辑器创建应用内 <code>DefaultEditorUndoManager</code>，本地实现 action 栈、批次、合并、<code>Undo/Redo/UndoTo/RedoTo/UndoAll/Clear</code> 和数量上限；<code>LambdaUndoAction</code> 的名称是普通字符串。</li>
+<li><strong>Avalonia</strong>：应用本体不再包含同名管理器；<code>DocumentViewModelBase</code> 经 <code>DefaultUndoRedoManagerFactory</code> 创建 Gekimini 的 <code>DefaultUndoRedoManager</code>。原有栈操作、批次事件、合并与数量上限 API 基本保留，action 名称改为 <code>LocalizedString</code>，业务调用点改用 Gekimini 的 <code>LambdaUndoAction</code>。</li>
+<li><strong>评价</strong>：核心撤销能力属于已实现的框架迁移，不应把原文件无同路径对应误判成 A；但应用设置到 <code>UndoCountLimit</code> 的连接丢失，具体用户可见缺口见 B-007。</li>
+<li><strong>建议</strong>：保持 Gekimini 管理器为唯一实现，修复 B-007 的设置接线后重点验收文档间隔离、批次合并、失败 action、清空与本地化名称刷新；任何业务模块不得另建平行撤销栈。用跨模块场景验证一次用户操作只产生一个 action，撤销/重做后选择、播放位置和脏状态一致。</li>
+</ul>
+<h3 id="c-012.resx-simpletypedlocalizer-json">C-012 本地化由 <code>.resx</code>/生成资源类改为 <code>SimpleTypedLocalizer</code> JSON 源生成</h3>
+<ul>
+<li><strong>WPF</strong>：<code>Resources.resx</code>、<code>Resources.ja.resx</code>、<code>Resources.zh-Hans.resx</code> 加 <code>Resources.Designer.cs</code>。</li>
+<li><strong>Avalonia</strong>：<code>Assets/Languages/ProgramLang*.json</code> 通过 <code>SimpleTypedLocalizer</code> 生成 <code>Lang</code> 静态键；项目以 <code>AdditionalFiles</code> 纳入语言 JSON。共同键的中性和简体中文文本逐值比较没有发现内容变化。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>语言</th>
+<th style="text-align: right;">WPF 键数</th>
+<th style="text-align: right;">Avalonia 键数</th>
+<th style="text-align: right;">旧有但新缺少</th>
+<th style="text-align: right;">新增</th>
+<th style="text-align: right;">共同键值变化</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>中性/英文</td>
+<td style="text-align: right;">724</td>
+<td style="text-align: right;">710</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>简体中文</td>
+<td style="text-align: right;">720</td>
+<td style="text-align: right;">706</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>日文</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">529</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">4</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>中性/简中缺少的 17 键</strong>：<code>Branch</code>、<code>CheckUpdates</code>、<code>CurrentVersion</code>、<code>EnableUpdateCheck</code>、<code>FileSize</code>、<code>HasNewVersion</code>、<code>NewVersion</code>、<code>ProgramReadyToUpdate</code>、<code>ProgramUpdates</code>、<code>ReleaseTime</code>、<code>SettingHasNewVersion</code>、<code>ShowNewVersionTitle</code>、<code>UpdateProgramReady</code>、<code>UpdaterCheckMasterBranchOnly</code>、<code>UpdateStart</code> 均属于 GUI 更新流程；<code>SvgPrefabFile</code>、<code>SvgPrefabText</code> 属于 SVG prefab UI。前 15 项与 D-004 一致，后 2 项与 B-006/D-002 一致。</li>
+<li><strong>三个新键</strong>：<code>AudioOutputFallback</code>、<code>AudioOutputFixedBackend</code>、<code>AudioOutputUnavailable</code>，用于 C-010/E-004 的平台音频降级和不可用提示。</li>
+<li><strong>日文仍缺少的 4 个旧键</strong>：<code>BulletNullPalleteDescription</code>、<code>BulletPalleteDisplayName</code>、<code>CantDeleteReferencedBulletPallete</code>、<code>MirrorSelectionLaneColors</code>。当前会依赖中性语言 fallback，说明日文本地化覆盖并非旧资源的严格超集。</li>
+<li><strong>日文的 33 个新键</strong>：主要覆盖 About、工程设置/转换窗口、快捷键分配与冲突、选择过滤器、刷子 TGrid 范围、变速读取时长和 Soflan 点列表等新 UI；其中 <code>BulletPalleteSelectDialogTitle</code>、<code>MenuMirrorSelectionLaneColors</code>、<code>ReturnStartTimeAfterPause</code>、<code>ShowHitObjectEffectInPreviewMode</code> 四个旧空值在新 JSON 中补上了日文文本。</li>
+<li><strong>残留不一致</strong>：<code>Assets/Languages/Lang.cs:7</code> 仍声明导入已经不存在的 <code>Assets/Languages/Lang.json</code>。两次核心项目 Rebuild（其中一次关闭 shared compilation）均为 0 error，说明当前生成器/缓存路径没有因此阻断构建；但该无效输入声明应在后续清理或恢复，避免生成器版本变化后出现不稳定结果。</li>
+<li><strong>建议</strong>：立即清理或恢复 <code>Lang.json</code> 的无效 source-generator 输入，并在 CI 比较三套语言键集合、检查 JSON 有效性和生成代码可重现性；对有意删除的键维护 allowlist。补齐 4 个日文旧键或明确接受 fallback，同时用不同语言启动 headless/UI 测试检查缺键、格式占位符和运行时切换。</li>
+</ul>
+<h3 id="c-013-xceed-avalonia-flyout">C-013 选择筛选器由 Xceed 多选控件改为 Avalonia 原生 Flyout 组合</h3>
+<ul>
+<li><strong>WPF 控件结构</strong>：<code>SelectionFilterView.xaml:126-149</code> 使用 Xceed <code>CheckComboBox</code> 选择弹幕调色板和可停靠轨道，<code>194-229</code> 使用 Xceed <code>CheckListBox</code> 显示对象类型，并挂接 <code>BubbleScrollWheelEventBehavior</code> 把内部滚轮事件重新抛给外层滚动容器。</li>
+<li><strong>Avalonia 对应</strong>：<code>SelectionFilterView.axaml:103-153</code> 改成 <code>DropDownButton + Flyout + CheckBox + ItemsControl</code>；对象类型区域在 <code>224</code>、<code>243</code> 行以普通全选复选框加条目列表实现。旧 <code>UI/Themes/CheckComboBox.xaml</code> 和 <code>BubbleScrollWheelEventBehavior.cs</code> 不再有同路径文件。</li>
+<li><strong>状态逻辑重写</strong>：<code>SelectionFilterOptions.cs:529-542</code>、<code>660-673</code> 新增 <code>IsAllSelected</code> 与 <code>SelectionSummary</code>，由 ViewModel 直接维护全选和下拉标题；旧 code-behind 的 <code>BulletPaletteCheckList_SetText</code> 与 Xceed partial-selection 刷新 hack 不再需要。</li>
+<li><strong>相似性</strong>：两版都保留对象类型逐项勾选、全选、启用/禁用现有过滤条件和命中数量统计；核心过滤类仍在同一模块。</li>
+<li><strong>交互差异/待验收</strong>：旧弹幕调色板标题按“无/全部/已选数量”显示，新标题拼接所有已选条目并截断；旧显式滚轮上抛行为没有等价 behavior；筛选器自身还受 B-016 中 <code>ParamValueToBoolConverter</code>、<code>ParenthesizeTextConverter</code> 等活动占位转换器影响，并且选项集合与应用后刷新明确缺失，详见 B-017。Avalonia 默认路由是否在所有嵌套滚动场景下达到相同体验，需要桌面 UI 实测，当前不能仅凭对象类型过滤逻辑相同判定完全等价。</li>
+<li><strong>建议</strong>：保留原生 Flyout 方案，但先修复 B-016/B-017，再确定标题采用“全部/数量”还是明细文本的产品语义；若嵌套滚动实测失败，增加最小化的滚轮转发 behavior。覆盖全选/部分选、Flyout 开关、键盘导航、长列表虚拟化、内外滚动和谱面切换后的动态选项。</li>
+</ul>
+<h3 id="c-014-desktop">C-014 致命异常捕获、救援和终止窗口迁到 Desktop 启动层</h3>
+<ul>
+<li><strong>WPF</strong>：<code>AppBootstrapper.cs:479-509</code> 在 Gemini bootstrapper 中订阅 AppDomain、WPF Dispatcher 和未观察任务异常，写日志/dump、救援谱面后创建 MahApps <code>ExceptionTermWindow</code>。</li>
+<li><strong>Avalonia</strong>：<code>Desktop/Program.cs:40-59</code>、<code>111-145</code> 订阅 AppDomain、Avalonia <code>Dispatcher.UIThread.UnhandledException</code> 和未观察任务异常；<code>268-280</code> 显示 Desktop 专用 Avalonia 窗口。窗口源码位于 <code>OngekiFumenEditor.Avalonia.Desktop/UI/Dialogs/ExceptionTermWindow.*</code>，所以核心项目的旧同路径缺失不属于 A。</li>
+<li><strong>保留行为</strong>：隐藏现有窗口、记录异常链、等待日志写入、Windows mini dump、谱面救援、显示日志/dump/救援目录、勾选确认后退出均存在；链接点击从 WPF <code>Hyperlink.Click</code> 改为 Avalonia 冒泡 <code>PointerPressed</code>。</li>
+<li><strong>新增防护</strong>：使用原子标记避免递归异常处理；后台线程会把处理投递到 UI 线程并设置超时；无法创建 Avalonia 窗口时退回原生消息框。dump 明确仅在 Windows 执行。</li>
+<li><strong>平台边界</strong>：Browser 没有 Desktop 终止窗口、任意本地日志路径或 Windows dump。该项证明 Desktop 大体迁移，不证明 Browser 具备同等崩溃恢复体验。</li>
+<li><strong>建议</strong>：用可注入故障点分别验证 UI 线程、后台线程和未观察任务异常，断言只执行一次救援、日志 flush 有上限且终止路径不会递归；dump/路径按钮仅在能力可用时显示。Browser 应提供独立的可复制诊断信息和内存内工程导出方案，而不是复用 Desktop 窗口假设。</li>
+</ul>
+<h3 id="c-015-windowtitlehelper">C-015 <code>WindowTitleHelper</code> 改为平台主窗口服务与文档标题双通道</h3>
+<ul>
+<li><strong>WPF</strong>：<code>Utils/WindowTitleHelper.cs</code> 持有 Gemini <code>IMainWindow</code>，提供前缀、内容、后缀、图标和 <code>UpdateWindowTitleByEditor</code>；<code>DefaultEditorDocumentManager.cs:44</code> 在活动编辑器变化时调用。</li>
+<li><strong>Avalonia</strong>：<code>OngekiFumenEditorApp.cs:65-74</code> 通过 <code>IPlatformMainWindow</code> 初始化标题和图标；<code>DefaultEditorDocumentManager.cs:48-51</code> 在活动文档变化时直接更新主窗口标题；<code>FumenVisualEditorViewModel.cs:356-359</code> 另把 <code>DisplayName</code> 写入 Gekimini 文档 <code>Title</code>。</li>
+<li><strong>差异</strong>：共享可变的 <code>TitlePrefix/TitleSuffix/Icon</code> helper API 被取消，窗口标题与 Dock 文档标题分别维护；无 GUI 的测试/命令行环境通过捕获 <code>InvalidOperationException</code> 跳过主窗口更新。</li>
+<li><strong>相似性/风险</strong>：默认标题、活动谱面名和 logo 图标均已接回；后续仍需验证脏标记、快速打开前缀、切换到非谱面文档以及 Browser shell 中两套标题是否始终同步。</li>
+<li><strong>建议</strong>：定义单一的标题状态/格式化服务，再由平台窗口和 Dock 文档分别订阅，避免两处手工拼接漂移；无窗口环境通过 capability/no-op 实现处理，而不是把异常作为普通控制流。覆盖活动文档切换、脏标记、另存为、快速打开、文档关闭、非谱面工具和 Browser 页面标题。</li>
+</ul>
+<h3 id="c-016-about-code-behind-gekimini-window-viewmodel">C-016 About 窗口由 code-behind 数据源改为 Gekimini Window ViewModel</h3>
+<ul>
+<li><strong>WPF</strong>：<code>UI/Dialogs/AboutWindow.xaml(.cs)</code> 是 MahApps <code>MetroWindow</code>，直接从 <code>ThisAssembly</code> 和程序集元数据读取产品版本、commit、提交时间、构建时间与配置。</li>
+<li><strong>Avalonia</strong>：<code>UI/Dialogs/Views/AboutWindowView.axaml</code> + <code>ViewModels/AboutWindowViewModel.cs</code> 通过 <code>WindowViewModelBase</code> 和编译绑定承载同一组字段；菜单 handler 改用 <code>IWindowManager.ShowDialogAsync</code>。</li>
+<li><strong>保留行为</strong>：产品版本、短 commit hash、commit/build 时间、构建配置以及“更新前版本 -&gt; 当前版本”的可选显示均保留。</li>
+<li><strong>差异</strong>：元数据来源从 <code>ThisAssembly</code> 常量改为标准程序集 attribute 解析，缺失或无法解析时显示 <code>N/A</code>；旧更新器通过构造参数弹出“更新成功 About”的入口随 D-004 GUI 更新链消失，当前普通 About 菜单只调用无参 ViewModel。</li>
+<li><strong>建议</strong>：在构建中固定写入版本、commit 和时间 attribute，并为缺失/格式错误提供稳定 fallback；用 ViewModel 测试覆盖正式包、开发构建和旧版本参数。若 D-004 将来恢复更新成功提示，应复用同一 About ViewModel 的显式状态，而不是重新引入 code-behind 数据读取。</li>
+</ul>
+<h3 id="c-017-gekimini">C-017 主窗口几何持久化迁到 Gekimini，但恢复坐标存在回归</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>AppBootstrapper.cs:294-300</code> 从 <code>ProgramSetting.WindowSizePositionLastTime</code> 按 <code>Left, Top, Width, Height</code> 恢复主窗口；<code>AppBootstrapper.cs:334-343</code> 关闭时保存同一顺序的四个值。</li>
+<li><strong>Avalonia 重写</strong>：<code>Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/App.axaml.cs:92-99</code> 改由 <code>GekiminiSetting.MainWindowRect*</code> 恢复，关闭时 <code>:102-115</code> 分别保存 <code>Left</code>、<code>Top</code>、<code>Width</code>、<code>Height</code>；旧字符串设置不再是活动恢复路径。</li>
+<li><strong>已确认缺陷</strong>：恢复代码构造 <code>new Point(setting.MainWindowRectTop, setting.MainWindowRectTop)</code>，X 坐标误用了 <code>Top</code>，没有读取 <code>MainWindowRectLeft</code>。因此重启后窗口横向位置会被上一次纵向位置覆盖；保存本身仍把四个值写入正确字段。</li>
+<li><strong>影响/验证要求</strong>：这是已有新持久化架构中的行为回归，不是单纯框架差异；修复后仍需覆盖首次启动、屏幕边界、最大化/全屏和旧设置迁移场景。</li>
+<li><strong>建议</strong>：优先把 X 改为 <code>MainWindowRectLeft</code>，并在应用前验证宽高、可见屏幕交集和窗口状态；显示器/DPI 变化时把窗口夹回可见工作区。增加保存后重启、负坐标、多显示器拔插、最大化/全屏、损坏设置和旧 <code>WindowSizePositionLastTime</code> 迁移测试。</li>
+</ul>
+<h3 id="c-018-toplevel">C-018 编辑器快捷键由视图触发器改为 TopLevel 集中路由</h3>
+<ul>
+<li><strong>WPF 结构</strong>：<code>FumenVisualEditorView.xaml:43-66</code> 在编辑器视图上声明 20 个 <code>ActionMessageKeyBinding</code>；<code>BatchModeBehavior.OnAttached()</code> 再为 15 个批量子模式动态注册普通和 Shift 变体，动作调用依赖 Caliburn <code>ActionExecutionContext</code> 与视图焦点。</li>
+<li><strong>Avalonia 重写</strong>：主编辑器 AXAML 不再声明这些 trigger；<code>OngekiFumenEditorApp.cs:80-89</code> 把 <code>IEditorKeyBindingRouter</code> 挂到应用 <code>TopLevel</code>，<code>DefaultEditorKeyBindingRouter.cs:205-279</code> 集中映射 35 个普通/批量定义到当前活动编辑器。旧、新 <code>KeyBindingDefinitions</code> 都有 35 个定义，新版 35 个字段全部带 <code>RegisterStaticObject</code>，不是因 XAML 删除而丢失注册。</li>
+<li><strong>输入语义变化</strong>：路由器按当前 Normal/Batch layer 匹配，冲突时记录错误且不执行；批量模式按旧行为在按住 Shift 时再尝试去掉 Shift 匹配。它会给 <code>WindowViewBase</code>、<code>TextBox</code>、<code>NumericUpDown</code>、<code>ComboBox</code>、<code>DataGrid</code>/<code>DataGridCell</code> 让路，避免编辑器快捷键吞掉文本和对话框输入。原 <code>OnFocusableChanged</code> 处理器只写日志，删除不造成业务缺口。</li>
+<li><strong>测试证据</strong>：<code>tests/.../Input/EditorKeyBindingRouterTests.cs</code> 检查 35 个定义唯一且全部有动作、焦点控件让路、冲突不执行和 Batch Shift 回退；定义格式另有 <code>KeyBindingDefinitionTests</code>。</li>
+<li><strong>平台风险</strong>：<code>DefaultKeyBindingManager</code> 仍把配置直接写到工作目录 <code>./keybind.json</code>，没有使用 Browser 已提供的 <code>BrowserSettingManager</code>/<code>localStorage</code>。Desktop 路径与旧版接近；Browser 最多只能依赖运行时虚拟文件系统，当前没有跨页面重载持久化证据，需要实测并考虑改为平台设置服务。</li>
+<li><strong>关联缺口</strong>：快捷键动作路由整体已迁移，但用户确认覆盖冲突的分支仍见 B-009。</li>
+<li><strong>建议</strong>：把快捷键持久化迁到平台设置服务，并保留路由器只处理输入匹配；修复 B-009 后统一执行冲突策略。除现有单元测试外，增加 Desktop/Browser 重启持久化、不同键盘布局、修饰键、焦点弹窗、菜单手势显示和 Batch 模式切换的 UI 测试。</li>
+</ul>
+<h3 id="c-019-wpf-listview-avalonia-datagrid">C-019 WPF 通用 ListView 拖放改为 Avalonia 类型化 DataGrid 重排</h3>
+<ul>
+<li><strong>WPF 结构</strong>：旧 <code>UI/ListViewDragDropManager/**</code> 共 3 个文件、约 882 行；Soflan 组与渲染顺序视图在 <code>Loaded</code> 时创建泛型 manager，再通过 <code>ProcessDrop</code> 手动修改集合。拖动态样式依赖 WPF attached state 和 Trigger。</li>
+<li><strong>Avalonia 重写</strong>：<code>UI/Behaviors/DataGridRowReorderBehavior.cs</code> 提供类型化 handler、拖动阈值、多选顺序保持、交互子控件避让、自动滚动、插入 adorner、虚拟化行目标解析和选择恢复；Soflan/渲染顺序分别用 <code>SoflanGroupRowReorderBehavior</code>、<code>RenderControlRowReorderBehavior</code> 接入。</li>
+<li><strong>业务层变化</strong>：<code>FumenSoflanGroupListViewerViewModel</code> 支持多行同序移动、拖入分组、跨组重排，并为前后快照建立撤销动作；渲染顺序 ViewModel 使用同一通用重排运算。Soflan 视图从 WPF 单选 <code>ListView</code> 改为扩展选择 <code>DataGrid</code>，双击跳转改为 <code>DoubleTapped</code> command；Checker、Bullet palette 和 TimeSignature 列表也把 WPF <code>MouseDoubleClick</code>/<code>cal:Message</code> 改为类型化 command behavior 或 code-behind 桥接。</li>
+<li><strong>测试证据</strong>：<code>DataGridRowReorderOperationsTests</code> 覆盖多项顺序、跨目标边界、目标/移动项缺失和 Inside 不变；<code>AxamlSmokeTests.ReorderDataGrids_DisableColumnSortingAndAttachTypedBehavior</code> 验证两个视图挂接正确 behavior。</li>
+<li><strong>待验收</strong>：现有测试主要覆盖纯重排算法与静态挂接，仍需在长列表虚拟化、边缘自动滚动、跨嵌套 Soflan 组、复选框/下拉框内拖动以及撤销后选择恢复场景做桌面 UI 实测。</li>
+<li><strong>建议</strong>：保留类型化 behavior 和纯重排算法的分层，补一组真实指针 UI 测试覆盖虚拟化、上下边缘自动滚动、嵌套组 Inside/Before/After、交互子控件避让和多选顺序；每次 drop 只建立一个撤销 action，撤销/重做后恢复集合与选择。未接入新 behavior 的旧 ListView 调用点要逐项决定替代或删除。</li>
+</ul>
+<h3 id="c-020-wpf-icollectionviewlistview-avalonia-datagrid">C-020 选中对象查看器由 WPF ICollectionView/ListView 改为 Avalonia DataGrid</h3>
+<ul>
+<li><strong>WPF 结构</strong>：<code>FumenEditorSelectingObjectViewerViewModel</code> 暴露 <code>ICollectionView CollectionView</code>，以 <code>ListView</code>/<code>GridView</code> 呈现 <code>ISelectableObject</code>；工具默认 <code>PreferredLocation</code> 为 <code>PaneLocation.Bottom</code>。单击、双击和列头排序均通过 WPF 路由事件与 Caliburn 行为接入。</li>
+<li><strong>Avalonia 重写</strong>：ViewModel 改为 <code>ObservableCollection&lt;SelectedObjectRow&gt;</code>，为每行提供 <code>Name</code>、<code>TGrid</code>、<code>Description</code> 和原对象引用；视图改为 <code>DataGrid</code>，通过 <code>ListViewMultiSelectionBehavior</code> 同步多选，单击/双击由 code-behind 桥接，工具停靠改为 <code>DockMode.Right</code>。SoflanGroup 显示改为模板中的 <code>MultiBinding</code> 转换器。</li>
+<li><strong>保留与变化</strong>：刷新、取消选择、单击属性浏览器、双击滚动/聚焦和列重排等主要路径仍有对应实现；WPF 的 <code>ICollectionView</code> 排序契约没有被保留，详见 B-013；SoflanGroup 的 MultiBinding 还受 B-016 中恒等转换器影响。停靠位置从底部改为右侧也会改变默认工作区布局，需要在桌面启动和布局恢复场景验收。</li>
+<li><strong>分类理由</strong>：这是为绕开 WPF <code>GridView</code>、<code>ICollectionView</code> 和 Caliburn 路由事件而进行的结构性重写，不能按同路径文件存在判定为直译；当前已实现部分归 C，明确丢失的列头排序另归 B。</li>
+<li><strong>建议</strong>：完成 B-013/B-016 后，把行展示、SoflanGroup 计算和排序键都放入明确的 row model，减少模板 converter 依赖；确认默认停靠从底部改右侧是否为产品决定，并提供布局迁移/重置。覆盖多选同步、对象删除/刷新、双击聚焦、排序后选择保持和布局恢复。</li>
+</ul>
+<h3 id="c-021-svg-png-desktop-rasterizer">C-021 预览 SVG 与 PNG 输出改为跨平台文本序列化和 Desktop rasterizer</h3>
+<ul>
+<li><strong>WPF 路径</strong>：共享生成器直接依赖 <code>Svg</code>、<code>System.Drawing</code>、SharpVectors 和 WPF 颜色类型，构造 <code>SvgDocument</code>/元素树；<code>RenderAsPng</code> 分支也在该生成器内创建位图并渲染。GUI 命令生成临时 SVG 后询问是否打开文件。</li>
+<li><strong>Avalonia 路径</strong>：共享 <code>DefaultPreviewSvgGenerator</code> 改用 <code>StringBuilder</code> 直接写 XML，不再依赖 WPF/System.Drawing；<code>StandardizeFormat.CopyFumenObject</code> 通过注入的 <code>IFumenParserManager</code> 完成复制。Desktop 命令行在 <code>SvgCommandLineHandler</code> 中把 PNG 分支拆到 <code>ISvgRasterizer</code>，由 <code>Svg.Skia</code>/SkiaSharp 读取生成的 SVG 再编码 PNG；共享生成器自身始终返回 SVG 字节。</li>
+<li><strong>入口变化</strong>：编辑器内命令从直接获取 <code>FumenVisualEditorViewModel</code> 改为检查 <code>IShell.ActiveDocument</code> 并通过反射寻找 <code>OngekiFumen</code>/<code>EditorProjectData.AudioDuration</code>；成功后只显示输出路径，不再询问并打开文件。Desktop CLI 则增加音频不存在时按谱面尾部估算时长，并为 PNG 使用独立 rasterizer。</li>
+<li><strong>相似性与边界</strong>：<code>XGridDisplayMaxUnit</code>、<code>ViewWidth</code>、<code>VerticalScale</code>、<code>SoflanMode</code>、<code>Duration</code> 和 PNG 选项仍保留，CLI 的 PNG 管线也有专门测试；但共享生成内容只是基础子集，详见 B-014。GUI 临时文件与外部打开体验、Browser 对生成文件的访问方式也需分别验收。</li>
+<li><strong>建议</strong>：用显式的预览源接口替代对活动文档属性的反射，并让 GUI、CLI 共用参数验证和生成服务；Desktop 的外部打开、Browser 的下载/保存分别走平台能力。结合 B-014 建立真实 SVG golden test 和 PNG 像素/尺寸测试，同时覆盖无活动文档、未知文档、无音频、取消与输出写入失败。</li>
+</ul>
+<h3 id="c-022-parser-invalid-enum-policy">C-022 OGKR 非法枚举值由失败改为静默回退默认值</h3>
+<ul>
+<li><strong>WPF 行为</strong>：<code>Parser/Ogkr/CommandParserImpl/BulletCommandParser.cs</code>、<code>BulletPalleteCommandParser.cs</code>、<code>CustomBellCommandParser.cs</code> 和 <code>CustomBulletCommandParser.cs</code> 对未知 damage/shooter/target/size/type token 进入 <code>NotImplementedException</code> 分支，解析失败并阻止继续使用不确定的谱面。</li>
+<li><strong>Avalonia 重写</strong>：对应 parser 改为 <code>WarnAndDefault(...)</code>，记录日志后分别回退到 Normal、TargetHead、Player、Normal 或 Circle 等默认枚举；已知 token 的 round-trip 仍保持，命令注册和参数转换也改为显式服务。</li>
+<li><strong>影响</strong>：未知值可能来自损坏文件、未来格式或拼写错误。当前行为会把原始 token 静默变成另一种游戏语义，随后保存可能把它永久序列化成默认值，用户看不到“文件不兼容”而只得到错误谱面。现有测试没有覆盖未知 token、诊断收集或保存后的数据损失。</li>
+<li><strong>建议</strong>：默认保持严格模式并抛出带行号/字段名的类型化解析错误；若确实需要兼容旧扩展，提供显式 lenient 选项或诊断集合，让 UI/CLI 显示“已回退字段”并阻止无确认保存。为四类 parser 增加未知 token、大小写、空字段、未来 token、严格/宽松模式和 round-trip 不丢失测试。</li>
+</ul>
+<h2 id="d">6. D 类：明确按本轮决策延期</h2>
+<h3 id="d-001-ipc">D-001 单实例 IPC 与命令行转发延期</h3>
+<ul>
+<li><strong>直接证据</strong>：核心项目文件注释 <code>Single-instance IPC and command-line forwarding are deferred for this migration round.</code>。</li>
+<li><strong>构建行为</strong>：<code>Startup.cs</code> 与 <code>Utils/IPCHelper.cs</code> 被 <code>Compile Remove</code> 排除。</li>
+<li><strong>影响</strong>：需要继续对照原 WPF 的单实例、已有进程激活、参数转发和首次实例处理逻辑。</li>
+<li><strong>建议</strong>：为延期项指定恢复版本和 Desktop owner；恢复时用平台 IPC 服务封装实例锁、已有窗口激活、参数序列化和超时/鉴权，Browser 明确不适用。此前应隐藏 B-010 中无效的多实例设置，并测试双启动竞态、首实例崩溃、路径含空格/Unicode、多文件参数和版本不兼容。</li>
+</ul>
+<h3 id="d-002-svg-prefab">D-002 SVG prefab 工程资源暂时禁用</h3>
+<ul>
+<li><strong>直接证据</strong>：异常文本 <code>temporarily disabled</code> 与 <code>ENABLE_SVG_PREFAB_OBJECTS</code> 条件编译。</li>
+<li><strong>资源侧证据</strong>：旧中性/简中资源中的 <code>SvgPrefabFile</code>、<code>SvgPrefabText</code> 没有进入新 <code>ProgramLang*.json</code>，与工程资源型 SVG UI 未恢复相互印证。</li>
+<li><strong>影响</strong>：见 B-006。该项是当前唯一可由源码明确证明的用户/迁移轮次延期，不把其他普通缺失主观归入 D。</li>
+<li><strong>建议</strong>：把退出延期的条件写成可验收清单：跨平台资源定位完成、保存/移动工程不含绝对路径、Browser 授权模型明确、B-006 入口不再抛异常且测试通过；在此之前用单一 feature capability 隐藏 UI。恢复时同步补回语言键和项目迁移版本。</li>
+</ul>
+<h3 id="d-003">D-003 原通用反射式命令发现/参数绑定机制暂不迁移</h3>
+<ul>
+<li><strong>决策证据</strong>：迁移记录明确“不移植 <code>DefaultCommandExecutor</code>/<code>OptionBindingAttrbute</code> 命令发现机制；CMD 模式改由强类型命令定义承载”。</li>
+<li><strong>当前状态</strong>：旧通用反射框架不在 Avalonia 产物中；五个已确认命令由 C-007 的强类型 Definition/Handler 取代。</li>
+<li><strong>边界</strong>：这是旧扩展机制的延期/不纳入本轮，不代表已实现的五个具体命令不可用。</li>
+<li><strong>建议</strong>：将该项视为有意破坏性变更并在扩展文档中说明；新扩展统一通过显式 <code>ICommandLineDefinition</code> 注册、依赖注入和唯一性校验接入。除非出现必须运行时加载第三方命令的明确需求，不恢复无约束程序集扫描；若需要插件，再设计受控 manifest/加载上下文和兼容版本。</li>
+</ul>
+<h3 id="d-004-gui">D-004 原 GUI 自更新检查/下载/提示暂不恢复</h3>
+<ul>
+<li><strong>决策证据</strong>：迁移记录中的 12C 明确删除版本检查、更新提示、下载、自覆盖 GUI 入口；后续要求按独立平台服务和发布包安全模型重新设计。</li>
+<li><strong>当前状态</strong>：共享核心没有 <code>IProgramUpdater</code>、<code>VersionInfo</code> 或新版本窗口；C-009 的 <code>updater</code> 只保留覆盖安装执行命令，属于发布/维护工具，不是用户 GUI 更新流程。</li>
+<li><strong>设置/资源侧证据</strong>：旧 <code>ProgramSetting</code> 的 <code>EnableUpdateCheck</code>、<code>UpdaterCheckMasterBranchOnly</code> 未迁入；中性和简中语言包同时移除了 15 个版本检查、版本信息、下载和“准备更新”相关键。这不是单个窗口漏绑，而是整条 GUI 更新链按层删除。</li>
+<li><strong>建议</strong>：先确定各发布渠道的更新策略、签名信任根、回滚和代理/离线要求，再决定恢复内置更新还是仅链接发布页；设计评审通过前保持设置、资源和 UI 不可见。若恢复，以 A-004 的分层方案实现，并把安全威胁模型、包验证和失败恢复作为上线门槛。</li>
+</ul>
+<h3 id="d-005">D-005 程序文件关联服务暂不实现</h3>
+<ul>
+<li><strong>决策证据</strong>：迁移记录记载用户于 2026-08-01 明确要求移除、不实现 <code>IFileAssociationService</code> 及设置页注册/注销 UI。</li>
+<li><strong>当前状态</strong>：原 WPF 的文件关联设置/服务没有 Avalonia 等价实现；Browser 也不提供该能力。</li>
+<li><strong>建议</strong>：保持应用内无相关死设置和按钮，并在安装/发布文档中明确是否由 MSIX/安装器负责文件关联；启动参数与外部文件打开仍应独立可用。若未来恢复，只在 Desktop 平台服务中实现并提供显式用户确认、查询当前状态、权限失败和卸载清理测试。</li>
+</ul>
+<h3 id="d-006">D-006 其余旧编译排除源码按迁移轮次保留、未直接启用</h3>
+<ul>
+<li><strong>决策证据</strong>：第 16 项明确不主动删除剩余 <code>&lt;Compile Remove&gt;</code> 源文件，等待各领域替代方案或产品决策。</li>
+<li><strong>项目文件证据</strong>：<code>OngekiFumenEditor.Avalonia.csproj:70-81</code> 当前排除下列 57 个文件、约 5,496 行；加上 D-001 的 <code>Startup.cs</code>/<code>IPCHelper.cs</code> 后，共有 59 个源文件、约 5,641 行保留在树中但不进入核心产物。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>排除组</th>
+<th style="text-align: right;">文件数</th>
+<th style="text-align: right;">物理行</th>
+<th>当前替代/结论</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Kernel/Graphics/OpenGL/**</code></td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">2,519</td>
+<td>C-004/E-001：活动构建只注册 Skia lease，不提供 OpenGL fallback</td>
+</tr>
+<tr>
+<td><code>Kernel/Graphics/Skia/D3dContexts/**</code></td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">167</td>
+<td>E-001：WPF/Windows Direct3D 互操作不能直接进入 Avalonia 控件树</td>
+</tr>
+<tr>
+<td><code>Kernel/Graphics/Skia/GlContexts/**</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">840</td>
+<td>C-004/E-001：不再自行创建 WGL/GLX/CGL context</td>
+</tr>
+<tr>
+<td><code>Kernel/Graphics/Skia/RenderBackendType.cs</code></td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">14</td>
+<td>C-002/C-004：用户可选 Skia backend 设置被移除</td>
+</tr>
+<tr>
+<td><code>Kernel/Graphics/Skia/RenderControls/**</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">404</td>
+<td>C-004：由 <code>AvaloniaSkiaRenderControl</code> 与 leased <code>SKCanvas</code> 取代</td>
+</tr>
+<tr>
+<td>旧波形 <code>AudioPlayerToolViewerViewModel.WaveformDrawing.cs</code></td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">280</td>
+<td>C-010：由 <code>WaveformRenderSession</code> 和新 host attach/detach 生命周期取代</td>
+</tr>
+<tr>
+<td><code>UI/ListViewDragDropManager/**</code></td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">882</td>
+<td>部分列表已用 <code>DataGridRowReorderBehavior&lt;T&gt;</code>、Soflan/渲染顺序专用 behavior 重写；仍需逐个旧调用点验收</td>
+</tr>
+<tr>
+<td>5 个旧 WPF 控件/Storyboard helper</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">390</td>
+<td>E-003：<code>AnimatedScrollViewer</code>、<code>ColumnExpandableListView</code>、<code>ExpandableGridViewColumn</code>、<code>ObjectPoolItemsControl</code>、<code>StoryboardWrapper</code> 均未进入产物，需按原使用点分别确认替代或功能删除</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>评价</strong>：这些文件“仍在仓库”不能作为已迁移证据；相反，<code>Compile Remove</code> 是它们不进入构建的直接证据。已有替代实现的归 C，明确延期的归 D，框架不可直接移植的归 E，尚无替代且仍有可达入口的才归 A/B。</li>
+<li><strong>建议</strong>：为每个排除组登记 owner、替代实现、剩余调用点和“迁移/删除/继续延期”目标版本；CI 应验证活动代码没有新引用排除类型，并定期生成文件/行数清单。完成替代验收后删除旧源码或移入明确的 legacy 归档，避免其被误修、误注册或当作 fallback。</li>
+</ul>
+<h3 id="d-007-fatal-rescue-io-gate">D-007 致命救援与全局项目 I/O 门的有界协调暂缓</h3>
+<ul>
+<li><strong>设计决策</strong>：<code>docs/fumen-visual-editor-project-folder-io-design.md:Q17</code> 明确把“致命异常时是否等待 D13 全局 I/O 门”列为本轮暂缓，并建议只做短超时的最佳努力补充，不形成无限等待策略。</li>
+<li><strong>当前实现</strong>：<code>FumenRescue.Rescue()</code> 遍历编辑器并直接执行工程/谱面序列化；普通项目读写使用 <code>EditorProjectIoGate.EnterAsync()</code>，但崩溃入口 <code>Desktop/Program.cs:133-137,258-261</code> 调用救援时没有 <code>TryEnter</code>、超时、crash generation 标记或快照服务统一协调。</li>
+<li><strong>影响</strong>：若异常发生在某个编辑器持有 I/O 门的保存/加载路径中，未来简单地把门改为无界等待可能在致命处理阶段死锁；当前则可能与正常快照/正式写入并发，产生不完整救援、重复格式或无法解释的恢复结果。该风险不能靠现有 B-029 的启动恢复缺口自动消除。</li>
+<li><strong>分类理由</strong>：设计文档已明确用户决定暂缓，且当前没有承诺完整的崩溃应急快照；因此应记录为 D，而不是把尚未决定的策略误报为已实现或直接迁移失败。</li>
+<li><strong>建议</strong>：恢复该项时将 <code>FumenRescue</code> 并入统一恢复快照服务：先用极短、可配置的 <code>TryEnter</code>/有界超时获取门，成功后只写应用恢复目录并标记 crash generation；超时、取消、序列化失败立即放弃，不覆盖已有自动快照，也不写用户项目目录。增加“异常发生于门内/门外、多个编辑器、部分写入失败、Browser 临时存储不可用、日志 flush 超时”的故障注入测试。</li>
+</ul>
+<h2 id="e">7. E 类：框架/平台导致不能直接迁移</h2>
+<h3 id="e-001-wpf-avalonia">E-001 WPF 多渲染宿主不能直接移植到 Avalonia 控件树</h3>
+<ul>
+<li><code>Microsoft.Wpf.Interop.DirectX-x64</code>、<code>OpenTK.GLWpfControl</code>、<code>SkiaSharp.Views.WPF</code> 与 WPF <code>D3DImage</code>/控件宿主没有 Avalonia 同构 API。</li>
+<li>当前选择是 C-004 的 Skia lease 重写；旧 DirectX/OpenGL/自建 RenderControl 代码被排除。</li>
+<li><strong>建议</strong>：以 Avalonia 渲染能力和 Skia lease 为正式抽象，平台差异通过 capability/降级处理，不再追求 WPF 控件一一对应；只有性能数据证明必要时才新增独立后端。验收重点放在画面正确、DPI、设备丢失、生命周期和 Desktop/Browser 性能，而不是旧类名是否保留。</li>
+</ul>
+<h3 id="e-002-caliburn.microgemini-wpf">E-002 Caliburn.Micro/Gemini WPF 行为、命令和视图生命周期不能直接移植</h3>
+<ul>
+<li>WPF 的 <code>cal:Message.Attach</code>、<code>ActionExecutionContext</code>、Gemini <code>CommandHandler</code>、窗口/文档/工具模型依赖 WPF 路由事件和视图约定。</li>
+<li>Avalonia 使用 Gekimini、Xaml Behaviors、自定义兼容上下文和新的命令接口，必须逐项重接事件参数、焦点、手势与窗口返回值。</li>
+<li><strong>建议</strong>：为每个迁移视图使用统一核对表：事件源/参数、路由阶段、焦点让路、CanExecute、对话框返回值、Loaded/Unloaded 订阅和释放；优先使用类型化 command/behavior，减少 code-behind 桥接。把 B-009、B-011、B-012 这类窗口结果缺口加入通用回归测试模板。</li>
+</ul>
+<h3 id="e-003-wpfxceedmahapps">E-003 WPF/Xceed/MahApps 专属控件不能直接移植</h3>
+<ul>
+<li>已发现的典型对象包括 Xceed <code>StandardColorPicker</code>、CheckComboBox，MahApps <code>MetroWindow</code>，WPF <code>GridViewColumn</code>/Trigger/Storyboard 语义。</li>
+<li>当前采用自定义控件、DataGrid、Avalonia Window/Styles/Behaviors 或占位降级；具体功能差异分别归 B/C 条目。</li>
+<li><strong>建议</strong>：维护“旧控件能力 -&gt; Avalonia 组件/自定义实现 -&gt; 已验收交互”的替换矩阵，不能以 AXAML 可加载作为完成标准；占位控件必须有 feature flag 和退出条件。重点覆盖键盘、焦点、滚动、排序、多选、主题、缩放和辅助功能，优先采用维护中的 Avalonia 控件而非复制 WPF 内部实现。</li>
+</ul>
+<h3 id="e-004-windows">E-004 浏览器平台没有任意本地路径与传统 Windows 音频/进程能力</h3>
+<ul>
+<li>Browser 必须使用 StorageProvider、授权 bookmark、内存/浏览器文件系统和 AudioWorklet；不能依赖 <code>FileInfo.FullName</code>、任意路径写入、WASAPI/ASIO/WinMM 或启动资源管理器。</li>
+<li>因此 Desktop 与 Browser 的音频、临时文件、日志、外部程序和最近工程行为必须分别审查，不能用 Desktop 通过来证明 Browser 等价。</li>
+<li><strong>建议</strong>：所有共享功能先依赖文件、音频、进程、剪贴板和持久化 capability，再由 Desktop/Browser 实现；UI 根据能力隐藏或替换命令，并提供重新授权/下载等浏览器流程。CI 至少分别构建并运行两套平台测试，禁止共享层新增未经抽象的绝对路径、进程启动或 Windows 音频 API。</li>
+</ul>
+<h3 id="e-005-browser-discard-temporary-storage">E-005 Browser 临时存储不可用时静默丢弃日志和缓存</h3>
+<ul>
+<li><strong>初始化证据</strong>：<code>wwwroot/main.js:1-3</code> 在启动 .NET 前等待临时文件系统初始化；<code>wwwroot/temporaryFileSystem.js:115-130</code> 遇到缺少 OPFS、安全上下文、权限或不支持时返回 <code>false</code>；<code>BrowserTemporaryFolderProvider.cs:16-27</code> 随后选择 <code>DiscardTemporaryFolderProvider</code>，其 <code>IsAvailable=false</code>。</li>
+<li><strong>实际语义</strong>：discard 后端的创建、<code>WriteAsync</code> 和 <code>AppendAsync</code> 会完成且不保存字节，<code>TryGetFile</code> 永远未命中。<code>FileLogOutputWrapper.cs:36-89</code> 仍把写入当作成功并返回一个不存在的相对日志路径；Browser 的 <code>TemporaryFileLoggerProvider</code> 会把启动和运行时日志全部转发到这里。<code>ImageLoader.cs:143-163</code> 则把丢失的持久缓存当作普通 cache miss，导致不同 loader 实例重复下载。</li>
+<li><strong>恢复边界</strong>：定时恢复快照在 <code>FumenRescue.SaveRecoverySnapshotAsync:25-27</code> 显式因不可用而跳过；但通用 <code>FumenRescue.Rescue()</code> 没有同样的 capability 门，若被 Browser 或测试路径复用，可能用虚假的相对路径记录“救援成功”。ACB 解码还会在需要本地路径时失败并记录错误。旧 WPF 的 <code>FileLogOutput.Init()</code> 直接创建真实的用户临时文件，失败会进入明确的异常/调试路径，语义并不相同。</li>
+<li><strong>影响</strong>：禁用 OPFS、非安全上下文、隐私模式或初始化权限失败的浏览器仍能显示主界面，但没有可持久化的文件日志、跨实例图片缓存或可靠的临时救援；“写入完成”和“路径可打开”的状态可能误导诊断与故障处理。</li>
+<li><strong>建议</strong>：把临时存储能力和不可用原因暴露给宿主。日志不能依赖 discard 写入，应始终保留控制台或有界内存环形缓冲，并提供浏览器下载/复制诊断；图片缓存不可用时明确按“无持久缓存”运行；救援、ACB 等需要真实数据的流程必须在入口检查 <code>IsAvailable</code> 并返回类型化的不可用结果，禁止报告虚假成功。增加 Browser 的 OPFS 缺失、安全错误、配额失败、日志 fallback、缓存重复下载和救援禁用测试。</li>
+</ul>
+<h2 id="section-6">8. 已确认的相似性</h2>
+<ol>
+<li><code>Base</code> 的文件数量保持 123，谱面对象、网格、集合和基础模型大体保留原目录结构；仍需做类型和方法级差异审查。</li>
+<li><code>Parser</code> 从 77 增至 79 个文件，OGKR/Nyageki 解析器主体均存在，并新增统一 parser manager 与 SVG prefab 格式工具。</li>
+<li>Parser 同路径类名首轮比对未发现旧版独有解析器类；新增的 <code>CommandArgs</code> 转换器、SVG 字段校验和 Nyageki 隐式默认 Soflan 替换均有对应实现。需要特别保留 C-022 记录的非法枚举处理差异，不能把“能解析”直接算作语义等价。</li>
+<li>除三个完整缺失模块外，大多数业务模块均保留同名 ViewModel、View、命令和核心模型目录。</li>
+<li>当前已有专门测试项目，而原旧报告中的“没有测试”结论已经过期；本轮可重复的构建与测试结果见 8.1，但仍不能代替尚未完成的逐文件和实际 UI 验收。</li>
+<li>音频、音频工具窗、波形、编辑器全局和日志设置共 59 个属性均能按名称与默认值一一对应；这部分数据契约相似度高，主要差异在持久化框架和使用接线。</li>
+<li>命令行仍暴露 <code>convert/svg/jacket/updater/acb</code> 五个命令以及 <code>--verbose/-v</code>，用户侧命令集合基本保留；新强类型绑定还修复了旧 jacket 小图宽高参数互换问题。</li>
+<li>撤销栈的批次、合并、定点撤销/重做、全部撤销和清空能力在 Gekimini 中均有对应；缺口集中在应用设置和属性编辑调用接线，而不是整个撤销系统消失。</li>
+<li>Desktop 致命异常流程仍保留日志、dump、谱面救援和确认退出；About 窗口仍显示版本、commit 与构建信息，但两者都从 WPF code-behind/Bootstrapper 改为平台化窗口或 ViewModel。</li>
+<li>选择筛选器仍保留对象类型、全选和匹配计数，并把 Xceed 多选控件改为 Avalonia 原生 Flyout 组合；选项过滤器并非完整保留，缺失部分见 B-017。</li>
+</ol>
+<h3 id="validation">8.1 构建、测试与环境验证（2026-08-07）</h3>
+<p>本节记录本机 Windows 11、.NET SDK <code>10.0.302</code> 下的 Debug 验证。构建命令均针对独立项目顺序执行，避免共享依赖输出目录的并发锁；测试项目使用 VSTest/xUnit。通过只说明当前配置可以编译或测试通过，不等于所有用户流程已经验收。</p>
+<table>
+<thead>
+<tr>
+<th>验证项</th>
+<th>范围/命令</th>
+<th>结果</th>
+<th>整改方向或剩余风险</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Desktop 构建</td>
+<td><code>dotnet build src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj -c Debug</code></td>
+<td>通过，0 错误，24 个警告</td>
+<td>继续清理可空性、非穷举 <code>switch</code>、MVVM Toolkit 和 XAML 诊断警告；将高严重性依赖警告纳入 CI 门禁。</td>
+</tr>
+<tr>
+<td>CommandLine 构建</td>
+<td><code>dotnet build src/OngekiFumenEditor.Avalonia.CommandLine/OngekiFumenEditor.Avalonia.CommandLine.csproj -c Debug</code></td>
+<td>通过，0 错误，24 个警告</td>
+<td>保持对 Desktop 共享服务的引用边界，并为五个 CLI 命令继续补充真实输入/输出和失败回滚测试。</td>
+</tr>
+<tr>
+<td>Browser 常规构建</td>
+<td><code>dotnet build src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditor.Avalonia.Browser.csproj -c Debug</code></td>
+<td>通过，0 错误，28 个警告</td>
+<td>处理 <code>NU1507</code> 源映射和 <code>WASM0001</code> P/Invoke 扫描；Browser 仍须做授权文件、下载和刷新后的运行时验收。</td>
+</tr>
+<tr>
+<td>Browser LLVM 构建</td>
+<td><code>dotnet build src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditor.Avalonia.Browser.LLVM.csproj -c Debug</code></td>
+<td>通过，0 错误，27 个警告</td>
+<td>LLVM 编译链已可用；发布配置仍需独立验证 AOT/trim 后反射、资源和音频工作线程行为。</td>
+</tr>
+<tr>
+<td>核心测试</td>
+<td><code>tests/OngekiFumenEditor.Avalonia.Tests</code>，289 个 xUnit 测试</td>
+<td>首次全量运行 288 通过、1 失败；失败用例隔离重跑及随后全量重跑均为 289/289 通过</td>
+<td>失败发生在 <code>SimpleFileWriteTransaction.cs:66</code> 的 <code>File.Move</code>，表现为一次性 <code>UnauthorizedAccessException</code>。建议在 Windows CI 做重复/并发压力运行，记录目标文件属性、HResult 和占用进程；仅对确认的共享冲突做有界重试，不要吞掉真正的权限错误。</td>
+</tr>
+<tr>
+<td>Desktop 专项测试</td>
+<td><code>tests/OngekiFumenEditor.Avalonia.Desktop.Tests</code></td>
+<td>106/106 通过</td>
+<td>继续增加真实窗口、设备丢失、更新权限和多显示器场景；专项测试通过不能证明 Browser 等价。</td>
+</tr>
+</tbody>
+</table>
+<h4>构建警告的可操作项</h4>
+<ul>
+<li><strong>依赖安全</strong>：<code>NU1903</code> 来自 Gekimini 独立项目的传递链 <code>FluentIcons.Avalonia.Fluent 1.2.313 -&gt; FluentAvaloniaUI 2.0.0 -&gt; Avalonia.Skia 11.0.0 -&gt; SkiaSharp 2.88.3</code>；应用主项目的直接版本虽为 3.119.x，不能因此视为依赖图已清洁。建议升级 FluentAvaloniaUI/图标包到与 Avalonia 11.3 兼容的版本，或在兼容性验证后启用受控的传递版本钉扎，并把 <code>NU1903</code> 高严重性漏洞纳入 CI 阻断。</li>
+<li><strong>包源治理</strong>：<code>src/OngekiFumenEditor.Avalonia.Browser/nuget.config:3-8</code> 同时声明 nuget.org 与 dotnet-experimental，触发 <code>NU1507</code>。建议添加 <code>packageSourceMapping</code>，只把 WebAssembly/实验包映射到实验源，其余包固定走 nuget.org，并在还原日志中验证映射没有扩大范围。</li>
+<li><strong>Browser P/Invoke 扫描</strong>：共享核心显式引用 <code>Microsoft.Build 17.7.2</code>（<code>src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia.csproj:117</code>），但活动源码没有对应调用；它使 Browser trim 扫描到 <code>Microsoft.Build.Framework.NativeMethods.GetModuleFileName</code> 并产生 <code>WASM0001</code>。这与 A-001 的旧脚本执行器缺失有关。建议移除共享核心中的闲置引用，或把脚本编译依赖隔离到 Desktop-only 模块；移除后分别重建普通/LLVM Browser 并做 trim 运行时 smoke test。</li>
+<li><strong>XAML 诊断噪声</strong>：<code>App.axaml</code> 触发 <code>AVLN3001</code>，原因是 <code>App</code> 为抽象类且构造函数受保护；当前 <code>App.xaml.cs:17-22</code> 已显式调用 <code>AvaloniaXamlLoader.Load(this)</code>，现有 smoke test 证明资源可加载。建议保留该设计时加带理由的定向抑制/规则说明，或改由可实例化的具体 App 承载资源，避免未来真正的 XAML 可达性警告被淹没。</li>
+</ul>
+<h3 id="command-menu-toolbar-keybinding-map">8.2 命令、菜单、工具栏与快捷键静态映射</h3>
+<p>本节比较应用仓库中的静态定义层，不把“类型仍存在”直接等同于用户流程已经可用。Avalonia 版以 Injectio 的 <code>RegisterStaticObject</code> 替换 WPF/MEF 的 <code>Export</code>；Gekimini 的 <code>ToolBarBuilder</code> 会从 DI 取得工具栏、分组和项目定义，并在 <code>ToolBarsViewModel.OnViewAfterLoaded</code> 中加入 <code>ToolBarTray</code>。因此工具栏定义具备运行时装配路径，但仍需真实窗口和命令处理器验收。</p>
+<table>
+<thead>
+<tr>
+<th>定义层</th>
+<th>WPF</th>
+<th>Avalonia</th>
+<th>结论与现有条目归因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应用命令定义类</td>
+<td>45</td>
+<td>40</td>
+<td>旧版独有的 5 项均已有归因：<code>RecentFilesCommandDefinition</code> 被 Gekimini 最近文件框架重写（C-008）；三个 OptionGenerator GUI 命令对应 A-003/C-006；<code>ViewOgkiFumenListBrowserCommandDefinition</code> 对应 A-002。未发现第六个未归因的旧命令定义。</td>
+</tr>
+<tr>
+<td>应用菜单静态字段</td>
+<td>45</td>
+<td>39</td>
+<td>旧版独有字段集中在 Fast Open（B-021）、旧 RecentFiles 菜单组（C-008）、OptionGeneratorTools 菜单组及三项工具（A-003/C-006）、Ogki 浏览器入口（A-002）；另有少量字段改由 Gekimini 基础菜单定义或改名承载。字段净减少不构成额外独立缺口，但菜单可见性和命令可执行性仍需运行时验证。</td>
+</tr>
+<tr>
+<td>应用工具栏静态字段</td>
+<td>25</td>
+<td>25</td>
+<td>启动页 3 项、编辑器状态工具栏 5 项、批量模式工具栏 17 项的字段名、父分组、排序号和命令类型逐项对应；主要变化是 <code>Export</code> 改为 <code>RegisterStaticObject</code>。批量模式具体行为缺口仍归 B-004，而不是工具栏定义丢失。</td>
+</tr>
+<tr>
+<td>编辑器快捷键定义</td>
+<td>35</td>
+<td>35</td>
+<td>配置键、默认按键、修饰键和编辑层逐项一致；新测试还断言 35 个定义/配置键/动作互不重复，并覆盖焦点让权、冲突不执行与记录、挂载/卸载及批量模式 Shift 回退。架构变化归 C-018，没有发现快捷键定义级删减。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>后续动作</strong>：增加一个从正式 DI 容器解析全部 <code>CommandDefinition</code>、菜单和工具栏集合的结构测试，断言每个可见命令至少有一个处理器且构建器不产生空项；再分别对 Desktop 与 Browser 做主菜单、标准工具栏、编辑器工具栏和批量工具栏的截图/点击 smoke test，核对文本、图标、排序、<code>CanExecute</code>、切换状态和焦点行为。完成这些运行时证据前，收尾清单中的“完整映射”仍保持未完成。</p>
+<h2 id="closing">9. 审查结论与后续建议</h2>
+<p>本节是本轮审查的收尾结论。它冻结截至 2026-08-07、代码基线 <code>286d33eb</code> 的证据，不再把未执行的逐文件或真实 UI 验收推定为已完成。条目中的建议是整改建议，不代表本轮已经实施。</p>
+<h3 id="closing-conclusion">9.1 最终结论</h3>
+<p><strong>总体判断：</strong>当前 Avalonia 版本已经形成可构建、可测试、分 Desktop/Browser/CommandLine 运行的主体架构，且大量核心模型、解析器、编辑器和命令行能力已经保留或重写；但从用户可达工作流和行为等价性看，迁移尚未达到“可替代旧 WPF 版本”的验收标准。最主要的风险集中在 A 类缺失入口、B 类未闭环行为，以及 C 类重写后缺少运行时证据，而不是文件数量本身。</p>
+<table>
+<thead>
+<tr>
+<th>结论层级</th>
+<th>当前状态</th>
+<th>收尾判断</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>阻断项</td>
+<td>A 5 项、B 46 项</td>
+<td>仍有明确缺失模块、固定失败、错误接线、占位实现或工作流断点；在产品验收前必须逐项关闭，或经负责人正式转入 D 类。</td>
+</tr>
+<tr>
+<td>可用但需专项验收</td>
+<td>C 22 项</td>
+<td>新架构实现并不等于旧行为等价；应以契约、端到端场景和平台矩阵验收，不能仅凭同名类型或成功构建放行。</td>
+</tr>
+<tr>
+<td>决策性范围</td>
+<td>D 7 项</td>
+<td>已有延期或暂时禁用证据；应保留清晰的产品决策、隐藏不可用入口，并为恢复时定义退出条件。</td>
+</tr>
+<tr>
+<td>平台差异</td>
+<td>E 5 项</td>
+<td>不能直接搬运 WPF/Windows 控件或 API；应通过 capability、平台适配和替代 UI 明确支持边界。</td>
+</tr>
+</tbody>
+</table>
+<h3 id="closing-priority">9.2 建议执行顺序</h3>
+<ol>
+<li><strong>P0：恢复用户主路径。</strong> 优先处理编辑器打开/新建/另存、批量模式、撤销配置、属性编辑、快速打开、主菜单命令接线和缺失模块入口；这些问题会直接阻断用户完成基本任务，重点对应 A-001 至 A-005、B-001 至 B-022、B-031/B-032/B-041。</li>
+<li><strong>P1：修正数据与生命周期正确性。</strong> 处理设置迁移和损坏恢复、编码/本地化、状态栏与浮动窗口反馈、资源释放以及 Browser capability 失败语义；修复后为保存、关闭、重开、取消、异常和多实例场景补回归测试。</li>
+<li><strong>P2：完成平台和发布质量。</strong> 关闭 C 类重写的运行时证据缺口，分别验收 Desktop 与 Browser 的文件授权、音频、渲染、日志和更新边界；同时治理 <code>NU1903</code>、<code>NU1507</code>、<code>WASM0001</code> 和 XAML 诊断噪声。</li>
+</ol>
+<h3 id="closing-exit">9.3 建议验收退出条件</h3>
+<ul>
+<li>A 类条目全部恢复、删除并正式替代，或有明确负责人和产品决策转入 D 类。</li>
+<li>B 类条目逐项关闭，并为每项保留代码证据、失败/取消路径和最小回归测试；任何暂时保留的占位行为都必须在界面上明确不可用。</li>
+<li>正式 DI 能解析所有可见命令、菜单和工具栏，命令处理器、<code>CanExecute</code>、快捷键和焦点行为均有结构或 UI 测试证据。</li>
+<li>设置、最近文件、项目和谱面完成跨版本读取、保存、损坏恢复、取消和重新打开测试；Desktop 与 Browser 的存储能力差异有明确用户反馈。</li>
+<li>Desktop、Browser（含 LLVM）和 CommandLine 在干净环境中构建通过；核心测试保持 289/289，Desktop 专项测试保持 106/106，并补充关键端到端场景。</li>
+<li>对每个 C/E 条目记录“保留旧语义、接受行为变化或平台限制”的明确决策，避免将架构重写误报为无差异迁移。</li>
+</ul>
+<h3 id="closing-evidence">9.4 尚未形成完整证明的证据清单</h3>
+<p>下面的未勾选项是后续工程 backlog，不是本轮新增审查任务。它们用于说明报告的证据边界，不能反向降低前述 A/B 条目的严重性；已勾选项表示本轮已经完成的静态或构建验证。</p>
+<ul class="contains-task-list">
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 建立旧/新文件数量、规范化路径和 129 个无同路径旧文件的首轮模块基线。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 完成 8 组设置的属性名/默认值静态对照，并识别 8 个未迁设置属性（Program 7 项、OptionGenerator 1 项）。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 完成三套语言资源的键集合和值差异对照。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 深查撤销管理器、最近文件管理器和五个命令行定义的迁移关系。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 对 129 个无同路径旧文件完成按文件组的首轮逻辑归因；仍需逐文件补精确行号与运行时结论。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 深查选择筛选器、Desktop 致命异常窗口、About 窗口、主窗口标题和 59 个编译排除文件的替代关系。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 核心项目两次 Debug Rebuild：均 0 error、57 warning；Desktop、Browser、Browser LLVM、CommandLine 和测试结果已在 8.1 补录。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 把 129 个旧文件的组级归因展开为逐文件表，并补充准确行号、调用入口和行为验证状态。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 对 92 个 Avalonia 新文件逐个建立来源/替代关系。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 对 905 个有路径对应文件按领域检查公开类型、方法和关键分支差异。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 核对 57 个 AXAML 的控件、绑定、命令、手势、资源、可见性和窗口语义。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" checked="checked" /> 构建 Desktop、Browser、Browser LLVM、CommandLine，并运行两套测试：最终核心 289/289、Desktop 专项 106/106 通过；核心测试首次运行出现 1 次本地文件提交权限异常，重跑通过，详见 8.1。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 对原/新命令、菜单、工具栏、快捷键做完整映射；静态定义层已完成数量与旧版独有项归因（见 8.2），仍缺正式 DI、处理器可达性和真实 UI 验收。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 验证设置保存时机、Browser store 与所有属性消费者；属性名/默认值映射已完成，旧配置未导入、Desktop 路径和损坏恢复已形成 B-024 至 B-026，仍需运行时持久化与消费者验收。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 对音频、渲染、文件 I/O、更新器、日志、异常处理和平台功能逐项验收。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 处理 8.1 记录的 SkiaSharp 传递漏洞、Browser 包源映射、Microsoft.Build/WASM 扫描警告，并确认本地文件事务偶发权限异常的根因。</li>
+<li class="task-list-item"><input disabled="disabled" type="checkbox" /> 最终为每个条目补充精确文件与行号，并生成分类统计和覆盖证明。</li>
+</ul>
+
+      </article>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const article = document.querySelector('article');
+      const toc = document.querySelector('#toc');
+      if (!article || !toc) return;
+
+      const headings = [...article.querySelectorAll('h2, h3')];
+      headings.forEach((heading, index) => {
+        if (!heading.id) heading.id = `section-${index + 1}`;
+        const link = document.createElement('a');
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent || `第 ${index + 1} 节`;
+        link.className = heading.tagName.toLowerCase() === 'h3' ? 'level-3' : 'level-2';
+        toc.appendChild(link);
+      });
+
+      article.querySelectorAll('table').forEach((table) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'table-wrap';
+        table.parentNode.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+
+      article.querySelectorAll('h3').forEach((heading) => {
+        const match = heading.textContent?.match(/^([A-E])-\d{3}/);
+        if (match) heading.dataset.category = match[1];
+      });
+    })();
+  </script>
+</body>
+</html>
