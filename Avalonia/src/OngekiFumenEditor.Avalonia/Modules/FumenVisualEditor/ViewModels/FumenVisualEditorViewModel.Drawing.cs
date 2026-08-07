@@ -463,7 +463,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         unusedSoflanGroups.Clear();
         unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
         foreach (var soflanGroupId in unusedSoflanGroups)
-            drawingContexts.Remove(soflanGroupId);
+            drawingContexts.TryRemove(soflanGroupId, out _);
 
         RecalculateMagaticXGridLines();
 

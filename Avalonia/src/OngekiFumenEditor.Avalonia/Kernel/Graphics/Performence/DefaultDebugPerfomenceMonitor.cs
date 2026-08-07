@@ -17,6 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 	public class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
 	{
 		const int RECORD_LENGTH = 165;
+		private readonly object syncRoot = new();
 
 		private class DrawingPerformenceData
 		{
@@ -58,58 +59,82 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 
 		public void OnBeforeRender()
 		{
-			currentDrawCall = 0;
-			timer.Restart();
-			//currentBeginRenderTick = timer.ElapsedTicks;
+			lock (syncRoot)
+			{
+				currentDrawCall = 0;
+				timer.Restart();
+				//currentBeginRenderTick = timer.ElapsedTicks;
+			}
 		}
 
 		public void OnBeginTargetDrawing(IDrawingTarget drawingTarget)
 		{
-			var data = GetDrawingTargetPerformenceData(drawingTarget);
-			data.OnBeginDrawingTicks = timer.ElapsedTicks;
+			lock (syncRoot)
+			{
+				var data = GetDrawingTargetPerformenceData(drawingTarget);
+				data.OnBeginDrawingTicks = timer.ElapsedTicks;
+			}
 		}
 
 		public void OnBeginDrawing(IDrawing drawing)
 		{
-			var data = GetDrawingPerformenceData(drawing);
-			data.OnBeginDrawingTicks = timer.ElapsedTicks;
+			lock (syncRoot)
+			{
+				var data = GetDrawingPerformenceData(drawing);
+				data.OnBeginDrawingTicks = timer.ElapsedTicks;
+			}
 		}
 
 		public void CountDrawCall(IDrawing drawing)
 		{
-			var data = GetDrawingPerformenceData(drawing);
-			data.DrawCallCount++;
-			currentDrawCall++;
+			lock (syncRoot)
+			{
+				var data = GetDrawingPerformenceData(drawing);
+				data.DrawCallCount++;
+				currentDrawCall++;
+			}
 		}
 
 		public void OnAfterDrawing(IDrawing drawing)
 		{
-			var data = GetDrawingPerformenceData(drawing);
-			var tickDiff = timer.ElapsedTicks - data.OnBeginDrawingTicks;
-			data.DrawingSpendTicks.Enqueue(tickDiff);
-			data.DrawCall.Enqueue(data.DrawCallCount);
+			lock (syncRoot)
+			{
+				var data = GetDrawingPerformenceData(drawing);
+				var tickDiff = timer.ElapsedTicks - data.OnBeginDrawingTicks;
+				data.DrawingSpendTicks.Enqueue(tickDiff);
+				data.DrawCall.Enqueue(data.DrawCallCount);
+			}
 		}
 
 		public void OnAfterTargetDrawing(IDrawingTarget drawing)
 		{
-			var data = GetDrawingTargetPerformenceData(drawing);
-			var tickDiff = timer.ElapsedTicks - data.OnBeginDrawingTicks;
-			data.DrawingSpendTicks.Enqueue(tickDiff);
+			lock (syncRoot)
+			{
+				var data = GetDrawingTargetPerformenceData(drawing);
+				var tickDiff = timer.ElapsedTicks - data.OnBeginDrawingTicks;
+				data.DrawingSpendTicks.Enqueue(tickDiff);
+			}
 		}
 
 		public void OnAfterRender()
 		{
-			timer.Stop();
-			RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
-			TotalDrawCall.Enqueue(currentDrawCall);
-			foreach (var data in drawDataMap.Values)
-				data.DrawCallCount = 0;
+			lock (syncRoot)
+			{
+				timer.Stop();
+				RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
+				TotalDrawCall.Enqueue(currentDrawCall);
+				foreach (var data in drawDataMap.Values)
+					data.DrawCallCount = 0;
+			}
 		}
 
 		public void Clear()
 		{
-			drawDataMap.Clear();
-			drawTargetDataMap.Clear();
+			lock (syncRoot)
+			{
+				drawDataMap.Clear();
+				drawTargetDataMap.Clear();
+			}
 		}
 
 		public struct DrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
@@ -147,29 +172,35 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 
 		public IDrawingPerformenceStatisticsData GetDrawingPerformenceData()
 		{
-			return StatisticsPerformenceData(drawDataMap.Values);
+			lock (syncRoot)
+				return StatisticsPerformenceData(drawDataMap.Values);
 		}
 
 		public IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData()
 		{
-			return StatisticsPerformenceData(drawTargetDataMap.Values);
+			lock (syncRoot)
+				return StatisticsPerformenceData(drawTargetDataMap.Values);
 		}
 
 		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
 		{
-			return new RenderPerformenceStatisticsData()
+			lock (syncRoot)
 			{
-				AveSpendTicks = RenderSpendTicks.Average(),
-				AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
-				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-				AveDrawCall = (int)TotalDrawCall.Average()
-			};
+				return new RenderPerformenceStatisticsData()
+				{
+					AveSpendTicks = RenderSpendTicks.Average(),
+					AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
+					MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
+					MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
+					AveDrawCall = (int)TotalDrawCall.Average()
+				};
+			}
 		}
 
 		public void PostUIRenderTime(TimeSpan ts)
 		{
-			UIRenderSpendTicks.Enqueue(ts.Ticks);
+			lock (syncRoot)
+				UIRenderSpendTicks.Enqueue(ts.Ticks);
 		}
 
 		public void FormatStatistics(StringBuilder builder)
