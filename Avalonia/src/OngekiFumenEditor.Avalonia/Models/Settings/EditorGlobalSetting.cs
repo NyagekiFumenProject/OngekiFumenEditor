@@ -1,10 +1,11 @@
 using System.Drawing;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using Gekimini.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Models.Settings;
 
-public partial class EditorGlobalSetting : SettingModelBase<EditorGlobalSetting>
+public partial class EditorGlobalSetting : SettingModelBase<EditorGlobalSetting>, IJsonOnDeserialized
 {
     public static JsonTypeInfo<EditorGlobalSetting> JsonTypeInfo => OngekiJsonSourceGenerateContext.Default.EditorGlobalSetting;
 
@@ -107,18 +108,23 @@ public partial class EditorGlobalSetting : SettingModelBase<EditorGlobalSetting>
     public partial bool EnableShowPlayerLocation { get; set; } = false;
 
     [ObservableProperty]
+    [JsonConverter(typeof(SystemDrawingColorJsonConverter))]
     public partial Color ColorHoldLeft { get; set; } = Color.Red;
 
     [ObservableProperty]
+    [JsonConverter(typeof(SystemDrawingColorJsonConverter))]
     public partial Color ColorHoldCenter { get; set; } = Color.Lime;
 
     [ObservableProperty]
+    [JsonConverter(typeof(SystemDrawingColorJsonConverter))]
     public partial Color ColorHoldRight { get; set; } = Color.Blue;
 
     [ObservableProperty]
+    [JsonConverter(typeof(SystemDrawingColorJsonConverter))]
     public partial Color ColorHoldWallRight { get; set; } = Color.FromArgb(35, 4, 117);
 
     [ObservableProperty]
+    [JsonConverter(typeof(SystemDrawingColorJsonConverter))]
     public partial Color ColorHoldWallLeft { get; set; } = Color.FromArgb(136, 3, 152);
 
     [ObservableProperty]
@@ -135,4 +141,15 @@ public partial class EditorGlobalSetting : SettingModelBase<EditorGlobalSetting>
 
     [ObservableProperty]
     public partial bool ShowHitObjectEffectInPreviewMode { get; set; } = true;
+
+    public void OnDeserialized()
+    {
+        ColorHoldLeft = RestoreColorIfEmpty(ColorHoldLeft, Color.Red);
+        ColorHoldCenter = RestoreColorIfEmpty(ColorHoldCenter, Color.Lime);
+        ColorHoldRight = RestoreColorIfEmpty(ColorHoldRight, Color.Blue);
+        ColorHoldWallRight = RestoreColorIfEmpty(ColorHoldWallRight, Color.FromArgb(35, 4, 117));
+        ColorHoldWallLeft = RestoreColorIfEmpty(ColorHoldWallLeft, Color.FromArgb(136, 3, 152));
+    }
+
+    private static Color RestoreColorIfEmpty(Color value, Color fallback) => value.IsEmpty ? fallback : value;
 }
