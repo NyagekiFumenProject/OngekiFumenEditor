@@ -130,7 +130,7 @@
                             <BehaviorCollection>
                                 <behaviors:DoubleTappedCommandBehavior
                                     Command="{Binding $parent[local:FumenCheckerListViewerView].((vm:FumenCheckerListViewerViewModel)DataContext).NavigateToResultCommand}"
-                                    CommandParameter="{Binding}" />
+                                    UseAssociatedDataContext="True" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>

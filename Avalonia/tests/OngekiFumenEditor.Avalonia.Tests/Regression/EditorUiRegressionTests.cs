@@ -9,7 +9,9 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.LogicalTree;
 using Avalonia.Threading;
+using Avalonia.Themes.Fluent;
 using Avalonia.VisualTree;
+using Avalonia.Xaml.Interactivity;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.ToolBars.Controls;
 using Gekimini.Avalonia.Modules.ToolBars.Views;
@@ -27,6 +29,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenEditorRenderControlViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views;
+using OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.EditorModeSwitch;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.ShowCurveControlAlways;
@@ -34,6 +37,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.SplashScreen.Commands.ShowSplashScreen;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters;
+using OngekiFumenEditor.Avalonia.UI.Behaviors;
 using OngekiFumenEditor.Avalonia.Utils;
 using Xunit;
 using AvaloniaBitmap = Avalonia.Media.Imaging.Bitmap;
@@ -251,6 +255,76 @@ public sealed class EditorUiRegressionTests
             window.Close();
             services.Dispose();
         }
+    }
+
+    [AvaloniaFact]
+    public void TimeSignatureRows_PassDisplayItemToDoubleTapCommand()
+    {
+        const string transparentBrushKey = "SystemControlTransparentBrush";
+        var resources = Application.Current!.Resources;
+        var hadTransparentBrush = resources.ContainsKey(transparentBrushKey);
+        var previousTransparentBrush = hadTransparentBrush ? resources[transparentBrushKey] : null;
+        resources[transparentBrushKey] = global::Avalonia.Media.Brushes.Transparent;
+        var view = new FumenTimeSignatureListViewerView();
+        var viewModel = new FumenTimeSignatureListViewerViewModel();
+        var item = new DisplayTimeSignatureItem();
+        viewModel.DisplayTimeSignatures.Add(item);
+        view.DataContext = viewModel;
+
+        var window = new Window
+        {
+            Width = 800,
+            Height = 300,
+            Content = view
+        };
+        window.Styles.Add(new FluentTheme());
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            var row = Assert.Single(view.GetVisualDescendants().OfType<DataGridRow>());
+            var behavior = Assert.Single(Interaction.GetBehaviors(row).OfType<DoubleTappedCommandBehavior>());
+            var parameter = behavior.GetEffectiveCommandParameter();
+
+            Assert.True(behavior.UseAssociatedDataContext);
+            Assert.Same(item, parameter);
+            Assert.True(behavior.Command.CanExecute(parameter));
+            behavior.Command.Execute(parameter);
+        }
+        finally
+        {
+            window.Close();
+            if (hadTransparentBrush)
+                resources[transparentBrushKey] = previousTransparentBrush;
+            else
+                resources.Remove(transparentBrushKey);
+        }
+    }
+
+    [AvaloniaFact]
+    public void DoubleTappedCommandBehavior_TracksAssociatedDataContextForRecycledRows()
+    {
+        var firstItem = new object();
+        var recycledItem = new object();
+        var explicitParameter = new object();
+        var row = new DataGridRow { DataContext = firstItem };
+        var behavior = new DoubleTappedCommandBehavior
+        {
+            CommandParameter = explicitParameter,
+            UseAssociatedDataContext = true
+        };
+        Interaction.GetBehaviors(row).Add(behavior);
+
+        Assert.Same(firstItem, behavior.GetEffectiveCommandParameter());
+
+        row.DataContext = recycledItem;
+        Assert.Same(recycledItem, behavior.GetEffectiveCommandParameter());
+
+        behavior.UseAssociatedDataContext = false;
+        Assert.Same(explicitParameter, behavior.GetEffectiveCommandParameter());
     }
 
     [AvaloniaFact]

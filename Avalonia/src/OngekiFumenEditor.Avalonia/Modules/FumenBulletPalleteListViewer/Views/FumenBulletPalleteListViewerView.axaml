@@ -69,7 +69,7 @@
                             <BehaviorCollection>
                                 <behaviors:DoubleTappedCommandBehavior
                                     Command="{Binding $parent[views:FumenBulletPalleteListViewerView].((vm:FumenBulletPalleteListViewerViewModel)DataContext).SelectReferencesCommand}"
-                                    CommandParameter="{Binding}" />
+                                    UseAssociatedDataContext="True" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>

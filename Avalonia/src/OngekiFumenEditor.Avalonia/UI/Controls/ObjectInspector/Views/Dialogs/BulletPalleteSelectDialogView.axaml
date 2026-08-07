@@ -46,7 +46,7 @@
                             <BehaviorCollection>
                                 <behaviors:DoubleTappedCommandBehavior
                                     Command="{Binding #Root.((dialog:BulletPalleteSelectDialogViewModel)DataContext).SelectAndConfirmCommand}"
-                                    CommandParameter="{Binding}" />
+                                    UseAssociatedDataContext="True" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>

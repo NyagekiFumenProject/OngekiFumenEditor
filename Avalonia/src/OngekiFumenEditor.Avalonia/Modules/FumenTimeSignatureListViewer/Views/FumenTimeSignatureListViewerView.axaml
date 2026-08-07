@@ -53,7 +53,7 @@
                             <BehaviorCollection>
                                 <behaviors:DoubleTappedCommandBehavior
                                     Command="{Binding $parent[views:FumenTimeSignatureListViewerView].((vm:FumenTimeSignatureListViewerViewModel)DataContext).NavigateToTimeSignatureCommand}"
-                                    CommandParameter="{Binding}" />
+                                    UseAssociatedDataContext="True" />
                             </BehaviorCollection>
                         </BehaviorCollectionTemplate>
                     </Setter>

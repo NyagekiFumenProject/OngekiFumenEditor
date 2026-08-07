@@ -13,6 +13,9 @@ public sealed class DoubleTappedCommandBehavior : Behavior<InputElement>
     public static readonly StyledProperty<object> CommandParameterProperty =
         AvaloniaProperty.Register<DoubleTappedCommandBehavior, object>(nameof(CommandParameter));
 
+    public static readonly StyledProperty<bool> UseAssociatedDataContextProperty =
+        AvaloniaProperty.Register<DoubleTappedCommandBehavior, bool>(nameof(UseAssociatedDataContext));
+
     public ICommand Command
     {
         get => GetValue(CommandProperty);
@@ -23,6 +26,12 @@ public sealed class DoubleTappedCommandBehavior : Behavior<InputElement>
     {
         get => GetValue(CommandParameterProperty);
         set => SetValue(CommandParameterProperty, value);
+    }
+
+    public bool UseAssociatedDataContext
+    {
+        get => GetValue(UseAssociatedDataContextProperty);
+        set => SetValue(UseAssociatedDataContextProperty, value);
     }
 
     protected override void OnAttachedToVisualTree()
@@ -41,7 +50,11 @@ public sealed class DoubleTappedCommandBehavior : Behavior<InputElement>
 
     private void OnDoubleTapped(object sender, TappedEventArgs e)
     {
-        if (Command?.CanExecute(CommandParameter) == true)
-            Command.Execute(CommandParameter);
+        var parameter = GetEffectiveCommandParameter();
+        if (Command?.CanExecute(parameter) == true)
+            Command.Execute(parameter);
     }
+
+    internal object GetEffectiveCommandParameter() =>
+        UseAssociatedDataContext ? AssociatedObject?.DataContext : CommandParameter;
 }

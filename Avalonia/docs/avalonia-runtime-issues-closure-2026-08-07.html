@@ -108,8 +108,8 @@
       <p class="meta">项目：OngekiFumenEditor.Avalonia · 日期：2026-08-07 · 更新：2026-08-08 · 范围：本轮用户反馈的运行时问题</p>
       <p>本报告记录已完成的代码修复、可重复验证结果以及后续维护建议。它是运行时问题的收尾记录，不替代原有的迁移差异审查报告。</p>
       <div class="summary">
-        <div class="metric"><strong>9 / 9</strong>用户反馈项已处理</div>
-        <div class="metric"><strong>305 / 305</strong>核心测试通过</div>
+        <div class="metric"><strong>10 / 10</strong>用户反馈项已处理</div>
+        <div class="metric"><strong>307 / 307</strong>核心测试通过</div>
         <div class="metric"><strong>0</strong>构建错误与差异格式错误</div>
       </div>
     </header>
@@ -166,20 +166,26 @@
             <tr>
               <td><span class="status">已修复</span><br>菜单点击时间计算器和当前选择物件查看器没出现对应界面，且对应菜单按钮变灰了</td>
               <td>两个命令处理器复制了元信息浏览器的接口解析，实际应解析各自的 <code>ITGridCalculatorToolViewer</code> 与 <code>IFumenEditorSelectingObjectViewer</code>，导致服务解析失败并使 <code>CanExecute</code> 变灰。已更正接口映射。</td>
-              <td>对应命令处理器已改为正确接口；全量 305 项核心测试通过，构建无错误。</td>
+              <td>对应命令处理器已改为正确接口；全量 307 项核心测试通过，构建无错误。</td>
               <td>为每个菜单命令建立“命令定义 - handler - tool interface”映射测试，并覆盖工具已打开时聚焦、未注册时禁用和切换文档后的 CanExecute。</td>
             </tr>
             <tr>
               <td><span class="status">已修复</span><br>编辑器Hold渲染出问题了，Hold长条被渲染成黑色而不是对应的颜色</td>
               <td>旧设置中的 <code>System.Drawing.Color</code> 被按对象形状反序列化为 <code>Color.Empty</code>（A/R/G/B 全为 0），渲染转换后自然变黑/透明。已加入兼容 JSON converter，按 ARGB 数字持久化，并在反序列化后对空颜色恢复默认 Hold 调色板。</td>
-              <td><code>EditorGlobalSettingJson_RoundTripsHoldColorsAsArgbNumbers</code>、legacy object recovery 测试通过；完整核心测试 305/305。</td>
+              <td><code>EditorGlobalSettingJson_RoundTripsHoldColorsAsArgbNumbers</code>、legacy object recovery 测试通过；完整核心测试 307/307。</td>
               <td>为设置文件增加 schema/version 迁移；加入渲染像素或颜色转换回归，覆盖旧文件、透明色、自定义色和未知字段，避免设置格式再次漂移。</td>
             </tr>
             <tr>
               <td><span class="status">已修复</span><br>[未处理 System.AggregateException]<br><code>Collection was modified; enumeration operation may not execute.</code></td>
               <td>渲染回调会清空并更新物件命中表，而指针按下事件同时通过 PLINQ 枚举同一个普通 <code>Dictionary</code>。已改用线程安全命中表，在查询前生成稳定快照，并移除输入路径中不必要的 PLINQ，避免底层集合异常再次被包装成 <code>AggregateException</code>。绘制上下文统计使用固定快照；调试性能监视器改为不可变字典 CAS、原子计数和固定容量无锁环形采样窗口。</td>
-              <td><code>HitObjects_CanBeQueriedWhileRenderFrameRefreshesThem</code> 与 <code>DebugPerformanceMonitor_CanReadAndClearWhileRendering</code> 均通过；完整核心测试 305/305，桌面测试 106/106。</td>
+              <td><code>HitObjects_CanBeQueriedWhileRenderFrameRefreshesThem</code> 与 <code>DebugPerformanceMonitor_CanReadAndClearWhileRendering</code> 均通过；完整核心测试 307/307，桌面测试 106/106。</td>
               <td>继续审计渲染线程、调度器与 UI 输入线程共享的可变缓存；优先使用不可变快照、原子交换和无锁环形缓冲，避免重新引入跨线程普通集合枚举或粗粒度锁。</td>
+            </tr>
+            <tr>
+              <td><span class="status">已修复</span><br>双击时间签名列表时传入了错误的命令参数<br><code>System.ArgumentException</code>：命令要求 <code>DisplayTimeSignatureItem</code>，实际收到 <code>FumenTimeSignatureListViewerViewModel</code></td>
+              <td><code>BehaviorCollectionTemplate</code> 在脱离行视觉树的位置创建行为，模板中的裸 <code>{Binding}</code> 继承了列表视图模型，而不是 <code>DataGridRow.DataContext</code>。已为 <code>DoubleTappedCommandBehavior</code> 增加按事件时读取关联控件 <code>DataContext</code> 的选项，并在时间签名、检查结果、子弹调色板列表及调色板选择对话框启用。</td>
+              <td><code>TimeSignatureRows_PassDisplayItemToDoubleTapCommand</code> 验证真实 <code>DataGridRow</code> 传入正确项目并可执行强类型命令；<code>DoubleTappedCommandBehavior_TracksAssociatedDataContextForRecycledRows</code> 验证行复用后参数随新 <code>DataContext</code> 更新。</td>
+              <td>虚拟化或模板化行上的行为不要使用裸 <code>{Binding}</code> 作为强类型命令参数；优先使用关联控件的当前 <code>DataContext</code> 或显式类型代理，并保留行复用回归测试。</td>
             </tr>
           </tbody>
         </table>
@@ -190,7 +196,7 @@
       <h2>验证记录</h2>
       <div class="checks">
         <div class="check"><code>dotnet build src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj --no-restore</code>：成功，0 errors。</div>
-        <div class="check"><code>dotnet test OngekiFumenEditor.Avalonia.sln --no-restore</code>：核心 305 passed、桌面 106 passed，0 failed，0 skipped。</div>
+        <div class="check"><code>dotnet test OngekiFumenEditor.Avalonia.sln --no-restore -p:UseSharedCompilation=false</code>：核心 307 passed、桌面 106 passed，0 failed，0 skipped。</div>
         <div class="check"><code>git -c core.whitespace=cr-at-eol diff HEAD --check</code>：通过；按仓库现有 CRLF 源码规则检查。</div>
         <div class="check">新增回归测试位于 <code>tests/OngekiFumenEditor.Avalonia.Tests/Regression/EditorUiRegressionTests.cs</code>。</div>
       </div>
@@ -205,6 +211,7 @@
         <li>属性生成器：<code>src/OngekiFumenEditor.Avalonia/UI/Controls/ObjectInspector/ValueConverters/</code>、<code>src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ValueConverters/</code></li>
         <li>拖放：<code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs</code>、<code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/FumenVisualEditorView.xaml.cs</code></li>
         <li>Hold 设置兼容：<code>src/OngekiFumenEditor.Avalonia/Models/Settings/EditorGlobalSetting.cs</code>、<code>src/OngekiFumenEditor.Avalonia/Models/Settings/SystemDrawingColorJsonConverter.cs</code></li>
+        <li>双击命令行为与列表行参数：<code>src/OngekiFumenEditor.Avalonia/UI/Behaviors/DoubleTappedCommandBehavior.cs</code>、四个列表/选择对话框的 <code>DataGridRow</code> 行为模板</li>
         <li>原迁移审查报告：<a href="wpf-avalonia-full-migration-audit-2026-08-07.html">wpf-avalonia-full-migration-audit-2026-08-07.html</a></li>
       </ul>
     </section>
