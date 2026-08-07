@@ -1,23 +1,29 @@
 using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Framework.Dialogs;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll;
 
 [RegisterSingleton<ICommandHandler>]
-public partial class InterpolateAllCommandHandler : CommandHandlerBase<InterpolateAllCommandDefinition>
+public partial class InterpolateAllCommandHandler : InterpolateAllCommandHandlerBase<InterpolateAllCommandDefinition>
 {
-    private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
-
-    public override Task Update(Command command)
+    public InterpolateAllCommandHandler(
+        IEditorDocumentManager editorDocumentManager,
+        IDialogManager dialogManager)
+        : base(editorDocumentManager, dialogManager, xGridLimit: false)
     {
-        command.Enabled = EditorDocumentManager.CurrentActivatedEditor is not null;
-        return Task.CompletedTask;
     }
+}
 
-    public override Task Run(Command command)
+[RegisterSingleton<ICommandHandler>]
+public partial class InterpolateAllWithXGridLimitCommandHandler :
+    InterpolateAllCommandHandlerBase<InterpolateAllWithXGridLimitCommandDefinition>
+{
+    public InterpolateAllWithXGridLimitCommandHandler(
+        IEditorDocumentManager editorDocumentManager,
+        IDialogManager dialogManager)
+        : base(editorDocumentManager, dialogManager, xGridLimit: true)
     {
-        EditorDocumentManager.CurrentActivatedEditor?.ToastNotify("InterpolateAll is not migrated yet.");
-        return Task.CompletedTask;
     }
 }

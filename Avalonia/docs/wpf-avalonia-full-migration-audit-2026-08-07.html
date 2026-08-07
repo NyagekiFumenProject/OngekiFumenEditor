@@ -117,6 +117,7 @@
       color: var(--accent);
       font-size: 1.15rem;
     }
+    .completed-plan { color: var(--danger); }
     p { margin: .7rem 0; }
     a { color: var(--accent); }
     blockquote {
@@ -481,12 +482,16 @@
 <li><strong>建议</strong>：在应用 <code>TopLevel</code> 增加只处理外部 <code>StorageItems</code> 的 DragOver/Drop 协调器，验证单项、支持类型和权限后复用 <code>DocumentOpenHelper</code>；通过明确的数据格式排除工具箱与 DataGrid 内部拖放，并显示可接受/拒绝的拖入反馈。Desktop 和 Browser 分别做一个平台适配器，覆盖单文件、多文件、目录、不支持扩展、内部令牌和打开失败测试。</li>
 </ul>
 <h2 id="b">4. B 类：已迁移但还没实现或仅占位</h2>
-<h3 id="b-001-interpolateall">B-001 <code>InterpolateAll</code> 命令为显式未迁移实现</h3>
+<h3 id="b-001-interpolateall" class="completed-plan">B-001 <code>InterpolateAll</code> 命令为显式未迁移实现（已完成）</h3>
 <ul>
-<li><strong>Avalonia 代码</strong>：<code>InterpolateAllCommandHandler.Run()</code> 只显示 <code>InterpolateAll is not migrated yet.</code>，随后完成任务。</li>
+<li><strong>完成状态（2026-08-08）</strong>：普通插值和 XGrid 限制插值均已恢复为可达命令，方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：两个命令处理器均通过构造函数注入 <code>IEditorDocumentManager</code> 与 <code>IDialogManager</code>，共用插值基类；执行前显示确认对话框，确认后锁定编辑器，并通过 <code>try/finally</code> 保证成功或异常都能解锁。普通模式显式使用 <code>DefaultCurveInterpolaterFactory</code>，受限模式显式使用 <code>XGridLimitedCurveInterpolaterFactory</code>，避免普通模式意外沿用 Lane 自带的受限工厂。</li>
+<li><strong>事务与引用处理</strong>：一次命令只写入一个 <code>LambdaUndoAction</code>，统一替换全部曲线 Lane，并同步重定向 Tap/Hold 等 <code>ILaneDockable</code> 的 Lane 引用；撤销恢复原 Lane 和原引用，重做再次应用生成结果。没有可插值 Lane 时不写入空撤销记录。</li>
+<li><strong>专项验证</strong>：<code>InterpolateAllCommandTests</code> 共 9 项全部通过，覆盖两种工厂选择、取消确认、无曲线对象、Lane 替换、单次撤销事务、撤销/重做、XGrid 整数约束、依附物件引用重定向、异常解锁、命令启用状态，以及 128 条曲线 Lane 的规模与耗时预算；随后运行完整 Avalonia 测试项目，316 项全部通过、0 项跳过。</li>
+<li><strong>审查时 Avalonia 代码</strong>：<code>InterpolateAllCommandHandler.Run()</code> 只显示 <code>InterpolateAll is not migrated yet.</code>，随后完成任务。</li>
 <li><strong>WPF 行为</strong>：确认后锁定编辑器，调用插值处理；另有带 XGrid 限制的命令处理器，两者都会执行同一个插值算法的不同工厂分支。</li>
-<li><strong>Avalonia 差集证据</strong>：<code>InterpolateAllWithXGridLimitCommandDefinition</code> 仍在 <code>Commands/OgkrImpl/MenuDefinitions.cs</code> 注册菜单，但源码中没有任何 <code>CommandHandlerBase&lt;InterpolateAllWithXGridLimitCommandDefinition&gt;</code> 或等价 <code>ICommandHandler</code> 注册；该菜单项没有可达处理器。普通命令则有处理器但只提示未迁移。</li>
-<li><strong>影响</strong>：普通菜单项可触发但不会修改谱面；带 XGrid 限制的菜单项还缺少处理器，不能依赖现有基类自动获得行为。</li>
+<li><strong>审查时差集证据</strong>：<code>InterpolateAllWithXGridLimitCommandDefinition</code> 仍在 <code>Commands/OgkrImpl/MenuDefinitions.cs</code> 注册菜单，但源码中没有任何 <code>CommandHandlerBase&lt;InterpolateAllWithXGridLimitCommandDefinition&gt;</code> 或等价 <code>ICommandHandler</code> 注册；该菜单项没有可达处理器。普通命令则有处理器但只提示未迁移。</li>
+<li><strong>原影响（已消除）</strong>：普通菜单项可触发但不会修改谱面；带 XGrid 限制的菜单项还缺少处理器，不能依赖现有基类自动获得行为。</li>
 <li><strong>建议</strong>：把旧插值算法提取为可测试的纯业务服务，两个命令 handler 只负责确认、参数/XGrid 限制、编辑器锁定和一次性撤销事务；同时补齐受限命令的 DI 注册。覆盖无可插值对象、曲线节点、XGrid 边界、取消、异常解锁、撤销/重做和大谱面性能测试。</li>
 </ul>
 <h3 id="b-002-standardizeformat">B-002 <code>StandardizeFormat</code> 命令为显式未迁移实现</h3>

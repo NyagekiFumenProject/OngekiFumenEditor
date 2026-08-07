@@ -1,88 +1,131 @@
-﻿using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Framework.Dialogs;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.OgkrImpl.Factory;
-using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll
+namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll;
+
+public abstract class InterpolateAllCommandHandlerBase<T> : CommandHandlerBase<T>
+    where T : CommandDefinition
 {
-	public abstract class InterpolateAllCommandHandlerBase<T> : CommandHandlerBase<T> where T : CommandDefinition
-	{
-		protected void Process(FumenVisualEditorViewModel editor, bool xGridLimit)
-		{
-			var fumen = editor.Fumen;
+    private readonly IEditorDocumentManager editorDocumentManager;
+    private readonly IDialogManager dialogManager;
+    private readonly bool xGridLimit;
 
-			var laneMap = new Dictionary<ConnectableStartObject, List<ConnectableStartObject>>();
+    protected InterpolateAllCommandHandlerBase(
+        IEditorDocumentManager editorDocumentManager,
+        IDialogManager dialogManager,
+        bool xGridLimit)
+    {
+        this.editorDocumentManager = editorDocumentManager;
+        this.dialogManager = dialogManager;
+        this.xGridLimit = xGridLimit;
+    }
 
-			var curveFactory = xGridLimit ? XGridLimitedCurveInterpolaterFactory.Default : default;
+    public override Task Update(Command command)
+    {
+        command.Enabled = editorDocumentManager.CurrentActivatedEditor?.Fumen is not null;
+        return Task.CompletedTask;
+    }
 
-			foreach ((var beforeLane, var genLanes) in Utils.Ogkr.InterpolateAll.Calculate(fumen, curveFactory))
-				laneMap[beforeLane] = genLanes.ToList();
+    public override async Task Run(Command command)
+    {
+        if (editorDocumentManager.CurrentActivatedEditor is not { Fumen: not null } editor)
+            return;
 
-			var curveStarts = laneMap.Keys.ToList();
+        if (!await dialogManager.ShowComfirmDialog(Lang.ComfirmInterpolateMessage, Lang.Warning))
+            return;
 
-			var affactObjects = Utils.Ogkr.InterpolateAll.CalculateAffectedDockableObjects(fumen, curveStarts).ToArray();
+        editor.LockAllUserInteraction();
+        try
+        {
+            Process(editor, xGridLimit);
+        }
+        finally
+        {
+            editor.UnlockAllUserInteraction();
+        }
+    }
 
-			var redoAction = new System.Action(() => { });
+    protected virtual bool Process(FumenVisualEditorViewModel editor, bool xGridLimit)
+    {
+        var fumen = editor.Fumen;
+        if (fumen is null)
+            return false;
 
-			var undoAction = new System.Action(() => { });
+        var laneMap = new Dictionary<ConnectableStartObject, List<ConnectableStartObject>>();
+        var curveFactory = ResolveCurveInterpolaterFactory(xGridLimit);
 
-			foreach (var item in laneMap)
-			{
-				var beforeLane = item.Key;
-				var afterLanes = item.Value;
+        foreach ((var beforeLane, var genLanes) in Utils.Ogkr.InterpolateAll.Calculate(fumen, curveFactory))
+            laneMap[beforeLane] = genLanes.ToList();
 
-				redoAction += () =>
-				{
-					fumen.RemoveObject(beforeLane);
-					fumen.AddObjects(afterLanes);
-				};
+        if (laneMap.Count == 0)
+            return false;
 
-				undoAction += () =>
-				{
-					fumen.AddObject(beforeLane);
-					fumen.RemoveObjects(afterLanes);
-				};
-			}
+        var curveStarts = laneMap.Keys.ToList();
+        var laneMapByRecordId = laneMap.ToDictionary(x => x.Key.RecordId, x => x.Value);
+        var affectedObjects = new List<(ILaneDockable Object, LaneStartBase BeforeLane, LaneStartBase AfterLane)>();
 
-			foreach (var obj in affactObjects)
-			{
-				var tGrid = obj.TGrid;
-				var beforeXGrid = obj.XGrid;
-				var beforeLane = obj.ReferenceLaneStart;
+        foreach (var obj in Utils.Ogkr.InterpolateAll.CalculateAffectedDockableObjects(fumen, curveStarts))
+        {
+            if (obj.ReferenceLaneStart is not { } beforeLane ||
+                !laneMapByRecordId.TryGetValue(beforeLane.RecordId, out var generatedLanes))
+                continue;
 
-				(var afterLane, var afterXGrid) = laneMap[obj.ReferenceLaneStart]
-					.Where(x => tGrid >= x.MinTGrid && tGrid <= x.MaxTGrid)
-					.Select(x => (x, x.CalulateXGrid(tGrid)))
-					.Where(x => x.Item2 is not null)
-					.OrderBy(x => x.Item2)
-					.FirstOrDefault();
+            var afterLane = generatedLanes
+                .Where(x => obj.TGrid >= x.MinTGrid && obj.TGrid <= x.MaxTGrid)
+                .Select(x => (Lane: x, XGrid: x.CalulateXGrid(obj.TGrid)))
+                .Where(x => x.XGrid is not null)
+                .OrderBy(x => x.XGrid)
+                .Select(x => x.Lane)
+                .OfType<LaneStartBase>()
+                .FirstOrDefault();
 
-				redoAction += () =>
-				{
-					obj.ReferenceLaneStart = afterLane as LaneStartBase;
-					//obj.XGrid = afterXGrid;
-				};
+            if (afterLane is not null)
+                affectedObjects.Add((obj, beforeLane, afterLane));
+        }
 
-				undoAction += () =>
-				{
-					obj.ReferenceLaneStart = beforeLane;
-					//obj.XGrid = beforeXGrid;
-				};
-			}
+        var redoAction = new Action(() =>
+        {
+            foreach (var (beforeLane, afterLanes) in laneMap)
+            {
+                fumen.RemoveObject(beforeLane);
+                fumen.AddObjects(afterLanes);
+            }
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.CommandInterpolateAll.ToLocalizedString(), redoAction, undoAction));
-			Log.LogInfo(Lang.InterpolateComplete.Format(curveStarts.Count, laneMap.Values.Select(x => x.Count).Sum(), affactObjects.Count()));
-		}
-	}
+            foreach (var affectedObject in affectedObjects)
+                affectedObject.Object.ReferenceLaneStart = affectedObject.AfterLane;
+        });
+
+        var undoAction = new Action(() =>
+        {
+            foreach (var (beforeLane, afterLanes) in laneMap)
+            {
+                fumen.AddObject(beforeLane);
+                fumen.RemoveObjects(afterLanes);
+            }
+
+            foreach (var affectedObject in affectedObjects)
+                affectedObject.Object.ReferenceLaneStart = affectedObject.BeforeLane;
+        });
+
+        editor.UndoRedoManager.ExecuteAction(
+            LambdaUndoAction.Create(Lang.B.CommandInterpolateAll.ToLocalizedString(), redoAction, undoAction));
+        Log.LogInfo(Lang.InterpolateComplete.Format(
+            curveStarts.Count,
+            laneMap.Values.Select(x => x.Count).Sum(),
+            affectedObjects.Count));
+        return true;
+    }
+
+    internal static ICurveInterpolaterFactory ResolveCurveInterpolaterFactory(bool xGridLimit) =>
+        xGridLimit ? XGridLimitedCurveInterpolaterFactory.Default : DefaultCurveInterpolaterFactory.Default;
 }
-
-
-
-
