@@ -173,17 +173,28 @@ public abstract class OngekiFumenEditorApp : App
         }
     }
 
+    /// <summary>
+    /// Gives a single-view platform a chance to finish laying out the window host
+    /// before a managed window is added to it.
+    /// </summary>
+    protected virtual Task WaitForSplashScreenHostReadyAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     private async Task ShowSplashScreenAfterBootAsync()
     {
         if (ProgramSetting.Default.DisableShowSplashScreenAfterBoot)
             return;
 
-        var shell = ServiceProvider.GetRequiredService<IShell>();
-        if (shell.Documents.Any())
-            return;
-
         try
         {
+            await WaitForSplashScreenHostReadyAsync();
+
+            var shell = ServiceProvider.GetRequiredService<IShell>();
+            if (shell.Documents.Any())
+                return;
+
             var splashScreen = ServiceProvider.GetRequiredService<ISplashScreenWindow>();
             await ServiceProvider.GetRequiredService<IWindowManager>()
                 .ShowWindowAsync(splashScreen.WindowViewModel);
