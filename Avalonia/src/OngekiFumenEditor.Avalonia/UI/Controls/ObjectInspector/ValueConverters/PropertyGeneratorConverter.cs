@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Data.Converters;
+using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using System.Globalization;
 
 namespace OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters;
@@ -7,11 +9,14 @@ public class PropertyGeneratorConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return value;
+        if (value is not IObjectPropertyAccessProxy wrapper)
+            return AvaloniaProperty.UnsetValue;
+
+        return PropertiesUIGenerator.GenerateUI(wrapper) ?? AvaloniaProperty.UnsetValue;
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        return value;
+        return AvaloniaProperty.UnsetValue;
     }
 }

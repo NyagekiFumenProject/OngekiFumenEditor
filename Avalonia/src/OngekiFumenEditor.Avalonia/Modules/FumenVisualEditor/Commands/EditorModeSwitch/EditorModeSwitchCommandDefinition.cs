@@ -3,6 +3,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.EditorModeSwitch;
 
@@ -16,4 +17,6 @@ public class EditorModeSwitchCommandDefinition : CommandDefinition
     public override LocalizedString Text { get; } = Lang.B.EditorModeSwitch.ToLocalizedString();
 
     public override LocalizedString ToolTip => Text;
+
+    public override Uri IconSource => ResourceUtils.GetResourceUri("Icons/preview.png");
 }

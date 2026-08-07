@@ -38,6 +38,7 @@
             BorderBrush="Transparent"
             ItemsSource="{Binding DisplayTimeSignatures}"
             CanUserReorderColumns="True"
+            HorizontalScrollBarVisibility="Auto"
             PointerPressed="OnRowPointerPressed"
             SelectedItem="{Binding CurrentSelectTimeSignature}">
             <DataGrid.Styles>
@@ -62,23 +63,26 @@
             <DataGrid.Columns>
                 <DataGridTextColumn
                     x:DataType="vm:DisplayTimeSignatureItem"
-                    Width="100"
+                    Width="110"
+                    MinWidth="110"
                     Binding="{Binding StartAudioTime, Converter={StaticResource IntToTimeDisplayConverter}}"
                     Header="{markup:Translate {x:Static languages:Lang+B.AudioTime}}" />
 
                 <DataGridTextColumn
                     x:DataType="vm:DisplayTimeSignatureItem"
-                    Width="100"
+                    Width="120"
+                    MinWidth="120"
                     Binding="{Binding StartTGrid}"
                     Header="{markup:Translate {x:Static languages:Lang+B.AudioTGrid}}" />
 
                 <DataGridTextColumn
                     x:DataType="vm:DisplayTimeSignatureItem"
-                    Width="100"
+                    Width="90"
+                    MinWidth="90"
                     Binding="{Binding BPMChange.BPM}"
                     Header="Bpm" />
 
-                <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.TimeSignature}}">
+                <DataGridTemplateColumn Width="120" MinWidth="120" Header="{markup:Translate {x:Static languages:Lang+B.TimeSignature}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:DisplayTimeSignatureItem">
                             <TextBlock>

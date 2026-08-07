@@ -19,6 +19,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using OpenTK.Mathematics;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -267,7 +268,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     public void Render(TimeSpan ts)
         => OnEditorLoop(ts);
 
-    Dictionary<int, DrawingTargetContext> drawingContexts = new();
+    private readonly ConcurrentDictionary<int, DrawingTargetContext> drawingContexts = new();
     private IRenderManagerImpl renderImpl;
 
     private void UpdateActualRenderInterval()
@@ -299,7 +300,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         PerfomenceMonitor.PostUIRenderTime(ts);
         PerfomenceMonitor.OnBeforeRender();
 
-        hits.Clear();
+        ClearHitObjects();
 
         drawingContexts.Clear();
 
@@ -656,11 +657,12 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
             PerfomenceMonitor?.FormatStatistics(stringBuilder);
 #if DEBUG
+            var drawingContextSnapshot = drawingContexts.ToArray();
             stringBuilder.AppendLine();
             stringBuilder.AppendLine($"Viewport: {ViewWidth}x{ViewHeight}");
-            stringBuilder.AppendLine($"VisibleRanges ({drawingContexts.Count} sfl groups):");
+            stringBuilder.AppendLine($"VisibleRanges ({drawingContextSnapshot.Length} sfl groups):");
 
-            foreach (var item in drawingContexts.OrderBy(x => x.Key))
+            foreach (var item in drawingContextSnapshot.OrderBy(x => x.Key))
             {
                 var ranges = item.Value?.VisibleTGridRanges;
                 if (ranges != null)
@@ -676,7 +678,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     stringBuilder.AppendLine();
-                    if (drawingContexts.ElementAtOrDefault(0).Value?.Rect.MaxY - lastPointerViewPosition.Y is double mouseY)
+                    var defaultDrawingContext = drawingContextSnapshot.FirstOrDefault(x => x.Key == 0).Value;
+                    if (defaultDrawingContext?.Rect.MaxY - lastPointerViewPosition.Y is double mouseY)
                     {
                         stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
                         foreach (var tGrid in TGridCalculator.ConvertYToTGrid_PreviewMode(mouseY, this))

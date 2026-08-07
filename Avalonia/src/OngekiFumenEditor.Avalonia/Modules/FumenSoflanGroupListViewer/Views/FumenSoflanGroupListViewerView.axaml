@@ -53,6 +53,7 @@
             Grid.Column="0"
             Background="Transparent"
             CanUserSortColumns="False"
+            HorizontalScrollBarVisibility="Auto"
             ItemsSource="{Binding DisplaySoflanGroupItemGroupRoot.DisplayableItemSource}"
             SelectionMode="Extended">
             <Interaction.Behaviors>
@@ -114,7 +115,7 @@
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="220" Header="Name">
+                <DataGridTemplateColumn Width="220" MinWidth="220" Header="Name">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
                             <ContentControl Content="{Binding .}">
@@ -153,7 +154,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Design">
+                <DataGridTemplateColumn Width="80" MinWidth="80" Header="Design">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
                             <CheckBox
@@ -163,7 +164,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Preview">
+                <DataGridTemplateColumn Width="80" MinWidth="80" Header="Preview">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
                             <CheckBox
@@ -173,7 +174,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Soflans">
+                <DataGridTemplateColumn Width="90" MinWidth="90" Header="Soflans">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="editorObjects:SoflanGroupDisplayItemListViewBase">
                             <ContentControl Content="{Binding .}">
@@ -225,6 +226,7 @@
             Grid.Column="1"
             Background="Transparent"
             DoubleTapped="OnSoflanPointDoubleTapped"
+            HorizontalScrollBarVisibility="Auto"
             ItemsSource="{Binding DisplaySoflanPointList}"
             SelectionMode="Single">
             <DataGrid.Styles>
@@ -238,28 +240,28 @@
                 </Style>
             </DataGrid.Styles>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Width="150" Header="Y">
+                <DataGridTemplateColumn Width="150" MinWidth="150" Header="Y">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SoflanPointRow">
                             <TextBlock Text="{Binding Y}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="90" Header="TGrid">
+                <DataGridTemplateColumn Width="100" MinWidth="100" Header="TGrid">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SoflanPointRow">
                             <TextBlock Text="{Binding TGrid}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="90" Header="Bpm">
+                <DataGridTemplateColumn Width="90" MinWidth="90" Header="Bpm">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SoflanPointRow">
                             <TextBlock Text="{Binding Bpm}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="150" Header="Speed">
+                <DataGridTemplateColumn Width="150" MinWidth="150" Header="Speed">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SoflanPointRow">
                             <TextBlock Text="{Binding Speed}" />

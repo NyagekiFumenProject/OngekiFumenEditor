@@ -33,6 +33,7 @@
             Grid.Row="1"
             Background="Transparent"
             CanUserSortColumns="False"
+            HorizontalScrollBarVisibility="Auto"
             ItemsSource="{Binding ControlItems}"
             SelectionMode="Extended">
             <Interaction.Behaviors>
@@ -51,10 +52,11 @@
             <DataGrid.Columns>
                 <DataGridTextColumn
                     x:DataType="vm:RenderControlItem"
-                    Width="30"
+                    Width="90"
+                    MinWidth="90"
                     Binding="{Binding RenderOrder}"
                     Header="{markup:Translate {x:Static languages:Lang+B.RenderOrder}}" />
-                <DataGridTemplateColumn Header="Design">
+                <DataGridTemplateColumn Width="80" MinWidth="80" Header="Design">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:RenderControlItem">
                             <CheckBox
@@ -64,7 +66,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Preview">
+                <DataGridTemplateColumn Width="80" MinWidth="80" Header="Preview">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:RenderControlItem">
                             <CheckBox
@@ -76,6 +78,8 @@
                 </DataGridTemplateColumn>
                 <DataGridTextColumn
                     x:DataType="vm:RenderControlItem"
+                    Width="180"
+                    MinWidth="180"
                     Binding="{Binding Name}"
                     Header="{markup:Translate {x:Static languages:Lang+B.Name}}" />
             </DataGrid.Columns>

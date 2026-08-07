@@ -12,6 +12,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions
 		public void Drop(FumenVisualEditorViewModel editor, Point mousePosition)
 		{
 			var displayObject = GetDisplayObject();
+			if (displayObject is null)
+				return;
+
 			var isFirst = true;
 
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(mousePosition))

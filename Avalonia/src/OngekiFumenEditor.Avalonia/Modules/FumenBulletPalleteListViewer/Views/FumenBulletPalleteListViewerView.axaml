@@ -56,6 +56,7 @@
             Background="Transparent"
             BorderBrush="Transparent"
             CanUserReorderColumns="True"
+            HorizontalScrollBarVisibility="Auto"
             ItemsSource="{Binding DataView}"
             SelectionMode="Extended">
             <Interaction.Behaviors>
@@ -82,10 +83,11 @@
             <DataGrid.Columns>
                     <DataGridTextColumn
                         x:DataType="objects:BulletPallete"
-                        Width="60"
+                        Width="70"
+                        MinWidth="70"
                         Binding="{Binding StrID}"
                         Header="{markup:Translate {x:Static languages:Lang+B.BulletPaletteId}}" />
-                    <DataGridTemplateColumn Width="120" Header="{markup:Translate {x:Static languages:Lang+B.Name}}">
+                    <DataGridTemplateColumn Width="150" MinWidth="150" Header="{markup:Translate {x:Static languages:Lang+B.Name}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding EditorName}">
@@ -94,7 +96,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootSource}}">
+                    <DataGridTemplateColumn Width="120" MinWidth="120" Header="{markup:Translate {x:Static languages:Lang+B.ShootSource}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
@@ -102,7 +104,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="80" Header="{markup:Translate {x:Static languages:Lang+B.ShootOffset}}">
+                    <DataGridTemplateColumn Width="100" MinWidth="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootOffset}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding PlaceOffset}">
@@ -111,7 +113,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootTarget}}">
+                    <DataGridTemplateColumn Width="120" MinWidth="120" Header="{markup:Translate {x:Static languages:Lang+B.ShootTarget}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
@@ -119,7 +121,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="60" Header="{markup:Translate {x:Static languages:Lang+B.BulletSpeed}}">
+                    <DataGridTemplateColumn Width="90" MinWidth="90" Header="{markup:Translate {x:Static languages:Lang+B.BulletSpeed}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding Speed}">
@@ -128,7 +130,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.BulletSize}}">
+                    <DataGridTemplateColumn Width="110" MinWidth="110" Header="{markup:Translate {x:Static languages:Lang+B.BulletSize}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
@@ -136,7 +138,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.BulletType}}">
+                    <DataGridTemplateColumn Width="110" MinWidth="110" Header="{markup:Translate {x:Static languages:Lang+B.BulletType}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
@@ -144,7 +146,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.RandomOffsetRange}}">
+                    <DataGridTemplateColumn Width="150" MinWidth="150" Header="{markup:Translate {x:Static languages:Lang+B.RandomOffsetRange}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <TextBox Text="{Binding RandomOffsetRange}" />
@@ -165,7 +167,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
 
-                    <DataGridTemplateColumn Width="240" Header="{markup:Translate {x:Static languages:Lang+B.Action}}">
+                    <DataGridTemplateColumn Width="280" MinWidth="280" Header="{markup:Translate {x:Static languages:Lang+B.Action}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
                                 <StackPanel Orientation="Horizontal">

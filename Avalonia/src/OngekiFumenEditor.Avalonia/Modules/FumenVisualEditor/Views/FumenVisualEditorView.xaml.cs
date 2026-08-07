@@ -12,6 +12,7 @@ public partial class FumenVisualEditorView : ViewBase
     {
         InitializeComponent();
         AddHandler(DragDrop.DragEnterEvent, OnDragEnter);
+        AddHandler(DragDrop.DragOverEvent, OnDragOver);
         AddHandler(DragDrop.DropEvent, OnDrop);
     }
 
@@ -19,6 +20,12 @@ public partial class FumenVisualEditorView : ViewBase
     {
         if (DataContext is FumenVisualEditorViewModel viewModel)
             viewModel.OnDragEnter(e);
+    }
+
+    private void OnDragOver(object sender, DragEventArgs e)
+    {
+        if (DataContext is FumenVisualEditorViewModel viewModel)
+            viewModel.OnDragOver(e);
     }
 
     private void OnDrop(object sender, DragEventArgs e)

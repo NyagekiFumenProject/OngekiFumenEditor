@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Framework.DragDrops;
 using Gekimini.Avalonia.Modules.Toolbox.Models;
+using Gekimini.Avalonia.Modules.Toolbox.ViewModels;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
@@ -27,6 +28,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer;
+using System.Collections.Concurrent;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 {
@@ -122,7 +124,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             get => currentCursorPosition;
             set => SetProperty(ref currentCursorPosition, value);
         }
-        private Dictionary<OngekiObjectBase, Rect> hits = new();
+        // Rendering can run on Avalonia's compositor callback while pointer input is handled on the UI thread.
+        private readonly ConcurrentDictionary<OngekiObjectBase, Rect> hits = new();
         private OngekiObjectBase mouseDownNextHitObject;
         private Point mouseCanvasStartPosition;
         private double startXOffset;
@@ -151,7 +154,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
 
-        public ImmutableDictionary<OngekiObjectBase, Rect> GetHits() => hits.ToImmutableDictionary();
+        public ImmutableDictionary<OngekiObjectBase, Rect> GetHits() =>
+            hits.ToArray().ToImmutableDictionary(x => x.Key, x => x.Value);
 
         #region provide extra MenuItem by plugins
 
@@ -1263,7 +1267,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
                     isSelectRangeDragging = false;
 
-                    var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
+                    var hitResult = QueryHitObjects(position);
                     if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
                     {
                         var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
@@ -1678,32 +1682,49 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void OnDragEnter(DragEventArgs arg)
         {
-            if (IsLocked)
-            {
-                Log.LogWarn($"discard user actions because editor was locked.");
-                return;
-            }
-
-            if (!IoC.Get<IDragDropManager>().TryGetDragData(arg, out _))
-                arg.DragEffects = DragDropEffects.None;
+            UpdateDragEffects(arg);
         }
 
-        public void OnDrop(DragEventArgs arg, Point mousePosition)
+        public void OnDragOver(DragEventArgs arg)
+        {
+            UpdateDragEffects(arg);
+        }
+
+        private void UpdateDragEffects(DragEventArgs arg)
         {
             if (IsLocked)
             {
                 Log.LogWarn($"discard user actions because editor was locked.");
-                return;
-            }
-            if (!IsDesignMode)
-            {
-                Toast.ShowMessage(Lang.EditorMustBeDesignMode);
+                arg.DragEffects = DragDropEffects.None;
+                arg.Handled = true;
                 return;
             }
 
+            var canDrop = IoC.Get<IDragDropManager>().TryGetDragData(arg, out var dragData) &&
+                          dragData is ToolboxItem or ToolboxItemViewModel or IEditorDropHandler;
+            arg.DragEffects = canDrop ? DragDropEffects.Move : DragDropEffects.None;
+            arg.Handled = true;
+        }
+
+        public void OnDrop(DragEventArgs arg, Point mousePosition)
+        {
             var dragDropManager = IoC.Get<IDragDropManager>();
-            if (dragDropManager.TryGetDragData(arg, out var dragData))
+            try
             {
+                if (!dragDropManager.TryGetDragData(arg, out var dragData))
+                    return;
+
+                if (IsLocked)
+                {
+                    Log.LogWarn($"discard user actions because editor was locked.");
+                    return;
+                }
+                if (!IsDesignMode)
+                {
+                    Toast.ShowMessage(Lang.EditorMustBeDesignMode);
+                    return;
+                }
+
                 mousePosition = mousePosition.WithY(RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY);
 
                 switch (dragData)
@@ -1711,12 +1732,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     case ToolboxItem toolboxItem:
                         new DefaultToolBoxDropAction(toolboxItem).Drop(this, mousePosition);
                         break;
+                    case ToolboxItemViewModel toolboxItemViewModel:
+                        new DefaultToolBoxDropAction(toolboxItemViewModel.Model).Drop(this, mousePosition);
+                        break;
                     case IEditorDropHandler dropHandler:
                         dropHandler.Drop(this, mousePosition);
                         break;
                 }
-
+            }
+            finally
+            {
                 dragDropManager.EndDragDropEvent(arg);
+                arg.Handled = true;
             }
         }
 
@@ -1727,6 +1754,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         {
             //rect.Y = rect.Y - CurrentPlayTime;
             hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
+        }
+
+        internal void ClearHitObjects() => hits.Clear();
+
+        internal List<OngekiObjectBase> QueryHitObjects(Point position)
+        {
+            // Materialize before filtering so a concurrent render frame cannot invalidate the input query.
+            return hits.ToArray()
+                .Where(x => x.Value.Contains(position))
+                .Select(x => x.Key)
+                .OrderBy(x => x.Id)
+                .ToList();
         }
 
         public void ScrollPage(int page)

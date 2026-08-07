@@ -1,7 +1,7 @@
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Shell;
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser;
+using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Commands;
 
@@ -12,7 +12,7 @@ public partial class ViewFumenMetaInfoBrowserCommandHandler : CommandHandlerBase
 
     public override Task Run(Command command)
     {
-        var tool = IoC.Get<IFumenMetaInfoBrowser>();
+        var tool = IoC.Get<IFumenEditorSelectingObjectViewer>();
         if (tool is Gekimini.Avalonia.Framework.IToolViewModel tvm)
             Shell.ShowTool(tvm);
         return Task.CompletedTask;
