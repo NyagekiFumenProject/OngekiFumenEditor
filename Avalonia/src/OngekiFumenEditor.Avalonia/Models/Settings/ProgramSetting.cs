@@ -44,4 +44,7 @@ public partial class ProgramSetting : SettingModelBase<ProgramSetting>
 
     [ObservableProperty]
     public partial bool __NeedUpgradeSetting { get; set; } = true;
+
+    [ObservableProperty]
+    public partial string __PrevProgramVersionString { get; set; } = string.Empty;
 }

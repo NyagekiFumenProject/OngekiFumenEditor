@@ -1,11 +1,13 @@
 using System;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.Documents;
 using Gekimini.Avalonia.Modules.Shell;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Utils;
 using Iciclecreek.Avalonia.WindowManager;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +15,8 @@ using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Browser.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
+using OngekiFumenEditor.Avalonia.Models.Settings;
+using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Browser;
 
@@ -51,10 +55,54 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
         base.OnFrameworkInitializationCompleted();
 
         logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorBrowserApp>>();
+        InitializeProgramVersion();
+
         var shell = ServiceProvider.GetService<IShell>();
 
         shell.DockableOpened += AutoSaveLayout;
         shell.DockableClosed += AutoSaveLayout;
+    }
+
+    private void InitializeProgramVersion()
+    {
+        try
+        {
+            var currentVersion = typeof(OngekiFumenEditorApp).Assembly.GetName().Version ??
+                new Version(0, 0, 0, 0);
+            var currentVersionString = currentVersion.ToString();
+            var setting = ProgramSetting.Default;
+            var previousVersionString = setting.__PrevProgramVersionString;
+
+            setting.__PrevProgramVersionString = currentVersionString;
+            setting.Save();
+
+            if (string.IsNullOrWhiteSpace(previousVersionString) ||
+                !Version.TryParse(previousVersionString, out var previousVersion) ||
+                previousVersion.Equals(currentVersion))
+                return;
+
+            Dispatcher.UIThread.Post(
+                () => _ = ShowProgramUpdateAboutDialogAsync(previousVersion),
+                DispatcherPriority.Background);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to initialize browser program version tracking.");
+        }
+    }
+
+    private async Task ShowProgramUpdateAboutDialogAsync(Version sourceVersion)
+    {
+        try
+        {
+            await WaitForSplashScreenHostReadyAsync();
+            await ServiceProvider.GetRequiredService<IWindowManager>()
+                .ShowDialogAsync(new AboutWindowViewModel(true, sourceVersion));
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to show the About dialog after a browser update.");
+        }
     }
 
     private void AutoSaveLayout(object sender, IDockableViewModel e)
