@@ -32,6 +32,21 @@ namespace OngekiFumenEditor.Avalonia.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> Repeat<T>(this T o, int repeatCount) => Enumerable.Repeat(o, repeatCount);
 
+        /// <summary>
+        /// 获取首个满足条件的元素下标，未找到时返回 -1
+        /// </summary>
+        public static int FirstIndexOf<T>(this IEnumerable<T> collection, Func<T, bool> predicate)
+        {
+            var index = 0;
+            foreach (var item in collection)
+            {
+                if (predicate(item))
+                    return index;
+                index++;
+            }
+            return -1;
+        }
+
         public static void ForEach<T>(this IEnumerable<T> list, Action<T> fun)
         {
             if (list is null)

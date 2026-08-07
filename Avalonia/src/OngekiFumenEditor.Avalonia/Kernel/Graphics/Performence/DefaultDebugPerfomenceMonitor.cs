@@ -1,11 +1,12 @@
-using OngekiFumenEditor.Avalonia.Base.Collections;
 using System;
+using System.Collections.Immutable;
 using System.Collections.Generic;
 using Injectio.Attributes;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using static OngekiFumenEditor.Avalonia.Kernel.Graphics.IPerfomenceMonitor;
 using static OngekiFumenEditor.Avalonia.Kernel.Graphics.IPerfomenceMonitor.IDrawingPerformenceStatisticsData;
 
@@ -17,23 +18,95 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 	public class DefaultDebugPerfomenceMonitor : IPerfomenceMonitor
 	{
 		const int RECORD_LENGTH = 165;
-		private readonly object syncRoot = new();
+
+		private sealed class LockFreeSampleBuffer
+		{
+			private readonly long[] values;
+			private readonly long[] sequenceNumbers;
+			private readonly int capacity;
+			private long nextSequence;
+
+			public LockFreeSampleBuffer(int capacity)
+			{
+				this.capacity = capacity;
+				values = new long[capacity];
+				sequenceNumbers = new long[capacity];
+				Array.Fill(sequenceNumbers, -1L);
+			}
+
+			public void Enqueue(long value)
+			{
+				var sequence = Interlocked.Increment(ref nextSequence) - 1;
+				var index = (int)(sequence % capacity);
+
+				// Invalidate the slot before replacing its value; readers discard an in-flight slot.
+				Volatile.Write(ref sequenceNumbers[index], long.MinValue);
+				Volatile.Write(ref values[index], value);
+				Volatile.Write(ref sequenceNumbers[index], sequence);
+			}
+
+			public long[] Snapshot()
+			{
+				var end = Volatile.Read(ref nextSequence);
+				if (end <= 0)
+					return Array.Empty<long>();
+
+				var count = (int)Math.Min(end, capacity);
+				var start = end - count;
+				var snapshot = new long[count];
+				var actualCount = 0;
+
+				for (var sequence = start; sequence < end; sequence++)
+				{
+					var index = (int)(sequence % capacity);
+					var sequenceBefore = Volatile.Read(ref sequenceNumbers[index]);
+					var value = Volatile.Read(ref values[index]);
+					var sequenceAfter = Volatile.Read(ref sequenceNumbers[index]);
+
+					if (sequenceBefore == sequence && sequenceAfter == sequence)
+						snapshot[actualCount++] = value;
+				}
+
+				if (actualCount != snapshot.Length)
+					Array.Resize(ref snapshot, actualCount);
+
+				return snapshot;
+			}
+		}
 
 		private class DrawingPerformenceData
 		{
 			public string Name { get; init; }
-			public int DrawCallCount { get; set; }
-			public long OnBeginDrawingTicks { get; set; }
+			private LockFreeSampleBuffer drawingSpendTicks = new(RECORD_LENGTH);
+			private LockFreeSampleBuffer drawCall = new(RECORD_LENGTH);
+			private int drawCallCount;
+			private long onBeginDrawingTicks;
 
-			public FixedSizeCycleCollection<long> DrawingSpendTicks { get; } = new(RECORD_LENGTH);
-			public FixedSizeCycleCollection<long> DrawCall { get; } = new(RECORD_LENGTH);
+			public long OnBeginDrawingTicks => Volatile.Read(ref onBeginDrawingTicks);
+
+			public void SetOnBeginDrawingTicks(long value) => Volatile.Write(ref onBeginDrawingTicks, value);
+
+			public void IncrementDrawCall() => Interlocked.Increment(ref drawCallCount);
+
+			public void RecordDrawing(long spendTicks)
+			{
+				Volatile.Read(ref drawingSpendTicks).Enqueue(spendTicks);
+				Volatile.Read(ref drawCall).Enqueue(Volatile.Read(ref drawCallCount));
+			}
+
+			public void RecordTargetDrawing(long spendTicks) => Volatile.Read(ref drawingSpendTicks).Enqueue(spendTicks);
+
+			public (long[] SpendTicks, long[] DrawCalls) Snapshot() =>
+				(Volatile.Read(ref drawingSpendTicks).Snapshot(), Volatile.Read(ref drawCall).Snapshot());
 
 			public void ClearAll()
 			{
-				DrawingSpendTicks.Clear();
-				OnBeginDrawingTicks = default;
-				DrawCallCount = default;
+				// Swap only the sample windows; an active render pair may still use the timestamp and count.
+				Interlocked.Exchange(ref drawingSpendTicks, new LockFreeSampleBuffer(RECORD_LENGTH));
+				Interlocked.Exchange(ref drawCall, new LockFreeSampleBuffer(RECORD_LENGTH));
 			}
+
+			public void ResetDrawCallCount() => Interlocked.Exchange(ref drawCallCount, 0);
 		}
 
 		private class DrawingTargetPerformenceData : DrawingPerformenceData
@@ -41,100 +114,94 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 
 		}
 
-		private Dictionary<IDrawing, DrawingPerformenceData> drawDataMap = new();
-		private Dictionary<IDrawingTarget, DrawingTargetPerformenceData> drawTargetDataMap = new();
-		private Stopwatch timer = new Stopwatch();
+		private ImmutableDictionary<IDrawing, DrawingPerformenceData> drawDataMap = ImmutableDictionary<IDrawing, DrawingPerformenceData>.Empty;
+		private ImmutableDictionary<IDrawingTarget, DrawingTargetPerformenceData> drawTargetDataMap = ImmutableDictionary<IDrawingTarget, DrawingTargetPerformenceData>.Empty;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private DrawingPerformenceData GetDrawingPerformenceData(IDrawing d) => drawDataMap.TryGetValue(d, out var data) ? data : (drawDataMap[d] = new DrawingPerformenceData() { Name = d.GetType().Name });
+		private DrawingPerformenceData GetDrawingPerformenceData(IDrawing d) => GetOrAdd(ref drawDataMap, d, static key => new DrawingPerformenceData() { Name = key.GetType().Name });
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private DrawingTargetPerformenceData GetDrawingTargetPerformenceData(IDrawingTarget d) => drawTargetDataMap.TryGetValue(d, out var data) ? data : (drawTargetDataMap[d] = new DrawingTargetPerformenceData() { Name = d.GetType().Name });
+		private DrawingTargetPerformenceData GetDrawingTargetPerformenceData(IDrawingTarget d) => GetOrAdd(ref drawTargetDataMap, d, static key => new DrawingTargetPerformenceData() { Name = key.GetType().Name });
 
-		private FixedSizeCycleCollection<long> RenderSpendTicks { get; } = new(RECORD_LENGTH);
-		private FixedSizeCycleCollection<long> UIRenderSpendTicks { get; } = new(RECORD_LENGTH);
-		private FixedSizeCycleCollection<long> TotalDrawCall { get; } = new(RECORD_LENGTH);
+		private static TValue GetOrAdd<TKey, TValue>(ref ImmutableDictionary<TKey, TValue> map, TKey key, Func<TKey, TValue> valueFactory)
+			where TKey : notnull
+			where TValue : class
+		{
+			while (true)
+			{
+				var current = Volatile.Read(ref map);
+				if (current.TryGetValue(key, out var existing))
+					return existing;
+
+				var created = valueFactory(key);
+				var updated = current.Add(key, created);
+				if (ReferenceEquals(Interlocked.CompareExchange(ref map, updated, current), current))
+					return created;
+			}
+		}
+
+		private LockFreeSampleBuffer renderSpendTicks = new(RECORD_LENGTH);
+		private LockFreeSampleBuffer uiRenderSpendTicks = new(RECORD_LENGTH);
+		private LockFreeSampleBuffer totalDrawCall = new(RECORD_LENGTH);
 		private long currentDrawCall = 0;
 		private long currentBeginRenderTick = 0;
 
 		public void OnBeforeRender()
 		{
-			lock (syncRoot)
-			{
-				currentDrawCall = 0;
-				timer.Restart();
-				//currentBeginRenderTick = timer.ElapsedTicks;
-			}
+			Interlocked.Exchange(ref currentDrawCall, 0);
+			Volatile.Write(ref currentBeginRenderTick, Stopwatch.GetTimestamp());
 		}
 
 		public void OnBeginTargetDrawing(IDrawingTarget drawingTarget)
 		{
-			lock (syncRoot)
-			{
-				var data = GetDrawingTargetPerformenceData(drawingTarget);
-				data.OnBeginDrawingTicks = timer.ElapsedTicks;
-			}
+			var data = GetDrawingTargetPerformenceData(drawingTarget);
+			data.SetOnBeginDrawingTicks(Stopwatch.GetTimestamp());
 		}
 
 		public void OnBeginDrawing(IDrawing drawing)
 		{
-			lock (syncRoot)
-			{
-				var data = GetDrawingPerformenceData(drawing);
-				data.OnBeginDrawingTicks = timer.ElapsedTicks;
-			}
+			var data = GetDrawingPerformenceData(drawing);
+			data.SetOnBeginDrawingTicks(Stopwatch.GetTimestamp());
 		}
 
 		public void CountDrawCall(IDrawing drawing)
 		{
-			lock (syncRoot)
-			{
-				var data = GetDrawingPerformenceData(drawing);
-				data.DrawCallCount++;
-				currentDrawCall++;
-			}
+			var data = GetDrawingPerformenceData(drawing);
+			data.IncrementDrawCall();
+			Interlocked.Increment(ref currentDrawCall);
 		}
 
 		public void OnAfterDrawing(IDrawing drawing)
 		{
-			lock (syncRoot)
-			{
-				var data = GetDrawingPerformenceData(drawing);
-				var tickDiff = timer.ElapsedTicks - data.OnBeginDrawingTicks;
-				data.DrawingSpendTicks.Enqueue(tickDiff);
-				data.DrawCall.Enqueue(data.DrawCallCount);
-			}
+			var data = GetDrawingPerformenceData(drawing);
+			var tickDiff = Stopwatch.GetTimestamp() - data.OnBeginDrawingTicks;
+			data.RecordDrawing(tickDiff);
 		}
 
 		public void OnAfterTargetDrawing(IDrawingTarget drawing)
 		{
-			lock (syncRoot)
-			{
-				var data = GetDrawingTargetPerformenceData(drawing);
-				var tickDiff = timer.ElapsedTicks - data.OnBeginDrawingTicks;
-				data.DrawingSpendTicks.Enqueue(tickDiff);
-			}
+			var data = GetDrawingTargetPerformenceData(drawing);
+			var tickDiff = Stopwatch.GetTimestamp() - data.OnBeginDrawingTicks;
+			data.RecordTargetDrawing(tickDiff);
 		}
 
 		public void OnAfterRender()
 		{
-			lock (syncRoot)
-			{
-				timer.Stop();
-				RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
-				TotalDrawCall.Enqueue(currentDrawCall);
-				foreach (var data in drawDataMap.Values)
-					data.DrawCallCount = 0;
-			}
+			var tickDiff = Stopwatch.GetTimestamp() - Volatile.Read(ref currentBeginRenderTick);
+			Volatile.Read(ref renderSpendTicks).Enqueue(tickDiff);
+			Volatile.Read(ref totalDrawCall).Enqueue(Volatile.Read(ref currentDrawCall));
+
+			foreach (var data in Volatile.Read(ref drawDataMap).Values)
+				data.ResetDrawCallCount();
 		}
 
 		public void Clear()
 		{
-			lock (syncRoot)
-			{
-				drawDataMap.Clear();
-				drawTargetDataMap.Clear();
-			}
+			foreach (var data in Volatile.Read(ref drawDataMap).Values)
+				data.ClearAll();
+
+			foreach (var data in Volatile.Read(ref drawTargetDataMap).Values)
+				data.ClearAll();
 		}
 
 		public struct DrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
@@ -150,16 +217,24 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 
 		private IDrawingPerformenceStatisticsData StatisticsPerformenceData(IEnumerable<DrawingPerformenceData> dataList)
 		{
-			if (dataList.Count() == 0)
+			var snapshots = dataList
+				.Select(x => (x.Name, Data: x.Snapshot()))
+				.Where(x => x.Data.SpendTicks.Length > 0)
+				.ToArray();
+
+			if (snapshots.Length == 0)
 				return default;
 
-			var ave = dataList.Select(x => x.DrawingSpendTicks.Average()).Average();
-			var most = dataList.SelectMany(x => x.DrawingSpendTicks).GroupBy(x => (int)x).OrderByDescending(x => x.Count()).SelectMany(x => x).Average();
+			var ave = snapshots.Select(x => x.Data.SpendTicks.Average()).Average();
+			var most = MostFrequentAverage(snapshots.SelectMany(x => x.Data.SpendTicks));
 
-			var list = dataList
-				.Select(x => new { TotalCost = x.DrawingSpendTicks.Sum(), Obj = x })
+			var list = snapshots
+				.Select(x => new { TotalCost = x.Data.SpendTicks.Sum(), Data = x })
 				.OrderByDescending(x => x.TotalCost)
-				.Select(x => new PerformenceItem(x.Obj.Name, x.Obj.DrawingSpendTicks.Average(), (int)x.Obj.DrawCall.Average()))
+				.Select(x => new PerformenceItem(
+					x.Data.Name,
+					x.Data.Data.SpendTicks.Average(),
+					x.Data.Data.DrawCalls.Length == 0 ? 0 : (int)x.Data.Data.DrawCalls.Average()))
 				.ToList();
 
 			return new DrawingPerformenceStatisticsData()
@@ -170,37 +245,55 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 			};
 		}
 
+		private static double MostFrequentAverage(IEnumerable<long> values)
+		{
+			var group = values
+				.GroupBy(x => (int)x)
+				.OrderByDescending(x => x.Count())
+				.FirstOrDefault();
+
+			return group is null ? 0 : group.Average();
+		}
+
+		private static long MostFrequentValue(IEnumerable<long> values)
+		{
+			var group = values
+				.GroupBy(x => (int)x)
+				.OrderByDescending(x => x.Count())
+				.FirstOrDefault();
+
+			return group?.Key ?? 0;
+		}
+
 		public IDrawingPerformenceStatisticsData GetDrawingPerformenceData()
 		{
-			lock (syncRoot)
-				return StatisticsPerformenceData(drawDataMap.Values);
+			return StatisticsPerformenceData(Volatile.Read(ref drawDataMap).Values);
 		}
 
 		public IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData()
 		{
-			lock (syncRoot)
-				return StatisticsPerformenceData(drawTargetDataMap.Values);
+			return StatisticsPerformenceData(Volatile.Read(ref drawTargetDataMap).Values);
 		}
 
 		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
 		{
-			lock (syncRoot)
+			var renderSpendTicks = Volatile.Read(ref this.renderSpendTicks).Snapshot();
+			var uiRenderSpendTicks = Volatile.Read(ref this.uiRenderSpendTicks).Snapshot();
+			var totalDrawCall = Volatile.Read(ref this.totalDrawCall).Snapshot();
+
+			return new RenderPerformenceStatisticsData()
 			{
-				return new RenderPerformenceStatisticsData()
-				{
-					AveSpendTicks = RenderSpendTicks.Average(),
-					AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
-					MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-					MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-					AveDrawCall = (int)TotalDrawCall.Average()
-				};
-			}
+				AveSpendTicks = renderSpendTicks.Length == 0 ? 0 : renderSpendTicks.Average(),
+				AveUIRenderSpendTicks = uiRenderSpendTicks.Length == 0 ? 0 : uiRenderSpendTicks.Average(),
+				MostUIRenderSpendTicks = MostFrequentValue(uiRenderSpendTicks),
+				MostSpendTicks = MostFrequentValue(renderSpendTicks),
+				AveDrawCall = totalDrawCall.Length == 0 ? 0 : (int)totalDrawCall.Average()
+			};
 		}
 
 		public void PostUIRenderTime(TimeSpan ts)
 		{
-			lock (syncRoot)
-				UIRenderSpendTicks.Enqueue(ts.Ticks);
+			Volatile.Read(ref uiRenderSpendTicks).Enqueue(ts.Ticks);
 		}
 
 		public void FormatStatistics(StringBuilder builder)

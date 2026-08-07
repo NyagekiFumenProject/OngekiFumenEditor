@@ -1,16 +1,25 @@
 using System.Drawing;
 using System.Globalization;
 using System.Numerics;
+using System.Text;
 using System.Text.Json;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Headless.XUnit;
 using Avalonia.LogicalTree;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Gekimini.Avalonia.Framework.Commands;
+using Gekimini.Avalonia.Modules.ToolBars.Controls;
+using Gekimini.Avalonia.Modules.ToolBars.Views;
 using Gekimini.Avalonia.UI.ValueConverters;
+using Gekimini.Avalonia.Utils;
+using Gekimini.Avalonia.Views;
+using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenBulletPalleteListViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Views;
@@ -27,6 +36,8 @@ using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters;
 using OngekiFumenEditor.Avalonia.Utils;
 using Xunit;
+using AvaloniaBitmap = Avalonia.Media.Imaging.Bitmap;
+using AvaloniaImage = Avalonia.Controls.Image;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Regression;
 
@@ -132,6 +143,117 @@ public sealed class EditorUiRegressionTests
     }
 
     [AvaloniaFact]
+    public void ToolbarOverflowButton_IsHiddenUntilItemsOverflow()
+    {
+        var toolBarsView = new ToolBarsView();
+        var toolBar = new AdaptiveToolBar { Width = 360 };
+        toolBar.Items.Add(new Button { Width = 90, Content = "one" });
+        toolBar.Items.Add(new Button { Width = 90, Content = "two" });
+        toolBar.Items.Add(new Button { Width = 90, Content = "three" });
+        toolBarsView.ToolBarTray.ToolBars.Add(toolBar);
+
+        var window = new Window
+        {
+            Width = 400,
+            Height = 80,
+            Content = toolBarsView
+        };
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            var overflowButton = Assert.Single(
+                toolBar.GetVisualDescendants().OfType<ToggleButton>(),
+                button => button.Name == "PART_OverflowButton");
+            var mainPanelBorder = Assert.Single(
+                toolBar.GetVisualDescendants().OfType<Border>(),
+                border => border.Name == "MainPanelBorder");
+
+            Assert.False(toolBar.HasOverflowItems);
+            Assert.False(overflowButton.IsVisible);
+            Assert.Equal(0, mainPanelBorder.Margin.Right);
+
+            toolBar.Width = 100;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.True(toolBar.HasOverflowItems);
+            Assert.True(overflowButton.IsVisible);
+            Assert.Equal(11, mainPanelBorder.Margin.Right);
+
+            toolBar.Width = 360;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.False(toolBar.HasOverflowItems);
+            Assert.False(overflowButton.IsVisible);
+            Assert.Equal(0, mainPanelBorder.Margin.Right);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public void ViewLocator_ReattachedToolbarViewRestoresIconAndCommandBindings()
+    {
+        var services = new ServiceCollection()
+            .AddLogging()
+            .AddSingleton<Gekimini.Avalonia.Utils.ITypeCollectedActivator<IView>, TestToolbarViewActivator>()
+            .BuildServiceProvider();
+        var locator = new ViewLocator(
+            services.GetRequiredService<Microsoft.Extensions.Logging.ILogger<ViewLocator>>(),
+            services);
+        var viewModel = new TestToolbarItemViewModel();
+        var view = Assert.IsType<TestToolbarItemView>(locator.Build(viewModel));
+        var host = new ContentControl();
+        var window = new Window
+        {
+            Width = 120,
+            Height = 80,
+            Content = host
+        };
+
+        try
+        {
+            window.Show();
+            host.Content = view;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Same(viewModel, view.DataContext);
+            Assert.NotNull(view.Button.Command);
+            Assert.NotNull(view.Icon.Source);
+
+            host.Content = null;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+            Assert.Same(viewModel, view.DataContext);
+
+            host.Content = view;
+            window.UpdateLayout();
+            Dispatcher.UIThread.RunJobs();
+
+            Assert.Same(viewModel, view.DataContext);
+            Assert.NotNull(view.Button.Command);
+            Assert.NotNull(view.Icon.Source);
+            Assert.True(view.Button.IsEffectivelyEnabled);
+
+            view.Button.Command!.Execute(null);
+            Assert.Equal(1, viewModel.ExecuteCount);
+        }
+        finally
+        {
+            window.Close();
+            services.Dispose();
+        }
+    }
+
+    [AvaloniaFact]
     public void PropertyGeneratorConverter_SupportedProperty_ReturnsGeneratedControl()
     {
         var target = new InspectorTarget();
@@ -179,6 +301,46 @@ public sealed class EditorUiRegressionTests
         Assert.True(queryCount > 0);
         Assert.Equal(objects.Length, editor.QueryHitObjects(new global::Avalonia.Point(0, 0)).Count);
     }
+
+#if DEBUG
+    [Fact]
+    public async Task DebugPerformanceMonitor_CanReadAndClearWhileRendering()
+    {
+        var monitor = new DefaultDebugPerfomenceMonitor();
+        var drawing = new CommonDrawingBase();
+        var drawingTarget = new TestDrawingTarget();
+
+        var renderTask = Task.Run(() =>
+        {
+            for (var frame = 0; frame < 1000; frame++)
+            {
+                monitor.OnBeforeRender();
+                monitor.OnBeginDrawing(drawing);
+                monitor.OnBeginTargetDrawing(drawingTarget);
+                monitor.CountDrawCall(drawing);
+                monitor.OnAfterDrawing(drawing);
+                monitor.OnAfterTargetDrawing(drawingTarget);
+                monitor.OnAfterRender();
+                monitor.PostUIRenderTime(TimeSpan.FromMilliseconds(1));
+            }
+        });
+
+        var statisticsTask = Task.Run(() =>
+        {
+            for (var sample = 0; sample < 1000; sample++)
+            {
+                var render = monitor.GetRenderPerformenceData();
+                Assert.True(render.AveSpendTicks >= 0);
+
+                var builder = new StringBuilder();
+                monitor.FormatStatistics(builder);
+                monitor.Clear();
+            }
+        });
+
+        await Task.WhenAll(renderTask, statisticsTask);
+    }
+#endif
 
     [AvaloniaTheory]
     [InlineData(typeof(FumenBulletPalleteListViewerView))]
@@ -229,4 +391,62 @@ public sealed class EditorUiRegressionTests
     {
         public int Value { get; set; }
     }
+
+    private sealed class TestToolbarItemViewModel : Gekimini.Avalonia.ViewModels.ViewModelBase
+    {
+        public TestToolbarItemViewModel()
+        {
+            using var stream = ResourceUtils.OpenReadResourceStream("Icons/home.png");
+            IconSource = new AvaloniaBitmap(stream);
+            Command = new CommunityToolkit.Mvvm.Input.RelayCommand(() => ExecuteCount++);
+        }
+
+        public AvaloniaBitmap IconSource { get; }
+
+        public System.Windows.Input.ICommand Command { get; }
+
+        public int ExecuteCount { get; private set; }
+    }
+
+    private sealed class TestToolbarItemView : ViewBase
+    {
+        public TestToolbarItemView()
+        {
+            Icon = new AvaloniaImage { Width = 16, Height = 16 };
+            Icon.Bind(AvaloniaImage.SourceProperty, new global::Avalonia.Data.Binding(nameof(TestToolbarItemViewModel.IconSource)));
+
+            Button = new Button();
+            Button.Bind(Button.CommandProperty, new global::Avalonia.Data.Binding(nameof(TestToolbarItemViewModel.Command)));
+            Button.Content = Icon;
+            Content = Button;
+        }
+
+        public Button Button { get; }
+
+        public AvaloniaImage Icon { get; }
+    }
+
+    private sealed class TestToolbarViewActivator : Gekimini.Avalonia.Utils.ITypeCollectedActivator<IView>
+    {
+        public bool TryCreateInstance(IServiceProvider serviceProvider, string fullName, out IView obj)
+        {
+            if (fullName == typeof(TestToolbarItemView).FullName)
+            {
+                obj = new TestToolbarItemView();
+                return true;
+            }
+
+            obj = default!;
+            return false;
+        }
+    }
+
+#if DEBUG
+    private sealed class TestDrawingTarget : IDrawingTarget
+    {
+        public void Initialize(IRenderManagerImpl impl)
+        {
+        }
+    }
+#endif
 }

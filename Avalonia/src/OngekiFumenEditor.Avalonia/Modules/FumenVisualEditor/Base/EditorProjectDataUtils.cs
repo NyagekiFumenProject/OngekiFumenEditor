@@ -76,44 +76,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			if (audioFile is not null &&
 				Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
 			{
-				if (string.IsNullOrWhiteSpace(audioFile.LocalPath))
+				if (OperatingSystem.IsBrowser() || string.IsNullOrWhiteSpace(audioFile.LocalPath))
 				{
 					errors.Add($"Audio '{projectData.AudioFilePath}': ACB decoding is not supported on this platform.");
 				}
 				else
 				{
-					try
-					{
-						await using var acbStream = await audioFile.OpenRead();
-						using var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false);
-						if (acb.InternalAwb is null)
-						{
-							var rawAwbLocator = acb.ExternalAwb?.FileName;
-							if (string.IsNullOrWhiteSpace(rawAwbLocator))
-							{
-								errors.Add($"Audio '{projectData.AudioFilePath}': the ACB has no usable AWB data.");
-							}
-							else if (!EditorProjectPathResolver.TryResolveDependency(
-								         projectRoot,
-								         rootRelativeAudioLocator,
-								         rawAwbLocator,
-								         out audioAwbFile,
-								         out _,
-								         out _,
-								         out var awbError))
-							{
-								errors.Add($"Audio AWB '{rawAwbLocator}': {awbError}");
-							}
-							else if (string.IsNullOrWhiteSpace(audioAwbFile?.LocalPath))
-							{
-								errors.Add($"Audio AWB '{rawAwbLocator}': external AWB decoding is not supported on this platform.");
-							}
-						}
-					}
-					catch (Exception exception)
-					{
-						errors.Add($"Audio '{projectData.AudioFilePath}': the ACB package cannot be inspected: {exception.Message}");
-					}
+					audioAwbFile = await InspectAcbDependencyAsync(
+						projectRoot,
+						audioFile,
+						rootRelativeAudioLocator,
+						projectData.AudioFilePath,
+						errors);
 				}
 			}
 
@@ -197,6 +171,56 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			projectData.ProjectRoot = projectRoot;
 			ApplyBulletPalleteListEditorData(projectData);
 			return projectData;
+		}
+
+		// Keep the legacy desktop-only ACB parser out of the general browser load path.
+		private static async Task<ISimpleFile> InspectAcbDependencyAsync(
+			ISimpleDirectory projectRoot,
+			ISimpleFile audioFile,
+			string rootRelativeAudioLocator,
+			string audioFilePath,
+			List<string> errors)
+		{
+			try
+			{
+				await using var acbStream = await audioFile.OpenRead();
+				using var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false);
+				if (acb.InternalAwb is not null)
+					return null;
+
+				var rawAwbLocator = acb.ExternalAwb?.FileName;
+				if (string.IsNullOrWhiteSpace(rawAwbLocator))
+				{
+					errors.Add($"Audio '{audioFilePath}': the ACB has no usable AWB data.");
+					return null;
+				}
+
+				if (!EditorProjectPathResolver.TryResolveDependency(
+						projectRoot,
+						rootRelativeAudioLocator,
+						rawAwbLocator,
+						out var audioAwbFile,
+						out _,
+						out _,
+						out var awbError))
+				{
+					errors.Add($"Audio AWB '{rawAwbLocator}': {awbError}");
+					return null;
+				}
+
+				if (string.IsNullOrWhiteSpace(audioAwbFile?.LocalPath))
+				{
+					errors.Add($"Audio AWB '{rawAwbLocator}': external AWB decoding is not supported on this platform.");
+					return null;
+				}
+
+				return audioAwbFile;
+			}
+			catch (Exception exception)
+			{
+				errors.Add($"Audio '{audioFilePath}': the ACB package cannot be inspected: {exception.Message}");
+				return null;
+			}
 		}
 
 		private static void ApplyBulletPalleteListEditorData(EditorProjectDataModel projectData)

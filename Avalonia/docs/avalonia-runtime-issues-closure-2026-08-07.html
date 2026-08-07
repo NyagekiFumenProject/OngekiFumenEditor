@@ -105,11 +105,11 @@
   <main>
     <header>
       <h1>Avalonia 运行时问题收尾报告</h1>
-      <p class="meta">项目：OngekiFumenEditor.Avalonia · 日期：2026-08-07 · 范围：本轮用户反馈的运行时问题</p>
+      <p class="meta">项目：OngekiFumenEditor.Avalonia · 日期：2026-08-07 · 更新：2026-08-08 · 范围：本轮用户反馈的运行时问题</p>
       <p>本报告记录已完成的代码修复、可重复验证结果以及后续维护建议。它是运行时问题的收尾记录，不替代原有的迁移差异审查报告。</p>
       <div class="summary">
-        <div class="metric"><strong>7 / 7</strong>用户反馈项已处理</div>
-        <div class="metric"><strong>302 / 302</strong>完整测试通过</div>
+        <div class="metric"><strong>9 / 9</strong>用户反馈项已处理</div>
+        <div class="metric"><strong>305 / 305</strong>核心测试通过</div>
         <div class="metric"><strong>0</strong>构建错误与差异格式错误</div>
       </div>
     </header>
@@ -134,6 +134,18 @@
               <td>继续为新增命令执行“非空 URI + 资源可读”烟囱测试；资源文件改名时让 CI 立即失败，避免再次出现空白按钮。</td>
             </tr>
             <tr>
+              <td><span class="status">已修复</span><br>当没有内容溢出时，隐藏按钮</td>
+              <td>第三方 Toolbar 模板始终显示右下角溢出按钮，只在无溢出时将其禁用，因此呈现灰色三角并永久预留 11px。已引入 <code>AdaptiveToolBar</code>，按 <code>HasOverflowItems</code> 同步按钮可见性，并在隐藏时回收预留空间。</td>
+              <td><code>ToolbarOverflowButton_IsHiddenUntilItemsOverflow</code> 覆盖正常宽度、发生溢出以及重新展开三个状态，验证按钮可见性和边距回切。</td>
+              <td>升级 <code>AvaloniaControlsToolBar</code> 时核对 <code>PART_OverflowButton</code> 与 <code>MainPanelBorder</code> 模板部件名称，并保留三态布局回归，避免依赖模板变化后静默失效。</td>
+            </tr>
+            <tr>
+              <td><span class="status">已修复</span><br>当展示的按钮被收入溢出时，再放出来就没有按钮icon也无法点击</td>
+              <td>Toolbar 在主区域与溢出弹层之间搬移视图时会触发短暂 <code>Unloaded</code>；通用 <code>ViewLocator</code> 此时清空 <code>DataContext</code>，导致视图返回主区域后图标和命令绑定同时丢失。现在卸载仍执行生命周期清理，但保留定位器创建时的一对一 DataContext，并在加载时防御性恢复。</td>
+              <td><code>ViewLocator_ReattachedToolbarViewRestoresIconAndCommandBindings</code> 验证视图卸载再挂载后 DataContext、图片源、命令、启用状态和实际执行结果均正常。</td>
+              <td>其他会跨视觉根移动内容的控件（Popup、Flyout、虚拟化面板）也应复用该生命周期回归；业务资源释放继续放在 <code>OnViewBeforeUnload</code>，不要依赖清空 DataContext。</td>
+            </tr>
+            <tr>
               <td><span class="status">已修复</span><br>物件属性窗口无法显示实时生成的控件</td>
               <td>三个属性/操作 converter 是占位实现，直接返回输入对象，没有调用 Avalonia UI generator。已分别接通单对象、多对象和属性 wrapper 的生成器，并对不支持输入返回 <code>UnsetValue</code>。</td>
               <td><code>PropertyGeneratorConverter_SupportedProperty_ReturnsGeneratedControl</code> 通过；项目构建成功。</td>
@@ -154,20 +166,20 @@
             <tr>
               <td><span class="status">已修复</span><br>菜单点击时间计算器和当前选择物件查看器没出现对应界面，且对应菜单按钮变灰了</td>
               <td>两个命令处理器复制了元信息浏览器的接口解析，实际应解析各自的 <code>ITGridCalculatorToolViewer</code> 与 <code>IFumenEditorSelectingObjectViewer</code>，导致服务解析失败并使 <code>CanExecute</code> 变灰。已更正接口映射。</td>
-              <td>对应命令处理器已改为正确接口；全量 301 项测试通过，构建无错误。</td>
+              <td>对应命令处理器已改为正确接口；全量 305 项核心测试通过，构建无错误。</td>
               <td>为每个菜单命令建立“命令定义 - handler - tool interface”映射测试，并覆盖工具已打开时聚焦、未注册时禁用和切换文档后的 CanExecute。</td>
             </tr>
             <tr>
               <td><span class="status">已修复</span><br>编辑器Hold渲染出问题了，Hold长条被渲染成黑色而不是对应的颜色</td>
               <td>旧设置中的 <code>System.Drawing.Color</code> 被按对象形状反序列化为 <code>Color.Empty</code>（A/R/G/B 全为 0），渲染转换后自然变黑/透明。已加入兼容 JSON converter，按 ARGB 数字持久化，并在反序列化后对空颜色恢复默认 Hold 调色板。</td>
-              <td><code>EditorGlobalSettingJson_RoundTripsHoldColorsAsArgbNumbers</code>、legacy object recovery 测试通过；完整测试 301/301。</td>
+              <td><code>EditorGlobalSettingJson_RoundTripsHoldColorsAsArgbNumbers</code>、legacy object recovery 测试通过；完整核心测试 305/305。</td>
               <td>为设置文件增加 schema/version 迁移；加入渲染像素或颜色转换回归，覆盖旧文件、透明色、自定义色和未知字段，避免设置格式再次漂移。</td>
             </tr>
             <tr>
               <td><span class="status">已修复</span><br>[未处理 System.AggregateException]<br><code>Collection was modified; enumeration operation may not execute.</code></td>
-              <td>渲染回调会清空并更新物件命中表，而指针按下事件同时通过 PLINQ 枚举同一个普通 <code>Dictionary</code>。已改用线程安全命中表，在查询前生成稳定快照，并移除输入路径中不必要的 PLINQ，避免底层集合异常再次被包装成 <code>AggregateException</code>。</td>
-              <td><code>HitObjects_CanBeQueriedWhileRenderFrameRefreshesThem</code> 同时执行 500 个模拟渲染帧和命中查询，测试通过；完整测试 302/302。</td>
-              <td>继续审计渲染线程与 UI 输入线程共享的可变缓存；跨线程读取统一使用不可变快照或并发集合，输入事件中避免对高频变动集合直接执行 PLINQ。</td>
+              <td>渲染回调会清空并更新物件命中表，而指针按下事件同时通过 PLINQ 枚举同一个普通 <code>Dictionary</code>。已改用线程安全命中表，在查询前生成稳定快照，并移除输入路径中不必要的 PLINQ，避免底层集合异常再次被包装成 <code>AggregateException</code>。绘制上下文统计使用固定快照；调试性能监视器改为不可变字典 CAS、原子计数和固定容量无锁环形采样窗口。</td>
+              <td><code>HitObjects_CanBeQueriedWhileRenderFrameRefreshesThem</code> 与 <code>DebugPerformanceMonitor_CanReadAndClearWhileRendering</code> 均通过；完整核心测试 305/305，桌面测试 106/106。</td>
+              <td>继续审计渲染线程、调度器与 UI 输入线程共享的可变缓存；优先使用不可变快照、原子交换和无锁环形缓冲，避免重新引入跨线程普通集合枚举或粗粒度锁。</td>
             </tr>
           </tbody>
         </table>
@@ -178,8 +190,8 @@
       <h2>验证记录</h2>
       <div class="checks">
         <div class="check"><code>dotnet build src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj --no-restore</code>：成功，0 errors。</div>
-        <div class="check"><code>dotnet test tests/OngekiFumenEditor.Avalonia.Tests/OngekiFumenEditor.Avalonia.Tests.csproj --no-restore</code>：302 passed，0 failed，0 skipped。</div>
-        <div class="check"><code>git diff --check</code>：通过。</div>
+        <div class="check"><code>dotnet test OngekiFumenEditor.Avalonia.sln --no-restore</code>：核心 305 passed、桌面 106 passed，0 failed，0 skipped。</div>
+        <div class="check"><code>git -c core.whitespace=cr-at-eol diff HEAD --check</code>：通过；按仓库现有 CRLF 源码规则检查。</div>
         <div class="check">新增回归测试位于 <code>tests/OngekiFumenEditor.Avalonia.Tests/Regression/EditorUiRegressionTests.cs</code>。</div>
       </div>
       <p class="note"><strong>残留告警：</strong>构建仍报告既有的 <code>NU1903</code>（传递依赖 SkiaSharp 2.88.3 高严重性漏洞），本轮没有擅自升级依赖。建议单独安排依赖升级、兼容性验证和 CI 安全门禁。</p>
@@ -189,6 +201,7 @@
       <h2>主要改动索引</h2>
       <ul>
         <li>工具栏图标命令：<code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Commands/</code>、<code>src/OngekiFumenEditor.Avalonia/Modules/SplashScreen/Commands/</code></li>
+        <li>工具栏溢出与视图生命周期：<code>Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/ToolBars/Controls/AdaptiveToolBar.cs</code>、<code>Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Views/ViewLocator.cs</code></li>
         <li>属性生成器：<code>src/OngekiFumenEditor.Avalonia/UI/Controls/ObjectInspector/ValueConverters/</code>、<code>src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ValueConverters/</code></li>
         <li>拖放：<code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs</code>、<code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/FumenVisualEditorView.xaml.cs</code></li>
         <li>Hold 设置兼容：<code>src/OngekiFumenEditor.Avalonia/Models/Settings/EditorGlobalSetting.cs</code>、<code>src/OngekiFumenEditor.Avalonia/Models/Settings/SystemDrawingColorJsonConverter.cs</code></li>

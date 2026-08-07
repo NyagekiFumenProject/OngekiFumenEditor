@@ -1,5 +1,4 @@
 using Injectio.Attributes;
-using DereTore.Common;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
