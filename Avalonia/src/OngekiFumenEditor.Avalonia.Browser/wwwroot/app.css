@@ -1,58 +1,336 @@
-﻿/* HTML styles for the splash screen */
-.avalonia-splash {
-    position: absolute;
-    height: 100%;
+﻿* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#out {
+    min-height: 100%;
     width: 100%;
-    background: white;
-    font-family: 'Outfit', sans-serif;
-    justify-content: center;
-    align-items: center;
+}
+
+body {
+    background: #f5f7fb;
+    color: #182230;
+    font-family: "Segoe UI", "Noto Sans SC", sans-serif;
+}
+
+#out {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+}
+
+/* The overlay stays outside #out so Avalonia can replace the host content safely. */
+.avalonia-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
     display: flex;
-    pointer-events: none;
-}
-
-/* Light theme styles */
-@media (prefers-color-scheme: light) {
-    .avalonia-splash {
-        background: white;
-    }
-
-    .avalonia-splash h2 {
-        color: #1b2a4e;
-    }
-
-    .avalonia-splash a {
-        color: #0D6EFD;
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    .avalonia-splash {
-        background: #1b2a4e;
-    }
-
-    .avalonia-splash h2 {
-        color: white;
-    }
-
-    .avalonia-splash a {
-        color: white;
-    }
-}
-
-.avalonia-splash h2 {
-    font-weight: 400;
-    font-size: 1.5rem;
-}
-
-.avalonia-splash a {
-    text-decoration: none;
-    font-size: 2.5rem;
-    display: block;   
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+    background: rgba(245, 247, 251, 0.98);
+    color: #182230;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 240ms ease, visibility 240ms ease;
 }
 
 .avalonia-splash.splash-close {
-    transition: opacity 200ms, display 200ms;
-    display: none;
+    pointer-events: none;
     opacity: 0;
+    visibility: hidden;
+}
+
+.startup-panel {
+    width: min(680px, 100%);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
+    padding: 24px;
+    border: 1px solid #d9e0ea;
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 16px 44px rgba(24, 34, 48, 0.14);
+}
+
+.startup-panel h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 18px;
+    color: #1b2a4e;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.2;
+}
+
+.startup-panel h2 a {
+    display: block;
+    color: #0d6efd;
+    line-height: 0;
+    text-decoration: none;
+}
+
+.startup-panel h2 svg {
+    width: 172px;
+    height: auto;
+}
+
+.startup-heading {
+    margin-bottom: 6px;
+    color: #182230;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.startup-status {
+    min-height: 1.5em;
+    color: #49576a;
+    font-size: 0.95rem;
+}
+
+.startup-resource {
+    min-height: 1.4em;
+    margin-top: 4px;
+    overflow: hidden;
+    color: #0d6efd;
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.startup-progress {
+    height: 10px;
+    margin-top: 18px;
+    overflow: hidden;
+    border-radius: 5px;
+    background: #e6ebf2;
+}
+
+.startup-progress-bar {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: #0d6efd;
+    transition: width 180ms ease;
+}
+
+.startup-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 7px;
+    color: #657386;
+    font-size: 0.78rem;
+}
+
+.startup-progress-meta span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.startup-resources-heading {
+    margin-top: 22px;
+    color: #49576a;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.startup-resources {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 180px;
+    margin: 8px 0 0;
+    padding: 0 4px 0 0;
+    overflow: auto;
+    list-style: none;
+}
+
+.startup-resource-row {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 8px;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 7px;
+    border-radius: 4px;
+    background: #f5f7fb;
+    font-size: 0.78rem;
+}
+
+.startup-resource-state {
+    color: #657386;
+    font-weight: 600;
+}
+
+.startup-resource-name {
+    overflow: hidden;
+    color: #344255;
+    font-family: Consolas, "Cascadia Mono", monospace;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.startup-resource-row[data-status="loading"] .startup-resource-state {
+    color: #0d6efd;
+}
+
+.startup-resource-row[data-status="loaded"] .startup-resource-state {
+    color: #16804b;
+}
+
+.startup-resource-row[data-status="warning"] .startup-resource-state,
+.startup-resource-row[data-status="error"] .startup-resource-state {
+    color: #b54708;
+}
+
+.startup-error {
+    margin-top: 18px;
+    padding: 14px;
+    border: 1px solid #e9b6b6;
+    border-radius: 6px;
+    background: #fff5f5;
+}
+
+.startup-error-title {
+    color: #b42318;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.startup-error-message,
+.startup-error-resource {
+    margin-top: 6px;
+    overflow-wrap: anywhere;
+    color: #7a271a;
+    font-size: 0.88rem;
+}
+
+.startup-error-resource {
+    font-family: Consolas, "Cascadia Mono", monospace;
+    font-size: 0.78rem;
+}
+
+.startup-error-details {
+    margin-top: 10px;
+    color: #7a271a;
+    font-size: 0.78rem;
+}
+
+.startup-error-details pre {
+    max-height: 180px;
+    margin: 8px 0 0;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.startup-reload {
+    min-height: 34px;
+    margin-top: 12px;
+    padding: 6px 14px;
+    border: 1px solid #0d6efd;
+    border-radius: 4px;
+    background: #0d6efd;
+    color: #ffffff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 0.86rem;
+}
+
+.startup-reload:hover {
+    background: #0957c7;
+}
+
+.startup-reload:focus-visible {
+    outline: 3px solid rgba(13, 110, 253, 0.35);
+    outline-offset: 2px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #101722;
+        color: #edf2f7;
+    }
+
+    .avalonia-splash {
+        background: rgba(16, 23, 34, 0.98);
+        color: #edf2f7;
+    }
+
+    .startup-panel {
+        border-color: #2b394b;
+        background: #182230;
+        box-shadow: 0 16px 44px rgba(0, 0, 0, 0.32);
+    }
+
+    .startup-panel h2,
+    .startup-heading {
+        color: #edf2f7;
+    }
+
+    .startup-panel h2 a,
+    .startup-resource {
+        color: #72a9ff;
+    }
+
+    .startup-status,
+    .startup-progress-meta,
+    .startup-resources-heading {
+        color: #a8b5c5;
+    }
+
+    .startup-progress {
+        background: #2b394b;
+    }
+
+    .startup-resource-row {
+        background: #202d3d;
+    }
+
+    .startup-resource-name {
+        color: #d4dce6;
+    }
+
+    .startup-error {
+        border-color: #6d3434;
+        background: #321f24;
+    }
+
+    .startup-error-title {
+        color: #ffb4ab;
+    }
+
+    .startup-error-message,
+    .startup-error-resource,
+    .startup-error-details {
+        color: #ffd7d2;
+    }
+}
+
+@media (max-width: 560px) {
+    .avalonia-splash {
+        align-items: flex-start;
+        padding: 12px;
+    }
+
+    .startup-panel {
+        max-height: calc(100vh - 24px);
+        padding: 18px;
+    }
+
+    .startup-panel h2 svg {
+        width: 136px;
+    }
 }
