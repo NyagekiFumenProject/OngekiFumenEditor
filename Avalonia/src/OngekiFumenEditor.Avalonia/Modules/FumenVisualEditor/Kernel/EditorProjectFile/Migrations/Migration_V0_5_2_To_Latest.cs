@@ -1,4 +1,5 @@
 using MigratableSerializer.Wrapper;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile.Serializers;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using System;
@@ -20,10 +21,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 		public override async Task<EditorProjectDataModel> UpgradeAsync(EditorProjectDataModel_V0_5_2 fromObj)
 		{
 			var ms = new MemoryStream();
-			await JsonSerializer.SerializeAsync(ms, fromObj);
+			await JsonSerializer.SerializeAsync(
+				ms,
+				fromObj,
+				EditorProjectJsonSerialization.GetTypeInfo<EditorProjectDataModel_V0_5_2>());
 			ms.Position = 0;
-			var r = await JsonSerializer.DeserializeAsync<EditorProjectDataModel>(ms);
-			return r;
+			return await JsonSerializer.DeserializeAsync(
+				ms,
+				EditorProjectJsonSerialization.GetTypeInfo<EditorProjectDataModel>()) ??
+				throw new JsonException("Unable to migrate the editor project to the latest version.");
 		}
 	}
 }

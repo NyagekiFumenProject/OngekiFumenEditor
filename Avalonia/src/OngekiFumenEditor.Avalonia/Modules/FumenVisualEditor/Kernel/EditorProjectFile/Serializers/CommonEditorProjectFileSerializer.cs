@@ -3,7 +3,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectF
 using System;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile.Serializers
@@ -12,66 +12,32 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 	{
 		public abstract Version Version { get; }
 
-		public static readonly JsonSerializerOptions jsonSerializerOptions;
-		private class TimeSpanJsonConverter : JsonConverter<TimeSpan>
+		private static readonly JsonTypeInfo<T> jsonTypeInfo =
+			EditorProjectJsonSerialization.GetTypeInfo<T>();
+
+		public override Task<bool> CheckParsableAsync(byte[] buffer)
 		{
-			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-			{
-				var result = default(TimeSpan);
-				if (reader.TokenType == JsonTokenType.StartObject)
-				{
-					while (reader.Read())
-					{
-						if (reader.TokenType == JsonTokenType.EndObject)
-							break;
-						if (reader.GetString() == "Ticks")
-						{
-							if (!reader.Read())
-								throw new Exception("Json parse TimeSpan rrror");
-							var ticks = reader.GetInt64();
-							result = TimeSpan.FromTicks(ticks);
-						}
-					}
-				}
-				return result;
-			}
+			using var document = JsonDocument.Parse(buffer);
+			var isMatch = document.RootElement.TryGetProperty(
+				nameof(EditorProjectDataModelBase.Version),
+				out var versionElement) &&
+				versionElement.ValueKind == JsonValueKind.String &&
+				System.Version.TryParse(versionElement.GetString(), out var version) &&
+				version.Equals(Version);
 
-			public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
-			{
-				writer.WriteStartObject();
-				writer.WriteNumber("Ticks", value.Ticks);
-				writer.WriteEndObject();
-			}
-		}
-
-		static CommonEditorProjectFileSerializer()
-		{
-			jsonSerializerOptions = new JsonSerializerOptions()
-			{
-				WriteIndented = true
-			};
-			jsonSerializerOptions.Converters.Add(new TimeSpanJsonConverter());
-		}
-
-		public override async Task<bool> CheckParsableAsync(byte[] buffer)
-		{
-			ValueTask<TX> DeserializeAnonymousType<TX>(Stream ms, TX _) => JsonSerializer.DeserializeAsync<TX>(ms, jsonSerializerOptions);
-
-			var ms = new MemoryStream(buffer);
-			var r = await DeserializeAnonymousType(ms, new { Version = new Version() });
-
-			return r?.Version == Version;
+			return Task.FromResult(isMatch);
 		}
 
 		public override async Task<T> ParseAsync(byte[] buffer)
 		{
-			var ms = new MemoryStream(buffer);
-			return await JsonSerializer.DeserializeAsync<T>(ms, jsonSerializerOptions);
+			using var ms = new MemoryStream(buffer);
+			return await JsonSerializer.DeserializeAsync(ms, jsonTypeInfo) ??
+				throw new JsonException($"Unable to deserialize {typeof(T)}.");
 		}
 
 		public override Task WriteAsync(Stream stream, T obj)
 		{
-			return JsonSerializer.SerializeAsync(stream, obj, jsonSerializerOptions);
+			return JsonSerializer.SerializeAsync(stream, obj, jsonTypeInfo);
 		}
 	}
 }

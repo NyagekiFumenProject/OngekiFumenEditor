@@ -1,7 +1,9 @@
 using Avalonia.Headless.XUnit;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile.Serializers;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 using System.Security.Cryptography;
@@ -12,6 +14,36 @@ namespace OngekiFumenEditor.Avalonia.Tests.Utils;
 
 public sealed class TemporaryStorageConsumerTests
 {
+    [AvaloniaFact]
+    public async Task EditorProjectFileManager_LegacyV052Project_UpgradesToLatestModel()
+    {
+        var provider = new InMemoryTemporaryFolderProvider();
+        var file = await provider.Root.GetOrCreateFileAsync("legacy.nyagekiProj");
+        Guid projectId = Guid.NewGuid();
+        var legacy = new EditorProjectDataModel_V0_5_2
+        {
+            Id = projectId,
+            AudioFilePath = "legacy-audio.wav",
+            FumenFilePath = "legacy-chart.ogkr",
+            AudioDuration = TimeSpan.FromSeconds(84),
+            RememberLastDisplayTime = TimeSpan.FromSeconds(21)
+        };
+
+        var serializer = new EditorProjectDataModelSerializer_V0_5_2();
+        await file.WriteAsync((stream, _) => serializer.WriteAsync(stream, legacy));
+        string serialized = Encoding.UTF8.GetString(await file.ReadAllBytesAsync());
+        var reloaded = await new EditorProjectFileManager().Load(file);
+
+        Assert.Contains("\"Version\": \"0.5.2\"", serialized, StringComparison.Ordinal);
+        Assert.IsType<EditorProjectDataModel>(reloaded);
+        Assert.Equal(EditorProjectDataModel.VERSION, reloaded.Version);
+        Assert.Equal(projectId, reloaded.Id);
+        Assert.Equal(legacy.AudioFilePath, reloaded.AudioFilePath);
+        Assert.Equal(legacy.FumenFilePath, reloaded.FumenFilePath);
+        Assert.Equal(legacy.AudioDuration, reloaded.AudioDuration);
+        Assert.Equal(legacy.RememberLastDisplayTime, reloaded.RememberLastDisplayTime);
+    }
+
     [Fact]
     public async Task ImageLoader_NetworkCacheSurvivesLoaderInstances()
     {
