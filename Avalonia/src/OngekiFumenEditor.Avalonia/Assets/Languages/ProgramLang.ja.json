@@ -318,6 +318,7 @@
     "OngekiFumen":  "オンゲキ譜面",
     "OngekiFumenStandardized":  "標準オンゲキ譜面",
     "OpenEditorBeforeUsing":  "エディタを開いてください",
+    "OpenOutputFolderFailed":  "出力は保存されましたが、出力フォルダを開けませんでした。",
     "OpenProject":  "プロジェクトを開く",
     "OpenProjectTipText":  "既存のプロジェクトを開く",
     "Option":  "オプション",

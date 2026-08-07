@@ -494,11 +494,16 @@
 <li><strong>原影响（已消除）</strong>：普通菜单项可触发但不会修改谱面；带 XGrid 限制的菜单项还缺少处理器，不能依赖现有基类自动获得行为。</li>
 <li><strong>建议</strong>：把旧插值算法提取为可测试的纯业务服务，两个命令 handler 只负责确认、参数/XGrid 限制、编辑器锁定和一次性撤销事务；同时补齐受限命令的 DI 注册。覆盖无可插值对象、曲线节点、XGrid 边界、取消、异常解锁、撤销/重做和大谱面性能测试。</li>
 </ul>
-<h3 id="b-002-standardizeformat">B-002 <code>StandardizeFormat</code> 命令为显式未迁移实现</h3>
+<h3 id="b-002-standardizeformat" class="completed-plan">B-002 <code>StandardizeFormat</code> 命令为显式未迁移实现（已完成）</h3>
 <ul>
-<li><strong>Avalonia 代码</strong>：<code>StandardizeFormatCommandHandler.Run()</code> 只显示 <code>StandardizeFormat is not migrated yet.</code>。</li>
+<li><strong>完成状态（2026-08-08）</strong>：标准化菜单已恢复完整导出流程，方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：命令处理器改为注入 <code>IEditorDocumentManager</code>、<code>IDialogManager</code>、<code>IFumenConvertService</code> 和平台输出服务。保存选择器经 Avalonia <code>StorageProvider</code> 固定为 <code>.ogkr</code>，建议 <code>standardized.ogkr</code> 文件名、自动补扩展并启用覆盖确认；取消选择不会锁定编辑器或执行转换。</li>
+<li><strong>业务与写入事务</strong>：命令直接把当前内存谱面交给共享 <code>IFumenConvertService</code>，设置 <code>IsStandarizeFumen</code> 后复用标准化、序列化与事务写入链。处理期间锁定编辑器并以 <code>try/finally</code> 保证异常解锁；本地文件通过同目录临时文件原子替换，非本地 StorageProvider 通过 <code>ISimpleFile.WriteAsync</code> 完成一次受控写入，转换/校验失败不会进入提交步骤。</li>
+<li><strong>平台边界</strong>：只有输出文件暴露本地路径且当前存在 <code>TopLevel</code> 时才询问是否打开目录，并通过 Avalonia <code>Launcher</code> 执行；Browser/非本地提供程序只显示导出成功，不尝试进程或文件管理器调用。Launcher 拒绝时显示“已保存但无法打开目录”的三语错误提示。</li>
+<li><strong>验证</strong>：<code>StandardizeFormatCommandTests</code> 11 项全部通过，覆盖取消、保存选择器失败、标准化参数、锁定状态、业务失败、写入异常、目录能力、Launcher 返回失败与抛异常；<code>ConvertCommandIntegrationTests</code> 7 项全部通过，验证标准化文件可重新解析、内容/引用保留、连续标准化两次字节完全一致、非本地事务写入及取消时保留原目标；完整 Avalonia 测试项目 327 项全部通过、0 项跳过。</li>
+<li><strong>审查时 Avalonia 代码</strong>：<code>StandardizeFormatCommandHandler.Run()</code> 只显示 <code>StandardizeFormat is not migrated yet.</code>。</li>
 <li><strong>WPF 行为</strong>：选择输出路径、执行标准化、序列化写盘，并可打开输出目录。</li>
-<li><strong>影响</strong>：用户可以触发命令，但不能得到标准化谱面文件。</li>
+<li><strong>原影响（已消除）</strong>：用户可以触发命令，但不能得到标准化谱面文件。</li>
 <li><strong>建议</strong>：将标准化变换和序列化封装为共享服务，GUI handler 使用 StorageProvider 选择输出位置并处理覆盖/取消，Desktop 才提供“在文件管理器中显示”。用解析 -&gt; 标准化 -&gt; 序列化 -&gt; 再解析的 golden fixture 验证对象数量、时间/XGrid、引用关系和幂等性，失败时不得留下半写文件。</li>
 </ul>
 <h3 id="b-003-commoncolorpicker-12">B-003 <code>CommonColorPicker</code> 是固定 12 色占位实现</h3>

@@ -92,7 +92,11 @@ public static class FileDialogHelper
         return await AvaloniaStorageProviderFileSystemBuilder.LoadFromAvaloniaStorageFile(files[0]);
     }
 
-    public static async Task<ISimpleFile> SaveFileAsync(string title, IEnumerable<(string ext, string desc)> extParams)
+    public static async Task<ISimpleFile> SaveFileAsync(
+        string title,
+        IEnumerable<(string ext, string desc)> extParams,
+        string suggestedFileName = null,
+        string defaultExtension = null)
     {
         var topLevel = GetTopLevel();
         if (topLevel is null)
@@ -108,10 +112,15 @@ public static class FileDialogHelper
             return default;
         }
 
+        var pickerFilters = BuildPickerFilters(extParams);
         var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = title,
-            FileTypeChoices = BuildPickerFilters(extParams)
+            SuggestedFileName = suggestedFileName,
+            DefaultExtension = defaultExtension?.TrimStart('.'),
+            FileTypeChoices = pickerFilters,
+            SuggestedFileType = pickerFilters.LastOrDefault(),
+            ShowOverwritePrompt = true
         });
 
         return file is null

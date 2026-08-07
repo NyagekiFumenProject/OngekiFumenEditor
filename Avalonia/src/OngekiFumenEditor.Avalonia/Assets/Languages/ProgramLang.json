@@ -321,6 +321,7 @@
     "OngekiFumen":  "Ongeki Fumen",
     "OngekiFumenStandardized":  "Standardized Ongeki Fumen",
     "OpenEditorBeforeUsing":  "Open the editor first",
+    "OpenOutputFolderFailed":  "The output was saved, but its folder could not be opened.",
     "OpenProject":  "Open Project",
     "OpenProjectTipText":  "Create an existing project",
     "Option":  "Option",

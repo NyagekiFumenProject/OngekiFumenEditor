@@ -321,6 +321,7 @@
     "OngekiFumen":  "音击谱面",
     "OngekiFumenStandardized":  "已标准化的音击谱面",
     "OpenEditorBeforeUsing":  "请先打开编辑器",
+    "OpenOutputFolderFailed":  "输出已保存，但无法打开输出文件夹。",
     "OpenProject":  "打开项目",
     "OpenProjectTipText":  "打开现有的项目",
     "Option":  "选项",

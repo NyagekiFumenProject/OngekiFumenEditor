@@ -74,6 +74,45 @@ public sealed class ConvertCommandIntegrationTests
     }
 
     [Fact]
+    public async Task StandardizeFixture_Twice_ProducesIdenticalOutput()
+    {
+        using var directory = new TemporaryDirectory();
+        using var provider = CreateProvider();
+        var fixturePath = Path.Combine(AppContext.BaseDirectory, "Fixtures", "minimal.nyageki");
+        var firstOutputPath = directory.File("standardized-first.ogkr");
+        var secondOutputPath = directory.File("standardized-second.ogkr");
+        var service = provider.GetRequiredService<IFumenConvertService>();
+
+        var firstResult = await service.GenerateAsync(new FumenConvertOption
+        {
+            InputFumenFilePath = fixturePath,
+            OutputFumenFilePath = firstOutputPath,
+            IsStandarizeFumen = true
+        });
+
+        Assert.True(firstResult.IsSuccess, firstResult.Message);
+        var parserManager = provider.GetRequiredService<IFumenParserManager>();
+        var deserializer = Assert.IsAssignableFrom<IFumenDeserializable>(
+            parserManager.GetDeserializer(firstOutputPath));
+        await using var firstStream = File.OpenRead(firstOutputPath);
+        var firstStandardizedFumen = await deserializer.DeserializeAsync(firstStream);
+
+        var secondResult = await service.GenerateAsync(
+            new FumenConvertOption
+            {
+                OutputFumenFilePath = secondOutputPath,
+                IsStandarizeFumen = true
+            },
+            firstStandardizedFumen);
+
+        Assert.True(secondResult.IsSuccess, secondResult.Message);
+        Assert.Equal(
+            await File.ReadAllBytesAsync(firstOutputPath),
+            await File.ReadAllBytesAsync(secondOutputPath));
+        Assert.Empty(directory.FindTemporaryFiles());
+    }
+
+    [Fact]
     public async Task GenerateAsync_NonLocalSimpleFiles_UsesTransactionalWriteAndRoundTrips()
     {
         Log.Initialize(new Log([]));
