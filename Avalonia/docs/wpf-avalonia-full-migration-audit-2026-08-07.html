@@ -506,11 +506,15 @@
 <li><strong>原影响（已消除）</strong>：用户可以触发命令，但不能得到标准化谱面文件。</li>
 <li><strong>建议</strong>：将标准化变换和序列化封装为共享服务，GUI handler 使用 StorageProvider 选择输出位置并处理覆盖/取消，Desktop 才提供“在文件管理器中显示”。用解析 -&gt; 标准化 -&gt; 序列化 -&gt; 再解析的 golden fixture 验证对象数量、时间/XGrid、引用关系和幂等性，失败时不得留下半写文件。</li>
 </ul>
-<h3 id="b-003-commoncolorpicker-12">B-003 <code>CommonColorPicker</code> 是固定 12 色占位实现</h3>
+<h3 id="b-003-commoncolorpicker-12" class="completed-plan">B-003 <code>CommonColorPicker</code> 是固定 12 色占位实现（已完成）</h3>
 <ul>
-<li><strong>Avalonia 代码</strong>：视图注释明确说明 Xceed <code>StandardColorPicker</code> 不可用，暂用固定色板占位。</li>
+<li><strong>完成状态（2026-08-08）</strong>：颜色选择窗口已从固定色板占位升级为完整颜色编辑器，方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：中央包版本和 Avalonia 主项目新增同版本 <code>Avalonia.Controls.ColorPicker</code> 依赖，应用资源显式加载其 Fluent 主题；窗口主体使用官方 <code>ColorView</code>，启用色谱、标准色板、RGB/HSV 分量、分量滑块与文本框、ARGB 十六进制输入、alpha 编辑、颜色预览和强调色，<code>Color</code> 通过编译绑定双向连接至视图模型。</li>
+<li><strong>交互与兼容</strong>：原 12 色保留为带工具提示和自动化名称的快捷 swatch，文本参数通过 <code>Color.TryParse</code> 安全解析，非法值不会抛异常或改色。编辑期间仍按旧 WPF 语义实时回写，新增“确认/取消”按钮；视图模型保存打开时的 ARGB，取消或直接关闭窗口会回滚原色，确认后保留最终颜色。</li>
+<li><strong>专项验证</strong>：<code>DialogViewModelTests</code> 相关 12 项全部通过，覆盖实时回写与通知、ARGB/alpha 解析、非法输入、取消回滚、确认保持、颜色 round-trip、完整 <code>ColorView</code> 模板及高对比主题变体下的主题继承与非零布局；随后运行完整 Avalonia 测试项目和 Desktop 测试项目，分别为 331 项与 107 项全部通过、0 项跳过。</li>
+<li><strong>审查时 Avalonia 代码</strong>：视图注释明确说明 Xceed <code>StandardColorPicker</code> 不可用，暂用固定色板占位。</li>
 <li><strong>WPF 行为</strong>：使用完整标准颜色选择控件。</li>
-<li><strong>影响</strong>：任意颜色编辑、精确颜色输入、色相/饱和度等原控件能力缺失；只有 12 个预设色可选。</li>
+<li><strong>原影响（已消除）</strong>：任意颜色编辑、精确颜色输入、色相/饱和度等原控件能力缺失；只有 12 个预设色可选。</li>
 <li><strong>建议</strong>：采用成熟的 Avalonia 颜色选择控件，或实现包含色相/饱和度/亮度、RGB/ARGB 文本输入、透明度、最近颜色和键盘可访问性的复合控件；固定 12 色可保留为快捷 swatch。增加格式解析、非法输入、alpha、取消/确认、颜色 round-trip 和高对比主题测试。</li>
 </ul>
 <h3 id="b-004">B-004 批量模式的核心交互行为未迁移</h3>

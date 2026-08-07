@@ -14,6 +14,7 @@
         <DockFluentTheme />
         <status:StatusBarTheme />
         <StyleInclude Source="avares://Avalonia.Controls.ToolBar/Themes/Avalonia.Controls.ToolBar.axaml" />
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
         <windowManager:WindowManagerTheme />
 
         <Style Selector="Button.DialogButton">

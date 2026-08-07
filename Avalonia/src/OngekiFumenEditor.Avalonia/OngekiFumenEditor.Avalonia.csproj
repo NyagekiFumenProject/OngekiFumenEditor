@@ -112,6 +112,7 @@
 
     <ItemGroup>
         <PackageReference Include="Avalonia.Skia" />
+        <PackageReference Include="Avalonia.Controls.ColorPicker" />
         <PackageReference Include="Avalonia.Controls.DataGrid" />
         <PackageReference Include="Xaml.Behaviors" />
         <PackageReference Include="Microsoft.Build" />

@@ -5,37 +5,80 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels"
     Title="{CompiledBinding Title}"
-    Width="300"
-    Height="450"
+    Width="420"
+    Height="650"
+    MinWidth="380"
+    MinHeight="560"
     Background="{DynamicResource EditorWindowBackgroundBrush}"
     d:DataContext="{d:DesignInstance Type=vm:CommonColorPickerViewModel, IsDesignTimeCreatable=True}"
     mc:Ignorable="d">
-    <Grid>
-        <!-- Xceed StandardColorPicker 在 Avalonia 下不可用，先用固定色板占位：点击按钮设置 CurrentColor -->
-        <StackPanel Margin="10">
-            <Border
-                Height="40"
-                Background="{CompiledBinding CurrentColor}"
-                BorderBrush="Gray"
-                BorderThickness="1" />
-            <WrapPanel Margin="0,10,0,0">
-                <Button Width="32" Height="32" Margin="2" Background="#FFFFFFFF" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFFFFFF" />
-                <Button Width="32" Height="32" Margin="2" Background="#FF000000" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF000000" />
-                <Button Width="32" Height="32" Margin="2" Background="#FFFF0000" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFF0000" />
-                <Button Width="32" Height="32" Margin="2" Background="#FF00FF00" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF00FF00" />
-                <Button Width="32" Height="32" Margin="2" Background="#FF0000FF" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF0000FF" />
-                <Button Width="32" Height="32" Margin="2" Background="#FFFFFF00" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFFFF00" />
-                <Button Width="32" Height="32" Margin="2" Background="#FFFF00FF" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFF00FF" />
-                <Button Width="32" Height="32" Margin="2" Background="#FF00FFFF" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF00FFFF" />
-                <Button Width="32" Height="32" Margin="2" Background="#FFFFA500" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFFA500" />
-                <Button Width="32" Height="32" Margin="2" Background="#FF800080" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF800080" />
-                <Button Width="32" Height="32" Margin="2" Background="#FFA52A2A" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFA52A2A" />
-                <Button Width="32" Height="32" Margin="2" Background="#FF808080" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF808080" />
-            </WrapPanel>
-        </StackPanel>
+    <views:WindowViewBase.Styles>
+        <Style Selector="Button.quick-color">
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="Margin" Value="2" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+    </views:WindowViewBase.Styles>
+
+    <Grid Margin="12" RowDefinitions="Auto,*,Auto">
+        <!-- 保留原 12 色作为快捷入口，完整颜色编辑由下方 ColorView 提供。 -->
+        <WrapPanel
+            Margin="0,0,0,8"
+            AutomationProperties.Name="Quick colors"
+            HorizontalAlignment="Center">
+            <Button AutomationProperties.Name="#FFFFFFFF" Background="#FFFFFFFF" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFFFFFF" ToolTip.Tip="#FFFFFFFF" />
+            <Button AutomationProperties.Name="#FF000000" Background="#FF000000" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF000000" ToolTip.Tip="#FF000000" />
+            <Button AutomationProperties.Name="#FFFF0000" Background="#FFFF0000" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFF0000" ToolTip.Tip="#FFFF0000" />
+            <Button AutomationProperties.Name="#FF00FF00" Background="#FF00FF00" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF00FF00" ToolTip.Tip="#FF00FF00" />
+            <Button AutomationProperties.Name="#FF0000FF" Background="#FF0000FF" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF0000FF" ToolTip.Tip="#FF0000FF" />
+            <Button AutomationProperties.Name="#FFFFFF00" Background="#FFFFFF00" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFFFF00" ToolTip.Tip="#FFFFFF00" />
+            <Button AutomationProperties.Name="#FFFF00FF" Background="#FFFF00FF" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFF00FF" ToolTip.Tip="#FFFF00FF" />
+            <Button AutomationProperties.Name="#FF00FFFF" Background="#FF00FFFF" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF00FFFF" ToolTip.Tip="#FF00FFFF" />
+            <Button AutomationProperties.Name="#FFFFA500" Background="#FFFFA500" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFFFA500" ToolTip.Tip="#FFFFA500" />
+            <Button AutomationProperties.Name="#FF800080" Background="#FF800080" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF800080" ToolTip.Tip="#FF800080" />
+            <Button AutomationProperties.Name="#FFA52A2A" Background="#FFA52A2A" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FFA52A2A" ToolTip.Tip="#FFA52A2A" />
+            <Button AutomationProperties.Name="#FF808080" Background="#FF808080" Classes="quick-color" Command="{CompiledBinding SelectColorCommand}" CommandParameter="#FF808080" ToolTip.Tip="#FF808080" />
+        </WrapPanel>
+
+        <ColorView
+            x:Name="ColorEditor"
+            Grid.Row="1"
+            AutomationProperties.Name="Color editor"
+            Color="{CompiledBinding CurrentColor, Mode=TwoWay}"
+            IsAccentColorsVisible="True"
+            IsAlphaEnabled="True"
+            IsAlphaVisible="True"
+            IsColorComponentsVisible="True"
+            IsColorModelVisible="True"
+            IsColorPaletteVisible="True"
+            IsColorPreviewVisible="True"
+            IsColorSpectrumSliderVisible="True"
+            IsColorSpectrumVisible="True"
+            IsComponentSliderVisible="True"
+            IsComponentTextInputVisible="True"
+            IsHexInputVisible="True" />
+
+        <Grid Grid.Row="2" Margin="0,10,0,0" ColumnDefinitions="*,Auto,Auto">
+            <Button
+                x:Name="CancelButton"
+                Grid.Column="1"
+                MinWidth="88"
+                Margin="0,0,8,0"
+                Command="{CompiledBinding CancelCommand}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Cancel}}" />
+            <Button
+                x:Name="ConfirmButton"
+                Grid.Column="2"
+                MinWidth="88"
+                Command="{CompiledBinding ConfirmCommand}"
+                Content="{markup:Translate {x:Static languages:Lang+B.Confirm}}" />
+        </Grid>
     </Grid>
 </views:WindowViewBase>

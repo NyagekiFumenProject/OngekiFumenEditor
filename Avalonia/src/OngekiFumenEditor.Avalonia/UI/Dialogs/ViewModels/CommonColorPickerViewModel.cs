@@ -6,16 +6,22 @@ namespace OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 
 public partial class CommonColorPickerViewModel : WindowViewModelBase
 {
-    private readonly Func<Color> getter;
     private readonly Action<Color> setter;
+    private readonly Color initialColor;
+    private Color currentColor;
+    private bool isAccepted;
 
     public string Title { get; }
 
     public Color CurrentColor
     {
-        get => getter();
+        get => currentColor;
         set
         {
+            if (currentColor == value)
+                return;
+
+            currentColor = value;
             setter(value);
             OnPropertyChanged();
         }
@@ -28,17 +34,38 @@ public partial class CommonColorPickerViewModel : WindowViewModelBase
 
     public CommonColorPickerViewModel(Func<Color> getter, Action<Color> setter, string title)
     {
-        this.getter = getter ?? throw new ArgumentNullException(nameof(getter));
+        ArgumentNullException.ThrowIfNull(getter);
         this.setter = setter ?? throw new ArgumentNullException(nameof(setter));
+        initialColor = currentColor = getter();
         Title = string.IsNullOrWhiteSpace(title) ? "CommonColorPicker" : title;
     }
 
     [RelayCommand]
     private void SelectColor(string colorText)
     {
-        if (string.IsNullOrWhiteSpace(colorText))
+        if (Color.TryParse(colorText, out var color))
+            CurrentColor = color;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmAsync()
+    {
+        isAccepted = true;
+        await TryCloseAsync(true);
+    }
+
+    [RelayCommand]
+    private async Task CancelAsync()
+    {
+        CancelChanges();
+        await TryCloseAsync(false);
+    }
+
+    internal void CancelChanges()
+    {
+        if (isAccepted)
             return;
 
-        CurrentColor = Color.Parse(colorText);
+        CurrentColor = initialColor;
     }
 }

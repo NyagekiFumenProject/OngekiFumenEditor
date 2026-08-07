@@ -2,6 +2,8 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Headless.XUnit;
+using Avalonia.Styling;
+using Avalonia.VisualTree;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
 using Gekimini.Avalonia.Modules.Window.Views;
@@ -70,18 +72,129 @@ public sealed class DialogViewModelTests
     }
 
     [Fact]
-    public void CommonColorPickerViewModel_SelectColorCommand_ParsesPaletteValue()
+    public void CommonColorPickerViewModel_SelectColorCommand_ParsesArgbAndIgnoresInvalidValue()
     {
         var selectedColor = Colors.Black;
+        var setterCallCount = 0;
+        var viewModel = new CommonColorPickerViewModel(
+            () => selectedColor,
+            color =>
+            {
+                selectedColor = color;
+                setterCallCount++;
+            },
+            "Palette");
+
+        viewModel.SelectColorCommand.Execute("#80112233");
+
+        Assert.Equal(Color.FromArgb(0x80, 0x11, 0x22, 0x33), selectedColor);
+        Assert.Equal(selectedColor, viewModel.CurrentColor);
+        Assert.Equal(1, setterCallCount);
+
+        viewModel.SelectColorCommand.Execute("not-a-color");
+
+        Assert.Equal(Color.FromArgb(0x80, 0x11, 0x22, 0x33), selectedColor);
+        Assert.Equal(1, setterCallCount);
+    }
+
+    [AvaloniaFact]
+    public async Task CommonColorPickerViewModel_CancelCommand_RestoresInitialColor()
+    {
+        var selectedColor = Color.FromArgb(0x60, 0x10, 0x20, 0x30);
+        var initialColor = selectedColor;
+        var setterCallCount = 0;
+        var viewModel = new CommonColorPickerViewModel(
+            () => selectedColor,
+            color =>
+            {
+                selectedColor = color;
+                setterCallCount++;
+            },
+            "Cancelable color");
+
+        viewModel.CurrentColor = Color.FromArgb(0xA0, 0xAA, 0xBB, 0xCC);
+        await viewModel.CancelCommand.ExecuteAsync(null);
+
+        Assert.Equal(initialColor, selectedColor);
+        Assert.Equal(initialColor, viewModel.CurrentColor);
+        Assert.Equal(2, setterCallCount);
+    }
+
+    [AvaloniaFact]
+    public async Task CommonColorPickerViewModel_ConfirmCommand_KeepsRoundTrippedColor()
+    {
+        var selectedColor = Colors.Black;
+        var expectedColor = Color.FromArgb(0x42, 0x12, 0x34, 0x56);
+        var setterCallCount = 0;
+        var viewModel = new CommonColorPickerViewModel(
+            () => selectedColor,
+            color =>
+            {
+                selectedColor = color;
+                setterCallCount++;
+            },
+            "Confirmed color");
+
+        viewModel.CurrentColor = expectedColor;
+        await viewModel.ConfirmCommand.ExecuteAsync(null);
+        viewModel.CancelChanges();
+
+        Assert.Equal(expectedColor, selectedColor);
+        Assert.Equal(expectedColor, viewModel.CurrentColor);
+        Assert.Equal(1, setterCallCount);
+    }
+
+    [AvaloniaFact]
+    public void CommonColorPickerView_RendersFullEditorInHighContrastTheme()
+    {
+        var highContrastTheme = new ThemeVariant("HighContrast", ThemeVariant.Dark);
+        var selectedColor = Color.FromArgb(0x80, 0x11, 0x22, 0x33);
         var viewModel = new CommonColorPickerViewModel(
             () => selectedColor,
             color => selectedColor = color,
-            "Palette");
+            "High contrast color");
+        var view = new CommonColorPickerView
+        {
+            DataContext = viewModel
+        };
+        var window = new Window
+        {
+            Width = 520,
+            Height = 760,
+            Content = view,
+            RequestedThemeVariant = highContrastTheme
+        };
 
-        viewModel.SelectColorCommand.Execute("#FF00FFFF");
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
 
-        Assert.Equal(Color.FromArgb(0xFF, 0x00, 0xFF, 0xFF), selectedColor);
-        Assert.Equal(selectedColor, viewModel.CurrentColor);
+            var colorView = Assert.Single(view.GetVisualDescendants().OfType<ColorView>());
+            Assert.Equal(selectedColor, colorView.Color);
+            Assert.Equal(highContrastTheme, colorView.ActualThemeVariant);
+            Assert.True(colorView.IsAlphaEnabled);
+            Assert.True(colorView.IsAlphaVisible);
+            Assert.True(colorView.IsColorComponentsVisible);
+            Assert.True(colorView.IsColorPaletteVisible);
+            Assert.True(colorView.IsColorSpectrumVisible);
+            Assert.True(colorView.IsComponentTextInputVisible);
+            Assert.True(colorView.IsHexInputVisible);
+            Assert.True(colorView.Bounds.Width > 0);
+            Assert.True(colorView.Bounds.Height > 0);
+            Assert.Contains(colorView.GetVisualDescendants(), static control => control is TabControl);
+            Assert.True(colorView.GetVisualDescendants().Count() > 4);
+
+            var roundTrippedColor = Color.FromArgb(0x33, 0xDE, 0xAD, 0xBE);
+            colorView.Color = roundTrippedColor;
+
+            Assert.Equal(roundTrippedColor, viewModel.CurrentColor);
+            Assert.Equal(roundTrippedColor, selectedColor);
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     [Fact]
