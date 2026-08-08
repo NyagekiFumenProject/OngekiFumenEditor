@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Window.Views;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
@@ -11,6 +12,10 @@ namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs;
 
 public partial class ConfigKeyBindingDialog : WindowViewBase, INotifyPropertyChanged
 {
+    private readonly IKeyBindingManager keyBindingManager;
+    private readonly IDialogManager dialogManager;
+    private IReadOnlyList<KeyBindingDefinition> conflictDefinitions = [];
+
     public KeyBindingDefinition Definition { get; }
 
     private KeyModifiers modifier;
@@ -20,21 +25,24 @@ public partial class ConfigKeyBindingDialog : WindowViewBase, INotifyPropertyCha
 
     public string CurrentExpression => KeyBindingDefinition.FormatToExpression(key, modifier);
 
-    public KeyBindingDefinition ConflictDefinition
-    {
-        get => field;
-        private set
-        {
-            if (field == value)
-                return;
-            field = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConflictDefinition)));
-        }
-    }
+    public IReadOnlyList<KeyBindingDefinition> ConflictDefinitions => conflictDefinitions;
+    public KeyBindingDefinition ConflictDefinition => conflictDefinitions.FirstOrDefault();
+    public string ConflictDisplayName => string.Join(", ", conflictDefinitions.Select(x => x.DisplayName));
+    public bool HasConflict => conflictDefinitions.Count > 0;
 
     public ConfigKeyBindingDialog(KeyBindingDefinition definition)
+        : this(definition, null, null)
+    {
+    }
+
+    internal ConfigKeyBindingDialog(
+        KeyBindingDefinition definition,
+        IKeyBindingManager keyBindingManager,
+        IDialogManager dialogManager)
     {
         Definition = definition;
+        this.keyBindingManager = keyBindingManager;
+        this.dialogManager = dialogManager;
         key = definition.Key;
         modifier = definition.Modifiers;
 
@@ -137,10 +145,18 @@ public partial class ConfigKeyBindingDialog : WindowViewBase, INotifyPropertyCha
         UpdateExpression();
     }
 
-    private void OnConfirmButtonClick(object sender, RoutedEventArgs e)
+    private async void OnConfirmButtonClick(object sender, RoutedEventArgs e)
     {
-        if (TryApply())
-            Close(true);
+        ConfirmButton.IsEnabled = false;
+        try
+        {
+            if (await TryApplyAsync())
+                Close(true);
+        }
+        finally
+        {
+            ConfirmButton.IsEnabled = true;
+        }
     }
 
     private void OnClearButtonClick(object sender, RoutedEventArgs e)
@@ -160,16 +176,19 @@ public partial class ConfigKeyBindingDialog : WindowViewBase, INotifyPropertyCha
         UpdateExpression();
     }
 
-    public bool TryApply()
+    public async Task<bool> TryApplyAsync()
     {
-        if (ConflictDefinition is not null)
+        UpdateConflicts();
+        if (HasConflict && !await DialogManager.ShowComfirmDialog(
+                Lang.ConflictNotifyComfirm.Format(ConflictDisplayName),
+                Lang.Warning))
         {
-            Log.LogWarn(Lang.ConflictNotifyComfirm.Format(ConflictDefinition.DisplayName));
+            Log.LogInfo($"Key binding conflict replacement canceled: {ConflictDisplayName}");
             return false;
         }
 
-        Definition.Key = key;
-        Definition.Modifiers = modifier;
+        KeyBindingManager.ChangeKeyBindingResolvingConflicts(Definition, key, modifier);
+        SetConflictDefinitions([]);
         return true;
     }
 
@@ -177,14 +196,24 @@ public partial class ConfigKeyBindingDialog : WindowViewBase, INotifyPropertyCha
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentExpression)));
 
-        if (string.IsNullOrWhiteSpace(CurrentExpression))
-            return;
-
-        var manager = IoC.Get<IKeyBindingManager>();
-        var conflict = manager?.QueryKeyBinding(key, modifier, Definition.Layer);
-        if (conflict == Definition)
-            conflict = null;
-        ConflictDefinition = conflict;
+        UpdateConflicts();
     }
+
+    private void UpdateConflicts()
+    {
+        SetConflictDefinitions(KeyBindingManager.QueryKeyBindingConflicts(Definition, key, modifier));
+    }
+
+    private void SetConflictDefinitions(IReadOnlyList<KeyBindingDefinition> value)
+    {
+        conflictDefinitions = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConflictDefinitions)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConflictDefinition)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ConflictDisplayName)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(HasConflict)));
+    }
+
+    private IKeyBindingManager KeyBindingManager => keyBindingManager ?? IoC.Get<IKeyBindingManager>();
+    private IDialogManager DialogManager => dialogManager ?? IoC.Get<IDialogManager>();
 }
 

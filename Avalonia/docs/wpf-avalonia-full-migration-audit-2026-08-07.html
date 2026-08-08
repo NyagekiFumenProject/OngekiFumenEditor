@@ -558,13 +558,17 @@
 <li><strong>影响</strong>：通过接口传入自定义布局会被静默忽略，导出得到空流；菜单“应用建议布局”不会读取 <code>suggestLayout.bin</code>，首次启动也不会询问用户。</li>
 <li><strong>建议</strong>：二选一并收紧契约：要么基于 Gekimini 的版本化布局 JSON 真正实现 <code>Stream</code> 导入/导出和嵌入推荐布局，要么删除/重命名会静默忽略流的 API 与菜单。恢复首次启动提示时记录一次性决策，并对未知版本、损坏数据、缺失工具、跨屏幕和回退默认布局做测试。</li>
 </ul>
-<h3 id="b-009">B-009 快捷键冲突检测存在，但确认覆盖冲突的分支被删掉</h3>
+<h3 id="b-009" class="completed-plan">B-009 快捷键冲突覆盖确认分支已恢复（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：冲突快捷键现在可以由用户明确确认后覆盖，取消确认或直接关闭配置窗口均不修改任何绑定；方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：<code>IKeyBindingManager</code> 新增冲突集合查询和一次性冲突解析操作。查询排除当前定义，按键与修饰键必须完全一致，并遵循现有层规则：同层互斥，任一侧为 <code>Global</code> 时跨层互斥；确认覆盖时先物化全部冲突，将所有适用旧定义清为 <code>None</code>，再写入目标定义，能够清理损坏配置中遗留的多个重复绑定。</li>
+<li><strong>确认与取消</strong>：<code>ConfigKeyBindingDialog</code> 的确认按钮改为异步流程，检测到冲突时通过现有 <code>IDialogManager.ShowComfirmDialog()</code> 显示本地化警告，并在等待期间禁用确认按钮。用户选择取消时只保留冲突提示并返回编辑；确认后调用管理器完成替换并关闭窗口。无冲突重绑和清空快捷键不会弹出多余确认。</li>
+<li><strong>界面修复</strong>：对话框公开 <code>HasConflict</code>、冲突集合和合并后的冲突名称，冲突提示的 <code>IsVisible</code> 改为编译布尔绑定，不再依赖当前存在语义问题的 <code>NullToVisibilityConverter</code>；多个冲突会在同一提示和确认文案中列出。</li>
+<li><strong>持久化边界</strong>：冲突替换只更新设置会话中的定义，不在对话框内重复调用 <code>SaveConfig()</code>；仍由设置页既有的 <code>ApplyChanges()</code> 统一持久化一次，因此取消或关闭确认框不会产生配置文件写入。</li>
+<li><strong>验证</strong>：新增冲突解析测试，覆盖 Normal/Batch 隔离、Global 跨层冲突、多个冲突、不同修饰键、自身重绑、确认、取消、无冲突直写和不提前保存；连同快捷键定义、集中输入路由和本地化绑定的定向测试共 <code>28/28</code> 通过，Avalonia 核心完整测试共 <code>345/345</code> 通过。</li>
 <li><strong>WPF 行为</strong>：<code>Kernel/SettingPages/KeyBinding/Dialogs/ConfigKeyBindingDialog.xaml.cs:138-153</code> 检测冲突后弹出 <code>ConflictNotifyComfirm</code> 的 Yes/No 确认；<code>KeyBindingSettingViewModel.cs:89-96</code> 在确认后先把冲突定义清为 <code>None</code>，再写入新快捷键。</li>
-<li><strong>Avalonia 状态</strong>：<code>Kernel/SettingPages/KeyBinding/Dialogs/ConfigKeyBindingDialog.xaml.cs:143-154</code> 的 <code>TryApply()</code> 发现 <code>ConflictDefinition</code> 就记录日志并返回 <code>false</code>；确认按钮只有在 <code>TryApply()</code> 为真时才关闭窗口。<code>KeyBindingSettingViewModel.ChangeKeybindAsync()</code> 只显示窗口并刷新列表，没有清除冲突定义或二次确认。</li>
-<li><strong>保留部分</strong>：按键捕获、修饰键、清除和恢复默认操作仍在；缺口集中在“用户明确确认后覆盖旧绑定”这一关键分支。</li>
-<li><strong>影响</strong>：新快捷键与已有命令冲突时，界面会显示冲突但永远无法确认覆盖；用户只能取消或改用其他按键。</li>
-<li><strong>建议</strong>：在对话框返回明确确认后，由快捷键管理器原子地清除冲突项、写入新项并只持久化一次；取消或窗口关闭必须完全不改状态。增加冲突覆盖、取消、同命令重绑、多个冲突、防止保留重复绑定和保存失败回滚测试。</li>
+<li><strong>原缺口（已消除）</strong>：审查时按键捕获、修饰键、清除、恢复默认和冲突检测均已存在，但 <code>TryApply()</code> 遇到冲突只写日志并固定返回 <code>false</code>，设置页也没有后续清除分支，导致用户永远无法确认覆盖。</li>
+<li><strong>后续建议</strong>：把 <code>DefaultKeyBindingManager.SaveConfig()</code> 从直接 <code>File.WriteAllText</code> 升级为平台持久化服务和临时文件原子替换，保存失败时保留上一次有效文件并向用户报告；Browser 应使用可重载的浏览器存储。再增加一次真实窗口点击测试，覆盖嵌套确认框的焦点、Escape、窗口直接关闭、保存失败回滚和重启后唯一绑定。</li>
 </ul>
 <h3 id="b-010">B-010 程序设置页保留了若干没有活动消费者的开关</h3>
 <ul>

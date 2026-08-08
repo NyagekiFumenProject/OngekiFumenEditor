@@ -37,13 +37,13 @@
         <TextBlock
             HorizontalAlignment="Center"
             FontSize="16"
-            IsVisible="{Binding ConflictDefinition,Converter={StaticResource NullToVisibilityConverter} }"
+            IsVisible="{CompiledBinding HasConflict}"
             Foreground="OrangeRed"
             FontWeight="Bold">
             <TextBlock.Text>
                 <MultiBinding Converter="{StaticResource LocalizeConverter}">
                     <Binding Path="Text" Source="{x:Static languages:Lang+B.KeyBindingConflictDetect}" />
-                    <Binding Path="ConflictDefinition.Name" />
+                    <Binding Path="ConflictDisplayName" />
                 </MultiBinding>
             </TextBlock.Text>
         </TextBlock>
