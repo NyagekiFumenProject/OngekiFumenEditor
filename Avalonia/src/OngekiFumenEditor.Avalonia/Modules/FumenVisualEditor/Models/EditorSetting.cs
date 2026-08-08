@@ -190,7 +190,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
             get => showXOffsetScrollBar;
             set
             {
-                showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value;
+                showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar = value;
                 RequestSave();
                 OnPropertyChanged(nameof(ShowXOffsetScrollBar));
             }

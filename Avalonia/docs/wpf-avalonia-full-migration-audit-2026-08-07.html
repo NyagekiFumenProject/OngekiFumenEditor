@@ -860,13 +860,14 @@
 <li><strong>审计时状态</strong>：处理器曾跨模块复制并解析 <code>IFumenMetaInfoBrowser</code>，导致 TGrid 计算器菜单不能打开正确工具，或者因元信息接口未注册而抛出解析异常。该原影响现已消除。</li>
 <li><strong>后续建议</strong>：将仍带有复制痕迹的文件名和类名 <code>ViewFumenMetaInfoBrowserCommandHandler</code> 重命名为 TGrid 计算器语义，降低再次串接模块的概率；再补打开后编辑器切换、选中对象自动同步、TGrid 滚动和回写按钮 <code>CanExecute</code> 的 UI 级测试，并把所有“查看工具”命令做成接口到具体 ViewModel 的参数化映射测试。</li>
 </ul>
-<h3 id="b-033-show-x-offset-scrollbar-setting">B-033 <code>ShowXOffsetScrollBar</code> 设置写入了错误字段（旧版遗留，迁移后未修复）</h3>
+<h3 id="b-033-show-x-offset-scrollbar-setting" class="completed-plan">B-033 <code>ShowXOffsetScrollBar</code> 设置字段已修复（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：修正 Avalonia <code>EditorSetting.ShowXOffsetScrollBar</code> setter，使其写入同名的 <code>EditorGlobalSetting.ShowXOffsetScrollBar</code>，不再覆盖 <code>ForceXGridMagneticDock</code>。方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>验证</strong>：新增 <code>EditorSettingTests.ShowXOffsetScrollBar_UpdatesOnlyItsGlobalSetting</code>，分别切换两个开关，断言滚动条设置会持久化到正确字段、磁吸设置保持原值，并断言外部全局设置变化同步回编辑器设置；专项测试 <code>1/1</code>、Avalonia 核心完整测试集 <code>369/369</code> 通过，0 项跳过。</li>
 <li><strong>旧版与 Avalonia 现状</strong>：两版 <code>EditorSetting</code> 的 <code>ShowXOffsetScrollBar</code> setter（旧版 <code>OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs:187-195</code>，当前 <code>src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorSetting.cs:187-195</code>）都执行 <code>Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock = value</code>，而不是写入同名的 <code>ShowXOffsetScrollBar</code>。当前全局设置模型同时定义了这两个独立属性，AXAML 又把滚动条可见性绑定到 <code>Setting.ShowXOffsetScrollBar</code>。</li>
-<li><strong>影响</strong>：用户切换“显示 X 偏移滚动条”时会意外改变 XGrid 强制吸附；真正的滚动条设置不会持久化，重载设置或重新打开编辑器后界面状态可能恢复为旧值。该问题不是 Avalonia 新增回归，而是旧 WPF 缺陷被原样带入，属于迁移后仍未修复的可见设置问题。</li>
+<li><strong>审计时状态</strong>：旧版和迁移后的 Avalonia setter 都曾使用错误字段，用户切换“显示 X 偏移滚动条”会意外改变 XGrid 强制吸附，滚动条可见性也无法正确持久化。当前 Avalonia 生产路径已消除该影响；旧 WPF 源码仍保留原历史行为，作为兼容边界单独记录。</li>
 <li><strong>分类理由</strong>：设置页、模型和绑定均已迁移，但 setter 的实际行为不符合公开属性语义，因此按 B 记录；“旧版也存在”作为归因边界，不能把它算作 Avalonia 独有差异。</li>
-<li><strong>测试缺口</strong>：没有属性隔离测试证明改动 <code>ShowXOffsetScrollBar</code> 不会改变 <code>ForceXGridMagneticDock</code>，也没有保存后重载和实际滚动条可见性的回归测试。</li>
-<li><strong>建议</strong>：将 setter 改为 <code>showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar = value</code>，并决定是否同步修复旧分支以避免两套行为继续分叉。增加“分别切换两个开关、保存/Reload、跨编辑器实例、水平滚动条可见性和磁吸行为”测试；若设置迁移需兼容旧配置，先保留旧值并只在明确升级步骤中转换，不能用错误字段覆盖。</li>
+<li><strong>后续建议</strong>：补充设置保存/Reload、跨编辑器实例和实际水平滚动条可见性的 UI 测试；评估是否在独立的 WPF 维护分支同步修正，避免两套产品行为继续分叉。若未来做配置迁移，应在明确升级步骤中转换旧值，不能用错误字段覆盖新设置。</li>
 </ul>
 <h3 id="b-034-project-load-root-ownership-leak">B-034 项目加载失败时可能泄漏尚未转移所有权的目录树</h3>
 <ul>
