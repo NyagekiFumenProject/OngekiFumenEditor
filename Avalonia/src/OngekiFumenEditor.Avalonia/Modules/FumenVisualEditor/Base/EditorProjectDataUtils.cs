@@ -38,9 +38,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				throw new InvalidDataException(projectLocatorError);
 			}
 
-			EditorProjectDataModel projectData;
-			await using (var projectStream = await projectFile.OpenRead())
-				projectData = await projFileManager.Load(projectStream, cancellationToken);
+			// The loader consumes the root: success transfers it to the returned model,
+			// while every failure path releases the directory tree here.
+			EditorProjectDataModel projectData = null;
+			var rootTransferred = false;
+			try
+			{
+				await using (var projectStream = await projectFile.OpenRead())
+					projectData = await projFileManager.Load(projectStream, cancellationToken);
 
 			var defaultFumenLocator = Path.GetFileNameWithoutExtension(projectFile.FileName) + ".ogkr";
 			var rawFumenLocator = string.IsNullOrWhiteSpace(projectData.FumenFilePath)
@@ -168,9 +173,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			projectData.FumenFile = fumenFile;
 			projectData.AudioFile = audioFile;
 			projectData.AudioAwbFile = audioAwbFile;
-			projectData.ProjectRoot = projectRoot;
-			ApplyBulletPalleteListEditorData(projectData);
-			return projectData;
+				projectData.ProjectRoot = projectRoot;
+				rootTransferred = true;
+				ApplyBulletPalleteListEditorData(projectData);
+				return projectData;
+			}
+			catch
+			{
+				projectData?.DisposeRuntimeFiles();
+				if (!rootTransferred)
+					projectRoot.Dispose();
+				throw;
+			}
 		}
 
 		// Keep the legacy desktop-only ACB parser out of the general browser load path.

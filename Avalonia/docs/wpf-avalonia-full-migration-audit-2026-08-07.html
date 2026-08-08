@@ -869,14 +869,14 @@
 <li><strong>分类理由</strong>：设置页、模型和绑定均已迁移，但 setter 的实际行为不符合公开属性语义，因此按 B 记录；“旧版也存在”作为归因边界，不能把它算作 Avalonia 独有差异。</li>
 <li><strong>后续建议</strong>：补充设置保存/Reload、跨编辑器实例和实际水平滚动条可见性的 UI 测试；评估是否在独立的 WPF 维护分支同步修正，避免两套产品行为继续分叉。若未来做配置迁移，应在明确升级步骤中转换旧值，不能用错误字段覆盖新设置。</li>
 </ul>
-<h3 id="b-034-project-load-root-ownership-leak">B-034 项目加载失败时可能泄漏尚未转移所有权的目录树</h3>
+<h3 id="b-034-project-load-root-ownership-leak" class="completed-plan">B-034 项目加载失败的目录树所有权已收口（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：将工程加载器的目录树所有权改为事务式契约：成功返回前把 <code>projectRoot</code> 转交给 <code>EditorProjectDataModel.ProjectRoot</code>，任何解析、依赖校验、谱面反序列化或后处理异常都由加载器释放根目录和已建立的运行时资源；上层失败分支不再重复猜测根目录是否仍由自己拥有。方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>验证</strong>：新增 <code>EditorProjectLoadOwnershipTests.FailedLoad_DisposesOwnedRootAndChildren</code>，使用可计数的 fake 目录和工程文件，在工程文件已解析但谱面/音频依赖缺失时断言根目录和子文件各释放一次；专项测试 <code>1/1</code>、Avalonia 核心完整测试集 <code>370/370</code> 通过，0 项跳过。</li>
 <li><strong>所有权转移点</strong>：<code>FumenVisualEditorViewModel.ProjectIO.cs:145-150</code> 在调用加载 helper 前把 <code>projectRoot</code> 置空，表示目录树所有权已交给 helper。<code>LoadProjectWithoutGateAsync():192-210</code> 的异常分支随后根据 <code>projectData is null</code> 决定释放对象。</li>
-<li><strong>泄漏路径</strong>：<code>EditorProjectDataUtils.TryLoadFromFileAsync():41-43</code> 成功解析工程文件后已经创建非空 <code>EditorProjectDataModel</code>；但 <code>ProjectRoot</code> 只有在完成谱面、音频、ACB/AWB 校验和谱面反序列化后的 <code>:189-197</code> 才赋值。此期间若路径校验失败、ACB 检查失败、缺少依赖或谱面解析抛异常，外层只调用 <code>projectData.DisposeRuntimeFiles()</code>，而该方法在 <code>EditorProjectDataModel.cs:95-108</code> 只能释放已经绑定的资源，无法释放尚未赋给 <code>ProjectRoot</code> 的目录树。</li>
-<li><strong>影响</strong>：一次损坏工程或反复打开失败的操作可能保留整棵 <code>IStorageFolder/IStorageFile</code> 包装和 Browser 授权句柄，导致内存/句柄持续增长、目录权限对象迟迟不释放，长会话中的后续打开和清理行为变得不可靠。</li>
+<li><strong>审计时风险</strong>：原实现把根目录转移到 helper 后再依赖上层根据 <code>projectData</code> 是否返回来判断释放责任，底层 helper 本身没有声明失败时的所有权结果；直接调用 helper 的新入口很容易在解析异常时遗漏释放。当前生产路径已消除该隐式契约和对应的句柄泄漏风险。</li>
 <li><strong>分类理由</strong>：这是 Avalonia 新增的“授权目录树 + 延迟所有权绑定”实现中的失败路径缺口；旧 WPF 直接按路径打开文件，没有对应的目录树所有权契约，不能归为 E 类框架限制。</li>
-<li><strong>测试缺口</strong>：现有测试覆盖成功加载和部分文件系统操作，但没有使用可计数的 fake directory/file 验证工程解析异常、缺少音频、ACB 外置 AWB 缺失、谱面解析异常和取消后的每个句柄都被释放。</li>
-<li><strong>建议</strong>：把所有权写成显式不变量：在 <code>TryLoadFromFileAsync</code> 内用 <code>try/finally</code> 持有 <code>projectRoot</code>，只有在 <code>projectData.ProjectRoot = projectRoot</code> 完成后才清除本地 owner；或让模型构造函数一次性接收并拥有 root。失败时同时释放已解析的谱面对象、<code>fumenFile</code>、<code>audioFile</code> 和 <code>audioAwbFile</code>，并保留原始异常。加入资源计数、重复失败和取消的生命周期测试，Desktop 与 Browser provider 各覆盖一次。</li>
+<li><strong>后续建议</strong>：继续为缺少音频、ACB 外置 AWB 缺失、谱面解析异常、取消和重复失败增加资源计数测试，并分别覆盖 Desktop 与 Browser provider；fake 目录/文件应保持释放计数和原始异常断言，避免未来重新引入“先清空 owner、后延迟绑定”的路径。</li>
 </ul>
 <h3 id="b-035-project-folder-scan-bounds">B-035 项目文件夹打开缺少取消、进度和资源预算</h3>
 <ul>

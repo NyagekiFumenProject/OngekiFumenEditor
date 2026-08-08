@@ -204,10 +204,7 @@ public partial class FumenVisualEditorViewModel
         }
         catch
         {
-            if (projectData is null)
-                projectRoot.Dispose();
-            else
-                projectData.DisposeRuntimeFiles();
+            projectData?.DisposeRuntimeFiles();
             throw;
         }
     }
