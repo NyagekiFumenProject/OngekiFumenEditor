@@ -57,12 +57,22 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
             return;
 
         var bplList = editor.Fumen.BulletPalleteList.Prepend(BulletPallete.DummyCustomPallete).ToArray();
-        var dialog = new BulletPalleteSelectDialogViewModel(bplList, TypedProxyValue);
-        await IoC.Get<IWindowManager>().ShowDialogAsync(dialog);
-        if (dialog.SelectedPallete is not null)
-            TypedProxyValue = dialog.SelectedPallete;
+        await OpenSelectListCoreAsync(bplList, IoC.Get<IWindowManager>());
+    }
 
+    internal async Task<bool> OpenSelectListCoreAsync(
+        IEnumerable<BulletPallete> bulletPalleteList,
+        IWindowManager windowManager)
+    {
+        var dialog = new BulletPalleteSelectDialogViewModel(bulletPalleteList, TypedProxyValue);
+        var result = await windowManager.ShowDialogAsync(dialog);
+        var selectedPallete = dialog.SelectedPallete;
+        if (result != true || selectedPallete is null || ReferenceEquals(selectedPallete, TypedProxyValue))
+            return false;
+
+        TypedProxyValue = selectedPallete;
         OnPropertyChanged(nameof(StrId));
+        return true;
     }
 
     [RelayCommand]

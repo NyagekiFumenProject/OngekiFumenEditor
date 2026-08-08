@@ -590,13 +590,16 @@
 <li><strong>分类理由</strong>：窗口、命令和刷入算法均已迁移，但关键确认分支被显式注释，属于可达的半实现行为。</li>
 <li><strong>后续建议</strong>：在范围对话框内增加起止顺序的即时验证和禁用确认状态，并提供本地化错误提示；再增加真实窗口按钮与键盘 Escape 测试，验证焦点、关闭结果和无效输入提示，防止未来窗口模板变化绕过 ViewModel 级守卫。</li>
 </ul>
-<h3 id="b-012">B-012 弹幕调色板选择对话框取消后仍会应用当前选中项</h3>
+<h3 id="b-012" class="completed-plan">B-012 弹幕调色板选择已恢复确认提交语义（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：调色板列表中的选择现在只保存在对话框 ViewModel；只有窗口明确返回 <code>true</code> 且选中项实际变化时才写回物件属性。取消和直接关闭窗口均保持原值，方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：<code>OpenSelectListAsync()</code> 把候选调色板和 <code>IWindowManager</code> 交给可测试的核心流程。流程保留打开时的属性值作为初始选择，等待 <code>ShowDialogAsync()</code> 后同时检查返回值、非空选择和引用变化；任一条件不满足都直接返回，不触发属性代理 setter 或 <code>StrId</code> 通知。</li>
+<li><strong>交互一致性</strong>：普通列表选择仍只更新 <code>BulletPalleteSelectDialogViewModel.SelectedPallete</code>；确认按钮与双击命令继续通过 <code>TryCloseAsync(true)</code> 提交，取消命令通过 <code>TryCloseAsync(false)</code> 放弃。确认新选项只写入一次，确认原选项不会制造冗余属性变更。</li>
+<li><strong>验证</strong>：新增 <code>BulletPalleteSelectionTests</code> 5 项并全部通过，覆盖改选后取消、改选后窗口关闭、确认新选择、双击确认和原值确认；测试直接执行取消、确认和双击命令，并断言属性代理写入次数分别为 0 或 1。Avalonia 核心完整测试共 <code>354/354</code> 通过、0 项跳过。</li>
 <li><strong>WPF 行为</strong>：<code>UI/Controls/ObjectInspector/ViewModels/BulletPalleteTypeUIViewModel.cs:67-72</code> 只有在 <code>ShowDialogAsync(dialog)</code> 返回 <code>true</code> 时才把 <code>SelectedPallete</code> 写回属性；取消不会改变目标对象。</li>
-<li><strong>Avalonia 状态</strong>：同名 ViewModel 的 <code>OpenSelectListAsync()</code>（约 <code>59-65</code> 行）等待对话框后不检查返回值，只要 <code>dialog.SelectedPallete</code> 非空就写回。对话框构造时已经把当前属性值设为初始选中项，列表选择还会即时更新该字段；<code>CancelAsync()</code> 虽调用 <code>TryCloseAsync(false)</code>，结果没有被调用方使用。</li>
-<li><strong>影响</strong>：用户在列表中点选另一调色板后按“取消”，新选择仍会应用到正在编辑的对象；即使没有改选，取消也会执行一次不必要的属性回写。双击和确认路径本身仍正确返回 <code>true</code>。</li>
-<li><strong>测试缺口</strong>：需要覆盖“改选后取消”“窗口关闭按钮取消”“确认”和“双击确认”四条路径，验证属性值与撤销记录均符合预期。</li>
-<li><strong>建议</strong>：仅在 <code>ShowDialogAsync()</code> 返回 <code>true</code> 且选择实际变化时写回；对话框内部选择保持为临时状态，取消不触发目标属性或撤销记录。按上述四条路径增加 ViewModel 测试，并断言无变化确认也不产生冗余 action。</li>
+<li><strong>审查时 Avalonia 状态</strong>：同名 ViewModel 的 <code>OpenSelectListAsync()</code>（约 <code>59-65</code> 行）等待对话框后不检查返回值，只要 <code>dialog.SelectedPallete</code> 非空就写回。对话框构造时已经把当前属性值设为初始选中项，列表选择还会即时更新该字段；<code>CancelAsync()</code> 虽调用 <code>TryCloseAsync(false)</code>，结果没有被调用方使用。</li>
+<li><strong>原影响（已消除）</strong>：用户在列表中点选另一调色板后按“取消”，新选择仍会应用到正在编辑的对象；即使没有改选，取消也会执行一次不必要的属性回写。双击和确认路径本身仍正确返回 <code>true</code>。</li>
+<li><strong>后续建议</strong>：把 DataGrid 的 <code>SelectedItem</code> 显式声明为编译双向绑定，并增加真实 DataGrid 行选择、双击、Escape 与标题栏关闭测试；同时在没有选中项时禁用确认按钮，避免未来模板或默认绑定模式变化破坏当前临时选择契约。</li>
 </ul>
 <h3 id="b-013">B-013 选中对象查看器丢失列头排序</h3>
 <ul>
