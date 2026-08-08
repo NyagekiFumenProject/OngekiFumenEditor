@@ -70,6 +70,7 @@
     "CheckRuleSoflanProblem":  "ソフラン速度は最終的に1倍速に戻るべきですが，{0}倍速になっています。",
     "CheckScript":  "スクリプトを確認",
     "CleanRecentFilesRecords":  "最近開いたファイルをクリア",
+    "CleanRecentFilesRecordsConfirm":  "最近開いたファイルの履歴と保存されたアクセスデータをすべて削除しますか？この操作は元に戻せません。",
     "ClearCopyList":  "コピー一覧をクリア",
     "ClearHistory":  "履歴をクリア",
     "ClonePallete":  "複製",

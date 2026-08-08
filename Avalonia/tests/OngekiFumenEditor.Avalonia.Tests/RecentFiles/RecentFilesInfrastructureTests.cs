@@ -82,6 +82,27 @@ public sealed class RecentFilesInfrastructureTests
     }
 
     [Fact]
+    public void ClearAllRecordsAndDatas_RemovesAggregateStateAndRestartsValidation()
+    {
+        var coordinator = new RecordingValidityCoordinator();
+        var manager = new DefaultEditorRecentFilesManager(new RecordingSettingManager(), coordinator);
+        var first = manager.PostRecent(FileType, "First", "first", new byte[] { 1 });
+        var second = manager.PostRecent(FileType, "Second", "second", new byte[] { 2 });
+        manager.SetMarkedInvalid(first, true);
+
+        manager.ClearAllRecordsAndDatas();
+
+        Assert.Empty(manager.RecentRecordInfos);
+        Assert.Null(manager.ReadData(first));
+        Assert.Null(manager.ReadData(second));
+        Assert.False(manager.IsMarkedInvalid(first));
+        Assert.Equal(1, coordinator.BeginGenerationCallCount);
+
+        var replacement = manager.PostRecent(FileType, "Replacement", "replacement", new byte[] { 3 });
+        Assert.Equal(new byte[] { 3 }, manager.ReadData(replacement));
+    }
+
+    [Fact]
     public void Constructor_LegacyStore_DiscardsLocationKeyedRecordsAndData()
     {
         var settings = new RecordingSettingManager();
@@ -211,6 +232,25 @@ public sealed class RecentFilesInfrastructureTests
             var created = new T();
             settings[typeof(T)] = created;
             return created;
+        }
+    }
+
+    private sealed class RecordingValidityCoordinator : IRecentRecordValidityCoordinator
+    {
+        public int BeginGenerationCallCount { get; private set; }
+
+        public long BeginValidationGeneration() => ++BeginGenerationCallCount;
+
+        public Task<bool> GetOrCheckAsync(
+            RecentRecordInfo recordInfo,
+            Func<Task<bool>> checkFactory) => checkFactory();
+
+        public Task<bool> CheckFreshAsync(
+            RecentRecordInfo recordInfo,
+            Func<Task<bool>> checkFactory) => checkFactory();
+
+        public void Invalidate(Guid recordId)
+        {
         }
     }
 }

@@ -71,6 +71,7 @@
     "CheckRuleSoflanProblem":  "最后一个Soflan变速后应该变回正常的1速,但现在是{0}速",
     "CheckScript":  "检查脚本",
     "CleanRecentFilesRecords":  "清除最近打开文件历史记录",
+    "CleanRecentFilesRecordsConfirm":  "确定清除全部最近打开文件历史及其保存的访问数据吗？此操作无法撤销。",
     "ClearCopyList":  "清空复制列表",
     "ClearHistory":  "清除历史记录",
     "ClonePallete":  "克隆到新的子弹类型",

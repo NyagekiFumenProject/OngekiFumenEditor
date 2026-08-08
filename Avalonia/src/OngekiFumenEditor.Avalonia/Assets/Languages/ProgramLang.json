@@ -71,6 +71,7 @@
     "CheckRuleSoflanProblem":  "After the last Soflan speed change, the speed should return to 1x normally, but now is {0}x.",
     "CheckScript":  "Check script",
     "CleanRecentFilesRecords":  "Clear recent file history",
+    "CleanRecentFilesRecordsConfirm":  "Clear all recent file history and its stored access data? This action cannot be undone.",
     "ClearCopyList":  "Clear the copy list",
     "ClearHistory":  "Clear history",
     "ClonePallete":  "Clone",

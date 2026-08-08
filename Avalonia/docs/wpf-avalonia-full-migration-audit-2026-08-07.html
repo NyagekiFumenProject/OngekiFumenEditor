@@ -731,14 +731,18 @@
 <li><strong>测试缺口</strong>：现有 <code>FumenVisualEditorProviderTests</code> 只验证 <code>TryNew/TryOpen</code> 委托，没有断言 provider 元数据或 New/Open command list 的枚举结果；Gekimini 侧也没有覆盖“可打开但不可新建”的 provider。</li>
 <li><strong>建议</strong>：删除 <code>OpenFileCommandListHandler</code> 对 <code>CanCreateNew</code> 的过滤，让所有声明了 <code>FileTypes</code> 的 provider 都能出现在“打开”列表；若未来确实存在只新建或只打开的 provider，应把接口拆成独立的 <code>CanCreateNew</code>/<code>CanOpen</code> 能力，而不是复用一个标志。增加集成测试：<code>CanCreateNew=false</code> 时 New 列表为空、Open 列表仍有一项且执行后调用 <code>TryOpen()</code>。</li>
 </ul>
-<h3 id="b-019">B-019 编辑器全局设置丢失“清除最近文件历史”入口</h3>
+<h3 id="b-019" class="completed-plan">B-019 编辑器全局设置已恢复“清除最近文件历史”入口（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：编辑器全局设置页末尾已恢复“Other”分组和“清除最近打开文件历史记录”按钮。执行前显示本地化的不可撤销警告，只有明确确认后才清理；方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：<code>FumenVisualEditorGlobalSettingViewModel</code> 新增 <code>ClearRecentFilesCommand</code>，通过 <code>IDialogManager.ShowComfirmDialog()</code> 显示警告并在确认后调用 <code>IEditorRecentFilesManager.ClearAllRecordsAndDatas()</code>。保留无参构造和现有 Injectio 注册路径，同时提供内部依赖入口供命令测试隔离对话框与最近文件管理器。</li>
+<li><strong>数据一致性</strong>：清理沿用 Gekimini 的聚合提交，不只删除可见记录，还会同步清空每条记录的扩展数据和无效标记，并启动新的有效性验证代次；空历史重复执行保持幂等。最近文件菜单每次展开都从管理器重新生成，Splash 在视图重新加载或切换语言刷新时也不会重新出现旧记录。</li>
+<li><strong>本地化与界面</strong>：英文、简体中文和日文资源新增了明确说明“历史、保存的访问数据和不可撤销性”的确认文案；AXAML 按钮继续复用已有 <code>CleanRecentFilesRecords</code> 文本键，并通过编译绑定连接生成命令。</li>
+<li><strong>验证</strong>：新增 5 项测试并全部通过，覆盖取消后记录保持、确认后只清理一次、空历史重复清理、设置页按钮文本与命令绑定，以及真实管理器对记录、数据、无效标记和验证代次的完整清理并可重新添加记录。Avalonia 核心完整测试共 <code>363/363</code> 通过、0 项跳过。</li>
 <li><strong>WPF 行为</strong>：<code>FumenVisualEditorGlobalSettingView.xaml:211-218</code> 的“Other”分组包含 <code>CleanRecentFilesRecords</code> 按钮，调用 ViewModel 的 <code>ClearRecentOpen()</code>；该方法通过旧 <code>IEditorRecentFilesManager.ClearAllRecords()</code> 清空最近记录。</li>
-<li><strong>Avalonia 状态</strong>：同名设置 ViewModel 只保留保存设置和前景/背景色选择命令，AXAML 在游玩区域设置后直接结束，没有“Other”分组或清理命令。三套 <code>ProgramLang*.json</code> 仍保留 <code>CleanRecentFilesRecords</code>，但全仓没有活动引用。</li>
+<li><strong>审查时 Avalonia 状态</strong>：同名设置 ViewModel 只保留保存设置和前景/背景色选择命令，AXAML 在游玩区域设置后直接结束，没有“Other”分组或清理命令。三套 <code>ProgramLang*.json</code> 虽保留 <code>CleanRecentFilesRecords</code>，全仓却没有活动引用。</li>
 <li><strong>可用基础设施</strong>：Gekimini 的 <code>IEditorRecentFilesManager.ClearAllRecordsAndDatas()</code> 已完整实现，会原子清除记录列表、每条记录的扩展数据和无效标记，并重启有效性验证代次；因此缺的是用户入口和接线，不是最近文件底层能力。</li>
-<li><strong>影响</strong>：用户能在 Splash 和“最近打开”菜单看到历史，却无法再从设置页一次性清空；只能等待数量上限淘汰或逐条走其他尚未确认的入口。</li>
-<li><strong>测试缺口</strong>：现有测试没有覆盖设置页清理命令，也没有断言执行后记录、数据 map、invalid ids 和菜单/Splash 视图均不再显示旧项。</li>
-<li><strong>建议</strong>：在设置 ViewModel 增加 <code>ClearRecentFilesCommand</code>，先显示不可撤销确认，再调用 <code>ClearAllRecordsAndDatas()</code>；在 AXAML 恢复“Other”分组并复用现有语言键。增加取消不变、确认全清、空列表幂等、清理后重新添加记录和相关 UI 刷新的集成测试。</li>
+<li><strong>原影响（已消除）</strong>：用户能在 Splash 和“最近打开”菜单看到历史，却无法从设置页一次性清空，只能等待数量上限淘汰；记录附带的访问数据和无效状态也没有用户可达的统一清理入口。</li>
+<li><strong>后续建议</strong>：为 <code>IEditorRecentFilesManager</code> 增加轻量的变更通知，让已经处于可见状态的 Splash 和已展开菜单无需重新加载即可即时移除记录；再补一项真实确认对话框的键盘 Escape/标题栏关闭测试，以及持久化失败时的本地化错误提示，避免清理失败只进入全局异常路径。</li>
 </ul>
 <h3 id="b-020">B-020 音频偏移工具的输入格式从 MP3/WAV 收缩为仅 WAV</h3>
 <ul>

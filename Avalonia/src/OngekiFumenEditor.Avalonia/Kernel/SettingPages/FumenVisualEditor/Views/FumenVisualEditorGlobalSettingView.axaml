@@ -210,6 +210,15 @@
                 </controls:GroupBox>
             </StackPanel>
         </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Other}}">
+            <StackPanel Margin="10">
+                <Button
+                    x:Name="ClearRecentFilesButton"
+                    HorizontalAlignment="Left"
+                    Command="{Binding ClearRecentFilesCommand}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.CleanRecentFilesRecords}}" />
+            </StackPanel>
+        </controls:GroupBox>
     </StackPanel>
 </gekViews:ViewBase>
 
