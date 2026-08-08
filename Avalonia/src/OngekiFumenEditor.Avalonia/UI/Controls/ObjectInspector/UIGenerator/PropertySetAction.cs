@@ -12,7 +12,7 @@ public class PropertySetAction<T> : IUndoableAction
     private readonly T oldValue;
     private readonly T newValue;
 
-    public LocalizedString Name => LocalizedString.CreateFromRawText(Lang.ObjectPropertyChanged.Format($"鐗╀欢灞炴€?{propName})鍙樻洿"));
+    public LocalizedString Name => LocalizedString.CreateFromRawText(Lang.ObjectPropertyChanged.Format(propName));
 
     public PropertySetAction(string propName, Action<T> setterAction, T oldValue, T newValue)
     {

@@ -242,7 +242,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 
 			bool skipAfter = false;
 
-			//妫€鏌ヤ竴缁勫鏄惁瀛樺湪鏃堕棿鍐茬獊
+			//检查一组墙是否存在时间冲突
 			foreach (var result in CheckWallChildrenTGridConfict(allWalls))
 			{
 				yield return result;
@@ -253,7 +253,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 				yield break;
 			skipAfter = false;
 
-			//妫€鏌ヤ竴缁勭粍澧欎箣闂存槸鍚︽椂闂村啿绐?
+			//检查一组组墙之间是否时间冲突
 			foreach (var result in CheckTGridConfict(leftWalls))
 			{
 				yield return result;
@@ -269,7 +269,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 				yield break;
 			skipAfter = false;
 
-			//妫€鏌ュ乏鍙冲涔嬮棿鏄惁浼氫氦鍙?
+			//检查左右墙之间是否会交叉
 			foreach (var leftWall in leftWalls)
 			{
 				var leftTGridRange = leftWall.TGridRange;

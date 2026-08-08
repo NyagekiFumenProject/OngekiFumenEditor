@@ -266,7 +266,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
             }
             else
             {
-                //灏卞湪褰撳墠[prev,cur]鑼冨洿鍐咃紝閭ｄ箞灏辨彃鍊艰绠楀挴
+                //就在当前[prev,cur]范围内，那么就插值计算咯
                 var xGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid, PrevObject.XGrid.TotalGrid, PrevObject.TGrid.TotalGrid, XGrid.TotalGrid, TGrid.TotalGrid);
                 return xGrid;
             }

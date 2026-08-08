@@ -67,8 +67,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 ? false : true;
 
         public bool EditorObjectVisibility =>
-            IsLocked || // 缂栬緫鍣ㄨ閿佷綇
-            IsUserRequestHideEditorObject // 鐢ㄦ埛瑕佹眰闅愯棌(姣斿鎸変笅Q)
+            IsLocked || // 编辑器被锁住
+            IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
                 ? false : true;
 
         public bool IsDesignMode => EditorObjectVisibility;
@@ -442,7 +442,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         private OngekiObjectBase mouseDownHitObject;
         private Point? mouseDownHitObjectPosition;
         /// <summary>
-        /// 琛ㄧず鎸囬拡鏄惁鍑烘嫋鍔ㄥ嚭婊氬姩鑼冨洿
+        /// 表示指针是否已拖出滚动范围
         /// </summary>
         private bool dragOutBound;
         private int currentDraggingActionId;
@@ -489,7 +489,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.RecoveryObjectToAudioTime.ToLocalizedString(),
                 () =>
                 {
-                    Log.LogInfo($"寮€濮嬫仮澶嶇墿浠舵椂闂?..");
+                    Log.LogInfo("开始恢复物件时间...");
                     foreach ((var timelineObject, var audioTime) in recoverTargets)
                         timelineObject.TGrid = TGridCalculator.ConvertYToTGrid_DesignMode(audioTime, this);
 
@@ -678,11 +678,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             var beforeHoldEndXGrid = (dockable as Hold)?.HoldEnd?.XGrid;
             var beforeLane = dockable.ReferenceLaneStart;
 
-            //濡傛灉鏈韩宸茬粡鏈夎建閬撳紩鐢ㄤ笖鏄悓涓€涓被鍨嬬殑杞ㄩ亾锛岄偅涔堝氨鍒ゆ柇涓€涓嬩綅缃?閽﹀畾涓嬩竴鏉″悓绫诲瀷杞ㄩ亾
+            //如果本身已经有轨道引用且是同一个类型的轨道，那么就判断一下位置,钦定下一条同类型轨道
             if (beforeLane is not null)
             {
                 var curXGrid = dockable.XGrid;
-                //鑾峰彇杞ㄩ亾骞惰绠楀搴旂殑浣嶇疆锛岀劧鍚庢帓搴忥紝濡傛灉浣嶇疆鐩稿悓閭ｄ箞灏卞啀鎸塕ecordId鍘绘帓搴?
+                //获取轨道并计算对应的位置，然后排序，如果位置相同那么就再按RecordId去排序
                 var pickableLanes = dockableLanes
                     .Select(x =>
                         new
@@ -697,10 +697,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     .Where(x => x.XGrid >= curXGrid)
                     .Select(x => x.Lane);
 
-                //杩欓噷鑰冭檻濡傛灉鏄垏鎹㈠埌鍏朵粬棰滆壊杞ㄩ亾锛岄偅涔堝彲浠ョ洿鎺ュ師鍦板彉鑹层€?
+                //这里考虑如果是切换到其他颜色轨道，那么可以直接原地变色。
                 var pick = beforeLane.LaneType == targetType ? r.FindNextOrDefault(beforeLane) : r.FirstOrDefault();
 
-                //濡傛灉pick涓虹┖锛岃鏄庡彸渚у啀涔熸病鏈夊悎閫傜殑杞ㄩ亾鍙互鏀句簡锛岄偅涔堝氨灏濊瘯鐩存帴鑾峰彇鏈€宸︿晶鐨勮建閬擄紝閲嶆柊寮€濮?
+                //如果pick为空，说明右侧再也没有合适的轨道可以放了，那么就尝试直接获取最左侧的轨道，重新开始
                 if (pick is null)
                     pick = pickableLanes
                         .Select(x => x.Lane)
@@ -724,7 +724,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     if (dockable.ReferenceLaneStart.CalulateXGrid(dockable.TGrid) is XGrid xGrid)
                         dockable.XGrid = xGrid;
 
-                    //濡傛灉鏄疕old杩樺緱浠栨暣鐞嗕竴涓嬪熬宸村憿
+                    //如果是Hold还得他整理一下尾巴呢
                     if (dockable is Hold hold)
                     {
                         if (hold.HoldEnd is HoldEnd holdEnd && dockable.ReferenceLaneStart.CalulateXGrid(holdEnd.TGrid) is XGrid holdXGrid)
@@ -752,11 +752,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //鑾峰彇瑕佸垹闄ょ殑鐗╀欢
+            //获取要删除的物件
             var selects = selection?.ToArray() ?? SelectObjects.OfType<OngekiObjectBase>().ToArray();
 
-            //渚濋檮浜庡叾浠栧璞＄殑瀛愮墿浠讹紝姣斿杞ㄩ亾鑺傜偣锛屾洸绾挎帶鍒惰妭鐐癸紝鏃犳硶鍋氬埌鍗曠函鍒犻櫎鍜屾坊鍔?
-            //璁板綍瀹冧滑瀛愯妭鐐圭浉瀵逛簬闆嗗悎鐨勪綅缃紝涓嬫鎭㈠鐨勬椂鍊欏氨鏄彃鍏ヤ簡
+            //依附于其他对象的子物件，比如轨道节点，曲线控制节点，无法做到单纯删除和添加
+            //记录它们子节点相对于集合的位置，下次恢复的时候就是插入了
             var curveControlMaps = selects
                 .OfType<LaneCurvePathControlObject>()
                 .GroupBy(x => x.RefCurveObject)
@@ -830,7 +830,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            //鍙栨秷閫夋嫨
+            //取消选择
             SelectObjects.ForEach(x => x.IsSelected = false);
         }
 
@@ -851,7 +851,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 };
                 if (child != null)
                 {
-                    //鍙湁涓€涓建閬揘ext琚€夋嫨
+                    //只有一个轨道Next被选择
                     ProcessAsAddCurve(child, position);
                     return;
                 }
@@ -958,7 +958,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
             if (propertyBrowser.SelectedObjects.IsOnlyOne() && propertyBrowser.SelectedObjects.FirstOrDefault() is Hold hold)
             {
-                //鍙湁涓€涓猦old琚€夋嫨锛屾寜涓婣閭ｄ箞灏辨槸娣诲姞HoldEnd
+                //只有一个hold被选择，按下A那么就是添加HoldEnd
                 ProcessAsHoldEnd(hold, position);
                 return;
             }
@@ -1068,7 +1068,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 objs = objs.Where(x => x switch
                 {
                     IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
-                    or ConnectableObjectBase => false, //杞ㄩ亾鐢变緷闄勭殑鐗╀欢鍘诲喅瀹?
+                    or ConnectableObjectBase => false, //轨道由依附的物件去决定
                     _ => true
                 });
                 //recache all objects
@@ -1095,8 +1095,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                         return;
                     }
                     _cacheSoflanGroupRecorder.SetCache(obj.Id, soflanList, soflanGroup);
-                    //鐩墠鍙湁Hold鐗╀欢鑳藉奖鍝嶅埌鎵€灞炶建閬撶殑SoflanGroup?
-                    /* 娉ㄩ噴浠ｇ爜鍥犱负id:1120
+                    //目前只有Hold物件能影响到所属轨道的SoflanGroup?
+                    /* 注释代码因为id:1120
                     if (obj is Hold hold && hold.ReferenceLaneStart is ConnectableStartObject start)
                         _cacheSoflanGroupRecorder.SetCache(start.Id, soflanList, soflanGroup);
                     */
@@ -1306,7 +1306,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     }
                     else
                     {
-                        //杩欓噷濡傛灉宸茬粡鏈夌墿浠堕€夋嫨浜嗗氨鍒ゆ柇鏄惁杩樻湁鍏朵粬鐗╀欢鍙互閫夋嫨
+                        //这里如果已经有物件选择了就判断是否还有其他物件可以选择
                         SelectionArea.IsActive = false;
                         mouseDownHitObject = hitOngekiObject;
                         mouseDownHitObjectPosition = position;
@@ -1439,7 +1439,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     else if (rp <= trigPrecent && dragOutBound)
                         offsetYAcc = rp / trigPrecent - 1;
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                        dragOutBound = true; //褰撴寚閽堝湪婊戝姩鑼冨洿澶栭潰锛岄偅涔堝氨鍙互杩涜浠讳綍鐨勬粦鍔ㄦ搷浣滀簡锛岄伩鍏嶆寚閽堜粠婊戝姩鑼冨洿鍐呭紑濮嬪氨婊氬姩
+                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
                     offsetY = offsetYAcc * autoScrollSpeed;
                     var y = RectInDesignMode.MinY + Setting.JudgeLineOffsetY + offsetY;
 
@@ -1454,7 +1454,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                             OnMouseMove(pos);
                     }
 
-                    //鎷夋
+                    //拉框
                     var p = pos;
                     p = p.WithY(Math.Min(TotalDurationHeight, Math.Max(0, RectInDesignMode.MaxY - p.Y + offsetY)));
                     SelectionArea.EndPoint = p;
@@ -1486,7 +1486,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     else if (rp <= trigPrecent && dragOutBound)
                         offsetYAcc = rp / trigPrecent - 1;
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                        dragOutBound = true; //褰撴寚閽堝湪婊戝姩鑼冨洿澶栭潰锛岄偅涔堝氨鍙互杩涜浠讳綍鐨勬粦鍔ㄦ搷浣滀簡锛岄伩鍏嶆寚閽堜粠婊戝姩鑼冨洿鍐呭紑濮嬪氨婊氬姩
+                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
                     offsetY = offsetYAcc * autoScrollSpeed;
 
                     var prev = CurrentPlayTime;
@@ -1502,7 +1502,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
                     if (EnableDragging && !IsRangeSelecting)
                     {
-                        //鎷栧姩宸查€夌墿浠?
+                        //拖动已选物件
                         var cp = pos;
                         cp = cp.WithY(RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY);
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
@@ -1601,7 +1601,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             var count = SelectObjects.Take(2).Count();
             var first = SelectObjects.FirstOrDefault();
 
-            if ((count > 1) || (count == 1 && first != obj)) //姣斿浣犵洰鍓嶆湁澶氫釜宸查€夋嫨鐨勶紝浣嗕綘鍗曠偣浜嗕竴涓?
+            if ((count > 1) || (count == 1 && first != obj)) //比如你目前有多个已选择的，但你单点了一个
             {
                 TryCancelAllObjectSelecting(obj as ISelectableObject);
                 selectable.IsSelected = true;
@@ -1800,7 +1800,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
 
                 var nextY = ScrollViewerVerticalOffset + TGridCalculator.CalculateOffsetYPerBeat(bpm, meter, Setting.BeatSplit, Setting.VerticalDisplayScale) * 2;
-                //娑堥櫎绮惧害璇樊~
+                //消除精度误差~
                 var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
 
                 var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
@@ -1937,7 +1937,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         #region Lock/Unlock User Interaction
 
         /// <summary>
-        /// 閿佷綇缂栬緫鍣ㄦ墍鏈変氦浜掓搷浣滐紝鐢ㄦ埛鏃犳硶瀵规缂栬緫鍣ㄥ仛浠讳綍鐨勬搷浣?
+        /// 锁住编辑器所有交互操作，用户无法对此编辑器做任何的操作
         /// </summary>
         public void LockAllUserInteraction()
         {
@@ -1950,7 +1950,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         }
 
         /// <summary>
-        /// 鎺ヨЕ瀵圭紪杈戝櫒鐢ㄦ埛鎿嶄綔鐨勫皝閿?
+        /// 解除对编辑器用户操作的封锁
         /// </summary>
         public void UnlockAllUserInteraction()
         {

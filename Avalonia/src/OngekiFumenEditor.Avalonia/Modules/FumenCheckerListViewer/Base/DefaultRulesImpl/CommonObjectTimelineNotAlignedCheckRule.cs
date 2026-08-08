@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 				{
 					(_, currentStartTGrid, currentMeter, _) = beats[currentIndex];
 					nextStartTGrid = beats.ElementAtOrDefault(currentIndex + 1).startTGrid;
-					//璁＄畻姣忎竴鎷嶇殑(grid)闀垮害
+					//计算每一拍的(grid)长度
 					var resT = currentStartTGrid.ResT;
 					var beatCount = currentMeter.BunShi;
 					lengthPerBeat = resT * 1.0d / beatCount;
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 
 				foreach (var obj in objs.OrderBy(x => x.TGrid))
 				{
-					//纭繚obj灞炰簬currentStartTGrid閲岄潰鐨?
+					//确保obj属于currentStartTGrid里面的
 					while (nextStartTGrid != null && obj.TGrid >= nextStartTGrid)
 					{
 						currentIndex++;

@@ -986,14 +986,15 @@
 <li><strong>测试缺口</strong>：没有创建浮动 tool、切换开关并断言 Dock window 属性/图标，也没有覆盖布局更新后新建浮动窗口、关闭窗口、Browser 宿主和无主窗口状态。</li>
 <li><strong>建议</strong>：在 Desktop 实现 Dock 浮动窗口到 Avalonia <code>Window</code> 的能力适配，统一同步 icon、<code>ShowInTaskbar</code> 或等价属性，并在布局变化时重放；在 Browser 将属性标记为不支持并从设置/接口暴露中裁剪。增加窗口级 smoke test 和能力矩阵，避免静默 no-op。</li>
 </ul>
-<h3 id="b-046-migration-text-encoding-corruption">B-046 迁移源码仍有中文编码损坏，包含可执行日志和撤销历史文案</h3>
+<h3 id="b-046-migration-text-encoding-corruption" class="completed-plan">B-046 已登记的迁移关键源码中文编码损坏已修复（已完成）</h3>
 <ul>
-<li><strong>扫描证据</strong>：当前核心源码中有 6 个文件、29 行匹配典型乱码序列；<code>Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs:489</code> 的恢复日志为 <code>寮€濮嬫仮澶嶇墿浠舵椂闂?..</code>，<code>UI/Controls/ObjectInspector/UIGenerator/PropertySetAction.cs:15</code> 的动作名包含 <code>鐗╀欢灞炴€?</code>。其余命中位于 <code>EditorSetting</code>、<code>Bell</code> 和检查规则的注释/文档。</li>
-<li><strong>对照结果</strong>：旧版相同文件中的对应可执行字符串和注释仍为正常中文（例如旧 <code>PropertySetAction.Name</code> 使用“物件属性({propName})变更”，旧恢复日志为“开始恢复物件时间...”）；这不是 PowerShell 显示编码差异，而是新文件字节内容本身已经被错误转码。</li>
-<li><strong>影响</strong>：撤销历史和日志诊断会向用户/开发者显示不可读文本；乱码注释还会降低后续维护、审查和故障定位的可靠性。当前没有统一规则阻止新提交继续引入同类损坏。</li>
-<li><strong>分类理由</strong>：文件和功能主体已经迁移，但迁移过程损坏了源文本，且至少两处进入运行时输出，属于 B 的迁移质量缺口；不把纯注释逐行拆成独立功能条目。</li>
-<li><strong>测试缺口</strong>：构建和现有测试没有检查 UTF-8 解码后的可疑替换字符/典型 mojibake 序列，也没有在三种语言下断言撤销动作名、恢复日志和检查结果摘要可读。</li>
-<li><strong>建议</strong>：以旧版 UTF-8 内容或人工校对为来源，逐文件恢复 29 行文本但保留原注释位置和语义；可执行字符串优先改为语言资源/结构化日志模板。加入 CI/预提交扫描，拒绝 BOM 之外的非法 UTF-8、替换字符和已知乱码模式，并补充动作名与日志快照测试，避免仅依赖编辑器显示结果。</li>
+<li><strong>完成状态（2026-08-08）</strong>：以旧版正常源码和属性实际语义为依据，恢复 10 个生产文件中的 46 行乱码文本，保留原注释位置与业务代码结构；方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>实际修复</strong>：覆盖 <code>OngekiObjectBase</code>、<code>ConnectableChildObjectBase</code>、<code>Bell</code>、<code>StandardizeFormat</code>、三个检查规则、<code>EditorSetting</code> 和 <code>FumenVisualEditorViewModel.UserInteractionActions</code>。恢复日志、XML 文档、设置说明、交互流程注释和检查规则注释均已使用可读中文；<code>Bell.IsEnableSoflan</code> 的旧文件本身已含不可逆替换字符，因此按属性语义校正为“是否受 Soflan 速度变化影响”。</li>
+<li><strong>运行时文案</strong>：恢复物件时间日志已改回“开始恢复物件时间...”；<code>PropertySetAction.Name</code> 不再把一段乱码中文作为 <code>ObjectPropertyChanged</code> 的参数，而是直接执行 <code>Lang.ObjectPropertyChanged.Format(propName)</code>，三种语言均由现有资源模板生成正确的撤销历史名称。</li>
+<li><strong>回归保护</strong>：新增 <code>MigrationEncodingRegressionTests</code>，使用严格 UTF-8 解码逐个读取本条目修复的 10 个源码文件，并拒绝替换字符和已知 mojibake 标记；另行断言 <code>PropertySetAction</code> 的动作名等于当前语言的 <code>ObjectPropertyChanged</code> 模板格式化结果。</li>
+<li><strong>验证</strong>：B-046 专项测试 <code>2/2</code> 通过，完整测试集达到 <code>377/377</code>，0 项跳过。构建仍报告既有 <code>NU1903</code>、编译器和 Avalonia 诊断警告，本条修改没有新增编译错误。</li>
+<li><strong>原影响（已消除）</strong>：本条登记的撤销历史与恢复日志不再向用户或开发者显示不可读文本，相关设置、交互和检查规则注释也恢复了可维护性；严格解码测试会阻止这些文件重新引入同类损坏。</li>
+<li><strong>后续建议</strong>：全仓复扫仍发现本条登记范围之外的历史乱码注释，集中在 DirectX/OpenGL 渲染后端、<code>DrawPlayableAreaHelper</code>、<code>DockableObjectInteractiveAction</code>、<code>AnimatedScrollViewer</code> 等旧代码。应建立单独的可缩减清单，按原始编码或旧版语义分批恢复后再把严格 UTF-8/乱码扫描扩大到整个 <code>src</code>；CI 期间不得用永久忽略替代治理。可执行日志继续优先迁入语言资源或结构化日志模板，并补三语言快照。</li>
 </ul>
 <h2 id="c">5. C 类：已实现但经过较大重写</h2>
 <h3 id="c-001">C-001 应用外壳和依赖注入体系重写</h3>

@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private bool disableXGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableXGridMagneticDock;
         /// <summary>
-        /// 琛ㄧず鐗╀欢鎴栬€呭叾浠栧湪X杞翠笂绉诲姩鏃讹紝鏄惁鍙互鑷姩鍚搁檮鍒版渶杩戠殑鍗曚綅绾夸笂
+        /// 表示物件或者其他在X轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
         public bool DisableXGridMagneticDock
         {
@@ -87,7 +87,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private bool disableTGridMagneticDock = Properties.EditorGlobalSetting.Default.DisableTGridMagneticDock;
         /// <summary>
-        /// 琛ㄧず鐗╀欢鎴栬€呭叾浠栧湪鏃堕棿杞翠笂绉诲姩鏃讹紝鏄惁鍙互鑷姩鍚搁檮鍒版渶杩戠殑鍗曚綅绾夸笂
+        /// 表示物件或者其他在时间轴上移动时，是否可以自动吸附到最近的单位线上
         /// </summary>
         public bool DisableTGridMagneticDock
         {
@@ -114,7 +114,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private double xOffset = Properties.EditorGlobalSetting.Default.XOffset;
         /// <summary>
-        /// X杞翠笂鍗曚綅绾块棿璺濆ぇ灏?
+        /// X轴上单位线间距大小
         /// </summary>
         public double XOffset
         {
@@ -129,7 +129,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private double xGridUnitSpace = Properties.EditorGlobalSetting.Default.XGridUnitSpace;
         /// <summary>
-        /// X杞翠笂鍗曚綅绾块棿璺濆ぇ灏?
+        /// X轴上单位线间距大小
         /// </summary>
         public double XGridUnitSpace
         {
@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private int beatSplit = Properties.EditorGlobalSetting.Default.BeatSplit;
         /// <summary>
-        /// 鏃堕棿杞翠笂鍗曚綅绾垮垝鍒嗗瘑搴?
+        /// 时间轴上单位线划分密度
         /// </summary>
         public int BeatSplit
         {
@@ -159,7 +159,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private int xGridDisplayMaxUnit = Properties.EditorGlobalSetting.Default.XGridDisplayMaxUnit;
         /// <summary>
-        /// 妯酱闀垮害
+        /// 横轴长度
         /// </summary>
         public int XGridDisplayMaxUnit
         {

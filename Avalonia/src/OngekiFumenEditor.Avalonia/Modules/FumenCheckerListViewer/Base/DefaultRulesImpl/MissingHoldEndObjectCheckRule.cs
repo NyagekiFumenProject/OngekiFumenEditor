@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 			//		yield return new CommonCheckResult()
 			//		{
 			//			Severity = RuleSeverity.Problem,
-			//			Description = $"鐗╀欢{missingObject.IDShortName}(id:{missingObject.RecordId})缂哄皯涓鐗╀欢",
+			//			Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
 			//			LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
 			//			NavigateBehavior = new NavigateToObjectBehavior(missingObject),
 			//			RuleName = RuleName,
@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.Default
 			//		yield return new CommonCheckResult()
 			//		{
 			//			Severity = RuleSeverity.Problem,
-			//			Description = $"鐗╀欢{missingObject.IDShortName}(id:{missingObject.RecordId})缂哄皯涓鐗╀欢",
+			//			Description = $"物件{missingObject.IDShortName}(id:{missingObject.RecordId})缺少中止物件",
 			//			LocationDescription = $"{missingObject.XGrid} {missingObject.TGrid}",
 			//			NavigateBehavior = new NavigateToObjectBehavior(missingObject),
 			//			RuleName = RuleName,

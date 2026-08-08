@@ -34,9 +34,9 @@ namespace OngekiFumenEditor.Avalonia.Base
 		}
 
 		/// <summary>
-		/// 婢跺秴鍩楅悧鈺€娆㈤崣鍌涙殶閸滃苯鍞寸€?
+		/// 复制物件参数和内容
 		/// </summary>
-		/// <param name="fromObj">婢跺秴鍩楀┃鎰剁礉閺堫剙顕挒锛勬畱娴犲灝鍩楅惄顔界垼</param>
+		/// <param name="fromObj">复制源，本对象的仿制目标</param>
 		public abstract void Copy(OngekiObjectBase fromObj);
 
 		public OngekiObjectBase CopyNew()
