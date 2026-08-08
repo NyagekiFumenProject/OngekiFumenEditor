@@ -12,26 +12,33 @@ public static class StatusBarHelper
         }
     }
 
+    private static readonly object statusLock = new();
     private static readonly List<Notify> currentStatusList = [];
 
     private static void UpdateStatusToStatusBar()
     {
         var firstStatus = currentStatusList.FirstOrDefault();
         var descStr = firstStatus?.StatusDescription ?? string.Empty;
-        IoC.Get<CommonStatusBar>().MainContentViewModel.Message = descStr;
+        IoC.Get<CommonStatusBar>().SetMainMessage(descStr);
     }
 
     public static Notify BeginStatus(string statusDescription)
     {
         var notify = new Notify(statusDescription);
-        currentStatusList.Add(notify);
-        UpdateStatusToStatusBar();
+        lock (statusLock)
+        {
+            currentStatusList.Add(notify);
+            UpdateStatusToStatusBar();
+        }
         return notify;
     }
 
     public static void EndStatus(Notify notify)
     {
-        if (currentStatusList.Remove(notify))
-            UpdateStatusToStatusBar();
+        lock (statusLock)
+        {
+            if (currentStatusList.Remove(notify))
+                UpdateStatusToStatusBar();
+        }
     }
 }

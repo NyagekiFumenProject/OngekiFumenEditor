@@ -1125,7 +1125,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
-            IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
+            IoC.Get<CommonStatusBar>().SetSubRightMessage(string.Empty);
             OnMouseUp(e);
             /*
             if (IsLocked)
@@ -1675,8 +1675,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 return $"SG[{soflanGroup}] SG.C[{canvasX:F2},{drwaingY:F2}] {(tGrid is not null ? $"SG.T[{tGrid.Unit},{tGrid.Grid}]" : "SG.T[N/A]")}";
             }
 
-            IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = updateRight();
-            IoC.Get<CommonStatusBar>().SubLeftContentViewModel.Message = updateLeft();
+            var statusBar = IoC.Get<CommonStatusBar>();
+            statusBar.SetSubRightMessage(updateRight());
+            statusBar.SetSubLeftMessage(updateLeft());
         }
 
         public void OnDragEnter(DragEventArgs arg)

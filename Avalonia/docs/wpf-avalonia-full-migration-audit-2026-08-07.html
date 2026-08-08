@@ -966,15 +966,16 @@
 <li><strong>测试缺口</strong>：没有覆盖设置应用后主菜单 ViewModel 更新、失焦折叠、Alt/键盘访问、鼠标唤醒、菜单打开期间保持可见、焦点返回内容区以及重启恢复的 UI 测试。</li>
 <li><strong>建议</strong>：若保留该功能，为 Avalonia <code>MenuEx</code> 增加可绑定的 <code>AutoHide</code> styled/direct property 和明确的键盘/焦点状态机，并让设置变更实时通知现有 <code>IMenu</code>；折叠后必须保留可发现的 Alt/菜单键入口和无障碍焦点语义。若不计划支持，应从设置页和模型中移除或禁用该选项并说明迁移策略，不能继续保存无消费者的值。补充 Desktop UI 自动化和 Browser 键盘/触摸降级测试。</li>
 </ul>
-<h3 id="b-044-status-bar-bridge-disconnected">B-044 状态栏桥接对象与实际 Gekimini 状态栏断开，状态消息没有可见更新链</h3>
+<h3 id="b-044-status-bar-bridge-disconnected" class="completed-plan">B-044 状态消息已桥接到实际 Gekimini 状态栏（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：<code>CommonStatusBar</code> 不再创建平行字符串模型，而是通过构造注入取得 <code>IStatusBar</code>，把主、左辅助和右辅助属性直接映射到真实的前三个 <code>StatusBarItemViewModel</code>；编辑器坐标、拖拽状态和 <code>StatusBarHelper</code> 的消息现在进入 Gekimini 视图所绑定的同一组 item。方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>线程与状态栈</strong>：桥接新增三个明确的消息写入方法；UI 线程直接更新，后台线程以 <code>Dispatcher.UIThread.Post(..., Background)</code> 投递。<code>StatusBarHelper</code> 的活动状态列表增加同步锁，嵌套状态的加入、移除和可见消息更新按同一顺序提交。</li>
+<li><strong>验证</strong>：新增 <code>CommonStatusBarTests.Bridge_UsesRealStatusBarItemsAndDispatchesBackgroundUpdates</code>，断言三个公开属性与真实 <code>IStatusBar.Items</code> 引用相同、三段消息均写入真实 item，并验证后台线程更新在 Dispatcher 排队后可见；<code>Constructor_IncompleteStatusBar_FailsFast</code> 断言状态栏契约不足三项时不会静默退化。专项测试 <code>2/2</code>、完整测试集 <code>375/375</code> 通过，0 项跳过。</li>
+<li><strong>原影响（已消除）</strong>：加载、拖拽和指针坐标状态只修改不可见普通对象，启动状态与编辑器状态落在两套 item 上，用户通常看不到编辑器提供的主状态和左右辅助信息。</li>
 <li><strong>旧版链路</strong>：<code>OngekiFumenEditor/Utils/CommonStatusBar.cs:20-27</code> 注入 <code>Gemini.Modules.StatusBar.IStatusBar</code>，通过 <code>AddItem</code> 创建一个 Star 宽度主区域和两个 Auto 区域；<code>MainContentViewModel</code> 等属性直接返回实际状态栏集合中的可观察 item。</li>
-<li><strong>Avalonia 状态</strong>：当前 <code>src/OngekiFumenEditor.Avalonia/Utils/CommonStatusBar.cs:4-16</code> 自己声明了三个普通嵌套字符串对象，没有注入或引用 <code>Gekimini.Avalonia.Modules.StatusBar.IStatusBar</code>，对象也没有 <code>INotifyPropertyChanged</code>。与此同时 Gekimini <code>StatusBarViewModel.OnViewAfterLoaded():29-44</code> 自己创建并绑定另一组固定 item；<code>OngekiFumenEditorApp.cs</code> 写的是 Gekimini item，而编辑器 <code>OnMouseLeave/OnMouseUp</code> 和 <code>StatusBarHelper</code> 写的是断开的 <code>CommonStatusBar</code> 对象。</li>
-<li><strong>附带布局差异</strong>：旧版主 item 使用 <code>GridLength(1, Star)</code>，当前 Gekimini 三项都以 <code>GridLength.Auto</code> 创建，<code>StatusBarViewModel</code> 对 <code>Width</code> 变化也只留 <code>//todo: not support</code>，因此即使重新接线，长坐标/状态文本仍可能挤压或改变布局。</li>
-<li><strong>影响</strong>：加载、拖拽和指针坐标状态通常只改变不可见对象，用户看不到旧版应显示的主状态/左右辅助信息；启动时的“Application ready.”与编辑器状态分别落在两套 item 上，表现不一致。长文本没有 Star 区域时还会争抢状态栏空间。</li>
 <li><strong>分类理由</strong>：状态栏模块和应用 helper 都已建立，但迁移时缺少适配器且通知契约被削弱，属于 B；不是状态栏框架本身不存在。</li>
 <li><strong>测试缺口</strong>：没有从 <code>CommonStatusBar</code> 写入消息后断言真实 <code>StatusBarManager</code> 文本变化，也没有覆盖视图重载、线程切换、清空/恢复、宽度和长字符串布局。</li>
-<li><strong>建议</strong>：让 <code>CommonStatusBar</code> 注入并持有 Gekimini 实际 item，或把应用状态对象实现为可观察桥接并在 <code>OnViewAfterLoaded</code> 绑定/解绑；不要再维护平行字符串模型。恢复 Star/Auto 三段布局，定义宽度变更的支持或移除 <code>Width</code> API；所有后台状态更新统一投递 UI 线程。补充启动、加载、拖拽和状态栏 attach/detach 的可见性测试。</li>
+<li><strong>后续建议</strong>：增加加载、拖拽、指针离开、状态栏视图 attach/detach 和长字符串的 UI 可见性测试。Gekimini 当前仍不消费 <code>StatusBarItemViewModel.Width</code>；应在其适配层实现明确的主区域伸展策略，或移除该无效 API，避免调用方误以为设置 <code>GridLength</code> 会改变底层 <code>StatusBar.Avalonia</code> 布局。</li>
 </ul>
 <h3 id="b-045-floating-window-taskbar-no-op">B-045 浮动窗口“显示在任务栏”契约回调为空</h3>
 <ul>
