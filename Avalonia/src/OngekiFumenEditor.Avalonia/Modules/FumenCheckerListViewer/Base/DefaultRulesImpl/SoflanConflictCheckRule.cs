@@ -8,9 +8,11 @@ using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using static OngekiFumenEditor.Avalonia.Base.OngekiObjects.EnemySet;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
+    [RegisterSingleton]
     internal class SoflanConflictCheckRule : IFumenCheckRule
     {
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)

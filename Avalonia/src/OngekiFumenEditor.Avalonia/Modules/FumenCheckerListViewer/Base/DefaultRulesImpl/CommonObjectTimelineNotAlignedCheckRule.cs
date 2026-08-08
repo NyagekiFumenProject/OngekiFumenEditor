@@ -7,9 +7,11 @@ using OngekiFumenEditor.Avalonia.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
+	[RegisterSingleton]
 	internal class CommonObjectTimelineNotAlignedCheckRule : IFumenCheckRule
 	{
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)

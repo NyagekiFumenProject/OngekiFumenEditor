@@ -5,9 +5,11 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using System.Collections.Generic;
 using System.Linq;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
+	[RegisterSingleton]
 	internal class InvalidConnectablePathCheckRule : IFumenCheckRule
 	{
 		public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)

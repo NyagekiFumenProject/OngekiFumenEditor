@@ -4,8 +4,10 @@ using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultNavi
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
+[RegisterSingleton]
 public class LaneBlockOnMultipleWallsCheckRule : IFumenCheckRule
 {
     private const string RuleName = "LaneBlockAcrossWalls";

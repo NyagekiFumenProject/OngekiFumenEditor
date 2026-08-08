@@ -10,10 +10,12 @@ using OngekiFumenEditor.Avalonia.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.OgkrImpl
 {
 
+    [RegisterSingleton]
     internal class ColorIdCheckRule : IOngekiFumenCheckRule
     {
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)

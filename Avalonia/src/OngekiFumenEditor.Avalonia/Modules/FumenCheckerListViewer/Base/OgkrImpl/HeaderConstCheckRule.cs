@@ -4,10 +4,12 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections.Generic;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.OgkrImpl
 {
 
+	[RegisterSingleton]
 	internal class HeaderConstCheckRule : IOngekiFumenCheckRule
 	{
 		private class NavigateMetaInfoViewBehavior : INavigateBehavior

@@ -9,10 +9,12 @@ using OngekiFumenEditor.Avalonia.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
 	//
+	[RegisterSingleton]
 	internal class WallConflictCheckRule : IFumenCheckRule
 	{
 		const string RuleName = "WallConflict";

@@ -905,14 +905,17 @@
 <li><strong>测试缺口</strong>：已有音频能力测试覆盖输出后端和 Browser fallback，却没有验证 Browser 设置页是否隐藏/禁用该控件、目录选择取消与不支持的差异，也没有断言保存值不会被误认为已应用。</li>
 <li><strong>建议</strong>：增加 <code>SupportsCustomSoundFolder</code> 能力并让设置页按宿主裁剪；Browser 要么隐藏本地路径字段并提供“导入/打包音效”或逐文件授权流程，要么改用可持久化的 <code>ISimpleDirectory</code>/bookmark 而不是强制 <code>LocalPath</code>。不支持或取消时给出明确状态，不要静默返回；分别测试 Desktop 自定义文件、Browser 授权目录、无 OPFS/权限撤销和回退到内置音效的行为。</li>
 </ul>
-<h3 id="b-038-checker-rules-not-registered">B-038 谱面检查器规则类存在，但 DI 没有注册任何规则</h3>
+<h3 id="b-038-checker-rules-not-registered" class="completed-plan">B-038 谱面检查器规则已注册到 DI（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：16 个检查器规则实现均已添加 <code>[RegisterSingleton]</code>，Injectio 的默认 <code>SelfWithInterfaces</code> 注册策略会把普通规则注册到 <code>IFumenCheckRule</code>，把 Ongeki 规则同时注册到 <code>IOngekiFumenCheckRule</code> 和继承的基础契约；检查器刷新链路现在能取得并执行完整规则集合。方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>验证</strong>：新增 <code>CheckerRuleRegistrationTests.ContainerRegistersAllCheckerRulesAndRunsARegisteredRule</code>，从真实 Avalonia 测试容器断言 16 个唯一规则类型、5 个 Ongeki 派生规则类型，并用空谱面执行 <code>EnemySetCheckRule</code> 断言产生 <code>MissingBossEnemySet</code>；专项测试 <code>1/1</code> 通过，完整测试集随后达到 <code>371/371</code>，0 项跳过。</li>
+<li><strong>实际改写</strong>：规则实现文件分别补充 <code>Injectio.Attributes</code> 和 <code>[RegisterSingleton]</code>，没有复制算法或改变检查结果；<code>FumenCheckerListViewerViewModel</code> 与 <code>DefaultFumenConvertService</code> 继续通过 <code>IoC.GetAll&lt;IFumenCheckRule&gt;()</code> 复用同一集合。</li>
+<li><strong>审计时状态</strong>：当前目录虽有 16 个规则类，但没有任何 <code>RegisterSingleton&lt;IFumenCheckRule&gt;</code>、<code>RegisterSingleton&lt;IOngekiFumenCheckRule&gt;</code> 或手工 <code>Add*CheckRule</code> 注册；生成的 Injectio 注册表对基础契约匹配数为 0，刷新逻辑因此静默消费空集合。该影响现已消除。</li>
+<li><strong>原影响（已消除）</strong>：检查器工具可以打开、筛选和显示计数，却不会运行重叠、时间轴未对齐、缺失引用、颜色、Soflan、HoldEnd、Header 等规则，用户会得到“没有问题”的空结果。</li>
 <li><strong>旧版注册</strong>：旧项目 <code>Modules/FumenCheckerListViewer</code> 下 16 个规则类均通过 MEF <code>[Export(typeof(IFumenCheckRule))]</code> 或 <code>[Export(typeof(IOngekiFumenCheckRule))]</code> 进入容器，<code>FumenCheckerListViewerViewModel</code> 再以 <code>IoC.GetAll&lt;IFumenCheckRule&gt;()</code> 执行。</li>
-<li><strong>Avalonia 状态</strong>：当前同目录仍有 16 个对应规则类，但源码中没有任何 <code>RegisterSingleton&lt;IFumenCheckRule&gt;</code>、<code>RegisterSingleton&lt;IOngekiFumenCheckRule&gt;</code> 或手工 <code>Add*CheckRule</code> 注册；已生成的 <code>obj/Debug/net10.0/generated/Injectio.Generators/.../Injectio.g.cs</code> 中对 <code>IFumenCheckRule</code> 的注册匹配数为 0。刷新逻辑 <code>FumenCheckerListViewerViewModel.cs:80,111-122</code> 直接消费该空集合。</li>
-<li><strong>影响</strong>：检查器工具可以打开、筛选和显示计数，但不会运行重叠、时间轴未对齐、缺失引用、颜色、Soflan、HoldEnd、Header 等任何规则；用户会得到“没有问题”的空结果，属于静默漏检而非明显报错。</li>
 <li><strong>分类理由</strong>：规则实现代码已经迁移，缺口发生在 Avalonia 的 DI 注册边界，属于 B；不是 A（类和算法并未消失），也不是 E（Injectio 支持多实现接口注册）。</li>
 <li><strong>测试缺口</strong>：现有测试检查查看器和 AXAML 能加载，但没有断言 <code>IoC.GetAll&lt;IFumenCheckRule&gt;()</code> 的最小数量、规则名称集合或一张包含已知错误的谱面能产生结果，因此空集合可以长期通过构建。</li>
-<li><strong>建议</strong>：给每个规则类补上明确的 <code>[RegisterSingleton&lt;IFumenCheckRule&gt;]</code>（实现 Ongeki 子接口的规则可同时注册到两个契约，或统一只注册基接口），并在启动/DI 快照测试中断言 16 个规则类型、规则名唯一且没有重复实例。增加一张最小 fixture 覆盖每类错误，并把规则集合为空视为启动配置错误而不是正常状态。</li>
+<li><strong>后续建议</strong>：继续增加每类错误的最小 fixture、规则结果唯一性和 checker UI 导航测试；把规则集合为空或出现重复类型视为启动配置错误，并在 Injectio 生成注册表变更时运行 DI 快照。若未来引入可选规则，应通过明确的 feature/capability 过滤而不是静默缺席。</li>
 </ul>
 <h3 id="b-039-header-check-navigation-empty">B-039 Header 常量检查结果的导航行为仍是空实现</h3>
 <ul>

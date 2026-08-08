@@ -6,9 +6,11 @@ using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections.Generic;
 using System.Linq;
+using Injectio.Attributes;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
+    [RegisterSingleton]
     internal class SoflanCheckRule : IFumenCheckRule
     {
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
