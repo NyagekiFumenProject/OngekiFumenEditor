@@ -842,13 +842,14 @@
 <li><strong>分类理由</strong>：导航行为、调用点和真正的选择实现都已迁移，缺陷来自迁移时新增的可达空重载，属于明确的半实现而不是框架限制。</li>
 <li><strong>后续建议</strong>：把五个快速选轨命令按轨道类型参数化测试，并分别覆盖“优先选最后一个子对象”和“无子对象时回退到轨道起点”；再补换轨撤销/重做、曲线控制点与 HoldEnd 新增/拖放、<code>AddToSelection</code> 和 <code>next</code> 候选切换。长期可将选择流程抽成返回实际选中对象的服务，让鼠标、导航和命令不再依赖重载解析。</li>
 </ul>
-<h3 id="b-031-selecting-viewer-command-service">B-031 选择对象工具命令解析成了元信息浏览器服务</h3>
+<h3 id="b-031-selecting-viewer-command-service" class="completed-plan">B-031 选择对象工具命令服务映射已复查（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：复查确认当前命令处理器已经解析 <code>IFumenEditorSelectingObjectViewer</code>，并把该单例作为 <code>IToolViewModel</code> 交给 <code>Shell.ShowTool</code>；错误解析元信息浏览器接口的审计缺陷已在审计后的代码中修正。本次补齐容器、具体类型和重复执行的回归证据，方案名以红色标记表示复查、验证和签入闭环已经完成。</li>
+<li><strong>当前实现</strong>：<code>Modules/FumenEditorSelectingObjectViewer/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs</code> 调用 <code>IoC.Get&lt;IFumenEditorSelectingObjectViewer&gt;()</code>。选择对象查看器仍由 <code>FumenEditorSelectingObjectViewerViewModel</code> 以该接口注册；Shell 对同一工具实例的第二次打开会保持现有面板，不会创建重复容器。</li>
+<li><strong>验证</strong>：新增 <code>SelectingObjectViewerCommandTests</code>，从真实测试容器取得命令处理器和工具接口，断言解析结果的具体类型为 <code>FumenEditorSelectingObjectViewerViewModel</code>、首次执行后 Shell 中展示的是同一实例，并断言连续执行命令后仍只有一个可用工具面板；专项测试 <code>1/1</code>、Avalonia 核心完整测试集 <code>367/367</code> 通过，0 项跳过。</li>
 <li><strong>旧版入口</strong>：<code>ViewFumenEditorSelectingObjectViewerCommandHandler</code> 调用 <code>_shell.ShowTool&lt;IFumenEditorSelectingObjectViewer&gt;()</code>，打开选择对象工具。</li>
-<li><strong>Avalonia 状态</strong>：<code>Modules/FumenEditorSelectingObjectViewer/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs:4,9,15-17</code> 引入并解析的是另一个模块的 <code>IFumenMetaInfoBrowser</code>；当前选择对象工具真正注册的是 <code>FumenEditorSelectingObjectViewerViewModel.cs:18-19</code> 的 <code>IFumenEditorSelectingObjectViewer</code>。元信息浏览器没有该接口的 <code>RegisterSingleton</code>，其菜单处理器另行通过具体 ViewModel 创建实例。</li>
-<li><strong>影响</strong>：执行“选择对象查看器”菜单时会解析错误的工具，通常因 DI 中没有 <code>IFumenMetaInfoBrowser</code> 而直接失败；即使容器未来提供该接口，也会打开元信息页而不是当前选择列表，原菜单功能不可用。</li>
-<li><strong>分类理由</strong>：命令定义、视图和正确工具注册均已迁移，缺陷是处理器接线时跨模块复制了错误接口，属于可达的迁移半实现。</li>
-<li><strong>建议</strong>：将处理器改为解析 <code>IFumenEditorSelectingObjectViewer</code>，并保留 <code>IToolViewModel</code> 类型检查后调用 <code>Shell.ShowTool</code>；同时为命令增加容器解析和实际工具类型断言测试，覆盖重复打开、活动编辑器切换及无活动编辑器状态。</li>
+<li><strong>审计时状态</strong>：处理器曾跨模块复制并解析 <code>IFumenMetaInfoBrowser</code>，导致“选择对象查看器”菜单在常规容器中抛出服务解析异常，或者在未来错误注册出现时打开元信息页。该原影响现已消除。</li>
+<li><strong>后续建议</strong>：将仍带有复制痕迹的文件名和类名 <code>ViewFumenMetaInfoBrowserCommandHandler</code> 重命名为选择对象查看器语义，降低再次串接模块的概率；再补活动编辑器切换、无活动编辑器、工具隐藏后重新打开及菜单路由的 UI 级测试，并把所有“查看工具”命令做成接口到具体 ViewModel 的参数化映射测试。</li>
 </ul>
 <h3 id="b-032-tgrid-viewer-command-service">B-032 TGrid 计算器命令解析成了元信息浏览器服务</h3>
 <ul>
