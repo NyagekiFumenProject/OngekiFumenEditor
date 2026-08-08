@@ -323,6 +323,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
                 case nameof(Properties.EditorGlobalSetting.LoopPlayTiming):
                     loopPlayTiming = Properties.EditorGlobalSetting.Default.LoopPlayTiming;
                     break;
+                case nameof(Properties.EditorGlobalSetting.IsEnableUndoActionSavingLimit):
+                case nameof(Properties.EditorGlobalSetting.UndoActionSavingLimit):
+                case nameof(Properties.EditorGlobalSetting.RecoveryCurrentTimeAfterExecuteAction):
+                    break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
                     break;

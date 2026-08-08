@@ -538,14 +538,17 @@
 <li><strong>分类交叉</strong>：明确“temporarily disabled”的决策证据同时满足 D；主功能表现先列 B，延期原因在 D 类登记。</li>
 <li><strong>建议</strong>：在重新启用前先定义工程资源的跨平台所有权、相对定位、复制/嵌入和释放语义，再恢复 <code>ProjectResourceSimpleFile</code> 及导入器；禁止把本地绝对路径直接写入可移植工程。功能开关关闭时应隐藏工具箱和属性入口而不是运行时抛异常。覆盖工程移动、资源缺失、同名冲突、Browser 授权丢失和保存/重开测试。</li>
 </ul>
-<h3 id="b-007-ui">B-007 撤销历史上限设置已保留在 UI/模型中，但没有接到当前撤销管理器</h3>
+<h3 id="b-007-ui" class="completed-plan">B-007 撤销历史上限设置已接入当前撤销管理器（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：设置页、全局设置模型和每个编辑器的 Gekimini 撤销管理器已经形成完整运行链路，方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：<code>FumenVisualEditorViewModel</code> 在视图加载并建立运行时订阅时立即应用设置；<code>IsEnableUndoActionSavingLimit</code> 或 <code>UndoActionSavingLimit</code> 变化会实时更新当前编辑器的 <code>UndoCountLimit</code>，禁用时明确映射为 <code>null</code>（无限制），负数配置按 <code>0</code> 处理。视图卸载后停止响应，重新加载时按最新设置重建限制，避免隐藏文档继续持有运行时订阅。</li>
+<li><strong>设置页支持</strong>：<code>FumenVisualEditorGlobalSettingView.axaml</code> 的启用复选框、数量输入和“记住撤销位置”均改为显式编译双向绑定；数量区域随启用状态即时切换，页面修改会直接写回 <code>EditorGlobalSetting</code> 并广播到已加载编辑器。<code>EditorSetting</code> 也把三个设置项列为受支持的全局转发属性，不再将其记录成未知变更。</li>
+<li><strong>裁剪与重做链</strong>：正常降低上限会立即裁剪最旧的已执行历史；如果当前存在比目标上限更长的重做链，适配层会先保留连续重做序列、优先移除已执行历史，并在重做链缩短后自动收敛到用户配置值，避免共享管理器旧裁剪算法产生负计数或断裂的重做序列。组合动作仍按一个撤销项计数。</li>
+<li><strong>验证</strong>：新增设置页双向绑定与编辑器运行时测试，覆盖启用/禁用、即时改值、降低上限、裁剪后 undo/redo、组合动作、负值边界、卸载/重载、重做链收敛和多文档历史隔离；B-007 相关定向测试共 <code>11/11</code> 通过，Avalonia 核心完整测试共 <code>340/340</code> 通过。</li>
 <li><strong>WPF 行为</strong>：<code>Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorUndoManager.cs</code> 在构造时读取 <code>IsEnableUndoActionSavingLimit</code> 与 <code>UndoActionSavingLimit</code>，并监听设置变更，把结果写入 <code>UndoCountLimit</code>。</li>
-<li><strong>Avalonia 已迁移表面</strong>：<code>FumenVisualEditorGlobalSettingView.axaml:41-64</code> 仍显示“记住撤销位置”“限制撤销数量”和最大保存数量控件；<code>EditorGlobalSetting</code> 也完整保留三个属性。Gekimini 的 <code>DefaultUndoRedoManager</code> 本身仍提供 <code>UndoCountLimit</code>。</li>
-<li><strong>未实现接线</strong>：当前应用源码中没有找到任何 <code>UndoCountLimit = ...</code> 赋值；<code>FumenVisualEditorViewModel.OnSettingPropertyChanged()</code>（约 <code>326-353</code> 行）只处理缩放、颜色、游玩区域、玩家位置和 FPS，不处理两个撤销上限属性。</li>
-<li><strong>影响</strong>：用户可以修改并保存撤销数量设置，但当前撤销栈不会据此限长，设置属于可见但无运行效果的半迁移功能。</li>
+<li><strong>原缺口（已消除）</strong>：审查时页面和 <code>EditorGlobalSetting</code> 已保留三个属性，Gekimini 的 <code>DefaultUndoRedoManager</code> 也提供 <code>UndoCountLimit</code>，但应用源码没有任何赋值或设置变更处理，导致设置可见、可保存却不影响撤销栈。</li>
 <li><strong>关联问题</strong>：<code>RecoveryCurrentTimeAfterExecuteAction</code> 同样没有找到当前消费者。旧 WPF 管理器虽然订阅该属性，但其构造的包装 action 没有回写到实际入栈变量，疑似旧版遗留缺陷；因此这里记录为“现版本仍无有效实现”，不把它误报成已确认的 Avalonia 独有回归。</li>
-<li><strong>建议</strong>：在编辑器/撤销管理器创建时把设置映射到 <code>UndoCountLimit</code>，订阅属性变化并在释放时退订；关闭限制时明确使用无限值，降低上限时立即按既定策略裁剪。为运行时开关、边界值、批次动作、裁剪后 undo/redo 和多文档隔离补测试；<code>RecoveryCurrentTimeAfterExecuteAction</code> 应单独确认产品语义，不能照搬旧缺陷。</li>
+<li><strong>后续建议</strong>：继续保持 Gekimini 管理器为唯一撤销实现，并把历史限制的产品定义明确为“可执行连续历史”而不是简单集合长度；设置页后续可改用带最小值约束的数值控件并提示 <code>0</code> 表示不保留历史。<code>RecoveryCurrentTimeAfterExecuteAction</code> 应另立需求确认是恢复执行前、撤销目标还是 action 自身记录的位置，再设计可撤销的位置快照，不能照搬旧缺陷。</li>
 </ul>
 <h3 id="b-008">B-008 编辑器布局流保留了接口，但忽略导入数据且没有应用推荐布局</h3>
 <ul>

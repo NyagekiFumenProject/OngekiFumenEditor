@@ -40,24 +40,30 @@
         </controls:GroupBox>
         <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.UndoRedo}}">
             <StackPanel Margin="10">
-                <CheckBox VerticalContentAlignment="Center" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">
+                <CheckBox
+                    x:Name="RecoveryCurrentTimeAfterExecuteActionCheckBox"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{CompiledBinding Setting.RecoveryCurrentTimeAfterExecuteAction, Mode=TwoWay}">
                     <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.RememberUndoPlace}}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
+                    x:Name="UndoHistoryLimitEnabledCheckBox"
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">
+                    IsChecked="{CompiledBinding Setting.IsEnableUndoActionSavingLimit, Mode=TwoWay}">
                     <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.LimitUndoCount}}" TextWrapping="Wrap" />
                 </CheckBox>
                 <StackPanel
+                    x:Name="UndoHistoryLimitEditor"
                     Margin="0,10,0,0"
-                    IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
+                    IsEnabled="{CompiledBinding Setting.IsEnableUndoActionSavingLimit}"
                     Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SaveMaxCount_Part1}}" />
                     <TextBox
+                        x:Name="UndoHistoryLimitTextBox"
                         Width="50"
                         Margin="5,0,5,0"
-                        Text="{Binding Setting.UndoActionSavingLimit}">
+                        Text="{CompiledBinding Setting.UndoActionSavingLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SaveMaxCount_Part2}}" />
                 </StackPanel>

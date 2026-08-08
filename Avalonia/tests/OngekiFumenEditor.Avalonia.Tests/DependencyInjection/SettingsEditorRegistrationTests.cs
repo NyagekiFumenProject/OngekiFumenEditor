@@ -16,6 +16,7 @@ using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.Views;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.Views;
+using OngekiFumenEditor.Avalonia.Models.Settings;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.DependencyInjection;
@@ -103,6 +104,50 @@ public sealed class SettingsEditorRegistrationTests
             Assert.Equal(expected.ViewType, view.GetType());
             Assert.Same(editor, view.DataContext);
         });
+    }
+
+    [AvaloniaFact]
+    public void FumenVisualEditorGlobalSettingView_UndoLimitControlsUseTwoWayBindings()
+    {
+        var setting = EditorGlobalSetting.Default;
+        var originalEnabled = setting.IsEnableUndoActionSavingLimit;
+        var originalLimit = setting.UndoActionSavingLimit;
+
+        try
+        {
+            setting.IsEnableUndoActionSavingLimit = false;
+            setting.UndoActionSavingLimit = 50;
+            var view = new FumenVisualEditorGlobalSettingView
+            {
+                DataContext = new FumenVisualEditorGlobalSettingViewModel()
+            };
+            var enabledCheckBox = Assert.IsType<CheckBox>(
+                view.FindControl<CheckBox>("UndoHistoryLimitEnabledCheckBox"));
+            var editorPanel = Assert.IsType<StackPanel>(
+                view.FindControl<StackPanel>("UndoHistoryLimitEditor"));
+            var limitTextBox = Assert.IsType<TextBox>(
+                view.FindControl<TextBox>("UndoHistoryLimitTextBox"));
+
+            Assert.False(enabledCheckBox.IsChecked);
+            Assert.False(editorPanel.IsEnabled);
+            Assert.Equal("50", limitTextBox.Text);
+
+            enabledCheckBox.IsChecked = true;
+            Assert.True(setting.IsEnableUndoActionSavingLimit);
+            Assert.True(editorPanel.IsEnabled);
+
+            limitTextBox.Text = "17";
+            Assert.Equal(17, setting.UndoActionSavingLimit);
+
+            setting.IsEnableUndoActionSavingLimit = false;
+            Assert.False(enabledCheckBox.IsChecked);
+            Assert.False(editorPanel.IsEnabled);
+        }
+        finally
+        {
+            setting.IsEnableUndoActionSavingLimit = originalEnabled;
+            setting.UndoActionSavingLimit = originalLimit;
+        }
     }
 
     private static SettingsPageViewModel GetRequiredPage(

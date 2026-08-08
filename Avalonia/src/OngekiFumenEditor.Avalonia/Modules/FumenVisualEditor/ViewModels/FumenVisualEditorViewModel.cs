@@ -269,6 +269,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
             return;
 
         Setting.PropertyChanged += OnSettingPropertyChanged;
+        ApplyUndoHistoryLimit();
         UndoRedoManager.PropertyChanged += OnUndoRedoManagerPropertyChanged;
         areRuntimeSubscriptionsAttached = true;
     }
@@ -321,6 +322,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     {
         if (e.PropertyName == nameof(IUndoRedoManager.UndoActionCount))
             IsDirty = true;
+
+        if (e.PropertyName is nameof(IUndoRedoManager.UndoActionCount) or nameof(IUndoRedoManager.RedoActionCount))
+            ApplyUndoHistoryLimit();
     }
 
     private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -350,7 +354,25 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
             case nameof(EditorGlobalSetting.LimitFPS):
                 UpdateActualRenderInterval();
                 break;
+            case nameof(EditorGlobalSetting.IsEnableUndoActionSavingLimit):
+            case nameof(EditorGlobalSetting.UndoActionSavingLimit):
+                ApplyUndoHistoryLimit();
+                break;
         }
+    }
+
+    private void ApplyUndoHistoryLimit()
+    {
+        var setting = EditorGlobalSetting.Default;
+        if (!setting.IsEnableUndoActionSavingLimit)
+        {
+            UndoRedoManager.UndoCountLimit = null;
+            return;
+        }
+
+        var configuredLimit = Math.Max(0, setting.UndoActionSavingLimit);
+        // A pending redo chain must stay contiguous; trim executed history first, then converge to the configured limit.
+        UndoRedoManager.UndoCountLimit = Math.Max(configuredLimit, UndoRedoManager.RedoActionCount);
     }
 
     private void UpdateTitle()
