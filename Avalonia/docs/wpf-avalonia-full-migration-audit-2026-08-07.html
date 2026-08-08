@@ -601,13 +601,16 @@
 <li><strong>原影响（已消除）</strong>：用户在列表中点选另一调色板后按“取消”，新选择仍会应用到正在编辑的对象；即使没有改选，取消也会执行一次不必要的属性回写。双击和确认路径本身仍正确返回 <code>true</code>。</li>
 <li><strong>后续建议</strong>：把 DataGrid 的 <code>SelectedItem</code> 显式声明为编译双向绑定，并增加真实 DataGrid 行选择、双击、Escape 与标题栏关闭测试；同时在没有选中项时禁用确认按钮，避免未来模板或默认绑定模式变化破坏当前临时选择契约。</li>
 </ul>
-<h3 id="b-013">B-013 选中对象查看器丢失列头排序</h3>
+<h3 id="b-013" class="completed-plan">B-013 选中对象查看器列头排序已恢复（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：Name、ObjectTime 和 SoflanGroup 三个列头已经恢复 DataGrid 原生升/降序，刷新选中对象后继续沿用当前排序并按对象引用恢复表格选择。方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：ViewModel 现在持有稳定的 <code>DataGridCollectionView</code>，底层使用独立 <code>ObservableCollection&lt;SelectedObjectRow&gt;</code>；刷新只更新数据源，不替换集合视图，因此 <code>SortDescriptions</code> 不会丢失。<code>SelectedObjectRow</code> 在刷新时快照 <code>Name</code>、<code>TGrid</code>、<code>SoflanGroup</code> 和描述，其中 SoflanGroup 通过当前谱面的 <code>IndividualSoflanAreaMap.QuerySoflanGroup()</code> 计算。</li>
+<li><strong>列与交互接线</strong>：AXAML 显式启用 <code>CanUserSortColumns</code>，并为三列分别声明 <code>SortMemberPath=&quot;Name&quot;</code>、<code>TGrid</code> 和 <code>SoflanGroup</code>；描述列明确禁用排序。SoflanGroup 单元格直接绑定行快照，移除了该视图对恒等占位 <code>GetObjectSoflanGroupConverter</code> 和错误 MultiBinding 形态的依赖。</li>
+<li><strong>验证</strong>：新增 <code>SelectingObjectViewerSortingTests</code> 4 项并全部通过，覆盖列排序键、三类字段升降序、相同名称的稳定次序、数据源刷新后排序保持、对象属性变化后的分组重算、按对象引用恢复选择，以及 5000 行排序性能。Avalonia 核心完整测试共 <code>358/358</code> 通过、0 项跳过。</li>
 <li><strong>WPF 行为</strong>：<code>Modules/FumenEditorSelectingObjectViewer/ViewModels/FumenEditorSelectingObjectViewerViewModel.cs</code> 以 <code>ICollectionView</code> 作为 <code>ItemsSource</code>，<code>SortColumn()</code> 根据当前列的 <code>DisplayMemberBinding</code> 在 <code>Name</code>、<code>TGrid</code> 和 <code>SoflanGroup</code> 三个列头之间切换升/降序；<code>OnRefresh()</code> 在刷新集合后重新刷新视图。原 XAML 的三个 <code>GridViewColumnHeader</code> 都绑定到该方法。</li>
-<li><strong>Avalonia 状态</strong>：<code>Modules/FumenEditorSelectingObjectViewer/Views/FumenEditorSelectingObjectViewerView.axaml</code> 改用 <code>DataGridTemplateColumn</code>，但没有 <code>SortMemberPath</code>、列头 <code>Sorting</code> 事件或等价的集合视图排序代码；对应 ViewModel 只有 <code>ObservableCollection&lt;SelectedObjectRow&gt;</code> 和刷新逻辑。<code>SoflanGroup</code> 只通过 <code>GetObjectSoflanGroupConverter</code> 在模板中计算，<code>SelectedObjectRow</code> 没有可供 DataGrid 排序的该属性。</li>
-<li><strong>影响</strong>：用户点击 Name、ObjectTime 或 SoflanGroup 列头时不能再按旧版切换排序；其中 SoflanGroup 即使打开控件默认排序，也没有稳定的行数据字段可用。列的显示和重排仍在，但排序这一项不是直接迁移。</li>
-<li><strong>证据/边界</strong>：仓库中没有该视图的 <code>SortMemberPath</code>/<code>Sorting=</code> 或 ViewModel 排序实现；已有迁移状态报告也将三处 <code>SortColumn</code> 标为“放弃”。这是可达的功能缺口，不是因为 DataGrid 只是改变外观。</li>
-<li><strong>建议</strong>：把 SoflanGroup 计算结果加入 <code>SelectedObjectRow</code>，为三列设置明确的排序键，并在 ViewModel 或 DataGrid <code>Sorting</code> 事件中实现稳定升/降序；刷新后保留当前排序与选择。覆盖空值、相同键稳定性、刷新、对象变更和大选择集性能测试。</li>
+<li><strong>审查时 Avalonia 状态</strong>：视图虽已改用 <code>DataGridTemplateColumn</code>，却没有 <code>SortMemberPath</code>、列头 <code>Sorting</code> 事件或等价集合视图排序代码；ViewModel 只有直接暴露的 <code>ObservableCollection&lt;SelectedObjectRow&gt;</code>。SoflanGroup 只通过恒等占位转换器在模板中计算，行对象没有可供 DataGrid 排序的字段。</li>
+<li><strong>原影响（已消除）</strong>：用户点击 Name、ObjectTime 或 SoflanGroup 列头时无法像旧版一样切换排序；SoflanGroup 也没有稳定的行数据键，刷新会天然丢失任何外部排序和表格选择状态。</li>
+<li><strong>后续建议</strong>：补充真实桌面窗口的鼠标列头测试和排序方向箭头截图基线，以覆盖 DataGrid 主题模板与平台输入层；将硬编码的 <code>SoflanGroup</code> 列头纳入本地化资源。若后续需要对象属性修改后即时更新行快照，应订阅受影响属性并做批量节流，避免大选择集频繁重排。</li>
 </ul>
 <h3 id="b-014-svg">B-014 预览 SVG 生成器只恢复了旧实现的基础子集</h3>
 <ul>

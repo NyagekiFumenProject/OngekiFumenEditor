@@ -1,4 +1,5 @@
 using Dock.Model.Core;
+using Avalonia.Collections;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
@@ -21,7 +22,10 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
 
     public ObservableCollection<SelectedObjectRow> SelectedItems { get; } = [];
-    public ObservableCollection<SelectedObjectRow> EditorSelectObjects { get; } = [];
+    private readonly ObservableCollection<SelectedObjectRow> editorSelectObjectSource = [];
+    private DataGridCollectionView editorSelectObjects;
+    public DataGridCollectionView EditorSelectObjects =>
+        editorSelectObjects ??= new DataGridCollectionView(editorSelectObjectSource);
 
     public SelectionFilterViewModel SelectionFilter { get; }
 
@@ -69,9 +73,19 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     [RelayCommand]
     private void Refresh()
     {
-        EditorSelectObjects.Clear();
+        var selectedObjects = SelectedItems
+            .Select(x => x.Object)
+            .ToHashSet(ReferenceEqualityComparer.Instance);
+
+        editorSelectObjectSource.Clear();
+        SelectedItems.Clear();
         foreach (var item in Editor?.SelectObjects ?? [])
-            EditorSelectObjects.Add(new SelectedObjectRow(item));
+        {
+            var row = new SelectedObjectRow(item, Editor.Fumen);
+            editorSelectObjectSource.Add(row);
+            if (selectedObjects.Contains(item))
+                SelectedItems.Add(row);
+        }
 
         if (IsFilterMenuVisible)
             SelectionFilter.OnSelectedItemsRefreshed();
@@ -110,12 +124,32 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     }
 }
 
-public sealed class SelectedObjectRow(ISelectableObject selectableObject)
+public sealed class SelectedObjectRow
 {
-    public ISelectableObject Object { get; } = selectableObject;
-    public string Name => Object is OngekiObjectBase ongekiObject
-        ? ongekiObject.Name
-        : Object.GetType().Name;
-    public TGrid TGrid => (Object as ITimelineObject)?.TGrid;
-    public string Description => Object.ToString() ?? string.Empty;
+    public ISelectableObject Object { get; }
+    public string Name { get; }
+    public TGrid TGrid { get; }
+    public int? SoflanGroup { get; }
+    public string Description { get; }
+
+    public SelectedObjectRow(ISelectableObject selectableObject, OngekiFumen fumen = null)
+    {
+        Object = selectableObject;
+        Name = Object is OngekiObjectBase ongekiObject
+            ? ongekiObject.Name
+            : Object.GetType().Name;
+        TGrid = (Object as ITimelineObject)?.TGrid;
+        SoflanGroup = ResolveSoflanGroup(Object, fumen);
+        Description = Object.ToString() ?? string.Empty;
+    }
+
+    private static int? ResolveSoflanGroup(ISelectableObject selectableObject, OngekiFumen fumen)
+    {
+        if (fumen is null ||
+            selectableObject is not ITimelineObject { TGrid: { } tGrid } ||
+            selectableObject is not IHorizonPositionObject { XGrid: { } xGrid })
+            return null;
+
+        return fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid);
+    }
 }

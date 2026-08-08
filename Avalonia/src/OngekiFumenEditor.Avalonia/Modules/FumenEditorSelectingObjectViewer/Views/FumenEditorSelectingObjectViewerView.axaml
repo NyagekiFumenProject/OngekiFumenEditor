@@ -13,7 +13,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
     xmlns:system="clr-namespace:System;assembly=System.Runtime"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ValueConverters"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels"
     xmlns:views="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views"
     x:DataType="vm:FumenEditorSelectingObjectViewerViewModel"
@@ -26,9 +25,6 @@
     <gekViews:ViewBase.KeyBindings>
         <KeyBinding Command="{Binding CancelSelectedObjectsCommand}" Gesture="Delete" />
     </gekViews:ViewBase.KeyBindings>
-    <gekViews:ViewBase.Resources>
-        <valueconverters:GetObjectSoflanGroupConverter x:Key="GetObjectSoflanGroupConverter" />
-    </gekViews:ViewBase.Resources>
     <TabControl>
         <TabItem Header="Selection">
 
@@ -43,6 +39,7 @@
             Grid.Row="1"
             Background="Transparent"
             BorderBrush="Transparent"
+            CanUserSortColumns="True"
             ItemsSource="{Binding EditorSelectObjects}"
             CanUserReorderColumns="True"
             HorizontalScrollBarVisibility="Auto"
@@ -70,7 +67,7 @@
             </DataGrid.Styles>
             <DataGrid.Columns>
 
-                <DataGridTemplateColumn Width="150" MinWidth="150" Header="{markup:Translate {x:Static languages:Lang+B.Name}}">
+                <DataGridTemplateColumn Width="150" MinWidth="150" Header="{markup:Translate {x:Static languages:Lang+B.Name}}" SortMemberPath="Name">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <TextBlock Text="{Binding Name}" />
@@ -78,7 +75,7 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="130" MinWidth="130" Header="{markup:Translate {x:Static languages:Lang+B.ObjectTime}}">
+                <DataGridTemplateColumn Width="130" MinWidth="130" Header="{markup:Translate {x:Static languages:Lang+B.ObjectTime}}" SortMemberPath="TGrid">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <TextBlock Text="{Binding TGrid}" />
@@ -87,22 +84,15 @@
                 </DataGridTemplateColumn>
 
 
-                <DataGridTemplateColumn Width="130" MinWidth="130" Header="SoflanGroup">
+                <DataGridTemplateColumn Width="130" MinWidth="130" Header="SoflanGroup" SortMemberPath="SoflanGroup">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
-                            <Label>
-                                <Label.Content>
-                                    <MultiBinding Converter="{StaticResource GetObjectSoflanGroupConverter}">
-                                        <Binding Path="Object" />
-                                        <Binding ElementName="Root" Path="((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).Editor" />
-                                    </MultiBinding>
-                                </Label.Content>
-                            </Label>
+                            <TextBlock Text="{Binding SoflanGroup}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
-                <DataGridTemplateColumn Width="550" MinWidth="550" Header="{markup:Translate {x:Static languages:Lang+B.Description}}">
+                <DataGridTemplateColumn CanUserSort="False" Width="550" MinWidth="550" Header="{markup:Translate {x:Static languages:Lang+B.Description}}">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SelectedObjectRow">
                             <TextBlock Text="{Binding Description}" />
