@@ -215,6 +215,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
 
     public void NotifyObjectClicked(OngekiTimelineObjectBase ongekiObject)
     {
+        NotifyObjectClicked((OngekiObjectBase)ongekiObject);
     }
 
     public void KeyboardAction_HideOrShow(object _)

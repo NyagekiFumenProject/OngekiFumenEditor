@@ -831,14 +831,16 @@
 <li><strong>测试缺口</strong>：现有测试覆盖快照写入与部分保存清理，但没有模拟异常终止后的下一次启动，也没有覆盖多文档、快照损坏/只写一半、原工程比快照更新、重复恢复、丢弃与保留策略、临时目录不可用和长期清理。</li>
 <li><strong>建议</strong>：先明确产品语义。若仍承诺“自动保存”，应恢复对用户工程的事务式定时写回，并只在脏文档、I/O 空闲且目标仍可写时执行；若采用更安全的“恢复快照”，则应重命名设置与提示，并在启动时提供恢复中心，扫描快照、显示原工程定位与时间、允许预览后恢复/另存/丢弃，同时设置版本、保留数量和过期清理。Desktop 与 Browser 通过 capability 明确显示可用性，不能静默假装已启用。增加硬终止后重启的端到端测试，以及完整、损坏、过期、重复和多平台快照矩阵。</li>
 </ul>
-<h3 id="b-030-object-navigation-selection-overload">B-030 对象导航命中了空的 <code>NotifyObjectClicked</code> 重载</h3>
+<h3 id="b-030-object-navigation-selection-overload" class="completed-plan">B-030 对象导航的 <code>NotifyObjectClicked</code> 重载已恢复选择语义（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：<code>NotifyObjectClicked(OngekiTimelineObjectBase)</code> 不再是空方法，现已显式转发到 <code>NotifyObjectClicked(OngekiObjectBase, OngekiObjectBase)</code> 的完整选择流程。所有以时间轴派生静态类型调用的导航、快速选轨、新增和撤销/重做入口都会得到与鼠标点击相同的行为；方案名以红色标记表示实现、专项验证和签入闭环已经完成。</li>
+<li><strong>实际改写</strong>：保留现有公开重载以兼容调用方，仅增加一次明确的基类转换和转发，没有复制选择算法或逐个修改调用点。由此统一复用选中切换、互斥取消、候选 <code>next</code> 回退、属性浏览器刷新和 Shell 文档激活逻辑，也避免未来两个重载再次分叉。</li>
+<li><strong>验证</strong>：新增 <code>ObjectSelectionOverloadTests</code> 3 项并全部通过，覆盖时间轴重载的首次选择与再次点击取消、时间轴/基类静态参数的互斥选择一致性、属性浏览器选中集合和引用编辑器同步，以及检查器 <code>NavigateToObjectBehavior</code> 的滚动、选择和活动文档更新。Avalonia 核心完整测试共 <code>366/366</code> 通过、0 项跳过。</li>
 <li><strong>WPF 行为</strong>：<code>FumenVisualEditorViewModel.UserInteractionActions.cs:1571-1596</code> 只有 <code>NotifyObjectClicked(OngekiObjectBase, OngekiObjectBase)</code> 实现。检查器的 <code>NavigateToObjectBehavior.Navigate()</code> 传入 <code>OngekiTimelineObjectBase</code> 时会进入该方法，切换对象选中状态、取消互斥选择、刷新属性浏览器并把编辑器设为活动布局项。</li>
-<li><strong>Avalonia 状态</strong>：完整选择逻辑仍保留在 <code>FumenVisualEditorViewModel.UserInteractionActions.cs:1592-1617</code>；但 <code>FumenVisualEditorViewModel.cs:216-218</code> 又新增了更具体的 <code>NotifyObjectClicked(OngekiTimelineObjectBase)</code> 空方法。<code>NavigateToObjectBehavior.cs:15-19</code> 的调用因此由重载解析命中空方法，而不会转发到已实现的基类参数重载。<code>FastPickLaneCommandHandler.cs:36-40</code> 也把目标保存为 <code>ConnectableObjectBase</code>（其继承链包含 <code>OngekiTimelineObjectBase</code>），所以快速选轨命令同样会命中这个空重载。静态扫描还确认 <code>UserInteractionActions.cs:105</code> 的 <code>AddToSelection(OngekiMovableObjectBase)</code>、<code>:620,628</code> 的换轨撤销/重做、<code>:938</code> 的曲线控制点、<code>:1022</code> 的 HoldEnd，以及 <code>AddLaneCurvePathControlDropAction.cs:36</code> 的曲线控制点拖放都会把已知的时间轴派生类型直接传入该重载；只有参数静态类型已经收窄为 <code>OngekiObjectBase</code> 的调用会落到完整实现。</li>
-<li><strong>影响</strong>：从谱面检查器等“定位到时间轴对象”的入口仍会执行 <code>ScrollTo()</code>，但目标对象不会成为当前选中项，属性浏览器不会刷新，编辑器焦点/活动状态也不会按旧版更新；用户看到的是“滚到了位置但没有选中对象”。快速选轨命令还会出现“定位到最近对象但选择状态/属性面板不变”；换轨撤销/重做、曲线控制点和 HoldEnd 的新增/拖放路径也可能完成数据修改却不把新对象交给选择器，导致后续属性编辑落到旧选中集合。任何静态类型为 <code>OngekiTimelineObjectBase</code>（包括由具体连接对象向上转换后的类型）的后续调用都会继承该陷阱。</li>
+<li><strong>审查时 Avalonia 状态</strong>：完整选择逻辑仍保留在 <code>FumenVisualEditorViewModel.UserInteractionActions.cs:1592-1617</code>；但 <code>FumenVisualEditorViewModel.cs:216-218</code> 又新增了更具体的 <code>NotifyObjectClicked(OngekiTimelineObjectBase)</code> 空方法。<code>NavigateToObjectBehavior</code>、<code>FastPickLaneCommandHandler</code>、<code>AddToSelection</code>、换轨撤销/重做、曲线控制点、HoldEnd 和曲线控制点拖放等调用会因静态类型而命中空重载，只有已收窄为 <code>OngekiObjectBase</code> 的调用才进入完整实现。</li>
+<li><strong>原影响（已消除）</strong>：检查器导航只滚动不选择，属性浏览器和活动编辑器不更新；快速选轨、新增/拖放与撤销/重做还可能完成数据修改却继续把属性编辑留在旧选中集合。任何未来以 <code>OngekiTimelineObjectBase</code> 静态类型调用的入口都会继承同一陷阱。</li>
 <li><strong>分类理由</strong>：导航行为、调用点和真正的选择实现都已迁移，缺陷来自迁移时新增的可达空重载，属于明确的半实现而不是框架限制。</li>
-<li><strong>测试缺口</strong>：现有测试没有断言检查器导航后的 <code>IsSelected</code>、属性浏览器选中集合、编辑器激活状态和再次点击切换语义，也没有覆盖重载解析所造成的行为分叉；五个快速选轨命令（左右墙、左右轨和中央轨）及“优先选子对象/回退到轨道本身”的两条路径、换轨撤销/重做、曲线控制点与 HoldEnd 的添加/拖放、<code>AddToSelection</code> 入口均没有覆盖。</li>
-<li><strong>建议</strong>：删除该多余重载，或令其显式调用 <code>NotifyObjectClicked((OngekiObjectBase)ongekiObject)</code>；更稳妥的是把两个入口收口为一个命名明确的选择服务，返回实际选中的对象，并由导航、鼠标点击、快速选轨和撤销/重做共同调用。增加检查器单击/双击导航、已选/未选、多选互斥、属性浏览器刷新、编辑器激活和两个静态参数类型调用结果一致的回归测试。</li>
+<li><strong>后续建议</strong>：把五个快速选轨命令按轨道类型参数化测试，并分别覆盖“优先选最后一个子对象”和“无子对象时回退到轨道起点”；再补换轨撤销/重做、曲线控制点与 HoldEnd 新增/拖放、<code>AddToSelection</code> 和 <code>next</code> 候选切换。长期可将选择流程抽成返回实际选中对象的服务，让鼠标、导航和命令不再依赖重载解析。</li>
 </ul>
 <h3 id="b-031-selecting-viewer-command-service">B-031 选择对象工具命令解析成了元信息浏览器服务</h3>
 <ul>
