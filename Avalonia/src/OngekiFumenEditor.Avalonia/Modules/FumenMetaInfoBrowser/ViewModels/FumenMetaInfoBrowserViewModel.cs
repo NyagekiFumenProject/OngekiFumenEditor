@@ -8,12 +8,14 @@ using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.Views;
+using Injectio.Attributes;
 using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.ViewModels;
 
+[RegisterSingleton<IFumenMetaInfoBrowser>]
 public partial class FumenMetaInfoBrowserViewModel : ToolViewModelBase, IFumenMetaInfoBrowser
 {
     private static readonly ConcurrentDictionary<Type, PropertyInfo> FumenPropertyCache = new();

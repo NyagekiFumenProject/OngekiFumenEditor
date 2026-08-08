@@ -917,14 +917,16 @@
 <li><strong>测试缺口</strong>：现有测试检查查看器和 AXAML 能加载，但没有断言 <code>IoC.GetAll&lt;IFumenCheckRule&gt;()</code> 的最小数量、规则名称集合或一张包含已知错误的谱面能产生结果，因此空集合可以长期通过构建。</li>
 <li><strong>后续建议</strong>：继续增加每类错误的最小 fixture、规则结果唯一性和 checker UI 导航测试；把规则集合为空或出现重复类型视为启动配置错误，并在 Injectio 生成注册表变更时运行 DI 快照。若未来引入可选规则，应通过明确的 feature/capability 过滤而不是静默缺席。</li>
 </ul>
-<h3 id="b-039-header-check-navigation-empty">B-039 Header 常量检查结果的导航行为仍是空实现</h3>
+<h3 id="b-039-header-check-navigation-empty" class="completed-plan">B-039 Header 常量检查结果导航已接通（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：Header 检查结果的 <code>NavigateMetaInfoViewBehavior</code> 已解析共享的 <code>IFumenMetaInfoBrowser</code> 单例，把触发检查的编辑器谱面写入工具后交给 <code>IShell.ShowTool</code>；X/T 分辨率和 Creator 三类错误现在都能进入可编辑元信息面板。方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>验证</strong>：<code>HeaderCheckNavigationTests.HeaderResults_NavigateToTheSharedMetaInfoToolForEveryMismatch</code> 构造三类 Header 错误，逐项执行导航并断言 Shell 只展示同一个工具且其 <code>Fumen</code> 与触发编辑器一致；同文件另有命令重复打开测试。专项共 <code>2/2</code> 通过，完整测试集为 <code>373/373</code>，0 项跳过。</li>
+<li><strong>实际改写</strong>：<code>IFumenMetaInfoBrowser</code> 暴露当前 <code>OngekiFumen</code> 契约；<code>FumenMetaInfoBrowserViewModel</code> 以 <code>[RegisterSingleton&lt;IFumenMetaInfoBrowser&gt;]</code> 注册，导航行为不再保留空方法或跨模块构造具体 ViewModel。</li>
+<li><strong>原影响（已消除）</strong>：Header 规则即使已经执行，用户点击三类错误也只会调用空方法，无法打开或聚焦元信息工具，修复路径中断。</li>
 <li><strong>旧版行为</strong>：<code>OngekiFumenEditor/Modules/FumenCheckerListViewer/Base/OgkrImpl/HeaderConstCheckRule.cs:13-20</code> 的 <code>NavigateMetaInfoViewBehavior.Navigate</code> 调用 <code>IoC.Get&lt;IShell&gt;().ShowTool&lt;IFumenMetaInfoBrowser&gt;()</code>，点击 X/T 分辨率或 Creator 错误会打开元信息工具。</li>
-<li><strong>Avalonia 状态</strong>：当前同文件 <code>HeaderConstCheckRule.cs:13-20</code> 只保留注释 <code>Pending actual tool wiring when FumenMetaInfoBrowser integration is finalized</code>，<code>Navigate</code> 方法体为空；虽然当前已有 <code>Modules/FumenMetaInfoBrowser</code>、<code>IFumenMetaInfoBrowser</code> 和独立命令处理器，但检查器结果不会调用它们。</li>
-<li><strong>影响</strong>：即使 Header 规则恢复注册，用户点击这三类错误也不会打开或聚焦可编辑的元信息面板，修复路径中断；与 B-038 叠加时表现为规则既不执行又无法定位。</li>
 <li><strong>分类理由</strong>：导航接口、规则结果和元信息工具均已迁移，只有该行为体未接线，属于 B；框架替换不妨碍通过当前 <code>IShell.ShowTool</code> 完成等价操作。</li>
 <li><strong>测试缺口</strong>：没有针对 Header 三种错误分别执行 <code>Navigate</code> 并断言 Shell 打开/激活 <code>FumenMetaInfoBrowserViewModel</code> 的测试，也没有验证工具随后绑定当前编辑器。</li>
-<li><strong>建议</strong>：将行为体改为注入或解析 <code>IShell</code>，调用 <code>ShowTool</code> 并在已有工具实例上刷新当前文档；若需要直接聚焦具体字段，扩展元信息工具的定位参数。先用 fake Shell 验证三类结果都触发一次，再做 Desktop/Browser UI 测试，避免只检查方法不抛异常。</li>
+<li><strong>后续建议</strong>：继续在 Desktop/Browser UI 测试中验证工具打开后的字段焦点、当前编辑器切换、无活动文档和元信息写回脏状态；若未来需要直接定位到具体字段，可在接口上增加字段定位参数，而不是让规则依赖 ViewModel 具体类型。</li>
 </ul>
 <h3 id="b-040-property-browser-undo-disconnected">B-040 属性浏览器写回绕过撤销栈，保留的撤销 action 已无生产调用者</h3>
 <ul>
@@ -936,14 +938,15 @@
 <li><strong>测试缺口</strong>：没有覆盖标量、允许空值、TGrid/XGrid/Range 子属性、多对象异构旧值、连续编辑合并、撤销/重做后 <code>IsDirty</code> 以及本地化动作名称的属性浏览器测试。</li>
 <li><strong>建议</strong>：恢复所有 setter 对 <code>UndoRedoManager.ExecuteAction</code> 的唯一入口，值未变化时不入栈；单对象和子属性使用类型安全的 <code>PropertySetAction&lt;T&gt;</code>，多对象 action 必须保存每个 wrapper 的独立旧值并在一次 undo 中完整恢复。动作名改用 Gekimini 的 <code>LocalizedString</code> 和现有语言键，不拼接乱码原文；补齐上述测试，并验证属性编辑会正确触发脏状态、保存清栈和关闭提示。</li>
 </ul>
-<h3 id="b-041-meta-info-duplicate-tool-instances">B-041 元信息菜单每次创建新工具实例，重复打开会破坏 Shell 的工具缓存</h3>
+<h3 id="b-041-meta-info-duplicate-tool-instances" class="completed-plan">B-041 元信息工具已改为接口单例并复用 Shell 面板（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：元信息 ViewModel 现在以 <code>IFumenMetaInfoBrowser</code> 单例注册，菜单处理器通过接口解析并交给 Shell，连续点击不会再构造同类型的新实例或覆盖工具缓存。方案名以红色标记表示实现、验证和签入闭环已经完成。</li>
+<li><strong>验证</strong>：<code>HeaderCheckNavigationTests.MetaInfoCommand_ReusesTheRegisteredInterfaceSingleton</code> 连续执行真实命令两次，断言 Shell 只有一个工具且引用与容器接口实例相同；完整测试集为 <code>373/373</code>，0 项跳过。</li>
+<li><strong>实际改写</strong>：<code>FumenMetaInfoBrowserViewModel</code> 增加 <code>[RegisterSingleton&lt;IFumenMetaInfoBrowser&gt;]</code>；<code>ViewFumenMetaInfoBrowserCommandHandler</code> 移除具体类型的 <code>ServiceProvider.Resolve</code>，统一调用 <code>IoC.Get&lt;IFumenMetaInfoBrowser&gt;()</code>。</li>
+<li><strong>原影响（已消除）</strong>：命令每次解析新具体 ViewModel，Shell 对象重载仅按引用防重，重复打开会出现多个同类型面板并让类型 ID 缓存指向最后一个容器。</li>
 <li><strong>旧版行为</strong>：旧 <code>ViewFumenMetaInfoBrowserCommandHandler</code> 调用 <code>_shell.ShowTool&lt;IFumenMetaInfoBrowser&gt;()</code>，<code>FumenMetaInfoBrowserViewModel</code> 以接口导出，由 Shell 聚焦已有的同类型工具。</li>
-<li><strong>Avalonia 状态</strong>：当前 <code>Modules/FumenMetaInfoBrowser/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs:15-21</code> 每次都执行 <code>ServiceProvider.Resolve&lt;FumenMetaInfoBrowserViewModel&gt;()</code> 后传给 <code>Shell.ShowTool(model)</code>；ViewModel 没有 <code>[RegisterSingleton&lt;IFumenMetaInfoBrowser&gt;]</code>。未注册的具体类型会被构造为新对象。</li>
-<li><strong>Shell 契约冲突</strong>：<code>Gekimini.Avalonia/Modules/Shell/ViewModels/ShellViewModel.cs:107-126</code> 的对象重载只用引用相等的 <code>Tools.Contains(model)</code> 防重；不同实例会生成相同的类型 ID，并覆盖 <code>cachedIdToToolContainerMap[id]</code>。泛型 <code>ShowTool&lt;TTool&gt;()</code> 才按类型检查已有工具。</li>
-<li><strong>影响</strong>：连续点击元信息菜单会出现多个同类型面板，而 ID 缓存只指向最后一个容器；后续隐藏、关闭、布局恢复或导航可能操作错误实例，旧面板仍留在界面且绑定状态分叉。B-031、B-032 和 B-039 修复后若复用当前具体类型写法，也会放大该问题。</li>
 <li><strong>测试缺口</strong>：没有断言重复执行命令只保留一个 tool/container，也没有覆盖活动编辑器切换、关闭后重开和布局序列化后的实例一致性。</li>
-<li><strong>建议</strong>：按旧契约注册单例 <code>IFumenMetaInfoBrowser</code>，处理器统一调用 <code>Shell.ShowTool&lt;IFumenMetaInfoBrowser&gt;()</code>；或者在 Shell 中按稳定 ID/类型查找并聚焦现有实例，禁止相同 ID 静默覆盖缓存。增加“两次执行只有一个实例”、关闭/重开、布局恢复及当前编辑器重新绑定测试，并让所有导航入口复用同一个打开服务。</li>
+<li><strong>后续建议</strong>：补关闭后重开、布局序列化/恢复、活动编辑器切换和当前元信息写回的 UI 测试；Shell 层仍应禁止相同稳定 ID 的不同实例静默覆盖缓存，所有导航入口继续复用该接口单例。</li>
 </ul>
 <h3 id="b-042-editor-render-resource-lifecycle">B-042 关闭编辑器没有释放设置订阅、绘制辅助器和渲染控件资源（旧缺陷被迁移保留）</h3>
 <ul>
