@@ -9,6 +9,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.Attributes;
@@ -117,59 +118,64 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		}
 
 		[RelayCommand]
-		private async Task BrushAlongLaneAsync()
+		private Task BrushAlongLaneAsync()
 		{
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
+			return BrushAlongLaneCoreAsync(
+				editor,
+				IoC.Get<IFumenEditorClipboard>().CurrentCopiedObjects,
+				IoC.Get<IWindowManager>(),
+				IoC.Get<IDialogManager>());
+		}
+
+		internal async Task BrushAlongLaneCoreAsync(
+			FumenVisualEditorViewModel editor,
+			IReadOnlyCollection<OngekiObjectBase> copiedObjects,
+			IWindowManager windowManager,
+			IDialogManager dialogManager)
+		{
 			var fumen = editor.Fumen;
 
 			if (RefStartObject?.IsPathVaild() != true)
 			{
-				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.LaneContainInvalidPath);
+				await dialogManager.ShowMessageDialog(Lang.LaneContainInvalidPath);
 				return;
 			}
 
-			var copiedObjects = IoC.Get<IFumenEditorClipboard>().CurrentCopiedObjects;
-
-			if (copiedObjects.Count() > 1)
+			if (copiedObjects.Count > 1)
 			{
-				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.DisableUseBrushByMoreObjects);
+				await dialogManager.ShowMessageDialog(Lang.DisableUseBrushByMoreObjects);
 				return;
 			}
 
 			if (!editor.IsDesignMode)
 			{
-				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.EditorMustBeDesignMode);
+				await dialogManager.ShowMessageDialog(Lang.EditorMustBeDesignMode);
 				return;
 			}
 
-			if (copiedObjects.Count() < 1)
+			if (copiedObjects.Count < 1)
 			{
-				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.CopyOneObjectOnceBeforeUsingBrush);
+				await dialogManager.ShowMessageDialog(Lang.CopyOneObjectOnceBeforeUsingBrush);
 				return;
 			}
 
 			var copiedObjectViewModel = copiedObjects.FirstOrDefault();
 
-			if (copiedObjectViewModel?.CopyNew() is null)
-			{
-				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.ObjectNotSupportedInBatchMode);
-				return;
-			}
-
 			var dialog = new BrushTGridRangeDialogViewModel();
 			dialog.BeginTGrid = RefStartObject.MinTGrid.CopyNew();
 			dialog.EndTGrid = RefStartObject.MaxTGrid.CopyNew();
 
-            await IoC.Get<IWindowManager>().ShowDialogAsync(dialog);
-            /* //todo fix this after implement dialog result
-            if (dialog != true)
+			var dialogResult = await windowManager.ShowDialogAsync(dialog);
+			if (dialogResult != true)
 				return;
-			*/
-            var beginTGrid = dialog.BeginTGrid;
-			var endTGrid = dialog.EndTGrid;
 
-			var redoAction = new System.Action(() => { });
-			var undoAction = new System.Action(() => { });
+			var beginTGrid = dialog.BeginTGrid?.CopyNew();
+			var endTGrid = dialog.EndTGrid?.CopyNew();
+			if (beginTGrid is null || endTGrid is null || beginTGrid > endTGrid)
+				return;
+
+			var generatedObjects = new List<OngekiObjectBase>();
 
 			foreach ((var tGrid, _, _, _, _) in TGridCalculator.GetVisbleTimelines_DesignMode(
 				fumen.SoflansMap.DefaultSoflanList, //todo check this
@@ -181,29 +187,37 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 				editor.Setting.BeatSplit,
 				editor.Setting.VerticalDisplayScale))
 			{
-				var obj = copiedObjectViewModel.CopyNew();
+				var obj = copiedObjectViewModel?.CopyNew();
+				if (obj is null)
+				{
+					await dialogManager.ShowMessageDialog(Lang.ObjectNotSupportedInBatchMode);
+					return;
+				}
+
 				var xGrid = RefStartObject.CalulateXGrid(tGrid);
 
 				if (xGrid is null)
 					continue;
 
-				redoAction += () =>
-				{
-					if (obj is ITimelineObject timelineObject)
-						timelineObject.TGrid = tGrid;
-					if (obj is IHorizonPositionObject horizonPositionObject)
-						horizonPositionObject.XGrid = xGrid;
+				if (obj is ITimelineObject timelineObject)
+					timelineObject.TGrid = tGrid.CopyNew();
+				if (obj is IHorizonPositionObject horizonPositionObject)
+					horizonPositionObject.XGrid = xGrid.CopyNew();
 
-					editor.Fumen.AddObject(obj);
-				};
-				undoAction += () =>
-				{
-					editor.RemoveObject(obj);
-				};
+				generatedObjects.Add(obj);
 			}
 
+			if (generatedObjects.Count == 0)
+				return;
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.ObjectBatchBrush.ToLocalizedString(), redoAction, undoAction));
+			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
+				Lang.B.ObjectBatchBrush.ToLocalizedString(),
+				() => editor.Fumen.AddObjects(generatedObjects),
+				() =>
+				{
+					foreach (var obj in generatedObjects)
+						editor.RemoveObject(obj);
+				}));
 		}
 
 		[RelayCommand]
@@ -250,6 +264,5 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		}
 	}
 }
-
 
 
