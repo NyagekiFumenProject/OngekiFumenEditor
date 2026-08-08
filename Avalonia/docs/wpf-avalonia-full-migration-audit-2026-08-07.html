@@ -851,13 +851,14 @@
 <li><strong>审计时状态</strong>：处理器曾跨模块复制并解析 <code>IFumenMetaInfoBrowser</code>，导致“选择对象查看器”菜单在常规容器中抛出服务解析异常，或者在未来错误注册出现时打开元信息页。该原影响现已消除。</li>
 <li><strong>后续建议</strong>：将仍带有复制痕迹的文件名和类名 <code>ViewFumenMetaInfoBrowserCommandHandler</code> 重命名为选择对象查看器语义，降低再次串接模块的概率；再补活动编辑器切换、无活动编辑器、工具隐藏后重新打开及菜单路由的 UI 级测试，并把所有“查看工具”命令做成接口到具体 ViewModel 的参数化映射测试。</li>
 </ul>
-<h3 id="b-032-tgrid-viewer-command-service">B-032 TGrid 计算器命令解析成了元信息浏览器服务</h3>
+<h3 id="b-032-tgrid-viewer-command-service" class="completed-plan">B-032 TGrid 计算器命令服务映射已复查（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-08）</strong>：复查确认当前命令处理器已经解析 <code>ITGridCalculatorToolViewer</code>，并把该单例作为 <code>IToolViewModel</code> 交给 <code>Shell.ShowTool</code>；错误解析元信息浏览器接口的审计缺陷已在审计后的代码中修正。本次补齐容器、具体类型和重复执行的回归证据，方案名以红色标记表示复查、验证和签入闭环已经完成。</li>
+<li><strong>当前实现</strong>：<code>Modules/TGridCalculatorToolViewer/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs</code> 调用 <code>IoC.Get&lt;ITGridCalculatorToolViewer&gt;()</code>。TGrid 计算器仍由 <code>TGridCalculatorToolViewerViewModel</code> 以该接口注册；Shell 对同一工具实例的第二次打开会保持现有面板，不会创建重复容器。</li>
+<li><strong>验证</strong>：新增 <code>TGridCalculatorCommandTests</code>，从真实测试容器取得命令处理器和工具接口，断言解析结果的具体类型为 <code>TGridCalculatorToolViewerViewModel</code>、首次执行后 Shell 中展示的是同一实例，并断言连续执行命令后仍只有一个可用工具面板；专项测试 <code>1/1</code>、Avalonia 核心完整测试集 <code>368/368</code> 通过，0 项跳过。</li>
 <li><strong>旧版入口</strong>：<code>ViewTGridCalculatorToolViewerCommandHandler</code> 调用 <code>_shell.ShowTool&lt;ITGridCalculatorToolViewer&gt;()</code>，打开 TGrid 计算器。</li>
-<li><strong>Avalonia 状态</strong>：<code>Modules/TGridCalculatorToolViewer/Commands/ViewFumenMetaInfoBrowserCommandHandler.cs:4,9,15-17</code> 同样引入并解析了 <code>OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.IFumenMetaInfoBrowser</code>；正确的 <code>ITGridCalculatorToolViewer</code> 由 <code>TGridCalculatorToolViewerViewModel.cs:19-20</code> 注册。</li>
-<li><strong>影响</strong>：TGrid 计算器菜单不能打开正确工具，常规容器下会因元信息接口没有注册而抛解析异常；用户无法使用时间/TGrid 换算、定位和回写功能。</li>
-<li><strong>分类理由</strong>：计算器 ViewModel 和接口已经存在，故不是 A 类缺失；错误发生在 Avalonia 命令处理器的服务接线，属于 B 类可达半实现。</li>
-<li><strong>建议</strong>：把处理器改为解析 <code>ITGridCalculatorToolViewer</code>，并增加命令到具体工具接口的一一映射测试；测试打开后编辑器切换、选中对象自动同步、TGrid 滚动和回写按钮的 <code>CanExecute</code> 状态，防止复制处理器时再次串模块。</li>
+<li><strong>审计时状态</strong>：处理器曾跨模块复制并解析 <code>IFumenMetaInfoBrowser</code>，导致 TGrid 计算器菜单不能打开正确工具，或者因元信息接口未注册而抛出解析异常。该原影响现已消除。</li>
+<li><strong>后续建议</strong>：将仍带有复制痕迹的文件名和类名 <code>ViewFumenMetaInfoBrowserCommandHandler</code> 重命名为 TGrid 计算器语义，降低再次串接模块的概率；再补打开后编辑器切换、选中对象自动同步、TGrid 滚动和回写按钮 <code>CanExecute</code> 的 UI 级测试，并把所有“查看工具”命令做成接口到具体 ViewModel 的参数化映射测试。</li>
 </ul>
 <h3 id="b-033-show-x-offset-scrollbar-setting">B-033 <code>ShowXOffsetScrollBar</code> 设置写入了错误字段（旧版遗留，迁移后未修复）</h3>
 <ul>
