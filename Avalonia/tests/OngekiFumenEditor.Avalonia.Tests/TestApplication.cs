@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Themes.Fluent;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,10 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
 
         // Gekimini owns this field privately; populate it for headless tests while intentionally skipping shell startup.
         ServiceProviderField.SetValue(this, services.BuildServiceProvider());
+
+        // 真实应用由 Gekimini 的 IThemeManager 在启动时把 FluentTheme 加进 Styles；
+        // headless 路径跳过了那一启动流程，这里补上以保持与运行时一致。
+        Styles.Add(new FluentTheme());
     }
 
     protected override void DoExit(int exitCode = 0)
