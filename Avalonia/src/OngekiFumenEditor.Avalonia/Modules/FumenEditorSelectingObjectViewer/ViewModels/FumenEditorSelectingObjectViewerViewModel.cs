@@ -19,8 +19,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Vi
 [RegisterSingleton<IFumenEditorSelectingObjectViewer>]
 public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBase, IFumenEditorSelectingObjectViewer
 {
-    private IEditorDocumentManager EditorDocumentManager => OngekiFumenEditor.Avalonia.IoC.Get<IEditorDocumentManager>();
-
     public ObservableCollection<SelectedObjectRow> SelectedItems { get; } = [];
     private readonly ObservableCollection<SelectedObjectRow> editorSelectObjectSource = [];
     private DataGridCollectionView editorSelectObjects;
@@ -50,13 +48,13 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         }
     }
 
-    public FumenEditorSelectingObjectViewerViewModel() : base(Lang.B.FumenEditorSelectingObjectViewer.ToLocalizedString())
+    public FumenEditorSelectingObjectViewerViewModel(IEditorDocumentManager editorDocumentManager) : base(Lang.B.FumenEditorSelectingObjectViewer.ToLocalizedString())
     {
         Dock = DockMode.Right;
         SelectionFilter = new SelectionFilterViewModel(this);
 
-        EditorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
-        Editor = EditorDocumentManager.CurrentActivatedEditor;
+        editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
+        Editor = editorDocumentManager.CurrentActivatedEditor;
     }
 
     private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
