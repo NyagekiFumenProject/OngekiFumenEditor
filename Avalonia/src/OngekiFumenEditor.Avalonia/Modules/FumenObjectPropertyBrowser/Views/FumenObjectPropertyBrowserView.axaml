@@ -31,10 +31,8 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource ObjectOperationGeneratorConverter}}">
-            </ContentPresenter>
-            <ContentPresenter Content="{Binding SelectedObjects, Converter={StaticResource MultiObjectsOperationGeneratorConverter}}">
-            </ContentPresenter>
+            <ContentControl Content="{Binding SelectedObjects, Converter={StaticResource ObjectOperationGeneratorConverter}}" />
+            <ContentControl Content="{Binding SelectedObjects, Converter={StaticResource MultiObjectsOperationGeneratorConverter}}" />
         </StackPanel>
     </ScrollViewer>
 </gekViews:ViewBase>

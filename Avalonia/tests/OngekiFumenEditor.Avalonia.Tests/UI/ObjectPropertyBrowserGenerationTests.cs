@@ -94,6 +94,50 @@ public sealed class ObjectPropertyBrowserGenerationTests
     }
 
     [AvaloniaFact]
+    public void BrowserView_RendersLaneNextOperationControl_AfterRefreshSelected()
+    {
+        var browser = IoC.Get<IFumenObjectPropertyBrowser>();
+        browser.RefreshSelected((global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel)null!);
+
+        var laneStart = new LaneLeftStart();
+        var laneNext = new LaneLeftNext();
+        laneStart.AddChildObject(laneNext);
+
+        var view = new global::OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.FumenObjectPropertyBrowserView
+        {
+            DataContext = browser
+        };
+        var window = new Window
+        {
+            Width = 400,
+            Height = 800,
+            Content = view
+        };
+
+        try
+        {
+            window.Show();
+
+            browser.RefreshSelected(null, laneNext);
+            window.UpdateLayout();
+
+            Assert.Same(laneNext, Assert.Single(browser.SelectedObjects));
+
+            var operationView = view.GetVisualDescendants()
+                .OfType<global::OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.Views.ConnectableObjectOperationView>()
+                .SingleOrDefault();
+            Assert.NotNull(operationView);
+
+            var operationViewModel = Assert.IsType<global::OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels.LaneOperationViewModel>(operationView.DataContext);
+            Assert.Same(laneNext, operationViewModel.ConnectableObject);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public void BrowserView_RendersGeneratedControls_AfterRefreshSelected()
     {
         var browser = IoC.Get<IFumenObjectPropertyBrowser>();
