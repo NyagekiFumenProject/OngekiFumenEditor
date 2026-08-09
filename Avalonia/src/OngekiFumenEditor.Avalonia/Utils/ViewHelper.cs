@@ -1,4 +1,5 @@
 using Avalonia.Controls;
+using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Utils.Attributes;
 using System.Reflection;
 
@@ -18,8 +19,11 @@ public static class ViewHelper
     {
         var mapToAttr = viewModel.GetType().GetCustomAttribute<MapToViewAttribute>();
         if (mapToAttr?.ViewType is not null && CacheLambdaActivator.CreateInstance(mapToAttr.ViewType) is Control ctrl)
+        {
+            ctrl.DataContext = viewModel;
             return ctrl;
+        }
 
-        return new ContentControl { DataContext = viewModel };
+        return IoC.Get<ViewLocator>().Build(viewModel);
     }
 }
