@@ -145,7 +145,7 @@ public class SelectionAreaKind
         if (!objs.Any())
             return;
 
-        editor.DeleteSelection();
+        editor.DeleteSelection(objs);
     });
 
     public readonly Action<FumenVisualEditorViewModel, IEnumerable<OngekiObjectBase>> SelectAction;

@@ -143,6 +143,21 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         /// <summary>最近一次输入事件携带的修饰键状态，替代 WPF 的 Keyboard.Modifiers 全局查询。</summary>
         public KeyModifiers CurrentKeyModifiers { get; private set; }
 
+        internal Point UpdateBatchModePointerStateFromView(Point viewPosition, KeyModifiers modifiers, bool leftButtonPressed)
+        {
+            lastPointerViewPosition = viewPosition;
+            var canvasPosition = viewPosition.WithY(Math.Max(0, RectInDesignMode.MaxY - viewPosition.Y));
+            UpdateBatchModePointerState(canvasPosition, modifiers, leftButtonPressed);
+            return canvasPosition;
+        }
+
+        internal void UpdateBatchModePointerState(Point canvasPosition, KeyModifiers modifiers, bool leftButtonPressed)
+        {
+            CurrentCursorPosition = canvasPosition;
+            CurrentKeyModifiers = modifiers;
+            isLeftButtonPressed = leftButtonPressed;
+        }
+
         private bool isSelectRangeDragging;
 
         public bool EnableDragging => !IsBatchMode || (CurrentKeyModifiers.HasFlag(KeyModifiers.Alt) &&

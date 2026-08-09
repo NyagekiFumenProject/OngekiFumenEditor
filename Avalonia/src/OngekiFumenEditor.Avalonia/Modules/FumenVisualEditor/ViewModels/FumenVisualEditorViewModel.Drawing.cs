@@ -702,11 +702,13 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         base.OnViewAfterLoaded(view);
         AttachRuntimeSubscriptions();
         View = view as FumenVisualEditorView;
+        UpdateBatchModeBehaviorAttachment();
         InitExtraMenuItems();
     }
 
     public override void OnViewBeforeUnload(IView view)
     {
+        DetachBatchModeBehavior();
         DetachRuntimeSubscriptions();
         View = null;
         base.OnViewBeforeUnload(view);

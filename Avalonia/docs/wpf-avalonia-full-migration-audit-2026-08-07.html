@@ -517,12 +517,15 @@
 <li><strong>原影响（已消除）</strong>：任意颜色编辑、精确颜色输入、色相/饱和度等原控件能力缺失；只有 12 个预设色可选。</li>
 <li><strong>建议</strong>：采用成熟的 Avalonia 颜色选择控件，或实现包含色相/饱和度/亮度、RGB/ARGB 文本输入、透明度、最近颜色和键盘可访问性的复合控件；固定 12 色可保留为快捷 swatch。增加格式解析、非法输入、alpha、取消/确认、颜色 round-trip 和高对比主题测试。</li>
 </ul>
-<h3 id="b-004">B-004 批量模式的核心交互行为未迁移</h3>
+<h3 id="b-004" class="completed-plan">B-004 批量模式核心交互已按原设计兼容迁移（已完成）</h3>
 <ul>
-<li><strong>Avalonia 代码</strong>：<code>BatchModeBehavior</code> 已退化为只保存 <code>CurrentSubmode</code> 的普通 <code>ObservableObject</code>；原 WPF <code>Behavior&lt;FumenVisualEditorView&gt;</code> 中的键盘接管、鼠标按下/抬起、批量刷入、删除、过滤选择、撤销动作和附加/拆卸清理均不存在。</li>
-<li><strong>注意</strong>：文件中的三个 <code>ConvertBack()</code> 抛异常不是主问题；真正的功能缺口是整个行为主体被移除。</li>
-<li><strong>影响</strong>：批量模式工具栏可存在，但原批量绘制与过滤交互不能按旧方式工作。</li>
-<li><strong>建议</strong>：把批量模式重建为独立的编辑器交互状态机/协调器，由集中快捷键路由和指针事件调用，而不是把全部逻辑塞回视图 behavior；每次手势形成单个可撤销事务，并明确 pointer capture、模式切换和 detach 清理。按 15 个子模式建立行为矩阵，覆盖普通/Shift、拖动、取消、删除、筛选、撤销和失焦中断。</li>
+<li><strong>完成状态（2026-08-09）</strong>：<code>BatchModeBehavior</code> 已恢复为 <code>Behavior&lt;FumenVisualEditorView&gt;</code>，并由独立的 <code>BatchModeInteractionCoordinator</code> 承载可测试的手势状态；<code>IsBatchMode</code> 重新负责行为挂载/卸载，方案名以红色标记表示实现、文档、验证和签入闭环已经完成。</li>
+<li><strong>架构兼容</strong>：原 WPF 动态替换键盘 trigger 的职责继续由现有集中快捷键路由承担，保留 15 个子模式及 Shift 快捷键回退；行为只接管渲染宿主的 Tunnel 指针事件、Alt 菜单键和右键上下文请求，避免恢复双重快捷键源。</li>
+<li><strong>交互恢复</strong>：普通左键刷入、Ctrl/Shift 修改、Alt 临时让权、Ctrl+Alt 单类型筛选、三类过滤框选、右键单类型删除和过滤范围删除均已接回；受控手势使用 pointer capture，并在捕获丢失、焦点离开、模式关闭和视图卸载时取消状态。抬起时按住 Alt 可取消刷入，右键批量操作不会弹出编辑器上下文菜单。</li>
+<li><strong>撤销与回归修复</strong>：每次刷入、单击删除或范围删除只建立一个撤销动作；刷入固定使用手势完成时的位置和修饰键快照，重做不会读取之后的鼠标或键盘状态；冲突物件仍按旧行为改为选中现有物件。<code>SelectionAreaKind.Delete</code> 现把实际命中的过滤对象集传给 <code>DeleteSelection(objs)</code>，不会误删当前选择；<code>NullToZeroConverter</code> 同步恢复空值为 0、非空为指定行高的覆盖层契约。</li>
+<li><strong>专项验证</strong>：<code>IsBatchMode_AttachesBehaviorAndDisablingCancelsOwnedGesture</code>、<code>PointerPressMatrix_PreservesInputFilterAndAltOverrideSemantics</code>、<code>BrushPlacement_SnapshotsReleasePositionAndModifiersAcrossUndoRedo</code>、<code>RightClick_DeletesOnlyTheCurrentSingleInputTypeAsOneUndoableAction</code>、<code>RangeDelete_UsesTheFilteredRangeObjectsInsteadOfCurrentSelection</code> 和 <code>NullToZeroConverter_RestoresOriginalRowHeightContract</code> 全部通过；相邻快捷键/生命周期/AXAML 回归集 <code>78/78</code>、完整 Avalonia 测试 <code>384/384</code>、Desktop 测试 <code>107/107</code> 均为 0 失败、0 跳过，Desktop 与 CommandLine 构建成功。</li>
+<li><strong>审查时状态</strong>：当时 <code>BatchModeBehavior</code> 只保存 <code>CurrentSubmode</code>，批量刷入、删除、过滤选择、撤销动作和附加/拆卸清理均不存在；文件中的三个 <code>ConvertBack()</code> 抛异常并不是主体缺口。</li>
+<li><strong>原影响（已消除）</strong>：批量模式工具栏虽可显示，但无法按旧方式完成绘制、筛选和删除。当前功能链已恢复；后续仍建议补充真实 Desktop 指针拖出窗口、窗口失活和多指针设备的手工 smoke 验收。</li>
 </ul>
 <h3 id="b-005">B-005 新建空项目流程固定失败</h3>
 <ul>
@@ -677,9 +680,9 @@
 <td><code>FumenVisualEditorSettingsView.axaml:161</code> 的字符串 <code>SupportTimeFormats</code> 与 enum <code>Setting.DisplayTimeFormat</code> 不再可靠互选/回写。</td>
 </tr>
 <tr>
-<td><code>NullToZeroConverter</code></td>
+<td><code>NullToZeroConverter</code>（已修复）</td>
 <td>空值返回 <code>0</code>，非空返回指定行高</td>
-<td><code>BatchModeOverlayView.axaml:41-42</code> 把修改控件对象本身交给 <code>RowDefinition.MaxHeight</code>；批量模式覆盖层的可选控制行高度失去原契约，并与 B-004 的主体缺失叠加。</td>
+<td>2026-08-09 已恢复原转换契约，<code>BatchModeOverlayView.axaml:41-42</code> 的 Ctrl/Shift 可选控制行会在修改动作为空时折叠为 0，非空时采用指定行高；由 <code>NullToZeroConverter_RestoresOriginalRowHeightContract</code> 覆盖。</td>
 </tr>
 <tr>
 <td><code>LevelToIndentConverter</code></td>
@@ -1524,7 +1527,7 @@
 <td>应用工具栏静态字段</td>
 <td>25</td>
 <td>25</td>
-<td>启动页 3 项、编辑器状态工具栏 5 项、批量模式工具栏 17 项的字段名、父分组、排序号和命令类型逐项对应；主要变化是 <code>Export</code> 改为 <code>RegisterStaticObject</code>。批量模式具体行为缺口仍归 B-004，而不是工具栏定义丢失。</td>
+<td>启动页 3 项、编辑器状态工具栏 5 项、批量模式工具栏 17 项的字段名、父分组、排序号和命令类型逐项对应；主要变化是 <code>Export</code> 改为 <code>RegisterStaticObject</code>。批量模式具体行为已在 B-004 完成兼容迁移，工具栏定义本身没有删减。</td>
 </tr>
 <tr>
 <td>编辑器快捷键定义</td>
