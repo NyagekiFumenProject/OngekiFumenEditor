@@ -716,14 +716,14 @@
 <li><strong>测试缺口</strong>：测试目录没有上述活动 converter 的单元测试，也没有 UI 测试覆盖属性面板生成、筛选器 RadioButton 双向值、颜色预览、Soflan 层级缩进、上下文菜单启用状态或 dummy palette 字段显示。</li>
 <li><strong>建议</strong>：按表逐个恢复真实语义，并为 <code>MultiBinding</code> 场景改用正确的 <code>IMultiValueConverter</code>；对无法反向转换的单向 converter 返回 <code>BindingOperations.DoNothing</code>/合理 sentinel，而不是原值。每个活动 converter 建立输入类型、空值、参数、反向和错误类型单元测试，再用绑定诊断或 headless UI 测试确认 AXAML 没有类型转换错误；未使用的兼容 converter 应删除资源注册或明确标为遗留。</li>
 </ul>
-<h3 id="b-017-14-5">B-017 选择筛选器只恢复了 14 个选项过滤器中的 5 个</h3>
+<h3 id="b-017-14-5" class="completed-plan">B-017 选择筛选器已按原设计恢复完整选项与同步链（已完成）</h3>
 <ul>
-<li><strong>WPF 选项集</strong>：<code>SelectionFilterViewModel.cs:217-295</code> 初始化 5 个选项页、14 个过滤器：标签；轨道节点类型、曲线前/后节点选中状态；Critical、Flick 方向、可停靠轨道、Hold 头尾；弹幕调色板、弹幕大小、弹幕类型；LaneBlock 方向/头尾、Soflan 头尾。<code>GenerateBulletPaletteOption()</code> 还会随编辑器加载/卸载更新当前谱面的调色板列表。</li>
-<li><strong>Avalonia 当前选项集</strong>：同文件 <code>148-199</code> 只初始化 3 页、5 项：标签、Critical、Flick 方向、弹幕大小、弹幕类型。缺少轨道节点、曲线相邻节点、可停靠轨道、Hold 头尾、弹幕调色板、LaneBlock 方向/头尾和 Soflan 头尾共 9 项。</li>
-<li><strong>“类存在”不是已接线</strong>：<code>SelectionFilterOptions.cs</code> 仍保留 <code>LaneNodeSpecificationOption</code>、<code>DockableObjectLaneFilterOption</code>、<code>BulletPaletteFilterOption</code>、<code>HeadTailSpecificationOption</code> 和 <code>SelectionStatusSpecification</code> 等实现；<code>SelectionFilterView.axaml</code> 甚至仍有 BulletPalette/DockableLane 的 DataTemplate。但全仓没有创建这些类型的活动调用点，因此这些模板不可达，旧动态调色板订阅链也没有恢复。</li>
-<li><strong>应用后刷新回归</strong>：旧 <code>ApplyFilterToSelection()</code> 在修改 <code>IsSelected</code> 后调用 <code>IFumenObjectPropertyBrowser.RefreshSelected(Editor)</code>；新实现删掉该调用，只重新计算筛选计数。编辑器对 <code>IsSelected</code> 属性变化不会自动通知 <code>SelectObjects</code>，而其他取消/聚焦路径仍显式调用 <code>RefreshSelected</code>，因此应用筛选后属性浏览器和选中对象列表可能继续显示旧选择，直到下一次显式刷新。</li>
-<li><strong>测试缺口</strong>：当前只把 <code>SelectionFilterView</code> 纳入 AXAML 加载 smoke test，没有断言选项数量、动态弹幕调色板/轨道列表、各类过滤结果或应用筛选后的属性浏览器同步。</li>
-<li><strong>建议</strong>：按旧 5 页/14 项清单恢复 9 个缺失实例及编辑器 load/unload 订阅，优先复用已迁移的 option 类和现存 DataTemplate；把选择变更收口为一个同时刷新 <code>SelectObjects</code>、属性浏览器和匹配计数的方法。用参数化测试覆盖每个过滤器的包含/排除语义，并增加切换谱面后动态调色板/轨道集合不残留旧对象的生命周期测试。</li>
+<li><strong>完成状态（2026-08-10）</strong>：Avalonia 选择筛选器已恢复 WPF 原有的 5 个对象类型页、25 个对象类型，以及 5 个选项页、14 个选项过滤器；此前缺失的轨道节点、曲线相邻节点、可停靠轨道、Hold 头尾、弹幕调色板、LaneBlock 方向/头尾和 Soflan 头尾均重新接入活动集合与现存 DataTemplate。</li>
+<li><strong>原设计兼容迁移</strong>：对象类型按轨道、可停靠物件、浮空物件、时间轴物件和其他物件分组，包含 Wall/Lane/Colorful/Enemy/Autoplay/Beam/曲线控制点、Tap/Hold、Bell/Bullet/Flick、LaneBlock/ClickSE/Soflan/Meter/Individual Soflan 及 SVG 文件/文本和 Comment。选项过滤器继续复用原迁移类和原有包含/排除语义，而不是引入第二套筛选规则。</li>
+<li><strong>动态生命周期</strong>：<code>BulletPaletteFilterOption</code> 会随活动编辑器及其 <code>Fumen</code> 属性切换解绑旧调色板集合、绑定新集合并重建选项；编辑器置空后只保留空值与 dummy palette，不再残留旧谱面对象，也不会响应旧集合的后续变化。Avalonia 通过当前编辑器属性生命周期完成该接线，等价承接旧版 load/unload 目的。</li>
+<li><strong>应用后刷新</strong>：<code>ApplyFilterToSelection()</code> 在修改选择状态后重新计算编辑器选择集合，并恢复调用 <code>IFumenObjectPropertyBrowser.RefreshSelected(Editor)</code>；选中对象查看器、属性浏览器、匹配数量和结果文本会在同一次操作后同步。</li>
+<li><strong>验证</strong>：<code>Constructor_RestoresOriginalObjectTypesAndFourteenOptions</code> 断言完整 5/25 与 5/14 清单；<code>RestoredOptionFilters_MatchAndRejectOriginalScenarios</code> 以 14 组参数覆盖每项过滤器的匹配/排除语义；<code>ActiveEditorAndFumenChanges_RebindPaletteWithoutRetainingOldEntries</code> 覆盖编辑器、谱面和集合切换；<code>ApplyFilterToSelection_RefreshesEditorViewerAndPropertyBrowser</code> 覆盖应用后同步。B-017 专项 <code>17/17</code>、相邻筛选/命令/AXAML 集合 <code>78/78</code>、Avalonia 全集 <code>401/401</code>、Desktop 全集 <code>107/107</code> 通过，解决方案非增量构建 0 错误。</li>
+<li><strong>剩余验收</strong>：自动化已覆盖数据与生命周期契约；原生 Flyout 的长列表滚动、键盘操作和不同 DPI 下的实际布局仍归 C-013 的 Desktop UI 验收，不影响本项功能闭环。</li>
 </ul>
 <h3 id="b-018-provider">B-018 主菜单“打开”会错误过滤掉当前唯一的编辑器 provider</h3>
 <ul>
@@ -1206,8 +1206,8 @@
 <li><strong>Avalonia 对应</strong>：<code>SelectionFilterView.axaml:103-153</code> 改成 <code>DropDownButton + Flyout + CheckBox + ItemsControl</code>；对象类型区域在 <code>224</code>、<code>243</code> 行以普通全选复选框加条目列表实现。旧 <code>UI/Themes/CheckComboBox.xaml</code> 和 <code>BubbleScrollWheelEventBehavior.cs</code> 不再有同路径文件。</li>
 <li><strong>状态逻辑重写</strong>：<code>SelectionFilterOptions.cs:529-542</code>、<code>660-673</code> 新增 <code>IsAllSelected</code> 与 <code>SelectionSummary</code>，由 ViewModel 直接维护全选和下拉标题；旧 code-behind 的 <code>BulletPaletteCheckList_SetText</code> 与 Xceed partial-selection 刷新 hack 不再需要。</li>
 <li><strong>相似性</strong>：两版都保留对象类型逐项勾选、全选、启用/禁用现有过滤条件和命中数量统计；核心过滤类仍在同一模块。</li>
-<li><strong>交互差异/待验收</strong>：旧弹幕调色板标题按“无/全部/已选数量”显示，新标题拼接所有已选条目并截断；旧显式滚轮上抛行为没有等价 behavior；筛选器自身还受 B-016 中 <code>ParamValueToBoolConverter</code>、<code>ParenthesizeTextConverter</code> 等活动占位转换器影响，并且选项集合与应用后刷新明确缺失，详见 B-017。Avalonia 默认路由是否在所有嵌套滚动场景下达到相同体验，需要桌面 UI 实测，当前不能仅凭对象类型过滤逻辑相同判定完全等价。</li>
-<li><strong>建议</strong>：保留原生 Flyout 方案，但先修复 B-016/B-017，再确定标题采用“全部/数量”还是明细文本的产品语义；若嵌套滚动实测失败，增加最小化的滚轮转发 behavior。覆盖全选/部分选、Flyout 开关、键盘导航、长列表虚拟化、内外滚动和谱面切换后的动态选项。</li>
+<li><strong>交互差异/待验收</strong>：旧弹幕调色板标题按“无/全部/已选数量”显示，新标题拼接所有已选条目并截断；旧显式滚轮上抛行为没有等价 behavior；筛选器自身还受 B-016 中 <code>ParamValueToBoolConverter</code>、<code>ParenthesizeTextConverter</code> 等活动占位转换器影响。B-017 已恢复完整选项集合、谱面生命周期和应用后刷新；Avalonia 默认路由是否在所有嵌套滚动场景下达到相同体验，仍需要桌面 UI 实测。</li>
+<li><strong>建议</strong>：保留原生 Flyout 方案并继续修复 B-016，再确定标题采用“全部/数量”还是明细文本的产品语义；若嵌套滚动实测失败，增加最小化的滚轮转发 behavior。覆盖全选/部分选、Flyout 开关、键盘导航、长列表虚拟化和内外滚动；谱面切换后的动态选项已由 B-017 自动化测试覆盖。</li>
 </ul>
 <h3 id="c-014-desktop">C-014 致命异常捕获、救援和终止窗口迁到 Desktop 启动层</h3>
 <ul>
@@ -1440,7 +1440,7 @@
 <li>命令行仍暴露 <code>convert/svg/jacket/updater/acb</code> 五个命令以及 <code>--verbose/-v</code>，用户侧命令集合基本保留；新强类型绑定还修复了旧 jacket 小图宽高参数互换问题。</li>
 <li>撤销栈的批次、合并、定点撤销/重做、全部撤销和清空能力在 Gekimini 中均有对应；缺口集中在应用设置和属性编辑调用接线，而不是整个撤销系统消失。</li>
 <li>Desktop 致命异常流程仍保留日志、dump、谱面救援和确认退出；About 窗口仍显示版本、commit 与构建信息，但两者都从 WPF code-behind/Bootstrapper 改为平台化窗口或 ViewModel。</li>
-<li>选择筛选器仍保留对象类型、全选和匹配计数，并把 Xceed 多选控件改为 Avalonia 原生 Flyout 组合；选项过滤器并非完整保留，缺失部分见 B-017。</li>
+<li>选择筛选器已恢复 WPF 原有的 5 个对象类型页/25 个对象类型和 5 个选项页/14 个过滤器，并补回动态弹幕调色板生命周期及应用后的属性浏览器同步；Xceed 多选控件继续采用 Avalonia 原生 Flyout 组合，剩余交互验收见 C-013。</li>
 </ol>
 <h3 id="validation">8.1 构建、测试与环境验证（2026-08-07）</h3>
 <p>本节记录本机 Windows 11、.NET SDK <code>10.0.302</code> 下的 Debug 验证。构建命令均针对独立项目顺序执行，避免共享依赖输出目录的并发锁；测试项目使用 VSTest/xUnit。通过只说明当前配置可以编译或测试通过，不等于所有用户流程已经验收。</p>

@@ -34,7 +34,10 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         {
             this.RegisterOrUnregisterPropertyChangeEvent(field, value, OnEditorPropChanged);
             if (SetProperty(ref field, value))
+            {
+                SelectionFilter.OnEditorChanged(value);
                 Refresh();
+            }
         }
     }
 
@@ -64,7 +67,12 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
 
     private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FumenVisualEditorViewModel.SelectObjects))
+        if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+        {
+            SelectionFilter.OnEditorFumenChanged(Editor);
+            Refresh();
+        }
+        else if (e.PropertyName == nameof(FumenVisualEditorViewModel.SelectObjects))
             Refresh();
     }
 

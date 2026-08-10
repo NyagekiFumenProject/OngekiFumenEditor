@@ -649,6 +649,8 @@
     "MeterChange":  "Meter Change",
     "IndividualSoflanArea":  "IndividualSoflanArea",
     "Comment":  "Comment",
+    "SvgPrefabFile":  "SVG Prefab (File)",
+    "SvgPrefabText":  "SVG Prefab (Text)",
     "EnemyLane":  "Enemy Lane",
     "SelectionFilter_ResultsLabelReplaceMode":  "{0} objects will be remaining in the selection",
     "SelectionFilter_ResultsLabelRemoveMode":  "{0} objects will be removed from the selection",

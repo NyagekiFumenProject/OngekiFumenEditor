@@ -416,6 +416,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
     public ObservableCollection<BulletPaletteFilterItem> Items { get; } = [];
     private Dictionary<BulletPallete, BulletPaletteFilterItem> paletteTable = new();
     private BulletPaletteFilterItem nullPaletteItem;
+    private OngekiFumen? currentFumen;
 
     public int FilterMatches
     {
@@ -455,23 +456,48 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
     public void FumenLoaded(OngekiFumen fumen)
     {
-        fumen.BulletPalleteList.CollectionChanged += BulletPaletteCollectionChanged;
-        UpdateOptions(fumen.BulletPalleteList);
+        SetFumen(fumen);
     }
 
     public void FumenUnloaded(OngekiFumen fumen)
     {
-        fumen.BulletPalleteList.CollectionChanged -= BulletPaletteCollectionChanged;
+        if (ReferenceEquals(currentFumen, fumen))
+            SetFumen(null);
+    }
+
+    internal void SetFumen(OngekiFumen? fumen)
+    {
+        if (ReferenceEquals(currentFumen, fumen))
+            return;
+
+        if (currentFumen is not null)
+            currentFumen.BulletPalleteList.CollectionChanged -= BulletPaletteCollectionChanged;
+
+        currentFumen = fumen;
+        if (currentFumen is not null)
+        {
+            currentFumen.BulletPalleteList.CollectionChanged += BulletPaletteCollectionChanged;
+            UpdateOptions(currentFumen.BulletPalleteList);
+        }
+        else
+        {
+            UpdateOptionsCore([]);
+        }
     }
 
     public void UpdateOptions(BulletPalleteList paletteList)
+    {
+        UpdateOptionsCore(paletteList);
+    }
+
+    private void UpdateOptionsCore(IEnumerable<BulletPallete> palettes)
     {
         Items.Clear();
 
         nullPaletteItem = new BulletPaletteFilterItem(null);
         Items.Add(nullPaletteItem);
         Items.Add(new BulletPaletteFilterItem(BulletPallete.DummyCustomPallete));
-        foreach (var p in paletteList)
+        foreach (var p in palettes)
             Items.Add(new BulletPaletteFilterItem(p));
 
         paletteTable = Items.Where(i => i != nullPaletteItem && i.Palette is not null).ToDictionary(i => i.Palette!, i => i);
