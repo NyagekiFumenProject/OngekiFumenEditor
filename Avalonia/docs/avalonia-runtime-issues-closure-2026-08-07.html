@@ -147,9 +147,9 @@
             </tr>
             <tr>
               <td><span class="status">已修复</span><br>物件属性窗口无法显示实时生成的控件</td>
-              <td>三个属性/操作 converter 是占位实现，直接返回输入对象，没有调用 Avalonia UI generator。已分别接通单对象、多对象和属性 wrapper 的生成器，并对不支持输入返回 <code>UnsetValue</code>。</td>
-              <td><code>PropertyGeneratorConverter_SupportedProperty_ReturnsGeneratedControl</code> 通过；项目构建成功。</td>
-              <td>补齐所有属性类型及单选/多选操作面板的参数化 headless UI 测试，重点断言双向写回、校验提示和撤销 action。</td>
+              <td>问题包含两层：三个属性/操作 converter 曾直接返回输入对象，没有调用 Avalonia UI generator；接线后，页面末尾两个裸 <code>ContentPresenter</code> 的运行时 <code>DataContext</code> 仍为 <code>null</code>，使 <code>SelectedObjects</code> 绑定无法调用对象操作生成器。现已接通属性、单对象和多对象 generator，并把两个页面级操作宿主改为 <code>ContentControl</code>。</td>
+              <td><code>BrowserView_RendersGeneratedControls_AfterRefreshSelected</code> 验证属性控件实际进入视觉树；<code>BrowserView_RendersLaneNextOperationControl_AfterRefreshSelected</code> 验证选择 <code>LaneNextBase</code> 后生成并绑定 <code>ConnectableObjectOperationView</code>。相关专项测试 <code>9/9</code> 通过，最终聚焦测试 <code>1/1</code> 通过，Desktop Debug 构建 0 错误；对象操作宿主修复签入 <code>f016b0ec</code>。</td>
+              <td>继续覆盖 Hold、Beam、Soflan 和多对象轨道操作面板，并增加真实 Desktop 选择/布局回归。双向写回、校验提示和撤销 action 继续由迁移审计 <code>B-040</code> 独立跟踪。</td>
             </tr>
             <tr>
               <td><span class="status">已修复</span><br>工具箱拖动物件到编辑器里面无法工作，物件并没有实际添加到编辑器上</td>
