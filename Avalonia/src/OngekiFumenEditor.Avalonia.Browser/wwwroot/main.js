@@ -1,8 +1,12 @@
+import {initialize as initializeOpfs} from './opfs.js';
 import {
     initialize as initializeTemporaryFileSystem,
     isAvailable as isTemporaryStorageAvailable,
-    isLogAvailable,
 } from './temporaryFileSystem.js';
+import {
+    initialize as initializeLogFileSystem,
+    isAvailable as isLogStorageAvailable,
+} from './logFileSystem.js';
 
 const startup = globalThis.__startupProgress;
 let currentPhase = "启动入口";
@@ -54,11 +58,15 @@ async function loadDotnetModule() {
 
 async function startBrowserApplication() {
     phaseStart("temporary-file-system", "正在初始化 OPFS 临时与日志存储...", 8);
-    trackResourceStart("./temporaryFileSystem.js", "OPFS 存储模块");
-    await initializeTemporaryFileSystem();
+    trackResourceStart("./opfs.js", "OPFS 基础存储模块");
+    await initializeOpfs();
+    await Promise.all([
+        initializeTemporaryFileSystem(),
+        initializeLogFileSystem(),
+    ]);
     const temporaryStorageAvailable = isTemporaryStorageAvailable();
-    const logStorageAvailable = isLogAvailable();
-    trackResourceComplete("./temporaryFileSystem.js");
+    const logStorageAvailable = isLogStorageAvailable();
+    trackResourceComplete("./opfs.js");
     const storageStatus = temporaryStorageAvailable && logStorageAvailable
         ? "OPFS 临时与日志存储已准备。"
         : temporaryStorageAvailable

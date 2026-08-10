@@ -208,7 +208,7 @@ Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultIm
 
 Desktop 的 [`DesktopLogFileStorage`](../src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/Logging/DesktopLogFileStorage.cs) 将目录固定为 `AppContext.BaseDirectory/logs`（即 exe 所在目录的 `logs` 子目录），并使用不覆盖已有文件的时间戳名称。原 Desktop `ILogger` provider 现在转发到同一 `FileLogOutputWrapper`，不再额外创建工作目录下的 `Logs/current.log`。
 
-Browser 的 [`BrowserLogFileStorage`](../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/Logging/BrowserLogFileStorage.cs) 通过 `LogFileSystemInterop` 使用 OPFS 根目录的 `logs` 子目录；临时文件仍位于 OPFS `temp`，`ClearAsync` 不会清理日志。`BrowserFileLoggerProvider` 将 `Microsoft.Extensions.Logging` 记录转发到同一文件。OPFS 不可用时，文件 sink 明确报告不可用且不返回伪造路径，控制台日志仍保留。
+Browser 的 [`opfs.js`](../src/OngekiFumenEditor.Avalonia.Browser/wwwroot/opfs.js) 统一负责 OPFS 根初始化、安全相对路径解析和目录内文件 CRUD；[`temporaryFileSystem.js`](../src/OngekiFumenEditor.Avalonia.Browser/wwwroot/temporaryFileSystem.js) 与 [`logFileSystem.js`](../src/OngekiFumenEditor.Avalonia.Browser/wwwroot/logFileSystem.js) 分别适配根目录下同级的 `temp` 和 `logs`。[`BrowserLogFileStorage`](../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/Logging/BrowserLogFileStorage.cs) 通过 `LogFileSystemInterop` 写入 `logs`，`ClearAsync` 只清理 `temp`。`BrowserFileLoggerProvider` 将 `Microsoft.Extensions.Logging` 记录转发到同一文件。OPFS 不可用时，文件 sink 明确报告不可用且不返回伪造路径，控制台日志仍保留。
 
 旧 `LogSetting.LogFileDirPath` 属性仅为读取旧设置文件而保留；日志设置页改为展示平台实际目录并设为只读，不再提供不会生效的目录选择命令。
 
@@ -234,7 +234,7 @@ Browser 的 [`BrowserLogFileStorage`](../src/OngekiFumenEditor.Avalonia.Browser/
 
 旧 `TempFileHelper` 已删除。公共句柄实现位于 [`Platforms/Services/FileSystem/Providers`](../src/OngekiFumenEditor.Avalonia/Platforms/Services/FileSystem/Providers/ITemporaryFolderProvider.cs)，统一执行单路径段校验、固定名称复用、唯一文件实际占位、递归删除及显式清理。写入回调只有成功结束才提交新内容；回调失败或取消时保留原内容，进入提交阶段后不再响应取消。
 
-Desktop [`DesktopTemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/FileSystem/Providers/DesktopTemporaryFolderProvider.cs) 使用 `%TEMP%/NagekiFumenEditorTempFolder`，通过同目录事务文件和原子替换提交，并对所有 `LocalPath` 做根目录包含性校验。Browser [`BrowserTemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/FileSystem/Providers/BrowserTemporaryFolderProvider.cs) 使用当前 origin 的 OPFS `temp` 目录，数据受 origin 隔离、浏览器配额和站点数据清理影响。
+Desktop [`DesktopTemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/FileSystem/Providers/DesktopTemporaryFolderProvider.cs) 使用 `%TEMP%/NagekiFumenEditorTempFolder`，通过同目录事务文件和原子替换提交，并对所有 `LocalPath` 做根目录包含性校验。Browser [`BrowserTemporaryFolderProvider`](../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/FileSystem/Providers/BrowserTemporaryFolderProvider.cs) 通过 `temporaryFileSystem.js` 使用当前 origin 的 OPFS `temp` 目录，底层根句柄和通用操作由 `opfs.js` 提供；数据受 origin 隔离、浏览器配额和站点数据清理影响。
 
 两端均不在启动或退出时自动清空，也不做过期和容量淘汰。只有调用文件/目录删除 API 或 `ITemporaryFolderProvider.ClearAsync` 才会删除内容。Browser 如果在启动时因缺少 OPFS、安全上下文或权限而无法初始化，会切换到 discard 后端：`IsAvailable=false`，写入回调仍执行但数据被丢弃，查找始终未命中，直接读取按文件不存在处理；初始化成功后的配额耗尽等运行错误仍向调用者传播。
 
