@@ -5,8 +5,12 @@ const EntryKind = Object.freeze({
 });
 
 const writeBuffers = new Map();
+const logWriteBuffers = new Map();
+let originRoot = null;
 let temporaryRoot = null;
+let logRoot = null;
 let available = false;
+let logAvailable = false;
 
 function isNotFound(error) {
     return error instanceof DOMException && error.name === "NotFoundError";
@@ -38,8 +42,21 @@ function copyFromMemoryView(source, destination) {
 }
 
 function requireAvailable() {
-    if (!available || temporaryRoot === null) {
+    if (!available || originRoot === null || temporaryRoot === null) {
         throw new DOMException("Origin-private temporary storage is unavailable.", "NotSupportedError");
+    }
+}
+
+function requireLogAvailable() {
+    if (!logAvailable || logRoot === null) {
+        throw new DOMException("Origin-private log storage is unavailable.", "NotSupportedError");
+    }
+}
+
+function validateLogFileName(fileName) {
+    if (typeof fileName !== "string" || fileName.length === 0 || fileName === "." || fileName === ".." ||
+        fileName.includes("\\") || fileName.includes("/")) {
+        throw new TypeError(`Unsafe log file name: ${fileName}`);
     }
 }
 
@@ -110,29 +127,51 @@ async function abortSilently(writable) {
 
 export async function initialize() {
     available = false;
+    originRoot = null;
     temporaryRoot = null;
+    logRoot = null;
+    logAvailable = false;
 
     try {
         if (typeof navigator?.storage?.getDirectory !== "function") {
             return false;
         }
 
-        const originRoot = await navigator.storage.getDirectory();
-        temporaryRoot = await originRoot.getDirectoryHandle("temp", { create: true });
-        available = true;
-        return true;
+        originRoot = await navigator.storage.getDirectory();
     } catch (error) {
-        temporaryRoot = null;
+        originRoot = null;
         if (!isUnavailableInitializationError(error)) {
             throw error;
         }
-        console.warn("OPFS temporary storage is unavailable; writes will be discarded.", error);
+        console.warn("OPFS storage is unavailable.", error);
         return false;
     }
+
+    try {
+        temporaryRoot = await originRoot.getDirectoryHandle("temp", { create: true });
+        available = true;
+    } catch (error) {
+        temporaryRoot = null;
+        console.warn("OPFS temporary storage is unavailable; temporary writes will be discarded.", error);
+    }
+
+    try {
+        logRoot = await originRoot.getDirectoryHandle("logs", { create: true });
+        logAvailable = true;
+    } catch (error) {
+        logRoot = null;
+        console.warn("OPFS log storage is unavailable; file logs are disabled.", error);
+    }
+
+    return available || logAvailable;
 }
 
 export function isAvailable() {
     return available;
+}
+
+export function isLogAvailable() {
+    return logAvailable;
 }
 
 export async function getEntryKind(relativePath) {
@@ -216,6 +255,24 @@ function requireWriteBuffer(handle) {
     return bytes;
 }
 
+function setLogWriteBuffer(handle, data, byteLength) {
+    const bytes = new Uint8Array(byteLength);
+    copyFromMemoryView(data, bytes);
+    logWriteBuffers.set(handle, bytes);
+}
+
+function releaseLogWriteBuffer(handle) {
+    logWriteBuffers.delete(handle);
+}
+
+function requireLogWriteBuffer(handle) {
+    const bytes = logWriteBuffers.get(handle);
+    if (bytes === undefined) {
+        throw new Error(`Unknown log write buffer ${handle}.`);
+    }
+    return bytes;
+}
+
 export async function writeFile(relativePath, handle) {
     const bytes = requireWriteBuffer(handle);
     const resolved = await requireParent(relativePath);
@@ -236,6 +293,42 @@ export async function writeFile(relativePath, handle) {
 export async function appendFile(relativePath, handle) {
     const bytes = requireWriteBuffer(handle);
     const fileHandle = await requireFile(relativePath);
+    const original = await fileHandle.getFile();
+    const writable = await fileHandle.createWritable({ keepExistingData: true });
+    let committed = false;
+    try {
+        await writable.seek(original.size);
+        await writable.write(bytes);
+        await writable.close();
+        committed = true;
+    } finally {
+        if (!committed) {
+            await abortSilently(writable);
+        }
+    }
+}
+
+export async function tryCreateLogFile(fileName) {
+    requireLogAvailable();
+    validateLogFileName(fileName);
+    try {
+        await logRoot.getFileHandle(fileName);
+        return false;
+    } catch (error) {
+        if (!isNotFound(error)) {
+            throw error;
+        }
+    }
+
+    await logRoot.getFileHandle(fileName, { create: true });
+    return true;
+}
+
+export async function appendLogFile(fileName, handle) {
+    requireLogAvailable();
+    validateLogFileName(fileName);
+    const bytes = requireLogWriteBuffer(handle);
+    const fileHandle = await logRoot.getFileHandle(fileName);
     const original = await fileHandle.getFile();
     const writable = await fileHandle.createWritable({ keepExistingData: true });
     let committed = false;
@@ -317,4 +410,12 @@ globalThis.TemporaryFileSystemInterop = Object.freeze({
     deleteFile,
     deleteFolder,
     clear,
+});
+
+globalThis.LogFileSystemInterop = Object.freeze({
+    isAvailable: isLogAvailable,
+    tryCreateFile: tryCreateLogFile,
+    setWriteBuffer: setLogWriteBuffer,
+    releaseWriteBuffer: releaseLogWriteBuffer,
+    appendFile: appendLogFile,
 });

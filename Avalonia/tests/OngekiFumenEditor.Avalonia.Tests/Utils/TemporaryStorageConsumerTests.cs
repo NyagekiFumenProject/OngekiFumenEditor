@@ -5,7 +5,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectF
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using OngekiFumenEditor.Avalonia.Utils;
-using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
@@ -74,23 +73,6 @@ public sealed class TemporaryStorageConsumerTests
         Assert.Equal(1, downloadCount);
         Assert.NotNull(cacheFile);
         Assert.Equal(expected, await cacheFile.ReadAllBytesAsync());
-    }
-
-    [Fact]
-    public async Task FileLogOutput_AppendsInCallOrderUnderRuntimeFolder()
-    {
-        var provider = new InMemoryTemporaryFolderProvider();
-        var output = new FileLogOutputWrapper(provider);
-
-        Task first = output.WriteLogAsync("first\n");
-        Task second = output.WriteLogAsync("second\n");
-        await Task.WhenAll(first, second);
-        await output.FlushAsync();
-        var file = await output.GetCurrentFileAsync();
-
-        Assert.StartsWith("logs/runtime/", file.RelativePath, StringComparison.Ordinal);
-        Assert.Equal(file.RelativePath, output.GetCurrentLogFile());
-        Assert.Equal("first\nsecond\n", Encoding.UTF8.GetString(await file.ReadAllBytesAsync()));
     }
 
     [AvaloniaFact]

@@ -12,6 +12,7 @@ public partial class LogSetting : SettingModelBase<LogSetting>
 
     protected override JsonTypeInfo<LogSetting> JsonTypeInfoCore => JsonTypeInfo;
 
+    // Retained for compatibility with existing settings files. Runtime log locations are platform-owned.
     [ObservableProperty]
     public partial string LogFileDirPath { get; set; } = ".\\Logs";
 }

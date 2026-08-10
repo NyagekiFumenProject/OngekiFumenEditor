@@ -1,4 +1,8 @@
-import {initialize as initializeTemporaryFileSystem} from './temporaryFileSystem.js';
+import {
+    initialize as initializeTemporaryFileSystem,
+    isAvailable as isTemporaryStorageAvailable,
+    isLogAvailable,
+} from './temporaryFileSystem.js';
 
 const startup = globalThis.__startupProgress;
 let currentPhase = "启动入口";
@@ -49,15 +53,22 @@ async function loadDotnetModule() {
 }
 
 async function startBrowserApplication() {
-    phaseStart("temporary-file-system", "正在初始化临时文件系统...", 8);
-    trackResourceStart("./temporaryFileSystem.js", "临时文件系统模块");
-    const temporaryFileSystemAvailable = await initializeTemporaryFileSystem();
+    phaseStart("temporary-file-system", "正在初始化 OPFS 临时与日志存储...", 8);
+    trackResourceStart("./temporaryFileSystem.js", "OPFS 存储模块");
+    await initializeTemporaryFileSystem();
+    const temporaryStorageAvailable = isTemporaryStorageAvailable();
+    const logStorageAvailable = isLogAvailable();
     trackResourceComplete("./temporaryFileSystem.js");
+    const storageStatus = temporaryStorageAvailable && logStorageAvailable
+        ? "OPFS 临时与日志存储已准备。"
+        : temporaryStorageAvailable
+            ? "OPFS 临时存储已准备，文件日志不可用。"
+            : logStorageAvailable
+                ? "OPFS 文件日志已准备，临时文件将使用非持久化回退。"
+                : "OPFS 不可用：临时文件将使用非持久化回退，文件日志已禁用。";
     phaseComplete(
         "temporary-file-system",
-        temporaryFileSystemAvailable
-            ? "临时文件系统已准备。"
-            : "临时文件系统不可用，将使用不持久化的回退实现。",
+        storageStatus,
         18);
 
     phaseStart("dotnet-entry", "正在加载 .NET runtime 入口...", 22);

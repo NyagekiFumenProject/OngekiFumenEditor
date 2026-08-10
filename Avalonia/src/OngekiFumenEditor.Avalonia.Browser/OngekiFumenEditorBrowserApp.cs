@@ -47,7 +47,7 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
             o.AddProvider(new ConsoleLoggerProvider());
             o.AddDebug();
         });
-        serviceCollection.AddSingleton<ILoggerProvider, TemporaryFileLoggerProvider>();
+        serviceCollection.AddSingleton<ILoggerProvider, BrowserFileLoggerProvider>();
     }
 
     public override void OnFrameworkInitializationCompleted()

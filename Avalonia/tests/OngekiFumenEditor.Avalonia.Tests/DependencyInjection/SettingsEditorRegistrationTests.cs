@@ -17,6 +17,7 @@ using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.Views;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.Views;
 using OngekiFumenEditor.Avalonia.Models.Settings;
+using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.DependencyInjection;
@@ -150,6 +151,22 @@ public sealed class SettingsEditorRegistrationTests
         }
     }
 
+    [AvaloniaFact]
+    public void LogsSettingView_ShowsEffectivePlatformFolderAsReadOnly()
+    {
+        const string effectivePath = "opfs:/logs";
+        var view = new LogsSettingView
+        {
+            DataContext = new LogsSettingViewModel(new StubLogFileStorage(effectivePath))
+        };
+
+        var pathTextBox = Assert.IsType<TextBox>(
+            view.FindControl<TextBox>("LogFolderPathTextBox"));
+
+        Assert.True(pathTextBox.IsReadOnly);
+        Assert.Equal(effectivePath, pathTextBox.Text);
+    }
+
     private static SettingsPageViewModel GetRequiredPage(
         IEnumerable<SettingsPageViewModel> pages,
         string name)
@@ -161,5 +178,17 @@ public sealed class SettingsEditorRegistrationTests
         where TEditor : ISettingsEditor
     {
         Assert.IsType<TEditor>(Assert.Single(page.Editors));
+    }
+
+    private sealed class StubLogFileStorage(string path) : ILogFileStorage
+    {
+        public bool IsAvailable => true;
+        public string LogDirectoryPath { get; } = path;
+
+        public Task<ILogFile?> CreateUniqueFileAsync(
+            string prefix,
+            string extension = ".log",
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult<ILogFile?>(null);
     }
 }

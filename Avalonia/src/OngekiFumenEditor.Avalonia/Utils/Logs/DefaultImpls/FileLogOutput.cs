@@ -1,5 +1,9 @@
+#nullable enable
+
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 
@@ -7,7 +11,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 
 internal static class FileLogOutput
 {
-    private static FileLogOutputWrapper current;
+    private static FileLogOutputWrapper? current;
 
     public static void WaitForWriteDone()
     {
@@ -29,23 +33,27 @@ internal static class FileLogOutput
 [RegisterSingleton<ILogOutput>]
 public sealed class FileLogOutputWrapper : ILogOutput
 {
-    private readonly Lazy<Task<ITemporaryFile>> file;
+    internal const string BeginFileLogOutputMarker = "----------BEGIN FILE LOG OUTPUT----------\n";
+
+    private readonly ILogFileStorage storage;
+    private readonly Func<DateTime> getNow;
+    private readonly Lazy<Task<ILogFile?>> file;
     private readonly object sync = new();
     private Task pendingWrite = Task.CompletedTask;
 
-    public FileLogOutputWrapper(ITemporaryFolderProvider temporaryFolderProvider)
+    public FileLogOutputWrapper(ILogFileStorage storage)
+        : this(storage, static () => DateTime.Now)
     {
-        ArgumentNullException.ThrowIfNull(temporaryFolderProvider);
-        file = new Lazy<Task<ITemporaryFile>>(
-            async () =>
-            {
-                var logs = await temporaryFolderProvider.Root.GetOrCreateFolderAsync("logs");
-                var runtime = await logs.GetOrCreateFolderAsync("runtime");
-                return await temporaryFolderProvider.CreateUniqueFileAsync(
-                    DateTime.Now.ToString("yyyyMMdd_HHmmss"),
-                    ".log",
-                    runtime);
-            },
+    }
+
+    internal FileLogOutputWrapper(ILogFileStorage storage, Func<DateTime> getNow)
+    {
+        ArgumentNullException.ThrowIfNull(storage);
+        ArgumentNullException.ThrowIfNull(getNow);
+        this.storage = storage;
+        this.getNow = getNow;
+        file = new Lazy<Task<ILogFile?>>(
+            CreateCurrentFileAsync,
             LazyThreadSafetyMode.ExecutionAndPublication);
         FileLogOutput.SetCurrent(this);
     }
@@ -76,15 +84,49 @@ public sealed class FileLogOutputWrapper : ILogOutput
     internal string GetCurrentLogFile()
     {
         var currentFile = file.Value.GetAwaiter().GetResult();
-        return currentFile.LocalPath ?? currentFile.RelativePath;
+        return currentFile?.Path ?? string.Empty;
     }
 
-    internal Task<ITemporaryFile> GetCurrentFileAsync() => file.Value;
+    internal Task<ILogFile?> GetCurrentFileAsync() => file.Value;
+
+    private async Task<ILogFile?> CreateCurrentFileAsync()
+    {
+        if (!storage.IsAvailable)
+            return null;
+
+        try
+        {
+            string prefix = getNow().ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture);
+            var currentFile = await storage.CreateUniqueFileAsync(prefix, ".log").ConfigureAwait(false);
+            if (currentFile is not null)
+            {
+                await currentFile.AppendAsync(Encoding.UTF8.GetBytes(BeginFileLogOutputMarker))
+                    .ConfigureAwait(false);
+            }
+            return currentFile;
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"Failed to initialize file log output: {exception}");
+            return null;
+        }
+    }
 
     private async Task AppendAfterAsync(Task previousWrite, string content)
     {
         await previousWrite.ConfigureAwait(false);
         var currentFile = await file.Value.ConfigureAwait(false);
-        await currentFile.AppendAsync(Encoding.UTF8.GetBytes(content)).ConfigureAwait(false);
+        if (currentFile is null)
+            return;
+
+        try
+        {
+            await currentFile.AppendAsync(Encoding.UTF8.GetBytes(content)).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            // Match the original WPF sink: logging failures are diagnostic-only and must not crash the app.
+            Debug.WriteLine($"Failed to append file log output: {exception}");
+        }
     }
 }

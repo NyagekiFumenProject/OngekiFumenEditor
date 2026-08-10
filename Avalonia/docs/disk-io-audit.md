@@ -97,7 +97,7 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 | 编号 | I/O 意图 | 具体操作与位置 | 说明 |
 | --- | --- | --- | --- |
 | D1 | 快捷键配置 | 读取和同步覆盖当前工作目录 `keybind.json`；见 [`DefaultKeyBindingManager.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/KeyBinding/DefaultKeyBindingManager.cs) | 程序内部用户偏好 |
-| D2 | Core 诊断日志 | 在临时根的 `logs/runtime/*.log` 创建并顺序追加日志；见 [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) | Desktop 写入 `%TEMP%`，Browser 写入 OPFS；主意图仍是诊断 |
+| D2 | Core 诊断日志 | 通过平台日志存储在 `logs/*.log` 创建单会话文件，写入 WPF 兼容起始标记并顺序追加 UTF-8 日志；见 [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) 和 [`ILogFileStorage.cs`](../src/OngekiFumenEditor.Avalonia/Platforms/Services/Logging/ILogFileStorage.cs) | Desktop 写入 exe 所在目录的 `logs`，Browser 写入 OPFS 根的 `logs`；主意图仍是诊断 |
 | D3 | 崩溃转储 | 创建 `ProgramSetting.DumpFileDirPath/*.dmp` 并调用原生 `MiniDumpWriteDump`；见 [`DumpFileHelper.cs`](../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/DumpFileHelper.cs) | 当前未初始化、无活动调用者；工程救援副本另归 A7 |
 | D4 | 外部打开与资源管理器 | 检查文件或目录后启动 Explorer、默认程序或 URL；见 [`ProcessUtils.cs`](../src/OngekiFumenEditor.Avalonia/Utils/ProcessUtils.cs) | 本进程只做元数据检查和进程启动 |
 | D5 | 文件选择平台机制 | Core 中的 Avalonia StorageProvider 调用打开文件、保存文件和目录选择器 | 只记录 Core 调用；具体平台 Provider 不在范围内，选择目标按用途归入 B、C 或 D |
@@ -204,11 +204,13 @@ Core 设置模型通过 [`SettingModelBase.cs`](../src/OngekiFumenEditor.Avaloni
 
 ### 4.7 日志
 
-Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) 在临时根的 `logs/runtime/{timestamp}.{guid}.log` 创建实际占位文件，并通过临时文件句柄串行追加 UTF-8 日志。Desktop 对应 `%TEMP%/NagekiFumenEditorTempFolder/logs/runtime/`，Browser 对应 OPFS `temp/logs/runtime/`。
+Core [`FileLogOutput.cs`](../src/OngekiFumenEditor.Avalonia/Utils/Logs/DefaultImpls/FileLogOutput.cs) 通过 [`ILogFileStorage`](../src/OngekiFumenEditor.Avalonia/Platforms/Services/Logging/ILogFileStorage.cs) 创建每次启动一份时间戳 `.log` 文件，并在文件开头写入原 WPF 的 `----------BEGIN FILE LOG OUTPUT----------` 标记，再按调用顺序串行追加 UTF-8 日志。文件创建失败只记录诊断信息，不让日志故障反向终止应用。
 
-Browser 还通过 `TemporaryFileLoggerProvider` 将现有 `Microsoft.Extensions.Logging` 启动日志转发到同一个 `FileLogOutputWrapper`，因此设置、主题和 Shell 等真实运行日志会进入 OPFS `temp/logs/runtime/`，而不只覆盖旧 `ILogOutput` 调用点。
+Desktop 的 [`DesktopLogFileStorage`](../src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/Logging/DesktopLogFileStorage.cs) 将目录固定为 `AppContext.BaseDirectory/logs`（即 exe 所在目录的 `logs` 子目录），并使用不覆盖已有文件的时间戳名称。原 Desktop `ILogger` provider 现在转发到同一 `FileLogOutputWrapper`，不再额外创建工作目录下的 `Logs/current.log`。
 
-`LogSetting.LogFileDirPath` 目前只被设置页面修改，Core `FileLogOutput` 未读取该设置。
+Browser 的 [`BrowserLogFileStorage`](../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/Logging/BrowserLogFileStorage.cs) 通过 `LogFileSystemInterop` 使用 OPFS 根目录的 `logs` 子目录；临时文件仍位于 OPFS `temp`，`ClearAsync` 不会清理日志。`BrowserFileLoggerProvider` 将 `Microsoft.Extensions.Logging` 记录转发到同一文件。OPFS 不可用时，文件 sink 明确报告不可用且不返回伪造路径，控制台日志仍保留。
+
+旧 `LogSetting.LogFileDirPath` 属性仅为读取旧设置文件而保留；日志设置页改为展示平台实际目录并设为只读，不再提供不会生效的目录选择命令。
 
 ### 4.8 图片、纹理和 SVG 文件
 
@@ -304,9 +306,9 @@ Core [项目文件](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia
 
 因此，纹理配置、编辑器纹理和默认音效读取在当前部署结构下存在确定的路径缺失或路径不一致问题。
 
-### 8.4 日志目录设置没有控制 Core 日志位置
+### 8.4 日志目录由平台能力固定提供
 
-设置页面可以修改 `LogSetting.LogFileDirPath`，但 Core `FileLogOutput` 不读取该值。用户选择的日志目录目前不会改变 Core 日志的实际落盘位置。
+日志位置已经由 `ILogFileStorage` 统一抽象：Desktop 是 exe 所在目录的 `logs`，Browser 是 OPFS 根的 `logs`。旧 `LogSetting.LogFileDirPath` 不再作为活动写入配置，设置页只展示实际能力，因此不存在“保存成功但日志仍写到另一目录”的断链。对应迁移审计条目 B-036 已完成并有核心、Desktop 和 Browser 契约测试证据。
 
 ### 8.5 临时存储只支持显式生命周期管理
 
@@ -317,7 +319,7 @@ Core [项目文件](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia
 | 数据 | 分类 | 默认路径或来源 |
 | --- | --- | --- |
 | 快捷键 | D1 | 当前工作目录 `keybind.json` |
-| Core 日志 | D2 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/logs/runtime/*.log`；Browser：OPFS `temp/logs/runtime/*.log` |
+| Core 日志 | D2 | Desktop：`AppContext.BaseDirectory/logs/*.log`；Browser：OPFS 根 `logs/*.log` |
 | 通用临时文件 | A1 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/<subfolder>/`；Browser：OPFS `temp/<subfolder>/` |
 | 网络图片缓存 | A5 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/images/*.img.cache`；Browser：OPFS `temp/images/*.img.cache` |
 | ACB 解码 WAV 缓存 | A6 | Desktop：`%TEMP%/NagekiFumenEditorTempFolder/decodeAcbFiles/`；Browser 无本地路径，不执行该转换 |

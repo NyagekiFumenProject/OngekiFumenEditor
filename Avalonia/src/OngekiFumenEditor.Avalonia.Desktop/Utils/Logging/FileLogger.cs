@@ -1,23 +1,23 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.Logging;
+using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
+using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
 
 public class FileLogger : ILogger
 {
-    private static readonly object locker = new();
-    private readonly string[] filePathList;
+    private readonly FileLogOutputWrapper output;
     private readonly string simpliedCategoryName;
     private readonly DateTime startTime;
 
-    public FileLogger(string categoryName, string[] filePathList, DateTime startTime)
+    public FileLogger(string categoryName, FileLogOutputWrapper output, DateTime startTime)
     {
-        this.filePathList = filePathList;
+        this.output = output;
         this.startTime = startTime;
         simpliedCategoryName = categoryName.Split(".").LastOrDefault();
     }
@@ -72,12 +72,17 @@ public class FileLogger : ILogger
             logRecord += $"--------------------------{Environment.NewLine}";
         }
 
-        lock (locker)
-        {
-            foreach (var filePath in filePathList)
-                File.AppendAllText(filePath, logRecord);
-        }
+        output.WriteLog(ToSeverity(logLevel), logRecord);
     }
+
+    private static Severity ToSeverity(LogLevel logLevel) => logLevel switch
+    {
+        LogLevel.Trace or LogLevel.Debug => Severity.Debug,
+        LogLevel.Information => Severity.Info,
+        LogLevel.Warning => Severity.Warn,
+        LogLevel.Error or LogLevel.Critical => Severity.Error,
+        _ => Severity.Info
+    };
 
     private string BuildExceptionMessageContent(Exception e)
     {

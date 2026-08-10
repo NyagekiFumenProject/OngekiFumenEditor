@@ -44,11 +44,11 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         serviceCollection.AddLogging(o =>
         {
             o.SetMinimumLevel(LogLevel.Debug);
-            o.AddProvider(new FileLoggerProvider());
             o.AddDebug();
             if (IsGUIMode)
                 o.AddConsole();
         });
+        serviceCollection.AddSingleton<ILoggerProvider, FileLoggerProvider>();
     }
 
     public override void OnFrameworkInitializationCompleted()

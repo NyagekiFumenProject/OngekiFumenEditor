@@ -1,41 +1,28 @@
-using Gekimini.Avalonia.ViewModels;
-using CommunityToolkit.Mvvm.ComponentModel;
-using OngekiFumenEditor.Avalonia.Assets.Languages;
-using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Modules.Settings;
+using Gekimini.Avalonia.ViewModels;
 using Injectio.Attributes;
-using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.ViewModels;
 
 [RegisterSingleton<ISettingsEditor>]
 public partial class LogsSettingViewModel : ViewModelBase, ISettingsEditor
 {
-    public LogSetting Setting => LogSetting.Default;
+    public string LogFolderPath { get; }
 
     public string SettingsPageName => Lang.TabLogger;
 
     public string SettingsPagePath => Lang.TabEnviorment;
 
-    public LogsSettingViewModel()
+    public LogsSettingViewModel(ILogFileStorage storage)
     {
-        Setting.PropertyChanged += (_, e) => Log.LogDebug($"logs setting property changed : {e.PropertyName}");
+        ArgumentNullException.ThrowIfNull(storage);
+        LogFolderPath = storage.LogDirectoryPath;
     }
 
     public void ApplyChanges()
     {
-        Setting.Save();
-    }
-
-    [RelayCommand]
-    private async Task SelectLogsFolderAsync()
-    {
-        using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.LoggerFolder);
-        if (string.IsNullOrWhiteSpace(folder?.LocalPath))
-            return;
-
-        Setting.LogFileDirPath = folder.LocalPath;
-        ApplyChanges();
+        // The location is an effective platform capability, not an editable application setting.
     }
 }
-

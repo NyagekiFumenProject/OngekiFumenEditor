@@ -8,6 +8,7 @@ using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
 
 namespace OngekiFumenEditor.Avalonia.Tests;
 
@@ -37,6 +38,7 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
         services.AddTypeCollectedActivator(
             global::OngekiFumenEditor.Avalonia.ToolViewModelTypeCollectedActivator.Default);
         services.AddSingleton<ITemporaryFolderProvider, DiscardTemporaryFolderProvider>();
+        services.AddSingleton<ILogFileStorage, DiscardLogFileStorage>();
         services.AddSingleton<ISettingManager, InMemorySettingManager>();
 
         // Gekimini owns this field privately; populate it for headless tests while intentionally skipping shell startup.

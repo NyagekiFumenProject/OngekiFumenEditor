@@ -892,14 +892,14 @@
 <li><strong>测试缺口</strong>：没有大目录/深层目录/多工程候选、枚举中途取消、单项属性读取失败、超大音频和 Browser 慢 provider 的 UI 进度与释放测试。</li>
 <li><strong>建议</strong>：给目录扫描建立带 <code>CancellationToken</code>、进度报告和预算策略的服务，优先按候选扩展名或惰性索引，避免为无关文件长期持有句柄；在对话框显示阶段性计数并允许取消，超过文件数、深度或总字节预算时给出可重试错误。音频采用流式/受限解码或先做大小预检，取消和超限都必须释放已建立的目录树与授权句柄。为 Desktop、Browser 和无 GUI 单测分别加入取消、预算、慢枚举和内存峰值验收。</li>
 </ul>
-<h3 id="b-036-log-folder-setting-disconnected">B-036 日志目录设置仍可编辑，但实际日志输出完全忽略该设置</h3>
+<h3 id="b-036-log-folder-setting-disconnected" class="completed-plan">B-036 日志文件已按平台固定目录兼容迁移（已完成）</h3>
 <ul>
 <li><strong>旧版消费链路</strong>：<code>OngekiFumenEditor/Utils/Logs/DefaultImpls/FileLogOutput.cs:25-31</code> 读取 <code>LogSetting.Default.LogFileDirPath</code>，创建目录并在该目录生成当前日志文件；<code>Kernel/SettingPages/Logs/Views/LogsSettingView.xaml:29</code> 和旧 ViewModel 的保存逻辑共同构成“设置页到文件输出”的完整链路。</li>
-<li><strong>Avalonia 状态</strong>：当前仍保留 <code>Models/Settings/LogSetting.cs:16</code>、<code>Kernel/SettingPages/Logs/Views/LogsSettingView.axaml:33</code> 和 <code>LogsSettingViewModel.cs:37</code>，用户可以选择并保存目录；但 <code>Utils/Logs/DefaultImpls/FileLogOutput.cs:36-49</code> 只注入 <code>ITemporaryFolderProvider</code>，固定写入 <code>logs/runtime/&lt;timestamp&gt;.&lt;guid&gt;.log</code>，没有读取 <code>LogFileDirPath</code> 的活动消费者。Desktop 的临时根目录是 <code>%TEMP%/NagekiFumenEditorTempFolder</code>，Browser 则使用 OPFS 或丢弃型 provider。</li>
-<li><strong>影响</strong>：用户修改“日志目录”后设置表面上保存成功，但运行日志、崩溃窗口所显示的当前日志和后续诊断仍位于临时/OPFS 存储；Desktop 文件可能被系统临时目录清理，Browser 的本地路径字段更无法代表实际写入位置，形成误导性的可配置项。</li>
-<li><strong>分类理由</strong>：设置模型、界面和保存命令已迁移，但核心消费者断开，属于 B；Browser 的任意本地路径限制另见 E-004，不能用平台限制解释 Desktop 也忽略目录设置的事实。</li>
-<li><strong>测试缺口</strong>：现有测试覆盖设置编辑和 XAML 加载，但没有验证选择目录后新日志实际落在该目录，也没有覆盖目录不可写、设置变更后的日志轮换、崩溃窗口取当前日志以及 Browser 无 OPFS 时的反馈。</li>
-<li><strong>建议</strong>：把日志输出拆成带能力声明的平台 sink。Desktop 读取并校验配置目录，采用临时文件加原子创建、不可写时回退到明确的默认用户数据目录并显示状态；配置变更时规定“下次启动生效”或安全轮换当前文件。Browser 隐藏本地路径输入，改为下载/导出当前日志或 OPFS 书签，并在无持久化能力时明确提示。增加 configured/default/unwritable/Browser/crash-window 的端到端测试，确保 UI 文案只承诺真实可用的存储能力。</li>
+<li><strong>完成状态（2026-08-10）</strong>：按原 WPF 文件输出细节重建平台日志 sink。Core <code>FileLogOutputWrapper</code> 通过 <code>ILogFileStorage</code> 创建单会话时间戳 <code>.log</code> 文件，写入原始 <code>----------BEGIN FILE LOG OUTPUT----------</code> 起始标记、以 UTF-8 顺序追加，并在创建/追加失败时只记录诊断信息。旧 <code>LogSetting.LogFileDirPath</code> 属性保留用于读取旧配置，但不再被误认为活动路径设置。</li>
+<li><strong>平台路径</strong>：Desktop <code>DesktopLogFileStorage</code> 固定使用 <code>AppContext.BaseDirectory/logs</code>，即 exe 所在目录的 <code>logs</code> 子目录；Browser <code>BrowserLogFileStorage</code> 通过 <code>LogFileSystemInterop</code> 使用 OPFS 根目录的 <code>logs</code> 子目录，临时文件的 <code>temp</code> 根和日志根彼此独立。Desktop 原 <code>Logs/current.log</code> provider 已改为转发到同一会话文件，崩溃处理读取的当前路径因此与普通日志一致。</li>
+<li><strong>设置页行为</strong>：<code>LogsSettingViewModel</code> 和 <code>LogsSettingView.axaml</code> 现在展示平台返回的实际目录（Desktop 物理路径或 Browser 的 <code>opfs:/logs</code> 标识），路径框只读，不再提供不会生效的目录选择命令。</li>
+<li><strong>验证</strong>：<code>FileLogOutputTests.FileLogOutput_CreatesTimestampedSessionFileWithOriginalMarkerAndOrderedContent</code>、<code>FileLogOutputTests.FileLogOutput_UnavailableStorageDoesNotReportFabricatedCurrentPath</code>、<code>SettingsEditorRegistrationTests.LogsSettingView_ShowsEffectivePlatformFolderAsReadOnly</code> 与 <code>BrowserOpfsLogStorageContractTests.BrowserOpfsLogStorage_CreatesLogsFolderAtOriginRootInsteadOfTemporaryRoot</code> 核心专项 <code>4/4</code> 通过；<code>DesktopLogFileStorageTests</code> 专项（目录、唯一文件、ILogger 合流、DI 单例）<code>4/4</code> 通过；Avalonia 核心完整测试集 <code>404/404</code>、Desktop 完整测试集 <code>111/111</code> 通过，均为 0 项跳过；Core、Desktop、Browser Debug 构建均为 <code>0</code> 错误。</li>
+<li><strong>分类理由</strong>：原缺口是迁移后的消费者断链，属于 B；Browser 不能提供任意本地路径仍按 E-004 处理，但 OPFS 可用时的持久日志已经有明确平台实现，无 OPFS 时不再伪报成功。</li>
 </ul>
 <h3 id="b-037-browser-sound-folder-setting">B-037 Browser 仍展示无法生效的自定义音效目录设置</h3>
 <ul>
@@ -1423,13 +1423,13 @@
 <li>因此 Desktop 与 Browser 的音频、临时文件、日志、外部程序和最近工程行为必须分别审查，不能用 Desktop 通过来证明 Browser 等价。</li>
 <li><strong>建议</strong>：所有共享功能先依赖文件、音频、进程、剪贴板和持久化 capability，再由 Desktop/Browser 实现；UI 根据能力隐藏或替换命令，并提供重新授权/下载等浏览器流程。CI 至少分别构建并运行两套平台测试，禁止共享层新增未经抽象的绝对路径、进程启动或 Windows 音频 API。</li>
 </ul>
-<h3 id="e-005-browser-discard-temporary-storage">E-005 Browser 临时存储不可用时静默丢弃日志和缓存</h3>
+<h3 id="e-005-browser-discard-temporary-storage">E-005 Browser 临时存储不可用时缓存仍会静默降级</h3>
 <ul>
-<li><strong>初始化证据</strong>：<code>wwwroot/main.js:1-3</code> 在启动 .NET 前等待临时文件系统初始化；<code>wwwroot/temporaryFileSystem.js:115-130</code> 遇到缺少 OPFS、安全上下文、权限或不支持时返回 <code>false</code>；<code>BrowserTemporaryFolderProvider.cs:16-27</code> 随后选择 <code>DiscardTemporaryFolderProvider</code>，其 <code>IsAvailable=false</code>。</li>
-<li><strong>实际语义</strong>：discard 后端的创建、<code>WriteAsync</code> 和 <code>AppendAsync</code> 会完成且不保存字节，<code>TryGetFile</code> 永远未命中。<code>FileLogOutputWrapper.cs:36-89</code> 仍把写入当作成功并返回一个不存在的相对日志路径；Browser 的 <code>TemporaryFileLoggerProvider</code> 会把启动和运行时日志全部转发到这里。<code>ImageLoader.cs:143-163</code> 则把丢失的持久缓存当作普通 cache miss，导致不同 loader 实例重复下载。</li>
+<li><strong>初始化证据</strong>：<code>wwwroot/main.js</code> 在启动 .NET 前等待 OPFS 初始化，并分别读取临时存储与日志存储能力；<code>wwwroot/temporaryFileSystem.js</code> 独立创建 OPFS 根下的 <code>temp</code> 与 <code>logs</code>，一项失败不会连带禁用另一项。临时存储不可用时 <code>BrowserTemporaryFolderProvider</code> 选择 <code>DiscardTemporaryFolderProvider</code>，其 <code>IsAvailable=false</code>；日志存储不可用时 B-036 的独立 sink 返回不可用。</li>
+<li><strong>实际语义</strong>：discard 后端的创建、<code>WriteAsync</code> 和 <code>AppendAsync</code> 仍会完成且不保存字节，<code>TryGetFile</code> 永远未命中；但 B-036 已把 <code>FileLogOutputWrapper</code> 改为先检查 <code>ILogFileStorage.IsAvailable</code>，不可用时不创建文件、不返回伪造的相对路径，<code>BrowserFileLoggerProvider</code> 的记录仍可由控制台 provider 观察。<code>ImageLoader.cs:143-163</code> 仍把丢失的持久缓存当作普通 cache miss，导致不同 loader 实例重复下载。</li>
 <li><strong>恢复边界</strong>：定时恢复快照在 <code>FumenRescue.SaveRecoverySnapshotAsync:25-27</code> 显式因不可用而跳过；但通用 <code>FumenRescue.Rescue()</code> 没有同样的 capability 门，若被 Browser 或测试路径复用，可能用虚假的相对路径记录“救援成功”。ACB 解码还会在需要本地路径时失败并记录错误。旧 WPF 的 <code>FileLogOutput.Init()</code> 直接创建真实的用户临时文件，失败会进入明确的异常/调试路径，语义并不相同。</li>
-<li><strong>影响</strong>：禁用 OPFS、非安全上下文、隐私模式或初始化权限失败的浏览器仍能显示主界面，但没有可持久化的文件日志、跨实例图片缓存或可靠的临时救援；“写入完成”和“路径可打开”的状态可能误导诊断与故障处理。</li>
-<li><strong>建议</strong>：把临时存储能力和不可用原因暴露给宿主。日志不能依赖 discard 写入，应始终保留控制台或有界内存环形缓冲，并提供浏览器下载/复制诊断；图片缓存不可用时明确按“无持久缓存”运行；救援、ACB 等需要真实数据的流程必须在入口检查 <code>IsAvailable</code> 并返回类型化的不可用结果，禁止报告虚假成功。增加 Browser 的 OPFS 缺失、安全错误、配额失败、日志 fallback、缓存重复下载和救援禁用测试。</li>
+<li><strong>影响</strong>：禁用 OPFS、非安全上下文、隐私模式或临时目录初始化失败的浏览器仍能显示主界面，但没有跨实例图片缓存或可靠的临时救援；这些通用临时写入仍可能以 discard 方式完成。文件日志已经不再依赖该 discard 后端，且启动状态会分别说明临时存储与日志存储是否可用。</li>
+<li><strong>建议</strong>：继续把临时存储不可用原因暴露给具体消费者；图片缓存不可用时明确按“无持久缓存”运行；救援、ACB 等需要真实数据的流程必须在入口检查 <code>IsAvailable</code> 并返回类型化的不可用结果，禁止报告虚假成功。日志后续可增加有界内存环形缓冲和浏览器下载/复制诊断。增加 Browser 的 OPFS 缺失、安全错误、配额失败、缓存重复下载和救援禁用测试。</li>
 </ul>
 <h2 id="section-6">8. 已确认的相似性</h2>
 <ol>

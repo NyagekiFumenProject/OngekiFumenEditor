@@ -8,22 +8,22 @@ using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Utils;
 
-internal sealed class TemporaryFileLoggerProvider : ILoggerProvider
+internal sealed class BrowserFileLoggerProvider : ILoggerProvider
 {
     private readonly FileLogOutputWrapper output;
 
-    public TemporaryFileLoggerProvider(IEnumerable<ILogOutput> outputs)
+    public BrowserFileLoggerProvider(IEnumerable<ILogOutput> outputs)
     {
         output = outputs.OfType<FileLogOutputWrapper>().Single();
     }
 
-    public ILogger CreateLogger(string categoryName) => new TemporaryFileLogger(categoryName, output);
+    public ILogger CreateLogger(string categoryName) => new BrowserFileLogger(categoryName, output);
 
     public void Dispose()
     {
     }
 
-    private sealed class TemporaryFileLogger(string categoryName, FileLogOutputWrapper output) : ILogger
+    private sealed class BrowserFileLogger(string categoryName, FileLogOutputWrapper output) : ILogger
     {
         public IDisposable BeginScope<TState>(TState state) => null;
 

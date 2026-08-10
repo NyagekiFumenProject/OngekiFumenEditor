@@ -1,33 +1,26 @@
 ﻿using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Logging;
+using OngekiFumenEditor.Avalonia.Utils.Logs;
+using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
 
-public class FileLoggerProvider : ILoggerProvider
+public sealed class FileLoggerProvider : ILoggerProvider
 {
-    private const string LoggerFolderPath = "Logs";
-    private const string CurrentLogFilePath = "current.log";
-
-    private readonly string[] logFiles;
+    private readonly FileLogOutputWrapper output;
     private readonly DateTime startTime;
 
-    public FileLoggerProvider()
+    public FileLoggerProvider(IEnumerable<ILogOutput> outputs)
     {
-        File.Delete(CurrentLogFilePath);
+        output = outputs.OfType<FileLogOutputWrapper>().Single();
         startTime = DateTime.Now;
-        Directory.CreateDirectory(LoggerFolderPath);
-        var logFileName = $"app-{startTime:yyyy-MM-dd HH-mm-ss}.log";
-        logFiles = new[]
-        {
-            Path.Combine(LoggerFolderPath, logFileName),
-            CurrentLogFilePath
-        };
     }
 
     public ILogger CreateLogger(string categoryName)
     {
-        return new FileLogger(categoryName, logFiles, startTime);
+        return new FileLogger(categoryName, output, startTime);
     }
 
     public void Dispose()
