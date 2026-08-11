@@ -66,10 +66,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 
 				if (closestLaneObject?.startObject is not null)
 				{
-					//Èç¹ûÒÑ¾­¸½×Åµ½¹ìµÀµÄ»°£¬ÄÇ¾Í¿¼ÂÇÈç¹ûÍÏ¶¯µ½ÁíÒ»ÌõÏßÉÏ¹ı½ü£¬»òÕß×î½üµÄÏßÒÀ¾ÉÊÇ×Ô¼º¸½ÊôµÄ£¬
-					//ÄÇÃ´¾ÍÇ¿ÖÆ¸üĞÂÎï¼şµÄË®Æ½Î»ÖÃ³É¶ÔÓ¦¹ìµÀµÄ
-					if (closestLaneObject?.Item1 < magneticDockDistance || //¿ÉÄÜÍÏ¶¯µ½ÁíÒ»ÌõÏßÉÏ
-						closestLaneObject?.startObject == dockable.ReferenceLaneStart) //Ã»ÍÏµ½ÁíÒ»ÌõÏßÉÏ(µ«»¹ÊÇÒª¸üĞÂË®Æ½Î»ÖÃ)
+					//å¦‚æœå·²ç»é™„ç€åˆ°è½¨é“çš„è¯ï¼Œé‚£å°±è€ƒè™‘å¦‚æœæ‹–åŠ¨åˆ°å¦ä¸€æ¡çº¿ä¸Šè¿‡è¿‘ï¼Œæˆ–è€…æœ€è¿‘çš„çº¿ä¾æ—§æ˜¯è‡ªå·±é™„å±çš„ï¼Œ
+					//é‚£ä¹ˆå°±å¼ºåˆ¶æ›´æ–°ç‰©ä»¶çš„æ°´å¹³ä½ç½®æˆå¯¹åº”è½¨é“çš„
+					if (closestLaneObject?.Item1 < magneticDockDistance || //å¯èƒ½æ‹–åŠ¨åˆ°å¦ä¸€æ¡çº¿ä¸Š
+						closestLaneObject?.startObject == dockable.ReferenceLaneStart) //æ²¡æ‹–åˆ°å¦ä¸€æ¡çº¿ä¸Š(ä½†è¿˜æ˜¯è¦æ›´æ–°æ°´å¹³ä½ç½®)
 					{
 						relativePoint = new Point(closestLaneObject?.Value ?? default, relativePoint.Y);
 						dockable.ReferenceLaneStart = closestLaneObject?.startObject;
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 				}
 			}
 
-			//Èç¹ûForceTapHoldMagneticDockToLane=true,Ôò²»ĞèÒªÕâÀïÇÕ¶¨Î»ÖÃ
+			//å¦‚æœForceTapHoldMagneticDockToLane=true,åˆ™ä¸éœ€è¦è¿™é‡Œé’¦å®šä½ç½®
 			if (enableMoveTo)
 				base.OnMoveCanvas(obj, relativePoint, editor);
 		}

@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
             bpl.Speed = float.Parse(map["Speed"]);
             bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 
-            //兼容老铺�?
+            //兼容老铺面
             if (map.TryGetValue("RandomOffsetRange", out var r))
                 bpl.RandomOffsetRange = int.Parse(r);
 

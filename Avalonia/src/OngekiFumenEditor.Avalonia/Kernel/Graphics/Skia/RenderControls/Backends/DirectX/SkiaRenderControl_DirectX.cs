@@ -60,7 +60,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.RenderControls.Backend
             // draw on the bitmap
             bitmap.Lock();
 
-            // ĞÂ½¨Ò»¸öDXäÖÈ¾µÄSurface
+            // æ–°å»ºä¸€ä¸ªDXæ¸²æŸ“çš„Surface
             using var renderSurface = SKSurface.Create(grContext, true, info);
 
             if (!IgnorePixelScaling)
@@ -74,7 +74,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.RenderControls.Backend
             OnPaintSurface(new SKPaintSurfaceEventArgs(renderSurface, info.WithSize(userVisibleSize), info));
             CurrentRenderSurface = default;
 
-            //äÖÈ¾½á¹û¸´ÖÆµ½bitmapÉÏ
+            //æ¸²æŸ“ç»“æœå¤åˆ¶åˆ°bitmapä¸Š
             using var presentSurface = SKSurface.Create(info, bitmap.BackBuffer, bitmap.BackBufferStride);
             presentSurface.Canvas.DrawSurface(renderSurface, 0, 0);
 

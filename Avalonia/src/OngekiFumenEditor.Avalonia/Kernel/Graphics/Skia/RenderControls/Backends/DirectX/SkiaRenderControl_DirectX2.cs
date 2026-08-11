@@ -52,14 +52,14 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.RenderControls.Backend
         {
             if (isNewSurfaceCreated)
             {
-                //todo清除老的资源
+                //todo娓呴櫎鑰佺殑璧勬簮
                 backendRenderTarget?.Dispose();
                 backendTexture?.Dispose();
                 d12Texture2DResource?.Release();
                 d11Texture2DResource?.Release();
                 d11Texture2D?.Release();
 
-                //新建DX11 Surface
+                //鏂板缓DX11 Surface
                 var r = new IDXGISurface(dxgiSurfacePtr);
                 var d3d11Texture2d = r.QueryInterface<ID3D11Texture2D>();
 

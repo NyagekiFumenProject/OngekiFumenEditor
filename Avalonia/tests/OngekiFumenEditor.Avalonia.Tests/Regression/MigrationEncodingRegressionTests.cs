@@ -19,7 +19,14 @@ public sealed class MigrationEncodingRegressionTests
         "src/OngekiFumenEditor.Avalonia/Modules/FumenCheckerListViewer/Base/DefaultRulesImpl/MissingHoldEndObjectCheckRule.cs",
         "src/OngekiFumenEditor.Avalonia/Modules/FumenCheckerListViewer/Base/DefaultRulesImpl/WallConflictCheckRule.cs",
         "src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorSetting.cs",
-        "src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"
+        "src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs",
+        "src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/RenderControls/Backends/OpenGL/SkiaRenderControl_OpenGL.cs",
+        "src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/RenderControls/Backends/DirectX/SkiaRenderControl_DirectX2.cs",
+        "src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/RenderControls/Backends/DirectX/SkiaRenderControl_DirectX.cs",
+        "src/OngekiFumenEditor.Avalonia/UI/Controls/AnimatedScrollViewer.cs",
+        "src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/CommandImpl/Objects/BulletPalleteCommandParser.cs",
+        "src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawPlayableAreaHelper.cs",
+        "src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/Interactives/Impls/DockableObjectInteractiveAction.cs"
     ];
 
     private static readonly string[] MojibakeMarkers =

@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 	public class AnimatedScrollViewer : ScrollViewer
 	{
 		/// <summary>
-		/// ¹ö¶¯·½Ïò
+		/// æ»šåŠ¨æ–¹å‘
 		/// </summary>
 		public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register(
 			"Orientation",
@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 			new PropertyMetadata(Orientation.Vertical));
 
 		/// <summary>
-		/// ÊÇ·ñÏìÓ¦Êó±ê¹öÂÖ²Ù×÷
+		/// æ˜¯å¦å“åº”é¼ æ ‡æ»šè½®æ“ä½œ
 		/// </summary>
 		public static readonly DependencyProperty CanMouseWheelProperty = DependencyProperty.Register(
 			"CanMouseWheel",
@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 			new PropertyMetadata(true));
 
 		/// <summary>
-		/// ÊÇ·ñÖ§³ÖÆ½»¬¹ö¶¯
+		/// æ˜¯å¦æ”¯æŒå¹³æ»‘æ»šåŠ¨
 		/// </summary>
 		public static readonly DependencyProperty IsSmoothScrollingEnabledProperty =
 			DependencyProperty.RegisterAttached(
@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 				new PropertyMetadata(true));
 
 		/// <summary>
-		/// ´¹Ö±¹ö¶¯¾àÀë
+		/// å‚ç›´æ»šåŠ¨è·ç¦»
 		/// </summary>
 		public static readonly DependencyProperty VerticalScrollingDistanceProperty = DependencyProperty.Register(
 			"VerticalScrollingDistance",
@@ -47,7 +47,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 			new PropertyMetadata(120d));
 
 		/// <summary>
-		/// Ë®Æ½¹ö¶¯¾àÀë
+		/// æ°´å¹³æ»šåŠ¨è·ç¦»
 		/// </summary>
 		public static readonly DependencyProperty HorizontalScrollingDistanceProperty = DependencyProperty.Register(
 			"HorizontalScrollingDistance",
@@ -56,7 +56,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 			new PropertyMetadata(120d));
 
 		/// <summary>
-		/// µ±Ç°´¹Ö±¹ö¶¯Æ«ÒÆ
+		/// å½“å‰å‚ç›´æ»šåŠ¨åç§»
 		/// </summary>
 		internal static readonly DependencyProperty CurrentVerticalOffsetProperty = DependencyProperty.Register(
 			"CurrentVerticalOffset",
@@ -73,7 +73,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// µ±Ç°Ë®Æ½¹ö¶¯Æ«ÒÆ
+		/// å½“å‰æ°´å¹³æ»šåŠ¨åç§»
 		/// </summary>
 		internal static readonly DependencyProperty CurrentHorizontalOffsetProperty = DependencyProperty.Register(
 			"CurrentHorizontalOffset",
@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// ¹ö¶¯·½Ïò
+		/// æ»šåŠ¨æ–¹å‘
 		/// </summary>
 		public Orientation Orientation
 		{
@@ -112,7 +112,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// ÊÇ·ñÏìÓ¦Êó±ê¹öÂÖ²Ù×÷
+		/// æ˜¯å¦å“åº”é¼ æ ‡æ»šè½®æ“ä½œ
 		/// </summary>
 		public bool CanMouseWheel
 		{
@@ -121,7 +121,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// ÊÇ·ñÖ§³Ö¹ßĞÔ
+		/// æ˜¯å¦æ”¯æŒæƒ¯æ€§
 		/// </summary>
 		public bool IsSmoothScrollingEnabled
 		{
@@ -130,7 +130,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// ´¹Ö±¹ö¶¯¾àÀë
+		/// å‚ç›´æ»šåŠ¨è·ç¦»
 		/// </summary>
 		public double VerticalScrollingDistance
 		{
@@ -139,7 +139,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// Ë®Æ½¹ö¶¯¾àÀë
+		/// æ°´å¹³æ»šåŠ¨è·ç¦»
 		/// </summary>
 		public double HorizontalScrollingDistance
 		{
@@ -148,7 +148,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// µ±Ç°´¹Ö±¹ö¶¯Æ«ÒÆ
+		/// å½“å‰å‚ç›´æ»šåŠ¨åç§»
 		/// </summary>
 		internal double CurrentVerticalOffset
 		{
@@ -157,7 +157,7 @@ namespace OngekiFumenEditor.Avalonia.UI.Controls
 		}
 
 		/// <summary>
-		/// µ±Ç°Ë®Æ½¹ö¶¯Æ«ÒÆ
+		/// å½“å‰æ°´å¹³æ»šåŠ¨åç§»
 		/// </summary>
 		internal double CurrentHorizontalOffset
 		{
