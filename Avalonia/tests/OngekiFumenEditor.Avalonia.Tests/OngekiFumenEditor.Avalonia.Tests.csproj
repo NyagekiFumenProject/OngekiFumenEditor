@@ -27,6 +27,26 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\BrowserOpfsContracts.cs"
+                 Link="BrowserOpfsBrowser\BrowserOpfsContracts.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\BrowserOpfsDownloadPlanner.cs"
+                 Link="BrowserOpfsBrowser\BrowserOpfsDownloadPlanner.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\Assets\Languages\BrowserOpfsLang.cs"
+                 Link="BrowserOpfsBrowser\Assets\Languages\BrowserOpfsLang.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\ViewModels\BrowserOpfsBrowserViewModel.cs"
+                 Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsBrowserViewModel.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\ViewModels\BrowserOpfsDirectoryNodeViewModel.cs"
+                 Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsDirectoryNodeViewModel.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\ViewModels\BrowserOpfsEntryViewModel.cs"
+                 Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsEntryViewModel.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\Assets\Languages\*.json" />
     </ItemGroup>
 
     <ItemGroup>

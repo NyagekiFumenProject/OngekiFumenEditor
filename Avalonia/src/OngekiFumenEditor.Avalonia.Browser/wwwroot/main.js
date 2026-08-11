@@ -7,6 +7,7 @@ import {
     initialize as initializeLogFileSystem,
     isAvailable as isLogStorageAvailable,
 } from './logFileSystem.js';
+import {initialize as initializeBrowserOpfs} from './opfsBrowser.js';
 
 const startup = globalThis.__startupProgress;
 let currentPhase = "启动入口";
@@ -63,6 +64,7 @@ async function startBrowserApplication() {
     await Promise.all([
         initializeTemporaryFileSystem(),
         initializeLogFileSystem(),
+        initializeBrowserOpfs(),
     ]);
     const temporaryStorageAvailable = isTemporaryStorageAvailable();
     const logStorageAvailable = isLogStorageAvailable();

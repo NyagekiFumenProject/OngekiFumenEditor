@@ -1,0 +1,392 @@
+<views:WindowViewBase
+    x:Class="OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser.Views.BrowserOpfsBrowserView"
+    x:Name="Root"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors;assembly=OngekiFumenEditor.Avalonia"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:icons="using:FluentIcons.Avalonia.Fluent"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser.ViewModels"
+    x:CompileBindings="True"
+    x:DataType="vm:BrowserOpfsBrowserViewModel"
+    Title="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsWindowTitle}}"
+    Width="960"
+    Height="620"
+    MinWidth="540"
+    MinHeight="380"
+    Background="{DynamicResource EditorWindowBackgroundBrush}"
+    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
+    d:DesignWidth="960"
+    d:DesignHeight="620"
+    mc:Ignorable="d">
+    <views:WindowViewBase.Styles>
+        <Style Selector="Button.toolbar">
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+        </Style>
+        <Style Selector="Button.breadcrumb">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="4,2" />
+            <Setter Property="MinHeight" Value="28" />
+        </Style>
+        <Style Selector="Button.column-sort">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="8,4" />
+        </Style>
+        <Style Selector="DataGridColumnHeader">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Foreground" Value="{DynamicResource EditorToolWindowForegroundBrush}" />
+        </Style>
+        <Style Selector="DataGridRow" x:DataType="vm:BrowserOpfsEntryViewModel">
+            <Setter Property="MinHeight" Value="34" />
+            <Setter Property="IsSelected" Value="{CompiledBinding IsSelected, Mode=TwoWay}" />
+            <Setter Property="IsEnabled" Value="{CompiledBinding IsSelectable}" />
+            <Setter Property="Interaction.Behaviors">
+                <BehaviorCollectionTemplate x:DataType="vm:BrowserOpfsEntryViewModel">
+                    <BehaviorCollection>
+                        <behaviors:DoubleTappedCommandBehavior
+                            Command="{CompiledBinding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).OpenEntryCommand}"
+                            UseAssociatedDataContext="True" />
+                    </BehaviorCollection>
+                </BehaviorCollectionTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="TreeViewItem" x:DataType="vm:BrowserOpfsDirectoryNodeViewModel">
+            <Setter Property="IsExpanded" Value="{CompiledBinding IsExpanded, Mode=TwoWay}" />
+        </Style>
+    </views:WindowViewBase.Styles>
+
+    <Grid Margin="8" RowDefinitions="Auto,Auto,*,Auto,Auto">
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto">
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <Button
+                    Classes="toolbar"
+                    Command="{CompiledBinding GoBackCommand}"
+                    ToolTip.Tip="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsBack}}">
+                    <icons:FluentIcon Icon="ArrowLeft" IconSize="Size20" />
+                </Button>
+                <Button
+                    Classes="toolbar"
+                    Command="{CompiledBinding GoForwardCommand}"
+                    ToolTip.Tip="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsForward}}">
+                    <icons:FluentIcon Icon="ArrowRight" IconSize="Size20" />
+                </Button>
+                <Button
+                    Classes="toolbar"
+                    Command="{CompiledBinding GoUpCommand}"
+                    ToolTip.Tip="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsUp}}">
+                    <icons:FluentIcon Icon="ArrowUp" IconSize="Size20" />
+                </Button>
+                <Button
+                    Classes="toolbar"
+                    Command="{CompiledBinding RefreshCommand}"
+                    ToolTip.Tip="{x:Static languages:BrowserOpfsLang.BrowserOpfsRefresh}">
+                    <icons:FluentIcon Icon="ArrowSync" IconSize="Size20" />
+                </Button>
+            </StackPanel>
+
+            <Border
+                Grid.Column="1"
+                MinHeight="32"
+                Margin="4,0,8,0"
+                Padding="4,0"
+                BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                BorderThickness="1">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{CompiledBinding Breadcrumbs}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:BrowserOpfsBreadcrumbViewModel">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock
+                                        Margin="2,0"
+                                        VerticalAlignment="Center"
+                                        IsVisible="{CompiledBinding !IsRoot}"
+                                        Text="›" />
+                                    <Button
+                                        Classes="breadcrumb"
+                                        Command="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).NavigateBreadcrumbCommand}"
+                                        CommandParameter="{CompiledBinding}"
+                                        Content="{CompiledBinding Name}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Border>
+
+            <Button
+                Grid.Column="2"
+                MinWidth="92"
+                Height="32"
+                Padding="10,0"
+                Command="{CompiledBinding DownloadCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <icons:FluentIcon Icon="ArrowDownload" IconSize="Size20" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsDownload}}" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <Border
+            Grid.Row="1"
+            Margin="0,8,0,6"
+            Padding="6,3"
+            BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+            BorderThickness="0,0,0,1">
+            <TextBlock
+                FontSize="12"
+                Text="{CompiledBinding CurrentPathDisplay}"
+                TextTrimming="CharacterEllipsis"
+                ToolTip.Tip="{CompiledBinding CurrentPathDisplay}" />
+        </Border>
+
+        <Grid x:Name="BrowserGrid" Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="230" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" MinWidth="280" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                x:Name="FolderTreePanel"
+                Grid.Column="0"
+                Margin="0,0,4,0"
+                BorderBrush="{DynamicResource ThemeBorderLowBrush}"
+                BorderThickness="0,0,1,0">
+                <TreeView
+                    Margin="0,0,4,0"
+                    ItemsSource="{CompiledBinding RootNodes}"
+                    SelectedItem="{CompiledBinding SelectedTreeNode, Mode=TwoWay}"
+                    SelectionMode="Single">
+                    <TreeView.ItemTemplate>
+                        <TreeDataTemplate
+                            x:DataType="vm:BrowserOpfsDirectoryNodeViewModel"
+                            ItemsSource="{CompiledBinding Children}">
+                            <Grid MinHeight="28">
+                                <StackPanel
+                                    VerticalAlignment="Center"
+                                    IsVisible="{CompiledBinding !IsPlaceholder}"
+                                    Orientation="Horizontal"
+                                    Spacing="6">
+                                    <icons:FluentIcon Icon="Folder" IconSize="Size20" />
+                                    <TextBlock
+                                        MaxWidth="180"
+                                        VerticalAlignment="Center"
+                                        Text="{CompiledBinding Name}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip.Tip="{CompiledBinding Name}" />
+                                </StackPanel>
+                                <ProgressBar
+                                    Width="42"
+                                    Height="3"
+                                    VerticalAlignment="Center"
+                                    IsIndeterminate="True"
+                                    IsVisible="{CompiledBinding IsPlaceholder}" />
+                            </Grid>
+                        </TreeDataTemplate>
+                    </TreeView.ItemTemplate>
+                </TreeView>
+            </Border>
+
+            <GridSplitter
+                x:Name="FolderTreeSplitter"
+                Grid.Column="1"
+                Background="Transparent"
+                ResizeDirection="Columns" />
+
+            <DataGrid
+                x:Name="EntryGrid"
+                Grid.Column="2"
+                Background="Transparent"
+                BorderBrush="Transparent"
+                CanUserReorderColumns="True"
+                CanUserResizeColumns="True"
+                CanUserSortColumns="False"
+                GridLinesVisibility="Horizontal"
+                HeadersVisibility="Column"
+                HorizontalScrollBarVisibility="Auto"
+                ItemsSource="{CompiledBinding Entries}"
+                KeyDown="OnEntryGridKeyDown"
+                SelectionMode="Extended"
+                VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="42" CanUserResize="False" CanUserReorder="False">
+                        <DataGridTemplateColumn.Header>
+                            <CheckBox
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Command="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).ToggleSelectAllCommand}"
+                                IsChecked="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).AreAllCurrentEntriesSelected, Mode=OneWay}"
+                                IsThreeState="True"
+                                ToolTip.Tip="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsSelectAll}}" />
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:BrowserOpfsEntryViewModel">
+                                <CheckBox
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    IsChecked="{CompiledBinding IsSelected, Mode=TwoWay}"
+                                    IsEnabled="{CompiledBinding IsSelectable}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Width="2*" MinWidth="180">
+                        <DataGridTemplateColumn.Header>
+                            <Button Classes="column-sort" Click="OnSortNameClick">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{x:Static languages:BrowserOpfsLang.BrowserOpfsName}" />
+                                    <TextBlock Grid.Column="1" Margin="6,0,0,0" Text="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).NameSortIndicator}" />
+                                </Grid>
+                            </Button>
+                        </DataGridTemplateColumn.Header>
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="vm:BrowserOpfsEntryViewModel">
+                                <Grid Margin="8,0" ColumnDefinitions="Auto,*,Auto">
+                                    <icons:FluentIcon
+                                        Grid.Column="0"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        Icon="Folder"
+                                        IconSize="Size20"
+                                        IsVisible="{CompiledBinding IsFolder}" />
+                                    <icons:FluentIcon
+                                        Grid.Column="0"
+                                        Margin="0,0,8,0"
+                                        VerticalAlignment="Center"
+                                        Icon="Document"
+                                        IconSize="Size20"
+                                        IsVisible="{CompiledBinding IsFile}" />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Text="{CompiledBinding Name}"
+                                        TextTrimming="CharacterEllipsis"
+                                        ToolTip.Tip="{CompiledBinding RelativePath}" />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        Margin="8,0,0,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Text="{CompiledBinding StagingStatusDisplay}" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn
+                        x:DataType="vm:BrowserOpfsEntryViewModel"
+                        Width="150"
+                        MinWidth="100"
+                        Binding="{CompiledBinding TypeDisplay}">
+                        <DataGridTextColumn.Header>
+                            <Button Classes="column-sort" Click="OnSortTypeClick">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsType}}" />
+                                    <TextBlock Grid.Column="1" Margin="6,0,0,0" Text="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).TypeSortIndicator}" />
+                                </Grid>
+                            </Button>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn
+                        x:DataType="vm:BrowserOpfsEntryViewModel"
+                        Width="110"
+                        MinWidth="90"
+                        Binding="{CompiledBinding SizeDisplay}">
+                        <DataGridTextColumn.Header>
+                            <Button Classes="column-sort" Click="OnSortSizeClick">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsSize}}" />
+                                    <TextBlock Grid.Column="1" Margin="6,0,0,0" Text="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).SizeSortIndicator}" />
+                                </Grid>
+                            </Button>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+
+                    <DataGridTextColumn
+                        x:DataType="vm:BrowserOpfsEntryViewModel"
+                        Width="170"
+                        MinWidth="145"
+                        Binding="{CompiledBinding ModifiedTimeDisplay}">
+                        <DataGridTextColumn.Header>
+                            <Button Classes="column-sort" Click="OnSortModifiedTimeClick">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsModifiedTime}}" />
+                                    <TextBlock Grid.Column="1" Margin="6,0,0,0" Text="{Binding #Root.((vm:BrowserOpfsBrowserViewModel)DataContext).ModifiedTimeSortIndicator}" />
+                                </Grid>
+                            </Button>
+                        </DataGridTextColumn.Header>
+                    </DataGridTextColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <Grid
+            Grid.Row="3"
+            Margin="0,7,0,0"
+            ColumnDefinitions="*,180,Auto"
+            IsVisible="{CompiledBinding IsDownloadInProgress}">
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,0,8,0"
+                VerticalAlignment="Center"
+                Text="{CompiledBinding DownloadProgressText}"
+                TextTrimming="CharacterEllipsis"
+                ToolTip.Tip="{CompiledBinding DownloadProgressText}" />
+            <ProgressBar
+                Grid.Column="1"
+                Height="8"
+                Margin="0,0,8,0"
+                VerticalAlignment="Center"
+                IsIndeterminate="{CompiledBinding IsDownloadProgressIndeterminate}"
+                Maximum="100"
+                Value="{CompiledBinding DownloadProgressValue}" />
+            <Button
+                Grid.Column="2"
+                Height="30"
+                Padding="8,0"
+                Command="{CompiledBinding CancelDownloadCommand}">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <icons:FluentIcon Icon="Dismiss" IconSize="Size16" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate {x:Static languages:BrowserOpfsLang+B.BrowserOpfsCancelDownload}}" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="4" Margin="0,7,0,0" ColumnDefinitions="*,Auto">
+            <TextBlock
+                Grid.Column="0"
+                Margin="0,0,12,0"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Text="{CompiledBinding StatusMessage}"
+                TextTrimming="CharacterEllipsis"
+                ToolTip.Tip="{CompiledBinding StatusMessage}" />
+            <TextBlock
+                Grid.Column="1"
+                VerticalAlignment="Center"
+                FontSize="12"
+                Text="{CompiledBinding ItemStatusDisplay}" />
+        </Grid>
+    </Grid>
+</views:WindowViewBase>

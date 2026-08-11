@@ -96,6 +96,10 @@ export function isAvailable() {
     return originRoot !== null;
 }
 
+export function getOriginRootHandle() {
+    return requireOriginRoot();
+}
+
 export async function getOrCreateRootDirectory(entryName) {
     validateEntryName(entryName);
     const handle = await requireOriginRoot().getDirectoryHandle(entryName, { create: true });
