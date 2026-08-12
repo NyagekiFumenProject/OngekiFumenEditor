@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>dea1cfe5</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>3d11e42e</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>14</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>14</strong><span>未修复</span></div>
-      <div class="metric"><strong>8 / 6</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>4</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>18</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>18</strong><span>未修复</span></div>
+      <div class="metric"><strong>10 / 8</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>5</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -366,6 +366,42 @@
           <td>属性浏览器 / 撤销</td>
           <td>Undoable 属性包装器直接写值，完全没有建立撤销动作</td>
           <td><code>UndoablePropertyInfoWrapper.cs:32-50</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-015"><code>CA-015</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>音频工具 / 生命周期</td>
+          <td>旧文档异步清理可覆盖新文档刚建立的音效播放会话</td>
+          <td><code>AudioPlayerToolViewerViewModel.cs:49-51, 316-329, 341-385</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-016"><code>CA-016</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>NAudio / 并发</td>
+          <td>禁用音效多重播放后，混音回调与调度线程无锁修改同一组字典</td>
+          <td><code>NAudioManager.cs:30-31, 191-248</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-017"><code>CA-017</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>谱面元信息 / 持久化</td>
+          <td>元信息面板修改不会置脏，正常关闭流程可无提示丢弃改动</td>
+          <td><code>OngekiFumenModelProxy.cs:18-243</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-018"><code>CA-018</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>谱面元信息 / 时间轴</td>
+          <td>首拍号写入元信息但未同步运行时，保存前预览与重载后语义不同</td>
+          <td><code>FumenMetaInfo.cs:22-25, 65</code></td>
         </tr>
         </tbody>
       </table>
@@ -1105,6 +1141,222 @@ referenceEditor.UndoRedoManager.ExecuteAction(
     </ul>
   </section>
 
+  <section id="ca-015" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-015</code> 文档切换清理会与新文档播放准备争用同一单例状态</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs"><code>Editor</code> setter</a> 丢弃旧会话清理任务，随后立即暴露新文档播放器</div>
+      <div class="fact"><strong>共享对象</strong><a href="../src/OngekiFumenEditor.Avalonia/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs"><code>DefaultFumenSoundPlayer</code></a> 注册为单例，所有文档共用一组字段</div>
+      <div class="fact"><strong>竞态字段</strong><code>Clean</code> 与 <code>Prepare</code> 都等待并改写 <code>updateCts</code>、<code>updateTask</code>、<code>player</code>、<code>editor</code> 和事件集合</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>文档 A 已启动谱面音效更新循环时切换到文档 B；工具 setter 以 fire-and-forget 方式启动 <code>Clean()</code>。在旧循环退出前立即点击 B 的播放按钮，新的 <code>Prepare(B)</code> 会与仍在继续的 <code>Clean(A)</code> 同时等待和修改单例状态。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>// AudioPlayerToolViewerViewModel.Editor
+SetProperty(ref editor, value);
+_ = CleanSoundPlayerAsync();                         // 不等待旧会话清理
+AudioPlayer = value?.AudioPlayer;                    // B 已可立即播放
+
+// DefaultFumenSoundPlayer.Prepare
+await StopUpdateLoopAsync();
+this.player = player;
+this.editor = editor;
+RebuildEvents();
+updateCts = new CancellationTokenSource();
+updateTask = Task.Run(() =&gt; OnUpdate(updateCts.Token), updateCts.Token);
+
+// DefaultFumenSoundPlayer.Clean
+await StopUpdateLoopAsync();
+player = default;
+editor = default;
+events.Clear();</code></pre>
+    <p><code>StopUpdateLoopAsync</code> 也没有锁或代次快照：两个调用可等待同一个 <code>updateTask</code>，随后一个调用创建新令牌，而另一个调用继续清空或处置共享字段。异常虽然会被工具层捕获并写日志，但新的播放会话已经失败或被旧清理覆盖。</p>
+
+    <h3>影响</h3>
+    <p>快速切换谱面并播放时，新谱面可能没有音效、播放请求失败，或刚重建的事件表被清空。重复切换会叠加多个清理任务，使问题呈现为偶发且难以从 UI 判断原因的音频失效。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>用单一异步门闩串行化 <code>Prepare</code>/<code>Clean</code>/<code>Dispose</code>，并让文档切换流程能够等待旧会话完全结束。</li>
+      <li>为每次准备分配会话代次；旧清理只能清理自己的令牌、任务和事件快照，不能修改更新代次的状态。</li>
+      <li><code>StopUpdateLoopAsync</code> 应先原子捕获本地 <code>CancellationTokenSource</code>/<code>Task</code>，再取消、等待和处置，避免等待期间字段被其他调用替换。</li>
+      <li>增加可控任务屏障测试：启动 A 的清理，在循环退出前启动 B 的准备，释放屏障后断言无异常且最终会话仍属于 B。</li>
+    </ul>
+  </section>
+
+  <section id="ca-016" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-016</code> 禁用音效多重播放后混音回调与调度线程并发写字典</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">代码与依赖确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>触发设置</strong><a href="../src/OngekiFumenEditor.Avalonia/Models/Settings/AudioSetting.cs"><code>EnableSoundMultiPlay</code></a> 是用户可配置项；关闭并重启后启用字典去重路径</div>
+      <div class="fact"><strong>调度线程</strong><a href="../src/OngekiFumenEditor.Avalonia/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs"><code>OnUpdate</code></a> 在后台任务中每 1 ms 调用一次音效播放</div>
+      <div class="fact"><strong>输出线程</strong>当前解析的 <code>NAudio.Core 3.0.0-preview.19</code> 会在混音器 <code>Read()</code> 内同步触发 <code>MixerInputEnded</code></div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>在音频设置中关闭“允许同一音效同时多次播放”并重启程序，然后播放包含密集短音效的谱面。谱面调度任务会调用 <code>PlaySound()</code> 增删映射；与此同时，音频输出线程在某个输入读完时调用 <code>SoundMixer_MixerInputEnded()</code>，进入同一个移除方法。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>private readonly Dictionary&lt;CachedSound, ISampleProvider&gt; cs2providerMap = [];
+private readonly Dictionary&lt;ISampleProvider, CachedSound&gt; provider2csMap = [];
+
+public void PlaySound(...)
+{
+    if (!enableSoundMultiPlay &amp;&amp; cs2providerMap.TryGetValue(sound, out var prevProvider))
+        RemoveSoundMixerInput(prevProvider, true);       // 调度任务
+    ...
+    AddSoundMixerInput(provider, sound);                 // 写两个 Dictionary
+}
+
+private void SoundMixer_MixerInputEnded(...)
+{
+    RemoveSoundMixerInput(e.SampleProvider, false);      // 音频输出 Read 回调
+}</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/Kernel/Audio/NAudioImpl/NAudioManager.cs"><code>NAudioManager</code></a> 对两张普通 <code>Dictionary</code> 没有任何锁或线程封送。本次还检查了当前解析的 NAudio 二进制：<code>MixingSampleProvider.Read</code> 在持有其输入列表锁时同步触发结束事件，因此回调确实位于输出读取路径，不是随后由调用方串行派发。</p>
+
+    <h3>影响</h3>
+    <p>并发读写普通 <code>Dictionary</code> 可能抛出异常、破坏映射一致性或让旧 provider 残留。该问题默认设置下不触发，但配置入口对用户公开，并且“禁止重叠”模式本身会提高同一音效被快速替换和移除的频率。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>将 provider 生命周期集中到单一所有者线程或串行队列；两张映射必须作为一个事务更新，不能仅各自换成 <code>ConcurrentDictionary</code>。</li>
+      <li>不要在持有映射锁时调用混音器的 <code>AddMixerInput</code>/<code>RemoveMixerInput</code>，因为结束回调当前发生在 NAudio 的输入列表锁内，锁顺序相反会引入死锁。</li>
+      <li>增加关闭多重播放的并发测试：控制混音读取结束回调与重复 <code>PlaySound</code> 交错，断言无异常、无死锁且双向映射始终一致。</li>
+    </ul>
+  </section>
+
+  <section id="ca-017" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-017</code> 谱面元信息编辑绕过脏状态，关闭文档可静默丢失修改</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>直接写入</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenMetaInfoBrowser/ViewModels/OngekiFumenModelProxy.cs"><code>OngekiFumenModelProxy</code></a> 的 setter 都直接修改模型，不提交编辑器命令；除首 BPM 外只通知代理自身</div>
+      <div class="fact"><strong>通知缺口</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/FumenMetaInfo.cs"><code>FumenMetaInfo</code></a> 除首 BPM 外几乎都是不会通知的自动属性</div>
+      <div class="fact"><strong>关闭条件</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/Shell/ShellDockFactory.cs"><code>CanCloseDocument</code></a> 在 <code>IsDirty == false</code> 时直接允许关闭</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>打开“谱面元信息”工具，修改作者、BPM 定义、分辨率、判定 BPM 或伤害值等任一字段。不要执行其他会置脏的画布操作，随后通过文档标签关闭或退出程序。文档仍被视为未修改，因此正常关闭协议不会显示保存确认。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>// OngekiFumenModelProxy
+FumenMetaInfo.Creator = value;
+OnPropertyChanged();                                  // 只通知代理，不通知编辑器
+
+FumenMetaInfo.BulletDamage = value;
+OnPropertyChanged();
+
+// FumenVisualEditorViewModel 只监听：
+fumen.BpmList.OnChangedEvent += OnTimeSignatureListChanged;
+fumen.MeterChanges.OnChangedEvent += OnTimeSignatureListChanged;
+fumen.ObjectModifiedChanged += OnFumenObjectModifiedChanged;
+
+public void OnTimeSignatureListChanged()
+{
+    RecalculateTotalDurationHeight();                  // 首 BPM 也不会在这里置脏
+}</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenMetaInfoBrowser/ViewModels/FumenMetaInfoBrowserViewModel.cs"><code>FumenMetaInfoBrowserViewModel</code></a> 只负责把活动文档的谱面包装成代理，没有持有编辑器、提交撤销动作或监听代理变更来设置 <code>IsDirty</code>。这些字段并非临时显示数据：<a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>OGKR</code></a> 与 <a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/DefaultNyagekiFumenFormatter.cs"><code>Nyageki</code></a> 格式化器会将它们写入文件。</p>
+
+    <h3>影响</h3>
+    <p>用户完成元信息编辑后可在没有任何警告的情况下丢失全部修改。即使先做了其他操作让文档变脏并成功保存，元信息修改也没有撤销记录，保存前无法单独撤回，且保存后的干净基线无法准确表达后续元信息变更。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把元信息编辑接入所属编辑器的命令与撤销管理器，使执行、撤销、重做和脏状态共用一个变更入口。</li>
+      <li>让持久化字段具备一致的模型通知；即使暂不支持撤销，编辑器也必须订阅元信息变更并置脏。</li>
+      <li>逐个覆盖代理公开字段：从干净文档修改后断言 <code>IsDirty</code>，再验证关闭提示、保存/重载值以及撤销/重做结果。</li>
+      <li>测试应走文档标签关闭和应用退出协议；不能用 <code>CA-012</code> 中已知绕过确认的菜单路径代替验证。</li>
+    </ul>
+  </section>
+
+  <section id="ca-018" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-018</code> 首拍号保存值与当前运行时状态不同步</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>编辑目标</strong>元信息代理的 <code>Bunshi</code>/<code>Bunbo</code> 只修改 <code>MetaInfo.MeterDefinition</code></div>
+      <div class="fact"><strong>运行时目标</strong>时间线、吸附、检查器和音效节拍均读取 <a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/MeterChangeList.cs"><code>MeterChanges</code></a></div>
+      <div class="fact"><strong>重载行为</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiFumen.cs"><code>OngekiFumen.Setup()</code></a> 会在加载时才用已保存元信息重新建立 <code>FirstMeter</code></div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>在谱面元信息面板把首拍号从例如 4/4 改为 3/4。当前会话中的时间线、磁性吸附、谱面检查和节拍音仍按照旧的 <code>MeterChanges.FirstMeter</code> 工作；保存并重新打开后，<code>Setup()</code> 才读取新值，行为突然切换为 3/4。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>public class MetDef                              // 不是 ObservableObject
+{
+    public int Bunbo { get; set; } = 4;
+    public int Bunshi { get; set; } = 4;
+}
+
+// 代理只改嵌套对象；FumenMetaInfo 不会收到 PropertyChanged
+FumenMetaInfo.MeterDefinition.Bunbo = value;
+FumenMetaInfo.MeterDefinition.Bunshi = value;
+
+// 只有收到 MeterDefinition 通知时才会同步，但该通知不会发生
+if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
+{
+    MeterChanges.FirstMeter.Bunbo = MetaInfo.MeterDefinition.Bunbo;
+    MeterChanges.FirstMeter.BunShi = MetaInfo.MeterDefinition.Bunshi;
+}</code></pre>
+    <p>格式化器从 <code>MetaInfo.MeterDefinition</code> 写出 <code>MET_DEF</code>，而 <a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/TGridCalculator.cs"><code>TGridCalculator</code></a>、<a href="../src/OngekiFumenEditor.Avalonia/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs"><code>DefaultFumenSoundPlayer</code></a> 和检查规则都读取 <code>MeterChanges</code>。因此同一内存谱面同时存在两个具有业务意义但内容不同的首拍号。</p>
+
+    <h3>影响</h3>
+    <p>用户保存的谱面语义可能与保存前看到和听到的结果不同；重载后物件对齐、节拍线、吸附和节拍音均可能变化。这会掩盖错误编辑，并可能让当前会话中的检查结果在重新打开后失效。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>让 <code>MetDef</code> 可观察，并像 <code>BpmDef</code> 一样把嵌套属性变化提升为 <code>FumenMetaInfo.MeterDefinition</code> 通知；或由统一编辑命令同时更新两个模型。</li>
+      <li>同步时必须触发 <code>MeterChangeList</code> 的缓存失效与变更事件，并与 <code>CA-017</code> 一起设置脏状态、建立撤销动作。</li>
+      <li>回归测试应修改分子和分母，立即断言 <code>FirstMeter</code>、时间线缓存、吸附/节拍计算和音效节拍均使用新值。</li>
+      <li>保存重载后再次运行相同断言，证明编辑前后与重载后的行为一致，而不只是文件头文本正确。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -1128,12 +1380,17 @@ referenceEditor.UndoRedoManager.ExecuteAction(
         审查 Shell 文档关闭协议、多文档工具状态、属性浏览器包装器和旧版迁移差异。记录 <code>CA-012</code> 至 <code>CA-014</code>。
         OPFS 流式下载在 JavaScript 入口复制跨语言缓冲区，并用 Promise 链串行写入、在提交前等待失败结果，本批排除“提前释放缓冲导致 ZIP 损坏”的候选。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A05</time>
+      <div>
+        审查音频工具文档切换、单例音效播放器生命周期、NAudio 输出回调线程和谱面元信息代理。记录 <code>CA-015</code> 至 <code>CA-018</code>。
+        本次按当前解析的 NAudio 二进制确认了结束事件的实际触发位置；Hold 结束点关系变化未通知区间索引的候选仍缺少稳定可见后果，因此保留待查、不提前编号。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查项目文件原子保存、音频后台线程、对象集合一致性、Browser/桌面平台差异和多文档渲染状态。新增问题从 <code>CA-015</code> 起顺序编号。</p>
+    <p>继续检查项目文件原子保存、Hold 区间索引一致性、Browser/桌面平台生命周期、后台集合更新和多文档渲染状态。新增问题从 <code>CA-019</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
