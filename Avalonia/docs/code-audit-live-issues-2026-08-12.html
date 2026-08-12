@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>a32d4e77</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>41dd3707</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>42</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>42</strong><span>未修复</span></div>
-      <div class="metric"><strong>23 / 19</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>10</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>47</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>47</strong><span>未修复</span></div>
+      <div class="metric"><strong>24 / 23</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>11</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -618,6 +618,51 @@
           <td>Beam / 复制</td>
           <td>Beam 未复制宽度和斜向源，整条复制后退化为默认宽度普通 Beam</td>
           <td><code>BeamStart.cs:12-49; BeamNext.cs:8-36; ConnectableStartObject.cs:486-496</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-043"><code>CA-043</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>OGKR / 横坐标持久化</td>
+          <td>多数对象只保存 XGrid.Unit，非零 Grid 重载后横向位置改变</td>
+          <td><code>XGrid.cs:17-20; DefaultOngekiFumenFormatter.cs:375-527</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-044"><code>CA-044</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Soflan 分组 / 持久化</td>
+          <td>空组、同名组和设计/预览显示状态无法无损保存</td>
+          <td><code>DefaultOngekiFumenFormatter.cs:77-123; SoflanGroupWrapItemCommandParser.cs:20-35</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-045"><code>CA-045</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>OGKR / LaneBlock</td>
+          <td>缺少对应墙体的左侧 Block 保存重载后会翻成右侧</td>
+          <td><code>DefaultOngekiFumenFormatter.cs:218-228; LaneBlockCommandParser.cs:15-27</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-046"><code>CA-046</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>Browser OPFS / 下载清理</td>
+          <td>回退下载成功后完整暂存副本会保留到下次模块初始化</td>
+          <td><code>opfsBrowser.js:383-442, 526-542, 807-842</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-047"><code>CA-047</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>Browser OPFS / 取消</td>
+          <td>目录下载在清单构建和校验阶段无法取消，关闭窗口会一直等待</td>
+          <td><code>BrowserOpfsService.cs:104-138; opfsBrowser.js:472-523, 677-745</code></td>
         </tr>
         </tbody>
       </table>
@@ -2913,6 +2958,284 @@ foreach (var child in from.Children)
     </ul>
   </section>
 
+  <section id="ca-043" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-043</code> OGKR 会丢弃多数对象 XGrid 的 Grid 分量</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">读写契约确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>坐标语义</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/GridBase.cs"><code>GridBase</code></a> 用 <code>Unit + Grid / 4096</code> 计算 X 的实际位置；非零 Grid 不是冗余显示字段</div>
+      <div class="fact"><strong>正常入口</strong><a href="../src/OngekiFumenEditor.Avalonia/UI/Controls/ObjectInspector/ViewModels/XGridTypeUIViewModel.cs"><code>XGridTypeUIViewModel</code></a> 允许分别编辑 Unit 和 Grid，并构造 <code>new XGrid(unit, grid)</code></div>
+      <div class="fact"><strong>写入遗漏</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/XGrid.cs"><code>XGrid.Serialize()</code></a> 只返回 Unit；Lane、Bullet、Beam、Bell 和 Flick 的 OGKR 写入均直接调用它</div>
+      <div class="fact"><strong>读取遗漏</strong>对应解析器只用单列构造 XGrid 或赋值 Unit；同一格式中的 Tap/Hold 却明确读写 Unit 与 Grid 两列</div>
+      <div class="fact"><strong>保存路径</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs"><code>TrySaveFumenFileAsync</code></a> 直接调用格式化器，不会预先归一化这些坐标</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>在属性面板把 Flick、Bullet、Bell、Beam 节点或 Lane 节点的 XGrid 设置为 <code>Unit = 1, Grid = 2048</code>，实际位置为 1.5 单位。</li>
+      <li>正常保存 OGKR。格式化器调用 <code>XGrid.Serialize()</code>，文件中只写入 <code>1</code>。</li>
+      <li>重新打开文件，对应解析器得到 <code>new XGrid(1)</code> 或只设置 Unit，Grid 恢复为 0。</li>
+      <li>对象横向移动 0.5 单位；Lane/Beam 的节点几何也随之变化，而 Tap/Hold 因使用另一套两列写法不会发生同样丢失。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public override string Serialize()
+{
+    return Unit.ToString();
+}
+
+// Lane、Bullet、Beam、Bell、Flick
+sb.AppendLine($"...\t{o.XGrid.Serialize()}...");
+
+// 对应读取只恢复单个 Unit
+connectObject.XGrid = new XGrid(dataArr[4]);
+
+// Tap/Hold 反而明确保存两个分量
+$"...\t{tap.XGrid.Unit}\t{tap.XGrid.Grid}"</code></pre>
+
+    <h3>影响</h3>
+    <p>这是普通属性编辑后即可触发的静默数据损坏。保存过程返回成功且文件语法有效，但重新打开后多个对象族的横向位置、轨道形状和 Beam 几何永久变化；含非零 Grid 的工程不能依赖 OGKR 往返保持。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>若 OGKR 的 X 列表示总单位，应集中按不变区域设置写入 <code>TotalUnit</code>；不要继续复用只返回 Unit 的 <code>XGrid.Serialize()</code>。</li>
+      <li>若必须先转换为 Unit-only 表示，应在临时副本中把 <code>TotalUnit</code> 放入 Unit 并把 Grid 清零；禁止为了保存而修改编辑器中的活对象。</li>
+      <li>为 Lane 起点/子点、普通与自定义 Bullet/Bell、Beam 起点/子点和 Flick 建立非零及负 Grid 的格式往返测试。</li>
+      <li>逐项断言 <code>TotalGrid</code>、绘制位置及第二次序列化文本稳定；Tap/Hold 也纳入同一测试矩阵，避免修复时破坏其现有两列格式。</li>
+    </ul>
+  </section>
+
+  <section id="ca-044" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-044</code> Soflan 分组界面状态无法无损保存</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">界面与格式确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>正常创建</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenSoflanGroupListViewer/ViewModels/FumenSoflanGroupListViewerViewModel.cs"><code>CreateNewGroup</code></a> 接受任意非空名称，不检查重名，并立即创建一个可以保持为空的组</div>
+      <div class="fact"><strong>可见状态</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenSoflanGroupListViewer/Views/FumenSoflanGroupListViewerView.axaml"><code>Design</code>/<code>Preview</code></a> 两列直接绑定组和项目的显示开关</div>
+      <div class="fact"><strong>运行时消费</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs"><code>CheckSoflanGroupVisible</code></a> 用这些开关决定设计和预览模式是否绘制对应组</div>
+      <div class="fact"><strong>写入有损</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessSoflanGroupWrapItem</code></a> 只按组名聚合 ID，并只输出至少含一个 ID 的组；没有显示状态字段</div>
+      <div class="fact"><strong>读取合并</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/SoflanGroupWrapItemCommandParser.cs"><code>SoflanGroupWrapItemCommandParser</code></a> 按名称查找第一个组并复用，因此同名组无法恢复为两个对象</div>
+    </div>
+
+    <h3>触发方式与结果</h3>
+    <ol>
+      <li>在 Soflan 组工具中创建一个空组；再创建两个同名组，把不同 Soflan ID 分别拖入其中。</li>
+      <li>取消某个组或项目的 Design/Preview 勾选，当前编辑器会立即隐藏对应绘制内容。</li>
+      <li>保存并重新打开 OGKR。</li>
+      <li>空组因没有输出任何 <code>[SGWI]</code> 行而消失；两个同名组在写入和读取两端均被合并。</li>
+      <li>显示开关没有任何序列化字段，新建对象恢复默认 true，原本隐藏的内容重新显示。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var existing = maps.FirstOrDefault(x =&gt; x.Name == name).Ids;
+...
+foreach (var (name, ids) in maps.Where(x =&gt; x.Ids.Count &gt; 0))
+    sb.AppendLine($"[SGWI]\t{name}\t{string.Join("\t", ids)}");
+
+var itemGroup = root.Children
+    .OfType&lt;SoflanGroupWrapItemGroup&gt;()
+    .FirstOrDefault(x =&gt; x.DisplayName == groupName)
+    ?? new SoflanGroupWrapItemGroup();</code></pre>
+
+    <h3>影响</h3>
+    <p>谱面主体对象仍在，但用户整理出的工作分组、空占位组和绘制过滤状态会在一次正常保存重载后改变。大型 Soflan 工程会重新显示已主动隐藏的内容，同名分组的边界不可恢复，后续编辑容易在错误组上操作。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为分组引入稳定身份并在编辑器扩展格式中持久化名称、顺序、空组及 Design/Preview 状态；不要再把可变显示名称当作唯一键。</li>
+      <li>若短期仍使用名称作为键，至少禁止创建重名组并明确迁移已有重复数据，但这不能替代空组和开关字段的持久化。</li>
+      <li>增加从真实 ViewModel 创建组、拖动项目、切换复选框后保存重载的测试，断言组数量、身份、成员顺序和所有显示状态一致。</li>
+      <li>覆盖旧文件只有 <code>[SGWI] name ids...</code> 的兼容读取，并为新增字段建立版本或可选列策略。</li>
+    </ul>
+  </section>
+
+  <section id="ca-045" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-045</code> 缺少墙体时左侧 LaneBlock 保存后会翻成右侧</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">往返与规则确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>创建入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>KeyboardAction_AddNewBlock</code></a> 默认直接创建 Left Block，不要求当前位置已有左墙</div>
+      <div class="fact"><strong>写入推导</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/LaneBlockArea.cs"><code>CalculateReferenceWallLanes</code></a> 只查询当前 Direction 对应墙体；找不到时格式化器写 RecordId <code>-1</code></div>
+      <div class="fact"><strong>读取回退</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/LaneBlockCommandParser.cs"><code>LaneBlockCommandParser</code></a> 只在引用解析成 WallLeft 时设 Left，其他所有情况都设 Right</div>
+      <div class="fact"><strong>检查遗漏</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenCheckerListViewer/Base/DefaultRulesImpl/LaneBlockOnMultipleWallsCheckRule.cs"><code>LaneBlockOnMultipleWallsCheckRule</code></a> 只比较起止引用；两端均为 null 时相等，不会报告问题</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>在没有任何左墙的谱面中使用普通新增 Block 快捷操作；对象的 Direction 为 Left。</li>
+      <li>运行检查器不会得到跨墙错误，因为计算结果是 <code>(null, null)</code>。</li>
+      <li>保存 OGKR 时写出 <code>LBK -1 ...</code>。</li>
+      <li>重新打开时 RecordId <code>-1</code> 找不到 Lane，<code>refLaneType</code> 为 null，条件表达式落入 Right。</li>
+      <li>同一个 Block 的方向从 Left 静默变为 Right；如果是先创建后删除左墙，也会得到相同结果。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// 保存
+$"LBK\t{startWallLane?.RecordId ?? -1}\t..."
+
+// 读取：缺失引用与真正的右墙使用同一个分支
+var refLaneType = fumen.Lanes.FirstOrDefault(x =&gt; x.RecordId == laneRecId)?.LaneType;
+lbk.Direction = refLaneType == LaneType.WallLeft
+    ? BlockDirection.Left
+    : BlockDirection.Right;
+
+// 两端都缺失时 null != null 为 false
+if (refLaneStart != refLaneEnd) { ... }</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在没有可引用墙体时显式保存方向，例如使用可向后兼容的方向字段或不同哨兵值；不能从不存在的 Lane 类型反推。</li>
+      <li>解析旧的歧义 <code>-1</code> 数据时应记录警告并采用明确兼容策略，不能无声统一解释为 Right。</li>
+      <li>检查规则应单独报告“指定方向没有可用墙体”，即使起止引用同为 null。</li>
+      <li>测试无墙、删除墙、仅有反方向墙、合法左墙和合法右墙五种 OGKR 往返，逐项断言 Direction 与检查结果。</li>
+    </ul>
+  </section>
+
+  <section id="ca-046" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-046</code> OPFS 回退下载的完整暂存副本不会按成功生命周期清理</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">成功路径确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>条件入口</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/wwwroot/opfsBrowser.js"><code>beginStagingDownload</code></a> 在原生保存选择器不可用时，于 OPFS 根目录的 <code>.ongeki-opfs-downloads</code> 中生成完整输出</div>
+      <div class="fact"><strong>成功路径</strong><code>closeDownload</code> 关闭写入流、触发普通锚点下载，然后只把条目标记为 <code>waitingAutomaticCleanup</code></div>
+      <div class="fact"><strong>实际删除</strong><code>removeStagingFile</code> 只由创建失败和中止路径调用；成功文件只能等下一次 <code>initialize</code> 递归删除整个暂存目录</div>
+      <div class="fact"><strong>独立问题</strong><code>CA-003</code> 记录的是 Blob URL 保留造成的内存占用；本条记录的是 OPFS 配额中仍存在的持久文件副本</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>在不支持或不能使用 <code>showSaveFilePicker</code> 的 Browser 环境中下载单文件或多个文件 ZIP。</li>
+      <li>下载内容先完整写入 <code>.ongeki-opfs-downloads/&lt;name&gt;</code>，然后由对象 URL 触发普通下载。</li>
+      <li>成功后状态变为“等待自动清理”，但没有定时器、下载完成回调或其他删除调用。</li>
+      <li>保持应用页面运行并重复下载，暂存目录持续积累与下载文件等大的完整副本；只有重新加载并再次初始化模块才尝试统一删除。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>await output.writable.close();
+if (output.mode === "staging") {
+    await triggerOrdinaryDownload(output);
+    stagingStates.set(output.stagingPath, StagingState.waitingAutomaticCleanup);
+}
+
+// 成功后没有 removeStagingFile；它只出现在失败/abort 路径
+if (output.mode === "staging") {
+    await removeStagingFile(output.stagingPath);
+}
+
+// 下一次初始化才清整目录
+await root.removeEntry(stagingDirectoryName, { recursive: true });</code></pre>
+
+    <h3>影响</h3>
+    <p>长时间运行的 Browser 会为每次成功下载额外保留一份完整文件或 ZIP，快速消耗站点 OPFS 配额。达到配额后，后续下载及应用其他 OPFS 写入都可能失败；用户还会在“整个 OPFS 根目录”浏览器中持续看到不可选择的内部暂存内容。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为普通下载建立有界成功清理：浏览器接收锚点下载后，在经过验证的安全时点同时撤销对象 URL、删除暂存文件并清除状态。</li>
+      <li>不要在锚点尚未读取 Blob 时立即删除；清理延迟或包装页生命周期必须通过 Chrome/Firefox 等实际目标环境验证。</li>
+      <li>浏览器集成测试强制走 staging 分支，完成连续大文件与 ZIP 下载后，无需重载页面即可断言暂存目录和状态集合回到基线。</li>
+      <li>同时覆盖失败、取消和页面卸载，确保所有终态幂等清理且不会删除仍在生成的输出。</li>
+    </ul>
+  </section>
+
+  <section id="ca-047" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-047</code> OPFS 下载在清单构建和校验阶段无法取消</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">跨语言取消链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>.NET 调用</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Platforms/Services/FileSystem/BrowserOpfs/BrowserOpfsService.cs"><code>DownloadAsync</code></a> 将 CancellationToken 用于压缩和复制，但调用 <code>BuildManifestAsync</code>/<code>ValidateManifestAsync</code> 时没有任何取消参数</div>
+      <div class="fact"><strong>JS 遍历</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/wwwroot/opfsBrowser.js"><code>addManifestDirectory</code></a> 递归列举全部子目录并对每个文件调用 <code>getFile()</code>；校验阶段再次逐项解析和读取元数据</div>
+      <div class="fact"><strong>取消行为</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Modules/BrowserOpfsBrowser/ViewModels/BrowserOpfsBrowserViewModel.cs"><code>CancelDownload</code></a> 只取消 .NET CTS，正在等待的 JS Promise 不会观察它</div>
+      <div class="fact"><strong>关闭阻塞</strong><code>RequestCloseAsync</code> 取消后还会等待 <code>downloadTask</code>；因此窗口确认关闭必须等不可取消的遍历自然完成</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>选择包含大量子目录和文件的 OPFS 文件夹并开始下载，界面进入“准备下载”。</li>
+      <li>在 <code>buildManifest</code> 递归遍历期间点击取消，或确认关闭窗口。</li>
+      <li>CTS 已取消，但 JavaScript 没有 operation handle、AbortSignal 或取消标志，仍会访问完整目录树。</li>
+      <li>只有 <code>BuildManifestAsync</code> 返回后，后续压缩/读取路径首次检查 token 才会抛出取消；关闭对话框在此之前一直等待。</li>
+      <li>同理，文件写完后进入 <code>validateManifest</code> 时，取消也必须等所有条目再次校验完才生效。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>string manifestJson = await BrowserOpfsInterop.BuildManifestAsync(requestJson);
+...
+cancellationToken.ThrowIfCancellationRequested();
+if (!await BrowserOpfsInterop.ValidateManifestAsync(manifestJson)) ...
+cancellationToken.ThrowIfCancellationRequested();
+
+for (const [name, handle] of await getSortedEntries(directory)) {
+    if (handle.kind === "directory")
+        await addManifestDirectory(childPath, manifest, visitedPaths);
+    else
+        await handle.getFile();
+}
+
+downloadCancellationTokenSource?.Cancel();
+await downloadTask; // JS 遍历返回前无法结束</code></pre>
+
+    <h3>影响</h3>
+    <p>对大目录或慢 OPFS，取消按钮和窗口关闭确认可长时间没有效果，并继续执行用户已经要求终止的大量 I/O。回退下载还会让部分输出占据配额，直到遍历最终返回后 .NET 才能进入 Abort 清理。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为一次下载建立跨 JS/.NET 的 operation handle；取消时设置 JS 可见状态，并在目录递归、排序结果处理、<code>getFile()</code> 前后和校验循环中检查。</li>
+      <li>也可把枚举拆成可恢复的小批次由 .NET 驱动，使每批之间自然观察 CancellationToken；不能只在整个 Promise 返回后补一次检查。</li>
+      <li>取消必须触发输出 Abort 和 staging 清理，且与仍在返回的旧 JS continuation 使用代次隔离，避免取消后重新写状态。</li>
+      <li>浏览器集成测试用受控延迟目录，在准备阶段和校验阶段分别取消，断言在明确时间上限内返回、关闭窗口完成、没有继续访问新条目且暂存输出已删除。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -2966,12 +3289,17 @@ foreach (var child in from.Children)
         审查 Lane 合并的入口/撤销链、Connectable 派生字段复制，以及剪贴板的清空状态、坐标映射、模板冲突和轨道镜像。记录 <code>CA-034</code> 至 <code>CA-042</code>。
         <code>CompositeUndoAction</code> 的顺序候选当前尚未找到可稳定复现的生产错误结果；<code>TaskExtension.WithTimeout</code> 与 <code>AbortableThread</code> 当前没有生产调用，故本批没有把这些纯潜在风险提前编号。旧 WPF 工程中存在相同实现，只作为缺陷来源线索，不作为 Avalonia 当前行为成立的替代证据。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A11</time>
+      <div>
+        审查 OGKR 横坐标、Soflan 分组和 LaneBlock 的保存重载契约，以及 Browser OPFS 回退下载的成功清理和跨语言取消链。记录 <code>CA-043</code> 至 <code>CA-047</code>。
+        Nyageki 的主要对象坐标明确读写 Unit/Grid 两个分量；OGKR 中 Tap/Hold 也采用两列，因此本批把多数对象的 Unit-only 写法判定为真实字段遗漏，而不是格式统一限制。OPFS Blob URL 的保留已由 <code>CA-003</code> 覆盖，本批只新增独立的持久暂存文件与不可取消遍历问题。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查 Browser/桌面平台差异、命令执行的异常与取消边界、谱面解析后的对象关系恢复、撤销组合的依赖顺序，以及格式转换器对未知或缺失字段的处理。新增问题从 <code>CA-043</code> 起顺序编号。</p>
+    <p>继续检查 Browser/桌面 Provider 与文件能力恢复、解析器对未知命令和不完整引用的处理、项目创建/加载的失败释放边界、组合撤销的对象身份，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-048</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
