@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>3d11e42e</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>ff4f96fd</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>18</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>18</strong><span>未修复</span></div>
-      <div class="metric"><strong>10 / 8</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>5</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>21</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>21</strong><span>未修复</span></div>
+      <div class="metric"><strong>11 / 10</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>6</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -402,6 +402,33 @@
           <td>谱面元信息 / 时间轴</td>
           <td>首拍号写入元信息但未同步运行时，保存前预览与重载后语义不同</td>
           <td><code>FumenMetaInfo.cs:22-25, 65</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-019"><code>CA-019</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>项目保存 / 数据一致性</td>
+          <td>保存完成会清除保存期间产生的新修改和恢复快照</td>
+          <td><code>FumenVisualEditorViewModel.cs:178-205</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-020"><code>CA-020</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Browser OPFS / 生命周期</td>
+          <td>初始刷新期间关闭窗口后仍会启动永久轮询</td>
+          <td><code>BrowserOpfsBrowserViewModel.cs:178-195, 414-440</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-021"><code>CA-021</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Browser OPFS / 导航</td>
+          <td>目录路径先切换但旧行仍可操作，可能打开或下载错误目录文件</td>
+          <td><code>BrowserOpfsBrowserViewModel.cs:288-298, 335-342</code></td>
         </tr>
         </tbody>
       </table>
@@ -1357,6 +1384,172 @@ if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
     </ul>
   </section>
 
+  <section id="ca-019" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-019</code> 保存完成会把保存期间的新修改错误标记为已保存</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">异步时序确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>保存快照</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs"><code>TrySaveEditorAsync</code></a> 先把谱面和项目序列化成字节，再异步读取原文件并写回</div>
+      <div class="fact"><strong>编辑入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>FumenVisualEditorViewModel</code></a> 的模型与撤销事件会在后续编辑时重新设置 <code>IsDirty</code></div>
+      <div class="fact"><strong>错误收尾</strong>保存成功后先删除恢复快照，再无条件执行 <code>IsDirty = false</code>，没有保存代次或变更版本检查</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>在已修改的谱面中执行保存；保存器完成 <code>fumenBytes</code> 和 <code>projectBytes</code> 快照。</li>
+      <li>保存流程在读取原文件或写入项目文件时让出 UI 线程。Browser OPFS、网络映射盘或较慢磁盘都会扩大该窗口。</li>
+      <li>用户继续移动、添加或修改物件；新修改触发对象或撤销事件，将 <code>IsDirty</code> 重新设为 <code>true</code>，但它不在步骤一的字节快照中。</li>
+      <li>旧保存任务完成后删除恢复快照，并把 <code>IsDirty</code> 无条件重置为 <code>false</code>。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var fumenBytes = await fumenSerializer.SerializeAsync(cloneProject.Fumen);
+...
+var originalFumen = await fumenFile.ReadAllBytes();
+var originalProject = await projectFile.ReadAllBytes();
+await WriteBytesAsync(fumenFile, fumenBytes, cancellationToken);
+await WriteBytesAsync(projectFile, projectBytes, cancellationToken);
+
+// FumenVisualEditorViewModel.Save
+await FumenRescue.DeleteRecoverySnapshotAsync(this);
+IsDirty = false;                                      // 不检查保存后的新变更</code></pre>
+    <p><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/Documents/DocumentViewModelBase.cs"><code>RunSaveFileCommand</code></a> 只是返回 <code>Save()</code> 的任务，没有调用编辑器已有的 <code>LockAllUserInteraction()</code>。即使以后临时锁住画布，属性工具或后台模型更新仍可能产生变更，因此仅靠禁用鼠标输入不能建立可靠的保存边界。</p>
+
+    <h3>影响</h3>
+    <p>保存期间产生的修改没有写入磁盘，却会失去星号和关闭确认；用户随后正常关闭文档时可静默丢失这批修改。恢复快照也已被删除，因此崩溃恢复无法补救。现有 <a href="../tests/OngekiFumenEditor.Avalonia.Tests/Modules/FumenVisualEditor/FumenVisualEditorInitializationTests.cs"><code>Save</code> 测试</a> 只覆盖没有并发编辑的成功路径。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为所有持久化变更维护单调递增的修改代次；保存开始时捕获代次，只在提交完成且代次未变化时清除脏状态和恢复快照。</li>
+      <li>保存期间若代次变化，当前字节仍可作为旧版本成功提交，但文档必须保持脏状态，并保留或立即重建恢复快照。</li>
+      <li>增加可控 <code>ISimpleFile</code> 屏障测试：阻塞写入、修改谱面、释放写入，断言 <code>Save()</code> 返回成功但 <code>IsDirty</code> 仍为真，且下一次保存/重载包含新修改。</li>
+      <li>另行覆盖属性面板和后台变更，证明实现依赖模型代次而不是只禁用画布输入。</li>
+    </ul>
+  </section>
+
+  <section id="ca-020" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-020</code> 初始刷新未完成时关闭 OPFS 窗口会遗留后台轮询</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">生命周期时序确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>打开事件</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Modules/BrowserOpfsBrowser/Views/BrowserOpfsBrowserView.axaml.cs"><code>OnOpened</code></a> 是 <code>async void</code>，会等待首次 OPFS 刷新</div>
+      <div class="fact"><strong>关闭事件</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Modules/BrowserOpfsBrowser/ViewModels/BrowserOpfsBrowserViewModel.cs"><code>OnWindowClosed</code></a> 只能取消当时已经创建的轮询令牌</div>
+      <div class="fact"><strong>对象所有权</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Modules/BrowserOpfsBrowser/Commands/BrowseBrowserOpfsCommandHandler.cs"><code>BrowseBrowserOpfsCommandHandler</code></a> 是单例，并永久保存同一个 ViewModel 字段</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>首次打开 OPFS 浏览器，<code>OnWindowOpenedAsync</code> 先把 <code>isWindowOpen</code> 设为真，再等待初始目录刷新。</li>
+      <li>在 JavaScript/OPFS 调用返回前关闭窗口；<code>OnWindowClosed</code> 把标记设为假，但此时轮询令牌尚未创建，因此无任务可取消。</li>
+      <li>初始刷新随后返回，打开方法没有重新检查窗口状态，直接调用 <code>StartPolling()</code> 创建新令牌和每五秒一次的循环。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public async Task OnWindowOpenedAsync()
+{
+    isWindowOpen = true;
+    await RefreshNowAsync();
+    StartPolling();                                    // 关闭后仍会执行
+}
+
+public void OnWindowClosed()
+{
+    isWindowOpen = false;
+    pollingCancellationTokenSource?.Cancel();          // 此时可能还是 null
+}
+
+private void StartPolling()
+{
+    pollingCancellationTokenSource = new CancellationTokenSource();
+    _ = PollAsync(pollingCancellationTokenSource.Token);
+}</code></pre>
+    <p>轮询任务本身没有观察 <code>isWindowOpen</code>；它只依赖刚创建的令牌。命令处理器的单例字段让 ViewModel 在窗口销毁后仍可达，因此这不是等待垃圾回收即可结束的短暂任务。</p>
+
+    <h3>影响</h3>
+    <p>关闭窗口后应用仍每五秒访问 OPFS、刷新目录树并修改已无界面的集合和状态消息。隐藏 I/O 会持续到再次打开窗口并恰好替换令牌，或应用退出；慢存储下还会造成无意义的 JavaScript 互操作和内存驻留。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在开始初始刷新前创建窗口生命周期令牌，并把同一令牌传给刷新和轮询；关闭时取消整个生命周期，而不是只取消当前轮询字段。</li>
+      <li>初始刷新返回后必须验证生命周期代次和 <code>isWindowOpen</code>，旧窗口的 continuation 不得创建新任务。</li>
+      <li>保存轮询 <code>Task</code> 并在关闭路径等待其退出，确保后续状态更新不会越过窗口边界。</li>
+      <li>在 <a href="../tests/OngekiFumenEditor.Avalonia.Tests/Modules/BrowserOpfsBrowser/BrowserOpfsBrowserViewModelTests.cs"><code>BrowserOpfsBrowserViewModelTests</code></a> 中用目录读取屏障复现：启动打开、先关闭、再释放刷新，并断言等待超过轮询间隔后没有新增服务调用；重新打开时只能存在一个轮询。</li>
+    </ul>
+  </section>
+
+  <section id="ca-021" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-021</code> OPFS 导航期间新路径会与旧文件列表同时显示</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">可见中间态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>状态切换</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Modules/BrowserOpfsBrowser/ViewModels/BrowserOpfsBrowserViewModel.cs"><code>NavigateWithoutHistoryAsync</code></a> 先更新 <code>CurrentPath</code>、面包屑和树节点，最后才等待刷新</div>
+      <div class="fact"><strong>列表切换</strong><code>Entries</code> 只在目录服务异步返回后的 <code>ApplyEntrySnapshots</code> 中增量更新，导航开始时不会清空或冻结</div>
+      <div class="fact"><strong>可操作性</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/Modules/BrowserOpfsBrowser/Views/BrowserOpfsBrowserView.axaml"><code>DataGridRow</code></a> 仍按条目自身的 <code>IsSelectable</code> 启用，双击命令直接使用旧条目的 <code>RelativePath</code></div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>在目录 A 已显示文件时，通过面包屑、后退、上级按钮或目录树切换到目录 B，并让 B 的 OPFS 列举调用延迟。界面立即显示 <code>OPFS/B</code>，但表格仍是 A 的文件。此时可双击旧文件进行预览，或重新勾选旧行并下载；操作使用条目保存的 A 路径，而不是界面显示的 B 路径。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>private async Task NavigateWithoutHistoryAsync(string targetPath)
+{
+    ClearSelection();
+    CurrentPath = NormalizePath(targetPath);            // UI 已显示新目录
+    UpdateBreadcrumbs();
+    SelectLoadedTreeNode(CurrentPath);
+    await RefreshNowAsync();                            // 旧 Entries 在等待期间保留
+}
+
+private Task OpenEntryAsync(BrowserOpfsEntryViewModel entry)
+{
+    if (entry.IsFolder)
+        return NavigateAsync(entry.RelativePath);
+    service.OpenFilePreview(entry.RelativePath);        // 直接操作旧行路径
+}</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/UI/Behaviors/DoubleTappedCommandBehavior.cs"><code>DoubleTappedCommandBehavior</code></a> 只检查命令当前是否可执行；从面包屑、树或其他导航命令进入时，<code>OpenEntryCommand</code> 本身并不处于执行状态。现有 OPFS 测试的服务桩全部同步返回目录内容，因此不会出现该中间态。</p>
+
+    <h3>影响</h3>
+    <p>路径栏和文件列表表达不同目录，用户可预览、下载或继续导航错误的文件。目录越大或 Browser 存储越慢，中间态越明显；轮询刷新与快速连续导航还可能让旧快照短暂覆盖当前列表，使问题更难从操作结果追溯。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把路径与条目快照作为同一导航提交原子切换：可先加载目标目录，成功后同时更新 <code>CurrentPath</code>、面包屑、树选中项和列表。</li>
+      <li>若产品需要立即显示新路径，则导航期间必须禁用列表的选择、双击和下载，并用导航代次丢弃过期刷新结果。</li>
+      <li>增加可控目录读取测试：A 已加载，阻塞 B，发起面包屑或上级导航；在释放 B 前断言旧行不能执行预览/下载，释放后只出现 B 的快照。</li>
+      <li>再覆盖 A→B→C 的连续导航，故意按 C、B、A 顺序释放请求，证明最终路径与列表始终属于同一代次。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -1385,12 +1578,17 @@ if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
         审查音频工具文档切换、单例音效播放器生命周期、NAudio 输出回调线程和谱面元信息代理。记录 <code>CA-015</code> 至 <code>CA-018</code>。
         本次按当前解析的 NAudio 二进制确认了结束事件的实际触发位置；Hold 结束点关系变化未通知区间索引的候选仍缺少稳定可见后果，因此保留待查、不提前编号。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A06</time>
+      <div>
+        审查项目保存快照边界、保存命令交互协议、Browser OPFS 首次打开/关闭生命周期和异步目录导航。记录 <code>CA-019</code> 至 <code>CA-021</code>。
+        项目双文件写入已有原内容回滚，本批未把普通写入失败误报为“必然截断”；真正编号的是保存快照之后继续编辑却被旧保存错误清除脏状态的独立竞态。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查项目文件原子保存、Hold 区间索引一致性、Browser/桌面平台生命周期、后台集合更新和多文档渲染状态。新增问题从 <code>CA-019</code> 起顺序编号。</p>
+    <p>继续检查 Hold 区间索引的一致性与下游查询、后台集合订阅和重置动作、Browser/桌面平台差异以及多文档渲染状态。新增问题从 <code>CA-022</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
