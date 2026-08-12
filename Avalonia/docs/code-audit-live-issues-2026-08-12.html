@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>88300e6c</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>4ae76980</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>64</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>64</strong><span>未修复</span></div>
-      <div class="metric"><strong>32 / 32</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>14</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>66</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>66</strong><span>未修复</span></div>
+      <div class="metric"><strong>34 / 32</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>15</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -816,6 +816,24 @@
           <td>快捷新增 / HoldEnd 撤销</td>
           <td>对已有尾点的 Hold 按 A 会覆盖旧 HoldEnd，撤销后变成没有尾点而不是恢复原值</td>
           <td><code>FumenVisualEditorViewModel.UserInteractionActions.cs:974-978, 1027-1046; Hold.cs:64-80</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-065"><code>CA-065</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>属性浏览器 / 轨道 RecordId</td>
+          <td>RecordId 可被改成重复或负数，保存重载会合并轨道、丢弃子点并改绑音符</td>
+          <td><code>ConnectableObjectBase.cs:9-11; FumenObjectPropertyBrowserViewModel.cs:58-95; ConnectableObjectList.cs:27-40; LaneCommandParser.cs:49-60</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-066"><code>CA-066</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>Nyageki / SVG 字符串转义</td>
+          <td>TypefaceName 未转义即可注入重复字段，使编辑器自身保存的谱面重载后被篡改或无法打开</td>
+          <td><code>DefaultNyagekiFumenFormatter.cs:97-111; ParserUtils.cs:11-21; LinqExtensionMethod.cs:272-278; SvgPrefabCommandParser.cs:42-68</code></td>
         </tr>
         </tbody>
       </table>
@@ -4361,6 +4379,128 @@ this.holdEnd = end;                    // 没有 old.RefHold = null</code></pre>
     </ul>
   </section>
 
+  <section id="ca-065" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-065</code> RecordId 非法编辑会在保存重载时破坏轨道关系</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">序列化与解析链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>正常界面可触发</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableObjectBase.cs"><code>RecordId</code></a> 带属性浏览器别名且公开可写；整数生成器会为它建立普通文本编辑框</div>
+      <div class="fact"><strong>setter 不守不变量</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs"><code>ConnectableStartObject.RecordId</code></a> 只执行 <code>SetProperty</code>，不限制非负、也不检查同一 Lane/Beam 集合中的唯一性</div>
+      <div class="fact"><strong>保存直接采用脏值</strong>OGKR 和 Nyageki 都把当前 <code>RecordId</code> 写入起点、子点及 Tap/Hold 引用，没有在保存前重新分配或拒绝冲突</div>
+      <div class="fact"><strong>重复值取第一个</strong>OGKR 子点、Tap、Hold 和两种 Nyageki 音符解析器都使用 <code>FirstOrDefault(x =&gt; x.RecordId == id)</code>，第二条同 ID 轨道无法被可靠引用</div>
+      <div class="fact"><strong>负值会被半途改号</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/ConnectableObjectList.cs"><code>ConnectableObjectList.Add</code></a> 只在添加起点时把负 ID 自动改成新 ID；OGKR 后续仍按文件中的负 ID 查找子点，因此子点被直接丢弃</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>建立两条各自带子点和 Tap/Hold 的 Lane，在属性浏览器中把第二条 LaneStart 的 <code>RecordId</code> 改成第一条的值。</li>
+      <li>保存为 OGKR 再重载。第一条起点先进入集合，第二条起点仍以相同 ID 加入；第二条的子点逐行解析时通过 <code>FirstOrDefault</code> 挂到第一条，第二条变成空轨道。所有同 ID 的 Tap/Hold 也只能指向第一条。</li>
+      <li>另把一条带子点的 LaneStart ID 改为 <code>-1</code> 并保存 OGKR。重载起点时集合先为它分配非负 ID，随后文件中的子点仍携带 <code>-1</code>，查找失败并返回 <code>default</code>，整条子点链消失。</li>
+      <li>Nyageki 会在整条 Lane 加入集合时改掉负 ID，因此轨道链本身可能幸存，但稍后解析的 Tap/Hold 仍按文件中的 <code>-1</code> 查找并失去引用。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>[LocalizableObjectPropertyBrowserAlias(nameof(Lang.RecordId))]
+public abstract int RecordId { get; set; }
+
+public override int RecordId
+{
+    get =&gt; recordId;
+    set =&gt; SetProperty(ref recordId, value); // 无范围和唯一性校验
+}
+
+if (startObject.RecordId &lt; 0)
+    startObject.RecordId = GetNextRecordId(); // 起点加入时才改号
+
+if (fumen.Lanes.FirstOrDefault(x =&gt; x.RecordId == beamRecordId)
+    is not ConnectableStartObject beamStart)
+{
+    Log.LogError(...);
+    return default;                           // 子点被丢弃
+}
+
+var refLaneStart = fumen.Lanes.FirstOrDefault(x =&gt; x.RecordId == laneId);
+tap.ReferenceLaneStart = refLaneStart;        // 重复 ID 永远取第一个</code></pre>
+
+    <h3>影响</h3>
+    <p>这是从普通属性编辑入口即可触发的持久化数据损坏。重复值会在重载时合并本应独立的轨道链，并把音符静默改绑到另一条轨道；负值会让 OGKR 丢失全部子点，同时让两种格式中的 Tap/Hold 脱离轨道。当前检查器没有唯一性或非负规则，保存过程也不会提示用户。该问题与 <code>CA-051</code> 的“删除后复用 ID”相关，但本条无需删除对象，直接编辑公开属性即可触发，且额外包含负 ID 的子点丢失路径。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>最小修复是从通用属性浏览器隐藏或只读化 <code>RecordId</code>；如果产品确实需要改号，应提供由所属集合执行的原子重命名操作。</li>
+      <li>重命名必须在对应 Lane 或 Beam ID 命名空间内验证非负且唯一，冲突时保持原值并给出可见错误，不能依赖保存重载“自动整理”。</li>
+      <li>解析器应建立 ID 索引并明确拒绝重复起点；负 ID 或找不到父对象时应让导入失败或至少阻止覆盖原文件，不能仅记录日志后丢弃对象。</li>
+      <li>保存前检查器增加重复/负 ID 规则，覆盖 Lane、Wall、Autoplay Fader 和 Beam。</li>
+      <li>回归测试使用两条同类型同 ID 轨道和一条 <code>-1</code> 轨道，分别验证 OGKR/Nyageki 的 Children、Curve、Tap、Hold 引用以及保存重载后的对象数量和身份。</li>
+    </ul>
+  </section>
+
+  <section id="ca-066" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-066</code> Nyageki SVG 字体名可注入并覆盖同一命令的字段</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">语法与覆盖行为确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>值可任意编辑</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/EditorObjects/Svg/SvgStringPrefab.cs"><code>SvgStringPrefab.TypefaceName</code></a> 是公开字符串属性，没有字符限制，通用属性浏览器会提供文本编辑框</div>
+      <div class="fact"><strong>唯一未编码的自由字符串</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/DefaultNyagekiFumenFormatter.cs"><code>DefaultNyagekiFumenFormatter</code></a> 对 Content 和文件路径使用 Base64，却把字体名直接拼成 <code>TypefaceName[value]</code></div>
+      <div class="fact"><strong>语法没有转义层</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/CommandImpl/ParserUtils.cs"><code>ParseParams</code></a> 用 <code>(\w+)\[(.*?)\]</code> 正则识别字段，值内的 <code>], Name[</code> 会立即结束当前字段并创建新字段</div>
+      <div class="fact"><strong>重复字段后者覆盖</strong><a href="../src/OngekiFumenEditor.Avalonia/Utils/LinqExtensionMethod.cs"><code>ToDictionaryWithObjectPool</code></a> 对每个匹配执行 <code>dic[key] = value</code>，不拒绝重复键；字体名位于公共字段之后，因此它注入的同名字段会覆盖真实值</div>
+      <div class="fact"><strong>OGKR 不受同一缺陷影响</strong>OGKR 格式化器和解析器对 TypefaceName 成对使用 Base64；问题限定于 Nyageki 写入路径</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>打开或构造一个 <code>SvgStringPrefab</code>，在属性浏览器中把字体名改成 <code>Arial], Scale[999</code>。</li>
+      <li>保存为 Nyageki。格式化器生成的片段会变成 <code>TypefaceName[Arial], Scale[999]</code>；同一行前部已经存在由真实属性生成的 <code>Scale[原值]</code>。</li>
+      <li>重载时正则把该片段解析成两个独立字段，字典把后出现的 <code>Scale=999</code> 覆盖到原值上。</li>
+      <li><code>SvgPrefabCommandParser.ApplyCommonFields</code> 随后把注入值写回对象，谱面在没有警告的情况下改变缩放。注入 <code>Type</code>、缺失依赖字段或仅包含无法匹配的右方括号时，还可把编辑器自身保存的文件变成无法打开。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>fields.Add($"Content[{Base64.Encode(text.Content)}]");
+fields.Add($"FontSize[{SvgPrefabFormatUtils.Format(text.FontSize)}]");
+fields.Add($"TypefaceName[{text.TypefaceName}]"); // 原样进入字段语法
+
+private static Regex s = new Regex(@"(\w+)\[(.*?)\]\s*(,|$)");
+
+foreach (var item in collection)
+    dic[keySelector(item)] = valueSelector(item); // 后一个同名字段覆盖前一个
+
+TypefaceName = Required(fields, "TypefaceName");
+svg.Scale = ParseSingle(Required(fields, "Scale"), "Scale");</code></pre>
+
+    <h3>影响</h3>
+    <p>用户编辑一个看似普通的字体名称，就能让保存结果不再与内存模型等价。最温和的结果是字体名被截断；更严重时可静默覆盖 Scale、Opacity、坐标、颜色或其他公共字段，甚至改变对象类型并导致整份谱面加载失败。由于保存本身成功且错误只在下次打开时出现，用户可能已经覆盖唯一副本。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为 Nyageki 新增明确的 <code>TypefaceNameBase64</code> 字段并优先读取它，同时保留旧 <code>TypefaceName</code> 的向后兼容读取；不要继续把自由字符串直接嵌入括号语法。</li>
+      <li>若格式层要普遍支持任意字符串，应实现统一的转义/反转义或结构化 tokenizer，而不是继续扩展当前非转义正则。</li>
+      <li>解析字段映射时拒绝重复键并报告行号和字段名，避免恶意或损坏输入通过“最后一个获胜”静默改变语义。</li>
+      <li>保存前对不支持安全表示的旧格式值给出错误，不能写出已知无法无损读回的文本。</li>
+      <li>回归测试覆盖字体名中的 <code>]</code>、逗号、冒号、Unicode 和伪造 <code>Scale</code>/<code>Type</code> 字段，并断言 Nyageki 往返保持每个 SVG 属性且重复键被明确拒绝。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -4434,12 +4574,17 @@ this.holdEnd = end;                    // 没有 old.RefHold = null</code></pre>
         审查 HoldEnd 属性面板拖放、快速新增组合动作、Connectable 子点插入与磁吸，以及 HoldEnd 替换后的撤销关系。记录 <code>CA-061</code> 至 <code>CA-064</code>。
         越界批量新增生成的脱离谱面对象会被 <code>RefreshSelected</code> 从 Fumen 重枚举时过滤掉，因此本批记录的是空历史项、原选择丢失和错误标脏，不扩写为幽灵属性编辑；未绑定到生产输入路由的 <code>KeyboardAction_AddNew*</code> 也没有作为可达问题编号。
       </div>
+      <time datetime="2026-08-13">2026-08-13 / A15</time>
+      <div>
+        审查 OGKR/Nyageki 的重复和负 RecordId、即时引用解析、SVG 字段往返、Browser StorageProvider 书签所有权，以及项目 EditorSetting 的反序列化行为。记录 <code>CA-065</code> 至 <code>CA-066</code>。
+        专项往返验证确认 getter-only <code>EditorSetting</code> 能由当前 System.Text.Json 源生成上下文填充，因此未误报为反序列化丢失；StorageProvider 书签的保存、打开和释放链当前完整，临时不可用后永久停检已由 <code>CA-053</code> 覆盖。乱序 OGKR/Nyageki 引用是否违反格式规范尚缺少权威依据，本批不提前编号。构建中的 Gekimini 传递 SkiaSharp 告警已在现有迁移审计文档中显式记录，不作为新发现重复分配编号。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查解析器对重复 RecordId 和乱序引用的处理、Browser 书签权限恢复、项目设置兼容字段的反序列化副作用，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-065</code> 起顺序编号。</p>
+    <p>继续检查格式解析的区段顺序契约、其他自由字符串的转义边界、集合键属性变更后的索引一致性，以及 Browser 多窗口 TopLevel/StorageProvider 归属。新增问题从 <code>CA-067</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
