@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>3c5af47e</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>0747779d</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>53</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>53</strong><span>未修复</span></div>
-      <div class="metric"><strong>26 / 27</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>12</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>60</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>60</strong><span>未修复</span></div>
+      <div class="metric"><strong>29 / 31</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>13</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -717,6 +717,69 @@
           <td>最近项目 / 有效性恢复</td>
           <td>项目文件一次暂时缺失就被永久禁用，恢复后仍不会重新校验</td>
           <td><code>FumenVisualEditorProvider.cs:55-99; OpenRecentFileCommandHandler.cs:82-93</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-054"><code>CA-054</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>画布输入 / 选择拖拽</td>
+          <td>拖动未选对象会移动旧选择集，按下的对象反而不会被选中</td>
+          <td><code>FumenVisualEditorViewModel.UserInteractionActions.cs:1195-1215, 1282-1333, 1478-1525</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-055"><code>CA-055</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>画布输入 / 拖拽提交</td>
+          <td>释放事件的最终坐标会被撤销动作立即回退，最后一段拖拽丢失</td>
+          <td><code>DefaultObjectInteractiveAction.cs:29-56; DefaultUndoRedoManager.cs:65-85</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-056"><code>CA-056</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>画布输入 / 指针生命周期</td>
+          <td>拖拽出画布后释放不会结束手势，物件改动没有撤销记录</td>
+          <td><code>FumenVisualEditorViewModel.Drawing.cs:1015-1062; FumenVisualEditorViewModel.UserInteractionActions.cs:1141-1164, 1478-1525</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-057"><code>CA-057</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>撤销历史 / Slider</td>
+          <td>历史滑杆当前值少一格，向初始状态移动一格会跳过一次撤销</td>
+          <td><code>HistoryView.axaml:20-26; HistoryViewModel.cs:37-49, 129-174</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-058"><code>CA-058</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>项目加载 / 异常回滚</td>
+          <td>零 BPM 在资源交接后触发异常，编辑器会保留播放器并引用已释放项目句柄</td>
+          <td><code>FumenVisualEditorViewModel.cs:146-170; FumenVisualEditorViewModel.ProjectIO.cs:187-209; BpmList.cs:120-158</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-059"><code>CA-059</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>项目加载 / 音频时长</td>
+          <td>打开项目时信任旧 AudioDuration，替换音频后时间轴仍被旧长度裁剪或拉长</td>
+          <td><code>FumenVisualEditorViewModel.cs:146-166, 235-248; FumenVisualEditorViewModel.ScrollViewer.cs:83-95</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-060"><code>CA-060</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>项目模型 / 设置所有权</td>
+          <td>每个项目模型都会创建未使用且永不释放的全局设置订阅</td>
+          <td><code>EditorProjectDataModel_V0_5_2.cs:32-40; EditorSetting.cs:12-15, 341-348; EditorProjectDataModel.cs:95-108</code></td>
         </tr>
         </tbody>
       </table>
@@ -3632,6 +3695,410 @@ private Task&lt;bool&gt; CheckIsValid(..., bool forceFresh = false)
     </ul>
   </section>
 
+  <section id="ca-054" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-054</code> 拖动未选对象会移动旧选择集</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">选择与拖拽时序确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>按下不改变选择</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>OnMouseDown</code></a> 命中物件时只记录 <code>mouseDownHitObject</code>，真正的 <code>NotifyObjectClicked</code> 延后到未发生拖拽的 PointerReleased</div>
+      <div class="fact"><strong>移动旧集合</strong>只要左键仍按下，首次 PointerMoved 就把 <code>isSelectRangeDragging</code> 设为 true，并对当时的全局 <code>SelectObjects</code> 调用 <code>OnDragStart</code>；没有把按下物件加入或冻结为本次拖拽集合</div>
+      <div class="fact"><strong>释放跳过选择</strong>拖拽标记为 true 后，PointerReleased 只结束 <code>SelectObjects</code> 的拖拽，完全跳过点击选择分支</div>
+      <div class="fact"><strong>两种确定结果</strong>已有 A 被选中时按住未选 B 拖动，会移动 A；没有任何选择时拖动 B，集合为空但拖拽标记仍成立，B 既不移动也不会在释放时被选中</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>在设计模式中放置两个可移动物件 A、B，单击 A 使其成为唯一选择。</li>
+      <li>把指针按在未选择的 B 上，保持左键并移动。</li>
+      <li>第一次移动事件以当前 <code>SelectObjects == [A]</code> 启动拖拽，后续移动持续修改 A 的 TGrid/XGrid。</li>
+      <li>释放时进入拖拽结束分支，B 的 <code>NotifyObjectClicked</code> 永远不执行；最终 A 被移动并产生撤销项，B 仍未选中。</li>
+      <li>取消所有选择后重复拖动 B，则没有对象响应移动，释放后 B 仍未选中。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// PointerPressed：只记住命中对象
+mouseDownHitObject = hitOngekiObject;
+mouseDownHitObjectPosition = position;
+
+// PointerMoved：实际拖动的是旧选择集
+isSelectRangeDragging = true;
+SelectObjects.ToArray().ForEach(x =&gt; dragCall(x as OngekiObjectBase, cp));
+
+// PointerReleased：一旦移动过就不会点击选择 mouseDownHitObject
+if (isSelectRangeDragging)
+    SelectObjects.ToArray().ForEach(x =&gt; interactive.OnDragEnd(...));
+else if (mouseDownHitObject is not null)
+    NotifyObjectClicked(mouseDownHitObject, mouseDownNextHitObject);</code></pre>
+
+    <h3>影响</h3>
+    <p>用户对 B 的直接拖拽会静默修改视觉上不在指针下方的 A，尤其在大范围多选后容易一次移动整组选中物件。错误修改可以进入撤销栈，但用户若没有立即发现，保存后会形成真实谱面位置变化。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在超过拖拽阈值、开始手势之前确定一次不可变的拖拽对象集；若按下物件不在当前选择中，应按普通/Shift 修饰键语义先更新选择，再以新集合开始拖拽。</li>
+      <li>单击仍应在未超过阈值时执行，不能用任意一个 PointerMoved 直接把点击变成拖拽；同一手势的 Start/Move/End 必须使用同一对象集合。</li>
+      <li>Headless 指针测试覆盖“已有 A 时拖 B”“无选择时拖 B”“Shift 增选后拖动”和“仅轻微抖动仍按单击处理”，断言只有预期对象的位置和选择状态变化。</li>
+    </ul>
+  </section>
+
+  <section id="ca-055" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-055</code> PointerReleased 的最终拖拽坐标会被立即回退</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">命令立即执行语义确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>释放点会传入</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>OnMouseUp</code></a> 取得 PointerReleased 的实际坐标并传给每个交互器的 <code>OnDragEnd</code></div>
+      <div class="fact"><strong>先保存旧终点</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/Interactives/Impls/DefaultObjectInteractiveAction.cs"><code>DefaultObjectInteractiveAction.OnDragEnd</code></a> 在应用释放点之前，先从对象当前模型值计算 <code>x/y</code>；这只是最后一次 PointerMoved 的位置</div>
+      <div class="fact"><strong>变量含义反转</strong>方法随后调用 <code>OnDragMove(obj, point)</code> 应用真正释放点，却把先前的 <code>x/y</code> 命名为 <code>newPos</code> 并写进动作的 Execute 分支</div>
+      <div class="fact"><strong>动作立即执行</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/UndoRedo/DefaultImpl/DefaultUndoRedoManager.cs"><code>DefaultUndoRedoManager.ExecuteAction</code></a> 会立即调用 Execute；多选时子动作先进入组合栈，最终组合动作执行时同样把所有对象移回释放前的最后移动位置</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>选中任意可拖动物件，发送 PointerMoved 到位置 P1，使模型实时更新到 P1。</li>
+      <li>不再发送新的 PointerMoved，直接在不同位置 P2 发送 PointerReleased；触摸板、低采样率输入或 Headless 测试都可稳定构造。</li>
+      <li><code>OnDragEnd</code> 先把 P1 对应模型位置保存到 <code>x/y</code>，再把物件移动到 P2。</li>
+      <li>组合撤销动作随即执行，其 Execute 又调用 <code>OnMoveCanvas(obj, P1)</code>，最终物件回到 P1。</li>
+      <li>撤销回到拖拽起点，重做也只到 P1；P2 从未进入历史。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var x = ConvertXGridToX(obj.XGrid, editor); // 最后一次 Move 的位置
+var y = ConvertTGridToY(obj.TGrid, editor);
+
+OnDragMove(obj, point, editor);             // 应用最终 Released 坐标
+var newPos = new Point(x, y);               // 实际仍是旧位置
+
+ExecuteAction(LambdaUndoAction.Create(
+    "Drag",
+    () =&gt; OnMoveCanvas(obj, newPos, editor), // 提交时立即回到旧位置
+    () =&gt; RestoreDragStart(obj)));
+
+public void ExecuteAction(IUndoableAction action)
+{
+    action.Execute();
+    ActionStack.Add(action);
+}</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>先应用并校正最终释放点，再从对象模型读取最终 XGrid/TGrid/车道引用作为 redo 快照；原始拖拽快照只用于 undo。</li>
+      <li>动作首次提交、撤销、重做都应设置明确快照，不依赖当前画布坐标再次换算，避免磁吸和车道吸附在重做时漂移。</li>
+      <li>测试刻意让最后一次 PointerMoved 与 PointerReleased 坐标不同，断言提交后位于释放点、撤销回起点、重做恢复释放点；再覆盖多选组合动作。</li>
+    </ul>
+  </section>
+
+  <section id="ca-056" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-056</code> 拖拽出画布后释放会留下无撤销记录的模型修改</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">路由事件类型与捕获链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>普通模式只监听画布</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs"><code>AttachRenderControlHandlers</code></a> 把 Pressed/Moved/Released/Exited 直接挂到 renderControl，没有在按下后捕获 Pointer，也没有 CaptureLost 处理器</div>
+      <div class="fact"><strong>Exited 类型不兼容</strong><code>RenderControl_PointerExited</code> 把普通 <code>PointerEventArgs</code> 交给 <code>OnMouseLeave</code>；后者调用 <code>OnMouseUp</code>，但 <code>OnMouseUp</code> 第一行要求 <code>PointerReleasedEventArgs</code>，转换失败后直接返回</div>
+      <div class="fact"><strong>实时修改已发生</strong>离开前的 PointerMoved 已经通过 <code>OnDragMove</code> 修改对象模型；只有正常 PointerReleased 的 <code>OnDragEnd</code> 才创建撤销动作并清理拖拽状态</div>
+      <div class="fact"><strong>同项目已有正确范式</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Behaviors/BatchMode/BatchModeBehavior.cs"><code>BatchModeBehavior</code></a> 会显式 Capture、监听 PointerCaptureLost 并取消活动手势，说明普通模式缺失的是独立生命周期处理而非平台限制</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>选中物件并在 renderControl 内开始拖动，至少产生一次 PointerMoved，使 TGrid/XGrid 已改变。</li>
+      <li>保持左键，把指针移出画布；PointerExited 调用 <code>OnMouseLeave</code>。</li>
+      <li>由于事件参数不是 PointerReleased，<code>OnMouseUp</code> 立即返回，未调用 <code>OnDragEnd</code>，也未清理 <code>isSelectRangeDragging</code> 和交互器的拖拽快照。</li>
+      <li>在画布外释放。普通模式没有 Pointer capture，renderControl 不会收到该 Released。</li>
+      <li>物件保留离开画布前的实时位置，但撤销栈没有“拖动物件”动作；保存会把这次不可撤销的修改写入谱面。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>renderControl.PointerReleased += RenderControl_PointerReleased;
+renderControl.PointerExited += RenderControl_PointerExited;
+// 普通模式没有 e.Pointer.Capture(...) / PointerCaptureLost
+
+private void RenderControl_PointerExited(object sender, PointerEventArgs e) =&gt;
+    OnMouseLeave(CreateExecutionContext(sender, e));
+
+public void OnMouseLeave(ActionExecutionContext e)
+{
+    OnMouseUp(e);
+}
+
+public void OnMouseUp(ActionExecutionContext e)
+{
+    var arg = e.EventArgs as PointerReleasedEventArgs;
+    if (arg is null || arg.Handled)
+        return; // Exited 永远走这里
+}</code></pre>
+
+    <h3>影响</h3>
+    <p>普通的跨边界拖动就能绕过撤销系统，模型仍会因属性变化被标记为脏并可保存。用户无法用 Ctrl+Z 回到拖拽前状态；遗留的手势状态还可能影响下一次点击或覆盖交互器中的旧快照。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>开始对象拖拽时捕获 Pointer，并在正常 Released 后释放；把 PointerCaptureLost、窗口失焦、控件卸载统一映射为明确的“提交”或“取消并恢复起点”语义。</li>
+      <li>不要把 PointerExited 冒充 PointerReleased。结束/取消 API 应接收已经归一化的坐标与原因，而不是依赖具体 RoutedEventArgs 类型转换。</li>
+      <li>Headless 测试覆盖“拖出画布后在外部释放”“捕获丢失”“拖拽中卸载视图”，断言对象要么产生一个完整撤销动作，要么恢复起点，且下一次手势状态干净。</li>
+    </ul>
+  </section>
+
+  <section id="ca-057" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-057</code> 撤销历史滑杆的当前值少一格</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">一基索引映射确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>列表多一个初始状态</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/UndoRedo/ViewModels/HistoryViewModel.cs"><code>HistoryItems[0]</code></a> 是“初始状态”，第一个动作从索引 1 开始</div>
+      <div class="fact"><strong>Slider 使用一基值</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/UndoRedo/Views/HistoryView.axaml"><code>Slider</code></a> 的范围是 1 到 <code>HistoryItems.Count</code>，setter 也用 <code>value - 1</code> 映射列表项；这部分契约一致</div>
+      <div class="fact"><strong>刷新写成零基索引</strong><code>RefreshItemTypes</code> 找到当前动作行 <code>HistoryItems[i]</code> 后却赋值 <code>_selectedIndex = i</code>，正确 Slider 值应是 <code>i + 1</code>；初始状态也被写成低于 Minimum 的 0</div>
+      <div class="fact"><strong>操作会跨两步</strong>执行三个动作时当前行索引为 3，正确值为 4，但滑杆显示 3；用户向初始方向移动一格到 2，会映射到行索引 1，并一次撤销动作 3 和动作 2</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>打开历史工具，连续执行三个可撤销操作。</li>
+      <li>列表正确把第三个动作标成 Current，但滑杆值被刷新为 3，而不是包含初始状态后的 4。</li>
+      <li>把滑杆向初始状态方向移动一格到 2。</li>
+      <li>setter 读取 <code>HistoryItems[1]</code>，即第一个动作，并调用 <code>UndoTo</code>；结果第二、第三个动作同时撤销。</li>
+      <li>只有一个动作时滑杆仍停在最小值 1；向 2 移动映射到当前动作而不做任何事，因此无法用滑杆撤销这唯一动作。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>&lt;Slider Minimum="1"
+        Maximum="{Binding HistoryItems.Count}"
+        Value="{Binding SelectedIndex}" /&gt;
+
+// Slider 值按一基索引解释
+HistoryItems.ElementAtOrDefault(value - 1);
+
+// Refresh 却写入零基列表索引
+for (var i = 1; i &lt;= UndoRedoManager.ActionStack.Count; i++)
+{
+    if (UndoRedoManager.UndoActionCount - i == 0)
+    {
+        HistoryItems[i].ItemType = HistoryItemType.Current;
+        _selectedIndex = i; // 应为 i + 1
+    }
+}</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>统一用 Slider 的一基状态编号：当前值应始终为 <code>UndoActionCount + 1</code>，初始状态为 1，全部动作已执行时为 <code>HistoryItems.Count</code>。</li>
+      <li>把“用户改变 Slider”与“撤销管理器刷新 Slider”区分开，避免 VM 推送当前值时反向触发历史跳转。</li>
+      <li>测试 0、1、3 个已执行动作以及存在 redo 链的状态，逐一断言滑杆值、Current 行和每移动一格恰好撤销/重做一个动作；列表点击与滑杆操作也必须得到同一状态。</li>
+    </ul>
+  </section>
+
+  <section id="ca-058" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-058</code> 项目晚期异常会留下播放器和已释放文件的半挂载状态</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">可构造晚期异常链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>状态先于验证提交</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>LoadProjectAsync</code></a> 成功解码音频后立即释放旧播放器，并依次赋值新 <code>AudioPlayer</code>、<code>EditorProjectData</code> 和 <code>Fumen</code>；后面还有时间轴换算、滚动和事件回调等可抛操作</div>
+      <div class="fact"><strong>赋值本身会换算</strong><code>OnEditorProjectDataChanged</code> 与 <code>OnFumenChanged</code> 都会调用 <code>RecalculateTotalDurationHeight</code>，因此异常甚至可发生在属性 setter 尚未返回时</div>
+      <div class="fact"><strong>稳定文件触发</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/BpmCommandParser.cs"><code>BpmCommandParser</code></a> 和 <a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/BPMChange.cs"><code>BPMChange.BPM</code></a> 接受 0；若首 BPM 为 0 且后面还有正时间 BPM，<a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/BpmList.cs"><code>BpmList</code></a> 会计算出正无穷毫秒并由 <code>TimeSpan.FromMilliseconds</code> 抛出溢出异常</div>
+      <div class="fact"><strong>catch 释放同一项目</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ProjectIO.cs"><code>LoadProjectWithoutGateAsync</code></a> 捕获后调用 <code>projectData.DisposeRuntimeFiles()</code>，但没有清空 VM 对该项目和 Fumen 的引用、没有释放新 AudioPlayer，也没有恢复先前状态</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>准备一个可正常解码的音频和一个 OGKR：首 BPM 为 0，另有一个位于正 TGrid 的 BPM 事件；解析器可以构造该模型。</li>
+      <li>通过项目文件打开。依赖解析和音频加载均成功，新播放器先被赋给编辑器。</li>
+      <li>赋值新 Fumen 时触发总高度重算；从零 BPM 到后续 BPM 的长度除以 0，缓存把正无穷传给 <code>TimeSpan.FromMilliseconds</code> 并抛异常。</li>
+      <li>外层 catch 对 <code>projectData</code> 调用 <code>DisposeRuntimeFiles</code>，其 AudioFile/FumenFile/ProjectFile/ProjectRoot 全部变为 null。</li>
+      <li>编辑器仍持有该 <code>EditorProjectData</code>、Fumen 和新 AudioPlayer，打开流程返回 false。结合 <code>CA-048</code> 的失败文档所有权缺口，这个隐藏编辑器和播放器不会被确定性释放。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var audioPlayer = await audioManager.LoadProjectAudioAsync(...);
+AudioPlayer?.Dispose();
+AudioPlayer = audioPlayer;       // 已提交
+EditorProjectData = project;     // setter 可触发 Recalculate
+Fumen = project.Fumen;           // setter 再次触发 Recalculate
+RecalculateTotalDurationHeight();
+
+// 零 BPM + 后续事件
+var len = CalculateBPMLength(prev, cur.TGrid); // ... / bpm == +Infinity
+var time = TimeSpan.FromMilliseconds(currentTimeMs); // overflow
+
+catch
+{
+    projectData?.DisposeRuntimeFiles(); // VM 仍引用同一个 projectData
+    throw;
+}</code></pre>
+
+    <h3>影响</h3>
+    <p>一个能够通过解析的异常谱面即可在错误对话框后保留音频播放器、模型订阅和半失效项目对象；文件能力已经被置空，VM 却仍认为项目已赋值。任何其他晚期换算、滚动或 LoadingFinished 订阅异常也会走同一非事务路径。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把新项目、播放器、派生时间轴数据和初始滚动位置先构造成候选状态，完成所有可能失败的验证后再原子交换；交换前不得释放旧播放器。</li>
+      <li>候选阶段失败时只释放候选播放器和候选项目；一旦 VM 接管项目，外层加载器就不能再释放仍由 VM 引用的句柄。若提交阶段失败，必须恢复完整旧状态。</li>
+      <li>解析和模型入口还应拒绝非有限或小于等于 0 的 BPM，但这不能替代加载事务，因为其他回调和换算仍可能抛错。</li>
+      <li>用可观察播放器/文件句柄和零 BPM 模型测试失败路径，断言旧状态不变、候选资源恰好释放一次、VM 不引用已释放项目；另让 LoadingFinished 抛错验证相同回滚协议。</li>
+    </ul>
+  </section>
+
+  <section id="ca-059" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-059</code> 打开项目不会用实际音频刷新持久化时长</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">时长真值链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>实际时长已知</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>LoadProjectAsync</code></a> 已成功创建 AudioPlayer，因此可读取当前音频文件的真实 <code>Duration</code>，但没有把它写回项目</div>
+      <div class="fact"><strong>旧字段优先</strong><code>RecalculateTotalDurationHeight</code> 只要持久化 <code>EditorProjectData.AudioDuration &gt; 0</code> 就完全忽略播放器时长；只有字段缺失或非正数才回退到实际音频</div>
+      <div class="fact"><strong>滚动同样被裁剪</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ScrollViewer.cs"><code>ScrollTo(TimeSpan)</code></a> 无条件用项目的 AudioDuration 限制 CurrentPlayTime，画布放置和拖动边界又依赖由该旧值计算的 <code>TotalDurationHeight</code></div>
+      <div class="fact"><strong>已有手工修复命令</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Commands/RecalculateTotalHeight/RecalculateTotalHeightCommandHandler.cs"><code>重新计算编辑器画幅总长度</code></a> 明确执行 <code>editorProjectData.AudioDuration = audioPlayer.Duration</code>，说明当前自动加载链没有完成这一步</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>创建一个项目并保存，使 <code>AudioDuration</code> 记录为 60 秒。</li>
+      <li>在应用外用同名 120 秒音频替换项目引用的音频文件，不修改 <code>.nyagekiProj</code>。</li>
+      <li>重新打开项目。播放器解码到真实 120 秒，但总画布高度仍按 60 秒计算，<code>ScrollTo</code> 也把任何更晚时间钳制到 60 秒。</li>
+      <li>用户无法正常滚动、放置或拖动物件到后 60 秒；执行工具菜单的“重新计算编辑器画幅总长度”后才恢复。</li>
+      <li>反向用更短音频替换时，编辑器会保留超出实际音频的空白时间轴和错误末尾边界。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var audioPlayer = await audioManager.LoadProjectAudioAsync(audioFile, ...);
+AudioPlayer = audioPlayer;
+// 缺少：project.AudioDuration = audioPlayer.Duration
+
+var duration = EditorProjectData.AudioDuration &gt; TimeSpan.Zero
+    ? EditorProjectData.AudioDuration
+    : AudioPlayer?.Duration ?? TimeSpan.Zero;
+
+var fixedAudioTime = Min(audioTime, EditorProjectData.AudioDuration);
+
+// 只有手工菜单命令执行真实同步
+editorProjectData.AudioDuration = audioPlayer.Duration;</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>音频成功解码后，以播放器报告的 Duration 作为运行时真值并自动更新项目字段；持久值只能用于打开前提示或无法解码时的后备。</li>
+      <li>派生字段自动校正不应在打开瞬间被误当成用户内容修改；可记录“项目元数据需在下次保存更新”，但画布和播放必须立即使用真实值。</li>
+      <li>测试让项目字段分别短于和长于假播放器时长，断言加载后总高度、CurrentPlayTime 钳制和放置边界都以播放器为准，并验证后续保存写入新时长。</li>
+    </ul>
+  </section>
+
+  <section id="ca-060" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-060</code> 项目模型自带的 EditorSetting 永不释放</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态订阅所有权确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>每个模型自动创建</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectFiles/EditorProjectDataModel_V0_5_2.cs"><code>EditorProjectDataModel_V0_5_2.EditorSetting</code></a> 用字段初始化器为每个新建、反序列化或迁移项目创建一个 <code>EditorSetting</code></div>
+      <div class="fact"><strong>构造即静态订阅</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorSetting.cs"><code>EditorSetting</code></a> 构造函数立即订阅全局单例 <code>EditorGlobalSetting.Default.PropertyChanged</code>，唯一退订入口是其 <code>Dispose</code></div>
+      <div class="fact"><strong>编辑器使用另一实例</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>FumenVisualEditorViewModel.Setting</code></a> 自己再创建一个实例，绘制、交互和设置监听都读取这个 VM 实例；全仓没有生产代码读取 <code>EditorProjectData.EditorSetting</code></div>
+      <div class="fact"><strong>正常关闭也不退订</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectDataModel.cs"><code>DisposeRuntimeFiles</code></a> 只释放 SVG 和文件/目录句柄；VM Dispose 只调用自身 <code>Setting.Dispose()</code>，从未调用项目模型内的 Setting.Dispose</div>
+      <div class="fact"><strong>格式与迁移放大</strong>项目 JSON 确实序列化 <code>EditorSetting</code>；<a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/EditorProjectFile/Migrations/Migration_V0_5_2_To_Latest.cs"><code>0.5.2 迁移</code></a> 先反序列化旧模型再构造最新模型，因此旧模型和新模型各自创建的订阅都没有所有者负责释放</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>正常打开任意当前版本项目。项目反序列化创建一个内部 <code>EditorSetting</code>，VM 同时创建另一个实际使用的 Setting。</li>
+      <li>关闭编辑器。VM Setting 被退订，项目只执行 <code>DisposeRuntimeFiles</code>，内部 Setting 未退订。</li>
+      <li>丢弃项目和编辑器的全部普通引用并强制 GC；全局 PropertyChanged 事件仍强引用项目 Setting，因此弱引用保持存活。</li>
+      <li>重复打开/关闭项目，每次稳定增加一个处理器；打开需要迁移的 0.5.2 项目还会为中间旧模型额外增加一个。</li>
+      <li>之后每次全局编辑器设置变化都会广播给所有遗留实例。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// 项目模型中的兼容字段
+public EditorSetting EditorSetting { get; } = new EditorSetting();
+
+// VM 另有实际使用的实例
+public EditorSetting Setting { get; } = new();
+
+public EditorSetting()
+{
+    EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+}
+
+public void DisposeRuntimeFiles()
+{
+    AudioFile = null;
+    FumenFile = null;
+    ProjectFile = null;
+    ProjectRoot = null;
+    // 没有 EditorSetting.Dispose()
+}</code></pre>
+
+    <h3>影响</h3>
+    <p>这条泄漏不依赖取消或失败打开，与 <code>CA-048</code> 不同：每次正常项目会话关闭后也会永久留下一个全局事件处理器。长时间运行中，内存和设置广播成本随打开次数增长；旧版本迁移、项目克隆和设置对话框临时模型还会进一步放大数量。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>先明确项目内 EditorSetting 是仍需生效的项目状态还是仅为旧格式兼容字段。若仍需使用，应让 VM 使用同一实例并由项目/编辑器唯一所有者释放；若已改成全局设置，应迁移为无事件副作用的纯 DTO 或从新格式移除。</li>
+      <li>项目模型需要完整的 IDisposable/IAsyncDisposable 所有权协议，不能把“运行时文件释放”当成对象全部释放；迁移中间对象也必须在结果创建后确定性销毁。</li>
+      <li>弱引用测试分别覆盖当前项目正常关闭、0.5.2 迁移、Clone 和 Setup 对话框取消，断言所有临时/项目 Setting 都可回收；全局设置变化只通知仍打开编辑器对应的实例。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -3695,12 +4162,17 @@ private Task&lt;bool&gt; CheckIsValid(..., bool forceFresh = false)
         审查 Shell Provider 枚举与失败文档所有权、项目挂载和最近记录的提交顺序、最近条目恢复策略、未知格式命令，以及 Lane 删除后的引用持久化。记录 <code>CA-048</code> 至 <code>CA-053</code>。
         StorageProvider 文件夹树的所有权转交和项目模型各文件属性的幂等释放路径当前完整；调色板列表 UI 也会阻止删除仍被 Bullet/Bell 引用的模板，因此这些候选未重复编号。未知区段标记本身可被有意忽略，本批只记录无法区分并静默删除未来/扩展命令的真实保存风险。
       </div>
+      <time datetime="2026-08-13">2026-08-13 / A13</time>
+      <div>
+        审查普通画布的选择/拖拽路由、Pointer 结束与捕获语义、撤销历史 Slider 映射，以及项目音频挂载、持久时长和设置对象所有权。记录 <code>CA-054</code> 至 <code>CA-060</code>。
+        Batch Mode 已显式捕获 Pointer、处理 CaptureLost 并取消手势，因此未把它并入普通模式的 <code>CA-056</code>；<code>DefaultObjectInteractiveAction.dragStartCanvasPoint</code> 的未使用局部变量只作为 <code>CA-055</code> 的实现线索，没有单独编号。项目 JSON 中的 EditorSetting 确实存在，但本批只记录可证明的静态事件订阅泄漏，不把 getter-only 属性的具体反序列化覆盖行为扩写成另一条未经验证的问题。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查快捷新增与拖放创建的撤销边界、解析器对重复 RecordId 和乱序引用的处理、音频/项目切换的异常回滚、Browser 书签权限恢复，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-054</code> 起顺序编号。</p>
+    <p>继续检查快捷新增与拖放创建的撤销边界、解析器对重复 RecordId 和乱序引用的处理、Browser 书签权限恢复、项目设置兼容字段的反序列化副作用，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-061</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
