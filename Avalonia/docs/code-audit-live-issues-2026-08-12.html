@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OngekiFumenEditor 持续代码审计问题台账</title>
+  <style>
+    :root {
+      --canvas: #f3f5f7;
+      --surface: #ffffff;
+      --surface-muted: #f7f9fa;
+      --text: #20262d;
+      --muted: #5d6874;
+      --border: #cbd3da;
+      --accent: #075f9b;
+      --accent-soft: #e6f2f8;
+      --danger: #a72d2d;
+      --danger-soft: #fbeaea;
+      --warning: #8b5000;
+      --warning-soft: #fff3df;
+      --success: #216e45;
+      --success-soft: #e7f4ec;
+      --code: #eef1f3;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--text);
+      font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.65;
+      letter-spacing: 0;
+    }
+
+    main {
+      width: min(1320px, 100%);
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    header, section {
+      margin-bottom: 1rem;
+      padding: 1.25rem 1.4rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      line-height: 1.3;
+    }
+
+    h1 { margin-bottom: .4rem; font-size: 2rem; }
+    h2 { margin-bottom: .75rem; font-size: 1.25rem; }
+    h3 { margin-bottom: .55rem; font-size: 1.08rem; }
+    p { margin: .45rem 0; }
+    ul, ol { margin: .45rem 0 .45rem 1.3rem; padding: 0; }
+    li { margin: .28rem 0; }
+
+    a { color: var(--accent); }
+
+    code {
+      padding: .08rem .3rem;
+      border-radius: 3px;
+      background: var(--code);
+      font-family: Consolas, "Cascadia Code", monospace;
+      font-size: .9em;
+      overflow-wrap: anywhere;
+    }
+
+    pre {
+      margin: .65rem 0;
+      padding: .85rem 1rem;
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #f4f6f8;
+      line-height: 1.5;
+    }
+
+    pre code { padding: 0; background: transparent; }
+
+    .meta { color: var(--muted); font-size: .92rem; }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .7rem;
+      margin-top: 1rem;
+    }
+
+    .metric {
+      min-height: 88px;
+      padding: .75rem .9rem;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .metric strong { display: block; font-size: 1.3rem; }
+    .metric span { color: var(--muted); font-size: .88rem; }
+
+    .status, .severity, .confidence, .exposure {
+      display: inline-block;
+      padding: .1rem .5rem;
+      border-radius: 999px;
+      font-size: .8rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-open { color: var(--danger); background: var(--danger-soft); }
+    .severity-high { color: var(--danger); background: var(--danger-soft); }
+    .severity-medium { color: var(--warning); background: var(--warning-soft); }
+    .confidence-confirmed { color: var(--success); background: var(--success-soft); }
+    .exposure-active { color: var(--danger); background: var(--danger-soft); }
+    .exposure-dormant { color: var(--warning); background: var(--warning-soft); }
+
+    .notice {
+      padding: .75rem .9rem;
+      border-left: 4px solid var(--warning);
+      background: var(--warning-soft);
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      min-width: 1050px;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: .7rem .65rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th { background: #edf1f4; font-weight: 700; }
+    tbody tr:hover { background: var(--surface-muted); }
+
+    .issue {
+      scroll-margin-top: 1rem;
+      border-top: 4px solid var(--border);
+    }
+
+    .issue.high { border-top-color: var(--danger); }
+    .issue.medium { border-top-color: var(--warning); }
+
+    .issue-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: .8rem;
+    }
+
+    .issue-head h2 { margin: 0; }
+    .badges { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: .65rem;
+      margin: .8rem 0;
+    }
+
+    .fact {
+      min-width: 0;
+      padding: .65rem .75rem;
+      border: 1px solid var(--border);
+      background: var(--surface-muted);
+    }
+
+    .fact strong { display: block; margin-bottom: .15rem; font-size: .86rem; }
+
+    .audit-log {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr);
+      gap: .4rem 1rem;
+    }
+
+    .audit-log time { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 820px) {
+      main { padding: .8rem .6rem 2rem; }
+      header, section { padding: 1rem; }
+      h1 { font-size: 1.55rem; }
+      .summary, .facts { grid-template-columns: 1fr; }
+      .issue-head { display: block; }
+      .badges { justify-content: flex-start; margin-top: .65rem; }
+      .audit-log { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
+    <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>51d8fa6b</code> · 状态：持续审计中</p>
+    <div class="summary" aria-label="审计摘要">
+      <div class="metric"><strong>8</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>8</strong><span>未修复</span></div>
+      <div class="metric"><strong>4 / 4</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>2</strong><span>已完成审计批次</span></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>记录规则</h2>
+    <div class="notice">
+      编号使用 <code>CA-NNN</code>，一经分配不复用。修复后只更新状态、修复提交和验证证据，不删除原记录。
+    </div>
+    <ul>
+      <li>只记录存在明确触发路径、错误结果和源码证据的问题；纯风格偏好不入账。</li>
+      <li>“活动”表示当前用户功能存在直接调用路径；“潜伏”表示代码会编译或注册，但本次全仓检索未发现生产调用。</li>
+      <li>行号对应上述基线，后续代码移动时以文件和符号名为准。</li>
+      <li>本台账是增量审计，不代表尚未审查的模块已经安全。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>问题索引</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>编号</th>
+          <th>严重度</th>
+          <th>状态</th>
+          <th>暴露面</th>
+          <th>子系统</th>
+          <th>问题</th>
+          <th>主要证据</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td><a href="#ca-001"><code>CA-001</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-dormant">潜伏</span></td>
+          <td>图片加载 / 并发</td>
+          <td>队列退出窗口会丢失唤醒，使新请求永久挂起</td>
+          <td><code>ImageLoader.cs:50-51, 62, 99</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-002"><code>CA-002</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-dormant">潜伏</span></td>
+          <td>图片加载 / 并发</td>
+          <td>非原子启动门闩可启动多个处理器，绕过并发上限</td>
+          <td><code>ImageLoader.cs:25, 55-61</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-003"><code>CA-003</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Browser OPFS / 内存</td>
+          <td>预览和普通下载的 Blob URL 在应用退出前均不释放</td>
+          <td><code>opfsBrowser.js:23, 257-259, 432-441, 846-850</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-004"><code>CA-004</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>谱面编辑器 / 渲染</td>
+          <td>渲染初始化异常从 Loaded 的 async void 泄漏，桌面端会退出进程</td>
+          <td><code>FumenVisualEditorView.xaml.cs:37-41</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-005"><code>CA-005</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>调度器 / 生命周期</td>
+          <td>已移除调度项仍被时间字典强引用，实例无法回收</td>
+          <td><code>SchedulerManager.cs:11, 37, 103-113</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-006"><code>CA-006</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>调度器 / 并发</td>
+          <td>后台枚举普通 List 时 UI 线程会并发增删</td>
+          <td><code>SchedulerManager.cs:10, 24, 28-60, 103-113</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-007"><code>CA-007</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>自动保存 / 性能</td>
+          <td>零或负自动保存间隔会让调度器进入无延迟紧循环</td>
+          <td><code>DefaultEditorDocumentManager.cs:163-170</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-008"><code>CA-008</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>谱面编辑器 / 图形资源</td>
+          <td>单例绘制目标随每个编辑器重复初始化并累积纹理资源</td>
+          <td><code>TapDrawingTarget.cs:14, 43-78</code></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ca-001" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-001</code> 图片加载队列存在丢失唤醒竞态</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-dormant">潜伏</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>位置</strong><a href="../src/OngekiFumenEditor.Avalonia/Utils/ImageLoader.cs"><code>ImageLoader.cs</code></a>，<code>LoadImage</code> / <code>PrcessQueue</code></div>
+      <div class="fact"><strong>结果</strong>返回的 <code>Task&lt;byte[]&gt;</code> 永久不完成</div>
+      <div class="fact"><strong>覆盖情况</strong>现有测试仅覆盖顺序缓存复用，没有并发入队测试</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>已有处理器在 <code>while (!tasks.IsEmpty)</code> 处观察到队列为空，准备退出。</li>
+      <li>另一个线程在处理器执行 <code>isProcessing = false</code> 之前调用 <code>LoadImage</code>，先把任务压入栈，再调用 <code>PrcessQueue</code>。</li>
+      <li>新调用看到 <code>isProcessing == true</code> 后直接返回。</li>
+      <li>旧处理器随后把 <code>isProcessing</code> 置为 <code>false</code> 并退出；队列中已有新任务，但没有任何处理器，也没有后续唤醒。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>tasks.Push(new LoadTask(taskCompleteSource, url, cancellationToken)); // 50
+PrcessQueue();                                                       // 51
+
+while (!tasks.IsEmpty)                                               // 62
+{
+    ...
+}
+
+isProcessing = false;                                                // 99</code></pre>
+    <p><code>ConcurrentStack</code> 只保证栈操作本身线程安全，不会把“判空、入队、处理器状态切换”组合成一个原子协议，因此上述交错不依赖未定义行为。</p>
+
+    <h3>影响</h3>
+    <p>调用方会无限等待图片数据；如果 UI 正在等待该任务，表现为图片不再出现、加载状态不结束，或者依赖该任务的后续流程停滞。取消令牌在任务滞留队列期间也不会主动完成对应的 <code>TaskCompletionSource</code>。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>使用单一、可证明无丢失唤醒的生产者/消费者原语，例如 <code>Channel&lt;LoadTask&gt;</code> 加固定数量消费者，或用锁保护“入队 + 启动/退出”状态机。</li>
+      <li>增加确定性并发测试，覆盖“处理器判空后、清除运行标记前”发生入队的交错，并断言所有返回任务在超时内完成。</li>
+      <li>本次全仓检索只找到单例注册和测试调用，未找到生产调用；问题当前属于潜伏缺陷，但代码一旦重新接入即可能触发。</li>
+    </ul>
+  </section>
+
+  <section id="ca-002" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-002</code> 图片加载处理器门闩非原子，并发上限可失效</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-dormant">潜伏</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>位置</strong><a href="../src/OngekiFumenEditor.Avalonia/Utils/ImageLoader.cs"><code>ImageLoader.cs</code></a>，<code>isProcessing</code> / <code>PrcessQueue</code></div>
+      <div class="fact"><strong>结果</strong><code>ParallelCount = 2</code> 不能构成全局并发上限</div>
+      <div class="fact"><strong>附带成本</strong>达到局部上限时反复 <code>Task.Yield</code>，产生调度器空转</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>两个线程近同时进入 <code>PrcessQueue</code>，都在另一个线程写入前读到 <code>isProcessing == false</code>。</li>
+      <li>两个线程都写入 <code>true</code> 并进入处理循环。</li>
+      <li>每个处理器都有自己的局部 <code>currentTaskRunningCount</code>，因此每个处理器都可以再启动两个工作任务；实际并发量可超过常量声明的 2。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>private volatile bool isProcessing = false; // 25
+
+if (isProcessing)                          // 57
+    return;
+isProcessing = true;                       // 59
+
+var currentTaskRunningCount = 0;           // 61</code></pre>
+    <p><code>volatile</code> 提供可见性，但“检查后设置”不是原子操作；局部计数器也无法约束其他同时启动的处理器。</p>
+
+    <h3>影响</h3>
+    <p>高并发入队时可能同时执行超过预期数量的网络、磁盘和解码任务，造成带宽突发、内存峰值和响应抖动。队列饱和时的反复 <code>Task.Yield</code> 还会产生无效调度。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>与 <code>CA-001</code> 一并替换为固定消费者或原子状态机；不要只把字段改成另一种可见性修饰符。</li>
+      <li>使用阻塞点记录测试下载器的同时运行数，在并发提交大量请求时断言峰值不超过 <code>ParallelCount</code>。</li>
+      <li>修复后不应再靠循环 <code>Task.Yield</code> 等待容量，应等待明确的工作完成或通道可读事件。</li>
+    </ul>
+  </section>
+
+  <section id="ca-003" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-003</code> OPFS 预览与普通下载长期保留 Blob URL</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>位置</strong><a href="../src/OngekiFumenEditor.Avalonia.Browser/wwwroot/opfsBrowser.js"><code>opfsBrowser.js</code></a>，预览、普通下载和卸载清理</div>
+      <div class="fact"><strong>结果</strong>已关闭预览或已完成下载对应的 Blob 仍被主页面持有</div>
+      <div class="fact"><strong>暴露面</strong>Browser 菜单中的 OPFS 文件浏览器已直接调用这些路径</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>反复双击 OPFS 文件进行预览，或者下载多个/较大的单文件。</li>
+      <li>每次操作都通过 <code>URL.createObjectURL</code> 创建 URL，并加入全局 <code>retainedObjectUrls</code>。</li>
+      <li>成功路径没有从集合移除，也没有调用 <code>URL.revokeObjectURL</code>；关闭预览标签页或下载完成均不会触发清理。</li>
+      <li>只有主应用页面发生 <code>beforeunload</code> 时才一次性释放全部 URL。作为长期运行的 Browser 应用，该事件可能数小时都不发生。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>const retainedObjectUrls = new Set();                 // 23
+
+objectUrl = URL.createObjectURL(previewContent);      // 257
+retainedObjectUrls.add(objectUrl);                    // 258
+previewWindow.location.replace(objectUrl);            // 259
+
+const objectUrl = URL.createObjectURL(file);           // 432
+retainedObjectUrls.add(objectUrl);                    // 433
+anchor.click();                                       // 440
+
+globalThis.addEventListener?.("beforeunload", () =&gt; { // 846
+    // 唯一的成功路径清理点
+});</code></pre>
+
+    <h3>影响</h3>
+    <p>对象 URL 会让对应 Blob 保持可达。对较大的音频、谱面资源、压缩包或其他 OPFS 文件反复预览/下载时，浏览器进程内存会持续增长，最终可能触发明显卡顿、内存压力或页面崩溃。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>普通下载在浏览器已接收点击后安排有界延迟清理，并从集合移除对应 URL。</li>
+      <li>预览需要独立生命周期：使用可感知预览页关闭/卸载的包装页，或跟踪子窗口关闭后释放该 URL；不能在资源尚未加载时过早撤销。</li>
+      <li>增加 JS 生命周期测试或浏览器集成测试，断言连续完成下载、关闭预览后保留集合回到基线，而主应用无需卸载。</li>
+    </ul>
+  </section>
+
+  <section id="ca-004" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-004</code> 渲染初始化异常会进入应用级崩溃流程</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/FumenVisualEditorView.xaml.cs"><code>FumenVisualEditorView.xaml.cs</code></a> 的 Loaded 事件</div>
+      <div class="fact"><strong>传播</strong><code>InitializeRenderControlAsync</code> 清理后再次 <code>throw</code></div>
+      <div class="fact"><strong>桌面结果</strong>全局 Dispatcher 异常处理最终执行 <code>Environment.Exit(-1)</code></div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>打开谱面编辑器时，只要渲染控件初始化、绘制目标初始化或纹理资源加载中的任意一步抛出非取消异常，就会走到该路径。资源缺失、损坏的本地资源覆盖、后端不匹配或设备初始化失败都属于可能来源。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>private async void OnRenderControlHostLoaded(...) // View: 37
+{
+    ...
+    await viewModel.InitializeRenderControlAsync(contentControl); // 41
+}
+
+catch (Exception exception)                     // Drawing: 1002
+{
+    DetachRenderControl();
+    renderInitializationTaskSource.TrySetException(exception);
+    throw;                                      // 1011
+}</code></pre>
+    <p>异常从返回 <code>Task</code> 的方法重新抛出后，由 <code>async void</code> 事件处理器交给 UI SynchronizationContext。桌面入口的 <a href="../src/OngekiFumenEditor.Avalonia.Desktop/Program.cs"><code>Program.cs</code></a> 在 <code>Dispatcher.UIThread.UnhandledException</code> 中处理后，于第 149 行退出整个进程。音频波形视图的同类挂载代码已经捕获并记录异常，说明谱面编辑器缺少的是局部错误边界。</p>
+
+    <h3>影响</h3>
+    <p>单个文档的渲染初始化失败会升级为整个桌面应用退出，其他已打开且可能未保存的谱面也受影响。Browser 端没有同等的本地捕获，行为依赖运行时的未处理异常策略。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在视图或专用挂载协调器中捕获异常，记录完整错误，并在该文档内显示不可用状态；不要让它逃出 <code>async void</code> 事件。</li>
+      <li>保留现有资源清理，但明确初始化失败后的重试或关闭语义。</li>
+      <li>增加 Headless 测试：注入会抛错的渲染管理器，断言控件被释放、错误被报告且没有触发 Dispatcher 未处理异常。</li>
+    </ul>
+  </section>
+
+  <section id="ca-005" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-005</code> 调度器时间字典永久保留已移除实例</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>位置</strong><a href="../src/OngekiFumenEditor.Avalonia/Kernel/Scheduler/SchedulerManager.cs"><code>SchedulerManager.cs</code></a></div>
+      <div class="fact"><strong>所有权</strong><code>ConcurrentDictionary&lt;ISchedulable, DateTime&gt;</code> 的键是强引用</div>
+      <div class="fact"><strong>增长来源</strong>编辑器激活/关闭，以及每个新建的桌面音频播放器</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li><code>AddScheduler</code> 同时把实例加入列表和 <code>schedulersCallTime</code>。</li>
+      <li>文档切换、文档关闭、音频暂停或播放器释放时调用 <code>RemoveScheduler</code>。</li>
+      <li>移除方法只从 <code>schedulers</code> 列表删除，没有从 <code>schedulersCallTime</code> 删除。</li>
+      <li>调度器是应用级单例，因此字典键会保留这些实例直到进程结束。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>private readonly ConcurrentDictionary&lt;ISchedulable, DateTime&gt;
+    schedulersCallTime = [];                         // 11
+
+schedulers.Add(s);
+schedulersCallTime[s] = DateTime.MinValue;          // 36-37
+
+schedulers.Remove(s);                               // 111
+// 缺少 schedulersCallTime.TryRemove(s, out _)</code></pre>
+
+    <h3>影响</h3>
+    <p>长时间打开、关闭谱面或重复装载音频会让字典无界增长，并阻止对应编辑器和播放器实例被 GC。即使播放器释放时清空了大块采样数组，残留对象图、事件源和管理器引用仍会持续占用内存，也使生命周期测试产生误判空间。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>移除调度项时同步删除时间记录；终止管理器时清空两个容器。</li>
+      <li>把列表和时间状态纳入同一个原子所有权协议，避免只修字典却保留 <code>CA-006</code>。</li>
+      <li>增加弱引用回收测试：注册并移除编辑器/播放器后，在管理器仍存活时实例应可被回收。</li>
+    </ul>
+  </section>
+
+  <section id="ca-006" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-006</code> 调度器后台枚举与前台增删存在集合竞态</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>容器</strong>普通 <code>List&lt;ISchedulable&gt;</code></div>
+      <div class="fact"><strong>读线程</strong><code>Task.Run</code> 启动的后台循环</div>
+      <div class="fact"><strong>写线程</strong>Shell 文档事件和音频播放命令所在的 UI 线程</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>在后台循环执行 LINQ 枚举期间切换/关闭文档，或播放、暂停音频。<code>List&lt;T&gt;</code> 在枚举中检测到版本变化会抛出 <code>InvalidOperationException</code>；增加操作中的“按名称查重再加入”也不是原子的。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>private readonly List&lt;ISchedulable&gt; schedulers = []; // 10
+
+runTask = Task.Run(() =&gt; Run(runCts.Token), ...);    // 24
+
+var pending = Schedulers                             // 48
+    .Where(...)
+    .Select(...)
+    .ToArray();
+
+schedulers.Add(s);                                   // 36
+schedulers.Remove(s);                                // 111</code></pre>
+    <p>循环会捕获并记录异常后重试，所以通常不是永久停止，而是丢失本轮调度、产生错误日志，并在频繁增删时出现抖动。</p>
+
+    <h3>影响</h3>
+    <p>音频的 60 FPS 属性刷新、编辑器性能统计和自动保存都共用该循环。竞态发生时会出现更新跳帧、自动保存周期延后或日志刷屏；重复注册检查也可能在多写线程下失效。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>用锁保护增删并在锁内生成快照，随后在锁外调用调度项；或使用不可变快照/并发友好的注册表。</li>
+      <li>注册、按名称去重、时间记录初始化和移除必须作为一个一致操作处理。</li>
+      <li>增加压力测试，在循环运行期间并发增删数千次，断言无异常、无重复项且每个存活项仍能被调用。</li>
+    </ul>
+  </section>
+
+  <section id="ca-007" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-007</code> 非正自动保存间隔会触发无延迟调度</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>输入</strong><a href="../src/OngekiFumenEditor.Avalonia/Kernel/SettingPages/FumenVisualEditor/Views/FumenVisualEditorGlobalSettingView.axaml"><code>FumenVisualEditorGlobalSettingView.axaml</code></a> 的普通文本框</div>
+      <div class="fact"><strong>转换</strong><code>TimeSpan.FromMinutes(AutoSaveTimeInterval)</code>，无下限检查</div>
+      <div class="fact"><strong>结果</strong>调度项每轮都到期，循环不执行 10 ms 退避</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>在设置页把自动保存间隔输入为 <code>0</code> 或负整数，或者从旧/手工修改的配置中载入该值。模型、反序列化和 UI 均没有范围验证。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>Text="{Binding Setting.AutoSaveTimeInterval}"         // XAML: 35
+
+scheduleCallLoopInterval = TimeSpan.FromMinutes(
+    EditorGlobalSetting.Default.AutoSaveTimeInterval); // Manager: 165
+
+DateTime.Now - lastCall &gt;= ScheduleCallLoopInterval   // Scheduler: 49
+// interval &lt;= 0 时恒为 true；pending 非空时不会执行第 60 行的 Task.Delay</code></pre>
+
+    <h3>影响</h3>
+    <p>没有活动文档时，调度器会以尽可能高的频率执行一个同步返回任务并占用 CPU；存在可保存文档时，它会连续生成恢复快照，造成高 CPU、持续磁盘/OPFS 写入、日志增长和界面卡顿。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>UI 改用带最小值的数值控件，并在模型反序列化/应用设置时再次钳制，不能只依赖控件验证。</li>
+      <li>调度器自身拒绝或归一化非正间隔，作为所有 <code>ISchedulable</code> 的最后防线。</li>
+      <li>增加对 <code>0</code>、负数和超大值的测试，使用调用计数证明固定时间窗内不会紧循环。</li>
+    </ul>
+  </section>
+
+  <section id="ca-008" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-008</code> 单例绘制目标在每个编辑器中重复加载并保留纹理</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>生命周期</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/OngekiObjects/TapDrawingTarget.cs"><code>TapDrawingTarget</code></a> 等均注册为 Singleton</div>
+      <div class="fact"><strong>重复入口</strong>每个编辑器的 <code>PrepareRenderLoop</code> 都遍历并调用 <code>Initialize</code></div>
+      <div class="fact"><strong>关闭行为</strong>编辑器只清空自身引用，不释放共享绘制目标</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>打开第一个谱面，单例目标加载纹理并把纹理作为多个字典的键。</li>
+      <li>再打开一个谱面，同一单例目标再次执行 <code>Initialize</code>，字段被新纹理覆盖，并向既有字典继续加入新键。</li>
+      <li>旧纹理仍被字典强引用；关闭编辑器时 <code>DisposeRenderResources</code> 只把该编辑器的 <code>drawingTargets</code> 设为空。</li>
+      <li>重复开关文档会持续增加 Skia/GPU 图片对象和空绘制列表。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>[RegisterSingleton&lt;IFumenEditorDrawingTarget&gt;]       // Tap: 14
+
+foreach (var drawTarget in drawingTargets)
+    drawTarget.Initialize(renderImpl);               // Drawing VM: 232-233
+
+texture = ResourceUtils.OpenReadTextureFromResource(...);
+normalList[texture] = new();                         // Tap: 47-50
+
+drawingTargets = [];                                // Drawing VM: 1189</code></pre>
+    <p><code>TapDrawingTarget.Dispose</code> 只释放当前 7 个纹理中的 4 个，且编辑器关闭时并不会调用它；<code>BulletDrawingTarget</code> 每次初始化还会把新纹理加入继承的绘制字典，但自身没有实现 <code>IDisposable</code>。</p>
+
+    <h3>影响</h3>
+    <p>打开多个谱面或反复关闭重开后，图形资源和字典项随初始化次数增长，可能造成工作集/GPU 资源上升、绘制循环额外遍历，以及最终的内存压力或渲染失败。单例目标还保存逐帧可变状态，所有权边界与多文档模型不一致。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>优先让绘制目标成为每编辑器实例并由编辑器显式释放；可共享的不可变纹理资源应拆到独立缓存并采用引用计数或应用级所有权。</li>
+      <li>所有实现必须完整释放其创建的 <code>IImage</code>，重复初始化前也要有确定的旧资源处理。</li>
+      <li>增加双编辑器生命周期测试，跟踪创建/释放的图片数量，断言关闭后回到基线且两个编辑器不共享逐帧可变目标实例。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>审计日志</h2>
+    <div class="audit-log">
+      <time datetime="2026-08-12">2026-08-12 / A01</time>
+      <div>
+        审查 Browser OPFS、窗口打开/关闭、异步轮询、图片加载队列和音频波形后台任务。记录 <code>CA-001</code> 至 <code>CA-003</code>。
+        音频波形旧文件 <code>AudioPlayerToolViewerViewModel.WaveformDrawing.cs</code> 已由项目文件排除编译，因此其中旧异步实现未作为当前缺陷编号。
+      </div>
+      <time datetime="2026-08-12">2026-08-12 / A02</time>
+      <div>
+        审查编辑器渲染初始化与关闭、调度器注册表、自动保存设置、音频调度和绘制目标资源所有权。记录 <code>CA-004</code> 至 <code>CA-008</code>。
+        B-042 的“释放后异步重新挂载”场景已有取消令牌、版本号检查和对应生命周期测试，本批未将其列为问题。
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>下一批范围</h2>
+    <p>继续检查命令执行异常、文件系统抽象、设置订阅生命周期、Browser/桌面平台差异和多文档渲染状态。新增问题从 <code>CA-009</code> 起顺序编号。</p>
+  </section>
+</main>
+</body>
+</html>
