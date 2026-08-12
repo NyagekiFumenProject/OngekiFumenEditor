@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EditorFileAccessContext 重构实时审核</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f6f7f5;
+      --surface: #ffffff;
+      --ink: #202522;
+      --muted: #606862;
+      --line: #d8ddd9;
+      --strong-line: #aeb8b1;
+      --accent: #176b62;
+      --accent-soft: #e7f3f0;
+      --warn: #9a5b00;
+      --warn-soft: #fff3dc;
+      --danger: #9b2c2c;
+      --danger-soft: #fceaea;
+      --code: #171b19;
+      --code-ink: #e8eee9;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.68;
+      letter-spacing: 0;
+    }
+
+    header {
+      background: #242a26;
+      color: #f7faf7;
+      border-bottom: 5px solid var(--accent);
+    }
+
+    header .inner,
+    main,
+    footer .inner {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    header .inner {
+      padding: 34px 0 28px;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      line-height: 1.28;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    h2 {
+      margin-top: 42px;
+      padding-bottom: 9px;
+      border-bottom: 2px solid var(--line);
+      font-size: 23px;
+    }
+
+    h3 {
+      margin-top: 28px;
+      font-size: 18px;
+    }
+
+    p {
+      margin: 10px 0;
+    }
+
+    a {
+      color: var(--accent);
+    }
+
+    code {
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 0.94em;
+    }
+
+    :not(pre) > code {
+      padding: 1px 4px;
+      border: 1px solid #d7dfda;
+      border-radius: 4px;
+      background: #eef2ef;
+    }
+
+    pre {
+      overflow-x: auto;
+      margin: 14px 0;
+      padding: 16px 18px;
+      border-radius: 6px;
+      background: var(--code);
+      color: var(--code-ink);
+      line-height: 1.55;
+    }
+
+    main {
+      padding: 24px 0 64px;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin-top: 10px;
+      color: #cbd4cd;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 24px;
+      margin-top: 20px;
+      color: #dfe6e1;
+      font-size: 14px;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 2px 9px;
+      border: 1px solid #77aca4;
+      border-radius: 4px;
+      background: #193f39;
+      color: #ddf3ee;
+      font-weight: 600;
+    }
+
+    .notice,
+    .recommendation,
+    .risk {
+      margin: 16px 0;
+      padding: 14px 18px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .risk {
+      border-left-color: var(--warn);
+      background: var(--warn-soft);
+    }
+
+    .recommendation strong,
+    .risk strong,
+    .notice strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    table {
+      width: 100%;
+      margin: 16px 0 24px;
+      border-collapse: collapse;
+      background: var(--surface);
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf1ee;
+      font-weight: 650;
+    }
+
+    ul,
+    ol {
+      padding-left: 24px;
+    }
+
+    li + li {
+      margin-top: 6px;
+    }
+
+    .question {
+      margin-top: 24px;
+      padding: 0 0 4px 20px;
+      border-left: 5px solid var(--accent);
+    }
+
+    .question-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 14px;
+    }
+
+    .question-title .state {
+      padding: 2px 7px;
+      border: 1px solid #d5a85b;
+      border-radius: 4px;
+      background: var(--warn-soft);
+      color: #744300;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .question-title .state.resolved {
+      border-color: #76aa9e;
+      background: var(--accent-soft);
+      color: #155a52;
+    }
+
+    .option-label {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .decision-impact {
+      border-left-color: var(--danger);
+      background: var(--danger-soft);
+    }
+
+    .answer-slot {
+      margin: 20px 0;
+      padding: 14px 16px;
+      border: 1px dashed var(--strong-line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--muted);
+    }
+
+    .source-list {
+      word-break: break-word;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      background: #ecefec;
+      color: var(--muted);
+    }
+
+    footer .inner {
+      padding: 18px 0 28px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+      header .inner,
+      main,
+      footer .inner {
+        width: min(100% - 24px, 1120px);
+      }
+
+      h1 {
+        font-size: 25px;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      .question {
+        padding-left: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <h1>EditorFileAccessContext 重构实时审核</h1>
+      <p class="subtitle">
+        对 <code>docs/editor_file_access_context_refactory.md</code> 的逐题设计访谈、代码核验和决策记录。
+        本文档在每次回答后实时更新；未确认内容不会被写成最终结论。
+      </p>
+      <div class="meta">
+        <span class="status">访谈进行中：Q2 等待回答</span>
+        <span>创建日期：2026-08-12</span>
+        <span>当前问题：新建谱面目标的绑定时机</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="rules">
+      <h2>审核规则</h2>
+      <ul>
+        <li>每次只提出一个需要用户决策的问题。</li>
+        <li>能从代码、测试或既有设计文档确认的事实，由审核直接核验，不反问用户。</li>
+        <li>每题必须说明触发原因、方案差异、连锁影响和推荐答案，并尽量给出代码或流程示意。</li>
+        <li>用户回答后，先详细归纳其含义、边界与后续影响，再把结论写入本文档并进入下一题。</li>
+        <li>本文只完善和审核设计；除非用户另行要求，不实施生产代码重构。</li>
+      </ul>
+    </section>
+
+    <section id="baseline">
+      <h2>已核验基线</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>主题</th>
+            <th>当前代码事实</th>
+            <th>对新草案的影响</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Provider 注册</td>
+            <td>
+              Core 中只有一个 <code>FumenVisualEditorProvider</code> 同时注册为
+              <code>IEditorProvider</code> 与 <code>IFumenVisualEditorProvider</code>；Desktop/Browser
+              尚无各自的 Fumen Provider 注册。
+            </td>
+            <td>按平台拆分可行，但必须定义 Core 共享服务与平台入口的注册边界，避免同时注册出两个相同文件类型 Provider。</td>
+          </tr>
+          <tr>
+            <td>职责现状</td>
+            <td>
+              Provider 的 <code>TryNew/TryOpen</code> 目前只转发；文件夹选择、书签恢复、项目扫描和加载仍在
+              <code>FumenVisualEditorViewModel.ProjectIO.cs</code>。
+            </td>
+            <td>草案提出把交互与平台逻辑移回 Provider，方向与现状相反，需要明确 ViewModel 接收上下文后的最小职责。</td>
+          </tr>
+          <tr>
+            <td>现有加载不变量</td>
+            <td>
+              <code>EditorProjectDataUtils.TryLoadFromFileAsync</code> 接收一个项目根目录，并通过
+              <code>EditorProjectPathResolver.TryResolveDependency</code> 在该根目录内解析谱面和音频。
+            </td>
+            <td>当前实现是严格单根模型；草案中的 Desktop 多目录兼容不能直接套用现有解析器。</td>
+          </tr>
+          <tr>
+            <td>运行时所有权</td>
+            <td>
+              <code>EditorProjectDataModel</code> 当前持有并释放 <code>ProjectRoot</code>、
+              <code>ProjectFile</code>、<code>FumenFile</code>、<code>AudioFile</code> 等句柄。
+            </td>
+            <td>若新增 <code>EditorFileAccessContext</code> 也持有这些对象，必须确定唯一所有者和转移时点，否则容易双重释放或泄漏。</td>
+          </tr>
+          <tr>
+            <td>最近记录</td>
+            <td>
+              当前 Fumen 最近记录数据只有“一个文件夹书签 + 一个工程根相对定位符”；有效性检查也只恢复这一目录。
+            </td>
+            <td>它只能重建单根工作区，无法自动表达 Desktop 工程、谱面、音频分别位于不同目录的情况。</td>
+          </tr>
+          <tr>
+            <td>Fast Open</td>
+            <td>
+              Core 的 Fast Open 注册已关闭；遗留流程可从单独谱面和用户补选音频构造
+              <code>EditorProjectDataModel</code>，但不一定存在 <code>.nyagekiProj</code> 文件。
+            </td>
+            <td>草案把 <code>ProjectFile</code> 写成必需字段，与 Fast Open 的无工程文件状态存在后续待决冲突。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="notice">
+        <strong>与既有设计的关系</strong>
+        <code>docs/fumen-visual-editor-project-folder-io-design.md</code> 已确认 D1：用户授权的项目文件夹是全部项目 I/O
+        的唯一权限边界。新草案的 Desktop 行为允许三个主文件分散在不同文件夹，因此这是一次明确的设计变更，不能只视为类名重构。
+      </div>
+    </section>
+
+    <section id="decision-tree">
+      <h2>决策树</h2>
+      <pre><code>Q1  核心是否感知平台目录拓扑？
+ |
+ +-- 已确认：不感知；平台 Provider 构造并验证文件能力
+       |
+       v
+Q2  新建空白谱面时，可写 FumenFile 何时绑定？
+ |
+ +-- 打开编辑器前绑定 --> Q3 ProjectFile 的创建与 Fast Open 缺省语义
+ |
+ +-- 首次保存时绑定 --> 先定义平台回调边界，再进入 Q3
+
+随后进入：上下文所有权 -> Provider 注册边界 -> 最近记录重建 ->
+保存/另存为 -> 错误模型 -> 并发/取消 -> 测试与迁移顺序</code></pre>
+    </section>
+
+    <section id="q1" class="question">
+      <div class="question-title">
+        <h2>Q1. Desktop 是否正式支持“多授权根工作区”？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>为什么必须先决定</h3>
+      <p>
+        新草案同时写了两个目前不能自然共存的不变量：<code>ProjectDirectory</code> 是项目主目录；Desktop 又可忽略
+        <code>.nyagekiProj</code>、谱面和音频位于不同文件夹。若只增加一个
+        <code>List&lt;ISimpleDirectory&gt; AdditionDirectories</code>，调用方仍然不知道每个文件由哪个目录授权、哪些路径允许保存、
+        最近记录应恢复几个权限，以及谁负责释放重复目录句柄。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>不先明确会出现的直接歧义</strong>
+        <ul>
+          <li><code>ProjectDirectory</code> 究竟是权限边界、工程文件父目录、默认保存目录，还是仅用于 UI 显示？</li>
+          <li>工程中的绝对路径在 Desktop 上是继续保留、转为相对路径，还是保存时被重写？</li>
+          <li>谱面和音频位于外部目录时，<code>Save</code> 是否可以原地覆盖，<code>Save As</code> 又能选择哪些目录？</li>
+          <li>最近记录只有一个目录书签时，应用重启后无法恢复多目录工作区；只保存本地路径又无法证明权限和可写性。</li>
+          <li><code>AdditionDirectories</code> 与文件没有角色绑定，无法可靠去重和安排反向释放顺序。</li>
+        </ul>
+      </div>
+
+      <h3>方案 A：所有平台保持单根</h3>
+      <p>
+        Desktop 打开旧工程时，如果谱面或音频在项目根外，也先复制到项目内再加载。这样完全延续既有 D1，Browser 与 Desktop
+        使用同一种上下文和最近记录格式。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>模型最简单；现有路径解析、保存边界和“一个目录书签”最近记录可以复用；项目天然可搬运。</td></tr>
+          <tr><th>代价</th><td>改变原 Desktop 行为；打开旧工程可能产生副本并重写引用；不能原地编辑散落在外部目录的资源。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：Browser 单根，Desktop 显式多根</h3>
+      <p>
+        Browser 新建与打开继续形成便携单根工作区；Desktop 的旧工程和 Fast Open 可形成兼容多根工作区。
+        “多根”必须成为上下文的显式模式，每个文件都要绑定自己的授权根，而不是仅把目录放入一个无类型列表。
+      </p>
+      <pre><code class="language-csharp">public enum EditorWorkspaceKind
+{
+    PortableSingleRoot,
+    DesktopLegacyMultiRoot
+}
+
+public enum EditorFileRole
+{
+    Project,
+    Fumen,
+    Audio
+}
+
+public sealed record EditorFileBinding(
+    EditorFileRole Role,
+    ISimpleFile File,
+    ISimpleDirectory AuthorizationRoot);
+
+public sealed class EditorFileAccessContext : IAsyncDisposable
+{
+    public required EditorWorkspaceKind WorkspaceKind { get; init; }
+    public required ISimpleDirectory ProjectDirectory { get; init; }
+    public required IReadOnlyList&lt;EditorFileBinding&gt; Files { get; init; }
+}
+</code></pre>
+      <p>
+        上述代码只是表达本题推荐的不变量，不是最终 API：后续还要单独决定 Fast Open 时
+        <code>Project</code> 绑定是否可缺省、目录/文件句柄由谁拥有，以及是否需要专门的保存策略对象。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>保留 Desktop 原行为；Browser 仍维持可移植和权限受限模型；平台差异在 Provider 构造上下文时显式化。</td></tr>
+          <tr><th>代价</th><td>最近记录、路径语义、保存边界和资源所有权都必须支持两种模式；测试矩阵明显扩大。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：Desktop 直接使用任意本地路径</h3>
+      <p>
+        把 <code>ProjectDirectory</code> 只当工程文件父目录，谱面和音频继续按绝对字符串路径访问；
+        <code>AdditionDirectories</code> 仅作辅助信息。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>最接近旧 Desktop 代码，短期改动量看似较小。</td></tr>
+          <tr><th>风险</th><td>绕过新文件能力模型；ViewModel/加载器重新依赖 <code>System.IO</code>；上下文不能证明权限和所有权；Browser 与 Desktop 的核心加载路径再次分叉。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="recommendation">
+        <strong>回答前的审核建议：选择方案 B，并把它定义成受约束的兼容模式。</strong>
+        <p>
+          这最符合草案明确提出的 Desktop 兼容目标，同时不会把“任意本地路径”泄漏回 ViewModel。Provider 负责把平台来源转换成完整、已验证的文件绑定；
+          ViewModel 只消费绑定好的文件句柄。Browser 永远只产生 <code>PortableSingleRoot</code>；Desktop 只有打开旧工程或 Fast Open
+          时才可产生 <code>DesktopLegacyMultiRoot</code>，新建项目仍优先产生单根工作区。
+        </p>
+      </div>
+
+      <h3>推荐流程</h3>
+      <pre><code>Browser 新建/打开
+  -> 选择项目根
+  -> 外部谱面/音频复制到 autoImport
+  -> 验证所有主文件属于项目根
+  -> PortableSingleRoot
+
+Desktop 新建
+  -> 与 Browser 共用导入流程
+  -> PortableSingleRoot
+
+Desktop 打开旧 .nyagekiProj / Fast Open
+  -> 解析旧引用
+  -> 分别取得并验证工程、谱面、音频文件能力
+  -> 为每个文件记录授权根
+  -> DesktopLegacyMultiRoot
+
+两种模式
+  -> EditorContext
+  -> FumenVisualEditorViewModel.Load(EditorContext)
+  -> ViewModel 不再自行弹 Picker 或解析任意系统路径</code></pre>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        你是否同意：<strong>Browser 与普通新建保持单根便携工作区；Desktop 打开旧工程和 Fast Open 时正式允许显式、受约束的多授权根工作区，
+        并要求每个主文件绑定自己的授权根</strong>？
+      </p>
+      <p>
+        你可以回答“同意推荐方案”，也可以选择方案 A / C，或说明你希望的边界。下一题会根据本题答案继续确定
+        <code>EditorFileAccessContext</code> 的结构，而不会提前混入其他决策。
+      </p>
+
+      <div class="notice">
+        <strong>回答后的修正</strong>
+        上面的初步建议错误地准备把 <code>WorkspaceKind</code> 和每个文件的 <code>AuthorizationRoot</code>
+        暴露给核心项目。用户明确指出，这些信息只属于平台构造过程。新结论保留“平台可以采用单根或多根来源”的自由，
+        但核心契约不描述来源拓扑，也不因 Desktop/Browser 产生两套加载算法。
+      </div>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>
+          <code>EditorFileAccessContext</code> 只由平台项目构造。对于核心项目，它只负责提供合适的可读写目录，
+          以及角色明确、可读写的谱面、音频和项目文件上下文。核心项目不关心这些对象如何从单目录、多目录、书签、
+          本地路径或复制导入流程中产生，只关心如何读取和使用所需文件内容。
+        </p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>构造责任属于平台 Provider。</strong> Browser/Desktop Provider 负责文件选择、目录授权、外部文件复制、
+            路径解析、文件存在性检查，以及交付前所需的可读写能力验证。
+          </li>
+          <li>
+            <strong>核心只依赖能力，不依赖来源。</strong> Core 中的 ViewModel 和加载服务通过
+            <code>ISimpleDirectory</code>/<code>ISimpleFile</code> 读取或写入，不分支判断 Desktop、Browser、单根或多根，
+            也不把 <code>LocalPath</code> 当作正常加载前提。
+          </li>
+          <li>
+            <strong>Desktop 多目录仍可存在，但被封装。</strong> 原草案允许 Desktop 的工程、谱面和音频位于不同目录；
+            平台可在内部组合这些能力，但不应把 <code>WorkspaceKind</code>、授权根映射或书签结构泄漏进核心领域模型。
+          </li>
+          <li>
+            <strong>文件角色必须直接可见。</strong> 核心不应从 <code>AdditionDirectories</code> 中猜测哪个文件是谱面、音频或工程；
+            三个主文件应由明确命名的属性提供。附加目录只有在核心确实需要按目录发现资源时才有意义，不能承担隐式主文件解析职责。
+          </li>
+          <li>
+            <strong>“已验证”是交付前置条件，不是永不失败保证。</strong> 平台在构造时应尽可能确认文件存在且支持预期读写；
+            交付后仍可能发生权限撤销、文件被外部删除、磁盘已满或写入异常，核心必须把这些视为正常 I/O 失败并正确呈现，
+            不能假定句柄永久有效。
+          </li>
+          <li>
+            <strong>既有设计需要标明被修订的范围。</strong> 旧文档 D1 的“单一项目根是全部 I/O 边界”继续适用于 Browser
+            和便携项目流程，但不能再作为 Core 加载器必须了解的全局不变量；Desktop Provider 可以交付来自多个位置的已绑定文件能力。
+          </li>
+        </ul>
+
+        <strong>最终决策 D1：</strong>
+        <p>
+          <code>EditorFileAccessContext</code> 是平台构造、核心消费的能力对象。Core 不建模或判断文件系统拓扑，
+          只按角色读取和写入平台已经绑定的目录及文件；平台差异必须在调用
+          <code>FumenVisualEditorViewModel.New(EditorContext)</code> 或 <code>Load(EditorContext)</code> 之前被消化。
+        </p>
+      </div>
+    </section>
+
+    <section id="q2" class="question">
+      <div class="question-title">
+        <h2>Q2. 新建时没有已有谱面，可写的 FumenFile 应在何时绑定？</h2>
+        <span class="state">等待回答</span>
+      </div>
+
+      <h3>触发原因</h3>
+      <p>
+        Q1 已确认核心只消费平台准备好的文件能力。然而原草案又规定：新建时“已有谱面文件”是可选项；若没有指定谱面保存路径，
+        等用户第一次保存时再弹出选择对话框。这意味着平台调用 <code>New(EditorContext)</code> 时，
+        <code>FumenFile</code> 可能尚不存在，与“上下文向核心提供明显、可读写的谱面文件”之间存在冲突。
+      </p>
+
+      <p>当前代码也说明这个缺口不能留成模糊约定：</p>
+      <ul>
+        <li><code>FumenVisualEditorViewModel.Save()</code> 最终要求一个已绑定的 <code>FumenFile</code> 才能序列化并写入。</li>
+        <li>一旦编辑器已经打开，框架的标准保存命令只调用 ViewModel，不会重新调用创建该文档的 Provider。</li>
+        <li>若 ViewModel 自己使用 Avalonia Storage API 弹保存对话框，它又重新承担了 Q1 已划给平台 Provider 的权限和目标构造职责。</li>
+      </ul>
+
+      <h3>方案 A：平台在打开编辑器前确定谱面目标</h3>
+      <p>
+        Setup 对话框仍允许“导入已有谱面”为空，但必须另外确定一个项目内的谱面保存目标。若用户选择了已有谱面，平台先按规则复制或重定向，
+        最终把实际可读写的项目内文件作为 <code>FumenFile</code>；若用户不选择已有谱面，平台先选择或创建一个空白谱面的目标文件，
+        再调用核心初始化空白内容。
+      </p>
+
+      <pre><code>平台 New 流程
+  -> 选择 ProjectDirectory
+  -> 选择 AudioFile，并在需要时导入
+  -> 可选：选择已有谱面作为初始内容
+  -> 必选：确定项目内 FumenFile 保存目标
+  -> 验证目标可写
+  -> 构造 EditorContext
+  -> Core.New(context)
+       -> 有初始谱面：读取并初始化
+       -> 无初始谱面：创建空白模型并写入 FumenFile
+  -> 成功后才显示编辑器</code></pre>
+
+      <p>
+        为避免用“文件长度是否为零”猜测初始化方式，可以让 <code>EditorContext</code> 表达内容初始化意图，而
+        <code>EditorFileAccessContext.FumenFile</code> 始终只是明确的读写目标：
+      </p>
+
+      <pre><code class="language-csharp">public enum FumenInitializationKind
+{
+    CreateBlank,
+    LoadBoundFile
+}
+
+public sealed class EditorContext
+{
+    public required EditorFileAccessContext FileAccessContext { get; init; }
+    public required FumenInitializationKind FumenInitialization { get; init; }
+}
+
+public sealed class EditorFileAccessContext
+{
+    public required ISimpleDirectory ProjectDirectory { get; init; }
+    public required ISimpleFile FumenFile { get; init; }
+    public required ISimpleFile AudioFile { get; init; }
+    // ProjectFile 的必需性留到下一题决定。
+}</code></pre>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>严格符合 Q1；核心保存永远只写已绑定文件；上下文不出现“以后再补”的隐式半成品状态。</td></tr>
+          <tr><th>代价</th><td>谱面保存位置要在 Setup 阶段确定，改变原草案的“首次保存时再问”；取消新建时还要清理可能已创建的空文件。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：保留首次保存选择，但由平台能力回调完成</h3>
+      <p>
+        <code>FumenFile</code> 可以暂时为空，但不能让 Core 直接调用 Storage API。平台在
+        <code>EditorContext</code> 中提供一个目标解析器；首次保存时 Core 只提出“需要谱面保存目标”的请求，由平台实现弹窗、边界检查、
+        文件创建和句柄返回。
+      </p>
+
+      <pre><code class="language-csharp">public interface IEditorFileTargetResolver
+{
+    Task&lt;ISimpleFile?&gt; ResolveFumenSaveTargetAsync(
+        EditorFileAccessContext currentFiles,
+        CancellationToken cancellationToken);
+}
+
+public sealed class EditorContext
+{
+    public required EditorFileAccessContext FileAccessContext { get; init; }
+    public required IEditorFileTargetResolver FileTargetResolver { get; init; }
+}</code></pre>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>保留原定的首次保存体验；Core 不直接了解 Browser/Desktop 或 Storage API。</td></tr>
+          <tr><th>代价</th><td><code>EditorContext</code> 不再只是文件数据，还携带平台交互服务；需要定义取消、重复保存、目标绑定更新和资源释放语义。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：FumenFile 为空时由 ViewModel 直接弹 Storage API 对话框</h3>
+      <p>
+        这是原草案文字最直接的实现，但会让 Core 再次负责平台目标选择、目录归属验证和权限获取，与刚确认的 D1 冲突。
+        同时，独立文件选择器返回的句柄在 Browser 上未必能通过路径字符串可靠证明属于原项目目录。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，平台在交付上下文前绑定可写 FumenFile。</strong>
+        <p>
+          你的 Q1 回答强调上下文应直接提供“明显的可读写谱面文件”，因此最一致的不变量是：Core 收到
+          <code>EditorFileAccessContext</code> 时，任何它需要保存的主文件都已经有真实写入目标。已有谱面仍可选，但它代表“初始内容来源是否存在”，
+          不应同时决定“保存目标是否存在”。如果首次保存再选择的位置体验是必须保留的需求，则应明确选择方案 B，而不能让 ViewModel 直接构造文件能力。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        新建时用户没有选择已有谱面，你希望：<strong>在 Setup/Provider 阶段就要求选择或创建项目内的可写谱面目标（方案 A，推荐）</strong>，
+        还是保留首次保存时再选择，并通过平台提供给 <code>EditorContext</code> 的目标解析回调完成（方案 B）？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>等待回答。<br>
+        <strong>审核归纳：</strong>等待回答后补充。<br>
+        <strong>最终决策：</strong>未形成。
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2>本轮代码依据</h2>
+      <ul class="source-list">
+        <li><a href="editor_file_access_context_refactory.md">docs/editor_file_access_context_refactory.md</a></li>
+        <li><a href="fumen-visual-editor-project-folder-io-design.md">docs/fumen-visual-editor-project-folder-io-design.md</a>：D1、D30-D40。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs">FumenVisualEditorProvider.cs</a>：当前 Provider 注册、转发和最近记录校验。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ProjectIO.cs">FumenVisualEditorViewModel.ProjectIO.cs</a>：当前文件夹选择、扫描、书签恢复和加载流程。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs">EditorProjectDataUtils.cs</a>：当前单根依赖解析。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectDataModel.cs">EditorProjectDataModel.cs</a>：当前运行时句柄所有权。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/DocumentOpenHelper.cs">DocumentOpenHelper.cs</a>：遗留 Fast Open 数据构造路径。</li>
+        <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/IEditorProvider.cs">IEditorProvider.cs</a>：框架 Provider 契约。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <div class="inner">
+      实时审核文档。最后更新：2026-08-12，Q1 已确认，Q2 等待用户回答。
+    </div>
+  </footer>
+</body>
+</html>
