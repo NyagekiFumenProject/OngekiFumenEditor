@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>51d8fa6b</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>dea1cfe5</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>8</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>8</strong><span>未修复</span></div>
-      <div class="metric"><strong>4 / 4</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>2</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>14</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>14</strong><span>未修复</span></div>
+      <div class="metric"><strong>8 / 6</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>4</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -312,6 +312,60 @@
           <td>谱面编辑器 / 图形资源</td>
           <td>单例绘制目标随每个编辑器重复初始化并累积纹理资源</td>
           <td><code>TapDrawingTarget.cs:14, 43-78</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-009"><code>CA-009</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>谱面编辑器 / 事件生命周期</td>
+          <td>Hold 绘制目标每次初始化都重复订阅同一个全局设置事件</td>
+          <td><code>HoldDrawingTarget.cs:16, 31-36</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-010"><code>CA-010</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>快捷键 / 异步命令</td>
+          <td>批量模式快捷键把 async void 操作伪装成已完成任务</td>
+          <td><code>DefaultEditorKeyBindingRouter.cs:235-236, 283-289</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-011"><code>CA-011</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>编辑器设置 / 持久化</td>
+          <td>延迟保存的文件异常会越过调用方并触发桌面进程退出</td>
+          <td><code>EditorSetting.cs:17-25</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-012"><code>CA-012</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Shell / 文档关闭</td>
+          <td>“文件 → 关闭”绕过脏文档确认并直接销毁编辑器</td>
+          <td><code>CloseFileCommandHandler.cs:26-29</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-013"><code>CA-013</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>属性浏览器 / 多文档</td>
+          <td>切换活动文档后仍编辑上一谱面的对象与操作上下文</td>
+          <td><code>FumenObjectPropertyBrowserViewModel.cs:39-45, 107-118</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-014"><code>CA-014</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>属性浏览器 / 撤销</td>
+          <td>Undoable 属性包装器直接写值，完全没有建立撤销动作</td>
+          <td><code>UndoablePropertyInfoWrapper.cs:32-50</code></td>
         </tr>
         </tbody>
       </table>
@@ -711,6 +765,346 @@ drawingTargets = [];                                // Drawing VM: 1189</code></
     </ul>
   </section>
 
+  <section id="ca-009" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-009</code> Hold 绘制目标重复订阅全局设置事件</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>订阅方</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/OngekiObjects/Holds/HoldDrawingTarget.cs"><code>HoldDrawingTarget</code></a> 是应用级 Singleton</div>
+      <div class="fact"><strong>重复入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs"><code>PrepareRenderLoop</code></a> 为每个编辑器调用一次 <code>Initialize</code></div>
+      <div class="fact"><strong>缺失出口</strong>类型没有幂等保护，也没有取消订阅或 <code>Dispose</code></div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>打开一个谱面，单例 <code>HoldDrawingTarget.Initialize</code> 向 <code>EditorGlobalSetting.Default.PropertyChanged</code> 注册一次委托。</li>
+      <li>再打开或重新初始化编辑器，同一个目标实例、同一个方法和同一个发布者再次执行 <code>+=</code>；.NET 事件允许重复委托项。</li>
+      <li>关闭编辑器不会移除这些项，后续每次修改任一 <code>ColorHold*</code> 设置都会按历史初始化次数重复执行 <code>RebuildColors</code>。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>[RegisterSingleton&lt;IFumenEditorDrawingTarget&gt;]       // HoldDrawingTarget: 16
+
+public override void Initialize(IRenderManagerImpl impl)
+{
+    lineDrawing = impl.LineDrawing;
+    EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+    RebuildColors();
+}
+
+foreach (var drawTarget in drawingTargets)
+    drawTarget.Initialize(renderImpl);               // Drawing VM: 232-233</code></pre>
+
+    <h3>影响</h3>
+    <p>回调列表和颜色重建次数随编辑器初始化总次数单调增长，而不是随当前打开文档数变化。单次重建成本不高，但长时间会话中会形成无意义的同步 UI 工作和事件列表膨胀；它也证明共享绘制目标的生命周期协议没有做到幂等。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>若保留 Singleton，订阅应只在构造或一次性初始化中发生，并在应用级释放时成对取消；更彻底的所有权调整可与 <code>CA-008</code> 一并完成。</li>
+      <li>增加重复调用 <code>Initialize</code> 的测试，通过可观测重建计数断言一次属性变化只触发一次回调。</li>
+      <li>测试还应覆盖打开、关闭、重开多个编辑器，避免仅验证连续调用两次的狭窄路径。</li>
+    </ul>
+  </section>
+
+  <section id="ca-010" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-010</code> 批量模式快捷键丢失异步命令的任务与异常</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>异步入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>KeyboardAction_ToggleBatchMode</code></a> 声明为 <code>async void</code></div>
+      <div class="fact"><strong>错误适配</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorKeyBindingRouter.cs"><code>AsTask(Action&lt;...&gt;)</code></a> 调用后无条件返回 <code>Task.CompletedTask</code></div>
+      <div class="fact"><strong>失效边界</strong>路由器的 <code>await</code> 与 <code>catch</code> 只能观察伪造的已完成任务</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>用户按下批量模式快捷键，映射项通过只接受 <code>Action</code> 的 <code>AsTask</code> 调用异步方法。</li>
+      <li><code>KeyboardAction_ToggleBatchMode</code> 开始等待 <a href="../src/OngekiFumenEditor.Avalonia/Utils/CommandRouterHelper.cs"><code>CommandRouterHelper.ExecuteCommand</code></a>，但调用者立即得到 <code>Task.CompletedTask</code>。</li>
+      <li>路由器认为动作已完成；若命令更新、执行或相关属性通知随后抛出异常，异常由 <code>async void</code> 投递到同步上下文，无法进入路由器第 153-155 行的日志边界。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public async void KeyboardAction_ToggleBatchMode(ActionExecutionContext ctx)
+{
+    var command = ...;
+    await CommandRouterHelper.ExecuteCommand(command);
+}
+
+[KBD_ToggleBatchMode] = AsTask(
+    static (editor, context) =&gt; editor.KeyboardAction_ToggleBatchMode(context));
+
+action(editor, executionContext);
+return Task.CompletedTask;                          // 实际异步操作仍可能在运行</code></pre>
+    <p>当前 <a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Commands/BatchModeToggle/BatchModeSwitchCommandHandler.cs"><code>BatchModeSwitchCommandHandler</code></a> 的 <code>Update</code>/<code>Run</code> 都返回已完成任务，因此正常切换通常看不出问题；缺陷会在命令链变为真正异步或执行期间发生异常时暴露。现有路由测试覆盖映射、焦点、冲突和挂接生命周期，但没有覆盖动作完成等待或异步故障。</p>
+
+    <h3>影响</h3>
+    <p>路由器无法保证命令完成顺序，也无法按设计捕获并记录该快捷键动作的异常。桌面端未处理的 UI 异常会进入应用级致命异常流程；快速重复按键时也可能在前一次操作尚未完成前再次进入。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把 <code>KeyboardAction_ToggleBatchMode</code> 改为返回 <code>Task</code>，并直接映射到 <code>EditorKeyAction</code>；不要经过 <code>Action</code> 适配器。</li>
+      <li>用未完成的 <code>TaskCompletionSource</code> 作为命令处理器，断言路由动作不会提前完成。</li>
+      <li>让处理器返回故障任务，断言异常由路由器记录且不会触发 Dispatcher 未处理异常。</li>
+    </ul>
+  </section>
+
+  <section id="ca-011" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-011</code> 编辑器设置延迟保存失败会终止桌面应用</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>用户入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorSetting.cs"><code>EditorSetting</code></a> 的多个属性 setter 都调用 <code>RequestSave</code></div>
+      <div class="fact"><strong>实际 I/O</strong><a href="../src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/Settings/DesktopSettingManager.cs"><code>DesktopSettingManager</code></a> 同步创建、刷新、替换或移动配置文件</div>
+      <div class="fact"><strong>最终结果</strong><a href="../src/OngekiFumenEditor.Avalonia.Desktop/Program.cs"><code>Program</code></a> 对 Dispatcher 未处理异常执行救援后 <code>Environment.Exit(-1)</code></div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>用户修改判定线偏移、吸附、显示选项等任一编辑器设置，setter 调用 <code>async void RequestSave()</code>。</li>
+      <li>方法在 UI 上下文等待 2 秒后，通过 <a href="../src/OngekiFumenEditor.Avalonia/Models/Settings/SettingModelBase.cs"><code>SettingModelBase.Save</code></a> 同步写入 <code>AppContext.BaseDirectory/setting.json</code>。</li>
+      <li>目录不可写、磁盘空间不足、文件被占用或原子替换失败时，文件 API 抛出异常；<code>RequestSave</code> 没有 <code>try/catch/finally</code>。</li>
+      <li>异常从 <code>async void</code> 投递到 Dispatcher，全局处理器最终退出进程，其他打开谱面的未保存工作也被迫进入救援流程。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>private async void RequestSave()
+{
+    if (isDisposed || isRequestSave)
+        return;
+    isRequestSave = true;
+    await Task.Delay(2000);
+    if (!isDisposed)
+        EditorGlobalSetting.Default.Save();          // 同步文件 I/O，可抛异常
+    isRequestSave = false;                           // 异常时不会执行
+}
+
+WriteSettingFileAtomically(content);                 // DesktopSettingManager: 60
+...
+finally { Environment.Exit(-1); }                    // Program: 147-149</code></pre>
+
+    <h3>影响</h3>
+    <p>一次非关键配置保存失败会被升级为整个编辑器的致命故障，用户可能在没有主动保存谱面的情况下失去当前工作上下文。非桌面生命周期即使不退出，异常也会使 <code>isRequestSave</code> 永久保持为 <code>true</code>，该 <code>EditorSetting</code> 后续不再发起保存。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把延迟保存实现为可观察的 <code>Task</code> 或专用防抖服务，并在边界捕获持久化异常；设置保存失败应记录并以非致命方式提示。</li>
+      <li>用 <code>finally</code> 恢复防抖状态，确保一次失败不会永久禁用后续保存；销毁时取消尚未到期的延迟任务。</li>
+      <li>用会抛出 <code>IOException</code>/<code>UnauthorizedAccessException</code> 的 <code>ISettingManager</code> 测试替身，断言不会产生 Dispatcher 未处理异常，并能在下一次修改时重试。</li>
+      <li>桌面安装场景还应验证配置位置具备用户写权限；若坚持便携模式，应明确处理只读目录。</li>
+    </ul>
+  </section>
+
+  <section id="ca-012" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-012</code> 文件关闭命令绕过脏文档保存确认</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>用户入口</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/Shell/MenuDefinitions.cs"><code>FileCloseMenuItem</code></a> 直接绑定关闭文件命令</div>
+      <div class="fact"><strong>绕过点</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/Shell/ViewModels/ShellViewModel.cs"><code>CloseDocumentAsync</code></a> 不调用 <code>CanCloseDocument</code></div>
+      <div class="fact"><strong>销毁结果</strong>移除事件经应用桥接调用 <code>NotifyDestory</code>，最终释放编辑器及运行时文件</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>用户修改谱面，使 <code>FumenVisualEditorViewModel.IsDirty == true</code>。</li>
+      <li>从“文件 → 关闭”执行 <a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/Shell/Commands/CloseFileCommandHandler.cs"><code>CloseFileCommandHandler</code></a>。</li>
+      <li>处理器直接调用 <code>shell.CloseDocumentAsync(shell.ActiveDocument)</code>；该方法立即执行 <code>Factory.RemoveDocument</code>。</li>
+      <li>与标签页关闭使用的 <a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/Shell/ShellDockFactory.cs"><code>CloseDockable</code></a> 不同，这条路径从未调用 <code>CanCloseDocument</code>，不会显示保存/放弃/取消对话框。</li>
+      <li><code>DockableClosed</code> 随后触发 <a href="../src/OngekiFumenEditor.Avalonia/OngekiFumenEditorApp.cs"><code>OngekiFumenEditorApp</code></a> 的桥接，编辑器被直接 <code>Dispose</code>。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public override Task Run(Command command)
+{
+    var shell = _serviceProvider.GetService&lt;IShell&gt;();
+    return shell.CloseDocumentAsync(shell.ActiveDocument);       // Close handler: 26-29
+}
+
+public Task CloseDocumentAsync(IDocumentViewModel model)
+{
+    ...
+    Factory.RemoveDocument(documentContainer);                   // Shell VM: 202-206
+    return Task.CompletedTask;
+}
+
+public override async void CloseDockable(IDockable dockable)
+{
+    if (dockable is IDocument document &amp;&amp; !await CanCloseDocument(document))
+        return;                                                  // 只有标签页关闭走这里
+    base.CloseDockable(dockable);
+}</code></pre>
+
+    <h3>影响</h3>
+    <p>菜单关闭当前谱面时，未保存修改会在没有任何提示的情况下丢失。该命令是普通文件菜单项，不是内部清理 API，因此用户很难预期它与关闭标签页具有不同的数据保护语义。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把“询问是否允许关闭”放到统一的 Shell 文档关闭入口，所有菜单、快捷键、标签页和程序化关闭共享同一协议；另设显式的强制移除内部 API。</li>
+      <li>关闭方法应返回是否真正关闭，避免调用方把用户取消误判为成功。</li>
+      <li>增加脏文档测试，分别模拟保存、放弃和取消，覆盖菜单命令与标签页按钮；取消后文档、资源和活动状态必须保持不变。</li>
+      <li>现有测试只把 <code>CloseDocumentAsync</code> 用作清理，没有验证脏文档保护。</li>
+    </ul>
+  </section>
+
+  <section id="ca-013" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-013</code> 属性浏览器在文档切换后保留上一谱面的编辑上下文</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>持久状态</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/FumenObjectPropertyBrowserViewModel.cs"><code>FumenObjectPropertyBrowserViewModel</code></a> 是 Singleton，保存对象集合和 <code>referenceEditor</code></div>
+      <div class="fact"><strong>缺失事件</strong>只监听 <code>OnNotifyDestoryed</code>，完全不监听 <code>OnActivateEditorChanged</code></div>
+      <div class="fact"><strong>直接写入</strong>属性包装器持有旧对象并通过反射设置其属性</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>在谱面 A 选择一个物件，属性浏览器生成包装器并把 <code>referenceEditor</code> 设为 A。</li>
+      <li>切换到谱面 B。文档管理器广播活动编辑器变化，但属性浏览器没有订阅该事件，界面继续显示 A 的物件和操作控件。</li>
+      <li>在 B 可见时修改属性，<a href="../src/OngekiFumenEditor.Avalonia/UI/Controls/ObjectInspector/UIGenerator/PropertyInfoWrapper.cs"><code>PropertyInfoWrapper</code></a> 仍对 A 的对象调用 <code>PropertyInfo.SetValue</code>，A 在后台被标记为脏。</li>
+      <li>下游 <a href="../src/OngekiFumenEditor.Avalonia/Modules/TGridCalculatorToolViewer/ViewModels/TGridCalculatorToolViewerViewModel.cs"><code>TGridCalculatorToolViewer</code></a> 还会保留该旧对象，却把换算和滚动上下文切换到 B；“应用到物件”按钮仍可见并可修改旧对象。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>private HashSet&lt;ISelectableObject&gt; selectedObjects = [];
+private FumenVisualEditorViewModel referenceEditor;
+
+public FumenObjectPropertyBrowserViewModel()
+{
+    EditorDocumentManager.OnNotifyDestoryed += OnEditorDestoryed; // 没有活动文档事件
+}
+
+public void RefreshSelected(..., FumenVisualEditorViewModel referenceEditor)
+{
+    selectedObjects.Clear();
+    ...
+    this.referenceEditor = referenceEditor;
+}
+
+private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, ...)
+{
+    Editor = @new;                                                // TGrid 工具只换 Editor
+}                                                                // TimelineObject 未清空</code></pre>
+
+    <h3>影响</h3>
+    <p>属性面板视觉上属于当前工作区，却可能静默修改后台谱面；用户随后保存当前谱面 B 时不会保存这些变化，而谱面 A 会无提示变脏。时间轴工具还可能用 B 的 BPM/节拍映射计算数值后写入 A 的物件，造成难以察觉的数据错误。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>属性浏览器必须跟随活动文档切换：切换时刷新为新编辑器的当前选择，或至少清空对象、包装器和操作控件。</li>
+      <li>所有下游工具应同时更新“编辑器 + 所选对象”的原子上下文，命令可执行条件要验证对象确实属于当前编辑器。</li>
+      <li>增加双编辑器 UI/VM 测试：A 选择对象后切到 B，断言属性面板不再持有 A；任何属性或 TGrid 操作都不能改变 A。</li>
+      <li>关闭 A 的现有清理不能替代切换测试，因为错误窗口恰好发生在 A 仍然打开时。</li>
+    </ul>
+  </section>
+
+  <section id="ca-014" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-014</code> 属性浏览器修改不再进入撤销栈</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>单对象</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/UIGenerator/UndoablePropertyInfoWrapper.cs"><code>UndoablePropertyInfoWrapper</code></a> 的 setter 直接调用核心包装器</div>
+      <div class="fact"><strong>多对象</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/UIGenerator/UndoableMultiObjectPropertyInfoWrapper.cs"><code>UndoableMultiObjectPropertyInfoWrapper</code></a> 同样直接批量写值</div>
+      <div class="fact"><strong>移植证据</strong>两个类都保存但从未使用 <code>referenceEditor</code>；WPF 版本会提交 <code>PropertySetAction</code>/<code>LambdaUndoAction</code></div>
+    </div>
+
+    <h3>触发方式</h3>
+    <p>选择一个或多个物件，在属性浏览器中修改任一可写属性；包含由自定义控件调用 <code>ExecuteSubPropertySetAction</code> 的嵌套属性修改。对象值会改变并把谱面标记为脏，但编辑器撤销栈没有对应动作。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>private readonly FumenVisualEditorViewModel referenceEditor;      // 保存但未使用
+
+public object ProxyValue
+{
+    get =&gt; core.ProxyValue;
+    set
+    {
+        core.ProxyValue = value;                                 // 直接写入
+        OnPropertyChanged(nameof(ProxyValue));
+    }
+}
+
+public void ExecuteSubPropertySetAction&lt;T&gt;(...)
+{
+    setterAction(newValue);                                      // 同样没有撤销动作
+}
+
+// WPF 原实现：
+referenceEditor.UndoRedoManager.ExecuteAction(
+    new PropertySetAction(core.PropertyInfo.Name, core, oldValue, newValue));</code></pre>
+    <p>多对象 WPF 实现还会保存每个对象的旧值并用 <code>LambdaUndoAction</code> 恢复；当前 Avalonia 实现丢失了这一整段逻辑。这不是命名或风格问题，而是明确的迁移行为回归。</p>
+
+    <h3>影响</h3>
+    <p>属性面板中的修改无法通过撤销命令恢复，批量修改尤其可能一次不可逆地覆盖大量物件。由于其他画布操作仍正常进入撤销栈，用户会合理地相信属性编辑也受同一撤销机制保护。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>恢复单对象 <code>PropertySetAction</code>、多对象旧值快照和子属性动作，并使用包装器保存的 <code>referenceEditor.UndoRedoManager</code>。</li>
+      <li>避免 setter 先写一次、动作执行再写一次；撤销动作应成为唯一变更入口。</li>
+      <li>增加单对象、多对象、类型转换值、可空值和子属性测试，逐项断言执行、撤销、重做后的值及动作计数。</li>
+      <li>增加跨文档断言，确保动作进入对象所属编辑器的撤销栈；这也应与 <code>CA-013</code> 的上下文修复共同验证。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -724,12 +1118,22 @@ drawingTargets = [];                                // Drawing VM: 1189</code></
         审查编辑器渲染初始化与关闭、调度器注册表、自动保存设置、音频调度和绘制目标资源所有权。记录 <code>CA-004</code> 至 <code>CA-008</code>。
         B-042 的“释放后异步重新挂载”场景已有取消令牌、版本号检查和对应生命周期测试，本批未将其列为问题。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A03</time>
+      <div>
+        审查全局设置事件订阅、编辑器快捷键任务契约、命令异常边界和设置持久化失败路径。记录 <code>CA-009</code> 至 <code>CA-011</code>。
+        <code>OnMouseMove</code> 的 <code>async void</code> 当前只等待内部自动滚动延时，批量模式命令处理器当前也同步完成；前者证据不足未编号，后者按潜在异常边界而非稳定功能失效记录。
+      </div>
+      <time datetime="2026-08-12">2026-08-12 / A04</time>
+      <div>
+        审查 Shell 文档关闭协议、多文档工具状态、属性浏览器包装器和旧版迁移差异。记录 <code>CA-012</code> 至 <code>CA-014</code>。
+        OPFS 流式下载在 JavaScript 入口复制跨语言缓冲区，并用 Promise 链串行写入、在提交前等待失败结果，本批排除“提前释放缓冲导致 ZIP 损坏”的候选。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查命令执行异常、文件系统抽象、设置订阅生命周期、Browser/桌面平台差异和多文档渲染状态。新增问题从 <code>CA-009</code> 起顺序编号。</p>
+    <p>继续检查项目文件原子保存、音频后台线程、对象集合一致性、Browser/桌面平台差异和多文档渲染状态。新增问题从 <code>CA-015</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
