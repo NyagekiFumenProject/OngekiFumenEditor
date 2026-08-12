@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>34938ba4</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>d3d4a934</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>67</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>67</strong><span>未修复</span></div>
-      <div class="metric"><strong>35 / 32</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>16</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>69</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>69</strong><span>未修复</span></div>
+      <div class="metric"><strong>35 / 34</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>17</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -843,6 +843,24 @@
           <td>BPM/Meter / 保存往返</td>
           <td>普通 BPM 或 Meter 事件移动到零时刻后，会被两种格式的保存器误当作首事件静默丢弃</td>
           <td><code>BpmList.cs:20-60; MeterChangeList.cs:34-86; DefaultOngekiFumenFormatter.cs:302-312; DefaultNyagekiFumenFormatter.cs:203-214</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-068"><code>CA-068</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>OGKR / BPM_DEF 往返</td>
+          <td>保存器与解析器采用相反列序，最大 BPM 和最小 BPM 每次保存重载都会互换</td>
+          <td><code>DefaultOngekiFumenFormatter.cs:231-240; BpmDefinitionCommandParser.cs:12-22; FumenMetaInfoBrowserView.axaml:91-102</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-069"><code>CA-069</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>曲线子点 / 插值器持久化</td>
+          <td>属性面板选择的曲线插值器未写入 OGKR/Nyageki，重载后静默恢复默认并改变后续插值结果</td>
+          <td><code>ConnectableChildObjectBase.cs:18-34, 321-338; DefaultOngekiFumenFormatter.cs:190-216; DefaultNyagekiFumenFormatter.cs:123-145</code></td>
         </tr>
         </tbody>
       </table>
@@ -4564,6 +4582,127 @@ fumen.MeterChanges
     </ul>
   </section>
 
+  <section id="ca-068" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-068</code> OGKR 保存重载会交换 BPM_DEF 的最大值和最小值</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">自身往返链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>正常界面可编辑</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenMetaInfoBrowser/Views/FumenMetaInfoBrowserView.axaml"><code>FumenMetaInfoBrowserView</code></a> 分别提供 Maximum 和 Minimum 文本框，代理也独立写入 <code>BpmDefinition.Maximum</code> 与 <code>Minimum</code></div>
+      <div class="fact"><strong>写出顺序为最大后最小</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessHEADER</code></a> 生成 <code>BPM_DEF First Common Maximum Minimum</code></div>
+      <div class="fact"><strong>读取顺序为最小后最大</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/MetaInfo/BpmDefinitionCommandParser.cs"><code>BpmDefinitionCommandParser</code></a> 却把第 3 列赋给 <code>Minimum</code>、第 4 列赋给 <code>Maximum</code></div>
+      <div class="fact"><strong>每次往返都会翻转</strong>内存中的 <code>Minimum=100, Maximum=300</code> 被保存为 <code>... 300 100</code>，重载后变成 <code>Minimum=300, Maximum=100</code>；再保存重载又会翻回</div>
+      <div class="fact"><strong>Nyageki 不受影响</strong>Nyageki 使用 <code>Header.MaximumBpm</code> 和 <code>Header.MinimumBpm</code> 两个具名字段，写入器与对应解析器赋值一致</div>
+      <div class="fact"><strong>现有样本掩盖问题</strong>仓库 OGKR 空模板四个 BPM 值均为 <code>1</code>，现有语料指纹中的 Minimum/Maximum 也同为 <code>240</code>，相等值交换后无法被断言发现</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>打开谱面元信息面板，把 Minimum BPM 设为 <code>100</code>，Maximum BPM 设为 <code>300</code>。</li>
+      <li>保存为 OGKR，检查头部可见 <code>BPM_DEF ... 300 100</code>。</li>
+      <li>关闭并重新打开该文件，Maximum 显示为 <code>100</code>，Minimum 显示为 <code>300</code>，形成最小值大于最大值的反向元信息。</li>
+      <li>再次保存并重载，两个值又恢复为 <code>100/300</code>；每次往返都会交替变化，保存过程没有警告。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// OGKR 写出：第 3 列 Maximum，第 4 列 Minimum
+sb.AppendLine($"BPM_DEF\t{metaInfo.BpmDefinition.First}\t"
+    + $"{metaInfo.BpmDefinition.Common}\t"
+    + $"{metaInfo.BpmDefinition.Maximum}\t"
+    + $"{metaInfo.BpmDefinition.Minimum}");
+
+// OGKR 读回：第 3 列 Minimum，第 4 列 Maximum
+fumen.MetaInfo.BpmDefinition = new FumenMetaInfo.BpmDef
+{
+    First = dataArr.ElementAtOrDefault(1),
+    Common = dataArr.ElementAtOrDefault(2),
+    Minimum = dataArr.ElementAtOrDefault(3),
+    Maximum = dataArr.ElementAtOrDefault(4),
+};</code></pre>
+
+    <h3>影响</h3>
+    <p>OGKR 无法稳定保存两个可见元信息字段，且一次重载就可能产生 <code>Minimum &gt; Maximum</code> 的自相矛盾状态。当前编辑器的实际时间换算主要使用首 BPM 和 BPM 事件列表，因此尚未发现这两个边界直接改变当前画布节奏；但它们会被继续导出给其他工具或游戏侧消费者，用户也会在元信息面板看到保存前后值被无提示篡改。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>依据 OGKR 的正式列契约统一解析器和格式化器顺序；无论选择哪一侧作为规范，编辑器自身保存再读取必须保持字段身份。</li>
+      <li>对历史版本写出的反向文件制定兼容策略。可在出现 <code>Minimum &gt; Maximum</code> 时报告并提供显式修复，但不能无记录地猜测所有外部文件。</li>
+      <li>元信息编辑和加载阶段增加 <code>Minimum &lt;= Maximum</code> 校验，阻止明显反向值继续覆盖文件。</li>
+      <li>往返测试必须使用不同的非对称值，例如 <code>Minimum=100, Maximum=300</code>，分别断言 OGKR 和 Nyageki 保存一次、连续保存两次后的字段值。</li>
+    </ul>
+  </section>
+
+  <section id="ca-069" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-069</code> 曲线子点选择的插值器不会随谱面保存</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">界面、操作与双格式链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>属性面板提供选择</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableChildObjectBase.cs"><code>ConnectableChildObjectBase.CurveInterpolaterFactory</code></a> 带属性浏览器别名；专用 ComboBox 会列出 IoC 中注册的所有插值器</div>
+      <div class="fact"><strong>当前有两个不同实现</strong><code>Default</code> 保留曲线采样得到的细分 XGrid，而 <code>XGrid.Unit limited</code> 会补充单位边界并在最终枚举时把每个 XGrid 截到整数 Unit</div>
+      <div class="fact"><strong>选择直接影响生产操作</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/ConnectableObjectOperationViewModel.cs"><code>InterpolatePart</code></a> 明确把当前子点的 <code>CurveInterpolaterFactory</code> 传给 <code>InterpolateCurveChildren</code>，由它决定生成的普通轨道点</div>
+      <div class="fact"><strong>对象复制会保留它</strong><code>ConnectableChildObjectBase.Copy</code> 同时复制 CurvePrecision、CurveInterpolaterFactory 和控制点，说明该选择被模型当作子点编辑状态，而非一次性对话框参数</div>
+      <div class="fact"><strong>两种保存器都遗漏</strong>OGKR 的 <code>LCO_PREC/LCO_CTRL</code> 与 Nyageki 的 <code>CurveControlPoint</code> 只写 CurvePrecision 和控制点坐标；两侧解析器也从不读取插值器名称</div>
+      <div class="fact"><strong>重载固定回默认值</strong>每个新建的 Connectable 子点把工厂初始化为 <code>XGridLimitedCurveInterpolaterFactory.Default</code>，因此文件重载后所有曾选择 <code>Default</code> 的曲线段都会静默恢复为 <code>XGrid.Unit limited</code></div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>建立一段带控制点的曲线，使采样路径包含非整数 XGrid Unit；选中对应 LaneNext/LaneEnd 子点。</li>
+      <li>在属性面板把曲线插值器从 <code>XGrid.Unit limited</code> 改为 <code>Default</code>。直接执行“插值当前段”时，生成点会保留细分 XGrid。</li>
+      <li>撤销该操作，保存为 OGKR 或 Nyageki，然后关闭并重新打开文件。控制点和 CurvePrecision 仍在，但属性面板中的插值器已经恢复为 <code>XGrid.Unit limited</code>。</li>
+      <li>再次执行“插值当前段”，生成点被限制到整数 XGrid Unit，与保存前相同曲线和相同可见设置产生不同结果。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>[LocalizableObjectPropertyBrowserAlias(nameof(Lang.CurveInterpolatorFactoryLabel))]
+public ICurveInterpolaterFactory CurveInterpolaterFactory
+{
+    get =&gt; curveInterpolaterFactory;
+    set =&gt; SetProperty(ref curveInterpolaterFactory, value);
+}
+
+var genChildren = childObj
+    .InterpolateCurveChildren(childObj.CurveInterpolaterFactory)
+    .ToList();
+
+// XGrid.Unit limited 的最终输出会截断到整数 Unit
+XGrid = new XGrid((int)(p.XGrid.TotalGrid * 1.0f / p.XGrid.ResX));
+
+// 两种格式只持久化精度和控制点，没有工厂名称
+LCO_PREC  recordId  childIndex  CurvePrecision  laneName
+CurveControlPoint : recordId : laneName : childIndex : CurvePrecision : PathControls</code></pre>
+
+    <h3>影响</h3>
+    <p>保存重载不会立即改变曲线控制点本身的贝塞尔外观，但会丢失用户为后续离散化操作选择的算法。用户在同一谱面、同一控制点和同一精度下执行“插值当前段”，仅因中间保存并重新打开，就可能得到不同数量和不同 XGrid 的轨道点；若随后保存，差异会永久写入谱面。SVG Prefab 已经在两种格式中保存同名工厂字段，说明格式层具备表达该状态的现成先例。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在 OGKR 编辑器扩展记录和 Nyageki <code>CurveControlPoint</code> 中保存稳定的插值器标识，并在解析曲线控制点时恢复对应注册实现。</li>
+      <li>复用或抽取 SVG Prefab 已有的名称解析逻辑；未知名称应给出可见警告并采用明确回退值，不能静默伪装成用户原选择。</li>
+      <li>旧文件没有该字段时继续使用 <code>XGrid.Unit limited</code>，保持向后兼容；新字段应允许旧解析器忽略或按版本区分。</li>
+      <li>回归测试为同一曲线分别选择两个工厂，验证 OGKR/Nyageki 往返后的工厂名称，并比较保存前后“插值当前段”生成的 TGrid/XGrid 序列完全一致。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -4647,12 +4786,17 @@ fumen.MeterChanges
         复核 RecordId 的反射特性继承、Connectable 子点改号事件、集合批处理和 BPM/Meter 首事件不变量，并检查两种格式的零时刻过滤。记录 <code>CA-067</code>；同时纠正 <code>CA-065</code> 的触发入口：当前属性浏览器确实继承并执行 <code>ObjectPropertyBrowserReadOnly</code>，问题限定为导入器未拒绝非法 ID。
         <code>IntervalTreeWrapper.BeginBatchAction</code> 当前没有生产调用；Connectable 子点 RecordId 在属性面板只读且全仓未找到挂接后改号的生产写入；Browser 当前子窗口共享同一 Avalonia TopLevel，尚不能证明全局 StorageProvider 会选错窗口。因此这些候选本批均未提前编号。
       </div>
+      <time datetime="2026-08-13">2026-08-13 / A17</time>
+      <div>
+        对照 OGKR/Nyageki 的全部元信息头字段，并沿属性面板、模型复制、曲线离散化操作和双格式保存链检查插值器状态。记录 <code>CA-068</code> 至 <code>CA-069</code>。
+        其余 Meter、分辨率、伤害值和 Nyageki 具名 BPM 字段的写入/读取当前对称；OGKR 现有模板与语料把 Maximum/Minimum 设为相同值，解释了测试为何未捕获列序交换。ConnectableStartObject 的工厂属性没有属性浏览器别名，本批只记录用户可直接选择且由“插值当前段”消费的子点属性；SVG Prefab 已有独立持久化，不属于该缺陷。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查格式解析的区段顺序契约、其他自由字符串的转义边界、集合重复订阅与首事件身份，以及编辑动作和保存模型之间的剩余不对称。新增问题从 <code>CA-068</code> 起顺序编号。</p>
+    <p>继续检查格式解析的区段顺序契约、自由字符串的剩余转义边界、集合重复订阅与对象重插入，以及项目侧设置和谱面对象之间的持久化归属。新增问题从 <code>CA-070</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
