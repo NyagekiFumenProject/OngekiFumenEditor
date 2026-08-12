@@ -966,8 +966,11 @@
 <li><strong>测试缺口</strong>：没有重复打开/关闭、视图 attach/detach、全局事件订阅计数、弱引用可回收性、fake <code>IImage.Dispose</code> 或渲染循环停止次数的生命周期测试。</li>
 <li><strong>建议</strong>：给编辑器建立幂等的统一销毁路径，并由文档管理器在成功关闭后调用：先停止并退订 <code>RenderContext</code>，移除渲染控件的全部具名/匿名处理器并清空 Content，再释放实现 <code>IDisposable</code> 的 drawing target、helper 纹理和 <code>EditorSetting</code>，最后清除大对象引用。辅助器应实现 <code>IDisposable</code> 或使用可组合 subscription token；明确工程模型/clone 的资源所有者。以 Desktop 和 Browser/Skia 各执行多轮开关文档测试，断言订阅、纹理、上下文和对象存活数回到基线。</li>
 </ul>
-<h3 id="b-043-main-menu-auto-hide-no-op">B-043 “自动隐藏主菜单”设置可保存，但 Avalonia 菜单完全不消费它</h3>
+<h3 id="b-043-main-menu-auto-hide-no-op" class="completed-plan">B-043 “自动隐藏主菜单”设置已恢复焦点、键盘和指针状态机（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-12）</strong>：<code>MainMenuView.axaml</code> 已把 <code>MenuEx.AutoHide</code> 绑定到 <code>MainMenuViewModel.AutoHide</code>；ViewModel 订阅缓存的 <code>GekiminiSetting.PropertyChanged</code>，设置页应用后当前会话立即更新，重新构造时仍从持久化值恢复。</li>
+<li><strong>控件行为</strong>：Avalonia <code>MenuEx</code> 新增可绑定的 <code>AutoHide</code> styled property 与只读 <code>IsAutoHideCollapsed</code> direct property。自动隐藏时失焦折叠为 2px 透明指针唤醒带；指针进入、Alt/F10 键盘入口、菜单获得焦点或一级子菜单打开都会保持展开，关闭菜单并把焦点还给内容区后重新折叠。控件在 visual tree attach/detach 时成对注册和移除顶层按键处理器。</li>
+<li><strong>验证</strong>：新增 <code>MainMenuAutoHideTests</code> 6 个专项用例，覆盖设置应用实时更新、重启恢复、XAML 绑定、失焦折叠、Alt/F10 唤醒与焦点进入、指针唤醒/离开、子菜单打开期间保持可见以及关闭后焦点返回内容区；专项测试 <code>6/6</code>、Avalonia 核心完整测试集 <code>434/434</code> 通过，0 项跳过。</li>
 <li><strong>旧版行为</strong>：Gemini WPF 的 <code>MainMenuView.xaml:14</code> 把 <code>MenuEx.AutoHide</code> 绑定到 ViewModel；<code>MenuEx.cs:8-71</code> 在焦点和设置变化时切换菜单高度，<code>MainMenuViewModel</code> 还监听设置变更并实时更新。</li>
 <li><strong>Avalonia 状态</strong>：Gekimini 设置页仍显示并保存 <code>AutoHideMainMenu</code>，<code>MainMenuViewModel</code> 也读取该值且在属性上标注 <code>//todo not support</code>；但 <code>MainMenuView.axaml</code> 只实例化 <code>&lt;controls:MenuEx ItemsSource=... /&gt;</code>，没有绑定 <code>AutoHide</code>，当前 <code>MenuEx</code> 本身也未定义该属性或焦点折叠逻辑。设置保存后也没有把值推回已创建的主菜单 ViewModel。</li>
 <li><strong>影响</strong>：用户切换并应用“自动隐藏主菜单”后，JSON 值会变化，但当前会话和下次启动的菜单始终保持普通显示；这是一个会成功保存却完全无效果的可见设置。</li>
