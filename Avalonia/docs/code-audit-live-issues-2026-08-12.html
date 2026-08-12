@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>4ae76980</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>34938ba4</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>66</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>66</strong><span>未修复</span></div>
-      <div class="metric"><strong>34 / 32</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>15</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>67</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>67</strong><span>未修复</span></div>
+      <div class="metric"><strong>35 / 32</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>16</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -821,10 +821,10 @@
           <td><a href="#ca-065"><code>CA-065</code></a></td>
           <td><span class="severity severity-high">高</span></td>
           <td><span class="status status-open">未修复</span></td>
-          <td><span class="exposure exposure-active">活动</span></td>
-          <td>属性浏览器 / 轨道 RecordId</td>
-          <td>RecordId 可被改成重复或负数，保存重载会合并轨道、丢弃子点并改绑音符</td>
-          <td><code>ConnectableObjectBase.cs:9-11; FumenObjectPropertyBrowserViewModel.cs:58-95; ConnectableObjectList.cs:27-40; LaneCommandParser.cs:49-60</code></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>OGKR/Nyageki / RecordId 导入</td>
+          <td>重复或负 RecordId 未被拒绝，打开文件会合并子链、丢弃子点或让 Tap/Hold 失去引用</td>
+          <td><code>ConnectableObjectList.cs:27-43; LaneCommandParser.cs:33-60; TapCommandParser.cs:14-23; HoldCommandParser.cs:14-23</code></td>
         </tr>
         <tr>
           <td><a href="#ca-066"><code>CA-066</code></a></td>
@@ -834,6 +834,15 @@
           <td>Nyageki / SVG 字符串转义</td>
           <td>TypefaceName 未转义即可注入重复字段，使编辑器自身保存的谱面重载后被篡改或无法打开</td>
           <td><code>DefaultNyagekiFumenFormatter.cs:97-111; ParserUtils.cs:11-21; LinqExtensionMethod.cs:272-278; SvgPrefabCommandParser.cs:42-68</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-067"><code>CA-067</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>BPM/Meter / 保存往返</td>
+          <td>普通 BPM 或 Meter 事件移动到零时刻后，会被两种格式的保存器误当作首事件静默丢弃</td>
+          <td><code>BpmList.cs:20-60; MeterChangeList.cs:34-86; DefaultOngekiFumenFormatter.cs:302-312; DefaultNyagekiFumenFormatter.cs:203-214</code></td>
         </tr>
         </tbody>
       </table>
@@ -4382,45 +4391,40 @@ this.holdEnd = end;                    // 没有 old.RefHold = null</code></pre>
   <section id="ca-065" class="issue high">
     <div class="issue-head">
       <div>
-        <h2><code>CA-065</code> RecordId 非法编辑会在保存重载时破坏轨道关系</h2>
+        <h2><code>CA-065</code> 非法 RecordId 输入会在导入时静默破坏轨道关系</h2>
         <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
         <span class="status status-open">未修复</span>
-        <span class="confidence confidence-confirmed">序列化与解析链确认</span>
-        <span class="exposure exposure-active">活动</span>
+        <span class="confidence confidence-confirmed">两种解析链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
       </div>
     </div>
 
     <div class="facts">
-      <div class="fact"><strong>正常界面可触发</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableObjectBase.cs"><code>RecordId</code></a> 带属性浏览器别名且公开可写；整数生成器会为它建立普通文本编辑框</div>
-      <div class="fact"><strong>setter 不守不变量</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs"><code>ConnectableStartObject.RecordId</code></a> 只执行 <code>SetProperty</code>，不限制非负、也不检查同一 Lane/Beam 集合中的唯一性</div>
-      <div class="fact"><strong>保存直接采用脏值</strong>OGKR 和 Nyageki 都把当前 <code>RecordId</code> 写入起点、子点及 Tap/Hold 引用，没有在保存前重新分配或拒绝冲突</div>
+      <div class="fact"><strong>属性面板实际只读</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableObjectBase.cs"><code>RecordId</code></a> 带 <code>ObjectPropertyBrowserReadOnly</code>；包装器使用继承感知的 <code>GetCustomAttribute</code>，因此普通属性编辑不是当前触发入口</div>
+      <div class="fact"><strong>输入没有全局校验</strong>OGKR 和 Nyageki 解析器都直接接受文件中的整数 <code>RecordId</code>，没有在提交模型前验证同类起点 ID 非负且唯一</div>
       <div class="fact"><strong>重复值取第一个</strong>OGKR 子点、Tap、Hold 和两种 Nyageki 音符解析器都使用 <code>FirstOrDefault(x =&gt; x.RecordId == id)</code>，第二条同 ID 轨道无法被可靠引用</div>
       <div class="fact"><strong>负值会被半途改号</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/ConnectableObjectList.cs"><code>ConnectableObjectList.Add</code></a> 只在添加起点时把负 ID 自动改成新 ID；OGKR 后续仍按文件中的负 ID 查找子点，因此子点被直接丢弃</div>
+      <div class="fact"><strong>失败仍返回部分模型</strong>找不到父起点时各对象解析器通常只写日志并返回 <code>default</code> 或空引用，整个打开流程不会因轨道关系损坏而事务性失败</div>
     </div>
 
     <h3>最小复现</h3>
     <ol>
-      <li>建立两条各自带子点和 Tap/Hold 的 Lane，在属性浏览器中把第二条 LaneStart 的 <code>RecordId</code> 改成第一条的值。</li>
-      <li>保存为 OGKR 再重载。第一条起点先进入集合，第二条起点仍以相同 ID 加入；第二条的子点逐行解析时通过 <code>FirstOrDefault</code> 挂到第一条，第二条变成空轨道。所有同 ID 的 Tap/Hold 也只能指向第一条。</li>
-      <li>另把一条带子点的 LaneStart ID 改为 <code>-1</code> 并保存 OGKR。重载起点时集合先为它分配非负 ID，随后文件中的子点仍携带 <code>-1</code>，查找失败并返回 <code>default</code>，整条子点链消失。</li>
+      <li>准备或外部修改一份 OGKR/Nyageki，使两条各自带子点和 Tap/Hold 的 Lane 起点使用同一 <code>RecordId</code>。</li>
+      <li>打开文件。OGKR 的子点以及两种格式后续解析的 Tap/Hold 都按 ID 使用 <code>FirstOrDefault</code>，因此只能命中其中一个起点；OGKR 的另一条轨道会变空，两种格式的音符引用都可能被改绑。Nyageki 的子点随各自 Lane 行内构造，不属于这段合并路径。</li>
+      <li>另把 OGKR 中一条带子点的 LaneStart ID 及其引用改为 <code>-1</code>。起点加入集合时先被自动分配非负 ID，随后仍携带 <code>-1</code> 的子点查找失败并被丢弃。</li>
       <li>Nyageki 会在整条 Lane 加入集合时改掉负 ID，因此轨道链本身可能幸存，但稍后解析的 Tap/Hold 仍按文件中的 <code>-1</code> 查找并失去引用。</li>
     </ol>
 
     <h3>源码证据</h3>
     <pre><code>[LocalizableObjectPropertyBrowserAlias(nameof(Lang.RecordId))]
+[ObjectPropertyBrowserReadOnly]
 public abstract int RecordId { get; set; }
 
-public override int RecordId
-{
-    get =&gt; recordId;
-    set =&gt; SetProperty(ref recordId, value); // 无范围和唯一性校验
-}
-
 if (startObject.RecordId &lt; 0)
-    startObject.RecordId = GetNextRecordId(); // 起点加入时才改号
+    startObject.RecordId = GetNewRecordId(); // 起点加入时才改号
 
 if (fumen.Lanes.FirstOrDefault(x =&gt; x.RecordId == beamRecordId)
     is not ConnectableStartObject beamStart)
@@ -4433,14 +4437,13 @@ var refLaneStart = fumen.Lanes.FirstOrDefault(x =&gt; x.RecordId == laneId);
 tap.ReferenceLaneStart = refLaneStart;        // 重复 ID 永远取第一个</code></pre>
 
     <h3>影响</h3>
-    <p>这是从普通属性编辑入口即可触发的持久化数据损坏。重复值会在重载时合并本应独立的轨道链，并把音符静默改绑到另一条轨道；负值会让 OGKR 丢失全部子点，同时让两种格式中的 Tap/Hold 脱离轨道。当前检查器没有唯一性或非负规则，保存过程也不会提示用户。该问题与 <code>CA-051</code> 的“删除后复用 ID”相关，但本条无需删除对象，直接编辑公开属性即可触发，且额外包含负 ID 的子点丢失路径。</p>
+    <p>外部工具、旧版本或损坏文件只要提供重复/负 ID，编辑器就会返回一个看似成功打开、实际已丢失关系的部分模型。用户随后保存会把静默合并、丢弃和空引用固化到新文件中。当前属性面板已正确把 RecordId 设为只读，因此本条限定为输入校验缺陷；它与 <code>CA-051</code> 的“编辑器内删除后复用 ID”是两个不同入口。</p>
 
     <h3>修复方向与回归门槛</h3>
     <ul>
-      <li>最小修复是从通用属性浏览器隐藏或只读化 <code>RecordId</code>；如果产品确实需要改号，应提供由所属集合执行的原子重命名操作。</li>
-      <li>重命名必须在对应 Lane 或 Beam ID 命名空间内验证非负且唯一，冲突时保持原值并给出可见错误，不能依赖保存重载“自动整理”。</li>
       <li>解析器应建立 ID 索引并明确拒绝重复起点；负 ID 或找不到父对象时应让导入失败或至少阻止覆盖原文件，不能仅记录日志后丢弃对象。</li>
-      <li>保存前检查器增加重复/负 ID 规则，覆盖 Lane、Wall、Autoplay Fader 和 Beam。</li>
+      <li>保留现有属性面板只读约束；若未来提供改号功能，应由所属集合执行原子重命名并验证对应 Lane/Beam 命名空间内非负且唯一。</li>
+      <li>保存前检查器增加重复/负 ID 规则，覆盖 Lane、Wall、Autoplay Fader 和 Beam，作为加载旧项目后覆盖文件前的第二道防线。</li>
       <li>回归测试使用两条同类型同 ID 轨道和一条 <code>-1</code> 轨道，分别验证 OGKR/Nyageki 的 Children、Curve、Tap、Hold 引用以及保存重载后的对象数量和身份。</li>
     </ul>
   </section>
@@ -4498,6 +4501,66 @@ svg.Scale = ParseSingle(Required(fields, "Scale"), "Scale");</code></pre>
       <li>解析字段映射时拒绝重复键并报告行号和字段名，避免恶意或损坏输入通过“最后一个获胜”静默改变语义。</li>
       <li>保存前对不支持安全表示的旧格式值给出错误，不能写出已知无法无损读回的文本。</li>
       <li>回归测试覆盖字体名中的 <code>]</code>、逗号、冒号、Unicode 和伪造 <code>Scale</code>/<code>Type</code> 字段，并断言 Nyageki 往返保持每个 SVG 属性且重复键被明确拒绝。</li>
+    </ul>
+  </section>
+
+  <section id="ca-067" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-067</code> 零时刻普通 BPM/Meter 事件会在保存时被静默删除</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">两种格式往返链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>正常编辑可触发</strong>BPMChange 和 MeterChange 均可从工具箱添加，通用 TGrid 编辑器允许直接输入 <code>Unit=0, Grid=0</code>；画布拖动也只把 Y 限制到不小于零，没有禁止普通事件落在起点</div>
+      <div class="fact"><strong>BPM 哨兵混在普通列表</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/BpmList.cs"><code>BpmList</code></a> 构造时就在 <code>changedBpmList</code> 中创建零时刻首 BPM；普通零时刻事件被排序插到它前面后，<code>BpmList.Skip(1)</code> 会隐藏真实事件并把内部首 BPM 当作普通对象显示，删除保护也随之保护错对象</div>
+      <div class="fact"><strong>Meter 编辑期间确实生效</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/MeterChangeList.cs"><code>MeterChangeList</code></a> 单独保存 <code>firstMeter</code>，枚举时再接普通列表；<code>GetMeter</code> 取最后一个不晚于当前时刻的事件，因此零时刻普通 Meter 会覆盖首拍号参与编辑和时间线计算</div>
+      <div class="fact"><strong>OGKR 按坐标误删</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessCOMPOSITION</code></a> 排除所有 <code>TGrid == 0</code> 的 BPM，以及所有与 <code>FirstMeter.TGrid</code> 相同的 Meter，而不是只排除内部首事件实例</div>
+      <div class="fact"><strong>Nyageki 同样误删</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/DefaultNyagekiFumenFormatter.cs"><code>ProcessCOMPOSITION</code></a> 使用完全相同的坐标过滤；两种格式都只从 MetaInfo 写出旧的 FirstBpm/MeterDefinition，不会把普通零时刻事件提升为首定义</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>在谱面正时间位置分别添加一个普通 BPMChange 和 MeterChange，并把数值设为与元信息中的首 BPM/首拍号不同。</li>
+      <li>通过属性浏览器把它们的 TGrid 改为 <code>0:0</code>，或拖到画布顶端。Meter 仍显示并从零时刻开始影响拍线；BPM 实例会被 <code>Skip(1)</code> 隐藏，内部首 BPM 反而进入可显示集合。</li>
+      <li>保存为 OGKR 或 Nyageki。格式化器不会写出这两个普通事件，头部仍保存修改前的 FirstBpm 和 MeterDefinition，保存过程没有警告。</li>
+      <li>重新打开文件，两个用户创建的对象均已消失，拍号和首 BPM 回到元信息中的旧值。若保存前删除画布上错误显示的内部首 BPM，<code>BpmList.Remove</code> 还会允许删除它，因为保护判断已把隐藏的普通零时刻事件误认成首 BPM。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public BpmList(...)
+{
+    FirstBpm = DefaultFirstBpm; // 在 changedBpmList 中创建 TGrid.Zero 对象
+}
+
+// 画布显示假设索引 0 永远是唯一哨兵
+.Concat(BpmList.Skip(1))
+.Concat(MeterChanges.Skip(1))
+
+// OGKR 与 Nyageki 都按坐标过滤，而非按对象身份过滤
+fumen.BpmList
+    .Where(x =&gt; x.TGrid != TGrid.Zero)
+
+fumen.MeterChanges
+    .Where(x =&gt; x.TGrid != fumen.MeterChanges.FirstMeter.TGrid)</code></pre>
+
+    <h3>影响</h3>
+    <p>这是由普通工具箱和属性编辑即可触发的保存数据丢失。Meter 在编辑会话中已经改变拍线和时间换算，用户有充分理由相信它会被保存，但重载后会无提示恢复旧拍号；BPM 的重复零键还会让显示集合交换真实事件与内部哨兵，并允许删除本应受保护的内部首对象。保存成功并覆盖原文件后，丢失的对象和值无法从文件恢复。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>明确零时刻的产品规则。若该位置只允许首 BPM/首 Meter，普通事件在拖放、属性 setter、粘贴和导入时都必须被拒绝并给出可见提示；不能等到保存时静默过滤。</li>
+      <li>若允许把普通事件移动到零时刻，应在一个可撤销事务中把其值提升到 MetaInfo/首事件，并移除普通实例，保证内存模型和文件模型只有一个零时刻定义。</li>
+      <li>集合与格式化器应按明确的首事件身份处理哨兵，不使用 <code>Skip(1)</code> 或 TGrid 相等来推断对象角色；BPM 最好也像 Meter 一样单独持有首对象。</li>
+      <li>加载和保存前检查器应报告重复零时刻 BPM/Meter，避免外部文件把同一不变量重新带回模型。</li>
+      <li>回归测试覆盖工具箱落点、拖动、TGrid 属性编辑、撤销/重做、OGKR/Nyageki 保存重载，并断言首事件不会进入普通显示/删除路径，普通事件也不会无提示消失。</li>
     </ul>
   </section>
 
@@ -4579,12 +4642,17 @@ svg.Scale = ParseSingle(Required(fields, "Scale"), "Scale");</code></pre>
         审查 OGKR/Nyageki 的重复和负 RecordId、即时引用解析、SVG 字段往返、Browser StorageProvider 书签所有权，以及项目 EditorSetting 的反序列化行为。记录 <code>CA-065</code> 至 <code>CA-066</code>。
         专项往返验证确认 getter-only <code>EditorSetting</code> 能由当前 System.Text.Json 源生成上下文填充，因此未误报为反序列化丢失；StorageProvider 书签的保存、打开和释放链当前完整，临时不可用后永久停检已由 <code>CA-053</code> 覆盖。乱序 OGKR/Nyageki 引用是否违反格式规范尚缺少权威依据，本批不提前编号。构建中的 Gekimini 传递 SkiaSharp 告警已在现有迁移审计文档中显式记录，不作为新发现重复分配编号。
       </div>
+      <time datetime="2026-08-13">2026-08-13 / A16</time>
+      <div>
+        复核 RecordId 的反射特性继承、Connectable 子点改号事件、集合批处理和 BPM/Meter 首事件不变量，并检查两种格式的零时刻过滤。记录 <code>CA-067</code>；同时纠正 <code>CA-065</code> 的触发入口：当前属性浏览器确实继承并执行 <code>ObjectPropertyBrowserReadOnly</code>，问题限定为导入器未拒绝非法 ID。
+        <code>IntervalTreeWrapper.BeginBatchAction</code> 当前没有生产调用；Connectable 子点 RecordId 在属性面板只读且全仓未找到挂接后改号的生产写入；Browser 当前子窗口共享同一 Avalonia TopLevel，尚不能证明全局 StorageProvider 会选错窗口。因此这些候选本批均未提前编号。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查格式解析的区段顺序契约、其他自由字符串的转义边界、集合键属性变更后的索引一致性，以及 Browser 多窗口 TopLevel/StorageProvider 归属。新增问题从 <code>CA-067</code> 起顺序编号。</p>
+    <p>继续检查格式解析的区段顺序契约、其他自由字符串的转义边界、集合重复订阅与首事件身份，以及编辑动作和保存模型之间的剩余不对称。新增问题从 <code>CA-068</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
