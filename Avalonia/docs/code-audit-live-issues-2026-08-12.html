@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>ff4f96fd</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>9659e54b</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>29</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>29</strong><span>未修复</span></div>
-      <div class="metric"><strong>14 / 15</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>8</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>33</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>33</strong><span>未修复</span></div>
+      <div class="metric"><strong>17 / 16</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>9</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -501,6 +501,42 @@
           <td>渲染控制工具 / 撤销</td>
           <td>重排撤销保存临时行实例，切换文档重建后撤销会无声空转</td>
           <td><code>FumenEditorRenderControlViewerViewModel.cs:88-123</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-030"><code>CA-030</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>谱面检查器 / 缺失引用</td>
+          <td>空轨道引用同时命中两遍规则，同一物件产生两条错误并重复计数</td>
+          <td><code>MissingRefObjectCheckRule.cs:19-31; IntervalTreeWrapper.cs:59-69</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-031"><code>CA-031</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>OGKR / 区域设置</td>
+          <td>数值读写跟随系统区域设置，跨区域打开会把小数放大或静默归零</td>
+          <td><code>DefaultOngekiFumenFormatter.cs:239-249, 307-344; IArgValueConverter.cs:26-54</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-032"><code>CA-032</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Nyageki / 坐标语法</td>
+          <td>小数逗号与坐标分隔符冲突，同区域保存后立即重开也会改坏位置</td>
+          <td><code>DefaultNyagekiFumenFormatter.cs:119-372; ParserUtils.cs:16-33</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-033"><code>CA-033</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>OGKR / 自定义 Bell</td>
+          <td>随机偏移读取错列，每次重载都把非零值清成 0</td>
+          <td><code>DefaultOngekiFumenFormatter.cs:516-517; CustomBellCommandParser.cs:19, 59</code></td>
         </tr>
         </tbody>
       </table>
@@ -2084,6 +2120,224 @@ private void ApplyControlItemOrder(IReadOnlyList&lt;RenderControlItem&gt; order)
     </ul>
   </section>
 
+  <section id="ca-030" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-030</code> 空轨道引用会被检查器重复报告和计数</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">谓词交集确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>第一遍规则</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenCheckerListViewer/Base/DefaultRulesImpl/MissingRefObjectCheckRule.cs"><code>MissingRefObjectCheckRule</code></a> 先枚举 <code>ReferenceLaneStart is null</code> 的 Tap/Hold</div>
+      <div class="fact"><strong>第二遍规则</strong>随后又枚举 <code>!fumen.Lanes.Contains(ReferenceLaneStart)</code>，但没有排除空引用</div>
+      <div class="fact"><strong>集合契约</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/Base/IntervalTreeWrapper.cs"><code>IntervalTreeWrapper.Contains</code></a> 对 <code>null</code> 明确返回 <code>false</code>，所以空引用必然再次命中</div>
+      <div class="fact"><strong>界面结果</strong><code>FumenCheckerListViewerViewModel</code> 不去重地追加全部结果，错误计数也直接按结果条数统计</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>打开一个包含未关联轨道的 Tap 或 Hold 的谱面，或通过编辑操作把其 <code>ReferenceLaneStart</code> 清空。</li>
+      <li>刷新谱面检查器。第一段循环生成“缺失引用”错误。</li>
+      <li>第二段循环把同一个空引用交给 <code>fumen.Lanes.Contains(null)</code>；该调用返回 <code>false</code>，于是又生成“引用不在谱面中”错误。</li>
+      <li>两条结果拥有相同规则名和导航对象，但都会进入列表与 <code>ErrorCount</code>，同一个实际缺陷被显示、统计两次。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>foreach (var dockableObj in ...
+    .Where(x =&gt; x.ReferenceLaneStart is null))
+    yield return MissingRefObject(...);
+
+foreach (var dockableObj in ...
+    .Where(x =&gt; !fumen.Lanes.Contains(x.ReferenceLaneStart)))
+    yield return MissingRefObject2(...);
+
+public bool Contains(TValue obj)
+{
+    if (obj is null)
+        return false;
+    ...
+}</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenCheckerListViewer/ViewModels/FumenCheckerListViewerViewModel.cs"><code>RefreshCurrentFumen</code></a> 使用 <code>SelectMany</code> 枚举所有规则结果，并逐条加入 <code>allCheckResults</code>；当前没有按规则、对象或描述合并结果的步骤。</p>
+
+    <h3>影响</h3>
+    <p>检查器列表和错误徽标被系统性放大，用户无法区分两个独立问题还是同一问题的重复表述。批量清理时也会重复导航到同一个物件，降低检查结果作为保存或发布门槛的可信度。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>第二个谓词应先要求 <code>ReferenceLaneStart is not null</code>，只负责报告“非空但不属于当前谱面”的悬空引用。</li>
+      <li>保留两种不同描述，但明确使谓词互斥；不应依赖界面层事后按文本去重。</li>
+      <li>测试空引用 Tap/Hold 各只产生一条结果；另用来自其他谱面的非空 LaneStart 验证只产生一条 <code>MissingRefObject2</code>。</li>
+      <li>在 ViewModel 层断言一项空引用只使 <code>ErrorCount</code> 增加 1，并且过滤开关不会改变总计数。</li>
+    </ul>
+  </section>
+
+  <section id="ca-031" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-031</code> OGKR 数值格式随区域设置变化并可静默损坏谱面</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">文化切换复现</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>写入端</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>DefaultOngekiFumenFormatter</code></a> 用普通字符串插值写 BPM、伤害、速度、坐标和区域宽度，没有指定固定文化</div>
+      <div class="fact"><strong>网格写入</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/TGrid.cs"><code>TGrid.Serialize</code></a> 与 <a href="../src/OngekiFumenEditor.Avalonia/Base/XGrid.cs"><code>XGrid.Serialize</code></a> 同样调用当前文化的数值格式化</div>
+      <div class="fact"><strong>读取端</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/IArgValueConverter.cs"><code>IArgValueConverter</code></a> 的数值实现使用默认 <code>TryParse</code>，因此也依赖当前文化</div>
+      <div class="fact"><strong>失败策略</strong>解析失败不抛错、不保留原文本，而是返回类型默认值；浮点数和整数会静默变成 <code>0</code></div>
+    </div>
+
+    <h3>确定性复现</h3>
+    <ol>
+      <li>在 <code>de-DE</code> 文化下保存含 <code>BPM = 1.5</code> 的 OGKR。<code>F6</code> 插值输出 <code>1,500000</code>。</li>
+      <li>在 <code>en-US</code> 下打开该文件。默认 <code>float.TryParse</code> 允许千位分隔符，因此把 <code>1,500000</code> 成功解析为 <code>1500000</code>，而不是报告格式不兼容。</li>
+      <li>未带固定小数位的坐标 <code>1,5</code> 会被解析为 <code>15</code>；反向从 <code>en-US</code> 到 <code>de-DE</code> 时，<code>1.5</code> 也会被解析为 <code>15</code>。</li>
+      <li>其他无法按当前文化解释的内容由转换器直接替换为 <code>0</code>。用户若再次保存，错误值成为新的文件内容。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{o.BPM:F6}");
+sb.Append($"...\t{o.Speed:F6}");
+sb.AppendLine($"...\t{centerXUnit}\t{o.GridLength}\t{o.AreaWidth}...");
+
+public override string Serialize()
+    =&gt; $"{Unit}\t{Grid}";
+
+public IEnumerable Parser(IEnumerable&lt;string&gt; inputs)
+    =&gt; inputs.Select(x =&gt; float.TryParse(x, out var d) ? d : default);</code></pre>
+    <p>这不是只影响显示文本的本地化问题。<a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenParser.cs"><code>DefaultOngekiFumenParser</code></a> 把转换后的数值直接构造成生产谱面对象，并在整文件解析期间没有记录失败列或停止加载。</p>
+
+    <h3>影响</h3>
+    <p>跨不同区域设置交换或迁移 <code>.ogkr</code> 文件时，BPM、Soflan 速度、T/X 坐标、伤害值、弹体速度及区域参数都可能被放大多个数量级或归零。错误通常不会在打开阶段暴露，而会表现为物件消失、时间轴极端拉长、音画错位或后续保存后的永久数据损坏。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把 OGKR 定义为固定文化格式；所有数值写入统一使用 <code>CultureInfo.InvariantCulture</code>，避免逐个插值点遗漏。</li>
+      <li>读取端使用显式 <code>NumberStyles</code> 与 <code>InvariantCulture</code>，不要允许与格式无关的千位分隔符。</li>
+      <li>转换失败必须携带行号、命令头和列号中止或报告错误，禁止以 <code>default</code> 继续构造可保存的损坏对象。</li>
+      <li>参数化测试在 <code>en-US</code>、<code>de-DE</code>、<code>fr-FR</code> 下分别序列化和反序列化同一组非整数值，断言字节文本和对象值均与当前文化无关。</li>
+      <li>增加畸形数值测试，断言解析明确失败且不会返回可再次保存的部分谱面。</li>
+    </ul>
+  </section>
+
+  <section id="ca-032" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-032</code> Nyageki 小数逗号会破坏自身坐标语法</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">同文化往返确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>格式语法</strong>Nyageki 用逗号分隔网格的 <code>Unit</code> 与 <code>Grid</code>，例如 <code>X[1.5,0]</code></div>
+      <div class="fact"><strong>写入端</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/DefaultNyagekiFumenFormatter.cs"><code>DefaultNyagekiFumenFormatter</code></a> 除 SVG 段外直接插值浮点值，仍使用当前文化</div>
+      <div class="fact"><strong>读取端</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/CommandImpl/ParserUtils.cs"><code>ParseToTGrid/ParseToXGrid</code></a> 无条件按字面逗号拆分，并只读取前两个片段</div>
+      <div class="fact"><strong>覆盖范围</strong>Lane、Beam、Tap、Hold、Bullet、Bell、Flick、Soflan 区域和曲线控制点都复用这种坐标文本</div>
+    </div>
+
+    <h3>确定性复现</h3>
+    <ol>
+      <li>把当前文化设为 <code>de-DE</code> 或 <code>fr-FR</code>，创建 <code>XGrid.Unit = 1.5</code>、<code>XGrid.Grid = 0</code> 的物件。</li>
+      <li>格式化器把它写成 <code>X[1,5,0]</code>：第一个逗号来自小数格式，第二个逗号才是 Nyageki 语法分隔符。</li>
+      <li>同一文化下立即重新打开。解析器执行 <code>Split(",")</code> 得到 <code>["1", "5", "0"]</code>，随后构造 <code>new XGrid(1, 5)</code>，第三段被静默忽略。</li>
+      <li>对象位置已经从 <code>1.5 + 0/4096</code> 改为 <code>1 + 5/4096</code>；再次保存会永久写入错误坐标。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// formatter
+$"X[{o.XGrid.Unit},{o.XGrid.Grid}]"
+$"T[{o.TGrid.Unit},{o.TGrid.Grid}]"
+
+// parser
+var data = xgridContent
+    .Trim(new char[] { 'X', '[', ']' })
+    .Trim()
+    .Split(",");
+return new XGrid(float.Parse(data[0]), int.Parse(data[1]));</code></pre>
+    <p>SVG Prefab 段已经通过 <a href="../src/OngekiFumenEditor.Avalonia/Parser/SvgPrefabFormatUtils.cs"><code>SvgPrefabFormatUtils</code></a> 使用固定文化，说明项目已有正确工具；但普通谱面对象仍走另一套当前文化插值，因此该保护没有覆盖核心 Nyageki 内容。</p>
+
+    <h3>影响</h3>
+    <p>在使用小数逗号的系统上，Nyageki 文件无需跨机器就会在一次保存/重载后改变物件位置。TGrid 小数同样受影响，可能改变节拍；独立的 BPM、Soflan 速度和伤害字段还存在与 <code>CA-031</code> 类似的跨文化误读风险。解析器忽略额外坐标片段，使损坏过程通常没有异常提示。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>所有 Nyageki 数值统一通过固定文化格式化工具输出；不能只修复 SVG 专用段。</li>
+      <li>坐标解析使用固定文化并要求恰好两个字段，遇到多余或缺失片段时提供带命令位置的错误，不得忽略尾部。</li>
+      <li>在 <code>de-DE</code>/<code>fr-FR</code> 下对非整数 TGrid/XGrid 执行保存后立即重载，断言 Unit、Grid 和 TotalGrid 完全相等。</li>
+      <li>覆盖 Lane、曲线控制点、Hold 结束点、Bullet/Bell 和个人 Soflan 区域，防止只修一类对象。</li>
+      <li>增加跨文化读取用例，并验证序列化文本始终使用点号小数和单一逗号坐标分隔符。</li>
+    </ul>
+  </section>
+
+  <section id="ca-033" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-033</code> OGKR 自定义 Bell 随机偏移读取错列</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">列契约确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>写入列</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessBELL</code></a> 将 <code>RandomOffsetRange</code> 写在从 0 开始的第 9 列</div>
+      <div class="fact"><strong>读取列</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/CustomBellCommandParser.cs"><code>CustomBellCommandParser</code></a> 却调用 <code>GetData&lt;int&gt;(10)</code></div>
+      <div class="fact"><strong>缺列行为</strong><code>CommandArgs.GetData</code> 使用 <code>ElementAtOrDefault</code>，不存在的第 10 列直接返回 <code>0</code></div>
+      <div class="fact"><strong>运行效果</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/OngekiObjects/BulletBell/ProjectileBatchDrawTargetBase.cs"><code>ProjectileBatchDrawTargetBase</code></a> 用该值计算 Bell 的横向随机目标偏移</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>创建使用 <code>BulletPallete.DummyCustomPallete</code> 的 Bell，并把 <code>RandomOffsetRange</code> 设为任意非零值。</li>
+      <li>保存为 OGKR。行尾顺序是 <code>... Speed, Size, RandomOffsetRange</code>，有效索引止于 9。</li>
+      <li>重新打开文件。解析器读取索引 10，<code>ElementAtOrDefault</code> 返回 <code>0</code>，并覆盖 Bell 的本地随机偏移。</li>
+      <li>视觉目标偏移消失；再次保存时行尾被写成 <code>0</code>，原值无法恢复。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// formatter: indexes 0..9
+sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}" +
+    $"\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}" +
+    $"\t{u.RandomOffsetRange}");
+
+// parser
+bell.RandomOffsetRange = args.GetData&lt;int&gt;(10); // 实际应读取 9</code></pre>
+    <p>同文件中的自定义 Bullet 因多一个 <code>Type</code> 字段，随机偏移确实位于索引 11，且解析器读取 11；错误只出现在 Bell 分支，不能通过复用 Bullet 的列号解决。</p>
+
+    <h3>影响</h3>
+    <p>所有使用本地自定义参数且随机偏移非零的 Bell 都会在一次 OGKR 重载后无提示丢失该参数，编辑器预览和最终谱面行为随之改变。这是稳定发生且会被下一次保存固化的单字段数据损坏。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>将自定义 Bell 的读取索引改为 9，并对必需字段数量做显式验证。</li>
+      <li>用命名列常量或集中式行结构描述格式化器与解析器，避免两端独立维护魔法数字。</li>
+      <li>创建每个自定义字段都使用不同非默认值的 Bell，执行 <code>对象 → OGKR → 对象</code> 往返，逐字段断言 Shooter、PlaceOffset、Target、Speed、Size 和 RandomOffsetRange。</li>
+      <li>增加缺列测试，要求解析器报告格式错误，而不是由 <code>ElementAtOrDefault</code> 静默补零。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -2127,12 +2381,17 @@ private void ApplyControlItemOrder(IReadOnlyList&lt;RenderControlItem&gt; order)
         审查排序范围的重复键边界、嵌套坐标通知、Soflan 组面板刷新以及渲染控制单例的异步重建和撤销身份。记录 <code>CA-026</code> 至 <code>CA-029</code>。
         <code>SortableCollection.Contains</code> 的同键语义当前没有生产调用；主属性编辑入口会整体替换 TGrid，而不是就地修改 Unit/Grid；Hold 结束关系的区间树候选仍只表现为过量查询，未找到稳定错误输出，故本批未编号这些候选。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A09</time>
+      <div>
+        审查检查器谓词边界、OGKR/Nyageki 的区域设置与往返列契约。记录 <code>CA-030</code> 至 <code>CA-033</code>。
+        <code>XGrid.Serialize</code> 当前只输出 Unit，因此弹体字段整体错位的初始候选不成立；Wall/Beam 的 End 由链尾位置动态决定，复用 Next 类型也是现有对象模型的正确行为。墙体冲突规则的相邻区间扫描虽不会一次列出所有重叠对，但已报告任一重叠即可阻止后续几何阶段，当前不足以证明存在未报告的有效谱面错误，故未编号。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查 Browser/桌面平台差异、多文档渲染状态、检查器规则的集合边界、格式化器与解析器的往返一致性，以及撤销动作对可变对象身份的依赖。新增问题从 <code>CA-030</code> 起顺序编号。</p>
+    <p>继续检查 Browser/桌面平台差异、命令执行的异常与取消边界、谱面解析后的对象关系恢复、剪贴板和撤销动作的跨文档身份，以及格式转换器对未知或缺失字段的处理。新增问题从 <code>CA-034</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
