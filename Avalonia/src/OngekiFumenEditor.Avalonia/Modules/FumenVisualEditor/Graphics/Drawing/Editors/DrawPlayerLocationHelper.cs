@@ -9,7 +9,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 
-public class DrawPlayerLocationHelper
+public class DrawPlayerLocationHelper : IDisposable
 {
     private (Vector2 size, Vector2 position, float rotation, Vector4 color)[] arr = { default };
     private IImage texture;
@@ -19,6 +19,7 @@ public class DrawPlayerLocationHelper
 
     public void Initalize(IRenderManagerImpl impl)
     {
+        Reset();
         textureDrawing = impl.TextureDrawing;
         arr[0].rotation = 0f;
 
@@ -64,6 +65,19 @@ public class DrawPlayerLocationHelper
         arr[0].size = size;
 
         textureDrawing.Draw(target, texture, arr);
+    }
+
+    public void Dispose()
+    {
+        Reset();
+    }
+
+    private void Reset()
+    {
+        Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
+        texture?.Dispose();
+        texture = null;
+        textureDrawing = null;
     }
 }
 

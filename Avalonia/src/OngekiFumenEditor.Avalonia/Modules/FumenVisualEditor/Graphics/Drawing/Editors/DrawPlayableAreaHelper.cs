@@ -21,7 +21,7 @@ using static OngekiFumenEditor.Avalonia.Utils.MathUtils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
-    public class DrawPlayableAreaHelper
+    public class DrawPlayableAreaHelper : IDisposable
     {
         static readonly Vector4 debugLeftColor = new Vector4(1, 51f / 255, 51f / 255, 0.75f);
         static readonly Vector4 debugRightColor = new Vector4(0, 204f / 255, 102f / 255, 0.75f);
@@ -38,6 +38,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public void Initalize(IRenderManagerImpl impl)
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
             polygonDrawing = impl.PolygonDrawing;
             lineDrawing = impl.SimpleLineDrawing;
             circleDrawing = impl.CircleDrawing;
@@ -1121,6 +1122,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             float b = bPrime + m;
 
             return (r, g, b);
+        }
+
+        public void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
+            polygonDrawing = null;
+            lineDrawing = null;
+            circleDrawing = null;
+            stringDrawing = null;
         }
     }
 }

@@ -93,6 +93,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
         internal void Clear()
         {
             list.Clear();
+            list.Add(defaultRecord);
             Log.LogDebug($"recorder list has clear.");
         }
     }

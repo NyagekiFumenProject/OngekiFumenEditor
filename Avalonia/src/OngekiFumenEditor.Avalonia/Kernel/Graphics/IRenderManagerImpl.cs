@@ -12,6 +12,9 @@ public interface IRenderManagerImpl
 
     IImage LoadImageFromStream(Stream stream);
     Control CreateRenderControl();
+    void ReleaseRenderControl(Control renderControl)
+    {
+    }
 
     ICircleDrawing CircleDrawing { get; }
     ILineDrawing LineDrawing { get; }

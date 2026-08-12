@@ -11,13 +11,14 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
-    public class DrawHitObjectEffectHelper
+    public class DrawHitObjectEffectHelper : IDisposable
     {
         private ICircleDrawing circleDrawing;
         private bool showHitEffect;
 
         public void Initalize(IRenderManagerImpl impl)
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
             circleDrawing = impl.CircleDrawing;
             showHitEffect = Properties.EditorGlobalSetting.Default.ShowHitObjectEffectInPreviewMode;
 
@@ -140,6 +141,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 }
             }
             circleDrawing.End();
+        }
+
+        public void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
+            circleDrawing = null;
         }
     }
 }

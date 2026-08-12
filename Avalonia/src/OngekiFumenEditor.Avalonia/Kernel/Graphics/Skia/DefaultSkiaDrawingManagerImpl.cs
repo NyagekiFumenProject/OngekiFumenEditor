@@ -77,4 +77,9 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         return new AvaloniaSkiaRenderControl();
     }
 
+    public void ReleaseRenderControl(Control renderControl)
+    {
+        if (renderControl is AvaloniaSkiaRenderControl skiaRenderControl)
+            skiaRenderControl.RenderContext.StopRendering();
+    }
 }

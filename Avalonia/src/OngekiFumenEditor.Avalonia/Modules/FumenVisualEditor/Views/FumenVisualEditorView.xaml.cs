@@ -36,7 +36,8 @@ public partial class FumenVisualEditorView : ViewBase
 
     private async void OnRenderControlHostLoaded(object sender, RoutedEventArgs e)
     {
-        if (sender is ContentControl contentControl && DataContext is FumenVisualEditorViewModel viewModel)
+        if (sender is ContentControl contentControl &&
+            DataContext is FumenVisualEditorViewModel { IsDisposed: false } viewModel)
             await viewModel.InitializeRenderControlAsync(contentControl);
     }
 }

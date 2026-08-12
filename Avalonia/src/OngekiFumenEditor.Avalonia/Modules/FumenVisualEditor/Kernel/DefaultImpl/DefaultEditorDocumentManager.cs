@@ -101,9 +101,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
             }
 			finally
 			{
-				editor.AudioPlayer?.Dispose();
-				editor.AudioPlayer = null;
-				editor.EditorProjectData?.DisposeRuntimeFiles();
+				editor.Dispose();
 			}
         }
 

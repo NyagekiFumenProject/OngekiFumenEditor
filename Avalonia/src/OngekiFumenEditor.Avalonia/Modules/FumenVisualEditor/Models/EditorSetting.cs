@@ -7,6 +7,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 {
     public class EditorSetting : ObservableObject, IDisposable
     {
+        private bool isDisposed;
+
         public EditorSetting()
         {
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -14,11 +16,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         private async void RequestSave()
         {
-            if (isRequestSave)
+            if (isDisposed || isRequestSave)
                 return;
             isRequestSave = true;
             await Task.Delay(2000);
-            Properties.EditorGlobalSetting.Default.Save();
+            if (!isDisposed)
+                Properties.EditorGlobalSetting.Default.Save();
             isRequestSave = false;
         }
 
@@ -337,6 +340,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 
         public void Dispose()
         {
+            if (isDisposed)
+                return;
+
+            isDisposed = true;
             Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
         }
     }

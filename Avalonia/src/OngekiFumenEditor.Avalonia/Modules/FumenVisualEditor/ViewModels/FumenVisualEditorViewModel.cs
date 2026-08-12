@@ -19,7 +19,7 @@ using System.ComponentModel;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
-public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersistedDocumentViewModel
+public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersistedDocumentViewModel, IDisposable
 {
     public delegate void LoadingFinishedEventHandler(object sender, EditorProjectDataModel args);
     public event LoadingFinishedEventHandler LoadingFinished;
@@ -75,6 +75,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     internal Guid RecoverySnapshotId { get; } = Guid.NewGuid();
 
     private bool areRuntimeSubscriptionsAttached;
+    private bool isDisposed;
+
+    internal bool IsDisposed => isDisposed;
 
     private bool isShowCurveControlAlways = false;
     public bool IsShowCurveControlAlways
@@ -379,6 +382,36 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     private void UpdateTitle()
     {
         Title = LocalizedString.CreateFromRawText(DisplayName);
+    }
+
+    public void Dispose()
+    {
+        if (isDisposed)
+            return;
+
+        isDisposed = true;
+        DetachBatchModeBehavior();
+        DetachRuntimeSubscriptions();
+        DisposeRenderResources();
+        DetachFumenSubscriptions(Fumen);
+        if (EditorProjectData is not null)
+        {
+            EditorProjectData.PropertyChanged -= OnEditorProjectDataPropertyChanged;
+            EditorProjectData.DisposeRuntimeFiles();
+        }
+
+        AudioPlayer?.Dispose();
+        AudioPlayer = null;
+        Setting.Dispose();
+        UndoRedoManager.Clear();
+        PlayerLocationRecorder.Clear();
+        hits.Clear();
+        cacheObjectAudioTime.Clear();
+        InteractiveManager = null;
+        View = null;
+        LoadingFinished = null;
+        Fumen = null;
+        EditorProjectData = null;
     }
 }
 

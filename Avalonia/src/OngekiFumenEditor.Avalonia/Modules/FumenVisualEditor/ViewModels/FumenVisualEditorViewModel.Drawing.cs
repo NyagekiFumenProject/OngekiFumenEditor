@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
 public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedulable, IFumenEditorDrawingContext
 {
-    private static Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
+    private Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
     private IPerfomenceMonitor actualPerformenceMonitor;
 
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
@@ -76,10 +76,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     private DrawXGridHelper xGridHelper;
     private int cacheMagaticXGridLinesHash;
 
-    private IEnumerable<IFumenEditorDrawingTarget> drawingTargets;
+    private IEnumerable<IFumenEditorDrawingTarget> drawingTargets = [];
     public IEnumerable<IFumenEditorDrawingTarget> CurrentDrawingTargets => drawingTargets;
 
-    private TaskCompletionSource renderInitializationTaskSource = new();
+    private readonly TaskCompletionSource renderInitializationTaskSource = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     private VisibleRect rectInDesignMode;
     public VisibleRect RectInDesignMode
@@ -206,6 +206,20 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     public void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl renderImpl)
     {
+        PrepareRenderLoop(
+            renderControl,
+            renderImpl,
+            IoC.GetAll<IFumenEditorDrawingTarget>(),
+            IoC.Get<IPerfomenceMonitor>());
+    }
+
+    internal void PrepareRenderLoop(
+        FrameworkElement renderControl,
+        IRenderManagerImpl renderImpl,
+        IEnumerable<IFumenEditorDrawingTarget> availableDrawingTargets,
+        IPerfomenceMonitor performenceMonitor)
+    {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
         ViewWidth = (float)renderControl.Bounds.Width;
         ViewHeight = (float)renderControl.Bounds.Height;
 
@@ -214,7 +228,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         hideWallLaneWhenEnablePlayField = EditorGlobalSetting.Default.HideWallLaneWhenEnablePlayField;
 
         //get and initialize drawing targets.
-        drawingTargets = IoC.GetAll<IFumenEditorDrawingTarget>();
+        drawingTargets = availableDrawingTargets.ToArray();
         foreach (var drawTarget in drawingTargets)
             drawTarget.Initialize(renderImpl);
         //build map for ongeki objects
@@ -225,6 +239,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         LoadRenderOrderVisible();
         ResortRenderOrder();
 
+        DisposeDrawingHelpers();
         timeSignatureHelper = new DrawTimeSignatureHelper();
         timeSignatureHelper.Initalize(renderImpl);
 
@@ -246,14 +261,14 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         hitObjectEffectHelper = new DrawHitObjectEffectHelper();
         hitObjectEffectHelper.Initalize(renderImpl);
 
-        actualPerformenceMonitor = IoC.Get<IPerfomenceMonitor>();
+        actualPerformenceMonitor = performenceMonitor;
         IsDisplayFPS = IsDisplayFPS;
 
         UpdateActualRenderInterval();
         sw = new Stopwatch();
         sw.Start();
 
-        renderInitializationTaskSource.SetResult();
+        renderInitializationTaskSource.TrySetResult();
     }
 
     private void OnEditorLoop(TimeSpan ts)
@@ -270,6 +285,12 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     private readonly ConcurrentDictionary<int, DrawingTargetContext> drawingContexts = new();
     private IRenderManagerImpl renderImpl;
+    private ContentControl renderControlHost;
+    private FrameworkElement attachedRenderControl;
+    private CancellationTokenSource renderControlLifetimeCancellationSource;
+    private CancellationToken renderControlLifetimeCancellationToken = new(canceled: true);
+    private int renderControlAttachmentVersion;
+    private bool isRenderControlLoaded;
 
     private void UpdateActualRenderInterval()
     {
@@ -922,31 +943,97 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     private ActionExecutionContext CreateExecutionContext(object source, object eventArgs)
         => new() { Source = source, EventArgs = eventArgs, View = View };
 
-    public async Task InitializeRenderControlAsync(ContentControl contentControl)
+    public Task InitializeRenderControlAsync(ContentControl contentControl)
     {
-        if (renderImpl != null)
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        return InitializeRenderControlAsync(
+            contentControl,
+            IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl(),
+            IoC.GetAll<IFumenEditorDrawingTarget>(),
+            IoC.Get<IPerfomenceMonitor>());
+    }
+
+    internal async Task InitializeRenderControlAsync(
+        ContentControl contentControl,
+        IRenderManagerImpl newRenderImpl,
+        IEnumerable<IFumenEditorDrawingTarget> availableDrawingTargets,
+        IPerfomenceMonitor performenceMonitor,
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(IsDisposed, this);
+        ArgumentNullException.ThrowIfNull(contentControl);
+        ArgumentNullException.ThrowIfNull(newRenderImpl);
+        ArgumentNullException.ThrowIfNull(availableDrawingTargets);
+        ArgumentNullException.ThrowIfNull(performenceMonitor);
+
+        if (attachedRenderControl is not null)
             return;
 
-        renderImpl = IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl();
-        var renderControl = renderImpl.CreateRenderControl();
-        await renderImpl.InitializeRenderControl(renderControl);
-        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
+        var attachmentVersion = Interlocked.Increment(ref renderControlAttachmentVersion);
+        var lifetimeCancellationSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var lifetimeCancellationToken = lifetimeCancellationSource.Token;
+        renderControlLifetimeCancellationSource = lifetimeCancellationSource;
+        renderControlLifetimeCancellationToken = lifetimeCancellationToken;
+        renderImpl = newRenderImpl;
+        renderControlHost = contentControl;
+        var newRenderControl = newRenderImpl.CreateRenderControl();
+        attachedRenderControl = newRenderControl;
 
+        try
+        {
+            await newRenderImpl.InitializeRenderControl(newRenderControl, lifetimeCancellationToken);
+            lifetimeCancellationToken.ThrowIfCancellationRequested();
+            if (attachmentVersion != Volatile.Read(ref renderControlAttachmentVersion) || IsDisposed)
+                return;
+
+            Log.LogDebug($"RenderControl({newRenderControl.GetHashCode()}) is created");
+            AttachRenderControlHandlers(newRenderControl);
+            contentControl.Content = newRenderControl;
+            PrepareRenderLoop(newRenderControl, newRenderImpl, availableDrawingTargets, performenceMonitor);
+        }
+        catch (OperationCanceledException) when (
+            lifetimeCancellationToken.IsCancellationRequested ||
+            IsDisposed ||
+            attachmentVersion != Volatile.Read(ref renderControlAttachmentVersion))
+        {
+            if (attachmentVersion == Volatile.Read(ref renderControlAttachmentVersion))
+                DetachRenderControl();
+        }
+        catch (Exception exception)
+        {
+            if (attachmentVersion == Volatile.Read(ref renderControlAttachmentVersion))
+            {
+                DetachRenderControl();
+                DisposeDrawingHelpers();
+                renderInitializationTaskSource.TrySetException(exception);
+            }
+
+            throw;
+        }
+    }
+
+    private void AttachRenderControlHandlers(FrameworkElement renderControl)
+    {
         renderControl.Loaded += RenderControl_Loaded;
         renderControl.Unloaded += RenderControl_UnLoaded;
         renderControl.SizeChanged += RenderControl_SizeChanged;
+        renderControl.PointerWheelChanged += RenderControl_PointerWheelChanged;
+        renderControl.PointerPressed += RenderControl_PointerPressed;
+        renderControl.PointerMoved += RenderControl_PointerMoved;
+        renderControl.PointerReleased += RenderControl_PointerReleased;
+        renderControl.PointerExited += RenderControl_PointerExited;
+    }
 
-        renderControl.PointerWheelChanged += (s, e) => OnMouseWheel(CreateExecutionContext(s, e));
-        renderControl.SizeChanged += (s, e) => OnSizeChanged(CreateExecutionContext(s, e));
-        renderControl.Loaded += (s, e) => OnLoaded(CreateExecutionContext(s, e));
-        renderControl.PointerPressed += (s, e) => OnMouseDown(CreateExecutionContext(s, e));
-        renderControl.PointerMoved += (s, e) => OnMouseMove(CreateExecutionContext(s, e));
-        renderControl.PointerReleased += (s, e) => OnMouseUp(CreateExecutionContext(s, e));
-        renderControl.PointerExited += (s, e) => OnMouseLeave(CreateExecutionContext(s, e));
-
-        contentControl.Content = renderControl;
-
-        PrepareRenderLoop(renderControl, renderImpl);
+    private void DetachRenderControlHandlers(FrameworkElement renderControl)
+    {
+        renderControl.Loaded -= RenderControl_Loaded;
+        renderControl.Unloaded -= RenderControl_UnLoaded;
+        renderControl.SizeChanged -= RenderControl_SizeChanged;
+        renderControl.PointerWheelChanged -= RenderControl_PointerWheelChanged;
+        renderControl.PointerPressed -= RenderControl_PointerPressed;
+        renderControl.PointerMoved -= RenderControl_PointerMoved;
+        renderControl.PointerReleased -= RenderControl_PointerReleased;
+        renderControl.PointerExited -= RenderControl_PointerExited;
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -956,26 +1043,161 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         ViewWidth = (float)e.NewSize.Width;
         ViewHeight = (float)e.NewSize.Height;
         RecalculateTotalDurationHeight();
+        OnSizeChanged(CreateExecutionContext(sender, e));
     }
 
-    private async void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
-    {
-        var renderControl = sender as FrameworkElement;
-        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
+    private void RenderControl_PointerWheelChanged(object sender, PointerWheelEventArgs e) =>
+        OnMouseWheel(CreateExecutionContext(sender, e));
 
-        RenderContext = await renderImpl.GetRenderContext(renderControl);
-        RenderContext.OnRender -= Render;
-        RenderContext.StopRendering();
+    private void RenderControl_PointerPressed(object sender, PointerPressedEventArgs e) =>
+        OnMouseDown(CreateExecutionContext(sender, e));
+
+    private void RenderControl_PointerMoved(object sender, PointerEventArgs e) =>
+        OnMouseMove(CreateExecutionContext(sender, e));
+
+    private void RenderControl_PointerReleased(object sender, PointerReleasedEventArgs e) =>
+        OnMouseUp(CreateExecutionContext(sender, e));
+
+    private void RenderControl_PointerExited(object sender, PointerEventArgs e) =>
+        OnMouseLeave(CreateExecutionContext(sender, e));
+
+    private void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement renderControl || !ReferenceEquals(renderControl, attachedRenderControl))
+            return;
+
+        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
+        isRenderControlLoaded = false;
+        StopRenderContext();
     }
 
     private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
     {
-        var renderControl = sender as FrameworkElement;
-        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
+        if (sender is not FrameworkElement renderControl)
+            return;
 
-        RenderContext = await renderImpl.GetRenderContext(renderControl);
-        RenderContext.OnRender += Render;
-        RenderContext.StartRendering();
+        await ActivateRenderControlAsync(renderControl, e);
+    }
+
+    internal async Task ActivateRenderControlAsync(FrameworkElement renderControl, object eventArgs)
+    {
+        if (!ReferenceEquals(renderControl, attachedRenderControl) || IsDisposed)
+            return;
+
+        Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
+        isRenderControlLoaded = true;
+        var attachmentVersion = Volatile.Read(ref renderControlAttachmentVersion);
+        var lifetimeCancellationToken = renderControlLifetimeCancellationToken;
+        var currentRenderImpl = renderImpl;
+        if (lifetimeCancellationToken.IsCancellationRequested || currentRenderImpl is null)
+            return;
+
+        try
+        {
+            var renderContext = await currentRenderImpl.GetRenderContext(
+                renderControl,
+                lifetimeCancellationToken);
+            if (IsDisposed ||
+                !isRenderControlLoaded ||
+                attachmentVersion != Volatile.Read(ref renderControlAttachmentVersion) ||
+                !ReferenceEquals(renderControl, attachedRenderControl))
+                return;
+
+            StartRenderContext(renderContext);
+            OnLoaded(CreateExecutionContext(renderControl, eventArgs));
+        }
+        catch (OperationCanceledException) when (IsDisposed || lifetimeCancellationToken.IsCancellationRequested)
+        {
+        }
+        catch (Exception exception)
+        {
+            Log.LogError($"Unable to start render control {renderControl.GetHashCode()}: {exception.Message}", exception);
+        }
+    }
+
+    private void StartRenderContext(IRenderContext renderContext)
+    {
+        if (!ReferenceEquals(RenderContext, renderContext))
+            StopRenderContext();
+
+        RenderContext = renderContext;
+        renderContext.OnRender -= Render;
+        renderContext.OnRender += Render;
+        renderContext.StartRendering();
+    }
+
+    private void StopRenderContext()
+    {
+        var renderContext = RenderContext;
+        RenderContext = null;
+        if (renderContext is null)
+            return;
+
+        renderContext.OnRender -= Render;
+        renderContext.StopRendering();
+    }
+
+    private void DetachRenderControl()
+    {
+        Interlocked.Increment(ref renderControlAttachmentVersion);
+        isRenderControlLoaded = false;
+
+        var lifetimeCancellationSource = renderControlLifetimeCancellationSource;
+        renderControlLifetimeCancellationSource = null;
+        renderControlLifetimeCancellationToken = new(canceled: true);
+        lifetimeCancellationSource?.Cancel();
+        lifetimeCancellationSource?.Dispose();
+
+        StopRenderContext();
+
+        var renderControl = attachedRenderControl;
+        attachedRenderControl = null;
+        if (renderControl is not null)
+            DetachRenderControlHandlers(renderControl);
+
+        var contentControl = renderControlHost;
+        renderControlHost = null;
+        if (contentControl is not null && ReferenceEquals(contentControl.Content, renderControl))
+            contentControl.Content = null;
+
+        var currentRenderImpl = renderImpl;
+        renderImpl = null;
+        if (renderControl is not null)
+            currentRenderImpl?.ReleaseRenderControl(renderControl);
+    }
+
+    private void DisposeDrawingHelpers()
+    {
+        playableAreaHelper?.Dispose();
+        playableAreaHelper = null;
+        playerLocationHelper?.Dispose();
+        playerLocationHelper = null;
+        hitObjectEffectHelper?.Dispose();
+        hitObjectEffectHelper = null;
+
+        timeSignatureHelper = null;
+        xGridHelper = null;
+        judgeLineHelper = null;
+        selectingRangeHelper = null;
+    }
+
+    private void DisposeRenderResources()
+    {
+        DetachRenderControl();
+        DisposeDrawingHelpers();
+
+        drawingTargets = [];
+        drawTargetOrder = [];
+        drawTargetMap.Clear();
+        drawMap.Clear();
+        drawingContexts.Clear();
+        cachedMagneticXGridLines.Clear();
+        CurrentDrawingTargetContext = null;
+        actualPerformenceMonitor = null;
+        PerfomenceMonitor = dummyPerformenceMonitor;
+        sw?.Stop();
+        sw = null;
+        renderInitializationTaskSource.TrySetResult();
     }
 
     public Task WaitForRenderInitializationIsDone()

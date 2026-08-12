@@ -52,4 +52,14 @@ public class DefaultOpenGLRenderManagerImpl : IRenderManagerImpl
     {
         return new Panel();
     }
+
+    public void ReleaseRenderControl(Control renderControl)
+    {
+        if (!cachedRenderControlMap.Remove(renderControl, out var renderContext))
+            return;
+
+        renderContext.StopRendering();
+        if (renderContext is IDisposable disposable)
+            disposable.Dispose();
+    }
 }

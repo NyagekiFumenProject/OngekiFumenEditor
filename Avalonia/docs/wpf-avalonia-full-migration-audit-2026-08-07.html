@@ -953,8 +953,12 @@
 <li><strong>测试缺口</strong>：没有断言重复执行命令只保留一个 tool/container，也没有覆盖活动编辑器切换、关闭后重开和布局序列化后的实例一致性。</li>
 <li><strong>后续建议</strong>：补关闭后重开、布局序列化/恢复、活动编辑器切换和当前元信息写回的 UI 测试；Shell 层仍应禁止相同稳定 ID 的不同实例静默覆盖缓存，所有导航入口继续复用该接口单例。</li>
 </ul>
-<h3 id="b-042-editor-render-resource-lifecycle">B-042 关闭编辑器没有释放设置订阅、绘制辅助器和渲染控件资源（旧缺陷被迁移保留）</h3>
+<h3 id="b-042-editor-render-resource-lifecycle" class="completed-plan">B-042 编辑器关闭已统一释放设置、绘制辅助器和渲染控件资源（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-12）</strong>：<code>FumenVisualEditorViewModel</code> 现在实现幂等 <code>IDisposable</code>，<code>DefaultEditorDocumentManager.NotifyDestory()</code> 在关闭通知结束后只调用这一条统一销毁链。销毁会取消进行中的渲染初始化、停止并退订 <code>RenderContext</code>、移除渲染控件全部具名事件、清空宿主 Content、释放后端控件资源、辅助器纹理、<code>EditorSetting</code>、音频及工程运行时文件，并清理谱面/工程/撤销与绘制缓存引用。</li>
+<li><strong>渲染与所有权</strong>：<code>IRenderManagerImpl.ReleaseRenderControl()</code> 明确后端释放入口；Skia 停止控件上下文，OpenGL 同时移除上下文缓存。绘制目标由容器以单例提供，因此关闭编辑器只清空实例引用，不误释放其他已打开编辑器共享的目标；三个订阅全局设置的 helper 均实现幂等 <code>Dispose()</code>，玩家位置纹理只释放一次。</li>
+<li><strong>竞态处理</strong>：渲染初始化保存生命周期 token 和 attachment version；即使后端忽略取消并晚于关闭完成，也不会重新挂接控件、事件或渲染循环。<code>WaitForRenderInitializationIsDone()</code> 在关闭路径会完成，工具窗口不会永久等待已销毁编辑器。</li>
+<li><strong>验证</strong>：新增 <code>EditorResourceLifecycleTests</code> 6 个专项用例，覆盖正常加载后停止/退订/清空/释放、纹理幂等释放、初始化可取消与忽略取消两类关闭竞态、文档管理器重复销毁，以及释放控件仍被外部持有时编辑器可由弱引用回收；专项测试 <code>6/6</code>、Avalonia 核心完整测试集 <code>428/428</code> 通过，0 项跳过。</li>
 <li><strong>当前所有权</strong>：每个 <code>FumenVisualEditorViewModel</code> 都创建一个实现 <code>IDisposable</code> 的 <code>EditorSetting</code>；其构造函数订阅全局 <code>EditorGlobalSetting.Default.PropertyChanged</code>，只有 <code>Dispose()</code> 才退订。<code>PrepareRenderLoop()</code> 还创建 <code>DrawPlayableAreaHelper</code>、<code>DrawPlayerLocationHelper</code> 和 <code>DrawHitObjectEffectHelper</code>，三者都订阅同一全局事件，且没有释放接口；其中播放器位置 helper 还持有可释放的 <code>IImage texture</code>。</li>
 <li><strong>关闭路径</strong>：<code>DefaultEditorDocumentManager.NotifyDestory():92-106</code> 只释放音频播放器和工程运行时文件；<code>FumenVisualEditorViewModel.OnViewBeforeUnload():705-711</code> 只拆除部分运行时订阅并清空 <code>View</code>。<code>InitializeRenderControlAsync():920-944</code> 为渲染控件注册具名和匿名事件处理器，但没有保存控件所有权或提供统一拆除方法，<code>renderImpl</code>、helper 和 drawing target 引用也一直保留。</li>
 <li><strong>归因边界</strong>：旧 WPF 代码已有相近的全局订阅和辅助器生命周期问题，因此这不是 Avalonia 独有回归；但移植后的关闭契约仍宣称销毁文档，并增加了 Skia/Browser 原生纹理、授权资源和 Avalonia 控件事件，不能继续依赖 GC 或视图卸载代替显式释放。</li>

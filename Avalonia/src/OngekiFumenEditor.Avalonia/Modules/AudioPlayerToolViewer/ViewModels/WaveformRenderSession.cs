@@ -175,7 +175,10 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
         var control = renderControl;
         renderControl = null;
         if (control is not null)
+        {
             control.SizeChanged -= OnRenderControlSizeChanged;
+            renderManager.ReleaseRenderControl(control);
+        }
 
         var oldHost = host;
         host = null;
