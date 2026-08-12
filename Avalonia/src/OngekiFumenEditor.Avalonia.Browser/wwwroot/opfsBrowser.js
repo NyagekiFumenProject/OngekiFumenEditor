@@ -21,6 +21,66 @@ const readHandles = new Map();
 const outputHandles = new Map();
 const stagingStates = new Map();
 const retainedObjectUrls = new Set();
+const textPreviewMimeType = "text/plain;charset=utf-8";
+const previewMimeTypesByExtension = Object.freeze({
+    ".avif": "image/avif",
+    ".bmp": "image/bmp",
+    ".gif": "image/gif",
+    ".ico": "image/x-icon",
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".flac": "audio/flac",
+    ".m4a": "audio/mp4",
+    ".mp3": "audio/mpeg",
+    ".oga": "audio/ogg",
+    ".ogg": "audio/ogg",
+    ".wav": "audio/wav",
+    ".mp4": "video/mp4",
+    ".ogv": "video/ogg",
+    ".webm": "video/webm",
+    ".pdf": "application/pdf",
+    ".axaml": textPreviewMimeType,
+    ".cfg": textPreviewMimeType,
+    ".cjs": textPreviewMimeType,
+    ".conf": textPreviewMimeType,
+    ".cs": textPreviewMimeType,
+    ".csproj": textPreviewMimeType,
+    ".css": textPreviewMimeType,
+    ".csv": textPreviewMimeType,
+    ".htm": textPreviewMimeType,
+    ".html": textPreviewMimeType,
+    ".ini": textPreviewMimeType,
+    ".js": textPreviewMimeType,
+    ".json": textPreviewMimeType,
+    ".jsonc": textPreviewMimeType,
+    ".jsx": textPreviewMimeType,
+    ".log": textPreviewMimeType,
+    ".m4s": textPreviewMimeType,
+    ".ma2": textPreviewMimeType,
+    ".maidata": textPreviewMimeType,
+    ".markdown": textPreviewMimeType,
+    ".md": textPreviewMimeType,
+    ".mjs": textPreviewMimeType,
+    ".nyageki": textPreviewMimeType,
+    ".ogkr": textPreviewMimeType,
+    ".props": textPreviewMimeType,
+    ".simai": textPreviewMimeType,
+    ".sln": textPreviewMimeType,
+    ".slnx": textPreviewMimeType,
+    ".targets": textPreviewMimeType,
+    ".toml": textPreviewMimeType,
+    ".ts": textPreviewMimeType,
+    ".tsv": textPreviewMimeType,
+    ".tsx": textPreviewMimeType,
+    ".txt": textPreviewMimeType,
+    ".xaml": textPreviewMimeType,
+    ".xhtml": textPreviewMimeType,
+    ".xml": textPreviewMimeType,
+    ".yaml": textPreviewMimeType,
+    ".yml": textPreviewMimeType,
+});
 let nextReadHandle = 0;
 let nextOutputHandle = 0;
 let browserAvailable = false;
@@ -120,6 +180,99 @@ async function resolveParent(relativePath) {
 async function resolveFile(relativePath) {
     const resolved = await resolveParent(relativePath);
     return resolved.parent.getFileHandle(resolved.name);
+}
+
+function getPreviewMimeType(relativePath, fileMimeType) {
+    const fileName = relativePath.slice(relativePath.lastIndexOf("/") + 1);
+    const extensionIndex = fileName.lastIndexOf(".");
+    if (extensionIndex >= 0) {
+        const extension = fileName.slice(extensionIndex).toLowerCase();
+        const mappedMimeType = previewMimeTypesByExtension[extension];
+        if (mappedMimeType !== undefined) {
+            return mappedMimeType;
+        }
+    }
+
+    const normalizedMimeType = fileMimeType.split(";", 1)[0].trim().toLowerCase();
+    if (normalizedMimeType.startsWith("text/") ||
+        normalizedMimeType === "application/json" ||
+        normalizedMimeType.endsWith("+json") ||
+        normalizedMimeType === "application/javascript" ||
+        normalizedMimeType.endsWith("+xml") ||
+        normalizedMimeType === "application/xml" ||
+        normalizedMimeType === "image/svg+xml") {
+        return textPreviewMimeType;
+    }
+    if (normalizedMimeType.startsWith("image/") ||
+        normalizedMimeType.startsWith("audio/") ||
+        normalizedMimeType.startsWith("video/") ||
+        normalizedMimeType === "application/pdf") {
+        return normalizedMimeType;
+    }
+    return textPreviewMimeType;
+}
+
+function showFilePreviewMessage(previewWindow, relativePath, message, isError = false) {
+    if (previewWindow.closed) {
+        return;
+    }
+
+    const fileName = relativePath.slice(relativePath.lastIndexOf("/") + 1);
+    const previewDocument = previewWindow.document;
+    previewDocument.title = fileName;
+    previewDocument.documentElement.style.colorScheme = "light dark";
+    previewDocument.body.replaceChildren();
+    Object.assign(previewDocument.body.style, {
+        alignItems: "center",
+        background: "Canvas",
+        color: isError ? "#c42b1c" : "CanvasText",
+        display: "flex",
+        fontFamily: "system-ui, sans-serif",
+        justifyContent: "center",
+        margin: "0",
+        minHeight: "100vh",
+        padding: "24px",
+        textAlign: "center",
+    });
+
+    const status = previewDocument.createElement("div");
+    status.style.whiteSpace = "pre-wrap";
+    status.textContent = message;
+    previewDocument.body.append(status);
+}
+
+async function loadFilePreview(previewWindow, relativePath) {
+    let objectUrl;
+    try {
+        const fileHandle = await resolveFile(relativePath);
+        const file = await fileHandle.getFile();
+        if (previewWindow.closed) {
+            return;
+        }
+
+        const previewMimeType = getPreviewMimeType(relativePath, file.type);
+        const previewContent = file.type === previewMimeType
+            ? file
+            : new Blob([file], { type: previewMimeType });
+        objectUrl = URL.createObjectURL(previewContent);
+        retainedObjectUrls.add(objectUrl);
+        previewWindow.location.replace(objectUrl);
+    } catch (error) {
+        if (objectUrl !== undefined) {
+            retainedObjectUrls.delete(objectUrl);
+            URL.revokeObjectURL(objectUrl);
+        }
+        const detail = error instanceof Error ? error.message : String(error);
+        try {
+            showFilePreviewMessage(
+                previewWindow,
+                relativePath,
+                `Unable to open this OPFS file.\n${detail}`,
+                true);
+        } catch {
+            // The preview page may have been closed while the OPFS file was being read.
+        }
+    }
 }
 
 async function getSortedEntries(directory) {
@@ -444,6 +597,37 @@ export async function directoryExists(relativePath) {
     }
 }
 
+export function openFilePreview(relativePath) {
+    requireBrowserAvailable();
+    const normalizedPath = normalizePath(relativePath);
+    if (normalizedPath.length === 0 || typeof globalThis.open !== "function") {
+        return false;
+    }
+
+    let previewWindow;
+    try {
+        // Open synchronously while the double-tap still counts as a browser user gesture.
+        previewWindow = globalThis.open("", "_blank");
+    } catch {
+        return false;
+    }
+    if (previewWindow === null) {
+        return false;
+    }
+
+    try {
+        previewWindow.opener = null;
+        const fileName = normalizedPath.slice(normalizedPath.lastIndexOf("/") + 1);
+        showFilePreviewMessage(previewWindow, normalizedPath, `Loading ${fileName} from OPFS...`);
+    } catch {
+        previewWindow.close();
+        return false;
+    }
+
+    void loadFilePreview(previewWindow, normalizedPath);
+    return true;
+}
+
 export async function beginDownload(suggestedFileName, useZip) {
     requireBrowserAvailable();
     const suggestedName = sanitizeSuggestedName(suggestedFileName);
@@ -671,6 +855,7 @@ globalThis.BrowserOpfsInterop = Object.freeze({
     isAvailable,
     listDirectory,
     directoryExists,
+    openFilePreview,
     beginDownload,
     buildManifest,
     validateManifest,

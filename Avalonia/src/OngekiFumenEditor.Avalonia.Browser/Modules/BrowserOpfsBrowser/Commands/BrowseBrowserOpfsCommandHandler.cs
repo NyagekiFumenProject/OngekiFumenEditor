@@ -1,17 +1,11 @@
 #nullable enable
 
-using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Dialogs;
-using Gekimini.Avalonia.Modules.Window.Views;
 using Gekimini.Avalonia.Platforms.Services.Window;
-using Iciclecreek.Avalonia.WindowManager;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser.ViewModels;
 
@@ -55,7 +49,7 @@ public sealed class BrowseBrowserOpfsCommandHandler
         Dispatcher.UIThread.VerifyAccess();
         viewModel ??= new BrowserOpfsBrowserViewModel(service, dialogManager);
 
-        if (FindExistingWindow(viewModel) is { } existingWindow)
+        if (windowManager.FindExistingWindow(viewModel) is { } existingWindow)
         {
             if (existingWindow.WindowState == WindowState.Minimized)
                 existingWindow.WindowState = WindowState.Normal;
@@ -65,18 +59,5 @@ public sealed class BrowseBrowserOpfsCommandHandler
         }
 
         await windowManager.ShowWindowAsync(viewModel);
-    }
-
-    private static WindowViewBase? FindExistingWindow(BrowserOpfsBrowserViewModel targetViewModel)
-    {
-        WindowsPanel? windowsPanel = null;
-        if (Application.Current?.ApplicationLifetime is ISingleViewApplicationLifetime singleView)
-            windowsPanel = singleView.MainView?.FindDescendantOfType<WindowsPanel>(true);
-        else if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            windowsPanel = desktop.MainWindow?.FindDescendantOfType<WindowsPanel>(true);
-
-        return windowsPanel?.Windows
-            .OfType<WindowViewBase>()
-            .FirstOrDefault(window => ReferenceEquals(window.DataContext, targetViewModel));
     }
 }

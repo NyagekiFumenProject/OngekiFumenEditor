@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Dialogs.ViewModels;
 using OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser;
+using OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser.ViewModels;
 using Xunit;
 
@@ -135,6 +136,35 @@ public sealed class BrowserOpfsBrowserViewModelTests
     }
 
     [Fact]
+    public async Task OpenEntryCommand_WhenEntryIsFile_OpensPreviewWithoutStartingDownload()
+    {
+        var service = new StubBrowserOpfsService();
+        service.SetDirectory(string.Empty, File("preview.txt", 12, 20));
+        var viewModel = CreateViewModel(service);
+        await viewModel.RefreshNowAsync();
+
+        BrowserOpfsEntryViewModel file = Assert.Single(viewModel.Entries);
+        await viewModel.OpenEntryCommand.ExecuteAsync(file);
+
+        Assert.Equal(["preview.txt"], service.PreviewedPaths);
+        Assert.False(service.DownloadStarted.Task.IsCompleted);
+        Assert.False(viewModel.IsDownloadInProgress);
+    }
+
+    [Fact]
+    public async Task OpenEntryCommand_WhenPreviewPageIsBlocked_ShowsStatusMessage()
+    {
+        var service = new StubBrowserOpfsService { IsPreviewOpeningAllowed = false };
+        service.SetDirectory(string.Empty, File("preview.txt", 12, 20));
+        var viewModel = CreateViewModel(service);
+        await viewModel.RefreshNowAsync();
+
+        await viewModel.OpenEntryCommand.ExecuteAsync(Assert.Single(viewModel.Entries));
+
+        Assert.Equal(BrowserOpfsLang.BrowserOpfsPreviewBlocked, viewModel.StatusMessage);
+    }
+
+    [Fact]
     public async Task RequestCloseAsync_DuringDownload_CancelsAndWaitsForCleanup()
     {
         var service = new StubBrowserOpfsService { BlockDownloads = true };
@@ -190,8 +220,10 @@ public sealed class BrowserOpfsBrowserViewModelTests
 
         public bool IsAvailable => true;
         public bool BlockDownloads { get; init; }
+        public bool IsPreviewOpeningAllowed { get; init; } = true;
         public bool CancellationObserved { get; private set; }
         public List<string> ListCalls { get; } = [];
+        public List<string> PreviewedPaths { get; } = [];
         public TaskCompletionSource DownloadStarted { get; } =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
 
@@ -222,6 +254,12 @@ public sealed class BrowserOpfsBrowserViewModelTests
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.FromResult(directories.ContainsKey(relativePath));
+        }
+
+        public bool OpenFilePreview(string relativePath)
+        {
+            PreviewedPaths.Add(relativePath);
+            return IsPreviewOpeningAllowed;
         }
 
         public async Task<BrowserOpfsDownloadResult> DownloadAsync(

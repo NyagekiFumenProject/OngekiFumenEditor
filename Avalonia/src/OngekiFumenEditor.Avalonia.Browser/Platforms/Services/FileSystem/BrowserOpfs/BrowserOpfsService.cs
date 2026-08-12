@@ -67,6 +67,13 @@ public sealed class BrowserOpfsService : IBrowserOpfsService
         return result;
     }
 
+    public bool OpenFilePreview(string relativePath)
+    {
+        if (!IsAvailable)
+            return false;
+        return BrowserOpfsInterop.OpenFilePreview(relativePath);
+    }
+
     public async Task<BrowserOpfsDownloadResult> DownloadAsync(
         IReadOnlyList<BrowserOpfsEntrySnapshot> selectedEntries,
         IProgress<BrowserOpfsDownloadProgress>? progress = null,

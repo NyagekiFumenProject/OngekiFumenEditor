@@ -289,9 +289,13 @@ public partial class BrowserOpfsBrowserViewModel : WindowViewModelBase
     {
         if (entry is null || !entry.IsSelectable)
             return Task.CompletedTask;
-        return entry.IsFolder
-            ? NavigateAsync(entry.RelativePath)
-            : BeginDownloadAsync([entry]);
+        if (entry.IsFolder)
+            return NavigateAsync(entry.RelativePath);
+
+        StatusMessage = service.OpenFilePreview(entry.RelativePath)
+            ? string.Empty
+            : BrowserOpfsLang.BrowserOpfsPreviewBlocked;
+        return Task.CompletedTask;
     }
 
     [RelayCommand]

@@ -143,6 +143,8 @@ public sealed class BulletPalleteSelectionTests
 
         public Func<BulletPalleteSelectDialogViewModel, Task>? Interact { get; init; }
 
+        public WindowViewBase FindExistingWindow(WindowViewModelBase windowViewModel) => null!;
+
         public Task ShowWindowAsync(WindowViewBase windowView) => Task.CompletedTask;
 
         public Task<bool?> ShowDialogAsync(WindowViewBase windowView) => Task.FromResult(Result);

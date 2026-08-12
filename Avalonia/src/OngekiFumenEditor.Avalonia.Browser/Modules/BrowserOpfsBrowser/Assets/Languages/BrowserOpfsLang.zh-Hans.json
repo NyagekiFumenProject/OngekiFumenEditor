@@ -1,4 +1,5 @@
 {
+    "BrowserOpfsPreviewBlocked":  "浏览器阻止了预览页面。请允许此站点打开弹出式窗口后重试。",
     "BrowserOpfsBack":  "后退",
     "BrowserOpfsCancelDownload":  "取消",
     "BrowserOpfsCloseDuringDownloadConfirm":  "下载仍在进行。是否取消下载、清理未完成输出并关闭此窗口？",

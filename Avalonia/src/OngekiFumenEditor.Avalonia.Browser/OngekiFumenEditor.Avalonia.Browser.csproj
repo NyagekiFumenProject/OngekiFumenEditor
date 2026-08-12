@@ -4,7 +4,12 @@
         <OutputType>Exe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>preview</LangVersion>
+        <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>
     </PropertyGroup>
+
+    <ItemGroup>
+        <CompilerVisibleProperty Include="InjectioDuplicateStrategy" />
+    </ItemGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
         <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>

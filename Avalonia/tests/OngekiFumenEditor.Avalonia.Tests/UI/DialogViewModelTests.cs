@@ -261,6 +261,8 @@ public sealed class DialogViewModelTests
         public int ShowDialogCallCount { get; private set; }
         public WindowViewModelBase? DialogViewModel { get; private set; }
 
+        public WindowViewBase FindExistingWindow(WindowViewModelBase windowViewModel) => null!;
+
         public Task ShowWindowAsync(WindowViewBase windowView) => Task.CompletedTask;
 
         public Task<bool?> ShowDialogAsync(WindowViewBase windowView) =>

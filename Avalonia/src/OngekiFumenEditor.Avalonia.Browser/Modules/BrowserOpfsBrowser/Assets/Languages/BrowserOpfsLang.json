@@ -1,4 +1,5 @@
 {
+    "BrowserOpfsPreviewBlocked":  "The browser blocked the preview page. Allow pop-ups for this site and try again.",
     "BrowserOpfsBack":  "Back",
     "BrowserOpfsCancelDownload":  "Cancel",
     "BrowserOpfsCloseDuringDownloadConfirm":  "A download is still in progress. Cancel it, remove the partial output, and close this window?",

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Headless.XUnit;
 using Avalonia.Threading;
+using Gekimini.Avalonia.Modules.Window.ViewModels;
 using Gekimini.Avalonia.Modules.Window.Views;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Iciclecreek.Avalonia.WindowManager;
@@ -190,6 +191,46 @@ public sealed class WindowDialogResultTests
         Assert.Equal(1, managedWindow.CloseAnimationCallCount);
         Assert.Equal(1, managedWindow.ClosedCallCount);
         Assert.DoesNotContain(managedWindow, host.WindowsPanel.Windows);
+    }
+
+    [AvaloniaFact]
+    public async Task DefaultWindowManager_FindExistingWindow_ReturnsOnlyMatchingViewModelFromBackgroundThread()
+    {
+        using var host = new WindowHostScope();
+        var windowManager = GetWindowManager();
+        var targetViewModel = new WindowViewModelBase();
+        var otherViewModel = new WindowViewModelBase();
+        var targetWindow = new WindowViewBase
+        {
+            Width = 200,
+            Height = 120,
+            AnimateWindow = false,
+            DataContext = targetViewModel
+        };
+        var otherWindow = new WindowViewBase
+        {
+            Width = 200,
+            Height = 120,
+            AnimateWindow = false,
+            DataContext = otherViewModel
+        };
+
+        await windowManager.ShowWindowAsync(otherWindow);
+        await windowManager.ShowWindowAsync(targetWindow);
+        try
+        {
+            var foundWindow = await Task.Run(() => windowManager.FindExistingWindow(targetViewModel));
+            var missingWindow = await Task.Run(() =>
+                windowManager.FindExistingWindow(new WindowViewModelBase()));
+
+            Assert.Same(targetWindow, foundWindow);
+            Assert.Null(missingWindow);
+        }
+        finally
+        {
+            await windowManager.TryCloseWindowAsync(targetWindow, false);
+            await windowManager.TryCloseWindowAsync(otherWindow, false);
+        }
     }
 
     [AvaloniaFact]

@@ -49,6 +49,8 @@ public interface IBrowserOpfsService
         string relativePath,
         CancellationToken cancellationToken = default);
 
+    bool OpenFilePreview(string relativePath);
+
     Task<BrowserOpfsDownloadResult> DownloadAsync(
         IReadOnlyList<BrowserOpfsEntrySnapshot> selectedEntries,
         IProgress<BrowserOpfsDownloadProgress>? progress = null,

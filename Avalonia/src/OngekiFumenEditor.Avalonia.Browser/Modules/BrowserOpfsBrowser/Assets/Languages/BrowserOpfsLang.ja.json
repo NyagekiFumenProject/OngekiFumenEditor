@@ -1,4 +1,5 @@
 {
+    "BrowserOpfsPreviewBlocked":  "ブラウザーによってプレビューページがブロックされました。このサイトのポップアップを許可してから再試行してください。",
     "BrowserOpfsBack":  "戻る",
     "BrowserOpfsCancelDownload":  "キャンセル",
     "BrowserOpfsCloseDuringDownloadConfirm":  "ダウンロード中です。キャンセルして未完了の出力を削除し、このウィンドウを閉じますか？",

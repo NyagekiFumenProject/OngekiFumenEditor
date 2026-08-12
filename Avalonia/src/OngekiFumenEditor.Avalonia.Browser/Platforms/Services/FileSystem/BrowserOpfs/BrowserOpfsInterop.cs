@@ -19,6 +19,9 @@ internal static partial class BrowserOpfsInterop
     [JSImport("globalThis.BrowserOpfsInterop.directoryExists")]
     public static partial Task<bool> DirectoryExistsAsync(string relativePath);
 
+    [JSImport("globalThis.BrowserOpfsInterop.openFilePreview")]
+    public static partial bool OpenFilePreview(string relativePath);
+
     [JSImport("globalThis.BrowserOpfsInterop.beginDownload")]
     public static partial Task<string> BeginDownloadAsync(string suggestedFileName, bool useZip);
 

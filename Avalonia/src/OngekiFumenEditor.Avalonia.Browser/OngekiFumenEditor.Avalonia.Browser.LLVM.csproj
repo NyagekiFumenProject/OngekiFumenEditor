@@ -13,6 +13,7 @@
         <StackTraceSupport>false</StackTraceSupport>
         <DebugType>none</DebugType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>
         <IlcHostPackagePath Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'true'">$(Pkgruntime_win-x64_Microsoft_DotNet_ILCompiler_LLVM)</IlcHostPackagePath>
         <IlcHostPackagePath Condition="'$([MSBuild]::IsOSPlatform(&quot;Windows&quot;))' == 'false'">$(Pkgruntime_linux-x64_Microsoft_DotNet_ILCompiler_LLVM)</IlcHostPackagePath>
         <UseAppHost>false</UseAppHost>
@@ -22,6 +23,7 @@
     </PropertyGroup>
     <ItemGroup>
         <EmccExportedRuntimeMethod Include="GL" />
+        <CompilerVisibleProperty Include="InjectioDuplicateStrategy" />
     </ItemGroup>
     <PropertyGroup>
         <EmccExtraArgs>$(EmccExtraArgs) -lcompiler_rt-wasm-sjlj</EmccExtraArgs>

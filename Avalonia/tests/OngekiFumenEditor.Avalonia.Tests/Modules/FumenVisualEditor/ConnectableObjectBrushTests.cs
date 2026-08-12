@@ -139,6 +139,8 @@ public sealed class ConnectableObjectBrushTests
 
         public int ShowDialogCallCount { get; private set; }
 
+        public WindowViewBase FindExistingWindow(WindowViewModelBase windowViewModel) => null!;
+
         public Task ShowWindowAsync(WindowViewBase windowView) => Task.CompletedTask;
 
         public Task<bool?> ShowDialogAsync(WindowViewBase windowView) => Task.FromResult(Result);

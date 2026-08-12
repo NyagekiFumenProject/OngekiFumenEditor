@@ -149,7 +149,75 @@ public sealed class BrowserOpfsBrowserContractTests
         Assert.DoesNotContain("Entries.Clear", viewModel, StringComparison.Ordinal);
         Assert.DoesNotContain("<TextBox", view, StringComparison.Ordinal);
         Assert.Contains("command.Enabled = service.IsAvailable", handler, StringComparison.Ordinal);
+        Assert.Contains("windowManager.FindExistingWindow(viewModel)", handler, StringComparison.Ordinal);
+        Assert.DoesNotContain("Application.Current", handler, StringComparison.Ordinal);
         Assert.Contains("existingWindow.Activate()", handler, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BrowserOpfsBrowser_OpensSingleFilesInNewBrowserPages()
+    {
+        string repositoryRoot = FindRepositoryRoot();
+        string contracts = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Modules",
+            "BrowserOpfsBrowser",
+            "BrowserOpfsContracts.cs");
+        string viewModel = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Modules",
+            "BrowserOpfsBrowser",
+            "ViewModels",
+            "BrowserOpfsBrowserViewModel.cs");
+        string script = ReadBrowserScript(repositoryRoot, "opfsBrowser.js");
+
+        Assert.Contains("bool OpenFilePreview(string relativePath)", contracts, StringComparison.Ordinal);
+        Assert.Contains("service.OpenFilePreview(entry.RelativePath)", viewModel, StringComparison.Ordinal);
+        Assert.Contains("export function openFilePreview(relativePath)", script, StringComparison.Ordinal);
+        Assert.Contains("globalThis.open(\"\", \"_blank\")", script, StringComparison.Ordinal);
+        Assert.Contains("void loadFilePreview(previewWindow, normalizedPath);", script, StringComparison.Ordinal);
+        Assert.Contains("previewWindow.location.replace(objectUrl);", script, StringComparison.Ordinal);
+        Assert.Contains("previewWindow.opener = null;", script, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void BrowserOpfsBrowser_AppendsItsMenuRegistrationsAndRegistersItsViewsInEveryBrowserBuild()
+    {
+        string repositoryRoot = FindRepositoryRoot();
+        string browserProject = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "OngekiFumenEditor.Avalonia.Browser.csproj");
+        string llvmBrowserProject = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "OngekiFumenEditor.Avalonia.Browser.LLVM.csproj");
+        string browserApplication = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "OngekiFumenEditorBrowserApp.cs");
+        string browserViewActivator = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "BrowserViewTypeCollectedActivator.cs");
+
+        Assert.Contains("<InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>", browserProject, StringComparison.Ordinal);
+        Assert.Contains("<CompilerVisibleProperty Include=\"InjectioDuplicateStrategy\" />", browserProject, StringComparison.Ordinal);
+        Assert.Contains("<InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>", llvmBrowserProject, StringComparison.Ordinal);
+        Assert.Contains("<CompilerVisibleProperty Include=\"InjectioDuplicateStrategy\" />", llvmBrowserProject, StringComparison.Ordinal);
+        Assert.Contains(
+            "serviceCollection.AddTypeCollectedActivator(BrowserViewTypeCollectedActivator.Default)",
+            browserApplication,
+            StringComparison.Ordinal);
+        Assert.Contains("[CollectTypeForActivator(typeof(IView))]", browserViewActivator, StringComparison.Ordinal);
     }
 
     private static string ReadBrowserScript(string repositoryRoot, string fileName) =>

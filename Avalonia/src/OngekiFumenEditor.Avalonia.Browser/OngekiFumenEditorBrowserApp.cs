@@ -9,6 +9,7 @@ using Gekimini.Avalonia.Framework.Documents;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Utils;
+using Gekimini.Avalonia.Utils.MethodExtensions;
 using Iciclecreek.Avalonia.WindowManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,8 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 #else
         serviceCollection.AddOngekiFumenEditorAvaloniaBrowser();
 #endif
+
+        serviceCollection.AddTypeCollectedActivator(BrowserViewTypeCollectedActivator.Default);
 
 #if DEBUG
         if (DesignModeHelper.IsDesignMode)
