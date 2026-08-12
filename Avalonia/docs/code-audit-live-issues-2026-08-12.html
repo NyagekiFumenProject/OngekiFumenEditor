@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>41dd3707</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>3c5af47e</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>47</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>47</strong><span>未修复</span></div>
-      <div class="metric"><strong>24 / 23</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>11</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>53</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>53</strong><span>未修复</span></div>
+      <div class="metric"><strong>26 / 27</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>12</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -663,6 +663,60 @@
           <td>Browser OPFS / 取消</td>
           <td>目录下载在清单构建和校验阶段无法取消，关闭窗口会一直等待</td>
           <td><code>BrowserOpfsService.cs:104-138; opfsBrowser.js:472-523, 677-745</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-048"><code>CA-048</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Shell / 文档所有权</td>
+          <td>取消或失败打开后丢弃 IDisposable 编辑器，永久累积全局设置订阅</td>
+          <td><code>OpenFileCommandListHandler.cs:47-55; SplashScreenViewModel.cs:137-151; EditorSetting.cs:12-15, 341-348</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-049"><code>CA-049</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>项目加载 / 最近记录</td>
+          <td>最近记录写入失败会把已挂载成功的项目误判为打开失败</td>
+          <td><code>FumenVisualEditorViewModel.ProjectIO.cs:63-91, 145-169; DefaultEditorRecentFilesManager.cs:206-215</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-050"><code>CA-050</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>谱面解析 / 向前兼容</td>
+          <td>未知 OGKR/Nyageki 命令被静默忽略，首次保存即永久删除</td>
+          <td><code>DefaultOngekiFumenParser.cs:41-73; DefaultNyagekiFumenParser.cs:27-56; EditorProjectDataUtils.cs:356-416</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-051"><code>CA-051</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Lane / 引用持久化</td>
+          <td>删除 Lane 后复用 RecordId，保存重载会把旧 Tap/Hold 静默改绑到新 Lane</td>
+          <td><code>ConnectableObjectList.cs:22-34; OngekiFumen.cs:324-348; DefaultOngekiFumenFormatter.cs:530-544</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-052"><code>CA-052</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Shell / 打开菜单</td>
+          <td>“打开文件”错误使用 CanCreateNew 过滤，唯一项目 Provider 不会出现在菜单和工具栏</td>
+          <td><code>OpenFileCommandListHandler.cs:20-37; FumenVisualEditorProvider.cs:34-48</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-053"><code>CA-053</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>最近项目 / 有效性恢复</td>
+          <td>项目文件一次暂时缺失就被永久禁用，恢复后仍不会重新校验</td>
+          <td><code>FumenVisualEditorProvider.cs:55-99; OpenRecentFileCommandHandler.cs:82-93</code></td>
         </tr>
         </tbody>
       </table>
@@ -3236,6 +3290,348 @@ await downloadTask; // JS 遍历返回前无法结束</code></pre>
     </ul>
   </section>
 
+  <section id="ca-048" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-048</code> 取消或失败打开后会永久累积全局设置订阅</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">所有权链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>创建即订阅</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>FumenVisualEditorViewModel</code></a> 在字段初始化时创建 <code>EditorSetting</code>，后者构造函数立即订阅全局单例 <code>EditorGlobalSetting.Default.PropertyChanged</code></div>
+      <div class="fact"><strong>常见取消</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ProjectIO.cs"><code>Load()</code></a> 在文件夹选择器取消时直接返回 <code>false</code>，这是正常用户流程而非异常</div>
+      <div class="fact"><strong>调用方丢弃</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/SplashScreen/ViewModels/SplashScreenViewModel.cs"><code>SplashScreenViewModel</code></a>、通用打开/新建和最近文件命令只在返回 true 时移交给 Shell，false 或异常路径均不调用 <code>Dispose</code></div>
+      <div class="fact"><strong>唯一退订点</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorSetting.cs"><code>EditorSetting.Dispose</code></a> 是移除全局事件处理器的唯一位置；全局发布者会一直强引用未释放的 Setting 实例</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>在启动页连续点击“打开项目”，每次都在文件夹选择器中取消。</li>
+      <li>每次操作都会先创建一个新的编辑器和 <code>EditorSetting</code>，然后 <code>Load()</code> 返回 false。</li>
+      <li>调用方离开方法时没有释放文档；虽然编辑器局部变量消失，全局设置事件仍持有对应的 <code>EditorSetting</code>。</li>
+      <li>强制 GC 也不能回收这些 Setting；之后每次全局设置变化都会调用所有遗留处理器。</li>
+      <li>打开最近项目失败、项目解析失败等 false 路径同样走这套所有权逻辑；若已创建运行时资源，未确定性释放的范围还会更大。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public EditorSetting Setting { get; } = new();
+
+public EditorSetting()
+{
+    EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+}
+
+var editor = editorProvider.Create();
+if (await editorProvider.TryOpen(editor))
+    await shell.OpenDocumentAsync(editor);
+// false / exception：没有 Dispose
+
+public void Dispose()
+{
+    EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
+}</code></pre>
+
+    <h3>影响</h3>
+    <p>单纯取消选择器就会产生可稳定累积的托管内存和全局事件处理器泄漏。长时间会话中反复取消或遇到打开失败后，设置广播成本持续增长；带有音频、项目目录或其他运行时资源的晚期失败还依赖 GC/底层终结器，而不是文档生命周期确定性清理。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>所有创建文档的调用方都应先持有所有权；仅在 <code>Shell.OpenDocumentAsync</code> 成功接管后解除，返回 false 或抛异常时在 <code>finally</code> 中对 <code>IDisposable</code> 文档调用 Dispose。</li>
+      <li>把这套所有权协议集中为一个打开辅助方法，覆盖通用打开、新建、最近项目和启动页，避免每个入口再次漏写。</li>
+      <li>测试使用可观察的假文档，断言 false 和异常路径恰好释放一次、成功路径不由调用方释放；另以弱引用验证连续取消后 <code>EditorSetting</code> 可被回收。</li>
+    </ul>
+  </section>
+
+  <section id="ca-049" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-049</code> 最近记录写入失败会推翻已经成功的项目加载</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">提交顺序确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>项目已提交</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>LoadProjectAsync</code></a> 已创建音频播放器，并赋值 <code>AudioPlayer</code>、<code>EditorProjectData</code>、<code>Fumen</code> 和文件信息后返回 true</div>
+      <div class="fact"><strong>辅助写入在后</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ProjectIO.cs"><code>Load()</code></a> 随后才调用 <code>PostRecent/UpdateRecent</code>；最近项目入口也在挂载完成后更新访问时间</div>
+      <div class="fact"><strong>持久化可抛错</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/DefaultImpl/DefaultEditorRecentFilesManager.cs"><code>Commit</code></a> 在返回前同步调用 <code>ISettingManager.SaveSetting</code>，磁盘写入、序列化或 Browser localStorage 失败都会冒泡</div>
+      <div class="fact"><strong>错误结果合并</strong>外层 catch 把最近记录异常显示成“无法打开项目”并返回 false，没有恢复已挂载状态；再与 <code>CA-048</code> 组合，由调用方直接丢弃该编辑器</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>准备一个包含有效谱面和音频的项目，并让文件夹书签可保存。</li>
+      <li>让最近记录持久化失败，例如使桌面 <code>setting.json</code> 目录不可写，或让 Browser localStorage 因配额/策略抛错。</li>
+      <li>选择项目后，解析与音频加载成功，编辑器字段已经全部指向新项目。</li>
+      <li><code>StoreRecentProject</code> 或 <code>UpdateRecent</code> 抛异常，外层捕获后弹出“无法打开”并返回 false。</li>
+      <li>用户看不到本来已经可用的文档；重复尝试会重复执行昂贵加载，并触发 <code>CA-048</code> 的失败文档释放问题。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var projectData = await LoadProjectAsync(...);
+if (projectData is null)
+    return false;
+
+projectData.RecentRecordId = StoreRecentProject(...); // 项目挂载之后
+return true;
+
+private void Commit(...)
+{
+    ...
+    settingManager.SaveSetting(next, ...);             // 可抛异常
+    setting = next;
+}
+
+catch (Exception exception)
+{
+    await ShowMessageDialog("Unable to open ...");
+    return false;                                      // 已挂载项目被判失败
+}</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把最近记录视为非关键附属写入：项目成功挂载后，即使记录失败也应记录警告并返回 true，不得改变核心打开结果。</li>
+      <li>如果产品明确要求最近记录是事务的一部分，则异常时必须完整卸载新项目、释放音频与目录并恢复旧编辑器状态，不能只返回 false。</li>
+      <li>分别让 <code>PostRecent</code> 和 <code>UpdateRecent</code> 抛错，断言项目仍可打开、错误只作为非阻断提示；同时测试真正的解析/音频失败仍返回 false 并释放资源。</li>
+    </ul>
+  </section>
+
+  <section id="ca-050" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-050</code> 未知格式命令会在首次保存时被静默删除</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">双格式往返确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>OGKR 读取</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenParser.cs"><code>DefaultOngekiFumenParser</code></a> 仅在命令名命中注册字典时处理该行；其他非空命令没有错误、警告或原文保留</div>
+      <div class="fact"><strong>Nyageki 读取</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/DefaultImpl/Nyageki/DefaultNyagekiFumenParser.cs"><code>DefaultNyagekiFumenParser</code></a> 使用相同策略，未知 <code>Command : ...</code> 行直接越过</div>
+      <div class="fact"><strong>保存重建</strong>两种格式化器都只从当前对象模型重新生成已知区段；<a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs"><code>TrySaveEditorAsync</code></a> 用这些新字节覆盖原谱面</div>
+      <div class="fact"><strong>无版本保护</strong>加载流程没有因更高格式版本进入只读/拒绝覆盖；OGKR 保存还固定写出 <code>VERSION 1 7 0</code>，会掩盖输入文件原本更高的版本</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>在可正常打开的 OGKR 中加入一条模拟新版对象的 <code>FUTURE_OBJECT ...</code>，或在 Nyageki 中加入 <code>FutureObject : ...</code>。</li>
+      <li>打开文件；解析器没有提示，已知对象仍正常显示。</li>
+      <li>只修改任意已知字段并执行普通保存。</li>
+      <li>检查文件，未知行已经消失；OGKR 的 VERSION 同时被重写为 1.7.0。</li>
+      <li>同样后果会发生在真实的未来格式扩展、第三方私有命令或当前版本漏注册的合法命令上。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>if (cmdName != null &amp;&amp; CommandParsers.TryGetValue(cmdName, out var parser))
+{
+    ...
+}
+// 未命中：没有 else，原始行永久丢失
+
+if (commandParsers.TryGetValue(commandName, out var commandParser))
+    commandParser.ParseAndApply(fumen, seg);
+
+var fumenBytes = await fumenSerializer.SerializeAsync(cloneProject.Fumen);
+await WriteBytesAsync(fumenFile, fumenBytes, cancellationToken);
+
+sb.AppendLine($"VERSION\t{1}\t{7}\t{0}");</code></pre>
+
+    <h3>影响</h3>
+    <p>编辑器可以在没有任何风险提示的情况下打开自己不能完整理解的文件，用户一次普通保存就会永久删除未知对象或元数据。这是典型的向前兼容数据损坏：文件在界面中看似正常，损失通常要到其他工具重新打开或游戏导入时才被发现。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>至少对未知的非空、非注释、非区段标记命令记录结构化诊断，并阻止原地覆盖或要求用户明确确认风险。</li>
+      <li>更完整的方案是在模型中保存未知行及其区段/顺序，格式化时无损回写；不能只把文本追加到文件末尾而改变语义。</li>
+      <li>检测高于当前支持范围的 VERSION 时默认只读或拒绝保存；OGKR 不应无条件伪装成 1.7.0。</li>
+      <li>双格式往返测试注入未知头字段、未知对象和更高版本，断言原文保留，或断言加载/保存被明确阻断且原文件字节不变。</li>
+    </ul>
+  </section>
+
+  <section id="ca-051" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-051</code> 删除 Lane 后复用 RecordId 会让旧物件静默改绑</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">保存重载链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>删除不处理引用</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiFumen.cs"><code>RemoveObject</code></a> 从 Lane 集合移除起点后只调用 <code>RelocateDockableObjects</code>；该方法仅重算 XGrid，不清空或迁移 Tap/Hold 的 <code>ReferenceLaneStart</code></div>
+      <div class="fact"><strong>ID 会立即复用</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/ConnectableObjectList.cs"><code>GetNewRecordId</code></a> 始终返回当前最大 ID 加一；删除最大 ID 的 Lane 后，下一个新 Lane 会得到同一 ID</div>
+      <div class="fact"><strong>保存只写数字</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessNOTES</code></a> 不验证引用对象仍属于集合，只写被删 Lane 对象保留的 RecordId</div>
+      <div class="fact"><strong>重载按 ID 解析</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/TapCommandParser.cs"><code>TapCommandParser</code></a> 和 Hold 解析器会在当前 Lane 集合中按数字查找，因此命中新建的不同 Lane</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>建立 RecordId 为 0、1 的两条 Lane，并让一个 Tap 或 Hold 引用 ID 1 的 Lane。</li>
+      <li>只删除 ID 1 的 Lane，不删除其上的 Tap/Hold；对象仍引用已经脱离集合的旧 Lane 实例。</li>
+      <li>新建另一条不同类型或不同位置的 Lane。当前最大 ID 为 0，因此新 Lane 再次得到 ID 1。</li>
+      <li>此时检查器可以看到引用对象不在集合中，但保存流程不阻断，仍把 Tap/Hold 写成引用数字 1。</li>
+      <li>重新打开文件，解析器把数字 1 解析成新 Lane；旧 Tap/Hold 的归属静默改变，且重载后缺失引用错误反而消失。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public int GetNewRecordId()
+    =&gt; startObjects.Count &gt; 0
+        ? startObjects.Select(x =&gt; x.RecordId).Max() + 1
+        : 0;
+
+Lanes.Remove(lane);
+RelocateDockableObjects(this, prev, refStart);
+RelocateDockableObjects(this, next, refStart); // 只修改 XGrid
+
+$"TAP\t{tap.ReferenceLaneStart?.RecordId ?? -1}\t..."
+
+var refLaneStart = fumen.Lanes.FirstOrDefault(x =&gt; x.RecordId == laneId);
+tap.ReferenceLaneStart = refLaneStart;         // 命中新建的同 ID Lane</code></pre>
+
+    <h3>影响</h3>
+    <p>用户执行完全正常的“删最高编号 Lane → 新建 Lane → 保存”操作后，音符会在重载时转移到另一条轨道。内存状态、保存文本和重载状态三者不一致，且错误在重载后自我隐藏，可能改变墙 Tap、判定归属、Hold 路径和最终谱面玩法。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>删除 Lane 必须以可撤销方式处理所有引用者：级联删除、显式置空，或由用户选择迁移目标；不能留下指向已脱离集合对象的强引用。</li>
+      <li>RecordId 分配至少在当前文档生命周期内保持单调且不复用；加载时还应拒绝重复起点 ID。</li>
+      <li>序列化前验证引用对象身份确实存在于 Lane 集合，发现脱离引用时阻止保存，而不是仅写它携带的数字。</li>
+      <li>回归测试覆盖删除最高/非最高 ID、随后新建、保存重载和撤销，分别断言 Tap 与 Hold 不会改变归属。</li>
+    </ul>
+  </section>
+
+  <section id="ca-052" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-052</code> “打开文件”菜单错误过滤掉唯一项目 Provider</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">注册与菜单链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>错误条件</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Modules/Shell/Commands/OpenFileCommandListHandler.cs"><code>OpenFileCommandListHandler.Populate</code></a> 与“新建”处理器一样使用 <code>if (!provider.CanCreateNew) continue</code></div>
+      <div class="fact"><strong>语义无关</strong><code>CanCreateNew</code> 只表示是否能无现有项目创建文档，不代表 Provider 是否实现 <code>TryOpen</code></div>
+      <div class="fact"><strong>当前唯一 Provider</strong>全仓只有 <a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs"><code>FumenVisualEditorProvider</code></a> 注册为 <code>IEditorProvider</code>；它因必须选择现有项目文件夹而声明 false，但完整实现了两个 TryOpen 入口</div>
+      <div class="fact"><strong>双入口受影响</strong>文件菜单和工具栏都绑定同一个 <code>OpenFileCommandListDefinition</code>，因此二者都会得到空命令列表；启动页的独立“打开项目”不经过此过滤所以仍可用</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>启动当前应用并进入主窗口。</li>
+      <li>展开“文件 → 打开”或使用对应工具栏下拉按钮。</li>
+      <li>命令处理器枚举到唯一 Provider，读取 <code>CanCreateNew == false</code> 后直接 continue。</li>
+      <li>用户看不到“Fumen Visual Editor Project”打开项，虽然启动页可以通过同一个 Provider 成功打开项目。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// OpenFileCommandListHandler
+foreach (var editorProvider in EditorProviders)
+{
+    if (!editorProvider.CanCreateNew)
+        continue; // 错把“不能新建”当成“不能打开”
+
+    foreach (var editorFileType in editorProvider.FileTypes)
+        commands.Add(...);
+}
+
+public bool CanCreateNew =&gt; false;
+public Task&lt;bool&gt; TryOpen(IDocumentViewModel document)
+    =&gt; editor.Load();</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>打开列表不应检查 <code>CanCreateNew</code>；如果框架需要可选打开能力，应增加独立 <code>CanOpen</code> 契约或按 TryOpen/FileTypes 能力建模。</li>
+      <li>“新建”列表继续使用 <code>CanCreateNew</code>，不能为了修复打开菜单而让当前 Provider 出现在不支持的新建入口。</li>
+      <li>命令测试用一个 <code>CanCreateNew=false</code>、可打开的假 Provider，断言打开列表包含它、新建列表排除它；集成检查菜单和工具栏均出现当前项目类型。</li>
+    </ul>
+  </section>
+
+  <section id="ca-053" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-053</code> 最近项目暂时缺失一次就不再自动复检</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">持久短路确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>后台校验会落盘</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs"><code>CheckIsValid</code></a> 在书签返回 null或目标项目文件不存在时调用 <code>SetMarkedInvalid(true)</code>，写入最近记录设置</div>
+      <div class="fact"><strong>可恢复状态被当永久</strong>项目文件暂时改名、同步中、网络盘/可移动盘短暂不可用都可能让一次精确查找失败，但记录数据和书签本身并未损坏</div>
+      <div class="fact"><strong>复检前即短路</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/Commands/OpenRecentFileCommandHandler.cs"><code>CheckIsValid</code></a> 先检查 <code>IsMarkedInvalid</code> 并直接返回 false；即使用户点击时要求 <code>forceFresh</code> 也不会调用 Provider</div>
+      <div class="fact"><strong>刷新无效</strong><code>BeginValidationGeneration</code> 只清理内存中的检查任务，不清除持久 InvalidRecordIds；当前 UI 只有清空全部最近记录，没有针对单项的“重试/恢复”路径</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>成功打开一个项目，使它出现在最近项目列表。</li>
+      <li>暂时把对应 <code>.nyagekiProj</code> 文件改名，然后打开“最近文件”菜单触发后台有效性检查。</li>
+      <li>精确文件查找失败，记录被加入持久化的 <code>InvalidRecordIds</code>，菜单项禁用。</li>
+      <li>把文件名恢复，再次展开菜单、刷新启动页或重启程序。</li>
+      <li><code>IsMarkedInvalid</code> 在 Provider 访问磁盘前就返回 false，恢复后的项目永远不会由该最近条目自动重新验证；用户只能重新从文件夹打开或清空记录。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>if (folder is null)
+{
+    MarkPermanentlyInvalid(recordInfo);
+    return false;
+}
+
+if (!await ContainsExactProjectFileAsync(folder, projectLocator))
+{
+    MarkPermanentlyInvalid(recordInfo);
+    return false;
+}
+
+private Task&lt;bool&gt; CheckIsValid(..., bool forceFresh = false)
+{
+    if (RecentOpenedManager.IsMarkedInvalid(info))
+        return Task.FromResult(false); // forceFresh 也到不了 Provider
+    ...
+}</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>只有记录反序列化失败、非法 locator 等结构性错误才应持久标记永久无效；书签打不开或文件当前不存在应作为临时 false。</li>
+      <li><code>forceFresh</code> 应允许绕过旧 invalid 标记调用 Provider，并在验证成功后清除标记；菜单可提供显式“重试”。</li>
+      <li>测试先让文件缺失并完成一次校验，再恢复文件、开始新验证代次，断言菜单项自动恢复且 invalid 标记被清除；另保留损坏序列化数据持续禁用的测试。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -3294,12 +3690,17 @@ await downloadTask; // JS 遍历返回前无法结束</code></pre>
         审查 OGKR 横坐标、Soflan 分组和 LaneBlock 的保存重载契约，以及 Browser OPFS 回退下载的成功清理和跨语言取消链。记录 <code>CA-043</code> 至 <code>CA-047</code>。
         Nyageki 的主要对象坐标明确读写 Unit/Grid 两个分量；OGKR 中 Tap/Hold 也采用两列，因此本批把多数对象的 Unit-only 写法判定为真实字段遗漏，而不是格式统一限制。OPFS Blob URL 的保留已由 <code>CA-003</code> 覆盖，本批只新增独立的持久暂存文件与不可取消遍历问题。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A12</time>
+      <div>
+        审查 Shell Provider 枚举与失败文档所有权、项目挂载和最近记录的提交顺序、最近条目恢复策略、未知格式命令，以及 Lane 删除后的引用持久化。记录 <code>CA-048</code> 至 <code>CA-053</code>。
+        StorageProvider 文件夹树的所有权转交和项目模型各文件属性的幂等释放路径当前完整；调色板列表 UI 也会阻止删除仍被 Bullet/Bell 引用的模板，因此这些候选未重复编号。未知区段标记本身可被有意忽略，本批只记录无法区分并静默删除未来/扩展命令的真实保存风险。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查 Browser/桌面 Provider 与文件能力恢复、解析器对未知命令和不完整引用的处理、项目创建/加载的失败释放边界、组合撤销的对象身份，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-048</code> 起顺序编号。</p>
+    <p>继续检查快捷新增与拖放创建的撤销边界、解析器对重复 RecordId 和乱序引用的处理、音频/项目切换的异常回滚、Browser 书签权限恢复，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-054</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
