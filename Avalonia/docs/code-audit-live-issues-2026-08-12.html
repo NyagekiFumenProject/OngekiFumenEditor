@@ -205,10 +205,10 @@
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
     <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>ff4f96fd</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>21</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>21</strong><span>未修复</span></div>
-      <div class="metric"><strong>11 / 10</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>6</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>29</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>29</strong><span>未修复</span></div>
+      <div class="metric"><strong>14 / 15</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>8</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -429,6 +429,78 @@
           <td>Browser OPFS / 导航</td>
           <td>目录路径先切换但旧行仍可操作，可能打开或下载错误目录文件</td>
           <td><code>BrowserOpfsBrowserViewModel.cs:288-298, 335-342</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-022"><code>CA-022</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>子弹调色板 / 数据一致性</td>
+          <td>可编辑 StrID 不会重建字典键，删除失效并可保存重复 ID</td>
+          <td><code>BulletPalleteList.cs:39-44, 81-102</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-023"><code>CA-023</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-dormant">潜伏</span></td>
+          <td>子弹调色板 / 集合契约</td>
+          <td>整数索引器递归调用自身，任何按下标访问都会栈溢出</td>
+          <td><code>BulletPalleteList.cs:8, 42-44</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-024"><code>CA-024</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>个人变速区域 / 分组索引</td>
+          <td>编辑 SoflanGroup 不迁移分桶，删除后仍绘制并写回文件</td>
+          <td><code>IndividualSoflanAreaListMap.cs:45, 68-89</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-025"><code>CA-025</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>个人变速区域 / 空间索引</td>
+          <td>空间索引删除只清缓存不移除成员，已删区域继续决定变速组</td>
+          <td><code>NotQuadTreeWrapper.cs:19, 37-57</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-026"><code>CA-026</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>排序集合 / 范围查询</td>
+          <td>重复时间键被当作范围下界时只返回最后一项，同拍物件会漏绘制和漏重定位</td>
+          <td><code>SortableCollection.cs:71-89; LinqExtensionMethod.cs:287-321</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-027"><code>CA-027</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Soflan 组工具 / 刷新</td>
+          <td>点位列表不订阅 Soflan 与 BPM 变化，编辑后持续显示旧计算结果</td>
+          <td><code>FumenSoflanGroupListViewerViewModel.cs:34-46, 59-65</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-028"><code>CA-028</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>渲染控制工具 / 异步</td>
+          <td>同一编辑器的过期重建任务可同时回写，生成重复控制行并改坏渲染顺序号</td>
+          <td><code>FumenEditorRenderControlViewerViewModel.cs:18-24, 42-59</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-029"><code>CA-029</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>渲染控制工具 / 撤销</td>
+          <td>重排撤销保存临时行实例，切换文档重建后撤销会无声空转</td>
+          <td><code>FumenEditorRenderControlViewerViewModel.cs:88-123</code></td>
         </tr>
         </tbody>
       </table>
@@ -1550,6 +1622,468 @@ private Task OpenEntryAsync(BrowserOpfsEntryViewModel entry)
     </ul>
   </section>
 
+  <section id="ca-022" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-022</code> 调色板 ID 可编辑但字典键不会随之更新</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">数据链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>编辑入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenBulletPalleteListViewer/Views/FumenBulletPalleteListViewerView.axaml"><code>调色板 DataGrid</code></a> 的第一列直接双向编辑 <code>StrID</code>，没有只读或提交校验</div>
+      <div class="fact"><strong>内部索引</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/BulletPalleteList.cs"><code>BulletPalleteList</code></a> 添加时把 ID 转成整数作为字典键，但属性变更处理器为空</div>
+      <div class="fact"><strong>持久化后果</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>OGKR 格式化器</code></a> 按对象当前 <code>StrID</code> 写调色板和引用，重载时同键对象只保留一个</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>新建一个调色板，集合以原 ID（例如 <code>A0</code>）建立字典项。</li>
+      <li>在调色板表格中把 <code>StrID</code> 改为 <code>B0</code>；对象属性已变，但字典仍以 <code>A0</code> 的整数值为键。</li>
+      <li>点击删除时，<code>RemovePallete</code> 使用当前 <code>B0</code> 查找，因此删除失败且不发送集合通知；<a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiFumen.cs"><code>OngekiFumen.RemoveObject</code></a> 随后仍无条件退订对象修改事件。</li>
+      <li>再新建第二个调色板并同样把其 ID 改为 <code>B0</code>。两个对象各自仍占用原先生成的不同字典键，但枚举时的当前 <code>StrID</code> 都是 <code>B0</code>。保存会写出重复 ID，重载时后加入者替换前者，引用也只能解析到单一幸存对象。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>private Dictionary&lt;int, BulletPallete&gt; palleteMap = new();
+public BulletPallete this[string strId] =&gt;
+    palleteMap.TryGetValue(ConvertIdToInt(strId), out var r) ? r : default;
+
+palleteMap[ConvertIdToInt(pallete.StrID)] = pallete;
+pallete.PropertyChanged += OnPalletePropChanged;
+
+public void RemovePallete(BulletPallete pallete)
+{
+    if (palleteMap.Remove(ConvertIdToInt(pallete.StrID))) // 使用修改后的 ID
+        ...
+}
+
+private void OnPalletePropChanged(object sender, PropertyChangedEventArgs e)
+{
+    // 没有把旧键迁移到新键
+}</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/BulletCommandParser.cs"><code>BulletCommandParser</code></a> 和 <a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/CommandParserImpl/BellCommandParser.cs"><code>BellCommandParser</code></a> 都按文本 ID 从枚举结果中取第一个调色板，无法恢复保存前两个不同对象的参数和引用关系。</p>
+
+    <h3>影响</h3>
+    <p>用户可看到删除按钮执行后对象仍留在列表中；该残留对象随后修改不再使文档变脏。若继续创建相同 ID 并保存，重载会合并调色板、丢失其中一组参数，并把原本指向不同对象的子弹或铃铛引用折叠到同一个调色板。这是可持久化的数据损坏，不只是列表刷新问题。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把 ID 修改收口到集合拥有的原子重命名操作，保存旧键、验证新 ID 合法且唯一，再迁移字典项；验证失败时回滚属性值并向界面呈现错误。</li>
+      <li>若业务不允许修改 ID，应把列设为只读，而不是保留一个会破坏集合不变量的公开 setter。</li>
+      <li>删除 API 应返回成功状态；只有实际从集合移除后，<code>OngekiFumen</code> 才能退订对象修改事件。</li>
+      <li>增加集合与界面回归测试：添加 <code>A0</code>、改为 <code>B0</code> 后验证查找和删除；再覆盖与已有 <code>B0</code> 冲突、错误提示、集合通知和脏状态。</li>
+      <li>增加保存重载测试，使用两个不同参数的调色板和分别引用它们的 Bullet/Bell，证明 ID 唯一且对象参数、引用身份均保持不变。</li>
+    </ul>
+  </section>
+
+  <section id="ca-023" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-023</code> 调色板整数索引器自调用会导致进程栈溢出</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">静态确定</span>
+        <span class="exposure exposure-dormant">潜伏</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>公开契约</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/BulletPalleteList.cs"><code>BulletPalleteList</code></a> 实现 <code>IReadOnlyList&lt;BulletPallete&gt;</code>，因此调用者有理由按下标访问</div>
+      <div class="fact"><strong>确定触发</strong><code>this[int index]</code> 的表达式主体仍是 <code>this[index]</code>，重载解析只会再次选择同一整数索引器</div>
+      <div class="fact"><strong>当前暴露</strong>本次全仓检索没有发现生产代码直接读取整数索引器，因此按“潜伏”记录，不把尚未发生的调用描述为现有用户流程</div>
+    </div>
+
+    <h3>源码证据</h3>
+    <pre><code>public class BulletPalleteList : IReadOnlyList&lt;BulletPallete&gt;
+{
+    public int Count =&gt; palleteMap.Count;
+    public BulletPallete this[int index] =&gt; this[index]; // 无限递归
+    public BulletPallete this[string strId] =&gt; ...;
+}</code></pre>
+    <p>调用 <code>list[0]</code> 或先转成 <code>IReadOnlyList&lt;BulletPallete&gt;</code> 再读取任意下标，都会不断进入同一个 getter。该路径不会到达边界检查或字典枚举，最终触发 <code>StackOverflowException</code>；在 .NET 中通常会直接终止进程，无法由普通业务异常处理恢复。为避免让审计过程本身退出，本批没有运行会故意耗尽进程栈的复现程序。</p>
+
+    <h3>影响</h3>
+    <p>任何后续使用通用 <code>IReadOnlyList</code> API 的界面、格式化器或测试，只要按下标读取调色板就会让整个编辑器退出。缺陷目前没有生产调用，但接口已经公开并宣称支持该操作，属于一旦接入即确定发生的高影响潜伏错误。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>从统一的稳定排序视图返回指定元素，例如按转换后的 ID 排序后执行受边界检查的下标访问；不要在 getter 内再次走自身索引器。</li>
+      <li>若集合并不承诺随机访问，应改为 <code>IReadOnlyCollection</code>，移除误导性的列表契约。</li>
+      <li>测试必须分别通过具体类型和 <code>IReadOnlyList&lt;BulletPallete&gt;</code> 访问首项、末项，并覆盖空集合、负下标和等于 <code>Count</code> 的越界行为。</li>
+      <li>断言索引顺序与枚举顺序一致，避免修复递归后引入两个不同的 ID 排序定义。</li>
+    </ul>
+  </section>
+
+  <section id="ca-024" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-024</code> 个人变速区域改组后会留在旧分桶并逃过删除</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">生产链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>编辑入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/FumenObjectPropertyBrowserViewModel.cs"><code>属性浏览器</code></a> 自动显示受支持类型的公开可写属性，因此 <a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/IndividualSoflanArea.cs"><code>SoflanGroup</code></a> 可直接修改</div>
+      <div class="fact"><strong>分桶实现</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/IndividualSoflanAreaListMap.cs"><code>IndividualSoflanAreaListMap</code></a> 添加和删除都读取对象当时的 <code>SoflanGroup</code>，没有记录注册时分组，也没有监听改组</div>
+      <div class="fact"><strong>下游枚举</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiFumen.cs"><code>GetAllDisplayableObjects</code></a>、OGKR 与 Nyageki 格式化器都遍历所有分桶值，仍会取得留在旧桶中的对象</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>放置一个 <code>SoflanGroup = 1</code> 的个人变速区域；它被加入键 1 对应的列表。</li>
+      <li>选中区域，在属性浏览器把 <code>SoflanGroup</code> 改为 2。属性值和文档修改事件会变化，但集合仍把对象保存在键 1 的列表。</li>
+      <li>删除该区域。删除实现访问 <code>this[2]</code>，必要时还会创建一个空的新桶，然后从该空列表删除对象；键 1 的原列表完全未触及。</li>
+      <li><code>OngekiFumen.RemoveObject</code> 仍把对象视为已删除并退订修改事件。旧桶继续被绘制和序列化，保存重载后区域重新出现为组 2。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public void Add(IndividualSoflanArea isf)
+{
+    this[isf.SoflanGroup].Add(isf);       // 只按添加时分组入桶
+    cacheTree.Add(isf);
+    cacheTotalTree.Add(isf);
+}
+
+public void Remove(IndividualSoflanArea isf)
+{
+    this[isf.SoflanGroup].Remove(isf);    // 改组后读取的是新分组
+    cacheTree.Remove(isf);
+    cacheTotalTree.Remove(isf);
+}</code></pre>
+    <p>相邻的 <a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/SoflanListMap.cs"><code>SoflanListMap</code></a> 已为普通 Soflan 保存 <code>registeredSoflanId</code>，并在 <code>SoflanGroup</code> 变化时先从旧桶移除再加入新桶；个人变速区域映射缺少同一套不变量维护。</p>
+
+    <h3>影响</h3>
+    <p>删除操作在界面和对象事件层面已经结束，但区域仍可出现在画布、全选结果和保存文件中；之后修改残留对象还可能不再置脏。用户保存并关闭后重新打开，会看到自认为已删除的区域重新出现，属于明确的持久化删除失败。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>像 <code>SoflanListMap</code> 一样保存对象到注册分组的映射，订阅 <code>SoflanGroup</code> 变化，并把迁移、树状态和组包装项更新作为一次原子操作。</li>
+      <li>删除时使用记录的旧分组和 <code>TryGetValue</code>，不得通过索引器为一次失败删除创建空桶；只有确实移除成功后才清理组节点和对象事件。</li>
+      <li>增加测试：组 1 添加、改为组 2 后，断言旧桶为空、新桶只含该对象、全局枚举恰好一次；再删除并断言所有桶、绘制枚举和序列化文本均不包含它。</li>
+      <li>覆盖撤销/重做和多选属性编辑，验证反复改组不会重复订阅、重复枚举或遗留空组节点。</li>
+    </ul>
+  </section>
+
+  <section id="ca-025" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-025</code> 空间索引删除后仍永久保留个人变速区域</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">状态机确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>真实成员表</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/Base/NotQuadTreeWrapper.cs"><code>NotQuadTreeWrapper</code></a> 用 <code>registerObjects</code> 保存所有成员，四叉树只是可丢弃的派生缓存</div>
+      <div class="fact"><strong>错误删除</strong><code>Remove</code> 只把树设为 <code>null</code> 并退订属性事件，从未执行 <code>registerObjects.Remove(obj)</code></div>
+      <div class="fact"><strong>生产消费</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/IndividualSoflanAreaListMap.cs"><code>QuerySoflanGroup</code></a> 直接查询该包装器；切换预览模式和选择对象列表都会使用其结果</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>为组 7 建立一条非默认变速曲线，再创建覆盖某坐标、同属组 7 的个人变速区域，并在区域内放置可移动物件。</li>
+      <li>不修改分组，直接正常删除该区域；分桶和时间区间树都能删除成功。</li>
+      <li><code>cacheTotalTree.Remove</code> 清空派生树，却把区域留在 <code>registerObjects</code>。下一次查询会从这个成员表重建树，因此仍返回已删除区域。</li>
+      <li>切换设计/预览模式触发 <a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>RebuildObjectSoflanGroupRecord</code></a>，区域内物件继续被缓存为组 7；选择对象工具也会显示同一错误归属。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>private HashSet&lt;TValue&gt; registerObjects = new();
+
+public void Add(TValue obj)
+{
+    tree = default;
+    registerObjects.Add(obj);
+    obj.PropertyChanged += OnItemPropChanged;
+}
+
+public void Remove(TValue obj)
+{
+    tree = default;
+    obj.PropertyChanged -= OnItemPropChanged;
+    // 缺少 registerObjects.Remove(obj)
+}
+
+// 重建仍使用包含已删除对象的成员表
+tree.Build(registerObjects);</code></pre>
+    <p>此问题不依赖 <code>CA-024</code> 的改组操作，使用从未修改过 <code>SoflanGroup</code> 的区域即可稳定触发。每删除一个区域，包装器还会永久保留对它及其结束点的可达引用，文档生命周期内持续累积。</p>
+
+    <h3>影响</h3>
+    <p>画布已不再显示且保存文件也不再包含区域，但当前会话中的物件仍可能使用已删除组的变速曲线，造成预览位置、速度归属和选择对象列表与重载后的结果不一致。关闭并重新打开文件才会恢复；大量编辑还会累积不可回收的区域对象。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li><code>Remove</code> 必须先从 <code>registerObjects</code> 删除成员，并仅在实际存在时退订一次；随后使派生树失效。</li>
+      <li>让 <code>Count</code> 和枚举以同一权威成员表为准，避免缓存是否已构建改变集合语义。</li>
+      <li>单元测试应添加区域并确认内部点查询为组 7，删除后立即断言查询回到默认组、计数为 0；再覆盖删除重叠区域后回退到仍存在的较早区域。</li>
+      <li>编辑器回归测试应删除区域、切换预览模式并重建对象分组缓存，证明区域内物件不再绑定已删除的 SoflanList；重复添加/撤销/重做不得增长成员数或事件订阅数。</li>
+    </ul>
+  </section>
+
+  <section id="ca-026" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-026</code> 重复时间键范围查询会从最后一个重复项开始</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">边界算法确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>重复键语义</strong><a href="../src/OngekiFumenEditor.Avalonia/Utils/LinqExtensionMethod.cs"><code>BinarySearchBy</code></a> 命中相等键后会继续向右扫描，明确返回最后一个重复项</div>
+      <div class="fact"><strong>错误下界</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/Base/SortableCollection.cs"><code>BinaryFindRangeIndex</code></a> 把该结果直接作为 <code>minIndex</code>，没有再寻找第一个相等项</div>
+      <div class="fact"><strong>生产调用</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs"><code>绘制枚举</code></a> 与 <a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableObjectBase.cs"><code>轨道附着物重定位</code></a> 都使用该范围 API</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>在同一 <code>TGrid</code> 放置至少两个同类型排序物件，例如分别附着到不同轨道的两个 Tap。</li>
+      <li>让查询下界恰好等于该 <code>TGrid</code>。拖动从此时间开始的轨道段时，重定位代码会用段起点作为 <code>min</code>；视口边界落在该拍时也会走相同路径。</li>
+      <li><code>BinarySearchBy(min)</code> 返回最后一个同拍 Tap 的下标，<code>BinaryFindRange</code> 从该位置开始枚举，前面的同拍 Tap 全部消失。</li>
+      <li>若应随轨道移动的 Tap 不是最后一项，它不会更新 <code>XGrid</code>；若发生在视口下界，漏掉的物件不会绘制和注册为可选择对象。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>if (order == 0)
+{
+    // 考虑到出现重复值
+    for (int r = i + 1; r &lt; insertable.Count; r++)
+    {
+        if (keySelect(insertable[r]).CompareTo(val) == 0)
+            i = r;                         // 最终得到最后一个相等项
+        else
+            break;
+    }
+    return i;
+}
+
+var minIndex = items.BinarySearchBy(min, sortKeySelector);
+minIndex = minIndex &lt; 0 ? ~minIndex : minIndex; // 直接当作范围下界
+var maxIndex = items.BinarySearchBy(max, sortKeySelector, minIndex);
+maxIndex = maxIndex &lt; 0 ? ~maxIndex : maxIndex + 1;</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiFumen.cs"><code>GetAllDisplayableObjects(min, max)</code></a> 对 Bells、Flicks、ClickSEs、EnemySets、Comments、Bullets 和 Taps 都复用这一实现。因此缺陷不是某一种物件的模板问题，而是所有 <code>TGridSortList</code> 范围消费者共享的边界错误。</p>
+
+    <h3>影响</h3>
+    <p>同拍物件在视口边缘可能只显示最后一个，滚动后又突然出现；轨道段重定位还会遗漏附着在段起点的物件，使其坐标与引用轨道不一致并把旧坐标继续保存。问题依赖排序中的重复键，谱面越密集越容易遇到。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为范围查询分别实现 <code>lower_bound</code>（第一个大于等于 <code>min</code>）和 <code>upper_bound</code>（第一个大于 <code>max</code>），不要复用“最后一个相等项”的点查询语义。</li>
+      <li>集合测试必须覆盖三个相同键位于下界、位于上界、同时位于上下界以及边界不存在的情况；<code>[key, key]</code> 应返回全部重复项且保持稳定顺序。</li>
+      <li>编辑器测试应在同一 TGrid 放置不同轨道的多个 Tap，移动相关轨道段后断言所有应受影响的附着物都更新 XGrid。</li>
+      <li>渲染测试应把多个同类物件放在可见范围下界，断言它们全部进入绘制枚举和选择注册。</li>
+    </ul>
+  </section>
+
+  <section id="ca-027" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-027</code> Soflan 点位列表不会随 Soflan 或 BPM 编辑刷新</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">通知链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>绑定目标</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenSoflanGroupListViewer/Views/FumenSoflanGroupListViewerView.axaml"><code>右侧 DataGrid</code></a> 直接绑定计算属性 <code>DisplaySoflanPointList</code></div>
+      <div class="fact"><strong>仅有通知</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenSoflanGroupListViewer/ViewModels/FumenSoflanGroupListViewerViewModel.cs"><code>ViewModel</code></a> 只在切换预览模式或选中组时通知该属性变化</div>
+      <div class="fact"><strong>已有底层事件</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/SoflanList.cs"><code>SoflanList</code></a> 和 <a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/BpmList.cs"><code>BpmList</code></a> 都在增删及属性变化时发出事件，但工具没有订阅</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>打开 Soflan 组工具并选中一个组，右侧列表读取一次缓存点位，显示 Y、TGrid、Bpm 与 Speed。</li>
+      <li>在画布或属性浏览器中新增、删除或修改该组的 Soflan；也可以修改任意参与换算的 BPM。</li>
+      <li>底层列表会使位置缓存失效，但 ViewModel 没有发出 <code>DisplaySoflanPointList</code> 的属性通知，DataGrid 不会重新读取计算属性。</li>
+      <li>右侧表格继续显示编辑前的点位；只有切换组、切换模式或重新打开文档等间接操作才会刷新。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public IEnumerable&lt;SoflanPointRow&gt; DisplaySoflanPointList
+{
+    get
+    {
+        var soflanList = fumen.SoflansMap[CurrentSelectedSoflanGroupWrapItem.SoflanGroupId];
+        var points = IsShowPreviewModeSoflanPositionList
+            ? soflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList)
+            : soflanList.GetCachedSoflanPositionList_DesignMode(fumen.BpmList);
+        return points.Select(point =&gt; new SoflanPointRow(point));
+    }
+}
+
+// 只有这两个 setter 通知 DisplaySoflanPointList
+OnPropertyChanged(nameof(DisplaySoflanPointList));</code></pre>
+    <p><code>RegisterFumenSoflanListMapEvent</code> 订阅的是 <code>IndividualSoflanAreaMap.PropertyChanged</code>，而且只在组树根属性变化时重建左侧分组；它既不观察当前 <code>SoflanList</code>，也不观察 <code>BpmList.OnChangedEvent</code>，无法覆盖右侧点位内容变化。</p>
+
+    <h3>影响</h3>
+    <p>用户编辑变速后看到的诊断表仍是旧结果，双击旧行还会导航到已经不存在或已移动的时间点。由于画布换算使用的是已失效并可重新计算的底层缓存，画布与工具表格会同时表达两套状态，容易误判变速配置。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>随活动谱面和当前选中组切换，成对订阅/退订对应 <code>SoflanList</code> 的集合与属性变化事件以及 <code>BpmList.OnChangedEvent</code>。</li>
+      <li>事件到达时在 UI 线程发出 <code>DisplaySoflanPointList</code> 通知；若连续编辑频繁，可合并同一调度周期的通知，但不得遗漏最终状态。</li>
+      <li>测试应先物化列表，再分别修改 Speed、TGrid、持续时间、增删 Soflan 和修改 BPM，断言绑定源重新生成并包含新值。</li>
+      <li>切换活动文档与选中组后，修改旧文档不得刷新当前列表，当前文档也不得保留对旧列表的事件订阅。</li>
+    </ul>
+  </section>
+
+  <section id="ca-028" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-028</code> 过期渲染控制重建任务可在同一编辑器上重复回写</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">异步 ABA 确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>启动方式</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenEditorRenderControlViewer/ViewModels/FumenEditorRenderControlViewerViewModel.cs"><code>Editor setter</code></a> 以 fire-and-forget 方式启动每次重建，没有保存任务、取消令牌或代次</div>
+      <div class="fact"><strong>等待窗口</strong>方法先清空列表，再等待编辑器渲染初始化完成；新建文档尚未初始化时可长时间停在该边界</div>
+      <div class="fact"><strong>无效校验</strong>续体只检查捕获的编辑器引用是否等于当前引用，无法区分 <code>A → B → A</code> 中两个属于 A 的不同请求</div>
+    </div>
+
+    <h3>触发时序</h3>
+    <ol>
+      <li>激活渲染尚未初始化完成的编辑器 A，重建任务 A1 清空列表并等待 A 的初始化任务。</li>
+      <li>在 A 完成前切换到编辑器 B，再切回 A；这会启动第二个同样等待 A 的任务 A2。</li>
+      <li>A 初始化完成后，A1 与 A2 捕获的引用都等于当前 <code>Editor</code>，因此两者都通过过期检查。</li>
+      <li>两个续体分别把同一组绘制目标包装后追加到集合。第二次追加前没有再次清空，最终每个目标出现两行。</li>
+      <li><code>UpdateRenderOrder</code> 对重复包装器逐行写回同一个目标，后半组覆盖前半组，使实际顺序号变为 <code>N..2N-1</code>；继续拖动或保存会把错误状态扩大或持久化。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public FumenVisualEditorViewModel Editor
+{
+    set
+    {
+        if (SetProperty(ref field, value))
+            _ = RebuildItemsAsync(false);               // 无请求代次
+    }
+}
+
+private async Task RebuildItemsAsync(bool sortByDefault)
+{
+    ControlItems.Clear();
+    var editor = Editor;
+    await editor.WaitForRenderInitializationIsDone();
+    if (editor != Editor)                               // A → B → A 时仍为真
+        return;
+
+    foreach (var target in editor.CurrentDrawingTargets)
+        ControlItems.Add(new RenderControlItem(target));
+    UpdateRenderOrder();
+}</code></pre>
+    <p><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs"><code>WaitForRenderInitializationIsDone</code></a> 返回同一编辑器的完成任务，因此 A1 与 A2 会在同一个信号后继续执行。比较对象引用只能拒绝当前为 B 的请求，不能拒绝已经绕回 A 的旧请求。</p>
+
+    <h3>影响</h3>
+    <p>渲染控制面板会显示重复行，两个复选框实际操作同一个绘制目标；行顺序与目标的 <code>CurrentRenderOrder</code> 不再一一对应，拖拽结果取决于同一目标最后出现的位置。用户若点击保存，异常顺序号还会写入全局渲染设置。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为每次重建分配单调递增代次或取消前一请求；等待完成后同时核对编辑器引用和请求代次。</li>
+      <li>先在局部变量中构建完整快照，确认请求仍有效后再一次性替换 UI 集合，避免半成品或多个续体交错追加。</li>
+      <li>用可控初始化任务测试 <code>A → B → A</code>，按顺序释放 A/B，断言每个绘制目标恰好一行且顺序号从 0 连续递增。</li>
+      <li>再覆盖连续执行重置默认值与关闭工具的情况，保证过期任务不能修改当前集合或全局绘制目标。</li>
+    </ul>
+  </section>
+
+  <section id="ca-029" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-029</code> 渲染控制重排在文档切换后无法撤销</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">对象身份确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>撤销快照</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenEditorRenderControlViewer/ViewModels/FumenEditorRenderControlViewerViewModel.cs"><code>Reorder</code></a> 把当前 <code>RenderControlItem</code> 实例数组直接捕获进编辑器 A 的撤销动作</div>
+      <div class="fact"><strong>重建行为</strong>每次切换活动编辑器都会清空集合，并为绘制目标创建全新的 <code>RenderControlItem</code> 包装器</div>
+      <div class="fact"><strong>应用方式</strong><code>ApplyControlItemOrder</code> 通过引用身份执行 <code>ControlItems.IndexOf(oldItem)</code>；旧包装器不在新集合时返回 -1 并静默跳过</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>在编辑器 A 的渲染控制面板拖动一行。动作立即执行，并把旧/新顺序的包装器数组压入 A 的 <code>UndoRedoManager</code>。</li>
+      <li>切换到编辑器 B，再切回 A。单例工具重建列表，目标仍可相同，但所有行包装器已换成新实例。</li>
+      <li>对 A 执行撤销。撤销栈调用旧动作，但数组中的每个对象在当前 <code>ControlItems</code> 中都找不到。</li>
+      <li>循环不移动任何行，随后只按当前错误顺序重写一次顺序号；撤销栈却已经消费该动作，界面和渲染结果保持不变。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var before = ControlItems.ToArray();
+var after = DataGridRowReorderOperations.Reorder(...).ToArray();
+var action = LambdaUndoAction.Create(
+    "Reorder render controls".ToLocalizedStringByRawText(),
+    () =&gt; ApplyControlItemOrder(after),
+    () =&gt; ApplyControlItemOrder(before));
+Editor.UndoRedoManager.ExecuteAction(action);
+
+private void ApplyControlItemOrder(IReadOnlyList&lt;RenderControlItem&gt; order)
+{
+    for (var i = 0; i &lt; order.Count; i++)
+    {
+        var oldIndex = ControlItems.IndexOf(order[i]);   // 重建后的新集合找不到旧实例
+        if (oldIndex &gt;= 0 &amp;&amp; oldIndex != i)
+            ControlItems.Move(oldIndex, i);
+    }
+    UpdateRenderOrder();
+}</code></pre>
+    <p><code>RenderControlItem</code> 没有按目标实现值相等，默认使用引用身份。即使底层 <code>IFumenEditorDrawingTarget</code> 是同一个单例，重新包装后也不会与撤销快照相等，因此这是确定的对象身份失配。</p>
+
+    <h3>影响</h3>
+    <p>用户在多文档间切换一次后，渲染顺序的撤销/重做会无提示失效；历史计数仍前进并把文档置脏，但实际顺序没有恢复。若随后保存渲染设置，用户原本打算撤销的全局配置仍会被持久化。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>撤销快照应保存稳定目标身份及顺序，例如绘制目标类型/实例与其目标顺序，而不是保存易失的行包装器。</li>
+      <li>撤销动作应绑定创建它的编辑器和目标集合；应用时按 <code>Target</code> 匹配当前行，并在工具当前显示其他文档时更新底层目标后按需重建界面。</li>
+      <li>测试应在 A 重排、切到 B、切回 A 后执行撤销和重做，断言 UI 行序、每个目标的 <code>CurrentRenderOrder</code> 与历史计数同步变化。</li>
+      <li>还需覆盖重建期间执行撤销，确保与 <code>CA-028</code> 的请求代次修复协同，不会让旧重建再次覆盖撤销结果。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -1583,12 +2117,22 @@ private Task OpenEntryAsync(BrowserOpfsEntryViewModel entry)
         审查项目保存快照边界、保存命令交互协议、Browser OPFS 首次打开/关闭生命周期和异步目录导航。记录 <code>CA-019</code> 至 <code>CA-021</code>。
         项目双文件写入已有原内容回滚，本批未把普通写入失败误报为“必然截断”；真正编号的是保存快照之后继续编辑却被旧保存错误清除脏状态的独立竞态。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A07</time>
+      <div>
+        审查调色板可变键与列表契约、Soflan 动态分桶、个人变速区域的时间/空间索引和属性浏览器编辑入口。记录 <code>CA-022</code> 至 <code>CA-025</code>。
+        <code>SoflanListMap</code> 已记录对象旧分组并在改组时迁移；<code>BpmList.Count</code> 的可疑值当前没有生产读取；Hold 结束关系的区间索引候选仍未找到稳定可见后果，这些项本批均未误编号。
+      </div>
+      <time datetime="2026-08-12">2026-08-12 / A08</time>
+      <div>
+        审查排序范围的重复键边界、嵌套坐标通知、Soflan 组面板刷新以及渲染控制单例的异步重建和撤销身份。记录 <code>CA-026</code> 至 <code>CA-029</code>。
+        <code>SortableCollection.Contains</code> 的同键语义当前没有生产调用；主属性编辑入口会整体替换 TGrid，而不是就地修改 Unit/Grid；Hold 结束关系的区间树候选仍只表现为过量查询，未找到稳定错误输出，故本批未编号这些候选。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查 Hold 区间索引的一致性与下游查询、后台集合订阅和重置动作、Browser/桌面平台差异以及多文档渲染状态。新增问题从 <code>CA-022</code> 起顺序编号。</p>
+    <p>继续检查 Browser/桌面平台差异、多文档渲染状态、检查器规则的集合边界、格式化器与解析器的往返一致性，以及撤销动作对可变对象身份的依赖。新增问题从 <code>CA-030</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
