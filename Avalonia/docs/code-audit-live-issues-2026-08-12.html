@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>9659e54b</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-12 · 基线提交：<code>a32d4e77</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>33</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>33</strong><span>未修复</span></div>
-      <div class="metric"><strong>17 / 16</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>9</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>42</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>42</strong><span>未修复</span></div>
+      <div class="metric"><strong>23 / 19</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>10</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -537,6 +537,87 @@
           <td>OGKR / 自定义 Bell</td>
           <td>随机偏移读取错列，每次重载都把非零值清成 0</td>
           <td><code>DefaultOngekiFumenFormatter.cs:516-517; CustomBellCommandParser.cs:19, 59</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-034"><code>CA-034</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Lane 合并 / 撤销</td>
+          <td>撤销时边拆链边追 Next，后半条轨道留在错误起点上</td>
+          <td><code>MultiLanesOperationViewModel.cs:61-99; ConnectableStartObject.cs:187-203</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-035"><code>CA-035</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Lane 合并 / 入口校验</td>
+          <td>未验证独立首尾和时间顺序，可删除自身或生成倒退轨道</td>
+          <td><code>MultiLanesStartOperationGenerator.cs:22-41; MultiLanesOperationViewModel.cs:58-80</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-036"><code>CA-036</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>彩色轨道 / 复制</td>
+          <td>Next 节点 Copy 判断成 Start，整轨复制后颜色和亮度退回默认值</td>
+          <td><code>ColorfulLaneNext.cs:23-32; ConnectableStartObject.cs:486-496</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-037"><code>CA-037</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>剪贴板 / 清空状态</td>
+          <td>空选择复制提示已清空，却提前返回并保留上一次复制内容</td>
+          <td><code>DefaultFumenEditorClipboard.cs:31-55</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-038"><code>CA-038</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>剪贴板 / 直接粘贴</td>
+          <td>复用源画布像素且吸附 X 留为 0，跨文档会改坐标并使 Tap/Hold 脱轨</td>
+          <td><code>DefaultFumenEditorClipboard.cs:154-185, 250-383, 474-550</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-039"><code>CA-039</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>剪贴板 / 子弹模板</td>
+          <td>同 ID 模板冲突会替换目标索引，撤销后连原模板也不会恢复</td>
+          <td><code>DefaultFumenEditorClipboard.cs:424-470; BulletPalleteList.cs:51-96</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-040"><code>CA-040</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>剪贴板 / 轨道镜像</td>
+          <td>纯轨道镜像先排除全部轨道，错误地围绕画布 0 而非选区中心</td>
+          <td><code>DefaultFumenEditorClipboard.cs:571-638; LinqExtensionMethod.cs:418-433</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-041"><code>CA-041</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Lane / 复制</td>
+          <td>LaneStartBase 未复制透明标志，粘贴和插值副本一律恢复为可见</td>
+          <td><code>LaneStartBase.cs:5-13; ConnectableStartObject.cs:476-496</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-042"><code>CA-042</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>Beam / 复制</td>
+          <td>Beam 未复制宽度和斜向源，整条复制后退化为默认宽度普通 Beam</td>
+          <td><code>BeamStart.cs:12-49; BeamNext.cs:8-36; ConnectableStartObject.cs:486-496</code></td>
         </tr>
         </tbody>
       </table>
@@ -2338,6 +2419,500 @@ bell.RandomOffsetRange = args.GetData&lt;int&gt;(10); // 实际应读取 9</code
     </ul>
   </section>
 
+  <section id="ca-034" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-034</code> Lane 合并撤销只迁回第一个子节点</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">链重连逐步确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>生产入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/Views/MultiLanesOperationView.axaml"><code>MultiLanesOperationView</code></a> 暴露可直接点击的合并按钮</div>
+      <div class="fact"><strong>执行阶段</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/MultiLanesOperationViewModel.cs"><code>CombineLanes</code></a> 先快照后轨道的全部子节点，再依次移动到前轨道</div>
+      <div class="fact"><strong>撤销阶段</strong>从 <code>midChild.NextObject</code> 开始循环，但每轮先拆除当前节点，再从被拆节点读取下一项</div>
+      <div class="fact"><strong>链表语义</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs"><code>RemoveChildObject</code></a> 重接后继的 <code>PrevObject</code> 时会同步清空当前节点的 <code>NextObject</code></div>
+    </div>
+
+    <h3>确定性复现</h3>
+    <ol>
+      <li>准备前轨道和至少包含两个子节点 <code>A -&gt; B</code> 的后轨道，选中前轨道末端与后轨道起点并执行合并。</li>
+      <li>合并后链为 <code>midChild -&gt; A -&gt; B</code>，后轨道已从谱面集合移除。</li>
+      <li>撤销先令 <code>next = A</code>，随后移除 <code>A</code>。重连过程把 <code>B.PrevObject</code> 改为 <code>midChild</code>，而 <code>PrevObject</code> setter 同时把 <code>A.NextObject</code> 清空。</li>
+      <li><code>A</code> 被加回后轨道后，循环执行 <code>next = next.NextObject</code> 得到 <code>null</code> 并提前结束；<code>B</code> 及其后所有节点仍留在前轨道。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var next = midChild.NextObject;
+while (next != null)
+{
+    frontStart.RemoveChildObject(next);
+    laterStart.AddChildObject(next);
+    next = next.NextObject; // 当前节点的 Next 已在 Remove 中被清空
+}
+
+if (next is not null)
+    next.PrevObject = prev;
+
+public ConnectableObjectBase PrevObject
+{
+    set
+    {
+        if (prevObject is not null)
+            prevObject.NextObject = default;
+        ...
+    }
+}</code></pre>
+
+    <h3>影响</h3>
+    <p>一次“合并 → 撤销”无法恢复原谱面：后轨道只取回首个子节点，其余节点仍属于前轨道。与此同时，撤销会把本次记录的所有 Tap/Hold 引用改回后轨道，因而可能让物件引用与实际几何链分属不同轨道。用户若继续编辑或保存，错误拓扑会被固化；再次重做还会向未清空的 <code>RedockedObjects</code> 继续追加重复项。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>执行前保存后轨道子节点的稳定数组及原顺序；撤销只能遍历该快照，不能沿正在修改的 <code>NextObject</code> 链追踪。</li>
+      <li>为重新停靠对象也保存稳定集合，并保证每次执行/撤销不会累积重复记录。</li>
+      <li>测试后轨道至少三个子节点及多个 Tap/Hold，执行合并、撤销、重做、再次撤销。</li>
+      <li>每一步断言两条轨道的集合成员、节点顺序、<code>PrevObject/NextObject</code>、<code>ReferenceStartObject</code>、谱面集合成员及全部停靠引用。</li>
+    </ul>
+  </section>
+
+  <section id="ca-035" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-035</code> Lane 合并未验证两条独立且首尾有序的轨道</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">入口与对象身份确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>生成条件</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/UIGenerator/ObjectsOperationImplement/MultiLanesStartOperationGenerator.cs"><code>MultiLanesStartOperationGenerator</code></a> 只检查对象数量、Child/Start 类型组合和 <code>LaneType</code> 相等</div>
+      <div class="fact"><strong>缺失约束</strong>没有检查两者来自不同起点、所选 Child 是末端、前轨道尾端早于后轨道起点</div>
+      <div class="fact"><strong>选择路径</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>TryCancelAllObjectSelecting</code></a> 在 Shift 或框选期间保留多选，因此起点和自身子点可同时进入属性浏览器</div>
+      <div class="fact"><strong>执行假设</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/MultiLanesOperationViewModel.cs"><code>CombineLanes</code></a> 忽略所选 Child 的具体位置，只取其 <code>ReferenceStartObject</code>，最终无条件移除 <code>laterStart</code></div>
+    </div>
+
+    <h3>最严重触发方式</h3>
+    <ol>
+      <li>Shift 选择某条 LaneStart 和它自己的任意子节点。两者 LaneType 相同，生成器返回合并界面。</li>
+      <li>执行时 <code>frontStart</code> 与 <code>laterStart</code> 是同一个实例；代码在同一集合中添加中间节点并把快照中的所有节点逐个移除再加回。</li>
+      <li>随后 <code>editor.Fumen.RemoveObject(laterStart)</code> 把这条唯一轨道从谱面集合删除，但其子节点和 Tap/Hold 仍持有该起点引用。</li>
+      <li>若在撤销前保存，轨道不会被格式化器枚举，而停靠物件仍会写出对应 RecordId，重载后形成缺失引用。</li>
+    </ol>
+
+    <h3>其他错误组合</h3>
+    <p>选择前轨道的非末端节点时，操作仍从真实链尾连接，所选节点本身完全不起作用。若后轨道起点早于前轨道链尾，新增 <code>midChild</code> 会以更早 TGrid 追加在尾部，<a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableChildObjectBase.cs"><code>IsVaildPath</code></a> 随即变为 <code>false</code>，检查器会报告倒退轨道。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>if (!((a is ConnectableChildObjectBase &amp;&amp; b is LaneStartBase) || ...))
+    return false;
+
+if (next.LaneType != (prev.ReferenceStartObject as LaneStartBase)?.LaneType)
+    return false;
+
+var frontStart = frontChild.ReferenceStartObject;
+...
+frontStart.AddChildObject(midChild);
+...
+editor.Fumen.RemoveObject(laterStart);</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>生成器必须要求 <code>!ReferenceEquals(prev.ReferenceStartObject, next)</code>、<code>prev.IsEndObject</code>，并验证真实前轨道尾端不晚于后轨道起点。</li>
+      <li>命令执行时再次验证对象仍属于当前谱面且前置条件未因其他编辑改变，不能只相信创建 ViewModel 时的状态。</li>
+      <li>测试同轨起点+子点、非末端子点、反向时间、不同类型和已从谱面移除的对象均不生成或不可执行合并命令。</li>
+      <li>保留一条合法的不同起点、同类型、首尾有序用例，验证合并仍成功并通过路径检查。</li>
+    </ul>
+  </section>
+
+  <section id="ca-036" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-036</code> 彩色轨道子节点复制时丢失颜色和亮度</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">类型契约确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>复制契约</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjectBase.cs"><code>CopyNew</code></a> 按当前运行时类型创建新对象，并把原对象传给其 <code>Copy</code></div>
+      <div class="fact"><strong>错误判断</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/Lane/ColorfulLaneNext.cs"><code>ColorfulLaneNext.Copy</code></a> 却只接受 <code>ColorfulLaneStart</code>，对正常的 <code>ColorfulLaneNext</code> 源必然提前返回</div>
+      <div class="fact"><strong>生产调用</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs"><code>CopyEntireConnectableObject</code></a> 对每个轨道子节点调用 <code>child.CopyNew()</code>；整轨剪贴板复制直接依赖它</div>
+      <div class="fact"><strong>持久化结果</strong>OGKR 和 Nyageki 格式化器都逐节点写出 <code>ColorId</code> 与 <code>Brightness</code>，因此默认值会成为真实文件内容</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>创建彩色轨道，让至少一个 Next 节点使用非默认颜色和非默认亮度。</li>
+      <li>选中整条轨道并复制；剪贴板在登记复制源时就调用 <code>CopyEntireConnectableObject</code>。</li>
+      <li>每个 Next 的 <code>CopyNew()</code> 传入 <code>ColorfulLaneNext</code>，类型判断失败，生成节点保留 <code>Akari</code> 和亮度 <code>3</code>。</li>
+      <li>粘贴后即使起点颜色正确，所有子节点的颜色过渡已丢失；保存会把默认值写入新轨道。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public OngekiObjectBase CopyNew()
+{
+    var newObj = CacheLambdaActivator.CreateInstance(GetType()) as OngekiObjectBase;
+    newObj.Copy(this); // this 是 ColorfulLaneNext
+    return newObj;
+}
+
+public override void Copy(OngekiObjectBase fromObj)
+{
+    base.Copy(fromObj);
+    if (fromObj is not ColorfulLaneStart cls) // 永远不匹配正常子节点
+        return;
+    ColorId = cls.ColorId;
+    Brightness = cls.Brightness;
+}</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>类型判断应为 <code>ColorfulLaneNext</code>，或按实际共享契约读取 <code>IColorfulLane</code>。</li>
+      <li>复制可变颜色对象时明确对象身份策略；至少断言复制结果不会因后续修改源节点而变化。</li>
+      <li>测试单个 Next 的 <code>CopyNew</code>、整轨 <code>CopyEntireConnectableObject</code> 和实际剪贴板复制/粘贴。</li>
+      <li>使用多个节点且每个节点颜色、亮度均不同，保存并重载后逐节点断言值和顺序不变。</li>
+    </ul>
+  </section>
+
+  <section id="ca-037" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-037</code> “清空复制列表”提示没有清空剪贴板</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">控制流确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>用户入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/FumenVisualEditorView.axaml"><code>复制可复制物件</code></a> 菜单和 Ctrl+C 都调用 <code>CopyObjects</code></div>
+      <div class="fact"><strong>界面承诺</strong>空选择分支显示本地化文本 <code>ClearCopyList</code>，中文内容为“清空复制列表”</div>
+      <div class="fact"><strong>实际控制流</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs"><code>CopyObjects</code></a> 在提示后立即返回；真正的 <code>currentCopiedSources.Clear()</code> 位于该返回之后</div>
+      <div class="fact"><strong>可见状态</strong><code>ContainPastableObjects</code> 仍为真，旧 <code>sourceEditor</code> 与旧对象快照也继续被持有</div>
+    </div>
+
+    <h3>触发方式与影响</h3>
+    <ol>
+      <li>先复制任意对象，确认可以粘贴。</li>
+      <li>取消全部选择，再按 Ctrl+C 或执行复制菜单；界面提示“清空复制列表”。</li>
+      <li>随后执行粘贴，上一批对象仍被再次添加。若用户已经切换文档，旧文档快照还会被粘贴到当前文档。</li>
+    </ol>
+    <p>提示和状态完全相反，会造成用户以为剪贴板已清空后仍意外重复谱面对象；同时单例剪贴板继续保留旧编辑器引用，延长已关闭文档的对象生命周期。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>if (objects.IsEmpty())
+{
+    sourceEditor.ToastNotify(Lang.ClearCopyList);
+    return;
+}
+
+// 实际清空永远不会在空选择分支执行
+currentCopiedSources.Clear();
+this.sourceEditor = default;</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>把清空复制数据和源编辑器引用封装成单一方法，并在显示成功提示前完成。</li>
+      <li>明确空选择复制究竟是清空还是无操作；界面文本、<code>ContainPastableObjects</code> 和命令可执行状态必须一致。</li>
+      <li>测试“有内容 → 空选择复制”后集合为空、不可粘贴、源编辑器引用不再保留。</li>
+      <li>另测锁定/非设计模式分支仍保持原剪贴板，以免把拒绝复制误实现为隐式清空。</li>
+    </ul>
+  </section>
+
+  <section id="ca-038" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-038</code> 直接粘贴混用画布像素与谱面坐标并使 Tap/Hold 脱轨</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">坐标流确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>默认入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/FumenVisualEditorView.axaml"><code>直接粘贴</code></a> 菜单调用 <code>PasteOption.Direct</code></div>
+      <div class="fact"><strong>复制数据</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs"><code>currentCopiedSources</code></a> 保存的是用源编辑器布局计算出的画布 <code>Point</code>，不是稳定的 TGrid/XGrid</div>
+      <div class="fact"><strong>直接分支</strong><code>CalcY/CalcX</code> 原样返回源画布像素，再用目标编辑器的 BPM、Soflan、宽度和偏移换算成新谱面坐标</div>
+      <div class="fact"><strong>停靠错误</strong><code>CalcX</code> 在 Direct 分支提前返回，使后续选轨使用的 <code>offsetedX</code> 始终为 <code>0</code></div>
+      <div class="fact"><strong>默认设置</strong><code>AdjustPastedObjects</code> 默认为 <code>false</code>，因此后面的交互吸附不会替该错误兜底</div>
+    </div>
+
+    <h3>同文档确定性复现</h3>
+    <ol>
+      <li>在正常宽度的编辑器中复制一个已停靠到 XGrid 0 轨道的 Tap 或 Hold，执行“直接粘贴”。</li>
+      <li>轨道在画布中的 X 通常位于视图中央，但筛选距离计算使用 <code>Math.Abs(0 - laneCanvasX)</code>，超过 8 像素后候选为空。</li>
+      <li>即使源对象仍引用原轨道，优先原轨道的分支也要求它先出现在候选集合；最终 <code>pickLane</code> 为 null。</li>
+      <li>粘贴对象被加入谱面时 <code>ReferenceLaneStart</code> 已清空，检查器随后报告缺失引用。</li>
+    </ol>
+
+    <h3>跨文档后果</h3>
+    <p>跨文档直接粘贴还绕过 <code>adjustY</code>：相同源像素在不同 BPM/Soflan 中会映射到不同 TGrid；源 X 像素在不同窗口宽度或 XOffset 中也会映射到不同 XGrid。单对象甚至不受垂直缩放差异保护，因此“直接”无法保留原谱面坐标。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>double CalcY(double sourceEditorY)
+{
+    if (pasteOption == PasteOption.Direct)
+        return sourceEditorY;
+    ...
+}
+
+var offsetedX = 0d;
+double CalcX(double x)
+{
+    if (pasteOption == PasteOption.Direct)
+        return x; // offsetedX 未赋值
+    ...
+    offsetedX = mirroredX + offset.X;
+    return offsetedX;
+}
+
+return (lane, Math.Abs(offsetedX - laneCanvasX));
+...
+dockable.ReferenceLaneStart = pickLane;</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>剪贴板应保存模型坐标及相对偏移；Direct 必须从源 TGrid/XGrid 显式映射，而不是复用源视图像素。</li>
+      <li>将“最终目标画布 X”保存在单一变量中，所有粘贴模式都用它执行轨道候选距离计算。</li>
+      <li>测试同文档直接粘贴 Tap/Hold 保留原轨道引用；覆盖 <code>AdjustPastedObjects</code> 开关两种状态。</li>
+      <li>跨两个具有不同 BPM、Soflan、视图宽度、XOffset 和缩放的编辑器直接粘贴，断言 TGrid/XGrid 与产品定义的 Direct 语义一致。</li>
+      <li>执行撤销/重做后再次断言对象位置、HoldEnd 偏移和轨道引用完全稳定。</li>
+    </ul>
+  </section>
+
+  <section id="ca-039" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-039</code> 跨文档粘贴会破坏同 ID 子弹模板及其撤销状态</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">索引替换与撤销确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>冲突策略</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs"><code>PasteObjects</code></a> 遇到同 StrID、部分字段不同的模板时复制新实例，但保留原 StrID</div>
+      <div class="fact"><strong>索引行为</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/Collections/BulletPalleteList.cs"><code>AddPallete</code></a> 以转换后的 StrID 为唯一键；新实例同键时会先删除目标谱面的旧模板</div>
+      <div class="fact"><strong>撤销行为</strong>撤销只删除新模板并清空粘贴对象引用，从未保存或恢复被替换的旧模板</div>
+      <div class="fact"><strong>不完整比较</strong>冲突判断没有比较运行时有效的 <code>Speed</code> 与 <code>RandomOffsetRange</code>，这些字段不同时反而直接复用目标模板</div>
+    </div>
+
+    <h3>破坏目标谱面的复现</h3>
+    <ol>
+      <li>源文档和目标文档都包含 StrID 相同但 <code>TypeValue</code> 不同的模板；目标已有 Bullet/Bell 引用自己的模板。</li>
+      <li>从源文档复制一个引用该模板的物件并粘贴到目标文档。冲突判断令 <code>isAppend = true</code>，新模板仍使用同一个 StrID。</li>
+      <li><code>AddPallete</code> 删除目标旧模板并把字典键指向新模板；目标原有 Bullet/Bell 仍持有已不在模板列表中的旧实例。</li>
+      <li>撤销粘贴时，新模板被删除，但旧模板没有加回，目标原有对象永久留下悬空模板引用。</li>
+      <li>保存时模板列表不再输出该旧实例，而原有 Bullet/Bell 仍写出它的 StrID；重载后解析器找不到模板并得到 null。</li>
+    </ol>
+
+    <h3>另一条静默语义变化</h3>
+    <p>若两份模板只有 <code>Speed</code> 或 <code>RandomOffsetRange</code> 不同，比较结果认为它们相同，粘贴对象直接引用目标模板。这样不会产生新模板，却会无提示改变从源文档复制来的弹体速度或随机偏移。</p>
+
+    <h3>源码证据</h3>
+    <pre><code>_check(x =&gt; x.TypeValue);
+_check(x =&gt; x.TargetValue);
+_check(x =&gt; x.ShooterValue);
+_check(x =&gt; x.EditorName);
+_check(x =&gt; x.PlaceOffset);
+_check(x =&gt; x.SizeValue);
+// Speed 和 RandomOffsetRange 未比较
+
+if (isAppend)
+    targetEditor.Fumen.AddObject(pickPallete);
+
+if (palleteMap.TryGetValue(ConvertIdToInt(pallete.StrID), out var old))
+    RemovePallete(old);
+
+// undo
+if (isAppend)
+    targetEditor.Fumen.RemoveObject(pickPallete); // 没有恢复 old</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>建立一次粘贴事务级的模板映射：相同完整定义复用目标实例；同 ID 不同定义必须分配新 ID，禁止覆盖目标模板。</li>
+      <li>比较所有影响运行时与持久化的字段，并让同一批多个物件共享同一个映射结果。</li>
+      <li>如果仍允许替换，撤销必须保存并恢复旧模板的精确实例、索引及所有引用；更稳妥的方案是不替换。</li>
+      <li>测试 Type 冲突、仅 Speed 冲突、仅 RandomOffsetRange 冲突、目标无模板以及多个物件共用源模板。</li>
+      <li>每个用例执行粘贴、撤销、重做和保存重载，断言目标原有物件语义不变、源物件语义被保留、模板 ID 唯一且所有引用都属于当前列表。</li>
+    </ul>
+  </section>
+
+  <section id="ca-040" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-040</code> 纯轨道按选区镜像时使用空集合中心</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">空序列计算确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>用户入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/FumenVisualEditorView.axaml"><code>按整体全体范围水平/垂直镜像粘贴</code></a> 直接调用对应 PasteOption</div>
+      <div class="fact"><strong>复制集合</strong>整轨复制只把 <code>ConnectableStartObject</code> 放入剪贴板，Child 由起点内部携带</div>
+      <div class="fact"><strong>镜像中心</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs"><code>CalculateXMirror/CalculateYMirror</code></a> 无条件过滤所有 <code>ConnectableObjectBase</code>，纯轨道集合因此变空</div>
+      <div class="fact"><strong>空序列结果</strong><a href="../src/OngekiFumenEditor.Avalonia/Utils/LinqExtensionMethod.cs"><code>MaxMinBy</code></a> 对空值类型序列用 <code>FirstOrDefault</code> 得到 <code>0</code>，返回中心 <code>0</code> 而不报错</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>完整选中一条或多条轨道并复制。</li>
+      <li>在目标位置打开上下文菜单，执行按选区中心水平镜像或垂直镜像粘贴。</li>
+      <li>镜像中心计算把全部轨道过滤掉，得到 <code>min=max=0</code>；X 分支甚至把画布左边缘像素 0 当成中心。</li>
+      <li>后续偏移仍按正确的源选区中心计算，两个不同中心混合后使粘贴结果额外偏移，通常远离请求位置；相对时间/空间也不是围绕所选轨道范围翻转。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>(var minX, var maxX) = objects
+    .Where(x =&gt; x is not ConnectableObjectBase) // 纯轨道全部被排除
+    ...
+    .MaxMinBy(x =&gt; x);
+
+var first = collection.FirstOrDefault(); // 空 double 序列得到 0
+X min = keySelector(first);
+X max = keySelector(first);</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>镜像中心与 <code>CalculateRangeCenter</code> 使用同一套测量对象选择规则：纯 Connectable 集合应使用各起点，而混合选择才排除轨道。</li>
+      <li>公共范围计算 API 应显式拒绝空集合，避免默认零掩盖调用方过滤错误。</li>
+      <li>测试单轨道、多轨道的水平和垂直选区镜像，断言镜像前后包围盒中心一致并准确落到上下文菜单目标点。</li>
+      <li>同时覆盖混合轨道+普通对象，验证既有“混合时忽略轨道”产品语义没有被改变。</li>
+    </ul>
+  </section>
+
+  <section id="ca-041" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-041</code> Lane 复制不会保留透明标志</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">继承链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>专有字段</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/Lane/Base/LaneStartBase.cs"><code>LaneStartBase</code></a> 定义 <code>IsTransparent</code>，默认值为 <code>false</code></div>
+      <div class="fact"><strong>复制继承链</strong>该基类没有覆写 <code>Copy</code>；普通、墙体和敌方 LaneStart 也没有覆写，彩色起点覆写只复制颜色与亮度</div>
+      <div class="fact"><strong>生产调用</strong><code>CopyNew</code>、整轨剪贴板复制和 <code>ConnectableStartObject.InterpolateCurve</code> 都通过同一复制链创建新起点</div>
+      <div class="fact"><strong>行为用途</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/LaneDrawingTargetBase.cs"><code>LaneDrawingTargetBase</code></a> 在预览模式排除透明轨道；两种格式也会持久化该标志</div>
+    </div>
+
+    <h3>触发方式与影响</h3>
+    <ol>
+      <li>把任意 LaneStart 的 <code>IsTransparent</code> 设为 true，在预览中该轨道不绘制。</li>
+      <li>完整选择并复制/粘贴该轨道，或执行生成复制起点的插值操作。</li>
+      <li>新起点只复制位置、RecordId 及具体子类已实现的字段，<code>IsTransparent</code> 保持默认 false。</li>
+      <li>副本在预览中重新可见，并在保存后以非透明轨道持久化，改变原设计语义。</li>
+    </ol>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在 <code>LaneStartBase.Copy</code> 中调用基类后复制 <code>IsTransparent</code>，让所有派生 Lane 统一获得正确行为。</li>
+      <li>测试普通 Lane、Wall、Colorful Lane 的 <code>CopyNew</code> 与整轨剪贴板复制。</li>
+      <li>断言预览过滤结果以及 OGKR/Nyageki 保存重载后的透明标志不变。</li>
+    </ul>
+  </section>
+
+  <section id="ca-042" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-042</code> Beam 复制会丢失宽度和斜向源参数</h2>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">派生字段与格式确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>起点字段</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/Beam/BeamStart.cs"><code>BeamStart</code></a> 拥有 <code>WidthId</code> 和 <code>ObliqueSourceXGridOffset</code>，但没有覆写 <code>Copy</code></div>
+      <div class="fact"><strong>子点字段</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/Beam/BeamNext.cs"><code>BeamNext</code></a> 也拥有独立 <code>WidthId</code> 和可选局部斜向源，同样没有覆写 <code>Copy</code></div>
+      <div class="fact"><strong>默认回退</strong>新起点和每个新子点的宽度均为 <code>WidthIdConst.Id_1</code>；新起点斜向源为 null，子点局部值为 null 后也只能继承这个 null</div>
+      <div class="fact"><strong>生产调用</strong>完整选择 Beam 后，剪贴板把它作为 <code>ConnectableStartObject</code> 并调用 <code>CopyEntireConnectableObject</code></div>
+      <div class="fact"><strong>格式语义</strong>OGKR/Nyageki 均逐节点输出宽度，且在斜向源非空时输出偏移；丢失会直接改变文件命令类型和几何</div>
+    </div>
+
+    <h3>触发方式</h3>
+    <ol>
+      <li>创建非默认宽度的 Beam，并给起点或部分子点设置 <code>ObliqueSourceXGridOffset</code>。</li>
+      <li>完整选择 Beam 后复制并粘贴。</li>
+      <li>起点的普通基类复制只保留位置和 RecordId；每个子点的普通基类复制只保留连接与曲线公共字段。</li>
+      <li>粘贴结果所有节点宽度变成 Id_1，斜向源全部消失，IDShortName 从 <code>OBS/OBN/OBE</code> 退化为普通 <code>BMS/BMN/BME</code>。</li>
+      <li>保存后格式化器输出新默认参数，原 Beam 的宽度变化和斜向几何不可恢复。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>public class BeamStart : ConnectableStartObject, IBeamObject
+{
+    private XGrid obliqueSourceXGrid;
+    private WidthId widthId = WidthIdConst.Id_1;
+    // 无 Copy override
+}
+
+public class BeamNext : ConnectableChildObjectBase, IBeamObject
+{
+    private WidthId widthId = WidthIdConst.Id_1;
+    private XGrid obliqueSourceXGrid = null;
+    // 无 Copy override
+}
+
+foreach (var child in from.Children)
+{
+    var copyChild = child.CopyNew() as ConnectableChildObjectBase;
+    AddChildObject(copyChild);
+}</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>分别为 <code>BeamStart</code> 和 <code>BeamNext</code> 实现派生字段复制；XGrid 偏移需要独立副本，不能共享可变实例。</li>
+      <li>构造起点和多个子点均使用不同非默认 WidthId、部分节点覆盖斜向源、部分节点继承起点的 Beam。</li>
+      <li>测试单节点 <code>CopyNew</code>、整 Beam 复制/粘贴、撤销/重做及 OGKR/Nyageki 保存重载。</li>
+      <li>逐节点断言 WidthId、局部/继承后的斜向源、IDShortName、位置、连接关系与序列化命令均保持一致。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -2386,12 +2961,17 @@ bell.RandomOffsetRange = args.GetData&lt;int&gt;(10); // 实际应读取 9</code
         审查检查器谓词边界、OGKR/Nyageki 的区域设置与往返列契约。记录 <code>CA-030</code> 至 <code>CA-033</code>。
         <code>XGrid.Serialize</code> 当前只输出 Unit，因此弹体字段整体错位的初始候选不成立；Wall/Beam 的 End 由链尾位置动态决定，复用 Next 类型也是现有对象模型的正确行为。墙体冲突规则的相邻区间扫描虽不会一次列出所有重叠对，但已报告任一重叠即可阻止后续几何阶段，当前不足以证明存在未报告的有效谱面错误，故未编号。
       </div>
+      <time datetime="2026-08-12">2026-08-12 / A10</time>
+      <div>
+        审查 Lane 合并的入口/撤销链、Connectable 派生字段复制，以及剪贴板的清空状态、坐标映射、模板冲突和轨道镜像。记录 <code>CA-034</code> 至 <code>CA-042</code>。
+        <code>CompositeUndoAction</code> 的顺序候选当前尚未找到可稳定复现的生产错误结果；<code>TaskExtension.WithTimeout</code> 与 <code>AbortableThread</code> 当前没有生产调用，故本批没有把这些纯潜在风险提前编号。旧 WPF 工程中存在相同实现，只作为缺陷来源线索，不作为 Avalonia 当前行为成立的替代证据。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查 Browser/桌面平台差异、命令执行的异常与取消边界、谱面解析后的对象关系恢复、剪贴板和撤销动作的跨文档身份，以及格式转换器对未知或缺失字段的处理。新增问题从 <code>CA-034</code> 起顺序编号。</p>
+    <p>继续检查 Browser/桌面平台差异、命令执行的异常与取消边界、谱面解析后的对象关系恢复、撤销组合的依赖顺序，以及格式转换器对未知或缺失字段的处理。新增问题从 <code>CA-043</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
