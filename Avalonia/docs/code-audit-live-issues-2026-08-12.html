@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>0747779d</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>88300e6c</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>60</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>60</strong><span>未修复</span></div>
-      <div class="metric"><strong>29 / 31</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>13</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>64</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>64</strong><span>未修复</span></div>
+      <div class="metric"><strong>32 / 32</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>14</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -780,6 +780,42 @@
           <td>项目模型 / 设置所有权</td>
           <td>每个项目模型都会创建未使用且永不释放的全局设置订阅</td>
           <td><code>EditorProjectDataModel_V0_5_2.cs:32-40; EditorSetting.cs:12-15, 341-348; EditorProjectDataModel.cs:95-108</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-061"><code>CA-061</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>属性浏览器 / HoldEnd 拖放</td>
+          <td>HoldEnd 拖到禁止区域仍会先改写关系，留下无撤销记录且可被保存的默认尾点</td>
+          <td><code>HoldOperationViewModel.cs:47-55; EditorAddObjectDropAction.cs:12-26; Hold.cs:64-97</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-062"><code>CA-062</code></a></td>
+          <td><span class="severity severity-medium">中</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>快捷新增 / 组合撤销</td>
+          <td>越界快速新增没有添加子点，却清空选择、写入空撤销记录并把文档标脏</td>
+          <td><code>FumenVisualEditorViewModel.UserInteractionActions.cs:990-1025; ConnectableObjectDropAction.cs:29-58</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-063"><code>CA-063</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">条件活动</span></td>
+          <td>轨道子点 / 磁吸排序</td>
+          <td>子点先按原始落点插入再磁吸改时刻，可让链表顺序与 TGrid 相反并原样保存</td>
+          <td><code>ConnectableObjectDropAction.cs:35-46; ConnectableStartObject.cs:116-185; DefaultObjectInteractiveAction.cs:118-155</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-064"><code>CA-064</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>快捷新增 / HoldEnd 撤销</td>
+          <td>对已有尾点的 Hold 按 A 会覆盖旧 HoldEnd，撤销后变成没有尾点而不是恢复原值</td>
+          <td><code>FumenVisualEditorViewModel.UserInteractionActions.cs:974-978, 1027-1046; Hold.cs:64-80</code></td>
         </tr>
         </tbody>
       </table>
@@ -4099,6 +4135,232 @@ public void DisposeRuntimeFiles()
     </ul>
   </section>
 
+  <section id="ca-061" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-061</code> 被拒绝的 HoldEnd 拖放仍会改写并保存关系</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">拖放时序与保存链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>生产拖放入口</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/Views/HoldOperationView.xaml.cs"><code>HoldOperationView.OnPointerMoved</code></a> 把 <code>CreateHoldEndDropAction()</code> 产生的参数交给全局 DragDrop</div>
+      <div class="fact"><strong>工厂带模型副作用</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/HoldOperationViewModel.cs"><code>CreateHoldEndDropAction</code></a> 的惰性函数不只创建对象，还立即调用 <code>ConnectableObject.SetHoldEnd</code> 并禁用再次拖放</div>
+      <div class="fact"><strong>校验顺序相反</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/DropActions/EditorAddObjectDropAction.cs"><code>Drop</code></a> 先执行 <code>GetDisplayObject()</code>，之后才检查落点是否超出音频；默认设置禁止越界时直接 return</div>
+      <div class="fact"><strong>没有回滚入口</strong>提前 return 发生在 <code>ExecuteAction</code> 之前，因此既没有把尾点加入谱面对象操作，也没有任何 Undo 动作能够解除已经建立的 Hold/End 关系</div>
+      <div class="fact"><strong>错误会持久化</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/Hold.cs"><code>Hold.GetDisplayableObjects</code></a> 仍返回该尾点；<a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessNOTES</code></a> 直接读取 <code>h.HoldEnd</code> 并写出其默认 TGrid/XGrid</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>保持默认的“禁止在音频长度外放置物件”，选择一个尚无尾点的 Hold。</li>
+      <li>从属性面板拖出 HoldEnd，并落到 <code>TotalDurationHeight</code> 之外。</li>
+      <li>Drop 先创建默认坐标的 HoldEnd、挂到 Hold 并把拖放按钮设为禁用，然后越界检查只显示提示并 return。</li>
+      <li>谱面没有新增动作，撤销栈也没有记录，但 <code>Hold.HoldEnd</code> 已非空；重新选择对象也无法通过撤销恢复原状态。</li>
+      <li>保存谱面时，格式化器把该默认尾点写入 HLD/CHD 行。若 Hold 起点晚于零时刻，重载后会得到尾点早于起点的错误 Hold，而且“缺少尾点”检查不再报警。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>return new OngekiObjectDropParam(() =&gt;
+{
+    var genWallChild = new HoldEnd();
+    ConnectableObject.SetHoldEnd(genWallChild); // 校验前改写模型
+    CheckEnableDrag();
+    return genWallChild;
+});
+
+var displayObject = GetDisplayObject();          // 执行上述副作用
+if (!editor.CheckAndNotifyIfPlaceBeyondDuration(mousePosition))
+    return;                                      // 没有 Undo，也没有解除关系
+
+var end = h.HoldEnd;
+sb.AppendLine($"{h.IDShortName}\t...\t{end?.TGrid.Serialize()}\t...");</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>拖放 payload 的对象工厂必须无副作用；先验证落点，再在同一个撤销动作的 Execute 中移动、建立关系并加入模型。</li>
+      <li>拒绝、取消和异常路径必须保持 Hold 关系、按钮状态、脏状态和撤销栈完全不变；必要时让 Drop 返回明确结果而不是静默 return。</li>
+      <li><code>SetHoldEnd</code> 应完整维护新旧双方引用并通知 <code>HoldEnd</code>/<code>EndTGrid</code>，使属性面板和区间索引能观察关系变化。</li>
+      <li>回归测试覆盖越界拒绝、DragDrop 取消、正常放置、Undo/Redo 和保存重载，断言失败路径绝不产生尾点，成功路径的关系与坐标往返一致。</li>
+    </ul>
+  </section>
+
+  <section id="ca-062" class="issue medium">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-062</code> 越界快速新增会制造空撤销记录并清空选择</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-medium">中</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">组合动作执行链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>快捷键已接入生产</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorKeyBindingRouter.cs"><code>KBD_FastAddConnectableChild</code></a> 默认绑定 A，并直接调用 <code>KeyboardAction_FastAddConnectableChild</code></div>
+      <div class="fact"><strong>子操作可被拒绝</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/DropActions/ConnectableObjectDropAction.cs"><code>Drop</code></a> 在越界时于登记 Undo 动作前 return，因此该 Lane 不会加入任何子动作</div>
+      <div class="fact"><strong>调用方忽略结果</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>ProcessAsAddNextObjects</code></a> 无论 Drop 是否成功都把新对象放入 <code>genChildren</code>，并无条件加入一个选择动作</div>
+      <div class="fact"><strong>组合期间不会立即执行</strong><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/UndoRedo/DefaultImpl/DefaultUndoRedoManager.cs"><code>ExecuteAction</code></a> 在 Begin/EndCombine 之间只收集动作；全部 Drop 被拒绝时，最终组合只含选择动作</div>
+      <div class="fact"><strong>选择动作不可撤销</strong>它先清除当前谱面选择，再把脱离谱面的临时对象设为选中；随后 Refresh 只从 <code>Fumen.GetAllDisplayableObjects()</code> 重建，所以面板为空，而 Undo 委托是空函数</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>选择一条或多条不同起点所属的 Lane 节点，把鼠标移动到音频时间轴外。</li>
+      <li>按默认快捷键 A。每个 <code>ConnectableObjectDropAction</code> 都因越界显示提示并在登记动作前返回。</li>
+      <li><code>ProcessAsAddNextObjects</code> 仍创建并执行组合动作；唯一子动作清除原选择，并把未加入任何 Lane 的临时子点标成选中。</li>
+      <li>属性面板刷新时从谱面重新枚举，因此最终显示无选择；Lane 的 Children 数量完全不变。</li>
+      <li>撤销历史却增加一条“快速添加”，<code>UndoActionCount</code> 变化把文档标脏。执行 Undo 不会恢复原选择，Redo 又会再次清空届时的选择。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>dropAction.Drop(this, newPos); // 可能在越界检查处直接 return
+genChildren.Add(genChild);     // 仍把失败对象计为成功
+
+UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(..., () =&gt;
+{
+    TryCancelAllObjectSelecting();
+    genChildren.ForEach(x =&gt; x.IsSelected = true);
+    propertyBrowser.RefreshSelected(this);
+}, () =&gt; { }));               // Undo 不恢复任何状态
+
+var combinedAction = UndoRedoManager.EndCombineAction(...);
+UndoRedoManager.ExecuteAction(combinedAction); // 写入历史并触发 IsDirty</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>让 Drop 返回成功状态或返回待执行动作；调用方只收集真正接受的对象，并在全部失败时不创建组合动作。</li>
+      <li>同一批对象共享 Y 落点时应在 BeginCombineAction 前统一做一次越界校验，避免多次提示和半成功状态。</li>
+      <li>选择切换只能针对已进入模型的对象；若把选择纳入撤销动作，应保存并恢复此前选择，不能使用空 Undo。</li>
+      <li>测试覆盖全部拒绝、全部成功和部分失败的可注入 Drop，分别断言 Children、选择、UndoActionCount、Redo 和 IsDirty 与实际内容修改一致。</li>
+    </ul>
+  </section>
+
+  <section id="ca-063" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-063</code> 磁吸后子点时刻可与轨道链顺序相反</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">插入、磁吸与保存链确认</span>
+        <span class="exposure exposure-active">条件活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>先按原始落点排序</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenObjectPropertyBrowser/ViewModels/DropActions/ConnectableObjectDropAction.cs"><code>Drop</code></a> 先把鼠标 Y 直接换算为 <code>dragTGrid</code>，据此决定 AddChildObject 或 InsertChildObject</div>
+      <div class="fact"><strong>后写最终时刻</strong>撤销动作 Execute 先修改 Children/Prev/Next 关系，随后才调用 <code>editor.MoveObjectTo</code> 给新子点写入实际坐标</div>
+      <div class="fact"><strong>Move 会改变排序键</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/Interactives/Impls/DefaultObjectInteractiveAction.cs"><code>CheckAndAdjustY</code></a> 默认会吸附 4 像素内节拍；ForceMagneticDock 则选择全局最近节拍，所以最终 TGrid 可以跨过相邻的非对齐子点</div>
+      <div class="fact"><strong>集合不自动重排</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs"><code>OnPropertyChanged(TGrid)</code></a> 只刷新路径和 Min/Max 缓存，不调整 <code>children</code> 的索引或 Prev/Next 链</div>
+      <div class="fact"><strong>文件保留错误顺序</strong><a href="../src/OngekiFumenEditor.Avalonia/Parser/Ogkr/DefaultOngekiFumenFormatter.cs"><code>ProcessLANE</code></a> 严格按 Children 枚举顺序输出；OGKR 解析器又按文件顺序 <code>AddChildObject</code>，重载不会按 TGrid 修复</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>建立一条已有末端子点的 Lane，让该末端位于某节拍线 B 之后一点，保持为非节拍对齐位置。</li>
+      <li>启用 ForceMagneticDock；也可把两个点安排在默认 4 像素磁吸范围内。</li>
+      <li>从属性面板拖一个新子点，原始落点略晚于现有末端，但离节拍线 B 比离下一节拍更近。</li>
+      <li>原始 <code>dragTGrid</code> 使代码先把新点追加到末尾；随后 Move 把它吸到 B，于是新末端的实际 TGrid 早于它的 PrevObject。</li>
+      <li><code>IsVaildPath</code> 变为 false，Lane 插值、依附物件定位和刷子等功能受到影响；保存重载后，倒序链仍按同一列表次序存在。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>var dragTGrid = ConvertYToTGrid_DesignMode(dragEndPoint.Y, editor);
+var isAppend = lastObj is not null &amp;&amp; lastObj.TGrid &lt; dragTGrid;
+
+if (isAppend)
+    startObject.AddChildObject(childObject);       // 先建立链表位置
+else
+    startObject.InsertChildObject(dragTGrid, childObject);
+
+editor.MoveObjectTo(childObject, dragEndPoint);   // 再磁吸并改写 TGrid
+
+var fin = forceMagneticAdjust
+    ? TGridCalculator.TryPickClosestBeatTime((float)y, editor)
+    : TGridCalculator.TryPickMagneticBeatTime((float)y, 4, editor);
+
+foreach (var child in laneStart.Children)          // 原样保存列表顺序
+    SerializeOutput(child);</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>在决定插入位置前先通过 Interactive 计算最终吸附坐标/TGrid；不要用原始落点排序、再修改排序键。</li>
+      <li>若架构要求先 Move，则在 TGrid 确定后按最终值重新插入，并原子修复 PrevObject/NextObject、事件订阅和路径缓存。</li>
+      <li>明确同 TGrid 子点的稳定排序或拒绝策略，避免不同运行时/撤销轮次产生不同链顺序。</li>
+      <li>测试覆盖追加点向前跨越、中间点向前/向后跨越、默认 4 像素和强制磁吸，并验证 Undo/Redo、IsPathVaild、OGKR/Nyageki 保存重载后的 Children 次序。</li>
+    </ul>
+  </section>
+
+  <section id="ca-064" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-064</code> 快捷新增会不可逆地覆盖已有 HoldEnd</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">快捷键与撤销关系确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>入口不检查已有尾点</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>KeyboardAction_FastAddConnectableChild</code></a> 只判断属性面板是否恰好选择一个 Hold，随后无条件调用 <code>ProcessAsHoldEnd</code></div>
+      <div class="fact"><strong>撤销动作前覆盖</strong><code>ProcessAsHoldEnd</code> 先创建新对象并调用 <code>hold.SetHoldEnd(holdEnd)</code>，然后才构造和执行 AddObject Undo 动作；旧尾点没有被捕获</div>
+      <div class="fact"><strong>双向关系也不完整</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiObjects/Hold.cs"><code>SetHoldEnd</code></a> 替换旧值时只退订其事件，不把旧 <code>HoldEnd.RefHold</code> 清空，因此旧对象仍声称引用该 Hold，而 Hold 已指向新对象</div>
+      <div class="fact"><strong>Undo 只删除新值</strong>动作的 Undo 调用 <code>RemoveObject(newEnd)</code>，它把当前关系设为 null；没有任何代码重新调用 <code>SetHoldEnd(oldEnd)</code></div>
+      <div class="fact"><strong>保存结果取决于操作时点</strong>覆盖后保存会永久写入新尾点；Undo 后保存则写出没有尾点的 Hold。两种结果都无法通过当前撤销历史恢复原尾点坐标</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>建立一个起点和尾点都有效的 Hold，只选择 Hold 头部。</li>
+      <li>把鼠标放到另一时间位置，按默认快捷键 A。</li>
+      <li>代码在登记撤销动作之前把 <code>Hold.HoldEnd</code> 从旧对象替换为新对象；旧对象从显示和保存关系中消失，但其 <code>RefHold</code> 仍指向原 Hold。</li>
+      <li>执行 Undo。新尾点被移除，<code>Hold.HoldEnd</code> 变成 null，而不是恢复原尾点。</li>
+      <li>执行 Redo 只能再次装回新尾点。保存 Undo 状态会触发缺少尾点错误，保存 Redo 状态则永久丢失原尾点位置。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>if (propertyBrowser.SelectedObjects.IsOnlyOne()
+    &amp;&amp; propertyBrowser.SelectedObjects.FirstOrDefault() is Hold hold)
+{
+    ProcessAsHoldEnd(hold, position); // 没有 HoldEnd == null 条件
+}
+
+var holdEnd = new HoldEnd();
+hold.SetHoldEnd(holdEnd);              // Undo 动作建立前覆盖旧值
+
+UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(...,
+    () =&gt; { MoveObjectTo(holdEnd, mousePosition); Fumen.AddObject(holdEnd); },
+    () =&gt; { RemoveObject(holdEnd); })); // 只删除新值，不恢复旧值
+
+if (this.holdEnd is not null)
+    this.holdEnd.PropertyChanged -= HoldEnd_PropertyChanged;
+this.holdEnd = end;                    // 没有 old.RefHold = null</code></pre>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>若快速新增只用于补尾点，入口必须在 HoldEnd 已存在时拒绝并保持模型、选择和历史不变。</li>
+      <li>若产品允许“替换尾点”，撤销动作必须同时捕获 oldEnd/newEnd，在 Execute/Undo 中原子切换关系和位置，不能在建动作前改写。</li>
+      <li><code>SetHoldEnd</code> 替换或清空时必须解除旧端的 RefHold，并对 HoldEnd/EndTGrid 发出关系通知，始终维持双向引用不变量。</li>
+      <li>回归测试覆盖已有尾点按 A、Undo、Redo、多轮切换和保存重载，断言原尾点身份、坐标和双方引用能够完整恢复；另验证无尾点 Hold 的正常快速新增。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -4167,12 +4429,17 @@ public void DisposeRuntimeFiles()
         审查普通画布的选择/拖拽路由、Pointer 结束与捕获语义、撤销历史 Slider 映射，以及项目音频挂载、持久时长和设置对象所有权。记录 <code>CA-054</code> 至 <code>CA-060</code>。
         Batch Mode 已显式捕获 Pointer、处理 CaptureLost 并取消手势，因此未把它并入普通模式的 <code>CA-056</code>；<code>DefaultObjectInteractiveAction.dragStartCanvasPoint</code> 的未使用局部变量只作为 <code>CA-055</code> 的实现线索，没有单独编号。项目 JSON 中的 EditorSetting 确实存在，但本批只记录可证明的静态事件订阅泄漏，不把 getter-only 属性的具体反序列化覆盖行为扩写成另一条未经验证的问题。
       </div>
+      <time datetime="2026-08-13">2026-08-13 / A14</time>
+      <div>
+        审查 HoldEnd 属性面板拖放、快速新增组合动作、Connectable 子点插入与磁吸，以及 HoldEnd 替换后的撤销关系。记录 <code>CA-061</code> 至 <code>CA-064</code>。
+        越界批量新增生成的脱离谱面对象会被 <code>RefreshSelected</code> 从 Fumen 重枚举时过滤掉，因此本批记录的是空历史项、原选择丢失和错误标脏，不扩写为幽灵属性编辑；未绑定到生产输入路由的 <code>KeyboardAction_AddNew*</code> 也没有作为可达问题编号。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查快捷新增与拖放创建的撤销边界、解析器对重复 RecordId 和乱序引用的处理、Browser 书签权限恢复、项目设置兼容字段的反序列化副作用，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-061</code> 起顺序编号。</p>
+    <p>继续检查解析器对重复 RecordId 和乱序引用的处理、Browser 书签权限恢复、项目设置兼容字段的反序列化副作用，以及其他格式字段的保存重载对称性。新增问题从 <code>CA-065</code> 起顺序编号。</p>
   </section>
 </main>
 </body>
