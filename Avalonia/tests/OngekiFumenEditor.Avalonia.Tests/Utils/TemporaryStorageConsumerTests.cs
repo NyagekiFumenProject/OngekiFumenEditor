@@ -5,14 +5,35 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectF
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using OngekiFumenEditor.Avalonia.Utils;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Utils;
 
 public sealed class TemporaryStorageConsumerTests
 {
+    [Fact]
+    public void EditorProjectDataModelBase_DeclaresOnlyVersion()
+    {
+        var properties = typeof(EditorProjectDataModelBase).GetProperties(
+            BindingFlags.Instance |
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.DeclaredOnly);
+        var fields = typeof(EditorProjectDataModelBase).GetFields(
+            BindingFlags.Instance |
+            BindingFlags.Public |
+            BindingFlags.NonPublic |
+            BindingFlags.DeclaredOnly);
+
+        var version = Assert.Single(properties);
+        Assert.Equal(nameof(EditorProjectDataModelBase.Version), version.Name);
+        Assert.Empty(fields);
+    }
+
     [AvaloniaFact]
     public async Task EditorProjectFileManager_LegacyV052Project_UpgradesToLatestModel()
     {
@@ -34,6 +55,16 @@ public sealed class TemporaryStorageConsumerTests
         var reloaded = await new EditorProjectFileManager().Load(file);
 
         Assert.Contains("\"Version\": \"0.5.2\"", serialized, StringComparison.Ordinal);
+        AssertTopLevelProperties(
+            serialized,
+            "Version",
+            "Id",
+            "AudioFilePath",
+            "AudioDuration",
+            "EditorSetting",
+            "FumenFilePath",
+            "RememberLastDisplayTime",
+            "StoreBulletPalleteEditorDatas");
         Assert.IsType<EditorProjectDataModel>(reloaded);
         Assert.Equal(EditorProjectDataModel.VERSION, reloaded.Version);
         Assert.Equal(projectId, reloaded.Id);
@@ -63,6 +94,16 @@ public sealed class TemporaryStorageConsumerTests
         var reloaded = await new EditorProjectFileManager().Load(file);
 
         Assert.Contains("\"Version\": \"0.5.4\"", serialized, StringComparison.Ordinal);
+        AssertTopLevelProperties(
+            serialized,
+            "Version",
+            "Id",
+            "AudioFilePath",
+            "AudioDuration",
+            "EditorSetting",
+            "FumenFilePath",
+            "RememberLastDisplayTime",
+            "StoreBulletPalleteEditorDatas");
         Assert.Equal(EditorProjectDataModel.VERSION, reloaded.Version);
         Assert.Equal(projectId, reloaded.Id);
         Assert.Equal(legacy.AudioDuration, reloaded.AudioDuration);
@@ -123,6 +164,15 @@ public sealed class TemporaryStorageConsumerTests
 
         Assert.True(result.IsSuccess, result.ErrorMessage);
         Assert.True(await file.GetLengthAsync() > 0);
+        string serialized = Encoding.UTF8.GetString(await file.ReadAllBytesAsync());
+        AssertTopLevelProperties(
+            serialized,
+            "Version",
+            "Id",
+            "AudioDuration",
+            "EditorSetting",
+            "RememberLastDisplayTime",
+            "StoreBulletPalleteEditorDatas");
         Assert.Equal(projectId, reloaded.Id);
         Assert.Equal(project.AudioDuration, reloaded.AudioDuration);
         Assert.Equal(project.RememberLastDisplayTime, reloaded.RememberLastDisplayTime);
@@ -134,6 +184,19 @@ public sealed class TemporaryStorageConsumerTests
             "AudioFilePath",
             Encoding.UTF8.GetString(await file.ReadAllBytesAsync()),
             StringComparison.Ordinal);
+    }
+
+    private static void AssertTopLevelProperties(string serialized, params string[] expectedProperties)
+    {
+        using var document = JsonDocument.Parse(serialized);
+        var actualProperties = document.RootElement
+            .EnumerateObject()
+            .Select(static property => property.Name)
+            .OrderBy(static name => name, StringComparer.Ordinal);
+
+        Assert.Equal(
+            expectedProperties.OrderBy(static name => name, StringComparer.Ordinal),
+            actualProperties);
     }
 
     private static async Task AssertLatestProjectHasNoFileLocators(EditorProjectDataModel project)

@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -68,4 +69,16 @@ internal static class EditorProjectJsonSerialization
 [JsonSerializable(typeof(EditorProjectDataModel))]
 [JsonSerializable(typeof(EditorProjectDataModel_V0_5_2))]
 [JsonSerializable(typeof(EditorProjectDataModel_V0_5_4))]
+[JsonSerializable(
+    typeof(EditorProjectDataModel.StoreBulletPalleteEditorData),
+    TypeInfoPropertyName = "LatestStoreBulletPalleteEditorData")]
+[JsonSerializable(
+    typeof(Dictionary<string, EditorProjectDataModel.StoreBulletPalleteEditorData>),
+    TypeInfoPropertyName = "LatestStoreBulletPalleteEditorDataDictionary")]
+[JsonSerializable(
+    typeof(EditorProjectDataModel_V0_5_2.StoreBulletPalleteEditorData),
+    TypeInfoPropertyName = "LegacyStoreBulletPalleteEditorData")]
+[JsonSerializable(
+    typeof(Dictionary<string, EditorProjectDataModel_V0_5_2.StoreBulletPalleteEditorData>),
+    TypeInfoPropertyName = "LegacyStoreBulletPalleteEditorDataDictionary")]
 internal partial class EditorProjectJsonSourceGenerationContext : JsonSerializerContext;
