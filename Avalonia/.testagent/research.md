@@ -436,3 +436,28 @@ Type、String、Collection、Comparison、Negative、State/Side-effect、Structu
 - 标准 Browser AOT 控制台没有应用 origin 的 JS 互操作错误；最终运行日志文件为 6447 字节，并包含设置、主题和 Shell 启动记录。
 - OPFS 初始化错误分类用 Node ESM 夹具验证：`SecurityError` 返回不可用并进入 discard，`QuotaExceededError` 保持上抛。
 - LLVM Browser 使用的 `Microsoft.DotNet.ILCompiler.LLVM 10.0.0-preview.2` 与当前 .NET 10/Avalonia JSExport 生成物不兼容。发布成功、OPFS JS 模块可独立读写，但应用启动在缺少 Avalonia JSExport wasm 导出时失败；该残余风险不归因于临时存储实现。
+
+## EditorFileAccessContextSnapshot（2026-08-13）
+
+### 有界目标
+
+- 新增 `EditorFileAccessContext`，统一保存项目目录、附加目录及 Project/Fumen/Audio 文件角色。
+- 新增用户指定结构的 `EditorFileAccessContextSnapshot`，通过异步书签保存与恢复和运行时上下文相互转换。
+- Avalonia Storage Provider 的简单文件/目录包装器提供窄书签能力，普通 `ISimpleFile`/`ISimpleDirectory` 不承担平台 API。
+- 最近记录的二进制 data 改为序列化快照；校验和打开从快照恢复上下文，不再读取旧 `FolderBookmark + ProjectFileLocator` 载荷。
+- 保持 Fast Open 的 `ProjectFile` 可空语义；必需的 ProjectDirectory、FumenFile、AudioFile 书签为空时拒绝快照。
+
+### 仓库与测试约定
+
+- 生产与测试均为 SDK-style `net10.0`；测试使用 xUnit 与 `AvaloniaFact`。
+- 书签 API 为异步 `SaveBookmarkAsync` / `OpenFileBookmarkAsync` / `OpenFolderBookmarkAsync`，因此转换 API必须异步。
+- 当前 `EditorProjectDataModel` 拥有并释放运行时文件；本轮需把资源所有权迁移到上下文，兼容属性只转发角色，避免上下文与模型双重释放。
+
+### 验收清单
+
+- [ ] 上下文到快照保存全部目录和 Project/Fumen/Audio 文件书签，Fast Open 可省略 ProjectFileBookmark。
+- [ ] 快照序列化为 UTF-8 JSON，可从 RecentRecordInfo data 精确反序列化。
+- [ ] 快照恢复上下文时逐项恢复书签；任一必需项失败会释放此前取得的全部资源。
+- [ ] 最近记录校验、打开、去重和更新均使用快照，不再依赖旧工程定位符载荷。
+- [ ] 运行时所有权只有上下文一处；模型兼容属性与关闭链不造成双重释放。
+- [ ] 聚焦测试和 Core 全量测试通过，`git diff --check` 无错误。

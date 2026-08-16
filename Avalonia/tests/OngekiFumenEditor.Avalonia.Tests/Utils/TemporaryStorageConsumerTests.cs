@@ -91,7 +91,9 @@ public sealed class TemporaryStorageConsumerTests
             RememberLastDisplayTime = TimeSpan.FromSeconds(7)
         };
 
-        EditorProjectDataUtils.Result result = await EditorProjectDataUtils.TrySaveProjFileAsync(file, project);
+        EditorProjectDataUtils.Result result = await EditorProjectDataUtils.TrySaveProjFileAsync(
+            file,
+            new EditorContext { ProjectData = project });
         var reloaded = await new EditorProjectFileManager().Load(file);
 
         Assert.True(result.IsSuccess, result.ErrorMessage);

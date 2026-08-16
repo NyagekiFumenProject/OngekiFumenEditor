@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
 using OngekiFumenEditor.Avalonia.Base;
 // using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public record Result(bool IsSuccess, string ErrorMessage);
 
-		public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(
+		public static async Task<EditorContext> TryLoadFromFileAsync(
 			ISimpleDirectory projectRoot,
 			ISimpleFile projectFile,
 			string projectFileLocator,
@@ -38,9 +38,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				throw new InvalidDataException(projectLocatorError);
 			}
 
-			// The loader consumes the root: success transfers it to the returned model,
+			// The loader consumes the root: success transfers it to the returned context,
 			// while every failure path releases the directory tree here.
 			EditorProjectDataModel projectData = null;
+			EditorContext editorContext = null;
 			var rootTransferred = false;
 			try
 			{
@@ -165,22 +166,29 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 			*/
 
-			projectData.Fumen = fumen;
 			projectData.FumenFilePath = projectRelativeFumenLocator;
 			projectData.AudioFilePath = projectRelativeAudioLocator;
-			projectData.ProjectFileLocator = normalizedProjectLocator;
-			projectData.ProjectFile = projectFile;
-			projectData.FumenFile = fumenFile;
-			projectData.AudioFile = audioFile;
-			projectData.AudioAwbFile = audioAwbFile;
-				projectData.ProjectRoot = projectRoot;
+				editorContext = new EditorContext
+				{
+					ProjectData = projectData,
+					Fumen = fumen,
+					ProjectFileLocator = normalizedProjectLocator,
+					FileAccessContext = new EditorFileAccessContext
+					{
+						ProjectDirectory = projectRoot,
+						ProjectFile = projectFile,
+						FumenFile = fumenFile,
+						AudioFile = audioFile,
+						AudioAwbFile = audioAwbFile
+					}
+				};
 				rootTransferred = true;
-				ApplyBulletPalleteListEditorData(projectData);
-				return projectData;
+				ApplyBulletPalleteListEditorData(projectData, fumen);
+				return editorContext;
 			}
 			catch
 			{
-				projectData?.DisposeRuntimeFiles();
+				editorContext?.Dispose();
 				if (!rootTransferred)
 					projectRoot.Dispose();
 				throw;
@@ -237,9 +245,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		private static void ApplyBulletPalleteListEditorData(EditorProjectDataModel projectData)
+		private static void ApplyBulletPalleteListEditorData(EditorProjectDataModel projectData, OngekiFumen fumen)
 		{
-			foreach (var bpl in projectData.Fumen.BulletPalleteList)
+			foreach (var bpl in fumen.BulletPalleteList)
 			{
 				if (projectData.StoreBulletPalleteEditorDatas.TryGetValue(bpl.StrID, out var storeEditorData))
 				{
@@ -249,9 +257,112 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		private static void StoreBulletPalleteListEditorData(EditorProjectDataModel projectData)
+		// Rebuilds a project from a restored file-access context (recent-record snapshot).
+		// On success the context ownership transfers to the returned EditorContext; every
+		// failure path disposes the context so bookmarked handles never leak.
+		public static async Task<EditorContext> TryLoadFromContextAsync(
+			EditorFileAccessContext context,
+			CancellationToken cancellationToken = default)
 		{
-			foreach (var bpl in projectData.Fumen.BulletPalleteList)
+			ArgumentNullException.ThrowIfNull(context);
+			context.ThrowIfDisposed();
+
+			EditorProjectDataModel projectData = null;
+			EditorContext editorContext = null;
+			var contextTransferred = false;
+			try
+			{
+				var projectFile = context.ProjectFile
+					?? throw new InvalidDataException("The restored project context has no project descriptor file.");
+				var fumenFile = context.FumenFile
+					?? throw new InvalidDataException("The restored project context has no fumen file.");
+				var audioFile = context.AudioFile
+					?? throw new InvalidDataException("The restored project context has no audio file.");
+
+				await using (var projectStream = await projectFile.OpenRead())
+					projectData = await projFileManager.Load(projectStream, cancellationToken);
+
+				var errors = new List<string>();
+
+				ISimpleFile audioAwbFile = null;
+				if (Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+				{
+					if (OperatingSystem.IsBrowser() || string.IsNullOrWhiteSpace(audioFile.LocalPath))
+					{
+						errors.Add($"Audio '{audioFile.FileName}': ACB decoding is not supported on this platform.");
+					}
+					else
+					{
+						audioAwbFile = await InspectRestoredAcbDependencyAsync(audioFile, errors);
+					}
+				}
+
+				if (errors.Count > 0)
+					throw new InvalidDataException(string.Join(Environment.NewLine, errors));
+
+				OngekiFumen fumen;
+				await using (var fumenStream = await fumenFile.OpenRead())
+				{
+					var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(fumenFile.FileName);
+					if (fumenDeserializer is null)
+						throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
+					fumen = await fumenDeserializer.DeserializeAsync(fumenStream);
+				}
+
+				editorContext = new EditorContext
+				{
+					ProjectData = projectData,
+					Fumen = fumen
+				};
+				if (audioAwbFile is not null)
+					context.AudioAwbFile = audioAwbFile;
+				editorContext.FileAccessContext = context;
+				contextTransferred = true;
+				ApplyBulletPalleteListEditorData(projectData, fumen);
+				return editorContext;
+			}
+			catch
+			{
+				editorContext?.Dispose();
+				if (!contextTransferred)
+					context.Dispose();
+				throw;
+			}
+		}
+
+		// Restore path: the snapshot only bookmarks the ACB, and the restored project root is a
+		// shallow wrap, so an external AWB cannot be located. Internal-AWB ACBs restore fine.
+		private static async Task<ISimpleFile> InspectRestoredAcbDependencyAsync(
+			ISimpleFile audioFile,
+			List<string> errors)
+		{
+			try
+			{
+				await using var acbStream = await audioFile.OpenRead();
+				using var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false);
+				if (acb.InternalAwb is not null)
+					return null;
+
+				var rawAwbLocator = acb.ExternalAwb?.FileName;
+				if (string.IsNullOrWhiteSpace(rawAwbLocator))
+				{
+					errors.Add($"Audio '{audioFile.FileName}': the ACB has no usable AWB data.");
+					return null;
+				}
+
+				errors.Add($"Audio '{audioFile.FileName}': the external AWB '{rawAwbLocator}' cannot be restored from a recent-project snapshot.");
+				return null;
+			}
+			catch (Exception exception)
+			{
+				errors.Add($"Audio '{audioFile.FileName}': the ACB package cannot be inspected: {exception.Message}");
+				return null;
+			}
+		}
+
+		private static void StoreBulletPalleteListEditorData(EditorProjectDataModel projectData, OngekiFumen fumen)
+		{
+			foreach (var bpl in fumen.BulletPalleteList)
 			{
 				if (projectData.StoreBulletPalleteEditorDatas.TryGetValue(bpl.StrID, out var storeEditorData))
 				{
@@ -271,14 +382,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public static async Task<Result> TrySaveProjFileAsync(
 			ITemporaryFile projectFile,
-			EditorProjectDataModel editorProject,
+			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
 			try
 			{
 				ArgumentNullException.ThrowIfNull(projectFile);
-				StoreBulletPalleteListEditorData(editorProject);
-				await projFileManager.Save(projectFile, editorProject, cancellationToken);
+				ArgumentNullException.ThrowIfNull(editorContext);
+				StoreBulletPalleteListEditorData(editorContext.ProjectData, editorContext.Fumen);
+				await projFileManager.Save(projectFile, editorContext.ProjectData, cancellationToken);
 				return new(true, "");
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -294,18 +406,19 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public static async Task<Result> TrySaveFumenFileAsync(
 			ITemporaryFile fumenFile,
-			EditorProjectDataModel editorProject,
+			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
 			try
 			{
 				ArgumentNullException.ThrowIfNull(fumenFile);
+				ArgumentNullException.ThrowIfNull(editorContext);
 				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.Name);
 				Log.LogDebug($"serializer = {serializer}");
 				if (serializer is null)
 					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.Name}");
 
-				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
+				var fumenBuffer = await serializer.SerializeAsync(editorContext.Fumen);
 				await fumenFile.WriteAllBytesAsync(fumenBuffer, cancellationToken);
 				return new(true, "");
 			}
@@ -322,19 +435,20 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public static async Task<Result> TrySaveFumenFileAsync(
 			ISimpleFile fumenFile,
-			EditorProjectDataModel editorProject,
+			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
 			try
 			{
 				ArgumentNullException.ThrowIfNull(fumenFile);
+				ArgumentNullException.ThrowIfNull(editorContext);
 
 				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.FileName);
 				Log.LogDebug($"serializer = {serializer}");
 				if (serializer is null)
 					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
 
-				var fumenBuffer = await serializer.SerializeAsync(editorProject.Fumen);
+				var fumenBuffer = await serializer.SerializeAsync(editorContext.Fumen);
 				await fumenFile.WriteAsync(
 					(stream, writerCancellationToken) =>
 						stream.WriteAsync(fumenBuffer, writerCancellationToken).AsTask(),
@@ -355,25 +469,24 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public static async Task<Result> TrySaveEditorAsync(
 			ISimpleFile projectFile,
-			EditorProjectDataModel editorProject,
+			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
 			try
 			{
 				ArgumentNullException.ThrowIfNull(projectFile);
-				ArgumentNullException.ThrowIfNull(editorProject);
-				if (editorProject.FumenFile is not { } fumenFile)
+				ArgumentNullException.ThrowIfNull(editorContext);
+				if (editorContext.FumenFile is not { } fumenFile)
 					throw new InvalidOperationException("The project does not have a bound fumen file.");
 
 				cancellationToken.ThrowIfCancellationRequested();
-				var cloneProject = await projFileManager.Clone(editorProject);
-				cloneProject.Fumen = editorProject.Fumen;
-				StoreBulletPalleteListEditorData(cloneProject);
+				var cloneProject = await projFileManager.Clone(editorContext.ProjectData);
+				StoreBulletPalleteListEditorData(cloneProject, editorContext.Fumen);
 
 				var fumenSerializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.FileName);
 				if (fumenSerializer is null)
 					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
-				var fumenBytes = await fumenSerializer.SerializeAsync(cloneProject.Fumen);
+				var fumenBytes = await fumenSerializer.SerializeAsync(editorContext.Fumen);
 
 				byte[] projectBytes;
 				await using (var projectBuffer = new MemoryStream())

@@ -275,8 +275,7 @@ public sealed class BatchModeInteractionTests
 
         var project = new EditorProjectDataModel
         {
-            AudioDuration = TimeSpan.FromSeconds(30),
-            Fumen = fumen
+            AudioDuration = TimeSpan.FromSeconds(30)
         };
         return new FumenVisualEditorViewModel
         {
@@ -288,7 +287,7 @@ public sealed class BatchModeInteractionTests
 
     private static void DisposeEditor(FumenVisualEditorViewModel editor)
     {
-        editor.EditorProjectData?.DisposeRuntimeFiles();
+        editor.EditorContext?.Dispose();
         editor.Setting.Dispose();
     }
 }

@@ -203,12 +203,12 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>d3d4a934</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>59725782</code> · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
-      <div class="metric"><strong>69</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>69</strong><span>未修复</span></div>
-      <div class="metric"><strong>35 / 34</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>17</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>70</strong><span>已编号问题</span></div>
+      <div class="metric"><strong>70</strong><span>未修复</span></div>
+      <div class="metric"><strong>36 / 34</strong><span>高 / 中严重度</span></div>
+      <div class="metric"><strong>18</strong><span>已完成审计批次</span></div>
     </div>
   </header>
 
@@ -861,6 +861,15 @@
           <td>曲线子点 / 插值器持久化</td>
           <td>属性面板选择的曲线插值器未写入 OGKR/Nyageki，重载后静默恢复默认并改变后续插值结果</td>
           <td><code>ConnectableChildObjectBase.cs:18-34, 321-338; DefaultOngekiFumenFormatter.cs:190-216; DefaultNyagekiFumenFormatter.cs:123-145</code></td>
+        </tr>
+        <tr>
+          <td><a href="#ca-070"><code>CA-070</code></a></td>
+          <td><span class="severity severity-high">高</span></td>
+          <td><span class="status status-open">未修复</span></td>
+          <td><span class="exposure exposure-active">活动</span></td>
+          <td>区间终点 / 删除撤销</td>
+          <td>单独删除个人变速区域的尾点会移除整个区域，而 Undo 把尾点当作顶层对象添加，无法恢复已删除数据</td>
+          <td><code>IndividualSoflanAreaDrawingTarget.cs:126-137; FumenVisualEditorViewModel.UserInteractionActions.cs:765-815; OngekiFumen.cs:152-242, 244-349</code></td>
         </tr>
         </tbody>
       </table>
@@ -4703,6 +4712,72 @@ CurveControlPoint : recordId : laneName : childIndex : CurvePrecision : PathCont
     </ul>
   </section>
 
+  <section id="ca-070" class="issue high">
+    <div class="issue-head">
+      <div>
+        <h2><code>CA-070</code> 单独删除个人变速区域尾点后无法撤销</h2>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+      </div>
+      <div class="badges">
+        <span class="severity severity-high">高</span>
+        <span class="status status-open">未修复</span>
+        <span class="confidence confidence-confirmed">选择、删除、撤销与保存链确认</span>
+        <span class="exposure exposure-active">活动</span>
+      </div>
+    </div>
+
+    <div class="facts">
+      <div class="fact"><strong>尾点可被独立选择</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/OngekiObjects/IndividualSoflanAreaDrawingTarget.cs"><code>IndividualSoflanAreaDrawingTarget</code></a> 分别把区域头和 <code>EndIndicator</code> 注册为可选择对象；键盘 Delete 会直接枚举当前选择</div>
+      <div class="fact"><strong>删除尾点会删除父区域</strong><a href="../src/OngekiFumenEditor.Avalonia/Base/OngekiFumen.cs"><code>OngekiFumen.RemoveObject</code></a> 遇到 <code>IndividualSoflanAreaEndIndicator</code> 时调用 <code>IndividualSoflanAreaMap.Remove(isfEnd.RefIndividualSoflanArea)</code></div>
+      <div class="fact"><strong>撤销分类遗漏尾点</strong><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs"><code>DeleteSelection</code></a> 只把曲线控制点和 Connectable 子点排除出普通恢复集合，因此尾点仍进入 <code>expectedObjects</code></div>
+      <div class="fact"><strong>AddObject 不支持尾点</strong>Undo 对 <code>expectedObjects</code> 逐个调用 <code>Fumen.AddObject</code>，但其分派没有个人变速尾点分支，只记录 “add-in list target not found” 后返回</div>
+      <div class="fact"><strong>保存会固化丢失</strong>OGKR 与 Nyageki 格式化器都只枚举 <code>IndividualSoflanAreaMap.Values</code>；父区域删除后 Undo 没有加回，下一次保存不会再输出该区域</div>
+      <div class="fact"><strong>同族终点也处理不一致</strong>Soflan 和 LaneBlock 的尾点同样可被独立选择，但 <code>RemoveObject</code> 与 <code>AddObject</code> 都不支持它们；Delete 因此只制造一条无实际模型变化的撤销记录，并把文档标脏</div>
+    </div>
+
+    <h3>最小复现</h3>
+    <ol>
+      <li>创建一个个人变速区域，确保起点和右上角尾点处于不同位置。</li>
+      <li>只点击右上角尾点，使 <code>IndividualSoflanAreaEndIndicator.IsSelected</code> 为真，按 Delete。</li>
+      <li>删除器把尾点映射到父区域并从 <code>IndividualSoflanAreaMap</code> 移除整个区域，区域立即从画布和保存枚举中消失。</li>
+      <li>执行 Undo。撤销委托只调用 <code>Fumen.AddObject(endIndicator)</code>；该类型不被接受，日志出现警告，区域仍然缺失，但撤销历史已经前进。</li>
+      <li>保存并重新打开 OGKR 或 Nyageki，原区域永久丢失。</li>
+    </ol>
+
+    <h3>源码证据</h3>
+    <pre><code>// 绘制目标允许用户只选中尾点
+target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
+target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
+
+// 删除把尾点解释为“删除整个父区域”
+else if (obj is IndividualSoflanArea.IndividualSoflanAreaEndIndicator isfEnd)
+{
+    IndividualSoflanAreaMap.Remove(isfEnd.RefIndividualSoflanArea);
+}
+
+// 撤销却仍把尾点当作可独立加入的普通对象
+var expectedObjects = selects.Where(x =&gt; x switch
+{
+    LaneCurvePathControlObject =&gt; false,
+    ConnectableChildObjectBase =&gt; false,
+    _ =&gt; true
+});
+
+expectedObjects.ForEach(Fumen.AddObject); // AddObject 没有尾点分支</code></pre>
+
+    <h3>影响</h3>
+    <p>用户点击的是一个明确可选择、可拖动的区间尾点，却会删除整个个人变速区域；最关键的是常规 Undo 无法恢复。保存后两种支持格式都不会再包含该区域，影响区域内物件的 Soflan 组归属和预览速度。操作表面上拥有正常的撤销历史项，因此用户可能在执行 Undo 后误以为数据已恢复并继续覆盖文件。</p>
+
+    <h3>修复方向与回归门槛</h3>
+    <ul>
+      <li>为所有复合区间对象建立明确的删除语义：选择尾点时可以拒绝删除、只移动/重置尾点，或规范化成删除父对象；无论选择哪种，Execute 与 Undo 必须操作同一个规范对象。</li>
+      <li><code>DeleteSelection</code> 应先把选择集合归一化为可由 Fumen 容器添加/删除的所有者对象，并去重；不能让尾点进入普通 <code>AddObject</code> 分支。</li>
+      <li><code>AddObject/RemoveObject</code> 应返回成功状态，删除命令只有在实际发生模型变化时才登记历史；Soflan/LaneBlock 尾点不能制造空历史和错误脏状态。</li>
+      <li>回归测试分别只选中 IndividualSoflanArea、Soflan、InterpolatableSoflan 和 LaneBlock 的尾点，执行 Delete、Undo、Redo，并断言集合成员、端点值、可见对象、历史计数和脏状态一致。</li>
+      <li>个人变速区域用例还必须在 Undo 后分别进行 OGKR/Nyageki 保存重载，断言区域、分组、起止 TGrid/XGrid 完整恢复且只出现一次。</li>
+    </ul>
+  </section>
+
   <section>
     <h2>审计日志</h2>
     <div class="audit-log">
@@ -4791,12 +4866,17 @@ CurveControlPoint : recordId : laneName : childIndex : CurvePrecision : PathCont
         对照 OGKR/Nyageki 的全部元信息头字段，并沿属性面板、模型复制、曲线离散化操作和双格式保存链检查插值器状态。记录 <code>CA-068</code> 至 <code>CA-069</code>。
         其余 Meter、分辨率、伤害值和 Nyageki 具名 BPM 字段的写入/读取当前对称；OGKR 现有模板与语料把 Maximum/Minimum 设为相同值，解释了测试为何未捕获列序交换。ConnectableStartObject 的工厂属性没有属性浏览器别名，本批只记录用户可直接选择且由“插值当前段”消费的子点属性；SVG Prefab 已有独立持久化，不属于该缺陷。
       </div>
+      <time datetime="2026-08-13">2026-08-13 / A18</time>
+      <div>
+        审查画布 Delete 命令、复合显示对象的选择身份、Fumen 容器添加/删除分派及撤销重插入。记录 <code>CA-070</code>。
+        曲线控制点和 Connectable 子点已有按父对象与原索引插回的专门路径；同时删除整条轨道及其子点时，父对象仍持有内部拓扑，撤销重新加入父对象即可恢复，因此未重复编号。Soflan/LaneBlock 尾点当前只会形成无效历史，作为同一根因的次要表现记录在 <code>CA-070</code>，不拆成独立问题。
+      </div>
     </div>
   </section>
 
   <section>
     <h2>下一批范围</h2>
-    <p>继续检查格式解析的区段顺序契约、自由字符串的剩余转义边界、集合重复订阅与对象重插入，以及项目侧设置和谱面对象之间的持久化归属。新增问题从 <code>CA-070</code> 起顺序编号。</p>
+    <p>继续检查格式解析的区段顺序契约、自由字符串的剩余转义边界、集合重复订阅与对象重插入，以及项目侧设置和谱面对象之间的持久化归属。新增问题从 <code>CA-071</code> 起顺序编号。</p>
   </section>
 </main>
 </body>

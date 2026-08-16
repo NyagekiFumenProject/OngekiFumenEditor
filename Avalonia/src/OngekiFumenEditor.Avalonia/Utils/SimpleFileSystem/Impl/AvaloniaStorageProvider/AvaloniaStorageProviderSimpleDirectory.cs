@@ -4,7 +4,7 @@ using Avalonia.Platform.Storage;
 
 namespace OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 
-public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
+public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, IBookmarkableSimpleFileSystemItem
 {
     private readonly List<AvaloniaStorageProviderSimpleDirectory> directories = [];
     private readonly List<AvaloniaStorageProviderSimpleFile> files = [];
@@ -39,6 +39,11 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory
     public string? LocalPath { get; }
 
     public string DirectoryName { get; set; }
+
+    bool IBookmarkableSimpleFileSystemItem.CanBookmark => GetStorageFolder().CanBookmark;
+
+    Task<string?> IBookmarkableSimpleFileSystemItem.SaveBookmarkAsync() =>
+        GetStorageFolder().SaveBookmarkAsync();
 
     public bool ExistsDirectory(string dirName)
     {

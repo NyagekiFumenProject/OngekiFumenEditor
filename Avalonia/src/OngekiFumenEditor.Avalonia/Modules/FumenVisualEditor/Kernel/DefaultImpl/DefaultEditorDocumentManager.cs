@@ -119,7 +119,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 return;
 
             var editor = CurrentActivatedEditor;
-            if (editor.EditorProjectData?.ProjectFile is null)
+            if (editor.EditorContext?.ProjectFile is null)
                 return;
 
             if (!EditorProjectIoGate.TryEnter(out var lease))

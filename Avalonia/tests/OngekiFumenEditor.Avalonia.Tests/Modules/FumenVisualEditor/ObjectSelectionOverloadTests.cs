@@ -102,8 +102,7 @@ public sealed class ObjectSelectionOverloadTests
 
         var project = new EditorProjectDataModel
         {
-            AudioDuration = TimeSpan.FromSeconds(30),
-            Fumen = fumen
+            AudioDuration = TimeSpan.FromSeconds(30)
         };
         return new FumenVisualEditorViewModel
         {
@@ -121,7 +120,7 @@ public sealed class ObjectSelectionOverloadTests
         browser.RefreshSelected((FumenVisualEditorViewModel)null!);
         if (shell.Documents.Contains(editor))
             await shell.CloseDocumentAsync(editor);
-        editor.EditorProjectData?.DisposeRuntimeFiles();
+        editor.EditorContext?.Dispose();
         editor.Setting.Dispose();
     }
 }

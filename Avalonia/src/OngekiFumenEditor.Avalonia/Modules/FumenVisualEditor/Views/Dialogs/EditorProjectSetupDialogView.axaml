@@ -73,7 +73,7 @@
                                 VerticalAlignment="Center"
                                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                                 IsEnabled="{Binding EditorProjectData.CanEditBaseBpm}"
-                                Text="{Binding EditorProjectData.BaseBPM}">
+                                Text="{Binding EditorContext.BaseBPM}">
                             </TextBox>
                         </StackPanel>
                         <Grid Margin="0,5,0,0">

@@ -5,7 +5,7 @@ using Avalonia.Platform.Storage;
 
 namespace OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 
-public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile
+public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkableSimpleFileSystemItem
 {
     private static readonly string[] LineSeparators = ["\r\n", "\n"];
 
@@ -42,6 +42,11 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile
     public string FileName { get; }
 
     public long FileLength { get; private set; }
+
+    bool IBookmarkableSimpleFileSystemItem.CanBookmark => GetStorageFile().CanBookmark;
+
+    Task<string?> IBookmarkableSimpleFileSystemItem.SaveBookmarkAsync() =>
+        GetStorageFile().SaveBookmarkAsync();
 
     public async ValueTask<byte[]> ReadAllBytes()
     {

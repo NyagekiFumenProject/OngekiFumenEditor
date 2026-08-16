@@ -31,6 +31,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     [ObservableProperty]
     public partial EditorProjectDataModel EditorProjectData { get; set; }
 
+    // 运行时上下文：持有谱面对象、文件能力和会话期状态，与纯数据模型 EditorProjectData 配对使用。
+    [ObservableProperty]
+    public partial EditorContext EditorContext { get; set; }
+
     [ObservableProperty]
     public partial string FilePath { get; set; } = string.Empty;
 
@@ -65,7 +69,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     [ObservableProperty]
     public partial bool IsDirty { get; set; }
 
-    public bool IsNew => EditorProjectData?.ProjectFile is null;
+    public bool IsNew => EditorContext?.ProjectFile is null;
 
     public override IEnumerable<Type> SupportCommandDefinitionTypes =>
         base.SupportCommandDefinitionTypes.Where(type => type != typeof(SaveFileAsCommandDefinition));
@@ -103,10 +107,15 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         DetachFumenSubscriptions(oldValue);
         AttachFumenSubscriptions(newValue);
 
-        if (EditorProjectData is not null && !ReferenceEquals(EditorProjectData.Fumen, newValue))
-            EditorProjectData.Fumen = newValue;
+        if (EditorContext is not null && !ReferenceEquals(EditorContext.Fumen, newValue))
+            EditorContext.Fumen = newValue;
 
         RecalculateTotalDurationHeight();
+    }
+
+    partial void OnEditorContextChanged(EditorContext oldValue, EditorContext newValue)
+    {
+        OnPropertyChanged(nameof(IsNew));
     }
 
     partial void OnEditorProjectDataChanged(EditorProjectDataModel oldValue, EditorProjectDataModel newValue)
@@ -116,7 +125,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         if (newValue is not null)
             newValue.PropertyChanged += OnEditorProjectDataPropertyChanged;
 
-        OnPropertyChanged(nameof(IsNew));
         RecalculateTotalDurationHeight();
 
         // 对齐 WPF：项目数据变化时，若自身是活动编辑器则刷新主窗口标题。
@@ -143,47 +151,43 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         UpdateTitle();
     }
 
-    internal async Task<bool> LoadProjectAsync(EditorProjectDataModel project, string sourcePath)
+    internal async Task<bool> LoadProjectAsync(EditorContext context, string sourcePath)
     {
-        if (project is null)
+        if (context?.ProjectData is null)
             return false;
 
-        var audioFile = GetAudioFile(project);
+        var audioFile = context.AudioFile;
         if (audioFile is null)
             return false;
 
         var audioPlayer = await IoC.Get<IAudioManager>()
-            .LoadProjectAudioAsync(audioFile, project.AudioAwbFile);
+            .LoadProjectAudioAsync(audioFile, context.AudioAwbFile);
         AudioPlayer?.Dispose();
         AudioPlayer = audioPlayer;
-        EditorProjectData = project;
-        Fumen = project.Fumen ?? new OngekiFumen();
+        EditorContext = context;
+        EditorProjectData = context.ProjectData;
+        Fumen = context.Fumen ?? new OngekiFumen();
         FilePath = sourcePath ?? string.Empty;
-        FileName = project.FumenFile?.FileName ??
+        FileName = context.FumenFile?.FileName ??
             (string.IsNullOrWhiteSpace(FilePath) ? "Untitled" : Path.GetFileName(FilePath));
         DisplayName = default;
         RecalculateTotalDurationHeight();
-        ScrollTo(project.RememberLastDisplayTime);
+        ScrollTo(context.ProjectData.RememberLastDisplayTime);
         UndoRedoManager.Clear();
         IsDirty = false;
         LoadingFinished?.Invoke(this, EditorProjectData);
         return true;
     }
 
-    private static ISimpleFile GetAudioFile(EditorProjectDataModel project)
-    {
-        return project.AudioFile;
-    }
-
     public async Task<bool> Save()
     {
-        if (EditorProjectData?.ProjectFile is not { } projectFile)
+        if (EditorContext?.ProjectFile is not { } projectFile)
             return false;
 
         EditorProjectData.RememberLastDisplayTime = CurrentPlayTime;
-        EditorProjectData.Fumen = Fumen;
+        EditorContext.Fumen = Fumen;
         using var ioLease = await EditorProjectIoGate.EnterAsync();
-        var saveResult = await EditorProjectDataUtils.TrySaveEditorAsync(projectFile, EditorProjectData);
+        var saveResult = await EditorProjectDataUtils.TrySaveEditorAsync(projectFile, EditorContext);
         if (!saveResult.IsSuccess)
         {
             Log.LogError(saveResult.ErrorMessage);
@@ -296,11 +300,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
                 RecalculateTotalDurationHeight();
                 IsDirty = true;
                 break;
-            case nameof(EditorProjectDataModel.Fumen):
-                if (EditorProjectData?.Fumen is { } fumen && !ReferenceEquals(Fumen, fumen))
-                    Fumen = fumen;
-                IsDirty = true;
-                break;
             case nameof(EditorProjectDataModel.RememberLastDisplayTime):
                 break;
             default:
@@ -397,8 +396,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         if (EditorProjectData is not null)
         {
             EditorProjectData.PropertyChanged -= OnEditorProjectDataPropertyChanged;
-            EditorProjectData.DisposeRuntimeFiles();
         }
+
+        EditorContext?.Dispose();
 
         AudioPlayer?.Dispose();
         AudioPlayer = null;
@@ -412,6 +412,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         LoadingFinished = null;
         Fumen = null;
         EditorProjectData = null;
+        EditorContext = null;
     }
 }
 

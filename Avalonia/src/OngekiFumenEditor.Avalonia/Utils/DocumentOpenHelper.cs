@@ -82,7 +82,7 @@ internal static class DocumentOpenHelper
         finally
         {
             if (!ownershipTransferred)
-                newProj.DisposeRuntimeFiles();
+                newProj.Dispose();
         }
 #else
         await Task.CompletedTask;
@@ -123,7 +123,7 @@ internal static class DocumentOpenHelper
                 if (newProj is null)
                     ogkrFile.Dispose();
                 else
-                    newProj.DisposeRuntimeFiles();
+                    newProj.Dispose();
             }
         }
 #else
@@ -133,7 +133,7 @@ internal static class DocumentOpenHelper
 #endif
     }
 
-    public static async Task<bool> TryOpenProject(EditorProjectDataModel proj)
+    public static async Task<bool> TryOpenProject(EditorContext proj)
     {
         if (proj is null)
             return false;
@@ -155,16 +155,16 @@ internal static class DocumentOpenHelper
         finally
         {
             if (!ownershipTransferred)
-                proj.DisposeRuntimeFiles();
+                proj.Dispose();
         }
 #else
-        proj.DisposeRuntimeFiles();
+        proj.Dispose();
         await Task.CompletedTask;
         return false;
 #endif
     }
 
-    public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath)
+    public static async Task<EditorContext> TryCreateEditorProjectDataModel(string ogkrFilePath)
     {
         ISimpleFile selectedAudioFile = null;
         try
@@ -191,13 +191,20 @@ internal static class DocumentOpenHelper
             var model = new EditorProjectDataModel
             {
                 FumenFilePath = ogkrFilePath,
-                Fumen = fumen,
                 AudioFilePath = audioFile,
-                AudioDuration = audioDuration,
-                AudioFile = selectedAudioFile
+                AudioDuration = audioDuration
+            };
+            var context = new EditorContext
+            {
+                ProjectData = model,
+                Fumen = fumen,
+                FileAccessContext = new EditorFileAccessContext
+                {
+                    AudioFile = selectedAudioFile
+                }
             };
             selectedAudioFile = null;
-            return model;
+            return context;
         }
         finally
         {
@@ -205,7 +212,7 @@ internal static class DocumentOpenHelper
         }
     }
 
-    public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(ISimpleFile ogkrFile)
+    public static async Task<EditorContext> TryCreateEditorProjectDataModel(ISimpleFile ogkrFile)
     {
         ArgumentNullException.ThrowIfNull(ogkrFile);
 
@@ -240,14 +247,21 @@ internal static class DocumentOpenHelper
             var model = new EditorProjectDataModel
             {
                 FumenFilePath = ogkrFile.LocalPath ?? ogkrFile.FullPath,
-                FumenFile = ogkrFile,
-                Fumen = fumen,
                 AudioFilePath = audioFilePath,
-                AudioDuration = audioDuration,
-                AudioFile = selectedAudioFile
+                AudioDuration = audioDuration
+            };
+            var context = new EditorContext
+            {
+                ProjectData = model,
+                Fumen = fumen,
+                FileAccessContext = new EditorFileAccessContext
+                {
+                    FumenFile = ogkrFile,
+                    AudioFile = selectedAudioFile
+                }
             };
             selectedAudioFile = null;
-            return model;
+            return context;
         }
         finally
         {

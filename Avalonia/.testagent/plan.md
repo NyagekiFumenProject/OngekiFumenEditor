@@ -601,3 +601,36 @@ service 收到同一个 option 实例和完全相等的 token，返回 0 且 std
 - 标准 Browser 真实启动日志写入 `temp/logs/runtime`，烟测时为 6447 字节；应用 origin 控制台无错误或警告。
 - Node ESM 初始化异常夹具确认 `SecurityError` 降级、`QuotaExceededError` 上抛。
 - LLVM Browser 发布成功，OPFS JS 模块读回 `[7,8,9]`；应用受既有 preview.2 LLVM/Avalonia JSExport 不兼容影响，启动时报缺少 `_Avalonia_Browser__GeneratedInitializer__Register_`，不能宣称运行烟测通过。
+
+## EditorFileAccessContextSnapshot（2026-08-13）
+
+### 阶段 A：平台书签桥接
+
+1. 增加内部 `IBookmarkableSimpleFileSystemItem`，仅暴露 `CanBookmark` 与 `SaveBookmarkAsync`。
+2. `AvaloniaStorageProviderSimpleDirectory/File` 转发底层 `IStorageItem` 书签能力；恢复继续由 `IStorageProvider` 完成。
+
+### 阶段 B：上下文与快照
+
+1. 实现 `EditorFileAccessContext` 的角色属性、附加目录、唯一资源释放和异步 `ToSnapshotAsync`。
+2. 实现 `EditorFileAccessContextSnapshot` 的 JSON data 序列化、反序列化与 `ToContextAsync(IStorageProvider)`。
+3. 将 `EditorProjectDataModel` 运行时属性改为转发 `FileAccessContext`，关闭时只释放上下文。
+
+### 阶段 C：最近记录接入
+
+1. 普通项目打开后从当前上下文生成快照并保存到 RecentRecordInfo data。
+2. `CheckIsValid` 从快照恢复临时上下文并释放。
+3. 最近项正式打开从快照恢复上下文，加载明确 Project/Fumen/Audio 文件，并在成功后转移所有权。
+
+### 阶段 D：测试与验证
+
+1. 新增快照 JSON、上下文到快照、Fast Open 可空 Project、恢复失败释放和完整恢复测试。
+2. 更新现有加载所有权/最近记录测试以匹配上下文模型。
+3. 运行聚焦测试、Core 全量测试、构建和 `git diff --check`。
+
+### 需求映射
+
+| Requirement | Planned evidence |
+| --- | --- |
+| `实现一个EditorFileAccessContextSnapshot` | `EditorFileAccessContextSnapshotTests` 的属性与 JSON 往返测试 |
+| `EditorFileAccessContext和EditorFileAccessContextSnapshot可以相互转换` | 上下文保存书签、快照恢复完整上下文、Fast Open 可空 Project 与失败释放测试 |
+| `后者作为RecentRecordInfo对应的data载体进行保存和读取` | Provider/ProjectIO 最近记录测试与生产 data 序列化调用 |

@@ -1,6 +1,6 @@
 # FumenVisualEditor 项目文件夹 I/O 设计访谈
 
-> 状态：设计已收敛，项目文件夹核心 I/O 首轮实现完成
+> 状态：设计再审中；D44 已修订项目文件依赖语义，首次打开的文件绑定流程等待 Q24 确认
 > 创建日期：2026-08-06
 > 目标：重构 `FumenVisualEditorViewModel` 的项目加载、资源解析与保存边界，使其在 Desktop 与 Browser 上都只依赖用户明确授权的项目文件夹。
 
@@ -591,6 +591,15 @@ ProjectFolder / ProjectFileSystem（唯一权限边界）
 - 按修订后的 D37 直接丢弃旧双设置数据，不实现旧哈希键到 GUID 的迁移或双读回退。
 - Browser 以单个 `localStorage.setItem` 保存聚合对象；Desktop 把完整 `setting.json` 写入同目录 UTF-8 临时文件，刷新到磁盘后原子替换目标。
 - 项目文件格式版本保持 D28 的当前 `0.5.4`；这里的版本 2 只属于 Gekimini 最近记录设置，不改变 `.nyagekiProj` 版本。
+
+### D44. 项目格式不再持久化主文件路径，运行时只使用 EditorFileAccessContext 的直接文件能力
+
+- 用户确认 `ProjectFileLocator`、`FumenFilePath` 和 `AudioFilePath` 都不应作为运行时或项目持久化契约继续存在。
+- 平台 Provider 在调用 `FumenVisualEditorViewModel.New(EditorContext)` / `Load(EditorContext)` 前，必须取得并验证 `ProjectFile`、`FumenFile` 和 `AudioFile`，然后把这些直接文件能力放入完整的 `EditorFileAccessContext`。
+- ViewModel、工程加载器、保存器、自动保存和恢复逻辑只操作上下文中的文件对象，不再根据 `.nyagekiProj` 中的字符串路径定位、打开或重新绑定主文件。
+- 最新 `EditorProjectDataModel` 及其序列化器应删除 `ProjectFileLocator`、`FumenFilePath`、`AudioFilePath`；现有 `FumenRescue` 的 `ProjectFileLocatorBase64` 元数据也应删除。
+- 本决策修订 D1、D5、D28-D30、D31、D36、D38、D40、D43 中把 `.nyagekiProj` 视为谱面/音频路径清单或把工程定位符作为恢复依据的部分；这些章节保留为历史设计记录，后续实现以 D44 和 `editor_file_access_context_refactory_live_review_2026-08-12.html` 的新决策为准。
+- `.nyagekiProj` 删除字段后的格式版本、旧文件迁移策略和首次冷启动打开时的主文件绑定流程尚未由 D44 单独决定；首次绑定先由实时审核 Q24 确认，版本与迁移随后继续问询。
 
 ## 7. 暂缓事项
 

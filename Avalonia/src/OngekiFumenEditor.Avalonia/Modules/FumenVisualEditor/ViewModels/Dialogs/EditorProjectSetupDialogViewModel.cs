@@ -15,21 +15,25 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 {
 	public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase
 	{
-		private EditorProjectDataModel editorProjectData = new();
+		private EditorContext editorContext = new() { ProjectData = new EditorProjectDataModel() };
 		private bool keepRuntimeFilesAfterClose;
 
-		public EditorProjectDataModel EditorProjectData
+		public EditorContext EditorContext
 		{
-			get => editorProjectData;
+			get => editorContext;
 			set
 			{
-				if (ReferenceEquals(editorProjectData, value))
+				if (ReferenceEquals(editorContext, value))
 					return;
 
-				editorProjectData?.DisposeRuntimeFiles();
-				SetProperty(ref editorProjectData, value);
+				editorContext?.Dispose();
+				SetProperty(ref editorContext, value);
+				OnPropertyChanged(nameof(EditorProjectData));
 			}
 		}
+
+		// 纯数据模型，仅用于绑定持久化设置项（路径、时长等）。
+		public EditorProjectDataModel EditorProjectData => EditorContext?.ProjectData;
 
 		private Task ShowMessageAsync(string content)
 		{
@@ -48,7 +52,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 				using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(file);
 				EditorProjectData.AudioFilePath = file.LocalPath ?? file.FullPath;
 				EditorProjectData.AudioDuration = audio.Duration;
-				EditorProjectData.AudioFile = file;
+				EditorContext.FileAccessContext ??= new EditorFileAccessContext();
+				EditorContext.FileAccessContext.AudioFile = file;
 				file = null;
 			}
 			finally
@@ -73,9 +78,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 				var fumen = await deserializer.DeserializeAsync(fs);
 
 				EditorProjectData.FumenFilePath = file.LocalPath ?? file.FullPath;
-				EditorProjectData.BaseBPM = fumen.MetaInfo.BpmDefinition.First;
-				EditorProjectData.Fumen = fumen;
-				EditorProjectData.FumenFile = file;
+				EditorContext.BaseBPM = fumen.MetaInfo.BpmDefinition.First;
+				EditorContext.Fumen = fumen;
+				EditorContext.FileAccessContext ??= new EditorFileAccessContext();
+				EditorContext.FileAccessContext.FumenFile = file;
 				file = null;
 			}
 			catch (Exception e)
@@ -91,7 +97,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		[RelayCommand]
 		private async Task CreateAsync()
 		{
-			if (EditorProjectData.AudioFile is null &&
+			if (EditorContext.AudioFile is null &&
 				(string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath)))
 			{
 				await ShowMessageAsync(Lang.AudioFileNotFound);
@@ -105,7 +111,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		public override void OnViewBeforeUnload(IView view)
 		{
 			if (!keepRuntimeFilesAfterClose)
-				EditorProjectData?.DisposeRuntimeFiles();
+				EditorContext?.Dispose();
 
 			base.OnViewBeforeUnload(view);
 		}

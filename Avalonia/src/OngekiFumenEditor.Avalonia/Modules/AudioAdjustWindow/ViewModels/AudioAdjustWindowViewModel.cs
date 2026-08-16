@@ -155,7 +155,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     {
         var currentEditor = editorDocumentManager.CurrentActivatedEditor;
         var currentEditorProject = currentEditor?.EditorProjectData;
-        var currentEditorAudioFile = currentEditorProject?.AudioFile;
+        var currentEditorAudioFile = currentEditor?.EditorContext?.AudioFile;
         var currentEditorAudioFilePath = currentEditorProject?.AudioFilePath;
 
         if (IsUseInputFile && inputWavFile is null)

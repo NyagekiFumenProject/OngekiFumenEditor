@@ -33,8 +33,7 @@ public sealed class FumenVisualEditorInitializationTests
         var fumen = new OngekiFumen();
         var project = new EditorProjectDataModel
         {
-            AudioDuration = TimeSpan.FromSeconds(10),
-            Fumen = fumen
+            AudioDuration = TimeSpan.FromSeconds(10)
         };
         var editor = new FumenVisualEditorViewModel
         {
@@ -69,8 +68,7 @@ public sealed class FumenVisualEditorInitializationTests
         {
             EditorProjectData = new EditorProjectDataModel
             {
-                AudioDuration = TimeSpan.FromSeconds(10),
-                Fumen = fumen
+                AudioDuration = TimeSpan.FromSeconds(10)
             },
             Fumen = fumen
         };
@@ -104,8 +102,7 @@ public sealed class FumenVisualEditorInitializationTests
             ViewHeight = 10,
             EditorProjectData = new EditorProjectDataModel
             {
-                AudioDuration = TimeSpan.FromSeconds(10),
-                Fumen = fumen
+                AudioDuration = TimeSpan.FromSeconds(10)
             },
             Fumen = fumen
         };
@@ -309,15 +306,23 @@ public sealed class FumenVisualEditorInitializationTests
         var project = new EditorProjectDataModel
         {
             AudioDuration = TimeSpan.FromSeconds(10),
-            FumenFilePath = "chart.nyageki",
-            ProjectFileLocator = "project.nyagekiProj",
+            FumenFilePath = "chart.nyageki"
+        };
+        var context = new EditorContext
+        {
+            ProjectData = project,
             Fumen = fumen,
-            ProjectFile = new LocalSimpleFile(projectPath),
-            FumenFile = new LocalSimpleFile(fumenPath)
+            ProjectFileLocator = "project.nyagekiProj",
+            FileAccessContext = new EditorFileAccessContext
+            {
+                ProjectFile = new LocalSimpleFile(projectPath),
+                FumenFile = new LocalSimpleFile(fumenPath)
+            }
         };
         var editor = new FumenVisualEditorViewModel
         {
             EditorProjectData = project,
+            EditorContext = context,
             Fumen = fumen,
             IsDirty = true
         };
@@ -332,7 +337,7 @@ public sealed class FumenVisualEditorInitializationTests
         }
         finally
         {
-            project.DisposeRuntimeFiles();
+            context.Dispose();
         }
     }
 

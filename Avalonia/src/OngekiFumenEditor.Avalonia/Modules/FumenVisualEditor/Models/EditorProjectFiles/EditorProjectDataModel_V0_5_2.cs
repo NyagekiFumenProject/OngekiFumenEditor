@@ -62,33 +62,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProj
 			set => SetProperty(ref rememberLastDisplayTime, value);
 		}
 
-		private OngekiFumen fumen = new();
-		[JsonIgnore]
-		public OngekiFumen Fumen
-		{
-			get => fumen;
-			set
-			{
-				SetProperty(ref fumen, value);
-				OnPropertyChanged(nameof(BaseBPM));
-			}
-		}
-
-		[JsonIgnore]
-		public double BaseBPM
-		{
-			get => Fumen.MetaInfo.BpmDefinition.First;
-			set
-			{
-				if (Fumen is not null)
-				{
-					Fumen.MetaInfo.BpmDefinition.First = value;
-					Fumen.BpmList.FirstBpm = value;
-				}
-				OnPropertyChanged(nameof(BaseBPM));
-			}
-		}
-
 		public class StoreBulletPalleteEditorData
 		{
 			public string Name { get; set; }

@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(editor);
-			if (editor.EditorProjectData is null)
+			if (editor.EditorProjectData is null || editor.EditorContext is null)
 				return null;
 
 			var provider = IoC.Get<ITemporaryFolderProvider>();
@@ -35,18 +35,18 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 
 			try
 			{
-				editor.EditorProjectData.Fumen = editor.Fumen;
+				editor.EditorContext.Fumen = editor.Fumen;
 				var projectFile = await snapshotFolder.GetOrCreateFileAsync(
 					"project.nyagekiProj",
 					cancellationToken);
 				var projectResult = await EditorProjectDataUtils.TrySaveProjFileAsync(
 					projectFile,
-					editor.EditorProjectData,
+					editor.EditorContext,
 					cancellationToken);
 				if (!projectResult.IsSuccess)
 					throw new IOException(projectResult.ErrorMessage);
 
-				var fumenExtension = Path.GetExtension(editor.EditorProjectData.FumenFile?.FileName);
+				var fumenExtension = Path.GetExtension(editor.EditorContext.FumenFile?.FileName);
 				if (string.IsNullOrWhiteSpace(fumenExtension))
 					fumenExtension = ".ogkr";
 				var fumenFile = await snapshotFolder.GetOrCreateFileAsync(
@@ -54,12 +54,12 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 					cancellationToken);
 				var fumenResult = await EditorProjectDataUtils.TrySaveFumenFileAsync(
 					fumenFile,
-					editor.EditorProjectData,
+					editor.EditorContext,
 					cancellationToken);
 				if (!fumenResult.IsSuccess)
 					throw new IOException(fumenResult.ErrorMessage);
 
-				var locator = editor.EditorProjectData.ProjectFileLocator ?? string.Empty;
+				var locator = editor.EditorContext.ProjectFileLocator ?? string.Empty;
 				var metadata = string.Join(
 					Environment.NewLine,
 					"Version=1",
@@ -163,7 +163,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 					cancellationToken);
 				var result = await EditorProjectDataUtils.TrySaveProjFileAsync(
 					tempProjFile,
-					editor.EditorProjectData,
+					editor.EditorContext,
 					cancellationToken);
 				if (!result.IsSuccess)
 					return null;
@@ -192,7 +192,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 					cancellationToken);
 				var result = await EditorProjectDataUtils.TrySaveFumenFileAsync(
 					tempFumenFile,
-					editor.EditorProjectData,
+					editor.EditorContext,
 					cancellationToken);
 				if (!result.IsSuccess)
 					return null;

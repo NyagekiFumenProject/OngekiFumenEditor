@@ -430,7 +430,7 @@ public sealed class SimpleFileSystemTests
         var storageRoot = await GetStorageFolder(temporaryDirectory.RootPath);
         var root = await AvaloniaStorageProviderFileSystemBuilder
             .LoadFromAvaloniaStorageFolder(storageRoot);
-        EditorProjectDataModel? loaded = null;
+        EditorContext? loaded = null;
         try
         {
             var projectFile = Assert.Single(root.ChildFiles, file =>
@@ -451,7 +451,7 @@ public sealed class SimpleFileSystemTests
             if (loaded is null)
                 root.Dispose();
             else
-                loaded.DisposeRuntimeFiles();
+                loaded.Dispose();
         }
     }
 

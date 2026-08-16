@@ -29,6 +29,10 @@ class EditorContext
 }
 ```
 
+运行时契约中不存在 `ProjectFileLocator`。`ProjectFile`、`FumenFile` 和 `AudioFile` 已由平台 Provider 解析、验证并作为直接文件能力放入 `EditorFileAccessContext`；`FumenVisualEditorViewModel.New(EditorContext)` / `Load(EditorContext)` 不再根据工程文件位置或路径字符串重新查找这些主文件。
+
+`.nyagekiProj` 不再持久化 `FumenFilePath` / `AudioFilePath`。项目模型和序列化格式不保存主文件路径或定位符；加载时只允许读取 `EditorFileAccessContext.ProjectFile`、`FumenFile` 和 `AudioFile` 已绑定的文件能力。平台 Provider 如何在首次打开时取得并绑定这些能力，由实时审核的后续问题继续确认。
+
 计划
 1. 移植好的FumenVisualEditorProvider内容拆分不需要了，改成不同平台实现不同的IEditorProvider，比如DefaultBrowserEditorProvider和DefaultDesktopBrowserEditorProvider,后面简称后者新实现为新provider，前者老实现为老provider。不同平台的provider有不同的表现和平台特色支持
 2. FumenVisualEditorViewModel不再实现New()/Load()/Load(recordInfo)。改回由新provider实现具体前者几个方法的具体业务逻辑

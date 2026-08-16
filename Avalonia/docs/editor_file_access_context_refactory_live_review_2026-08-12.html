@@ -288,9 +288,9 @@
         本文档在每次回答后实时更新；未确认内容不会被写成最终结论。
       </p>
       <div class="meta">
-        <span class="status">访谈进行中：Q2 等待回答</span>
+        <span class="status">访谈进行中：Q23 已确认，Q24 等待回答；正在确定首次打开时的主文件绑定流程</span>
         <span>创建日期：2026-08-12</span>
-        <span>当前问题：新建谱面目标的绑定时机</span>
+        <span>当前问题：无持久化路径时 Provider 如何构造完整文件上下文</span>
       </div>
     </div>
   </header>
@@ -364,7 +364,10 @@
               Core 的 Fast Open 注册已关闭；遗留流程可从单独谱面和用户补选音频构造
               <code>EditorProjectDataModel</code>，但不一定存在 <code>.nyagekiProj</code> 文件。
             </td>
-            <td>草案把 <code>ProjectFile</code> 写成必需字段，与 Fast Open 的无工程文件状态存在后续待决冲突。</td>
+            <td>
+              Q8 已确认 Fast Open 初始允许 <code>ProjectFile</code> 为空；首次由用户触发完整保存时再选择工程文件，
+              保存成功后将新句柄纳入当前运行时上下文。
+            </td>
           </tr>
         </tbody>
       </table>
@@ -385,12 +388,193 @@
        v
 Q2  新建空白谱面时，可写 FumenFile 何时绑定？
  |
- +-- 打开编辑器前绑定 --> Q3 ProjectFile 的创建与 Fast Open 缺省语义
+ +-- 已确认：Setup 分为“指定现有谱面”和“新建谱面”两条路径
+       |
+       +-- 两条路径都在交付 Core 前产生明确、可写的 FumenFile
+       |
+       v
+Q3  新建谱面创建在哪个目录？
  |
- +-- 首次保存时绑定 --> 先定义平台回调边界，再进入 Q3
+ +-- 已确认：此前“谱面文件夹”为口误，实际是项目文件夹
+       |
+       +-- 新谱面固定为 ProjectDirectory 的直接子文件
+       |
+       v
+Q4  文件名输入是否只表示名称主体，由保存格式追加扩展名？
+ |
+ +-- 已确认：名称主体与格式分离，格式是扩展名唯一来源
+       |
+       +-- Setup 实时显示最终文件名预览
+       |
+       v
+Q5  最终文件名已存在时，拒绝、覆盖还是自动改名？
+ |
+ +-- 已确认：拒绝创建并弹出错误对话框
+       |
+       +-- 保留 Setup 输入，不覆盖、不编号
+       |
+       v
+Q6  新文件何时写入有效内容，后续初始化失败是否删除？
+ |
+ +-- 已确认：交付 Core 前写入有效内容；所有权转交前失败则最佳努力回滚
+       |
+       +-- 回滚代码必须由独立 #region 包围，便于后续替换事务实现
+       |
+       v
+Q7  新建 .nyagekiProj 的文件名从哪里取得？
+ |
+ +-- 已确认：Setup 显著显示独立、必填的项目名称
+       |
+       +-- 最终名称不得与项目根现有条目冲突
+       |
+       v
+Q8  Fast Open 是否允许 ProjectFile 为空？
 
-随后进入：上下文所有权 -> Provider 注册边界 -> 最近记录重建 ->
-保存/另存为 -> 错误模型 -> 并发/取消 -> 测试与迁移顺序</code></pre>
+ +-- 已确认：允许；首次由用户触发完整保存时选择工程文件路径
+       |
+       +-- 保存成功后当前文档原地取得 ProjectFile，后续 Save 不再重复询问
+       |
+       v
+Q9  Fast Open 转正式项目时，谱面和音频是否继续保留在原位置？
+
+ +-- 已确认：若有关联文件位于项目文件夹外，首次保存时弹出选择对话框
+       |
+       +-- 复制：把关联文件导入项目文件夹并切换运行时绑定
+       |
+       +-- 不复制：保留原文件位置和 Desktop 多目录工程
+       |
+       v
+Q10 “音频等文件”的复制范围具体包含哪些文件？
+
+ +-- 已确认：复制谱面、主音频，以及存在时的外部 AWB
+       |
+       +-- 不复制 Music.xml、封面、其他邻接文件和本轮忽略的 SVG
+       |
+       v
+Q11 谱面副本应放在项目根还是 autoImport，重名时如何处理？
+
+ +-- 已确认：谱面副本位于 ProjectDirectory 根级并沿用原文件名
+       |
+       +-- 冲突时阻止复制并要求明确改名；不覆盖、不自动编号
+       |
+       v
+Q12 运行时文件能力由谁唯一持有，角色字段如何释放？
+
+ +-- 已确认：EditorFileAccessContext 是运行时能力的唯一所有者
+       |
+       +-- 角色字段只是借用别名；Provider 成功后整体转交给编辑器文档
+       |
+       v
+Q13 Provider 应如何按宿主注册，IEditorProvider 与专用接口如何保证同一实例？
+
+ +-- 已确认：每个宿主只注册一个平台 Provider
+       |
+       +-- IEditorProvider 与专用接口显式别名到同一具体单例
+       |
+       v
+Q14 RecentRecordInfo 应保存运行时上下文快照，还是 Provider 的恢复配方？
+
+ +-- 已确认：采用运行时上下文快照（5 字段书签），非平台恢复配方
+       |
+       +-- EditorFileAccessContextSnapshot 作为 RecentRecordInfo data 载体
+       |
+       +-- 上下文与快照双向转换；恢复经 IStorageProvider 重新取得能力
+       |
+       +-- 无法生成完整快照时不新增最近记录（D31）
+       |
+       +-- 已知偏离方案 A：Core 可见快照类型、未引入 HostKind/RootId recipe
+       |
+       v
+Q15 恢复失败如何区分永久失效、临时失败与需要用户重新授权？
+
+ +-- 已确认：维持二态，不引入“需要重新授权”第三态
+       |
+       +-- 书签不可恢复（含权限撤销 null）判永久失效并持久化置灰
+       |
+       +-- 临时平台异常按临时失败处理，由下次强制校验覆盖
+       |
+       +-- 用户恢复置灰记录的唯一路径：重新打开项目文件夹，按 D38 生成新记录
+       |
+       v
+Q16 外置 AWB 的 ACB 工程能否从最近记录快照恢复？
+
+ +-- 已确认：首版 5 字段快照不扩展 AWB 字段
+       |
+       +-- 外置 AWB 工程从最近记录恢复时干净失败并释放句柄，改用文件夹打开
+       |
+       +-- 内嵌 AWB 的 ACB 与普通音频不受影响
+       |
+       v
+Q17 平台交互与 Core 加载的职责边界：D14 接线是过渡形态还是终态？
+
+ +-- 已确认：本次就拆分 Provider（方案 B，非推荐）
+       |
+       +-- 平台交互（文件夹选择、目录构造、上下文构造）下沉到平台 Provider
+       |
+       +-- ViewModel 改为 Load(EditorContext) 消费已构造的上下文
+       |
+       v
+Q18 Core 共享 FumenVisualEditorProvider 的去留形态？
+
+ +-- 已确认：转为抽象基类 FumenVisualEditorProviderBase
+       |
+       +-- 基类保留 CheckIsValid/SupportFileTypes/Create/TryReadSnapshot 等共享逻辑，不注册
+       |
+       +-- DefaultDesktop/BrowserEditorProvider 继承并 override TryNew/TryOpen，唯一注册双接口
+       |
+       v
+Q19 EditorContext 是否携带显示元数据，最近记录写入归谁？
+
+ +-- 已确认：EditorContext = FileAccessContext + ProjectName + LocationDescription
+       |
+       +-- Provider 构造 EditorContext 时填充；ViewModel.Load(EditorContext) 保持 D14 最近记录写入
+       |
+       v
+Q20 最近记录恢复路径 Load(RecentRecordInfo) 归 Provider 还是 ViewModel？
+
+ +-- 已确认：Provider 做恢复并构造 EditorContext，ViewModel 删除 Load(RecentRecordInfo)
+       |
+       +-- 永久失效判定（IOException/InvalidDataException -> MarkPermanentlyInvalid）迁到 Provider 基类
+       |
+       +-- 记录刷新经 StoreRecentProject dedup 命中 UpdateRecent 自然实现
+       |
+       v
+Q21 拆分落地后是否立即实现 New/Setup 流程？
+
+ +-- 已确认：拆分先落地并验证，New/Setup 作为下一阶段
+       |
+       +-- TryNew 暂保持 false（CanCreateNew = false）直到 Setup 落地
+       |
+       +-- Setup 对话框（D2-D7）、autoImport（D9-D11）、.nyagekiProj 创建（D6-D7）下一阶段
+       |
+       v
+Q22 EditorContext 为什么需要 ProjectFileLocator，路径解析应归谁？
+
+ +-- 已确认：运行时契约中不存在 ProjectFileLocator
+       |
+       +-- ProjectFile/FumenFile/AudioFile 已在 EditorFileAccessContext 中直接给出
+       |
+       +-- 删除 EditorProjectDataModel.ProjectFileLocator、救援元数据和依赖该参数的 Core 加载入口
+       |
+       +-- Provider 在交付上下文前完成全部文件解析与绑定
+       |
+       v
+Q23 FumenFilePath/AudioFilePath 是持久化字段还是运行时查找入口？
+
+ +-- 已确认：不保留 FumenFilePath/AudioFilePath
+       |
+       +-- 项目格式、运行时模型和恢复数据都不保存主文件路径或定位符
+       |
+       +-- 加载器只从 EditorFileAccessContext 的 Project/Fumen/Audio 文件能力读取
+       |
+       v
+Q24 首次从 .nyagekiProj 或项目文件夹打开时，Provider 如何取得 FumenFile/AudioFile？
+
+ +-- 等待确认：需要选择显式绑定、唯一候选自动绑定或其他发现策略
+       |
+       v
+随后进入（实现阶段，非单题问询）：执行 D17-D24 拆分 ->
+New/Setup 实现 -> 保存/另存为与快照刷新 -> 测试与迁移顺序</code></pre>
     </section>
 
     <section id="q1" class="question">
@@ -581,7 +765,7 @@ Desktop 打开旧 .nyagekiProj / Fast Open
     <section id="q2" class="question">
       <div class="question-title">
         <h2>Q2. 新建时没有已有谱面，可写的 FumenFile 应在何时绑定？</h2>
-        <span class="state">等待回答</span>
+        <span class="state resolved">已确认</span>
       </div>
 
       <h3>触发原因</h3>
@@ -698,9 +882,2739 @@ public sealed class EditorContext
       </p>
 
       <div class="answer-slot">
-        <strong>用户回答：</strong>等待回答。<br>
-        <strong>审核归纳：</strong>等待回答后补充。<br>
-        <strong>最终决策：</strong>未形成。
+        <strong>用户回答：</strong>
+        <p>
+          平台 Setup 对话框提供复选框“指定现有谱面文件”。勾选后，用户必须指定一个现有谱面文件；
+          未勾选时，用户必须填写谱面文件名并选择谱面保存格式，随后在项目文件夹中新建一个谱面文件。
+          “项目文件夹”这一用词由用户在 Q3 中更正并确认。
+        </p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>Setup 不是允许 <code>FumenFile</code> 缺省，而是提供两种互斥的构造方式。</strong>
+            无论选择哪一条路径，Provider 完成 Setup 后都必须得到角色明确、可写的最终
+            <code>FumenFile</code>，然后才能构造 <code>EditorFileAccessContext</code> 并调用 Core。
+          </li>
+          <li>
+            <strong>勾选“指定现有谱面文件”：</strong>现有谱面文件为必填；平台先检查扩展名存在对应反序列化器、
+            文件可读且内容能够加载。若它不在 Browser 项目文件夹允许范围内，则按原草案先复制到项目内并让
+            <code>FumenFile</code> 指向最终副本，而不是把外部源句柄直接交给 Core。
+          </li>
+          <li>
+            <strong>未勾选：</strong>“谱面文件名”和“保存格式”均为必填；平台根据两者生成最终文件名，
+            在 <code>ProjectDirectory</code> 根级创建新文件，并把它作为空白谱面的固定保存目标。
+            编辑器第一次执行标准保存时不再弹出系统保存对话框。
+          </li>
+          <li>
+            <strong>保存格式来自 Core 的序列化能力注册表。</strong> Setup 应使用
+            <code>IFumenParserManager.GetSerializerDescriptions()</code> 动态生成选项，不能另写一份平台格式清单。
+            当前代码中实际注册的主要可写扩展名是 <code>.ogkr</code> 与 <code>.nyageki</code>；未来新增序列化器后 UI 应自动出现对应格式。
+          </li>
+          <li>
+            <strong>初始化方式需要显式传递。</strong> Core 不应通过文件长度为零、文件名或能否反序列化来猜测这是新建还是加载。
+            <code>EditorContext</code> 应携带类似 <code>CreateBlank</code>/<code>LoadBoundFile</code> 的初始化意图，
+            或分别由 <code>New(EditorContext)</code>/<code>Load(EditorContext)</code> 的调用入口表达该语义。
+          </li>
+          <li>
+            <strong>表单状态必须互斥且完整校验。</strong> 勾选时显示并校验现有谱面选择控件，隐藏或禁用文件名与格式；
+            未勾选时执行相反操作。只有当前分支所有必填项通过校验后，“创建”命令才可执行。
+          </li>
+          <li>
+            <strong>尚未由本题决定：</strong>最终文件名组合和同名文件处理、新文件是在确认 Setup 时立刻创建还是在完整初始化事务中提交，
+            以及失败后是否删除新建文件。这些问题继续逐项解决；目标目录已经由 Q3 确认为 <code>ProjectDirectory</code> 根级。
+          </li>
+        </ul>
+
+        <strong>最终决策 D2：</strong>
+        <p>
+          采用回答前推荐的“交付上下文前绑定”方案。平台 Setup 通过“现有谱面”或“按名称和格式新建”两条路径，
+          在打开编辑器之前生成非空且可写的 <code>FumenFile</code>；Core 不负责首次保存目标选择。
+        </p>
+      </div>
+    </section>
+
+    <section id="q3" class="question">
+      <div class="question-title">
+        <h2>Q3. 未指定现有谱面时，新谱面创建在哪个目录？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源</h3>
+      <p>
+        用户上一轮回答写成“在谱面文件夹新建一个谱面文件”，因此审核进一步询问这个目录是项目根、项目内可选子目录，
+        还是独立授权目录。用户随后明确更正：这里不是“谱面文件夹”，而是“项目文件夹”。
+      </p>
+
+      <div class="notice">
+        <strong>更正后的准确含义</strong>
+        未勾选“指定现有谱面文件”时，Setup 不显示谱面目标目录选择器。Provider 使用已经选定的
+        <code>ProjectDirectory</code>，并在该目录根级创建新谱面。
+      </div>
+
+      <pre><code class="language-csharp">var finalFileName = BuildFumenFileName(inputName, selectedFormat);
+var fumenFile = await projectDirectory.CreateFileAsync(
+    finalFileName,
+    cancellationToken);
+
+var fileAccessContext = new EditorFileAccessContext
+{
+    ProjectDirectory = projectDirectory,
+    FumenFile = fumenFile,
+    AudioFile = audioFile,
+    ProjectFile = projectFile
+};</code></pre>
+
+      <strong>审核归纳：</strong>
+      <ul>
+        <li>
+          <strong>“项目文件夹”在本流程中就是 <code>EditorFileAccessContext.ProjectDirectory</code>。</strong>
+          新建谱面是这个目录的直接子文件，不创建或选择 <code>charts/</code>、<code>fumen/</code> 等子目录。
+        </li>
+        <li>
+          <strong>Setup 表单不需要目标目录控件。</strong> 未勾选现有谱面时，用户只填写谱面文件名并选择保存格式；
+          平台已经通过项目文件夹选择步骤取得创建文件所需的目录能力。
+        </li>
+        <li>
+          <strong>不新增权限边界。</strong> Browser 不需要第二次目录授权，Desktop 也不需要为新谱面维护另一个目录；
+          最近记录不需要保存独立的谱面目录书签。
+        </li>
+        <li>
+          <strong><code>AdditionDirectories</code> 不参与新谱面目标解析。</strong> 它不能改变新谱面固定写入项目文件夹根级的规则，
+          也不能作为 Core 搜索谱面保存位置的候选列表。
+        </li>
+        <li>
+          <strong>已有谱面分支不被本题改写。</strong> 勾选“指定现有谱面文件”时，Provider 仍按平台规则取得现有文件；
+          若该文件需要导入项目，则最终目标路径由导入规则决定，而不是由本次空白谱面创建规则决定。
+        </li>
+        <li>
+          <strong>旧设计 D12 在此入口被收窄。</strong> 既有文档允许通过应用内目录树在项目任意子目录新建谱面；
+          本次重构明确规定 Setup 的空白谱面创建入口只写项目根。未来另存为或移动谱面是否允许子目录，需要独立决定。
+        </li>
+        <li>
+          <strong>工程内路径更容易稳定。</strong> 若 <code>.nyagekiProj</code> 同样位于项目根，
+          <code>FumenFilePath</code> 可直接保存最终文件名；若工程文件不在项目根，仍需计算相对于工程文件父目录的定位符，
+          不能简单假定二者同目录。工程文件位置将在后续问题中确定。
+        </li>
+      </ul>
+
+      <div class="answer-slot">
+        <strong>用户更正：</strong>
+        <p>“刚才说错了，不是谱面文件夹而是项目文件夹。”</p>
+
+        <strong>最终决策 D3：</strong>
+        <p>
+          未指定现有谱面时，新谱面固定创建在 <code>ProjectDirectory</code> 根级。Setup 不提供谱面目录选择；
+          Provider 调用 <code>ProjectDirectory.CreateFileAsync(finalFileName)</code> 获得最终
+          <code>FumenFile</code>，再将完整上下文交给 Core。
+        </p>
+      </div>
+    </section>
+
+    <section id="q4" class="question">
+      <div class="question-title">
+        <h2>Q4. “谱面文件名”和“保存格式”如何组合成最终文件名？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>为什么必须定义</h3>
+      <p>
+        Setup 同时提供文件名输入框和保存格式选择器。如果二者都允许携带扩展名，就会出现
+        <code>master.ogkr.nyageki</code>、输入扩展名与选择格式不一致，以及 Provider 不知道应信任哪一个值的问题。
+        Core 的序列化器按最终文件名后缀选择，因此该规则会直接决定实际写出的谱面格式。
+      </p>
+
+      <pre><code>用户输入：master.ogkr
+选择格式：Nyageki (*.nyageki)
+
+可能结果：
+  A. master.ogkr.nyageki
+  B. master.nyageki
+  C. master.ogkr，但实际选择 OGKR 序列化器
+  D. 拒绝输入并要求修正
+
+若没有固定规则，各平台很容易产生不同结果。</code></pre>
+
+      <h3>方案 A：输入名称主体，格式唯一决定扩展名</h3>
+      <p>
+        输入框表示叶级文件名的名称主体，不包含格式扩展名。格式下拉框选择一个具体可写扩展名，Provider 组合出最终名称，
+        并在表单中实时显示只读预览。
+      </p>
+
+      <pre><code>名称：master
+格式：Ongeki Fumen (*.ogkr)
+预览：master.ogkr
+
+名称：master.v2
+格式：Nyageki (*.nyageki)
+预览：master.v2.nyageki</code></pre>
+
+      <p>建议的表单验证如下：</p>
+      <ul>
+        <li>去除输入首尾空白后不能为空，也不能是 <code>.</code> 或 <code>..</code>。</li>
+        <li>不得包含目录分隔符；这里只接受直接子文件名，不接受相对路径。</li>
+        <li>若输入以任一已注册谱面扩展名结尾，则显示“文件名无需填写扩展名”，不静默猜测或改写。</li>
+        <li>平台继续检查其文件系统禁止的字符或保留名称。</li>
+        <li>最终名称通过所选具体扩展名构造，并再次用 <code>IFumenParserManager.GetSerializer(finalFileName)</code> 验证。</li>
+      </ul>
+
+      <h3>方案 B：输入完整文件名，格式只作为默认建议</h3>
+      <p>
+        用户可以直接输入 <code>master.ogkr</code>；格式选择器只在没有扩展名时补全，或用于初始默认值。
+        当二者冲突时还需另定“扩展名优先”还是“下拉框优先”。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>熟悉传统保存对话框的用户可以直接输入完整名称。</td></tr>
+          <tr><th>风险</th><td>同一信息有两个来源；冲突规则复杂；很容易使 UI 所示格式与实际序列化器不一致。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：允许完整名称，并自动替换扩展名</h3>
+      <p>
+        用户输入 <code>master.ogkr</code> 后选择 Nyageki，Provider 自动改为 <code>master.nyageki</code>。
+        这种体验表面方便，但如果名称末尾本来就是业务名称的一部分，静默替换可能令人意外；新增格式后识别规则也会变化。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，文件名输入只表示名称主体，保存格式唯一决定扩展名。</strong>
+        <p>
+          这是最清晰、可测试的单一事实来源。UI 应显示最终文件名预览，使用户在创建前能看见真实结果；
+          Provider 仍负责平台特定文件名校验，Core 只接收已经创建好的 <code>FumenFile</code>。
+          当前格式可产生 <code>.ogkr</code> 或 <code>.nyageki</code>，以后应继续从序列化器注册表动态取得。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>用户只填写不带格式扩展名的谱面名称，所选保存格式追加唯一扩展名，并在 Setup 中显示最终文件名预览</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>同意推荐方案。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>名称与格式是两个职责清晰的字段。</strong> “谱面文件名”输入框只保存名称主体；
+            “保存格式”选择器提供一个具体的、已注册的可写扩展名。扩展名只有一个来源，不从用户输入中推断。
+          </li>
+          <li>
+            <strong>最终文件名由 Provider 确定性组合。</strong> 例如名称 <code>master</code> 与格式
+            <code>.ogkr</code> 得到 <code>master.ogkr</code>；Core 不再解释或修正这个名称。
+          </li>
+          <li>
+            <strong>Setup 显示只读最终预览。</strong> 名称或格式变化时立即刷新预览，让用户在创建文件前看到真实目标；
+            “创建”按钮的有效性也应基于最终文件名，而不是仅验证两个原始字段各自非空。
+          </li>
+          <li>
+            <strong>输入不接受谱面格式扩展名。</strong> 如果名称以任一当前已注册的谱面扩展名结尾，表单显示校验错误，
+            要求用户移除扩展名；不自动产生双扩展名，也不静默替换用户输入。
+          </li>
+          <li>
+            <strong>格式选项继续动态生成。</strong> Provider 从
+            <code>IFumenParserManager.GetSerializerDescriptions()</code> 取得描述与扩展名，并用最终文件名再次调用
+            <code>GetSerializer</code> 验证，避免 UI 选择与实际序列化器不一致。
+          </li>
+          <li>
+            <strong>名称只能是项目根下的叶级名称主体。</strong> 去除首尾空白后不得为空、<code>.</code> 或
+            <code>..</code>，不得包含目录分隔符；平台还要检查其后端禁止字符、保留名称和长度限制。
+          </li>
+          <li>
+            <strong>多扩展格式应由格式项自己完整表达。</strong> 如果未来序列化器注册类似
+            <code>.chart.json</code> 的扩展名，Provider 应把它作为一个整体追加，不能只保留最后一个后缀。
+          </li>
+        </ul>
+
+        <strong>最终决策 D4：</strong>
+        <p>
+          新谱面文件名采用“名称主体 + 所选格式扩展名”的确定性组合。用户输入不含格式扩展名；
+          Setup 实时展示最终文件名并按最终值完成校验，随后由 Provider 在 <code>ProjectDirectory</code> 根级创建该文件。
+        </p>
+      </div>
+    </section>
+
+    <section id="q5" class="question">
+      <div class="question-title">
+        <h2>Q5. 最终谱面文件名已存在时，新建流程应如何处理？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>代码事实与风险</h3>
+      <p>
+        当前 <code>AvaloniaStorageProviderSimpleDirectory.CreateFileAsync</code> 已在目录快照中按
+        <code>OrdinalIgnoreCase</code> 检查同名文件，发现匹配时抛出 <code>IOException</code>；项目定位符解析同样采用不区分大小写的语义。
+        因此 <code>master.ogkr</code> 与 <code>MASTER.OGKR</code> 在项目逻辑层必须被视为冲突，即使某些底层文件系统技术上允许二者共存。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>覆盖尤其危险</strong>
+        <p>
+          Setup 尚未完成时直接覆盖已有谱面，会在编辑器初始化、音频解码或工程文件创建随后失败时留下不可恢复的数据损失。
+          而“指定现有谱面文件”分支已经提供了明确使用已有文件的入口，因此空白新建分支没有必要隐式兼任覆盖功能。
+        </p>
+      </div>
+
+      <h3>方案 A：拒绝冲突并要求改名</h3>
+      <p>
+        最终文件名存在任何不区分大小写的匹配时，Setup 将“创建”按钮禁用并显示实际冲突文件名；
+        用户必须修改名称或格式。若用户原意是打开已有谱面，应主动勾选“指定现有谱面文件”并选择它。
+      </p>
+
+      <pre><code>ProjectDirectory 已有：Master.ogkr
+
+输入名称：master
+选择格式：.ogkr
+最终预览：master.ogkr
+
+结果：
+  -> 检测到与 Master.ogkr 冲突
+  -> 禁止创建
+  -> 不覆盖、不删除、不自动切换分支
+  -> 提示改名，或改用“指定现有谱面文件”</code></pre>
+
+      <p>
+        表单预检只能改善体验，不能替代创建时检查。外部程序可能在用户点击“创建”前后写入同名文件，因此 Provider 仍需捕获
+        <code>CreateFileAsync</code> 的冲突异常，刷新目录状态并回到 Setup，而不能把它当成致命应用错误。
+      </p>
+
+      <h3>方案 B：询问是否覆盖</h3>
+      <p>
+        检测到冲突时弹出确认框，用户确认后清空或替换已有文件。该方案需要在任何新文件写入前保存旧内容并支持完整回滚，
+        还必须解释“覆盖”究竟是创建空白谱面，还是加载旧内容后覆盖保存。它与两条互斥 Setup 分支的含义容易混淆。
+      </p>
+
+      <h3>方案 C：自动生成可用名称</h3>
+      <p>
+        自动改成 <code>master (2).ogkr</code>、<code>master (3).ogkr</code> 等。虽然能快速完成创建，
+        但工程引用的名称会与用户输入不同，且并发创建仍需要重试循环；对创作项目文件而言，静默改名通常不够透明。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，空白新建绝不覆盖或自动改名。</strong>
+        <p>
+          这与现有 <code>CreateFileAsync</code> 和项目路径大小写规则一致，也让复选框的语义保持清晰：
+          未勾选代表创建一个全新的谱面；勾选代表明确使用一个已有谱面。冲突是可修正的表单错误，不应成为破坏性操作入口。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>只要项目文件夹根级存在与最终名称不区分大小写相同的文件，就禁止空白新建，要求用户改名；
+        不提供覆盖确认，也不自动编号</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>报错，并弹出对话框提示用户。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>同名冲突是阻止本次创建的错误。</strong> Provider 不覆盖已有文件、不截断其内容、不自动编号，
+            也不把空白新建分支静默切换成“指定现有谱面文件”。
+          </li>
+          <li>
+            <strong>使用错误对话框呈现。</strong> 对话框应采用 <code>DialogMessageType.Error</code>，
+            清楚显示最终目标名称已经存在，并提示用户修改谱面名称、选择其他保存格式，或在确实需要已有文件时勾选“指定现有谱面文件”。
+          </li>
+          <li>
+            <strong>关闭错误对话框后继续停留在 Setup。</strong> 项目文件夹、音频选择、复选框、谱面名称和保存格式等已输入内容全部保留；
+            用户可以就地修正，不应关闭整个新建流程或重新选择文件。
+          </li>
+          <li>
+            <strong>权威检查发生在点击“创建”时。</strong> UI 可以提前显示冲突状态，但不能只依赖早先缓存；
+            Provider 必须在创建前重新按 <code>OrdinalIgnoreCase</code> 检查，并捕获
+            <code>CreateFileAsync</code> 因竞态产生的冲突异常。
+          </li>
+          <li>
+            <strong>冲突对话框不是覆盖确认。</strong> 它只提供确认/关闭动作，不提供“仍然覆盖”选项，
+            避免空白新建流程成为破坏已有谱面的入口。
+          </li>
+          <li>
+            <strong>项目逻辑采用跨平台一致的大小写规则。</strong> 即使某个 Desktop 文件系统允许
+            <code>Master.ogkr</code> 与 <code>master.ogkr</code> 共存，Setup 仍视为冲突，以免之后的项目定位符解析变得不确定。
+          </li>
+          <li>
+            <strong>其他创建失败也应按可理解类别提示。</strong> 名称冲突使用明确的冲突文案；权限不足、目录失效、容量不足等 I/O 异常使用相应错误文案，
+            不把原始堆栈直接显示给用户。安全的诊断细节可以写入日志。
+          </li>
+        </ul>
+
+        <strong>最终决策 D5：</strong>
+        <p>
+          新谱面最终名称已存在时，阻止创建并弹出错误对话框。用户关闭提示后返回原 Setup 状态修改输入；
+          不覆盖、不自动改名、不自动选择已有文件。
+        </p>
+      </div>
+    </section>
+
+    <section id="q6" class="question">
+      <div class="question-title">
+        <h2>Q6. 新谱面文件应何时写入有效内容，初始化失败时是否删除？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>为什么紧接着决定</h3>
+      <p>
+        Q2-D2 要求 Provider 在交付上下文前得到真实的 <code>FumenFile</code>，Q3-D3 又要求通过
+        <code>ProjectDirectory.CreateFileAsync</code> 在项目根创建它。该 API 创建成功后，底层已经存在一个文件；
+        如果后面的空白谱面序列化、音频加载、工程文件创建或 ViewModel 初始化失败，项目目录可能残留一个零字节或半完成谱面。
+      </p>
+
+      <p>当前代码已经具备实现严格回滚的基础：</p>
+      <ul>
+        <li><code>ISimpleFile.WriteAsync</code> 可把序列化结果写入目标文件。</li>
+        <li><code>AvaloniaStorageProviderSimpleFile.DeleteAsync</code> 可删除文件并从父目录快照移除。</li>
+        <li><code>.ogkr</code> 与 <code>.nyageki</code> 格式器都能把初始化后的 <code>OngekiFumen</code> 序列化为有效内容。</li>
+        <li>现有 SVG 导入器已经使用“创建、写入、验证；失败则删除本次创建文件”的同类模式。</li>
+      </ul>
+
+      <h3>方案 A：把文件创建到编辑器成功初始化视为一个事务</h3>
+      <p>
+        Provider 或共享新建编排服务先在内存中构造空白谱面及工程模型，序列化成功后才创建最终文件；
+        创建后立即写入完整有效谱面，并可选地读回验证。随后继续创建/写入工程文件和初始化编辑器。
+        在所有权正式转交给编辑器之前，任一步失败都删除本次创建的谱面及其他新产物。
+      </p>
+
+      <pre><code>Setup 校验通过
+  -> 内存构造空白 OngekiFumen
+  -> 选择的序列化器先生成 bytes
+  -> CreateFileAsync(finalName)
+  -> WriteAsync(bytes)
+  -> 必要时读回并验证
+  -> 构造/写入 ProjectFile
+  -> 构造 EditorContext
+  -> Core.New(context) 初始化音频和编辑器
+  -> 成功：转交文件所有权，关闭 Setup
+
+任一步失败
+  -> 删除本次新建的 ProjectFile（若有）
+  -> 删除本次新建的 FumenFile
+  -> 保留原有文件与 Setup 输入
+  -> 弹出错误对话框
+  -> 清理失败只记录警告，不覆盖原始错误</code></pre>
+
+      <p>
+        这里的“事务”是应用级最佳努力事务，不声称底层 Storage API 提供跨文件原子性。关键不变量是：
+        只删除本次流程确实新建、且尚未转交所有权的文件，绝不能删除用户原先选择的音频或已有谱面。
+      </p>
+
+      <h3>方案 B：先创建零字节占位，首次保存才写有效谱面</h3>
+      <p>
+        Provider 只创建文件句柄并打开编辑器，等用户第一次保存时才序列化。这样减少 Setup 阶段写入，
+        但如果应用崩溃、用户关闭而不保存或初始化后来失败，项目中会留下无法解析的零字节谱面；最近记录和外部工具也可能看到这个无效文件。
+      </p>
+
+      <h3>方案 C：创建后立即写谱面，但初始化失败仍保留</h3>
+      <p>
+        该文件至少格式有效，可作为用户手工恢复的产物；但用户点击“新建”最终得到错误时，项目目录会产生他未明确接受的文件，
+        重试又会立即触发 Q5 同名冲突。还需要额外 UI 解释这个残留文件是否可用。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，写入有效初始内容，并在所有权转交前失败时删除本次产物。</strong>
+        <p>
+          它让 <code>EditorFileAccessContext</code> 的“可读写谱面文件”含义更强：交给 Core 的不是空句柄，
+          而是已经包含所选格式有效内容的文件。它也避免初始化失败后留下垃圾文件并导致下一次重试触发同名错误。
+          删除采用最佳努力；若清理本身失败，应在错误对话框中说明可能残留的文件名，并记录诊断日志。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>创建新谱面后立即写入有效的空白谱面内容；在编辑器成功初始化并接管上下文之前，
+        任何后续失败都尽力删除本次新建的谱面及工程文件，不保留零字节或失败残留</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>同意，但这个回滚操作需要一个 <code>#region</code> 包围，以便后续可能改进。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>采用方案 A。</strong> Provider 在创建最终文件前，先在内存中构造空白
+            <code>OngekiFumen</code>、工程模型以及可生成的序列化内容；谱面文件创建后立即写入所选格式的有效内容，
+            不把零字节占位文件交给 Core。
+          </li>
+          <li>
+            <strong>编辑器初始化成功是提交边界。</strong> 在 <code>Core.New(context)</code> 成功并明确接管上下文前，
+            Provider 仍拥有本次新建产物；任一步失败都进入最佳努力回滚。成功转交后，Provider 不再删除或释放这些文件能力。
+          </li>
+          <li>
+            <strong>只回滚本次流程独占创建的文件。</strong> 可删除对象仅包括本次新建且尚未转交的
+            <code>FumenFile</code> 和 <code>ProjectFile</code>。用户选择的音频、选择的已有谱面、导入前的源文件以及项目中原有文件
+            永远不属于该回滚集合。
+          </li>
+          <li>
+            <strong>按创建顺序的反方向清理。</strong> 若流程先创建谱面、后创建工程文件，则失败时先删除工程文件、再删除谱面文件；
+            每个删除单独捕获异常，避免一个清理失败阻止其余清理。
+          </li>
+          <li>
+            <strong>原始失败原因优先。</strong> 回滚失败不得替换最初的序列化、写入、音频加载或编辑器初始化异常。
+            原始错误用于用户提示；清理失败写入警告日志，并在对话框中列出可能残留的文件名，方便用户手工处理或理解下次同名冲突。
+          </li>
+          <li>
+            <strong>失败后保留 Setup 状态。</strong> 错误对话框关闭后，项目文件夹、音频、谱面分支、名称和格式等输入仍保留；
+            用户修正后可以重试。已成功回滚的目标不应在下一次重试中制造 Q5 的同名冲突。
+          </li>
+          <li>
+            <strong>回滚实现必须放在独立 <code>#region</code> 中。</strong> 该区域只包围“未提交新建产物的回滚”代码或其专用辅助方法，
+            不把正常创建、序列化、编辑器初始化和错误对话框混入其中。这样以后可以把最佳努力删除替换为暂存文件、原子提交或更完整的事务协调器。
+          </li>
+        </ul>
+
+        <pre><code>var ownershipTransferred = false;
+ISimpleFile? createdFumenFile = null;
+ISimpleFile? createdProjectFile = null;
+
+try
+{
+    // 先完成内存序列化，再创建并写入最终文件。
+    // Core.New(context) 成功后设置 ownershipTransferred = true。
+}
+finally
+{
+    #region Best-effort rollback for uncommitted new-project files
+    if (!ownershipTransferred)
+    {
+        await TryDeleteCreatedFileAsync(createdProjectFile);
+        await TryDeleteCreatedFileAsync(createdFumenFile);
+    }
+    #endregion
+}</code></pre>
+
+        <strong>最终决策 D6：</strong>
+        <p>
+          新建谱面必须在交付 Core 前包含有效的所选格式内容。编辑器成功接管上下文前发生失败时，Provider 按反向顺序
+          最佳努力删除本次新建的工程和谱面文件；不得删除任何已有或用户选择的源文件。回滚代码由独立
+          <code>#region</code> 包围，以便后续演进为更完整的事务实现。
+        </p>
+      </div>
+    </section>
+
+    <section id="q7" class="question">
+      <div class="question-title">
+        <h2>Q7. 新建时 <code>.nyagekiProj</code> 的文件名从哪里取得？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>为什么现在必须决定</h3>
+      <p>
+        Q6-D6 已确认新建流程会在编辑器初始化前创建并写入 <code>ProjectFile</code>，失败时还要把它纳入回滚；
+        因此 <code>EditorFileAccessContext.ProjectFile</code> 不能再等到第一次保存时才绑定。然而当前 Setup 需求只明确了
+        项目文件夹、音频、谱面分支、谱面名称和谱面格式，没有说明工程文件名如何产生。
+      </p>
+
+      <h3>历史代码能确认什么</h3>
+      <ul>
+        <li>
+          原 WPF <code>DoNew()</code> 只构造内存工程，文档保持新建状态；第一次保存时
+          <code>DoSave(string.Empty)</code> 再弹出工程文件保存对话框，由用户任意输入 <code>.nyagekiProj</code> 路径。
+        </li>
+        <li>
+          重构前 Avalonia 迁移代码同样把新文档显示为 <code>[New] Untitled</code>，并要求外部调用
+          <code>Save(projectFilePath)</code> 后才有工程路径。
+        </li>
+        <li>
+          测试和恢复快照常使用 <code>project.nyagekiProj</code>，但这只是 fixture/内部快照命名，不能证明用户项目必须使用固定名称。
+        </li>
+        <li>
+          Avalonia StorageProvider 的路径语义跨平台不同。新建工程应通过已授权
+          <code>ProjectDirectory.CreateFileAsync(finalName)</code> 创建，不应为了取得名称再打开一个独立系统保存对话框，
+          否则 Browser 难以证明返回文件仍属于项目目录能力。
+        </li>
+      </ul>
+
+      <div class="risk decision-impact">
+        <strong>这不是纯显示名称</strong>
+        <p>
+          工程文件名会成为最近记录的主定位符、窗口/项目显示名和谱面、音频相对路径的解析基准。
+          同一个项目文件夹允许存在多个 <code>.nyagekiProj</code>，因此命名规则还会决定新建流程能否自然支持多工程共存。
+        </p>
+      </div>
+
+      <h3>方案 A：固定为 <code>project.nyagekiProj</code></h3>
+      <p>
+        Setup 不新增字段，Provider 始终在项目文件夹根级创建固定名称。实现最简单，也容易识别默认工程；
+        但项目根中已有该文件时只能报错并要求用户更换整个项目文件夹，无法在同一目录自然新建第二个工程。
+      </p>
+
+      <pre><code>ProjectDirectory/
+  project.nyagekiProj
+  master.ogkr
+  audio.wav</code></pre>
+
+      <h3>方案 B：直接使用谱面名称主体</h3>
+      <p>
+        新谱面名为 <code>master.ogkr</code> 时自动创建 <code>master.nyagekiProj</code>；选择已有谱面时使用其文件名主体。
+        这不增加输入项，并让默认的一对工程/谱面名称对应清楚。但工程身份被隐式绑定到谱面名称：多个工程共享同一谱面时容易冲突，
+        以后更换或重命名谱面也会造成用户误以为工程文件必须同步改名。
+      </p>
+
+      <h3>方案 C：增加独立的“工程名称”输入，谱面名称只提供默认值</h3>
+      <p>
+        Setup 增加一个不含扩展名的工程名称字段，默认取最终谱面文件名的名称主体，用户可以修改；
+        <code>.nyagekiProj</code> 是固定扩展名，并实时显示最终工程文件名预览。工程文件固定创建在
+        <code>ProjectDirectory</code> 根级，不接受路径输入。
+      </p>
+
+      <pre><code>工程名称：master
+工程预览：master.nyagekiProj
+
+谱面名称：master
+谱面格式：.ogkr
+谱面预览：master.ogkr</code></pre>
+
+      <p>建议的构造和验证规则：</p>
+      <ul>
+        <li>选择或生成最终 <code>FumenFile</code> 后，用其名称主体初始化工程名称，但只作为可编辑建议值。</li>
+        <li>工程名称去除首尾空白后不能为空，不得是 <code>.</code>/<code>..</code>，不得包含路径分隔符或平台禁止字符。</li>
+        <li>用户不填写 <code>.nyagekiProj</code>；Provider 追加唯一固定扩展名并显示最终预览。</li>
+        <li>点击创建时按不区分大小写规则重新检查同名；冲突沿用 Q5，弹出错误对话框，不覆盖、不自动编号。</li>
+        <li>Provider 使用 <code>ProjectDirectory.CreateFileAsync(projectFileName)</code> 创建句柄，再写入已在内存中序列化的初始工程内容。</li>
+        <li>成功创建后该文件加入 Q6 的未提交产物集合；Core 接管前失败时由独立回滚 <code>#region</code> 删除。</li>
+      </ul>
+
+      <pre><code>var projectStem = setup.ProjectName.Trim();
+var projectFileName = projectStem + FumenVisualEditorProvider.FILE_EXTENSION_NAME;
+
+var projectFile = await projectDirectory.CreateFileAsync(
+    projectFileName,
+    cancellationToken);
+
+await projectFile.WriteAsync(
+    (stream, ct) =&gt; stream.WriteAsync(serializedProject, ct).AsTask(),
+    cancellationToken);</code></pre>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 C，工程名称独立输入，默认建议使用谱面名称主体。</strong>
+        <p>
+          它保留“通常同名”的低操作成本，又不把工程身份永久耦合到谱面文件；同一项目根可以清楚地容纳多个工程，
+          最近记录和错误提示也都有稳定、用户可见的名称。固定在项目根通过目录能力创建，符合 Browser 的授权边界，
+          不需要依赖可能返回外部位置的系统保存对话框。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 C：<strong>Setup 增加独立的“工程名称”字段，默认取谱面名称主体但允许修改；用户不输入扩展名，
+        Provider 固定追加 <code>.nyagekiProj</code>，在 <code>ProjectDirectory</code> 根级创建，并对同名冲突弹出错误对话框</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>需要用户在 Setup 界面明显给出项目名称，且不为空，也不能冲突。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>项目名称是 Setup 的一级必填字段。</strong> 它不能藏在高级选项、只读预览或后台推导中；
+            应放在项目设置区域的显著位置，使用明确的“项目名称”标签，并与项目文件夹、谱面名称分别表达。
+          </li>
+          <li>
+            <strong>项目名称是独立输入。</strong> 谱面名称主体可以作为可见的初始建议值，但不能成为唯一、不可见的命名来源；
+            用户必须能够在 Setup 中直接查看和修改最终采用的项目名称。
+          </li>
+          <li>
+            <strong>名称去除首尾空白后不得为空。</strong> 纯空白、<code>.</code>、<code>..</code>、路径分隔符、
+            平台保留名称和其他无法作为叶级文件名的输入都属于校验错误。无效时应在字段附近显示原因，并阻止完成 Setup。
+          </li>
+          <li>
+            <strong>用户输入名称主体，扩展名由 Provider 固定追加。</strong> Setup 应实时显示
+            <code>{ProjectName}.nyagekiProj</code> 的最终文件名预览；若用户输入扩展名，应提示移除，而不是生成双扩展名或静默改写。
+          </li>
+          <li>
+            <strong>最终工程文件名不得冲突。</strong> Provider 以追加扩展名后的完整名称，在
+            <code>ProjectDirectory</code> 根级按 <code>OrdinalIgnoreCase</code> 检查现有文件和目录项；
+            例如 <code>Master.nyagekiProj</code> 与 <code>master.nyagekiProj</code> 必须视为同名。
+          </li>
+          <li>
+            <strong>表单预检和创建时权威检查都必须存在。</strong> 输入变化时可立即显示冲突并阻止提交；
+            用户点击创建时仍要重新检查并捕获 <code>CreateFileAsync</code> 的竞态冲突，不能信任过期的目录快照。
+          </li>
+          <li>
+            <strong>冲突沿用 Q5 的错误交互。</strong> 弹出错误对话框，关闭后返回原 Setup 并保留全部输入；
+            不覆盖现有工程、不自动生成编号，也不要求用户更换整个项目文件夹，只要求修改项目名称或取消。
+          </li>
+          <li>
+            <strong>只有全部校验通过后才创建文件。</strong> Provider 使用最终名称调用
+            <code>ProjectDirectory.CreateFileAsync</code>，写入有效初始工程内容，并将文件加入 Q6 的未提交回滚集合。
+          </li>
+        </ul>
+
+        <pre><code>Setup
+  项目文件夹：ProjectDirectory
+  项目名称：   master              // 显著、独立、必填
+  最终预览：   master.nyagekiProj
+
+校验
+  -> Trim 后非空且是合法叶级名称
+  -> 项目根中不存在不区分大小写的同名文件或目录
+  -> 点击创建时再次执行权威检查
+  -> 冲突则弹出错误对话框并保留 Setup 输入
+  -> 通过后创建并写入 ProjectFile</code></pre>
+
+        <strong>最终决策 D7：</strong>
+        <p>
+          新建 Setup 必须显著提供独立的“项目名称”必填字段。Provider 固定追加
+          <code>.nyagekiProj</code> 并显示最终预览；名称不得为空或非法，最终工程文件名不得与
+          <code>ProjectDirectory</code> 根级任何现有条目发生不区分大小写的冲突。冲突时阻止创建并弹出错误对话框，
+          不覆盖、不自动编号，并保留用户输入。
+        </p>
+      </div>
+    </section>
+
+    <section id="q8" class="question">
+      <div class="question-title">
+        <h2>Q8. Desktop Fast Open 是否允许 <code>ProjectFile</code> 为空？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>代码事实与草案冲突</h3>
+      <p>
+        旧 WPF Fast Open 的目的，是直接选择一个 <code>.ogkr</code>/<code>.nyageki</code> 谱面并补选音频，
+        立即进入编辑器。<code>DocumentOpenHelper.TryCreateEditorProjectDataModel</code> 只设置谱面、音频和内存工程模型，
+        不创建或绑定 <code>.nyagekiProj</code>；窗口标题带有 <code>[Fast Open]</code> 前缀。
+      </p>
+
+      <p>
+        旧文档因此保持“尚未建立工程文件”的状态。用户第一次执行完整保存，或关闭脏文档并选择保存时，
+        才进入工程文件另存流程。当前 Avalonia 的未注册迁移代码仍保留相同数据形态：
+        <code>IsNew =&gt; EditorProjectData?.ProjectFile is null</code>，但 <code>Save()</code> 遇到空
+        <code>ProjectFile</code> 会直接失败，<code>SaveAs()</code> 又尚未实现。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>当前上下文声明过强</strong>
+        <p>
+          草案把 <code>EditorFileAccessContext.ProjectFile</code> 写成必需字段，同时又要求 Desktop 恢复原 Fast Open。
+          两者不能同时成立：要么 Fast Open 在打开前产生一个真实工程文件，要么上下文必须表达“谱面和音频已绑定，但尚无工程文件”的合法状态。
+        </p>
+      </div>
+
+      <h3>方案 A：保留真正的 Fast Open，允许 <code>ProjectFile</code> 为空</h3>
+      <p>
+        Desktop Provider 只验证并绑定可读写的 <code>FumenFile</code> 和可读的 <code>AudioFile</code>，
+        在内存构造编辑所需工程模型后立即打开文档，不创建任何 <code>.nyagekiProj</code>。上下文把
+        <code>ProjectFile</code> 改为可空；Core 只根据当前是否具有工程文件能力判断完整工程保存是否可直接执行，
+        不需要知道文件来自 Desktop Fast Open、Browser 或其他入口。
+      </p>
+
+      <pre><code>public sealed class EditorFileAccessContext
+{
+    public required ISimpleFile FumenFile { get; init; }
+    public required ISimpleFile AudioFile { get; init; }
+
+    // 普通新建/项目打开时非空；Desktop Fast Open 初始为空。
+    public ISimpleFile? ProjectFile { get; init; }
+}
+
+Fast Open
+  -> 选择并解析 FumenFile
+  -> 自动发现或补选 AudioFile
+  -> ProjectFile = null
+  -> Core.Load(context)
+  -> 不修改磁盘项目结构</code></pre>
+
+      <p>
+        该方案确认的只是“允许无工程文件进入编辑器”。首次保存、关闭脏文档、最近记录和把 Fast Open 转换为正式项目的交互，
+        仍需在后续问题中单独定义，不能继续沿用当前固定失败的 <code>Save()</code>。
+      </p>
+
+      <h3>方案 B：Fast Open 前强制创建正式工程</h3>
+      <p>
+        用户选完谱面和音频后，再进入一个类似新建 Setup 的步骤，选择项目文件夹并填写 Q7 的必填项目名称；
+        Provider 创建并写入 <code>.nyagekiProj</code> 后才打开编辑器。这样所有上下文始终有非空
+        <code>ProjectFile</code>，普通保存路径也最简单。
+      </p>
+
+      <pre><code>选择谱面
+  -> 选择/发现音频
+  -> 选择项目文件夹
+  -> 输入唯一项目名称
+  -> 创建 .nyagekiProj
+  -> 打开编辑器</code></pre>
+
+      <p>
+        代价是入口不再“快速”：即使用户只想临时检查或修正谱面，也必须创建持久工程；取消项目创建会导致谱面完全无法打开，
+        并且仅查看文件也会给项目目录带来写入副作用。
+      </p>
+
+      <h3>方案 C：创建隐藏的临时 <code>ProjectFile</code></h3>
+      <p>
+        Provider 在临时目录生成一个内部 <code>.nyagekiProj</code>，以维持字段非空。该文件不是用户项目的一部分，
+        其目录能力、相对路径、最近记录和保存目标都与真实工程不同；应用崩溃后还会留下难以解释的临时项目。
+        这也等同于用伪文件掩盖上下文状态，后续仍必须实现转成正式项目的流程。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，Fast Open 合法地允许 <code>ProjectFile</code> 为空。</strong>
+        <p>
+          这保留原入口的无副作用和快速特性，也符合 Q1 的边界：Core 不关心平台如何取得文件，只消费当前实际具备的能力。
+          <code>FumenFile</code> 与 <code>AudioFile</code> 对编辑是必需的，因此保持非空；工程文件不是加载独立谱面所必需，
+          不应通过强制落盘或临时伪文件制造。后续再明确首次保存时如何调用平台流程，把该文档转换为具有
+          <code>ProjectFile</code> 的正式项目。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>Desktop Fast Open 打开时不创建 <code>.nyagekiProj</code>，允许
+        <code>EditorFileAccessContext.ProjectFile</code> 为空；只要求谱面和音频能力有效，首次完整保存时再进入后续设计的正式项目创建流程</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>
+          允许 Fast Open 环境下项目文件为空；如果这时编辑器需要保存，则先弹出对话框，
+          要求用户指定项目文件的保存路径。
+        </p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong><code>ProjectFile</code> 是条件能力。</strong> 普通新建和打开已有工程时它必须存在；
+            Desktop Fast Open 初始可以为空。<code>FumenFile</code> 与 <code>AudioFile</code> 仍是进入编辑器前必须绑定的能力，
+            不能因为工程文件可空而一起退化成路径字符串或延迟猜测。
+          </li>
+          <li>
+            <strong><code>IsNew</code> 表示“尚未绑定正式工程文件”。</strong> Fast Open 文档在首次完整保存成功前保持新建状态；
+            这不代表谱面尚未存在，也不妨碍用户继续编辑和把谱面写回已经绑定的 <code>FumenFile</code>。
+          </li>
+          <li>
+            <strong>只有用户触发的保存流程可以打开目标选择对话框。</strong> 用户执行“保存”、关闭脏文档并选择保存等交互时，
+            若 <code>ProjectFile</code> 为空，平台保存流程先异步取得一个 <code>.nyagekiProj</code> 目标；后台自动保存、恢复快照调度器
+            和其他无用户交互路径不得突然弹出 Picker，应在缺少工程文件时跳过或仅保存其已有能力允许的内容。
+          </li>
+          <li>
+            <strong>文件选择发生在项目 I/O 门之外。</strong> 用户完成选择后，保存流程再进入序列化和写入临界区；
+            不能在持有全局项目 I/O 门时等待对话框，否则另一个文档的加载、保存或恢复可能被无限阻塞。
+          </li>
+          <li>
+            <strong>取消选择不改变文档状态。</strong> 保存返回失败或取消，<code>ProjectFile</code> 继续为空，
+            <code>IsDirty</code> 和 Fast Open 显示状态保持原样；关闭流程也必须因此留在当前文档，而不能把取消误判成保存成功。
+          </li>
+          <li>
+            <strong>完整保存成功后原地升级当前文档。</strong> 新工程文件句柄的所有权转交给当前运行时上下文，
+            <code>ProjectFile</code> 变为非空，<code>IsNew</code> 变为 false，清除 <code>[Fast Open]</code> 显示前缀、更新最近记录并清除脏状态。
+            不新开第二个编辑器，也不要求用户重新加载刚创建的工程。
+          </li>
+          <li>
+            <strong>失败时不得提前绑定半成品。</strong> 只有谱面和工程文件的完整保存全部成功后才提交新
+            <code>ProjectFile</code>；若创建或写入失败，当前上下文仍保持无工程文件状态。新目标的冲突、覆盖提示和失败回滚细节
+            继续在保存事务分支中确定。
+          </li>
+          <li>
+            <strong>Core 不直接依赖 Desktop Picker。</strong> 保存命令可以发现当前缺少工程文件，但目标选择应由平台提供的保存编排或回调完成；
+            具体接口形态与新句柄的唯一所有权由后续问题决定。
+          </li>
+        </ul>
+
+        <pre><code>Desktop Fast Open
+  -> FumenFile = 已选谱面
+  -> AudioFile = 自动发现或用户补选
+  -> ProjectFile = null
+  -> 编辑
+
+用户触发完整保存
+  -> ProjectFile 已存在？否
+  -> 平台异步选择 .nyagekiProj 目标
+  -> 用户取消：保持 ProjectFile = null，保存失败
+  -> 完整保存失败：保持 ProjectFile = null，报告错误
+  -> 完整保存成功：上下文接管新句柄，IsNew = false</code></pre>
+
+        <strong>最终决策 D8：</strong>
+        <p>
+          Desktop Fast Open 不创建临时或隐式工程文件，允许
+          <code>EditorFileAccessContext.ProjectFile</code> 初始为空。首次由用户触发完整保存时，平台先要求用户选择
+          <code>.nyagekiProj</code> 保存路径；只有完整保存成功后，当前编辑器才原地接管该文件并转为正式工程状态。
+        </p>
+      </div>
+    </section>
+
+    <section id="q9" class="question">
+      <div class="question-title">
+        <h2>Q9. Fast Open 转为正式工程时，谱面和音频是否保留在原位置？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>为什么必须在首次保存前决定</h3>
+      <p>
+        Q8-D8 已确认用户可以把新的 <code>.nyagekiProj</code> 保存到自己选择的位置，但 Fast Open 的
+        <code>FumenFile</code> 和 <code>AudioFile</code> 在此前已经绑定，通常位于谱面原目录。此时“选择工程文件保存路径”只确定了
+        工程文件本身的位置，并没有说明另外两个文件是否移动、复制，或者继续原地使用。
+      </p>
+
+      <p>
+        旧 WPF 的行为可以从代码直接确认：<code>TrySaveEditorAsync(string projFilePath, ...)</code> 克隆工程模型，
+        以新 <code>.nyagekiProj</code> 的父目录为基准，把已有谱面和音频的绝对路径转换成相对路径后写入工程；
+        随后仍把谱面保存回原文件。若两个路径不在同一卷、无法形成相对路径，.NET 会保留完整路径。
+        因此旧 Fast Open 转正只新增工程文件，不会自动搬运谱面或音频。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>当前 Avalonia 保存器不能替我们决定</strong>
+        <p>
+          <code>TrySaveEditorAsync(ISimpleFile projectFile, ...)</code> 只向已经绑定的 <code>FumenFile</code> 和新
+          <code>ProjectFile</code> 写入数据，不会根据运行时句柄重新生成工程中的谱面、音频定位符，也不会复制文件。
+          Provider 必须在首次保存前明确选择一种布局，并构造与该布局一致的持久化字段和文件能力。
+        </p>
+      </div>
+
+      <h3>方案 A：兼容旧 Desktop，所有已有文件原地保留</h3>
+      <p>
+        首次保存只创建用户选择的 <code>.nyagekiProj</code>。谱面继续由当前 <code>FumenFile</code> 原地保存，音频继续从当前
+        <code>AudioFile</code> 读取；工程文件记录指向二者的定位信息。Desktop Provider 在以后打开该工程时重新解析并绑定这些文件，
+        Core 仍只看到角色明确的文件能力，不感知它们来自几个目录。
+      </p>
+
+      <pre><code>保存前
+  ProjectFile = null
+  FumenFile   = D:\Charts\master.ogkr
+  AudioFile   = D:\Music\song.wav
+
+用户选择
+  E:\Projects\Song\song.nyagekiProj
+
+保存后
+  ProjectFile = E:\Projects\Song\song.nyagekiProj
+  FumenFile   = D:\Charts\master.ogkr       // 原地写回
+  AudioFile   = D:\Music\song.wav           // 不复制
+  工程定位符  = 相对工程目录优先；无法相对时保留 Desktop 完整定位</code></pre>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>完全保留 Fast Open 的文件身份和旧 WPF 行为；不复制大音频；不会让用户误以为仍在修改原谱面，实际却写入了副本。</td></tr>
+          <tr><th>代价</th><td>正式工程可能依赖多个目录且不便搬运；最近记录和 Desktop Provider 必须能恢复这些外部引用，路径失效时要给出明确修复流程。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：把谱面和音频复制到新工程文件所在目录</h3>
+      <p>
+        用户选择 <code>.nyagekiProj</code> 后，以其父目录建立便携项目；将现有谱面和音频复制到该目录或
+        <code>autoImport/</code>，再把上下文切换到副本。之后所有保存均发生在新目录，原始谱面不再更新。
+      </p>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>首次保存后形成 Browser 风格的单根项目，容易搬运、建立最近记录和执行边界校验。</td></tr>
+          <tr><th>风险</th><td>保存动作隐式复制音频和谱面，耗时且可能占用大量空间；文件名冲突、取消、部分复制回滚都要新增交互。更重要的是用户之后修改的是副本，而不是 Fast Open 时选择的原谱面。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：首次保存时再询问“原地引用”或“复制为便携项目”</h3>
+      <p>
+        保存对话框之后追加布局选择，让用户按项目决定。它兼顾两种需求，但每次 Fast Open 转正都多一个高影响选项，
+        两种保存、回滚、最近记录和重开路径都必须长期维护，测试矩阵也会翻倍。
+      </p>
+
+      <div class="recommendation">
+        <strong>回答前的推荐答案：方案 A，Desktop Fast Open 转正时只新增工程文件，谱面和音频继续原地使用。</strong>
+        <p>
+          这与草案要求恢复原 Desktop Fast Open、Q1 确认由平台封装多目录来源的方向一致，也避免“保存工程”暗中改变实际谱面目标。
+          工程定位符应优先按新工程文件父目录生成相对路径；不同卷等无法相对表达的 Desktop 本地文件允许保留完整定位。
+          若以后需要便携化，应提供名称明确的“导出/转换为便携项目”命令，而不是把复制作为普通首次保存的隐式副作用。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>Desktop Fast Open 首次保存只创建并绑定用户选择的
+        <code>.nyagekiProj</code>；现有谱面和音频不复制、不移动，谱面继续原地写回，工程文件以相对路径优先、Desktop 完整定位回退的方式引用它们</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>跳出对话框询问是否也需要复制音频等文件到项目文件夹。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>采用交互式布局选择，而不是固定使用方案 A 或 B。</strong> Fast Open 首次保存选择完
+            <code>.nyagekiProj</code> 后，平台根据该文件的父目录确定项目文件夹；若存在位于项目文件夹外的关联文件，
+            再弹出一个明确的确认对话框，让用户选择“复制到项目文件夹”或“保留原位置”。
+          </li>
+          <li>
+            <strong>没有外部文件时跳过询问。</strong> 如果待纳入范围的所有关联文件本来已位于项目文件夹内，
+            两个选项的结果相同，不应增加一次没有实际作用的对话框。
+          </li>
+          <li>
+            <strong>对话框必须说明保存目标变化。</strong> 选择复制后，编辑器会把运行时文件绑定切换到项目内副本，
+            后续谱面保存不再修改 Fast Open 时选择的项目外原文件；选择保留原位置时，谱面继续原地写回，
+            新工程成为 Desktop 多目录工程。不能只显示含糊的“是否复制文件”。
+          </li>
+          <li>
+            <strong>对话框提供三个结果。</strong> “复制到项目文件夹”继续便携化流程；“保留原位置”继续兼容多目录流程；
+            “取消”终止本次首次保存。关闭窗口或按 Esc 等同取消，不能默认选择会改变文件身份的复制操作。
+          </li>
+          <li>
+            <strong>用户交互发生在项目 I/O 门之外。</strong> 先完成工程目标选择和复制策略确认，再进入文件复制、序列化和保存临界区；
+            不能持锁等待任何 Picker 或确认对话框。
+          </li>
+          <li>
+            <strong>选择“不复制”时保持旧 Desktop 语义。</strong> 新建并绑定
+            <code>ProjectFile</code>，保留当前 <code>FumenFile</code>/<code>AudioFile</code> 句柄；工程定位符优先相对新工程目录生成，
+            无法相对表达时由 Desktop Provider 保存和恢复完整本地定位。
+          </li>
+          <li>
+            <strong>选择“复制”时必须先完成全部导入再提交上下文。</strong> Provider 把确定范围内的外部文件复制到项目文件夹，
+            验证副本可读写并构造新的文件句柄；只有关联文件复制和完整工程保存全部成功后，才一次性把当前运行时绑定切换到副本。
+          </li>
+          <li>
+            <strong>复制失败不能形成混合半提交状态。</strong> 若任一复制、序列化或写入失败，继续保留原 Fast Open 文件绑定和
+            <code>ProjectFile = null</code>；本次新建的工程文件与副本纳入 Q6 的独立回滚 <code>#region</code>，按反向顺序最佳努力删除。
+          </li>
+          <li>
+            <strong>同名冲突不得静默覆盖。</strong> 复制目标若与项目内现有文件冲突，平台应在实际写入前报告冲突并允许用户返回处理；
+            具体目录、命名和冲突交互在确认复制范围后继续细化。
+          </li>
+        </ul>
+
+        <pre><code>用户触发 Fast Open 首次保存
+  -> 选择 E:\Projects\Song\song.nyagekiProj
+  -> 项目文件夹 = E:\Projects\Song
+  -> 有关联文件位于项目文件夹外？
+       否 -> 直接完整保存
+       是 -> 显示复制确认对话框
+               |
+               +-- 复制到项目文件夹
+               |     -> 复制并验证全部目标
+               |     -> 完整保存工程和谱面
+               |     -> 成功后一次性切换到项目内副本
+               |
+               +-- 保留原位置
+               |     -> 完整保存工程和原谱面
+               |     -> 保留 Desktop 多目录绑定
+               |
+               +-- 取消
+                     -> 不创建正式工程，不改变当前状态</code></pre>
+
+        <strong>最终决策 D9：</strong>
+        <p>
+          Desktop Fast Open 首次保存时，若关联文件仍位于所选项目文件夹之外，平台必须弹出对话框询问是否将它们复制到项目文件夹。
+          用户可选择复制并切换到项目内副本、保留原位置并建立多目录工程，或取消保存；所有文件与上下文变更只有在完整流程成功后才提交。
+        </p>
+      </div>
+    </section>
+
+    <section id="q10" class="question">
+      <div class="question-title">
+        <h2>Q10. 选择“复制到项目文件夹”时，应复制哪些关联文件？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>“音频等文件”目前存在的歧义</h3>
+      <p>
+        Fast Open 至少持有一个可写的 <code>FumenFile</code> 和一个可读的 <code>AudioFile</code>。
+        若音频是外置 AWB 的 ACB，加载器还会额外持有 <code>AudioAwbFile</code>；缺少该 AWB 时，复制后的 ACB 不能独立解码。
+        因此只复制主音频不一定足够，而只复制音频却保留项目外谱面，也不能形成真正的单根便携工程。
+      </p>
+
+      <h3>代码可以直接排除的内容</h3>
+      <ul>
+        <li>
+          <code>Music.xml</code> 只在 Fast Open 阶段用于发现音频路径和生成更友好的显示名；工程已经保存明确的音频绑定后，
+          它不是重新打开编辑器所必需的文件。
+        </li>
+        <li>封面、目录中的其他音频和未知邻接文件当前没有进入 <code>EditorFileAccessContext</code>，不应仅因同目录就被批量复制。</li>
+        <li>SVG 已由原草案明确标记为本轮全部忽略，不加入本题复制集合。</li>
+      </ul>
+
+      <h3>方案 A：复制最小完整运行集合</h3>
+      <p>
+        复制项目文件夹外的 <code>FumenFile</code>、<code>AudioFile</code>，以及非空的
+        <code>AudioAwbFile</code>。成功后工程、谱面和完整音频链都位于项目文件夹内，运行时绑定统一切换到这些副本。
+      </p>
+
+      <pre><code>必须考虑的角色
+  FumenFile       -> 当前正在编辑和保存的谱面
+  AudioFile       -> WAV/MP3/OGG 或 ACB 主文件
+  AudioAwbFile?   -> 仅外置 AWB 的 ACB 需要
+
+不属于本轮复制集合
+  Music.xml       -> 仅 Fast Open 发现/显示辅助
+  Jacket.*        -> 当前不是工程加载依赖
+  其他邻接文件    -> 没有明确角色，不按目录猜测
+  SVG             -> 原草案明确忽略</code></pre>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>复制选择能够真正产生可独立重开的单根工程；集合由明确文件角色决定，不会意外复制整个歌曲目录。</td></tr>
+          <tr><th>代价</th><td>选择复制后，谱面后续写入项目内副本，原 Fast Open 谱面不再更新；对话框必须把这一点显著告诉用户。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：只复制音频链，不复制谱面</h3>
+      <p>
+        复制 <code>AudioFile</code> 和外部 <code>AudioAwbFile</code>，但继续原地写回 Fast Open 谱面。
+        这可以把体积较大或容易丢失的音频放进项目目录，却仍然形成一个依赖项目外谱面的多目录工程。
+      </p>
+
+      <table>
+        <tbody>
+          <tr><th>适用意图</th><td>用户明确希望继续编辑原谱面，但想让工程自带音频。</td></tr>
+          <tr><th>问题</th><td>“复制到项目文件夹”不再等于便携化；最近记录和重开仍需恢复外部谱面，复制与不复制之间的边界更难解释。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：复制 Fast Open 源目录中的全部相关文件</h3>
+      <p>
+        除上述主文件外，还复制 <code>Music.xml</code>、封面或同目录其他素材。该方案无法从现有上下文可靠判断哪些邻接文件真的相关，
+        可能复制大量无关或受版权约束的内容，也会引入递归目录、重名和容量估算问题。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，只复制谱面和完整音频依赖链。</strong>
+        <p>
+          这是由当前运行时明确持有的角色所定义的最小完整集合。它让“复制”具有稳定含义：把编辑器真正需要的文件全部纳入项目文件夹；
+          不复制发现阶段的辅助文件，也不扫描目录猜测关联素材。若未来恢复 SVG 或增加其他正式文件角色，再由对应上下文字段扩展复制集合。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>用户选择复制时，将项目外的谱面、主音频，以及存在时的外部 AWB 一并复制到项目文件夹并切换运行时绑定；
+        不复制 <code>Music.xml</code>、封面、其他邻接文件和本轮忽略的 SVG</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>同意推荐方案。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>复制集合由显式运行时角色决定。</strong> Provider 只处理
+            <code>EditorFileAccessContext</code> 中当前正式绑定的谱面与音频能力，不扫描源目录猜测“可能相关”的文件。
+          </li>
+          <li>
+            <strong>谱面是必复制项。</strong> 位于项目文件夹外的 <code>FumenFile</code> 必须产生项目内副本；
+            完整保存成功后，当前编辑器切换到该副本，后续保存不再修改 Fast Open 时选择的外部原谱面。
+          </li>
+          <li>
+            <strong>主音频是必复制项。</strong> 位于项目文件夹外的 <code>AudioFile</code> 必须按流复制，
+            从项目内副本重新完成解码与时长验证后，才允许切换音频绑定。
+          </li>
+          <li>
+            <strong>外置 AWB 与 ACB 构成不可拆分文件包。</strong> 若 ACB 使用内嵌 AWB，只复制 ACB；
+            若使用外部 AWB，则 <code>AudioAwbFile</code> 必须与 ACB 一起复制，并保持解码器要求的文件名和相对关系。
+            任一文件缺失、复制失败或项目内副本无法解码时，整个音频包导入失败。
+          </li>
+          <li>
+            <strong>已在项目文件夹内的角色不重复复制。</strong> 复制判断以平台已经验证的目录能力和文件归属为准，
+            不能仅比较未经规范化的路径字符串；项目内文件保持当前绑定。
+          </li>
+          <li>
+            <strong><code>Music.xml</code> 不复制。</strong> 它只参与 Fast Open 的音频自动发现和显示名生成；
+            正式工程已经持久化明确的谱面、音频定位符后，重开不依赖该文件。
+          </li>
+          <li>
+            <strong>封面和其他邻接文件不复制。</strong> 当前上下文没有为它们定义正式角色，不能因为它们与谱面同目录就扩大复制范围。
+            未来新增正式工程依赖时，应通过新字段和独立决策扩展，而不是修改目录扫描猜测规则。
+          </li>
+          <li>
+            <strong>SVG 继续排除。</strong> 原草案已明确本轮忽略全部 SVG 支持，因此即使谱面中存在外部 SVG 引用，
+            本次 Fast Open 转正复制流程也不收集、复制或重写它们。
+          </li>
+          <li>
+            <strong>全部复制与验证构成一次提交。</strong> 谱面、主音频和可选 AWB 只有在所有副本创建、内容验证、
+            工程与谱面完整保存均成功后才替换运行时绑定；失败时保持全部原绑定，并由 Q6 的回滚区域清理本次新建产物。
+          </li>
+        </ul>
+
+        <pre><code>复制集合 =
+  项目外 FumenFile
+  + 项目外 AudioFile
+  + AudioFile 为外置 AWB 的 ACB 时的 AudioAwbFile
+
+明确排除 =
+  Music.xml
+  + Jacket/封面
+  + 源目录中的其他文件
+  + SVG
+
+提交条件 =
+  全部复制成功
+  + 项目内音频链重新验证成功
+  + 工程和谱面完整保存成功</code></pre>
+
+        <strong>最终决策 D10：</strong>
+        <p>
+          用户选择“复制到项目文件夹”时，只复制项目外的谱面、主音频，以及外置 AWB 的 ACB 所需的 AWB 文件；
+          不复制 <code>Music.xml</code>、封面、其他邻接文件或本轮忽略的 SVG。所有项目内副本验证并完整保存成功后，
+          当前编辑器才一次性切换到新文件绑定。
+        </p>
+      </div>
+    </section>
+
+    <section id="q11" class="question">
+      <div class="question-title">
+        <h2>Q11. Fast Open 的谱面副本应放在哪里，重名时如何处理？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>谱面不能直接复用音频的内容寻址规则</h3>
+      <p>
+        既有设计已经确认普通音频进入 <code>autoImport/audioFiles/</code>，使用完整 SHA-256 命名并允许相同内容复用；
+        外置 AWB 的 ACB 则进入独立包子目录并保持包内文件名关系。这些规则适合只读资源，但 Fast Open 谱面会被编辑器持续改写。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>可写谱面不能按初始内容哈希长期命名或跨工程复用</strong>
+        <p>
+          如果把 <code>master.ogkr</code> 导入为 <code>master.&lt;初始哈希&gt;.ogkr</code>，第一次保存后内容已经变化，
+          文件名中的哈希不再描述实际内容。若两个工程因初始内容相同而复用同一个谱面副本，任一工程保存都会修改另一个工程的谱面，
+          因而谱面必须拥有当前工程独占的可写目标。
+        </p>
+      </div>
+
+      <h3>方案 A：谱面作为项目根一级主文件，沿用原文件名</h3>
+      <p>
+        把外部谱面复制为 <code>ProjectDirectory</code> 的直接子文件，例如
+        <code>master.ogkr</code>；音频仍按既有规则进入 <code>autoImport/audioFiles/</code>。
+        这与 Q3-D3 的空白新谱面布局一致：无论谱面来自新建还是 Fast Open 转正，项目的主谱面都位于项目根。
+      </p>
+
+      <pre><code>ProjectDirectory/
+  song.nyagekiProj
+  master.ogkr                      // 当前工程独占、持续可写
+  autoImport/
+    audioFiles/
+      song.&lt;sha256&gt;.wav            // 普通只读音频资源
+
+或：
+      package.&lt;packageHash&gt;/
+        song.acb
+        song.awb                    // 保持 ACB 外置引用关系</code></pre>
+
+      <p>谱面名称与冲突规则：</p>
+      <ul>
+        <li>默认名称使用 Fast Open 原谱面的叶级文件名，保留其已验证的可写格式扩展名。</li>
+        <li>项目根按 <code>OrdinalIgnoreCase</code> 检查文件和目录重名。</li>
+        <li>没有冲突时直接显示最终目标预览，不再要求用户重复输入。</li>
+        <li>存在冲突时阻止复制并显示名称输入，让用户明确填写新的名称主体；扩展名继续由原谱面格式唯一决定。</li>
+        <li>冲突对话框保留工程目标和“复制”选择，不覆盖、不自动编号；用户可以改名、返回选择“保留原位置”或取消首次保存。</li>
+        <li>点击继续时重新执行权威冲突检查并捕获 <code>CreateFileAsync</code> 的竞态失败。</li>
+      </ul>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>主文件布局与普通新建一致；谱面名称稳定且用户可见；不会与只读导入资源混在一起；工程定位符通常只是一个叶级文件名。</td></tr>
+          <tr><th>代价</th><td>项目根可能同时存在多个谱面文件；重名时需要一次明确改名交互。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：谱面放入 <code>autoImport/fumenFiles/</code></h3>
+      <p>
+        该布局把所有外部来源都归入 <code>autoImport</code>，但会把一个持续编辑、频繁保存的主文档伪装成导入缓存。
+        若继续采用哈希命名会产生哈希失真和复用风险；若不用哈希，仍需与方案 A 相同的重名处理，却让最终谱面位置更深、更不直观。
+      </p>
+
+      <h3>方案 C：在项目根自动编号</h3>
+      <p>
+        冲突时自动生成 <code>master (2).ogkr</code>、<code>master (3).ogkr</code>。操作较少，但用户可能没有意识到工程绑定了哪个副本；
+        不同平台或并发创建还可能产生不稳定编号，也与 Q5/Q7 已确认的“冲突不自动改名”规则不一致。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，谱面副本位于项目根，沿用原文件名；冲突时要求用户明确改名。</strong>
+        <p>
+          谱面是项目的可写主文件，不是内容寻址资源。让新建谱面和 Fast Open 导入谱面共享同一根级布局，
+          可以保持保存、最近记录和工程定位符规则一致；明确改名也延续此前拒绝覆盖、拒绝自动编号的决策。
+          音频与 ACB/AWB 则继续复用既有 <code>autoImport/audioFiles/</code> 内容寻址规则，无需在本题重新设计。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>Fast Open 选择复制时，谱面以原文件名复制到项目文件夹根级并成为当前工程独占的可写目标；
+        若根级已有不区分大小写的同名文件或目录，则阻止复制并要求用户明确输入新的名称主体，不覆盖、不自动编号</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>同意推荐方案。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>Fast Open 谱面副本是项目根一级主文件。</strong> 选择复制时，将外部谱面复制为
+            <code>ProjectDirectory</code> 的直接子文件；不放入 <code>autoImport</code>，从而与 Q3 的空白新建谱面保持相同布局。
+          </li>
+          <li>
+            <strong>默认沿用原谱面的叶级文件名与格式。</strong> 扩展名必须已经对应 Core 注册的可写序列化器；
+            用户只在发生冲突时输入新的名称主体，扩展名仍由原谱面格式唯一决定。
+          </li>
+          <li>
+            <strong>副本由当前工程独占并成为后续保存目标。</strong> 完整复制、验证和工程保存成功后，当前编辑器切换到项目内副本；
+            后续标准保存只写该副本，不再修改 Fast Open 时选择的外部原谱面，也不允许不同工程共享同一可写副本。
+          </li>
+          <li>
+            <strong>项目根按不区分大小写检查文件与目录冲突。</strong> 若任何现有文件或目录与最终谱面名按
+            <code>OrdinalIgnoreCase</code> 相等，则阻止创建并显示明确的改名输入。
+          </li>
+          <li>
+            <strong>冲突时不覆盖、不自动编号。</strong> 对话框保留已经选择的项目目标和“复制”意图；用户可以明确改名、
+            返回选择“保留原位置”，或取消首次保存。不得静默生成 <code>(2)</code>、<code>(3)</code> 等名称。
+          </li>
+          <li>
+            <strong>提交前必须重新执行权威检查。</strong> UI 预检查只用于即时反馈；点击继续时仍需重新检查文件和目录，
+            并把 <code>CreateFileAsync</code> 的竞态冲突作为可恢复错误返回改名界面。
+          </li>
+          <li>
+            <strong>音频布局不受本题改变。</strong> 普通音频继续使用 <code>autoImport/audioFiles/</code> 的内容寻址规则；
+            外置 AWB 的 ACB/AWB 继续使用独立包子目录并保持包内文件名关系。
+          </li>
+        </ul>
+
+        <strong>最终决策 D11：</strong>
+        <p>
+          Fast Open 选择复制时，谱面以原文件名复制到项目文件夹根级，成为当前工程独占的可写主文件和后续保存目标。
+          若项目根已有不区分大小写的同名文件或目录，则拒绝创建并要求用户明确输入新名称主体；不覆盖，也不自动编号。
+        </p>
+      </div>
+    </section>
+
+    <section id="q12" class="question">
+      <div class="question-title">
+        <h2>Q12. 运行时文件能力由谁唯一持有，角色字段应如何释放？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>当前实现把“角色引用”和“资源所有权”混在同一个模型中</h3>
+      <p>
+        <code>EditorProjectDataModel</code> 当前同时保存可序列化工程数据和运行时句柄。
+        <code>AudioFile</code>、<code>AudioAwbFile</code>、<code>FumenFile</code>、<code>ProjectFile</code>、
+        <code>ProjectRoot</code> 的 setter 都会释放旧值；编辑器关闭时再调用 <code>DisposeRuntimeFiles()</code> 依次清空角色文件和目录根。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>目录树中的文件角色通常只是别名，不能被当成独立所有者</strong>
+        <p>
+          <code>AvaloniaStorageProviderFileSystemBuilder</code> 会把整个文件夹树的所有权交给返回的根目录；根目录释放时递归释放所有子目录和子文件。
+          因此从该树解析出的 <code>ProjectFile</code>、<code>FumenFile</code> 和 <code>AudioFile</code> 只是指向树中节点的角色引用。
+          先逐个释放角色文件、再释放根目录，会对同一对象调用多次 <code>Dispose()</code>。当前若干实现恰好可重复释放，
+          但 <code>ISimpleFile</code>/<code>ISimpleDirectory</code> 契约没有承诺这一点，后续 Provider 也不应依赖该偶然性质。
+        </p>
+      </div>
+
+      <p>
+        另一方面，Desktop Fast Open 或多目录工程可能使用不属于 <code>ProjectDirectory</code> 树的独立本地文件句柄，
+        或由多个授权目录根提供谱面和音频。它们确实需要被某个长期对象持有并在文档关闭时释放，不能简单规定“只释放项目根”。
+      </p>
+
+      <h3>方案 A：<code>EditorFileAccessContext</code> 是唯一运行时所有者</h3>
+      <p>
+        让 <code>EditorFileAccessContext</code> 实现 <code>IDisposable</code>，显式记录它拥有的顶层资源；
+        <code>ProjectFile</code>、<code>FumenFile</code>、<code>AudioFile</code> 和可选 <code>AudioAwbFile</code> 只是用于业务访问的借用角色引用。
+        <code>EditorProjectDataModel</code> 回归可序列化工程状态，不再持有或释放任何文件系统对象。
+      </p>
+
+      <pre><code>EditorFileAccessContext（唯一运行时所有者）
+  OwnedDirectoryRoots
+    - ProjectDirectory
+    - AdditionDirectories 中互不重叠的授权根
+
+  OwnedStandaloneFiles
+    - 不属于上述任一目录树、由 Provider 单独取得的文件能力
+
+  BorrowedRoleAliases
+    - ProjectFile?
+    - FumenFile
+    - AudioFile
+    - AudioAwbFile?
+
+释放顺序
+  -> 每个顶层所有资源仅 Dispose 一次
+  -> 不单独 Dispose 目录树内的角色别名</code></pre>
+
+      <p>所有权转移规则：</p>
+      <ul>
+        <li>
+          Provider/Setup 在调用 Core 前拥有候选 <code>EditorContext</code> 及其文件访问上下文。
+        </li>
+        <li>
+          <code>New(EditorContext)</code>/<code>Load(EditorContext)</code> 返回成功时，所有权一次性转交给编辑器文档；
+          返回失败、取消或抛异常时，调用方仍负责释放候选上下文。
+        </li>
+        <li>
+          编辑器文档在成功初始化后只持有一个当前上下文，并在文档关闭时释放一次；音频播放器、流等派生对象继续按各自生命周期释放。
+        </li>
+        <li>
+          Fast Open 首次保存或后续绑定替换时，新资源在提交前由保存编排持有；提交成功后再转入当前上下文，旧顶层资源随后释放。
+          同一个可释放对象不得同时登记为两个上下文的拥有资源。
+        </li>
+        <li>
+          顶层拥有集合必须在构造时显式形成并去重，不能只靠路径字符串或 <code>ParentDictionary</code> 临时猜测；
+          <code>AdditionDirectories</code> 也不得包含 <code>ProjectDirectory</code> 或彼此的后代目录。
+        </li>
+      </ul>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>序列化数据与运行时能力职责分离；单根、Desktop 多根和独立文件使用同一所有权模型；失败回滚与绑定替换有明确边界。</td></tr>
+          <tr><th>代价</th><td>需要移除 <code>EditorProjectDataModel</code> 当前的运行时句柄和释放 setter，并为上下文构造、转移与替换增加专门 API 和测试。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：继续由 <code>EditorProjectDataModel</code> 持有句柄</h3>
+      <p>
+        <code>EditorFileAccessContext</code> 只作为进入 Core 的临时参数，初始化时把各字段再次写入项目模型。
+        该方案表面上改动较少，但会继续把持久化模型、目录树所有权和平台能力混在一起；上下文与模型之间还需要定义逐字段转移，
+        现有 setter 的“赋值即释放”会让 Fast Open 原地升级和事务回滚更容易提前释放仍在使用的旧绑定。
+      </p>
+
+      <h3>方案 C：每个字段独立拥有或引入引用计数</h3>
+      <p>
+        为每个目录和文件角色建立独立所有权或引用计数包装器。它可以容忍任意别名，但当前简单文件系统没有
+        <code>AddRef</code>/<code>Release</code> 契约，目录又会递归释放子项；为本次重构引入通用引用计数会扩大基础设施范围，
+        仍然不能替代 Provider 对顶层授权根的清晰建模。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，由 <code>EditorFileAccessContext</code> 独占运行时资源，角色字段全部是借用别名。</strong>
+        <p>
+          这与 Avalonia Storage Provider 的能力生命周期一致：平台在用户驱动流程中取得文件/目录能力，Provider 在初始化成功前持有，
+          成功后把整个上下文交给文档，文档关闭时统一释放。目录树按根释放，独立能力按显式顶层条目释放；
+          <code>EditorProjectDataModel</code> 只描述工程内容和持久化定位符，不再承担平台资源生命周期。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong><code>EditorFileAccessContext</code> 成为运行时文件能力的唯一所有者，显式拥有互不重叠的目录根和必要的独立文件；
+        Project/Fumen/Audio/AWB 字段只是借用角色引用，<code>EditorProjectDataModel</code> 不再持有或释放句柄；
+        Provider 在 Core 初始化成功前负责候选上下文，成功后由编辑器文档接管并在关闭时统一释放</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>同意方案 A。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>上下文是唯一运行时所有者。</strong> <code>EditorFileAccessContext</code> 负责所有文件和目录能力的生命周期，
+            实现 <code>IDisposable</code>，并在内部维护互不重叠的顶层拥有资源集合。
+          </li>
+          <li>
+            <strong>目录树按根拥有，子文件角色不重复释放。</strong> Storage Provider 构造的目录树由根目录递归拥有其子目录和子文件；
+            <code>ProjectFile</code>、<code>FumenFile</code>、<code>AudioFile</code> 和 <code>AudioAwbFile</code> 如果来自这些树，
+            只能作为借用别名。上下文释放时只释放根，不逐个释放别名。
+          </li>
+          <li>
+            <strong>不在目录树中的文件显式登记为独立拥有资源。</strong> Desktop Fast Open 或多授权根场景中，
+            Provider 单独取得的本地文件/Storage File 必须进入 <code>OwnedStandaloneFiles</code>，并由上下文在关闭时释放。
+            同一对象不能同时出现在目录根和独立文件集合中。
+          </li>
+          <li>
+            <strong>工程数据模型回归纯数据职责。</strong> <code>EditorProjectDataModel</code> 保留路径定位符、解析结果和编辑状态等可序列化/业务数据，
+            不再通过 setter 自动释放文件句柄，也不在 <code>DisposeRuntimeFiles()</code> 中承担平台资源清理。
+          </li>
+          <li>
+            <strong>初始化失败时所有权仍在 Provider。</strong> Setup 或 Provider 在调用 Core 前创建的候选上下文由调用方负责清理；
+            <code>Load(EditorContext)</code>/<code>New(EditorContext)</code> 明确返回成功后，才把整个上下文一次性转交给编辑器文档。
+            取消、返回 <code>false</code> 或抛异常都不构成转移。
+          </li>
+          <li>
+            <strong>替换采用“先建后换”。</strong> Fast Open 首次保存、另存为或资源导入时，新上下文在提交前独立拥有；
+            新文件全部写入并验证成功后，文档原子地切换当前上下文，再释放旧上下文。失败时旧绑定保持不变。
+          </li>
+          <li>
+            <strong>上下文必须校验根集合。</strong> 构造时拒绝把 <code>ProjectDirectory</code> 放进附加目录，
+            也拒绝把某个根的后代目录作为另一个拥有根；不能只用路径字符串或当前实现“可重复 Dispose”的偶然行为来兜底。
+          </li>
+        </ul>
+
+        <strong>最终决策 D12：</strong>
+        <p>
+          采用方案 A。<code>EditorFileAccessContext</code> 成为运行时文件能力的唯一所有者，显式拥有互不重叠的目录根和必要的独立文件；
+          Project/Fumen/Audio/AWB 字段只是借用角色引用，<code>EditorProjectDataModel</code> 不再持有或释放句柄。
+          Provider 在 Core 初始化成功前负责候选上下文，成功后由编辑器文档接管，并在文档关闭或上下文替换时统一释放。
+        </p>
+      </div>
+    </section>
+
+    <section id="q13" class="question">
+      <div class="question-title">
+        <h2>Q13. Provider 应如何按宿主注册，两个服务接口如何保证同一实例？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：当前共享 Provider 与平台拆分计划存在注册冲突</h3>
+      <p>
+        当前 <code>FumenVisualEditorProvider</code> 位于共享 <code>OngekiFumenEditor.Avalonia</code> 程序集，
+        同时标注 <code>[RegisterSingleton&lt;IEditorProvider&gt;]</code> 和
+        <code>[RegisterSingleton&lt;IFumenVisualEditorProvider&gt;]</code>，并把 <code>New</code>/<code>Load</code> 直接转发给 ViewModel。
+        但重构草案要求 Browser 和 Desktop 分别实现具有平台行为的 Provider，并由 Provider 构造
+        <code>EditorFileAccessContext</code> 后调用新的 <code>New(EditorContext)</code>/<code>Load(EditorContext)</code>。
+      </p>
+
+      <p>
+        两个宿主都会先调用共享的 <code>AddOngekiFumenEditorAvalonia()</code>，随后再调用各自的
+        <code>AddOngekiFumenEditorAvaloniaDesktop()</code> 或 <code>AddOngekiFumenEditorAvaloniaBrowser()</code>。
+        当前 Injectio 配置为 <code>InjectioDuplicateStrategy=Append</code>，而框架的“新建”“打开”“打开最近记录”命令都会枚举
+        <code>IEnumerable&lt;IEditorProvider&gt;</code>。因此，如果保留共享 Provider 再追加一个平台 Provider，菜单和最近记录匹配会出现两个实现。
+      </p>
+
+      <div class="risk decision-impact">
+        <strong>两个注册属性也不等于同一个单例对象</strong>
+        <p>
+          当前生成的 DI 代码分别写入两个
+          <code>ServiceDescriptor.Singleton&lt;IEditorProvider, FumenVisualEditorProvider&gt;</code> 与
+          <code>ServiceDescriptor.Singleton&lt;IFumenVisualEditorProvider, FumenVisualEditorProvider&gt;</code>。
+          Microsoft.Extensions.DependencyInjection 会按服务类型分别缓存实现类型实例；仅靠两个属性不能保证
+          <code>IoC.Get&lt;IFumenVisualEditorProvider&gt;()</code> 与 <code>IoC.GetAll&lt;IEditorProvider&gt;()</code> 取得的是同一对象。
+          Provider 一旦保存最近记录缓存、并发门或平台状态，这种差异会变成难以复现的行为分叉。
+        </p>
+      </div>
+
+      <h3>方案 A：每个宿主恰好注册一个平台 Provider，并把两个接口别名到同一实例（推荐）</h3>
+      <p>
+        共享程序集只保留 Provider 接口、文档工厂、与平台无关的解析/保存编排；不再让共享的具体 Provider 自动注册为
+        <code>IEditorProvider</code>。Desktop 程序注册 <code>DefaultDesktopFumenVisualEditorProvider</code>，
+        Browser 程序注册 <code>DefaultBrowserFumenVisualEditorProvider</code>；每个宿主只选择其中一个实现。
+        两个服务接口都显式解析到同一个具体单例，示意如下：
+      </p>
+
+      <pre><code>// 共享 AddOngekiFumenEditorAvalonia()
+// 只注册公共服务，不注册具体 IEditorProvider
+
+// Desktop 宿主
+services.AddSingleton&lt;DefaultDesktopFumenVisualEditorProvider&gt;();
+services.AddSingleton&lt;IEditorProvider&gt;(sp =&gt;
+    sp.GetRequiredService&lt;DefaultDesktopFumenVisualEditorProvider&gt;());
+services.AddSingleton&lt;IFumenVisualEditorProvider&gt;(sp =&gt;
+    sp.GetRequiredService&lt;DefaultDesktopFumenVisualEditorProvider&gt;());
+
+// Browser 宿主使用 DefaultBrowserFumenVisualEditorProvider 的同样模式
+</code></pre>
+
+      <p>该方案的具体约束：</p>
+      <ul>
+        <li>
+          <strong>每个宿主的 <code>IEnumerable&lt;IEditorProvider&gt;</code> 对本编辑器类型只有一项。</strong>
+          新建、打开、最近记录和文件扩展名匹配不会因共享/平台双注册而重复。
+        </li>
+        <li>
+          <strong><code>IFumenVisualEditorProvider</code> 只是同一实例的窄接口视图。</strong>
+          现有需要专用能力的调用点可以继续依赖该接口，但不能再用第二个实现类型或第二个状态容器。
+        </li>
+        <li>
+          <strong>Provider 单例不保存单次操作状态。</strong> 对话框结果、候选上下文、取消令牌和回滚清单必须是每次调用的局部对象或短生命周期服务；
+          这样同一 Provider 才能安全处理多个文档和并发的最近记录校验。
+        </li>
+        <li>
+          <strong>平台差异停留在宿主层。</strong> Browser 使用 Storage Provider、书签和受限路径能力；Desktop 可增加本地路径、Fast Open 和多授权根，
+          但两者都通过同一个 <code>EditorContext</code> 契约交付给共享编辑器。
+        </li>
+        <li>
+          <strong>注册顺序不承担选择语义。</strong> 不依赖 <code>Append</code>、最后注册优先或枚举顺序；错误地同时包含两个 Provider 应在启动/测试时显式检测并失败。
+        </li>
+      </ul>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>平台行为隔离；每个宿主只有一个文件类型 Provider；两个接口引用同一状态对象；核心程序集可在 Browser、Desktop、命令行测试中独立验证。</td></tr>
+          <tr><th>代价</th><td>需要把现有共享 Provider 的业务拆为公共编排与宿主实现，并改写源生成注册属性或改用显式 DI 注册；迁移期会触及 Provider 测试和启动组合根。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：保留一个共享 Provider，在内部按运行时平台分支</h3>
+      <p>
+        继续由共享程序集注册唯一 <code>FumenVisualEditorProvider</code>，在每个操作内部使用
+        <code>OperatingSystem.IsBrowser()</code>、Storage Provider 能力和本地路径能力选择分支。
+        这样不需要改变 DI 数量，但 Provider 会同时承担 Browser 的异步授权/书签语义和 Desktop 的本地多目录/Fast Open 语义。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>短期文件移动和注册改动最少；现有框架只看到一个 Provider。</td></tr>
+          <tr><th>风险</th><td>共享核心重新依赖运行时平台判断；Browser 和 Desktop 的失败/取消/路径规则会互相污染；未来增加第三个平台时继续堆条件分支；平台行为难以用无平台单元测试覆盖。</td></tr>
+          <tr><th>额外陷阱</th><td>即使保留一个具体类型，也必须改掉两个服务属性造成的“双描述符”问题，或改用显式工厂保证接口别名同实例。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：共享 Provider 与平台 Provider 同时注册，再依靠 Replace、优先级或枚举顺序</h3>
+      <p>
+        共享实现继续自动注册，宿主实现随后使用 <code>Replace</code>、自定义优先级或“取第一个/最后一个”来尝试覆盖它。
+        这种做法看起来能避免改共享源码，但框架的菜单和最近记录是按 <code>IEnumerable&lt;IEditorProvider&gt;</code> 枚举，
+        不同注册 API 对单服务解析和集合解析的行为并不相同；某些路径可能拿到平台实现，另一些路径仍拿到共享实现。
+        在 AOT/Trim 构建下，依赖反射顺序更不能作为协议。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>表面优点</th><td>迁移期间可以暂时保留旧类和旧测试，平台实现逐步接管。</td></tr>
+          <tr><th>实质风险</th><td>重复菜单、最近记录误匹配、接口别名实例不一致，以及注册顺序随生成器或宿主项目变化而改变；问题通常只在特定启动方式出现。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，每个宿主只注册一个平台 Provider，并将 <code>IEditorProvider</code> 与 <code>IFumenVisualEditorProvider</code> 映射到同一具体单例。</strong>
+        <p>
+          这是唯一同时满足三条不变量的方案：共享核心不依赖平台实现；框架枚举对本编辑器类型只得到一个 Provider；
+          需要专用接口的调用点和通用接口调用点观察到同一生命周期与同一状态。注册责任应放在 Desktop/Browser 的应用组合根，
+          而不是让共享模块通过源生成属性隐式决定宿主行为。迁移完成后，启动自检应断言每个宿主的 Provider 数量和接口实例身份，
+          失败时尽早暴露配置错误。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>共享程序集不再自动注册具体谱面 Provider；Desktop 与 Browser 各自注册唯一的平台 Provider，
+        并让 <code>IEditorProvider</code> 与 <code>IFumenVisualEditorProvider</code> 显式解析到同一个具体单例；
+        每个宿主的 Provider 枚举只允许一个本编辑器实现，不依赖注册顺序或优先级覆盖</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>
+        <p>同意方案 A。</p>
+
+        <strong>审核归纳：</strong>
+        <ul>
+          <li>
+            <strong>共享程序集不再决定具体宿主行为。</strong> 当前共享
+            <code>FumenVisualEditorProvider</code> 不再以 <code>IEditorProvider</code> 或
+            <code>IFumenVisualEditorProvider</code> 自动注册；可复用的解析、保存和文档创建逻辑拆成普通共享服务，
+            由宿主 Provider 显式组合。
+          </li>
+          <li>
+            <strong>Desktop 与 Browser 各自只有一个具体 Provider。</strong>
+            Desktop 注册 <code>DefaultDesktopFumenVisualEditorProvider</code>，Browser 注册
+            <code>DefaultBrowserFumenVisualEditorProvider</code>。二者分别负责本平台的选择器、书签、本地路径、
+            Fast Open 和候选上下文构造，不在共享 Provider 内使用运行时平台分支。
+          </li>
+          <li>
+            <strong>通用接口和专用接口必须引用同一个对象。</strong> 每个宿主先注册具体实现单例，再通过工厂把
+            <code>IEditorProvider</code> 与 <code>IFumenVisualEditorProvider</code> 都解析到该单例；
+            不继续使用两个独立的实现类型注册描述符。
+          </li>
+          <li>
+            <strong>框架枚举必须恰好出现一次。</strong>
+            <code>IEnumerable&lt;IEditorProvider&gt;</code> 中对谱面编辑器文件类型只能有一个实现，
+            因而新建、打开、最近记录和扩展名匹配不会依赖 Append 顺序、最后注册优先级或运行时去重。
+          </li>
+          <li>
+            <strong>Provider 单例只保存长期无会话状态的依赖。</strong> Setup 结果、候选
+            <code>EditorFileAccessContext</code>、回滚清单、取消令牌和单次恢复状态保持为调用局部对象；
+            多文档和并发校验不能共享可变的操作中间态。
+          </li>
+          <li>
+            <strong>注册错误必须在测试或启动时失败。</strong> Desktop 与 Browser 的组合根测试分别断言目标文件类型
+            Provider 数量为一，并使用 <code>ReferenceEquals</code> 断言两个接口解析结果身份相同；迁移时不能保留共享旧注册作为回退。
+          </li>
+        </ul>
+
+        <strong>最终决策 D13：</strong>
+        <p>
+          采用方案 A。共享程序集不再自动注册具体谱面 Provider；Desktop 与 Browser 各自注册唯一的平台 Provider，
+          并把 <code>IEditorProvider</code> 与 <code>IFumenVisualEditorProvider</code> 显式映射到同一个具体单例。
+          框架枚举不得同时包含共享实现与平台实现，也不得依靠注册顺序或优先级选择正确 Provider。
+        </p>
+      </div>
+    </section>
+
+    <section id="q14" class="question">
+      <div class="question-title">
+        <h2>Q14. 最近记录应保存运行时上下文快照，还是由平台解释的恢复配方？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：运行时文件能力不能被序列化，也不能由显示路径替代</h3>
+      <p>
+        原草案提出 <code>EditorFileAccessContext</code> 与 <code>RecentRecordInfo</code> 可以互相转换，
+        并在最近记录转回上下文时检查读写权限。这里需要先修正“互相转换”的含义：
+        <code>EditorFileAccessContext</code> 持有当前进程中的 <code>ISimpleDirectory</code>/<code>ISimpleFile</code>
+        能力和所有权，不能直接序列化；<code>RecentRecordInfo</code> 本身只有显示名称、显示位置、文件类型与稳定 ID，
+        Gekimini 另外提供以 <code>RecordId</code> 为键的二进制数据区。最近记录最多保存一份重新取得能力的配方，
+        不能保存或伪造活句柄。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>当前配方只覆盖单根工程</strong>
+          <code>FumenVisualEditorRecentRecordData</code> 版本 1 只有
+          <code>FolderBookmark + ProjectFileLocator</code>，恢复时只打开一个目录书签并在其中寻找工程文件
+        </div>
+        <div class="fact">
+          <strong>已确认的合法状态更多</strong>
+          Desktop 可打开工程、谱面和音频分散的旧项目；Fast Open 初始还允许
+          <code>ProjectFile == null</code>，因此不能假定每条记录都由一个工程文件完整描述
+        </div>
+        <div class="fact">
+          <strong>书签与路径不是同一种凭据</strong>
+          Browser 的路径可能只是隔离存储 URI；只有可恢复书签或仍有效的平台能力才能重新授权，
+          <code>LocationDescription</code> 只能用于显示
+        </div>
+        <div class="fact">
+          <strong>并非每次打开都能产生最近记录</strong>
+          当前目录 <code>CanBookmark == false</code>、保存书签返回空或失败时，项目仍可正常打开，
+          但没有足够信息承诺应用重启后恢复
+        </div>
+        <div class="fact">
+          <strong>恢复会重新取得资源所有权</strong>
+          Provider 可能连续打开多个目录或独立文件；任何一步失败都必须释放已取得能力，
+          只有完整上下文构造并被 Core 接受后才按 D12 转交所有权
+        </div>
+      </div>
+
+      <h3>必须区分的三个对象</h3>
+      <pre><code>运行时能力
+EditorFileAccessContext
+  - 当前进程可读写的目录根和文件句柄
+  - 拥有明确 Dispose 生命周期
+  - 不可序列化
+
+平台恢复配方
+FumenRecentOpenRecipe (版本化、宿主解释)
+  - 书签、本地定位符、角色与根的对应关系、打开类型
+  - 不包含活句柄
+  - 可能无法生成，因此是可选结果
+
+框架最近记录信封
+RecentRecordInfo + RecordId 对应的数据区
+  - Name / LocationDescription 只负责显示
+  - 二进制数据区保存恢复配方
+  - 不参与文件访问</code></pre>
+
+      <h3>方案 A：平台在构造上下文时同时生成版本化恢复配方（推荐）</h3>
+      <p>
+        Desktop/Browser Provider 不从已经失去来源信息的句柄集合“反推”权限，而是在用户选择、书签保存、
+        Fast Open 或工程加载时，同时构造运行时上下文和可选恢复配方。两者是同一次平台操作的并列结果：
+      </p>
+
+      <pre><code>internal sealed record PreparedEditorOpen(
+    EditorContext Context,
+    FumenRecentOpenRecipe? RecentRecipe,
+    string RecentName,
+    string LocationDescription);
+
+internal sealed record FumenRecentOpenRecipe
+{
+    public required int SchemaVersion { get; init; }
+    public required string HostKind { get; init; }
+    public required string OpenKind { get; init; } // Project / FastOpen
+    public required IReadOnlyList&lt;RecoveryRoot&gt; Roots { get; init; }
+    public required IReadOnlyList&lt;RecoveryRoleBinding&gt; Roles { get; init; }
+}
+
+// RootId 只在当前配方内关联角色，不泄漏进 Core。
+internal sealed record RecoveryRoleBinding(
+    string Role,       // Project / Fumen / Audio / AudioAwb
+    string RootId,
+    string Locator);</code></pre>
+
+      <p>不同宿主对 <code>RecoveryRoot</code> 的解释不同，但遵守同一安全边界：</p>
+      <table>
+        <thead>
+          <tr>
+            <th>场景</th>
+            <th>恢复配方</th>
+            <th>重建方式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Browser / 单根项目</td>
+            <td>项目目录书签 + 各角色的根相对定位符</td>
+            <td>异步恢复目录书签，在恢复的目录树内精确解析角色文件；不得用显示路径兜底</td>
+          </tr>
+          <tr>
+            <td>Desktop / 普通项目</td>
+            <td>平台认可的本地目录或文件定位信息；能使用书签时也可保存不透明书签</td>
+            <td>由 Desktop Provider 重新取得根或独立文件，检查存在性、类型及读写能力</td>
+          </tr>
+          <tr>
+            <td>Desktop / 多根旧工程</td>
+            <td>互不重叠的恢复根 + Project/Fumen/Audio/AWB 各自的根内定位符</td>
+            <td>逐根恢复并按角色绑定，不能要求 Core 根据工程字符串重新扫描整个文件系统</td>
+          </tr>
+          <tr>
+            <td>Desktop / Fast Open</td>
+            <td><code>OpenKind=FastOpen</code>，Project 角色缺省，显式记录 Fumen、Audio 和可选 AWB</td>
+            <td>按 Fast Open 不变量重建；不能为了满足旧数据结构虚构一个 <code>.nyagekiProj</code></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Provider 从记录恢复时执行以下流程：</p>
+      <pre><code>读取 RecordId 的二进制数据
+  -> 校验版本、宿主类型、打开类型和角色完整性
+  -> 当前宿主异步恢复所有根/独立文件能力
+  -> 规范化并解析每个角色定位符，拒绝越界、重复根和角色错配
+  -> 验证本场景必需文件可读；需要保存的角色还必须可写
+  -> 构造候选 EditorFileAccessContext
+  -> 调用 Core 的 Load(EditorContext)
+       成功 -> 整体转交上下文并更新同一个 RecentRecordInfo
+       失败 -> Provider 释放全部已恢复能力，不产生半初始化文档</code></pre>
+
+      <p>该方案还包含以下约束：</p>
+      <ul>
+        <li>
+          <strong>恢复配方属于平台 Provider，不属于 Core。</strong> Core 只消费已经构造完成的
+          <code>EditorContext</code>；它不解析书签、绝对路径、<code>HostKind</code> 或 <code>RootId</code>。
+        </li>
+        <li>
+          <strong>显示字段不参与恢复和去重。</strong> <code>Name</code> 与
+          <code>LocationDescription</code> 可随 UI 更新；真实配方只存入稳定 <code>RecordId</code> 对应的数据区，
+          书签正文不得写入日志、异常文本或显示字段。
+        </li>
+        <li>
+          <strong>可恢复性是可选能力。</strong> 平台无法创建完整配方时，本次文档仍可打开，
+          但不新增一个从产生起就无法恢复的最近记录；已有有效记录也不能被空配方覆盖。
+        </li>
+        <li>
+          <strong>记录更新跟随绑定提交。</strong> Fast Open 首次保存、复制导入或另存为完成“先建后换”后，
+          Provider 才以新配方更新原 <code>RecordId</code>；写文件或上下文替换失败时保留旧记录和旧绑定。
+        </li>
+        <li>
+          <strong>轻量校验与正式打开不共享活句柄。</strong> <code>CheckIsValid</code> 为菜单状态临时恢复并立即释放；
+          用户点击后再次权威恢复，由正式打开流程取得最终上下文。缓存只能缓存结果，不能跨流程缓存可释放句柄。
+        </li>
+      </ul>
+
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>保持 Q1 的平台边界；覆盖 Browser 单根、Desktop 多根与无工程文件 Fast Open；不把路径冒充权限；恢复失败有明确的资源回滚。</td></tr>
+          <tr><th>代价</th><td>Desktop 与 Browser 需要各自的配方序列化和恢复器；上下文构造 API 要返回配方这一并列结果；绑定改变时必须同步更新最近记录。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 B：在共享层定义一个通用的“根 + 角色”序列化模型</h3>
+      <p>
+        把书签、本地路径、根 ID、角色定位符和打开类型都放进共享程序集，由同一个通用转换器在
+        <code>RecentRecordInfo</code> 与 <code>EditorFileAccessContext</code> 之间转换。它表面上减少两套数据类型，
+        但共享层必须理解“书签根”“本地路径根”和各宿主的恢复规则，重新破坏 Q1 已确认的平台封装；
+        新平台还会迫使公共枚举和序列化格式持续扩张。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>优点</th><td>数据结构看起来统一，公共序列化和部分结构校验可以复用。</td></tr>
+          <tr><th>风险</th><td>Core/共享层知道平台权限拓扑；通用转换器容易把本地路径与书签误认为等价能力；无法自然表达某宿主不支持另一宿主配方的情况。</td></tr>
+        </tbody>
+      </table>
+
+      <h3>方案 C：最近记录只保存工程文件或显示路径</h3>
+      <p>
+        继续沿用单个 <code>FolderBookmark + ProjectFileLocator</code>，或在 Desktop 只保存工程文件绝对路径，
+        打开时再解析工程内容寻找谱面和音频。该方案不能表示 <code>ProjectFile == null</code> 的 Fast Open，
+        也不能证明 Browser 或多根 Desktop 对外部依赖仍有访问能力；若退回
+        <code>LocationDescription</code> 或路径字符串猜测，还会绕过已确认的授权边界。
+      </p>
+      <table>
+        <tbody>
+          <tr><th>表面优点</th><td>最接近当前版本 1 数据，迁移代码最少。</td></tr>
+          <tr><th>实质风险</th><td>合法上下文无法记录或无法恢复；文件移动和权限撤销后产生误判；可能在打开一半时才发现依赖缺失并泄漏已恢复资源。</td></tr>
+        </tbody>
+      </table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，把最近记录定义为平台 Provider 的版本化恢复配方，而不是运行时上下文的序列化快照。</strong>
+        <p>
+          这延续了 Q1、D12 和 D13 的同一边界：平台负责取得能力和构造上下文，Core 只读写已经验证的角色文件，
+          上下文负责运行时所有权。配方可以精确表达每个宿主实际能够重获的根、角色和 Fast Open 状态；
+          若平台无法生成完整配方，就诚实地不创建最近记录。恢复失败如何区分永久失效、临时失败与需要用户重新授权，
+          将在 Q15 单独确认，不在本题用一个 <code>false</code> 混合决定。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong><code>RecentRecordInfo</code> 及其数据区只保存由当前平台 Provider 生成的、
+        带版本和打开类型的恢复配方；Provider 在构造 <code>EditorFileAccessContext</code> 时同时生成该可选配方，
+        最近项恢复时由当前宿主异步重新取得所有根和角色文件、完整验证后再构造新上下文；
+        Core 不解析配方，显示路径不作为权限或加载地址，无法生成完整配方时本次仍可打开但不新增最近记录</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用运行时上下文快照方案。<code>EditorFileAccessContextSnapshot</code>（项目目录书签、附加目录书签、工程文件书签、谱面文件书签、音频文件书签共 5 个字段）作为 <code>RecentRecordInfo</code> 数据区的唯一载体；上下文与快照双向转换；最近项恢复时由快照重建上下文。不采用本题推荐的方案 A（平台版本化恢复配方）。<br>
+        <strong>审核归纳：</strong>用户依据原始任务（实现 5 字段书签快照并作为最近记录 data 载体）确认方向。该选择与方案 A 的核心理由相左--方案 A 主张 Core 永不解析最近记录载荷、由平台 Provider 生成 recipe；而快照方案把书签直接序列化进共享层数据模型，<code>ToContextAsync</code> 仍经由 <code>IStorageProvider</code> 重新取得能力，但快照类型本身位于 Core 可见的 Models 层。已按用户选择落地，并在实现中保留方案 A 关注的安全边界：恢复失败释放已取得句柄、显示字段不参与恢复、无法生成完整快照时不新增最近记录。<br>
+        <strong>实现结论：</strong><br>
+        &nbsp;&nbsp;• <code>EditorProjectDataUtils.TryLoadFromContextAsync(EditorFileAccessContext)</code> 消费快照重建的上下文，解析工程描述符与谱面、复检 ACB/AWB，成功后把上下文所有权转交给返回的 <code>EditorProjectDataModel</code>；前置必填校验已移入 try 块，任何失败（含 ProjectFile/FumenFile/AudioFile 缺失）都会释放上下文，避免句柄泄漏。<br>
+        &nbsp;&nbsp;• <code>ProjectIO.Load()</code> 加载成功后 <code>context.ToSnapshotAsync()</code> 生成快照并写入最近记录；书签不可用时仅记 warn、不阻断打开、不新增最近记录（D31）。<br>
+        &nbsp;&nbsp;• <code>ProjectIO.Load(RecentRecordInfo)</code> 读快照 -> <code>ToContextAsync</code> 重建 -> <code>TryLoadFromContextAsync</code> -> 挂载；<code>IOException</code>/<code>InvalidDataException</code> 判定永久失效并置灰，其余异常按临时失败处理。<br>
+        &nbsp;&nbsp;• 去重键按 D38 精神映射为 <code>ProjectDirectoryBookmark</code> 与 <code>ProjectFileBookmark</code> 的 Ordinal 全等；书签不透明值不等时仅生成独立记录，不误合并。<br>
+        &nbsp;&nbsp;• <code>Provider.CheckIsValid</code> 改为快照 <code>ToContextAsync</code> 恢复临时上下文并立即释放；旧 <code>ContainsExactProjectFileAsync</code>/链接枚举校验随目录扫描路径一并移除（书签精确指向文件，不再有路径冲突/越界扫描面）。<br>
+        &nbsp;&nbsp;• 还原路径的外置 AWB 暂不可恢复：5 字段快照未含 AWB 书签，且还原的 <code>ProjectDirectory</code> 是浅包装；内嵌 AWB 的 ACB 可正常还原，外置 AWB 会干净报错并释放资源。<br>
+        &nbsp;&nbsp;• 旧 <code>FumenVisualEditorRecentRecordData</code> 已删除；新增 <code>EditorFileAccessContextSnapshotTests</code>（6 项）覆盖 JSON 往返、可空 ProjectFile、缺必需书签、损坏载荷、上下文加载失败释放与缺 ProjectFile 释放；Core 全量 440 项测试通过。<br>
+        <strong>最终决策 D14：</strong>最近记录保存运行时上下文快照（5 字段书签），而非平台恢复配方。快照与上下文双向转换并作为 <code>RecentRecordInfo</code> data 载体；恢复由 <code>IStorageProvider</code> 重新取得能力并完整校验；无法生成快照时不新增最近记录。与方案 A 的差异（Core 可见快照类型、未引入 HostKind/RootId recipe）作为已知偏离记录在案，后续若需多根或跨宿主恢复再行评估。
+      </div>
+    </section>
+
+    <section id="q15" class="question">
+      <div class="question-title">
+        <h2>Q15. 恢复失败如何区分永久失效、临时失败与需要用户重新授权？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：Q14 已确认快照方案，但恢复失败仍只有 true/false</h3>
+      <p>
+        D14 落地后，<code>Provider.CheckIsValid</code> 与 <code>ProjectIO.Load(RecentRecordInfo)</code> 已把
+        <code>IOException</code>/<code>InvalidDataException</code> 判为永久失效并调用 <code>SetMarkedInvalid(true)</code>，
+        其余异常按临时失败处理（仅记 warn、不置灰）。但 Q14 推荐答案指出恢复失败本应区分三种语义：
+        书签/文件确已不可恢复（永久失效）、平台暂时不可用（临时失败）、以及权限被撤销但可由用户重新授权（需要重新授权）。
+        当前实现把第三种并入了前两种，需要确认这是否足够。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>框架只有二态</strong>
+          <code>IEditorRecentFilesManager.SetMarkedInvalid(info, bool)</code> 与 <code>IsMarkedInvalid(info)</code> 是当前唯一的失效持久化机制；
+          <code>CheckIsValid</code> 返回 <code>Task&lt;bool&gt;</code>，<code>OpenRecentFileCommandHandler</code> 据此决定菜单项可点击与置灰
+        </div>
+        <div class="fact">
+          <strong>校验结果被缓存</strong>
+          <code>IRecentRecordValidityCoordinator.GetOrCheckAsync</code> 缓存 Provider 校验结果；点击时 <code>forceFresh: true</code> 强制复验。
+          临时失败会被下次 fresh 校验覆盖，因此不需要单独持久化“临时失败”态
+        </div>
+        <div class="fact">
+          <strong>Browser 权限撤销的典型表现</strong>
+          Avalonia <code>StorageProvider</code> 在权限被撤销时通常返回 <code>null</code> 而非抛异常，已被 <code>ToContextAsync</code> 映射为
+          <code>IOException</code> 并判为永久失效；要触发“需要重新授权”需要额外的权限探测 API，当前共享层没有
+        </div>
+        <div class="fact">
+          <strong>Desktop 几乎不存在第三态</strong>
+          Desktop 书签指向本地路径，权限撤销等价于文件删除/移动，已能被永久失效覆盖；“需要重新授权”主要面向 Browser/受限沙箱
+        </div>
+      </div>
+
+      <h3>方案 A：维持二态，需要重新授权并入永久失效（推荐）</h3>
+      <p>
+        保留 D14 当前实现：书签不可恢复（含权限撤销导致的 <code>null</code>）一律判为永久失效并置灰；临时平台异常按临时失败处理。
+        用户若想恢复一条被置灰的记录，通过“打开项目文件夹”重新选择并产生新记录（D38 已允许同项目生成新记录而不误合并）。
+        不引入第三态，避免扩展 Gekimini 框架的 <code>IEditorRecentFilesManager</code> 与 <code>CheckIsValid</code> 契约。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>零框架改动；二态语义清晰；置灰记录可经“重新打开文件夹”自然恢复授权。</td></tr>
+        <tr><th>代价</th><td>权限被撤销但文件仍在的 Browser 记录会被永久置灰，不能一键“重新授权”恢复；用户需重新走选择流程。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：引入“需要重新授权”第三态，点击时触发授权流程</h3>
+      <p>
+        扩展 <code>IEditorRecentFilesManager</code> 的失效状态为三态枚举（有效 / 临时失败 / 永久失效 / 需要重新授权），
+        <code>CheckIsValid</code> 改为返回枚举；<code>OpenRecentFileCommandHandler</code> 在“需要重新授权”态点击时弹出
+        StorageProvider 的授权请求（如 Browser 的目录重新授权），成功后更新快照并恢复。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>Browser 权限撤销后可一键恢复，不必重新选择文件夹。</td></tr>
+        <tr><th>代价</th><td>需改动 Gekimini 框架契约与 UI 层；Avalonia 没有统一的“重新授权指定书签”API，Browser 端实现也依赖宿主权限模型；首版收益主要落在 Browser。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，维持二态，把“需要重新授权”并入永久失效。</strong>
+        <p>
+          当前框架只有二态、Desktop 几乎不存在第三态、Browser 权限撤销多表现为 <code>null</code> 已被永久失效覆盖。
+          首版不扩展框架契约；若后续 Browser 场景证明“一键重新授权”是高频痛点，再按方案 B 评估框架扩展。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>维持当前二态（永久失效 / 临时失败），不引入“需要重新授权”第三态；权限撤销等不可恢复情形按永久失效置灰，
+        用户通过重新打开项目文件夹恢复授权并生成新记录</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 A，维持二态，不引入“需要重新授权”第三态。<br>
+        <strong>审核归纳：</strong>用户确认首版不扩展 Gekimini 框架契约。代码库核查支撑该选择：
+        <code>IEditorRecentFilesManager</code> 仅有 <code>SetMarkedInvalid(bool)</code>/<code>IsMarkedInvalid</code> 二态，
+        <code>CheckIsValid</code> 返回 <code>Task&lt;bool&gt;</code>，<code>IRecentRecordValidityCoordinator</code> 缓存校验结果并在点击时强制复验，
+        临时失败会被下次 fresh 校验自然覆盖。Desktop 书签指向本地路径，权限撤销等价于文件删除，已被永久失效覆盖；
+        Browser 权限撤销多表现为 <code>null</code>，已被 <code>ToContextAsync</code> 映射为 <code>IOException</code> 并判永久失效。
+        因此 D14 现有实现（<code>IOException</code>/<code>InvalidDataException</code> -> 永久失效置灰，其余 -> 临时失败）即为终态方案，无需改动。<br>
+        <strong>最终决策 D15：</strong>恢复失败维持二态：书签不可恢复（含权限撤销导致的 <code>null</code>）判永久失效并持久化置灰；
+        临时平台异常按临时失败处理，不置灰，由下次强制校验覆盖。不引入“需要重新授权”第三态。
+        用户恢复已置灰记录的唯一路径是重新打开项目文件夹，按 D38 生成新记录而不误并旧权限。
+        若后续 Browser 场景证明“一键重新授权”为高频痛点，再行评估框架三态扩展。
+      </div>
+    </section>
+
+    <section id="q16" class="question">
+      <div class="question-title">
+        <h2>Q16. 外置 AWB 的 ACB 工程能否从最近记录快照恢复？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：5 字段快照未含 AWB 书签，还原路径无法定位外置 AWB</h3>
+      <p>
+        D14 确认的 <code>EditorFileAccessContextSnapshot</code> 只有 5 个书签字段（项目目录、附加目录、工程文件、谱面、音频），
+        不含 AWB。普通打开路径 <code>TryLoadFromFileAsync</code> 通过 ACB 检查解析外置 AWB 并按根相对定位符在项目目录树内定位；
+        但还原路径 <code>TryLoadFromContextAsync</code> 拿到的是快照重建的独立句柄，且还原的 <code>ProjectDirectory</code> 是浅包装
+        （<code>LoadRootFromAvaloniaStorageFolder</code> 不枚举子项），无法按定位符搜索外置 AWB。当前实现对内嵌 AWB 的 ACB 正常还原，
+        对外置 AWB 干净报错并释放资源。需确认这是首版可接受的限制，还是要求快照扩展 AWB 字段。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>外置 AWB 是真实场景</strong>
+          <code>AcbConverter</code> 与 <code>NAudioManager</code> 都处理 <code>acb.InternalAwb ?? acb.ExternalAwb</code>，
+          外置 AWB 需要单独的本地路径（<code>validatedExternalAwbPath</code>）
+        </div>
+        <div class="fact">
+          <strong>普通打开路径已正确处理</strong>
+          <code>InspectAcbDependencyAsync</code> 在枚举出的项目目录树内按根相对定位符解析外置 AWB，
+          所以从文件夹打开外置 AWB 工程不受影响；只有“从最近记录恢复”受影响
+        </div>
+        <div class="fact">
+          <strong>扩展快照需改序列化结构</strong>
+          增加 <code>AudioAwbFileBookmark</code> 字段会改变 JSON 载荷；<code>HasRequiredBookmarks</code> 需把 AWB 判为可选；
+          <code>ToContextAsync</code> 与 <code>FromContextAsync</code> 需同步处理 AWB 句柄的所有权与释放
+        </div>
+      </div>
+
+      <h3>方案 A：首版不扩展，外置 AWB 工程从最近记录恢复时失败并提示重走文件夹打开（推荐）</h3>
+      <p>
+        保留 5 字段快照。外置 AWB 的 ACB 工程从最近记录恢复时，<code>InspectRestoredAcbDependencyAsync</code> 报错、释放已恢复句柄、
+        用户改用“打开项目文件夹”重新打开（该路径能正确解析外置 AWB）。内嵌 AWB 的 ACB 与普通音频不受影响。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>快照结构稳定；实现已就绪；外置 AWB 工程仍可经文件夹打开使用，只是最近记录恢复不可用。</td></tr>
+        <tr><th>代价</th><td>外置 AWB 工程的最近记录恢复会失败；用户需感知“这类项目用文件夹打开”。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：快照增加可选 AudioAwbFileBookmark，支持外置 AWB 完整恢复</h3>
+      <p>
+        快照新增可选 <code>AudioAwbFileBookmark</code>；<code>FromContextAsync</code> 在 <code>context.AudioAwbFile</code> 非空且可书签时保存；
+        <code>ToContextAsync</code> 恢复并赋给 <code>context.AudioAwbFile</code>；<code>HasRequiredBookmarks</code> 将其判为可选。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>外置 AWB 工程可从最近记录完整恢复。</td></tr>
+        <tr><th>代价</th><td>改变快照 JSON 结构；需同步处理 AWB 句柄所有权与失败释放；AWB 句柄在 Browser 等平台可能不可书签，需降级处理。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，首版不扩展快照。</strong>
+        <p>
+          外置 AWB 是少数场景，且文件夹打开路径仍完整可用；扩展快照的收益有限而成本（序列化结构变更 + 多平台 AWB 书签可用性）较高。
+          若后续证明外置 AWB 工程的高频恢复需求，再按方案 B 扩展。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>首版 5 字段快照不扩展 AWB 字段；外置 AWB 的 ACB 工程从最近记录恢复时干净失败并提示用户改用“打开项目文件夹”；
+        内嵌 AWB 与普通音频不受影响</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 A，首版 5 字段快照不扩展 AWB 字段。<br>
+        <strong>审核归纳：</strong>用户确认外置 AWB 工程从最近记录恢复的缺口可接受。代码库核查支撑该选择：
+        普通文件夹打开路径 <code>InspectAcbDependencyAsync</code> 在枚举的目录树内按根相对定位符解析外置 AWB，仍完整可用；
+        只有从最近记录恢复路径受限于 5 字段快照与浅包装 <code>ProjectDirectory</code>。当前 <code>InspectRestoredAcbDependencyAsync</code>
+        已对内嵌 AWB 正常还原（返回 null）、对外置 AWB 干净报错并释放资源，行为与方案 A 一致，无需改动。<br>
+        <strong>最终决策 D16：</strong>首版 <code>EditorFileAccessContextSnapshot</code> 维持 5 字段，不增加 AWB 书签。
+        外置 AWB 的 ACB 工程从最近记录恢复时干净失败并释放已恢复句柄，用户改用“打开项目文件夹”重新打开（该路径能正确解析外置 AWB）。
+        内嵌 AWB 的 ACB 与普通音频不受影响。若后续证明外置 AWB 工程的高频恢复需求，再按方案 B 扩展可选 <code>AudioAwbFileBookmark</code> 字段。
+      </div>
+    </section>
+
+    <section id="q17" class="question">
+      <div class="question-title">
+        <h2>Q17. 平台交互与 Core 加载的职责边界：D14 接线是过渡形态还是终态？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：D14 接线把平台交互与 Core 加载混合在 ViewModel</h3>
+      <p>
+        D14 把快照接线落在 <code>FumenVisualEditorViewModel.ProjectIO.cs</code>：
+        <code>Load()</code> 同时做文件夹选择（<code>FileDialogHelper.OpenStorageFolderAsync</code>，平台交互）、
+        目录构造（<code>AvaloniaStorageProviderFileSystemBuilder</code>，平台能力）、扫描、加载、最近记录读写（含 <code>ToSnapshotAsync</code> 书签保存）。
+        <code>FumenVisualEditorProvider</code> 仅转发 <code>TryOpen -> editor.Load()</code>。
+        refactory.md 计划1-2 提出“把交互与平台逻辑移回 Provider，ViewModel 改为 <code>New(EditorContext)/Load(EditorContext)</code>”，
+        但 D13 只确认了注册边界（每宿主一个 Provider、双接口别名同实例），未确认职责边界。需决定当前 D14 形态是过渡还是终态。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>框架契约固定为 IDocumentViewModel</strong>
+          <code>IEditorProvider.TryOpen(IDocumentViewModel)</code> 是框架契约，不能改为接收 <code>EditorContext</code>；
+          <code>New(EditorContext)/Load(EditorContext)</code> 只能是 ViewModel 内部方法，由 Provider 在 TryOpen 内构造上下文后调用
+        </div>
+        <div class="fact">
+          <strong>Core 经 IBookmarkable 抽象已不直接依赖平台</strong>
+          <code>IBookmarkableSimpleFileSystemItem</code> 让 <code>EditorFileAccessContextSnapshot.FromContextAsync</code> 经接口调用书签，
+          Core 不直接引用 <code>Avalonia.Platform.Storage</code>；但文件夹选择器 <code>FileDialogHelper</code> 仍是平台交互入口
+        </div>
+        <div class="fact">
+          <strong>D14 接线已完整工作并通过测试</strong>
+          <code>Load()</code>/<code>Load(RecentRecordInfo)</code>/<code>CheckIsValid</code> 全链路 + 6 项快照测试 + 440 项 Core 回归通过；
+          拆分迁移会移动这些逻辑，需回归
+        </div>
+        <div class="fact">
+          <strong>Browser 与 Desktop 的真实差异有限</strong>
+          Desktop 额外支持 <code>.nyagekiProj</code> 直接打开与 Fast Open；Browser 只有文件夹打开+新建。
+          当前 Core 共享 Provider 只实现文件夹打开，差异面尚未体现
+        </div>
+      </div>
+
+      <h3>方案 A：首版保持 ViewModel 形态，D14 接线为过渡终态，Provider 拆分留待下一阶段（推荐）</h3>
+      <p>
+        保留当前 <code>ViewModel.Load()/Load(recordInfo)</code> 承担平台交互+加载；<code>FumenVisualEditorProvider</code> 继续转发。
+        D14 接线作为过渡终态，不在本次重构内拆分 Browser/Desktop Provider。下一阶段再按 refactory.md 计划1-2 迁移平台交互到 Provider、
+        引入 <code>Load(EditorContext)</code>。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>D14 已验证可工作；不扩大本次重构面；Provider 拆分可在 New/Setup 一起设计，避免半成品。</td></tr>
+        <tr><th>代价</th><td>ViewModel 仍混平台交互与 Core 加载，与 refactory.md 目标形态不一致；未来拆分时需搬迁 Load 逻辑并重新回归。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：本次就拆分，平台交互移到 Provider，ViewModel 改 Load(EditorContext)</h3>
+      <p>
+        新增 <code>DefaultDesktopEditorProvider</code>/<code>DefaultBrowserEditorProvider</code>，在 <code>TryOpen</code> 内完成文件夹选择、
+        目录构造、<code>EditorFileAccessContext</code>/EditorContext 构造，再调 <code>editor.Load(EditorContext)</code>。
+        ViewModel 只保留消费上下文、加载、挂载、最近记录 data 序列化；<code>ToSnapshotAsync</code> 书签保存经 IBookmarkable 保留在 Core。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>忠于 refactory.md 目标形态；平台交互与 Core 加载分离；为 New/Setup 的 Provider 实现铺路。</td></tr>
+        <tr><th>代价</th><td>本次重构面显著扩大：新增两个平台 Provider、迁移 Load 逻辑、改 ViewModel 签名、重新回归；Browser/Desktop 差异面（.nyagekiProj 直开、Fast Open）尚未实现，拆分收益有限。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，首版保持 ViewModel 形态。</strong>
+        <p>
+          D14 接线已完整验证，Provider 拆分是为 New/Setup 与平台差异（.nyagekiProj 直开、Fast Open）服务的；
+          在那些功能实现前拆分收益有限、风险较高。建议把拆分与 New/Setup 作为同一阶段推进，D14 接线作为该阶段的起点而非先拆。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>首版保留 <code>ViewModel.Load()/Load(recordInfo)</code> 承担平台交互与 Core 加载的混合职责，
+        <code>FumenVisualEditorProvider</code> 继续转发，D14 接线作为过渡终态；Provider 拆分（DefaultDesktop/BrowserEditorProvider + <code>Load(EditorContext)</code>）
+        与 New/Setup 一起作为下一阶段</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 B，本次就拆分 Provider。<br>
+        <strong>审核归纳：</strong>用户选择忠于 refactory.md 目标形态，把平台交互移到平台 Provider，ViewModel 改为消费 <code>EditorContext</code>。
+        这意味着 D14 接线（ViewModel 混合职责）是过渡形态，需在本次重构内迁移：新增 <code>DefaultDesktopEditorProvider</code>/<code>DefaultBrowserEditorProvider</code>，
+        在 <code>TryOpen</code> 内完成文件夹选择、目录构造、<code>EditorFileAccessContext</code>/<code>EditorContext</code> 构造，再调 <code>editor.Load(EditorContext)</code>；
+        ViewModel 只保留消费上下文、加载、挂载、最近记录 data 序列化。<br>
+        <strong>最终决策 D17：</strong>本次重构执行 Provider 拆分。平台交互（文件夹/文件选择、目录构造、上下文构造）下沉到平台 Provider；
+        ViewModel 改为 <code>Load(EditorContext)</code> 消费已构造的上下文。Core 共享 <code>FumenVisualEditorProvider</code> 的去留与平台 Provider 的具体形状由后续问题确认。
+      </div>
+    </section>
+
+    <section id="q18" class="question">
+      <div class="question-title">
+        <h2>Q18. Core 共享 FumenVisualEditorProvider 的去留形态？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：D17 拆分后 Core Provider 不能再注册 IEditorProvider，但其逻辑仍需复用</h3>
+      <p>
+        D17 决定本次拆分。当前 <code>FumenVisualEditorProvider</code>（Core 项目）用 <code>[RegisterSingleton&lt;IEditorProvider&gt;]</code> 自动注册到所有宿主，
+        含 <code>SupportFileTypes</code>/<code>Create</code>/<code>TryNew/TryOpen</code> 转发/<code>CheckIsValid</code>/<code>TryReadSnapshot</code>/<code>MarkPermanentlyInvalid</code>。
+        拆分后平台 Provider（Desktop/Browser）必须唯一注册 <code>IEditorProvider</code>，否则 <code>InjectioDuplicateStrategy=Append</code> 会双注册，
+        <code>PickDocumentProvider</code> 的 <code>FirstOrDefault</code> 取决于注册顺序，行为脆弱（违反 D13“每宿主只注册一个平台 Provider”）。
+        因此 Core 共享 Provider 不能再注册 <code>IEditorProvider</code>，但其 <code>CheckIsValid</code>/<code>SupportFileTypes</code>/<code>Create</code> 等逻辑仍需被平台 Provider 复用。需确定复用形态。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>双注册会竞争</strong>
+          <code>InjectioDuplicateStrategy=Append</code> 不去重；<code>OpenRecentFileCommandHandler.PickDocumentProvider</code> 用 <code>FirstOrDefault</code> 按文件类型 Id 选 Provider，
+          两个同类型 Provider 的选中顺序取决于 DI 注册顺序
+        </div>
+        <div class="fact">
+          <strong>共享逻辑确实存在</strong>
+          <code>CheckIsValid</code>（快照校验）、<code>SupportFileTypes</code>、<code>Create</code>、<code>TryReadSnapshot</code>、<code>MarkPermanentlyInvalid</code> 跨平台一致；
+          平台差异主要在 <code>TryNew/TryOpen</code> 的交互与上下文构造
+        </div>
+        <div class="fact">
+          <strong>D13 要求双接口别名同实例</strong>
+          <code>IEditorProvider</code> 与 <code>IFumenVisualEditorProvider</code> 别名到同一具体单例；复用形态必须保证平台 Provider 同时满足这两个接口的同一实例
+        </div>
+      </div>
+
+      <h3>方案 A：Core Provider 转为抽象基类，平台 Provider 继承并 override 交互（推荐）</h3>
+      <p>
+        <code>FumenVisualEditorProvider</code> 改为 <code>FumenVisualEditorProviderBase</code>（不注册 <code>IEditorProvider</code>），
+        保留 <code>SupportFileTypes</code>/<code>Create</code>/<code>CheckIsValid</code>/<code>TryReadSnapshot</code>/<code>MarkPermanentlyInvalid</code> 等共享实现；
+        <code>TryNew/TryOpen</code> 声明为 abstract 或 virtual。<code>DefaultDesktopEditorProvider</code>/<code>DefaultBrowserEditorProvider</code> 继承基类，
+        override <code>TryNew/TryOpen</code> 完成平台交互与 <code>EditorContext</code> 构造，并用 <code>[RegisterSingleton&lt;IEditorProvider&gt;]</code>+<code>[RegisterSingleton&lt;IFumenVisualEditorProvider&gt;]</code> 注册为平台唯一实例。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>共享逻辑零重复；D13 双接口同实例在平台子类自然满足；CheckIsValid 等只写一次。</td></tr>
+        <tr><th>代价</th><td>引入继承层次；基类的 abstract/virtual 边界需谨慎设计；平台子类仍需各自实现交互。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：删除 Core Provider，平台 Provider 各自完整实现，共享逻辑放静态工具</h3>
+      <p>
+        移除 Core 共享 Provider；<code>CheckIsValid</code>/<code>TryReadSnapshot</code> 等下沉为静态工具类（如 <code>FumenRecentRecordValidator</code>），
+        Desktop/Browser Provider 各自完整实现 <code>IEditorProvider</code> 并调用静态工具。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>无继承耦合；每个平台 Provider 自包含，便于单独理解。</td></tr>
+        <tr><th>代价</th><td>SupportFileTypes/Create/注册等在每个平台 Provider 重复；静态工具与实例状态（RecentFilesManager）交互需额外设计。</td></tr>
+      </tbody></table>
+
+      <h3>方案 C：Core Provider 保留为非注册共享实现，平台 Provider 组合持有并转发</h3>
+      <p>
+        Core Provider 保留但去掉 <code>[RegisterSingleton&lt;IEditorProvider&gt;]</code>，改为普通类；平台 Provider 注入或构造它，
+        转发 <code>CheckIsValid</code>/<code>Create</code> 等，仅 override <code>TryNew/TryOpen</code>。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>无继承；共享逻辑集中在 Core Provider 实例。</td></tr>
+        <tr><th>代价</th><td>D13 双接口同实例需平台 Provider 自己满足（Core Provider 不再注册 IFumenVisualEditorProvider）；组合转发样板代码多。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，Core Provider 转为抽象基类，平台 Provider 继承。</strong>
+        <p>
+          共享逻辑（CheckIsValid、SupportFileTypes、Create、最近记录校验）跨平台一致，继承能零重复复用且 D13 双接口同实例在平台子类自然满足。
+          平台差异集中在 TryNew/TryOpen 交互，正好用 abstract/virtual 隔离。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>Core 的 <code>FumenVisualEditorProvider</code> 转为不注册的抽象基类 <code>FumenVisualEditorProviderBase</code>，
+        保留共享逻辑；<code>DefaultDesktopEditorProvider</code>/<code>DefaultBrowserEditorProvider</code> 继承并 override 平台交互，
+        在各自宿主唯一注册 <code>IEditorProvider</code>+<code>IFumenVisualEditorProvider</code></strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 A，Core Provider 转为抽象基类，平台 Provider 继承。<br>
+        <strong>审核归纳：</strong>用户选择继承复用。<code>FumenVisualEditorProvider</code> 将改为 <code>FumenVisualEditorProviderBase</code>（不注册 <code>IEditorProvider</code>），
+        保留 <code>SupportFileTypes</code>/<code>Create</code>/<code>CheckIsValid</code>/<code>TryReadSnapshot</code>/<code>MarkPermanentlyInvalid</code> 等跨平台一致逻辑；
+        <code>TryNew/TryOpen</code> 声明为 abstract/virtual。<code>DefaultDesktopEditorProvider</code>/<code>DefaultBrowserEditorProvider</code> 继承，
+        override 交互与 <code>EditorContext</code> 构造，并在各自宿主用 <code>[RegisterSingleton&lt;IEditorProvider&gt;]</code>+<code>[RegisterSingleton&lt;IFumenVisualEditorProvider&gt;]</code> 唯一注册，满足 D13 双接口同实例。<br>
+        <strong>最终决策 D18：</strong>Core 共享 Provider 转为不注册的抽象基类 <code>FumenVisualEditorProviderBase</code>，平台 Provider 继承并 override 平台交互、唯一注册双接口。
+        共享逻辑（CheckIsValid、SupportFileTypes、Create、最近记录校验）集中在基类零重复；平台差异通过 abstract/virtual 隔离。
+      </div>
+    </section>
+
+    <section id="q19" class="question">
+      <div class="question-title">
+        <h2>Q19. EditorContext 是否携带显示元数据，最近记录写入归 Provider 还是 ViewModel？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：refactory.md 的 EditorContext 只含 FileAccessContext，但最近记录写入需要显示元数据</h3>
+      <p>
+        refactory.md 定义的 <code>EditorContext</code> 只含 <code>FileAccessContext</code>。但当前 <code>ViewModel.Load()</code> 的最近记录写入
+        （<code>TryStoreRecentFromContextAsync</code>）需要 <code>projectName</code> 与 <code>locationDescription</code>，
+        后者由 <code>folderDisplayName</code>（平台文件夹选择产生）+ <code>selectedLocator</code>（扫描产生）经 <code>BuildLocationDescription</code> 构造。
+        D17 拆分后这两个值在平台 Provider 产生。需决定 <code>EditorContext</code> 是否携带它们，以及最近记录写入（含 <code>ToSnapshotAsync</code> 书签保存）归 Provider 还是 ViewModel。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>显示元数据不是文件能力</strong>
+          <code>projectName</code>/<code>locationDescription</code> 只用于 <code>RecentRecordInfo</code> 的显示字段，不是 <code>EditorFileAccessContext</code> 的运行时句柄；
+          D34 已规定显示字段不参与恢复与去重
+        </div>
+        <div class="fact">
+          <strong>D14 接线当前在 ViewModel</strong>
+          <code>TryStoreRecentFromContextAsync</code>/<code>StoreRecentProject</code>/<code>TryReadSnapshot</code> 都在 <code>ViewModel.ProjectIO.cs</code>；
+          <code>ToSnapshotAsync</code> 经 IBookmarkable 抽象调用书签（Core 不直接依赖平台）
+        </div>
+        <div class="fact">
+          <strong>Provider 已产生这些值</strong>
+          Provider 做 folder 选择 + 扫描 + locator 选择时，自然产生 <code>folderDisplayName</code>/<code>selectedLocator</code>/<code>projectName</code>，
+          可直接填入 EditorContext 或直接调 RecentFilesManager
+        </div>
+      </div>
+
+      <h3>方案 A：EditorContext 扩展携带显示元数据，ViewModel 保持最近记录写入（推荐）</h3>
+      <p>
+        <code>EditorContext</code> 含 <code>FileAccessContext</code> + <code>ProjectName</code> + <code>LocationDescription</code>（可选，仅普通打开有；最近记录恢复沿用原 recordInfo）。
+        Provider 构造 EditorContext 时填这些；<code>ViewModel.Load(EditorContext)</code> 保持 D14 接线（<code>TryStoreRecentFromContextAsync</code> 仍在 ViewModel）。
+        最近记录恢复路径 <code>Load(RecentRecordInfo)</code> 的 ToContextAsync 仍在 ViewModel（或 Provider 构造 EditorContext 后调 Load）。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>D14 接线最小改动；最近记录写入/校验集中在 ViewModel；EditorContext 作为“本次打开完整描述”语义自洽。</td></tr>
+        <tr><th>代价</th><td>EditorContext 比 refactory.md 原样多了显示字段；显示元数据与运行时能力混在一个对象。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：EditorContext 只含 FileAccessContext，最近记录写入移到 Provider</h3>
+      <p>
+        <code>EditorContext</code> 严格只含 <code>FileAccessContext</code>（refactory.md 原样）。
+        Provider 在 <code>TryOpen</code> 成功挂载后，直接调 <code>RecentFilesManager</code> 存最近记录（用 Provider 持有的 <code>projectName</code>/<code>locationDescription</code> + 从 ViewModel 取快照）。
+        ViewModel.Load(EditorContext) 不碰最近记录。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>EditorContext 纯净，只含运行时能力；忠于 refactory.md 原样；显示元数据不渗入 Core 模型。</td></tr>
+        <tr><th>代价</th><td>最近记录写入从 ViewModel 迁到 Provider（基类或平台子类），D14 接线需重构；Provider 需从 ViewModel 取已挂载的 FileAccessContext 来 ToSnapshotAsync，跨层取状态。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，EditorContext 扩展携带显示元数据，ViewModel 保持最近记录写入。</strong>
+        <p>
+          D14 接线（TryStoreRecentFromContextAsync/StoreRecentProject/TryReadSnapshot）刚验证通过，方案 A 让其留在 ViewModel 最小改动；
+          EditorContext 携带显示元数据作为“本次打开完整描述”语义自洽，且 <code>ToSnapshotAsync</code> 经 IBookmarkable 不破坏 D1 平台边界。
+          方案 B 的“Provider 从 ViewModel 取 FileAccessContext 来 ToSnapshotAsync”引入跨层取状态，更脆。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong><code>EditorContext</code> 含 <code>FileAccessContext</code> + <code>ProjectName</code> + <code>LocationDescription</code>，
+        由 Provider 构造时填充；<code>ViewModel.Load(EditorContext)</code> 保持 D14 的最近记录写入逻辑</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 A，EditorContext 扩展携带显示元数据，ViewModel 保持最近记录写入。<br>
+        <strong>审核归纳：</strong>用户选择 D14 接线最小改动。<code>EditorContext</code> 含 <code>FileAccessContext</code> + <code>ProjectName</code> + <code>LocationDescription</code>，
+        由 Provider 构造时填充；<code>ViewModel.Load(EditorContext)</code> 保持 <code>TryStoreRecentFromContextAsync</code>/<code>StoreRecentProject</code>/<code>TryReadSnapshot</code>。
+        <code>ToSnapshotAsync</code> 经 IBookmarkable 不破坏 D1。<br>
+        <strong>最终决策 D19：</strong><code>EditorContext</code> = <code>FileAccessContext</code> + <code>ProjectName</code> + <code>LocationDescription</code>（恢复路径 LocationDescription 沿用原 recordInfo）。
+        Provider 构造 EditorContext；ViewModel.Load(EditorContext) 保持 D14 最近记录写入。最近记录恢复路径的具体归属由下一题确认。
+      </div>
+    </section>
+
+    <section id="q20" class="question">
+      <div class="question-title">
+        <h2>Q20. 最近记录恢复路径 Load(RecentRecordInfo) 归 Provider 还是 ViewModel？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：ToContextAsync 是平台交互，但 StoreRecentProject 的 dedup 可自然刷新记录</h3>
+      <p>
+        当前 <code>ViewModel.Load(RecentRecordInfo)</code> 做：读快照 -> <code>ToContextAsync</code>（书签恢复，平台交互）-> <code>TryLoadFromContextAsync</code> -> 挂载 -> <code>UpdateRecent</code>（刷新访问时间）。
+        D17 要把平台交互移到 Provider，而 <code>ToContextAsync</code> 调 <code>IStorageProvider.OpenFolderBookmarkAsync/OpenFileBookmarkAsync</code> 属平台交互。
+        同时 D19 让 <code>ViewModel.Load(EditorContext)</code> 的 <code>StoreRecentProject</code> 经 dedup（同 ProjectDirectoryBookmark+ProjectFileBookmark）命中 <code>UpdateRecent</code>，
+        可自然替代 <code>Load(RecentRecordInfo)</code> 里的刷新。需决定恢复路径归谁。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>CheckIsValid 已在 Provider 基类做 ToContextAsync</strong>
+          D14/D18 下 <code>FumenVisualEditorProviderBase.CheckIsValid</code> 已 <code>ToContextAsync</code> 恢复临时上下文并释放；
+          正式打开再恢复一次符合 D34“校验与正式打开不共享活句柄”
+        </div>
+        <div class="fact">
+          <strong>StoreRecentProject dedup 自然刷新</strong>
+          从最近记录恢复时，<code>Load(EditorContext)</code> 的 <code>TryStoreRecentFromContextAsync</code> -> <code>StoreRecentProject</code> 会命中同身份记录并 <code>UpdateRecent</code>，
+          等价于旧 <code>Load(RecentRecordInfo)</code> 的刷新访问时间
+        </div>
+        <div class="fact">
+          <strong>LocationDescription 需沿用原 recordInfo</strong>
+          恢复路径没有 folderDisplayName/selectedLocator，<code>EditorContext.LocationDescription</code> 应由 Provider 从 <code>recordInfo.LocationDescription</code> 填入，避免回退到文件名
+        </div>
+      </div>
+
+      <h3>方案 A：Provider 做恢复并构造 EditorContext，ViewModel 删除 Load(RecentRecordInfo)（推荐）</h3>
+      <p>
+        <code>Provider.TryOpen(document, recordInfo)</code>（平台子类或基类）做：读快照 -> <code>ToContextAsync</code> -> 构造 <code>EditorContext</code>
+        （<code>LocationDescription</code> 取自 <code>recordInfo.LocationDescription</code>）-> 调 <code>editor.Load(EditorContext)</code>。
+        ViewModel 删除 <code>Load(RecentRecordInfo)</code>；<code>Load(EditorContext)</code> 的 <code>StoreRecentProject</code> 经 dedup 命中 <code>UpdateRecent</code> 自然刷新记录。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>平台交互（ToContextAsync）全部归 Provider，符合 D17；ViewModel 只剩单一 Load(EditorContext) 入口；刷新经 dedup 自然实现，无重复逻辑。</td></tr>
+        <tr><th>代价</th><td>Provider 需处理快照读取失败/ToContextAsync 异常的永久失效判定（现 ViewModel 里的 catch IOException/InvalidDataException 逻辑迁到 Provider）。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：ViewModel 保留 Load(RecentRecordInfo)，内部转调 Load(EditorContext)</h3>
+      <p>
+        ViewModel 保留 <code>Load(RecentRecordInfo)</code>，内部 <code>ToContextAsync</code> + 构造 EditorContext + 调自身 <code>Load(EditorContext)</code> + 显式 <code>UpdateRecent</code>。
+        Provider.<code>TryOpen(document, recordInfo)</code> 仍转发 <code>editor.Load(recordInfo)</code>。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>最近记录全链路集中在 ViewModel；Provider 转发最简。</td></tr>
+        <tr><th>代价</th><td>ToContextAsync 平台交互留在 ViewModel，与 D17 相左；Load(RecentRecordInfo) 与 Load(EditorContext) 两条路径并存，刷新逻辑重复。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，Provider 做恢复并构造 EditorContext，ViewModel 删除 Load(RecentRecordInfo)。</strong>
+        <p>
+          符合 D17（平台交互归 Provider）；ViewModel 退化为单一 <code>Load(EditorContext)</code> 入口；
+          刷新经 <code>StoreRecentProject</code> dedup 自然实现，消除重复。永久失效判定逻辑迁到 Provider 基类，与 CheckIsValid 的同类判定一致。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>Provider.<code>TryOpen(document, recordInfo)</code> 做读快照+<code>ToContextAsync</code>+构造 EditorContext（LocationDescription 取自 recordInfo），
+        调 <code>editor.Load(EditorContext)</code>；ViewModel 删除 <code>Load(RecentRecordInfo)</code>，刷新经 <code>StoreRecentProject</code> dedup 自然实现</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 A，Provider 做恢复并构造 EditorContext，ViewModel 删除 Load(RecentRecordInfo)。<br>
+        <strong>审核归纳：</strong>用户确认平台交互全部归 Provider。<code>Provider.TryOpen(document, recordInfo)</code> 做读快照+<code>ToContextAsync</code>+构造
+        <code>EditorContext</code>（LocationDescription 取自 recordInfo），调 <code>editor.Load(EditorContext)</code>；永久失效判定（catch IOException/InvalidDataException -> MarkPermanentlyInvalid）
+        迁到 Provider 基类，与 CheckIsValid 的同类判定一致。ViewModel 的刷新经 <code>StoreRecentProject</code> dedup（同 ProjectDirectoryBookmark+ProjectFileBookmark）
+        命中 <code>UpdateRecent</code> 自然实现，无重复逻辑。<br>
+        <strong>最终决策 D20：</strong>最近记录恢复路径归 Provider：Provider 读快照、恢复上下文、构造 EditorContext、处理永久失效判定；
+        ViewModel 删除 <code>Load(RecentRecordInfo)</code>，只保留 <code>Load(EditorContext)</code> 单一入口；记录刷新经 StoreRecentProject dedup 完成。
+      </div>
+    </section>
+
+    <section id="q21" class="question">
+      <div class="question-title">
+        <h2>Q21. 拆分落地后是否立即实现 New/Setup 流程？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：D17-D20 已构成完整拆分设计，refactory.md 计划1 说拆分正是为 New/Setup 服务</h3>
+      <p>
+        D17（本次拆分）、D18（基类继承）、D19（EditorContext 含元数据）、D20（恢复路径归 Provider）已构成完整的拆分设计链。
+        refactory.md 计划1-2 指出拆分的目的是“不同平台的 provider 有不同的表现和平台特色支持”，其中 Browser/Desktop 的 <code>TryNew</code>（Setup 对话框新建项目）
+        是核心平台特色；D2-D7 已确认 Setup 的全部设计决策。需决定拆分落地与 New/Setup 实现的先后与范围。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>当前 New 是空实现</strong>
+          <code>ViewModel.New()</code> 仅记警告并返回 false；<code>Provider.CanCreateNew = false</code>。
+          Setup 对话框（D2-D7：项目名、谱面文件名、格式、冲突拒绝、autoImport 复制）完全未实现
+        </div>
+        <div class="fact">
+          <strong>拆分先落地可独立验证</strong>
+        D17-D20 的拆分（基类+平台 Provider+EditorContext+Load(EditorContext)）可用现有的文件夹打开与最近记录恢复路径完整验证，不依赖 New/Setup
+        </div>
+        <div class="fact">
+          <strong>New/Setup 是独立的较大功能</strong>
+        Setup 涉及新对话框 UI（项目名/谱面文件名/格式选择/冲突提示）、autoImport 复制逻辑、D6 的先写后交付与回滚、D7 的 .nyagekiProj 创建；
+        工作量与拆分本身相当
+        </div>
+      </div>
+
+      <h3>方案 A：拆分先落地并验证，New/Setup 作为下一阶段（推荐）</h3>
+      <p>
+        本次仅执行 D17-D20 的拆分：基类 + Desktop/Browser 平台 Provider + <code>EditorContext</code> + <code>ViewModel.Load(EditorContext)</code>，
+        用现有文件夹打开与最近记录恢复路径回归验证。<code>TryNew</code> 在平台 Provider 暂保持返回 false（<code>CanCreateNew = false</code>），
+        Setup 对话框与 autoImport 逻辑留待下一阶段。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>拆分可独立验证、风险可控；New/Setup 作为独立阶段可完整设计对话框与回滚；不阻塞当前已工作的打开/恢复链路。</td></tr>
+        <tr><th>代价</th><td>平台 Provider 首版只有打开能力，Browser/Desktop 差异面（TryNew）暂未体现；需两阶段回归。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：拆分与 New/Setup 一起实现</h3>
+      <p>
+        本次同时实现拆分与 Setup 对话框（D2-D7 全部）、autoImport 复制（D9-D11）、<code>.nyagekiProj</code> 创建（D6-D7），
+        平台 Provider 一次性具备 TryNew/TryOpen 完整能力。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>一次到位，平台 Provider 的差异面立即体现；避免两阶段回归。</td></tr>
+        <tr><th>代价</th><td>单次改动面很大（拆分 + 对话框 UI + 复制逻辑 + 回滚），验证复杂度高；Setup 对话框 UI 需先做视觉/交互设计。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，拆分先落地并验证，New/Setup 作为下一阶段。</strong>
+        <p>
+          拆分本身已含 4 个已确认决策（D17-D20），用现有链路即可完整回归；Setup 对话框涉及 UI 设计与 autoImport/回滚逻辑，独立成阶段更可控。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong>本次仅执行 D17-D20 的拆分（基类+平台 Provider+EditorContext+Load(EditorContext)），用现有打开/恢复路径回归验证；
+        New/Setup（Setup 对话框、autoImport、.nyagekiProj 创建）作为下一阶段</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>采用方案 A，拆分先落地并验证，New/Setup 作为下一阶段。<br>
+        <strong>审核归纳：</strong>用户确认拆分作为独立可验证阶段执行：D17-D20 的基类+平台 Provider+<code>EditorContext</code>+<code>Load(EditorContext)</code>
+        用现有文件夹打开与最近记录恢复路径回归验证；<code>TryNew</code> 暂保持 false。Setup 对话框（D2-D7）、autoImport 复制（D9-D11）、
+        <code>.nyagekiProj</code> 创建（D6-D7）作为下一阶段，届时平台 Provider 的 Browser/Desktop 差异面才真正体现。<br>
+        <strong>最终决策 D21：</strong>本次仅执行 D17-D20 的 Provider 拆分并以现有链路回归验证；New/Setup（Setup 对话框、autoImport、.nyagekiProj 创建）
+        作为下一阶段独立实现。拆分后 <code>CanCreateNew</code> 保持 false 直到 Setup 落地。
+      </div>
+    </section>
+
+    <section id="q22" class="question">
+      <div class="question-title">
+        <h2>Q22. EditorContext 为什么需要 ProjectFileLocator，路径解析应归谁？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：上一轮实现概要提出了一个与 D1/D17 不完全一致的字段</h3>
+      <p>
+        上一轮实现概要建议给 <code>EditorContext</code> 增加 <code>ProjectFileLocator</code>，理由是现有
+        <code>EditorProjectDataUtils.TryLoadFromFileAsync(projectRoot, projectFile, projectFileLocator)</code> 需要它。
+        代码核验后确认：这个 locator 的直接用途，是确定 <code>.nyagekiProj</code> 所在的根相对位置，进而把工程文件内的
+        <code>FumenFilePath</code>/<code>AudioFilePath</code> 按“相对于工程描述符所在目录”解析成具体文件能力。
+        它是上下文构造阶段的路径解析输入，不天然是编辑器运行时必须长期持有的能力。
+      </p>
+
+      <div class="notice">
+        <strong>对上一轮概要的修正</strong>
+        如果把 <code>ProjectFileLocator</code> 交给 <code>ViewModel.Load(EditorContext)</code>，再由 ViewModel 调
+        <code>TryLoadFromFileAsync</code> 去寻找谱面和音频，就会让 ViewModel 重新承担路径解析与文件绑定职责。
+        这与 D1“平台 Provider 在调用 Core 前消化来源差异并交付角色明确的文件能力”、D17“ViewModel 只消费已构造上下文”冲突。
+      </div>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>现有方法为什么需要 locator</strong>
+          <code>TryLoadFromFileAsync</code> 用 locator 取得工程描述符的父目录，再解析相对的谱面/音频路径；当工程文件位于所选根的子目录时，
+          仅有 <code>projectFile.FileName</code> 不足以表达这个基准位置
+        </div>
+        <div class="fact">
+          <strong>Provider 已经拥有 locator</strong>
+          <code>EditorProjectPathResolver.FindProjectFiles</code> 返回 <code>(Locator, File)</code>；普通文件夹打开时 Provider 在候选选择阶段已经得到
+          <code>selectedLocator</code>，无需把它作为运行时状态继续下传
+        </div>
+        <div class="fact">
+          <strong>完整上下文不需要再次按路径找主文件</strong>
+          按 D1，Provider 交付的 <code>EditorFileAccessContext</code> 应已绑定 <code>ProjectFile</code>/<code>FumenFile</code>/<code>AudioFile</code>
+          （以及需要时的 AWB）；ViewModel 可统一走 <code>TryLoadFromContextAsync</code>
+        </div>
+        <div class="fact">
+          <strong>旧模型字段不是充分理由</strong>
+          当前 <code>EditorProjectDataModel.ProjectFileLocator</code> 仅在加载时赋值，并被 <code>FumenRescue</code> 写进恢复元数据；代码库未发现该元数据的读取方。
+          是否保留这项诊断/恢复元数据应单独处理，不能反推 <code>EditorContext</code> 必须携带 locator
+        </div>
+      </div>
+
+      <h3>方案 A：ProjectFileLocator 只在 Provider 的上下文构造阶段存在（推荐）</h3>
+      <p>
+        Provider 保留 <code>selectedLocator</code> 局部变量，并调用共享的上下文准备逻辑：读取工程描述符、解析和验证谱面/音频/AWB、构造完整
+        <code>EditorFileAccessContext</code>，随后创建只含既定字段的 <code>EditorContext</code>
+        （<code>FileAccessContext</code> + <code>ProjectName</code> + <code>LocationDescription</code>）。
+        <code>ViewModel.Load(EditorContext)</code> 只按已绑定文件加载，不再使用 locator 找文件。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>严格符合 D1/D17；EditorContext 不携带一次性解析参数；普通打开、最近记录恢复和未来 Desktop 多根最终都汇合到完整文件能力。</td></tr>
+        <tr><th>代价</th><td>必须拆分当前混合了“解析文件位置”和“加载工程模型”的 <code>TryLoadFromFileAsync</code>，或新增 Provider 侧上下文工厂；改动比简单增加一个字符串字段更深。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：EditorContext 携带可选 ProjectFileLocator，但只作为元数据</h3>
+      <p>
+        保留可选 locator，用于填充 <code>EditorProjectDataModel.ProjectFileLocator</code>、诊断或恢复元数据；
+        ViewModel 仍不得用它解析和绑定主文件。此方案保留旧字段，但让 EditorContext 混入非能力型、仅部分打开路径存在的元数据。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>旧 <code>ProjectFileLocator</code> 数据可继续传递，迁移较直观。</td></tr>
+        <tr><th>代价</th><td>字段对最近记录恢复、Fast Open 和多根场景可能为空或语义不同；容易再次被误用成 Core 路径解析入口。</td></tr>
+      </tbody></table>
+
+      <h3>方案 C：EditorContext 必须携带 ProjectFileLocator，ViewModel 继续调用 TryLoadFromFileAsync</h3>
+      <p>
+        这是上一轮概要隐含的方案：Provider 只提供项目根、工程文件和 locator，谱面/音频仍由 ViewModel 解析。
+        它改动最小，但交付的是半成品上下文，并直接违反 D1/D17 已确认的职责边界。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，不把 ProjectFileLocator 加入 EditorContext。</strong>
+        <p>
+          它确实是现有文件夹加载算法所需的临时解析参数，但应在 Provider 构造完整 <code>EditorFileAccessContext</code> 时被消费。
+          需要修正的是加载器分层，而不是让一次性 locator 穿过新的职责边界。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong><code>ProjectFileLocator</code> 不进入 <code>EditorContext</code>；Provider 使用它完成工程描述符相对依赖解析并构造完整
+        <code>EditorFileAccessContext</code>，ViewModel 统一只消费已绑定文件能力</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong><code>ProjectFileLocator</code> 不应该存在；音频文件、谱面文件和项目文件已经在
+        <code>EditorFileAccessContext</code> 中给出。<br>
+        <strong>审核归纳：</strong>用户否定的不只是给 <code>EditorContext</code> 新增 locator，而是运行时契约中存在
+        <code>ProjectFileLocator</code> 这一概念本身。平台 Provider 必须在构造上下文前完成工程文件解析、主文件定位、存在性与读写能力验证，
+        并直接交付 <code>ProjectFile</code>/<code>FumenFile</code>/<code>AudioFile</code>。ViewModel 不得再根据工程文件的根相对位置寻找主文件。
+        因此当前 <code>EditorProjectDataModel.ProjectFileLocator</code>、<code>FumenRescue</code> 写入的
+        <code>ProjectFileLocatorBase64</code> 元数据，以及以 locator 作为 Core 加载入口参数的形态都应在拆分实现中移除；
+        若 Provider 内部为候选显示或一次性扫描产生路径字符串，它也只是局部实现细节，不进入 EditorContext、项目模型、快照或恢复契约。<br>
+        <strong>最终决策 D22：</strong>运行时和恢复契约中不存在 <code>ProjectFileLocator</code>。Provider 向 Core 交付的
+        <code>EditorFileAccessContext</code> 已完整绑定项目、谱面和音频文件；<code>ViewModel.Load(EditorContext)</code> 统一只消费这些直接文件能力。
+        拆分实现删除现有模型属性、无读取方的救援元数据及依赖 locator 的 Core 加载签名，并将上下文构造与文件绑定完整收口到 Provider。
+      </div>
+    </section>
+
+    <section id="q23" class="question">
+      <div class="question-title">
+        <h2>Q23. FumenFilePath/AudioFilePath 应保留为持久化字段，还是也从项目模型删除？</h2>
+        <span class="state resolved">已确认</span>
+      </div>
+
+      <h3>问题来源：D22 删除运行时 locator，但 .nyagekiProj 仍需要描述下次如何取得依赖</h3>
+      <p>
+        D22 已确认 <code>ProjectFileLocator</code> 不应存在，因为运行时主文件已经由 <code>EditorFileAccessContext</code> 直接给出。
+        但当前项目格式 <code>EditorProjectDataModel_V0_5_2</code> 仍用 <code>[JsonInclude]</code> 序列化
+        <code>FumenFilePath</code> 与 <code>AudioFilePath</code>。这两个字段描述的是保存到 <code>.nyagekiProj</code> 中、供下一次打开时使用的依赖引用，
+        与“当前会话已经取得的文件句柄”不是同一种状态。需明确 D22 是否也要求删除这些持久化引用。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>它们属于现有项目文件格式</strong>
+          <code>AudioFilePath</code>/<code>FumenFilePath</code> 会被 <code>EditorProjectFileManager</code> 保存进 <code>.nyagekiProj</code>；
+          下次仅选择工程文件或工程目录时，Provider 需要读取这些引用才能取得对应文件能力
+        </div>
+        <div class="fact">
+          <strong>运行时不需要用它们重新查找文件</strong>
+          Provider 构造完 <code>EditorFileAccessContext</code> 后，ViewModel 和编辑器服务应直接使用 <code>FumenFile</code>/<code>AudioFile</code>；
+          路径字符串不参与当前会话的权限证明、所有权或 I/O
+        </div>
+        <div class="fact">
+          <strong>从句柄反推路径并不可靠</strong>
+          Browser 书签文件、独立 Storage File 和 Desktop 多根文件未必有可移植的本地路径；若删除持久化引用并在保存时从
+          <code>ISimpleFile.FullPath/LocalPath</code> 反推，会重新引入平台差异和路径歧义
+        </div>
+        <div class="fact">
+          <strong>现有写入逻辑仍需整改</strong>
+          旧 Setup 代码会把 <code>LocalPath ?? FullPath</code> 直接写入项目模型。新 Provider 应在构造/保存边界生成符合项目格式版本的引用，
+          但这不意味着 Core 在运行时按该字符串重新打开文件
+        </div>
+      </div>
+
+      <h3>方案 A：保留为 .nyagekiProj 的持久化引用，禁止作为运行时能力（推荐）</h3>
+      <p>
+        <code>FumenFilePath</code>/<code>AudioFilePath</code> 继续作为项目格式字段保存。Provider 打开项目时读取它们、取得文件能力并构造完整上下文；
+        上下文交付后，ViewModel 只使用文件句柄。保存项目时由已确认的保存策略维护这些引用，而不是从运行时路径临时猜测。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>保持项目格式可独立重开；清楚区分“持久化引用”和“运行时能力”；兼容 Browser 书签与 Desktop 多根。</td></tr>
+        <tr><th>代价</th><td>模型同时持有持久化字符串和上下文中的文件句柄，需要命名、注释和测试防止调用方误用。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：从项目模型删除两个路径字段，保存时从文件句柄反推</h3>
+      <p>
+        <code>.nyagekiProj</code> 不再保存谱面和音频引用，或在保存时根据当前句柄重新生成。这样运行时模型更纯，但会改变项目格式，
+        且对没有稳定本地路径的 Storage API 文件无法可靠生成下次可恢复的引用。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>消除字符串与句柄双重表示。</td></tr>
+        <tr><th>代价</th><td>破坏现有项目格式和直接打开能力；Browser/多根场景无法可靠反推引用；需要新的项目清单或书签持久化格式替代。</td></tr>
+      </tbody></table>
+
+      <h3>方案 C：保留路径字段，并允许 ViewModel 在运行时按路径重新解析</h3>
+      <p>
+        延续当前 <code>TryLoadFromFileAsync</code> 的混合职责。它改动较小，但会让路径字符串重新成为运行时能力入口，与 D1/D17/D22 冲突。
+      </p>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，保留持久化引用，但从运行时加载契约中隔离。</strong>
+        <p>
+          D22 删除的是多余的“工程文件自身定位符”和 Core 的二次查找职责，不应连带删除项目清单描述其谱面、音频依赖的能力。
+          两个字段只在 Provider 构造上下文与项目保存边界使用。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        是否采用方案 A：<strong><code>FumenFilePath</code>/<code>AudioFilePath</code> 继续作为 <code>.nyagekiProj</code> 的持久化引用存在，
+        但 Provider 构造出完整上下文后，ViewModel 与运行时服务只使用 <code>FumenFile</code>/<code>AudioFile</code> 文件能力，不再按路径字符串查找文件</strong>？
+      </p>
+
+      <div class="answer-slot">
+        <strong>用户回答：</strong>不保留，只从 <code>EditorFileAccessContext</code> 对应文件尝试加载。<br>
+        <strong>审核归纳：</strong>用户选择删除双重表示。<code>.nyagekiProj</code>、运行时项目模型、最近记录和恢复数据都不再保存
+        <code>FumenFilePath</code>/<code>AudioFilePath</code>；工程加载不再把任何字符串解释成谱面或音频定位入口。
+        Provider 必须在构造上下文阶段取得实际的 <code>ProjectFile</code>/<code>FumenFile</code>/<code>AudioFile</code>，
+        Core 的加载器只打开这些对象并解析内容。现有 <code>EditorProjectDataModel_V0_5_2</code> 的两个 <code>[JsonInclude]</code> 字段、
+        <code>TryLoadFromFileAsync</code> 的相对依赖解析、Setup 中写入 <code>LocalPath ?? FullPath</code> 的逻辑及依赖这两个字段的保存/迁移代码均需重构。<br>
+        <strong>最终决策 D23：</strong>删除 <code>FumenFilePath</code>/<code>AudioFilePath</code> 的项目格式与运行时契约。
+        <code>EditorFileAccessContext</code> 是项目、谱面、音频主文件绑定的唯一事实来源；加载、保存、自动保存和恢复只操作上下文中的文件能力，
+        不从项目数据反向寻找文件。该决定使旧项目兼容、格式版本和“首次打开如何取得主文件能力”成为必须后续确认的独立问题。
+      </div>
+    </section>
+
+    <section id="q24" class="question">
+      <div class="question-title">
+        <h2>Q24. 不再持久化主文件路径后，首次打开工程时 Provider 如何取得 FumenFile 与 AudioFile？</h2>
+        <span class="state">等待回答</span>
+      </div>
+
+      <h3>问题的完整背景</h3>
+      <p>
+        D22-D23 已把运行时和持久化路径全部移除：<code>.nyagekiProj</code> 不再说明谱面和音频位于何处，
+        而 <code>ViewModel.Load(EditorContext)</code> 又只接受已经完整绑定三个主文件的 <code>EditorFileAccessContext</code>。
+        因此，在没有最近记录快照的“冷打开”中，Provider 不能只得到一个项目文件就调用 Core；它必须通过另一种明确规则取得
+        <code>FumenFile</code> 和 <code>AudioFile</code>。
+      </p>
+      <p>
+        这个问题不影响两类已有完整上下文的入口：新建/Setup 本来就会要求用户提供主文件；最近记录快照 D14 已分别保存项目、谱面、音频书签。
+        真正受影响的是普通打开：用户选择项目文件夹并选择某个 <code>.nyagekiProj</code>，或 Desktop 直接选择一个
+        <code>.nyagekiProj</code>。项目文件自身已经不能告诉 Provider 应绑定哪些谱面和音频。
+      </p>
+
+      <div class="facts">
+        <div class="fact">
+          <strong>当前打开算法将失效</strong>
+          现有流程读取 <code>.nyagekiProj</code> 的 <code>FumenFilePath</code>/<code>AudioFilePath</code> 后在目录树内解析。
+          D23 删除这两个字段后，扫描到工程文件只能证明 ProjectFile，不能证明另外两个角色
+        </div>
+        <div class="fact">
+          <strong>目录中可能存在多个合法候选</strong>
+          一个项目文件夹可以包含多个难度谱面、备份谱面、不同格式音频、转换产物或多个工程。
+          仅按扩展名扫描可能得到多个可读文件，无法知道哪两个属于当前工程
+        </div>
+        <div class="fact">
+          <strong>文件名约定不是现有不变量</strong>
+          当前工程允许任意 <code>FumenFilePath</code>/<code>AudioFilePath</code>，并未要求与项目文件同名。
+          默认选择同名谱面、目录中第一个音频或最近修改文件都会改变既有语义，并可能静默打开错误内容
+        </div>
+        <div class="fact">
+          <strong>Browser 必须依赖已授权能力</strong>
+          Browser 不能在只选择单个项目文件后自行访问任意相邻文件；若选择整个目录，可以枚举候选，但仍需解决角色歧义。
+          独立文件选择器取得的文件也不能只靠路径字符串证明与项目目录的关系
+        </div>
+        <div class="fact">
+          <strong>最近记录只能解决后续打开</strong>
+          用户首次成功绑定后，D14 快照可保存三个文件书签并直接恢复；但最近记录不能为第一次打开凭空确定谱面和音频
+        </div>
+      </div>
+
+      <h3>方案 A：每次冷打开都显式确认谱面与音频绑定（最严格，推荐）</h3>
+      <p>
+        用户选择项目文件夹或 <code>.nyagekiProj</code> 后，Provider 打开“项目文件绑定”对话框，分别要求确认一个谱面文件和一个音频文件。
+        目录入口可以把已授权目录内、扩展名受支持的文件列为候选；Desktop 还可通过文件选择器补充外部文件。
+        即使各自只有一个候选，也在对话框中展示并要求确认，不根据数量自动作出业务关联。确认后 Provider 验证可读写性、格式、音频可解码性和所有权，
+        再构造完整上下文。最近记录恢复与当前会话内重复打开可跳过该对话框。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>完全符合 D22-D23；不会因目录内容变化静默换绑；用户始终知道当前工程使用哪份谱面和音频；所有平台语义一致。</td></tr>
+        <tr><th>代价</th><td>没有最近记录时，每次打开都至少多一次确认；包含大量文件的目录需要候选搜索、筛选和清晰的绑定 UI。</td></tr>
+        <tr><th>失败行为</th><td>缺少任一文件、用户取消、文件不可读写或格式验证失败时，不构造 EditorContext，不创建最近记录，释放本轮取得的全部候选能力。</td></tr>
+      </tbody></table>
+
+      <h3>方案 B：唯一候选自动绑定，零个或多个候选时再询问（体验折中）</h3>
+      <p>
+        Provider 枚举已授权目录中的受支持谱面和音频。如果某角色恰好只有一个候选则自动绑定；为零时要求用户另外选择；超过一个时显示选择对话框。
+        成功后同样通过最近记录快照保存三个文件能力。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>简单目录通常可直接打开；仍不需要在项目文件中持久化路径。</td></tr>
+        <tr><th>风险</th><td>“当前只有一个”不等于“它属于这个工程”；增加或删除无关文件会改变是否弹窗，错误目录中可能自动绑定到可解析但不相关的文件。</td></tr>
+        <tr><th>需要的保护</th><td>UI 必须在打开完成后明确显示绑定结果，并提供重新绑定入口；自动绑定也必须完成完整格式与可写性验证。</td></tr>
+      </tbody></table>
+
+      <h3>方案 C：采用文件名或目录结构约定自动发现（自动化优先）</h3>
+      <p>
+        例如优先选择与 <code>.nyagekiProj</code> 同名的 <code>.ogkr</code>/<code>.nyageki</code>，音频选择同名文件、固定名称或固定子目录；
+        不满足约定时再要求用户选择。该方案需要把命名规则提升为新的项目格式不变量，并决定大小写、多个扩展名、重命名和旧项目兼容行为。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>遵循约定的新项目打开最快；项目文件本身仍不保存路径。</td></tr>
+        <tr><th>风险</th><td>当前项目没有该约定；会改变旧项目语义，可能选错同名备份或转换产物；Desktop 多根和 Fast Open 很难共用同一规则。</td></tr>
+      </tbody></table>
+
+      <h3>方案 D：在项目文件中保存非路径身份信息，再扫描匹配</h3>
+      <p>
+        不保存路径，但为谱面和音频保存稳定 GUID、内容哈希或其他标识；Provider 扫描授权目录并匹配标识。
+        这能自动重绑定改名后的文件，但本质上仍让项目文件持久化“哪个文件属于工程”的映射，而且音频内容变化会使哈希失效，GUID 还需要写入或伴随目标文件。
+      </p>
+      <table><tbody>
+        <tr><th>优点</th><td>理论上可兼顾重命名与自动发现。</td></tr>
+        <tr><th>风险</th><td>复杂度最高；大文件哈希和全目录扫描成本高；新增身份协议可能违背“只从 EditorFileAccessContext 对应文件加载”的简化目标。</td></tr>
+      </tbody></table>
+
+      <div class="recommendation">
+        <strong>推荐答案：方案 A，冷打开时显式确认两个角色文件。</strong>
+        <p>
+          在完全不持久化关联信息的前提下，只有用户确认才能可靠建立“这个谱面和音频属于这个项目”的关系。
+          方案 B/C 都是在目录内容或命名上猜测；方案 D 则重新引入另一种持久化关联。方案 A 的额外交互可由最近记录快照抵消：首次绑定后，正常再次打开无需重复选择。
+        </p>
+      </div>
+
+      <h3>请确认的唯一问题</h3>
+      <p>
+        对于没有可用最近记录快照的普通打开，是否采用方案 A：<strong>Provider 在选定 <code>.nyagekiProj</code> 后始终显示文件绑定对话框，
+        由用户明确确认一个 <code>FumenFile</code> 和一个 <code>AudioFile</code>；不按唯一候选、文件名、修改时间或目录顺序自动关联，
+        成功验证并构造完整 <code>EditorFileAccessContext</code> 后才调用 ViewModel</strong>？
+      </p>
+
+      <div class="answer-slot">
+        等待用户回答后写入最终决策 D24。
       </div>
     </section>
 
@@ -708,20 +3622,36 @@ public sealed class EditorContext
       <h2>本轮代码依据</h2>
       <ul class="source-list">
         <li><a href="editor_file_access_context_refactory.md">docs/editor_file_access_context_refactory.md</a></li>
-        <li><a href="fumen-visual-editor-project-folder-io-design.md">docs/fumen-visual-editor-project-folder-io-design.md</a>：D1、D30-D40。</li>
+        <li><a href="fumen-visual-editor-project-folder-io-design.md">docs/fumen-visual-editor-project-folder-io-design.md</a>：D1、D18-D21、D30-D40。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs">FumenVisualEditorProvider.cs</a>：当前 Provider 注册、转发和最近记录校验。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ProjectIO.cs">FumenVisualEditorViewModel.ProjectIO.cs</a>：当前文件夹选择、扫描、书签恢复和加载流程。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs">EditorProjectDataUtils.cs</a>：当前单根依赖解析。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectDataModel.cs">EditorProjectDataModel.cs</a>：当前运行时句柄所有权。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectFiles/EditorProjectDataModel_V0_5_2.cs">EditorProjectDataModel_V0_5_2.cs</a>：当前项目格式中的 <code>FumenFilePath</code>/<code>AudioFilePath</code> 持久化字段。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs">FumenRescue.cs</a>：当前唯一写入 <code>ProjectFileLocator</code> 救援元数据的位置。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/SimpleFileSystem/Impl/AvaloniaStorageProvider/AvaloniaStorageProviderSimpleDirectory.cs">AvaloniaStorageProviderSimpleDirectory.cs</a>：目录根对子目录和子文件的递归所有权。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/SimpleFileSystem/Impl/AvaloniaStorageProvider/AvaloniaStorageProviderFileSystemBuilder.cs">AvaloniaStorageProviderFileSystemBuilder.cs</a>：Storage Folder 树的所有权转交。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/DocumentOpenHelper.cs">DocumentOpenHelper.cs</a>：遗留 Fast Open 数据构造路径。</li>
         <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/IEditorProvider.cs">IEditorProvider.cs</a>：框架 Provider 契约。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/OngekiFumenEditorApp.cs">OngekiFumenEditorApp.cs</a>：共享服务组合根。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditorDesktopApp.cs">OngekiFumenEditorDesktopApp.cs</a>：Desktop 宿主服务注册。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditorBrowserApp.cs">OngekiFumenEditorBrowserApp.cs</a>：Browser 宿主服务注册。</li>
+        <li><a href="../Dependencies/Gekimini.Avalonia/Dependencies/Injectio/src/Injectio.Generators/ServiceRegistrationWriter.cs">ServiceRegistrationWriter.cs</a>：Injectio 的 Append/Replace/TryAdd 注册策略。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs">FumenVisualEditorProvider.cs</a>：当前共享 Provider 的双接口注册。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/FumenVisualEditorRecentRecordData.cs">FumenVisualEditorRecentRecordData.cs</a>：当前版本 1 最近数据仅保存单个目录书签和工程定位符。</li>
+        <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/RecentRecordInfo.cs">RecentRecordInfo.cs</a>：框架最近记录的显示信封与稳定 <code>RecordId</code>。</li>
+        <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/IEditorRecentFilesManager.cs">IEditorRecentFilesManager.cs</a>：以记录 ID 管理 Provider 专用二进制数据和失效状态的接口。</li>
+        <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/Commands/OpenRecentFileCommandHandler.cs">OpenRecentFileCommandHandler.cs</a>：最近项先异步校验、点击时强制复验并交给当前 Provider 打开的流程。</li>
+        <li><a href="../tests/OngekiFumenEditor.Avalonia.Tests/Modules/FumenVisualEditor/EditorProjectLoadOwnershipTests.cs">EditorProjectLoadOwnershipTests.cs</a>：当前加载失败时根目录与子文件释放边界。</li>
+        <li><a href="../../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs">WPF FumenVisualEditorViewModel.cs</a>：旧新建文档与首次保存工程文件的交互基线。</li>
+        <li><a href="../../OngekiFumenEditor/Utils/DocumentOpenHelper.cs">WPF DocumentOpenHelper.cs</a>：旧 Fast Open 的无工程文件数据构造与打开流程。</li>
       </ul>
     </section>
   </main>
 
   <footer>
     <div class="inner">
-      实时审核文档。最后更新：2026-08-12，Q1 已确认，Q2 等待用户回答。
+      实时审核文档。最后更新：2026-08-14，Q1-Q23 已确认，Q24 等待回答。
     </div>
   </footer>
 </body>

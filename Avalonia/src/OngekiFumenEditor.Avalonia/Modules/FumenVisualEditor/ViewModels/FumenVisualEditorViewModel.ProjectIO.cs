@@ -35,7 +35,6 @@ public partial class FumenVisualEditorViewModel
         try
         {
             var folderDisplayName = selectedFolder.Name;
-            var folderBookmark = await TrySaveFolderBookmarkAsync(selectedFolder);
 
             using (await EditorProjectIoGate.EnterAsync())
             {
@@ -63,22 +62,14 @@ public partial class FumenVisualEditorViewModel
             var selectedProject = candidates.Single(x => x.Locator == selectedLocator);
             var rootForLoad = projectRoot;
             projectRoot = null;
-            var projectData = await LoadProjectAsync(rootForLoad, selectedProject.File, selectedLocator);
-            if (projectData is null)
+            var projectContext = await LoadProjectAsync(rootForLoad, selectedProject.File, selectedLocator);
+            if (projectContext is null)
                 return false;
 
-            if (!string.IsNullOrWhiteSpace(folderBookmark))
-            {
-                var recentData = new FumenVisualEditorRecentRecordData
-                {
-                    FolderBookmark = folderBookmark,
-                    ProjectFileLocator = selectedLocator
-                };
-                projectData.RecentRecordId = StoreRecentProject(
-                    selectedProject.File.FileName,
-                    BuildLocationDescription(folderDisplayName, selectedLocator),
-                    recentData);
-            }
+            await TryStoreRecentFromContextAsync(
+                projectContext,
+                selectedProject.File.FileName,
+                BuildLocationDescription(folderDisplayName, selectedLocator));
 
             return true;
         }
@@ -99,7 +90,7 @@ public partial class FumenVisualEditorViewModel
 
     public virtual async Task<bool> Load(RecentRecordInfo recordInfo)
     {
-        if (!TryReadRecentData(recordInfo, out var recentData))
+        if (!TryReadSnapshot(recordInfo, out var snapshot))
         {
             MarkPermanentlyInvalid(recordInfo);
             await ShowInvalidRecentProjectAsync();
@@ -110,53 +101,33 @@ public partial class FumenVisualEditorViewModel
         if (storageProvider is null)
             return false;
 
-        IStorageFolder? storageFolder = null;
-        ISimpleDirectory? projectRoot = null;
         try
         {
             using (await EditorProjectIoGate.EnterAsync())
             {
-                storageFolder = await storageProvider.OpenFolderBookmarkAsync(recentData!.FolderBookmark);
-                if (storageFolder is null)
+                EditorFileAccessContext context;
+                try
                 {
+                    context = await snapshot!.ToContextAsync(storageProvider);
+                }
+                catch (Exception exception) when (exception is IOException or InvalidDataException)
+                {
+                    Log.LogWarn($"Recent project {recordInfo.RecordId:N} can no longer be restored: {exception.Message}");
                     MarkPermanentlyInvalid(recordInfo);
+                    await ShowInvalidRecentProjectAsync();
                     return false;
                 }
 
-                var transferredFolder = storageFolder;
-                storageFolder = null;
-                projectRoot = await AvaloniaStorageProviderFileSystemBuilder
-                    .LoadFromAvaloniaStorageFolder(transferredFolder);
-
-                if (!EditorProjectPathResolver.TryFindFile(
-                        projectRoot,
-                        recentData.ProjectFileLocator,
-                        out var projectFile,
-                        out var actualLocator,
-                        out _)
-                    || !actualLocator.EndsWith(
-                        FumenVisualEditorProvider.FILE_EXTENSION_NAME,
-                        StringComparison.OrdinalIgnoreCase))
-                {
-                    MarkPermanentlyInvalid(recordInfo);
-                    return false;
-                }
-
-                var rootForLoad = projectRoot;
-                projectRoot = null;
-                var projectData = await LoadProjectWithoutGateAsync(
-                    rootForLoad,
-                    projectFile!,
-                    actualLocator);
-                if (projectData is null)
+                var projectContext = await LoadProjectFromContextWithoutGateAsync(context);
+                if (projectContext is null)
                     return false;
 
                 var updated = RecentFilesManager.UpdateRecent(
                     recordInfo.RecordId,
-                    projectFile!.FileName,
+                    projectContext.ProjectFile?.FileName ?? recordInfo.LocationDescription,
                     recordInfo.LocationDescription,
-                    FumenVisualEditorRecentRecordData.Serialize(recentData));
-                projectData.RecentRecordId = updated.RecordId;
+                    snapshot.Serialize());
+                projectContext.RecentRecordId = updated.RecordId;
                 return true;
             }
         }
@@ -168,14 +139,9 @@ public partial class FumenVisualEditorViewModel
                 DialogMessageType.Error);
             return false;
         }
-        finally
-        {
-            projectRoot?.Dispose();
-            storageFolder?.Dispose();
-        }
     }
 
-    private async Task<EditorProjectDataModel?> LoadProjectAsync(
+    private async Task<EditorContext?> LoadProjectAsync(
         ISimpleDirectory projectRoot,
         ISimpleFile projectFile,
         string projectLocator)
@@ -184,29 +150,76 @@ public partial class FumenVisualEditorViewModel
         return await LoadProjectWithoutGateAsync(projectRoot, projectFile, projectLocator);
     }
 
-    private async Task<EditorProjectDataModel?> LoadProjectWithoutGateAsync(
+    private async Task<EditorContext?> LoadProjectWithoutGateAsync(
         ISimpleDirectory projectRoot,
         ISimpleFile projectFile,
         string projectLocator)
     {
-        EditorProjectDataModel? projectData = null;
+        EditorContext? projectContext = null;
         try
         {
-            projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(
+            projectContext = await EditorProjectDataUtils.TryLoadFromFileAsync(
                 projectRoot,
                 projectFile,
                 projectLocator);
-            if (await LoadProjectAsync(projectData, projectLocator))
-                return projectData;
+            if (await LoadProjectAsync(projectContext, projectLocator))
+                return projectContext;
 
-            projectData.DisposeRuntimeFiles();
+            projectContext.Dispose();
             return null;
         }
         catch
         {
-            projectData?.DisposeRuntimeFiles();
+            projectContext?.Dispose();
             throw;
         }
+    }
+
+    private async Task<EditorContext?> LoadProjectFromContextWithoutGateAsync(
+        EditorFileAccessContext context)
+    {
+        // TryLoadFromContextAsync consumes the context: it disposes the context on its own
+        // failure and transfers ownership into the returned EditorContext on success. From
+        // that point the EditorContext dispose releases the restored handles.
+        var projectContext = await EditorProjectDataUtils.TryLoadFromContextAsync(context);
+        try
+        {
+            if (await LoadProjectAsync(projectContext, projectContext.ProjectFile?.FileName ?? string.Empty))
+                return projectContext;
+
+            projectContext.Dispose();
+            return null;
+        }
+        catch
+        {
+            projectContext.Dispose();
+            throw;
+        }
+    }
+
+    private async Task TryStoreRecentFromContextAsync(
+        EditorContext projectContext,
+        string projectName,
+        string locationDescription)
+    {
+        var context = projectContext.FileAccessContext;
+        if (context is null)
+            return;
+
+        EditorFileAccessContextSnapshot snapshot;
+        try
+        {
+            snapshot = await context.ToSnapshotAsync();
+        }
+        catch (Exception exception)
+        {
+            // Bookmarks are unavailable on this platform or for this folder; per the recent-project
+            // policy this does not fail the open, it only skips creating a recent record.
+            Log.LogWarn($"The opened project could not be bookmarked for the recent list: {exception.Message}");
+            return;
+        }
+
+        projectContext.RecentRecordId = StoreRecentProject(projectName, locationDescription, snapshot);
     }
 
     private async Task<string?> SelectProjectLocatorAsync(
@@ -223,15 +236,14 @@ public partial class FumenVisualEditorViewModel
     private Guid StoreRecentProject(
         string projectName,
         string locationDescription,
-        FumenVisualEditorRecentRecordData recentData)
+        EditorFileAccessContextSnapshot snapshot)
     {
-        var serialized = FumenVisualEditorRecentRecordData.Serialize(recentData);
+        var serialized = snapshot.Serialize();
         var fileType = FumenVisualEditorProvider.SupportFileTypes[0];
         var existing = RecentFilesManager.RecentRecordInfos.FirstOrDefault(record =>
             record.EditorFileTypeId.Equals(fileType.Id, StringComparison.OrdinalIgnoreCase) &&
-            TryReadRecentData(record, out var stored) &&
-            stored!.FolderBookmark.Equals(recentData.FolderBookmark, StringComparison.Ordinal) &&
-            stored.ProjectFileLocator.Equals(recentData.ProjectFileLocator, StringComparison.OrdinalIgnoreCase));
+            TryReadSnapshot(record, out var stored) &&
+            IsSameProjectIdentity(stored!, snapshot));
 
         return existing is null
             ? RecentFilesManager.PostRecent(
@@ -246,20 +258,35 @@ public partial class FumenVisualEditorViewModel
                 serialized).RecordId;
     }
 
-    private bool TryReadRecentData(
+    // D38: only reuse an existing record when the project identity is provably identical.
+    // Bookmarks are opaque; equal opaque values prove sameness, but different values never
+    // prove difference, so unequal bookmarks simply create an independent recent record.
+    private static bool IsSameProjectIdentity(
+        EditorFileAccessContextSnapshot stored,
+        EditorFileAccessContextSnapshot candidate) =>
+        string.Equals(
+            stored.ProjectDirectoryBookmark,
+            candidate.ProjectDirectoryBookmark,
+            StringComparison.Ordinal) &&
+        string.Equals(
+            stored.ProjectFileBookmark ?? string.Empty,
+            candidate.ProjectFileBookmark ?? string.Empty,
+            StringComparison.Ordinal);
+
+    private bool TryReadSnapshot(
         RecentRecordInfo recordInfo,
-        out FumenVisualEditorRecentRecordData? recentData)
+        out EditorFileAccessContextSnapshot? snapshot)
     {
         try
         {
-            return FumenVisualEditorRecentRecordData.TryDeserialize(
+            return EditorFileAccessContextSnapshot.TryDeserialize(
                 RecentFilesManager.ReadData(recordInfo),
-                out recentData);
+                out snapshot);
         }
         catch (Exception exception)
         {
             Log.LogWarn($"Recent project data is invalid for record {recordInfo.RecordId:N}: {exception.Message}");
-            recentData = null;
+            snapshot = null;
             return false;
         }
     }
@@ -273,23 +300,6 @@ public partial class FumenVisualEditorViewModel
         catch (Exception exception)
         {
             Log.LogWarn($"Unable to persist invalid state for recent record {recordInfo.RecordId:N}: {exception.Message}");
-        }
-    }
-
-    private static async Task<string?> TrySaveFolderBookmarkAsync(IStorageFolder folder)
-    {
-        if (!folder.CanBookmark)
-            return null;
-
-        try
-        {
-            var bookmark = await folder.SaveBookmarkAsync();
-            return string.IsNullOrWhiteSpace(bookmark) ? null : bookmark;
-        }
-        catch (Exception exception)
-        {
-            Log.LogWarn($"The selected project folder could not be bookmarked: {exception.Message}");
-            return null;
         }
     }
 
