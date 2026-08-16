@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.Documents;
 using Gekimini.Avalonia.Framework.Languages;
+using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Framework.UndoRedo;
 using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using Gekimini.Avalonia.Modules.Shell.Commands;
@@ -150,6 +151,18 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         OnPropertyChanged(nameof(DisplayName));
         UpdateTitle();
     }
+
+    public virtual Task<bool> New()
+    {
+        Log.LogWarn("FumenVisualEditor does not currently support creating a project without an existing project folder.");
+        return Task.FromResult(false);
+    }
+
+    Task<bool> IPersistedDocumentViewModel.Load() =>
+        IoC.Get<IFumenVisualEditorProvider>().TryOpen(this);
+
+    Task<bool> IPersistedDocumentViewModel.Load(RecentRecordInfo recordInfo) =>
+        IoC.Get<IFumenVisualEditorProvider>().TryOpen(this, recordInfo);
 
     internal async Task<bool> LoadProjectAsync(EditorContext context, string sourcePath)
     {
@@ -415,4 +428,3 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         EditorContext = null;
     }
 }
-

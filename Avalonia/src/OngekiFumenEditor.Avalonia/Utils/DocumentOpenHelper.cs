@@ -95,7 +95,7 @@ internal static class DocumentOpenHelper
         ArgumentNullException.ThrowIfNull(ogkrFile);
 
 #if ENABLE_CROSS_PLATFORM_FAST_OPEN
-        EditorProjectDataModel newProj = null;
+        EditorContext newProj = null;
         var ownershipTransferred = false;
         try
         {
@@ -360,4 +360,3 @@ internal static class DocumentOpenHelper
             (t.Patterns ?? []).Any(p => p.EndsWith(ext, StringComparison.OrdinalIgnoreCase))));
     }
 }
-

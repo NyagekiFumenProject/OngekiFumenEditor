@@ -7,25 +7,19 @@ using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 
-namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
+namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 
-public partial class FumenVisualEditorViewModel
+internal partial class FumenVisualEditorProvider
 {
-    private IEditorRecentFilesManager RecentFilesManager => IoC.Get<IEditorRecentFilesManager>();
     private IDialogManager DialogManager => IoC.Get<IDialogManager>();
 
-    public virtual Task<bool> New()
-    {
-        Log.LogWarn("FumenVisualEditor does not currently support creating a project without an existing project folder.");
-        return Task.FromResult(false);
-    }
-
-    public virtual async Task<bool> Load()
+    private async Task<bool> OpenFromFolderAsync(FumenVisualEditorViewModel editor)
     {
         IStorageFolder? selectedFolder = await FileDialogHelper.OpenStorageFolderAsync("Open project folder");
         if (selectedFolder is null)
@@ -46,7 +40,7 @@ public partial class FumenVisualEditorViewModel
 
             var candidates = EditorProjectPathResolver.FindProjectFiles(
                 projectRoot,
-                FumenVisualEditorProvider.FILE_EXTENSION_NAME);
+                FILE_EXTENSION_NAME);
             if (candidates.Count == 0)
             {
                 await DialogManager.ShowMessageDialog(
@@ -62,15 +56,22 @@ public partial class FumenVisualEditorViewModel
             var selectedProject = candidates.Single(x => x.Locator == selectedLocator);
             var rootForLoad = projectRoot;
             projectRoot = null;
-            var projectContext = await LoadProjectAsync(rootForLoad, selectedProject.File, selectedLocator);
-            if (projectContext is null)
-                return false;
+
+            EditorContext projectContext;
+            using (await EditorProjectIoGate.EnterAsync())
+            {
+                projectContext = await EditorProjectDataUtils.TryLoadFromFileAsync(
+                    rootForLoad,
+                    selectedProject.File,
+                    selectedLocator);
+                if (!await TryTransferContextToEditorAsync(editor, projectContext, selectedLocator))
+                    return false;
+            }
 
             await TryStoreRecentFromContextAsync(
                 projectContext,
                 selectedProject.File.FileName,
                 BuildLocationDescription(folderDisplayName, selectedLocator));
-
             return true;
         }
         catch (Exception exception)
@@ -88,7 +89,9 @@ public partial class FumenVisualEditorViewModel
         }
     }
 
-    public virtual async Task<bool> Load(RecentRecordInfo recordInfo)
+    private async Task<bool> OpenFromRecentAsync(
+        FumenVisualEditorViewModel editor,
+        RecentRecordInfo recordInfo)
     {
         if (!TryReadSnapshot(recordInfo, out var snapshot))
         {
@@ -105,10 +108,10 @@ public partial class FumenVisualEditorViewModel
         {
             using (await EditorProjectIoGate.EnterAsync())
             {
-                EditorFileAccessContext context;
+                EditorFileAccessContext fileAccessContext;
                 try
                 {
-                    context = await snapshot!.ToContextAsync(storageProvider);
+                    fileAccessContext = await snapshot!.ToContextAsync(storageProvider);
                 }
                 catch (Exception exception) when (exception is IOException or InvalidDataException)
                 {
@@ -118,16 +121,19 @@ public partial class FumenVisualEditorViewModel
                     return false;
                 }
 
-                var projectContext = await LoadProjectFromContextWithoutGateAsync(context);
-                if (projectContext is null)
+                // TryLoadFromContextAsync consumes the context: it disposes the context on its own
+                // failure and transfers ownership into the returned EditorContext on success. From
+                // that point the EditorContext dispose releases the restored handles.
+                var projectContext = await EditorProjectDataUtils.TryLoadFromContextAsync(fileAccessContext);
+                if (!await TryTransferContextToEditorAsync(
+                        editor,
+                        projectContext,
+                        projectContext.ProjectFile?.FileName ?? string.Empty))
+                {
                     return false;
+                }
 
-                var updated = RecentFilesManager.UpdateRecent(
-                    recordInfo.RecordId,
-                    projectContext.ProjectFile?.FileName ?? recordInfo.LocationDescription,
-                    recordInfo.LocationDescription,
-                    snapshot.Serialize());
-                projectContext.RecentRecordId = updated.RecordId;
+                TryUpdateRecentProject(recordInfo, snapshot, projectContext);
                 return true;
             }
         }
@@ -141,60 +147,59 @@ public partial class FumenVisualEditorViewModel
         }
     }
 
-    private async Task<EditorContext?> LoadProjectAsync(
-        ISimpleDirectory projectRoot,
-        ISimpleFile projectFile,
-        string projectLocator)
+    public async Task<bool> CheckIsValid(RecentRecordInfo recordInfo)
     {
-        using var ioLease = await EditorProjectIoGate.EnterAsync();
-        return await LoadProjectWithoutGateAsync(projectRoot, projectFile, projectLocator);
-    }
+        if (!TryReadSnapshot(recordInfo, out var snapshot))
+        {
+            MarkPermanentlyInvalid(recordInfo);
+            return false;
+        }
 
-    private async Task<EditorContext?> LoadProjectWithoutGateAsync(
-        ISimpleDirectory projectRoot,
-        ISimpleFile projectFile,
-        string projectLocator)
-    {
-        EditorContext? projectContext = null;
+        var storageProvider = TryGetStorageProvider();
+        if (storageProvider is null)
+            return false;
+
         try
         {
-            projectContext = await EditorProjectDataUtils.TryLoadFromFileAsync(
-                projectRoot,
-                projectFile,
-                projectLocator);
-            if (await LoadProjectAsync(projectContext, projectLocator))
-                return projectContext;
+            using var ioLease = await EditorProjectIoGate.EnterAsync();
+            using var context = await snapshot!.ToContextAsync(storageProvider);
+            return true;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException)
+        {
+            Log.LogWarn($"Recent project {recordInfo.RecordId:N} is no longer valid: {exception.Message}");
+            MarkPermanentlyInvalid(recordInfo);
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception exception)
+        {
+            Log.LogWarn($"Recent project validation temporarily failed for record {recordInfo.RecordId:N}: {exception.Message}");
+            return false;
+        }
+    }
 
-            projectContext.Dispose();
-            return null;
+    private static async Task<bool> TryTransferContextToEditorAsync(
+        FumenVisualEditorViewModel editor,
+        EditorContext context,
+        string sourcePath)
+    {
+        try
+        {
+            if (await editor.LoadProjectAsync(context, sourcePath))
+                return true;
         }
         catch
         {
-            projectContext?.Dispose();
+            context.Dispose();
             throw;
         }
-    }
 
-    private async Task<EditorContext?> LoadProjectFromContextWithoutGateAsync(
-        EditorFileAccessContext context)
-    {
-        // TryLoadFromContextAsync consumes the context: it disposes the context on its own
-        // failure and transfers ownership into the returned EditorContext on success. From
-        // that point the EditorContext dispose releases the restored handles.
-        var projectContext = await EditorProjectDataUtils.TryLoadFromContextAsync(context);
-        try
-        {
-            if (await LoadProjectAsync(projectContext, projectContext.ProjectFile?.FileName ?? string.Empty))
-                return projectContext;
-
-            projectContext.Dispose();
-            return null;
-        }
-        catch
-        {
-            projectContext.Dispose();
-            throw;
-        }
+        context.Dispose();
+        return false;
     }
 
     private async Task TryStoreRecentFromContextAsync(
@@ -206,20 +211,38 @@ public partial class FumenVisualEditorViewModel
         if (context is null)
             return;
 
-        EditorFileAccessContextSnapshot snapshot;
         try
         {
-            snapshot = await context.ToSnapshotAsync();
+            var snapshot = await context.ToSnapshotAsync();
+            projectContext.RecentRecordId = StoreRecentProject(projectName, locationDescription, snapshot);
         }
         catch (Exception exception)
         {
             // Bookmarks are unavailable on this platform or for this folder; per the recent-project
             // policy this does not fail the open, it only skips creating a recent record.
-            Log.LogWarn($"The opened project could not be bookmarked for the recent list: {exception.Message}");
-            return;
+            // Recent-list persistence failures follow the same non-fatal policy.
+            Log.LogWarn($"The opened project could not be stored in the recent list: {exception.Message}");
         }
+    }
 
-        projectContext.RecentRecordId = StoreRecentProject(projectName, locationDescription, snapshot);
+    private void TryUpdateRecentProject(
+        RecentRecordInfo recordInfo,
+        EditorFileAccessContextSnapshot snapshot,
+        EditorContext projectContext)
+    {
+        try
+        {
+            var updated = RecentFilesManager.UpdateRecent(
+                recordInfo.RecordId,
+                projectContext.ProjectFile?.FileName ?? recordInfo.LocationDescription,
+                recordInfo.LocationDescription,
+                snapshot.Serialize());
+            projectContext.RecentRecordId = updated.RecordId;
+        }
+        catch (Exception exception)
+        {
+            Log.LogWarn($"Unable to update recent project record {recordInfo.RecordId:N}: {exception.Message}");
+        }
     }
 
     private async Task<string?> SelectProjectLocatorAsync(
@@ -239,7 +262,7 @@ public partial class FumenVisualEditorViewModel
         EditorFileAccessContextSnapshot snapshot)
     {
         var serialized = snapshot.Serialize();
-        var fileType = FumenVisualEditorProvider.SupportFileTypes[0];
+        var fileType = SupportFileTypes[0];
         var existing = RecentFilesManager.RecentRecordInfos.FirstOrDefault(record =>
             record.EditorFileTypeId.Equals(fileType.Id, StringComparison.OrdinalIgnoreCase) &&
             TryReadSnapshot(record, out var stored) &&

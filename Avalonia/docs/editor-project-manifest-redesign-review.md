@@ -897,6 +897,7 @@ Manifest 加载器只验证，不自动修正。创建项目、修改 binding �
   - 新增运行时上下文 `EditorContext`（`Models/EditorContext.cs`）：持有 `ProjectData`、`Fumen`、`FileAccessContext`、`ProjectFileLocator`、`RecentRecordId` 与 `BaseBPM`，`Dispose()` 释放谱面 SVG prefab 与文件能力。
   - 加载（`TryLoadFromFileAsync` / `TryLoadFromContextAsync`）、保存（`TrySaveEditorAsync` / `TrySaveProjFileAsync` / `TrySaveFumenFileAsync`）、`FumenVisualEditorViewModel`（新增 `EditorContext` 属性，`IsNew`/`Save`/`Dispose` 改走上下文）、Setup 对话框、`DocumentOpenHelper`、`FumenRescue`、自动保存与最近记录逻辑全部迁移到 `EditorContext`。
   - 持久化契约冻结：`.nyagekiProj` 序列化字段与 `0.5.4` 版本号不变，被移除成员均为 `[JsonIgnore]` 运行时成员；相关测试（440 项）全部通过。
+- 将项目打开编排迁移到 `FumenVisualEditorProvider`：Provider 负责目录选择、项目定位、书签恢复、`EditorContext` 构造与最近记录维护，`FumenVisualEditorViewModel` 只接收并持有完整上下文；VM 对 `IPersistedDocumentViewModel.Load` 的显式实现仅转发到 Provider，不再保留独立打开入口，并为快速打开补充直接传入 `EditorContext` 的 Provider 契约。
 
 ### 2026-08-14
 
