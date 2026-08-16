@@ -288,9 +288,9 @@
         本文档在每次回答后实时更新；未确认内容不会被写成最终结论。
       </p>
       <div class="meta">
-        <span class="status">访谈进行中：Q23 已确认，Q24 等待回答；正在确定首次打开时的主文件绑定流程</span>
+        <span class="status">审核完成：Q1-Q24 已确认；D22-D24 已于 2026-08-17 实现</span>
         <span>创建日期：2026-08-12</span>
-        <span>当前问题：无持久化路径时 Provider 如何构造完整文件上下文</span>
+        <span>当前状态：项目格式 0.5.5；冷打开显式绑定谱面与音频；旧 0.5.2/0.5.4 可迁移读取</span>
       </div>
     </div>
   </header>
@@ -303,12 +303,16 @@
         <li>能从代码、测试或既有设计文档确认的事实，由审核直接核验，不反问用户。</li>
         <li>每题必须说明触发原因、方案差异、连锁影响和推荐答案，并尽量给出代码或流程示意。</li>
         <li>用户回答后，先详细归纳其含义、边界与后续影响，再把结论写入本文档并进入下一题。</li>
-        <li>本文只完善和审核设计；除非用户另行要求，不实施生产代码重构。</li>
+        <li>本文记录设计决策及后续实现核验；生产代码只在用户另行要求后修改，并在对应问题下标注实施状态。</li>
       </ul>
     </section>
 
     <section id="baseline">
-      <h2>已核验基线</h2>
+      <h2>2026-08-12 已核验基线（历史）</h2>
+      <p>
+        下表及各问题背景中的“当前”“现有”均指 2026-08-12 至 2026-08-14 的审核时点，用于解释问题来源，不代表 2026-08-17 的当前实现；
+        D22-D24 的最终状态见本文末尾对应问题及实施说明。
+      </p>
       <table>
         <thead>
           <tr>
@@ -570,11 +574,15 @@ Q23 FumenFilePath/AudioFilePath 是持久化字段还是运行时查找入口？
        v
 Q24 首次从 .nyagekiProj 或项目文件夹打开时，Provider 如何取得 FumenFile/AudioFile？
 
- +-- 等待确认：需要选择显式绑定、唯一候选自动绑定或其他发现策略
+ +-- 已确认：冷打开时始终显式确认一个谱面文件和一个音频文件
+       |
+       +-- 即使候选唯一也不自动绑定，不按文件名、时间或目录顺序猜测
+       |
+       +-- 已实现 ProjectFileBindingDialog；确认后才构造完整 EditorFileAccessContext
        |
        v
-随后进入（实现阶段，非单题问询）：执行 D17-D24 拆分 ->
-New/Setup 实现 -> 保存/另存为与快照刷新 -> 测试与迁移顺序</code></pre>
+D22-D24 实施完成：删除 locator 与最新版路径字段 ->
+0.5.2/0.5.4 兼容迁移到 0.5.5 -> 冷打开显式绑定 -> 全量测试与条件构建验证</code></pre>
     </section>
 
     <section id="q1" class="question">
@@ -3417,6 +3425,13 @@ internal sealed record RecoveryRoleBinding(
         <code>EditorFileAccessContext</code> 已完整绑定项目、谱面和音频文件；<code>ViewModel.Load(EditorContext)</code> 统一只消费这些直接文件能力。
         拆分实现删除现有模型属性、无读取方的救援元数据及依赖 locator 的 Core 加载签名，并将上下文构造与文件绑定完整收口到 Provider。
       </div>
+
+      <div class="notice">
+        <strong>实施状态（2026-08-17，提交 0667b2d9）</strong>
+        <code>EditorContext.ProjectFileLocator</code>、<code>FumenRescue.ProjectFileLocatorBase64</code> 和
+        <code>EditorProjectDataUtils.TryLoadFromFileAsync(..., locator)</code> 已删除。工程加载只保留
+        <code>TryLoadFromContextAsync(EditorFileAccessContext)</code>；Provider 在调用 Core 前完成文件选择、ACB/AWB 补充绑定和上下文所有权转交。
+      </div>
     </section>
 
     <section id="q23" class="question">
@@ -3506,12 +3521,19 @@ internal sealed record RecoveryRoleBinding(
         <code>EditorFileAccessContext</code> 是项目、谱面、音频主文件绑定的唯一事实来源；加载、保存、自动保存和恢复只操作上下文中的文件能力，
         不从项目数据反向寻找文件。该决定使旧项目兼容、格式版本和“首次打开如何取得主文件能力”成为必须后续确认的独立问题。
       </div>
+
+      <div class="notice">
+        <strong>实施状态（2026-08-17，提交 0667b2d9）</strong>
+        最新 <code>EditorProjectDataModel</code> 版本已升为 <code>0.5.5</code>，序列化结果不包含两个路径字段。
+        <code>0.5.2</code> 与 <code>0.5.4</code> DTO 仅作为旧文件读取契约保留；迁移时丢弃旧路径，内存模型和后续保存统一使用无路径的 <code>0.5.5</code>。
+        Setup、Fast Open、音频调整和救援逻辑均改为读取当前上下文中的实际文件能力。
+      </div>
     </section>
 
     <section id="q24" class="question">
       <div class="question-title">
         <h2>Q24. 不再持久化主文件路径后，首次打开工程时 Provider 如何取得 FumenFile 与 AudioFile？</h2>
-        <span class="state">等待回答</span>
+        <span class="state resolved">已确认</span>
       </div>
 
       <h3>问题的完整背景</h3>
@@ -3614,21 +3636,35 @@ internal sealed record RecoveryRoleBinding(
       </p>
 
       <div class="answer-slot">
-        等待用户回答后写入最终决策 D24。
+        <strong>用户后续指示：</strong>按顺序全部实现。实施采用本题推荐的方案 A。<br>
+        <strong>审核归纳：</strong>没有可用最近记录快照时，Provider 在用户选定工程描述符后必须显示项目文件绑定对话框；
+        用户明确选择一个受支持的谱面文件和一个音频文件后才能继续。即使目录内各自只有一个候选也不预选、不自动关联；
+        用户可以通过 StorageProvider 文件选择器补充目录外文件。取消、缺少角色文件或验证失败时不构造编辑器上下文，并释放本轮仍由对话框或 Provider 持有的文件能力。<br>
+        <strong>最终决策 D24：</strong>冷打开采用显式绑定。Provider 不使用唯一候选、同名、修改时间或目录顺序猜测业务关联；
+        只有在项目、谱面、音频及需要时的外置 AWB 全部取得并验证后，才把完整 <code>EditorFileAccessContext</code> 交给 Core。
+        最近记录快照已经包含直接文件书签时，可沿恢复路径跳过该对话框。<br>
+        <strong>实施状态（2026-08-17，提交 0667b2d9）：</strong>新增 <code>ProjectFileBindingDialogView</code> 与
+        <code>ProjectFileBindingDialogViewModel</code>；现有项目文件夹 <code>TryOpen</code> 流程会扫描候选、要求显式确认并通过
+        <code>TryLoadFromContextAsync</code> 加载。外部 ACB 会优先绑定其明确声明且可取得的 AWB，否则要求再次显式选择。
+        当前共享 Provider 尚未另行暴露 Desktop“直接选择单个 <code>.nyagekiProj</code>”入口；该平台入口一旦实现，也必须复用本决策的显式绑定规则。
       </div>
     </section>
 
     <section id="sources">
-      <h2>本轮代码依据</h2>
+      <h2>设计与实施依据</h2>
       <ul class="source-list">
         <li><a href="editor_file_access_context_refactory.md">docs/editor_file_access_context_refactory.md</a></li>
-        <li><a href="fumen-visual-editor-project-folder-io-design.md">docs/fumen-visual-editor-project-folder-io-design.md</a>：D1、D18-D21、D30-D40。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs">FumenVisualEditorProvider.cs</a>：当前 Provider 注册、转发和最近记录校验。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.ProjectIO.cs">FumenVisualEditorViewModel.ProjectIO.cs</a>：当前文件夹选择、扫描、书签恢复和加载流程。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs">EditorProjectDataUtils.cs</a>：当前单根依赖解析。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectDataModel.cs">EditorProjectDataModel.cs</a>：当前运行时句柄所有权。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectFiles/EditorProjectDataModel_V0_5_2.cs">EditorProjectDataModel_V0_5_2.cs</a>：当前项目格式中的 <code>FumenFilePath</code>/<code>AudioFilePath</code> 持久化字段。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs">FumenRescue.cs</a>：当前唯一写入 <code>ProjectFileLocator</code> 救援元数据的位置。</li>
+        <li><a href="fumen-visual-editor-project-folder-io-design.md">docs/fumen-visual-editor-project-folder-io-design.md</a>：D44-D45 的无路径项目格式与显式绑定规则。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs">FumenVisualEditorProvider.cs</a>：Provider 入口、最近记录恢复与源文件显示解析。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.ProjectIO.cs">FumenVisualEditorProvider.ProjectIO.cs</a>：项目发现、显式文件绑定、ACB/AWB 补充绑定和完整上下文构造。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/Dialogs/ProjectFileBindingDialogViewModel.cs">ProjectFileBindingDialogViewModel.cs</a>：候选选择、外部文件浏览与句柄所有权转移。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Views/Dialogs/ProjectFileBindingDialogView.axaml">ProjectFileBindingDialogView.axaml</a>：冷打开时的显式谱面/音频绑定界面。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs">EditorProjectDataUtils.cs</a>：只从完整 <code>EditorFileAccessContext</code> 加载工程、谱面和音频。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectDataModel.cs">EditorProjectDataModel.cs</a>：无主文件路径的最新 <code>0.5.5</code> 项目数据契约。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectFiles/EditorProjectDataModel_V0_5_2.cs">EditorProjectDataModel_V0_5_2.cs</a>：旧 <code>0.5.2</code> 路径字段的只读兼容契约。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorProjectFiles/EditorProjectDataModel_V0_5_4.cs">EditorProjectDataModel_V0_5_4.cs</a>：旧 <code>0.5.4</code> 项目格式兼容契约。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Kernel/EditorProjectFile/Migrations/Migration_V0_5_4_To_Latest.cs">Migration_V0_5_4_To_Latest.cs</a>：丢弃旧路径并迁移到 <code>0.5.5</code>。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs">FumenRescue.cs</a>：版本 2 救援元数据，不再写入工程 locator。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/SimpleFileSystem/Impl/AvaloniaStorageProvider/AvaloniaStorageProviderSimpleDirectory.cs">AvaloniaStorageProviderSimpleDirectory.cs</a>：目录根对子目录和子文件的递归所有权。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/SimpleFileSystem/Impl/AvaloniaStorageProvider/AvaloniaStorageProviderFileSystemBuilder.cs">AvaloniaStorageProviderFileSystemBuilder.cs</a>：Storage Folder 树的所有权转交。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia/Utils/DocumentOpenHelper.cs">DocumentOpenHelper.cs</a>：遗留 Fast Open 数据构造路径。</li>
@@ -3637,12 +3673,13 @@ internal sealed record RecoveryRoleBinding(
         <li><a href="../src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditorDesktopApp.cs">OngekiFumenEditorDesktopApp.cs</a>：Desktop 宿主服务注册。</li>
         <li><a href="../src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditorBrowserApp.cs">OngekiFumenEditorBrowserApp.cs</a>：Browser 宿主服务注册。</li>
         <li><a href="../Dependencies/Gekimini.Avalonia/Dependencies/Injectio/src/Injectio.Generators/ServiceRegistrationWriter.cs">ServiceRegistrationWriter.cs</a>：Injectio 的 Append/Replace/TryAdd 注册策略。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.cs">FumenVisualEditorProvider.cs</a>：当前共享 Provider 的双接口注册。</li>
-        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/FumenVisualEditorRecentRecordData.cs">FumenVisualEditorRecentRecordData.cs</a>：当前版本 1 最近数据仅保存单个目录书签和工程定位符。</li>
+        <li><a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Models/EditorFileAccessContextSnapshot.cs">EditorFileAccessContextSnapshot.cs</a>：最近记录保存直接文件能力书签并恢复完整上下文。</li>
         <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/RecentRecordInfo.cs">RecentRecordInfo.cs</a>：框架最近记录的显示信封与稳定 <code>RecordId</code>。</li>
         <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/IEditorRecentFilesManager.cs">IEditorRecentFilesManager.cs</a>：以记录 ID 管理 Provider 专用二进制数据和失效状态的接口。</li>
         <li><a href="../Dependencies/Gekimini.Avalonia/src/Gekimini.Avalonia/Framework/RecentFiles/Commands/OpenRecentFileCommandHandler.cs">OpenRecentFileCommandHandler.cs</a>：最近项先异步校验、点击时强制复验并交给当前 Provider 打开的流程。</li>
-        <li><a href="../tests/OngekiFumenEditor.Avalonia.Tests/Modules/FumenVisualEditor/EditorProjectLoadOwnershipTests.cs">EditorProjectLoadOwnershipTests.cs</a>：当前加载失败时根目录与子文件释放边界。</li>
+        <li><a href="../tests/OngekiFumenEditor.Avalonia.Tests/Modules/FumenVisualEditor/EditorProjectLoadOwnershipTests.cs">EditorProjectLoadOwnershipTests.cs</a>：上下文加载失败时根目录与子文件释放边界。</li>
+        <li><a href="../tests/OngekiFumenEditor.Avalonia.Tests/Modules/FumenVisualEditor/ProjectFileBindingDialogViewModelTests.cs">ProjectFileBindingDialogViewModelTests.cs</a>：显式选择、取消和句柄所有权转移测试。</li>
+        <li><a href="../tests/OngekiFumenEditor.Avalonia.Tests/Utils/TemporaryStorageConsumerTests.cs">TemporaryStorageConsumerTests.cs</a>：<code>0.5.2/0.5.4</code> 迁移与 <code>0.5.5</code> 无路径序列化测试。</li>
         <li><a href="../../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs">WPF FumenVisualEditorViewModel.cs</a>：旧新建文档与首次保存工程文件的交互基线。</li>
         <li><a href="../../OngekiFumenEditor/Utils/DocumentOpenHelper.cs">WPF DocumentOpenHelper.cs</a>：旧 Fast Open 的无工程文件数据构造与打开流程。</li>
       </ul>
@@ -3651,7 +3688,7 @@ internal sealed record RecoveryRoleBinding(
 
   <footer>
     <div class="inner">
-      实时审核文档。最后更新：2026-08-14，Q1-Q23 已确认，Q24 等待回答。
+      实时审核文档。最后更新：2026-08-17，Q1-Q24 已确认；D22-D24 已实现并通过 449 项测试、完整解决方案构建和 Fast Open 条件构建验证。
     </div>
   </footer>
 </body>

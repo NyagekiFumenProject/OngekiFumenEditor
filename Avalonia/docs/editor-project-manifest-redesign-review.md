@@ -163,14 +163,14 @@ public sealed record EditorOpenMetadata(
 - `EditorProjectManifest.VERSION` 为 `0.2.0`。
 - 新的 `EditorProjectDataModel.VERSION` 为 `0.6.0`。
 - Manifest 与 ProjectData 使用相互独立的版本序列，不要求主版本号保持一致。
-- `.nyagekiProj` 的 `0.6.0` 明确表示新的最小 ProjectData 语义；旧程序只理解 `0.5.2/0.5.4` 时必须拒绝该版本。
+- `.nyagekiProj` 的 `0.6.0` 明确表示新的最小 ProjectData 语义；旧 WPF 只理解 `0.5.2/0.5.4`，Manifest 落地前的 Avalonia 还理解 `0.5.5`，这些实现都必须拒绝未知的 `0.6.0`。
 - Manifest `0.2.0` 是首个投入实现的新清单版本；不为尚未落地的 `0.1.0` 提供兼容承诺。
 
 ### R8. 有效 Manifest 可以绑定并内存迁移旧 ProjectData
 
-- `0.2.0` Manifest 的 `Project` binding 可以指向 `0.5.2`、`0.5.4` 或 `0.6.0` 的 `.nyagekiProj`。
+- `0.2.0` Manifest 的 `Project` binding 可以指向 `0.5.2`、`0.5.4`、`0.5.5` 或 `0.6.0` 的 `.nyagekiProj`。
 - 旧 ProjectData 只有在 Manifest 已成功解析、locator 已验证且其余资源 binding 已明确时，才允许迁移到内存中的 `0.6.0` 模型。
-- 迁移只保留 `AudioDuration` 与 `RememberLastDisplayTime`；旧资源路径、旧 `Id`、`EditorSetting` 和 bullet palette 数据不进入新模型。
+- 迁移只保留 `AudioDuration` 与 `RememberLastDisplayTime`；`0.5.2/0.5.4` 的旧资源路径以及三个旧版本中的 `Id`、`EditorSetting` 和 bullet palette 数据不进入新模型。
 - 仅加载不改写文件。第一次成功执行正常保存时，ProjectData 才写为 `0.6.0`。
 - 没有 Manifest 的旧 `.nyagekiProj` 仍不得进入正常打开流程。
 
@@ -214,7 +214,7 @@ public sealed record EditorOpenMetadata(
 
 ### R14. 旧项目导入继承有效旧 `Id`
 
-- 显式导入没有 Manifest 的 `0.5.2/0.5.4` 项目时，旧 ProjectData `Id` 非空则写入新 Manifest `ProjectId`。
+- 显式导入没有 Manifest 的 `0.5.2/0.5.4/0.5.5` 项目时，旧 ProjectData `Id` 非空则写入新 Manifest `ProjectId`。
 - 旧 `Id == Guid.Empty` 时生成新的随机非空 GUID。
 - 如果项目已经有有效 Manifest，则 Manifest `ProjectId` 权威，绑定的旧 ProjectData `Id` 被忽略。
 - 导入后的 `0.6.0` ProjectData 不再保存 `Id`。
@@ -465,16 +465,16 @@ SongA.nyagekiProjectData
 ### 9.6 确认后的强制约束
 
 - 新项目打开过滤器不得继续列出 `.nyagekiProj`。
-- 新格式必须使用不同于旧 `0.5.2`、`0.5.4` 的内容版本，避免旧程序按旧结构静默接受文件。
+- 新格式必须使用不同于旧 `0.5.2`、`0.5.4`、`0.5.5` 的内容版本，避免旧程序按旧结构静默接受文件。
 - 旧 `.nyagekiProj` 的兼容处理必须是显式拒绝或显式导入，不能由新项目 Provider 猜测其缺失的 Manifest 绑定。
 
 ## 10. Q2（已确认）：Manifest 与新 ProjectData 应采用什么版本和迁移边界？
 
 ### 10.1 现有版本机制
 
-当前 `EditorProjectFileManager` 按 JSON `Version` 精确选择序列化器，只登记 `0.5.2` 和 `0.5.4`，再通过 `MigratableSerializer` 把旧模型迁移到当前模型。旧 `.nyagekiProj` 同时包含编辑器状态和资源路径，而 R3 已确认的新 ProjectData 只包含 `AudioDuration` 与 `RememberLastDisplayTime`。
+当前 `EditorProjectFileManager` 按 JSON `Version` 精确选择序列化器，登记 `0.5.2`、`0.5.4` 和 `0.5.5`，再通过 `MigratableSerializer` 把旧模型迁移到当前模型。`0.5.2/0.5.4` 同时包含编辑器状态和资源路径；`0.5.5` 已删除资源路径，但仍不是 Manifest 体系下只含两个时间字段的最小 ProjectData。
 
-因此，新旧文件虽然共享 `.nyagekiProj` 后缀，却不是一次普通字段增删：旧文件缺少 Manifest，资源路径的权威来源也已经从 ProjectData 转移到 Manifest。仅把新模型继续标记为 `0.5.4` 会让旧 WPF 和现有解析器把两种不同语义视为同一格式。
+因此，新旧文件虽然共享 `.nyagekiProj` 后缀，却不是一次普通字段增删：旧文件缺少 Manifest，资源绑定的权威来源也已经转移到 Manifest。继续沿用任一 `0.5.x` 版本会让现有解析器把两种不同语义视为同一格式。
 
 ### 10.2 已确认的版本
 
@@ -486,9 +486,9 @@ SongA.nyagekiProjectData
 
 ### 10.3 Q2b 方案 A：允许 Manifest 内的旧 ProjectData 自动内存迁移（已采用）
 
-- 只有先成功解析并验证 `0.2.0` Manifest 后，才允许其 `Project` binding 指向 `0.5.2` 或 `0.5.4` 的 `.nyagekiProj`。
+- 只有先成功解析并验证 `0.2.0` Manifest 后，才允许其 `Project` binding 指向 `0.5.2`、`0.5.4` 或 `0.5.5` 的 `.nyagekiProj`。
 - `EditorProjectFileManager` 将旧 ProjectData 在内存中迁移为 `0.6.0`，只保留 `AudioDuration` 与 `RememberLastDisplayTime`。
-- 旧 `AudioFilePath`、`FumenFilePath`、`Id`、`EditorSetting` 和 bullet palette 数据不进入新 ProjectData；资源文件只服从 Manifest binding。
+- `0.5.2/0.5.4` 的旧 `AudioFilePath`、`FumenFilePath` 不参与资源查找；三个旧版本中的 `Id`、`EditorSetting` 和 bullet palette 数据也不进入新 ProjectData。资源文件只服从 Manifest binding。
 - 仅打开项目不改写文件。迁移后的 ProjectData 标记为待保存，第一次成功执行正常保存时写成 `0.6.0`。
 - 用户直接选择一个没有 Manifest 的旧 `.nyagekiProj` 时，正常打开流程仍拒绝；是否提供旧项目导入器由后续问题决定。
 
@@ -496,7 +496,7 @@ SongA.nyagekiProjectData
 
 ### 10.4 Q2b 方案 B：Manifest 只能绑定 `0.6.0` ProjectData（未采用）
 
-- 正常 Manifest 加载链拒绝 `0.5.2/0.5.4` ProjectData。
+- 正常 Manifest 加载链拒绝 `0.5.2/0.5.4/0.5.5` ProjectData。
 - 旧格式解析器只存在于显式旧项目导入器中；导入器生成 Manifest 和新的 `0.6.0` ProjectData 后，项目才可正常打开。
 - 加载规则最简单，但即使 Manifest 已经给出完整、可信的资源 binding，也不能直接复用旧文件中的两个兼容状态字段。
 
@@ -506,10 +506,10 @@ SongA.nyagekiProjectData
 
 ### 10.6 确认后的加载规则
 
-- `0.5.2/0.5.4` 的识别和迁移发生在 ProjectData 解析层，但必须由已验证的 Manifest 加载流程调用。
+- `0.5.2/0.5.4/0.5.5` 的识别和迁移发生在 ProjectData 解析层，但必须由已验证的 Manifest 加载流程调用。
 - 迁移器不得使用旧 `AudioFilePath`、`FumenFilePath` 查找资源。
 - 加载结果应携带“ProjectData 待升级保存”状态；不能通过比较内存模型版本猜测文件是否已升级。
-- 首次保存升级失败时保留原 `0.5.2/0.5.4` 文件，并继续把当前编辑器视为未保存状态。
+- 首次保存升级失败时保留原 `0.5.2/0.5.4/0.5.5` 文件，并继续把当前编辑器视为未保存状态。
 
 ## 11. Q3a（已确认）：Manifest 是否需要稳定的 `ProjectId`？
 
@@ -671,7 +671,7 @@ public sealed class EditorProjectManifest
 
 ### 14.1 现有旧字段
 
-`0.5.2/0.5.4` ProjectData 都继承旧模型中的 `Guid Id`。该字段默认初始化为随机 GUID，现有迁移测试也验证它能够跨序列化保留；但旧格式没有强制校验，文件仍可能显式保存 `Guid.Empty`。
+`0.5.2/0.5.4/0.5.5` ProjectData 都包含旧模型中的 `Guid Id`。该字段默认初始化为随机 GUID，现有迁移测试也验证它能够跨序列化保留；但旧格式没有强制校验，文件仍可能显式保存 `Guid.Empty`。
 
 ### 14.2 方案 A：继承有效旧 `Id`，空值时生成新 ID（已采用）
 
@@ -888,6 +888,18 @@ Manifest 加载器只验证，不自动修正。创建项目、修改 binding �
 是否确认采用方案 A，把 ProjectData、Fumen、Audio 书签从新快照契约中删除？
 
 ## 19. 变更记录
+
+### 2026-08-17
+
+- 完成 Manifest 新格式之前的 D22-D24 前置重构，提交为 `0667b2d9`。
+  - 从 `EditorContext`、救援元数据和 Core 加载签名中删除 `ProjectFileLocator`；`EditorProjectDataUtils` 只接受完整 `EditorFileAccessContext`。
+  - 当前 `.nyagekiProj` 最新版本由 `0.5.4` 升为 `0.5.5`，最新版 `EditorProjectDataModel` 不再声明或序列化 `FumenFilePath` / `AudioFilePath`。
+  - 保留 `EditorProjectDataModel_V0_5_2` 与 `EditorProjectDataModel_V0_5_4` 作为只读兼容契约；迁移器丢弃旧路径字段，资源绑定完全服从当前上下文中的直接文件能力。
+  - 新增 `ProjectFileBindingDialogView` / `ProjectFileBindingDialogViewModel`。项目文件夹冷打开在选定工程描述符后始终要求用户明确确认谱面和音频，即使候选唯一也不自动绑定。
+  - Provider 负责外部文件浏览、ACB/AWB 补充绑定、上下文构造和失败路径的句柄释放；最近记录恢复继续使用已保存的直接文件书签。
+  - Desktop 直接选择单个 `.nyagekiProj` 的平台专用入口尚未单独提供；它不影响 Manifest 设计，但未来实现必须复用同一显式绑定与能力所有权规则。
+  - 验证结果：449 项测试通过；完整解决方案和 `ENABLE_CROSS_PLATFORM_FAST_OPEN` 条件构建通过。
+- 本节修订 2026-08-16 记录中的临时状态：`EditorContext.ProjectFileLocator`、`TryLoadFromFileAsync`、路径字段及 `0.5.4` 最新版本冻结均不再代表当前代码。
 
 ### 2026-08-16
 
