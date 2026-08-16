@@ -8,8 +8,8 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System;
-using System.IO;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs
 {
@@ -29,11 +29,20 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 				editorContext?.Dispose();
 				SetProperty(ref editorContext, value);
 				OnPropertyChanged(nameof(EditorProjectData));
+				OnPropertyChanged(nameof(AudioFileDisplayName));
+				OnPropertyChanged(nameof(FumenFileDisplayName));
+				OnPropertyChanged(nameof(CanEditBaseBpm));
 			}
 		}
 
-		// 纯数据模型，仅用于绑定持久化设置项（路径、时长等）。
+		// 纯数据模型仅绑定持久化设置；运行时文件能力由 EditorContext 持有。
 		public EditorProjectDataModel EditorProjectData => EditorContext?.ProjectData;
+
+		public string AudioFileDisplayName => GetDisplayPath(EditorContext?.AudioFile);
+
+		public string FumenFileDisplayName => GetDisplayPath(EditorContext?.FumenFile);
+
+		public bool CanEditBaseBpm => EditorContext?.FumenFile is null;
 
 		private Task ShowMessageAsync(string content)
 		{
@@ -41,7 +50,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		}
 
 		[RelayCommand]
-		private async Task SelectAudioFilePathAsync()
+		private async Task SelectAudioFileAsync()
 		{
 			var file = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportAudioFileExtensionFilterList());
 			if (file is null)
@@ -50,11 +59,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 			try
 			{
 				using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(file);
-				EditorProjectData.AudioFilePath = file.LocalPath ?? file.FullPath;
 				EditorProjectData.AudioDuration = audio.Duration;
 				EditorContext.FileAccessContext ??= new EditorFileAccessContext();
 				EditorContext.FileAccessContext.AudioFile = file;
 				file = null;
+				OnPropertyChanged(nameof(AudioFileDisplayName));
 			}
 			finally
 			{
@@ -63,9 +72,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		}
 
 		[RelayCommand]
-		private async Task SelectFumenFilePathAsync()
+		private async Task SelectFumenFileAsync()
 		{
-			var file = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportFumenFileExtensionFilterList());
+			var file = await FileDialogHelper.OpenFileAsync(null, FileDialogHelper.GetSupportFumenOpenFileExtensionFilterList());
 			if (file is null)
 				return;
 
@@ -77,12 +86,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 					throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{file.FileName}");
 				var fumen = await deserializer.DeserializeAsync(fs);
 
-				EditorProjectData.FumenFilePath = file.LocalPath ?? file.FullPath;
 				EditorContext.BaseBPM = fumen.MetaInfo.BpmDefinition.First;
 				EditorContext.Fumen = fumen;
 				EditorContext.FileAccessContext ??= new EditorFileAccessContext();
 				EditorContext.FileAccessContext.FumenFile = file;
 				file = null;
+				OnPropertyChanged(nameof(FumenFileDisplayName));
+				OnPropertyChanged(nameof(CanEditBaseBpm));
 			}
 			catch (Exception e)
 			{
@@ -97,8 +107,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 		[RelayCommand]
 		private async Task CreateAsync()
 		{
-			if (EditorContext.AudioFile is null &&
-				(string.IsNullOrWhiteSpace(EditorProjectData.AudioFilePath) || !File.Exists(EditorProjectData.AudioFilePath)))
+			if (EditorContext.AudioFile is null)
 			{
 				await ShowMessageAsync(Lang.AudioFileNotFound);
 				return;
@@ -106,6 +115,17 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialog
 
 			keepRuntimeFilesAfterClose = true;
 			await TryCloseAsync(true);
+		}
+
+		private static string GetDisplayPath(ISimpleFile file)
+		{
+			if (file is null)
+				return string.Empty;
+			if (!string.IsNullOrWhiteSpace(file.LocalPath))
+				return file.LocalPath;
+			if (!string.IsNullOrWhiteSpace(file.FullPath))
+				return file.FullPath;
+			return file.FileName;
 		}
 
 		public override void OnViewBeforeUnload(IView view)

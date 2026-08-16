@@ -24,8 +24,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 			}
 
 			AddSerializer(new EditorProjectDataModelSerializer_V0_5_2());
+			AddSerializer(new EditorProjectDataModelSerializer_V0_5_4());
 			AddSerializer(new EditorProjectDataModelSerializer_Latest());
 			manager.AddMigration(new Migration_V0_5_2_To_Latest());
+			manager.AddMigration(new Migration_V0_5_4_To_Latest());
 		}
 
 		public Task<EditorProjectDataModel> Create()

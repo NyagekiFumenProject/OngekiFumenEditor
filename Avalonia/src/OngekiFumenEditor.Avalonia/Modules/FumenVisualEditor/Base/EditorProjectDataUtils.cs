@@ -22,229 +22,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 		public record Result(bool IsSuccess, string ErrorMessage);
 
-		public static async Task<EditorContext> TryLoadFromFileAsync(
-			ISimpleDirectory projectRoot,
-			ISimpleFile projectFile,
-			string projectFileLocator,
-			CancellationToken cancellationToken = default)
-		{
-			ArgumentNullException.ThrowIfNull(projectRoot);
-			ArgumentNullException.ThrowIfNull(projectFile);
-			if (!EditorProjectPathResolver.TryNormalizeRootRelativeLocator(
-					projectFileLocator,
-					out var normalizedProjectLocator,
-					out var projectLocatorError))
-			{
-				throw new InvalidDataException(projectLocatorError);
-			}
-
-			// The loader consumes the root: success transfers it to the returned context,
-			// while every failure path releases the directory tree here.
-			EditorProjectDataModel projectData = null;
-			EditorContext editorContext = null;
-			var rootTransferred = false;
-			try
-			{
-				await using (var projectStream = await projectFile.OpenRead())
-					projectData = await projFileManager.Load(projectStream, cancellationToken);
-
-			var defaultFumenLocator = Path.GetFileNameWithoutExtension(projectFile.FileName) + ".ogkr";
-			var rawFumenLocator = string.IsNullOrWhiteSpace(projectData.FumenFilePath)
-				? defaultFumenLocator
-				: projectData.FumenFilePath;
-
-			var errors = new List<string>();
-			if (!EditorProjectPathResolver.TryResolveDependency(
-					projectRoot,
-					normalizedProjectLocator,
-					rawFumenLocator,
-					out var fumenFile,
-					out _,
-					out var projectRelativeFumenLocator,
-					out var fumenError))
-			{
-				errors.Add($"Fumen '{rawFumenLocator}': {fumenError}");
-			}
-
-			if (!EditorProjectPathResolver.TryResolveDependency(
-					projectRoot,
-					normalizedProjectLocator,
-					projectData.AudioFilePath,
-					out var audioFile,
-					out var rootRelativeAudioLocator,
-					out var projectRelativeAudioLocator,
-					out var audioError))
-			{
-				errors.Add($"Audio '{projectData.AudioFilePath}': {audioError}");
-			}
-
-			ISimpleFile audioAwbFile = null;
-			if (audioFile is not null &&
-				Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
-			{
-				if (OperatingSystem.IsBrowser() || string.IsNullOrWhiteSpace(audioFile.LocalPath))
-				{
-					errors.Add($"Audio '{projectData.AudioFilePath}': ACB decoding is not supported on this platform.");
-				}
-				else
-				{
-					audioAwbFile = await InspectAcbDependencyAsync(
-						projectRoot,
-						audioFile,
-						rootRelativeAudioLocator,
-						projectData.AudioFilePath,
-						errors);
-				}
-			}
-
-			if (errors.Count > 0)
-				throw new InvalidDataException(string.Join(Environment.NewLine, errors));
-
-			OngekiFumen fumen;
-			await using (var fumenStream = await fumenFile!.OpenRead())
-			{
-				var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(fumenFile.FileName);
-				if (fumenDeserializer is null)
-					throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
-				fumen = await fumenDeserializer.DeserializeAsync(fumenStream);
-			}
-
-			/*
-			 * SVG prefab support is temporarily disabled. Keep the parser/formatter compatibility
-			 * layer, but do not resolve or read SVG dependencies while opening a project.
-			var svgBindings = new List<(SvgImageFilePrefab Svg, ISimpleFile File, string Locator)>();
-			foreach (var svg in fumen.SvgPrefabs.OfType<SvgImageFilePrefab>())
-			{
-				if (!EditorProjectPathResolver.TryResolveRootResource(
-						projectRoot,
-						svg.SvgFilePath,
-						out var svgFile,
-						out var svgLocator,
-						out var svgError))
-				{
-					errors.Add($"SVG '{svg.SvgFilePath}' at {svg.TGrid}: {svgError}");
-					continue;
-				}
-
-				svgBindings.Add((svg, svgFile!, svgLocator));
-			}
-
-			if (errors.Count > 0)
-			{
-				foreach (var svg in fumen.SvgPrefabs)
-					svg.Dispose();
-				throw new InvalidDataException(string.Join(Environment.NewLine, errors));
-			}
-
-			foreach (var binding in svgBindings)
-			{
-				try
-				{
-					await binding.Svg.BindProjectFileAsync(
-						binding.File,
-						binding.Locator,
-						cancellationToken);
-				}
-				catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-				{
-					foreach (var svg in fumen.SvgPrefabs)
-						svg.Dispose();
-					throw;
-				}
-				catch (Exception exception)
-				{
-					errors.Add(
-						$"SVG '{binding.Locator}' at {binding.Svg.TGrid} cannot be loaded: {exception.Message}");
-				}
-			}
-
-			if (errors.Count > 0)
-			{
-				foreach (var svg in fumen.SvgPrefabs)
-					svg.Dispose();
-				throw new InvalidDataException(string.Join(Environment.NewLine, errors));
-			}
-			*/
-
-			projectData.FumenFilePath = projectRelativeFumenLocator;
-			projectData.AudioFilePath = projectRelativeAudioLocator;
-				editorContext = new EditorContext
-				{
-					ProjectData = projectData,
-					Fumen = fumen,
-					ProjectFileLocator = normalizedProjectLocator,
-					FileAccessContext = new EditorFileAccessContext
-					{
-						ProjectDirectory = projectRoot,
-						ProjectFile = projectFile,
-						FumenFile = fumenFile,
-						AudioFile = audioFile,
-						AudioAwbFile = audioAwbFile
-					}
-				};
-				rootTransferred = true;
-				ApplyBulletPalleteListEditorData(projectData, fumen);
-				return editorContext;
-			}
-			catch
-			{
-				editorContext?.Dispose();
-				if (!rootTransferred)
-					projectRoot.Dispose();
-				throw;
-			}
-		}
-
-		// Keep the legacy desktop-only ACB parser out of the general browser load path.
-		private static async Task<ISimpleFile> InspectAcbDependencyAsync(
-			ISimpleDirectory projectRoot,
-			ISimpleFile audioFile,
-			string rootRelativeAudioLocator,
-			string audioFilePath,
-			List<string> errors)
-		{
-			try
-			{
-				await using var acbStream = await audioFile.OpenRead();
-				using var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false);
-				if (acb.InternalAwb is not null)
-					return null;
-
-				var rawAwbLocator = acb.ExternalAwb?.FileName;
-				if (string.IsNullOrWhiteSpace(rawAwbLocator))
-				{
-					errors.Add($"Audio '{audioFilePath}': the ACB has no usable AWB data.");
-					return null;
-				}
-
-				if (!EditorProjectPathResolver.TryResolveDependency(
-						projectRoot,
-						rootRelativeAudioLocator,
-						rawAwbLocator,
-						out var audioAwbFile,
-						out _,
-						out _,
-						out var awbError))
-				{
-					errors.Add($"Audio AWB '{rawAwbLocator}': {awbError}");
-					return null;
-				}
-
-				if (string.IsNullOrWhiteSpace(audioAwbFile?.LocalPath))
-				{
-					errors.Add($"Audio AWB '{rawAwbLocator}': external AWB decoding is not supported on this platform.");
-					return null;
-				}
-
-				return audioAwbFile;
-			}
-			catch (Exception exception)
-			{
-				errors.Add($"Audio '{audioFilePath}': the ACB package cannot be inspected: {exception.Message}");
-				return null;
-			}
-		}
-
 		private static void ApplyBulletPalleteListEditorData(EditorProjectDataModel projectData, OngekiFumen fumen)
 		{
 			foreach (var bpl in fumen.BulletPalleteList)
@@ -257,9 +34,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		// Rebuilds a project from a restored file-access context (recent-record snapshot).
+		// Rebuilds a project from a complete file-access context prepared by a provider.
 		// On success the context ownership transfers to the returned EditorContext; every
-		// failure path disposes the context so bookmarked handles never leak.
+		// failure path disposes the context so file handles never leak.
 		public static async Task<EditorContext> TryLoadFromContextAsync(
 			EditorFileAccessContext context,
 			CancellationToken cancellationToken = default)
@@ -273,18 +50,17 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			try
 			{
 				var projectFile = context.ProjectFile
-					?? throw new InvalidDataException("The restored project context has no project descriptor file.");
+					?? throw new InvalidDataException("The project context has no project descriptor file.");
 				var fumenFile = context.FumenFile
-					?? throw new InvalidDataException("The restored project context has no fumen file.");
+					?? throw new InvalidDataException("The project context has no fumen file.");
 				var audioFile = context.AudioFile
-					?? throw new InvalidDataException("The restored project context has no audio file.");
+					?? throw new InvalidDataException("The project context has no audio file.");
 
 				await using (var projectStream = await projectFile.OpenRead())
 					projectData = await projFileManager.Load(projectStream, cancellationToken);
 
 				var errors = new List<string>();
 
-				ISimpleFile audioAwbFile = null;
 				if (Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
 				{
 					if (OperatingSystem.IsBrowser() || string.IsNullOrWhiteSpace(audioFile.LocalPath))
@@ -293,7 +69,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 					}
 					else
 					{
-						audioAwbFile = await InspectRestoredAcbDependencyAsync(audioFile, errors);
+						await ValidateAcbDependencyAsync(audioFile, context.AudioAwbFile, errors);
 					}
 				}
 
@@ -314,8 +90,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 					ProjectData = projectData,
 					Fumen = fumen
 				};
-				if (audioAwbFile is not null)
-					context.AudioAwbFile = audioAwbFile;
 				editorContext.FileAccessContext = context;
 				contextTransferred = true;
 				ApplyBulletPalleteListEditorData(projectData, fumen);
@@ -330,10 +104,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		// Restore path: the snapshot only bookmarks the ACB, and the restored project root is a
-		// shallow wrap, so an external AWB cannot be located. Internal-AWB ACBs restore fine.
-		private static async Task<ISimpleFile> InspectRestoredAcbDependencyAsync(
+		private static async Task ValidateAcbDependencyAsync(
 			ISimpleFile audioFile,
+			ISimpleFile audioAwbFile,
 			List<string> errors)
 		{
 			try
@@ -341,22 +114,29 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				await using var acbStream = await audioFile.OpenRead();
 				using var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false);
 				if (acb.InternalAwb is not null)
-					return null;
+					return;
 
-				var rawAwbLocator = acb.ExternalAwb?.FileName;
-				if (string.IsNullOrWhiteSpace(rawAwbLocator))
+				var expectedAwbFileName = acb.ExternalAwb?.FileName;
+				if (string.IsNullOrWhiteSpace(expectedAwbFileName))
 				{
 					errors.Add($"Audio '{audioFile.FileName}': the ACB has no usable AWB data.");
-					return null;
+					return;
 				}
 
-				errors.Add($"Audio '{audioFile.FileName}': the external AWB '{rawAwbLocator}' cannot be restored from a recent-project snapshot.");
-				return null;
+				if (audioAwbFile is null)
+				{
+					errors.Add($"Audio '{audioFile.FileName}': the external AWB '{expectedAwbFileName}' is not bound.");
+					return;
+				}
+
+				if (string.IsNullOrWhiteSpace(audioAwbFile.LocalPath))
+				{
+					errors.Add($"Audio AWB '{audioAwbFile.FileName}': external AWB decoding is not supported on this platform.");
+				}
 			}
 			catch (Exception exception)
 			{
 				errors.Add($"Audio '{audioFile.FileName}': the ACB package cannot be inspected: {exception.Message}");
-				return null;
 			}
 		}
 
@@ -550,6 +330,3 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 		}
 	}
 }
-
-
-

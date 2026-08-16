@@ -57,6 +57,9 @@ public static class FileDialogHelper
     public static IEnumerable<(string ext, string desc)> GetSupportFumenFileExtensionFilterList()
         => IoC.Get<IFumenParserManager>().GetSerializerDescriptions().SelectMany(x => x.fileFormat.Select(y => (y, x.desc)));
 
+    public static IEnumerable<(string ext, string desc)> GetSupportFumenOpenFileExtensionFilterList()
+        => IoC.Get<IFumenParserManager>().GetDeserializerDescriptions().SelectMany(x => x.fileFormat.Select(y => (y, x.desc)));
+
     public static IEnumerable<(string ext, string desc)> GetSupportAudioFileExtensionFilterList()
         => IoC.Get<IAudioManager>().SupportAudioFileExtensionList;
 

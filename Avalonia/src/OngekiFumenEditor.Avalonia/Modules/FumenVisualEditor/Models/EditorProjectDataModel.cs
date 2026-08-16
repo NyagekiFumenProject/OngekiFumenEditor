@@ -4,11 +4,11 @@ using System;
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
 {
 	// Pure persistable data class: only project-related settings and options live here.
-	// Runtime state (parsed fumen, file handles, locators, recent-record identity) is owned
+	// Runtime state (parsed fumen, file handles and recent-record identity) is owned
 	// by the companion EditorContext.
-	public class EditorProjectDataModel : EditorProjectDataModel_V0_5_2
+	public class EditorProjectDataModel : EditorProjectDataModelBase
 	{
-		public readonly static Version VERSION = new(0, 5, 4);
+		public readonly static Version VERSION = new(0, 5, 5);
 		public override Version Version => VERSION;
 	}
 }

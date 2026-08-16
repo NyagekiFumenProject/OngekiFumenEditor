@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
@@ -154,9 +153,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     private async Task ExecuteConverterAsync()
     {
         var currentEditor = editorDocumentManager.CurrentActivatedEditor;
-        var currentEditorProject = currentEditor?.EditorContext?.ProjectData;
         var currentEditorAudioFile = currentEditor?.EditorContext?.AudioFile;
-        var currentEditorAudioFilePath = currentEditorProject?.AudioFilePath;
 
         if (IsUseInputFile && inputWavFile is null)
         {
@@ -164,7 +161,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
             return;
         }
 
-        if (!IsUseInputFile && currentEditorAudioFile is null && !File.Exists(currentEditorAudioFilePath))
+        if (!IsUseInputFile && currentEditorAudioFile is null)
         {
             await ShowMessageAsync(Lang.ErrorProcessAudioNotFound, DialogMessageType.Error);
             return;
@@ -227,20 +224,11 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
                 timeOffset,
                 commitOnSuccess);
         }
-        else if (currentEditorAudioFile is not null)
-        {
-            transactionTask = AudioAdjustmentTransaction.ExecuteAsync(
-                wavAudioOffsetService,
-                currentEditorAudioFile,
-                outputWavFile,
-                timeOffset,
-                commitOnSuccess);
-        }
         else
         {
             transactionTask = AudioAdjustmentTransaction.ExecuteAsync(
                 wavAudioOffsetService,
-                currentEditorAudioFilePath,
+                currentEditorAudioFile,
                 outputWavFile,
                 timeOffset,
                 commitOnSuccess);

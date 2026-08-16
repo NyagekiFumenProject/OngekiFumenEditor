@@ -67,4 +67,5 @@ internal static class EditorProjectJsonSerialization
 
 [JsonSerializable(typeof(EditorProjectDataModel))]
 [JsonSerializable(typeof(EditorProjectDataModel_V0_5_2))]
+[JsonSerializable(typeof(EditorProjectDataModel_V0_5_4))]
 internal partial class EditorProjectJsonSourceGenerationContext : JsonSerializerContext;

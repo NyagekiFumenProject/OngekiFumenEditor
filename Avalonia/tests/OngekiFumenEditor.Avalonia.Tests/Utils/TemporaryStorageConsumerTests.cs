@@ -37,10 +37,37 @@ public sealed class TemporaryStorageConsumerTests
         Assert.IsType<EditorProjectDataModel>(reloaded);
         Assert.Equal(EditorProjectDataModel.VERSION, reloaded.Version);
         Assert.Equal(projectId, reloaded.Id);
-        Assert.Equal(legacy.AudioFilePath, reloaded.AudioFilePath);
-        Assert.Equal(legacy.FumenFilePath, reloaded.FumenFilePath);
         Assert.Equal(legacy.AudioDuration, reloaded.AudioDuration);
         Assert.Equal(legacy.RememberLastDisplayTime, reloaded.RememberLastDisplayTime);
+        await AssertLatestProjectHasNoFileLocators(reloaded);
+    }
+
+    [AvaloniaFact]
+    public async Task EditorProjectFileManager_LegacyV054Project_UpgradesToLatestModel()
+    {
+        var provider = new InMemoryTemporaryFolderProvider();
+        var file = await provider.Root.GetOrCreateFileAsync("legacy-current.nyagekiProj");
+        Guid projectId = Guid.NewGuid();
+        var legacy = new EditorProjectDataModel_V0_5_4
+        {
+            Id = projectId,
+            AudioFilePath = "legacy-audio.wav",
+            FumenFilePath = "legacy-chart.ogkr",
+            AudioDuration = TimeSpan.FromSeconds(96),
+            RememberLastDisplayTime = TimeSpan.FromSeconds(24)
+        };
+
+        var serializer = new EditorProjectDataModelSerializer_V0_5_4();
+        await file.WriteAsync((stream, _) => serializer.WriteAsync(stream, legacy));
+        string serialized = Encoding.UTF8.GetString(await file.ReadAllBytesAsync());
+        var reloaded = await new EditorProjectFileManager().Load(file);
+
+        Assert.Contains("\"Version\": \"0.5.4\"", serialized, StringComparison.Ordinal);
+        Assert.Equal(EditorProjectDataModel.VERSION, reloaded.Version);
+        Assert.Equal(projectId, reloaded.Id);
+        Assert.Equal(legacy.AudioDuration, reloaded.AudioDuration);
+        Assert.Equal(legacy.RememberLastDisplayTime, reloaded.RememberLastDisplayTime);
+        await AssertLatestProjectHasNoFileLocators(reloaded);
     }
 
     [Fact]
@@ -85,8 +112,6 @@ public sealed class TemporaryStorageConsumerTests
         var project = new EditorProjectDataModel
         {
             Id = projectId,
-            AudioFilePath = "audio.wav",
-            FumenFilePath = "chart.ogkr",
             AudioDuration = TimeSpan.FromSeconds(42),
             RememberLastDisplayTime = TimeSpan.FromSeconds(7)
         };
@@ -99,9 +124,27 @@ public sealed class TemporaryStorageConsumerTests
         Assert.True(result.IsSuccess, result.ErrorMessage);
         Assert.True(await file.GetLengthAsync() > 0);
         Assert.Equal(projectId, reloaded.Id);
-        Assert.Equal(project.AudioFilePath, reloaded.AudioFilePath);
-        Assert.Equal(project.FumenFilePath, reloaded.FumenFilePath);
         Assert.Equal(project.AudioDuration, reloaded.AudioDuration);
         Assert.Equal(project.RememberLastDisplayTime, reloaded.RememberLastDisplayTime);
+        Assert.DoesNotContain(
+            "FumenFilePath",
+            Encoding.UTF8.GetString(await file.ReadAllBytesAsync()),
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "AudioFilePath",
+            Encoding.UTF8.GetString(await file.ReadAllBytesAsync()),
+            StringComparison.Ordinal);
+    }
+
+    private static async Task AssertLatestProjectHasNoFileLocators(EditorProjectDataModel project)
+    {
+        Assert.Null(typeof(EditorProjectDataModel).GetProperty("FumenFilePath"));
+        Assert.Null(typeof(EditorProjectDataModel).GetProperty("AudioFilePath"));
+
+        await using var stream = new MemoryStream();
+        await new EditorProjectFileManager().Save(stream, project);
+        var serialized = Encoding.UTF8.GetString(stream.ToArray());
+        Assert.DoesNotContain("FumenFilePath", serialized, StringComparison.Ordinal);
+        Assert.DoesNotContain("AudioFilePath", serialized, StringComparison.Ordinal);
     }
 }

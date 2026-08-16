@@ -58,12 +58,10 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 				if (!fumenResult.IsSuccess)
 					throw new IOException(fumenResult.ErrorMessage);
 
-				var locator = editor.EditorContext.ProjectFileLocator ?? string.Empty;
 				var metadata = string.Join(
 					Environment.NewLine,
-					"Version=1",
-					$"CreatedUtc={DateTimeOffset.UtcNow:O}",
-					$"ProjectFileLocatorBase64={Convert.ToBase64String(Encoding.UTF8.GetBytes(locator))}");
+					"Version=2",
+					$"CreatedUtc={DateTimeOffset.UtcNow:O}");
 				var metadataFile = await snapshotFolder.GetOrCreateFileAsync(
 					"metadata.txt",
 					cancellationToken);
@@ -179,7 +177,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			try
 			{
 				//save fumen file
-				var fumenName = Path.GetFileName(editor.EditorContext.ProjectData.FumenFilePath);
+				var fumenName = editor.EditorContext.FumenFile?.FileName;
 				if (string.IsNullOrWhiteSpace(fumenName))
 					fumenName = RandomHepler.RandomString() + ".ogkr";
 				var fumenExtension = Path.GetExtension(fumenName);

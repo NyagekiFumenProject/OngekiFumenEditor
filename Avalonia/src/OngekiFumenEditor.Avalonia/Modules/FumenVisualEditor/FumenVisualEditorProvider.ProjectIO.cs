@@ -2,6 +2,7 @@
 
 using Avalonia;
 using Avalonia.Platform.Storage;
+using DereTore.Exchange.Archive.ACB;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Platforms.Services.Window;
@@ -54,18 +55,44 @@ internal partial class FumenVisualEditorProvider
                 return false;
 
             var selectedProject = candidates.Single(x => x.Locator == selectedLocator);
-            var rootForLoad = projectRoot;
+            var selectedFiles = await SelectProjectFilesAsync(
+                projectRoot,
+                selectedLocator);
+            if (selectedFiles is null)
+                return false;
+
+            EditorFileAccessContext? fileAccessContext = new EditorFileAccessContext
+            {
+                ProjectDirectory = projectRoot,
+                ProjectFile = selectedProject.File,
+                FumenFile = selectedFiles.Value.FumenFile,
+                AudioFile = selectedFiles.Value.AudioFile
+            };
             projectRoot = null;
 
             EditorContext projectContext;
-            using (await EditorProjectIoGate.EnterAsync())
+            try
             {
-                projectContext = await EditorProjectDataUtils.TryLoadFromFileAsync(
-                    rootForLoad,
-                    selectedProject.File,
-                    selectedLocator);
-                if (!await TryTransferContextToEditorAsync(editor, projectContext, selectedLocator))
+                if (!await TryBindExternalAwbAsync(fileAccessContext))
                     return false;
+
+                using (await EditorProjectIoGate.EnterAsync())
+                {
+                    var contextForLoad = fileAccessContext;
+                    fileAccessContext = null;
+                    projectContext = await EditorProjectDataUtils.TryLoadFromContextAsync(contextForLoad);
+                    if (!await TryTransferContextToEditorAsync(
+                            editor,
+                            projectContext,
+                            selectedProject.File.FileName))
+                    {
+                        return false;
+                    }
+                }
+            }
+            finally
+            {
+                fileAccessContext?.Dispose();
             }
 
             await TryStoreRecentFromContextAsync(
@@ -254,6 +281,70 @@ internal partial class FumenVisualEditorProvider
         var dialog = new ProjectFileSelectionDialogViewModel(candidates.Select(x => x.Locator));
         var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialog);
         return result == true ? dialog.SelectedProjectLocator : null;
+    }
+
+    private async Task<(ISimpleFile FumenFile, ISimpleFile AudioFile)?> SelectProjectFilesAsync(
+        ISimpleDirectory projectRoot,
+        string projectLocator)
+    {
+        var fumenCandidates = EditorProjectPathResolver.FindFiles(
+            projectRoot,
+            FileDialogHelper.GetSupportFumenOpenFileExtensionFilterList().Select(x => x.ext));
+        var audioCandidates = EditorProjectPathResolver.FindFiles(
+            projectRoot,
+            FileDialogHelper.GetSupportAudioFileExtensionFilterList().Select(x => x.ext));
+
+        using var dialog = new ProjectFileBindingDialogViewModel(
+            projectLocator,
+            fumenCandidates,
+            audioCandidates);
+        var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialog);
+        return result == true ? dialog.TakeSelection() : null;
+    }
+
+    private static async Task<bool> TryBindExternalAwbAsync(EditorFileAccessContext context)
+    {
+        var audioFile = context.AudioFile ??
+            throw new InvalidDataException("The project file binding has no audio file.");
+        if (!Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        string? expectedAwbFileName;
+        await using (var acbStream = await audioFile.OpenRead())
+        using (var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false))
+        {
+            if (acb.InternalAwb is not null)
+                return true;
+
+            expectedAwbFileName = acb.ExternalAwb?.FileName;
+        }
+
+        if (string.IsNullOrWhiteSpace(expectedAwbFileName))
+            throw new InvalidDataException($"Audio '{audioFile.FileName}' has no usable AWB data.");
+
+        var siblingMatches = audioFile.ParentDictionary?.ChildFiles
+            .Where(file => file.FileName.Equals(expectedAwbFileName, StringComparison.OrdinalIgnoreCase))
+            .ToArray() ?? [];
+        if (siblingMatches.Length > 1)
+        {
+            throw new InvalidDataException(
+                $"Audio '{audioFile.FileName}' has multiple AWB candidates named '{expectedAwbFileName}'.");
+        }
+
+        if (siblingMatches.Length == 1)
+        {
+            context.AudioAwbFile = siblingMatches[0];
+            return true;
+        }
+
+        var selectedAwbFile = await FileDialogHelper.OpenFileAsync(
+            $"Select external AWB file ({expectedAwbFileName})",
+            [(".awb", "AWB audio archive")]);
+        if (selectedAwbFile is null)
+            return false;
+
+        context.AudioAwbFile = selectedAwbFile;
+        return true;
     }
 
     private Guid StoreRecentProject(

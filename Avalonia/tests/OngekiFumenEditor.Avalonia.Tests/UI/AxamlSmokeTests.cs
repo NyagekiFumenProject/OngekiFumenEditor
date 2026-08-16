@@ -51,6 +51,8 @@ public sealed class AxamlSmokeTests
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views.FumenTimeSignatureListViewerView),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.BatchModeOverlayView),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView),
+        typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.ProjectFileBindingDialogView),
+        typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.ProjectFileSelectionDialogView),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI.Toast),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView),
@@ -80,9 +82,9 @@ public sealed class AxamlSmokeTests
     }
 
     [Fact]
-    public void ViewInventory_ContainsAllFiftyOneUniqueParameterlessTypes()
+    public void ViewInventory_ContainsAllFiftyThreeUniqueParameterlessTypes()
     {
-        Assert.Equal(51, AllViewTypes.Length);
+        Assert.Equal(53, AllViewTypes.Length);
         Assert.Equal(AllViewTypes.Length, AllViewTypes.Distinct().Count());
         Assert.All(AllViewTypes, static type =>
         {

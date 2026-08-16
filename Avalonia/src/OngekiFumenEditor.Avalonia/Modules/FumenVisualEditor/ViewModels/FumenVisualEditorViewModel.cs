@@ -216,6 +216,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
             .LoadProjectAudioAsync(audioFile, context.AudioAwbFile);
         AudioPlayer?.Dispose();
         AudioPlayer = audioPlayer;
+        context.ProjectData.AudioDuration = audioPlayer.Duration;
         context.Fumen ??= new OngekiFumen();
         context.FilePath = sourcePath ?? string.Empty;
         context.FileName = context.FumenFile?.FileName ??

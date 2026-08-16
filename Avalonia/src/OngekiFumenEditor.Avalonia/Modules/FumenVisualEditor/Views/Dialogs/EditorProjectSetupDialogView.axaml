@@ -40,12 +40,12 @@
                                 <ColumnDefinition />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding EditorProjectData.AudioFilePath}" ToolTip.Tip="{Binding EditorProjectData.AudioFilePath}">
+                            <TextBlock Text="{Binding AudioFileDisplayName}" ToolTip.Tip="{Binding AudioFileDisplayName}">
                             </TextBlock>
                             <Button
                                 Grid.Column="1"
                                 Padding="10,5,10,5"
-                                Command="{Binding SelectAudioFilePathCommand}"
+                                Command="{Binding SelectAudioFileCommand}"
                                 Content="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
                         </Grid>
                         <TextBlock Foreground="{DynamicResource EditorToolWindowForegroundBrush}">
@@ -72,7 +72,7 @@
                                 Width="150"
                                 VerticalAlignment="Center"
                                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                                IsEnabled="{Binding EditorProjectData.CanEditBaseBpm}"
+                                IsEnabled="{Binding CanEditBaseBpm}"
                                 Text="{Binding EditorContext.BaseBPM}">
                             </TextBox>
                         </StackPanel>
@@ -87,13 +87,13 @@
                                 <TextBlock
                                     VerticalAlignment="Center"
                                     Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
-                                    Text="{Binding EditorProjectData.FumenFilePath}" />
+                                    Text="{Binding FumenFileDisplayName}" />
                             </StackPanel>
 
                             <Button
                                 Padding="10,5,10,5"
                                 HorizontalAlignment="Right"
-                                Command="{Binding SelectFumenFilePathCommand}"
+                                Command="{Binding SelectFumenFileCommand}"
                                 Content="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
                         </Grid>
                     </StackPanel>

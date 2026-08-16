@@ -54,7 +54,5 @@ internal partial class FumenVisualEditorProvider : IFumenVisualEditorProvider
             : Task.FromResult(false);
 
     private static string ResolveSourcePath(EditorContext context) =>
-        !string.IsNullOrWhiteSpace(context.ProjectFileLocator)
-            ? context.ProjectFileLocator
-            : context.FumenFile?.FileName ?? context.ProjectData.FumenFilePath ?? string.Empty;
+        context.ProjectFile?.FileName ?? context.FumenFile?.FileName ?? string.Empty;
 }

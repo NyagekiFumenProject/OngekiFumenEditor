@@ -394,14 +394,12 @@ public sealed class FumenVisualEditorInitializationTests
         var fumen = new OngekiFumen();
         var project = new EditorProjectDataModel
         {
-            AudioDuration = TimeSpan.FromSeconds(10),
-            FumenFilePath = "chart.nyageki"
+            AudioDuration = TimeSpan.FromSeconds(10)
         };
         var context = new EditorContext
         {
             ProjectData = project,
             Fumen = fumen,
-            ProjectFileLocator = "project.nyagekiProj",
             FileAccessContext = new EditorFileAccessContext
             {
                 ProjectFile = new LocalSimpleFile(projectPath),

@@ -25,8 +25,6 @@ public sealed partial class EditorContext : ObservableObject, IDisposable
     [ObservableProperty]
     public partial string FileName { get; set; } = "Untitled";
 
-    public string ProjectFileLocator { get; set; } = string.Empty;
-
     public Guid RecentRecordId { get; set; }
 
     // 与旧模型一致：默认持有一个空谱面，未加载谱面时也能安全访问。

@@ -11,16 +11,12 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenVisualEditor;
 public sealed class EditorProjectLoadOwnershipTests
 {
     [AvaloniaFact]
-    public async Task FailedLoad_DisposesOwnedRootAndChildren()
+    public async Task FailedContextLoad_DisposesOwnedRootAndChildren()
     {
         await using var projectBuffer = new MemoryStream();
         await new EditorProjectFileManager().Save(
             projectBuffer,
-            new EditorProjectDataModel
-            {
-                FumenFilePath = "missing.ogkr",
-                AudioFilePath = "missing.wav"
-            });
+            new EditorProjectDataModel());
 
         var projectFile = new TrackingFile(
             "project.nyagekiProj",
@@ -28,18 +24,27 @@ public sealed class EditorProjectLoadOwnershipTests
         var root = new TrackingDirectory(projectFile);
 
         await Assert.ThrowsAsync<InvalidDataException>(() =>
-            EditorProjectDataUtils.TryLoadFromFileAsync(
-                root,
-                projectFile,
-                "project.nyagekiProj"));
+            EditorProjectDataUtils.TryLoadFromContextAsync(
+                new EditorFileAccessContext
+                {
+                    ProjectDirectory = root,
+                    ProjectFile = projectFile
+                }));
 
         Assert.Equal(1, root.DisposeCount);
         Assert.Equal(1, projectFile.DisposeCount);
     }
 
-    private sealed class TrackingDirectory(TrackingFile projectFile) : ISimpleDirectory
+    private sealed class TrackingDirectory : ISimpleDirectory
     {
+        private readonly TrackingFile projectFile;
         private bool isDisposed;
+
+        public TrackingDirectory(TrackingFile projectFile)
+        {
+            this.projectFile = projectFile;
+            projectFile.ParentDictionary = this;
+        }
 
         public int DisposeCount { get; private set; }
         public ISimpleDirectory? ParentDictionary => null;
@@ -87,7 +92,7 @@ public sealed class EditorProjectLoadOwnershipTests
         }
 
         public int DisposeCount { get; private set; }
-        public ISimpleDirectory? ParentDictionary => null;
+        public ISimpleDirectory? ParentDictionary { get; set; }
         public string FullPath => $"memory://project/{FileName}";
         public string? LocalPath => null;
         public string FileName { get; }

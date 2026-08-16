@@ -10,10 +10,22 @@ public static class EditorProjectPathResolver
 
     public static IReadOnlyList<(string Locator, ISimpleFile File)> FindProjectFiles(
         ISimpleDirectory root,
-        string extension)
+        string extension) =>
+        FindFiles(root, [extension]);
+
+    public static IReadOnlyList<(string Locator, ISimpleFile File)> FindFiles(
+        ISimpleDirectory root,
+        IEnumerable<string> extensions)
     {
         ArgumentNullException.ThrowIfNull(root);
-        ArgumentException.ThrowIfNullOrWhiteSpace(extension);
+        ArgumentNullException.ThrowIfNull(extensions);
+
+        var normalizedExtensions = extensions
+            .Where(extension => !string.IsNullOrWhiteSpace(extension))
+            .Select(extension => extension.StartsWith('.') ? extension : $".{extension}")
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        if (normalizedExtensions.Count == 0)
+            throw new ArgumentException("At least one file extension is required.", nameof(extensions));
 
         var result = new List<(string Locator, ISimpleFile File)>();
         var pending = new Stack<ISimpleDirectory>();
@@ -26,7 +38,7 @@ public static class EditorProjectPathResolver
 
             foreach (var file in directory.ChildFiles)
             {
-                if (file.FileName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                if (normalizedExtensions.Contains(Path.GetExtension(file.FileName)))
                     result.Add((GetRootRelativeLocator(file), file));
             }
         }

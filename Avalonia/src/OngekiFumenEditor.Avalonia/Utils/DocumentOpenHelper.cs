@@ -166,32 +166,37 @@ internal static class DocumentOpenHelper
 
     public static async Task<EditorContext> TryCreateEditorProjectDataModel(string ogkrFilePath)
     {
-        ISimpleFile selectedAudioFile = null;
+        ISimpleFile fumenFile = null;
+        ISimpleFile audioFile = null;
         try
         {
-            (var audioFile, var audioDuration) = await GetAudioFilePath(ogkrFilePath);
-            if (!File.Exists(audioFile))
+            (var audioFilePath, var audioDuration) = await GetAudioFilePath(ogkrFilePath);
+            if (!File.Exists(audioFilePath))
             {
-                selectedAudioFile = await FileDialogHelper.OpenFileAsync(
+                audioFile = await FileDialogHelper.OpenFileAsync(
                     Lang.SelectAudioFileManually,
                     IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
-                if (selectedAudioFile is null)
+                if (audioFile is null)
                     return null;
-                audioDuration = await CalcAudioDuration(selectedAudioFile);
-                audioFile = selectedAudioFile.LocalPath ?? selectedAudioFile.FullPath;
+
+                audioDuration = await CalcAudioDuration(audioFile);
+            }
+            else
+            {
+                audioFile = new LocalSimpleFile(audioFilePath);
             }
 
-            using var fs = File.OpenRead(ogkrFilePath);
+            fumenFile = new LocalSimpleFile(ogkrFilePath);
             var parserManager = IoC.Get<IFumenParserManager>();
-            var deserializer = parserManager.GetDeserializer(ogkrFilePath);
+            var deserializer = parserManager.GetDeserializer(fumenFile.FileName);
             if (deserializer is null)
                 return null;
-            var fumen = await deserializer.DeserializeAsync(fs);
+
+            await using var fumenStream = await fumenFile.OpenRead();
+            var fumen = await deserializer.DeserializeAsync(fumenStream);
 
             var model = new EditorProjectDataModel
             {
-                FumenFilePath = ogkrFilePath,
-                AudioFilePath = audioFile,
                 AudioDuration = audioDuration
             };
             var context = new EditorContext
@@ -200,15 +205,18 @@ internal static class DocumentOpenHelper
                 Fumen = fumen,
                 FileAccessContext = new EditorFileAccessContext
                 {
-                    AudioFile = selectedAudioFile
+                    FumenFile = fumenFile,
+                    AudioFile = audioFile
                 }
             };
-            selectedAudioFile = null;
+            fumenFile = null;
+            audioFile = null;
             return context;
         }
         finally
         {
-            selectedAudioFile?.Dispose();
+            fumenFile?.Dispose();
+            audioFile?.Dispose();
         }
     }
 
@@ -216,7 +224,7 @@ internal static class DocumentOpenHelper
     {
         ArgumentNullException.ThrowIfNull(ogkrFile);
 
-        ISimpleFile selectedAudioFile = null;
+        ISimpleFile audioFile = null;
         try
         {
             string audioFilePath = null;
@@ -227,14 +235,17 @@ internal static class DocumentOpenHelper
 
             if (string.IsNullOrWhiteSpace(audioFilePath) || !File.Exists(audioFilePath))
             {
-                selectedAudioFile = await FileDialogHelper.OpenFileAsync(
+                audioFile = await FileDialogHelper.OpenFileAsync(
                     Lang.SelectAudioFileManually,
                     IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
-                if (selectedAudioFile is null)
+                if (audioFile is null)
                     return null;
 
-                audioDuration = await CalcAudioDuration(selectedAudioFile);
-                audioFilePath = selectedAudioFile.LocalPath ?? selectedAudioFile.FullPath;
+                audioDuration = await CalcAudioDuration(audioFile);
+            }
+            else
+            {
+                audioFile = new LocalSimpleFile(audioFilePath);
             }
 
             var parserManager = IoC.Get<IFumenParserManager>();
@@ -246,8 +257,6 @@ internal static class DocumentOpenHelper
             var fumen = await deserializer.DeserializeAsync(fumenStream);
             var model = new EditorProjectDataModel
             {
-                FumenFilePath = ogkrFile.LocalPath ?? ogkrFile.FullPath,
-                AudioFilePath = audioFilePath,
                 AudioDuration = audioDuration
             };
             var context = new EditorContext
@@ -257,15 +266,15 @@ internal static class DocumentOpenHelper
                 FileAccessContext = new EditorFileAccessContext
                 {
                     FumenFile = ogkrFile,
-                    AudioFile = selectedAudioFile
+                    AudioFile = audioFile
                 }
             };
-            selectedAudioFile = null;
+            audioFile = null;
             return context;
         }
         finally
         {
-            selectedAudioFile?.Dispose();
+            audioFile?.Dispose();
         }
     }
 

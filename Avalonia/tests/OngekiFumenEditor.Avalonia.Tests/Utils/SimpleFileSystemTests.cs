@@ -402,6 +402,26 @@ public sealed class SimpleFileSystemTests
     }
 
     [AvaloniaFact]
+    public async Task FindFiles_FiltersSupportedExtensionsAcrossDirectoryTree()
+    {
+        using var temporaryDirectory = new TemporaryDirectory();
+        var nested = temporaryDirectory.CreateDirectory("nested");
+        await File.WriteAllTextAsync(temporaryDirectory.File("audio.WAV"), "audio");
+        await File.WriteAllTextAsync(Path.Combine(nested, "chart.nyageki"), "chart");
+        await File.WriteAllTextAsync(Path.Combine(nested, "ignored.txt"), "ignored");
+
+        var storageRoot = await GetStorageFolder(temporaryDirectory.RootPath);
+        using var root = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFolder(storageRoot);
+
+        Assert.Equal(
+            ["audio.WAV", "nested/chart.nyageki"],
+            EditorProjectPathResolver
+                .FindFiles(root, ["wav", ".nyageki"])
+                .Select(x => x.Locator));
+    }
+
+    [AvaloniaFact]
     public async Task LoadProject_MissingSvgDependency_DoesNotAccessSvgWhileFeatureIsDisabled()
     {
         using var temporaryDirectory = new TemporaryDirectory();
@@ -421,11 +441,7 @@ public sealed class SimpleFileSystemTests
         await File.WriteAllBytesAsync(audioPath, [0]);
         await new EditorProjectFileManager().Save(
             projectPath,
-            new EditorProjectDataModel
-            {
-                FumenFilePath = "chart.nyageki",
-                AudioFilePath = "audio.wav"
-            });
+            new EditorProjectDataModel());
 
         var storageRoot = await GetStorageFolder(temporaryDirectory.RootPath);
         var root = await AvaloniaStorageProviderFileSystemBuilder
@@ -435,11 +451,19 @@ public sealed class SimpleFileSystemTests
         {
             var projectFile = Assert.Single(root.ChildFiles, file =>
                 file.FileName.Equals("project.nyagekiProj", StringComparison.OrdinalIgnoreCase));
+            var fumenFile = Assert.Single(root.ChildFiles, file =>
+                file.FileName.Equals("chart.nyageki", StringComparison.OrdinalIgnoreCase));
+            var audioFile = Assert.Single(root.ChildFiles, file =>
+                file.FileName.Equals("audio.wav", StringComparison.OrdinalIgnoreCase));
 
-            loaded = await EditorProjectDataUtils.TryLoadFromFileAsync(
-                root,
-                projectFile,
-                "project.nyagekiProj");
+            loaded = await EditorProjectDataUtils.TryLoadFromContextAsync(
+                new EditorFileAccessContext
+                {
+                    ProjectDirectory = root,
+                    ProjectFile = projectFile,
+                    FumenFile = fumenFile,
+                    AudioFile = audioFile
+                });
 
             var loadedSvg = Assert.IsType<SvgImageFilePrefab>(Assert.Single(loaded.Fumen.SvgPrefabs));
             Assert.Equal("missing/image.svg", loadedSvg.SvgFilePath);
