@@ -17,7 +17,7 @@ public partial class RecalculateTotalHeightCommandHandler : CommandHandlerBase<R
 
     public override Task Run(Command command)
     {
-        if (EditorDocumentManager.CurrentActivatedEditor is { AudioPlayer: { } audioPlayer, EditorProjectData: { } editorProjectData } editor)
+        if (EditorDocumentManager.CurrentActivatedEditor is { AudioPlayer: { } audioPlayer, EditorContext.ProjectData: { } editorProjectData } editor)
         {
             editorProjectData.AudioDuration = audioPlayer.Duration;
             editor.RecalculateTotalDurationHeight();

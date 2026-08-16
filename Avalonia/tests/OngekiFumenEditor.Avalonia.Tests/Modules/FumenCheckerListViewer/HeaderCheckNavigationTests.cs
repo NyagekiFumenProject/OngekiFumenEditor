@@ -5,6 +5,7 @@ using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.ViewModels;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using Xunit;
 
@@ -20,16 +21,16 @@ public sealed class HeaderCheckNavigationTests
 
         var editor = new FumenVisualEditorViewModel
         {
-            Fumen = new OngekiFumen()
+            EditorContext = new EditorContext { Fumen = new OngekiFumen() }
         };
-        editor.Fumen.MetaInfo.XRESOLUTION++;
-        editor.Fumen.MetaInfo.TRESOLUTION++;
-        editor.Fumen.MetaInfo.Creator = string.Empty;
+        editor.EditorContext.Fumen.MetaInfo.XRESOLUTION++;
+        editor.EditorContext.Fumen.MetaInfo.TRESOLUTION++;
+        editor.EditorContext.Fumen.MetaInfo.Creator = string.Empty;
 
         var rule = Assert.Single(
             IoC.GetAll<IFumenCheckRule>(),
             candidate => candidate.GetType().Name == "HeaderConstCheckRule");
-        var results = rule.CheckRule(editor.Fumen, editor).ToArray();
+        var results = rule.CheckRule(editor.EditorContext.Fumen, editor).ToArray();
         var tool = IoC.Get<IFumenMetaInfoBrowser>();
 
         Assert.Equal(3, results.Length);
@@ -42,7 +43,7 @@ public sealed class HeaderCheckNavigationTests
                 result.NavigateBehavior.Navigate(editor);
 
                 Assert.Same(tool, Assert.Single(shell.Tools));
-                Assert.Same(editor.Fumen, tool.Fumen);
+                Assert.Same(editor.EditorContext.Fumen, tool.Fumen);
             }
         }
         finally

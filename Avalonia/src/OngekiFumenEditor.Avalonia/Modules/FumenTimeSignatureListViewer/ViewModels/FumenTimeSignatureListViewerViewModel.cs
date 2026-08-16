@@ -26,7 +26,7 @@ public partial class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, 
         {
             this.RegisterOrUnregisterPropertyChangeEvent(field, value, OnEditorPropertyChanged);
             if (SetProperty(ref field, value))
-                Fumen = value?.Fumen;
+                Fumen = value?.EditorContext?.Fumen;
         }
     }
 
@@ -76,8 +76,8 @@ public partial class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, 
 
     private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
-            Fumen = Editor?.Fumen;
+        if (e.PropertyName == nameof(FumenVisualEditorViewModel.EditorContext))
+            Fumen = Editor?.EditorContext?.Fumen;
     }
 
     private void RefreshFumen()

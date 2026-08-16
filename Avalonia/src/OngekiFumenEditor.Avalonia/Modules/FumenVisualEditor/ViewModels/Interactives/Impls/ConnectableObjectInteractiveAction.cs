@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 				LaneCurvePathControlObject ctrl => ctrl.RefCurveObject,
 				_ => default
 			};
-			ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);
+			ConnectableStartObject.RelocateDockableObjects(editor.EditorContext.Fumen, obj);
 		}
 
 		public override void OnDragStart(OngekiObjectBase o, Point pos, FumenVisualEditorViewModel editor)
@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 			if (obj is ConnectableChildObjectBase child)
 				minTGrid = child.PrevObject.TGrid;
 
-			var infoList = editor.Fumen.GetAllDisplayableObjects(minTGrid, maxTGrid)
+			var infoList = editor.EditorContext.Fumen.GetAllDisplayableObjects(minTGrid, maxTGrid)
 				.OfType<ILaneDockable>()
 				.Where(x => x.ReferenceLaneStrId == refLaneId)
 				.Where(x => !((ISelectableObject)x).IsSelected)
@@ -106,7 +106,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.UpdateXGridForDockedObjects.ToLocalizedString(),
 				() =>
 				{
-					ConnectableStartObject.RelocateDockableObjects(editor.Fumen, obj);
+					ConnectableStartObject.RelocateDockableObjects(editor.EditorContext.Fumen, obj);
 				}, () =>
 				{
 					foreach (var info in infoList)

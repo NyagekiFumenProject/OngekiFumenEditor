@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base.Collections;
+using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer;
@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             lineDrawing.Draw(target, vertices, 1);
             var t = target.Editor.GetCurrentTGrid();
 
-            var bpmList = target.Editor.Fumen.BpmList;
+            var bpmList = target.Editor.EditorContext.Fumen.BpmList;
 
             string str;
             if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)
@@ -84,7 +84,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
 
             //print default soflan group speed
-            PrintSpeed(0, target.Editor.Fumen.SoflansMap.DefaultSoflanList, new(target.Editor.ViewWidth - 50, y - 10f), spdColor);
+            PrintSpeed(0, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList, new(target.Editor.ViewWidth - 50, y - 10f), spdColor);
 
             //print specify soflan group speed
             if (IoC.Get<IFumenSoflanGroupListViewer>().CurrentSoflansDisplaySoflanGroupWrapItem is SoflanGroupWrapItem item)
@@ -92,7 +92,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var soflanGroup = item.SoflanGroupId;
                 if (soflanGroup != 0)
                 {
-                    var soflanList = target.Editor.Fumen.SoflansMap[item.SoflanGroupId];
+                    var soflanList = target.Editor.EditorContext.Fumen.SoflansMap[item.SoflanGroupId];
                     var color = IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(item.SoflanGroupId);
                     PrintSpeed(item.SoflanGroupId, soflanList, new(target.Editor.ViewWidth - 100, y - 10f), color);
                 }

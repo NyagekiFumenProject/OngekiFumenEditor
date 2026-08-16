@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Modules.Toolbox;
+using Gekimini.Avalonia.Modules.Toolbox;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
@@ -88,14 +88,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.InterpolateCurve.ToLocalizedString(), () =>
 			{
-				editor.Fumen.RemoveObject(RefStartObject);
+				editor.EditorContext.Fumen.RemoveObject(RefStartObject);
 				foreach (var start in genStarts)
-					editor.Fumen.AddObject(start);
+					editor.EditorContext.Fumen.AddObject(start);
 			}, () =>
 			{
 				foreach (var start in genStarts)
-					editor.Fumen.RemoveObject(start);
-				editor.Fumen.AddObject(RefStartObject);
+					editor.EditorContext.Fumen.RemoveObject(start);
+				editor.EditorContext.Fumen.AddObject(RefStartObject);
 			}));
 		}
 
@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			IWindowManager windowManager,
 			IDialogManager dialogManager)
 		{
-			var fumen = editor.Fumen;
+			var fumen = editor.EditorContext.Fumen;
 
 			if (RefStartObject?.IsPathVaild() != true)
 			{
@@ -212,7 +212,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
 				Lang.B.ObjectBatchBrush.ToLocalizedString(),
-				() => editor.Fumen.AddObjects(generatedObjects),
+				() => editor.EditorContext.Fumen.AddObjects(generatedObjects),
 				() =>
 				{
 					foreach (var obj in generatedObjects)

@@ -51,7 +51,7 @@ public class FumenVisualEditorSettingsViewModel : ToolViewModelBase, IFumenVisua
                 Title = Lang.B.FumenVisualEditorSettings.ToLocalizedString();
             else
                 Title = LocalizedString.CreateFromTemplateFunc(() =>
-                    $"{Lang.B.FumenVisualEditorSettings.Text} - {Editor.FileName}");
+                    $"{Lang.B.FumenVisualEditorSettings.Text} - {Editor.EditorContext.FileName}");
         }
     }
 

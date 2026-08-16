@@ -40,7 +40,7 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
         if (editor is null)
             return;
 
-        var pallete = editor.Fumen.BulletPalleteList
+        var pallete = editor.EditorContext.Fumen.BulletPalleteList
             .FirstOrDefault(x => x.StrID.Equals(strId, StringComparison.CurrentCultureIgnoreCase));
         if (pallete is null)
             return;
@@ -56,7 +56,7 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
         if (editor is null)
             return;
 
-        var bplList = editor.Fumen.BulletPalleteList.Prepend(BulletPallete.DummyCustomPallete).ToArray();
+        var bplList = editor.EditorContext.Fumen.BulletPalleteList.Prepend(BulletPallete.DummyCustomPallete).ToArray();
         await OpenSelectListCoreAsync(bplList, IoC.Get<IWindowManager>());
     }
 

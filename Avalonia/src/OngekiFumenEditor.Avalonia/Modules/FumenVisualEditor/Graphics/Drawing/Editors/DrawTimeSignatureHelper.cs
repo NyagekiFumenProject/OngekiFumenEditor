@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             drawLines.Clear();
 
-            var fumen = target.Editor.Fumen;
+            var fumen = target.Editor.EditorContext.Fumen;
 
             if (target.Editor.Setting.BeatSplit == 0)
                 return;

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
@@ -88,9 +88,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
             var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
-            var bpmList = target.Editor.Fumen.BpmList;
+            var bpmList = target.Editor.EditorContext.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
-            //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
+            //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
             var height = target.CurrentDrawingTargetContext.Rect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -167,7 +167,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var fromXUnit = 0d;
                 var toXUnit = 0d;
 
-                var fumen = target.Editor.Fumen;
+                var fumen = target.Editor.EditorContext.Fumen;
 
                 #region ToXUnit
 

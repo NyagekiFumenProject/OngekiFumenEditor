@@ -31,15 +31,15 @@ public partial class StandardizeFormatCommandHandler : CommandHandlerBase<Standa
 
     public override Task Update(Command command)
     {
-        command.Enabled = editorDocumentManager.CurrentActivatedEditor?.Fumen is not null;
+        command.Enabled = editorDocumentManager.CurrentActivatedEditor?.EditorContext?.Fumen is not null;
         return Task.CompletedTask;
     }
 
     public override async Task Run(Command command)
     {
-        if (editorDocumentManager.CurrentActivatedEditor is not { Fumen: not null } editor)
+        if (editorDocumentManager.CurrentActivatedEditor is not { EditorContext.Fumen: not null } editor)
             return;
-        var fumen = editor.Fumen;
+        var fumen = editor.EditorContext.Fumen;
 
         ISimpleFile outputFile;
         try

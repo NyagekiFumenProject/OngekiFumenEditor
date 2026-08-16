@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
@@ -193,9 +193,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
 
             using var _d5 =
-                target.Editor.Fumen.IndividualSoflanAreaMap.Keys.Concat(target.Editor.Fumen.SoflansMap.Keys)
+                target.Editor.EditorContext.Fumen.IndividualSoflanAreaMap.Keys.Concat(target.Editor.EditorContext.Fumen.SoflansMap.Keys)
                 .Distinct()
-                .Select(x => target.Editor.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _))
+                .Select(x => target.Editor.EditorContext.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _))
                 .Where(x => x.IsDisplaySoflanDesignMode)
                 .Select(x => x.SoflanGroupId)
                 .ToHashSetWithObjectPool(out var visibleSoflanGroups);

@@ -10,6 +10,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using Xunit;
 
@@ -88,7 +89,10 @@ public sealed class SelectingObjectViewerSortingTests
         fumen.AddObject(inside);
         fumen.AddObject(outside);
 
-        var editor = new FumenVisualEditorViewModel { Fumen = fumen };
+        var editor = new FumenVisualEditorViewModel
+        {
+            EditorContext = new EditorContext { Fumen = fumen }
+        };
         try
         {
             var viewModel = CreateViewer(editor);

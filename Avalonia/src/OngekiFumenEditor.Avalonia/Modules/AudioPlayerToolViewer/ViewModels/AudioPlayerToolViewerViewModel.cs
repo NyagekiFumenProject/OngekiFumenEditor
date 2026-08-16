@@ -295,7 +295,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
 
     private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(FumenVisualEditorViewModel.EditorProjectData)
+        if (e.PropertyName is nameof(FumenVisualEditorViewModel.EditorContext)
             or nameof(FumenVisualEditorViewModel.AudioPlayer))
         {
             AudioPlayer = Editor?.AudioPlayer;

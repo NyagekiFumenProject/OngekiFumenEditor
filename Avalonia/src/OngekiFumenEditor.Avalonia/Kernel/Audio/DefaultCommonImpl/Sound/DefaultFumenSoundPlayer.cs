@@ -243,7 +243,7 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
             });
         }
 
-        var fumen = editor.Fumen;
+        var fumen = editor.EditorContext.Fumen;
         var soundObjects = fumen.GetAllDisplayableObjects().OfType<OngekiTimelineObjectBase>();
 
         if (!fumen.ClickSEs.Any(x => x.TGrid.TotalUnit <= 1))

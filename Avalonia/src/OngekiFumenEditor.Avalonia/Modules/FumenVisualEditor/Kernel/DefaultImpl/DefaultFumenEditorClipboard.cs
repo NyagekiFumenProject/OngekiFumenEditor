@@ -36,7 +36,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
         {
             if (sourceEditor.IsLocked)
                 return;
-            if (sourceEditor.Fumen is null)
+            if (sourceEditor.EditorContext.Fumen is null)
                 return;
             if (!sourceEditor.IsDesignMode)
             {
@@ -427,7 +427,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                     //如果IsAppend为false,那就直接改引用直接成这个。否则就新建一个
                     var isAppend = false;
                     BulletPallete existPallete = default;
-                    if (targetEditor.Fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == pallete.StrID) is BulletPallete e)
+                    if (targetEditor.EditorContext.Fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == pallete.StrID) is BulletPallete e)
                     {
                         existPallete = e;
                         bool _check<T>(Func<BulletPallete, T> select)
@@ -460,13 +460,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                     redo += () =>
                     {
                         if (isAppend)
-                            targetEditor.Fumen.AddObject(pickPallete);
+                            targetEditor.EditorContext.Fumen.AddObject(pickPallete);
                         bullet.ReferenceBulletPallete = pickPallete;
                     };
                     undo += () =>
                     {
                         if (isAppend)
-                            targetEditor.Fumen.RemoveObject(pickPallete);
+                            targetEditor.EditorContext.Fumen.RemoveObject(pickPallete);
                         bullet.ReferenceBulletPallete = default;
                     };
                 }
@@ -483,7 +483,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
 
                         var pickLane = default(LaneStartBase);
                         //获取附近能附着的轨道
-                        var dockableLanes = targetEditor.Fumen.Lanes
+                        var dockableLanes = targetEditor.EditorContext.Fumen.Lanes
                             .GetVisibleStartObjects(newTGrid, newTGrid)
                             .Where(x => x.IsDockableLane)
                             .Select(x =>
@@ -531,7 +531,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
 
                 redo += () =>
                 {
-                    targetEditor.Fumen.AddObject(copied);
+                    targetEditor.EditorContext.Fumen.AddObject(copied);
                     foreach ((var obj, var tuple) in posMap)
                     {
                         (var pos, var tGrid, var xGrid) = tuple;

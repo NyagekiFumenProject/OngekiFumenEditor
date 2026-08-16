@@ -95,13 +95,13 @@ public partial class SelectionFilterViewModel : ViewModelBase
 
     internal void OnEditorChanged(FumenVisualEditorViewModel? editor)
     {
-        bulletPaletteOption.SetFumen(editor?.Fumen);
+        bulletPaletteOption.SetFumen(editor?.EditorContext?.Fumen);
     }
 
     internal void OnEditorFumenChanged(FumenVisualEditorViewModel? editor)
     {
         if (ReferenceEquals(Editor, editor))
-            bulletPaletteOption.SetFumen(editor?.Fumen);
+            bulletPaletteOption.SetFumen(editor?.EditorContext?.Fumen);
     }
 
     private void OnOptionUpdated()

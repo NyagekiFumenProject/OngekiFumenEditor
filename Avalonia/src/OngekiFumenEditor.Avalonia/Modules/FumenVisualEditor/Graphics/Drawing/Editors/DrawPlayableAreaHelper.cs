@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
 
-            var fumen = target.Editor.Fumen;
+            var fumen = target.Editor.EditorContext.Fumen;
             //todo 暂时显示默认的变速组
             var soflanList = fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
 
@@ -176,7 +176,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
-            var fumen = target.Editor.Fumen;
+            var fumen = target.Editor.EditorContext.Fumen;
             var currentTGrid = target.Editor.GetCurrentTGrid();
             var soflanGroup = target.CurrentDrawingTargetContext.CurrentSoflanList;
 

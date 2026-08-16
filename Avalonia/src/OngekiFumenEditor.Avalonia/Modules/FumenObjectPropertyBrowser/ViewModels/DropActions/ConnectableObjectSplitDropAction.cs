@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
@@ -42,8 +42,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 			{
 				//计算出需要被划分出来的后边子物件集合
 				splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
-				affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
-					.Concat(editor.Fumen.Holds)
+				affactedObjects.AddRange(editor.EditorContext.Fumen.Taps.AsEnumerable<ILaneDockable>()
+					.Concat(editor.EditorContext.Fumen.Holds)
 					.Where(x => x.ReferenceLaneStart == startObject));
 
 				//被划分的子物件删除出来
@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 				}
 
 				startObject.AddChildObject(prevEndObject);
-				editor.Fumen.AddObject(nextStartObject);
+				editor.EditorContext.Fumen.AddObject(nextStartObject);
 
 				editor.MoveObjectTo(prevEndObject, dragEndPoint);
 				editor.MoveObjectTo(nextStartObject, dragEndPoint);

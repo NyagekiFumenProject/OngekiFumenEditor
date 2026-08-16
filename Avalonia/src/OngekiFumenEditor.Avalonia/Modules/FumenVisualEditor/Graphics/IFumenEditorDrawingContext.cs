@@ -20,8 +20,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics
         bool CheckVisible(TGrid tGrid);
         bool CheckRangeVisible(TGrid minTGrid, TGrid maxTGrid);
 
-        double ConvertToY_DefaultSoflanGroup(TGrid tGrid) => ConvertToY(tGrid.TotalUnit, Editor.Fumen.SoflansMap.DefaultSoflanList);
-        double ConvertToY_DefaultSoflanGroup(double tGridUnit) => ConvertToY(tGridUnit, Editor.Fumen.SoflansMap.DefaultSoflanList);
+        double ConvertToY_DefaultSoflanGroup(TGrid tGrid) => ConvertToY(tGrid.TotalUnit, Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
+        double ConvertToY_DefaultSoflanGroup(double tGridUnit) => ConvertToY(tGridUnit, Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
         double ConvertToY(TGrid tGrid, SoflanList soflans) => ConvertToY(tGrid.TotalUnit, soflans);
         double ConvertToY(double tGridUnit, SoflanList soflans);
     }

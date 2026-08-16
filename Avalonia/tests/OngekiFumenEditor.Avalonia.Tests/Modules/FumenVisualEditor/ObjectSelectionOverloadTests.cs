@@ -106,8 +106,11 @@ public sealed class ObjectSelectionOverloadTests
         };
         return new FumenVisualEditorViewModel
         {
-            EditorProjectData = project,
-            Fumen = fumen,
+            EditorContext = new EditorContext
+            {
+                ProjectData = project,
+                Fumen = fumen
+            },
             IsDirty = false
         };
     }

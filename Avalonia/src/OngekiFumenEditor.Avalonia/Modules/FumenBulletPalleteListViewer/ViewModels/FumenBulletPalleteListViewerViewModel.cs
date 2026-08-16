@@ -44,14 +44,14 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
             if (!SetProperty(ref field, value))
                 return;
 
-            BindPalleteList(value?.Fumen?.BulletPalleteList);
+            BindPalleteList(value?.EditorContext?.Fumen?.BulletPalleteList);
             OnPropertyChanged(nameof(IsEnable));
             CreateNewCommand.NotifyCanExecuteChanged();
             DeleteSelectedCommand.NotifyCanExecuteChanged();
         }
     }
 
-    public bool IsEnable => Editor?.Fumen is not null;
+    public bool IsEnable => Editor?.EditorContext?.Fumen is not null;
     public ObservableCollection<BulletPallete> SelectedItems { get; } = [];
     public ObservableCollection<BulletPallete> DataView { get; } = [];
 
@@ -70,8 +70,8 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
 
     private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
-            BindPalleteList(Editor?.Fumen?.BulletPalleteList);
+        if (e.PropertyName == nameof(FumenVisualEditorViewModel.EditorContext))
+            BindPalleteList(Editor?.EditorContext?.Fumen?.BulletPalleteList);
     }
 
     private void BindPalleteList(BulletPalleteList palleteList)
@@ -99,7 +99,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand(CanExecute = nameof(CanModifyFumen))]
     private void CreateNew()
     {
-        Editor.Fumen.AddObject(new BulletPallete());
+        Editor.EditorContext.Fumen.AddObject(new BulletPallete());
     }
 
     private bool CanDeleteSelected() => IsEnable && SelectedItems.Count > 0;
@@ -107,9 +107,9 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand(CanExecute = nameof(CanDeleteSelected))]
     private async Task DeleteSelectedAsync()
     {
-        var affectedReferences = Editor.Fumen.Bells
+        var affectedReferences = Editor.EditorContext.Fumen.Bells
             .OfType<IBulletPalleteReferencable>()
-            .Concat(Editor.Fumen.Bullets)
+            .Concat(Editor.EditorContext.Fumen.Bullets)
             .Where(x => x.ReferenceBulletPallete is not null)
             .Where(x => SelectedItems.Contains(x.ReferenceBulletPallete));
 
@@ -121,7 +121,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
         }
 
         foreach (var item in SelectedItems.ToArray())
-            Editor.Fumen.RemoveObject(item);
+            Editor.EditorContext.Fumen.RemoveObject(item);
     }
 
     public void OnCreateBulletPointerMoved(PointerEventArgs pointerEventArgs)
@@ -174,13 +174,13 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand]
     private void ClonePalette(BulletPallete pallete)
     {
-        if (pallete is null || Editor?.Fumen is null)
+        if (pallete is null || Editor?.EditorContext?.Fumen is null)
             return;
 
         var copiedPallete = new BulletPallete();
         copiedPallete.Copy(pallete);
         copiedPallete.StrID = null;
-        Editor.Fumen.AddObject(copiedPallete);
+        Editor.EditorContext.Fumen.AddObject(copiedPallete);
     }
 
     [RelayCommand]
@@ -190,9 +190,9 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
             return;
 
         Editor.TryCancelAllObjectSelecting();
-        foreach (var selectable in Editor.Fumen.Bells
+        foreach (var selectable in Editor.EditorContext.Fumen.Bells
                      .OfType<IBulletPalleteReferencable>()
-                     .Concat(Editor.Fumen.Bullets)
+                     .Concat(Editor.EditorContext.Fumen.Bullets)
                      .Where(x => x.ReferenceBulletPallete == pallete)
                      .OfType<ISelectableObject>())
         {
@@ -206,10 +206,10 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     private void RefreshFilter()
     {
         DataView.Clear();
-        if (Editor?.Fumen is null)
+        if (Editor?.EditorContext?.Fumen is null)
             return;
 
-        foreach (var pallete in Editor.Fumen.BulletPalleteList.Where(pallete =>
+        foreach (var pallete in Editor.EditorContext.Fumen.BulletPalleteList.Where(pallete =>
                      string.IsNullOrWhiteSpace(Filter) ||
                      pallete.ToString().Contains(Filter, StringComparison.InvariantCultureIgnoreCase)))
         {

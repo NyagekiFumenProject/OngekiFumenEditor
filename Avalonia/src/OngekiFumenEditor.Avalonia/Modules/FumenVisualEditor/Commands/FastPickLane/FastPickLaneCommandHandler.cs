@@ -31,7 +31,7 @@ public abstract class FastPickLaneCommandHandler<T, DEF> : CommandHandlerBase<DE
         }
 
         var filterTGrid = TGridCalculator.ConvertYToTGrid_DesignMode(editor.RectInDesignMode.MaxY, editor);
-        var selectLane = editor.Fumen.Lanes.OfType<T>().Where(x => x.MaxTGrid <= filterTGrid).OrderBy(x => x.MaxTGrid).LastOrDefault();
+        var selectLane = editor.EditorContext.Fumen.Lanes.OfType<T>().Where(x => x.MaxTGrid <= filterTGrid).OrderBy(x => x.MaxTGrid).LastOrDefault();
 
         var obj = selectLane?.Children.LastOrDefault() as ConnectableObjectBase;
         obj = obj ?? selectLane;

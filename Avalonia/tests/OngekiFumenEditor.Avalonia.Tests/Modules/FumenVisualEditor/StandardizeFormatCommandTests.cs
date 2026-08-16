@@ -8,6 +8,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.StandardizeFormat;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
@@ -78,7 +79,7 @@ public sealed class StandardizeFormatCommandTests
 
         Assert.Equal(1, convertService.CallCount);
         Assert.True(convertService.WasLockedDuringCall);
-        Assert.Same(editor.Fumen, convertService.LastFumen);
+        Assert.Same(editor.EditorContext.Fumen, convertService.LastFumen);
         Assert.True(convertService.LastOption!.IsStandarizeFumen);
         Assert.Same(outputFile, convertService.LastOption.OutputFumenFile);
         Assert.Null(convertService.LastOption.InputFumenFile);
@@ -257,7 +258,7 @@ public sealed class StandardizeFormatCommandTests
             outputService);
 
     private static FumenVisualEditorViewModel CreateEditor() =>
-        new() { Fumen = new OngekiFumen() };
+        new() { EditorContext = new EditorContext { Fumen = new OngekiFumen() } };
 
     private sealed class StubConvertService : IFumenConvertService
     {

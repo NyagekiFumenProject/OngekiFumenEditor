@@ -90,7 +90,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     public double Bpm
     {
         get => IsCurrentEditorAsInputFumen
-            ? editorDocumentManager.CurrentActivatedEditor?.Fumen?.BpmList?.FirstBpm ?? 0
+            ? editorDocumentManager.CurrentActivatedEditor?.EditorContext?.Fumen?.BpmList?.FirstBpm ?? 0
             : bpm ?? 0;
         set => SetProperty(ref bpm, value);
     }
@@ -154,7 +154,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     private async Task ExecuteConverterAsync()
     {
         var currentEditor = editorDocumentManager.CurrentActivatedEditor;
-        var currentEditorProject = currentEditor?.EditorProjectData;
+        var currentEditorProject = currentEditor?.EditorContext?.ProjectData;
         var currentEditorAudioFile = currentEditor?.EditorContext?.AudioFile;
         var currentEditorAudioFilePath = currentEditorProject?.AudioFilePath;
 
@@ -185,11 +185,11 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
         Dictionary<ITimelineObject, (TGrid before, TGrid after)> recalculateMap = null;
         if (IsCurrentEditorAsInputFumen && IsRecalculateObjects && currentEditor is not null)
         {
-            var firstBpm = currentEditor.Fumen.BpmList.FirstOrDefault();
+            var firstBpm = currentEditor.EditorContext.Fumen.BpmList.FirstOrDefault();
             var offset = firstBpm.LengthConvertToOffset(timeOffset.TotalMilliseconds);
             recalculateMap = [];
 
-            foreach (var timelineObject in currentEditor.Fumen.GetAllDisplayableObjects().OfType<ITimelineObject>())
+            foreach (var timelineObject in currentEditor.EditorContext.Fumen.GetAllDisplayableObjects().OfType<ITimelineObject>())
             {
                 var newTGrid = timelineObject.TGrid + offset;
                 if (newTGrid is null)

@@ -28,6 +28,86 @@ public sealed class FumenVisualEditorInitializationTests
     }
 
     [AvaloniaFact]
+    public void ContextBackedProperties_ForwardValuesAndNotifyBindings()
+    {
+        using var editor = new FumenVisualEditorViewModel();
+        var context = new EditorContext
+        {
+            ProjectData = new EditorProjectDataModel(),
+            Fumen = new OngekiFumen(),
+            FilePath = "project.nyagekiProj",
+            FileName = "chart.nyageki"
+        };
+        var changedProperties = new HashSet<string>();
+        editor.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is { } propertyName)
+                changedProperties.Add(propertyName);
+        };
+
+        editor.EditorContext = context;
+
+        Assert.Same(context, editor.EditorContext);
+        Assert.Contains(nameof(editor.EditorContext), changedProperties);
+
+        changedProperties.Clear();
+        var replacementFumen = new OngekiFumen();
+        var replacementProjectData = new EditorProjectDataModel();
+        context.Fumen = replacementFumen;
+        context.ProjectData = replacementProjectData;
+        context.FilePath = "updated/project.nyagekiProj";
+        context.FileName = "updated-chart.nyageki";
+
+        Assert.Same(replacementFumen, editor.EditorContext.Fumen);
+        Assert.Same(replacementProjectData, editor.EditorContext.ProjectData);
+        Assert.Equal("updated/project.nyagekiProj", editor.EditorContext.FilePath);
+        Assert.Equal("updated-chart.nyageki", editor.EditorContext.FileName);
+        Assert.Contains(nameof(editor.EditorContext), changedProperties);
+        Assert.Contains(nameof(editor.DisplayName), changedProperties);
+
+        // 编辑器不再代理谱面/项目数据/文件路径属性，外部统一通过 EditorContext 访问。
+        Assert.Null(typeof(FumenVisualEditorViewModel).GetProperty(nameof(EditorContext.Fumen)));
+        Assert.Null(typeof(FumenVisualEditorViewModel).GetProperty(nameof(EditorContext.ProjectData)));
+        Assert.Null(typeof(FumenVisualEditorViewModel).GetProperty(nameof(EditorContext.FilePath)));
+        Assert.Null(typeof(FumenVisualEditorViewModel).GetProperty(nameof(EditorContext.FileName)));
+    }
+
+    [AvaloniaFact]
+    public void Dispose_DoesNotRecalculateTimelineAfterContextIsDetached()
+    {
+        var context = new EditorContext
+        {
+            ProjectData = new EditorProjectDataModel
+            {
+                AudioDuration = TimeSpan.FromSeconds(10)
+            },
+            Fumen = new OngekiFumen()
+        };
+        var editor = new FumenVisualEditorViewModel
+        {
+            ViewHeight = 10,
+            EditorContext = context
+        };
+        editor.TotalDurationHeight = 1000;
+        editor.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(editor.TotalDurationHeight))
+                editor.ReverseScrollViewerVerticalOffset = editor.TotalDurationHeight;
+        };
+
+        var exception = Record.Exception(editor.Dispose);
+
+        Assert.Null(exception);
+        Assert.Null(editor.EditorContext);
+
+        // 上下文已与编辑器解除订阅，后续上下文变更不应再触发时间轴重算。
+        var totalDurationHeight = editor.TotalDurationHeight;
+        context.Fumen = new OngekiFumen();
+        context.ProjectData = new EditorProjectDataModel { AudioDuration = TimeSpan.FromSeconds(99) };
+        Assert.Equal(totalDurationHeight, editor.TotalDurationHeight);
+    }
+
+    [AvaloniaFact]
     public void ProjectAndTimingChanges_RecalculateTimelineExtentAndMarkDocumentDirty()
     {
         var fumen = new OngekiFumen();
@@ -38,8 +118,11 @@ public sealed class FumenVisualEditorInitializationTests
         var editor = new FumenVisualEditorViewModel
         {
             ViewHeight = 10,
-            EditorProjectData = project,
-            Fumen = fumen
+            EditorContext = new EditorContext
+            {
+                ProjectData = project,
+                Fumen = fumen
+            }
         };
 
         var initialHeight = editor.TotalDurationHeight;
@@ -66,11 +149,14 @@ public sealed class FumenVisualEditorInitializationTests
         fumen.AddObject(tap);
         var editor = new FumenVisualEditorViewModel
         {
-            EditorProjectData = new EditorProjectDataModel
+            EditorContext = new EditorContext
             {
-                AudioDuration = TimeSpan.FromSeconds(10)
-            },
-            Fumen = fumen
+                ProjectData = new EditorProjectDataModel
+                {
+                    AudioDuration = TimeSpan.FromSeconds(10)
+                },
+                Fumen = fumen
+            }
         };
 
         editor.IsDirty = false;
@@ -100,11 +186,14 @@ public sealed class FumenVisualEditorInitializationTests
         var editor = new FumenVisualEditorViewModel
         {
             ViewHeight = 10,
-            EditorProjectData = new EditorProjectDataModel
+            EditorContext = new EditorContext
             {
-                AudioDuration = TimeSpan.FromSeconds(10)
-            },
-            Fumen = fumen
+                ProjectData = new EditorProjectDataModel
+                {
+                    AudioDuration = TimeSpan.FromSeconds(10)
+                },
+                Fumen = fumen
+            }
         };
         var view = new FumenVisualEditorView();
 
@@ -321,9 +410,7 @@ public sealed class FumenVisualEditorInitializationTests
         };
         var editor = new FumenVisualEditorViewModel
         {
-            EditorProjectData = project,
             EditorContext = context,
-            Fumen = fumen,
             IsDirty = true
         };
 
@@ -347,7 +434,7 @@ public sealed class FumenVisualEditorInitializationTests
         {
             RootPath = Path.Combine(
                 Path.GetTempPath(),
-                "OngekiFumenEditor.FumenVisualEditor.Tests",
+                "OngekiFumenEditor.EditorContext.FumenVisualEditor.Tests",
                 Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(RootPath);
         }

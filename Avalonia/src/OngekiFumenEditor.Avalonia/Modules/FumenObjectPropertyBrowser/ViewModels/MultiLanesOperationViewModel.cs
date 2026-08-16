@@ -71,13 +71,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 					frontStart.AddChildObject(laterChild);
 				}
 
-				foreach (var dockable in editor.Fumen.Taps.Concat<ILaneDockable>(editor.Fumen.Holds)
+				foreach (var dockable in editor.EditorContext.Fumen.Taps.Concat<ILaneDockable>(editor.EditorContext.Fumen.Holds)
 					         .Where(d => d.ReferenceLaneStart == laterStart)) {
 					dockable.ReferenceLaneStart = (LaneStartBase)frontStart;
 					RedockedObjects.Add(dockable);
 				}
 
-				editor.Fumen.RemoveObject(laterStart);
+				editor.EditorContext.Fumen.RemoveObject(laterStart);
 				IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor);
 			}, () =>
 			{
@@ -89,7 +89,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 					next = next.NextObject;
 				}
 				frontStart.RemoveChildObject(midChild);
-				editor.Fumen.AddObject(laterStart);
+				editor.EditorContext.Fumen.AddObject(laterStart);
 
 				foreach (var dockable in RedockedObjects) {
 					dockable.ReferenceLaneStart = (LaneStartBase)laterStart;

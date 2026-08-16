@@ -310,8 +310,11 @@ public sealed class SvgPrefabTests
             var project = new EditorProjectDataModel();
             var editor = new FumenVisualEditorViewModel
             {
-                EditorProjectData = project,
-                Fumen = new OngekiFumen(),
+                EditorContext = new EditorContext
+                {
+                    ProjectData = project,
+                    Fumen = new OngekiFumen()
+                },
                 ViewWidth = 800,
                 ViewHeight = 600
             };

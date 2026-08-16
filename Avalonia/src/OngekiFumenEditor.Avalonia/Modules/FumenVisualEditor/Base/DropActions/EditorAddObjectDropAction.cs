@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using Avalonia;
@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.AddObject.ToLocalizedString(), () =>
 			{
 				editor.MoveObjectTo(displayObject, mousePosition);
-				editor.Fumen.AddObject(displayObject);
+				editor.EditorContext.Fumen.AddObject(displayObject);
 
 				if (isFirst)
 				{

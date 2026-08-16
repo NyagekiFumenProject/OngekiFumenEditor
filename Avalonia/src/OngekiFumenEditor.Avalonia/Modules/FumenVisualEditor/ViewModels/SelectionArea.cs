@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -85,7 +85,7 @@ public class SelectionArea : ObservableObject
         var minXGrid = XGridCalculator.ConvertXToXGrid(Rect.Left, editor);
         var maxXGrid = XGridCalculator.ConvertXToXGrid(Rect.Right, editor);
 
-        return editor.Fumen.GetAllDisplayableObjects()
+        return editor.EditorContext.Fumen.GetAllDisplayableObjects()
             .OfType<OngekiObjectBase>()
             .Distinct()
             .Where(Check);

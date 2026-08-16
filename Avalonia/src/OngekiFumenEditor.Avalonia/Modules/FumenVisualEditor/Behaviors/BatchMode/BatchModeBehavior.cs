@@ -436,7 +436,7 @@ internal sealed class BatchModeInteractionCoordinator
             Lang.B.BatchModeAddObject.ToFormatLocalizedString(submode.DisplayName.Text),
             () =>
             {
-                editor.Fumen.AddObject(ongekiObject);
+                editor.EditorContext.Fumen.AddObject(ongekiObject);
                 editor.InteractiveManager.GetInteractive(ongekiObject)
                     .OnMoveCanvas(ongekiObject, canvasPosition, editor);
 
@@ -472,7 +472,7 @@ internal sealed class BatchModeInteractionCoordinator
         editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(
             Lang.B.DeleteSpecificObject.ToFormatLocalizedString(submode.DisplayName.Text),
             () => editor.RemoveObject(hit),
-            () => editor.Fumen.AddObject(hit)));
+            () => editor.EditorContext.Fumen.AddObject(hit)));
     }
 
     private void Reset()

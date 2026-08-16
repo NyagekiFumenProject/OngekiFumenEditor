@@ -37,12 +37,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 
 			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.InterpolateDurationSoflan.ToLocalizedString(), () =>
 			{
-				editor.Fumen.AddObjects(list);
-				editor.Fumen.RemoveObject(soflan);
+				editor.EditorContext.Fumen.AddObjects(list);
+				editor.EditorContext.Fumen.RemoveObject(soflan);
 			}, () =>
 			{
-				editor.Fumen.AddObject(soflan);
-				editor.Fumen.RemoveObjects(list);
+				editor.EditorContext.Fumen.AddObject(soflan);
+				editor.EditorContext.Fumen.RemoveObjects(list);
 			}));
 		}
 	}

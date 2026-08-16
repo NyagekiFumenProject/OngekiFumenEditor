@@ -327,7 +327,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         #endregion
 
-        var fumen = Fumen;
+        var fumen = EditorContext.Fumen;
         if (fumen is null)
             goto End;
 
@@ -340,9 +340,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         var projectionMatrix =
             Matrix4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
 
-        IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = Fumen.SoflansMap;
+        IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = EditorContext.Fumen.SoflansMap;
         //if (IsDesignMode)
-        //    soflanMap = [new KeyValuePair<int, SoflanList>(0, Fumen.SoflansMap.DefaultSoflanList)];
+        //    soflanMap = [new KeyValuePair<int, SoflanList>(0, EditorContext.Fumen.SoflansMap.DefaultSoflanList)];
 
         foreach (KeyValuePair<int, SoflanList> pair in soflanMap)
         {
@@ -356,7 +356,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             {
                 //Preview Mode
                 var ranges =
-                    pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
+                    pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, EditorContext.Fumen.BpmList,
                         Setting.VerticalDisplayScale);
                 foreach (var x in ranges)
                 {
@@ -500,13 +500,13 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             */
 
             //特殊处理：子弹和Bell
-            var blts = Fumen.Bullets.AsEnumerable();
-            var bels = Fumen.Bells.AsEnumerable();
+            var blts = EditorContext.Fumen.Bullets.AsEnumerable();
+            var bels = EditorContext.Fumen.Bells.AsEnumerable();
             var curTGrid = GetCurrentTGrid();
             if (IsPreviewMode)
             {
-                blts = Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
-                bels = Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);
+                blts = EditorContext.Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
+                bels = EditorContext.Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);
             }
             bels = bels.Where(x =>
             {
@@ -909,7 +909,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     public bool CheckSoflanGroupVisible(int soflanGroup)
     {
-        var soflanGroupWrapItem = Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroup, out _);
+        var soflanGroupWrapItem = EditorContext.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroup, out _);
         if (IsDesignMode)
         {
             return soflanGroupWrapItem.IsDisplayInDesignMode;

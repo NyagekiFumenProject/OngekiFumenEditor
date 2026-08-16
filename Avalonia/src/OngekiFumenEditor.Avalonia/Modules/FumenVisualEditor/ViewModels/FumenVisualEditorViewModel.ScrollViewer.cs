@@ -44,6 +44,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 			get => TotalDurationHeight - ScrollViewerVerticalOffset;
 			set
 			{
+				if (IsDisposed || EditorContext?.Fumen is null)
+					return;
+
 				//ScrollViewerVerticalOffset = TotalDurationHeight - value;
 				var val = TotalDurationHeight - value;
 				if (IsDesignMode)
@@ -82,7 +85,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
 		public void ScrollTo(TimeSpan audioTime)
 		{
-			var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorProjectData.AudioDuration));
+			var fixedAudioTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(audioTime, EditorContext.ProjectData.AudioDuration));
 			CurrentPlayTime = fixedAudioTime;
 
 			var val = IsDesignMode ?

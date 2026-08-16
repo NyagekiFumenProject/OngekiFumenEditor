@@ -124,7 +124,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
 
             if (!EditorProjectIoGate.TryEnter(out var lease))
             {
-                Log.LogDebug($"Skip recovery snapshot for '{editor.FileName}' because project I/O is busy.");
+                Log.LogDebug($"Skip recovery snapshot for '{editor.EditorContext.FileName}' because project I/O is busy.");
                 return;
             }
 
@@ -134,7 +134,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 {
                     var snapshot = await FumenRescue.SaveRecoverySnapshotAsync(editor, cancellationToken);
                     if (snapshot is not null)
-                        Log.LogInfo($"Recovery snapshot updated for '{editor.FileName}'.");
+                        Log.LogInfo($"Recovery snapshot updated for '{editor.EditorContext.FileName}'.");
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
                 {
@@ -142,7 +142,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.DefaultImp
                 }
                 catch (Exception exception)
                 {
-                    Log.LogWarn($"Unable to update recovery snapshot for '{editor.FileName}': {exception.Message}");
+                    Log.LogWarn($"Unable to update recovery snapshot for '{editor.EditorContext.FileName}': {exception.Message}");
                 }
             }
         }

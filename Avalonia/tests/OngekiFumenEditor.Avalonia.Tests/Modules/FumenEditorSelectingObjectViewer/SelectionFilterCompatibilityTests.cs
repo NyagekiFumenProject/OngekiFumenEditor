@@ -14,6 +14,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.Base.S
 using OngekiFumenEditor.Avalonia.Modules.FumenEditorSelectingObjectViewer.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using Xunit;
 
@@ -129,7 +130,7 @@ public sealed class SelectionFilterCompatibilityTests
         var secondPalette = CreatePalette("B0", "Second");
         var secondFumen = new OngekiFumen();
         secondFumen.BulletPalleteList.AddPallete(secondPalette);
-        context.Editor.Fumen = secondFumen;
+        context.Editor.EditorContext.Fumen = secondFumen;
         Assert.Equal([secondPalette], GetChartPalettes(option));
 
         firstFumen.BulletPalleteList.AddPallete(CreatePalette("A2", "Detached"));
@@ -137,7 +138,7 @@ public sealed class SelectionFilterCompatibilityTests
 
         var thirdPalette = CreatePalette("C0", "Third");
         var thirdEditor = context.Activate(new OngekiFumen { });
-        thirdEditor.Fumen.BulletPalleteList.AddPallete(thirdPalette);
+        thirdEditor.EditorContext.Fumen.BulletPalleteList.AddPallete(thirdPalette);
         Assert.Equal([thirdPalette], GetChartPalettes(option));
 
         context.Manager.Activate(null);
@@ -279,8 +280,8 @@ public sealed class SelectionFilterCompatibilityTests
     {
         var first = CreatePalette("D0", "Selected");
         var second = CreatePalette("D1", "Rejected");
-        context.Editor.Fumen.BulletPalleteList.AddPallete(first);
-        context.Editor.Fumen.BulletPalleteList.AddPallete(second);
+        context.Editor.EditorContext.Fumen.BulletPalleteList.AddPallete(first);
+        context.Editor.EditorContext.Fumen.BulletPalleteList.AddPallete(second);
         var option = GetOption<BulletPaletteFilterOption>(
             context.Viewer.SelectionFilter,
             Lang.SelectionFilter_OptionLabelBulletPalette);
@@ -410,7 +411,10 @@ public sealed class SelectionFilterCompatibilityTests
 
         public ViewerContext(OngekiFumen? fumen = null)
         {
-            Editor = new FumenVisualEditorViewModel { Fumen = fumen ?? new OngekiFumen() };
+            Editor = new FumenVisualEditorViewModel
+            {
+                EditorContext = new EditorContext { Fumen = fumen ?? new OngekiFumen() }
+            };
             editors.Add(Editor);
             Manager = new TestEditorDocumentManager(Editor);
             Viewer = new FumenEditorSelectingObjectViewerViewModel(Manager);
@@ -418,7 +422,10 @@ public sealed class SelectionFilterCompatibilityTests
 
         public FumenVisualEditorViewModel Activate(OngekiFumen fumen)
         {
-            var editor = new FumenVisualEditorViewModel { Fumen = fumen };
+            var editor = new FumenVisualEditorViewModel
+            {
+                EditorContext = new EditorContext { Fumen = fumen }
+            };
             editors.Add(editor);
             Manager.Activate(editor);
             return editor;

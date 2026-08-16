@@ -52,8 +52,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             
             //todo 再判断设计模式怎么钦定
             var soflanPositionList = target.Editor.IsDesignMode ?
-                target.Editor.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.Fumen.BpmList) :
-                target.Editor._cacheSoflanGroupRecorder.GetCache(start)?.GetCachedSoflanPositionList_PreviewMode(target.Editor.Fumen.BpmList);
+                target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_DesignMode(target.Editor.EditorContext.Fumen.BpmList) :
+                target.Editor._cacheSoflanGroupRecorder.GetCache(start)?.GetCachedSoflanPositionList_PreviewMode(target.Editor.EditorContext.Fumen.BpmList);
             if (soflanPositionList is null)
                 return;
 

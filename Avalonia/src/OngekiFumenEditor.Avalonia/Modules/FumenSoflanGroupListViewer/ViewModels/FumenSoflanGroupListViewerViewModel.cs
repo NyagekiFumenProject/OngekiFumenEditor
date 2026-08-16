@@ -35,7 +35,7 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
     {
         get
         {
-            if (CurrentSelectedSoflanGroupWrapItem is null || Editor?.Fumen is not OngekiFumen fumen)
+            if (CurrentSelectedSoflanGroupWrapItem is null || Editor?.EditorContext?.Fumen is not OngekiFumen fumen)
                 return [];
 
             var soflanList = fumen.SoflansMap[CurrentSelectedSoflanGroupWrapItem.SoflanGroupId];
@@ -110,7 +110,7 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
 
     private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+        if (e.PropertyName == nameof(FumenVisualEditorViewModel.EditorContext))
         {
             RebuildItemGroupRoot();
             RegisterFumenSoflanListMapEvent();
@@ -125,7 +125,7 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
             previousFumen = null;
         }
 
-        if (Editor?.Fumen is OngekiFumen currentFumen)
+        if (Editor?.EditorContext?.Fumen is OngekiFumen currentFumen)
         {
             currentFumen.IndividualSoflanAreaMap.PropertyChanged += OnIndividualSoflanAreaMapPropertyChanged;
             previousFumen = currentFumen;
@@ -312,7 +312,7 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
         CurrentSelectedSoflanGroupWrapItem = null;
         CurrentSoflansDisplaySoflanGroupWrapItem = null;
 
-        if (Editor?.Fumen is not OngekiFumen fumen)
+        if (Editor?.EditorContext?.Fumen is not OngekiFumen fumen)
             return;
 
         DisplaySoflanGroupItemGroupRoot = fumen.IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot;

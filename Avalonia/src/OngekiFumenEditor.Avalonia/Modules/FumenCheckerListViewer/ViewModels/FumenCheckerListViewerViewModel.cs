@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Core;
@@ -27,7 +27,7 @@ public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumen
     public int ErrorCount => allCheckResults.Count(x => x.Severity == RuleSeverity.Error);
     public int ProblemCount => allCheckResults.Count(x => x.Severity == RuleSeverity.Problem);
     public int SuggestCount => allCheckResults.Count(x => x.Severity == RuleSeverity.Suggest);
-    public bool IsEnable => Editor?.Fumen is not null;
+    public bool IsEnable => Editor?.EditorContext?.Fumen is not null;
 
     public bool EnableShowError
     {
@@ -90,7 +90,7 @@ public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumen
 
     private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+        if (e.PropertyName == nameof(FumenVisualEditorViewModel.EditorContext))
         {
             RefreshCurrentFumen();
             OnPropertyChanged(nameof(IsEnable));
@@ -110,9 +110,9 @@ public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumen
 
         try
         {
-            if (Editor?.Fumen is not null)
+            if (Editor?.EditorContext?.Fumen is not null)
             {
-                foreach (var checkResult in checkRules.SelectMany(x => x.CheckRule(Editor.Fumen, Editor)))
+                foreach (var checkResult in checkRules.SelectMany(x => x.CheckRule(Editor.EditorContext.Fumen, Editor)))
                     allCheckResults.Add(checkResult);
             }
         }

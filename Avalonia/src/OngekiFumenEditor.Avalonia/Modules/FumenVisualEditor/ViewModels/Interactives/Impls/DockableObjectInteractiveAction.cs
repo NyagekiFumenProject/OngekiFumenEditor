@@ -13,7 +13,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Intera
 	{
 		public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
 		{
-			return editor.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();
+			return editor.EditorContext.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();
 		}
 
 		public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)

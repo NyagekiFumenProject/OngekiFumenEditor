@@ -67,7 +67,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
 
     private void OnEditorPropChanged(object sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+        if (e.PropertyName == nameof(FumenVisualEditorViewModel.EditorContext))
         {
             SelectionFilter.OnEditorFumenChanged(Editor);
             Refresh();
@@ -87,7 +87,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         SelectedItems.Clear();
         foreach (var item in Editor?.SelectObjects ?? [])
         {
-            var row = new SelectedObjectRow(item, Editor.Fumen);
+            var row = new SelectedObjectRow(item, Editor.EditorContext.Fumen);
             editorSelectObjectSource.Add(row);
             if (selectedObjects.Contains(item))
                 SelectedItems.Add(row);

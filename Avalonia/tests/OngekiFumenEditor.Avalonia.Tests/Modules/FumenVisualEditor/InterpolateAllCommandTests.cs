@@ -12,6 +12,7 @@ using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.DefaultImpl.Factory;
 using OngekiFumenEditor.Avalonia.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using Xunit;
 
@@ -59,7 +60,10 @@ public sealed class InterpolateAllCommandTests
             XGrid = new XGrid(0)
         };
         fumen.AddObject(lane);
-        var editor = new FumenVisualEditorViewModel { Fumen = fumen };
+        var editor = new FumenVisualEditorViewModel
+        {
+            EditorContext = new EditorContext { Fumen = fumen }
+        };
         var dialogManager = new StubDialogManager { ConfirmResult = true };
         var handler = new InterpolateAllCommandHandler(
             new StubEditorDocumentManager { Current = editor },
@@ -165,7 +169,10 @@ public sealed class InterpolateAllCommandTests
         for (var i = 0; i < laneCount; i++)
             fumen.AddObject(CreateCurvedLane(i, i * 3));
 
-        var editor = new FumenVisualEditorViewModel { Fumen = fumen };
+        var editor = new FumenVisualEditorViewModel
+        {
+            EditorContext = new EditorContext { Fumen = fumen }
+        };
         var handler = new InterpolateAllCommandHandler(
             new StubEditorDocumentManager { Current = editor },
             new StubDialogManager { ConfirmResult = true });
@@ -204,7 +211,10 @@ public sealed class InterpolateAllCommandTests
         var lane = CreateCurvedLane(1, 0);
         fumen.AddObject(lane);
 
-        return (new FumenVisualEditorViewModel { Fumen = fumen }, fumen, lane);
+        return (new FumenVisualEditorViewModel
+        {
+            EditorContext = new EditorContext { Fumen = fumen }
+        }, fumen, lane);
     }
 
     private static LaneLeftStart CreateCurvedLane(int recordId, int tGridOffset)

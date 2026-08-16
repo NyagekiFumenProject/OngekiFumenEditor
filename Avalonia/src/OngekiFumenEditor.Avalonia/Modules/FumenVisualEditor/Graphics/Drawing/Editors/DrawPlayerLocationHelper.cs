@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
@@ -59,7 +59,7 @@ public class DrawPlayerLocationHelper : IDisposable
         var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-        var y = target.ConvertToY(tGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);
+        var y = target.ConvertToY(tGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
 
         arr[0].position = new Vector2((float)x, (float)y);
         arr[0].size = size;

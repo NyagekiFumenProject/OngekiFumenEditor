@@ -70,9 +70,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
 
             var hitObjects = Enumerable.Empty<OngekiMovableObjectBase>()
-            .Concat(target.Editor.Fumen.Flicks.BinaryFindRange(minTGrid, maxTGrid))
-            .Concat(target.Editor.Fumen.Taps.BinaryFindRange(minTGrid, maxTGrid))
-            .Concat(target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid));
+            .Concat(target.Editor.EditorContext.Fumen.Flicks.BinaryFindRange(minTGrid, maxTGrid))
+            .Concat(target.Editor.EditorContext.Fumen.Taps.BinaryFindRange(minTGrid, maxTGrid))
+            .Concat(target.Editor.EditorContext.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid));
 
             circleDrawing.Begin(target);
             foreach (var hit in hitObjects)
@@ -88,7 +88,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             circleDrawing.End();
 
 
-            var bellObjects = target.Editor.Fumen.Bells.BinaryFindRange(minTGrid, maxTGrid);
+            var bellObjects = target.Editor.EditorContext.Fumen.Bells.BinaryFindRange(minTGrid, maxTGrid);
 
             circleDrawing.Begin(target);
             foreach (var bell in bellObjects)
@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             circleDrawing.End();
 
 
-            var bulletObjects = target.Editor.Fumen.Bullets.BinaryFindRange(minTGrid, maxTGrid);
+            var bulletObjects = target.Editor.EditorContext.Fumen.Bullets.BinaryFindRange(minTGrid, maxTGrid);
 
             circleDrawing.Begin(target);
             foreach (var bullet in bulletObjects)
@@ -119,14 +119,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
             circleDrawing.End();
 
-            var holdObjects = target.Editor.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid);
+            var holdObjects = target.Editor.EditorContext.Fumen.Holds.GetVisibleStartObjects(minTGrid, maxTGrid);
             circleDrawing.Begin(target);
             foreach (var hold in holdObjects)
             {
                 if (hold.ReferenceLaneStart is not { } start)
                     continue;
 
-                foreach (var judgeTGrid in hold.CalculateJudgeTGrid(minTGrid, maxTGrid, target.Editor.Fumen.BpmList, target.Editor.Fumen.MetaInfo.ProgJudgeBpm))
+                foreach (var judgeTGrid in hold.CalculateJudgeTGrid(minTGrid, maxTGrid, target.Editor.EditorContext.Fumen.BpmList, target.Editor.EditorContext.Fumen.MetaInfo.ProgJudgeBpm))
                 {
                     var xGrid = start.CalulateXGrid(judgeTGrid);
                     if (xGrid is null)

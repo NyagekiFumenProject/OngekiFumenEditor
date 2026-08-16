@@ -83,7 +83,7 @@ public sealed class BatchModeInteractionTests
                 new Point(12, 24),
                 KeyModifiers.Alt);
             Assert.True(canceledBrush.Handled);
-            Assert.Empty(editor.Fumen.GetAllDisplayableObjects().OfType<Tap>());
+            Assert.Empty(editor.EditorContext.Fumen.GetAllDisplayableObjects().OfType<Tap>());
             Assert.Equal(0, editor.UndoRedoManager.UndoActionCount);
 
             var filter = coordinator.HandlePointerPressed(
@@ -151,19 +151,19 @@ public sealed class BatchModeInteractionTests
 
             Assert.True(press.Handled);
             Assert.True(release.Handled);
-            var flick = Assert.Single(editor.Fumen.GetAllDisplayableObjects().OfType<Flick>());
+            var flick = Assert.Single(editor.EditorContext.Fumen.GetAllDisplayableObjects().OfType<Flick>());
             Assert.True(flick.IsCritical);
             Assert.Equal(1, editor.UndoRedoManager.UndoActionCount);
             var expectedTGrid = (flick.TGrid.Unit, flick.TGrid.Grid);
             var expectedXGrid = (flick.XGrid.Unit, flick.XGrid.Grid);
 
             editor.UndoRedoManager.Undo(1);
-            Assert.Empty(editor.Fumen.GetAllDisplayableObjects().OfType<Flick>());
+            Assert.Empty(editor.EditorContext.Fumen.GetAllDisplayableObjects().OfType<Flick>());
 
             editor.UpdateBatchModePointerState(new Point(600, 800), KeyModifiers.None, false);
             editor.UndoRedoManager.Redo(1);
 
-            var redone = Assert.Single(editor.Fumen.GetAllDisplayableObjects().OfType<Flick>());
+            var redone = Assert.Single(editor.EditorContext.Fumen.GetAllDisplayableObjects().OfType<Flick>());
             Assert.Same(flick, redone);
             Assert.True(redone.IsCritical);
             Assert.Equal(expectedTGrid, (redone.TGrid.Unit, redone.TGrid.Grid));
@@ -202,17 +202,17 @@ public sealed class BatchModeInteractionTests
                 KeyModifiers.None);
 
             Assert.True(release.Handled);
-            Assert.DoesNotContain(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, tap));
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, bell));
+            Assert.DoesNotContain(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, tap));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, bell));
             Assert.Equal(1, editor.UndoRedoManager.UndoActionCount);
 
             editor.UndoRedoManager.Undo(1);
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, tap));
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, bell));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, tap));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, bell));
 
             editor.UndoRedoManager.Redo(1);
-            Assert.DoesNotContain(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, tap));
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, bell));
+            Assert.DoesNotContain(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, tap));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, bell));
         }
         finally
         {
@@ -236,14 +236,14 @@ public sealed class BatchModeInteractionTests
         {
             SelectionAreaKind.Delete.SelectAction(editor, [rangeTarget]);
 
-            Assert.DoesNotContain(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, rangeTarget));
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, selectedOutsideRange));
+            Assert.DoesNotContain(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, rangeTarget));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, selectedOutsideRange));
             Assert.True(selectedOutsideRange.IsSelected);
             Assert.Equal(1, editor.UndoRedoManager.UndoActionCount);
 
             editor.UndoRedoManager.Undo(1);
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, rangeTarget));
-            Assert.Contains(editor.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, selectedOutsideRange));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, rangeTarget));
+            Assert.Contains(editor.EditorContext.Fumen.GetAllDisplayableObjects(), obj => ReferenceEquals(obj, selectedOutsideRange));
         }
         finally
         {
@@ -279,8 +279,11 @@ public sealed class BatchModeInteractionTests
         };
         return new FumenVisualEditorViewModel
         {
-            EditorProjectData = project,
-            Fumen = fumen,
+            EditorContext = new EditorContext
+            {
+                ProjectData = project,
+                Fumen = fumen
+            },
             IsDirty = false
         };
     }

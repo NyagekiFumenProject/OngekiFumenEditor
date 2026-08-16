@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        public IEnumerable<ISelectableObject> SelectObjects => Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().Where(x => x.IsSelected).Distinct();
+        public IEnumerable<ISelectableObject> SelectObjects => EditorContext.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().Where(x => x.IsSelected).Distinct();
 
         private Point? currentCursorPosition;
         public Point? CurrentCursorPosition
@@ -191,7 +191,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         {
             IsPreventMutualExclusionSelecting = true;
 
-            Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
+            EditorContext.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 
             IsPreventMutualExclusionSelecting = false;
@@ -202,7 +202,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         {
             IsPreventMutualExclusionSelecting = true;
 
-            Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = !x.IsSelected);
+            EditorContext.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = !x.IsSelected);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 
             IsPreventMutualExclusionSelecting = false;
@@ -374,16 +374,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    Fumen.RemoveObjects(laneObjects);
-                    Fumen.AddObjects(newLaneObjects);
+                    EditorContext.Fumen.RemoveObjects(laneObjects);
+                    EditorContext.Fumen.AddObjects(newLaneObjects);
                 }
                 newLaneObjects.ForEach(SelectLaneObjects);
             };
 
             var undo = () =>
             {
-                Fumen.RemoveObjects(newLaneObjects!);
-                Fumen.AddObjects(laneObjects);
+                EditorContext.Fumen.RemoveObjects(newLaneObjects!);
+                EditorContext.Fumen.AddObjects(laneObjects);
                 laneObjects.ForEach(SelectLaneObjects);
             };
 
@@ -431,18 +431,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     startNode.AddChildObject(newChild);
                 }
 
-                foreach (var tap in Fumen.Taps.Where(t => t.ReferenceLaneStart == obj))
+                foreach (var tap in EditorContext.Fumen.Taps.Where(t => t.ReferenceLaneStart == obj))
                 {
                     tap.ReferenceLaneStart = startNode;
                 }
 
-                foreach (var hold in Fumen.Holds.Where(h => h.ReferenceLaneStart == obj))
+                foreach (var hold in EditorContext.Fumen.Holds.Where(h => h.ReferenceLaneStart == obj))
                 {
                     hold.ReferenceLaneStart = startNode;
                 }
 
-                Fumen.RemoveObject(obj);
-                Fumen.AddObject(startNode);
+                EditorContext.Fumen.RemoveObject(obj);
+                EditorContext.Fumen.AddObject(startNode);
                 yield return startNode;
             }
         }
@@ -492,7 +492,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
-            var recoverTargets = Fumen.GetAllDisplayableObjects()
+            var recoverTargets = EditorContext.Fumen.GetAllDisplayableObjects()
                 .OfType<ITimelineObject>()
                 .Select(x => cacheObjectAudioTime.TryGetValue(x, out var audioTime) ? (x, audioTime) : default)
                 .Where(x => x.x is not null)
@@ -626,7 +626,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 genStart.AddChildObject(cpChild);
             }
 
-            var affactedDockableObjects = Fumen.GetAllDisplayableObjects()
+            var affactedDockableObjects = EditorContext.Fumen.GetAllDisplayableObjects()
                 .OfType<ILaneDockable>()
                 .Where(x => x.ReferenceLaneStart == start)
                 .ToArray();
@@ -634,7 +634,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.kbd_editor_ChangeDockableLaneType.ToLocalizedString(), () =>
             {
                 RemoveObject(start);
-                Fumen.AddObject(genStart);
+                EditorContext.Fumen.AddObject(genStart);
                 NotifyObjectClicked(genStart);
 
                 foreach (var obj in affactedDockableObjects)
@@ -642,7 +642,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }, () =>
             {
                 RemoveObject(genStart);
-                Fumen.AddObject(start);
+                EditorContext.Fumen.AddObject(start);
                 NotifyObjectClicked(start);
 
                 foreach (var obj in affactedDockableObjects)
@@ -657,7 +657,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.BatchModeAddObject.ToFormatLocalizedString(typeof(T).Name), () =>
             {
                 MoveObjectTo(tap, position);
-                Fumen.AddObject(tap);
+                EditorContext.Fumen.AddObject(tap);
 
                 if (isFirst)
                 {
@@ -683,7 +683,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastPlaceDockableObject(LaneType targetType, ILaneDockable dockable)
         {
-            var dockableLanes = Fumen.Lanes
+            var dockableLanes = EditorContext.Fumen.Lanes
                 .GetVisibleStartObjects(dockable.TGrid, dockable.TGrid)
                 .Where(x => x.LaneType == targetType);
 
@@ -793,7 +793,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 RemoveObjects(selects);
             }, () =>
             {
-                expectedObjects.ForEach(Fumen.AddObject);
+                expectedObjects.ForEach(EditorContext.Fumen.AddObject);
 
                 foreach (var item in curveControlMaps)
                 {
@@ -821,7 +821,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             {
                 if (obj is ISelectableObject selectable)
                     selectable.IsSelected = false;
-                Fumen.RemoveObject(obj);
+                EditorContext.Fumen.RemoveObject(obj);
             }
 
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
@@ -836,7 +836,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             if (IsLocked)
                 return;
 
-            Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
+            EditorContext.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
         }
 
@@ -1033,7 +1033,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.AddObject.ToLocalizedString(), () =>
             {
                 MoveObjectTo(holdEnd, mousePosition);
-                Fumen.AddObject(holdEnd);
+                EditorContext.Fumen.AddObject(holdEnd);
 
                 if (isFirst)
                 {
@@ -1064,7 +1064,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             IsUserRequestHideEditorObject = isPreviewMode;
             convertToY = IsDesignMode ?
                 ((tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor)) :
-                (tUnit, editor, soflans) => TGridCalculator.ConvertTGridUnitToY_PreviewMode(tUnit, soflans, editor.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
+                (tUnit, editor, soflans) => TGridCalculator.ConvertTGridUnitToY_PreviewMode(tUnit, soflans, editor.EditorContext.Fumen.BpmList, editor.Setting.VerticalDisplayScale);
             RecalculateTotalDurationHeight();
             ScrollTo(tGrid);
             var mousePos = lastPointerViewPosition;
@@ -1079,7 +1079,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
             //if (IsPreviewMode)
             {
-                var objs = Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>();
+                var objs = EditorContext.Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>();
                 objs = objs.Where(x => x switch
                 {
                     IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
@@ -1088,14 +1088,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 });
                 //recache all objects
 
-                _cacheSoflanGroupRecorder.SetDefault(Fumen.SoflansMap.DefaultSoflanList);
+                _cacheSoflanGroupRecorder.SetDefault(EditorContext.Fumen.SoflansMap.DefaultSoflanList);
                 Parallel.ForEach(objs, new ParallelOptions()
                 {
                     MaxDegreeOfParallelism = 1
                 }, obj =>
                 {
-                    var soflanGroup = Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
-                    if (!Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
+                    var soflanGroup = EditorContext.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
+                    if (!EditorContext.Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
                     {
 #if DEBUG
                         Log.LogWarn($"Can't find soflanList by soflanGroup: {soflanGroup} from object {obj}, use default soflanList.");
@@ -1284,7 +1284,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                     var hitResult = QueryHitObjects(position);
                     if (TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this) is TGrid tGrid)
                     {
-                        var lanes = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
+                        var lanes = EditorContext.Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).Select(start =>
                         {
                             var child = start.GetChildObjectFromTGrid(tGrid);
                             if (child?.CalulateXGrid(tGrid) is not XGrid xGrid)
@@ -1336,7 +1336,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 #if DEBUG
                     var xGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
                     var tGrid2 = TGridCalculator.ConvertYToTGrid_DesignMode(position.Y, this);
-                    var querySoflanGroup = tGrid2 is null ? -1 : Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid2);
+                    var querySoflanGroup = tGrid2 is null ? -1 : EditorContext.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(xGrid, tGrid2);
 
                     Log.LogDebug($"mousePos = ({position.X:F0},{position.Y:F0}) , hitOngekiObject = {hitOngekiObject} , mouseDownNextHitObject = {mouseDownNextHitObject} , soflanGroup = {querySoflanGroup}");
 #endif
@@ -1577,7 +1577,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             }
 
             MoveObjectTo(obj, CurrentCursorPosition.Value);
-            Fumen.AddObject(obj);
+            EditorContext.Fumen.AddObject(obj);
             InteractiveManager.GetInteractive(obj).OnMoveCanvas(obj, CurrentCursorPosition.Value, this);
 
             if (clearSelection)
@@ -1666,7 +1666,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 var soflanGroup = IoC.Get<IFumenSoflanGroupListViewer>().CurrentSelectedSoflanGroupWrapItem?.SoflanGroupId ?? 0;
                 if (soflanGroup == 0)
                     return string.Empty;
-                var soflanList = Fumen.SoflansMap[soflanGroup];
+                var soflanList = EditorContext.Fumen.SoflansMap[soflanGroup];
 
                 if (!drawingContexts.TryGetValue(soflanGroup, out var drawingTargetContext))
                     return string.Empty;
@@ -1678,11 +1678,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 var tGrid = default(TGrid);
                 if (IsDesignMode)
                 {
-                    tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(drwaingY, soflanList, Fumen.BpmList, Setting.VerticalDisplayScale);
+                    tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(drwaingY, soflanList, EditorContext.Fumen.BpmList, Setting.VerticalDisplayScale);
                 }
                 else
                 {
-                    var result = TGridCalculator.ConvertYToTGrid_PreviewMode(drwaingY, soflanList, Fumen.BpmList, Setting.VerticalDisplayScale);
+                    var result = TGridCalculator.ConvertYToTGrid_PreviewMode(drwaingY, soflanList, EditorContext.Fumen.BpmList, Setting.VerticalDisplayScale);
                     if (result.IsOnlyOne())
                         tGrid = result.FirstOrDefault();
                 }
@@ -1809,7 +1809,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 var time = TGridCalculator.ConvertTGridToAudioTime(tGrid, this);
                 var y = TGridCalculator.ConvertTGridToY_DesignMode(tGrid, this);
 
-                var timeSignatures = Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(Fumen.BpmList);
+                var timeSignatures = EditorContext.Fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(EditorContext.Fumen.BpmList);
                 (var prevAudioTime, _, var meter, var bpm) = timeSignatures.LastOrDefault(x => x.audioTime < time);
                 if (meter is null)
                     (prevAudioTime, _, meter, bpm) = timeSignatures.FirstOrDefault();
@@ -1818,9 +1818,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 //消除精度误差~
                 var prevY = Math.Max(0, TGridCalculator.ConvertAudioTimeToY_DesignMode(prevAudioTime, this) - 1);
 
-                var downs = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
+                var downs = TGridCalculator.GetVisbleTimelines_DesignMode(EditorContext.Fumen.SoflansMap.DefaultSoflanList, EditorContext.Fumen.BpmList, EditorContext.Fumen.MeterChanges, prevY, ScrollViewerVerticalOffset, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var downFirst = downs.Where(x => x.tGrid != tGrid).LastOrDefault();
-                var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
+                var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(EditorContext.Fumen.SoflansMap.DefaultSoflanList, EditorContext.Fumen.BpmList, EditorContext.Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
                 var result = arg.Delta.Y > 0 ? nextFirst : downFirst;
@@ -1934,7 +1934,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 if (!isDraggingPlayerLocation)
                 {
                     var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
-                    var apfLane = Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
+                    var apfLane = EditorContext.Fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<AutoplayFaderLaneStart>()
                         .LastOrDefault();
                     var xGrid = apfLane?.CalulateXGrid(tGrid)?.TotalUnit ?? PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime);
 
@@ -1989,7 +1989,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public OngekiObjectBase? GetConflictingObject(OngekiTimelineObjectBase obj)
         {
-            return (OngekiObjectBase)Fumen.GetAllDisplayableObjects().FirstOrDefault(x =>
+            return (OngekiObjectBase)EditorContext.Fumen.GetAllDisplayableObjects().FirstOrDefault(x =>
             {
                 if (x is not OngekiTimelineObjectBase tX) return false;
 

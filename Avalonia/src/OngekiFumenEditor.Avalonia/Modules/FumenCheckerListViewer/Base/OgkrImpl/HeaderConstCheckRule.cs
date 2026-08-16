@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl;
 using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base.OgkrImp
 					return;
 
 				var tool = IoC.Get<IFumenMetaInfoBrowser>();
-				tool.Fumen = editor.Fumen;
+				tool.Fumen = editor.EditorContext.Fumen;
 				IoC.Get<IShell>().ShowTool(tool);
 			}
 		}

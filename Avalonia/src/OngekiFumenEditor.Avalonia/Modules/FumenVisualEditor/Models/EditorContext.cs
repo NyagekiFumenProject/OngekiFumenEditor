@@ -16,7 +16,14 @@ public sealed partial class EditorContext : ObservableObject, IDisposable
     private EditorFileAccessContext? fileAccessContext;
     private bool isDisposed;
 
-    public required EditorProjectDataModel ProjectData { get; init; }
+    [ObservableProperty]
+    public partial EditorProjectDataModel ProjectData { get; set; } = new();
+
+    [ObservableProperty]
+    public partial string FilePath { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string FileName { get; set; } = "Untitled";
 
     public string ProjectFileLocator { get; set; } = string.Empty;
 
@@ -31,11 +38,16 @@ public sealed partial class EditorContext : ObservableObject, IDisposable
         get => fileAccessContext;
         set
         {
-            if (ReferenceEquals(fileAccessContext, value))
+            var previous = fileAccessContext;
+            if (!SetProperty(ref fileAccessContext, value))
                 return;
 
-            fileAccessContext?.Dispose();
-            fileAccessContext = value;
+            previous?.Dispose();
+            OnPropertyChanged(nameof(ProjectFile));
+            OnPropertyChanged(nameof(FumenFile));
+            OnPropertyChanged(nameof(AudioFile));
+            OnPropertyChanged(nameof(AudioAwbFile));
+            OnPropertyChanged(nameof(ProjectRoot));
         }
     }
 

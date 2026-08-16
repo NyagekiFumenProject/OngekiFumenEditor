@@ -56,16 +56,21 @@ public partial class GenerateSvgCommandHandler : CommandHandlerBase<GenerateSvgC
         if (document is null)
             return false;
 
+        // 文档 ViewModel 不再直接暴露谱面/项目数据，统一从 EditorContext 反射读取。
         var docType = document.GetType();
-        var fumenProp = docType.GetProperties(BindingFlags.Instance | BindingFlags.Public)
-            .FirstOrDefault(x => typeof(OngekiFumen).IsAssignableFrom(x.PropertyType) && x.CanRead);
+        var context = docType.GetProperty("EditorContext", BindingFlags.Instance | BindingFlags.Public)
+            ?.GetValue(document);
+        if (context is null)
+            return false;
 
-        fumen = fumenProp?.GetValue(document) as OngekiFumen;
+        var contextType = context.GetType();
+        fumen = contextType.GetProperty("Fumen", BindingFlags.Instance | BindingFlags.Public)
+            ?.GetValue(context) as OngekiFumen;
         if (fumen is null)
             return false;
 
-        var projectDataProp = docType.GetProperty("EditorProjectData", BindingFlags.Instance | BindingFlags.Public);
-        if (projectDataProp?.GetValue(document) is { } projectData)
+        if (contextType.GetProperty("ProjectData", BindingFlags.Instance | BindingFlags.Public)
+            ?.GetValue(context) is { } projectData)
         {
             var audioDurationProp = projectData.GetType().GetProperty("AudioDuration", BindingFlags.Instance | BindingFlags.Public);
             if (audioDurationProp?.GetValue(projectData) is TimeSpan value)

@@ -86,7 +86,7 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
                 DrawWaveform(canvas, target, peakData, viewport);
 
             //绘制节奏线
-            if (target.EditorViewModel is FumenVisualEditorViewModel editor && editor.Fumen is not null)
+            if (target.EditorViewModel is FumenVisualEditorViewModel editor && editor.EditorContext.Fumen is not null)
                 currentTimeText = DrawEditorOverlays(canvas, target, editor, viewport);
 
             //绘制当前播放时间游标
@@ -162,8 +162,8 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
         var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentTime, editor);
         (_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(
             currentTGrid,
-            editor.Fumen.BpmList,
-            editor.Fumen.MeterChanges);
+            editor.EditorContext.Fumen.BpmList,
+            editor.EditorContext.Fumen.MeterChanges);
 
         cachedObjTimeMap.Clear();
         if (option.ShowObjectPlaceLine)
@@ -196,7 +196,7 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
             }
         }
 
-        var fumen = editor.Fumen;
+        var fumen = editor.EditorContext.Fumen;
         ApplyObjectCounting(fumen.Taps.BinaryFindRange(beginTGrid, endTGrid), ObjType.Default);
         ApplyObjectCounting(fumen.Bullets.BinaryFindRange(beginTGrid, endTGrid), ObjType.Bullet);
         ApplyObjectCounting(fumen.Bells.BinaryFindRange(beginTGrid, endTGrid), ObjType.Bell);
@@ -271,14 +271,14 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
         cachedPostDrawList.Clear();
         var previousMeter = currentMeter;
         var previousBpm = currentBpm;
-        var bpmList = editor.Fumen.BpmList;
+        var bpmList = editor.EditorContext.Fumen.BpmList;
         using var beatPaint = CreateStrokePaint(BeatColor, 2);
 
         foreach ((var tGrid, var timeMilliseconds, var beatIndex, var meter, var bpm) in
             TGridCalculator.GetVisbleTimelines_DesignMode(
                 dummySoflanList,
                 bpmList,
-                editor.Fumen.MeterChanges,
+                editor.EditorContext.Fumen.MeterChanges,
                 beginTime.TotalMilliseconds,
                 endTime.TotalMilliseconds,
                 currentTime.TotalMilliseconds,

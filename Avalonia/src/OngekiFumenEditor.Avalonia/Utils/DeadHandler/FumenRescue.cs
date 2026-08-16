@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(editor);
-			if (editor.EditorProjectData is null || editor.EditorContext is null)
+			if (editor.EditorContext.ProjectData is null || editor.EditorContext is null)
 				return null;
 
 			var provider = IoC.Get<ITemporaryFolderProvider>();
@@ -35,7 +35,6 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 
 			try
 			{
-				editor.EditorContext.Fumen = editor.Fumen;
 				var projectFile = await snapshotFolder.GetOrCreateFileAsync(
 					"project.nyagekiProj",
 					cancellationToken);
@@ -140,7 +139,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			FumenVisualEditorViewModel editor,
 			CancellationToken cancellationToken = default)
 		{
-			var projFilePath = editor.FilePath;
+			var projFilePath = editor.EditorContext.FilePath;
 			var docName = "NotSavedUnknown-" + RandomHepler.RandomString(10);
 			if (!string.IsNullOrWhiteSpace(projFilePath))
 				docName = Path.GetFileNameWithoutExtension(projFilePath);
@@ -180,7 +179,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			try
 			{
 				//save fumen file
-				var fumenName = Path.GetFileName(editor.EditorProjectData.FumenFilePath);
+				var fumenName = Path.GetFileName(editor.EditorContext.ProjectData.FumenFilePath);
 				if (string.IsNullOrWhiteSpace(fumenName))
 					fumenName = RandomHepler.RandomString() + ".ogkr";
 				var fumenExtension = Path.GetExtension(fumenName);

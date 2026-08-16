@@ -64,10 +64,10 @@ public partial class SvgPrefabOperationViewModel : ViewModelBase
 
         editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Lang.B.SvgGenerateLane.ToLocalizedString(), () =>
         {
-            editor.Fumen.AddObjects(generatedLanes);
+            editor.EditorContext.Fumen.AddObjects(generatedLanes);
         }, () =>
         {
-            editor.Fumen.RemoveObjects(generatedLanes);
+            editor.EditorContext.Fumen.RemoveObjects(generatedLanes);
         }));
     }
 

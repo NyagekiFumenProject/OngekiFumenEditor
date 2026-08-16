@@ -17,8 +17,8 @@ public class AdjustDockablesHorizonPositionCommandHandler : CommandHandlerBase<A
     public override Task Run(Command command)
     {
         var editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
-        if (editor?.Fumen is not null)
-            AdjustDockablesHorizonPositionHelper.Execute(editor.Fumen);
+        if (editor?.EditorContext?.Fumen is not null)
+            AdjustDockablesHorizonPositionHelper.Execute(editor.EditorContext.Fumen);
         return Task.CompletedTask;
     }
 }

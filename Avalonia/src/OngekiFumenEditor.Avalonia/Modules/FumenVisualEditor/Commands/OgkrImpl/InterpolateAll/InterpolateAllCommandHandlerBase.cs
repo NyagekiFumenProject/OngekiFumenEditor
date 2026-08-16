@@ -32,13 +32,13 @@ public abstract class InterpolateAllCommandHandlerBase<T> : CommandHandlerBase<T
 
     public override Task Update(Command command)
     {
-        command.Enabled = editorDocumentManager.CurrentActivatedEditor?.Fumen is not null;
+        command.Enabled = editorDocumentManager.CurrentActivatedEditor?.EditorContext?.Fumen is not null;
         return Task.CompletedTask;
     }
 
     public override async Task Run(Command command)
     {
-        if (editorDocumentManager.CurrentActivatedEditor is not { Fumen: not null } editor)
+        if (editorDocumentManager.CurrentActivatedEditor is not { EditorContext.Fumen: not null } editor)
             return;
 
         if (!await dialogManager.ShowComfirmDialog(Lang.ComfirmInterpolateMessage, Lang.Warning))
@@ -57,7 +57,7 @@ public abstract class InterpolateAllCommandHandlerBase<T> : CommandHandlerBase<T
 
     protected virtual bool Process(FumenVisualEditorViewModel editor, bool xGridLimit)
     {
-        var fumen = editor.Fumen;
+        var fumen = editor.EditorContext.Fumen;
         if (fumen is null)
             return false;
 

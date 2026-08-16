@@ -111,7 +111,7 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
             var editor = editorDocumentManager.CurrentActivatedEditor;
             if (editor is not null)
             {
-                input = editor.Fumen;
+                input = editor.EditorContext.Fumen;
             }
             else
             {

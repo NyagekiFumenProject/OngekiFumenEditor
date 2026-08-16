@@ -9,6 +9,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels.Dialog;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using Xunit;
 
@@ -128,7 +129,10 @@ public sealed class ConnectableObjectBrushTests
 
         var fumen = new OngekiFumen();
         fumen.AddObject(lane);
-        return (new FumenVisualEditorViewModel { Fumen = fumen }, fumen, lane);
+        return (new FumenVisualEditorViewModel
+        {
+            EditorContext = new EditorContext { Fumen = fumen }
+        }, fumen, lane);
     }
 
     private sealed class RecordingWindowManager : IWindowManager
