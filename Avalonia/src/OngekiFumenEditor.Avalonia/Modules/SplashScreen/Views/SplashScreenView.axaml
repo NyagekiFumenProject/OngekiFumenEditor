@@ -168,12 +168,13 @@
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel Width="350">
 
-                        <!-- Project creation remains hidden until the project-contained creation flow is implemented.
                         <Button
                             Classes="ActionCard"
                             Command="{CompiledBinding CreateNewProjectCommand}"
                             Margin="0,5,0,5"
-                            HorizontalAlignment="Stretch">
+                            HorizontalAlignment="Stretch"
+                            IsVisible="{CompiledBinding CanCreateNew}"
+                            IsEnabled="{CompiledBinding CanCreateNew}">
                             <Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -201,7 +202,6 @@
                                 </Grid>
                             </Border>
                         </Button>
-                        -->
                         <Button
                             Classes="ActionCard"
                             Command="{CompiledBinding OpenProjectCommand}"

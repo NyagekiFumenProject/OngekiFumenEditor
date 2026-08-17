@@ -1,43 +1,36 @@
 #nullable enable
 
-using Avalonia;
-using Avalonia.Platform.Storage;
-using DereTore.Exchange.Archive.ACB;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Platforms.Services.Window;
+using OngekiFumenEditor.Avalonia.Kernel.Audio;
+using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Setup;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 
-internal partial class FumenVisualEditorProvider
+public abstract partial class FumenVisualEditorProviderBase
 {
     private IDialogManager DialogManager => IoC.Get<IDialogManager>();
 
     private async Task<bool> OpenFromFolderAsync(FumenVisualEditorViewModel editor)
     {
-        IStorageFolder? selectedFolder = await FileDialogHelper.OpenStorageFolderAsync("Open project folder");
-        if (selectedFolder is null)
+        var picker = CreateSetupFilePicker();
+        using var directorySelection = await picker.PickProjectDirectoryAsync();
+        if (directorySelection is null)
             return false;
 
         ISimpleDirectory? projectRoot = null;
         try
         {
-            var folderDisplayName = selectedFolder.Name;
-
-            using (await EditorProjectIoGate.EnterAsync())
-            {
-                var transferredFolder = selectedFolder;
-                selectedFolder = null;
-                projectRoot = await AvaloniaStorageProviderFileSystemBuilder
-                    .LoadFromAvaloniaStorageFolder(transferredFolder);
-            }
+            var folderDisplayName = directorySelection.DisplayName;
+            projectRoot = directorySelection.TakeDirectory();
 
             var candidates = EditorProjectPathResolver.FindProjectFiles(
                 projectRoot,
@@ -57,7 +50,8 @@ internal partial class FumenVisualEditorProvider
             var selectedProject = candidates.Single(x => x.Locator == selectedLocator);
             var selectedFiles = await SelectProjectFilesAsync(
                 projectRoot,
-                selectedLocator);
+                selectedLocator,
+                picker);
             if (selectedFiles is null)
                 return false;
 
@@ -112,7 +106,6 @@ internal partial class FumenVisualEditorProvider
         finally
         {
             projectRoot?.Dispose();
-            selectedFolder?.Dispose();
         }
     }
 
@@ -127,10 +120,6 @@ internal partial class FumenVisualEditorProvider
             return false;
         }
 
-        var storageProvider = TryGetStorageProvider();
-        if (storageProvider is null)
-            return false;
-
         try
         {
             using (await EditorProjectIoGate.EnterAsync())
@@ -138,7 +127,21 @@ internal partial class FumenVisualEditorProvider
                 EditorFileAccessContext fileAccessContext;
                 try
                 {
-                    fileAccessContext = await snapshot!.ToContextAsync(storageProvider);
+                    fileAccessContext = await RestoreContextAsync(snapshot!);
+                    try
+                    {
+                        if (!await TryBindExternalAwbAsync(fileAccessContext, allowExternalPicker: false))
+                        {
+                            await ShowRecentExternalAwbUnavailableAsync();
+                            fileAccessContext.Dispose();
+                            return false;
+                        }
+                    }
+                    catch
+                    {
+                        fileAccessContext.Dispose();
+                        throw;
+                    }
                 }
                 catch (Exception exception) when (exception is IOException or InvalidDataException)
                 {
@@ -160,7 +163,7 @@ internal partial class FumenVisualEditorProvider
                     return false;
                 }
 
-                TryUpdateRecentProject(recordInfo, snapshot, projectContext);
+                TryUpdateRecentProject(recordInfo, snapshot!, projectContext);
                 return true;
             }
         }
@@ -182,15 +185,11 @@ internal partial class FumenVisualEditorProvider
             return false;
         }
 
-        var storageProvider = TryGetStorageProvider();
-        if (storageProvider is null)
-            return false;
-
         try
         {
             using var ioLease = await EditorProjectIoGate.EnterAsync();
-            using var context = await snapshot!.ToContextAsync(storageProvider);
-            return true;
+            using var context = await RestoreContextAsync(snapshot!);
+            return await TryBindExternalAwbAsync(context, allowExternalPicker: false);
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException)
         {
@@ -285,42 +284,54 @@ internal partial class FumenVisualEditorProvider
 
     private async Task<(ISimpleFile FumenFile, ISimpleFile AudioFile)?> SelectProjectFilesAsync(
         ISimpleDirectory projectRoot,
-        string projectLocator)
+        string projectLocator,
+        IEditorProjectSetupFilePicker picker)
     {
+        var fumenExtensions = IoC.Get<IFumenParserManager>()
+            .GetDeserializerDescriptions()
+            .SelectMany(x => x.fileFormat.Select(y => (ext: y, desc: x.desc)));
+        var audioExtensions = IoC.Get<IAudioManager>()
+            .SupportAudioFileExtensionList
+            .Where(x => picker.SupportsAcb ||
+                !x.fileExt.Equals(".acb", StringComparison.OrdinalIgnoreCase));
         var fumenCandidates = EditorProjectPathResolver.FindFiles(
             projectRoot,
-            FileDialogHelper.GetSupportFumenOpenFileExtensionFilterList().Select(x => x.ext));
+            fumenExtensions.Select(x => x.ext));
         var audioCandidates = EditorProjectPathResolver.FindFiles(
             projectRoot,
-            FileDialogHelper.GetSupportAudioFileExtensionFilterList().Select(x => x.ext));
+            audioExtensions.Select(x => x.fileExt));
 
         using var dialog = new ProjectFileBindingDialogViewModel(
             projectLocator,
             fumenCandidates,
-            audioCandidates);
+            audioCandidates,
+            () => picker.PickExistingFumenAsync(),
+            () => picker.PickAudioAsync());
         var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialog);
         return result == true ? dialog.TakeSelection() : null;
     }
 
-    private static async Task<bool> TryBindExternalAwbAsync(EditorFileAccessContext context)
+    private async Task<bool> TryBindExternalAwbAsync(
+        EditorFileAccessContext context,
+        bool allowExternalPicker = true)
     {
         var audioFile = context.AudioFile ??
             throw new InvalidDataException("The project file binding has no audio file.");
-        if (!Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+        var picker = CreateSetupFilePicker();
+        var inspection = await Setup.AcbPackageInspector.InspectAsync(
+            audioFile,
+            picker.SupportsAcb);
+        if (!inspection.IsValid)
+            throw new InvalidDataException(inspection.ErrorMessage);
+        if (inspection.Kind != Setup.SetupAudioPackageKind.AcbWithExternalAwb)
             return true;
 
-        string? expectedAwbFileName;
-        await using (var acbStream = await audioFile.OpenRead())
-        using (var acb = AcbFile.FromStream(acbStream, audioFile.FileName, disposeStream: false))
-        {
-            if (acb.InternalAwb is not null)
-                return true;
+        // A snapshot may already carry an external AWB bookmark. Keep that capability
+        // instead of replacing it with a sibling alias and losing its ownership reference.
+        if (context.AudioAwbFile is not null)
+            return true;
 
-            expectedAwbFileName = acb.ExternalAwb?.FileName;
-        }
-
-        if (string.IsNullOrWhiteSpace(expectedAwbFileName))
-            throw new InvalidDataException($"Audio '{audioFile.FileName}' has no usable AWB data.");
+        var expectedAwbFileName = inspection.RequiredExternalAwbLeafName!;
 
         var siblingMatches = audioFile.ParentDictionary?.ChildFiles
             .Where(file => file.FileName.Equals(expectedAwbFileName, StringComparison.OrdinalIgnoreCase))
@@ -337,15 +348,21 @@ internal partial class FumenVisualEditorProvider
             return true;
         }
 
-        var selectedAwbFile = await FileDialogHelper.OpenFileAsync(
-            $"Select external AWB file ({expectedAwbFileName})",
-            [(".awb", "AWB audio archive")]);
+        if (!allowExternalPicker)
+            return false;
+
+        var selectedAwbFile = await picker.PickExternalAwbAsync(expectedAwbFileName);
         if (selectedAwbFile is null)
             return false;
 
         context.AudioAwbFile = selectedAwbFile;
         return true;
     }
+
+    private Task ShowRecentExternalAwbUnavailableAsync() =>
+        DialogManager.ShowMessageDialog(
+            "This recent project needs an external AWB file that is no longer available. Open the project folder to bind it again.",
+            DialogMessageType.Error);
 
     private Guid StoreRecentProject(
         string projectName,
@@ -414,18 +431,6 @@ internal partial class FumenVisualEditorProvider
         catch (Exception exception)
         {
             Log.LogWarn($"Unable to persist invalid state for recent record {recordInfo.RecordId:N}: {exception.Message}");
-        }
-    }
-
-    private static IStorageProvider? TryGetStorageProvider()
-    {
-        try
-        {
-            return (Application.Current as App)?.TopLevel?.StorageProvider;
-        }
-        catch (InvalidOperationException)
-        {
-            return null;
         }
     }
 

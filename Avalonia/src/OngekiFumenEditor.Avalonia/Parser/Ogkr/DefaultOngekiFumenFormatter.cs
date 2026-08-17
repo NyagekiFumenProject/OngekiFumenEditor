@@ -236,7 +236,8 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
             //sb.AppendLine($"VERSION\t{metaInfo.Version.Major}\t{metaInfo.Version.Minor}\t{metaInfo.Version.Build}");
             sb.AppendLine($"VERSION\t{1}\t{7}\t{0}");
             sb.AppendLine($"CREATOR\t{metaInfo.Creator}");
-            sb.AppendLine($"BPM_DEF\t{metaInfo.BpmDefinition.First}\t{metaInfo.BpmDefinition.Common}\t{metaInfo.BpmDefinition.Maximum}\t{metaInfo.BpmDefinition.Minimum}");
+			// Keep the serialized order aligned with BpmDefinitionCommandParser.
+			sb.AppendLine($"BPM_DEF\t{metaInfo.BpmDefinition.First}\t{metaInfo.BpmDefinition.Common}\t{metaInfo.BpmDefinition.Minimum}\t{metaInfo.BpmDefinition.Maximum}");
             sb.AppendLine($"MET_DEF\t{metaInfo.MeterDefinition.Bunshi}\t{metaInfo.MeterDefinition.Bunbo}");
             sb.AppendLine($"TRESOLUTION\t{metaInfo.TRESOLUTION}");
             sb.AppendLine($"XRESOLUTION\t{metaInfo.XRESOLUTION}");

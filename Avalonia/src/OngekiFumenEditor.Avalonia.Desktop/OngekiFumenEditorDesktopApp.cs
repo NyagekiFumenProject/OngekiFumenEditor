@@ -3,11 +3,14 @@ using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Gekimini.Avalonia;
+using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor;
 using Gekimini.Avalonia.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,6 +39,7 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         base.RegisterServices(serviceCollection);
 
         serviceCollection.AddOngekiFumenEditorAvaloniaDesktop();
+        RegisterFumenVisualEditorProvider(serviceCollection);
 
 #if DEBUG
         if (DesignModeHelper.IsDesignMode)
@@ -100,6 +104,15 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         {
             logger?.LogError(exception, "Failed to apply the admin permission title suffix.");
         }
+    }
+
+    internal static void RegisterFumenVisualEditorProvider(IServiceCollection services)
+    {
+        services.AddSingleton<DefaultDesktopFumenVisualEditorProvider>();
+        services.AddSingleton<IEditorProvider>(provider =>
+            provider.GetRequiredService<DefaultDesktopFumenVisualEditorProvider>());
+        services.AddSingleton<IFumenVisualEditorProvider>(provider =>
+            provider.GetRequiredService<DefaultDesktopFumenVisualEditorProvider>());
     }
 
     private async Task ProcessStartupArgsAsync()

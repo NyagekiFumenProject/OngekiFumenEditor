@@ -2,6 +2,7 @@ using Avalonia.Headless.XUnit;
 using Gekimini.Avalonia.Framework.Documents;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Setup;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using Xunit;
 
@@ -10,9 +11,9 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenVisualEditor;
 public sealed class FumenVisualEditorProviderTests
 {
     [AvaloniaFact]
-    public async Task TryNew_FumenVisualEditor_DelegatesToViewModelNew()
+    public async Task TryNew_WhenCreationIsDisabled_ReturnsFalse()
     {
-        var provider = new FumenVisualEditorProvider();
+        var provider = new TestProvider(canCreateNew: false);
         var editor = new TrackingFumenVisualEditorViewModel
         {
             NewResult = true
@@ -20,14 +21,14 @@ public sealed class FumenVisualEditorProviderTests
 
         var result = await provider.TryNew(editor);
 
-        Assert.True(result);
-        Assert.Equal(1, editor.NewCallCount);
+        Assert.False(result);
+        Assert.Equal(0, editor.NewCallCount);
     }
 
     [AvaloniaFact]
     public async Task TryOpen_ContextWithoutAudio_DoesNotAttachOrDisposeContext()
     {
-        var provider = new FumenVisualEditorProvider();
+        var provider = new TestProvider(canCreateNew: false);
         var editor = new FumenVisualEditorViewModel();
         using var context = new EditorContext
         {
@@ -45,7 +46,7 @@ public sealed class FumenVisualEditorProviderTests
     [AvaloniaFact]
     public async Task TryOpen_ContextForDifferentDocument_ReturnsFalseAndRetainsOwnership()
     {
-        var provider = new FumenVisualEditorProvider();
+        var provider = new TestProvider(canCreateNew: false);
         var document = new OtherDocumentViewModel();
         using var context = new EditorContext
         {
@@ -70,6 +71,26 @@ public sealed class FumenVisualEditorProviderTests
             NewCallCount++;
             return Task.FromResult(NewResult);
         }
+    }
+
+    private sealed class TestProvider : FumenVisualEditorProviderBase
+    {
+        private readonly bool canCreateNew;
+
+        public TestProvider(bool canCreateNew)
+        {
+            this.canCreateNew = canCreateNew;
+        }
+
+        public override bool CanCreateNew => canCreateNew;
+
+        protected override IEditorProjectSetupFilePicker CreateSetupFilePicker() =>
+            throw new NotSupportedException();
+
+        protected override Task<EditorFileAccessContext> RestoreContextAsync(
+            EditorFileAccessContextSnapshot snapshot,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
     }
 
     private sealed class OtherDocumentViewModel : DocumentViewModelBase

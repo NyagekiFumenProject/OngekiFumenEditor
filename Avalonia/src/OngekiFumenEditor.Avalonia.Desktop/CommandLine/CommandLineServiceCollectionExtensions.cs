@@ -11,6 +11,8 @@ public static class DesktopCommandLineServiceCollectionExtensions
         services.AddLogging();
         services.AddOngekiFumenEditorAvalonia();
         services.AddOngekiFumenEditorAvaloniaDesktop();
+        OngekiFumenEditor.Avalonia.Desktop.OngekiFumenEditorDesktopApp
+            .RegisterFumenVisualEditorProvider(services);
         return services;
     }
 }

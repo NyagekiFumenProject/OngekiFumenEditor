@@ -54,6 +54,8 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
 
     public WindowViewModelBase WindowViewModel => this;
 
+    public bool CanCreateNew => editorProvider.CanCreateNew;
+
     public IReadOnlyList<string> Languages { get; }
 
     public string SelectedLanguage
@@ -137,9 +139,14 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
     [RelayCommand]
     private async Task CreateNewProjectAsync()
     {
+        if (!editorProvider.CanCreateNew)
+            return;
+
         var editor = editorProvider.Create();
         if (await editorProvider.TryNew(editor))
             await shell.OpenDocumentAsync(editor);
+        else if (editor is IDisposable disposable)
+            disposable.Dispose();
     }
 
     [RelayCommand]
@@ -148,6 +155,8 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
         var editor = editorProvider.Create();
         if (await editorProvider.TryOpen(editor))
             await shell.OpenDocumentAsync(editor);
+        else if (editor is IDisposable disposable)
+            disposable.Dispose();
     }
 
     [RelayCommand]

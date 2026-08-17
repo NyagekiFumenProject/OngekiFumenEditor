@@ -16,7 +16,9 @@ using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Browser.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
+using OngekiFumenEditor.Avalonia.Browser.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Models.Settings;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Browser;
@@ -36,6 +38,12 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 #else
         serviceCollection.AddOngekiFumenEditorAvaloniaBrowser();
 #endif
+
+        serviceCollection.AddSingleton<DefaultBrowserFumenVisualEditorProvider>();
+        serviceCollection.AddSingleton<IEditorProvider>(provider =>
+            provider.GetRequiredService<DefaultBrowserFumenVisualEditorProvider>());
+        serviceCollection.AddSingleton<IFumenVisualEditorProvider>(provider =>
+            provider.GetRequiredService<DefaultBrowserFumenVisualEditorProvider>());
 
         serviceCollection.AddTypeCollectedActivator(BrowserViewTypeCollectedActivator.Default);
 
