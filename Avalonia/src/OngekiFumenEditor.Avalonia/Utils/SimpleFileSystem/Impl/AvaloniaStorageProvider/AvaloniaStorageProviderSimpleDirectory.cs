@@ -61,6 +61,27 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, I
         return [.. files.Where(file => regex.IsMatch(file.FileName))];
     }
 
+    public async Task<IReadOnlyList<SimpleDirectoryEntry>> GetEntrySnapshotAsync(
+        CancellationToken cancellationToken = default)
+    {
+        ObjectDisposedException.ThrowIf(isDisposed, this);
+        var entries = new List<SimpleDirectoryEntry>();
+        await foreach (var item in GetStorageFolder().GetItemsAsync().ConfigureAwait(false))
+        {
+            try
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                entries.Add(new SimpleDirectoryEntry(item.Name, item is IStorageFolder));
+            }
+            finally
+            {
+                item.Dispose();
+            }
+        }
+
+        return entries;
+    }
+
     public async Task<ISimpleDirectory> GetOrCreateDirectoryAsync(
         string directoryName,
         CancellationToken cancellationToken = default)

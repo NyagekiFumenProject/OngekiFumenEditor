@@ -99,22 +99,43 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
 
     partial void OnEditorContextChanged(EditorContext oldValue, EditorContext newValue)
     {
-        if (oldValue is not null)
-            oldValue.PropertyChanged -= OnEditorContextPropertyChanged;
+        try
+        {
+            if (oldValue is not null)
+                oldValue.PropertyChanged -= OnEditorContextPropertyChanged;
 
-        UpdateFumenSubscription(newValue?.Fumen);
-        UpdateProjectDataSubscription(newValue?.ProjectData);
+            UpdateFumenSubscription(newValue?.Fumen);
+            UpdateProjectDataSubscription(newValue?.ProjectData);
 
-        if (newValue is not null)
-            newValue.PropertyChanged += OnEditorContextPropertyChanged;
+            if (newValue is not null)
+                newValue.PropertyChanged += OnEditorContextPropertyChanged;
+        }
+        catch (Exception exception)
+        {
+            // The generated setter has already published newValue. Subscription cleanup
+            // must not make a completed ownership transfer look like a rejected context.
+            Log.LogWarn($"Unable to update project subscriptions: {exception.Message}");
+        }
+
+        // The generated observable property performs the complete state swap before this
+        // hook runs. The old context is no longer visible to the editor and can therefore
+        // release its file capabilities exactly once.
+        try
+        {
+            oldValue?.Dispose();
+        }
+        catch (Exception exception)
+        {
+            Log.LogWarn($"Unable to release the previous project context: {exception.Message}");
+        }
 
         if (isDisposed)
             return;
 
-        OnPropertyChanged(nameof(IsNew));
-        RecalculateTotalDurationHeight();
-        RefreshDisplayName();
-        RefreshActiveEditorTitle();
+        RunPostAttachAction(() => OnPropertyChanged(nameof(IsNew)), "refresh the project state");
+        RunPostAttachAction(RecalculateTotalDurationHeight, "recalculate the project duration");
+        RunPostAttachAction(RefreshDisplayName, "refresh the document name");
+        RunPostAttachAction(RefreshActiveEditorTitle, "refresh the window title");
     }
 
     private void OnEditorContextPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -203,7 +224,21 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     Task<bool> IPersistedDocumentViewModel.Load(RecentRecordInfo recordInfo) =>
         IoC.Get<IFumenVisualEditorProvider>().TryOpen(this, recordInfo);
 
-    internal async Task<bool> LoadProjectAsync(EditorContext context, string sourcePath)
+    internal Task<bool> LoadProjectAsync(
+        EditorContext context,
+        string sourcePath,
+        CancellationToken cancellationToken = default) =>
+        TryAttachProjectAsync(context, sourcePath, cancellationToken);
+
+    /// <summary>
+    /// Prepares all failure-prone state before replacing the current document. A false result
+    /// or exception leaves the current document and its audio player untouched; the caller
+    /// retains ownership of <paramref name="context"/> in both cases.
+    /// </summary>
+    internal async Task<bool> TryAttachProjectAsync(
+        EditorContext context,
+        string sourcePath,
+        CancellationToken cancellationToken = default)
     {
         if (context?.ProjectData is null)
             return false;
@@ -212,23 +247,90 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         if (audioFile is null)
             return false;
 
-        var audioPlayer = await IoC.Get<IAudioManager>()
-            .LoadProjectAudioAsync(audioFile, context.AudioAwbFile);
-        AudioPlayer?.Dispose();
-        AudioPlayer = audioPlayer;
-        context.ProjectData.AudioDuration = audioPlayer.Duration;
-        context.Fumen ??= new OngekiFumen();
-        context.FilePath = sourcePath ?? string.Empty;
-        context.FileName = context.FumenFile?.FileName ??
-            (string.IsNullOrWhiteSpace(context.FilePath) ? "Untitled" : Path.GetFileName(context.FilePath));
-        EditorContext = context;
-        DisplayName = default;
-        RecalculateTotalDurationHeight();
-        ScrollTo(context.ProjectData.RememberLastDisplayTime);
-        UndoRedoManager.Clear();
-        IsDirty = false;
-        LoadingFinished?.Invoke(this, context.ProjectData);
-        return true;
+        cancellationToken.ThrowIfCancellationRequested();
+
+        IAudioPlayer? preparedAudioPlayer = null;
+        try
+        {
+            preparedAudioPlayer = await IoC.Get<IAudioManager>()
+                .LoadProjectAudioAsync(audioFile, context.AudioAwbFile);
+            if (preparedAudioPlayer is null)
+                return false;
+
+            cancellationToken.ThrowIfCancellationRequested();
+            context.ProjectData.AudioDuration = preparedAudioPlayer.Duration;
+            context.Fumen ??= new OngekiFumen();
+            context.FilePath = sourcePath ?? string.Empty;
+            context.FileName = context.FumenFile?.FileName ??
+                (string.IsNullOrWhiteSpace(context.FilePath) ? "Untitled" : Path.GetFileName(context.FilePath));
+
+            // Audio is swapped only after it has loaded successfully. Publishing EditorContext
+            // is the ownership commit point: once the generated setter exposes the candidate,
+            // no later UI refresh failure may ask the caller to roll its files back.
+            var oldAudioPlayer = AudioPlayer;
+            AudioPlayer = preparedAudioPlayer;
+            try
+            {
+                EditorContext = context;
+            }
+            catch (Exception exception) when (ReferenceEquals(EditorContext, context))
+            {
+                // A PropertyChanged subscriber can throw after the generated setter has
+                // already assigned the field. At that point the editor owns the context.
+                Log.LogWarn($"A project context notification failed after attachment: {exception.Message}");
+            }
+            catch
+            {
+                AudioPlayer = oldAudioPlayer;
+                throw;
+            }
+
+            preparedAudioPlayer = null;
+            try
+            {
+                oldAudioPlayer?.Dispose();
+            }
+            catch (Exception exception)
+            {
+                Log.LogWarn($"Unable to release the previous audio player: {exception.Message}");
+            }
+
+            RunPostAttachAction(() => DisplayName = default, "reset the document name");
+            RunPostAttachAction(RecalculateTotalDurationHeight, "recalculate the project duration");
+            RunPostAttachAction(
+                () => ScrollTo(context.ProjectData.RememberLastDisplayTime),
+                "restore the project position");
+            RunPostAttachAction(UndoRedoManager.Clear, "clear the undo history");
+            RunPostAttachAction(() => IsDirty = false, "reset the dirty state");
+            try
+            {
+                LoadingFinished?.Invoke(this, context.ProjectData);
+            }
+            catch (Exception exception)
+            {
+                // Notification subscribers must not turn an already committed ownership
+                // transfer into a rollback request.
+                Log.LogWarn($"A project loading notification failed: {exception.Message}");
+            }
+
+            return true;
+        }
+        finally
+        {
+            preparedAudioPlayer?.Dispose();
+        }
+    }
+
+    private static void RunPostAttachAction(Action action, string description)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception exception)
+        {
+            Log.LogWarn($"Unable to {description} after project attachment: {exception.Message}");
+        }
     }
 
     public async Task<bool> Save()
@@ -444,9 +546,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         DetachBatchModeBehavior();
         DetachRuntimeSubscriptions();
         DisposeRenderResources();
-        var editorContext = EditorContext;
         EditorContext = null;
-        editorContext?.Dispose();
 
         AudioPlayer?.Dispose();
         AudioPlayer = null;

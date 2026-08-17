@@ -17,7 +17,8 @@ public sealed class EditorFileAccessContextSnapshotTests
             AdditionDirectoryBookmarks = ["add1", "add2"],
             ProjectFileBookmark = "proj-bmk",
             FumenFileBookmark = "fumen-bmk",
-            AudioFileBookmark = "audio-bmk"
+            AudioFileBookmark = "audio-bmk",
+            AudioAwbFileBookmark = "awb-bmk"
         };
 
         var ok = EditorFileAccessContextSnapshot.TryDeserialize(snapshot.Serialize(), out var restored);
@@ -29,6 +30,7 @@ public sealed class EditorFileAccessContextSnapshotTests
         Assert.Equal("proj-bmk", restored.ProjectFileBookmark);
         Assert.Equal("fumen-bmk", restored.FumenFileBookmark);
         Assert.Equal("audio-bmk", restored.AudioFileBookmark);
+        Assert.Equal("awb-bmk", restored.AudioAwbFileBookmark);
     }
 
     [Fact]

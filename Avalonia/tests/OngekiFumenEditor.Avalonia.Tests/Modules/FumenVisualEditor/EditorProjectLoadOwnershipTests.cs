@@ -10,6 +10,60 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenVisualEditor;
 
 public sealed class EditorProjectLoadOwnershipTests
 {
+    [Fact]
+    public void Context_RejectsOverlappingPhysicalDirectoryRoots()
+    {
+        using var projectRoot = new TrackingDirectory(
+            new TrackingFile("project.txt", []),
+            Path.Combine(Path.GetTempPath(), "editor-project"));
+        using var additionalRoot = new TrackingDirectory(
+            new TrackingFile("additional.txt", []),
+            Path.Combine(Path.GetTempPath(), "editor-project", "assets"));
+        using var context = new EditorFileAccessContext
+        {
+            ProjectDirectory = projectRoot
+        };
+
+        Assert.Throws<ArgumentException>(() => context.AdditionDirectories = [additionalRoot]);
+    }
+
+    [Fact]
+    public void Context_RoleReplacementDoesNotDisposeDirectoryOwnedAlias()
+    {
+        var file = new TrackingFile("audio.wav", []);
+        var root = new TrackingDirectory(file);
+        using (var context = new EditorFileAccessContext
+        {
+            ProjectDirectory = root,
+            AudioFile = file
+        })
+        {
+            context.AudioFile = null;
+            Assert.Equal(0, file.DisposeCount);
+        }
+
+        Assert.Equal(1, file.DisposeCount);
+    }
+
+    [Fact]
+    public void Context_RoleReplacementRetainsStandaloneAliasUntilContextDispose()
+    {
+        var first = new TrackingFile("first.wav", []);
+        var replacement = new TrackingFile("replacement.wav", []);
+        using (var context = new EditorFileAccessContext
+        {
+            AudioFile = first
+        })
+        {
+            context.AudioFile = replacement;
+            Assert.Equal(0, first.DisposeCount);
+            Assert.Equal(0, replacement.DisposeCount);
+        }
+
+        Assert.Equal(1, first.DisposeCount);
+        Assert.Equal(1, replacement.DisposeCount);
+    }
+
     [AvaloniaFact]
     public async Task FailedContextLoad_DisposesOwnedRootAndChildren()
     {
@@ -40,10 +94,11 @@ public sealed class EditorProjectLoadOwnershipTests
         private readonly TrackingFile projectFile;
         private bool isDisposed;
 
-        public TrackingDirectory(TrackingFile projectFile)
+        public TrackingDirectory(TrackingFile projectFile, string? localPath = null)
         {
             this.projectFile = projectFile;
             projectFile.ParentDictionary = this;
+            LocalPath = localPath;
         }
 
         public int DisposeCount { get; private set; }
@@ -51,7 +106,7 @@ public sealed class EditorProjectLoadOwnershipTests
         public ISimpleDirectory[] ChildDictionaries => [];
         public ISimpleFile[] ChildFiles => [projectFile];
         public string FullPath => "memory://project";
-        public string? LocalPath => null;
+        public string? LocalPath { get; }
         public string DirectoryName => string.Empty;
 
         public bool ExistsDirectory(string dirName) => false;

@@ -34,19 +34,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
-		// Rebuilds a project from a complete file-access context prepared by a provider.
-		// On success the context ownership transfers to the returned EditorContext; every
-		// failure path disposes the context so file handles never leak.
-		public static async Task<EditorContext> TryLoadFromContextAsync(
+		// Reads and parses a complete context without consuming its file capabilities. Creation
+		// transactions use this boundary so they can remove newly-created files before disposal.
+		public static async Task<LoadedEditorProjectData> LoadDataAsync(
 			EditorFileAccessContext context,
-			CancellationToken cancellationToken = default)
+			CancellationToken cancellationToken = default,
+			IFumenParserManager parserManager = null)
 		{
 			ArgumentNullException.ThrowIfNull(context);
 			context.ThrowIfDisposed();
 
 			EditorProjectDataModel projectData = null;
-			EditorContext editorContext = null;
-			var contextTransferred = false;
+			LoadedEditorProjectData loadedData = null;
 			try
 			{
 				var projectFile = context.ProjectFile
@@ -79,28 +78,49 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				OngekiFumen fumen;
 				await using (var fumenStream = await fumenFile.OpenRead())
 				{
-					var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(fumenFile.FileName);
+					var fumenDeserializer = (parserManager ?? IoC.Get<IFumenParserManager>())
+						.GetDeserializer(fumenFile.FileName);
 					if (fumenDeserializer is null)
 						throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
 					fumen = await fumenDeserializer.DeserializeAsync(fumenStream);
 				}
 
-				editorContext = new EditorContext
-				{
-					ProjectData = projectData,
-					Fumen = fumen
-				};
-				editorContext.FileAccessContext = context;
-				contextTransferred = true;
 				ApplyBulletPalleteListEditorData(projectData, fumen);
-				return editorContext;
+				loadedData = new LoadedEditorProjectData(projectData, fumen);
+				return loadedData;
 			}
 			catch
 			{
-				editorContext?.Dispose();
+				loadedData?.Dispose();
+				throw;
+			}
+		}
+
+		// Compatibility wrapper retaining the historical consuming contract: a successful
+		// load transfers the context to EditorContext, while every failure disposes it.
+		public static async Task<EditorContext> TryLoadFromContextAsync(
+			EditorFileAccessContext context,
+			CancellationToken cancellationToken = default)
+		{
+			ArgumentNullException.ThrowIfNull(context);
+			var contextTransferred = false;
+			try
+			{
+				using var loadedData = await LoadDataAsync(context, cancellationToken);
+				var (projectData, fumen) = loadedData.Take();
+				var editorContext = new EditorContext
+				{
+					ProjectData = projectData,
+					Fumen = fumen,
+					FileAccessContext = context
+				};
+				contextTransferred = true;
+				return editorContext;
+			}
+			finally
+			{
 				if (!contextTransferred)
 					context.Dispose();
-				throw;
 			}
 		}
 

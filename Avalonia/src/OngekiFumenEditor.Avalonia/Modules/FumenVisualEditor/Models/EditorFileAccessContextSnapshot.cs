@@ -20,6 +20,12 @@ public sealed class EditorFileAccessContextSnapshot
 
     public string AudioFileBookmark { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Optional bookmark for an external AWB selected for an ACB project. Older snapshots
+    /// omit this field and remain readable; the folder-open path can rebind a sibling AWB.
+    /// </summary>
+    public string? AudioAwbFileBookmark { get; set; }
+
     public byte[] Serialize() => JsonSerializer.SerializeToUtf8Bytes(
         this,
         EditorFileAccessContextSnapshotJsonContext.Default.EditorFileAccessContextSnapshot);
@@ -58,6 +64,7 @@ public sealed class EditorFileAccessContextSnapshot
         ISimpleFile? projectFile = null;
         ISimpleFile? fumenFile = null;
         ISimpleFile? audioFile = null;
+        ISimpleFile? audioAwbFile = null;
         try
         {
             projectDirectory = await OpenDirectoryAsync(
@@ -89,23 +96,48 @@ public sealed class EditorFileAccessContextSnapshot
                 AudioFileBookmark,
                 nameof(AudioFileBookmark)).ConfigureAwait(false);
 
+            if (!string.IsNullOrWhiteSpace(AudioAwbFileBookmark))
+            {
+                // An external AWB is optional and can be rebound from the project folder.
+                // A stale bookmark must therefore not make the whole recent project invalid.
+                try
+                {
+                    audioAwbFile = await OpenFileAsync(
+                        storageProvider,
+                        AudioAwbFileBookmark,
+                        nameof(AudioAwbFileBookmark)).ConfigureAwait(false);
+                }
+                catch (Exception exception) when (
+                    exception is IOException or
+                    InvalidDataException or
+                    UnauthorizedAccessException or
+                    NotSupportedException or
+                    ArgumentException)
+                {
+                    audioAwbFile = null;
+                }
+            }
+
             var context = new EditorFileAccessContext
             {
                 ProjectDirectory = projectDirectory,
                 AdditionDirectories = additionDirectories,
                 ProjectFile = projectFile,
                 FumenFile = fumenFile,
-                AudioFile = audioFile
+                AudioFile = audioFile,
+                AudioAwbFile = audioAwbFile
             };
             projectDirectory = null;
             additionDirectories = [];
             projectFile = null;
             fumenFile = null;
             audioFile = null;
+            audioAwbFile = null;
             return context;
         }
         catch
         {
+            audioAwbFile?.Dispose();
             audioFile?.Dispose();
             fumenFile?.Dispose();
             projectFile?.Dispose();
@@ -146,7 +178,12 @@ public sealed class EditorFileAccessContextSnapshot
                 "fumen file").ConfigureAwait(false),
             AudioFileBookmark = await SaveRequiredBookmarkAsync(
                 audioFile,
-                "audio file").ConfigureAwait(false)
+                "audio file").ConfigureAwait(false),
+            AudioAwbFileBookmark = context.AudioAwbFile is { } audioAwbFile
+                ? await SaveRequiredBookmarkAsync(
+                    audioAwbFile,
+                    "external AWB file").ConfigureAwait(false)
+                : null
         };
     }
 
