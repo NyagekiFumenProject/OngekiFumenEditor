@@ -13,10 +13,12 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.DeadHandler;
 using System.ComponentModel;
+using Gekimini.Avalonia.Framework.Commands;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
@@ -63,9 +65,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     public partial bool IsDirty { get; set; }
 
     public bool IsNew => EditorContext?.ProjectFile is null;
-
-    public override IEnumerable<Type> SupportCommandDefinitionTypes =>
-        base.SupportCommandDefinitionTypes.Where(type => type != typeof(SaveFileAsCommandDefinition));
 
     public IAudioPlayer AudioPlayer { get; set; }
 
@@ -224,11 +223,17 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     Task<bool> IPersistedDocumentViewModel.Load(RecentRecordInfo recordInfo) =>
         IoC.Get<IFumenVisualEditorProvider>().TryOpen(this, recordInfo);
 
-    internal Task<bool> LoadProjectAsync(
+    internal async Task<bool> LoadProjectAsync(
         EditorContext context,
         string sourcePath,
-        CancellationToken cancellationToken = default) =>
-        TryAttachProjectAsync(context, sourcePath, cancellationToken);
+        CancellationToken cancellationToken = default)
+    {
+        var loaded = await TryAttachProjectAsync(context, sourcePath, cancellationToken);
+        if (loaded)
+            ToastNotify(Lang.LoadProjectFileAndFumenFile);
+
+        return loaded;
+    }
 
     /// <summary>
     /// Prepares all failure-prone state before replacing the current document. A false result
@@ -359,7 +364,14 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         IsDirty = false;
         // 对齐 WPF：保存成功后重置显式名（去掉 "[快速打开]" 前缀），回退到文件名。
         DisplayName = default;
+        ToastNotify(Lang.SaveProjectFileAndFumenFile);
         return true;
+    }
+
+    protected override void UpdateSaveFileAsCommand(Command command)
+    {
+        // Save As remains unavailable until project-scoped destination selection is implemented.
+        command.Enabled = false;
     }
 
     public Task<bool> SaveAs()
@@ -557,6 +569,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         cacheObjectAudioTime.Clear();
         InteractiveManager = null;
         View = null;
+        Interlocked.Exchange(ref pendingToastMessage, null);
         LoadingFinished = null;
     }
 }

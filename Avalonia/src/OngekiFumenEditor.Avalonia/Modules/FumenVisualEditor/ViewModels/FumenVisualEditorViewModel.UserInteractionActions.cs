@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Avalonia.Threading;
 using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Framework.DragDrops;
 using Gekimini.Avalonia.Modules.Toolbox.Models;
@@ -136,6 +137,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         /// <summary>由 <see cref="OnViewAfterLoaded"/> 回注，替代 Caliburn 的 GetView()。</summary>
         public FumenVisualEditorView View { get; private set; }
+        private string pendingToastMessage;
 
         private Point lastPointerViewPosition;
         private bool isLeftButtonPressed;
@@ -1979,8 +1981,45 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void ToastNotify(string message)
         {
-            Toast?.ShowMessage(message);
             Log.LogInfo(message);
+
+            if (string.IsNullOrWhiteSpace(message))
+                return;
+
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(() => ShowToastOnUiThread(message));
+                return;
+            }
+
+            ShowToastOnUiThread(message);
+        }
+
+        private void ShowToastOnUiThread(string message)
+        {
+            if (IsDisposed)
+                return;
+
+            if (Toast is { } toast)
+            {
+                toast.ShowMessage(message);
+                return;
+            }
+
+            Interlocked.Exchange(ref pendingToastMessage, message);
+        }
+
+        internal void FlushPendingToast()
+        {
+            if (!Dispatcher.UIThread.CheckAccess())
+            {
+                Dispatcher.UIThread.Post(FlushPendingToast);
+                return;
+            }
+
+            var message = Interlocked.Exchange(ref pendingToastMessage, null);
+            if (!string.IsNullOrWhiteSpace(message))
+                ShowToastOnUiThread(message);
         }
 
         #region Object Interaction

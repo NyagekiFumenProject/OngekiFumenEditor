@@ -19,7 +19,8 @@
 
     <Grid RowDefinitions="*,Auto">
         <ScrollViewer
-            Margin="20,18,20,12"
+            Margin="20,18,0,12"
+            Padding="0,0,20,0"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto"
             IsVisible="{CompiledBinding IsEditing}">
@@ -27,12 +28,18 @@
                 <StackPanel Spacing="8">
                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="Project" />
                     <Grid ColumnDefinitions="140,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="Project folder" />
-                        <TextBox
+                        <TextBlock
+                            Grid.Row="0"
+                            VerticalAlignment="Center"
+                            Text="Project folder"
+                            ToolTip.Tip="Destination folder for the new project. Existing files in this folder are not overwritten." />
+                        <TextBlock
                             Grid.Row="0"
                             Grid.Column="1"
-                            IsReadOnly="True"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             Text="{CompiledBinding ProjectDirectoryDisplayName}"
+                            TextTrimming="CharacterEllipsis"
                             ToolTip.Tip="{CompiledBinding ProjectDirectoryDisplayName}" />
                         <Button
                             Grid.Row="0"
@@ -41,14 +48,22 @@
                             Command="{CompiledBinding SelectProjectDirectoryCommand}"
                             Content="Browse..." />
 
-                        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Project name" />
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Text="Project name"
+                            ToolTip.Tip="Name used for the project data file. Enter it without the .nyagekiProj extension." />
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="1"
-                            Grid.ColumnSpan="2"
+                            HorizontalAlignment="Stretch"
                             Text="{CompiledBinding ProjectName, Mode=TwoWay}" />
 
-                        <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Project file" />
+                        <TextBlock
+                            Grid.Row="2"
+                            VerticalAlignment="Center"
+                            Text="Project file"
+                            ToolTip.Tip="Preview of the project data file that will be created in the project folder." />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
@@ -64,12 +79,18 @@
                 <StackPanel Spacing="8">
                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="Audio" />
                     <Grid ColumnDefinitions="140,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
-                        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="Source audio" />
-                        <TextBox
+                        <TextBlock
+                            Grid.Row="0"
+                            VerticalAlignment="Center"
+                            Text="Source audio"
+                            ToolTip.Tip="Audio file to validate and bind or copy into the project. The source extension must be supported." />
+                        <TextBlock
                             Grid.Row="0"
                             Grid.Column="1"
-                            IsReadOnly="True"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             Text="{CompiledBinding AudioFileDisplayName}"
+                            TextTrimming="CharacterEllipsis"
                             ToolTip.Tip="{CompiledBinding AudioFileDisplayName}" />
                         <Button
                             Grid.Row="0"
@@ -83,14 +104,22 @@
                             Command="{CompiledBinding ClearAudioFileCommand}"
                             Content="Clear" />
 
-                        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Target name" />
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Text="Target name"
+                            ToolTip.Tip="File name used inside the project folder for the audio. Keep the source extension; changing the name creates a copy." />
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="1"
-                            Grid.ColumnSpan="3"
+                            HorizontalAlignment="Stretch"
                             Text="{CompiledBinding TargetAudioFileName, Mode=TwoWay}" />
 
-                        <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Duration" />
+                        <TextBlock
+                            Grid.Row="2"
+                            VerticalAlignment="Center"
+                            Text="Duration"
+                            ToolTip.Tip="Detected duration of the selected audio. This value is read-only and is stored in the project data." />
                         <TextBlock
                             Grid.Row="2"
                             Grid.Column="1"
@@ -102,14 +131,19 @@
                             Grid.Row="3"
                             VerticalAlignment="Center"
                             IsVisible="{CompiledBinding RequiresExternalAwb}"
-                            Text="External AWB" />
+                            Text="External AWB"
+                            ToolTip.Tip="External AWB archive required by this ACB. The matching archive is copied or bound using the shown target name." />
                         <StackPanel
                             Grid.Row="3"
                             Grid.Column="1"
                             Grid.ColumnSpan="3"
                             Spacing="3"
                             IsVisible="{CompiledBinding RequiresExternalAwb}">
-                            <TextBlock Text="{CompiledBinding AudioAwbDisplayName}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock
+                                HorizontalAlignment="Stretch"
+                                Text="{CompiledBinding AudioAwbDisplayName}"
+                                TextTrimming="CharacterEllipsis"
+                                ToolTip.Tip="{CompiledBinding AudioAwbDisplayName}" />
                             <TextBlock Opacity="0.72" Text="{CompiledBinding TargetAudioAwbFileName}" />
                         </StackPanel>
                     </Grid>
@@ -136,12 +170,18 @@
                         ColumnSpacing="10"
                         RowSpacing="8"
                         IsVisible="{CompiledBinding IsExistingFumenMode}">
-                        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="Source fumen" />
-                        <TextBox
+                        <TextBlock
+                            Grid.Row="0"
+                            VerticalAlignment="Center"
+                            Text="Source fumen"
+                            ToolTip.Tip="Existing fumen file used as the starting chart. It is validated before it is bound or copied." />
+                        <TextBlock
                             Grid.Row="0"
                             Grid.Column="1"
-                            IsReadOnly="True"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
                             Text="{CompiledBinding ExistingFumenDisplayName}"
+                            TextTrimming="CharacterEllipsis"
                             ToolTip.Tip="{CompiledBinding ExistingFumenDisplayName}" />
                         <Button
                             Grid.Row="0"
@@ -154,11 +194,15 @@
                             Grid.Column="3"
                             Command="{CompiledBinding ClearExistingFumenCommand}"
                             Content="Clear" />
-                        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Target name" />
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Text="Target name"
+                            ToolTip.Tip="File name used inside the project folder for the existing fumen. Keep its extension; changing the name creates a copy." />
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="1"
-                            Grid.ColumnSpan="3"
+                            HorizontalAlignment="Stretch"
                             Text="{CompiledBinding ExistingFumenTargetFileName, Mode=TwoWay}" />
                     </Grid>
 
@@ -168,7 +212,11 @@
                         ColumnSpacing="10"
                         RowSpacing="8"
                         IsVisible="{CompiledBinding IsCreateNewFumenMode}">
-                        <TextBlock Grid.Row="0" VerticalAlignment="Center" Text="File name" />
+                        <TextBlock
+                            Grid.Row="0"
+                            VerticalAlignment="Center"
+                            Text="File name"
+                            ToolTip.Tip="Base name for a new fumen. Enter it without an extension, then choose the format from the list." />
                         <TextBox
                             Grid.Row="0"
                             Grid.Column="1"
@@ -178,7 +226,11 @@
                             Grid.Column="2"
                             ItemsSource="{CompiledBinding FumenFormatOptions}"
                             SelectedItem="{CompiledBinding SelectedFumenFormat, Mode=TwoWay}" />
-                        <TextBlock Grid.Row="1" VerticalAlignment="Center" Text="Final file" />
+                        <TextBlock
+                            Grid.Row="1"
+                            VerticalAlignment="Center"
+                            Text="Final file"
+                            ToolTip.Tip="Preview of the new fumen file name after the selected format extension is applied." />
                         <TextBlock
                             Grid.Row="1"
                             Grid.Column="1"
@@ -186,7 +238,11 @@
                             VerticalAlignment="Center"
                             Text="{CompiledBinding FumenFileNamePreview}"
                             TextTrimming="CharacterEllipsis" />
-                        <TextBlock Grid.Row="2" VerticalAlignment="Center" Text="Initial BPM" />
+                        <TextBlock
+                            Grid.Row="2"
+                            VerticalAlignment="Center"
+                            Text="Initial BPM"
+                            ToolTip.Tip="Initial BPM written to a newly created fumen. Enter a finite value greater than 0; 240 is the default." />
                         <TextBox
                             Grid.Row="2"
                             Grid.Column="1"
@@ -247,7 +303,8 @@
                     VerticalAlignment="Center"
                     Opacity="0.72"
                     IsVisible="{CompiledBinding IsEditing}"
-                    Text="Files already in the project folder are bound directly." />
+                    Text="Files already in the project folder are bound directly."
+                    TextWrapping="Wrap" />
                 <Button
                     Grid.Column="1"
                     MinWidth="96"

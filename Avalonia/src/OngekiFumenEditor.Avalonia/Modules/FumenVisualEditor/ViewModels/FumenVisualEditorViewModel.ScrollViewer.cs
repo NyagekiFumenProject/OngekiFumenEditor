@@ -17,9 +17,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 			{
 				value = Math.Max(value, ViewHeight);
 				//Log.LogDebug($"TotalDurationHeight {TotalDurationHeight} -> {value}");
-				SetProperty(ref totalDurationHeight, value);
+				if (SetProperty(ref totalDurationHeight, value))
+					OnPropertyChanged(nameof(IsVerticalScrollBarVisible));
 			}
 		}
+
+		public bool IsVerticalScrollBarVisible => TotalDurationHeight > ViewHeight;
 
 		private double scrollViewerVerticalOffset;
 		public double ScrollViewerVerticalOffset

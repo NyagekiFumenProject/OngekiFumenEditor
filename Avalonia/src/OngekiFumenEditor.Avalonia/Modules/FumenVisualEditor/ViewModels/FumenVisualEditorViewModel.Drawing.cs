@@ -133,7 +133,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         get => viewHeight;
         set
         {
-            SetProperty(ref viewHeight, value);
+            if (SetProperty(ref viewHeight, value))
+                OnPropertyChanged(nameof(IsVerticalScrollBarVisible));
         }
     }
 
@@ -723,6 +724,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         base.OnViewAfterLoaded(view);
         AttachRuntimeSubscriptions();
         View = view as FumenVisualEditorView;
+        FlushPendingToast();
         UpdateBatchModeBehaviorAttachment();
         InitExtraMenuItems();
     }

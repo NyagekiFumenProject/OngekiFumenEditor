@@ -64,7 +64,7 @@ public abstract partial class FumenVisualEditorProviderBase : IFumenVisualEditor
 
     public Task<bool> TryOpen(IDocumentViewModel document, EditorContext context) =>
         document is FumenVisualEditorViewModel editor
-            ? editor.TryAttachProjectAsync(context, ResolveSourcePath(context))
+            ? editor.LoadProjectAsync(context, ResolveSourcePath(context))
             : Task.FromResult(false);
 
     private static string ResolveSourcePath(EditorContext context) =>

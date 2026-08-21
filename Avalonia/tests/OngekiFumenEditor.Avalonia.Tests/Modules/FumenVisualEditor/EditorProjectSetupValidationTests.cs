@@ -148,7 +148,7 @@ public sealed class EditorProjectSetupValidationTests
         Assert.Equal("Song Folder", viewModel.ProjectName);
         Assert.Equal("Song Folder", viewModel.NewFumenStem);
         Assert.Equal(".ogkr", viewModel.SelectedFumenFormat?.Extension);
-        Assert.Equal(string.Empty, viewModel.BaseBpmText);
+        Assert.Equal("240", viewModel.BaseBpmText);
         Assert.False(viewModel.CanCreate);
 
         viewModel.ProjectName = "Renamed";

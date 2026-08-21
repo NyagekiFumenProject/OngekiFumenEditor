@@ -1,10 +1,13 @@
 using Avalonia.Headless.XUnit;
+using Avalonia.Threading;
 using Gekimini.Avalonia.Framework;
+using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Modules.Shell.Commands;
 using Gekimini.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -168,14 +171,18 @@ public sealed class FumenVisualEditorInitializationTests
     }
 
     [AvaloniaFact]
-    public async Task PersistedDocumentContract_ExposesSaveButNotSaveAs()
+    public async Task PersistedDocumentContract_DisablesSaveAsUntilDestinationFlowExists()
     {
-        var editor = new FumenVisualEditorViewModel();
+        using var editor = new FumenVisualEditorViewModel();
         var persistedDocument = Assert.IsAssignableFrom<IPersistedDocumentViewModel>(editor);
 
         Assert.True(persistedDocument.IsNew);
         Assert.Contains(typeof(SaveFileCommandDefinition), editor.SupportCommandDefinitionTypes);
-        Assert.DoesNotContain(typeof(SaveFileAsCommandDefinition), editor.SupportCommandDefinitionTypes);
+        Assert.Contains(typeof(SaveFileAsCommandDefinition), editor.SupportCommandDefinitionTypes);
+
+        var saveAsCommand = new Command(new SaveFileAsCommandDefinition());
+        await ((ICommandHandler)editor).Update(saveAsCommand);
+        Assert.False(saveAsCommand.Enabled);
         Assert.False(await persistedDocument.SaveAs());
     }
 
@@ -383,6 +390,58 @@ public sealed class FumenVisualEditorInitializationTests
     }
 
     [AvaloniaFact]
+    public async Task LoadSuccessToast_IsQueuedUntilEditorViewLoads()
+    {
+        using var editor = new FumenVisualEditorViewModel();
+
+        editor.ToastNotify(Lang.LoadProjectFileAndFumenFile);
+        Assert.Null(editor.Toast);
+
+        var view = new FumenVisualEditorView();
+        editor.OnViewAfterLoaded(view);
+        try
+        {
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+
+            Assert.NotNull(editor.Toast);
+            Assert.True(editor.Toast!.IsVisible);
+            Assert.Equal(Lang.LoadProjectFileAndFumenFile, editor.Toast.Message);
+        }
+        finally
+        {
+            editor.OnViewBeforeUnload(view);
+        }
+    }
+
+    [AvaloniaFact]
+    public async Task LoadFailure_DoesNotShowLoadSuccessToast()
+    {
+        using var editor = new FumenVisualEditorViewModel();
+        using var context = new EditorContext
+        {
+            ProjectData = new EditorProjectDataModel(),
+            FileAccessContext = new EditorFileAccessContext()
+        };
+
+        Assert.False(await editor.LoadProjectAsync(context, "missing.nyagekiProj"));
+
+        var view = new FumenVisualEditorView();
+        editor.OnViewAfterLoaded(view);
+        try
+        {
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+
+            Assert.NotNull(editor.Toast);
+            Assert.False(editor.Toast!.IsVisible);
+            Assert.Empty(editor.Toast.Message);
+        }
+        finally
+        {
+            editor.OnViewBeforeUnload(view);
+        }
+    }
+
+    [AvaloniaFact]
     public async Task Save_SuccessfullyWritesProjectAndFumenAndClearsDirty()
     {
         using var temporaryDirectory = new TemporaryDirectory();
@@ -411,17 +470,24 @@ public sealed class FumenVisualEditorInitializationTests
             EditorContext = context,
             IsDirty = true
         };
+        var view = new FumenVisualEditorView();
+        editor.OnViewAfterLoaded(view);
 
         try
         {
             Assert.False(editor.IsNew);
             Assert.True(await editor.Save());
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
             Assert.False(editor.IsDirty);
             Assert.True(new FileInfo(projectPath).Length > 0);
             Assert.True(new FileInfo(fumenPath).Length > 0);
+            Assert.NotNull(editor.Toast);
+            Assert.True(editor.Toast!.IsVisible);
+            Assert.Equal(Lang.SaveProjectFileAndFumenFile, editor.Toast.Message);
         }
         finally
         {
+            editor.OnViewBeforeUnload(view);
             context.Dispose();
         }
     }

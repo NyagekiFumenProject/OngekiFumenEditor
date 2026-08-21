@@ -34,7 +34,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     private SetupFumenMode fumenMode = SetupFumenMode.CreateNew;
     private string newFumenStem;
     private FumenFormatOption? selectedFumenFormat;
-    private string baseBpmText = string.Empty;
+    private string baseBpmText = "240";
     private string existingFumenTargetFileName = string.Empty;
     private string targetAudioFileName = string.Empty;
     private string targetAudioAwbFileName = string.Empty;

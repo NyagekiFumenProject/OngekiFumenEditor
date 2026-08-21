@@ -129,14 +129,19 @@
             Maximum="{Binding TotalDurationHeight}"
             Minimum="0"
             Orientation="Vertical"
-            Value="{Binding ReverseScrollViewerVerticalOffset}">
+            ZIndex="10"
+            IsVisible="True"
+            ViewportSize="{Binding ViewHeight}"
+            Value="{Binding ReverseScrollViewerVerticalOffset, Mode=TwoWay}">
         </ScrollBar>
         <ScrollBar
             Grid.Row="1"
             Maximum="600"
             Minimum="-600"
             Orientation="Horizontal"
-            IsVisible="{Binding Setting.ShowXOffsetScrollBar, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter={x:Static sys:Boolean.TrueString}}"
+            HorizontalAlignment="Stretch"
+            ZIndex="10"
+            IsVisible="False"
             Value="{Binding Setting.XOffset, Mode=TwoWay}">
         </ScrollBar>
         <StackPanel

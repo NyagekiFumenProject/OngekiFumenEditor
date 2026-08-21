@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
 using Avalonia.Headless.XUnit;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -166,6 +168,35 @@ public sealed class AxamlSmokeTests
     }
 
     [AvaloniaFact]
+    public void FumenVisualEditorView_UsesFixedScrollbarVisibility()
+    {
+        var view = new global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView();
+        var window = new Window
+        {
+            Width = 800,
+            Height = 600,
+            Content = view
+        };
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+
+            var scrollBars = view.GetVisualDescendants().OfType<ScrollBar>().ToArray();
+            var vertical = Assert.Single(scrollBars, static scrollBar => scrollBar.Orientation == Orientation.Vertical);
+            var horizontal = Assert.Single(scrollBars, static scrollBar => scrollBar.Orientation == Orientation.Horizontal);
+
+            Assert.True(vertical.IsVisible);
+            Assert.False(horizontal.IsVisible);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
     public async Task Toast_NewerMessageOutlivesOlderHideTimer()
     {
         var toast = new Toast();
@@ -184,10 +215,56 @@ public sealed class AxamlSmokeTests
         Assert.True(toast.IsVisible);
         Assert.Equal("second", toast.Message);
 
-        await Task.Delay(220);
+        await Task.Delay(1650);
         await Dispatcher.UIThread.InvokeAsync(static () => { });
         Assert.False(toast.IsVisible);
         Assert.Empty(toast.Message);
+    }
+
+    [AvaloniaFact]
+    public async Task Toast_FadesInAndOut()
+    {
+        var toast = new Toast();
+        var window = new Window
+        {
+            Width = 320,
+            Height = 120,
+            Content = toast
+        };
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+
+            toast.ShowMessage("fade", showTime: 1000);
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+            Assert.True(toast.IsVisible);
+            Assert.Equal(0, toast.Opacity);
+
+            await Task.Delay(100);
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+            Assert.InRange(toast.Opacity, 0.01, 0.99);
+
+            await Task.Delay(750);
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+            Assert.Equal(1, toast.Opacity);
+
+            await Task.Delay(250);
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+            Assert.True(toast.IsVisible);
+            Assert.InRange(toast.Opacity, 0.01, 0.99);
+
+            await Task.Delay(850);
+            await Dispatcher.UIThread.InvokeAsync(static () => { });
+            Assert.False(toast.IsVisible);
+            Assert.Empty(toast.Message);
+            Assert.Equal(0, toast.Opacity);
+        }
+        finally
+        {
+            window.Close();
+        }
     }
 
     private static object GetRequiredResource(Application application, string key)
