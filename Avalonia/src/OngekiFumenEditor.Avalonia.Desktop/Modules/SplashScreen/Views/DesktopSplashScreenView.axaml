@@ -7,6 +7,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
+    xmlns:desktopLanguages="clr-namespace:OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen.Assets.Languages;assembly=OngekiFumenEditor.Avalonia.Desktop"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Desktop.Modules.SplashScreen.ViewModels"
     Title="Welcome"
     Width="1000"
@@ -16,5 +18,41 @@
     Background="{StaticResource EditorWindowBackgroundBrush}"
     CanResize="False"
     mc:Ignorable="d">
-    <splash:SplashScreenCommonView />
+    <splash:SplashScreenCommonView>
+        <splash:SplashScreenCommonView.AdditionalActions>
+        <!-- 编译绑定基类视图的 DataType 中没有 FastOpenCommand，这里使用反射绑定。 -->
+        <Button
+            Classes="ActionCard"
+            Command="{ReflectionBinding FastOpenCommand}"
+            Margin="0,0,0,5"
+            HorizontalAlignment="Stretch">
+            <Border>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border
+                        Width="40"
+                        Height="40"
+                        Margin="10,10,0,10">
+                        <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/document.png" />
+                    </Border>
+
+                    <StackPanel
+                        Grid.Column="1"
+                        Margin="10"
+                        VerticalAlignment="Center">
+                        <Label
+                            Content="{markup:Translate {x:Static desktopLanguages:DesktopLang+B.FastOpen2}}"
+                            FontSize="20"
+                            FontWeight="Bold" />
+                        <Label Content="{markup:Translate {x:Static desktopLanguages:DesktopLang+B.FastOpen2TipText}}" FontSize="15" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Button>
+        </splash:SplashScreenCommonView.AdditionalActions>
+    </splash:SplashScreenCommonView>
 </views:WindowViewBase>

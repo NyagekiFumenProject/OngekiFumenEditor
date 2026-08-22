@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -14,6 +15,13 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Kernel.ArgProcesser;
 [RegisterSingleton<IProgramArgProcessManager>]
 internal class DesktopProgramArgProcessManager : IProgramArgProcessManager
 {
+    private readonly DesktopFastOpenService fastOpenService;
+
+    public DesktopProgramArgProcessManager(DesktopFastOpenService fastOpenService)
+    {
+        this.fastOpenService = fastOpenService;
+    }
+
     public async Task ProcessArgs(string[] args)
     {
         if (args is null || args.Length == 0)
@@ -25,7 +33,12 @@ internal class DesktopProgramArgProcessManager : IProgramArgProcessManager
             Log.LogInfo($"arg.filePath: {filePath}");
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                _ = await DesktopDocumentOpenService.TryOpenAsync(filePath);
+                // .ogkr/.nyageki 与 UI FastOpen 走同一套 Desktop 发现与上下文构造逻辑。
+                var isFumenFile = filePath.EndsWith(".ogkr", StringComparison.OrdinalIgnoreCase) ||
+                                  filePath.EndsWith(".nyageki", StringComparison.OrdinalIgnoreCase);
+                _ = isFumenFile
+                    ? await fastOpenService.TryOpenAsync(filePath)
+                    : await DesktopDocumentOpenService.TryOpenAsync(filePath);
             });
         }
 
