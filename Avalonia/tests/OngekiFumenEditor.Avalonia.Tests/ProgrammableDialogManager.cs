@@ -28,19 +28,22 @@ public sealed class ProgrammableDialogManager : IDialogManager
             scriptedDirtyDialogAnswers.Enqueue(answer);
     }
 
+    /// <summary>非空时，脏文档对话框会等待其完成再应答，用于把确认流程卡在打开状态。</summary>
+    public TaskCompletionSource DirtyDialogGate { get; set; }
+
     public Task<T> ShowDialog<T>() where T : DialogViewModelBase => throw new NotSupportedException();
 
-    public Task ShowDialog(DialogViewModelBase dialogViewModel)
+    public async Task ShowDialog(DialogViewModelBase dialogViewModel)
     {
         if (dialogViewModel is SaveDirtyDocumentDialogViewModel dirtyDocumentDialog)
         {
             DirtyDialogCount++;
+            if (DirtyDialogGate is not null)
+                await DirtyDialogGate.Task;
             dirtyDocumentDialog.Result = scriptedDirtyDialogAnswers.Count > 0
                 ? scriptedDirtyDialogAnswers.Dequeue()
                 : DirtyDialogAnswer;
         }
-
-        return Task.CompletedTask;
     }
 
     public Task ShowMessageDialog(string content, DialogMessageType messageType = DialogMessageType.Info)
@@ -59,6 +62,7 @@ public sealed class ProgrammableDialogManager : IDialogManager
     {
         DirtyDialogAnswer = DialogResult.No;
         scriptedDirtyDialogAnswers.Clear();
+        DirtyDialogGate = null;
         DirtyDialogCount = 0;
         MessageDialogCount = 0;
     }

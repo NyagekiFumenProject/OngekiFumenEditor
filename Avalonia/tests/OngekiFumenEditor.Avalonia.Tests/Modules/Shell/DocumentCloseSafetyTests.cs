@@ -27,6 +27,9 @@ public sealed partial class DocumentCloseSafetyTests
     {
         var shell = IoC.Get<IShell>();
         await shell.ResetLayout();
+        // ResetLayout 会顺带确认清理上一个测试残留的脏文档，
+        // 这里重置计数器，保证后续断言只统计本测试自己的对话框。
+        ProgrammableDialogManager.Instance.Reset();
         await shell.OpenDocumentAsync(document);
         Assert.Contains(document, shell.Documents);
         return (ShellViewModel)shell;
@@ -259,6 +262,35 @@ public sealed partial class DocumentCloseSafetyTests
         // 守卫流程只确认不删除，两个文档都必须保持打开。
         Assert.Contains(first, shell.Documents);
         Assert.Contains(second, shell.Documents);
+        Assert.Equal(2, ProgrammableDialogManager.Instance.DirtyDialogCount);
+    }
+
+    [AvaloniaFact]
+    public async Task ExitAttempt_WhileConfirmDialogOpen_SecondAttemptRejectedImmediately()
+    {
+        var document = new StubPersistedDocument { IsDirty = true };
+        var shell = await PrepareShellWithDocumentAsync(document);
+        var app = (global::Gekimini.Avalonia.App)global::Avalonia.Application.Current;
+        var dialogGate = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        ProgrammableDialogManager.Instance.DirtyDialogGate = dialogGate;
+        ProgrammableDialogManager.Instance.DirtyDialogAnswer = DialogResult.Cancel;
+
+        // 第一次退出卡在脏确认对话框上，期间再次退出应被立即拒绝，不得并发进入第二轮确认。
+        var firstAttempt = app.TryExit();
+        var secondAttempt = await app.TryExit();
+
+        Assert.False(secondAttempt);
+        Assert.False(firstAttempt.IsCompleted);
+
+        dialogGate.SetResult();
+
+        Assert.False(await firstAttempt);
+        Assert.Equal(1, ProgrammableDialogManager.Instance.DirtyDialogCount);
+        Assert.Contains(document, shell.Documents);
+
+        // 用户取消后退出流程结束，再次退出允许重新进入确认。
+        var thirdAttempt = await app.TryExit();
+        Assert.False(thirdAttempt);
         Assert.Equal(2, ProgrammableDialogManager.Instance.DirtyDialogCount);
     }
 

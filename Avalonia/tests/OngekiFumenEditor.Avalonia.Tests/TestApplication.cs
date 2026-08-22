@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Themes.Fluent;
+using CommunityToolkit.Mvvm.Messaging;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils.MethodExtensions;
@@ -31,6 +32,10 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
 
     public override void OnFrameworkInitializationCompleted()
     {
+        // headless 可能按测试重建 App 与 DI 容器，但 WeakReferenceMessenger 是进程级静态；
+        // 不重置的话，历史 ShellViewModel（可能持有残留脏文档）会继续应答退出询问。
+        WeakReferenceMessenger.Default.Reset();
+
         var services = new ServiceCollection();
         RegisterServices(services);
         services.AddOngekiFumenEditorAvalonia();
