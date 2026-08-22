@@ -26,6 +26,7 @@ public sealed partial class DocumentCloseSafetyTests
     private static async Task<ShellViewModel> PrepareShellWithDocumentAsync(StubPersistedDocument document)
     {
         var shell = IoC.Get<IShell>();
+        ((ShellViewModel)shell).IsActive = true;
         await shell.ResetLayout();
         // ResetLayout 会顺带确认清理上一个测试残留的脏文档，
         // 这里重置计数器，保证后续断言只统计本测试自己的对话框。
