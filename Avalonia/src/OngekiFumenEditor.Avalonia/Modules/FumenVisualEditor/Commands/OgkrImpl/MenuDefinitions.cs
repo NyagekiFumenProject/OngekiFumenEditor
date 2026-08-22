@@ -1,5 +1,4 @@
-using Gekimini.Avalonia.Framework.Menus;
-using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
+﻿using Gekimini.Avalonia.Framework.Menus;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.InterpolateAll;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.StandardizeFormat;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
@@ -26,7 +25,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl
 
 		// Fast-open remains implemented for a future Desktop-only registration.
 		// [RegisterStaticObject]
-		// public static MenuItemDefinition FastOpenFumenMenuItem = new CommandMenuItemDefinition<FastOpenFumenCommandDefinition>(Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.FileNewOpenMenuGroup, 8);
 	}
 }
 

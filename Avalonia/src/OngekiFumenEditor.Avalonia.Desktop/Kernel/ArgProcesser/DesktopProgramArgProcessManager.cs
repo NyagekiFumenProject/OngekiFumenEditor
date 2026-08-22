@@ -1,12 +1,18 @@
 using Avalonia.Threading;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Desktop.Utils;
+using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Reflection;
 
-namespace OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
+namespace OngekiFumenEditor.Avalonia.Desktop.Kernel.ArgProcesser;
 
+/// <summary>
+///     启动参数只在 Desktop 生效：本地路径文档打开属于平台能力，
+///     Browser 不解析也不注册该处理器。
+/// </summary>
 [RegisterSingleton<IProgramArgProcessManager>]
-internal class DefaultArgProcessManager : IProgramArgProcessManager
+internal class DesktopProgramArgProcessManager : IProgramArgProcessManager
 {
     public async Task ProcessArgs(string[] args)
     {
@@ -19,7 +25,7 @@ internal class DefaultArgProcessManager : IProgramArgProcessManager
             Log.LogInfo($"arg.filePath: {filePath}");
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                _ = await DocumentOpenHelper.TryOpenAsDocument(filePath);
+                _ = await DesktopDocumentOpenService.TryOpenAsync(filePath);
             });
         }
 
@@ -35,7 +41,7 @@ internal class DefaultArgProcessManager : IProgramArgProcessManager
                 }
             }
 
-            var currentVersion = (Assembly.GetEntryAssembly() ?? typeof(DefaultArgProcessManager).Assembly).GetName().Version;
+            var currentVersion = (Assembly.GetEntryAssembly() ?? typeof(DesktopProgramArgProcessManager).Assembly).GetName().Version;
             Log.LogInfo($"Update finished. sourceVersion={sourceVersion}, currentVersion={currentVersion}");
         }
     }
