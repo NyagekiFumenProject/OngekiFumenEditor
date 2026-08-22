@@ -122,7 +122,7 @@ public sealed class ObjectSelectionOverloadTests
     {
         browser.RefreshSelected((FumenVisualEditorViewModel)null!);
         if (shell.Documents.Contains(editor))
-            await shell.CloseDocumentAsync(editor);
+            await shell.TryCloseDocumentAsync(editor);
         editor.EditorContext?.Dispose();
         editor.Setting.Dispose();
     }
