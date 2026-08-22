@@ -4,13 +4,22 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Gekimini.Avalonia.Modules.Window.Views;
 using Iciclecreek.Avalonia.WindowManager;
-using OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.UI;
 
 public sealed class SplashScreenSystemButtonTests
 {
+    // Splash 窗口已按平台拆分到 Desktop/Browser 程序集，这里用一个与 Splash 窗口
+    // 同配置(CanResize=false)的最小窗口保住系统按钮显隐的回归行为。
+    private sealed class SplashLikeWindow : WindowViewBase
+    {
+        public SplashLikeWindow()
+        {
+            CanResize = false;
+        }
+    }
+
     [AvaloniaFact]
     public void SplashScreenView_HidesDisabledMinMaxButtons()
     {
@@ -19,7 +28,7 @@ public sealed class SplashScreenSystemButtonTests
         window.Show();
         try
         {
-            var view = new SplashScreenView();
+            var view = new SplashLikeWindow();
             panel.Show(view);
 
             window.UpdateLayout();

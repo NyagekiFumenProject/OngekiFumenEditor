@@ -1,0 +1,20 @@
+<views:WindowViewBase
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
+    xmlns:splash="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views;assembly=OngekiFumenEditor.Avalonia"
+    x:Class="OngekiFumenEditor.Avalonia.Desktop.Modules.SplashScreen.Views.DesktopSplashScreenView"
+    x:DataType="vm:DesktopSplashScreenViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Desktop.Modules.SplashScreen.ViewModels"
+    Title="Welcome"
+    Width="1000"
+    Height="700"
+    BorderThickness="0"
+    d:DataContext="{d:DesignInstance Type=vm:DesktopSplashScreenViewModel}"
+    Background="{StaticResource EditorWindowBackgroundBrush}"
+    CanResize="False"
+    mc:Ignorable="d">
+    <splash:SplashScreenCommonView />
+</views:WindowViewBase>

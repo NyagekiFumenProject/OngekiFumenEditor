@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
@@ -16,6 +16,8 @@ using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Browser.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
+using OngekiFumenEditor.Avalonia.Browser.Modules.SplashScreen.ViewModels;
+using OngekiFumenEditor.Avalonia.Modules.SplashScreen;
 using OngekiFumenEditor.Avalonia.Browser.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
@@ -46,6 +48,10 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
             provider.GetRequiredService<DefaultBrowserFumenVisualEditorProvider>());
 
         serviceCollection.AddTypeCollectedActivator(BrowserViewTypeCollectedActivator.Default);
+
+        // Core 只提供 Splash 基类；具体平台窗口由组合根显式绑定，不依赖注册顺序。
+        serviceCollection.AddSingleton<ISplashScreenWindow>(provider =>
+            provider.GetRequiredService<BrowserSplashScreenViewModel>());
 
 #if DEBUG
         if (DesignModeHelper.IsDesignMode)

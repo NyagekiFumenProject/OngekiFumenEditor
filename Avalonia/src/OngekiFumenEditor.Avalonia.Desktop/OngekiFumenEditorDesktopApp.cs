@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
@@ -12,6 +12,9 @@ using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor;
 using Gekimini.Avalonia.Utils;
+using Gekimini.Avalonia.Utils.MethodExtensions;
+using OngekiFumenEditor.Avalonia.Desktop.Modules.SplashScreen.ViewModels;
+using OngekiFumenEditor.Avalonia.Modules.SplashScreen;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using XamlMcp.Avalonia;
@@ -40,6 +43,13 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 
         serviceCollection.AddOngekiFumenEditorAvaloniaDesktop();
         RegisterFumenVisualEditorProvider(serviceCollection);
+
+        // Desktop 视图经 ViewLocator 定位需要平台自己的视图类型收集器。
+        serviceCollection.AddTypeCollectedActivator(DesktopViewTypeCollectedActivator.Default);
+
+        // Core 只提供 Splash 基类；具体平台窗口由组合根显式绑定，不依赖注册顺序。
+        serviceCollection.AddSingleton<ISplashScreenWindow>(provider =>
+            provider.GetRequiredService<DesktopSplashScreenViewModel>());
 
 #if DEBUG
         if (DesignModeHelper.IsDesignMode)

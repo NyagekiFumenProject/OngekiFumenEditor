@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
@@ -58,7 +58,7 @@ public sealed class AxamlSmokeTests
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI.Toast),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView),
-        typeof(global::OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenView),
+        typeof(global::OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenCommonView),
         typeof(global::OngekiFumenEditor.Avalonia.Modules.TGridCalculatorToolViewer.Views.TGridCalculatorToolViewerView),
         typeof(global::OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ObjectInspectorView),
         typeof(global::OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.BaseValueTypeUIView),

@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Framework.Languages;
@@ -12,13 +12,11 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.MiscMenu.Commands.OpenUrlCommon;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
-using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.OgkrImpl.FastOpenFumen;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels;
 
-[RegisterSingleton<ISplashScreenWindow>]
-public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenWindow
+public abstract partial class SplashScreenViewModelBase : WindowViewModelBase, ISplashScreenWindow
 {
     private readonly ILanguageManager languageManager;
     private readonly ISettingManager settingManager;
@@ -30,7 +28,7 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
     private readonly string initialLanguage;
     private string selectedLanguage;
 
-    public SplashScreenViewModel(
+    protected SplashScreenViewModelBase(
         ILanguageManager languageManager,
         ISettingManager settingManager,
         IEditorRecentFilesManager recentFilesManager,
@@ -157,12 +155,6 @@ public partial class SplashScreenViewModel : WindowViewModelBase, ISplashScreenW
             await shell.OpenDocumentAsync(editor);
         else if (editor is IDisposable disposable)
             disposable.Dispose();
-    }
-
-    [RelayCommand]
-    private static Task FastOpenAsync()
-    {
-        return CommandRouterHelper.ExecuteCommand(new Command(new FastOpenFumenCommandDefinition()));
     }
 
     [RelayCommand]

@@ -1,7 +1,7 @@
-<views:WindowViewBase
-    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
-    x:Class="OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenView"
-    x:DataType="vm:SplashScreenViewModel"
+﻿<views:ViewBase
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
+    x:Class="OngekiFumenEditor.Avalonia.Modules.SplashScreen.Views.SplashScreenCommonView"
+    x:DataType="vm:SplashScreenViewModelBase"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
@@ -9,15 +9,9 @@
     xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels"
-    Title="Welcome"
-    Width="1000"
-    Height="700"
-    BorderThickness="0"
-    d:DataContext="{d:DesignInstance Type=vm:SplashScreenViewModel}"
-    Background="{StaticResource EditorWindowBackgroundBrush}"
-    CanResize="False"
+    d:DataContext="{d:DesignInstance Type=vm:SplashScreenViewModelBase}"
     mc:Ignorable="d">
-    <views:WindowViewBase.Styles>
+    <views:ViewBase.Styles>
         <Style Selector="Button.ActionCard">
             <Setter Property="Cursor" Value="Hand" />
             <Setter Property="BorderThickness" Value="2" />
@@ -38,7 +32,7 @@
         <Style Selector="Button.RecentFile:pointerover">
             <Setter Property="BorderBrush" Value="LightBlue" />
         </Style>
-    </views:WindowViewBase.Styles>
+    </views:ViewBase.Styles>
     <Grid Margin="20,25">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -234,40 +228,6 @@
                                 </Grid>
                             </Border>
                         </Button>
-                        <!-- Fast-open is intentionally unavailable in the cross-platform Core UI.
-                        <Button
-                            Classes="ActionCard"
-                            Command="{CompiledBinding FastOpenCommand}"
-                            Margin="0,0,0,5"
-                            HorizontalAlignment="Stretch">
-                            <Border>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <Border
-                                        Width="40"
-                                        Height="40"
-                                        Margin="10,10,0,10">
-                                        <Image Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/document.png" />
-                                    </Border>
-
-                                    <StackPanel
-                                        Grid.Column="1"
-                                        Margin="10"
-                                        VerticalAlignment="Center">
-                                        <Label
-                                            Content="{markup:Translate {x:Static languages:Lang+B.FastOpen2}}"
-                                            FontSize="20"
-                                            FontWeight="Bold" />
-                                        <Label Content="{markup:Translate {x:Static languages:Lang+B.FastOpen2TipText}}" FontSize="15" />
-                                    </StackPanel>
-                                </Grid>
-                            </Border>
-                        </Button>
-                        -->
                         <Rectangle
                             Height="2"
                             Margin="10,0,10,5"
@@ -319,4 +279,4 @@
             </Grid>
         </Grid>
     </Grid>
-</views:WindowViewBase>
+</views:ViewBase>
