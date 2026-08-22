@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json.Serialization.Metadata;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Themes.Fluent;
+using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +41,8 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
         services.AddSingleton<ITemporaryFolderProvider, DiscardTemporaryFolderProvider>();
         services.AddSingleton<ILogFileStorage, DiscardLogFileStorage>();
         services.AddSingleton<ISettingManager, InMemorySettingManager>();
+        // 真实 DefaultDialogManager 在 headless 下会等待视图交互，用可编程替身覆盖（后注册生效）。
+        services.AddSingleton<IDialogManager>(ProgrammableDialogManager.Instance);
 
         // Gekimini owns this field privately; populate it for headless tests while intentionally skipping shell startup.
         ServiceProviderField.SetValue(this, services.BuildServiceProvider());
