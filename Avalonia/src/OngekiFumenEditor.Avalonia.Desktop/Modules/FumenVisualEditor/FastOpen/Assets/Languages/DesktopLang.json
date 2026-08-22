@@ -1,0 +1,9 @@
+{
+    "FastOpen":  "FastOpen",
+    "FastOpen2":  "Fast Open",
+    "FastOpen2TipText":  "Open an existing fumen file",
+    "FastOpenFumen":  "Quickly open fumen",
+    "FastOpenOgkrFumen":  "Quickly open ongeki fumen",
+    "CantFastOpenFumen":  "Unable to fast open the fumen: ",
+    "SelectAudioFileManually":  "Select audio file manually"
+}

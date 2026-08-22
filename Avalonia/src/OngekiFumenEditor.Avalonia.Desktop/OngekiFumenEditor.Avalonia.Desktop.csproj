@@ -62,6 +62,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <AdditionalFiles Include="Modules\FumenVisualEditor\FastOpen\Assets\Languages\*.json" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Dependencies\AcbGeneratorFuck\src\AcbGeneratorFuck\AcbGeneratorFuck.csproj" />
         <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj" />
 
@@ -69,6 +73,7 @@
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj" />
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
+        <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj" />
         <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
     </ItemGroup>
 </Project>

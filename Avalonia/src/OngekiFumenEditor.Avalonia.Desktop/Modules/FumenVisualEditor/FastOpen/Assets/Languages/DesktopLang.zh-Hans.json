@@ -1,0 +1,9 @@
+{
+    "FastOpen":  "快速打开",
+    "FastOpen2":  "快速打开",
+    "FastOpen2TipText":  "打开现有的谱面文件",
+    "FastOpenFumen":  "快速打开谱面",
+    "FastOpenOgkrFumen":  "快速打开音击谱面",
+    "CantFastOpenFumen":  "无法快速打开谱面:",
+    "SelectAudioFileManually":  "手动选择音频文件"
+}

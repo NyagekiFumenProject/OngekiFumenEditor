@@ -1,0 +1,9 @@
+{
+    "FastOpen":  "クイックオープン",
+    "FastOpen2":  "クイックオープン",
+    "FastOpen2TipText":  "既存の譜面ファイルを開く",
+    "FastOpenFumen":  "譜面をクイックオープン",
+    "FastOpenOgkrFumen":  "オンゲキ譜面をクイックオープン",
+    "CantFastOpenFumen":  "譜面をクイックオープンできませんでした：",
+    "SelectAudioFileManually":  "音源ファイルを手動選択"
+}
