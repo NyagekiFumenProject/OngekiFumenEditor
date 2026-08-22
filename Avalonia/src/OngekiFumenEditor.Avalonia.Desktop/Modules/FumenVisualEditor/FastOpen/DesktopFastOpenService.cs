@@ -46,7 +46,7 @@ public sealed class DesktopFastOpenService
     {
         var fumenFile = await FileDialogHelper.OpenFileAsync(
             DesktopLang.FastOpenOgkrFumen,
-            [(".ogkr", DesktopLang.FastOpenFumen), (".nyageki", DesktopLang.FastOpenFumen)]);
+            FileDialogHelper.GetSupportFumenOpenFileExtensionFilterList(parserManager));
         if (fumenFile is null)
             return;
 
@@ -209,9 +209,8 @@ public sealed class DesktopFastOpenService
         return $"[{DesktopLang.FastOpen}] {result}";
     }
 
-    private static bool IsSupportedFumenFile(string fileName)
+    private bool IsSupportedFumenFile(string fileName)
     {
-        return fileName.EndsWith(".ogkr", StringComparison.OrdinalIgnoreCase) ||
-               fileName.EndsWith(".nyageki", StringComparison.OrdinalIgnoreCase);
+        return parserManager.GetDeserializer(fileName) is not null;
     }
 }

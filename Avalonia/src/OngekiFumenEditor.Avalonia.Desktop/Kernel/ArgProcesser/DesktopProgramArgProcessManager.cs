@@ -3,6 +3,7 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
+using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Reflection;
 
@@ -16,10 +17,14 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Kernel.ArgProcesser;
 internal class DesktopProgramArgProcessManager : IProgramArgProcessManager
 {
     private readonly DesktopFastOpenService fastOpenService;
+    private readonly IFumenParserManager parserManager;
 
-    public DesktopProgramArgProcessManager(DesktopFastOpenService fastOpenService)
+    public DesktopProgramArgProcessManager(
+        DesktopFastOpenService fastOpenService,
+        IFumenParserManager parserManager)
     {
         this.fastOpenService = fastOpenService;
+        this.parserManager = parserManager;
     }
 
     public async Task ProcessArgs(string[] args)
@@ -33,9 +38,8 @@ internal class DesktopProgramArgProcessManager : IProgramArgProcessManager
             Log.LogInfo($"arg.filePath: {filePath}");
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                // .ogkr/.nyageki 与 UI FastOpen 走同一套 Desktop 发现与上下文构造逻辑。
-                var isFumenFile = filePath.EndsWith(".ogkr", StringComparison.OrdinalIgnoreCase) ||
-                                  filePath.EndsWith(".nyageki", StringComparison.OrdinalIgnoreCase);
+                // 所有已注册的谱面解析器都走同一套 Desktop FastOpen 逻辑。
+                var isFumenFile = parserManager.GetDeserializer(filePath) is not null;
                 _ = isFumenFile
                     ? await fastOpenService.TryOpenAsync(filePath)
                     : await DesktopDocumentOpenService.TryOpenAsync(filePath);
