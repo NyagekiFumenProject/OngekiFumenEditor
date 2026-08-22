@@ -1,6 +1,7 @@
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Shell;
 using Injectio.Attributes;
+using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
@@ -26,20 +27,20 @@ public sealed class DesktopFastOpenService
     private readonly IFumenVisualEditorProvider editorProvider;
     private readonly IFumenParserManager parserManager;
     private readonly IDialogManager dialogManager;
-    private readonly IShell shell;
+    private readonly IServiceProvider serviceProvider;
 
     public DesktopFastOpenService(
         IAudioManager audioManager,
         IFumenVisualEditorProvider editorProvider,
         IFumenParserManager parserManager,
         IDialogManager dialogManager,
-        IShell shell)
+        IServiceProvider serviceProvider)
     {
         this.audioManager = audioManager;
         this.editorProvider = editorProvider;
         this.parserManager = parserManager;
         this.dialogManager = dialogManager;
-        this.shell = shell;
+        this.serviceProvider = serviceProvider;
     }
 
     public async Task OpenAsync()
@@ -91,7 +92,9 @@ public sealed class DesktopFastOpenService
                 if (editor is FumenVisualEditorViewModel viewModel)
                     viewModel.DisplayName = documentName;
 
-                await shell.OpenDocumentAsync(editor);
+                // Shell 会依赖命令服务，不能在 FastOpenService 构造阶段解析；
+                // 走到真正打开文档时命令服务已经完成构造，再解析即可。
+                await serviceProvider.GetRequiredService<IShell>().OpenDocumentAsync(editor);
                 ownershipTransferred = true;
                 return true;
             }
