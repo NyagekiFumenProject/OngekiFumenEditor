@@ -6,4 +6,7 @@ public partial class JsApplicationInterop
 {
     [JSImport("globalThis.JsApplication.exit")]
     public static partial void Exit();
+
+    [JSImport("globalThis.JsApplication.setDirtyState")]
+    public static partial void SetDirtyState(bool isDirty);
 }

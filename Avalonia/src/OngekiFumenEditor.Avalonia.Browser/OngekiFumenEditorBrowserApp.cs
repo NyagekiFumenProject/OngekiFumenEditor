@@ -72,6 +72,10 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 
         shell.DockableOpened += AutoSaveLayout;
         shell.DockableClosed += AutoSaveLayout;
+
+        // 关标签页/刷新没有 .NET 侧关闭事件，唯一可用提醒是 JS 的 beforeunload：
+        // 把文档脏状态聚合推给 JS，由 JS 在脏时挂接浏览器原生关闭确认框。
+        new BeforeUnloadDirtyDocumentGuard(JsApplicationInterop.SetDirtyState).Attach(shell);
     }
 
     private void InitializeProgramVersion()

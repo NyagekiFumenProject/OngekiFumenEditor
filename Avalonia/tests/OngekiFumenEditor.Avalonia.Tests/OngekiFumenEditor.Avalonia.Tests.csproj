@@ -31,6 +31,8 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Utils\BeforeUnloadDirtyDocumentGuard.cs"
+                 Link="BrowserUtils\BeforeUnloadDirtyDocumentGuard.cs" />
         <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\BrowserOpfsContracts.cs"
                  Link="BrowserOpfsBrowser\BrowserOpfsContracts.cs" />
         <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\BrowserOpfsDownloadPlanner.cs"
