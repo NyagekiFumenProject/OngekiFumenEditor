@@ -6,11 +6,12 @@ using Gekimini.Avalonia.Modules.Shell;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Avalonia.Modules.SplashScreen;
 using OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Modules.SplashScreen.ViewModels;
 
-[RegisterSingleton]
+[RegisterSingleton<ISplashScreenWindow>]
 public sealed partial class DesktopSplashScreenViewModel : SplashScreenViewModelBase
 {
     private readonly DesktopFastOpenService fastOpenService;

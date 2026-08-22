@@ -4,11 +4,12 @@ using Gekimini.Avalonia.Models.Settings;
 using Gekimini.Avalonia.Modules.Shell;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Avalonia.Modules.SplashScreen;
 using OngekiFumenEditor.Avalonia.Modules.SplashScreen.ViewModels;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Modules.SplashScreen.ViewModels;
 
-[RegisterSingleton]
+[RegisterSingleton<ISplashScreenWindow>]
 public sealed partial class BrowserSplashScreenViewModel : SplashScreenViewModelBase
 {
     public BrowserSplashScreenViewModel(
