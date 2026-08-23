@@ -56,8 +56,8 @@
                               Command="{Binding MenuItemAction_SelectEntireLaneCommand}"
                               IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
                     <MenuItem Header="Attached curve points"
-                        Command="{Binding MenuItemAction_SelectAttachedCurvesCommand}"
-                        IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
+                              Command="{Binding MenuItemAction_SelectAttachedCurvesCommand}"
+                              IsEnabled="{Binding SelectObjects, Converter={StaticResource SelectionLaneObjectsCheckConverter}}" />
                     <Separator />
                     <MenuItem Command="{Binding MenuItemAction_SelectAllCommand}" Header="{markup:Translate {x:Static languages:Lang+B.SelectAllObjects}}" />
                     <MenuItem Command="{Binding MenuItemAction_ReverseSelectCommand}" Header="{markup:Translate {x:Static languages:Lang+B.ReverseSelectAllObjects}}" />
@@ -106,10 +106,10 @@
         <ContentControl x:Name="renderControlHost" Loaded="OnRenderControlHostLoaded" />
 
         <!--<opentkcontrol:GLWpfControl
-            x:Name="glView"
-            cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
-            Ready="glView_Ready"
-            SizeChanged="glView_SizeChanged" />-->
+        x:Name="glView"
+        cal:Message.Attach="[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];"
+        Ready="glView_Ready"
+        SizeChanged="glView_SizeChanged" />-->
 
         <views:BatchModeOverlayView
             DataContext="{Binding BatchModeBehavior}"
@@ -130,6 +130,7 @@
             Minimum="0"
             Orientation="Vertical"
             ZIndex="10"
+            AllowAutoHide="False"
             IsVisible="True"
             ViewportSize="{Binding ViewHeight}"
             Value="{Binding ReverseScrollViewerVerticalOffset, Mode=TwoWay}">
@@ -141,6 +142,7 @@
             Orientation="Horizontal"
             HorizontalAlignment="Stretch"
             ZIndex="10"
+            AllowAutoHide="False"
             IsVisible="False"
             Value="{Binding Setting.XOffset, Mode=TwoWay}">
         </ScrollBar>
