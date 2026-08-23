@@ -99,12 +99,14 @@ public abstract class OngekiFumenEditorApp : App
             var shell = ServiceProvider.GetRequiredService<IShell>();
             var documentManager = ServiceProvider.GetRequiredService<IEditorDocumentManager>();
             var schedulerManager = ServiceProvider.GetRequiredService<ISchedulerManager>();
+            var bridgeLogger = ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>();
 
             // WPF 版由 FumenVisualEditorViewModel 的 Caliburn 生命周期钩子自行调用
             // NotifyCreate/NotifyActivate/NotifyDestory；Gekimini 没有等价钩子，
             // 这里改为订阅 IShell 的 Dock 事件转发，对齐原项目语义。
             shell.DockableOpened += (_, dockable) =>
             {
+                bridgeLogger.LogInformation("Shell dockable opened: {Type}.", dockable.GetType().FullName);
                 if (dockable is FumenVisualEditorViewModel editor)
                     documentManager.NotifyCreate(editor);
             };
@@ -113,6 +115,9 @@ public abstract class OngekiFumenEditorApp : App
                 var previous = documentManager.CurrentActivatedEditor;
                 if (ReferenceEquals(previous, document))
                     return;
+                bridgeLogger.LogInformation("Active document changed from {Previous} to {Current}.",
+                    previous?.GetType().FullName ?? "(none)",
+                    document?.GetType().FullName ?? "(none)");
                 // 对齐 WPF OnDeactivateAsync：切走编辑器时暂停音频、摘除调度任务。
                 if (previous is not null)
                 {
@@ -131,6 +136,7 @@ public abstract class OngekiFumenEditorApp : App
             };
             shell.DockableClosed += (_, dockable) =>
             {
+                bridgeLogger.LogInformation("Shell dockable closed: {Type}.", dockable.GetType().FullName);
                 if (dockable is FumenVisualEditorViewModel editor)
                 {
                     if (schedulerManager.Schedulers.Contains(editor))

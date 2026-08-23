@@ -25,6 +25,7 @@ public static class SvgProjectFileImporter
         var content = await sourceFile.ReadAllBytes();
         cancellationToken.ThrowIfCancellationRequested();
         ValidateSvg(content);
+        Log.LogInfo($"Importing SVG prefab source '{sourceFile.FileName}'.");
 
         var hash = Convert.ToHexString(SHA256.HashData(content)).ToLowerInvariant();
         var importRoot = await projectRoot.GetOrCreateDirectoryAsync(ImportRoot, cancellationToken);
@@ -39,6 +40,7 @@ public static class SvgProjectFileImporter
                 throw new InvalidDataException($"Imported SVG hash entry '{existing.FileName}' has unexpected content.");
 
             ValidateSvg(existingContent);
+            Log.LogInfo($"SVG prefab import reused existing entry '{existing.FileName}'.");
             return new ProjectResourceSimpleFile(
                 existing,
                 EditorProjectPathResolver.GetRootRelativeLocator(existing),
@@ -59,14 +61,16 @@ public static class SvgProjectFileImporter
             if (!content.AsSpan().SequenceEqual(verifiedContent))
                 throw new IOException($"Imported SVG '{targetName}' failed content verification.");
             ValidateSvg(verifiedContent);
+            Log.LogInfo($"SVG prefab import created '{targetName}'.");
 
             return new ProjectResourceSimpleFile(
                 createdFile,
                 EditorProjectPathResolver.GetRootRelativeLocator(createdFile),
                 verifiedContent);
         }
-        catch
+        catch (Exception exception)
         {
+            Log.LogError($"SVG prefab import of '{sourceFile.FileName}' failed.", exception);
             if (createdFile is not null)
             {
                 try

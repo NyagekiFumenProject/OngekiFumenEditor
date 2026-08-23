@@ -645,6 +645,7 @@ public sealed class EditorProjectCreationTransaction : IDisposable
                 }
             }, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
+            Log.LogInfo($"Copied project file '{copy.TargetFileName}' ({copy.Role}).");
             return target;
         }
         catch (OperationCanceledException)
@@ -653,6 +654,7 @@ public sealed class EditorProjectCreationTransaction : IDisposable
         }
         catch (Exception exception)
         {
+            Log.LogError($"Failed to copy '{copy.SourceFile.FileName}' to '{copy.TargetFileName}'.", exception);
             throw new EditorProjectCreationException(
                 EditorProjectCreationFailureKind.TargetWriteFailed,
                 $"Unable to copy '{copy.SourceFile.FileName}': {exception.Message}",
@@ -678,6 +680,7 @@ public sealed class EditorProjectCreationTransaction : IDisposable
             }, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             Report(progress, phase, fileName, bytes.LongLength, bytes.LongLength);
+            Log.LogInfo($"Created project file '{fileName}' ({phase}).");
             return target;
         }
         catch (OperationCanceledException)
@@ -686,6 +689,7 @@ public sealed class EditorProjectCreationTransaction : IDisposable
         }
         catch (Exception exception)
         {
+            Log.LogError($"Failed to create project file '{fileName}'.", exception);
             throw new EditorProjectCreationException(
                 EditorProjectCreationFailureKind.TargetWriteFailed,
                 $"Unable to write '{fileName}': {exception.Message}",
@@ -833,6 +837,7 @@ public sealed class EditorProjectCreationCoordinator
         Func<bool>? tryBeginFinalizing = null,
         Action? beginRollback = null)
     {
+        Log.LogInfo($"Project creation transaction started for '{plan.Selection.ProjectFileName}'.");
         using var transaction = new EditorProjectCreationTransaction(
             plan,
             parserManager,
@@ -872,6 +877,7 @@ public sealed class EditorProjectCreationCoordinator
                     "The editor rejected the new project.");
             }
 
+            Log.LogInfo($"Project creation transaction succeeded for '{plan.Selection.ProjectFileName}'.");
             transaction.Commit();
             return new EditorProjectCreationOutcome.Succeeded();
         }
@@ -879,12 +885,15 @@ public sealed class EditorProjectCreationCoordinator
         {
             beginRollback?.Invoke();
             var rollbackFailures = await transaction.RollbackAsync(progress);
+            Log.LogInfo($"Project creation transaction canceled for '{plan.Selection.ProjectFileName}'.");
             return new EditorProjectCreationOutcome.Canceled(rollbackFailures);
         }
         catch (Exception exception)
         {
             beginRollback?.Invoke();
             var rollbackFailures = await transaction.RollbackAsync(progress);
+            Log.LogError($"Project creation failed for '{plan.Selection.ProjectFileName}'.", exception);
+            Log.LogInfo($"Project creation transaction ended for '{plan.Selection.ProjectFileName}'.");
             var kind = exception is EditorProjectCreationException creationException
                 ? creationException.Kind
                 : EditorProjectCreationFailureKind.Unknown;

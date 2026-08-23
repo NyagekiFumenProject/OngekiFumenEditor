@@ -58,6 +58,7 @@ public static class ExternalAwbImporter
         ArgumentException.ThrowIfNullOrWhiteSpace(expectedAwbFileName);
         ArgumentNullException.ThrowIfNull(callbacks);
         PortableEntryNameValidator.ThrowIfInvalid(expectedAwbFileName, nameof(expectedAwbFileName));
+        Log.LogInfo($"Importing external AWB '{expectedAwbFileName}' for audio '{acbFile.FileName}'.");
 
         var parentDirectory = acbFile.ParentDictionary ?? fallbackParentDirectory ??
             throw new InvalidDataException($"Audio '{acbFile.FileName}' is not attached to the project directory.");
@@ -78,6 +79,7 @@ public static class ExternalAwbImporter
         if (existing is not null &&
             await TryVerifyDecodableAsync(verifier, acbFile, existing, cancellationToken).ConfigureAwait(false))
         {
+            Log.LogInfo($"External AWB import bound existing AWB '{existing.FileName}' for '{acbFile.FileName}'.");
             return new ExternalAwbImportResult(AwbImportAction.BindExisting, existing);
         }
 
@@ -85,7 +87,10 @@ public static class ExternalAwbImporter
         // has to match the ACB declaration exactly; the picker contract enforces that.
         var picked = await callbacks.PickExternalAwbAsync(expectedAwbFileName, cancellationToken).ConfigureAwait(false);
         if (picked is null)
+        {
+            Log.LogInfo("External AWB import canceled: no external AWB file was picked.");
             return null;
+        }
 
         var storage = temporaryFolderProvider ?? IoC.Get<ITemporaryFolderProvider>();
         if (!storage.IsAvailable)
@@ -124,6 +129,7 @@ public static class ExternalAwbImporter
                 {
                     // Identical bytes mean the earlier verification failure was transient;
                     // per Q3 identical content reuses the project copy without any change.
+                    Log.LogInfo($"External AWB import bound existing AWB '{existing.FileName}' for '{acbFile.FileName}' (identical content).");
                     return new ExternalAwbImportResult(AwbImportAction.BindExisting, existing);
                 }
 
@@ -142,6 +148,7 @@ public static class ExternalAwbImporter
                 await staging.CopyContentToAsync(existing, cancellationToken).ConfigureAwait(false);
                 await DeleteQuietlyAsync(staging).ConfigureAwait(false);
                 staging = null;
+                Log.LogInfo($"External AWB import replaced existing AWB '{existing.FileName}' for '{acbFile.FileName}'.");
                 return new ExternalAwbImportResult(AwbImportAction.ReplaceExisting, existing);
             }
 
@@ -151,10 +158,12 @@ public static class ExternalAwbImporter
             await staging.CopyContentToAsync(createdTarget, cancellationToken).ConfigureAwait(false);
             await DeleteQuietlyAsync(staging).ConfigureAwait(false);
             staging = null;
+            Log.LogInfo($"External AWB import committed new AWB '{createdTarget.FileName}' for '{acbFile.FileName}'.");
             return new ExternalAwbImportResult(AwbImportAction.CommitNew, createdTarget);
         }
-        catch
+        catch (Exception exception)
         {
+            Log.LogError($"External AWB import failed for audio '{acbFile.FileName}'.", exception);
             // Q5: never leave a half-written project AWB behind. Replacing commits keep the old
             // content by themselves; only the newly created placeholder needs explicit rollback.
             if (createdTarget is not null)

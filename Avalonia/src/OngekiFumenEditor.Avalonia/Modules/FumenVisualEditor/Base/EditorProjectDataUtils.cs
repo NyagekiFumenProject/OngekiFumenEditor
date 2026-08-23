@@ -72,8 +72,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				{
 					var fumenDeserializer = (parserManager ?? IoC.Get<IFumenParserManager>())
 						.GetDeserializer(fumenFile.FileName);
-					if (fumenDeserializer is null)
-						throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
+				if (fumenDeserializer is null)
+				{
+					Log.LogError($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
+					throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
+				}
 					fumen = await fumenDeserializer.DeserializeAsync(fumenStream);
 				}
 
@@ -81,9 +84,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				loadedData = new LoadedEditorProjectData(projectData, fumen);
 				return loadedData;
 			}
-			catch
+			catch (Exception exception)
 			{
 				loadedData?.Dispose();
+				Log.LogError($"Failed to load the project data of '{context.ProjectFile?.FileName}'.", exception);
 				throw;
 			}
 		}
@@ -95,6 +99,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(context);
+			var projectName = context.ProjectFile?.FileName ?? "(no project file)";
+			Log.LogInfo($"Loading project data '{projectName}'.");
 			var contextTransferred = false;
 			try
 			{
@@ -106,6 +112,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 					Fumen = fumen,
 					FileAccessContext = context
 				};
+				Log.LogInfo($"Project data loaded from '{projectName}'.");
 				contextTransferred = true;
 				return editorContext;
 			}
@@ -172,12 +179,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
+			Log.LogInfo($"Saving project file '{projectFile.FileName}'.");
 			try
 			{
 				ArgumentNullException.ThrowIfNull(projectFile);
 				ArgumentNullException.ThrowIfNull(editorContext);
 				StoreBulletPalleteListEditorData(editorContext.ProjectData, editorContext.Fumen);
 				await projFileManager.Save(projectFile, editorContext.ProjectData, cancellationToken);
+				Log.LogInfo($"Project file '{projectFile.FileName}' saved.");
 				return new(true, "");
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -187,6 +196,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			catch (Exception e)
 			{
 				var msg = $"{Lang.CantSaveProjectFile}{e.Message}{Environment.NewLine}{e.StackTrace}";
+				Log.LogError($"Failed to save project file '{projectFile.FileName}'.", e);
 				return new(false, msg);
 			}
 		}
@@ -196,6 +206,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
+			Log.LogInfo($"Saving fumen file '{fumenFile.FileName}'.");
 			try
 			{
 				ArgumentNullException.ThrowIfNull(fumenFile);
@@ -204,7 +215,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				var serializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.FileName);
 				Log.LogDebug($"serializer = {serializer}");
 				if (serializer is null)
+				{
+					Log.LogError($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
 					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
+				}
 
 				var fumenBuffer = await serializer.SerializeAsync(editorContext.Fumen);
 				await fumenFile.WriteAsync(
@@ -212,6 +226,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 						stream.WriteAsync(fumenBuffer, writerCancellationToken).AsTask(),
 					cancellationToken);
 
+				Log.LogInfo($"Fumen file '{fumenFile.FileName}' saved.");
 				return new(true, "");
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -221,6 +236,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			catch (Exception e)
 			{
 				var msg = $"{Lang.CantSaveFumenProject} {e.Message}{Environment.NewLine}{e.StackTrace}";
+				Log.LogError($"Failed to save fumen file '{fumenFile.FileName}'.", e);
 				return new(false, msg);
 			}
 		}
@@ -230,6 +246,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			EditorContext editorContext,
 			CancellationToken cancellationToken = default)
 		{
+			Log.LogInfo($"Saving editor project '{projectFile.FileName}'.");
 			try
 			{
 				ArgumentNullException.ThrowIfNull(projectFile);
@@ -243,7 +260,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 				var fumenSerializer = IoC.Get<IFumenParserManager>().GetSerializer(fumenFile.FileName);
 				if (fumenSerializer is null)
+				{
+					Log.LogError($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
 					throw new NotSupportedException($"{Lang.SerializeFileNotSupport}{fumenFile.FileName}");
+				}
 				var fumenBytes = await fumenSerializer.SerializeAsync(editorContext.Fumen);
 
 				byte[] projectBytes;
@@ -284,6 +304,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 					throw new AggregateException("Project save failed; rollback was attempted.", rollbackErrors);
 				}
 
+				Log.LogInfo($"Editor project '{projectFile.FileName}' saved.");
 				return new(true, string.Empty);
 			}
 			catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -292,6 +313,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 			catch (Exception exception)
 			{
+				Log.LogError($"Failed to save editor project '{projectFile.FileName}'.", exception);
 				return new(false, $"{Lang.CantSaveProjectTotally}{exception.Message}{Environment.NewLine}{exception.StackTrace}");
 			}
 		}

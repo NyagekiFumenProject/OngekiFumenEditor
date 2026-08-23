@@ -3,6 +3,8 @@
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Platforms.Services.Window;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
@@ -19,12 +21,16 @@ public abstract partial class FumenVisualEditorProviderBase
 {
     private IDialogManager DialogManager => IoC.Get<IDialogManager>();
 
+    private Microsoft.Extensions.Logging.ILogger<FumenVisualEditorProviderBase> Logger =>
+        ServiceProvider.GetRequiredService<ILogger<FumenVisualEditorProviderBase>>();
     private async Task<bool> OpenFromFolderAsync(FumenVisualEditorViewModel editor)
     {
         var picker = CreateSetupFilePicker();
         using var directorySelection = await picker.PickProjectDirectoryAsync();
         if (directorySelection is null)
             return false;
+
+        Logger.LogInformation("Opening project from folder '{Folder}'.", directorySelection.DisplayName);
 
         ISimpleDirectory? projectRoot = null;
         try
@@ -93,11 +99,13 @@ public abstract partial class FumenVisualEditorProviderBase
                 projectContext,
                 selectedProject.File.FileName,
                 BuildLocationDescription(folderDisplayName, selectedLocator));
+            Logger.LogInformation("Project opened from folder '{Folder}' (project '{Project}').",
+                folderDisplayName, selectedProject.File.FileName);
             return true;
         }
         catch (Exception exception)
         {
-            Log.LogError($"Failed to open a project folder: {exception.Message}");
+            Logger.LogError(exception, $"Failed to open a project folder: {exception.Message}");
             await DialogManager.ShowMessageDialog(
                 $"Unable to open the selected project: {exception.Message}",
                 DialogMessageType.Error);
@@ -119,6 +127,7 @@ public abstract partial class FumenVisualEditorProviderBase
             await ShowInvalidRecentProjectAsync();
             return false;
         }
+        Logger.LogInformation("Opening recent project record {RecordId}.", recordInfo.RecordId);
 
         try
         {
@@ -145,7 +154,7 @@ public abstract partial class FumenVisualEditorProviderBase
                 }
                 catch (Exception exception) when (exception is IOException or InvalidDataException)
                 {
-                    Log.LogWarn($"Recent project {recordInfo.RecordId:N} can no longer be restored: {exception.Message}");
+                    Logger.LogWarning(exception, $"Recent project {recordInfo.RecordId:N} can no longer be restored: {exception.Message}");
                     MarkPermanentlyInvalid(recordInfo);
                     await ShowInvalidRecentProjectAsync();
                     return false;
@@ -164,12 +173,14 @@ public abstract partial class FumenVisualEditorProviderBase
                 }
 
                 TryUpdateRecentProject(recordInfo, snapshot!, projectContext);
+                Logger.LogInformation("Recent project '{Project}' opened.",
+                    projectContext.ProjectFile?.FileName ?? recordInfo.LocationDescription);
                 return true;
             }
         }
         catch (Exception exception)
         {
-            Log.LogError($"Failed to open recent project record {recordInfo.RecordId:N}: {exception.Message}");
+            Logger.LogError(exception, $"Failed to open recent project record {recordInfo.RecordId:N}: {exception.Message}");
             await DialogManager.ShowMessageDialog(
                 $"Unable to open the recent project: {exception.Message}",
                 DialogMessageType.Error);
@@ -193,7 +204,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException)
         {
-            Log.LogWarn($"Recent project {recordInfo.RecordId:N} is no longer valid: {exception.Message}");
+            Logger.LogWarning(exception, $"Recent project {recordInfo.RecordId:N} is no longer valid: {exception.Message}");
             MarkPermanentlyInvalid(recordInfo);
             return false;
         }
@@ -203,7 +214,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogWarn($"Recent project validation temporarily failed for record {recordInfo.RecordId:N}: {exception.Message}");
+            Logger.LogWarning(exception, $"Recent project validation temporarily failed for record {recordInfo.RecordId:N}: {exception.Message}");
             return false;
         }
     }
@@ -247,7 +258,7 @@ public abstract partial class FumenVisualEditorProviderBase
             // Bookmarks are unavailable on this platform or for this folder; per the recent-project
             // policy this does not fail the open, it only skips creating a recent record.
             // Recent-list persistence failures follow the same non-fatal policy.
-            Log.LogWarn($"The opened project could not be stored in the recent list: {exception.Message}");
+            Logger.LogWarning(exception, $"The opened project could not be stored in the recent list: {exception.Message}");
         }
     }
 
@@ -267,7 +278,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogWarn($"Unable to update recent project record {recordInfo.RecordId:N}: {exception.Message}");
+            Logger.LogWarning(exception, $"Unable to update recent project record {recordInfo.RecordId:N}: {exception.Message}");
         }
     }
 
@@ -429,7 +440,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogWarn($"Recent project data is invalid for record {recordInfo.RecordId:N}: {exception.Message}");
+            Logger.LogWarning(exception, $"Recent project data is invalid for record {recordInfo.RecordId:N}: {exception.Message}");
             snapshot = null;
             return false;
         }
@@ -443,7 +454,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogWarn($"Unable to persist invalid state for recent record {recordInfo.RecordId:N}: {exception.Message}");
+            Logger.LogWarning(exception, $"Unable to persist invalid state for recent record {recordInfo.RecordId:N}: {exception.Message}");
         }
     }
 
