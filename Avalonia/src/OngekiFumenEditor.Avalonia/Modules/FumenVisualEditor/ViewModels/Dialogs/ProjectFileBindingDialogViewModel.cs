@@ -95,8 +95,10 @@ public partial class ProjectFileBindingDialogViewModel : WindowViewModelBase, ID
         SelectedFumenOption is not null && SelectedAudioOption is not null;
 
     [RelayCommand]
-    private Task BrowseFumenAsync() =>
-        BrowseAsync(
+    private Task BrowseFumenAsync()
+    {
+        Log.LogInfo("Browse fumen file triggered.");
+        return BrowseAsync(
             selectFumenFile,
             FumenOptions,
             option =>
@@ -105,10 +107,13 @@ public partial class ProjectFileBindingDialogViewModel : WindowViewModelBase, ID
                 SelectedFumenOption = option;
             },
             "Unable to select the fumen file");
+    }
 
     [RelayCommand]
-    private Task BrowseAudioAsync() =>
-        BrowseAsync(
+    private Task BrowseAudioAsync()
+    {
+        Log.LogInfo("Browse audio file triggered.");
+        return BrowseAsync(
             selectAudioFile,
             AudioOptions,
             option =>
@@ -117,12 +122,21 @@ public partial class ProjectFileBindingDialogViewModel : WindowViewModelBase, ID
                 SelectedAudioOption = option;
             },
             "Unable to select the audio file");
+    }
 
     [RelayCommand(CanExecute = nameof(CanConfirm))]
-    private Task ConfirmAsync() => TryCloseAsync(true);
+    private Task ConfirmAsync()
+    {
+        Log.LogInfo($"Confirm project file binding triggered (fumen='{SelectedFumenOption?.DisplayName}', audio='{SelectedAudioOption?.DisplayName}').");
+        return TryCloseAsync(true);
+    }
 
     [RelayCommand]
-    private Task CancelAsync() => TryCloseAsync(false);
+    private Task CancelAsync()
+    {
+        Log.LogInfo("Cancel project file binding triggered.");
+        return TryCloseAsync(false);
+    }
 
     internal (ISimpleFile FumenFile, ISimpleFile AudioFile) TakeSelection()
     {

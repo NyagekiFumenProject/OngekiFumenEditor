@@ -52,6 +52,7 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
     [RelayCommand]
     private async Task OpenSelectListAsync()
     {
+        Log.LogInfo("OpenSelectListAsync triggered.");
         var editor = IoC.Get<IEditorDocumentManager>()?.CurrentActivatedEditor;
         if (editor is null)
             return;
@@ -79,6 +80,7 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
     private void SetNull()
     {
         var rollback = TypedProxyValue;
+        Log.LogInfo("SetNull triggered.");
         try
         {
             TypedProxyValue = null;

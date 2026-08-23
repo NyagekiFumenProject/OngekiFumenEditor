@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.UI.Dialogs.ViewModels;
 
@@ -43,6 +44,7 @@ public partial class CommonColorPickerViewModel : WindowViewModelBase
     [RelayCommand]
     private void SelectColor(string colorText)
     {
+        Log.LogInfo($"SelectColor triggered with {colorText}.");
         if (Color.TryParse(colorText, out var color))
             CurrentColor = color;
     }
@@ -50,6 +52,7 @@ public partial class CommonColorPickerViewModel : WindowViewModelBase
     [RelayCommand]
     private async Task ConfirmAsync()
     {
+        Log.LogInfo($"Color picker confirmed (title='{Title}', color='{currentColor}').");
         isAccepted = true;
         await TryCloseAsync(true);
     }
@@ -57,6 +60,7 @@ public partial class CommonColorPickerViewModel : WindowViewModelBase
     [RelayCommand]
     private async Task CancelAsync()
     {
+        Log.LogInfo($"Color picker cancelled (title='{Title}').");
         CancelChanges();
         await TryCloseAsync(false);
     }

@@ -137,6 +137,7 @@ public abstract partial class SplashScreenViewModelBase : WindowViewModelBase, I
     [RelayCommand]
     private async Task CreateNewProjectAsync()
     {
+        Log.LogInfo("Create new project triggered from splash screen.");
         if (!editorProvider.CanCreateNew)
             return;
 
@@ -150,6 +151,7 @@ public abstract partial class SplashScreenViewModelBase : WindowViewModelBase, I
     [RelayCommand]
     private async Task OpenProjectAsync()
     {
+        Log.LogInfo("Open project triggered from splash screen.");
         var editor = editorProvider.Create();
         if (await editorProvider.TryOpen(editor))
             await shell.OpenDocumentAsync(editor);
@@ -160,6 +162,7 @@ public abstract partial class SplashScreenViewModelBase : WindowViewModelBase, I
     [RelayCommand]
     private static Task OpenTutorialAsync()
     {
+        Log.LogInfo("Open tutorial triggered from splash screen.");
         return CommandRouterHelper.ExecuteCommand(new Command(new UsageWikiCommandDefinition()));
     }
 }

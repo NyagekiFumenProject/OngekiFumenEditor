@@ -23,8 +23,16 @@ public partial class ProjectFileSelectionDialogViewModel : WindowViewModelBase
     private bool CanConfirm() => !string.IsNullOrWhiteSpace(SelectedProjectLocator);
 
     [RelayCommand(CanExecute = nameof(CanConfirm))]
-    private Task ConfirmAsync() => TryCloseAsync(true);
+    private Task ConfirmAsync()
+    {
+        Log.LogInfo($"Confirm project locator triggered (locator='{SelectedProjectLocator}').");
+        return TryCloseAsync(true);
+    }
 
     [RelayCommand]
-    private Task CancelAsync() => TryCloseAsync(false);
+    private Task CancelAsync()
+    {
+        Log.LogInfo("Cancel project selection triggered.");
+        return TryCloseAsync(false);
+    }
 }

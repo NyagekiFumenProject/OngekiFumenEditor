@@ -63,6 +63,7 @@ public partial class TGridTypeUIViewModel : CommonUIViewModelBase<TGrid>
     private void SetNull()
     {
         var rollback = TypedProxyValue;
+        Log.LogInfo("SetNull triggered.");
         try
         {
             TypedProxyValue = null;

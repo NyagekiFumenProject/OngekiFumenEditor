@@ -28,6 +28,7 @@ public partial class FileInfoTypeUIViewModel : CommonUIViewModelBase<ISimpleFile
     [RelayCommand]
     private Task SelectFileAsync()
     {
+        Log.LogInfo("SelectFileAsync triggered (SVG prefab import currently disabled).");
         // SVG prefab file selection/import is temporarily disabled with the prefab feature.
         return Task.CompletedTask;
 

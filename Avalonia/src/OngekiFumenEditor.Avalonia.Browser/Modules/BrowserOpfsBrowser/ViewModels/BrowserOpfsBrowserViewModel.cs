@@ -247,6 +247,7 @@ public partial class BrowserOpfsBrowserViewModel : WindowViewModelBase
     [RelayCommand(CanExecute = nameof(CanGoBack))]
     private async Task GoBackAsync()
     {
+        Log.LogInfo("GoBackAsync triggered.");
         if (backHistory.Count == 0)
             return;
 
@@ -261,6 +262,7 @@ public partial class BrowserOpfsBrowserViewModel : WindowViewModelBase
     [RelayCommand(CanExecute = nameof(CanGoForward))]
     private async Task GoForwardAsync()
     {
+        Log.LogInfo("GoForwardAsync triggered.");
         if (forwardHistory.Count == 0)
             return;
 
@@ -273,20 +275,32 @@ public partial class BrowserOpfsBrowserViewModel : WindowViewModelBase
     private bool CanGoForward() => forwardHistory.Count > 0;
 
     [RelayCommand(CanExecute = nameof(CanGoUp))]
-    private Task GoUpAsync() => NavigateAsync(GetParentPath(CurrentPath));
+    private Task GoUpAsync()
+    {
+        Log.LogInfo($"GoUpAsync triggered from '{CurrentPath}'.");
+        return NavigateAsync(GetParentPath(CurrentPath));
+    }
 
     private bool CanGoUp() => CurrentPath.Length > 0;
 
     [RelayCommand]
-    private Task RefreshAsync() => RefreshNowAsync();
+    private Task RefreshAsync()
+    {
+        Log.LogInfo("RefreshAsync triggered.");
+        return RefreshNowAsync();
+    }
 
     [RelayCommand]
-    private Task NavigateBreadcrumbAsync(BrowserOpfsBreadcrumbViewModel breadcrumb) =>
-        NavigateAsync(breadcrumb.RelativePath);
+    private Task NavigateBreadcrumbAsync(BrowserOpfsBreadcrumbViewModel breadcrumb)
+    {
+        Log.LogInfo($"NavigateBreadcrumbAsync triggered to '{breadcrumb.RelativePath}'.");
+        return NavigateAsync(breadcrumb.RelativePath);
+    }
 
     [RelayCommand]
     private Task OpenEntryAsync(BrowserOpfsEntryViewModel entry)
     {
+        Log.LogInfo($"OpenEntryAsync triggered on {entry?.RelativePath}.");
         if (entry is null || !entry.IsSelectable)
             return Task.CompletedTask;
         if (entry.IsFolder)
@@ -301,19 +315,28 @@ public partial class BrowserOpfsBrowserViewModel : WindowViewModelBase
     [RelayCommand]
     private void ToggleSelectAll()
     {
+        Log.LogInfo("ToggleSelectAll triggered.");
         bool select = AreAllCurrentEntriesSelected != true;
         foreach (var entry in Entries)
             entry.IsSelected = select && entry.IsSelectable;
         UpdateSelectionProperties();
     }
 
-    [RelayCommand(CanExecute = nameof(CanDownload))]
-    private Task DownloadAsync() => BeginDownloadAsync(Entries.Where(x => x.IsSelected && x.IsSelectable).ToArray());
+    [RelayCommand]
+    private Task DownloadAsync()
+    {
+        Log.LogInfo($"DownloadAsync triggered ({SelectedCount} selected entries).");
+        return BeginDownloadAsync(Entries.Where(x => x.IsSelected && x.IsSelectable).ToArray());
+    }
 
     private bool CanDownload() => !IsDownloadInProgress && SelectedCount > 0;
 
     [RelayCommand(CanExecute = nameof(CanCancelDownload))]
-    private void CancelDownload() => downloadCancellationTokenSource?.Cancel();
+    private void CancelDownload()
+    {
+        Log.LogInfo("CancelDownload triggered.");
+        downloadCancellationTokenSource?.Cancel();
+    }
 
     private bool CanCancelDownload() => IsDownloadInProgress;
 
