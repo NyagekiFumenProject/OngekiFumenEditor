@@ -127,6 +127,7 @@ public sealed class DesktopFastOpenService
     private async Task<EditorContext> TryCreateContextAsync(ISimpleFile ogkrFile)
     {
         ISimpleFile audioFile = null;
+        ISimpleFile audioAwbFile = null;
         try
         {
             var audioFilePath = string.IsNullOrWhiteSpace(ogkrFile.LocalPath)
@@ -162,7 +163,8 @@ public sealed class DesktopFastOpenService
             await using var fumenStream = await ogkrFile.OpenRead();
             var fumen = await deserializer.DeserializeAsync(fumenStream);
 
-            var audioDuration = await CalcAudioDurationAsync(audioFile);
+            audioAwbFile = TryResolveExternalAwbFile(audioFile);
+            var audioDuration = await CalcAudioDurationAsync(audioFile, audioAwbFile);
             var context = new EditorContext
             {
                 ProjectData = new EditorProjectDataModel
@@ -173,23 +175,67 @@ public sealed class DesktopFastOpenService
                 FileAccessContext = new EditorFileAccessContext
                 {
                     FumenFile = ogkrFile,
-                    AudioFile = audioFile
+                    AudioFile = audioFile,
+                    AudioAwbFile = audioAwbFile
                 }
             };
             audioFile = null;
+            audioAwbFile = null;
             return context;
         }
         finally
         {
             // 未转交进上下文的音频能力在此释放；谱面文件由调用方按所有权规则处理。
+            audioAwbFile?.Dispose();
             audioFile?.Dispose();
         }
     }
 
-    private async Task<TimeSpan> CalcAudioDurationAsync(ISimpleFile audioFile)
+    private static ISimpleFile TryResolveExternalAwbFile(ISimpleFile audioFile)
     {
-        using var audio = await audioManager.LoadAudioAsync(audioFile);
+        if (!Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var candidateNames = DesktopFastOpenAudioResolver
+            .GetExternalAwbFileNameCandidates(audioFile.FileName);
+        var siblingMatches = audioFile.ParentDictionary?.ChildFiles
+            .Where(file => candidateNames.Any(candidateName =>
+                file.FileName.Equals(candidateName, StringComparison.OrdinalIgnoreCase)))
+            .ToArray() ?? [];
+        if (siblingMatches.Length > 1)
+        {
+            throw new InvalidDataException(
+                $"Multiple external AWB files were found for '{audioFile.FileName}'.");
+        }
+
+        if (siblingMatches.Length == 1)
+            return siblingMatches[0];
+
+        if (audioFile.LocalPath is not { } localPath)
+            return null;
+
+        var externalAwbPath = DesktopFastOpenAudioResolver
+            .TryResolveExternalAwbFilePath(localPath);
+        return externalAwbPath is null ? null : new LocalSimpleFile(externalAwbPath);
+    }
+
+    private async Task<TimeSpan> CalcAudioDurationAsync(
+        ISimpleFile audioFile,
+        ISimpleFile externalAwbFile)
+    {
+        await using var audioStream = await audioFile.OpenRead();
+        using var audio = externalAwbFile is null
+            ? await audioManager.LoadAudioAsync(audioStream)
+            : await LoadAudioWithExternalAwbAsync(audioStream, externalAwbFile);
         return audio.Duration;
+    }
+
+    private async Task<IAudioPlayer> LoadAudioWithExternalAwbAsync(
+        Stream audioStream,
+        ISimpleFile externalAwbFile)
+    {
+        await using var externalAwbStream = await externalAwbFile.OpenRead();
+        return await audioManager.LoadAudioAsync(audioStream, externalAwbStream);
     }
 
     private static async Task<string> FormatOpenFileNameAsync(ISimpleFile ogkrFile)

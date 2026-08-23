@@ -14,6 +14,39 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen;
 /// </summary>
 public static class DesktopFastOpenAudioResolver
 {
+    internal static IReadOnlyList<string> GetExternalAwbFileNameCandidates(
+        string acbFileName)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(acbFileName);
+        var stem = Path.GetFileNameWithoutExtension(acbFileName);
+        return
+        [
+            $"{stem}_streamfiles.awb",
+            $"{stem}.awb",
+            $"{stem}_STR.awb"
+        ];
+    }
+
+    internal static string TryResolveExternalAwbFilePath(string acbFilePath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(acbFilePath);
+        if (!Path.GetExtension(acbFilePath).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+            return null;
+
+        var directory = Path.GetDirectoryName(acbFilePath);
+        if (string.IsNullOrWhiteSpace(directory))
+            return null;
+
+        foreach (var candidateName in GetExternalAwbFileNameCandidates(acbFilePath))
+        {
+            var candidatePath = Path.Combine(directory, candidateName);
+            if (File.Exists(candidatePath))
+                return candidatePath;
+        }
+
+        return null;
+    }
+
     public static async Task<string?> TryResolveAudioFilePathAsync(
         string ogkrFilePath,
         IReadOnlyList<string> supportedAudioExtensions)

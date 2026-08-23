@@ -186,4 +186,30 @@ public sealed class DesktopFastOpenAudioResolverTests
 
         Assert.Null(audio);
     }
+
+    [Theory]
+    [InlineData("music0001.acb", "music0001_streamfiles.awb")]
+    [InlineData("music0001.acb", "music0001.awb")]
+    [InlineData("music0001.acb", "music0001_STR.awb")]
+    public void ExternalAwbFileNameCandidates_UseAcbStem(
+        string acbFileName,
+        string expectedCandidate)
+    {
+        Assert.Contains(
+            expectedCandidate,
+            DesktopFastOpenAudioResolver.GetExternalAwbFileNameCandidates(acbFileName));
+    }
+
+    [Fact]
+    public void TryResolveExternalAwbFilePath_FindsConventionalSibling()
+    {
+        var acbPath = Path.Combine(root, "music0001.acb");
+        var awbPath = Path.Combine(root, "music0001.awb");
+        File.WriteAllBytes(acbPath, []);
+        File.WriteAllBytes(awbPath, []);
+
+        Assert.Equal(
+            Path.GetFullPath(awbPath),
+            DesktopFastOpenAudioResolver.TryResolveExternalAwbFilePath(acbPath));
+    }
 }
