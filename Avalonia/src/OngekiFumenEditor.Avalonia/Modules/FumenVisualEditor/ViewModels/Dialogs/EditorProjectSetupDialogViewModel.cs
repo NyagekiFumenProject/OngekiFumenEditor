@@ -336,9 +336,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
                 return;
             selectedAudio = ResolveProjectOwnedCapability(selectedAudio);
 
-            var inspection = await AcbPackageInspector.InspectAsync(
-                selectedAudio,
-                session.FilePicker.SupportsAcb);
+            var inspection = await AcbPackageInspector.InspectAsync(selectedAudio);
             if (!inspection.IsValid)
                 throw new InvalidDataException(inspection.ErrorMessage);
 

@@ -45,8 +45,6 @@ public sealed class EditorProjectDirectorySelection : IDisposable
 
 public interface IEditorProjectSetupFilePicker
 {
-    bool SupportsAcb => true;
-
     Task<EditorProjectDirectorySelection?> PickProjectDirectoryAsync(
         CancellationToken cancellationToken = default);
 
@@ -83,7 +81,6 @@ public sealed class EditorProjectSetupSelection : IDisposable
     public string? TargetAudioAwbFileName { get; init; }
     public TimeSpan AudioDuration { get; init; }
     public SetupAudioPackageKind AudioPackageKind { get; init; }
-    public bool SupportsAcb { get; init; }
     public bool FumenRequiresImport { get; init; }
     public bool AudioRequiresImport { get; init; }
     public bool AudioAwbRequiresImport { get; init; }

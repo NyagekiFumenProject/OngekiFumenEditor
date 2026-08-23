@@ -13,15 +13,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Setup;
 /// </summary>
 public sealed class AvaloniaEditorProjectSetupFilePicker : IEditorProjectSetupFilePicker
 {
-    private readonly bool supportsAcb;
-
-    public AvaloniaEditorProjectSetupFilePicker(bool supportsAcb)
-    {
-        this.supportsAcb = supportsAcb;
-    }
-
-    public bool SupportsAcb => supportsAcb;
-
     public async Task<EditorProjectDirectorySelection?> PickProjectDirectoryAsync(
         CancellationToken cancellationToken = default)
     {
@@ -52,17 +43,11 @@ public sealed class AvaloniaEditorProjectSetupFilePicker : IEditorProjectSetupFi
     public async Task<ISimpleFile?> PickAudioAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var extensions = FileDialogHelper.GetSupportAudioFileExtensionFilterList()
-            .Where(x => supportsAcb || !x.ext.Equals(".acb", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
+        var extensions = FileDialogHelper.GetSupportAudioFileExtensionFilterList();
         var file = await FileDialogHelper.OpenFileAsync("Select audio", extensions);
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (file is not null && !supportsAcb &&
-                Path.GetExtension(file.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
-                throw new PlatformNotSupportedException("ACB audio is not supported by this platform.");
-
             return file;
         }
         catch

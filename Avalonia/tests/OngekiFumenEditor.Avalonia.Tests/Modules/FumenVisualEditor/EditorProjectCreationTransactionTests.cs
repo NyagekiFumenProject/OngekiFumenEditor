@@ -217,7 +217,6 @@ public sealed class EditorProjectCreationTransactionTests
             TargetAudioFileName = audioTargetName,
             AudioDuration = TimeSpan.FromMinutes(2),
             AudioPackageKind = SetupAudioPackageKind.OrdinaryAudio,
-            SupportsAcb = true,
             AudioRequiresImport = true
         };
 
@@ -237,8 +236,7 @@ public sealed class EditorProjectCreationTransactionTests
             ExistingFumenTargetFileName = fumen.FileName,
             TargetAudioFileName = audio.FileName,
             AudioDuration = TimeSpan.FromMinutes(2),
-            AudioPackageKind = SetupAudioPackageKind.OrdinaryAudio,
-            SupportsAcb = true
+            AudioPackageKind = SetupAudioPackageKind.OrdinaryAudio
         };
 
     private sealed class BinaryFumenParserManager : IFumenParserManager

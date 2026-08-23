@@ -28,24 +28,24 @@ namespace OngekiFumenEditor.Avalonia.Utils
 			return result;
 		}
 
-		public static bool IsPathWritable(string filePath)
-		{
-			//https://stackoverflow.com/questions/876473/is-there-a-way-to-check-if-a-file-is-in-use
-			try
-			{
-				using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
-			}
-			catch (IOException)
-			{
-				//the file is unavailable because it is:
-				//still being written to
-				//or being processed by another thread
-				//or does not exist (has already been processed)
-				return !File.Exists(filePath);
-			}
+		//public static bool IsPathWritable(string filePath)
+		//{
+		//	//https://stackoverflow.com/questions/876473/is-there-a-way-to-check-if-a-file-is-in-use
+		//	try
+		//	{
+		//		using FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None);
+		//	}
+		//	catch (IOException)
+		//	{
+		//		//the file is unavailable because it is:
+		//		//still being written to
+		//		//or being processed by another thread
+		//		//or does not exist (has already been processed)
+		//		return !File.Exists(filePath);
+		//	}
 
-			return true;
-		}
+		//	return true;
+		//}
 	}
 }
 

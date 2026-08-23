@@ -107,7 +107,6 @@ public static class PortableEntryNameValidator
 public enum AcbExternalAwbReferenceError
 {
     None,
-    BrowserUnsupported,
     MissingLocalPath,
     MissingReference,
     NestedPathUnsupported,
@@ -129,26 +128,19 @@ public static class AcbPackageInspector
 {
     public static async Task<AcbPackageInspection> InspectAsync(
         ISimpleFile audioFile,
-        bool supportsAcb,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(audioFile);
         if (!Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
             return new(SetupAudioPackageKind.OrdinaryAudio, null, AcbExternalAwbReferenceError.None);
-        if (!supportsAcb || OperatingSystem.IsBrowser())
-            return new(SetupAudioPackageKind.OrdinaryAudio, null,
-                AcbExternalAwbReferenceError.BrowserUnsupported,
-                "ACB audio is not supported by this platform.");
-        if (string.IsNullOrWhiteSpace(audioFile.LocalPath))
-            return new(SetupAudioPackageKind.OrdinaryAudio, null,
-                AcbExternalAwbReferenceError.MissingLocalPath,
-                "ACB audio requires a local file capability.");
 
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
             await using var stream = await audioFile.OpenRead();
-            using var acb = AcbFile.FromStream(stream, audioFile.LocalPath, disposeStream: false);
+            // The DereTore parser only consumes the name for diagnostics; the actual content
+            // always comes from the stream, so a virtual file name works on every platform.
+            using var acb = AcbFile.FromStream(stream, audioFile.FileName, disposeStream: false);
             if (acb.InternalAwb is not null)
                 return new(SetupAudioPackageKind.AcbWithInternalAwb, null, AcbExternalAwbReferenceError.None);
 
@@ -158,7 +150,7 @@ public static class AcbPackageInspector
                     AcbExternalAwbReferenceError.MissingReference,
                     "The ACB does not declare an external AWB file.");
 
-            if (!TryResolveSiblingLeaf(audioFile.LocalPath, reference, out var leafName))
+            if (!TryResolveSiblingLeaf(reference, out var leafName))
                 return new(SetupAudioPackageKind.AcbWithExternalAwb, null,
                     AcbExternalAwbReferenceError.NestedPathUnsupported,
                     "Only an external AWB next to the ACB is supported.");
@@ -190,38 +182,21 @@ public static class AcbPackageInspector
     }
 
     private static bool TryResolveSiblingLeaf(
-        string sourcePath,
         string reference,
         out string leafName)
     {
         leafName = string.Empty;
-        if (!reference.Contains('/') && !reference.Contains('\\') &&
-            !Path.IsPathFullyQualified(reference) &&
-            !(Uri.TryCreate(reference, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Scheme)))
-        {
-            leafName = reference;
-            return true;
-        }
-
-        try
-        {
-            var sourceDirectory = Path.GetFullPath(Path.GetDirectoryName(sourcePath)!);
-            var referencedPath = Path.IsPathFullyQualified(reference)
-                ? Path.GetFullPath(reference)
-                : Path.GetFullPath(Path.Combine(sourceDirectory, reference));
-            var referencedDirectory = Path.GetDirectoryName(referencedPath);
-            if (referencedDirectory is null ||
-                !string.Equals(sourceDirectory, Path.GetFullPath(referencedDirectory),
-                    OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
-                return false;
-
-            leafName = Path.GetFileName(referencedPath);
-            return !string.IsNullOrWhiteSpace(leafName);
-        }
-        catch (Exception)
+        if (string.IsNullOrWhiteSpace(reference))
+            return false;
+        if (reference.Contains('/') || reference.Contains('\\') ||
+            Path.IsPathFullyQualified(reference) ||
+            (Uri.TryCreate(reference, UriKind.Absolute, out var uri) && !string.IsNullOrEmpty(uri.Scheme)))
         {
             return false;
         }
+
+        leafName = reference;
+        return true;
     }
 }
 

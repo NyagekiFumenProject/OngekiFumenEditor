@@ -14,7 +14,10 @@ internal sealed class BrowserNAudioFileReaderFactory : INAudioFileReaderFactory
     [
         (".wav", "Audio File"),
         (".aif", "Audio File"),
-        (".aiff", "Audio File")
+        (".aiff", "Audio File"),
+        // ACB never reaches the reader factory directly; NAudioManager converts an ACB into a
+        // temporary WAV first. The extension only enables the ACB branch and project selection.
+        (".acb", "ACB Audio Package")
     ];
 
     public WaveStream CreateAudioFileReader(string filePath)

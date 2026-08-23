@@ -291,9 +291,7 @@ public abstract partial class FumenVisualEditorProviderBase
             .GetDeserializerDescriptions()
             .SelectMany(x => x.fileFormat.Select(y => (ext: y, desc: x.desc)));
         var audioExtensions = IoC.Get<IAudioManager>()
-            .SupportAudioFileExtensionList
-            .Where(x => picker.SupportsAcb ||
-                !x.fileExt.Equals(".acb", StringComparison.OrdinalIgnoreCase));
+            .SupportAudioFileExtensionList;
         var fumenCandidates = EditorProjectPathResolver.FindFiles(
             projectRoot,
             fumenExtensions.Select(x => x.ext));
@@ -317,10 +315,7 @@ public abstract partial class FumenVisualEditorProviderBase
     {
         var audioFile = context.AudioFile ??
             throw new InvalidDataException("The project file binding has no audio file.");
-        var picker = CreateSetupFilePicker();
-        var inspection = await Setup.AcbPackageInspector.InspectAsync(
-            audioFile,
-            picker.SupportsAcb);
+        var inspection = await Setup.AcbPackageInspector.InspectAsync(audioFile);
         if (!inspection.IsValid)
             throw new InvalidDataException(inspection.ErrorMessage);
         if (inspection.Kind != Setup.SetupAudioPackageKind.AcbWithExternalAwb)
@@ -333,30 +328,48 @@ public abstract partial class FumenVisualEditorProviderBase
 
         var expectedAwbFileName = inspection.RequiredExternalAwbLeafName!;
 
-        var siblingMatches = audioFile.ParentDictionary?.ChildFiles
-            .Where(file => file.FileName.Equals(expectedAwbFileName, StringComparison.OrdinalIgnoreCase))
-            .ToArray() ?? [];
-        if (siblingMatches.Length > 1)
-        {
-            throw new InvalidDataException(
-                $"Audio '{audioFile.FileName}' has multiple AWB candidates named '{expectedAwbFileName}'.");
-        }
-
-        if (siblingMatches.Length == 1)
-        {
-            context.AudioAwbFile = siblingMatches[0];
-            return true;
-        }
-
         if (!allowExternalPicker)
+        {
+            // Recent-project recovery keeps its legacy behavior: bind an intact sibling only,
+            // never pick externally and never run the import transaction.
+            var recentSiblingMatches = audioFile.ParentDictionary?.ChildFiles
+                .Where(file => file.FileName.Equals(expectedAwbFileName, StringComparison.OrdinalIgnoreCase))
+                .ToArray() ?? [];
+            if (recentSiblingMatches.Length > 1)
+            {
+                throw new InvalidDataException(
+                    $"Audio '{audioFile.FileName}' has multiple AWB candidates named '{expectedAwbFileName}'.");
+            }
+
+            if (recentSiblingMatches.Length == 1)
+            {
+                context.AudioAwbFile = recentSiblingMatches[0];
+                return true;
+            }
+
+            return false;
+        }
+
+        var picker = CreateSetupFilePicker();
+        var importResult = await ExternalAwbImporter.ImportAsync(
+            audioFile,
+            expectedAwbFileName,
+            context.ProjectDirectory,
+            new ExternalAwbImportCallbacks(
+                (name, cancellationToken) => picker.PickExternalAwbAsync(name, cancellationToken),
+                (candidate, _) => ConfirmAwbReplaceAsync(candidate)));
+        if (importResult is null)
             return false;
 
-        var selectedAwbFile = await picker.PickExternalAwbAsync(expectedAwbFileName);
-        if (selectedAwbFile is null)
-            return false;
-
-        context.AudioAwbFile = selectedAwbFile;
+        context.AudioAwbFile = importResult.BoundAwbFile;
         return true;
+    }
+
+    private static async Task<bool> ConfirmAwbReplaceAsync(AwbReplaceCandidate candidate)
+    {
+        var dialog = new AwbReplaceConfirmationDialogViewModel(candidate);
+        var result = await IoC.Get<IWindowManager>().ShowDialogAsync(dialog);
+        return result == true;
     }
 
     private Task ShowRecentExternalAwbUnavailableAsync() =>

@@ -1,4 +1,4 @@
-﻿﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
 using OngekiFumenEditor.Avalonia.Base;
 // using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
@@ -59,17 +59,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 
 				var errors = new List<string>();
 
-				if (Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
-				{
-					if (OperatingSystem.IsBrowser() || string.IsNullOrWhiteSpace(audioFile.LocalPath))
-					{
-						errors.Add($"Audio '{audioFile.FileName}': ACB decoding is not supported on this platform.");
-					}
-					else
-					{
-						await ValidateAcbDependencyAsync(audioFile, context.AudioAwbFile, errors);
-					}
-				}
+			if (Path.GetExtension(audioFile.FileName).Equals(".acb", StringComparison.OrdinalIgnoreCase))
+			{
+				await ValidateAcbDependencyAsync(audioFile, context.AudioAwbFile, errors);
+			}
 
 				if (errors.Count > 0)
 					throw new InvalidDataException(string.Join(Environment.NewLine, errors));
@@ -146,11 +139,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 				{
 					errors.Add($"Audio '{audioFile.FileName}': the external AWB '{expectedAwbFileName}' is not bound.");
 					return;
-				}
-
-				if (string.IsNullOrWhiteSpace(audioAwbFile.LocalPath))
-				{
-					errors.Add($"Audio AWB '{audioAwbFile.FileName}': external AWB decoding is not supported on this platform.");
 				}
 			}
 			catch (Exception exception)

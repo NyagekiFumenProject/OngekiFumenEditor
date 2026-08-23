@@ -128,7 +128,6 @@ public sealed class EditorProjectSetupSession : IDisposable
             TargetAudioAwbFileName = targetAudioAwbFileName,
             AudioDuration = audioDuration,
             AudioPackageKind = audioPackageKind,
-            SupportsAcb = FilePicker.SupportsAcb,
             FumenRequiresImport = fumenRequiresImport,
             AudioRequiresImport = audioRequiresImport,
             AudioAwbRequiresImport = audioAwbRequiresImport,

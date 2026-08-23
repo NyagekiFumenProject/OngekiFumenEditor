@@ -1,7 +1,7 @@
 # Browser ACB/AWB 支持设计访谈与实施计划
 
 - **文档日期**：2026-08-23
-- **状态**：设计访谈阶段；MVP 范围和产品行为已基本确定；文件抽象已于 2026-08-24 统一（临时句柄直接使用 `ISimpleFile`/`ISimpleDirectory`），替换操作由 CopyTo + Delete 组合实现，不再引入 `IFileContentSource`
+- **状态**：实施中；MVP 范围和产品行为已确定；文件抽象已于 2026-08-24 统一（临时句柄直接使用 `ISimpleFile`/`ISimpleDirectory`），替换操作由 CopyTo + Delete 组合实现；同日已完成导入事务与 Browser 能力开关的代码落地（见 §2.4/§2.5）
 - **目标平台**：Avalonia Browser / WebAssembly（标准 Browser AOT，兼顾 LLVM Browser）
 - **相关能力**：ACB、内嵌 AWB、外部 AWB、HCA 解码、OPFS/StorageProvider、项目文件夹导入
 
@@ -9,13 +9,13 @@
 
 本文记录 Browser 支持 ACB/AWB 的完整设计访谈过程、已确认的产品决策、代码现状、约束、风险和分阶段实施计划。
 
-本文不是“已经完成”的实现说明。目前 Browser 仍有以下能力开关未解除：
+以下能力开关在 2026-08-24 的实施中已全部解除或移除（详见 §2.5）：
 
-- `DefaultBrowserFumenVisualEditorProvider` 仍使用 `supportsAcb: false`；
-- `BrowserNAudioFileReaderFactory` 的普通音频扩展列表目前只有 `.wav`、`.aif`、`.aiff`；
-- `AcbPackageInspector` 仍会在 Browser 环境返回 `BrowserUnsupported`；
-- `EditorProjectDataUtils` 仍会拒绝 Browser 上的 ACB 项目；
-- Browser 项目打开流程尚未把用户选择的外部 AWB 导入项目目录。
+- `supportsAcb` 能力开关已从代码中整体删除（所有平台均支持 ACB）；
+- `BrowserNAudioFileReaderFactory` 的音频扩展列表已加入 `.acb`；
+- `AcbPackageInspector` 已改为纯流式检查，不再依赖 Browser 短路与 `LocalPath`；
+- `EditorProjectDataUtils` 不再按平台/LocalPath 拒绝 ACB 项目；
+- 项目文件夹打开流程已接入外部 AWB 导入事务。
 
 ## 2. 背景与已知代码基础
 
@@ -103,6 +103,28 @@ PublicKeyToken=null' or one of its dependencies.
 
 - Desktop、Discard、Contract、Consumer 四组测试已全部迁移到新 API；
 - 契约测试新增 `TemporaryEntries_UseSimpleFileSystemContracts`，覆盖 `FullPath`、`ParentDictionary`、`ExistsFile`、`ChildFiles`、缓存长度等语义。
+
+### 2.5 本轮已实施的 ACB/AWB 改动（2026-08-24）
+
+Core 新增：
+
+- `Setup/AwbContentComparer.cs`：长度 → 确定性抽样（xorshift64*，固定种子混入长度）→ 完整流式比较；抽样只能提前判不同，一致性只由完整比较证明；
+- `Utils/SimpleFileSystem/SimpleFileCopyExtensions.cs`：`CopyContentToAsync(source, target)` 经目标事务式 `WriteAsync` 提交的流式复制（CopyTo 半边；Delete 由调用方显式执行）；
+- `Setup/ExternalAwbImporter.cs`：导入事务服务。契约：`ExternalAwbImportCallbacks`（选择器 + 替换确认两个 UI 回调）、`DecodeVerifier` 委托（默认经 `ITemporaryFolderProvider` + `AcbConverter` 解码验证）、`ExternalAwbImportResult`（BindExisting / CommitNew / ReplaceExisting）。
+- `ViewModels/Dialogs/AwbReplaceConfirmationDialogViewModel` + `Views/Dialogs/AwbReplaceConfirmationDialogView`：替换确认窗口，显示双方路径与大小，默认焦点在“取消”。
+
+行为变更：
+
+- `TryBindExternalAwbAsync` 文件夹打开路径改走导入事务：项目内已有可解码 AWB 直接复用（不弹选择器）；不可解码或缺失时要求选择外部 AWB → staging 复制 → 解码验证 → 同名比较（相同复用 / 不同弹确认替换 / 取消放弃打开）；提交失败回滚新建占位文件，旧 AWB 永不被破坏；recent 路径保持旧行为（仅 sibling 绑定，不选择器、不导入）；
+- `AcbPackageInspector.InspectAsync` 移除 `OperatingSystem.IsBrowser()` 短路与 `MissingLocalPath` 门槛，`AcbFile.FromStream` 的路径参数改传虚拟文件名，外部引用解析改为纯叶子名校验；
+- `EditorProjectDataUtils.LoadDataAsync` 对 `.acb` 一律走依赖校验（不再按平台拒绝），`ValidateAcbDependencyAsync` 移除 AWB `LocalPath` 要求；
+- Browser 工程与 Desktop 工程使用同一无参 Picker；`supportsAcb` 开关已整体删除，音频扩展列表加入 `.acb`。
+
+验证状态：
+
+- Core Debug 构建、Browser 构建、Desktop 构建通过；
+- 主测试套件 528 通过（新增比较器 / CopyContentToAsync / 导入事务共 16 个用例），Desktop 测试套件 133 通过；
+- 尚待真实验证：Browser Release AOT 发布产物、真实浏览器内嵌/外部/替换/取消/写入失败场景（§8.2）。
 
 ## 3. 最终产品范围：MVP
 
@@ -512,7 +534,7 @@ Core 业务服务不依赖：
 
 需要：
 
-- 将 `supportsAcb: false` 改为 `true`；
+- ~~将 `supportsAcb: false` 改为 `true`~~（实施时已改为整体删除该开关，见 §1/§2.5）；
 - 将 `.acb` 加入 Browser 的音频能力列表；
 - 让 `AcbPackageInspector` 在 Browser 通过流检查 ACB，而不是要求 `LocalPath`；
 - 移除 Browser 环境下无条件的 `BrowserUnsupported` 分支；
@@ -578,7 +600,7 @@ Core 业务服务不依赖：
 
 ### 7.4 Browser 合同测试
 
-- Browser 工程 `supportsAcb` 为 true；
+- `supportsAcb` 开关不存在（已删除），Browser 音频扩展列表包含 `.acb`；
 - Browser 音频扩展列表包含 `.acb`；
 - Browser 不再无条件返回 `ACB audio is not supported by this platform.`；
 - ACB/AWB 程序集显式引用和 trimming root 仍存在；

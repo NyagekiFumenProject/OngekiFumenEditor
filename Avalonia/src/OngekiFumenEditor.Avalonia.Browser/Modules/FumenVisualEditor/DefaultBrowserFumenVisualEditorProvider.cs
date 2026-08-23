@@ -15,7 +15,7 @@ public sealed class DefaultBrowserFumenVisualEditorProvider : FumenVisualEditorP
     public override bool CanCreateNew => false;
 
     protected override IEditorProjectSetupFilePicker CreateSetupFilePicker() =>
-        new AvaloniaEditorProjectSetupFilePicker(supportsAcb: false);
+        new AvaloniaEditorProjectSetupFilePicker();
 
     protected override Task<EditorFileAccessContext> RestoreContextAsync(
         EditorFileAccessContextSnapshot snapshot,
