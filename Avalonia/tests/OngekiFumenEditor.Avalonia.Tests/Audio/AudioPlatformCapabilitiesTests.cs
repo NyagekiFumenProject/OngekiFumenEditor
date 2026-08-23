@@ -1,5 +1,6 @@
 using Avalonia.Headless.XUnit;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
+using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using Xunit;
@@ -98,6 +99,7 @@ public sealed class AudioPlatformCapabilitiesTests
         var setting = new AudioSetting { AudioOutputType = (int)AudioOutputType.Asio };
         var saveCount = 0;
         var viewModel = new AudioSettingViewModel(
+            NullLogger<AudioSettingViewModel>.Instance,
             capabilities,
             setting,
             new AudioPlayerToolViewerSetting(),
@@ -123,6 +125,7 @@ public sealed class AudioPlatformCapabilitiesTests
         var setting = new AudioSetting { AudioOutputType = (int)AudioOutputType.Asio };
         var saveCount = 0;
         var viewModel = new AudioSettingViewModel(
+            NullLogger<AudioSettingViewModel>.Instance,
             capabilities,
             setting,
             new AudioPlayerToolViewerSetting(),
@@ -146,6 +149,7 @@ public sealed class AudioPlatformCapabilitiesTests
             supportsVarspeed: false);
         var setting = new AudioSetting { AudioOutputType = (int)AudioOutputType.Asio };
         var viewModel = new AudioSettingViewModel(
+            NullLogger<AudioSettingViewModel>.Instance,
             capabilities,
             setting,
             new AudioPlayerToolViewerSetting(),

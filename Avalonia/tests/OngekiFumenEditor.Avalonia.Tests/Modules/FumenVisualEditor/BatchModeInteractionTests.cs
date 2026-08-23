@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Xaml.Interactivity;
+using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
@@ -277,7 +278,7 @@ public sealed class BatchModeInteractionTests
         {
             AudioDuration = TimeSpan.FromSeconds(30)
         };
-        return new FumenVisualEditorViewModel
+        return new FumenVisualEditorViewModel(NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             EditorContext = new EditorContext
             {

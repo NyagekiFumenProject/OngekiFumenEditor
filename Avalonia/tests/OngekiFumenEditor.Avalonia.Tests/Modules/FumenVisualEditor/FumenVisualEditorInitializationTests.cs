@@ -22,7 +22,7 @@ public sealed class FumenVisualEditorInitializationTests
     [AvaloniaFact]
     public void Constructor_InitializesInactiveSelectionArea()
     {
-        var editor = new FumenVisualEditorViewModel();
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
 
         Assert.NotNull(editor.SelectionArea);
         Assert.Equal(SelectionAreaKind.Select, editor.SelectionArea.SelectionAreaKind);
@@ -33,7 +33,7 @@ public sealed class FumenVisualEditorInitializationTests
     [AvaloniaFact]
     public void ContextBackedProperties_ForwardValuesAndNotifyBindings()
     {
-        using var editor = new FumenVisualEditorViewModel();
+        using var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
         var context = new EditorContext
         {
             ProjectData = new EditorProjectDataModel(),
@@ -86,7 +86,7 @@ public sealed class FumenVisualEditorInitializationTests
             },
             Fumen = new OngekiFumen()
         };
-        var editor = new FumenVisualEditorViewModel
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             ViewHeight = 10,
             EditorContext = context
@@ -118,7 +118,7 @@ public sealed class FumenVisualEditorInitializationTests
         {
             AudioDuration = TimeSpan.FromSeconds(10)
         };
-        var editor = new FumenVisualEditorViewModel
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             ViewHeight = 10,
             EditorContext = new EditorContext
@@ -150,7 +150,7 @@ public sealed class FumenVisualEditorInitializationTests
         var fumen = new OngekiFumen();
         var tap = new Tap();
         fumen.AddObject(tap);
-        var editor = new FumenVisualEditorViewModel
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             EditorContext = new EditorContext
             {
@@ -173,7 +173,7 @@ public sealed class FumenVisualEditorInitializationTests
     [AvaloniaFact]
     public async Task PersistedDocumentContract_DisablesSaveAsUntilDestinationFlowExists()
     {
-        using var editor = new FumenVisualEditorViewModel();
+        using var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
         var persistedDocument = Assert.IsAssignableFrom<IPersistedDocumentViewModel>(editor);
 
         Assert.True(persistedDocument.IsNew);
@@ -190,7 +190,7 @@ public sealed class FumenVisualEditorInitializationTests
     public void LoadedView_SubscriptionsReactToSettingsAndUndoActions()
     {
         var fumen = new OngekiFumen();
-        var editor = new FumenVisualEditorViewModel
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             ViewHeight = 10,
             EditorContext = new EditorContext
@@ -231,7 +231,7 @@ public sealed class FumenVisualEditorInitializationTests
         var globalSetting = EditorGlobalSetting.Default;
         var originalEnabled = globalSetting.IsEnableUndoActionSavingLimit;
         var originalLimit = globalSetting.UndoActionSavingLimit;
-        var editor = new FumenVisualEditorViewModel();
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
         var view = new FumenVisualEditorView();
         var isLoaded = false;
 
@@ -339,8 +339,8 @@ public sealed class FumenVisualEditorInitializationTests
         var globalSetting = EditorGlobalSetting.Default;
         var originalEnabled = globalSetting.IsEnableUndoActionSavingLimit;
         var originalLimit = globalSetting.UndoActionSavingLimit;
-        var firstEditor = new FumenVisualEditorViewModel();
-        var secondEditor = new FumenVisualEditorViewModel();
+        var firstEditor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
+        var secondEditor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
         var firstView = new FumenVisualEditorView();
         var secondView = new FumenVisualEditorView();
 
@@ -392,7 +392,7 @@ public sealed class FumenVisualEditorInitializationTests
     [AvaloniaFact]
     public async Task LoadSuccessToast_IsQueuedUntilEditorViewLoads()
     {
-        using var editor = new FumenVisualEditorViewModel();
+        using var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
 
         editor.ToastNotify(Lang.LoadProjectFileAndFumenFile);
         Assert.Null(editor.Toast);
@@ -416,7 +416,7 @@ public sealed class FumenVisualEditorInitializationTests
     [AvaloniaFact]
     public async Task LoadFailure_DoesNotShowLoadSuccessToast()
     {
-        using var editor = new FumenVisualEditorViewModel();
+        using var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
         using var context = new EditorContext
         {
             ProjectData = new EditorProjectDataModel(),
@@ -465,7 +465,7 @@ public sealed class FumenVisualEditorInitializationTests
                 FumenFile = new LocalSimpleFile(fumenPath)
             }
         };
-        var editor = new FumenVisualEditorViewModel
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             EditorContext = context,
             IsDirty = true

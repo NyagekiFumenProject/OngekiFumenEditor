@@ -29,7 +29,7 @@ public sealed class FumenVisualEditorProviderTests
     public async Task TryOpen_ContextWithoutAudio_DoesNotAttachOrDisposeContext()
     {
         var provider = new TestProvider(canCreateNew: false);
-        var editor = new FumenVisualEditorViewModel();
+        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
         using var context = new EditorContext
         {
             ProjectData = new EditorProjectDataModel(),
@@ -62,6 +62,10 @@ public sealed class FumenVisualEditorProviderTests
 
     private sealed class TrackingFumenVisualEditorViewModel : FumenVisualEditorViewModel
     {
+        public TrackingFumenVisualEditorViewModel()
+            : base(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        {
+        }
         public bool NewResult { get; init; }
 
         public int NewCallCount { get; private set; }

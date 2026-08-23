@@ -1,6 +1,7 @@
 using Avalonia.Headless.XUnit;
 using Gekimini.Avalonia.Framework.Commands;
 using Gekimini.Avalonia.Modules.Shell;
+using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser;
@@ -19,7 +20,7 @@ public sealed class HeaderCheckNavigationTests
         var shell = IoC.Get<IShell>();
         await shell.ResetLayout();
 
-        var editor = new FumenVisualEditorViewModel
+        var editor = new FumenVisualEditorViewModel(NullLogger<FumenVisualEditorViewModel>.Instance)
         {
             EditorContext = new EditorContext { Fumen = new OngekiFumen() }
         };

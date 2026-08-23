@@ -411,18 +411,18 @@ public sealed class SelectionFilterCompatibilityTests
 
         public ViewerContext(OngekiFumen? fumen = null)
         {
-            Editor = new FumenVisualEditorViewModel
+            Editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
             {
                 EditorContext = new EditorContext { Fumen = fumen ?? new OngekiFumen() }
             };
             editors.Add(Editor);
             Manager = new TestEditorDocumentManager(Editor);
-            Viewer = new FumenEditorSelectingObjectViewerViewModel(Manager);
+            Viewer = new FumenEditorSelectingObjectViewerViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenEditorSelectingObjectViewerViewModel>.Instance, Manager);
         }
 
         public FumenVisualEditorViewModel Activate(OngekiFumen fumen)
         {
-            var editor = new FumenVisualEditorViewModel
+            var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
             {
                 EditorContext = new EditorContext { Fumen = fumen }
             };
