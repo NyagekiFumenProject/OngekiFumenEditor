@@ -18,6 +18,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.DeadHandler;
 using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 using Gekimini.Avalonia.Framework.Commands;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -91,8 +92,11 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
     private bool hideWallLaneWhenEnablePlayField;
     public bool HideWallLaneWhenEnablePlayField => hideWallLaneWhenEnablePlayField;
 
-    public FumenVisualEditorViewModel()
+    private readonly ILogger<FumenVisualEditorViewModel> logger;
+
+    public FumenVisualEditorViewModel(ILogger<FumenVisualEditorViewModel> logger)
     {
+        this.logger = logger;
         SelectionArea = new(this);
     }
 
@@ -351,8 +355,14 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
 
     public async Task<bool> Save()
     {
+        var filePathForLog = EditorContext?.FilePath ?? "Untitled";
+        logger.LogInformation("Save requested for '{FilePath}'.", filePathForLog);
         if (EditorContext?.ProjectFile is not { } projectFile)
+        {
+            logger.LogInformation("Save aborted: no project file is bound ('{FilePath}').", filePathForLog);
             return false;
+        }
+
 
         EditorContext.ProjectData.RememberLastDisplayTime = CurrentPlayTime;
         using var ioLease = await EditorProjectIoGate.EnterAsync();
@@ -360,6 +370,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         if (!saveResult.IsSuccess)
         {
             Log.LogError(saveResult.ErrorMessage);
+            logger.LogError("Saving '{FilePath}' failed.", filePathForLog);
             return false;
         }
 
@@ -376,6 +387,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         // 对齐 WPF：保存成功后重置显式名（去掉 "[快速打开]" 前缀），回退到文件名。
         DisplayName = default;
         ToastNotify(Lang.SaveProjectFileAndFumenFile);
+        logger.LogInformation("Saved '{FilePath}'.", filePathForLog);
         return true;
     }
 
@@ -387,6 +399,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
 
     public Task<bool> SaveAs()
     {
+        logger.LogInformation("Save As requested for '{FilePath}' (currently unavailable).", EditorContext?.FilePath ?? "Untitled");
         Log.LogWarn("Save As is unavailable until a project-folder-scoped destination flow is implemented.");
         return Task.FromResult(false);
     }

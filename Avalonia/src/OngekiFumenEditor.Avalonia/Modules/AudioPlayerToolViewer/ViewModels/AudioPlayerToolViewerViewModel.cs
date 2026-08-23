@@ -10,6 +10,7 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
+using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
@@ -33,6 +34,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
     private readonly DispatcherTimer playbackSyncTimer;
     private TimeSpan playStartTime;
     private bool isDisposed;
+    private readonly ILogger<AudioPlayerToolViewerViewModel> logger;
 
     private FumenVisualEditorViewModel editor;
     public FumenVisualEditorViewModel Editor
@@ -235,8 +237,9 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
         set => SetProperty(ref isShowWaveform, value);
     }
 
-    public AudioPlayerToolViewerViewModel() : base(Lang.B.AudioPlayerToolViewer.ToLocalizedString())
+    public AudioPlayerToolViewerViewModel(ILogger<AudioPlayerToolViewerViewModel> logger) : base(Lang.B.AudioPlayerToolViewer.ToLocalizedString())
     {
+        this.logger = logger;
         Dock = global::Dock.Model.Core.DockMode.Bottom;
 
         WaveformDrawing = TryGetService<IWaveformDrawing>();
@@ -332,6 +335,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
     private void StopPlayback()
     {
         //Editor.UnlockAllUserInteraction();
+        logger.LogInformation("Playback stopped.");
         FumenSoundPlayer?.Stop();
         AudioPlayer?.Stop();
 
@@ -362,6 +366,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
 
             if (AudioPlayer.IsPlaying)
             {
+                logger.LogInformation("Playback paused by user.");
                 StopPlayback();
                 return;
             }
@@ -375,7 +380,7 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
             await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
             var tGrid = Editor.GetCurrentTGrid();
             var seekTo = TGridCalculator.ConvertTGridToAudioTime(tGrid, Editor);
-            Log.LogDebug($"seek to {tGrid}({seekTo})");
+            logger.LogInformation("Play requested: seek to {TGrid}({SeekTo}).", tGrid, seekTo);
             AudioPlayer.Seek(seekTo, false);
             FumenSoundPlayer.Seek(seekTo, false);
             playStartTime = seekTo;
@@ -398,24 +403,28 @@ public partial class AudioPlayerToolViewerViewModel : ToolViewModelBase, IAudioP
         if (FumenSoundPlayer is not null)
             FumenSoundPlayer.SoundControl = soundControl;
 
+        logger.LogInformation("Sound control switches changed to {SoundControl}.", soundControl);
         OnPropertyChanged(nameof(SoundControls));
     }
 
     [RelayCommand]
     private void ResetWaveformOptions()
     {
+        logger.LogInformation("ResetWaveformOptions triggered.");
         WaveformDrawing?.Options?.Reset();
     }
 
     [RelayCommand]
     private void SaveWaveformOptions()
     {
+        logger.LogInformation("SaveWaveformOptions triggered.");
         WaveformDrawing?.Options?.Save();
     }
 
     [RelayCommand]
     private async Task ReloadSoundFilesAsync()
     {
+        logger.LogInformation("ReloadSoundFiles triggered.");
         if (AudioPlayer is null || FumenSoundPlayer is null)
         {
             await ShowMessageAsync(Lang.WaitForAudioAndFumenLoaded);

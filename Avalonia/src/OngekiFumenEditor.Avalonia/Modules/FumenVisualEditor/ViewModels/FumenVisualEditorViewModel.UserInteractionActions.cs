@@ -23,6 +23,7 @@ using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
 using Gekimini.Avalonia.Framework.Commands;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
@@ -191,6 +192,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_SelectAll()
         {
+            logger.LogInformation("Select all objects (current selection: {Count}).", SelectObjects.Count());
             IsPreventMutualExclusionSelecting = true;
 
             EditorContext.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
@@ -202,6 +204,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_ReverseSelect()
         {
+            logger.LogInformation("Reverse select objects (current selection: {Count}).", SelectObjects.Count());
             IsPreventMutualExclusionSelecting = true;
 
             EditorContext.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = !x.IsSelected);
@@ -212,11 +215,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         [RelayCommand]
         public Task MenuItemAction_CopySelectedObjects()
-            => IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
+        {
+            logger.LogInformation("Copy selected objects ({Count}).", SelectObjects.Count());
+            return IoC.Get<IFumenEditorClipboard>().CopyObjects(this, SelectObjects);
+        }
 
         [RelayCommand]
         public void MenuItemAction_SelectEntireLane()
         {
+            logger.LogInformation("Select entire lanes under {Count} selected objects.", SelectObjects.Count());
             foreach (var connectable in SelectObjects.OfType<ConnectableObjectBase>().Select(c => c.ReferenceStartObject).Distinct()) {
                 foreach (var child in connectable.Children) {
                     child.IsSelected = true;
@@ -228,6 +235,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_SelectAttachedCurves()
         {
+            logger.LogInformation("Select attached curves of {Count} selected objects.", SelectObjects.Count());
             foreach (var connectable in SelectObjects.OfType<ConnectableChildObjectBase>()) {
                 foreach (var curve in connectable.PathControls) {
                     curve.IsSelected = true;
@@ -280,6 +288,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public async Task PasteCopiesObjects(PasteOption mirrorOption, Point? placePoint = default)
         {
+            logger.LogInformation("Paste copies objects (option={Option}, placePoint={Point}).", mirrorOption, placePoint);
             if (IsLocked)
                 return;
 
@@ -295,6 +304,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_MirrorSelectionXGridZero()
         {
+            logger.LogInformation("Mirror selection around XGrid zero ({Count} objects).", SelectObjects.Count());
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
             {
@@ -308,6 +318,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_MirrorSelectionXGrid()
         {
+            logger.LogInformation("Mirror selection around selection center XGrid ({Count} objects).", SelectObjects.Count());
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
             {
@@ -357,6 +368,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_MirrorLaneColors()
         {
+            logger.LogInformation("Mirror lane colors of selection ({Count} objects).", SelectObjects.Count());
             var laneObjects = SelectObjects.OfType<ConnectableStartObject>()
                 .Where(o => o.IsDockableLane)
                 .Where(o => o.Children.All(c => c.IsSelected))
@@ -467,6 +479,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_RememberSelectedObjectAudioTime()
         {
+            logger.LogInformation("Remember audio time of selected objects.");
             if (!IsDesignMode)
             {
                 ToastNotify(Lang.EditorMustBeDesignMode);
@@ -488,6 +501,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [RelayCommand]
         public void MenuItemAction_RecoverySelectedObjectToAudioTime()
         {
+            logger.LogInformation("Recover objects to remembered audio time.");
             if (!IsDesignMode)
             {
                 ToastNotify(Lang.EditorMustBeDesignMode);
@@ -560,6 +574,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastPlaceNewTap(ActionExecutionContext e)
         {
+            logger.LogInformation("Fast place new Tap.");
             var position = lastPointerViewPosition;
             position = position.WithY(RectInDesignMode.Height - position.Y + RectInDesignMode.MinY);
 
@@ -568,6 +583,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastPlaceNewHold(ActionExecutionContext e)
         {
+            logger.LogInformation("Fast place new Hold.");
             var position = lastPointerViewPosition;
             position = position.WithY(RectInDesignMode.Height - position.Y + RectInDesignMode.MinY);
 
@@ -576,6 +592,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_ChangeDockableLaneType(ActionExecutionContext e)
         {
+            logger.LogInformation("Change dockable lane type.");
             if (!(
                 SelectObjects.IsOnlyOne(out var r) &&
                 r is ConnectableObjectBase connectable &&
@@ -685,6 +702,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastPlaceDockableObject(LaneType targetType, ILaneDockable dockable)
         {
+            logger.LogInformation("Fast place dockable object to lane {TargetType}.", targetType);
             var dockableLanes = EditorContext.Fumen.Lanes
                 .GetVisibleStartObjects(dockable.TGrid, dockable.TGrid)
                 .Where(x => x.LaneType == targetType);
@@ -819,6 +837,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void RemoveObjects(IEnumerable<OngekiObjectBase> objs)
         {
+            logger.LogInformation("Remove {Count} objects.", objs.Count());
             foreach (var obj in objs)
             {
                 if (obj is ISelectableObject selectable)
@@ -853,6 +872,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastSetObjectIsCritical(ActionExecutionContext e)
         {
+            logger.LogInformation("Fast toggle object IsCritical.");
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
             var position = lastPointerViewPosition;
@@ -902,6 +922,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastSwitchFlickDirection(ActionExecutionContext _)
         {
+            logger.LogInformation("Fast switch flick direction.");
             var selectedFlicks = SelectObjects.OfType<Flick>().ToList();
 
             if (selectedFlicks.Count == 0)
@@ -923,6 +944,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public async void KeyboardAction_ToggleBatchMode(ActionExecutionContext ctx)
         {
+            logger.LogInformation("Toggle batch mode requested.");
             var command = IoC.Get<ICommandService>().GetCommand(new BatchModeToggleCommandDefinition());
             await CommandRouterHelper.ExecuteCommand(command);
         }
@@ -966,6 +988,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastAddConnectableChild(ActionExecutionContext e)
         {
+            logger.LogInformation("Fast add connectable child.");
             if (!IsDesignMode)
                 return;
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
@@ -1060,6 +1083,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
+            logger.LogInformation("Switch editor mode to {Mode}.", isPreviewMode ? "Preview" : "Design");
             BulletPallete.RandomSeed = DateTime.Now.ToString().GetHashCode();
 
             var tGrid = GetCurrentTGrid();
@@ -1731,6 +1755,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 if (!dragDropManager.TryGetDragData(arg, out var dragData))
                     return;
 
+                logger.LogInformation("Drop data {DataType} at {Position}.", dragData.GetType().Name, mousePosition);
                 if (IsLocked)
                 {
                     Log.LogWarn($"discard user actions because editor was locked.");
@@ -1787,6 +1812,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         public void ScrollPage(int page)
         {
+            logger.LogInformation("Scroll page {Page}.", page);
             TGrid changeGrid;
 
             if (!IsDesignMode && TGridCalculator.ConvertYToTGrid_PreviewMode(RectInDesignMode.Height, this).ToList() is [{ } single])
@@ -1891,7 +1917,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
             var newVal = jump + Setting.XGridUnitSpace;
             if (newVal != 0 && newVal <= 16)
+            {
+                var oldVal = Setting.XGridUnitSpace;
                 Setting.XGridUnitSpace = newVal;
+                logger.LogInformation("XGrid unit spacing changed {Old} -> {New}.", oldVal, newVal);
+            }
         }
 
         /*
@@ -1911,7 +1941,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
             var newVal = jump + Setting.BeatSplit;
             if (newVal != 0 && newVal <= 16)
+            {
+                var oldVal = Setting.BeatSplit;
                 Setting.BeatSplit = newVal;
+                logger.LogInformation("Beat split changed {Old} -> {New}.", oldVal, newVal);
+            }
         }
 
         private void OnWheelVerticalScale(MouseWheelEventArgs arg)
@@ -1922,7 +1956,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 <= 1 => 0.15,
                 _ => 0.3
             };
-            Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta.Y) * change, 0.1, 3);
+            {
+                var oldScale = Editor.Setting.VerticalDisplayScale;
+                Editor.Setting.VerticalDisplayScale = Math.Clamp(Editor.Setting.VerticalDisplayScale + Math.Sign(arg.Delta.Y) * change, 0.1, 3);
+                logger.LogInformation("Vertical display scale changed {Old:F2} -> {New:F2}.", oldScale, Editor.Setting.VerticalDisplayScale);
+            }
         }
 
         private bool isDraggingPlayerLocation = false;
@@ -1958,6 +1996,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         /// </summary>
         public void LockAllUserInteraction()
         {
+            logger.LogInformation("Lock all user interaction.");
             if (IsLocked)
                 return;
             IsLocked = true;
@@ -1971,6 +2010,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         /// </summary>
         public void UnlockAllUserInteraction()
         {
+            logger.LogInformation("Unlock all user interaction.");
             if (!IsLocked)
                 return;
             IsLocked = false;

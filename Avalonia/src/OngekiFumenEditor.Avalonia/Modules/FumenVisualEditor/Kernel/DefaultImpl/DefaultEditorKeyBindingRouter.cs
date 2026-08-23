@@ -137,6 +137,9 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
             return;
         }
 
+        logger.LogInformation("Dispatch editor key binding {Definition} (key={Key}, modifiers={Modifiers}, layer={Layer}).",
+            definition.ConfigKey, e.Key, e.KeyModifiers, activeLayer);
+
         var executionContext = new ActionExecutionContext
         {
             Source = e.Source ?? sender ?? attachedTopLevel,
