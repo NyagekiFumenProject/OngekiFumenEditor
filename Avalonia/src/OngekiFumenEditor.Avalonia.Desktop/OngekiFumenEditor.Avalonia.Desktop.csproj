@@ -36,6 +36,7 @@
         <PackageReference Include="XamlMcp.Avalonia" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+        <PackageReference Include="NAudio" />
         <PackageReference Include="NAudio.Wasapi" />
         <PackageReference Include="SkiaSharp" />
         <PackageReference Include="SixLabors.ImageSharp" />

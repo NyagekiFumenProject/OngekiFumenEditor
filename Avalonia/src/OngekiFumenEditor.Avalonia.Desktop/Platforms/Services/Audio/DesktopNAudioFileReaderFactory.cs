@@ -22,21 +22,21 @@ internal sealed class DesktopNAudioFileReaderFactory : INAudioFileReaderFactory
     public WaveStream CreateAudioFileReader(string filePath)
         => Path.GetExtension(filePath).ToLowerInvariant() switch
         {
+            ".mp3" => new Mp3FileReader(filePath),
             ".wav" => CreateWaveFileReader(filePath),
             ".aif" or ".aiff" => new AiffFileReader(filePath),
             _ => new MediaFoundationReader(filePath)
         };
 
-    public WaveStream CreateAudioFileReader(Stream stream, string fileName)
-        => Path.GetExtension(fileName).ToLowerInvariant() switch
+    public WaveStream CreateAudioFileReader(Stream stream, AudioStreamFormat format)
+        => format switch
         {
-            ".wav" => CreateWaveFileReader(stream),
-            ".aif" or ".aiff" => new AiffFileReader(stream),
-            ".mp3" => throw new PlatformNotSupportedException(
-                "MP3 decoding through Media Foundation requires a local file path."),
-            ".acb" => throw new PlatformNotSupportedException(
-                "ACB audio requires a local file path and its associated AWB file."),
-            _ => throw new NotSupportedException($"Unsupported audio file format: {fileName}")
+            AudioStreamFormat.Wav => CreateWaveFileReader(stream),
+            AudioStreamFormat.Aiff => new AiffFileReader(stream),
+            AudioStreamFormat.Mp3 => new Mp3FileReader(stream),
+            AudioStreamFormat.Acb => throw new PlatformNotSupportedException(
+                "ACB audio must be converted before creating an audio reader."),
+            _ => throw new NotSupportedException($"Unsupported audio stream format: {format}")
         };
 
     private static WaveStream CreateWaveFileReader(string filePath)

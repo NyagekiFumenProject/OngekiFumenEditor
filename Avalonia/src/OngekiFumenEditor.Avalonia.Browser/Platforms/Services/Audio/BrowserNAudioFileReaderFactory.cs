@@ -26,11 +26,11 @@ internal sealed class BrowserNAudioFileReaderFactory : INAudioFileReaderFactory
                 "Browser audio decoding currently supports PCM/IEEE-float WAV and AIFF files.")
         };
 
-    public WaveStream CreateAudioFileReader(Stream stream, string fileName)
-        => Path.GetExtension(fileName).ToLowerInvariant() switch
+    public WaveStream CreateAudioFileReader(Stream stream, AudioStreamFormat format)
+        => format switch
         {
-            ".wav" => CreateWaveFileReader(stream),
-            ".aif" or ".aiff" => new AiffFileReader(stream),
+            AudioStreamFormat.Wav => CreateWaveFileReader(stream),
+            AudioStreamFormat.Aiff => new AiffFileReader(stream),
             _ => throw new PlatformNotSupportedException(
                 "Browser audio decoding currently supports PCM/IEEE-float WAV and AIFF files.")
         };

@@ -13,6 +13,7 @@
         <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Features" Version="4.11.0" />
         <PackageVersion Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.11.0" />
         <PackageVersion Include="NAudio.Core" Version="$(NAudioPackageVersion)" />
+        <PackageVersion Include="NAudio" Version="$(NAudioPackageVersion)" />
         <PackageVersion Include="NAudio.Asio" Version="$(NAudioPackageVersion)" />
         <PackageVersion Include="NAudio.Wasapi" Version="$(NAudioPackageVersion)" />
         <PackageVersion Include="NAudio.WinMM" Version="$(NAudioPackageVersion)" />

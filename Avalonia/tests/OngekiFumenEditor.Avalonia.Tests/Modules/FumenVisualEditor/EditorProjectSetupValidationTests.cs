@@ -248,10 +248,10 @@ public sealed class EditorProjectSetupValidationTests
         public float MusicVolume { get; set; }
         public float MusicSpeed { get; set; }
         public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList => [];
-        public Task<ISoundPlayer> LoadSoundAsync(ISimpleFile file) => throw new NotSupportedException();
-        public Task<ISoundPlayer> LoadSoundAsync(Stream stream, string fileName) => throw new NotSupportedException();
-        public Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file) => throw new NotSupportedException();
-        public Task<IAudioPlayer> LoadProjectAudioAsync(ISimpleFile file, ISimpleFile? externalAwbFile) =>
+        public Task<ISoundPlayer> LoadSoundAsync(Stream stream) => throw new NotSupportedException();
+        public Task<IAudioPlayer> LoadAudioAsync(Stream stream) =>
+            throw new NotSupportedException();
+        public Task<IAudioPlayer> LoadAudioAsync(Stream acbStream, Stream externalAwbStream) =>
             throw new NotSupportedException();
         public void Dispose()
         {

@@ -356,9 +356,14 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
                 }
             }
 
+            await using var audioStream = await selectedAudio.OpenRead();
             using var player = selectedAwb is null
-                ? await audioManager.LoadAudioAsync(selectedAudio)
-                : await audioManager.LoadProjectAudioAsync(selectedAudio, selectedAwb);
+                ? await audioManager.LoadAudioAsync(
+                    audioStream)
+                : await LoadAudioWithExternalAwbAsync(
+                    audioManager,
+                    selectedAwb,
+                    audioStream);
 
             session.SetAudioFile(selectedAudio);
             selectedAudio = null;
@@ -380,6 +385,17 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
             DisposeIfStandalone(selectedAwb);
             DisposeIfStandalone(selectedAudio);
         }
+    }
+
+    private static async Task<IAudioPlayer> LoadAudioWithExternalAwbAsync(
+        IAudioManager audioManager,
+        ISimpleFile externalAwbFile,
+        Stream audioStream)
+    {
+        await using var externalAwbStream = await externalAwbFile.OpenRead();
+        return await audioManager.LoadAudioAsync(
+            audioStream,
+            externalAwbStream);
     }
 
     [RelayCommand]

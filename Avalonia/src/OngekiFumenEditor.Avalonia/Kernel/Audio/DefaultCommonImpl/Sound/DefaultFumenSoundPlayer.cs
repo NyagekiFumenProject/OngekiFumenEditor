@@ -6,7 +6,6 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
-using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Runtime.CompilerServices;
 
@@ -52,7 +51,6 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     private async Task<bool> LoadSoundsAsync()
     {
         var audioManager = IoC.Get<IAudioManager>();
-        var soundFolderPath = AudioSetting.Default.SoundFolderPath;
 
         bool noError = true;
 
@@ -60,13 +58,8 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         {
             try
             {
-                await using var stream = OpenSoundStream(
-                    fileName,
-                    soundFolderPath,
-                    AppContext.BaseDirectory,
-                    Path.Combine(AppContext.BaseDirectory, "Resources"),
-                    allowLocalFiles: !OperatingSystem.IsBrowser());
-                cacheSounds[sound] = await audioManager.LoadSoundAsync(stream, fileName);
+                await using var stream = OpenSoundStream(fileName);
+                cacheSounds[sound] = await audioManager.LoadSoundAsync(stream);
             }
             catch (Exception e)
             {
@@ -102,53 +95,8 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         return noError;
     }
 
-    internal static Stream OpenSoundStream(
-        string fileName,
-        string configuredSoundFolderPath,
-        string baseDirectory,
-        string resourceOverrideRootPath,
-        bool allowLocalFiles)
-    {
-        if (allowLocalFiles &&
-            TryGetConfiguredSoundFilePath(fileName, configuredSoundFolderPath, baseDirectory) is { } customFilePath)
-        {
-            return new FileStream(
-                customFilePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read,
-                81_920,
-                FileOptions.Asynchronous | FileOptions.SequentialScan);
-        }
-
-        return ResourceUtils.OpenReadResourceStream(
-            $"sounds/{fileName}",
-            resourceOverrideRootPath,
-            allowLocalFiles);
-    }
-
-    private static string TryGetConfiguredSoundFilePath(
-        string fileName,
-        string configuredSoundFolderPath,
-        string baseDirectory)
-    {
-        if (string.IsNullOrWhiteSpace(configuredSoundFolderPath))
-            return null;
-
-        try
-        {
-            var folderPath = Path.IsPathFullyQualified(configuredSoundFolderPath)
-                ? Path.GetFullPath(configuredSoundFolderPath)
-                : Path.GetFullPath(configuredSoundFolderPath, baseDirectory);
-            var filePath = Path.Combine(folderPath, fileName);
-            return File.Exists(filePath) ? filePath : null;
-        }
-        catch (Exception exception) when (exception is ArgumentException or IOException or NotSupportedException)
-        {
-            Log.LogWarning($"Invalid sound folder path '{configuredSoundFolderPath}': {exception.Message}");
-            return null;
-        }
-    }
+    internal static Stream OpenSoundStream(string fileName) =>
+        ResourceUtils.OpenReadResourceStream($"sounds/{fileName}");
 
     public async Task Prepare(FumenVisualEditorViewModel editor, IAudioPlayer player)
     {

@@ -455,11 +455,25 @@ public sealed class EditorProjectCreationTransaction : IDisposable
         cancellationToken.ThrowIfCancellationRequested();
         try
         {
-            using var player = selection.AudioAwbFile is null
-                ? await audioManager.LoadAudioAsync(selection.AudioFile)
-                : await audioManager.LoadProjectAudioAsync(selection.AudioFile, selection.AudioAwbFile);
-            cancellationToken.ThrowIfCancellationRequested();
-            return player.Duration;
+            await using var audioStream = await selection.AudioFile.OpenRead();
+            IAudioPlayer player;
+            if (selection.AudioAwbFile is { } externalAwbFile)
+            {
+                await using var externalAwbStream = await externalAwbFile.OpenRead();
+                player = await audioManager.LoadAudioAsync(
+                    audioStream,
+                    externalAwbStream);
+            }
+            else
+            {
+                player = await audioManager.LoadAudioAsync(audioStream);
+            }
+
+            using (player)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return player.Duration;
+            }
         }
         catch (OperationCanceledException)
         {

@@ -302,11 +302,10 @@ public sealed class EditorProjectCreationTransactionTests
         public IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList =>
             [(".wav", "Wave audio")];
 
-        public Task<ISoundPlayer> LoadSoundAsync(ISimpleFile file) => throw new NotSupportedException();
-        public Task<ISoundPlayer> LoadSoundAsync(Stream stream, string fileName) => throw new NotSupportedException();
-        public Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file) =>
+        public Task<ISoundPlayer> LoadSoundAsync(Stream stream) => throw new NotSupportedException();
+        public Task<IAudioPlayer> LoadAudioAsync(Stream stream) =>
             Task.FromResult<IAudioPlayer>(new StubAudioPlayer());
-        public Task<IAudioPlayer> LoadProjectAudioAsync(ISimpleFile file, ISimpleFile externalAwbFile) =>
+        public Task<IAudioPlayer> LoadAudioAsync(Stream acbStream, Stream externalAwbStream) =>
             Task.FromResult<IAudioPlayer>(new StubAudioPlayer());
         public void Dispose()
         {

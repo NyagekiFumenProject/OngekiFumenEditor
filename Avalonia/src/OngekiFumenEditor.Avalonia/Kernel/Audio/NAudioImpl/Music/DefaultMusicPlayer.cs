@@ -108,12 +108,38 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         {
             Log.LogInfo($"Load audio file: {audioFile.FullPath}");
             await using var sourceStream = await audioFile.OpenRead();
-            using var rawStream = audioFileReaderFactory.CreateAudioFileReader(sourceStream, audioFile.FileName);
-            await LoadCore(rawStream, targetSampleRate);
+            await Load(sourceStream, targetSampleRate);
         }
         catch (Exception e)
         {
             Log.LogError($"Load audio file ({audioFile.FullPath}) failed : {e.Message}");
+            Dispose();
+        }
+    }
+
+    public async Task Load(Stream audioStream, int targetSampleRate)
+    {
+        ArgumentNullException.ThrowIfNull(audioStream);
+        Dispose();
+
+        try
+        {
+            var seekableStream = await AudioStreamFormatDetector.EnsureSeekableAsync(audioStream);
+            try
+            {
+                var format = AudioStreamFormatDetector.Detect(seekableStream);
+                using var rawStream = audioFileReaderFactory.CreateAudioFileReader(seekableStream, format);
+                await LoadCore(rawStream, targetSampleRate);
+            }
+            finally
+            {
+                if (!ReferenceEquals(seekableStream, audioStream))
+                    await seekableStream.DisposeAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Log.LogError($"Load audio stream failed : {e.Message}");
             Dispose();
         }
     }

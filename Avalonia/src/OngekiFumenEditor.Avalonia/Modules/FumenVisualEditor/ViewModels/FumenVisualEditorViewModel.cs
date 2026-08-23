@@ -257,8 +257,19 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         IAudioPlayer? preparedAudioPlayer = null;
         try
         {
-            preparedAudioPlayer = await IoC.Get<IAudioManager>()
-                .LoadProjectAudioAsync(audioFile, context.AudioAwbFile);
+            var audioManager = IoC.Get<IAudioManager>();
+            await using var audioStream = await audioFile.OpenRead();
+            if (context.AudioAwbFile is { } audioAwbFile)
+            {
+                await using var externalAwbStream = await audioAwbFile.OpenRead();
+                preparedAudioPlayer = await audioManager.LoadAudioAsync(
+                    audioStream,
+                    externalAwbStream);
+            }
+            else
+            {
+                preparedAudioPlayer = await audioManager.LoadAudioAsync(audioStream);
+            }
             if (preparedAudioPlayer is null)
                 return false;
 

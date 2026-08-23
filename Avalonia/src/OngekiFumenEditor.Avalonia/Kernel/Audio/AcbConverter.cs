@@ -1,7 +1,6 @@
 using DereTore.Exchange.Archive.ACB;
 using DereTore.Exchange.Audio.HCA;
-using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
-using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System.Buffers;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio;
@@ -10,109 +9,206 @@ public static class AcbConverter
 {
     private static readonly SemaphoreSlim locker = new(1, 1);
 
-    private static async Task ProcessAllBinaries(uint acbFormatVersion, string extractFilePath, Afs2Archive archive, Stream dataStream)
+    public static async Task ConvertAcbFileToWavAsync(
+        Stream acbInputStream,
+        Stream externalAwbInputStream,
+        ISimpleFile outputWavFile,
+        CancellationToken cancellationToken = default)
     {
-        async Task DecodeHca(Stream hcaDataStream, Stream waveStream, DecodeParams decodeParams)
-        {
-            using var hcaStream = new OneWayHcaAudioStream(hcaDataStream, decodeParams, true);
-            var buffer = ArrayPool<byte>.Shared.Rent(1_024_000);
-            var read = 1;
+        ArgumentNullException.ThrowIfNull(acbInputStream);
+        ArgumentNullException.ThrowIfNull(outputWavFile);
 
-            while (read > 0)
-            {
-                read = await hcaStream.ReadAsync(buffer, 0, buffer.Length);
-                if (read > 0)
-                    await waveStream.WriteAsync(buffer, 0, read);
-            }
-
-            ArrayPool<byte>.Shared.Return(buffer);
-        }
-
-        foreach (var entry in archive.Files)
-        {
-            var record = entry.Value;
-            var len = (int)record.FileLength;
-            var buffer = ArrayPool<byte>.Shared.Rent(len);
-            dataStream.Seek(record.FileOffsetAligned, SeekOrigin.Begin);
-            var read = dataStream.Read(buffer, 0, len);
-            using var fileData = new MemoryStream(buffer, 0, read);
-
-            if (HcaReader.IsHcaStream(fileData))
-            {
-                Log.LogDebug($"Processing {acbFormatVersion} AFS: #{record.CueId} (offset={record.FileOffsetAligned} size={record.FileLength})...");
-                try
-                {
-                    using var fs = File.Open(extractFilePath, FileMode.Create, FileAccess.Write, FileShare.Write);
-                    await DecodeHca(fileData, fs, DecodeParams.Default);
-                    Log.LogDebug("decoded");
-                }
-                catch (Exception ex)
-                {
-                    if (File.Exists(extractFilePath))
-                        File.Delete(extractFilePath);
-                    Log.LogDebug(ex.ToString());
-                    if (ex.InnerException is not null)
-                    {
-                        Log.LogDebug("Details:");
-                        Log.LogDebug(ex.InnerException.ToString());
-                    }
-                }
-            }
-            else
-            {
-                Log.LogDebug("skipped (not HCA)");
-            }
-
-            ArrayPool<byte>.Shared.Return(buffer);
-        }
-    }
-
-    public static async Task<ITemporaryFile> ConvertAcbFileToWavFile(
-        string filePath,
-        string validatedExternalAwbPath = null)
-    {
-        await locker.WaitAsync();
+        await locker.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var provider = IoC.Get<ITemporaryFolderProvider>();
-            var tempFolder = await provider.Root.GetOrCreateFolderAsync("decodeAcbFiles");
-            var temporaryFile = await provider.CreateUniqueFileAsync(
-                "decoded",
-                ".wav",
-                tempFolder);
-            var tempAwbFilePath = temporaryFile.GetRequiredLocalPath();
-            Log.LogInfo("Decode ACB audio into a temporary WAV file.");
+            Log.LogInfo("Decode ACB audio into a WAV file.");
 
+            var acbStream = await EnsureSeekableReadAsync(
+                acbInputStream,
+                cancellationToken).ConfigureAwait(false);
             try
             {
-                using var acb = AcbFile.FromFile(filePath);
-                var awb = acb.InternalAwb ?? acb.ExternalAwb
-                    ?? throw new InvalidDataException("The ACB file has no AWB data.");
-                using var awbStream = awb == acb.InternalAwb
-                    ? acb.Stream
-                    : File.OpenRead(validatedExternalAwbPath
-                        ?? throw new InvalidDataException("External AWB access was not validated by the project session."));
-                await ProcessAllBinaries(acb.FormatVersion, tempAwbFilePath, awb, awbStream);
-                if (await temporaryFile.GetLengthAsync() <= 0)
-                    throw new InvalidDataException("The ACB file did not produce decodable audio.");
-                return temporaryFile;
+                if (AudioStreamFormatDetector.Detect(acbStream) != AudioStreamFormat.Acb)
+                    throw new InvalidDataException("The first stream is not an ACB file.");
+
+                if (externalAwbInputStream is not null)
+                {
+                    var externalAwbStream = await EnsureSeekableReadAsync(
+                        externalAwbInputStream,
+                        cancellationToken).ConfigureAwait(false);
+                    try
+                    {
+                        using var externalAwb = new Afs2Archive(
+                            externalAwbStream,
+                            0,
+                            "audio.awb",
+                            disposeStream: false);
+                        externalAwb.Initialize();
+
+                        var converted = await WriteFirstHcaAsWavAsync(
+                            0,
+                            externalAwb,
+                            externalAwbStream,
+                            outputWavFile,
+                            cancellationToken).ConfigureAwait(false);
+                        if (!converted)
+                            throw new InvalidDataException(
+                                "The external AWB did not produce decodable audio.");
+                        return;
+                    }
+                    finally
+                    {
+                        if (!ReferenceEquals(externalAwbStream, externalAwbInputStream))
+                            await externalAwbStream.DisposeAsync().ConfigureAwait(false);
+                    }
+                }
+
+                AcbFile acb;
+                try
+                {
+                    acb = AcbFile.FromStream(
+                        acbStream,
+                        Path.Combine(AppContext.BaseDirectory, "stream-audio.acb"),
+                        disposeStream: false);
+                }
+                catch (Exception exception) when (
+                    exception is ArgumentException or FileNotFoundException)
+                {
+                    throw new InvalidDataException(
+                        "The ACB file requires an external AWB stream.",
+                        exception);
+                }
+
+                using (acb)
+                {
+                    if (acb.InternalAwb is { } internalAwb)
+                    {
+                        var converted = await WriteFirstHcaAsWavAsync(
+                            acb.FormatVersion,
+                            internalAwb,
+                            acb.Stream,
+                            outputWavFile,
+                            cancellationToken).ConfigureAwait(false);
+                        if (!converted)
+                            throw new InvalidDataException(
+                                "The embedded AWB did not produce decodable audio.");
+                        return;
+                    }
+
+                    throw new InvalidDataException(
+                        "The ACB file does not contain an embedded AWB stream. " +
+                        "Pass its external AWB as the second stream argument.");
+                }
             }
-            catch (Exception e)
+            finally
             {
-                await temporaryFile.DeleteAsync();
-                Log.LogError($"Load acb file failed : {e.Message}");
-                return null;
+                if (!ReferenceEquals(acbStream, acbInputStream))
+                    await acbStream.DisposeAsync().ConfigureAwait(false);
             }
-        }
-        catch (Exception e)
-        {
-            Log.LogError($"Temporary ACB decode storage is unavailable : {e.Message}");
-            return null;
         }
         finally
         {
             locker.Release();
         }
     }
-}
 
+    private static async Task<bool> WriteFirstHcaAsWavAsync(
+        uint acbFormatVersion,
+        Afs2Archive archive,
+        Stream dataStream,
+        ISimpleFile outputWavFile,
+        CancellationToken cancellationToken)
+    {
+        foreach (var record in archive.Files.Values.OrderBy(x => x.CueId))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (record.FileLength <= 0 || record.FileLength > int.MaxValue)
+                continue;
+
+            var buffer = ArrayPool<byte>.Shared.Rent(checked((int)record.FileLength));
+            try
+            {
+                dataStream.Position = record.FileOffsetAligned;
+                await dataStream.ReadExactlyAsync(
+                    buffer.AsMemory(0, checked((int)record.FileLength)),
+                    cancellationToken).ConfigureAwait(false);
+
+                using var fileData = new MemoryStream(
+                    buffer,
+                    0,
+                    checked((int)record.FileLength),
+                    writable: false,
+                    publiclyVisible: true);
+                fileData.Position = 0;
+                if (!HcaReader.IsHcaStream(fileData))
+                    continue;
+
+                fileData.Position = 0;
+                Log.LogDebug(
+                    $"Processing {acbFormatVersion} AFS: #{record.CueId} " +
+                    $"(offset={record.FileOffsetAligned} size={record.FileLength})...");
+
+                await outputWavFile.WriteAsync(
+                    (outputStream, writerCancellationToken) =>
+                        DecodeHcaAsync(fileData, outputStream, writerCancellationToken),
+                    cancellationToken).ConfigureAwait(false);
+                return true;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
+        return false;
+    }
+
+    private static async Task DecodeHcaAsync(
+        Stream hcaDataStream,
+        Stream waveStream,
+        CancellationToken cancellationToken)
+    {
+        using var hcaStream = new OneWayHcaAudioStream(
+            hcaDataStream,
+            DecodeParams.Default,
+            outputWaveHeader: true);
+        var buffer = ArrayPool<byte>.Shared.Rent(1_024_000);
+        try
+        {
+            while (true)
+            {
+                var read = await hcaStream.ReadAsync(
+                    buffer.AsMemory(),
+                    cancellationToken).ConfigureAwait(false);
+                if (read == 0)
+                    break;
+
+                await waveStream.WriteAsync(
+                    buffer.AsMemory(0, read),
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(buffer);
+        }
+    }
+
+    private static async Task<Stream> EnsureSeekableReadAsync(
+        Stream sourceStream,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (sourceStream.CanSeek)
+        {
+            sourceStream.Position = 0;
+            return sourceStream;
+        }
+
+        var buffer = new MemoryStream();
+        await sourceStream.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+        buffer.Position = 0;
+        return buffer;
+    }
+}

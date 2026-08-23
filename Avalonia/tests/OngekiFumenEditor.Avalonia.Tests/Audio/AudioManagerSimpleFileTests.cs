@@ -4,6 +4,7 @@ using NAudio.Wave;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
+using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
 
@@ -12,29 +13,34 @@ namespace OngekiFumenEditor.Avalonia.Tests.Audio;
 public sealed class AudioManagerSimpleFileTests
 {
     [Fact]
-    public void Interface_LoadMethods_AcceptSimpleFilesAndSoundStreamsWithoutPathOnlyOverloads()
+    public void Interface_LoadMethods_AcceptStreams()
     {
         var methods = typeof(IAudioManager)
             .GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
-        var loadAudio = Assert.Single(methods, x => x.Name == nameof(IAudioManager.LoadAudioAsync));
+        var loadAudio = methods.Where(x => x.Name == nameof(IAudioManager.LoadAudioAsync)).ToArray();
         var loadSounds = methods.Where(x => x.Name == nameof(IAudioManager.LoadSoundAsync)).ToArray();
-        var simpleFileSound = Assert.Single(loadSounds, x => x.GetParameters().Length == 1);
-        var streamSound = Assert.Single(loadSounds, x => x.GetParameters().Length == 2);
+        var streamSound = Assert.Single(loadSounds);
 
-        Assert.Equal(typeof(Task<IAudioPlayer>), loadAudio.ReturnType);
-        Assert.Equal(typeof(ISimpleFile), Assert.Single(loadAudio.GetParameters()).ParameterType);
-        Assert.Equal(typeof(Task<ISoundPlayer>), simpleFileSound.ReturnType);
-        Assert.Equal(typeof(ISimpleFile), Assert.Single(simpleFileSound.GetParameters()).ParameterType);
-        Assert.Equal(typeof(Task<ISoundPlayer>), streamSound.ReturnType);
         Assert.Collection(
-            streamSound.GetParameters(),
-            parameter => Assert.Equal(typeof(Stream), parameter.ParameterType),
-            parameter => Assert.Equal(typeof(string), parameter.ParameterType));
-        Assert.DoesNotContain(
-            methods,
-            x => x.GetParameters() is [{ ParameterType: var parameterType }] &&
-                 parameterType == typeof(string));
+            loadAudio.OrderBy(x => x.GetParameters().Length),
+            method =>
+            {
+                Assert.Equal(typeof(Task<IAudioPlayer>), method.ReturnType);
+                Assert.Collection(
+                    method.GetParameters(),
+                    parameter => Assert.Equal(typeof(Stream), parameter.ParameterType));
+            },
+            method =>
+            {
+                Assert.Equal(typeof(Task<IAudioPlayer>), method.ReturnType);
+                Assert.Collection(
+                    method.GetParameters(),
+                    parameter => Assert.Equal(typeof(Stream), parameter.ParameterType),
+                    parameter => Assert.Equal(typeof(Stream), parameter.ParameterType));
+            });
+        Assert.Equal(typeof(Task<ISoundPlayer>), streamSound.ReturnType);
+        Assert.Equal(typeof(Stream), Assert.Single(streamSound.GetParameters()).ParameterType);
     }
 
     [AvaloniaFact]
@@ -45,7 +51,8 @@ public sealed class AudioManagerSimpleFileTests
             new StubWavePlayerFactory(),
             readerFactory,
             new StubSchedulerManager(),
-            AudioPlatformCapabilities.Unknown);
+            AudioPlatformCapabilities.Unknown,
+            new DiscardTemporaryFolderProvider());
         using var file = new StreamOnlyTestSimpleFile(
             "sound.wav",
             "test://audio/sound.wav",
@@ -56,7 +63,7 @@ public sealed class AudioManagerSimpleFileTests
         Assert.NotNull(sound);
         Assert.Equal(1, readerFactory.StreamOpenCount);
         Assert.Equal(0, readerFactory.PathOpenCount);
-        Assert.Equal("sound.wav", readerFactory.OpenedFileName);
+        Assert.Equal(nameof(AudioStreamFormat.Wav), readerFactory.OpenedFileName);
         Assert.InRange(
             sound.Duration,
             TimeSpan.FromMilliseconds(9),
@@ -112,10 +119,10 @@ public sealed class AudioManagerSimpleFileTests
             throw new InvalidOperationException("The non-local file must not be opened by path.");
         }
 
-        public WaveStream CreateAudioFileReader(Stream stream, string fileName)
+        public WaveStream CreateAudioFileReader(Stream stream, AudioStreamFormat format)
         {
             StreamOpenCount++;
-            OpenedFileName = fileName;
+            OpenedFileName = format.ToString();
             return new WaveFileReader(stream);
         }
     }

@@ -8,5 +8,5 @@ public interface INAudioFileReaderFactory
 
     WaveStream CreateAudioFileReader(string filePath);
 
-    WaveStream CreateAudioFileReader(Stream stream, string fileName);
+    WaveStream CreateAudioFileReader(Stream stream, AudioStreamFormat format);
 }

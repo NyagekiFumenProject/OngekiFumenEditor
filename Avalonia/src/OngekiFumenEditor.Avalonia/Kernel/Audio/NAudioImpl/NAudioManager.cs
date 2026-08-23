@@ -11,6 +11,7 @@ using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using System.Text;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl;
 
@@ -23,6 +24,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
     private readonly INAudioWavePlayerFactory wavePlayerFactory;
     private readonly INAudioFileReaderFactory audioFileReaderFactory;
     private readonly ISchedulerManager schedulerManager;
+    private readonly ITemporaryFolderProvider temporaryFolderProvider;
     private readonly SemaphoreSlim outputInitializationLock = new(1, 1);
     private readonly MixingSampleProvider masterMixer;
     private readonly MixingSampleProvider soundMixer;
@@ -87,11 +89,13 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         INAudioWavePlayerFactory wavePlayerFactory,
         INAudioFileReaderFactory audioFileReaderFactory,
         ISchedulerManager schedulerManager,
-        IAudioPlatformCapabilities platformCapabilities)
+        IAudioPlatformCapabilities platformCapabilities,
+        ITemporaryFolderProvider temporaryFolderProvider)
     {
         this.wavePlayerFactory = wavePlayerFactory;
         this.audioFileReaderFactory = audioFileReaderFactory;
         this.schedulerManager = schedulerManager;
+        this.temporaryFolderProvider = temporaryFolderProvider;
 
         var requestedVarspeed = AudioSetting.Default.EnableVarspeed;
         enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
@@ -248,118 +252,107 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         }
     }
 
-    private async Task<IAudioPlayer> LoadAudioFromLocalPathAsync(
-        string filePath,
-        string validatedExternalAwbPath = null)
+    public Task<IAudioPlayer> LoadAudioAsync(Stream audioFileStream) =>
+        LoadAudioCoreAsync(audioFileStream, null);
+
+    public Task<IAudioPlayer> LoadAudioAsync(
+        Stream acbStream,
+        Stream externalAwbStream) =>
+        LoadAcbAudioAsync(acbStream, externalAwbStream);
+
+    private async Task<IAudioPlayer> LoadAudioCoreAsync(
+        Stream stream,
+        Stream externalAwbStream)
     {
-        if (string.IsNullOrWhiteSpace(filePath))
-            return null;
+        ArgumentNullException.ThrowIfNull(stream);
 
-        await EnsureAudioOutputInitializedAsync();
-
-        ITemporaryFile temporaryWavFile = null;
-        if (filePath.EndsWith(".acb", StringComparison.OrdinalIgnoreCase))
-        {
-            if (!SupportAudioFileExtensionList.Any(x =>
-                    x.fileExt.Equals(".acb", StringComparison.OrdinalIgnoreCase)))
-            {
-                throw new PlatformNotSupportedException(
-                    "ACB audio conversion is not available on this platform.");
-            }
-
-            temporaryWavFile = await AcbConverter.ConvertAcbFileToWavFile(
-                filePath,
-                validatedExternalAwbPath);
-            if (temporaryWavFile is null)
-                throw new InvalidDataException("The ACB audio could not be decoded.");
-            filePath = temporaryWavFile.GetRequiredLocalPath();
-        }
-
-        var player = new DefaultMusicPlayer(
-            musicMixer,
-            this,
-            schedulerManager,
-            audioFileReaderFactory);
-        ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+        var seekableStream = await AudioStreamFormatDetector.EnsureSeekableAsync(stream);
         try
         {
-            await player.Load(filePath, targetSampleRate);
+            var format = AudioStreamFormatDetector.Detect(seekableStream);
+            if (format == AudioStreamFormat.Acb)
+                return await LoadAcbAudioAsync(seekableStream, externalAwbStream);
+
+            await EnsureAudioOutputInitializedAsync();
+            var player = new DefaultMusicPlayer(
+                musicMixer,
+                this,
+                schedulerManager,
+                audioFileReaderFactory);
+            ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+            await player.Load(seekableStream, targetSampleRate);
             if (!player.IsAvaliable)
+            {
+                player.Dispose();
                 throw new InvalidDataException("The selected audio could not be decoded.");
+            }
             return player;
-        }
-        catch
-        {
-            player.Dispose();
-            throw;
         }
         finally
         {
-            if (temporaryWavFile is not null)
-            {
-                try
-                {
-                    await temporaryWavFile.DeleteAsync(CancellationToken.None);
-                }
-                catch (Exception exception)
-                {
-                    Log.LogWarn($"Unable to delete a decoded ACB temporary file: {exception.Message}");
-                }
-            }
+            if (!ReferenceEquals(seekableStream, stream))
+                await seekableStream.DisposeAsync();
         }
     }
 
-    public Task<IAudioPlayer> LoadAudioAsync(ISimpleFile file) =>
-        LoadAudioCoreAsync(file, null);
-
-    public Task<IAudioPlayer> LoadProjectAudioAsync(
-        ISimpleFile file,
-        ISimpleFile externalAwbFile) =>
-        LoadAudioCoreAsync(file, externalAwbFile);
-
-    private async Task<IAudioPlayer> LoadAudioCoreAsync(
-        ISimpleFile file,
-        ISimpleFile externalAwbFile)
+    private async Task<IAudioPlayer> LoadAcbAudioAsync(
+        Stream acbStream,
+        Stream externalAwbStream)
     {
-        if (file is null)
-            return null;
-
-        var extension = Path.GetExtension(file.FileName);
-        if (extension.Equals(".acb", StringComparison.OrdinalIgnoreCase))
+        if (!SupportAudioFileExtensionList.Any(x =>
+                x.fileExt.Equals(".acb", StringComparison.OrdinalIgnoreCase)))
         {
-            if (string.IsNullOrWhiteSpace(file.LocalPath))
+            throw new PlatformNotSupportedException(
+                "ACB audio conversion is not available on this platform.");
+        }
+
+        if (!temporaryFolderProvider.IsAvailable)
+            throw new PlatformNotSupportedException(
+                "ACB audio conversion requires temporary file storage on this platform.");
+
+        var tempFolder = await temporaryFolderProvider.Root
+            .GetOrCreateFolderAsync("decodeAcbFiles");
+        var temporaryWavFile = await temporaryFolderProvider.CreateUniqueFileAsync(
+            "decoded",
+            ".wav",
+            tempFolder);
+
+        try
+        {
+            using var outputFile = new TemporaryFileSimpleFile(temporaryWavFile);
+            await AcbConverter.ConvertAcbFileToWavAsync(
+                acbStream,
+                externalAwbStream,
+                outputFile);
+
+            await EnsureAudioOutputInitializedAsync();
+            var player = new DefaultMusicPlayer(
+                musicMixer,
+                this,
+                schedulerManager,
+                audioFileReaderFactory);
+            ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+            await using var outputStream = await outputFile.OpenRead();
+            await player.Load(outputStream, targetSampleRate);
+            if (!player.IsAvaliable)
             {
-                throw new PlatformNotSupportedException(
-                    "ACB audio requires a local file path and access to its associated AWB file.");
+                player.Dispose();
+                throw new InvalidDataException("The ACB audio could not be decoded.");
             }
 
-            if (externalAwbFile is not null && string.IsNullOrWhiteSpace(externalAwbFile.LocalPath))
-                throw new PlatformNotSupportedException("The external AWB file does not expose a local path.");
-
-            return await LoadAudioFromLocalPathAsync(file.LocalPath, externalAwbFile?.LocalPath);
+            return player;
         }
-
-        if (extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase) &&
-            !string.IsNullOrWhiteSpace(file.LocalPath))
+        finally
         {
-            // The current Desktop decoder is Media Foundation, whose API accepts paths only.
-            return await LoadAudioFromLocalPathAsync(file.LocalPath);
+            try
+            {
+                await temporaryWavFile.DeleteAsync(CancellationToken.None);
+            }
+            catch (Exception exception)
+            {
+                Log.LogWarn($"Unable to delete a decoded ACB temporary file: {exception.Message}");
+            }
         }
-
-        await EnsureAudioOutputInitializedAsync();
-        var player = new DefaultMusicPlayer(
-            musicMixer,
-            this,
-            schedulerManager,
-            audioFileReaderFactory);
-        ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-        await player.Load(file, targetSampleRate);
-        if (!player.IsAvaliable)
-        {
-            player.Dispose();
-            throw new InvalidDataException("The selected audio could not be decoded.");
-        }
-        return player;
     }
 
     public async Task<ISoundPlayer> LoadSoundAsync(ISimpleFile file)
@@ -367,31 +360,33 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         if (file is null)
             return null;
 
-        var extension = Path.GetExtension(file.FileName);
         Log.LogInfo($"Load sound file: {file.FullPath}");
 
-        if ((extension.Equals(".mp3", StringComparison.OrdinalIgnoreCase) ||
-             extension.Equals(".acb", StringComparison.OrdinalIgnoreCase)) &&
-            !string.IsNullOrWhiteSpace(file.LocalPath))
-        {
-            await EnsureAudioOutputInitializedAsync();
-            using var localAudioFileReader = audioFileReaderFactory.CreateAudioFileReader(file.LocalPath);
-            return await CreateSoundPlayerAsync(localAudioFileReader);
-        }
-
         await using var sourceStream = await file.OpenRead();
-        return await LoadSoundAsync(sourceStream, file.FileName);
+        return await LoadSoundAsync(sourceStream);
     }
 
-    public async Task<ISoundPlayer> LoadSoundAsync(Stream stream, string fileName)
+    public Task<ISoundPlayer> LoadSoundAsync(Stream stream) =>
+        LoadSoundCoreAsync(stream);
+
+    private async Task<ISoundPlayer> LoadSoundCoreAsync(Stream stream)
     {
         ArgumentNullException.ThrowIfNull(stream);
-        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
 
         await EnsureAudioOutputInitializedAsync();
-        Log.LogInfo($"Load sound stream: {fileName}");
-        using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(stream, fileName);
-        return await CreateSoundPlayerAsync(audioFileReader);
+        var seekableStream = await AudioStreamFormatDetector.EnsureSeekableAsync(stream);
+        try
+        {
+            var format = AudioStreamFormatDetector.Detect(seekableStream);
+            Log.LogInfo($"Load sound stream: {format}");
+            using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(seekableStream, format);
+            return await CreateSoundPlayerAsync(audioFileReader);
+        }
+        finally
+        {
+            if (!ReferenceEquals(seekableStream, stream))
+                await seekableStream.DisposeAsync();
+        }
     }
 
     private async Task<ISoundPlayer> CreateSoundPlayerAsync(WaveStream audioFileReader)
@@ -400,6 +395,51 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
             audioFileReader.ToSampleProvider(),
             targetSampleRate);
         return new NAudioSoundPlayer(new CachedSound(provider), this);
+    }
+
+    private sealed class TemporaryFileSimpleFile(ITemporaryFile file) : ISimpleFile
+    {
+        private long fileLength;
+
+        public ISimpleDirectory ParentDictionary => null;
+        public string FullPath => file.RelativePath;
+        public string LocalPath => file.LocalPath;
+        public string FileName => file.Name;
+        public long FileLength => fileLength;
+
+        public async ValueTask<string[]> ReadAllLines()
+        {
+            var text = Encoding.UTF8.GetString(await ReadAllBytes());
+            return text.Split(["\r\n", "\n"], StringSplitOptions.None);
+        }
+
+        public async ValueTask<byte[]> ReadAllBytes()
+        {
+            var bytes = await file.ReadAllBytesAsync();
+            fileLength = bytes.LongLength;
+            return bytes;
+        }
+
+        public Task<Stream> OpenRead() => file.OpenReadAsync();
+
+        public Task<Stream> OpenWrite() =>
+            throw new NotSupportedException(
+                "Temporary ACB output files must be written through WriteAsync().");
+
+        public async Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default)
+        {
+            await file.WriteAsync(writer, cancellationToken);
+            fileLength = await file.GetLengthAsync(cancellationToken);
+        }
+
+        public Task DeleteAsync(CancellationToken cancellationToken = default) =>
+            file.DeleteAsync(cancellationToken);
+
+        public void Dispose()
+        {
+        }
     }
 
     public void Dispose()

@@ -6,6 +6,9 @@ using System.Collections;
 using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
+using NAudio.Wave;
+using OngekiFumenEditor.Avalonia.Kernel.Audio;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Acb;
@@ -50,6 +53,47 @@ public sealed class AcbGenerateServiceIntegrationTests
         AssertAcbCanBeReopened(acbPath, awbPath);
         AssertAwbCanBeReopened(awbPath);
         Assert.NotEmpty(Directory.EnumerateFiles(temporaryRootPath, "*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
+    public async Task AcbConverter_ExternalAwb_UsesSimpleFilesAndWritesPlayableWav()
+    {
+        using var directory = new TemporaryDirectory();
+        var inputPath = directory.File("source.wav");
+        WritePcmWave(inputPath, sampleRate: 48_000, duration: TimeSpan.FromMilliseconds(250));
+        var service = CreateService(Path.Combine(directory.RootPath, "temp"));
+        var result = await service.GenerateAsync(new AcbGenerateOption
+        {
+            MusicId = 428,
+            InputAudioFilePath = inputPath,
+            OutputFolderPath = directory.RootPath,
+            PreviewBeginTime = 60_000,
+            PreviewEndTime = 80_000
+        });
+
+        Assert.True(result.IsSuccess, result.Message);
+        using var acbFile = new LocalSimpleFile(directory.File("music0428.acb"));
+        using var awbFile = new LocalSimpleFile(directory.File("music0428.awb"));
+        using var outputFile = new LocalSimpleFile(directory.File("decoded.wav"));
+
+        await using var acbStream = await acbFile.OpenRead();
+        await using var awbStream = await awbFile.OpenRead();
+        await AcbConverter.ConvertAcbFileToWavAsync(
+            acbStream,
+            awbStream,
+            outputFile);
+
+        Assert.True(new FileInfo(outputFile.FullPath).Length > 44);
+        using var reader = new WaveFileReader(outputFile.FullPath);
+        Assert.True(reader.TotalTime > TimeSpan.Zero);
+
+        using var missingAwbOutputFile = new LocalSimpleFile(directory.File("decoded-missing-awb.wav"));
+        await using var missingAwbAcbStream = await acbFile.OpenRead();
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            AcbConverter.ConvertAcbFileToWavAsync(
+                missingAwbAcbStream,
+                null,
+                missingAwbOutputFile));
     }
 
     private static void AssertPreviewTime(string acbPath, byte[] marker, int expectedMilliseconds)
