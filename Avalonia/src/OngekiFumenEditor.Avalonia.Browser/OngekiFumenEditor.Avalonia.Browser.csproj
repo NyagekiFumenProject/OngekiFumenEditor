@@ -48,4 +48,31 @@
         <AdditionalFiles Include="Modules\BrowserOpfsBrowser\Views\*.axaml" />
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
+
+    <ItemGroup>
+        <!-- Keep the local ACB parser and its dependencies in trimmed WebAssembly publishes. -->
+        <TrimmerRootAssembly Include="DereTore.Exchange.Archive.ACB" />
+        <TrimmerRootAssembly Include="DereTore.Common" />
+        <TrimmerRootAssembly Include="DereTore.Exchange.Audio.HCA" />
+        <TrimmerRootAssembly Include="DereTore.Interop.OS" />
+    </ItemGroup>
+    <ItemGroup>
+        <!-- The shared core references these legacy DLLs through HintPath. Declare them here too so the Browser linker can resolve and root them. -->
+        <Reference Include="DereTore.Common">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Common.dll</HintPath>
+            <Private>true</Private>
+        </Reference>
+        <Reference Include="DereTore.Exchange.Archive.ACB">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Exchange.Archive.ACB.dll</HintPath>
+            <Private>true</Private>
+        </Reference>
+        <Reference Include="DereTore.Exchange.Audio.HCA">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Exchange.Audio.HCA.dll</HintPath>
+            <Private>true</Private>
+        </Reference>
+        <Reference Include="DereTore.Interop.OS">
+            <HintPath>..\..\..\OngekiFumenEditor\Dependencies\DereTore\DereTore.Interop.OS.dll</HintPath>
+            <Private>true</Private>
+        </Reference>
+    </ItemGroup>
 </Project>
