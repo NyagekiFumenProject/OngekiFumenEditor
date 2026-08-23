@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
+using Microsoft.Extensions.Logging;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
@@ -26,6 +27,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         editorSelectObjects ??= new DataGridCollectionView(editorSelectObjectSource);
 
     public SelectionFilterViewModel SelectionFilter { get; }
+    private readonly ILogger<FumenEditorSelectingObjectViewerViewModel> logger;
 
     public FumenVisualEditorViewModel Editor
     {
@@ -51,8 +53,10 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         }
     }
 
-    public FumenEditorSelectingObjectViewerViewModel(IEditorDocumentManager editorDocumentManager) : base(Lang.B.FumenEditorSelectingObjectViewer.ToLocalizedString())
+    public FumenEditorSelectingObjectViewerViewModel(ILogger<FumenEditorSelectingObjectViewerViewModel> logger, IEditorDocumentManager editorDocumentManager) : base(Lang.B.FumenEditorSelectingObjectViewer.ToLocalizedString())
     {
+        this.logger = logger;
+
         Dock = DockMode.Right;
         SelectionFilter = new SelectionFilterViewModel(this);
 
@@ -79,6 +83,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     [RelayCommand]
     private void Refresh()
     {
+        logger.LogInformation("Refresh triggered.");
         var selectedObjects = SelectedItems
             .Select(x => x.Object)
             .ToHashSet(ReferenceEqualityComparer.Instance);
@@ -100,6 +105,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     [RelayCommand]
     private void CancelSelectedObjects()
     {
+        logger.LogInformation("CancelSelectedObjects triggered.");
         foreach (var item in SelectedItems.ToArray())
             item.Object.IsSelected = false;
 
@@ -117,6 +123,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     [RelayCommand]
     private void FocusItem(ISelectableObject item)
     {
+        logger.LogInformation("FocusItem triggered.");
         if (Editor is null || item is null)
             return;
 

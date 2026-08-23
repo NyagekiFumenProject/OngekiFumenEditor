@@ -1,6 +1,7 @@
 using Gekimini.Avalonia.ViewModels;
 using Avalonia.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Settings;
@@ -15,6 +16,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels;
 [RegisterSingleton<ISettingsEditor>]
 public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
 {
+    private readonly ILogger<KeyBindingSettingViewModel> logger;
     private readonly IKeyBindingManager keybindingManager;
     private KeyBindingDefinition[] definitions;
 
@@ -30,8 +32,9 @@ public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
     [ObservableProperty]
     public partial string FilterKeywords { get; set; } = string.Empty;
 
-    public KeyBindingSettingViewModel()
+    public KeyBindingSettingViewModel(ILogger<KeyBindingSettingViewModel> logger)
     {
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         keybindingManager = IoC.Get<IKeyBindingManager>();
         definitions = keybindingManager.KeyBindingDefinations.OrderBy(x => x.DisplayName).ToArray();
         UpdateDisplayList();
@@ -40,6 +43,7 @@ public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     public void UpdateDisplayList()
     {
+        logger.LogInformation("UpdateDisplayList triggered (filter={Filter}, showUnassignedOnly={ShowUnassignedOnly}).", FilterKeywords, IsShowNotAssignOnly);
         Definitions.Clear();
         var list = definitions.AsEnumerable();
 
@@ -60,6 +64,7 @@ public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     private async Task ChangeKeybindAsync(KeyBindingDefinition definition)
     {
+        logger.LogInformation("ChangeKeybindAsync triggered ({Definition}).", definition?.DisplayName);
         if (definition is null)
             return;
 
@@ -70,6 +75,7 @@ public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     private async Task ResetAllDefinitionsAsync()
     {
+        logger.LogInformation("ResetAllDefinitionsAsync triggered.");
         if (!await IoC.Get<IDialogManager>().ShowComfirmDialog(
                 Lang.ComfirmResetAllKeybindingDefinitions,
                 Lang.Warning))

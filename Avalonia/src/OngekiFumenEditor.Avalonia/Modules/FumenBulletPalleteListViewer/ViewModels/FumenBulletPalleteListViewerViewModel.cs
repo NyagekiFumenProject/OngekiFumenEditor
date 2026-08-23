@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.DragDrops;
@@ -28,6 +29,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     private bool draggingItem;
     private Point mouseStartPosition;
     private BulletPallete selectingPallete;
+    private readonly ILogger<FumenBulletPalleteListViewerViewModel> logger;
 
     public string Filter
     {
@@ -55,8 +57,9 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     public ObservableCollection<BulletPallete> SelectedItems { get; } = [];
     public ObservableCollection<BulletPallete> DataView { get; } = [];
 
-    public FumenBulletPalleteListViewerViewModel() : base(Lang.B.FumenBulletPalleteListViewer.ToLocalizedString())
+    public FumenBulletPalleteListViewerViewModel(ILogger<FumenBulletPalleteListViewerViewModel> logger) : base(Lang.B.FumenBulletPalleteListViewer.ToLocalizedString())
     {
+        this.logger = logger;
         Dock = global::Dock.Model.Core.DockMode.Bottom;
         SelectedItems.CollectionChanged += (_, _) => DeleteSelectedCommand.NotifyCanExecuteChanged();
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
@@ -99,6 +102,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand(CanExecute = nameof(CanModifyFumen))]
     private void CreateNew()
     {
+        logger.LogInformation("CreateNew triggered.");
         Editor.EditorContext.Fumen.AddObject(new BulletPallete());
     }
 
@@ -107,6 +111,8 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand(CanExecute = nameof(CanDeleteSelected))]
     private async Task DeleteSelectedAsync()
     {
+        logger.LogInformation("DeleteSelected triggered.");
+
         var affectedReferences = Editor.EditorContext.Fumen.Bells
             .OfType<IBulletPalleteReferencable>()
             .Concat(Editor.EditorContext.Fumen.Bullets)
@@ -174,6 +180,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand]
     private void ClonePalette(BulletPallete pallete)
     {
+        logger.LogInformation("ClonePalette triggered.");
         if (pallete is null || Editor?.EditorContext?.Fumen is null)
             return;
 
@@ -186,6 +193,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand]
     private void SelectReferences(BulletPallete pallete)
     {
+        logger.LogInformation("SelectReferences triggered.");
         if (pallete is null || Editor is null)
             return;
 
@@ -205,9 +213,11 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     [RelayCommand]
     private void RefreshFilter()
     {
-        DataView.Clear();
+        logger.LogInformation("RefreshFilter triggered.");
         if (Editor?.EditorContext?.Fumen is null)
             return;
+
+        DataView.Clear();
 
         foreach (var pallete in Editor.EditorContext.Fumen.BulletPalleteList.Where(pallete =>
                      string.IsNullOrWhiteSpace(Filter) ||

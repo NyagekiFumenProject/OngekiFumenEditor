@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Models.Settings;
@@ -15,8 +16,10 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Modules.SplashScreen.ViewModels;
 public sealed partial class DesktopSplashScreenViewModel : SplashScreenViewModelBase
 {
     private readonly DesktopFastOpenService fastOpenService;
+    private readonly ILogger<DesktopSplashScreenViewModel> logger;
 
     public DesktopSplashScreenViewModel(
+        ILogger<DesktopSplashScreenViewModel> logger,
         ILanguageManager languageManager,
         Gekimini.Avalonia.Platforms.Services.Settings.ISettingManager settingManager,
         IEditorRecentFilesManager recentFilesManager,
@@ -34,12 +37,15 @@ public sealed partial class DesktopSplashScreenViewModel : SplashScreenViewModel
             commandService,
             shell)
     {
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.fastOpenService = fastOpenService;
     }
 
     [RelayCommand]
     private Task FastOpenAsync()
     {
+        logger.LogInformation("FastOpenAsync triggered.");
         return fastOpenService.OpenAsync();
     }
+
 }

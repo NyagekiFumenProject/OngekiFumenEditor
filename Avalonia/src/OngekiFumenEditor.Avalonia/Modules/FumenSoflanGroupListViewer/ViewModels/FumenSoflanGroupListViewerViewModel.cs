@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
+using Microsoft.Extensions.Logging;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
@@ -20,6 +21,8 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
     IDataGridRowReorderHandler<SoflanGroupDisplayItemListViewBase>
 {
     private OngekiFumen previousFumen;
+
+    private readonly ILogger<FumenSoflanGroupListViewerViewModel> logger;
 
     public bool IsShowPreviewModeSoflanPositionList
     {
@@ -96,8 +99,10 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
         }
     }
 
-    public FumenSoflanGroupListViewerViewModel() : base(Lang.B.SoflanGroupListViewer.ToLocalizedString())
+    public FumenSoflanGroupListViewerViewModel(ILogger<FumenSoflanGroupListViewerViewModel> logger) : base(Lang.B.SoflanGroupListViewer.ToLocalizedString())
     {
+        this.logger = logger;
+
         Dock = global::Dock.Model.Core.DockMode.Bottom;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
         Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
@@ -144,6 +149,8 @@ public partial class FumenSoflanGroupListViewerViewModel : ToolViewModelBase, IF
     [RelayCommand(CanExecute = nameof(CanCreateNewGroup))]
     private void CreateNewGroup()
     {
+        logger.LogInformation("CreateNewGroup triggered.");
+
         if (string.IsNullOrWhiteSpace(CreateNewGroupName))
         {
             //todo messagebox

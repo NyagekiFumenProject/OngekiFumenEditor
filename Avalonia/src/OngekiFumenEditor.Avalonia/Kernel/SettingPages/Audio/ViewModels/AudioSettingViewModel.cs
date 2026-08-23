@@ -1,6 +1,7 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Modules.Settings;
+using Microsoft.Extensions.Logging;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using CommunityToolkit.Mvvm.Input;
@@ -13,6 +14,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
 {
     private readonly IAudioPlatformCapabilities platformCapabilities;
+    private readonly ILogger<AudioSettingViewModel> logger;
     private readonly AudioSetting setting;
     private readonly AudioPlayerToolViewerSetting playerSetting;
     private readonly Action saveSettings;
@@ -61,8 +63,9 @@ public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
         }
     }
 
-    public AudioSettingViewModel()
+    public AudioSettingViewModel(ILogger<AudioSettingViewModel> logger)
         : this(
+            logger,
             ResolvePlatformCapabilities(),
             AudioSetting.Default,
             AudioPlayerToolViewerSetting.Default,
@@ -71,11 +74,13 @@ public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
     }
 
     internal AudioSettingViewModel(
+        ILogger<AudioSettingViewModel> logger,
         IAudioPlatformCapabilities platformCapabilities,
         AudioSetting setting,
         AudioPlayerToolViewerSetting playerSetting,
         Action saveSettings)
     {
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.platformCapabilities = platformCapabilities ?? throw new ArgumentNullException(nameof(platformCapabilities));
         this.setting = setting ?? throw new ArgumentNullException(nameof(setting));
         this.playerSetting = playerSetting ?? throw new ArgumentNullException(nameof(playerSetting));
@@ -143,6 +148,7 @@ public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     private async Task SelectSoundFolderAsync()
     {
+        logger.LogInformation("SelectSoundFolderAsync triggered.");
         using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.SoundFolderPath);
         if (string.IsNullOrWhiteSpace(folder?.LocalPath))
             return;
