@@ -12,6 +12,7 @@ using System.Linq;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
@@ -52,6 +53,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		[RelayCommand]
 		private void CombineLanes()
 		{
+			Log.LogInfo("CombineLanes triggered.");
 			if (IoC.Get<IFumenObjectPropertyBrowser>().Editor is not FumenVisualEditorViewModel editor)
 				return;
 

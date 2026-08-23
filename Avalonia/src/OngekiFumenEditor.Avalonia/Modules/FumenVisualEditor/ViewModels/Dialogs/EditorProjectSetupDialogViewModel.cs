@@ -6,6 +6,7 @@ using Gekimini.Avalonia.Views;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Setup;
 using OngekiFumenEditor.Avalonia.Parser;
+using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs;
@@ -292,6 +293,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private async Task SelectProjectDirectoryAsync()
     {
+        Log.LogInfo("Select project directory triggered.");
         if (!IsEditing)
             return;
         try
@@ -324,6 +326,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private async Task SelectAudioFileAsync()
     {
+        Log.LogInfo("Select audio file triggered.");
         if (!IsEditing)
             return;
         ISimpleFile? selectedAudio = null;
@@ -399,6 +402,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private void ClearAudioFile()
     {
+        Log.LogInfo("Clear audio file triggered.");
         if (!IsEditing)
             return;
         session.SetAudioFile(null);
@@ -413,6 +417,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private async Task SelectExistingFumenAsync()
     {
+        Log.LogInfo("Select existing fumen triggered.");
         if (!IsEditing)
             return;
         ISimpleFile? selected = null;
@@ -451,6 +456,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private void ClearExistingFumen()
     {
+        Log.LogInfo("Clear existing fumen triggered.");
         if (!IsEditing)
             return;
         session.SetExistingFumenFile(null);
@@ -463,6 +469,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private async Task CreateAsync()
     {
+        Log.LogInfo("Create project triggered.");
         if (!CanCreate)
             return;
 
@@ -534,6 +541,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     [RelayCommand]
     private async Task CancelAsync()
     {
+        Log.LogInfo("Cancel project setup triggered.");
         if (RunState == EditorProjectSetupRunState.Editing)
         {
             RunState = EditorProjectSetupRunState.Completed;

@@ -27,8 +27,16 @@ public partial class AwbReplaceConfirmationDialogViewModel : WindowViewModelBase
     public string PickedAwbSizeText { get; }
 
     [RelayCommand]
-    private Task ReplaceAsync() => TryCloseAsync(true);
+    private Task ReplaceAsync()
+    {
+        Log.LogInfo($"Replace AWB confirmed by user (picked='{PickedAwbDisplayPath}').");
+        return TryCloseAsync(true);
+    }
 
     [RelayCommand]
-    private Task CancelAsync() => TryCloseAsync(false);
+    private Task CancelAsync()
+    {
+        Log.LogInfo($"Replace AWB cancelled by user (picked='{PickedAwbDisplayPath}').");
+        return TryCloseAsync(false);
+    }
 }

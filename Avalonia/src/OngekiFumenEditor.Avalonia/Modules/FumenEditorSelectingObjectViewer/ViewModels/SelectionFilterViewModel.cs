@@ -292,6 +292,7 @@ public partial class SelectionFilterViewModel : ViewModelBase
     [RelayCommand]
     public void ApplyFilterToSelection()
     {
+        Log.LogInfo($"ApplyFilterToSelection triggered (invert={IsInvertFilter}).");
         if (Editor is null)
             return;
 
@@ -315,6 +316,7 @@ public partial class SelectionFilterViewModel : ViewModelBase
     [RelayCommand]
     public void SelectAllObjectTypes()
     {
+        Log.LogInfo("SelectAllObjectTypes triggered.");
         var allSelected = true;
         foreach (var category in FilterTypeCategories)
         {
@@ -341,6 +343,7 @@ public partial class SelectionFilterViewModel : ViewModelBase
     [RelayCommand]
     public void ResetSelectedObjectTypes()
     {
+        Log.LogInfo("ResetSelectedObjectTypes triggered.");
         foreach (var category in FilterTypeCategories)
         {
             foreach (var item in category.Items)
@@ -360,6 +363,7 @@ public partial class SelectionFilterViewModel : ViewModelBase
     [RelayCommand]
     public void ResetFilterOptions()
     {
+        Log.LogInfo("ResetFilterOptions triggered.");
         foreach (var opt in OptionCategories.SelectMany(c => c.Options))
             opt.IsEnabled = false;
     }

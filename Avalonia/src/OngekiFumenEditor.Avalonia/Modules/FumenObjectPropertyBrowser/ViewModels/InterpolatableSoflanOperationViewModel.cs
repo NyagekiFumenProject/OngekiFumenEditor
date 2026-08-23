@@ -14,6 +14,7 @@ using Avalonia;
 using Avalonia.Input;
 using OngekiFumenEditor.Avalonia;
 using Gekimini.Avalonia.Utils.MethodExtensions;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels
 {
@@ -29,6 +30,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		[RelayCommand]
 		private void Interpolate()
 		{
+			Log.LogInfo("Interpolate triggered (interpolatable soflan).");
 			var list = soflan.GenerateKeyframeSoflans().OfType<OngekiObjectBase>().ToArray();
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 

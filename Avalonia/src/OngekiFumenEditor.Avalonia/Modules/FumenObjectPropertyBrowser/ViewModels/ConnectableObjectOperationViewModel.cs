@@ -77,6 +77,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		[RelayCommand]
 		private void Interpolate()
 		{
+			Log.LogInfo("Interpolate triggered.");
 			if (RefStartObject.Children.IsEmpty())
 			{
 				_ = IoC.Get<IDialogManager>().ShowMessageDialog(Lang.DisableInterpolateByNoConnectableChildren);
@@ -120,6 +121,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		[RelayCommand]
 		private Task BrushAlongLaneAsync()
 		{
+			Log.LogInfo($"BrushAlongLane triggered (copiedObjects={IoC.Get<IFumenEditorClipboard>().CurrentCopiedObjects?.Count ?? 0}).");
 			var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
 			return BrushAlongLaneCoreAsync(
 				editor,
@@ -223,6 +225,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewMode
 		[RelayCommand]
 		private void InterpolatePart()
 		{
+			Log.LogInfo("InterpolatePart triggered.");
 			var childObj = ConnectableObject as ConnectableChildObjectBase;
 
 			if (!childObj.CheckCurveVaild())

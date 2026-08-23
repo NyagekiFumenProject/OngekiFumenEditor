@@ -15,6 +15,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base.DropActions;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.ViewModels;
 
@@ -30,6 +31,7 @@ public partial class SvgPrefabOperationViewModel : ViewModelBase
     [RelayCommand]
     private void GenerateLanes()
     {
+        Log.LogInfo($"GenerateLanes triggered ({SvgPrefab.GetType().Name}).");
         var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
         if (editor is null)
         {
