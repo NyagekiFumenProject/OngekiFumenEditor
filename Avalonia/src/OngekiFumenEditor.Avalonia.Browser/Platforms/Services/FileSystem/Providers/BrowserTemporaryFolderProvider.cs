@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
@@ -28,18 +29,18 @@ public sealed class BrowserTemporaryFolderProvider : ITemporaryFolderProvider
     }
 
     public bool IsAvailable => implementation.IsAvailable;
-    public ITemporaryFolder Root => implementation.Root;
+    public ISimpleDirectory Root => implementation.Root;
 
-    public Task<ITemporaryFile> CreateUniqueFileAsync(
+    public Task<ISimpleFile> CreateUniqueFileAsync(
         string prefix = "tempFile",
         string extension = ".dat",
-        ITemporaryFolder? parent = null,
+        ISimpleDirectory? parent = null,
         CancellationToken cancellationToken = default) =>
         implementation.CreateUniqueFileAsync(prefix, extension, parent, cancellationToken);
 
-    public Task<ITemporaryFolder> CreateUniqueFolderAsync(
+    public Task<ISimpleDirectory> CreateUniqueFolderAsync(
         string prefix = "tempFolder",
-        ITemporaryFolder? parent = null,
+        ISimpleDirectory? parent = null,
         CancellationToken cancellationToken = default) =>
         implementation.CreateUniqueFolderAsync(prefix, parent, cancellationToken);
 

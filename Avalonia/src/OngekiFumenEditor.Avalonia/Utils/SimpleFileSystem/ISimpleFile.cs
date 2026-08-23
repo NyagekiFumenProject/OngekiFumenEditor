@@ -23,11 +23,31 @@ public interface ISimpleFile : IDisposable
 
     long FileLength { get; }
 
+    Task<long> GetLengthAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(FileLength);
+    }
+
     ValueTask<string[]> ReadAllLines();
 
     ValueTask<byte[]> ReadAllBytes();
 
+    async Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        byte[] bytes = await ReadAllBytes().ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        return bytes;
+    }
+
     Task<Stream> OpenRead();
+
+    async Task<Stream> OpenReadAsync(CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        return await OpenRead().ConfigureAwait(false);
+    }
 
     /// <summary>
     ///     Opens a stream that replaces the current content when the backing provider supports writing.
@@ -45,4 +65,26 @@ public interface ISimpleFile : IDisposable
         Func<Stream, CancellationToken, Task> writer,
         CancellationToken cancellationToken = default) =>
         SimpleFileWriteTransaction.WriteAsync(this, writer, cancellationToken);
+
+    Task WriteAllBytesAsync(
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default) =>
+        WriteAsync(
+            (stream, writerCancellationToken) =>
+                stream.WriteAsync(data, writerCancellationToken).AsTask(),
+            cancellationToken);
+
+    async Task AppendAsync(
+        ReadOnlyMemory<byte> data,
+        CancellationToken cancellationToken = default)
+    {
+        byte[] existing = await ReadAllBytesAsync(cancellationToken).ConfigureAwait(false);
+        await WriteAsync(
+            async (stream, writerCancellationToken) =>
+            {
+                await stream.WriteAsync(existing, writerCancellationToken).ConfigureAwait(false);
+                await stream.WriteAsync(data, writerCancellationToken).ConfigureAwait(false);
+            },
+            cancellationToken).ConfigureAwait(false);
+    }
 }

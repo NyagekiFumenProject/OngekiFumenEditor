@@ -31,6 +31,26 @@ public interface ISimpleDirectory : IDisposable
 
     ISimpleFile[] GetFiles(string pattern = "*");
 
+    Task<ISimpleFile?> TryGetFileAsync(
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(ChildFiles.FirstOrDefault(file =>
+            file.FileName.Equals(fileName, StringComparison.OrdinalIgnoreCase)));
+    }
+
+    Task<ISimpleDirectory?> TryGetDirectoryAsync(
+        string directoryName,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(directoryName);
+        cancellationToken.ThrowIfCancellationRequested();
+        return Task.FromResult(ChildDictionaries.FirstOrDefault(directory =>
+            directory.DirectoryName.Equals(directoryName, StringComparison.OrdinalIgnoreCase)));
+    }
+
     /// <summary>
     /// Returns a point-in-time root entry snapshot without taking ownership of the entries.
     /// Storage-backed implementations use this to catch conflicts created after a picker
@@ -53,6 +73,22 @@ public interface ISimpleDirectory : IDisposable
     Task<ISimpleFile> CreateFileAsync(
         string fileName,
         CancellationToken cancellationToken = default);
+
+    async Task<ISimpleFile> GetOrCreateFileAsync(
+        string fileName,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
+        ISimpleFile? existing = await TryGetFileAsync(fileName, cancellationToken).ConfigureAwait(false);
+        if (existing is not null)
+            return existing;
+        if (await TryGetDirectoryAsync(fileName, cancellationToken).ConfigureAwait(false) is not null)
+            throw new IOException($"A directory already exists at '{fileName}'.");
+        return await CreateFileAsync(fileName, cancellationToken).ConfigureAwait(false);
+    }
+
+    Task DeleteAsync(CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException($"Deleting '{FullPath}' is not supported by this directory provider.");
 }
 
 public readonly record struct SimpleDirectoryEntry(string Name, bool IsDirectory);

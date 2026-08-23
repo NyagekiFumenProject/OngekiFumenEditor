@@ -2,6 +2,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -14,7 +15,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 	{
 		private const string AutoSaveFolderName = "AutoSave";
 
-		public static async Task<ITemporaryFolder> SaveRecoverySnapshotAsync(
+		public static async Task<ISimpleDirectory> SaveRecoverySnapshotAsync(
 			FumenVisualEditorViewModel editor,
 			CancellationToken cancellationToken = default)
 		{
@@ -26,10 +27,10 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			if (!provider.IsAvailable)
 				return null;
 
-			var autoSaveRoot = await provider.Root.GetOrCreateFolderAsync(
+			var autoSaveRoot = await provider.Root.GetOrCreateDirectoryAsync(
 				AutoSaveFolderName,
 				cancellationToken);
-			var snapshotFolder = await autoSaveRoot.GetOrCreateFolderAsync(
+			var snapshotFolder = await autoSaveRoot.GetOrCreateDirectoryAsync(
 				editor.RecoverySnapshotId.ToString("N"),
 				cancellationToken);
 
@@ -92,12 +93,12 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			if (!provider.IsAvailable)
 				return;
 
-			var autoSaveRoot = await provider.Root.TryGetFolderAsync(
+			var autoSaveRoot = await provider.Root.TryGetDirectoryAsync(
 				AutoSaveFolderName,
 				cancellationToken);
 			var snapshotFolder = autoSaveRoot is null
 				? null
-				: await autoSaveRoot.TryGetFolderAsync(
+				: await autoSaveRoot.TryGetDirectoryAsync(
 					editor.RecoverySnapshotId.ToString("N"),
 					cancellationToken);
 			if (snapshotFolder is not null)
@@ -115,7 +116,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 					var savedFolder = await Rescue(editor, cancellationToken);
 					if (savedFolder is not null)
 					{
-						var savedFolderPath = savedFolder.LocalPath ?? savedFolder.RelativePath;
+						var savedFolderPath = savedFolder.LocalPath ?? savedFolder.FullPath;
 						Log.LogInfo($"Rescue fumen/proj file successfully: {savedFolderPath}");
 						list.Add(savedFolderPath);
 						//return savedFolderPath;
@@ -133,7 +134,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			return list.ToArray();
 		}
 
-		public static async Task<ITemporaryFolder> Rescue(
+		public static async Task<ISimpleDirectory> Rescue(
 			FumenVisualEditorViewModel editor,
 			CancellationToken cancellationToken = default)
 		{
@@ -143,7 +144,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 				docName = Path.GetFileNameWithoutExtension(projFilePath);
 
 			var provider = IoC.Get<ITemporaryFolderProvider>();
-			var rescueRoot = await provider.Root.GetOrCreateFolderAsync("Rescue", cancellationToken);
+			var rescueRoot = await provider.Root.GetOrCreateDirectoryAsync("Rescue", cancellationToken);
 			var rescueFolder = await provider.CreateUniqueFolderAsync(
 				GetSafeRescueFolderPrefix(docName),
 				rescueRoot,

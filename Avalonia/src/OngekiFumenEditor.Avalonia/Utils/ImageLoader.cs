@@ -143,7 +143,7 @@ namespace OngekiFumenEditor.Avalonia.Utils
         private async Task SaveCache(string hash, byte[] data, CancellationToken cancellationToken)
         {
             var cacheFolder = await temporaryFolderProvider.Root
-                .GetOrCreateFolderAsync("images", cancellationToken);
+                .GetOrCreateDirectoryAsync("images", cancellationToken);
             var cacheFile = await cacheFolder.GetOrCreateFileAsync(
                 $"{hash}.img.cache",
                 cancellationToken);
@@ -153,7 +153,7 @@ namespace OngekiFumenEditor.Avalonia.Utils
         private async Task<byte[]> LoadCache(string hash, CancellationToken cancellationToken)
         {
             var cacheFolder = await temporaryFolderProvider.Root
-                .GetOrCreateFolderAsync("images", cancellationToken);
+                .GetOrCreateDirectoryAsync("images", cancellationToken);
             var cacheFile = await cacheFolder.TryGetFileAsync(
                 $"{hash}.img.cache",
                 cancellationToken);

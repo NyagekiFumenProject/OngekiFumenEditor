@@ -46,7 +46,7 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
             cancellationToken.ThrowIfCancellationRequested();
             var jacketName = $"ui_jacket_{option.MusicId.ToString().PadLeft(4, '0')}";
             var tempRoot = await temporaryFolderProvider.Root
-                .GetOrCreateFolderAsync("JacketGen", cancellationToken);
+                .GetOrCreateDirectoryAsync("JacketGen", cancellationToken);
             var tempFolderEntry = await temporaryFolderProvider.CreateUniqueFolderAsync(
                 jacketName,
                 tempRoot,
@@ -129,8 +129,8 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         var bundlesCount = 0;
         var bundlesList = new List<(int id, string name, int[] dependencies)>();
 
-        var tempRoot = await temporaryFolderProvider.Root
-            .GetOrCreateFolderAsync("assets.bytes", cancellationToken);
+            var tempRoot = await temporaryFolderProvider.Root
+            .GetOrCreateDirectoryAsync("assets.bytes", cancellationToken);
         var tmpFileEntry = await temporaryFolderProvider.CreateUniqueFileAsync(
             "assets",
             ".bytes",

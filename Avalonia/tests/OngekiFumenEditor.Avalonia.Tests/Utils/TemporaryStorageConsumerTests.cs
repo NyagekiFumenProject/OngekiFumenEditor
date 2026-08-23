@@ -132,7 +132,7 @@ public sealed class TemporaryStorageConsumerTests
         byte[] second = await secondLoader.LoadImage(url, CancellationToken.None);
 
         string hash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(url)));
-        var images = await provider.Root.TryGetFolderAsync("images");
+        var images = await provider.Root.TryGetDirectoryAsync("images");
         Assert.NotNull(images);
         var cacheFile = await images.TryGetFileAsync($"{hash}.img.cache");
 
@@ -147,7 +147,7 @@ public sealed class TemporaryStorageConsumerTests
     public async Task RescueProjectSerialization_WritesAndReloadsTemporaryFileHandle()
     {
         var provider = new InMemoryTemporaryFolderProvider();
-        var rescue = await provider.Root.GetOrCreateFolderAsync("Rescue");
+        var rescue = await provider.Root.GetOrCreateDirectoryAsync("Rescue");
         var file = await rescue.GetOrCreateFileAsync("project.nyagekiProj");
         Guid projectId = Guid.NewGuid();
         var project = new EditorProjectDataModel

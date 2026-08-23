@@ -1,7 +1,7 @@
 # Browser ACB/AWB 支持设计访谈与实施计划
 
 - **文档日期**：2026-08-23
-- **状态**：设计访谈阶段；MVP 范围和产品行为已基本确定，文件抽象 API 边界仍待最终确认
+- **状态**：设计访谈阶段；MVP 范围和产品行为已基本确定；文件抽象已于 2026-08-24 统一（临时句柄直接使用 `ISimpleFile`/`ISimpleDirectory`），替换操作由 CopyTo + Delete 组合实现，不再引入 `IFileContentSource`
 - **目标平台**：Avalonia Browser / WebAssembly（标准 Browser AOT，兼顾 LLVM Browser）
 - **相关能力**：ACB、内嵌 AWB、外部 AWB、HCA 解码、OPFS/StorageProvider、项目文件夹导入
 
@@ -65,6 +65,44 @@ PublicKeyToken=null' or one of its dependencies.
 - `EditorProjectCreationTransaction` 在创建新项目时已经有复制外部 AWB 的基础。
 
 本轮 Browser 需求主要补齐的是：**打开已有项目文件夹时的 ACB/AWB 导入、验证和绑定**。
+
+### 2.4 已落地的文件抽象统一重构（2026-08-24 基线）
+
+接口统一决策已经实施完毕，作为后续 ACB/AWB 实施的基础：
+
+接口层：
+
+- 删除 `ITemporaryEntry`、`ITemporaryFile`、`ITemporaryFolder`；
+- `ITemporaryFolderProvider` 只暴露 `ISimpleDirectory Root`、`CreateUniqueFileAsync`、`CreateUniqueFolderAsync`；
+- `TemporaryEntryExtensions` 重命名为 `SimpleFileSystemEntryExtensions`，为 `ISimpleFile` / `ISimpleDirectory` 分别提供 `GetRequiredLocalPath`。
+
+`ISimple*` 默认接口实现扩充：
+
+- `ISimpleFile` 新增 `GetLengthAsync`、`ReadAllBytesAsync`、`OpenReadAsync`、`WriteAllBytesAsync`、`AppendAsync`；
+- `ISimpleDirectory` 新增 `TryGetFileAsync`、`TryGetDirectoryAsync`、`GetOrCreateFileAsync` 默认实现，以及默认抛 `NotSupportedException` 的 `DeleteAsync`。
+
+临时 Provider 实现要点（`TemporaryFolderProviderBase`）：
+
+- 内部 `TemporaryFile` / `TemporaryFolder` 句柄直接实现 `ISimpleFile` / `ISimpleDirectory`；
+- 临时文件用 `Interlocked` 维护缓存的 `FileLength`，读取、写入、追加后刷新，避免同步属性阻塞 Browser/OPFS 异步 I/O；
+- 临时目录维护子项跟踪字典（Track/Untrack/ClearTrackedEntries）；同步子项属性表示当前已知句柄快照，异步查找与创建仍是权威查询；
+- 临时文件不支持普通 `OpenWrite()`，显式抛出 `NotSupportedException`；写入一律走事务式 `WriteAsync`；
+- `ClearAsync` 清空存储后同步清空 root 的跟踪快照。
+
+消费者迁移清单：
+
+- `NAudioManager`：删除私有适配器类 `TemporaryFileSimpleFile`，ACB 解码输出的临时 WAV 句柄直接作为 `ISimpleFile` 使用；
+- `EditorProjectDataUtils`：保存签名改用 `ISimpleFile`，删除基于 `ITemporaryFile` 的重复版 `TrySaveFumenFileAsync`；
+- `EditorProjectFileManager`：`Load` / `Save` / `Save<T>` 改用 `ISimpleFile`；
+- `FumenRescue`：自动存档快照与救援目录改用 `ISimpleDirectory`；
+- `ImageLoader`：图片缓存迁移到 `GetOrCreateDirectoryAsync`；
+- `DefaultAcbGenerateService` / `DefaultJacketGenerateService`：迁移到 `GetOrCreateDirectoryAsync`；
+- `BrowserTemporaryFolderProvider`：转发签名全部改为 `ISimple*`。
+
+测试基线：
+
+- Desktop、Discard、Contract、Consumer 四组测试已全部迁移到新 API；
+- 契约测试新增 `TemporaryEntries_UseSimpleFileSystemContracts`，覆盖 `FullPath`、`ParentDictionary`、`ExistsFile`、`ChildFiles`、缓存长度等语义。
 
 ## 3. 最终产品范围：MVP
 
@@ -258,7 +296,7 @@ recent project 维持现有行为：
 
 但实现必须使用平台无关的文件抽象：
 
-- staging 使用 `ITemporaryFolderProvider` / `ITemporaryFile`；
+- staging 使用 `ITemporaryFolderProvider` 分配的 `ISimpleDirectory` / `ISimpleFile`；
 - 项目文件使用 `ISimpleFile` / `ISimpleDirectory`；
 - 业务层只通过流复制；
 - Browser/OPFS 的原子提交由底层 StorageProvider 实现；
@@ -287,35 +325,41 @@ Directory.CreateDirectory
 
 - `ISimpleFile.OpenRead()`；
 - `ISimpleFile.WriteAsync()`；
-- `ITemporaryFile.OpenReadAsync()`；
-- `ITemporaryFile.WriteAsync()`；
+- `ISimpleFile.OpenReadAsync()`；
+- `ISimpleFile.WriteAsync()`；
 - `Stream.CopyToAsync()`。
 
 `System.IO` 相关的底层实现只应存在于对应平台 Provider 内部，不能进入 ACB/AWB 业务服务。
 
 ---
 
-### Q12：`ITemporaryFile` 是否直接转换为 `ISimpleFile`
+### Q12：临时句柄是否直接使用 `ISimpleFile` / `ISimpleDirectory`
 
-**问题**：是否让 `ITemporaryFile` 继承 `ISimpleFile`，然后实现 `ISimpleFile.ReplaceTo`？
+**问题**：临时存储是否保留独立的文件/文件夹接口，还是直接使用通用 simple 文件系统接口？
 
-**当前建议：不直接继承，待最终确认。**
+**当时建议：保留独立接口，待最终确认。**
 
-原因：
+**后续决定（2026-08-24）**：废弃独立的 `ITemporaryFile`、`ITemporaryFolder`、`ITemporaryEntry`。`ITemporaryFolderProvider`
+只暴露 `ISimpleFile` / `ISimpleDirectory`，临时句柄直接参与平台无关的文件/文件夹操作。临时文件通过句柄缓存维护
+`ISimpleFile.FileLength`，不会为了同步属性阻塞 Browser/OPFS 的异步 I/O；临时目录的同步子项属性表示当前已知句柄快照，
+异步查找和创建仍然负责权威查询。临时文件不支持普通 `OpenWrite()` 时显式抛出 `NotSupportedException`，写入继续使用
+事务式 `WriteAsync`。跨 Provider 的替换提交同样不引入新抽象：以 CopyTo（经目标端事务式 `WriteAsync` 流式复制）+
+Delete（清理临时 staging）的组合实现 Replace 语义。
 
-- `ITemporaryFile.GetLengthAsync()` 是异步，`ISimpleFile.FileLength` 是同步；
-- `ITemporaryFile` 没有普通 `OpenWrite()`；
-- 临时文件的生命周期和普通文件不同；
+当时讨论中的关键考量：
+
+- 临时句柄的底层 I/O 仍然是异步的，`ISimpleFile` 同时提供异步辅助入口；
+- 临时文件没有普通 `OpenWrite()`；
 - 临时文件和项目文件可能属于不同的底层存储 Provider；
 - 跨 Provider 通常不能做物理 rename；
 - 直接继承会暴露临时文件实际不支持的能力。
 
-建议改为：
+当时的备选建议：
 
 1. 增加一个只读内容源抽象，例如 `IFileContentSource`；
-2. `ITemporaryFile` 和 `ISimpleFile` 都实现该抽象；
+2. 临时文件和 `ISimpleFile` 都实现该抽象；
 3. 在目标 `ISimpleFile` 上提供 `ReplaceFromAsync`；
-4. 如需保留用户希望的调用形式，再提供 `ReplaceToAsync` 扩展方法。
+4. 如需保留用户希望的调用形式，再提供 `CopyToAsync` 扩展方法。
 
 示意：
 
@@ -340,7 +384,7 @@ public interface ISimpleFile : IDisposable, IFileContentSource
 
 public static class FileContentSourceExtensions
 {
-    public static Task ReplaceToAsync(
+    public static Task CopyToAsync(
         this IFileContentSource source,
         ISimpleFile target,
         CancellationToken cancellationToken = default) =>
@@ -356,7 +400,7 @@ public static class FileContentSourceExtensions
 
 而不是让源文件负责了解目标 Provider 的原子替换机制。
 
-这是当前尚未最终确认的 API 设计点。
+**后续决定（2026-08-24）**：上述 `IFileContentSource` / `ReplaceFromAsync` 备选方案未被采用，此处仅作历史记录保留。替换操作最终由 CopyTo + Delete 组合实现，不新增任何接口抽象。
 
 ## 5. 目标实现流程
 
@@ -405,7 +449,7 @@ public static class FileContentSourceExtensions
     ↓
 要求所选文件名符合 ACB 声明
     ↓
-流式复制到 ITemporaryFile
+流式复制到临时 `ISimpleFile`
     ↓
 用临时 AWB 解码验证
     ↓
@@ -413,7 +457,7 @@ public static class FileContentSourceExtensions
     ↓
 创建项目内 expected.awb
     ↓
-通过 ReplaceFromAsync / ReplaceToAsync 提交
+staging 内容 CopyTo 项目内 AWB（事务式提交），成功后 Delete 临时 staging
     ↓
 绑定项目内 AWB
 ```
@@ -441,7 +485,7 @@ public static class FileContentSourceExtensions
 选择“替换”：
 
 - 先使用临时 AWB 完成解码验证；
-- 验证成功后调用目标文件的原子替换操作；
+- 验证成功后将 staging 内容 CopyTo 项目内 AWB（事务式提交，旧内容保持不变），成功后 Delete 临时 staging；
 - 提交成功后刷新/重新取得项目内 AWB capability；
 - 绑定项目内 AWB。
 
@@ -451,8 +495,7 @@ public static class FileContentSourceExtensions
 
 建议新增或整理：
 
-- `IFileContentSource`（如果最终采用该方案）；
-- `ReplaceFromAsync` 的共享契约；
+- AWB 替换辅助：CopyTo + Delete 组合（扩展方法或服务内部函数即可，不引入 `IFileContentSource` / `ReplaceFromAsync` 抽象）；
 - AWB 比较器：长度、确定性抽样、完整流式比较；
 - 外部 AWB 导入服务；
 - ACB/AWB 导入结果和失败原因模型。
@@ -600,11 +643,11 @@ Core 业务服务不依赖：
 - Browser OPFS 读取流已经是分块读取，不能为了方便改成全文件 `ReadAllBytes`；
 - 临时 WAV 需要继续使用 `ITemporaryFolderProvider`，不能改回本地临时路径。
 
-## 10. 当前待确认项
+## 10. 历史待确认项（已解决）
 
-当前唯一尚未最终确认的架构细节是：
+当时唯一尚未最终确认的架构细节是：
 
-> 是否采用 `IFileContentSource` + 目标端 `ISimpleFile.ReplaceFromAsync`，并提供源端 `ReplaceToAsync` 扩展方法，而不是让 `ITemporaryFile` 直接继承 `ISimpleFile`。
+> 是否采用 `IFileContentSource` + 目标端 `ISimpleFile.ReplaceFromAsync`，并提供源端 `CopyToAsync` 扩展方法，而不是继续保留独立的临时文件接口。
 
 推荐采用该方案，原因是：
 
@@ -612,12 +655,14 @@ Core 业务服务不依赖：
 - 目标文件拥有原子提交语义；
 - 能处理临时 Provider 与项目 Provider 不同的情况；
 - 业务层保持平台无关；
-- 可以通过扩展方法保留直观的 `temporaryAwb.ReplaceToAsync(projectAwb)` 调用形式。
+- 可以通过扩展方法保留直观的 `temporaryAwb.CopyToAsync(projectAwb)` 调用形式。
+
+以上内容保留为当时的备选方案记录；2026-08-24 已改为本节 Q12 所述的 `ISimple*` 统一方案，替换提交也确定为 CopyTo + Delete 组合，不再需要 `ReplaceFromAsync`。
 
 ## 11. 实施顺序
 
-1. 确认文件内容源和原子替换 API；
-2. 为 Core 和各 Provider 增加/强化替换契约；
+1. （已完成）确认替换 API：不引入新抽象，替换操作由 CopyTo + Delete 组合实现；
+2. 验证并强化各 Provider 事务式 `WriteAsync` 的原子提交语义；
 3. 实现确定性抽样 + 完整流式 AWB 比较器；
 4. 实现平台无关的外部 AWB staging/import 服务；
 5. 增加替换确认窗口；
@@ -642,4 +687,4 @@ Core 业务服务不依赖：
 - 比较使用确定性抽样预检后完整流式比较；
 - 业务层不使用 `System.IO` 直接文件系统 API；
 - 原子提交由平台无关文件抽象及各 Provider 实现；
-- 当前尚待最终确认的是 `ITemporaryFile` 与 `ISimpleFile` 的抽象关系，以及 `ReplaceFromAsync`/`ReplaceToAsync` 的最终 API 形态。
+- 临时 Provider 只返回 `ISimpleFile`/`ISimpleDirectory`；异步 simple API 是 Browser/OPFS 等平台的实际 I/O 入口。

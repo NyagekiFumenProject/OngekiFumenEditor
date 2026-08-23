@@ -11,7 +11,6 @@ using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
-using System.Text;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl;
 
@@ -311,7 +310,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
                 "ACB audio conversion requires temporary file storage on this platform.");
 
         var tempFolder = await temporaryFolderProvider.Root
-            .GetOrCreateFolderAsync("decodeAcbFiles");
+            .GetOrCreateDirectoryAsync("decodeAcbFiles");
         var temporaryWavFile = await temporaryFolderProvider.CreateUniqueFileAsync(
             "decoded",
             ".wav",
@@ -319,7 +318,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
 
         try
         {
-            using var outputFile = new TemporaryFileSimpleFile(temporaryWavFile);
+            using ISimpleFile outputFile = temporaryWavFile;
             await AcbConverter.ConvertAcbFileToWavAsync(
                 acbStream,
                 externalAwbStream,
@@ -395,51 +394,6 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
             audioFileReader.ToSampleProvider(),
             targetSampleRate);
         return new NAudioSoundPlayer(new CachedSound(provider), this);
-    }
-
-    private sealed class TemporaryFileSimpleFile(ITemporaryFile file) : ISimpleFile
-    {
-        private long fileLength;
-
-        public ISimpleDirectory ParentDictionary => null;
-        public string FullPath => file.RelativePath;
-        public string LocalPath => file.LocalPath;
-        public string FileName => file.Name;
-        public long FileLength => fileLength;
-
-        public async ValueTask<string[]> ReadAllLines()
-        {
-            var text = Encoding.UTF8.GetString(await ReadAllBytes());
-            return text.Split(["\r\n", "\n"], StringSplitOptions.None);
-        }
-
-        public async ValueTask<byte[]> ReadAllBytes()
-        {
-            var bytes = await file.ReadAllBytesAsync();
-            fileLength = bytes.LongLength;
-            return bytes;
-        }
-
-        public Task<Stream> OpenRead() => file.OpenReadAsync();
-
-        public Task<Stream> OpenWrite() =>
-            throw new NotSupportedException(
-                "Temporary ACB output files must be written through WriteAsync().");
-
-        public async Task WriteAsync(
-            Func<Stream, CancellationToken, Task> writer,
-            CancellationToken cancellationToken = default)
-        {
-            await file.WriteAsync(writer, cancellationToken);
-            fileLength = await file.GetLengthAsync(cancellationToken);
-        }
-
-        public Task DeleteAsync(CancellationToken cancellationToken = default) =>
-            file.DeleteAsync(cancellationToken);
-
-        public void Dispose()
-        {
-        }
     }
 
     public void Dispose()

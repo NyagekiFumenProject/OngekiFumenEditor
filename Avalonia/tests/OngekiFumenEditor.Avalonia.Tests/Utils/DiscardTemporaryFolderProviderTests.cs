@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Utils;
@@ -9,7 +10,7 @@ public sealed class DiscardTemporaryFolderProviderTests
     public async Task WritesRunProducerButNeverCreateReadableData()
     {
         var provider = new DiscardTemporaryFolderProvider();
-        var folder = await provider.Root.GetOrCreateFolderAsync("discarded");
+        var folder = await provider.Root.GetOrCreateDirectoryAsync("discarded");
         var file = await folder.GetOrCreateFileAsync("data.bin");
         bool producerRan = false;
 
@@ -24,7 +25,7 @@ public sealed class DiscardTemporaryFolderProviderTests
         Assert.False(provider.IsAvailable);
         Assert.True(producerRan);
         Assert.Null(file.LocalPath);
-        Assert.Null(await provider.Root.TryGetFolderAsync("discarded"));
+        Assert.Null(await provider.Root.TryGetDirectoryAsync("discarded"));
         Assert.Null(await folder.TryGetFileAsync("data.bin"));
         await Assert.ThrowsAsync<FileNotFoundException>(() => file.GetLengthAsync());
         await Assert.ThrowsAsync<FileNotFoundException>(() => file.ReadAllBytesAsync());
@@ -35,7 +36,7 @@ public sealed class DiscardTemporaryFolderProviderTests
     public async Task UniqueDeleteAndClear_AreSafeNoOps()
     {
         var provider = new DiscardTemporaryFolderProvider();
-        var folder = await provider.CreateUniqueFolderAsync("folder");
+        ISimpleDirectory folder = await provider.CreateUniqueFolderAsync("folder");
         var file = await provider.CreateUniqueFileAsync("file", ".tmp", folder);
 
         await file.DeleteAsync();
@@ -43,8 +44,8 @@ public sealed class DiscardTemporaryFolderProviderTests
         await folder.DeleteAsync();
         await provider.ClearAsync();
 
-        Assert.Null(await provider.Root.TryGetFolderAsync(folder.Name));
-        Assert.Null(await provider.Root.TryGetFileAsync(file.Name));
+        Assert.Null(await provider.Root.TryGetDirectoryAsync(folder.DirectoryName));
+        Assert.Null(await provider.Root.TryGetFileAsync(file.FileName));
     }
 
     [Fact]

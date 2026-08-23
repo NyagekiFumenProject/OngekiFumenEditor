@@ -41,7 +41,7 @@ internal sealed class DefaultAcbGenerateService : IAcbGenerateService
             var musicIdStr = option.MusicId.ToString().PadLeft(4, '0');
             var musicSourceName = $"musicsource{musicIdStr}";
             var tempRoot = await temporaryFolderProvider.Root
-                .GetOrCreateFolderAsync("AcbGen", cancellationToken);
+                .GetOrCreateDirectoryAsync("AcbGen", cancellationToken);
             var tempFolderEntry = await temporaryFolderProvider.CreateUniqueFolderAsync(
                 musicSourceName,
                 tempRoot,

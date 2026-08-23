@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Utils;
@@ -6,24 +7,44 @@ namespace OngekiFumenEditor.Avalonia.Tests.Utils;
 public sealed class TemporaryFolderProviderContractTests
 {
     [Fact]
+    public async Task TemporaryEntries_UseSimpleFileSystemContracts()
+    {
+        var provider = new InMemoryTemporaryFolderProvider();
+        ISimpleDirectory directory = await provider.Root.GetOrCreateDirectoryAsync("simple");
+        ISimpleFile file = await directory.GetOrCreateFileAsync("data.txt");
+
+        Assert.Equal("simple", directory.FullPath);
+        Assert.Equal("simple/data.txt", file.FullPath);
+        Assert.Same(directory, file.ParentDictionary);
+        Assert.True(directory.ExistsFile("data.txt"));
+        Assert.Single(directory.ChildFiles);
+
+        await file.WriteAsync(
+            (stream, cancellationToken) => stream.WriteAsync("temporary"u8.ToArray(), cancellationToken).AsTask());
+
+        Assert.Equal(9, file.FileLength);
+        Assert.Equal("temporary", System.Text.Encoding.UTF8.GetString(await file.ReadAllBytes()));
+        Assert.Equal("data.txt", Assert.Single(directory.GetFiles()).FileName);
+    }
+
+    [Fact]
     public async Task CreateUniqueFileAsync_CreatesPlaceholderBeforeReturningAndUsesDistinctNames()
     {
         var provider = new InMemoryTemporaryFolderProvider();
-        var parent = await provider.Root.GetOrCreateFolderAsync("unique");
+        ISimpleDirectory parent = await provider.Root.GetOrCreateDirectoryAsync("unique");
 
-        ITemporaryFile first = await provider.CreateUniqueFileAsync("asset", ".bin", parent);
-        ITemporaryFile[] concurrent = await Task.WhenAll(
+        ISimpleFile first = await provider.CreateUniqueFileAsync("asset", ".bin", parent);
+        ISimpleFile[] concurrent = await Task.WhenAll(
             Enumerable.Range(0, 32)
                 .Select(_ => provider.CreateUniqueFileAsync("asset", ".bin", parent)));
 
-        Assert.Equal("temp", provider.Root.Name);
-        Assert.Equal(string.Empty, provider.Root.RelativePath);
+        Assert.Equal(string.Empty, provider.Root.FullPath);
         Assert.Null(provider.Root.LocalPath);
         Assert.Equal(0, await first.GetLengthAsync());
-        Assert.NotNull(await parent.TryGetFileAsync(first.Name));
-        Assert.StartsWith("asset.", first.Name, StringComparison.Ordinal);
-        Assert.EndsWith(".bin", first.Name, StringComparison.Ordinal);
-        Assert.Equal(33, concurrent.Append(first).Select(file => file.Name).Distinct().Count());
+        Assert.NotNull(await parent.TryGetFileAsync(first.FileName));
+        Assert.StartsWith("asset.", first.FileName, StringComparison.Ordinal);
+        Assert.EndsWith(".bin", first.FileName, StringComparison.Ordinal);
+        Assert.Equal(33, concurrent.Append(first).Select(file => file.FileName).Distinct().Count());
     }
 
     [Fact]
@@ -31,18 +52,18 @@ public sealed class TemporaryFolderProviderContractTests
     {
         var provider = new InMemoryTemporaryFolderProvider();
 
-        var firstFolder = await provider.Root.GetOrCreateFolderAsync("level1");
-        var secondFolder = await provider.Root.GetOrCreateFolderAsync("level1");
-        var nested = await firstFolder.GetOrCreateFolderAsync("level2");
+        var firstFolder = await provider.Root.GetOrCreateDirectoryAsync("level1");
+        var secondFolder = await provider.Root.GetOrCreateDirectoryAsync("level1");
+        var nested = await firstFolder.GetOrCreateDirectoryAsync("level2");
         var firstFile = await nested.GetOrCreateFileAsync("fixed.dat");
         await firstFile.WriteAllBytesAsync(new byte[] { 1, 2, 3 });
         var secondFile = await nested.GetOrCreateFileAsync("fixed.dat");
 
-        Assert.Equal(firstFolder.RelativePath, secondFolder.RelativePath);
-        Assert.Equal("level1/level2", nested.RelativePath);
-        Assert.Equal("level1/level2/fixed.dat", secondFile.RelativePath);
+        Assert.Equal(firstFolder.FullPath, secondFolder.FullPath);
+        Assert.Equal("level1/level2", nested.FullPath);
+        Assert.Equal("level1/level2/fixed.dat", secondFile.FullPath);
         Assert.Equal(new byte[] { 1, 2, 3 }, await secondFile.ReadAllBytesAsync());
-        Assert.NotNull(await firstFolder.TryGetFolderAsync("level2"));
+        Assert.NotNull(await firstFolder.TryGetDirectoryAsync("level2"));
     }
 
     [Fact]
@@ -113,8 +134,8 @@ public sealed class TemporaryFolderProviderContractTests
     public async Task DeleteAndClear_AreIdempotentAndProviderRemainsReusable()
     {
         var provider = new InMemoryTemporaryFolderProvider();
-        var removed = await provider.Root.GetOrCreateFolderAsync("removed");
-        var child = await removed.GetOrCreateFolderAsync("child");
+        var removed = await provider.Root.GetOrCreateDirectoryAsync("removed");
+        var child = await removed.GetOrCreateDirectoryAsync("child");
         await (await child.GetOrCreateFileAsync("data.bin")).WriteAllBytesAsync(new byte[] { 1 });
         var retained = await provider.Root.GetOrCreateFileAsync("retained.bin");
         await retained.WriteAllBytesAsync(new byte[] { 2 });
@@ -122,11 +143,13 @@ public sealed class TemporaryFolderProviderContractTests
         await removed.DeleteAsync();
         await removed.DeleteAsync();
 
-        Assert.Null(await provider.Root.TryGetFolderAsync("removed"));
+        Assert.Null(await provider.Root.TryGetDirectoryAsync("removed"));
         Assert.Equal(new byte[] { 2 }, await retained.ReadAllBytesAsync());
 
         await provider.ClearAsync();
         Assert.Null(await provider.Root.TryGetFileAsync("retained.bin"));
+        Assert.Empty(((ISimpleDirectory)provider.Root).ChildFiles);
+        Assert.False(((ISimpleDirectory)provider.Root).ExistsFile("retained.bin"));
         Assert.NotNull(await provider.Root.GetOrCreateFileAsync("after-clear.bin"));
     }
 
@@ -154,7 +177,7 @@ public sealed class TemporaryFolderProviderContractTests
         await Assert.ThrowsAsync<ArgumentException>(
             () => provider.Root.GetOrCreateFileAsync(name));
         await Assert.ThrowsAsync<ArgumentException>(
-            () => provider.Root.GetOrCreateFolderAsync(name));
+            () => provider.Root.GetOrCreateDirectoryAsync(name));
     }
 
     [Fact]
@@ -162,7 +185,7 @@ public sealed class TemporaryFolderProviderContractTests
     {
         var provider = new InMemoryTemporaryFolderProvider();
         var otherProvider = new InMemoryTemporaryFolderProvider();
-        var foreignParent = await otherProvider.Root.GetOrCreateFolderAsync("foreign");
+        ISimpleDirectory foreignParent = await otherProvider.Root.GetOrCreateDirectoryAsync("foreign");
 
         await Assert.ThrowsAsync<ArgumentException>(
             () => provider.CreateUniqueFileAsync("../escape", ".dat"));
@@ -197,6 +220,6 @@ public sealed class TemporaryFolderProviderContractTests
 
         var exception = Assert.Throws<PlatformNotSupportedException>(file.GetRequiredLocalPath);
 
-        Assert.Contains(file.RelativePath, exception.Message, StringComparison.Ordinal);
+        Assert.Contains(file.FullPath, exception.Message, StringComparison.Ordinal);
     }
 }

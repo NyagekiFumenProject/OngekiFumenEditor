@@ -1,22 +1,24 @@
 #nullable enable
 
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+
 namespace OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
 public interface ITemporaryFolderProvider
 {
     bool IsAvailable { get; }
 
-    ITemporaryFolder Root { get; }
+    ISimpleDirectory Root { get; }
 
-    Task<ITemporaryFile> CreateUniqueFileAsync(
+    Task<ISimpleFile> CreateUniqueFileAsync(
         string prefix = "tempFile",
         string extension = ".dat",
-        ITemporaryFolder? parent = null,
+        ISimpleDirectory? parent = null,
         CancellationToken cancellationToken = default);
 
-    Task<ITemporaryFolder> CreateUniqueFolderAsync(
+    Task<ISimpleDirectory> CreateUniqueFolderAsync(
         string prefix = "tempFolder",
-        ITemporaryFolder? parent = null,
+        ISimpleDirectory? parent = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

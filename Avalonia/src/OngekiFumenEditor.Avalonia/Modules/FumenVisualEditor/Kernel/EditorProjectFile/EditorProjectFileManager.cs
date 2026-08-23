@@ -3,7 +3,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectF
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProjectFile.Serializers;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models.EditorProjectFiles;
-using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 		}
 
 		public async Task<EditorProjectDataModel> Load(
-			ITemporaryFile file,
+			ISimpleFile file,
 			CancellationToken cancellationToken = default)
 		{
 			ArgumentNullException.ThrowIfNull(file);
@@ -108,13 +108,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 		}
 
 		public Task Save(
-			ITemporaryFile file,
+			ISimpleFile file,
 			EditorProjectDataModel proj,
 			CancellationToken cancellationToken = default)
 			=> Save<EditorProjectDataModel>(file, proj, cancellationToken);
 
 		public Task Save<T>(
-			ITemporaryFile file,
+			ISimpleFile file,
 			EditorProjectDataModel proj,
 			CancellationToken cancellationToken = default) where T : EditorProjectDataModelBase
 		{
