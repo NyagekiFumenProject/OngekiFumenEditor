@@ -17,7 +17,6 @@ using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
-using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 using OngekiFumenEditor.Avalonia.Browser.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
@@ -40,12 +39,6 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
         serviceCollection.AddOngekiFumenEditorAvaloniaBrowser();
 #endif
 
-        serviceCollection.AddSingleton<DefaultBrowserFumenVisualEditorProvider>();
-        serviceCollection.AddSingleton<IEditorProvider>(provider =>
-            provider.GetRequiredService<DefaultBrowserFumenVisualEditorProvider>());
-        serviceCollection.AddSingleton<IFumenVisualEditorProvider>(provider =>
-            provider.GetRequiredService<DefaultBrowserFumenVisualEditorProvider>());
-
         serviceCollection.AddTypeCollectedActivator(BrowserViewTypeCollectedActivator.Default);
 #if DEBUG
         if (DesignModeHelper.IsDesignMode)
@@ -62,10 +55,6 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
-
-        // Browser 的 DevTools 输出统一走 System.Console 的 WASM 原生重定向：
-        // 挂载共享层着色输出端后，门面广播(含 MEL 桥接流量)直达 DevTools。
-        Log.Instance.AddOutputIfNotExist<ConsoleLogOutput>();
 
         InitializeProgramVersion();
 
