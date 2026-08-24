@@ -6,6 +6,7 @@ using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -40,7 +41,6 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         base.RegisterServices(serviceCollection);
 
         serviceCollection.AddOngekiFumenEditorAvaloniaDesktop();
-        RegisterFumenVisualEditorProvider(serviceCollection);
 
         // Desktop 视图经 ViewLocator 定位需要平台自己的视图类型收集器。
         serviceCollection.AddTypeCollectedActivator(DesktopViewTypeCollectedActivator.Default);
@@ -53,7 +53,7 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
             o.SetMinimumLevel(LogLevel.Debug);
             o.AddDebug();
             // 仅命令行模式保留 MEL 终端直显；GUI 的控制台由 ConsoleWindowHelper
-            // 挂载的着色 ConsoleLogOutput 承担，MEL 流量经 MELTransportLoggerProvider
+            // 挂载的着色 DesktopConsoleLogOutput 承担，MEL 流量经 MELTransportLoggerProvider
             // 进入门面广播(文件+控制台)。
             if (!IsGUIMode)
                 o.AddConsole();
@@ -130,17 +130,8 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
     {
         // 对齐 WPF AppBootstrapper：OS 控制台承载着色日志输出；DEBUG 恒显示，
         // Release 由 ShowConsoleWindowInGUIMode 决定，设置页可实时切换。
-        // 共享层 ConsoleWindowHelper 内部已联动 Log 输出的挂载与摘除。
+        // ConsoleWindowHelper 内部已联动 Log 输出的挂载与摘除。
         ConsoleWindowHelper.SetConsoleWindowVisible(show);
-    }
-
-    internal static void RegisterFumenVisualEditorProvider(IServiceCollection services)
-    {
-        services.AddSingleton<DefaultDesktopFumenVisualEditorProvider>();
-        services.AddSingleton<IEditorProvider>(provider =>
-            provider.GetRequiredService<DefaultDesktopFumenVisualEditorProvider>());
-        services.AddSingleton<IFumenVisualEditorProvider>(provider =>
-            provider.GetRequiredService<DefaultDesktopFumenVisualEditorProvider>());
     }
 
     private async Task ProcessStartupArgsAsync()

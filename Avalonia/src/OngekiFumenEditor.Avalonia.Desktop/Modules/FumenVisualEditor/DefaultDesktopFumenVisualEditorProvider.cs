@@ -4,12 +4,17 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
+using Gekimini.Avalonia.Framework;
+using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Setup;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor;
 
+// 注册自身与全部实现接口（IEditorProvider、IFumenVisualEditorProvider），接口由生成器
+// 经代理工厂转发到同一单例；Skip 对展开产生的重复描述符按服务类型去重。
+[RegisterSingleton<IEditorProvider>(Registration = RegistrationStrategy.SelfWithProxyFactory, Duplicate = DuplicateStrategy.Skip)]
 public sealed class DefaultDesktopFumenVisualEditorProvider : FumenVisualEditorProviderBase
 {
     public override bool CanCreateNew => true;
