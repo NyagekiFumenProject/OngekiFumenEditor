@@ -32,6 +32,7 @@ internal class Program
     {
         StartupArgs = args ?? [];
 
+#if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             ProcessException(sender, e.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException");
         TaskScheduler.UnobservedTaskException += (sender, e) =>
@@ -39,6 +40,7 @@ internal class Program
             ProcessException(sender, e.Exception, "TaskScheduler.UnobservedTaskException");
             e.SetObserved();
         };
+#endif
         return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
