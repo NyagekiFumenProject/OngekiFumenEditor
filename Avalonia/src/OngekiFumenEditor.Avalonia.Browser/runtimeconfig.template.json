@@ -1,5 +1,10 @@
 {
+  // WasmAppHost 以通配方式在输出目录查找 *.staticwebassets.runtime.json，
+  // 引用工程（如 NAudio.BrowserAudioWorklet）的清单会被复制进输出目录并按字母序
+  // 遮蔽应用自身的清单，导致除该库资源外全部 404。
+  // 指定 mainAssembly 后，宿主直接按 "<主程序集>.staticwebassets.runtime.json" 命中正确清单。
   "wasmHostProperties": {
+    "mainAssembly": "OngekiFumenEditor.Avalonia.Browser.dll",
     "perHostConfig": [
       {
         "name": "browser",
