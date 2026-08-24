@@ -8,7 +8,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Gekimini.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Desktop.UI.Dialogs;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia.Utils.DeadHandler;
@@ -117,13 +116,12 @@ internal class Program
             Dispatcher.UIThread.VerifyAccess();
 
             var app = Application.Current as App;
-            var logger = app?.ServiceProvider?.GetService<ILogger<Program>>();
-            logger?.LogInformationEx($"triggered by {trigSource}");
+            Log.LogInfo($"triggered by {trigSource}");
 
             HideApplicationWindows(app);
 
             var (innerMessage, report) = BuildExceptionReport(sender, exception, trigSource);
-            logger?.LogError(exception, report);
+            Log.LogError(report, exception);
             await TryWriteLogAsync(report);
 
             var dumpFile = TryWriteMiniDump();

@@ -7,7 +7,8 @@ using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia;
-using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
+using OngekiFumenEditor.Avalonia.Models.Settings;
+using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor;
@@ -21,7 +22,6 @@ namespace OngekiFumenEditor.Avalonia.Desktop;
 
 public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 {
-    private ILogger<OngekiFumenEditorDesktopApp> logger;
     private readonly string[] commandLineArgs;
 
     public OngekiFumenEditorDesktopApp()
@@ -52,10 +52,12 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         {
             o.SetMinimumLevel(LogLevel.Debug);
             o.AddDebug();
-            if (IsGUIMode)
+            // 仅命令行模式保留 MEL 终端直显；GUI 的控制台由 ConsoleWindowHelper
+            // 挂载的着色 ConsoleLogOutput 承担，MEL 流量经 MELTransportLoggerProvider
+            // 进入门面广播(文件+控制台)。
+            if (!IsGUIMode)
                 o.AddConsole();
         });
-        serviceCollection.AddSingleton<ILoggerProvider, FileLoggerProvider>();
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -66,7 +68,6 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         Program.InstallDispatcherExceptionHandler();
 #endif
 
-        logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorDesktopApp>>();
 
         if (!IsGUIMode)
         {
@@ -79,6 +80,22 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 #if DEBUG
         this.AttachXamlMcp();
 #endif
+
+        if (OperatingSystem.IsWindows())
+        {
+#if DEBUG
+            var showConsole = true;
+#else
+            var showConsole = ProgramSetting.Default.ShowConsoleWindowInGUIMode;
+#endif
+            ConsoleWindowHelper.SetConsoleWindowVisible(showConsole);
+
+            ProgramSetting.Default.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(ProgramSetting.ShowConsoleWindowInGUIMode))
+                    ConsoleWindowHelper.SetConsoleWindowVisible(ProgramSetting.Default.ShowConsoleWindowInGUIMode);
+            };
+        }
 
         ApplyAdminPermissionTitleSuffix();
 
@@ -99,14 +116,22 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
                     System.Security.Principal.WindowsBuiltInRole.Administrator))
                 return;
 
-            logger?.LogWarning("Program is within admin permission.");
+            Log.LogWarn("Program is within admin permission.");
             var mainWindow = ServiceProvider.GetRequiredService<IPlatformMainWindow>();
             mainWindow.Title += "(以管理员权限运行)";
         }
         catch (Exception exception)
         {
-            logger?.LogError(exception, "Failed to apply the admin permission title suffix.");
+            Log.LogError("Failed to apply the admin permission title suffix.", exception);
         }
+    }
+
+    private static void ApplyConsoleVisibility(bool show)
+    {
+        // 对齐 WPF AppBootstrapper：OS 控制台承载着色日志输出；DEBUG 恒显示，
+        // Release 由 ShowConsoleWindowInGUIMode 决定，设置页可实时切换。
+        // 共享层 ConsoleWindowHelper 内部已联动 Log 输出的挂载与摘除。
+        ConsoleWindowHelper.SetConsoleWindowVisible(show);
     }
 
     internal static void RegisterFumenVisualEditorProvider(IServiceCollection services)
@@ -127,7 +152,7 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         }
         catch (Exception exception)
         {
-            logger?.LogError(exception, "Failed to process the startup arguments.");
+            Log.LogError("Failed to process the startup arguments.", exception);
         }
     }
 
@@ -141,7 +166,7 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         }
         catch (Exception exception)
         {
-            logger?.LogError(exception, "Failed to execute the command line.");
+            Log.LogError("Failed to execute the command line.", exception);
             await Console.Error.WriteLineAsync(exception.Message);
         }
 
@@ -158,7 +183,7 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
             return;
         desktop.Shutdown(exitCode);
         */
-        logger.LogInformationEx("bye.");
+        Log.LogInfo("bye.");
         Environment.Exit(exitCode);
     }
 }

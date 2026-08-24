@@ -7,7 +7,6 @@ using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
@@ -74,8 +73,7 @@ public abstract class OngekiFumenEditorApp : App
         }
         catch (Exception exception)
         {
-            ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>()
-                .LogError(exception, "Failed to initialize the main window title and icon.");
+            Log.LogError("Failed to initialize the main window title and icon.", exception);
         }
     }
 
@@ -87,8 +85,7 @@ public abstract class OngekiFumenEditorApp : App
         }
         catch (Exception exception)
         {
-            ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>()
-                .LogError(exception, "Failed to attach the editor key binding router.");
+            Log.LogError("Failed to attach the editor key binding router.", exception);
         }
     }
 
@@ -99,14 +96,13 @@ public abstract class OngekiFumenEditorApp : App
             var shell = ServiceProvider.GetRequiredService<IShell>();
             var documentManager = ServiceProvider.GetRequiredService<IEditorDocumentManager>();
             var schedulerManager = ServiceProvider.GetRequiredService<ISchedulerManager>();
-            var bridgeLogger = ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>();
 
             // WPF 版由 FumenVisualEditorViewModel 的 Caliburn 生命周期钩子自行调用
             // NotifyCreate/NotifyActivate/NotifyDestory；Gekimini 没有等价钩子，
             // 这里改为订阅 IShell 的 Dock 事件转发，对齐原项目语义。
             shell.DockableOpened += (_, dockable) =>
             {
-                bridgeLogger.LogInformation("Shell dockable opened: {Type}.", dockable.GetType().FullName);
+                Log.LogInfo($"Shell dockable opened: {dockable.GetType().FullName}.");
                 if (dockable is FumenVisualEditorViewModel editor)
                     documentManager.NotifyCreate(editor);
             };
@@ -115,9 +111,7 @@ public abstract class OngekiFumenEditorApp : App
                 var previous = documentManager.CurrentActivatedEditor;
                 if (ReferenceEquals(previous, document))
                     return;
-                bridgeLogger.LogInformation("Active document changed from {Previous} to {Current}.",
-                    previous?.GetType().FullName ?? "(none)",
-                    document?.GetType().FullName ?? "(none)");
+                Log.LogInfo($"Active document changed from {previous?.GetType().FullName ?? "(none)"} to {document?.GetType().FullName ?? "(none)"}.");
                 // 对齐 WPF OnDeactivateAsync：切走编辑器时暂停音频、摘除调度任务。
                 if (previous is not null)
                 {
@@ -136,7 +130,7 @@ public abstract class OngekiFumenEditorApp : App
             };
             shell.DockableClosed += (_, dockable) =>
             {
-                bridgeLogger.LogInformation("Shell dockable closed: {Type}.", dockable.GetType().FullName);
+                Log.LogInfo($"Shell dockable closed: {dockable.GetType().FullName}.");
                 if (dockable is FumenVisualEditorViewModel editor)
                 {
                     if (schedulerManager.Schedulers.Contains(editor))
@@ -156,8 +150,7 @@ public abstract class OngekiFumenEditorApp : App
         }
         catch (Exception exception)
         {
-            ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>()
-                .LogError(exception, "Failed to attach the editor document manager bridge.");
+            Log.LogError("Failed to attach the editor document manager bridge.", exception);
         }
     }
 
@@ -174,8 +167,7 @@ public abstract class OngekiFumenEditorApp : App
         }
         catch (Exception exception)
         {
-            ServiceProvider.GetService<ILogger<OngekiFumenEditorApp>>()
-                ?.LogError(exception, "Failed to terminate the scheduler manager.");
+            Log.LogError("Failed to terminate the scheduler manager.", exception);
         }
     }
 
@@ -207,8 +199,7 @@ public abstract class OngekiFumenEditorApp : App
         }
         catch (Exception exception)
         {
-            ServiceProvider.GetRequiredService<ILogger<OngekiFumenEditorApp>>()
-                .LogError(exception, "Failed to show the splash screen after startup.");
+            Log.LogError("Failed to show the splash screen after boot.", exception);
         }
     }
 }
