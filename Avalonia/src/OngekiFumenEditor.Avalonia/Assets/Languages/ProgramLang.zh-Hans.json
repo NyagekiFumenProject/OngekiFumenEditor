@@ -1,4 +1,4 @@
-﻿{
+{
     "AcbGenerator":  "音频文件生成器",
     "Action":  "操作",
     "AddConnectableNextObject":  "添加Next物件",
@@ -158,7 +158,10 @@
     "EditScriptByVisualStudio":  "使用VS编辑脚本",
     "Enable":  "开启",
     "EnableAutoSave":  "是否开启自动保存功能",
-    "EnableDumpFullMemory":  "是否截取完整内存",
+    "CrashDumpLevel":  "崩溃转储体积",
+    "CrashDumpSmall":  "小型（仅线程堆栈）",
+    "CrashDumpMedium":  "中型（推荐）",
+    "CrashDumpFull":  "完整内存",
     "EnableHorizonScroll":  "允许水平滚动",
     "EnableHorizonScrollBarDisplay":  "显示水平滚动轴",
     "EnableLoopPlayTiming":  "打开节拍器(仅编辑模式)",

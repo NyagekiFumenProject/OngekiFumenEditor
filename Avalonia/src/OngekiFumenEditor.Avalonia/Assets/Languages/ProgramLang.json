@@ -1,4 +1,4 @@
-﻿{
+{
     "AcbGenerator":  "Audio File Generator",
     "Action":  "Actions",
     "AddConnectableNextObject":  "Add next object",
@@ -158,7 +158,10 @@
     "EditScriptByVisualStudio":  "Use Visual Studio to edit the script.",
     "Enable":  "Enable",
     "EnableAutoSave":  "Enable autosave",
-    "EnableDumpFullMemory":  "Enable full memory dumps on crash",
+    "CrashDumpLevel":  "Crash dump size",
+    "CrashDumpSmall":  "Small (thread stacks only)",
+    "CrashDumpMedium":  "Medium (recommended)",
+    "CrashDumpFull":  "Full memory",
     "EnableHorizonScroll":  "Enable horizontal scrolling",
     "EnableHorizonScrollBarDisplay":  "Display horizontal scroll bar",
     "EnableLoopPlayTiming":  "Enable metronome (only in Design Mode)",

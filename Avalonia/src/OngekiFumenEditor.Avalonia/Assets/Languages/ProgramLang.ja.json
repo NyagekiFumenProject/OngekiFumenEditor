@@ -1,4 +1,4 @@
-﻿{
+{
     "AcbGenerator":  "音源生成ツール",
     "Action":  "操作",
     "AddConnectableNextObject":  "接続可能オブジェクトを追加",
@@ -156,7 +156,10 @@
     "EditScriptByVisualStudio":  "Visual Studioでスクリプトを編集",
     "Enable":  "有効化",
     "EnableAutoSave":  "自動保存を有効にしますか？",
-    "EnableDumpFullMemory":  "フルメモリダンプを有効にしますか？",
+    "CrashDumpLevel":  "クラッシュダンプのサイズ",
+    "CrashDumpSmall":  "小型（スレッドスタックのみ）",
+    "CrashDumpMedium":  "中型（推奨）",
+    "CrashDumpFull":  "フルメモリ",
     "EnableHorizonScroll":  "水平スクロールを有効化",
     "EnableHorizonScrollBarDisplay":  "水平スクロールバーを表示",
     "EnableLoopPlayTiming":  "メトロノームを有効化（デザインモードのみ）",

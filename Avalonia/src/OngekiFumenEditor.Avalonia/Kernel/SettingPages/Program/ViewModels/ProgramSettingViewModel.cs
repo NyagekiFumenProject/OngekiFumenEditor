@@ -5,7 +5,8 @@ using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Settings;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
-using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Models.Settings;
+using SimpleTypedLocalizer;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 
@@ -73,6 +74,29 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     {
         Log.LogInfo("ThrowException triggered.");
         _ = Task.Run(() => throw new Exception("Crash dump test exception."));
+    }
+
+    public sealed record CrashDumpLevelOption(CrashDumpLevel Level, ILocalizedTextSource Name);
+
+    public IReadOnlyList<CrashDumpLevelOption> CrashDumpLevels { get; } =
+    [
+        new(CrashDumpLevel.Small, Lang.B.CrashDumpSmall),
+        new(CrashDumpLevel.Medium, Lang.B.CrashDumpMedium),
+        new(CrashDumpLevel.Full, Lang.B.CrashDumpFull),
+    ];
+
+    public CrashDumpLevelOption SelectedCrashDumpLevel
+    {
+        get => CrashDumpLevels.FirstOrDefault(o => o.Level == Setting.DumpLevel) ?? CrashDumpLevels[0];
+        set
+        {
+            if (value is null || value.Level == Setting.DumpLevel)
+                return;
+
+            Setting.DumpLevel = value.Level;
+            OnPropertyChanged();
+            ApplyChanges();
+        }
     }
 
 }

@@ -15,8 +15,9 @@ public partial class ProgramSetting : SettingModelBase<ProgramSetting>
     [ObservableProperty]
     public partial string DumpFileDirPath { get; set; } = ".\\Dumps";
 
+    /// <summary>崩溃转储体积档位（仅 Windows 平台生效）。</summary>
     [ObservableProperty]
-    public partial bool IsFullDump { get; set; } = false;
+    public partial CrashDumpLevel DumpLevel { get; set; } = CrashDumpLevel.Small;
 
     [ObservableProperty]
     public partial bool IsNotifyUserCrash { get; set; } = true;

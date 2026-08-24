@@ -58,12 +58,14 @@
                         Command="{Binding SelectDumpFolderCommand}"
                         Content="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
                 </Grid>
-                <CheckBox
-                    Margin="10,0,10,10"
-                    Content="{markup:Translate {x:Static languages:Lang+B.EnableDumpFullMemory}}"
-                    IsChecked="{Binding Setting.IsFullDump}">
-
-                </CheckBox>
+                <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CrashDumpLevel}}" />
+                    <ComboBox
+                        MinWidth="160"
+                        DisplayMemberBinding="{Binding Name.Text}"
+                        ItemsSource="{Binding CrashDumpLevels}"
+                        SelectedItem="{Binding SelectedCrashDumpLevel}" />
+                </StackPanel>
                 <CheckBox
                     Margin="10,0,10,10"
                     Content="{markup:Translate {x:Static languages:Lang+B.EnableNotifyUserByDialog}}"
