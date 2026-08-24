@@ -14,8 +14,10 @@ using Iciclecreek.Avalonia.WindowManager;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia;
+using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
+using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 using OngekiFumenEditor.Avalonia.Browser.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
@@ -27,7 +29,6 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 {
     // Keep the host above DefaultWindowManager's minimum managed-window size.
     private const double MinimumWindowHostLength = 50;
-    private ILogger<OngekiFumenEditorBrowserApp> logger;
 
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
@@ -54,17 +55,18 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
         serviceCollection.AddLogging(o =>
         {
             o.SetMinimumLevel(LogLevel.Debug);
-            o.AddProvider(new ConsoleLoggerProvider());
             o.AddDebug();
         });
-        serviceCollection.AddSingleton<ILoggerProvider, BrowserFileLoggerProvider>();
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
 
-        logger = ServiceProvider.GetService<ILogger<OngekiFumenEditorBrowserApp>>();
+        // Browser 的 DevTools 输出统一走 System.Console 的 WASM 原生重定向：
+        // 挂载共享层着色输出端后，门面广播(含 MEL 桥接流量)直达 DevTools。
+        Log.Instance.AddOutputIfNotExist<ConsoleLogOutput>();
+
         InitializeProgramVersion();
 
         var shell = ServiceProvider.GetService<IShell>();
@@ -101,7 +103,7 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Failed to initialize browser program version tracking.");
+            Log.LogError("Failed to initialize browser program version tracking.", exception);
         }
     }
 
@@ -115,7 +117,7 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Failed to show the About dialog after a browser update.");
+            Log.LogError("Failed to show the About dialog after a browser update.", exception);
         }
     }
 
@@ -128,7 +130,7 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 
     protected override void DoExit(int exitCode = 0)
     {
-        logger.LogInformationEx($"bye. exitCode={exitCode}");
+        Log.LogInfo($"bye. exitCode={exitCode}");
         JsApplicationInterop.Exit();
     }
 

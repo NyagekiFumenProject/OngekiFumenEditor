@@ -4,7 +4,7 @@ using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 namespace OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 
 [RegisterSingleton<ILogOutput>]
-internal class ConsoleLogOutput : ILogOutput
+public sealed class ConsoleLogOutput : ILogOutput
 {
     public void WriteLog(Severity severity, string content)
     {

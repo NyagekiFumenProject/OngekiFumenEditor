@@ -1,9 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Logging;
-using OngekiFumenEditor.Avalonia.Desktop.Utils.Logging;
 using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
+using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.Logs;
+using OngekiFumenEditor.Avalonia.Utils.Logging;
 using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 using Xunit;
 
@@ -46,28 +47,39 @@ public sealed class DesktopLogFileStorageTests
     }
 
     [Fact]
-    public async Task DesktopLoggerAndApplicationLogOutput_ShareTheSameSessionFile()
+    public async Task MelTransportAndApplicationLogOutput_ShareTheSameSessionFile()
     {
         using var directory = new TemporaryDirectory();
         var storage = new DesktopLogFileStorage(directory.RootPath);
         var now = new DateTime(2026, 8, 10, 15, 4, 5, DateTimeKind.Local);
         var output = new FileLogOutputWrapper(storage, () => now);
-        using var provider = new FileLoggerProvider(new ILogOutput[] { output });
-        ILogger logger = provider.CreateLogger("OngekiFumenEditor.Tests.Category");
 
-        await output.WriteLogAsync("application-record\n");
-        logger.LogInformation("microsoft-logger-record");
-        await output.FlushAsync();
+        var previous = Log.Instance;
+        Log.Initialize(new Log(new ILogOutput[] { output }));
+        try
+        {
+            await output.WriteLogAsync("application-record\n");
+            using var provider = new MELTransportLoggerProvider();
+            ILogger logger = provider.CreateLogger("OngekiFumenEditor.Tests.Category");
+            logger.LogInformation("microsoft-logger-record");
+            await Log.WaitForAllLogWriteDone();
+            await output.FlushAsync();
 
-        string currentPath = output.GetCurrentLogFile();
-        string content = await File.ReadAllTextAsync(currentPath);
-        string[] files = Directory.GetFiles(storage.LogDirectoryPath, "*.log");
+            string currentPath = output.GetCurrentLogFile();
+            string content = await File.ReadAllTextAsync(currentPath);
+            string[] files = Directory.GetFiles(storage.LogDirectoryPath, "*.log");
 
-        Assert.Single(files);
-        Assert.Equal(Path.GetFullPath(files[0]), Path.GetFullPath(currentPath));
-        Assert.StartsWith(FileLogOutputWrapper.BeginFileLogOutputMarker, content, StringComparison.Ordinal);
-        Assert.Contains("application-record", content, StringComparison.Ordinal);
-        Assert.Contains("[Category] microsoft-logger-record", content, StringComparison.Ordinal);
+            Assert.Single(files);
+            Assert.Equal(Path.GetFullPath(files[0]), Path.GetFullPath(currentPath));
+            Assert.StartsWith(FileLogOutputWrapper.BeginFileLogOutputMarker, content, StringComparison.Ordinal);
+            Assert.Contains("application-record", content, StringComparison.Ordinal);
+            Assert.Contains("<Category> microsoft-logger-record", content, StringComparison.Ordinal);
+        }
+        finally
+        {
+            if (previous is not null)
+                Log.Initialize(previous);
+        }
     }
 
     [Fact]

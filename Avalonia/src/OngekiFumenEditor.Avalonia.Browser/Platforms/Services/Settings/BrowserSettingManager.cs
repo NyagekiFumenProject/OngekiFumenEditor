@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using OngekiFumenEditor.Avalonia.Utils;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -7,7 +8,6 @@ using Gekimini.Avalonia;
 using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.Settings;
 
@@ -16,14 +16,12 @@ public class BrowserSettingManager : ISettingManager
 {
     private const string persistenceStoreKey = "__browserPersistence_";
     private readonly Dictionary<string, object> cacheObj = new();
-    private readonly ILogger logger;
     private readonly IServiceProvider provider;
     private readonly object locker = new();
 
-    public BrowserSettingManager(IServiceProvider provider, ILogger<BrowserSettingManager> logger)
+    public BrowserSettingManager(IServiceProvider provider)
     {
         this.provider = provider;
-        this.logger = logger;
     }
 
 
@@ -44,7 +42,7 @@ public class BrowserSettingManager : ISettingManager
             var jsonContent = JsonSerializer.Serialize(obj, jsonTypeInfo);
             SetLocalStorage(key, jsonContent);
             cacheObj[key] = obj;
-            logger.LogDebugEx($"save/update cached {typeof(T).Name} object, hash = {obj.GetHashCode()}");
+            Log.LogDebug($"save/update cached {typeof(T).Name} object, hash = {obj.GetHashCode()}");
         }
     }
 
@@ -59,7 +57,7 @@ public class BrowserSettingManager : ISettingManager
 
             if (cacheObj.TryGetValue(key, out var obj))
             {
-                logger.LogDebugEx($"return cached {typeName} object, hash = {obj.GetHashCode()}");
+                Log.LogDebug($"return cached {typeName} object, hash = {obj.GetHashCode()}");
                 return (T) obj;
             }
 
@@ -68,12 +66,12 @@ public class BrowserSettingManager : ISettingManager
             if (!string.IsNullOrWhiteSpace(jsonContent))
             {
                 cw = JsonSerializer.Deserialize(jsonContent, jsonTypeInfo);
-                logger.LogDebugEx($"create new {typeName} object from browser storage, hash = {cw.GetHashCode()}");
+                Log.LogDebug($"create new {typeName} object from browser storage, hash = {cw.GetHashCode()}");
             }
             else
             {
                 cw = provider.Resolve<T>();
-                logger.LogDebugEx(
+                Log.LogDebug(
                     $"create new {typeName} object from ActivatorUtilities.CreateInstance(), hash = {cw.GetHashCode()}");
             }
 
@@ -90,14 +88,14 @@ public class BrowserSettingManager : ISettingManager
     private void SetLocalStorage(string key, string value)
     {
         LocalStorageInterop.Save(key, value);
-        logger.LogDebugEx($"saved setting '{key}', length = {value?.Length ?? 0}");
+        Log.LogDebug($"saved setting '{key}', length = {value?.Length ?? 0}");
     }
 
     private string GetLocalStorage(string key)
     {
         var value = LocalStorageInterop.Load(key);
 
-        logger.LogDebugEx($"loaded setting '{key}', length = {value?.Length ?? 0}");
+        Log.LogDebug($"loaded setting '{key}', length = {value?.Length ?? 0}");
         return value;
     }
 }

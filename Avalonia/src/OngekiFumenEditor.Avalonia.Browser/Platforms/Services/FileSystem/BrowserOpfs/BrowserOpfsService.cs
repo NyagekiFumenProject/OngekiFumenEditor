@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using OngekiFumenEditor.Avalonia.Utils;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +12,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.FileSystem.BrowserOpfs;
@@ -21,11 +21,9 @@ namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.FileSystem.Brows
 public sealed class BrowserOpfsService : IBrowserOpfsService
 {
     private const int CopyBufferLength = 256 * 1024;
-    private readonly ILogger<BrowserOpfsService> logger;
 
-    public BrowserOpfsService(ILogger<BrowserOpfsService> logger)
+    public BrowserOpfsService()
     {
-        this.logger = logger;
     }
 
     public bool IsAvailable
@@ -151,7 +149,7 @@ public sealed class BrowserOpfsService : IBrowserOpfsService
                 }
                 catch (Exception exception)
                 {
-                    logger.LogWarning(exception, "Failed to clean a partial browser OPFS download output.");
+                    Log.LogWarn("Failed to clean a partial browser OPFS download output.", exception);
                 }
             }
         }
