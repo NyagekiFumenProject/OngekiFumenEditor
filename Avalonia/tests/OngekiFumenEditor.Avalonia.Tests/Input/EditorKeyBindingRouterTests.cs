@@ -3,8 +3,6 @@ using System.Runtime.CompilerServices;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
@@ -101,8 +99,7 @@ public sealed class EditorKeyBindingRouterTests
             new KeyBindingDefinition("test-conflict-b", Key.S)
         ];
         var keyBindingManager = new StubKeyBindingManager(definitions) { MatchAll = true };
-        var logger = new RecordingLogger<DefaultEditorKeyBindingRouter>();
-        var router = CreateRouter(keyBindingManager, logger);
+        var router = CreateRouter(keyBindingManager);
         var window = new Window();
 
         try
@@ -113,10 +110,6 @@ public sealed class EditorKeyBindingRouterTests
 
             Assert.Equal(2, keyBindingManager.CheckCallCount);
             Assert.False(eventArgs.Handled);
-            var logEntry = Assert.Single(logger.Entries, static entry => entry.Level == LogLevel.Error);
-            Assert.Equal(LogLevel.Error, logEntry.Level);
-            Assert.Contains("conflict", logEntry.Message, StringComparison.OrdinalIgnoreCase);
-            Assert.DoesNotContain("No editor action", logEntry.Message, StringComparison.Ordinal);
         }
         finally
         {
@@ -209,14 +202,14 @@ public sealed class EditorKeyBindingRouterTests
     }
 
     private static DefaultEditorKeyBindingRouter CreateRouter(
-        StubKeyBindingManager keyBindingManager,
-        ILogger<DefaultEditorKeyBindingRouter>? logger = null)
+        StubKeyBindingManager keyBindingManager)
     {
         return new DefaultEditorKeyBindingRouter(
             keyBindingManager,
-            new StubEditorDocumentManager(),
-            logger ?? NullLogger<DefaultEditorKeyBindingRouter>.Instance);
+            new StubEditorDocumentManager());
     }
+
+
 
     private static KeyEventArgs RaiseKeyDown(InputElement source, Key key)
     {
@@ -319,31 +312,4 @@ public sealed class EditorKeyBindingRouterTests
         }
     }
 
-    private sealed class RecordingLogger<T> : ILogger<T>
-    {
-        public List<(LogLevel Level, string Message)> Entries { get; } = [];
-
-        public IDisposable BeginScope<TState>(TState state) where TState : notnull => NoopScope.Instance;
-
-        public bool IsEnabled(LogLevel logLevel) => true;
-
-        public void Log<TState>(
-            LogLevel logLevel,
-            EventId eventId,
-            TState state,
-            Exception? exception,
-            Func<TState, Exception?, string> formatter)
-        {
-            Entries.Add((logLevel, formatter(state, exception)));
-        }
-
-        private sealed class NoopScope : IDisposable
-        {
-            public static NoopScope Instance { get; } = new();
-
-            public void Dispose()
-            {
-            }
-        }
-    }
 }

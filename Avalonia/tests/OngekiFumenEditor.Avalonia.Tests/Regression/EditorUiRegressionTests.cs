@@ -266,7 +266,7 @@ public sealed class EditorUiRegressionTests
         var previousTransparentBrush = hadTransparentBrush ? resources[transparentBrushKey] : null;
         resources[transparentBrushKey] = global::Avalonia.Media.Brushes.Transparent;
         var view = new FumenTimeSignatureListViewerView();
-        var viewModel = new FumenTimeSignatureListViewerViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenTimeSignatureListViewerViewModel>.Instance);
+        var viewModel = new FumenTimeSignatureListViewerViewModel();
         var item = new DisplayTimeSignatureItem();
         viewModel.DisplayTimeSignatures.Add(item);
         view.DataContext = viewModel;
@@ -344,7 +344,7 @@ public sealed class EditorUiRegressionTests
     [AvaloniaFact]
     public async Task HitObjects_CanBeQueriedWhileRenderFrameRefreshesThem()
     {
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
+        var editor = new FumenVisualEditorViewModel();
         var objects = Enumerable.Range(0, 256).Select(_ => new Tap()).ToArray();
         using var barrier = new Barrier(2);
 

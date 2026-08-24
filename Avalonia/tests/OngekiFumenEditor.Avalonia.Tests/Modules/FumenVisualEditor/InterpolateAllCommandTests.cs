@@ -60,7 +60,7 @@ public sealed class InterpolateAllCommandTests
             XGrid = new XGrid(0)
         };
         fumen.AddObject(lane);
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        var editor = new FumenVisualEditorViewModel()
         {
             EditorContext = new EditorContext { Fumen = fumen }
         };
@@ -169,7 +169,7 @@ public sealed class InterpolateAllCommandTests
         for (var i = 0; i < laneCount; i++)
             fumen.AddObject(CreateCurvedLane(i, i * 3));
 
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        var editor = new FumenVisualEditorViewModel()
         {
             EditorContext = new EditorContext { Fumen = fumen }
         };
@@ -211,7 +211,7 @@ public sealed class InterpolateAllCommandTests
         var lane = CreateCurvedLane(1, 0);
         fumen.AddObject(lane);
 
-        return (new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        return (new FumenVisualEditorViewModel()
         {
             EditorContext = new EditorContext { Fumen = fumen }
         }, fumen, lane);

@@ -129,7 +129,7 @@ public sealed class ConnectableObjectBrushTests
 
         var fumen = new OngekiFumen();
         fumen.AddObject(lane);
-        return (new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        return (new FumenVisualEditorViewModel()
         {
             EditorContext = new EditorContext { Fumen = fumen }
         }, fumen, lane);

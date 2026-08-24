@@ -308,7 +308,7 @@ public sealed class SvgPrefabTests
                 TGrid = new TGrid(4)
             };
             var project = new EditorProjectDataModel();
-            var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+            var editor = new FumenVisualEditorViewModel()
             {
                 EditorContext = new EditorContext
                 {

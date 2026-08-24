@@ -5,7 +5,6 @@ using Gekimini.Avalonia.Modules.Settings;
 using Gekimini.Avalonia.Modules.Settings.ViewModels;
 using Gekimini.Avalonia.Views;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.Views;
@@ -121,7 +120,7 @@ public sealed class SettingsEditorRegistrationTests
             setting.UndoActionSavingLimit = 50;
             var view = new FumenVisualEditorGlobalSettingView
             {
-                DataContext = new FumenVisualEditorGlobalSettingViewModel(NullLogger<FumenVisualEditorGlobalSettingViewModel>.Instance)
+                DataContext = new FumenVisualEditorGlobalSettingViewModel()
             };
             var enabledCheckBox = Assert.IsType<CheckBox>(
                 view.FindControl<CheckBox>("UndoHistoryLimitEnabledCheckBox"));

@@ -258,7 +258,7 @@ public sealed class StandardizeFormatCommandTests
             outputService);
 
     private static FumenVisualEditorViewModel CreateEditor() =>
-        new(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance) { EditorContext = new EditorContext { Fumen = new OngekiFumen() } };
+        new() { EditorContext = new EditorContext { Fumen = new OngekiFumen() } };
 
     private sealed class StubConvertService : IFumenConvertService
     {

@@ -4,8 +4,6 @@ using System.Diagnostics;
 using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
@@ -91,7 +89,7 @@ public sealed class SelectingObjectViewerSortingTests
         fumen.AddObject(inside);
         fumen.AddObject(outside);
 
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        var editor = new FumenVisualEditorViewModel()
         {
             EditorContext = new EditorContext { Fumen = fumen }
         };
@@ -188,10 +186,8 @@ public sealed class SelectingObjectViewerSortingTests
     private static FumenEditorSelectingObjectViewerViewModel CreateViewer(FumenVisualEditorViewModel editor)
     {
         var injectedConstructor = typeof(FumenEditorSelectingObjectViewerViewModel)
-            .GetConstructor([typeof(ILogger<FumenEditorSelectingObjectViewerViewModel>), typeof(IEditorDocumentManager)]);
-        var viewModel = (FumenEditorSelectingObjectViewerViewModel)injectedConstructor.Invoke(
-            [NullLogger<FumenEditorSelectingObjectViewerViewModel>.Instance,
-             new StubEditorDocumentManager { Current = editor }]);
+            .GetConstructor([typeof(IEditorDocumentManager)]);
+        var viewModel = (FumenEditorSelectingObjectViewerViewModel)injectedConstructor.Invoke([new StubEditorDocumentManager { Current = editor }]);
         viewModel.Editor = editor;
         return viewModel;
     }

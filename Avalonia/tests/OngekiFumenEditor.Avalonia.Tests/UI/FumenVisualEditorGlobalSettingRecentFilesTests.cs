@@ -4,7 +4,6 @@ using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Modules.Dialogs.ViewModels;
-using Microsoft.Extensions.Logging.Abstractions;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views;
@@ -19,7 +18,7 @@ public sealed class FumenVisualEditorGlobalSettingRecentFilesTests
     {
         var dialogManager = new StubDialogManager(false);
         var recentFilesManager = new StubRecentFilesManager(recordCount: 1);
-        var viewModel = new FumenVisualEditorGlobalSettingViewModel(NullLogger<FumenVisualEditorGlobalSettingViewModel>.Instance, dialogManager, recentFilesManager);
+        var viewModel = new FumenVisualEditorGlobalSettingViewModel(dialogManager, recentFilesManager);
 
         await viewModel.ClearRecentFilesCommand.ExecuteAsync(null);
 
@@ -35,7 +34,7 @@ public sealed class FumenVisualEditorGlobalSettingRecentFilesTests
     {
         var dialogManager = new StubDialogManager(true);
         var recentFilesManager = new StubRecentFilesManager(recordCount: 2);
-        var viewModel = new FumenVisualEditorGlobalSettingViewModel(NullLogger<FumenVisualEditorGlobalSettingViewModel>.Instance, dialogManager, recentFilesManager);
+        var viewModel = new FumenVisualEditorGlobalSettingViewModel(dialogManager, recentFilesManager);
 
         await viewModel.ClearRecentFilesCommand.ExecuteAsync(null);
 
@@ -47,9 +46,7 @@ public sealed class FumenVisualEditorGlobalSettingRecentFilesTests
     public async Task ClearRecentFilesCommand_EmptyHistory_IsIdempotent()
     {
         var recentFilesManager = new StubRecentFilesManager(recordCount: 0);
-        var viewModel = new FumenVisualEditorGlobalSettingViewModel(
-            NullLogger<FumenVisualEditorGlobalSettingViewModel>.Instance,
-            new StubDialogManager(true),
+        var viewModel = new FumenVisualEditorGlobalSettingViewModel(new StubDialogManager(true),
             recentFilesManager);
 
         await viewModel.ClearRecentFilesCommand.ExecuteAsync(null);
@@ -62,9 +59,7 @@ public sealed class FumenVisualEditorGlobalSettingRecentFilesTests
     [AvaloniaFact]
     public void View_ExposesLocalizedClearRecentFilesCommand()
     {
-        var viewModel = new FumenVisualEditorGlobalSettingViewModel(
-            NullLogger<FumenVisualEditorGlobalSettingViewModel>.Instance,
-            new StubDialogManager(true),
+        var viewModel = new FumenVisualEditorGlobalSettingViewModel(new StubDialogManager(true),
             new StubRecentFilesManager(recordCount: 1));
         var view = new FumenVisualEditorGlobalSettingView { DataContext = viewModel };
 

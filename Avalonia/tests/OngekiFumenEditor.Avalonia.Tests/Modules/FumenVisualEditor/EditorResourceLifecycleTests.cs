@@ -21,7 +21,7 @@ public sealed class EditorResourceLifecycleTests
     [AvaloniaFact]
     public async Task Dispose_ReleasesRenderContextControlAudioAndGlobalSettingSubscription()
     {
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
+        var editor = new FumenVisualEditorViewModel();
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager();
         var audioPlayer = new TrackingAudioPlayer();
@@ -92,7 +92,7 @@ public sealed class EditorResourceLifecycleTests
     [AvaloniaFact]
     public async Task Dispose_DuringRenderInitialization_CancelsAttachmentAndReleasesControl()
     {
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
+        var editor = new FumenVisualEditorViewModel();
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager(delayInitialization: true);
 
@@ -117,7 +117,7 @@ public sealed class EditorResourceLifecycleTests
     [AvaloniaFact]
     public async Task Dispose_DuringNonCancelableInitialization_DoesNotReattachClosedEditor()
     {
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
+        var editor = new FumenVisualEditorViewModel();
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager(ignoreInitializationCancellation: true);
 
@@ -143,7 +143,7 @@ public sealed class EditorResourceLifecycleTests
     {
         var scheduler = new StubSchedulerManager();
         var manager = new DefaultEditorDocumentManager(scheduler);
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        var editor = new FumenVisualEditorViewModel()
         {
             AudioPlayer = new TrackingAudioPlayer()
         };
@@ -180,7 +180,7 @@ public sealed class EditorResourceLifecycleTests
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static Panel CreateAndDisposeEditor(out WeakReference editorReference)
     {
-        var editor = new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance);
+        var editor = new FumenVisualEditorViewModel();
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager();
         editor.InitializeRenderControlAsync(

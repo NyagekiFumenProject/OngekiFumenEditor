@@ -104,7 +104,7 @@ public sealed class ObjectSelectionOverloadTests
         {
             AudioDuration = TimeSpan.FromSeconds(30)
         };
-        return new FumenVisualEditorViewModel(Microsoft.Extensions.Logging.Abstractions.NullLogger<FumenVisualEditorViewModel>.Instance)
+        return new FumenVisualEditorViewModel()
         {
             EditorContext = new EditorContext
             {
