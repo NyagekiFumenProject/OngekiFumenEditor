@@ -10,7 +10,6 @@ using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
-using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
 
 namespace OngekiFumenEditor.Avalonia.Tests;
 
@@ -44,7 +43,6 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
         services.AddTypeCollectedActivator(
             global::OngekiFumenEditor.Avalonia.ToolViewModelTypeCollectedActivator.Default);
         services.AddSingleton<ITemporaryFolderProvider, DiscardTemporaryFolderProvider>();
-        services.AddSingleton<ILogFileStorage, DiscardLogFileStorage>();
         services.AddSingleton<ISettingManager, InMemorySettingManager>();
         // 真实 DefaultDialogManager 在 headless 下会等待视图交互，用可编程替身覆盖（后注册生效）。
         services.AddSingleton<IDialogManager>(ProgrammableDialogManager.Instance);

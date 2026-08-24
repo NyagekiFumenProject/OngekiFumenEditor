@@ -10,8 +10,9 @@ using Gekimini.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Desktop.UI.Dialogs;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
+using OngekiFumenEditor.Avalonia.Desktop.Utils.DeadHandler;
+using OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Logging;
 using OngekiFumenEditor.Avalonia.Utils.DeadHandler;
-using OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Desktop;
@@ -190,7 +191,7 @@ internal class Program
     {
         try
         {
-            await FileLogOutput.WriteLog(content);
+            await DesktopFileLogOutput.WriteLog(content);
         }
         catch
         {
@@ -214,7 +215,7 @@ internal class Program
     {
         try
         {
-            return FileLogOutput.GetCurrentLogFile();
+            return DesktopFileLogOutput.CurrentLogFile;
         }
         catch
         {

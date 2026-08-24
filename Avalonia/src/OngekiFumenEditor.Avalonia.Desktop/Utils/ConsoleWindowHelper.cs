@@ -1,0 +1,107 @@
+using System.Runtime.InteropServices;
+using System.Threading;
+using Microsoft.Win32.SafeHandles;
+using OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Logging;
+using OngekiFumenEditor.Avalonia.Utils;
+
+namespace OngekiFumenEditor.Avalonia.Desktop.Utils
+{
+    internal static class ConsoleWindowHelper
+    {
+        [DllImport("Kernel32.dll")]
+        private static extern IntPtr GetConsoleWindow();
+
+        [DllImport("User32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool AttachConsole(int dwProcessId);
+
+        [DllImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool AllocConsole();
+
+        [DllImport("Kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool FreeConsole();
+
+        [DllImport("Kernel32.dll")]
+        private static extern IntPtr GetStdHandle(int nStdHandle);
+
+        [DllImport("Kernel32.dll")]
+        private static extern int GetConsoleProcessList(IntPtr lpdwProcessList, int dwProcessCount);
+
+        private static int hasConsole = 0;
+
+        private enum StdHandle
+        {
+            Stdin = -10,
+            Stdout = -11,
+            Stderr = -12,
+        }
+
+
+        public static void SetConsoleWindowVisible(bool isShow)
+        {
+            if (isShow)
+            {
+                Show();
+                Log.Instance.AddOutputIfNotExist<DesktopConsoleLogOutput>();
+            }
+            else
+            {
+                Hide();
+                Log.Instance.RemoveOutput<DesktopConsoleLogOutput>();
+            }
+        }
+
+        public static void Hide()
+        {
+            var ori = Interlocked.CompareExchange(ref hasConsole, 0, 1);
+            if (ori == 0)
+            {
+                return;
+            }
+            FreeConsole();
+            Console.SetOut(System.IO.TextWriter.Null);
+            Console.SetIn(System.IO.TextReader.Null);
+            Console.SetError(System.IO.TextWriter.Null);
+        }
+
+        public static void Show()
+        {
+            var ori = Interlocked.CompareExchange(ref hasConsole, 1, 0);
+            if (ori == 1)
+            {
+                return;
+            }
+            AllocConsole();
+            SafeFileHandle stdoutHandle = new(GetStdHandle((int)StdHandle.Stdout), false);
+            SafeFileHandle stdinHandle = new(GetStdHandle((int)StdHandle.Stdin), false);
+            SafeFileHandle stderrHandle = new(GetStdHandle((int)StdHandle.Stderr), false);
+            var stdoutStream = new System.IO.FileStream(stdoutHandle, System.IO.FileAccess.Write);
+            var stdinStream = new System.IO.FileStream(stdinHandle, System.IO.FileAccess.Read);
+            var stderrStream = new System.IO.FileStream(stderrHandle, System.IO.FileAccess.Write);
+            Console.SetOut(new System.IO.StreamWriter(stdoutStream) { AutoFlush = true });
+            Console.SetIn(new System.IO.StreamReader(stdinStream));
+            Console.SetError(new System.IO.StreamWriter(stderrStream) { AutoFlush = true });
+        }
+
+        public static void AttachConsole()
+        {
+            AttachConsole(-1);
+            SafeFileHandle stdoutHandle = new(GetStdHandle((int)StdHandle.Stdout), false);
+            SafeFileHandle stdinHandle = new(GetStdHandle((int)StdHandle.Stdin), false);
+            SafeFileHandle stderrHandle = new(GetStdHandle((int)StdHandle.Stderr), false);
+            var stdoutStream = new System.IO.FileStream(stdoutHandle, System.IO.FileAccess.Write);
+            var stdinStream = new System.IO.FileStream(stdinHandle, System.IO.FileAccess.Read);
+            var stderrStream = new System.IO.FileStream(stderrHandle, System.IO.FileAccess.Write);
+            Console.SetOut(new System.IO.StreamWriter(stdoutStream) { AutoFlush = true });
+            Console.SetIn(new System.IO.StreamReader(stdinStream));
+            Console.SetError(new System.IO.StreamWriter(stderrStream) { AutoFlush = true });
+        }
+
+    }
+}

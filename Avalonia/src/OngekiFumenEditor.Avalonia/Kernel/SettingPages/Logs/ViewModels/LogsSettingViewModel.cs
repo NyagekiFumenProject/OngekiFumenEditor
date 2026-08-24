@@ -2,7 +2,7 @@ using Gekimini.Avalonia.Modules.Settings;
 using Gekimini.Avalonia.ViewModels;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
-using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
+using OngekiFumenEditor.Avalonia.Utils.Logs;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.ViewModels;
 
@@ -15,10 +15,10 @@ public partial class LogsSettingViewModel : ViewModelBase, ISettingsEditor
 
     public string SettingsPagePath => Lang.TabEnviorment;
 
-    public LogsSettingViewModel(ILogFileStorage storage)
+    public LogsSettingViewModel(IEnumerable<ILogOutput> outputs)
     {
-        ArgumentNullException.ThrowIfNull(storage);
-        LogFolderPath = storage.LogDirectoryPath;
+        ArgumentNullException.ThrowIfNull(outputs);
+        LogFolderPath = outputs.OfType<IFileLogOutput>().FirstOrDefault()?.LogDirectoryPath ?? string.Empty;
     }
 
     public void ApplyChanges()

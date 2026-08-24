@@ -52,7 +52,7 @@ public sealed class BrowserOpfsLogStorageContractTests
             "Platforms",
             "Services",
             "Logging",
-            "BrowserLogFileStorage.cs"));
+            "BrowserFileLogOutput.cs"));
 
         Assert.Contains(
             "requireOriginRoot().getDirectoryHandle(entryName, { create: true })",
@@ -67,7 +67,7 @@ public sealed class BrowserOpfsLogStorageContractTests
         Assert.Contains("const writeBuffers = new Map();", logs, StringComparison.Ordinal);
         Assert.Contains("tryCreateFile,", logs, StringComparison.Ordinal);
         Assert.Contains("appendFile,", logs, StringComparison.Ordinal);
-        Assert.Contains("[RegisterSingleton<ILogFileStorage>]", provider, StringComparison.Ordinal);
+        Assert.Contains("[RegisterSingleton<ILogOutput>]", provider, StringComparison.Ordinal);
         Assert.Contains("opfs:/logs", provider, StringComparison.Ordinal);
     }
 

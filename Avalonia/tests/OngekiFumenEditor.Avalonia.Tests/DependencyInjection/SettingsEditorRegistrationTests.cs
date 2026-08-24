@@ -17,7 +17,7 @@ using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Logs.Views;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.Views;
 using OngekiFumenEditor.Avalonia.Models.Settings;
-using OngekiFumenEditor.Avalonia.Platforms.Services.Logging;
+using OngekiFumenEditor.Avalonia.Utils.Logs;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.DependencyInjection;
@@ -157,7 +157,7 @@ public sealed class SettingsEditorRegistrationTests
         const string effectivePath = "opfs:/logs";
         var view = new LogsSettingView
         {
-            DataContext = new LogsSettingViewModel(new StubLogFileStorage(effectivePath))
+            DataContext = new LogsSettingViewModel(new ILogOutput[] { new StubFileLogOutput(effectivePath) })
         };
 
         var pathTextBox = Assert.IsType<TextBox>(
@@ -180,15 +180,12 @@ public sealed class SettingsEditorRegistrationTests
         Assert.IsType<TEditor>(Assert.Single(page.Editors));
     }
 
-    private sealed class StubLogFileStorage(string path) : ILogFileStorage
+    private sealed class StubFileLogOutput(string path) : IFileLogOutput
     {
-        public bool IsAvailable => true;
         public string LogDirectoryPath { get; } = path;
 
-        public Task<ILogFile?> CreateUniqueFileAsync(
-            string prefix,
-            string extension = ".log",
-            CancellationToken cancellationToken = default) =>
-            Task.FromResult<ILogFile?>(null);
+        public void WriteLog(ILogOutput.Severity severity, string content)
+        {
+        }
     }
 }

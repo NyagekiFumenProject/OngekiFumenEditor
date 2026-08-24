@@ -1,10 +1,11 @@
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Utils.Logs;
 using static OngekiFumenEditor.Avalonia.Utils.Logs.ILogOutput;
 
-namespace OngekiFumenEditor.Avalonia.Utils.Logs.DefaultImpls;
+namespace OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Logging;
 
 [RegisterSingleton<ILogOutput>]
-public sealed class ConsoleLogOutput : ILogOutput
+public sealed class DesktopConsoleLogOutput : ILogOutput
 {
     public void WriteLog(Severity severity, string content)
     {
@@ -21,5 +22,3 @@ public sealed class ConsoleLogOutput : ILogOutput
         Console.ForegroundColor = backup;
     }
 }
-
-
