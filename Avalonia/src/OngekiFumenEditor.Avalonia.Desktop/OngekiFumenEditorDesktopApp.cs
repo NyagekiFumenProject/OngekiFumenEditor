@@ -6,6 +6,7 @@ using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
+using OngekiFumenEditor.Avalonia.Desktop.Utils.DeadHandler;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Models.Settings;
@@ -64,10 +65,21 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
     {
         base.OnFrameworkInitializationCompleted();
 
-#if !DEBUG
         Program.InstallDispatcherExceptionHandler();
-#endif
 
+        // 原生顶层过滤器：托管管道覆盖不到的原生崩溃（P/Invoke 访问冲突等）也写出 minidump。
+        // 需在 DI 容器构建完成后执行，Init 内部要读取 ProgramSetting。
+        if (OperatingSystem.IsWindows())
+        {
+            try
+            {
+                DumpFileHelper.Init();
+            }
+            catch (Exception exception)
+            {
+                Log.LogError("Failed to install native unhandled exception filter.", exception);
+            }
+        }
 
         if (!IsGUIMode)
         {

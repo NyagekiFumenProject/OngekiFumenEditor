@@ -32,7 +32,6 @@ internal class Program
     {
         StartupArgs = args ?? [];
 
-#if !DEBUG
         AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             ProcessException(sender, e.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException");
         TaskScheduler.UnobservedTaskException += (sender, e) =>
@@ -40,7 +39,6 @@ internal class Program
             ProcessException(sender, e.Exception, "TaskScheduler.UnobservedTaskException");
             e.SetObserved();
         };
-#endif
         return BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }
@@ -230,13 +228,12 @@ internal class Program
 
         try
         {
+            // 托管异常没有原生 EXCEPTION_POINTERS（GetExceptionPointers() 为 Zero），
+            // 此时 DumpFileHelper 写不带异常上下文的转储；原生崩溃则带上真实指针。
             var exceptionHandle = Marshal.GetExceptionPointers();
-            if (exceptionHandle == IntPtr.Zero)
-                return string.Empty;
-
             lock (exceptionHandleLock)
             {
-                if (!recordedExceptionHandles.Add(exceptionHandle))
+                if (exceptionHandle != IntPtr.Zero && !recordedExceptionHandles.Add(exceptionHandle))
                     return string.Empty;
             }
 
