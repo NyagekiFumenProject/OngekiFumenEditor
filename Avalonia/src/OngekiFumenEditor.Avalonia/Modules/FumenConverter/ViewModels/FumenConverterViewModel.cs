@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Window.ViewModels;
-using Microsoft.Extensions.Logging;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
@@ -20,7 +19,6 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
     private readonly IEditorDocumentManager editorDocumentManager;
     private ISimpleFile inputFumenFile;
     private ISimpleFile outputFumenFile;
-    private readonly ILogger<FumenConverterViewModel> logger;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExecuteConverterCommand))]
@@ -42,9 +40,8 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
 
     public string CurrentEditorName => editorDocumentManager?.CurrentActivatedEditor?.DisplayName;
 
-    public FumenConverterViewModel(ILogger<FumenConverterViewModel> logger)
+    public FumenConverterViewModel()
     {
-        this.logger = logger;
 
         editorDocumentManager = IoC.Get<IEditorDocumentManager>();
         editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
@@ -71,7 +68,7 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
     [RelayCommand]
     private async Task OpenSelectInputFileAsync()
     {
-        logger.LogInformation("OpenSelectInputFile triggered.");
+        Log.LogInfo("OpenSelectInputFile triggered.");
         var file = await FileDialogHelper.OpenFileAsync(string.Empty,
             FileDialogHelper.GetSupportFumenFileExtensionFilterList());
         if (file is null)
@@ -86,7 +83,7 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
     [RelayCommand]
     private async Task OpenSelectOutputFileAsync()
     {
-        logger.LogInformation("OpenSelectOutputFile triggered.");
+        Log.LogInfo("OpenSelectOutputFile triggered.");
         var file = await FileDialogHelper.SaveFileAsync(string.Empty,
             FileDialogHelper.GetSupportFumenFileExtensionFilterList());
         if (file is null)
@@ -104,7 +101,7 @@ public partial class FumenConverterViewModel : WindowViewModelBase, IFumenConver
     [RelayCommand(CanExecute = nameof(CanExecuteConverter))]
     private async Task ExecuteConverterAsync()
     {
-        logger.LogInformation("ExecuteConverter triggered.");
+        Log.LogInfo("ExecuteConverter triggered.");
         var option = new FumenConvertOption
         {
             InputFumenFile = IsUseInputFile ? inputFumenFile : null,

@@ -6,7 +6,6 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -22,7 +21,6 @@ public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumen
     private readonly IEditorDocumentManager editorDocumentManager;
     private readonly List<IFumenCheckRule> checkRules;
     private readonly List<ICheckResult> allCheckResults = [];
-    private readonly ILogger<FumenCheckerListViewerViewModel> logger;
 
     public ObservableCollection<ICheckResult> CheckResults { get; } = [];
 
@@ -75,9 +73,8 @@ public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumen
         }
     }
 
-    public FumenCheckerListViewerViewModel(ILogger<FumenCheckerListViewerViewModel> logger) : base(Lang.B.FumenCheckerListViewer.ToLocalizedString())
+    public FumenCheckerListViewerViewModel() : base(Lang.B.FumenCheckerListViewer.ToLocalizedString())
     {
-        this.logger = logger;
 
         Dock = DockMode.Bottom;
         editorDocumentManager = IoC.Get<IEditorDocumentManager>();
@@ -104,14 +101,14 @@ public partial class FumenCheckerListViewerViewModel : ToolViewModelBase, IFumen
     [RelayCommand]
     private void NavigateToResult(ICheckResult checkResult)
     {
-        logger.LogInformation("Navigate to check result ({ResultType}).", checkResult?.GetType().Name);
+        Log.LogInfo($"Navigate to check result ({checkResult?.GetType().Name}).");
         checkResult?.NavigateBehavior?.Navigate(Editor);
     }
 
     [RelayCommand]
     public void RefreshCurrentFumen()
     {
-        logger.LogInformation("RefreshCurrentFumen triggered.");
+        Log.LogInfo("RefreshCurrentFumen triggered.");
 
         allCheckResults.Clear();
 

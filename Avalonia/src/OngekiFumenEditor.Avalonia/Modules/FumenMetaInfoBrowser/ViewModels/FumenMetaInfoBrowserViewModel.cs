@@ -9,7 +9,6 @@ using Gekimini.Avalonia.Modules.Shell;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Gekimini.Avalonia.Views;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 
@@ -25,7 +24,6 @@ public partial class FumenMetaInfoBrowserViewModel : ToolViewModelBase, IFumenMe
     private string errorMessage;
     private OngekiFumenModelProxy fumenProxy;
     private IShell Shell => OngekiFumenEditor.Avalonia.IoC.Get<IShell>();
-    private ILogger<FumenMetaInfoBrowserViewModel> Logger => OngekiFumenEditor.Avalonia.IoC.Get<ILogger<FumenMetaInfoBrowserViewModel>>();
 
     public FumenMetaInfoBrowserViewModel() : base(Lang.B.FumenMetaInfoBrowser.ToLocalizedString())
     {
@@ -64,7 +62,7 @@ public partial class FumenMetaInfoBrowserViewModel : ToolViewModelBase, IFumenMe
             if (SetProperty(ref errorMessage, value))
             {
                 if (!string.IsNullOrWhiteSpace(value))
-                    Logger.LogError("Current error message: {ErrorMessage}", value);
+                    Log.LogError($"Current error message: {value}");
                 OnPropertyChanged(nameof(IsErrorVisible));
             }
         }

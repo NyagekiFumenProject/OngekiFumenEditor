@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
-using Microsoft.Extensions.Logging;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
@@ -20,7 +19,6 @@ public partial class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, 
 {
     public ObservableCollection<DisplayTimeSignatureItem> DisplayTimeSignatures { get; } = [];
 
-    private readonly ILogger<FumenTimeSignatureListViewerViewModel> logger;
 
     public FumenVisualEditorViewModel Editor
     {
@@ -64,9 +62,8 @@ public partial class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, 
         set => SetProperty(ref field, value);
     }
 
-    public FumenTimeSignatureListViewerViewModel(ILogger<FumenTimeSignatureListViewerViewModel> logger) : base(Lang.B.FumenTimeSignatureListViewer.ToLocalizedString())
+    public FumenTimeSignatureListViewerViewModel() : base(Lang.B.FumenTimeSignatureListViewer.ToLocalizedString())
     {
-        this.logger = logger;
 
         Dock = global::Dock.Model.Core.DockMode.Bottom;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += (@new, _) => Editor = @new;
@@ -122,7 +119,7 @@ public partial class FumenTimeSignatureListViewerViewModel : ToolViewModelBase, 
     [RelayCommand]
     private void NavigateToTimeSignature(DisplayTimeSignatureItem item)
     {
-        logger.LogInformation("NavigateToTimeSignature triggered.");
+        Log.LogInfo("NavigateToTimeSignature triggered.");
         if (item is null || Editor is null)
             return;
 

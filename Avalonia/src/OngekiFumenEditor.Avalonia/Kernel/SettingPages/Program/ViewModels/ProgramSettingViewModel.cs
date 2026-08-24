@@ -1,6 +1,5 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Settings;
@@ -13,7 +12,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 [RegisterSingleton<ISettingsEditor>]
 public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
 {
-    private readonly ILogger<ProgramSettingViewModel> logger;
 
     public ProgramSetting Setting => ProgramSetting.Default;
 
@@ -21,9 +19,8 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
 
     public string SettingsPagePath => Lang.TabEnviorment;
 
-    public ProgramSettingViewModel(ILogger<ProgramSettingViewModel> logger)
+    public ProgramSettingViewModel()
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         Setting.PropertyChanged += (_, e) => Log.LogDebug($"program setting property changed : {e.PropertyName}");
     }
 
@@ -35,7 +32,7 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     private async Task ResetAllSettingsAsync()
     {
-        logger.LogInformation("ResetAllSettingsAsync triggered.");
+        Log.LogInfo("ResetAllSettingsAsync triggered.");
         if (!await IoC.Get<IDialogManager>().ShowComfirmDialog(Lang.ResetAllSettingComfirm, Lang.Warning))
             return;
 
@@ -62,7 +59,7 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     private async Task SelectDumpFolderAsync()
     {
-        logger.LogInformation("SelectDumpFolderAsync triggered.");
+        Log.LogInfo("SelectDumpFolderAsync triggered.");
         using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.CrashDumpFileOutput);
         if (string.IsNullOrWhiteSpace(folder?.LocalPath))
             return;
@@ -74,7 +71,7 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     [RelayCommand]
     private void ThrowException()
     {
-        logger.LogInformation("ThrowException triggered.");
+        Log.LogInfo("ThrowException triggered.");
         _ = Task.Run(() => throw new Exception("Crash dump test exception."));
     }
 

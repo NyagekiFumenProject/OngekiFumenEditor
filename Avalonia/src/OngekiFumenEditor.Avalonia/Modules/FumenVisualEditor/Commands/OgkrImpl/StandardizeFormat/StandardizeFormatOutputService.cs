@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
@@ -21,25 +20,23 @@ public interface IStandardizeFormatOutputService
 [RegisterSingleton<IStandardizeFormatOutputService>]
 public sealed class StandardizeFormatOutputService : IStandardizeFormatOutputService
 {
-    private readonly ILogger<StandardizeFormatOutputService> logger;
 
-    public StandardizeFormatOutputService(ILogger<StandardizeFormatOutputService> logger)
+    public StandardizeFormatOutputService()
     {
-        this.logger = logger;
     }
 
     public async Task<ISimpleFile> PickOutputFileAsync()
     {
-        logger.LogInformation("Requesting standardized fumen output file path.");
+        Log.LogInfo("Requesting standardized fumen output file path.");
         var outputFile = await FileDialogHelper.SaveFileAsync(
             Lang.NewFumenFileSavePath,
             [(".ogkr", Lang.OngekiFumenStandardized)],
             suggestedFileName: "standardized.ogkr",
             defaultExtension: "ogkr");
         if (outputFile is null)
-            logger.LogInformation("Standardized fumen output file picking canceled.");
+            Log.LogInfo("Standardized fumen output file picking canceled.");
         else
-            logger.LogInformation("Standardized fumen output file selected: '{Path}'.", outputFile.FullPath);
+            Log.LogInfo($"Standardized fumen output file selected: '{outputFile.FullPath}'.");
         return outputFile;
     }
 
@@ -48,16 +45,16 @@ public sealed class StandardizeFormatOutputService : IStandardizeFormatOutputSer
 
     public async Task<bool> RevealOutputDirectoryAsync(ISimpleFile outputFile)
     {
-        logger.LogInformation("Revealing output directory for '{Path}'.", outputFile?.LocalPath ?? "(unknown)");
+        Log.LogInfo($"Revealing output directory for '{outputFile?.LocalPath ?? "(unknown)"}'.");
         if (!TryGetOutputDirectory(outputFile, out var outputDirectory) ||
             TryGetTopLevel() is not { } topLevel)
         {
-            logger.LogWarning("Cannot reveal output directory for '{Path}'.", outputFile?.LocalPath ?? "(unknown)");
+            Log.LogWarn($"Cannot reveal output directory for '{outputFile?.LocalPath ?? "(unknown)"}'.");
             return false;
         }
 
         var launched = await topLevel.Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(outputDirectory));
-        logger.LogInformation("Reveal output directory result for '{Path}': {Launched}.", outputFile.LocalPath, launched);
+        Log.LogInfo($"Reveal output directory result for '{outputFile.LocalPath}': {launched}.");
         return launched;
     }
 

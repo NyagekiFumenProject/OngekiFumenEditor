@@ -11,7 +11,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Utils;
-using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Globalization;
 
@@ -92,11 +91,9 @@ public partial class TGridCalculatorToolViewerViewModel : ToolViewModelBase, ITG
     public bool IsEnabled => Editor is not null;
     public bool IsSelectedObject => TimelineObject is not null;
 
-    private readonly ILogger<TGridCalculatorToolViewerViewModel> logger;
 
-    public TGridCalculatorToolViewerViewModel(ILogger<TGridCalculatorToolViewerViewModel> logger) : base(Lang.B.TGridCalculatorToolViewer.ToLocalizedString())
+    public TGridCalculatorToolViewerViewModel() : base(Lang.B.TGridCalculatorToolViewer.ToLocalizedString())
     {
-        this.logger = logger;
         Dock = DockMode.Bottom;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
         Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
@@ -157,7 +154,7 @@ public partial class TGridCalculatorToolViewerViewModel : ToolViewModelBase, ITG
     [RelayCommand(CanExecute = nameof(CanUseEditor))]
     private void ScrollEditorToTGrid()
     {
-        logger.LogInformation("Scroll editor to TGrid ({Unit}, {Grid}).", Unit, Grid);
+        Log.LogInfo($"Scroll editor to TGrid ({Unit}, {Grid}).");
         Editor.ScrollTo(new TGrid(Unit, Grid));
     }
 
@@ -166,7 +163,7 @@ public partial class TGridCalculatorToolViewerViewModel : ToolViewModelBase, ITG
     [RelayCommand(CanExecute = nameof(CanApplyTGridToObject))]
     private void ApplyTGridToObject()
     {
-        logger.LogInformation("Apply TGrid ({Unit}, {Grid}) to {ObjectType}.", Unit, Grid, TimelineObject.GetType().Name);
+        Log.LogInfo($"Apply TGrid ({Unit}, {Grid}) to {TimelineObject.GetType().Name}.");
         TimelineObject.TGrid = new TGrid(Unit, Grid);
     }
 }

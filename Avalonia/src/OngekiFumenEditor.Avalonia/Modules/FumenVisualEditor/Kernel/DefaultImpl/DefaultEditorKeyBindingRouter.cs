@@ -7,7 +7,6 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using Gekimini.Avalonia.Modules.Window.Views;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Compat;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Behaviors.BatchMode;
@@ -22,7 +21,6 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
 
     private readonly IKeyBindingManager keyBindingManager;
     private readonly IEditorDocumentManager editorDocumentManager;
-    private readonly ILogger<DefaultEditorKeyBindingRouter> logger;
     private readonly IReadOnlyDictionary<KeyBindingDefinition, EditorKeyAction> actions;
     private readonly EventHandler<KeyEventArgs> keyDownHandler;
 
@@ -42,12 +40,10 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
 
     public DefaultEditorKeyBindingRouter(
         IKeyBindingManager keyBindingManager,
-        IEditorDocumentManager editorDocumentManager,
-        ILogger<DefaultEditorKeyBindingRouter> logger)
+        IEditorDocumentManager editorDocumentManager)
     {
         this.keyBindingManager = keyBindingManager;
         this.editorDocumentManager = editorDocumentManager;
-        this.logger = logger;
 
         actions = CreateActions();
         if (actions.Count != ExpectedEditorActionCount)
@@ -81,7 +77,7 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
             attachedWindow.Closed += OnAttachedWindowClosed;
         }
 
-        logger.LogInformation("Attached the editor key binding router to {TopLevelType}.", topLevel.GetType().Name);
+        Log.LogInfo($"Attached the editor key binding router to {topLevel.GetType().Name}.");
     }
 
     public void Detach()
@@ -121,24 +117,18 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
 
         if (matches.Length > 1)
         {
-            logger.LogError(
-                "Editor key binding conflict for {Key} ({Modifiers}) in {Layer}: {Definitions}. No action was executed.",
-                e.Key,
-                e.KeyModifiers,
-                activeLayer,
-                string.Join(", ", matches.Select(definition => definition.ConfigKey)));
+            Log.LogError($"Editor key binding conflict for {e.Key} ({e.KeyModifiers}) in {activeLayer}: {string.Join(", ", matches.Select(definition => definition.ConfigKey))}. No action was executed.");
             return;
         }
 
         var definition = matches[0];
         if (!actions.TryGetValue(definition, out var action))
         {
-            logger.LogError("No editor action is mapped for key binding {Definition}.", definition.ConfigKey);
+            Log.LogError($"No editor action is mapped for key binding {definition.ConfigKey}.");
             return;
         }
 
-        logger.LogInformation("Dispatch editor key binding {Definition} (key={Key}, modifiers={Modifiers}, layer={Layer}).",
-            definition.ConfigKey, e.Key, e.KeyModifiers, activeLayer);
+        Log.LogInfo($"Dispatch editor key binding {definition.ConfigKey} (key={e.Key}, modifiers={e.KeyModifiers}, layer={activeLayer}).");
 
         var executionContext = new ActionExecutionContext
         {
@@ -155,7 +145,7 @@ internal sealed class DefaultEditorKeyBindingRouter : IEditorKeyBindingRouter
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "Editor key binding action {Definition} failed.", definition.ConfigKey);
+            Log.LogError($"Editor key binding action {definition.ConfigKey} failed.", exception);
         }
     }
 

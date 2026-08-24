@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.Languages;
@@ -24,7 +23,6 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
 {
     private static readonly (string ext, string desc)[] WavFileFilter = [(".wav", ".wav Audio File")];
     private readonly IEditorDocumentManager editorDocumentManager;
-    private readonly ILogger<AudioAdjustWindowViewModel> logger;
     private readonly IWavAudioOffsetService wavAudioOffsetService;
     private ISimpleFile inputWavFile;
     private ISimpleFile outputWavFile;
@@ -111,11 +109,9 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     }
 
     public AudioAdjustWindowViewModel(
-        ILogger<AudioAdjustWindowViewModel> logger,
         IEditorDocumentManager editorDocumentManager,
         IWavAudioOffsetService wavAudioOffsetService)
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.editorDocumentManager = editorDocumentManager;
         this.wavAudioOffsetService = wavAudioOffsetService;
         editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
@@ -133,7 +129,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     [RelayCommand]
     private async Task OpenSelectInputFileAsync()
     {
-        logger.LogInformation("OpenSelectInputFileAsync triggered.");
+        Log.LogInfo("OpenSelectInputFileAsync triggered.");
         var file = await FileDialogHelper.OpenFileAsync(Lang.SelectAudioFile, WavFileFilter);
         if (file is null)
             return;
@@ -146,7 +142,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     [RelayCommand]
     private async Task OpenSelectOutputFileAsync()
     {
-        logger.LogInformation("OpenSelectOutputFileAsync triggered.");
+        Log.LogInfo("OpenSelectOutputFileAsync triggered.");
         var file = await FileDialogHelper.SaveFileAsync(Lang.SaveNewAudioFile, WavFileFilter);
         if (file is null)
             return;
@@ -158,7 +154,7 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
     [RelayCommand]
     private async Task ExecuteConverterAsync()
     {
-        logger.LogInformation("ExecuteConverterAsync triggered (useInputFile={UseInputFile}, inputFumen={InputFumen}, outputFumen={OutputFumen}).", IsUseInputFile, InputFumenFilePath, OutputFumenFilePath);
+        Log.LogInfo($"ExecuteConverterAsync triggered (useInputFile={IsUseInputFile}, inputFumen={InputFumenFilePath}, outputFumen={OutputFumenFilePath}).");
         var currentEditor = editorDocumentManager.CurrentActivatedEditor;
         var currentEditorAudioFile = currentEditor?.EditorContext?.AudioFile;
 

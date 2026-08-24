@@ -4,7 +4,6 @@ using Gekimini.Avalonia.Framework.Languages;
 using Gekimini.Avalonia.Framework.Tools;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Injectio.Attributes;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -28,11 +27,9 @@ public partial class FumenEditorRenderControlViewerViewModel : ToolViewModelBase
 
     public ObservableCollection<RenderControlItem> ControlItems { get; } = [];
 
-    private readonly ILogger<FumenEditorRenderControlViewerViewModel> logger;
 
-    public FumenEditorRenderControlViewerViewModel(ILogger<FumenEditorRenderControlViewerViewModel> logger) : base(Lang.B.FumenEditorRenderControlViewer.ToLocalizedString())
+    public FumenEditorRenderControlViewerViewModel() : base(Lang.B.FumenEditorRenderControlViewer.ToLocalizedString())
     {
-        this.logger = logger;
 
         Dock = global::Dock.Model.Core.DockMode.Right;
         IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
@@ -130,7 +127,7 @@ public partial class FumenEditorRenderControlViewerViewModel : ToolViewModelBase
     [RelayCommand]
     private async Task ResetDefaultAsync()
     {
-        logger.LogInformation("ResetDefault triggered.");
+        Log.LogInfo("ResetDefault triggered.");
 
         await RebuildItemsAsync(true);
         foreach (var item in ControlItems)
@@ -143,7 +140,7 @@ public partial class FumenEditorRenderControlViewerViewModel : ToolViewModelBase
     [RelayCommand]
     private void Save()
     {
-        logger.LogInformation("Save triggered.");
+        Log.LogInfo("Save triggered.");
         Editor?.SaveRenderOrderVisible();
     }
 }

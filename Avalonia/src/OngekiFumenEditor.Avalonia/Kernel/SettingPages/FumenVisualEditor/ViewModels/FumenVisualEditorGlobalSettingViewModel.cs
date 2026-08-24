@@ -1,7 +1,6 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework.RecentFiles;
 using Gekimini.Avalonia.Modules.Settings;
@@ -18,7 +17,6 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
 {
     private readonly IDialogManager dialogManager;
     private readonly IEditorRecentFilesManager recentFilesManager;
-    private readonly ILogger<FumenVisualEditorGlobalSettingViewModel> logger;
 
     public EditorGlobalSetting Setting => EditorGlobalSetting.Default;
 
@@ -26,18 +24,15 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
 
     public string SettingsPagePath => Lang.TabDocument;
 
-    public FumenVisualEditorGlobalSettingViewModel(
-        ILogger<FumenVisualEditorGlobalSettingViewModel> logger)
-        : this(logger, null, null)
+    public FumenVisualEditorGlobalSettingViewModel()
+        : this(null, null)
     {
     }
 
     internal FumenVisualEditorGlobalSettingViewModel(
-        ILogger<FumenVisualEditorGlobalSettingViewModel> logger,
         IDialogManager dialogManager,
         IEditorRecentFilesManager recentFilesManager)
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.dialogManager = dialogManager;
         this.recentFilesManager = recentFilesManager;
         EditorGlobalSetting.Default.PropertyChanged += (_, e) => Log.LogDebug($"editor global setting property changed : {e.PropertyName}");
@@ -51,7 +46,7 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
     [RelayCommand]
     private Task SelectBackgroundColorAsync()
     {
-        logger.LogInformation("SelectBackgroundColorAsync triggered.");
+        Log.LogInfo("SelectBackgroundColorAsync triggered.");
         return ShowColorPickerAsync(
             () => System.Drawing.Color.FromArgb(Setting.PlayFieldBackgroundColor).ToMediaColor(),
             color => Setting.PlayFieldBackgroundColor = color.ToDrawingColor().ToArgb(),
@@ -61,7 +56,7 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
     [RelayCommand]
     private Task SelectForegroundColorAsync()
     {
-        logger.LogInformation("SelectForegroundColorAsync triggered.");
+        Log.LogInfo("SelectForegroundColorAsync triggered.");
         return ShowColorPickerAsync(
             () => System.Drawing.Color.FromArgb(Setting.PlayFieldForegroundColor).ToMediaColor(),
             color => Setting.PlayFieldForegroundColor = color.ToDrawingColor().ToArgb(),
@@ -71,7 +66,7 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
     [RelayCommand]
     private async Task ClearRecentFilesAsync()
     {
-        logger.LogInformation("ClearRecentFilesAsync triggered.");
+        Log.LogInfo("ClearRecentFilesAsync triggered.");
         var dialog = dialogManager ?? IoC.Get<IDialogManager>();
         if (!await dialog.ShowComfirmDialog(Lang.CleanRecentFilesRecordsConfirm, Lang.Warning))
             return;

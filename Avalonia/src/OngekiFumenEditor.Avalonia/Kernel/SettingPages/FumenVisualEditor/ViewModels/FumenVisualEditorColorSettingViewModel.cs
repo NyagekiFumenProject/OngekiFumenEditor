@@ -1,7 +1,6 @@
 using Gekimini.Avalonia.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Modules.Settings;
-using Microsoft.Extensions.Logging;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Models;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Platforms.Services.Window;
@@ -23,11 +22,9 @@ public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase, ISe
     public string SettingsPagePath => Lang.TabDocument + "\\" + Lang.TabEditor;
     public ColorPropertyWrapper[] ColorsProperties { get; }
 
-    private readonly ILogger<FumenVisualEditorColorSettingViewModel> logger;
 
-    public FumenVisualEditorColorSettingViewModel(ILogger<FumenVisualEditorColorSettingViewModel> logger)
+    public FumenVisualEditorColorSettingViewModel()
     {
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         ColorsProperties = typeof(EditorGlobalSetting)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Where(x => x.Name.StartsWith("Color") && x.PropertyType == typeof(System.Drawing.Color))
@@ -42,7 +39,7 @@ public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase, ISe
     [RelayCommand]
     private Task SelectColorAsync(ColorPropertyWrapper colorProperty)
     {
-        logger.LogInformation("SelectColorAsync triggered (colorProperty={Name}).", colorProperty?.Name);
+        Log.LogInfo($"SelectColorAsync triggered (colorProperty={colorProperty?.Name}).");
         if (colorProperty is null)
             return Task.CompletedTask;
 
