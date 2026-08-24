@@ -12,11 +12,14 @@ namespace OngekiFumenEditor.Avalonia.Utils;
 [RegisterSingleton]
 public class Log
 {
-    private record LogRecord(Severity Severity, string Message, bool NewLine, bool Time, string Prefix, string FilePath, int LineNumber);
+    private readonly record struct LogRecord(Severity Severity, string Message, bool NewLine, bool Time, string Prefix, string FilePath, int LineNumber);
 
     private static Log cacheInstance;
     private readonly List<ILogOutput> outputs = [];
     private readonly ConcurrentQueue<LogRecord> logRecordQueue = [];
+
+    [ThreadStatic]
+    private static StringBuilder messageBuilder;
     private volatile bool isRunning;
 
     public Log(IEnumerable<ILogOutput> outputs)
@@ -48,29 +51,65 @@ public class Log
         outputs.Add(new T());
     }
 
+    /// <summary>供外部日志体系(MEL等)向门面广播队列提交已格式化的消息。</summary>
+    public void Emit(ILogOutput.Severity severity, string message, string prefix = null)
+    {
+        EnqueueLogRecord(message, severity, newLine: true, time: true, prefix, filePath: null, lineNumber: -1);
+        AwakeLogger();
+    }
+
     private void Output(Severity severity, string message)
     {
         foreach (var output in LogOutputs)
             output.WriteLog(severity, message);
     }
 
+    private static string SeverityText(Severity severity) => severity switch
+    {
+        Severity.Debug => "DEBUG",
+        Severity.Info => "INFO",
+        Severity.Warn => "WARN",
+        Severity.Error => "ERROR",
+        _ => severity.ToString(),
+    };
+
     private static string BuildLogMessage(LogRecord record)
     {
+        // 复用线程级 StringBuilder，热路径仅最终 ToString 产生一次分配。
+        var sb = messageBuilder ??= new StringBuilder(256);
+        sb.Clear();
+
+        sb.Append('[');
+        if (record.Time)
+            sb.Append(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff"));
+        sb.Append(' ').Append(SeverityText(record.Severity))
+          .Append(':').Append(Thread.CurrentThread.ManagedThreadId).Append(']');
+
         var prefix = record.Prefix;
-        if (prefix == ".ctor")
-            prefix = Path.GetFileNameWithoutExtension(record.FilePath) + prefix;
-        prefix += $":{record.LineNumber}";
+        var filePath = record.FilePath;
 
-        var sb = new StringBuilder(256);
-        sb.AppendFormat("[{0} {1}:{2}]",
-            record.Time ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") : string.Empty,
-            record.Severity.ToString().ToUpper(),
-            Thread.CurrentThread.ManagedThreadId);
+        var hasFilePath = !string.IsNullOrWhiteSpace(filePath);
+        var hasPrefix = !string.IsNullOrWhiteSpace(prefix);
 
-        if (!string.IsNullOrWhiteSpace(prefix))
-            sb.AppendFormat("<{0}>", prefix);
+        if (hasFilePath || hasPrefix)
+        {
+            sb.Append('<');
+            if (hasFilePath)
+                sb.Append(Path.GetFileNameWithoutExtension(record.FilePath));
 
-        sb.AppendFormat(" {0}", record.Message.TrimStart());
+            if (hasPrefix)
+            {
+                if (hasFilePath)
+                    sb.Append('.');
+                sb.Append(prefix);
+            }
+
+            if (record.LineNumber > 0)
+                sb.Append(':').Append(record.LineNumber);
+            sb.Append('>');
+        }
+
+        sb.Append(' ').Append(record.Message.TrimStart());
         if (record.NewLine)
             sb.AppendLine();
 
@@ -145,6 +184,12 @@ public class Log
         [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
     {
         BeginLogRecord(message, Severity.Warn, newLine, time, prefix, filePath, lineNumber);
+    }
+
+    public static void LogWarn(string message, Exception e, bool newLine = true, bool time = true,
+        [CallerMemberName] string prefix = "<Unknown>", [CallerFilePath] string filePath = default, [CallerLineNumber] int lineNumber = 0)
+    {
+        LogWarn($"{message}\nContains exception:{e.Message}\n{e.StackTrace}", newLine, time, prefix, filePath, lineNumber);
     }
 
     public static void LogWarning(string message, bool newLine = true, bool time = true,
