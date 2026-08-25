@@ -18,7 +18,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Services;
 [RegisterSingleton<IOgkiFumenListBrowserJacketDecoder>]
 public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJacketDecoder
 {
+    private const int MaxParallelDecodes = 2;
     private static readonly byte[] UnityAssetBundleMagic = "UnityFS"u8.ToArray();
+    private static readonly SemaphoreSlim AssetBundleDecodeGate = new(MaxParallelDecodes, MaxParallelDecodes);
     private static readonly Lazy<MethodInfo?> TextureDecodeMethod = new(FindTextureDecodeMethod);
     private readonly ITemporaryFolderProvider temporaryFolderProvider;
     private readonly ConcurrentDictionary<string, WeakReference<byte[]>> memoryCache = new(StringComparer.Ordinal);
@@ -46,9 +48,26 @@ public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJac
             return cached;
         }
 
-        byte[]? pngBytes = IsUnityAssetBundle(sourceBytes)
-            ? await DecodeAssetBundleAsync(sourceBytes, sourceFile.FileName, cancellationToken).ConfigureAwait(false)
-            : sourceBytes;
+        byte[]? pngBytes;
+        if (!IsUnityAssetBundle(sourceBytes))
+        {
+            pngBytes = sourceBytes;
+        }
+        else
+        {
+            await AssetBundleDecodeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                pngBytes = await DecodeAssetBundleAsync(
+                    sourceBytes,
+                    sourceFile.FileName,
+                    cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                AssetBundleDecodeGate.Release();
+            }
+        }
         if (pngBytes is null)
             return null;
 

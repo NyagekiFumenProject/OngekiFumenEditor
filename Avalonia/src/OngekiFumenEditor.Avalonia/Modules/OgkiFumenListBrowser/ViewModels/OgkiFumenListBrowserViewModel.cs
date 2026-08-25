@@ -602,6 +602,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     private void ReleaseSession()
     {
+        Interlocked.Increment(ref refreshVersion);
         refreshCancellation?.Cancel();
         refreshCancellation?.Dispose();
         refreshCancellation = null;

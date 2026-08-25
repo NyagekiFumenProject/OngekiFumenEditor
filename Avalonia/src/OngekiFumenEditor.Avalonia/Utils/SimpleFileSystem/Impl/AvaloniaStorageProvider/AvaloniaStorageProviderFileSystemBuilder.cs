@@ -96,6 +96,16 @@ public static class AvaloniaStorageProviderFileSystemBuilder
             }
             catch
             {
+                try
+                {
+                    await Task.WhenAll(childTasks).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // The original child failure is rethrown below. Awaiting all children
+                    // first ensures successful sibling ownerships can be released here.
+                }
+
                 foreach (var childTask in childTasks)
                 {
                     if (childTask is { IsCompletedSuccessfully: true })
