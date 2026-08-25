@@ -1,0 +1,94 @@
+<views:WindowViewBase
+    x:Class="OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Views.OgkiFumenListBrowserView"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Views"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Models"
+    xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.ViewModels"
+    x:DataType="vm:OgkiFumenListBrowserViewModel"
+    Title="{markup:Translate {x:Static languages:Lang+B.OgkiFumenListBrowser}}"
+    Width="560"
+    Height="760"
+    MinWidth="420"
+    MinHeight="480"
+    Background="{StaticResource EditorWindowBackgroundBrush}"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance Type=vm:OgkiFumenListBrowserViewModel}"
+    mc:Ignorable="d">
+    <Grid RowDefinitions="Auto,*" IsEnabled="{CompiledBinding !IsBusy}">
+        <StackPanel Margin="10" Spacing="8">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SelectGameRootFolder}}" />
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           Text="{CompiledBinding RootFolderDisplayName}"
+                           TextTrimming="CharacterEllipsis"
+                           ToolTip.Tip="{CompiledBinding RootFolderDisplayName}" />
+                <Button Grid.Column="2"
+                        Command="{CompiledBinding SelectFolderCommand}"
+                        Content="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.KeywordSortFilter}}" />
+                <TextBox Grid.Column="1"
+                         Text="{CompiledBinding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordSortFilter}}" />
+                <Button Grid.Column="2"
+                        Command="{CompiledBinding ApplyKeywordsCommand}"
+                        Content="{markup:Translate {x:Static languages:Lang+B.Filter}}" />
+            </Grid>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{CompiledBinding DisplayFumenSets}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:OngekiFumenSet">
+                        <Border Margin="6,3" Padding="6" BorderBrush="{DynamicResource EditorToolWindowForegroundBrush}" BorderThickness="1">
+                            <Expander>
+                                <Expander.Header>
+                                    <Grid ColumnDefinitions="64,*" ColumnSpacing="8">
+                                        <Border Width="56" Height="56" Background="#202838">
+                                            <Image Source="{CompiledBinding JacketBitmap}" Stretch="UniformToFill" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="2">
+                                            <TextBlock Text="{CompiledBinding Title}" FontWeight="Bold" TextWrapping="Wrap" />
+                                            <TextBlock Text="{CompiledBinding Artist}" TextWrapping="Wrap" />
+                                            <TextBlock Text="{CompiledBinding MusicId, StringFormat='ID: {0}'}" Opacity="0.72" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Expander.Header>
+                                <ItemsControl ItemsSource="{CompiledBinding Difficults}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel HorizontalAlignment="Center" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:OngekiFumenDiff">
+                                            <Border Margin="4" Padding="6" BorderBrush="#657080" BorderThickness="1">
+                                                <StackPanel Width="128" Spacing="3">
+                                                    <TextBlock Text="{CompiledBinding DiffName}" FontWeight="Bold" />
+                                                    <TextBlock Text="{CompiledBinding Level, StringFormat='Level: {0:0.##}'}" />
+                                                    <TextBlock Text="{CompiledBinding Bpm, StringFormat='BPM: {0:0.##}'}" />
+                                                    <TextBlock Text="{CompiledBinding Creator}" TextWrapping="Wrap" />
+                                                    <Button Command="{Binding $parent[local:OgkiFumenListBrowserView].((vm:OgkiFumenListBrowserViewModel)DataContext).LoadFumenCommand}"
+                                                            CommandParameter="{CompiledBinding}"
+                                                            Content="{markup:Translate {x:Static languages:Lang+B.LoadFumen}}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </Expander>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</views:WindowViewBase>
