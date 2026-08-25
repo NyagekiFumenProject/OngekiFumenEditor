@@ -634,3 +634,17 @@ service 收到同一个 option 实例和完全相等的 token，返回 0 且 std
 | `实现一个EditorFileAccessContextSnapshot` | `EditorFileAccessContextSnapshotTests` 的属性与 JSON 往返测试 |
 | `EditorFileAccessContext和EditorFileAccessContextSnapshot可以相互转换` | 上下文保存书签、快照恢复完整上下文、Fast Open 可空 Project 与失败释放测试 |
 | `后者作为RecentRecordInfo对应的data载体进行保存和读取` | Provider/ProjectIO 最近记录测试与生产 data 序列化调用 |
+
+## OgkiFumenListBrowser Focused Plan
+
+| Requirement | Test evidence |
+| --- | --- |
+| Nested chart/audio/cover discovery and metadata | `ScanAsync_NestedPackage_ProjectsChartAudioAndCoverMetadata` |
+| XML BOM/declared encoding compatibility | `ScanAsync_Utf16MusicSourceXml_UsesDeclaredXmlEncoding` |
+| Simple ACB/AWB sibling matching without package inspection | `ScanAsync_AcbWithSameNameAwb_UsesSiblingAwbWithoutInspectingAcbContent`, `ScanAsync_AcbWithoutSameNameAwb_ExcludesSong` |
+| Invalid chart and audio exclusion | `ScanAsync_InvalidOrMissingChart_IsExcluded`, `ScanAsync_MissingOrUnsupportedAudio_ExcludesWholeSong` |
+| Unity AssetBundle cover conversion and Avalonia bitmap loading | `LoadPngBytesAsync_RepositoryUnityAssetBundle_ProducesAvaloniaBitmap` |
+| Duplicate MusicId ordering | `ScanAsync_DuplicateMusicId_IsContinuouslyDeduplicatedAfterSort` |
+| Locator safety | `RelativePath_RejectsAbsoluteUriDriveAndRootEscape` |
+| DI/menu registration | `AddOngekiFumenEditorAvalonia_RegistersWindowCommandMenuAndInterface` |
+| View construction/layout and static IO constraint | `AxamlSmokeTests.AllParameterlessViews_ConstructAttachAndCompleteLayout`, `ProductionModule_UsesSimpleFileCapabilitiesInsteadOfHostFileApis` |

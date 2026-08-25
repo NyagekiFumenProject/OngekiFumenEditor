@@ -338,3 +338,11 @@ Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT 
 | `OPFS 缺失或初始化因安全上下文/权限失败时，切换到 discard 后端。` | `DiscardTemporaryFolderProviderTests` 与 Browser 组合提供程序实现 |
 | `发布并短启动 Desktop Native AOT。` | 最终 win-x64 AOT EXE 短启动存活 8 秒 |
 | `发布标准 Browser Release AOT 和 LLVM Browser` | 两种最终发布均成功；标准 AOT 全部运行烟测通过，LLVM 运行受明确记录的 preview 工具链 JSExport 缺陷阻断 |
+
+## OgkiFumenListBrowser Final Review
+
+- Core build: passed with 0 errors.
+- Focused Ogki tests: 15 passed, including scanner, UTF-16 XML decoding, simple ACB/AWB matching, Unity AssetBundle jacket-to-PNG decoding, locator safety, registration, static constraints, and headless XAML coverage.
+- `git diff --check`: passed.
+- ACB handling only requires a same-stem sibling `.awb`; no `AcbPackageInspector` call remains in the scanner.
+- Repository `Resources/ui_jacket_0666` was decoded through `TexturePlugin.TextureEncoderDecoder` and loaded as a non-empty Avalonia `Bitmap`; decoded PNG bytes use a weak in-memory cache and best-effort temporary-folder cache.

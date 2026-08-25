@@ -461,3 +461,9 @@ Type、String、Collection、Comparison、Negative、State/Side-effect、Structu
 - [ ] 最近记录校验、打开、去重和更新均使用快照，不再依赖旧工程定位符载荷。
 - [ ] 运行时所有权只有上下文一处；模型兼容属性与关闭链不造成双重释放。
 - [ ] 聚焦测试和 Core 全量测试通过，`git diff --check` 无错误。
+
+## OgkiFumenListBrowser Focused Inventory
+
+- Production targets: simple-file scanner, relative locator guard, Unity AssetBundle jacket conversion, weak/temporary cover caching, window lifecycle, storage bookmarks, editor-context ownership, and compiled XAML view.
+- Existing conventions: SDK-style net10.0 xUnit tests with `Avalonia.Headless.XUnit`; storage fixtures are wrapped through `AvaloniaStorageProviderFileSystemBuilder`.
+- Acceptance evidence is recorded in the Ogki-specific test classes under `tests/OngekiFumenEditor.Avalonia.Tests/Modules/OgkiFumenListBrowser`.
