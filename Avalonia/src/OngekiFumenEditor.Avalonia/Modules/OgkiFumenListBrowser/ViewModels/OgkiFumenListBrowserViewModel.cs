@@ -2,6 +2,7 @@
 
 // Injectio registration is intentionally kept on this concrete window model.
 
+using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using Avalonia;
 using Avalonia.Media.Imaging;
@@ -42,7 +43,8 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     private readonly IEditorRecentFilesManager recentFilesManager;
     private readonly IOgkiFumenListBrowserJacketDecoder jacketDecoder;
     private readonly SemaphoreSlim refreshGate = new(1, 1);
-    private readonly Dictionary<string, WeakReference<Bitmap>> jacketBitmapCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, WeakReference<Bitmap>> jacketBitmapCache = new(StringComparer.OrdinalIgnoreCase);
+    private readonly ConcurrentDictionary<string, Lazy<Task>> jacketLoadTasks = new(StringComparer.OrdinalIgnoreCase);
     private CancellationTokenSource? refreshCancellation;
     private ISimpleDirectory? rootDirectory;
     private bool isDisposed;
@@ -153,7 +155,25 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
         foreach (var set in result)
             DisplayFumenSets.Add(set);
-        _ = LoadVisibleJacketsAsync(DisplayFumenSets.ToArray(), refreshVersion);
+    }
+
+    /// <summary>
+    /// Requests a jacket only when its virtualized list item becomes visible.
+    /// </summary>
+    internal void RequestJacketLoad(OngekiFumenSet set)
+    {
+        ArgumentNullException.ThrowIfNull(set);
+        if (isDisposed || set.JacketFile is null || string.IsNullOrWhiteSpace(set.JacketLocator) || set.JacketBitmap is not null)
+            return;
+
+        var version = Volatile.Read(ref refreshVersion);
+        var key = $"{version}:{set.JacketLocator}";
+        var lazyTask = jacketLoadTasks.GetOrAdd(
+            key,
+            _ => new Lazy<Task>(
+                () => LoadJacketAsync(set, version, key),
+                LazyThreadSafetyMode.ExecutionAndPublication));
+        _ = lazyTask.Value;
     }
 
     [RelayCommand]
@@ -178,6 +198,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         refreshCancellation?.Cancel();
         refreshCancellation?.Dispose();
         refreshCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        jacketLoadTasks.Clear();
         var token = refreshCancellation.Token;
 
         await refreshGate.WaitAsync(token).ConfigureAwait(false);
@@ -275,6 +296,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     {
         Interlocked.Increment(ref refreshVersion);
         refreshCancellation?.Cancel();
+        jacketLoadTasks.Clear();
         foreach (var set in fumenSets)
             set.JacketBitmap = null;
         fumenSets = [];
@@ -467,46 +489,72 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         }
     }
 
-    private async Task LoadVisibleJacketsAsync(IEnumerable<OngekiFumenSet> sets, long version)
+    private async Task LoadJacketAsync(OngekiFumenSet set, long version, string requestKey)
     {
-        foreach (var set in sets)
+        try
         {
-            if (isDisposed || version != refreshVersion)
-                return;
             if (set.JacketFile is null || string.IsNullOrWhiteSpace(set.JacketLocator))
-                continue;
-            try
-            {
-                if (jacketBitmapCache.TryGetValue(set.JacketLocator, out var weak) && weak.TryGetTarget(out var cached))
-                {
-                    set.JacketBitmap = cached;
-                    continue;
-                }
+                return;
 
-                var bytes = await jacketDecoder.LoadPngBytesAsync(set.JacketFile).ConfigureAwait(false);
-                if (isDisposed || version != refreshVersion)
-                    return;
-                if (bytes is null or { Length: 0 })
-                {
-                    set.JacketBitmap = null;
-                    continue;
-                }
-                await using var stream = new MemoryStream(bytes, writable: false);
-                var bitmap = new Bitmap(stream);
-                if (isDisposed || version != refreshVersion)
-                {
-                    bitmap.Dispose();
-                    return;
-                }
-                jacketBitmapCache[set.JacketLocator] = new WeakReference<Bitmap>(bitmap);
-                set.JacketBitmap = bitmap;
-            }
-            catch
+            if (jacketBitmapCache.TryGetValue(set.JacketLocator, out var weak) && weak.TryGetTarget(out var cached))
             {
-                set.JacketBitmap = null;
+                await PublishJacketBitmapAsync(set, cached, version, disposeWhenStale: false).ConfigureAwait(false);
+                return;
             }
+
+            var cancellationToken = refreshCancellation?.Token ?? CancellationToken.None;
+            var bytes = await jacketDecoder.LoadPngBytesAsync(set.JacketFile, cancellationToken).ConfigureAwait(false);
+            if (bytes is null or { Length: 0 })
+                return;
+
+            await using var stream = new MemoryStream(bytes, writable: false);
+            var bitmap = new Bitmap(stream);
+            if (!IsJacketRequestCurrent(set, version))
+            {
+                bitmap.Dispose();
+                return;
+            }
+
+            jacketBitmapCache[set.JacketLocator] = new WeakReference<Bitmap>(bitmap);
+            await PublishJacketBitmapAsync(set, bitmap, version, disposeWhenStale: true).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
+        {
+            Log.LogDebug($"Unable to load Ogki jacket for '{set.JacketLocator}': {exception.Message}");
+        }
+        finally
+        {
+            jacketLoadTasks.TryRemove(requestKey, out _);
         }
     }
+
+    private async Task PublishJacketBitmapAsync(
+        OngekiFumenSet set,
+        Bitmap bitmap,
+        long version,
+        bool disposeWhenStale)
+    {
+        await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            if (!IsJacketRequestCurrent(set, version))
+            {
+                if (disposeWhenStale)
+                    bitmap.Dispose();
+                return;
+            }
+
+            set.JacketBitmap = bitmap;
+        }).GetTask().ConfigureAwait(false);
+    }
+
+    private bool IsJacketRequestCurrent(OngekiFumenSet set, long version) =>
+        !isDisposed &&
+        version == Volatile.Read(ref refreshVersion) &&
+        set.JacketFile is not null &&
+        !string.IsNullOrWhiteSpace(set.JacketLocator);
 
     private static int FuzzyDistance(OngekiFumenSet set, string keyword)
     {
@@ -557,6 +605,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         refreshCancellation?.Cancel();
         refreshCancellation?.Dispose();
         refreshCancellation = null;
+        jacketLoadTasks.Clear();
         rootDirectory?.Dispose();
         rootDirectory = null;
         fumenSets = [];

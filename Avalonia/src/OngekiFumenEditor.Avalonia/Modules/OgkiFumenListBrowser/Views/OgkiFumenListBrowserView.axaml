@@ -44,16 +44,28 @@
             </Grid>
         </StackPanel>
 
-        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl ItemsSource="{CompiledBinding DisplayFumenSets}">
-                <ItemsControl.ItemTemplate>
+        <ListBox Grid.Row="1"
+                 ItemsSource="{CompiledBinding DisplayFumenSets}"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                 SelectionMode="Single">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="models:OngekiFumenSet">
                         <Border Margin="6,3" Padding="6" BorderBrush="{DynamicResource EditorToolWindowForegroundBrush}" BorderThickness="1">
                             <Expander>
                                 <Expander.Header>
                                     <Grid ColumnDefinitions="64,*" ColumnSpacing="8">
                                         <Border Width="56" Height="56" Background="#202838">
-                                            <Image Source="{CompiledBinding JacketBitmap}" Stretch="UniformToFill" />
+                                            <Image AttachedToVisualTree="OnJacketImageAttached"
+                                                   DataContextChanged="OnJacketImageDataContextChanged"
+                                                   Source="{CompiledBinding JacketBitmap}"
+                                                   Stretch="UniformToFill" />
                                         </Border>
                                         <StackPanel Grid.Column="1" Spacing="2">
                                             <TextBlock Text="{CompiledBinding Title}" FontWeight="Bold" TextWrapping="Wrap" />
@@ -87,8 +99,7 @@
                             </Expander>
                         </Border>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+            </ListBox.ItemTemplate>
+        </ListBox>
     </Grid>
 </views:WindowViewBase>
