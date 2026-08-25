@@ -14,6 +14,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Services;
 /// </summary>
 public sealed class OgkiFumenListBrowserScanner
 {
+    private const int MaxParallelOperations = 4;
     private static readonly Regex BpmRegex = new(@"BPM_DEF\s*([\d.]+)", RegexOptions.Compiled);
     private static readonly Regex CreatorRegex = new(@"CREATOR\s*(.+)", RegexOptions.Compiled);
     private readonly HashSet<string> supportedAudioExtensions;
@@ -42,31 +43,39 @@ public sealed class OgkiFumenListBrowserScanner
 
         var audioBySourceId = new Dictionary<int, AudioResource>();
         var jacketsByMusicId = new Dictionary<int, JacketResource>();
-        foreach (var entry in entries)
+        var audioEntries = entries
+            .Where(static entry => entry.Capability.FileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        var audioResources = await RunBoundedAsync(
+            audioEntries,
+            (entry, token) => TryReadAudioResourceAsync(entry.Capability, entry.Locator, token),
+            cancellationToken).ConfigureAwait(false);
+        foreach (var resource in audioResources)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (entry.Capability.FileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase))
-            {
-                var resource = await TryReadAudioResourceAsync(entry.Capability, entry.Locator, cancellationToken)
-                    .ConfigureAwait(false);
-                if (resource is not null && !audioBySourceId.ContainsKey(resource.SourceId))
-                    audioBySourceId.Add(resource.SourceId, resource);
-            }
-            else if (TryParseJacket(entry.Capability.FileName, entry.Locator, out var musicId))
-            {
-                jacketsByMusicId.TryAdd(musicId, new JacketResource(entry.Capability, entry.Locator));
-            }
+            if (resource is not null && !audioBySourceId.ContainsKey(resource.SourceId))
+                audioBySourceId.Add(resource.SourceId, resource);
         }
 
-        var result = new List<OngekiFumenSet>();
         foreach (var entry in entries)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!entry.Capability.FileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase))
-                continue;
+            if (TryParseJacket(entry.Capability.FileName, entry.Locator, out var musicId))
+                jacketsByMusicId.TryAdd(musicId, new JacketResource(entry.Capability, entry.Locator));
+        }
 
-            var set = await TryReadFumenSetAsync(entry.Capability, entry.Locator, cancellationToken)
-                .ConfigureAwait(false);
+        var musicEntries = entries
+            .Where(static entry => entry.Capability.FileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        var fumenSets = await RunBoundedAsync(
+            musicEntries,
+            (entry, token) => TryReadFumenSetAsync(entry.Capability, entry.Locator, token),
+            cancellationToken).ConfigureAwait(false);
+
+        var result = new List<OngekiFumenSet>(fumenSets.Length);
+        foreach (var set in fumenSets)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             if (set is null || !audioBySourceId.TryGetValue(set.MusicSourceId, out var audio))
                 continue;
 
@@ -133,35 +142,60 @@ public sealed class OgkiFumenListBrowserScanner
             .Descendants("FumenData")
             .Where(x => x.Element("FumenFile") is not null)
             .ToArray();
+        var diffTasks = new Task<OngekiFumenDiff?>[fumenEntries.Length];
         for (var index = 0; index < fumenEntries.Length; index++)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             var entry = fumenEntries[index];
-            var path = entry.Element("FumenFile")?.Element("path")?.Value;
-            var parentLocator = GetParentLocator(locator);
-            if (!OgkiFumenListBrowserPath.TryCombineRelative(parentLocator, path, out var fumenLocator))
-                continue;
+            diffTasks[index] = TryReadFumenDiffAsync(
+                set,
+                musicFile,
+                locator,
+                entry,
+                index,
+                cancellationToken);
+        }
 
-            // A Music.xml capability only knows its own parent. Resolve through its root by
-            // walking parents instead of accepting a provider-specific path string.
-            var fumenFile = ResolveFromFileParent(musicFile, path ?? string.Empty);
-            if (fumenFile is null)
-                continue;
-
-            var integerPart = ParseInt(entry.Element("FumenConstIntegerPart")?.Value) ?? 0;
-            var fractionalPart = ParseInt(entry.Element("FumenConstFractionalPart")?.Value) ?? 0;
-            var diff = new OngekiFumenDiff(set)
-            {
-                DiffIdx = index,
-                Level = integerPart + fractionalPart / 100f,
-                FumenFile = fumenFile,
-                FumenLocator = fumenLocator
-            };
-            await ReadFumenInfoAsync(diff, cancellationToken).ConfigureAwait(false);
-            set.Difficults.Add(diff);
+        var diffs = await Task.WhenAll(diffTasks).ConfigureAwait(false);
+        foreach (var diff in diffs)
+        {
+            if (diff is not null)
+                set.Difficults.Add(diff);
         }
 
         return set.Difficults.Count == 0 ? null : set;
+    }
+
+    private static async Task<OngekiFumenDiff?> TryReadFumenDiffAsync(
+        OngekiFumenSet set,
+        ISimpleFile musicFile,
+        string musicLocator,
+        XElement entry,
+        int diffIndex,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var path = entry.Element("FumenFile")?.Element("path")?.Value;
+        var parentLocator = GetParentLocator(musicLocator);
+        if (!OgkiFumenListBrowserPath.TryCombineRelative(parentLocator, path, out var fumenLocator))
+            return null;
+
+        // A Music.xml capability only knows its own parent. Resolve through its root by
+        // walking parents instead of accepting a provider-specific path string.
+        var fumenFile = ResolveFromFileParent(musicFile, path ?? string.Empty);
+        if (fumenFile is null)
+            return null;
+
+        var integerPart = ParseInt(entry.Element("FumenConstIntegerPart")?.Value) ?? 0;
+        var fractionalPart = ParseInt(entry.Element("FumenConstFractionalPart")?.Value) ?? 0;
+        var diff = new OngekiFumenDiff(set)
+        {
+            DiffIdx = diffIndex,
+            Level = integerPart + fractionalPart / 100f,
+            FumenFile = fumenFile,
+            FumenLocator = fumenLocator
+        };
+        await ReadFumenInfoAsync(diff, cancellationToken).ConfigureAwait(false);
+        return diff;
     }
 
     private async Task<AudioResource?> TryReadAudioResourceAsync(
@@ -384,6 +418,26 @@ public sealed class OgkiFumenListBrowserScanner
     {
         var index = fileName.LastIndexOf('.');
         return index < 0 ? string.Empty : fileName[index..];
+    }
+
+    private static async Task<TOutput[]> RunBoundedAsync<TInput, TOutput>(
+        IReadOnlyList<TInput> items,
+        Func<TInput, CancellationToken, Task<TOutput>> operation,
+        CancellationToken cancellationToken)
+    {
+        var results = new TOutput[items.Count];
+        await Parallel.ForEachAsync(
+            Enumerable.Range(0, items.Count),
+            new ParallelOptions
+            {
+                CancellationToken = cancellationToken,
+                MaxDegreeOfParallelism = MaxParallelOperations
+            },
+            async (index, token) =>
+            {
+                results[index] = await operation(items[index], token).ConfigureAwait(false);
+            }).ConfigureAwait(false);
+        return results;
     }
 
     private sealed record FileEntry(ISimpleFile Capability, string Locator);
