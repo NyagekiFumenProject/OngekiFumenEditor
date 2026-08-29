@@ -326,6 +326,8 @@
     "OgkiBrowserCreator":  "作成者",
     "OgkiBrowserRefresh":  "曲ライブラリを更新",
     "OgkiBrowserWorking":  "処理中...",
+    "OgkiBrowserScanFailed":  "ゲームフォルダを読み込めませんでした。更新するか、別のフォルダを選択してください。",
+    "OgkiBrowserRetry":  "再試行",
     "OngekiFumen":  "オンゲキ譜面",
     "OngekiFumenStandardized":  "標準オンゲキ譜面",
     "OpenEditorBeforeUsing":  "エディタを開いてください",

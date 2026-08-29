@@ -329,6 +329,8 @@
     "OgkiBrowserCreator":  "制作者",
     "OgkiBrowserRefresh":  "刷新曲库",
     "OgkiBrowserWorking":  "处理中...",
+    "OgkiBrowserScanFailed":  "无法读取游戏目录，请刷新或选择其他目录。",
+    "OgkiBrowserRetry":  "重试",
     "OngekiFumen":  "音击谱面",
     "OngekiFumenStandardized":  "已标准化的音击谱面",
     "OpenEditorBeforeUsing":  "请先打开编辑器",

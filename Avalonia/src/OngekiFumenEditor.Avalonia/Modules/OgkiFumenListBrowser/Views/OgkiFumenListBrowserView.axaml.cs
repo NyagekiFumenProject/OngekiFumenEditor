@@ -1,7 +1,7 @@
 #nullable enable
 
 using Avalonia.Controls;
-using Avalonia.VisualTree;
+using Avalonia.Layout;
 using Gekimini.Avalonia.Modules.Window.Views;
 using OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Models;
 using OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.ViewModels;
@@ -15,11 +15,16 @@ public partial class OgkiFumenListBrowserView : WindowViewBase
         InitializeComponent();
     }
 
-    private void OnJacketImageAttached(object? sender, VisualTreeAttachmentEventArgs e) =>
-        RequestJacketLoad(sender);
+    private void OnJacketImageEffectiveViewportChanged(object? sender, EffectiveViewportChangedEventArgs e)
+    {
+        if (sender is not Layoutable image ||
+            e.EffectiveViewport.Width <= 0 ||
+            e.EffectiveViewport.Height <= 0 ||
+            !e.EffectiveViewport.Intersects(new global::Avalonia.Rect(image.Bounds.Size)))
+            return;
 
-    private void OnJacketImageDataContextChanged(object? sender, EventArgs e) =>
         RequestJacketLoad(sender);
+    }
 
     private void OnTrackRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
     {

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
@@ -39,13 +40,25 @@ public sealed class OgkiFumenListBrowserScanner
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(root);
-        var entries = EnumerateFiles(root, cancellationToken).ToArray();
-
+        // Keep the scan index limited to metadata and jacket candidates. Large game
+        // roots contain many chart/audio binaries that are resolved from the directory
+        // capabilities only when a matching metadata record is found.
+        var audioEntries = new List<FileEntry>();
+        var musicEntries = new List<FileEntry>();
         var audioBySourceId = new Dictionary<int, AudioResource>();
         var jacketsByMusicId = new Dictionary<int, JacketResource>();
-        var audioEntries = entries
-            .Where(static entry => entry.Capability.FileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
+
+        foreach (var entry in EnumerateFiles(root, cancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (entry.Capability.FileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase))
+                audioEntries.Add(entry);
+            else if (entry.Capability.FileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase))
+                musicEntries.Add(entry);
+            else if (TryParseJacket(entry.Capability.FileName, entry.Locator, out var musicId))
+                jacketsByMusicId.TryAdd(musicId, new JacketResource(entry.Capability, entry.Locator));
+        }
+
         var audioResources = await RunBoundedAsync(
             audioEntries,
             (entry, token) => TryReadAudioResourceAsync(entry.Capability, entry.Locator, token),
@@ -57,16 +70,6 @@ public sealed class OgkiFumenListBrowserScanner
                 audioBySourceId.Add(resource.SourceId, resource);
         }
 
-        foreach (var entry in entries)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (TryParseJacket(entry.Capability.FileName, entry.Locator, out var musicId))
-                jacketsByMusicId.TryAdd(musicId, new JacketResource(entry.Capability, entry.Locator));
-        }
-
-        var musicEntries = entries
-            .Where(static entry => entry.Capability.FileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase))
-            .ToArray();
         var fumenSets = await RunBoundedAsync(
             musicEntries,
             (entry, token) => TryReadFumenSetAsync(entry.Capability, entry.Locator, token),
@@ -256,8 +259,13 @@ public sealed class OgkiFumenListBrowserScanner
     {
         try
         {
-            var lines = await diff.FumenFile.ReadAllLines().ConfigureAwait(false);
-            foreach (var line in lines)
+            await using var stream = await diff.FumenFile.OpenReadAsync(cancellationToken).ConfigureAwait(false);
+            using var reader = new StreamReader(
+                stream,
+                Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: true,
+                bufferSize: 4096);
+            while (await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
             {
                 if (diff.Bpm <= 0 && BpmRegex.Match(line) is { Success: true } bpmMatch &&
                     float.TryParse(
@@ -272,7 +280,6 @@ public sealed class OgkiFumenListBrowserScanner
                     diff.Creator = creatorMatch.Groups[1].Value.Trim();
                 if (diff.Bpm > 0 && !string.IsNullOrWhiteSpace(diff.Creator))
                     break;
-                cancellationToken.ThrowIfCancellationRequested();
             }
         }
         catch (OperationCanceledException)
@@ -292,7 +299,9 @@ public sealed class OgkiFumenListBrowserScanner
         string locator = "")
     {
         cancellationToken.ThrowIfCancellationRequested();
-        foreach (var file in directory.ChildFiles.OrderBy(x => x.FileName, StringComparer.OrdinalIgnoreCase))
+        foreach (var file in directory.ChildFiles
+                     .Where(static file => IsRelevantFileName(file.FileName))
+                     .OrderBy(x => x.FileName, StringComparer.OrdinalIgnoreCase))
         {
             cancellationToken.ThrowIfCancellationRequested();
             yield return new(file, string.IsNullOrEmpty(locator) ? file.FileName : locator + "/" + file.FileName);
@@ -305,6 +314,11 @@ public sealed class OgkiFumenListBrowserScanner
                 yield return entry;
         }
     }
+
+    private static bool IsRelevantFileName(string fileName) =>
+        fileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase) ||
+        fileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase) ||
+        fileName.StartsWith("ui_jacket_", StringComparison.OrdinalIgnoreCase);
 
     private static ISimpleFile? ResolveFromFileParent(ISimpleFile sourceFile, string relativePath)
     {

@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:icons="using:FluentIcons.Avalonia.Fluent"
     xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Views"
     xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
@@ -152,7 +153,7 @@
                         </StackPanel>
                     </Button>
                 </Grid>
-                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
                     <Border Width="34"
                             Height="34"
                             Background="{DynamicResource BrowserSubtleSurfaceBrush}"
@@ -163,22 +164,67 @@
                     <TextBox Grid.Column="1"
                              Classes="search-box"
                              Text="{CompiledBinding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordSortFilter}}" />
+                             Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordFilter}}">
+                        <TextBox.KeyBindings>
+                            <KeyBinding Command="{CompiledBinding ApplyKeywordsCommand}" Gesture="Enter" />
+                        </TextBox.KeyBindings>
+                    </TextBox>
                     <Button Grid.Column="2"
+                            Classes="icon-button"
+                            IsVisible="{CompiledBinding HasKeywords}"
+                            AutomationProperties.Name="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserClearFilter}}"
+                            Command="{CompiledBinding ClearKeywordsCommand}"
+                            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserClearFilter}}">
+                        <icons:FluentIcon Icon="Dismiss" IconSize="Size16" />
+                    </Button>
+                    <Button Grid.Column="3"
                             Classes="secondary-action"
                             Command="{CompiledBinding ApplyKeywordsCommand}"
                             Content="{markup:Translate {x:Static languages:Lang+B.Filter}}" />
-                    <Button Grid.Column="3"
+                    <Button Grid.Column="4"
                             Classes="icon-button"
+                            AutomationProperties.Name="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRefresh}}"
                             Command="{CompiledBinding RefreshListCommand}"
                             ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRefresh}}">
-                        <TextBlock FontSize="18" Text="↻" />
+                        <icons:FluentIcon Icon="ArrowSync" IconSize="Size20" />
                     </Button>
                 </Grid>
             </Grid>
         </Border>
 
         <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Border IsVisible="{CompiledBinding ShowErrorState}"
+                    Padding="34"
+                    Background="{DynamicResource BrowserSurfaceBrush}"
+                    BorderBrush="{DynamicResource BrowserBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                <StackPanel HorizontalAlignment="Center"
+                            MaxWidth="440"
+                            Spacing="12">
+                    <Border Width="58"
+                            Height="58"
+                            HorizontalAlignment="Center"
+                            Background="{DynamicResource BrowserAccentSoftBrush}"
+                            CornerRadius="16">
+                        <Image Margin="14"
+                               Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/notication.png" />
+                    </Border>
+                    <TextBlock HorizontalAlignment="Center"
+                               Text="{CompiledBinding ErrorMessage}"
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                    <Button HorizontalAlignment="Center"
+                            Classes="primary-action"
+                            Command="{CompiledBinding RetryCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <icons:FluentIcon Icon="ArrowSync" IconSize="Size16" />
+                            <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRetry}}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
             <Border IsVisible="{CompiledBinding ShowNoRootState}"
                     Padding="34"
                     Background="{DynamicResource BrowserSurfaceBrush}"
@@ -242,7 +288,7 @@
                 </StackPanel>
             </Border>
 
-            <ScrollViewer IsVisible="{CompiledBinding HasResults}"
+            <ScrollViewer IsVisible="{CompiledBinding ShowResults}"
                           IsTabStop="False"
                           ScrollViewer.BringIntoViewOnFocusChange="False"
                           HorizontalScrollBarVisibility="Disabled"
@@ -273,8 +319,7 @@
                                                                FontWeight="SemiBold"
                                                                Foreground="{DynamicResource BrowserAccentBrush}"
                                                                Text="{CompiledBinding MusicId, StringFormat='#{0:0000}'}" />
-                                                    <Image AttachedToVisualTree="OnJacketImageAttached"
-                                                           DataContextChanged="OnJacketImageDataContextChanged"
+                                                    <Image EffectiveViewportChanged="OnJacketImageEffectiveViewportChanged"
                                                            Source="{CompiledBinding JacketBitmap}"
                                                            Stretch="UniformToFill" />
                                                 </Grid>

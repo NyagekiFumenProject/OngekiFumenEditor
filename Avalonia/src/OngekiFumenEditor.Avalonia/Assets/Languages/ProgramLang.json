@@ -329,6 +329,8 @@
     "OgkiBrowserCreator":  "CREATOR",
     "OgkiBrowserRefresh":  "Refresh library",
     "OgkiBrowserWorking":  "Working...",
+    "OgkiBrowserScanFailed":  "The game folder could not be read. Try refreshing or choose another folder.",
+    "OgkiBrowserRetry":  "Try again",
     "OngekiFumen":  "Ongeki Fumen",
     "OngekiFumenStandardized":  "Standardized Ongeki Fumen",
     "OpenEditorBeforeUsing":  "Open the editor first",

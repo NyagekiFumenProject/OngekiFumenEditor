@@ -4,9 +4,12 @@
 
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
@@ -35,6 +38,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.ViewModels;
 [RegisterSingleton<IOgkiFumenListBrowser>]
 public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiFumenListBrowser, IDisposable
 {
+    private const int JacketDecodeWidth = 176;
     private readonly IAudioManager audioManager;
     private readonly IFumenParserManager parserManager;
     private readonly IFumenVisualEditorProvider editorProvider;
@@ -93,17 +97,30 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     [ObservableProperty]
     public partial bool IsBusy { get; private set; }
 
-    public ObservableCollection<OngekiFumenSet> DisplayFumenSets { get; } = [];
+    [ObservableProperty]
+    public partial string ErrorMessage { get; private set; } = string.Empty;
+
+    private readonly BatchObservableCollection<OngekiFumenSet> displayFumenSets = [];
+
+    public ObservableCollection<OngekiFumenSet> DisplayFumenSets => displayFumenSets;
 
     public string RootFolderPath => RootFolderDisplayName;
 
     public bool HasRootFolder => !string.IsNullOrWhiteSpace(RootFolderDisplayName);
 
+    public bool HasKeywords => !string.IsNullOrWhiteSpace(Keywords);
+
     public bool HasResults => DisplayFumenSets.Count > 0;
 
-    public bool ShowNoRootState => !IsBusy && !HasRootFolder;
+    public bool ShowResults => !HasError && HasResults;
 
-    public bool ShowNoResultsState => !IsBusy && HasRootFolder && !HasResults;
+    public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    public bool ShowErrorState => !IsBusy && HasError;
+
+    public bool ShowNoRootState => !IsBusy && !HasError && !HasRootFolder;
+
+    public bool ShowNoResultsState => !IsBusy && !HasError && HasRootFolder && !HasResults;
 
     private List<OngekiFumenSet> fumenSets = [];
 
@@ -142,14 +159,21 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         for (var index = 1; index < folders.Count; index++)
             folders[index].Dispose();
 
-        await SetRootFromStorageFolderAsync(folders[0]);
+        try
+        {
+            await SetRootFromStorageFolderAsync(folders[0]);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException)
+        {
+            Log.LogError("Unable to use the selected Ogki game root.", exception);
+            await InvokeOnUiThreadAsync(() => ErrorMessage = Lang.OgkiBrowserScanFailed);
+        }
     }
 
     [RelayCommand]
     private void ApplyKeywords()
     {
         var keyword = Keywords?.Trim() ?? string.Empty;
-        DisplayFumenSets.Clear();
         IEnumerable<OngekiFumenSet> result = fumenSets;
         if (!string.IsNullOrWhiteSpace(keyword))
         {
@@ -161,14 +185,13 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 .Select(x => x.Set);
         }
 
-        foreach (var set in result)
-            DisplayFumenSets.Add(set);
+        displayFumenSets.ReplaceAll(result);
 
         NotifyDisplayState();
     }
 
     /// <summary>
-    /// Requests a jacket when its list item is attached to the visual tree.
+    /// Requests a jacket when its list item enters the effective viewport.
     /// </summary>
     internal void RequestJacketLoad(OngekiFumenSet set)
     {
@@ -178,10 +201,11 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
         var version = Volatile.Read(ref refreshVersion);
         var key = $"{version}:{set.JacketLocator}";
+        var cancellationToken = refreshCancellation?.Token ?? CancellationToken.None;
         var lazyTask = jacketLoadTasks.GetOrAdd(
             key,
             _ => new Lazy<Task>(
-                () => LoadJacketAsync(set, version, key),
+                () => LoadJacketAsync(set, version, key, cancellationToken),
                 LazyThreadSafetyMode.ExecutionAndPublication));
         _ = lazyTask.Value;
     }
@@ -191,6 +215,9 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     [RelayCommand]
     private Task RefreshListAsync() => RefreshAsync();
+
+    [RelayCommand]
+    private Task RetryAsync() => rootDirectory is null ? SelectFolderAsync() : RefreshAsync();
 
     [RelayCommand]
     private void ClearKeywords()
@@ -209,9 +236,14 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         var root = rootDirectory;
         if (root is null)
         {
-            fumenSets = [];
-            DisplayFumenSets.Clear();
-            NotifyDisplayState();
+            await InvokeOnUiThreadAsync(() =>
+            {
+                fumenSets = [];
+                displayFumenSets.ReplaceAll(Array.Empty<OngekiFumenSet>());
+                ErrorMessage = string.Empty;
+                IsBusy = false;
+                NotifyDisplayState();
+            });
             return;
         }
 
@@ -222,17 +254,31 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         jacketLoadTasks.Clear();
         var token = refreshCancellation.Token;
 
-        await refreshGate.WaitAsync(token).ConfigureAwait(false);
+        var acquiredRefreshGate = false;
         try
         {
-            IsBusy = true;
+            await refreshGate.WaitAsync(token).ConfigureAwait(false);
+            acquiredRefreshGate = true;
+            await InvokeOnUiThreadAsync(() =>
+            {
+                if (version != refreshVersion || isDisposed)
+                    return;
+                IsBusy = true;
+                ErrorMessage = string.Empty;
+            });
             var scanner = new OgkiFumenListBrowserScanner(audioManager);
             var result = await scanner.ScanAsync(root, token).ConfigureAwait(false);
             if (isDisposed || version != refreshVersion || token.IsCancellationRequested)
                 return;
 
-            fumenSets = result.ToList();
-            await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(ApplyKeywords);
+            var scannedSets = result.ToList();
+            await InvokeOnUiThreadAsync(() =>
+            {
+                if (isDisposed || version != refreshVersion || token.IsCancellationRequested)
+                    return;
+                fumenSets = scannedSets;
+                ApplyKeywords();
+            });
         }
         catch (OperationCanceledException)
         {
@@ -240,12 +286,26 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         catch (Exception exception)
         {
             Log.LogError("Ogki fumen list scan failed.", exception);
+            await InvokeOnUiThreadAsync(() =>
+            {
+                if (isDisposed || version != refreshVersion)
+                    return;
+                fumenSets = [];
+                displayFumenSets.ReplaceAll(Array.Empty<OngekiFumenSet>());
+                ErrorMessage = Lang.OgkiBrowserScanFailed;
+                NotifyDisplayState();
+            });
         }
         finally
         {
+            if (acquiredRefreshGate)
+                refreshGate.Release();
             if (version == refreshVersion)
-                IsBusy = false;
-            refreshGate.Release();
+                await InvokeOnUiThreadAsync(() =>
+                {
+                    if (version == refreshVersion)
+                        IsBusy = false;
+                });
         }
     }
 
@@ -287,10 +347,11 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             loaded = await AvaloniaStorageProviderFileSystemBuilder
                 .LoadFromAvaloniaStorageFolder(ownedStorageFolder, CancellationToken.None)
                 .ConfigureAwait(false);
-            ReplaceRoot(loaded);
+            await InvokeOnUiThreadAsync(() => ReplaceRoot(loaded));
             loaded = null;
 
-            RootFolderDisplayName = displayName ?? string.Empty;
+            var resolvedDisplayName = displayName ?? string.Empty;
+            await InvokeOnUiThreadAsync(() => RootFolderDisplayName = resolvedDisplayName);
             string bookmark = string.Empty;
             if (saveBookmark && rootDirectory is IBookmarkableSimpleFileSystemItem bookmarkable && bookmarkable.CanBookmark)
             {
@@ -321,7 +382,9 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         foreach (var set in fumenSets)
             set.JacketBitmap = null;
         fumenSets = [];
-        DisplayFumenSets.Clear();
+        displayFumenSets.ReplaceAll(Array.Empty<OngekiFumenSet>());
+        ErrorMessage = string.Empty;
+        IsBusy = false;
         NotifyDisplayState();
         ClearJacketCache();
         var previous = rootDirectory;
@@ -332,6 +395,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     private void ClearSavedRoot()
     {
         RootFolderDisplayName = string.Empty;
+        ErrorMessage = string.Empty;
         var setting = OgkiFumenListBrowserSetting.Default;
         setting.RootFolderBookmark = string.Empty;
         setting.RootFolderDisplayName = string.Empty;
@@ -340,14 +404,32 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     partial void OnRootFolderDisplayNameChanged(string value) => NotifyDisplayState();
 
+    partial void OnKeywordsChanged(string value) => OnPropertyChanged(nameof(HasKeywords));
+
     partial void OnIsBusyChanged(bool value) => NotifyDisplayState();
+
+    partial void OnErrorMessageChanged(string value) => NotifyDisplayState();
 
     private void NotifyDisplayState()
     {
         OnPropertyChanged(nameof(HasRootFolder));
         OnPropertyChanged(nameof(HasResults));
+        OnPropertyChanged(nameof(ShowResults));
+        OnPropertyChanged(nameof(HasError));
+        OnPropertyChanged(nameof(ShowErrorState));
         OnPropertyChanged(nameof(ShowNoRootState));
         OnPropertyChanged(nameof(ShowNoResultsState));
+    }
+
+    private static async Task InvokeOnUiThreadAsync(Action action)
+    {
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            action();
+            return;
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(action);
     }
 
     private async Task OpenFumenAsync(OngekiFumenDiff diff)
@@ -404,7 +486,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 if (editor is IDisposable disposable)
                     disposable.Dispose();
             }
-            IsBusy = false;
+            await InvokeOnUiThreadAsync(() => IsBusy = false);
         }
     }
 
@@ -523,7 +605,11 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         }
     }
 
-    private async Task LoadJacketAsync(OngekiFumenSet set, long version, string requestKey)
+    private async Task LoadJacketAsync(
+        OngekiFumenSet set,
+        long version,
+        string requestKey,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -536,21 +622,23 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 return;
             }
 
-            var cancellationToken = refreshCancellation?.Token ?? CancellationToken.None;
             var bytes = await jacketDecoder.LoadPngBytesAsync(set.JacketFile, cancellationToken).ConfigureAwait(false);
             if (bytes is null or { Length: 0 })
                 return;
 
             await using var stream = new MemoryStream(bytes, writable: false);
-            var bitmap = new Bitmap(stream);
+            var bitmap = Bitmap.DecodeToWidth(stream, JacketDecodeWidth, BitmapInterpolationMode.MediumQuality);
             if (!IsJacketRequestCurrent(set, version))
             {
                 bitmap.Dispose();
                 return;
             }
 
-            jacketBitmapCache[set.JacketLocator] = new WeakReference<Bitmap>(bitmap);
-            await PublishJacketBitmapAsync(set, bitmap, version, disposeWhenStale: true).ConfigureAwait(false);
+            if (await PublishJacketBitmapAsync(set, bitmap, version, disposeWhenStale: true).ConfigureAwait(false) &&
+                IsJacketRequestCurrent(set, version))
+            {
+                jacketBitmapCache[set.JacketLocator] = new WeakReference<Bitmap>(bitmap);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -565,12 +653,13 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         }
     }
 
-    private async Task PublishJacketBitmapAsync(
+    private async Task<bool> PublishJacketBitmapAsync(
         OngekiFumenSet set,
         Bitmap bitmap,
         long version,
         bool disposeWhenStale)
     {
+        var published = false;
         await global::Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
         {
             if (!IsJacketRequestCurrent(set, version))
@@ -581,7 +670,9 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             }
 
             set.JacketBitmap = bitmap;
+            published = true;
         }).GetTask().ConfigureAwait(false);
+        return published;
     }
 
     private bool IsJacketRequestCurrent(OngekiFumenSet set, long version) =>
@@ -592,27 +683,60 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     private static int FuzzyDistance(OngekiFumenSet set, string keyword)
     {
-        var values = new[] { set.Artist, set.Title }
-            .Concat(set.Difficults.Select(x => x.Creator))
-            .Where(x => !string.IsNullOrWhiteSpace(x));
-        return values.Select(x => LevenshteinDistance(x, keyword)).DefaultIfEmpty(int.MaxValue).Min();
+        var best = int.MaxValue;
+        if (!string.IsNullOrWhiteSpace(set.Artist))
+        {
+            best = Math.Min(best, LevenshteinDistance(set.Artist, keyword));
+            if (best == 0)
+                return best;
+        }
+
+        if (!string.IsNullOrWhiteSpace(set.Title))
+        {
+            best = Math.Min(best, LevenshteinDistance(set.Title, keyword));
+            if (best == 0)
+                return best;
+        }
+
+        foreach (var diff in set.Difficults)
+        {
+            if (string.IsNullOrWhiteSpace(diff.Creator))
+                continue;
+
+            best = Math.Min(best, LevenshteinDistance(diff.Creator, keyword));
+            if (best == 0)
+                return best;
+        }
+
+        return best;
     }
 
     private static int LevenshteinDistance(string left, string right)
     {
+        if (left.Length == 0)
+            return right.Length;
+        if (right.Length == 0)
+            return left.Length;
+
         if (left.Contains(right, StringComparison.InvariantCultureIgnoreCase) ||
             right.Contains(left, StringComparison.InvariantCultureIgnoreCase))
             return 0;
         left = left.ToLowerInvariant();
         right = right.ToLowerInvariant();
-        var previous = Enumerable.Range(0, right.Length + 1).ToArray();
+        if (right.Length > left.Length)
+            (left, right) = (right, left);
+
+        var previous = new int[right.Length + 1];
+        var current = new int[right.Length + 1];
+        for (var index = 0; index < previous.Length; index++)
+            previous[index] = index;
+
         for (var i = 1; i <= left.Length; i++)
         {
-            var current = new int[right.Length + 1];
             current[0] = i;
             for (var j = 1; j <= right.Length; j++)
                 current[j] = Math.Min(Math.Min(current[j - 1] + 1, previous[j] + 1), previous[j - 1] + (left[i - 1] == right[j - 1] ? 0 : 1));
-            previous = current;
+            (previous, current) = (current, previous);
         }
         return previous[^1];
     }
@@ -644,9 +768,31 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         rootDirectory?.Dispose();
         rootDirectory = null;
         fumenSets = [];
-        DisplayFumenSets.Clear();
+        displayFumenSets.ReplaceAll(Array.Empty<OngekiFumenSet>());
+        ErrorMessage = string.Empty;
+        IsBusy = false;
         NotifyDisplayState();
         ClearJacketCache();
+    }
+
+    private sealed class BatchObservableCollection<T> : ObservableCollection<T>
+    {
+        public void ReplaceAll(IEnumerable<T> items)
+        {
+            ArgumentNullException.ThrowIfNull(items);
+            var next = items as IReadOnlyList<T> ?? items.ToArray();
+            if (Count == next.Count && this.SequenceEqual(next))
+                return;
+
+            CheckReentrancy();
+            Items.Clear();
+            foreach (var item in next)
+                Items.Add(item);
+
+            OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
+            OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
     }
 
     private sealed class MemorySimpleFile : ISimpleFile
