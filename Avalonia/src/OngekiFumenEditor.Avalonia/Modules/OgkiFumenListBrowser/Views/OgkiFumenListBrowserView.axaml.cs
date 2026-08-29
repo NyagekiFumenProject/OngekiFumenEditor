@@ -21,6 +21,15 @@ public partial class OgkiFumenListBrowserView : WindowViewBase
     private void OnJacketImageDataContextChanged(object? sender, EventArgs e) =>
         RequestJacketLoad(sender);
 
+    private void OnTrackRequestBringIntoView(object? sender, RequestBringIntoViewEventArgs e)
+    {
+        // The item header is an interaction surface, not a navigation target.
+        // Suppress its automatic bring-into-view request so expanding an item
+        // cannot move the list to a different position.
+        if (sender is Expander)
+            e.Handled = true;
+    }
+
     private void RequestJacketLoad(object? sender)
     {
         if (sender is not Image image ||

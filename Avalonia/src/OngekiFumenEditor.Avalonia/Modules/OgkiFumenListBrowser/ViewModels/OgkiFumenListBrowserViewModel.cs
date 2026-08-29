@@ -97,6 +97,14 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     public string RootFolderPath => RootFolderDisplayName;
 
+    public bool HasRootFolder => !string.IsNullOrWhiteSpace(RootFolderDisplayName);
+
+    public bool HasResults => DisplayFumenSets.Count > 0;
+
+    public bool ShowNoRootState => !IsBusy && !HasRootFolder;
+
+    public bool ShowNoResultsState => !IsBusy && HasRootFolder && !HasResults;
+
     private List<OngekiFumenSet> fumenSets = [];
 
     public override void OnViewAfterLoaded(Gekimini.Avalonia.Views.IView view)
@@ -155,10 +163,12 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
         foreach (var set in result)
             DisplayFumenSets.Add(set);
+
+        NotifyDisplayState();
     }
 
     /// <summary>
-    /// Requests a jacket only when its virtualized list item becomes visible.
+    /// Requests a jacket when its list item is attached to the visual tree.
     /// </summary>
     internal void RequestJacketLoad(OngekiFumenSet set)
     {
@@ -179,6 +189,16 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     [RelayCommand]
     private Task LoadFumenAsync(OngekiFumenDiff diff) => OpenFumenAsync(diff);
 
+    [RelayCommand]
+    private Task RefreshListAsync() => RefreshAsync();
+
+    [RelayCommand]
+    private void ClearKeywords()
+    {
+        Keywords = string.Empty;
+        ApplyKeywords();
+    }
+
     public Task<IReadOnlyList<OngekiFumenSet>> SearchFumenSet(
         ISimpleDirectory root,
         CancellationToken cancellationToken = default) =>
@@ -191,6 +211,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         {
             fumenSets = [];
             DisplayFumenSets.Clear();
+            NotifyDisplayState();
             return;
         }
 
@@ -301,6 +322,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             set.JacketBitmap = null;
         fumenSets = [];
         DisplayFumenSets.Clear();
+        NotifyDisplayState();
         ClearJacketCache();
         var previous = rootDirectory;
         rootDirectory = next;
@@ -314,6 +336,18 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         setting.RootFolderBookmark = string.Empty;
         setting.RootFolderDisplayName = string.Empty;
         setting.Save();
+    }
+
+    partial void OnRootFolderDisplayNameChanged(string value) => NotifyDisplayState();
+
+    partial void OnIsBusyChanged(bool value) => NotifyDisplayState();
+
+    private void NotifyDisplayState()
+    {
+        OnPropertyChanged(nameof(HasRootFolder));
+        OnPropertyChanged(nameof(HasResults));
+        OnPropertyChanged(nameof(ShowNoRootState));
+        OnPropertyChanged(nameof(ShowNoResultsState));
     }
 
     private async Task OpenFumenAsync(OngekiFumenDiff diff)
@@ -611,6 +645,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         rootDirectory = null;
         fumenSets = [];
         DisplayFumenSets.Clear();
+        NotifyDisplayState();
         ClearJacketCache();
     }
 

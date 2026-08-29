@@ -198,6 +198,7 @@
 <p>状态：本轮审查已冻结（已完成文件基线，以及设置、本地化、撤销/重做、最近文件、命令行、异常终止流程、窗口标题、选择筛选器、状态栏、编码、注册和项目文件夹 I/O 的首轮深查；当前登记 85 个差异条目）<br />
 首次建立：2026-08-07<br />
 本轮收尾：2026-08-07<br />
+最近复核：2026-08-24（代码基线 <code>f9c57aad</code>；逐项复核全部未完成条目：确认 B-005、B-018、B-021 已闭环并红标，刷新 A-005、B-010、B-022、B-023、B-027、B-028、B-035、B-037、D-002 的现状证据，其余条目经查证维持原状）<br />
 当前代码基线：<code>286d33eb</code>（分支 <code>avalonia</code>）<br />
 原项目根：<code>OngekiFumenEditor/</code>、<code>OngekiFumenEditor.CommandLine/</code><br />
 移植项目根：<code>Avalonia/src/OngekiFumenEditor.Avalonia*/</code></p>
@@ -253,6 +254,7 @@
 </tr>
 </tbody>
 </table>
+<p>复核进度（2026-08-24）：B 类 46 条中已有 28 条标记完成（含本次新关闭的 B-005、B-018、B-021）；A 类 5 条经复查仍全部缺失；其余未完成条目的最新证据已写入各自条目的「完成状态/现状更新」段。</p>
 <h2 id="section-1">2. 审查边界和证据规则</h2>
 <h3 id="section-2">2.1 纳入范围</h3>
 <ol>
@@ -475,6 +477,7 @@
 </ul>
 <h3 id="a-005">A-005 主窗口拖入单个文件打开文档的入口缺失</h3>
 <ul>
+<li><strong>现状更新（2026-08-24）</strong>：外部文件拖入仍未实现——共享 App、Desktop App 与 Gekimini Shell 主窗口均没有接受外部 <code>StorageItems</code> 的 DragOver/Drop 处理器；现有拖放全部是 Gekimini 内部令牌（工具箱、编辑器放置处理器、DataGrid 行重排）。另外旧 <code>DocumentOpenHelper</code> 已从 Avalonia 源树整体删除（职责并入 Desktop 快速打开服务），下文“<code>TryOpenAsDocument</code> 可达调用点”的描述随之失效，但拖入打开缺失的结论不变。</li>
 <li><strong>WPF 行为</strong>：<code>AppBootstrapper.cs:288-289</code> 给主窗口设置 <code>AllowDrop</code> 并订阅 <code>MainWindow_Drop</code>；<code>AppBootstrapper.cs:393-407</code> 读取 <code>DataFormats.FileDrop</code>，当外部文件数恰为一个时调用 <code>DocumentOpenHelper.TryOpenAsDocument(filePath)</code>。</li>
 <li><strong>Avalonia 状态</strong>：没有在 Desktop 主窗口或 <code>TopLevel</code> 上找到接收外部 <code>StorageItems</code>/文件路径的拖放处理器。<code>FumenVisualEditorView.xaml.cs</code> 的 <code>DragEnter</code>/<code>Drop</code> 只把 Gekimini 内部拖放令牌转给编辑器 ViewModel；<code>DocumentOpenHelper.TryOpenAsDocument</code> 当前可达调用点只有快速打开命令和启动参数处理器。</li>
 <li><strong>影响</strong>：用户不能把一个工程/谱面文件从操作系统文件管理器直接拖到主窗口打开。DataGrid 行重排、工具箱对象拖放等内部拖放不等价于外部文件拖入。</li>
@@ -527,8 +530,10 @@
 <li><strong>审查时状态</strong>：当时 <code>BatchModeBehavior</code> 只保存 <code>CurrentSubmode</code>，批量刷入、删除、过滤选择、撤销动作和附加/拆卸清理均不存在；文件中的三个 <code>ConvertBack()</code> 抛异常并不是主体缺口。</li>
 <li><strong>原影响（已消除）</strong>：批量模式工具栏虽可显示，但无法按旧方式完成绘制、筛选和删除。当前功能链已恢复；后续仍建议补充真实 Desktop 指针拖出窗口、窗口失活和多指针设备的手工 smoke 验收。</li>
 </ul>
-<h3 id="b-005">B-005 新建空项目流程固定失败</h3>
+<h3 id="b-005" class="completed-plan">B-005 新建空项目流程固定失败（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-24）</strong>：新建空项目工作流已实现并接通，方案名以红色标记表示实现与签入闭环已经完成。<code>FumenVisualEditorProvider.TryNew</code> 走 <code>CreateNewProjectAsync</code>：选择目标目录后打开 <code>EditorProjectSetupDialogViewModel</code>，由 <code>EditorProjectCreationTransaction</code> 以事务完成创建——写入 <code>.nyagekiProj</code>、绑定谱面/音频（含外置 AWB）、做谱面序列化回读校验，再附着编辑器并记录最近工程；“不支持在没有现有项目文件夹时创建工程”的固定失败分支已不存在。</li>
+<li><strong>平台边界</strong>：Desktop 的 <code>DefaultDesktopFumenVisualEditorProvider.CanCreateNew => true</code>；Browser 保持 <code>false</code> 并按平台设计隐藏 Splash 新建按钮。相关提交：<code>735cf0c5</code>（setup workflow）、<code>8086ab48</code>（orchestration 进 provider）、<code>859b6a85</code>（EditorContext 重构）。</li>
 <li><strong>Avalonia 代码</strong>：<code>FumenVisualEditorViewModel.New()</code> 记录“不支持在没有现有项目文件夹时创建工程”并固定返回 <code>false</code>。</li>
 <li><strong>当前已实现部分</strong>：从文件夹加载 <code>.nyagekiProj</code>、多工程文件选择、最近项目 bookmark 恢复已有完整新路径。</li>
 <li><strong>入口侧影响</strong>：<code>FumenVisualEditorProvider.CanCreateNew</code> 同时被设为 <code>false</code>，因此 Gekimini 主菜单“新建”不会列出该 provider；Splash 的“新建工程”虽然绕过菜单直接调用 <code>TryNew()</code>，仍因上述固定返回值无提示地留在原窗口。打开已有工程已不再是旧报告所述的整体缺失，但“新建工程”仍没有完成。</li>
@@ -575,6 +580,7 @@
 </ul>
 <h3 id="b-010">B-010 程序设置页保留了若干没有活动消费者的开关</h3>
 <ul>
+<li><strong>现状更新（2026-08-24）</strong>：<code>ShowConsoleWindowInGUIMode</code> 已有活动消费者——<code>OngekiFumenEditorDesktopApp</code> 在 Release 构建按该开关调用 <code>ConsoleWindowHelper.SetConsoleWindowVisible()</code>，并订阅属性变化实时生效；但 <code>UpgradeProcessPriority</code> 与 <code>EnableMultiInstances</code> 仍无任何消费者（后者唯一调用点 <code>Utils/IPCHelper.cs</code> 仍被 Compile Remove，全仓无 <code>ProcessPriorityClass</code> 调用）。本项保持未完成，剩余缺口收窄为这两个开关。</li>
 <li><strong>迁移后的可见表面</strong>：<code>Kernel/SettingPages/Program/Views/ProgramSettingView.axaml:22-43</code> 仍显示进程优先级、多实例、启动后不显示 Splash 和显示控制台四个开关；<code>Models/Settings/ProgramSetting.cs:25-40</code> 也保留对应属性。</li>
 <li><strong>当前消费者核对</strong>：<code>DisableShowSplashScreenAfterBoot</code> 由 <code>OngekiFumenEditorApp.ShowSplashScreenAfterBootAsync()</code> 使用，<code>DumpFileDirPath</code>/<code>IsFullDump</code> 由 dump 服务使用；但没有 Avalonia 代码消费 <code>UpgradeProcessPriority</code> 或 <code>ShowConsoleWindowInGUIMode</code>。<code>EnableMultiInstances</code> 的唯一新调用点位于 <code>Utils/IPCHelper.cs</code>，而该文件被 D-001 的 <code>Compile Remove</code> 排除，因此当前开关也不产生有效行为。</li>
 <li><strong>遗留项区分</strong>：<code>IsNotifyUserCrash</code> 在 WPF 也没有找到实际读取点，属于原有死选项，不应单独算作本轮回归；<code>IsFirstTimeOpenEditor</code> 的无消费者则与 B-008 的首次布局流程直接相关。<code>DisableStringRendererAntialiasing</code> 只被排除的旧 OpenGL 绘制代码读取，随 C-004/E-001 的后端替换而失效。</li>
@@ -727,8 +733,9 @@
 <li><strong>验证</strong>：<code>Constructor_RestoresOriginalObjectTypesAndFourteenOptions</code> 断言完整 5/25 与 5/14 清单；<code>RestoredOptionFilters_MatchAndRejectOriginalScenarios</code> 以 14 组参数覆盖每项过滤器的匹配/排除语义；<code>ActiveEditorAndFumenChanges_RebindPaletteWithoutRetainingOldEntries</code> 覆盖编辑器、谱面和集合切换；<code>ApplyFilterToSelection_RefreshesEditorViewerAndPropertyBrowser</code> 覆盖应用后同步。B-017 专项 <code>17/17</code>、相邻筛选/命令/AXAML 集合 <code>78/78</code>、Avalonia 全集 <code>401/401</code>、Desktop 全集 <code>107/107</code> 通过，解决方案非增量构建 0 错误。</li>
 <li><strong>剩余验收</strong>：自动化已覆盖数据与生命周期契约；原生 Flyout 的长列表滚动、键盘操作和不同 DPI 下的实际布局仍归 C-013 的 Desktop UI 验收，不影响本项功能闭环。</li>
 </ul>
-<h3 id="b-018-provider">B-018 主菜单“打开”会错误过滤掉当前唯一的编辑器 provider</h3>
+<h3 id="b-018-provider" class="completed-plan">B-018 主菜单“打开”会错误过滤掉当前唯一的编辑器 provider（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-24）</strong>：Gekimini 的 <code>OpenFileCommandListHandler.Populate()</code> 已不再按 <code>CanCreateNew</code> 过滤 provider（该过滤只保留在 New handler 中，属合理语义），主菜单“打开”能列出谱面编辑器；两个宿主均已通过 Injectio 把 provider 注册进 <code>IEditorProvider</code>（Desktop 提交 <code>a0d6f257</code>、Browser 提交 <code>9f5ca4d9</code>），Splash 的打开入口与同一 provider 共享链路。方案名以红色标记表示修复与签入闭环已经完成。</li>
 <li><strong>旧行为</strong>：WPF <code>FumenVisualEditorProvider.CanCreateNew</code> 为 <code>true</code>，Gemini 的文件菜单可通过该 provider 新建或打开 <code>.nyagekiProj</code>；Splash 也分别构造 New/Open 命令进入同一编辑器链路。</li>
 <li><strong>Avalonia 元数据</strong>：当前应用只注册了一个 <code>IEditorProvider</code>，即 <code>FumenVisualEditorProvider</code>，其 <code>CanCreateNew</code> 为 <code>false</code>。这对 B-005 的未完成新建流程本身合理，但不应代表“不能打开”。</li>
 <li><strong>Gekimini 缺陷</strong>：<code>OpenFileCommandListHandler.Populate()</code> 与 New handler 一样在 <code>!editorProvider.CanCreateNew</code> 时跳过 provider；而活动 <code>MenuDefinitions.FileOpenMenuItemList</code> 正是使用该 Open command list。因此主菜单“打开”得到空列表，尽管同一 provider 的 <code>TryOpen()</code> 已完整实现文件夹选择与加载。</li>
@@ -759,8 +766,10 @@
 <li><strong>测试缺口</strong>：现有 <code>WavAudioOffsetServiceTests</code> 深度覆盖 WAV 容器和事务，但没有 ViewModel 输入格式矩阵，也没有 MP3/平台 capability 场景。</li>
 <li><strong>建议</strong>：把工具输入改为 capability 驱动：WAV 继续走当前字节安全的 <code>IWavAudioOffsetService</code>，Desktop 的 MP3 等压缩格式通过 <code>INAudioFileReaderFactory</code> 解码后写为 PCM WAV；Browser 只显示其可从授权流解码的格式。若产品决定永久只支持 WAV，应将窗口文案、类型和错误提示明确改为“WAV 偏移”并记录破坏性变化。增加 Desktop MP3、WAV 原地替换、Browser 受限过滤、取消和解码失败测试。</li>
 </ul>
-<h3 id="b-021">B-021 单独谱面的“快速打开”入口和执行链均被停用</h3>
+<h3 id="b-021" class="completed-plan">B-021 单独谱面的“快速打开”入口和执行链均被停用（已完成）</h3>
 <ul>
+<li><strong>完成状态（2026-08-24，Desktop）</strong>：快速打开已在 Desktop 全面恢复——Splash 快速打开卡片（<code>DesktopSplashScreenView.axaml:22-51</code>）、文件菜单项与 <code>Ctrl+F</code> 快捷键（<code>FastOpenFumenCommandDefinition</code>/<code>FastOpenFumenCommandHandler</code> 的 Injectio 注册已激活）重新可达；<code>DesktopFastOpenService</code> 负责音频自动发现（<code>DesktopFastOpenAudioResolver</code>）与外置 AWB 解析，经 <code>editorProvider.TryOpen</code> + Shell 打开临时工程。方案名以红色标记表示实现与签入闭环已经完成。</li>
+<li><strong>迁移方式变化</strong>：旧 <code>DocumentOpenHelper</code> 与 <code>ENABLE_CROSS_PLATFORM_FAST_OPEN</code> 条件编译已被整体删除（全仓零匹配），不再依赖全局编译常量；Browser 无 FastOpen 引用，平台边界继续按 E-004 处理。相关提交：<code>da5c4d7c</code>、<code>aeb6efd0</code>、<code>1b2e6d36</code>。</li>
 <li><strong>WPF 行为</strong>：启动页提供可见的“快速打开”卡片，文件菜单注册 <code>FastOpenFumenMenuItem</code>，命令还声明 <code>Ctrl+F</code>；处理器选择 <code>.ogkr</code>/<code>.nyageki</code> 后调用 <code>DocumentOpenHelper.TryOpenOgkrFileAsDocument()</code>，在需要时补选音频并创建临时编辑器工程。</li>
 <li><strong>Avalonia 入口状态</strong>：<code>SplashScreenView.axaml:237-270</code> 将快速打开卡片整段注释；<code>Commands/OgkrImpl/MenuDefinitions.cs:27-29</code> 将菜单注册注释；命令定义和处理器上的 Injectio 注册也都被注释。保留的 <code>FastOpenCommand</code> 因没有活动命令定义/处理器而不可由正常 UI 到达。</li>
 <li><strong>核心逻辑状态</strong>：<code>DocumentOpenHelper</code> 的字符串、<code>ISimpleFile</code> 和临时工程三个快速打开分支均受 <code>ENABLE_CROSS_PLATFORM_FAST_OPEN</code> 条件保护；全仓没有定义该符号，当前构建只会执行返回 <code>false</code>（并释放输入资源）的禁用分支。</li>
@@ -770,6 +779,7 @@
 </ul>
 <h3 id="b-022">B-022 “另存为”能力被显式过滤且实现固定失败</h3>
 <ul>
+<li><strong>现状更新（2026-08-24）</strong>：用户可见行为不变，机制已变——重构后基础 <code>DocumentViewModelBase.SupportCommandDefinitionTypes</code> 已包含 <code>SaveFileAsCommandDefinition</code>，编辑器改为在 <code>UpdateSaveFileAsCommand()</code> 中把该命令强制 <code>Enabled=false</code>，<code>SaveAs()</code> 仍记录同一缺口并固定返回 <code>false</code>；初始化测试断言命令存在但禁用且保存失败。用户仍无法另存为，本项保持未完成。</li>
 <li><strong>WPF 行为</strong>：<code>FumenVisualEditorViewModel.DoSave(string filePath)</code> 在没有目标工程路径时弹出项目保存对话框，并在谱面尚无保存位置时继续选择谱面目标；关闭未保存的新文档时也会进入 <code>DoSaveAs()</code>，因此旧版能够为工程建立新保存位置。</li>
 <li><strong>Avalonia 状态</strong>：当前 <code>Save()</code> 已能事务式写回会话绑定的项目和谱面，但 <code>SaveAs()</code> 只记录“project-folder-scoped destination flow”尚未实现并固定返回 <code>false</code>；<code>SupportCommandDefinitionTypes</code> 又主动过滤 <code>SaveFileAsCommandDefinition</code>，所以标准“另存为”命令不会对该编辑器启用。</li>
 <li><strong>影响</strong>：用户不能复制、迁移或以新名称保存已经打开的工程，也不能通过“另存为”改变工程根目录；B-005 解决新建空项目后仍不会自动恢复既有工程的另存为工作流。</li>
@@ -780,6 +790,7 @@
 <h3 id="b-023">B-023 新工程 I/O 与预览错误路径绕过本地化资源</h3>
 <ul>
 <li><strong>WPF 行为</strong>：工程创建、加载、保存及预览生成的用户错误和对话框标题主要通过 <code>Resources</code> 键取得，随当前语言切换。</li>
+<li><strong>现状更新（2026-08-24）</strong>：成功反馈部分恢复——Load/Save 成功路径已重新发送 <code>Lang.LoadProjectFileAndFumenFile</code>/<code>Lang.SaveProjectFileAndFumenFile</code> Toast；但 <code>RecaculatedSuccess</code> 键仍无生产调用点，<code>GenerateSvgCommandHandler</code> 的“无活动谱面/生成结果”提示仍是英文常量，<code>IsShowCurveControlAlways</code> 仍拼接英文字符串，<code>ProjectFileSelectionDialogView.axaml</code> 与 <code>FumenVisualEditorProvider.ProjectIO.cs</code> 的对话框文案也仍为硬编码英文。本项保持未完成。</li>
 <li><strong>Avalonia 状态</strong>：<code>FumenVisualEditorViewModel.ProjectIO.cs</code> 直接向用户显示 <code>Open project folder</code>、所选目录没有工程、工程打开失败、最近工程失效等英文字符串；<code>GenerateSvgCommandHandler</code> 的“没有活动谱面文档”提示同样是英文常量。另有 <code>FumenVisualEditorViewModel.IsShowCurveControlAlways</code> 把旧版的 <code>Resources.ShowCurveControlAlways/Enable/Disable</code> Toast 改成 <code>ShowCurveControlAlways: Enable/Disable</code> 硬编码。它们没有进入 <code>ProgramLang*.json</code>，也不会由 <code>SimpleTypedLocalizer</code> 处理。</li>
 <li><strong>成功反馈也被静默掉</strong>：旧版 <code>DoLoad</code>、<code>DoSave</code> 和 <code>RecalculateTotalHeightCommandHandler.Run</code> 分别发送 <code>Resources.LoadProjectFileAndFumenFile</code>、<code>Resources.SaveProjectFileAndFumenFile</code>、<code>Resources.RecaculatedSuccess</code> Toast；当前 <code>ProjectIO.Load/Save</code> 与重算处理器只返回或更新数据，不再发送对应成功提示，而这三个键仍存在于 <code>ProgramLang*.json</code> 且没有活动调用。这样既改变了操作反馈，也留下了无法由编译器发现的死语言键。</li>
 <li><strong>影响</strong>：简体中文或日文界面在打开目录失败、最近记录失效、无活动文档和切换曲线控制点显示等用户可见路径突然切换为英文；这不是缺少某个 fallback 翻译，而是文案完全绕过语言系统。</li>
@@ -812,6 +823,7 @@
 <h3 id="b-027-dirty-document-close-guard">B-027 菜单关闭文档绕过未保存检查，现有确认窗也缺少完整提示</h3>
 <ul>
 <li><strong>WPF 行为</strong>：<code>FumenVisualEditorViewModel.CanCloseAsync()</code>（<code>:321-349</code>）在脏文档关闭前显示本地化的“是否保存”提示，并按“是/否/取消”分别保存后关闭、直接关闭或保留文档；Gemini 的 <code>ShellViewModel.CloseDocumentAsync()</code> 通过 <code>DeactivateItemAsync(..., close: true)</code> 进入 Caliburn 的 <code>IGuardClose</code> 链，因此菜单关闭也受该检查保护。</li>
+<li><strong>现状更新（2026-08-24）</strong>：数据丢失主缺口已修复——Gekimini 新增统一关闭协议 <code>IShell.TryCloseDocumentAsync</code>（提交 <code>86229134</code>），菜单关闭、标签页关闭、应用退出与布局重置全部收敛到同一条“脏检查 → 确认 → 保存失败保留文档 → 再移除”链路（<code>85b14e21</code>），并有 <code>DocumentCloseSafetyTests</code> 回归覆盖（<code>29d74401</code>）；Browser 另加 beforeunload 脏文档警告（<code>51aee4c8</code>）。仍未完成的部分：<code>SaveDirtyDocumentDialogView</code> 只显示文档名，按钮仍是硬编码英文 Yes/No/Cancel，三语言均存在的 <code>SaveBeforeClosingPrompt</code> 键依旧没有被消费。</li>
 <li><strong>Avalonia 分叉路径</strong>：Gekimini 的 <code>CloseFileCommandHandler.cs:29</code> 仍调用 <code>IShell.CloseDocumentAsync()</code>，但 <code>ShellViewModel.cs:196-213</code> 直接执行 <code>Factory.RemoveDocument()</code> 并删除缓存映射，没有调用 <code>ShellDockFactory.CanCloseDocument()</code>。相反，标签页关闭在 <code>ShellDockFactory.cs:156-169</code> 会先检查脏文档，应用退出在 <code>ShellViewModel.cs:466-480</code> 也会检查，导致同一文档因关闭入口不同而具有不同的数据安全语义。</li>
 <li><strong>确认窗降级</strong>：真正走到 <code>CanCloseDocument()</code> 时，<code>SaveDirtyDocumentDialogView.axaml:14-22</code> 只显示文档标题，按钮文本固定为 <code>Yes</code>/<code>No</code>/<code>Cancel</code>；旧版使用的 <code>SaveBeforeClosingPrompt</code> 已存在于当前三套 Ongeki 语言资源中，却没有被该通用对话框消费。用户无法从窗口正文明确判断问题与三个选择的含义，中文/日文环境也会混入英文按钮。</li>
 <li><strong>影响</strong>：从“文件 → 关闭”关闭任何已修改谱面时会无提示地移除文档，随后 <code>DockableClosed</code> 链释放音频和工程运行时文件，未保存的内存修改直接丢失。自动恢复快照只在已持久化工程、启用自动保存且调度已运行时才可能存在，不能作为关闭确认的替代；新文档在受保护路径选择保存时还会命中 B-022 的 <code>Save()/SaveAs()</code> 固定失败。</li>
@@ -821,6 +833,7 @@
 <h3 id="b-028-startup-file-open-stub">B-028 启动参数的单文件打开链路存在固定失败分支</h3>
 <ul>
 <li><strong>WPF 行为</strong>：<code>Kernel/ArgProcesser/DefaultArgProcessManager.cs</code> 收到单个存在路径后调用 <code>DocumentOpenHelper.TryOpenAsDocument()</code>；旧 helper 对 <code>.nyagekiProj</code> 通过 <code>IEditorProvider.Handles()</code> 创建并打开文档，对 <code>.ogkr/.nyageki</code> 调用 <code>TryOpenOgkrFileAsDocument()</code>，因此从文件管理器传入的路径有可达打开结果。</li>
+<li><strong>现状更新（2026-08-24）</strong>：<code>.ogkr/.nyageki</code> 启动打开链路已修复——旧 <code>DocumentOpenHelper</code> 与 <code>ENABLE_CROSS_PLATFORM_FAST_OPEN</code> 已删除，本地打开逻辑迁至 Desktop（<code>DesktopProgramArgProcessManager</code> + <code>DesktopFastOpenService</code>，含音频自动发现与外置 AWB）。但 <code>.nyagekiProj</code> 参数仍在 <code>Desktop/Utils/DesktopDocumentOpenService.cs:20-21</code> 对 <code>IFumenVisualEditorProvider</code> 固定返回 <code>false</code> 且无错误提示；带有效文档时的 Splash 抑制时序也未见调整。本项保持未完成，缺口收窄为项目文件分支。</li>
 <li><strong>Avalonia 状态</strong>：<code>Desktop/Program.cs</code> 和 <code>Kernel/ArgProcesser/DefaultArgProcessManager.cs</code> 已接收并记录参数，但 <code>Utils/DocumentOpenHelper.cs:35-57</code> 遇到 <code>IFumenVisualEditorProvider</code> 会直接 <code>return false</code>，所以唯一项目扩展名 <code>.nyagekiProj</code> 不会进入 provider 的 <code>TryOpen</code>。同文件 <code>:60-145</code> 的原始谱面打开逻辑包在 <code>#if ENABLE_CROSS_PLATFORM_FAST_OPEN</code> 中；当前项目没有定义该符号，实际编译结果是直接返回 <code>false</code>（或释放文件后返回 <code>false</code>）。</li>
 <li><strong>影响</strong>：用户以一个存在的 <code>.nyagekiProj</code>、<code>.ogkr</code> 或 <code>.nyageki</code> 路径启动桌面程序时，日志会出现 <code>arg.filePath</code>，但窗口不打开文档，也没有错误提示；文件关联若在 D-005 之后接入该启动入口，也会继承这个静默失败。<code>--notifySucess</code> 目前也只写日志，旧版的更新完成 About 提示则属于 D-004 的延期范围。另有启动时序回归：<code>OngekiFumenEditorApp.OnFrameworkInitializationCompleted()</code> 先投递 <code>ShowSplashScreenAfterBootAsync()</code>，<code>OngekiFumenEditorDesktopApp</code> 再投递 <code>ProcessStartupArgsAsync()</code>；旧版则在显示 Splash/主窗口前先处理参数。即使文件打开分支恢复，带路径启动也可能先闪出 Splash，或在工程加载时被启动页遮挡。</li>
 <li><strong>分类理由</strong>：启动参数接口、调用点和文件 helper 都存在，但关键扩展名分支被显式短路/条件编译掉，属于“迁移壳已建立、行为未实现”，不是单纯的 E 类平台限制。</li>
@@ -886,6 +899,7 @@
 <h3 id="b-035-project-folder-scan-bounds">B-035 项目文件夹打开缺少取消、进度和资源预算</h3>
 <ul>
 <li><strong>旧版行为</strong>：WPF <code>FumenVisualEditorViewModel.DoLoad()</code>（<code>OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs:237-255</code>）由文件选择器直接得到一个 <code>.nyagekiProj</code> 路径，再只解析该工程及其声明的谱面/音频。</li>
+<li><strong>现状更新（2026-08-24）</strong>：扫描底层已加固——<code>AvaloniaStorageProviderFileSystemBuilder.BuildDirectory</code> 接受 <code>CancellationToken</code> 并逐项检查、拒绝/跳过符号链接、异常时释放半建的目录树（<code>aafe2c47</code>）；隐式工程文件定位已改为显式绑定（<code>0667b2d9</code>）。但仍缺用户可见能力：所有 UI 入口都传默认 token（无取消按钮）、无进度回调，也没有文件数/深度/总字节预算，<code>EditorProjectPathResolver.FindFiles</code> 依旧无界遍历。本项保持未完成，缺口集中在交互层预算与取消。</li>
 <li><strong>Avalonia 状态</strong>：当前 <code>Load()</code> 在 <code>FumenVisualEditorViewModel.ProjectIO.cs:30-66</code> 选择目录后调用 <code>LoadFromAvaloniaStorageFolder</code>；builder 的 <code>:63-140</code> 会递归枚举整个授权目录并为每个文件建立内存索引，<code>FindProjectFiles():11-37</code> 再遍历完整树寻找工程文件。调用点没有传入取消源、进度回调或文件数量/总字节/目录深度限制；工程加载还会把完整音频解码到内存。设计基线 <code>docs/fumen-visual-editor-project-folder-io-design.md:17-24,47-54</code> 已明确记录“无重扫、进度、用户取消、流式发现、资源上限”。</li>
 <li><strong>影响</strong>：用户误选大型游戏目录、网络目录或包含大量无关文件的目录时，打开过程可能长时间占用 UI 和全局 I/O 门，内存压力在显示错误前就已经发生；用户无法中途放弃，也没有已扫描数量/预计剩余时间或超限原因。完整音频缓冲还会把大型音频的峰值内存与目录索引叠加。</li>
 <li><strong>分类理由</strong>：目录授权和递归索引已经实现，但面向实际工作流的可取消、可观测和资源保护没有闭环，属于 B；Avalonia StorageProvider 已提供异步枚举和取消参数，因此不是无法直接迁移的 E 类。</li>
@@ -904,6 +918,7 @@
 <h3 id="b-037-browser-sound-folder-setting">B-037 Browser 仍展示无法生效的自定义音效目录设置</h3>
 <ul>
 <li><strong>当前界面</strong>：共享 <code>Kernel/SettingPages/Audio/Views/AudioSettingView.axaml:81-91</code> 在所有宿主显示 <code>SoundFolderPath</code> 文本框和目录选择按钮；<code>AudioSettingViewModel.SelectSoundFolderAsync():144-151</code> 只有在所选目录存在非空 <code>LocalPath</code> 时才保存，因此 Browser 的授权目录没有本地路径时点击后静默返回。</li>
+<li><strong>现状更新（2026-08-24）</strong>：问题范围扩大而非缩小——音效播放改为从内嵌资源读取（<code>DefaultFumenSoundPlayer</code> 使用 <code>ResourceUtils.OpenReadResourceStream("sounds/...")</code>，原 <code>allowLocalFiles</code> 分支移除），<code>SoundFolderPath</code> 设置现在在包括 Desktop 在内的所有宿主都没有播放侧消费者；设置页控件仍无条件显示，选择目录依旧静默无效。“Desktop 可用、Browser 不可用”的旧表述已过时，本项保持未完成。</li>
 <li><strong>实际播放链路</strong>：<code>Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs:55-68</code> 在 Browser 明确传入 <code>allowLocalFiles: !OperatingSystem.IsBrowser()</code>；<code>OpenSoundStream():107-127</code> 因而跳过 <code>TryGetConfiguredSoundFilePath</code>，只从打包的 <code>Resources/sounds</code> 读取。Desktop 可以使用该设置，Browser 则不能。</li>
 <li><strong>影响</strong>：Browser 用户看到并可能保存一个“音效文件夹路径”，但选择操作可能无反馈，保存值不会改变播放结果；重启或重新加载音效后仍使用内置音效，造成设置页与实际能力不一致。</li>
 <li><strong>分类理由</strong>：这是迁移后共享设置 UI 没有按宿主能力裁剪的半实现，属于 B；任意本地路径本身确实受 Browser 平台约束，交叉参见 E-004，但不能把一个仍可见且无效的控件当作已完成迁移。</li>
@@ -1305,6 +1320,7 @@
 <ul>
 <li><strong>直接证据</strong>：异常文本 <code>temporarily disabled</code> 与 <code>ENABLE_SVG_PREFAB_OBJECTS</code> 条件编译。</li>
 <li><strong>资源侧证据</strong>：旧中性/简中资源中的 <code>SvgPrefabFile</code>、<code>SvgPrefabText</code> 没有进入新 <code>ProgramLang*.json</code>，与工程资源型 SVG UI 未恢复相互印证。</li>
+<li><strong>现状更新（2026-08-24）</strong>：上面的资源侧证据已过时——<code>SvgPrefabFile</code>/<code>SvgPrefabText</code> 键现已存在于 <code>ProgramLang.json</code>（约 :648-649），选择筛选器也将两类 SVG prefab 列为可筛对象；但 <code>ENABLE_SVG_PREFAB_OBJECTS</code> 仍未定义、绘制目标/工具箱/操作生成器注册仍被注释、运行期抛 <code>NotSupportedException</code> 的路径未变，延期决策本身继续有效。</li>
 <li><strong>影响</strong>：见 B-006。该项是当前唯一可由源码明确证明的用户/迁移轮次延期，不把其他普通缺失主观归入 D。</li>
 <li><strong>建议</strong>：把退出延期的条件写成可验收清单：跨平台资源定位完成、保存/移动工程不含绝对路径、Browser 授权模型明确、B-006 入口不再抛异常且测试通过；在此之前用单一 feature capability 隐藏 UI。恢复时同步补回语言键和项目迁移版本。</li>
 </ul>

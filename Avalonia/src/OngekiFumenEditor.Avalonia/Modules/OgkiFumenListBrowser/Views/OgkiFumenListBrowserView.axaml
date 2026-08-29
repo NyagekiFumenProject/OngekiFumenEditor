@@ -12,94 +12,405 @@
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.ViewModels"
     x:DataType="vm:OgkiFumenListBrowserViewModel"
     Title="{markup:Translate {x:Static languages:Lang+B.OgkiFumenListBrowser}}"
-    Width="560"
+    Width="760"
     Height="760"
-    MinWidth="420"
-    MinHeight="480"
-    Background="{StaticResource EditorWindowBackgroundBrush}"
+    MinWidth="560"
+    MinHeight="500"
+    Background="{DynamicResource EditorWindowBackgroundBrush}"
+    Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
     d:Background="White"
     d:DataContext="{d:DesignInstance Type=vm:OgkiFumenListBrowserViewModel}"
     mc:Ignorable="d">
-    <Grid RowDefinitions="Auto,*" IsEnabled="{CompiledBinding !IsBusy}">
-        <StackPanel Margin="10" Spacing="8">
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SelectGameRootFolder}}" />
-                <TextBlock Grid.Column="1"
-                           VerticalAlignment="Center"
-                           Text="{CompiledBinding RootFolderDisplayName}"
-                           TextTrimming="CharacterEllipsis"
-                           ToolTip.Tip="{CompiledBinding RootFolderDisplayName}" />
-                <Button Grid.Column="2"
-                        Command="{CompiledBinding SelectFolderCommand}"
-                        Content="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
-            </Grid>
-            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.KeywordSortFilter}}" />
-                <TextBox Grid.Column="1"
-                         Text="{CompiledBinding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordSortFilter}}" />
-                <Button Grid.Column="2"
-                        Command="{CompiledBinding ApplyKeywordsCommand}"
-                        Content="{markup:Translate {x:Static languages:Lang+B.Filter}}" />
-            </Grid>
-        </StackPanel>
 
-        <ListBox Grid.Row="1"
-                 ItemsSource="{CompiledBinding DisplayFumenSets}"
-                 Background="Transparent"
-                 BorderThickness="0"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                 SelectionMode="Single">
-            <ListBox.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <VirtualizingStackPanel />
-                </ItemsPanelTemplate>
-            </ListBox.ItemsPanel>
-            <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="models:OngekiFumenSet">
-                        <Border Margin="6,3" Padding="6" BorderBrush="{DynamicResource EditorToolWindowForegroundBrush}" BorderThickness="1">
-                            <Expander>
-                                <Expander.Header>
-                                    <Grid ColumnDefinitions="64,*" ColumnSpacing="8">
-                                        <Border Width="56" Height="56" Background="#202838">
-                                            <Image AttachedToVisualTree="OnJacketImageAttached"
-                                                   DataContextChanged="OnJacketImageDataContextChanged"
-                                                   Source="{CompiledBinding JacketBitmap}"
-                                                   Stretch="UniformToFill" />
-                                        </Border>
-                                        <StackPanel Grid.Column="1" Spacing="2">
-                                            <TextBlock Text="{CompiledBinding Title}" FontWeight="Bold" TextWrapping="Wrap" />
-                                            <TextBlock Text="{CompiledBinding Artist}" TextWrapping="Wrap" />
-                                            <TextBlock Text="{CompiledBinding MusicId, StringFormat='ID: {0}'}" Opacity="0.72" />
-                                        </StackPanel>
-                                    </Grid>
-                                </Expander.Header>
-                                <ItemsControl ItemsSource="{CompiledBinding Difficults}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <WrapPanel HorizontalAlignment="Center" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate x:DataType="models:OngekiFumenDiff">
-                                            <Border Margin="4" Padding="6" BorderBrush="#657080" BorderThickness="1">
-                                                <StackPanel Width="128" Spacing="3">
-                                                    <TextBlock Text="{CompiledBinding DiffName}" FontWeight="Bold" />
-                                                    <TextBlock Text="{CompiledBinding Level, StringFormat='Level: {0:0.##}'}" />
-                                                    <TextBlock Text="{CompiledBinding Bpm, StringFormat='BPM: {0:0.##}'}" />
-                                                    <TextBlock Text="{CompiledBinding Creator}" TextWrapping="Wrap" />
-                                                    <Button Command="{Binding $parent[local:OgkiFumenListBrowserView].((vm:OgkiFumenListBrowserViewModel)DataContext).LoadFumenCommand}"
-                                                            CommandParameter="{CompiledBinding}"
-                                                            Content="{markup:Translate {x:Static languages:Lang+B.LoadFumen}}" />
-                                                </StackPanel>
+    <views:WindowViewBase.Resources>
+        <SolidColorBrush x:Key="BrowserSurfaceBrush" Color="{DynamicResource SystemRegionColor}" />
+        <SolidColorBrush x:Key="BrowserSubtleSurfaceBrush" Color="{DynamicResource SystemChromeLowColor}" />
+        <SolidColorBrush x:Key="BrowserBorderBrush" Color="{DynamicResource SystemChromeHighColor}" />
+        <SolidColorBrush x:Key="BrowserMutedTextBrush" Color="{DynamicResource SystemBaseMediumColor}" />
+        <SolidColorBrush x:Key="BrowserAccentBrush" Color="{DynamicResource SystemAccentColor}" />
+        <SolidColorBrush x:Key="BrowserAccentSoftBrush" Color="#220073CF" />
+        <SolidColorBrush x:Key="BrowserCardBrush" Color="{DynamicResource SystemAltHighColor}" />
+    </views:WindowViewBase.Resources>
+
+    <views:WindowViewBase.Styles>
+        <Style Selector="TextBlock.eyebrow">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource BrowserMutedTextBrush}" />
+            <Setter Property="LetterSpacing" Value="1.2" />
+        </Style>
+        <Style Selector="TextBlock.meta">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource BrowserMutedTextBrush}" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        </Style>
+        <Style Selector="Button.icon-button">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+        <Style Selector="Button.icon-button:pointerover">
+            <Setter Property="Background" Value="{DynamicResource BrowserAccentSoftBrush}" />
+        </Style>
+        <Style Selector="Button.primary-action">
+            <Setter Property="Padding" Value="14,9" />
+            <Setter Property="Background" Value="{DynamicResource BrowserAccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.primary-action:pointerover">
+            <Setter Property="Opacity" Value="0.86" />
+        </Style>
+        <Style Selector="Button.secondary-action">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Background" Value="{DynamicResource BrowserSubtleSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrowserBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="Button.secondary-action:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrowserAccentBrush}" />
+        </Style>
+        <Style Selector="TextBox.search-box">
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Background" Value="{DynamicResource BrowserSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrowserBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="TextBox.search-box:focus">
+            <Setter Property="BorderBrush" Value="{DynamicResource BrowserAccentBrush}" />
+        </Style>
+        <Style Selector="Expander.track-expander > ToggleButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Expander.track-expander /template/ ToggleButton">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+        </Style>
+        <Style Selector="Border.difficulty-card">
+            <Setter Property="Background" Value="{DynamicResource BrowserSubtleSurfaceBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BrowserBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="9" />
+        </Style>
+        <Style Selector="Button.load-button">
+            <Setter Property="Padding" Value="10,7" />
+            <Setter Property="Background" Value="{DynamicResource BrowserAccentSoftBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource BrowserAccentBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style Selector="Button.load-button:pointerover">
+            <Setter Property="Background" Value="{DynamicResource BrowserAccentBrush}" />
+            <Setter Property="Foreground" Value="White" />
+        </Style>
+    </views:WindowViewBase.Styles>
+
+    <Grid Margin="16" RowDefinitions="Auto,*" IsEnabled="{CompiledBinding !IsBusy}">
+        <Border Grid.Row="0"
+                Padding="12"
+                Background="{DynamicResource BrowserSurfaceBrush}"
+                BorderBrush="{DynamicResource BrowserBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+            <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Border Width="34"
+                            Height="34"
+                            Background="{DynamicResource BrowserAccentSoftBrush}"
+                            CornerRadius="8">
+                        <Image Margin="8"
+                               Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/home.png" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                        <TextBlock Classes="eyebrow" Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserGameRoot}}" />
+                        <TextBlock IsVisible="{CompiledBinding HasRootFolder}"
+                                   FontWeight="SemiBold"
+                                   Text="{CompiledBinding RootFolderDisplayName}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip.Tip="{CompiledBinding RootFolderDisplayName}" />
+                        <TextBlock IsVisible="{CompiledBinding ShowNoRootState}"
+                                   Classes="meta"
+                                   Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserNoRootSelected}}" />
+                    </StackPanel>
+                    <Button Grid.Column="2"
+                            Classes="secondary-action"
+                            Command="{CompiledBinding SelectFolderCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <Image Width="16"
+                                   Height="16"
+                                   Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/open-folder.png" />
+                            <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.Browser}}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                <Grid Grid.Row="1" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                    <Border Width="34"
+                            Height="34"
+                            Background="{DynamicResource BrowserSubtleSurfaceBrush}"
+                            CornerRadius="8">
+                        <Image Margin="8"
+                               Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/search.png" />
+                    </Border>
+                    <TextBox Grid.Column="1"
+                             Classes="search-box"
+                             Text="{CompiledBinding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordSortFilter}}" />
+                    <Button Grid.Column="2"
+                            Classes="secondary-action"
+                            Command="{CompiledBinding ApplyKeywordsCommand}"
+                            Content="{markup:Translate {x:Static languages:Lang+B.Filter}}" />
+                    <Button Grid.Column="3"
+                            Classes="icon-button"
+                            Command="{CompiledBinding RefreshListCommand}"
+                            ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRefresh}}">
+                        <TextBlock FontSize="18" Text="↻" />
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,12,0,0">
+            <Border IsVisible="{CompiledBinding ShowNoRootState}"
+                    Padding="34"
+                    Background="{DynamicResource BrowserSurfaceBrush}"
+                    BorderBrush="{DynamicResource BrowserBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                <StackPanel HorizontalAlignment="Center"
+                            MaxWidth="420"
+                            Spacing="12">
+                    <Border Width="58"
+                            Height="58"
+                            HorizontalAlignment="Center"
+                            Background="{DynamicResource BrowserAccentSoftBrush}"
+                            CornerRadius="16">
+                        <Image Margin="14"
+                               Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/home.png" />
+                    </Border>
+                    <TextBlock HorizontalAlignment="Center"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserEmptyRootTitle}}" />
+                    <Button HorizontalAlignment="Center"
+                            Classes="primary-action"
+                            Command="{CompiledBinding SelectFolderCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="7">
+                            <Image Width="16"
+                                   Height="16"
+                                   Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/open-folder.png" />
+                            <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.SelectGameRootFolder}}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <Border IsVisible="{CompiledBinding ShowNoResultsState}"
+                    Padding="34"
+                    Background="{DynamicResource BrowserSurfaceBrush}"
+                    BorderBrush="{DynamicResource BrowserBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="14">
+                <StackPanel HorizontalAlignment="Center"
+                            MaxWidth="420"
+                            Spacing="12">
+                    <Border Width="58"
+                            Height="58"
+                            HorizontalAlignment="Center"
+                            Background="{DynamicResource BrowserSubtleSurfaceBrush}"
+                            CornerRadius="16">
+                        <Image Margin="14"
+                               Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/search.png" />
+                    </Border>
+                    <TextBlock HorizontalAlignment="Center"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserNoMatchesTitle}}" />
+                    <Button HorizontalAlignment="Center"
+                            Classes="secondary-action"
+                            Command="{CompiledBinding ClearKeywordsCommand}">
+                        <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserClearFilter}}" />
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer IsVisible="{CompiledBinding HasResults}"
+                          IsTabStop="False"
+                          ScrollViewer.BringIntoViewOnFocusChange="False"
+                          HorizontalScrollBarVisibility="Disabled"
+                          VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{CompiledBinding DisplayFumenSets}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <!-- Expanders change item height; keep pixel offsets stable while they open. -->
+                            <StackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:OngekiFumenSet">
+                            <Border Margin="0,0,0,10">
+                                <Expander Classes="track-expander"
+                                          RequestBringIntoView="OnTrackRequestBringIntoView">
+                                    <Expander.Header>
+                                        <Grid ColumnDefinitions="88,*,Auto" ColumnSpacing="14" Margin="14">
+                                            <Border Width="88"
+                                                    Height="88"
+                                                    Background="{DynamicResource BrowserAccentSoftBrush}"
+                                                    CornerRadius="10"
+                                                    ClipToBounds="True">
+                                                <Grid>
+                                                    <TextBlock HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="20"
+                                                               FontWeight="SemiBold"
+                                                               Foreground="{DynamicResource BrowserAccentBrush}"
+                                                               Text="{CompiledBinding MusicId, StringFormat='#{0:0000}'}" />
+                                                    <Image AttachedToVisualTree="OnJacketImageAttached"
+                                                           DataContextChanged="OnJacketImageDataContextChanged"
+                                                           Source="{CompiledBinding JacketBitmap}"
+                                                           Stretch="UniformToFill" />
+                                                </Grid>
                                             </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </Expander>
-                        </Border>
-                    </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                                            <StackPanel Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        MinWidth="0"
+                                                        Spacing="5">
+                                                <TextBlock Classes="eyebrow"
+                                                           Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserMusic}}" />
+                                                <TextBlock Classes="meta"
+                                                           Text="{CompiledBinding MusicId, StringFormat='{}{0:0000}'}" />
+                                                <TextBlock FontSize="17"
+                                                           FontWeight="SemiBold"
+                                                           Text="{CompiledBinding Title}"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTip.Tip="{CompiledBinding Title}" />
+                                                <TextBlock Classes="meta"
+                                                           Text="{CompiledBinding Artist}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                                    <TextBlock Classes="meta" Text="{CompiledBinding Genre}" />
+                                                    <TextBlock Classes="meta"
+                                                               Text="{CompiledBinding Difficults.Count}" />
+                                                    <TextBlock Classes="meta"
+                                                               Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserChartsLabel}}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2"
+                                                        HorizontalAlignment="Right"
+                                                        VerticalAlignment="Center"
+                                                        Spacing="4">
+                                                <TextBlock Classes="eyebrow"
+                                                           HorizontalAlignment="Right"
+                                                           Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserCharts}}" />
+                                                <TextBlock HorizontalAlignment="Right"
+                                                           FontSize="24"
+                                                           FontWeight="SemiBold"
+                                                           Text="{CompiledBinding Difficults.Count}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Expander.Header>
+                                    <Border Margin="14,0,14,14"
+                                            Padding="12"
+                                            Background="{DynamicResource BrowserSubtleSurfaceBrush}"
+                                            CornerRadius="10">
+                                        <StackPanel Spacing="8">
+                                            <Grid ColumnDefinitions="*,Auto">
+                                                <TextBlock Classes="eyebrow"
+                                                           Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserAvailableDifficulties}}" />
+                                            </Grid>
+                                            <ItemsControl ItemsSource="{CompiledBinding Difficults}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel Orientation="Horizontal" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate x:DataType="models:OngekiFumenDiff">
+                                                        <Border Classes="difficulty-card"
+                                                                Width="190"
+                                                                Margin="0,0,8,8"
+                                                                Padding="11">
+                                                            <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6">
+                                                                <Grid ColumnDefinitions="*,Auto">
+                                                                    <TextBlock FontSize="14"
+                                                                               FontWeight="SemiBold"
+                                                                               Foreground="{DynamicResource BrowserAccentBrush}"
+                                                                               Text="{CompiledBinding DiffName}" />
+                                                                    <TextBlock Grid.Column="1"
+                                                                               Classes="meta"
+                                                                               Text="{CompiledBinding DiffIdx, StringFormat='#{0}'}" />
+                                                                </Grid>
+                                                                <StackPanel Grid.Row="1"
+                                                                            Orientation="Horizontal"
+                                                                            Spacing="5">
+                                                                    <TextBlock Classes="eyebrow"
+                                                                               VerticalAlignment="Center"
+                                                                               Text="{markup:Translate {x:Static languages:Lang+B.DiffLevel}}" />
+                                                                    <TextBlock FontSize="20"
+                                                                               FontWeight="SemiBold"
+                                                                               Text="{CompiledBinding Level, StringFormat='{}{0:0.##}'}" />
+                                                                </StackPanel>
+                                                                <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="8">
+                                                                    <StackPanel Spacing="1">
+                                                                        <TextBlock Classes="eyebrow"
+                                                                                   Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserBpm}}" />
+                                                                        <TextBlock Text="{CompiledBinding Bpm, StringFormat='{}{0:0.##}'}" />
+                                                                    </StackPanel>
+                                                                    <StackPanel Grid.Column="1" Spacing="1">
+                                                                        <TextBlock Classes="eyebrow"
+                                                                                   Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserCreator}}" />
+                                                                        <TextBlock Classes="meta"
+                                                                                   Text="{CompiledBinding Creator}"
+                                                                                   TextTrimming="CharacterEllipsis"
+                                                                                   ToolTip.Tip="{CompiledBinding Creator}" />
+                                                                    </StackPanel>
+                                                                </Grid>
+                                                                <Button Grid.Row="3"
+                                                                        Classes="load-button"
+                                                                        Command="{Binding $parent[local:OgkiFumenListBrowserView].((vm:OgkiFumenListBrowserViewModel)DataContext).LoadFumenCommand}"
+                                                                        CommandParameter="{CompiledBinding}">
+                                                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                        <TextBlock Text=">" />
+                                                                        <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.LoadFumen}}" />
+                                                                    </StackPanel>
+                                                                </Button>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Border>
+                                </Expander>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Border IsVisible="{CompiledBinding IsBusy}"
+                    Background="#B8000000"
+                    CornerRadius="14"
+                    ZIndex="10">
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Width="260"
+                            Spacing="12">
+                    <ProgressBar IsIndeterminate="True" Height="4" />
+                    <TextBlock HorizontalAlignment="Center"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserWorking}}" />
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </views:WindowViewBase>

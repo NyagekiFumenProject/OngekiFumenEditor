@@ -115,6 +115,35 @@ public sealed class AxamlSmokeTests
         Assert.IsAssignableFrom<IBrush>(GetRequiredResource(application, "EditorInteractionAccentBrush"));
     }
 
+    [AvaloniaFact]
+    public void ApplicationStyles_ExpandersStretchHorizontallyByDefault()
+    {
+        var expander = new Expander
+        {
+            Content = new Border { Width = 40, Height = 20 }
+        };
+        var window = new Window
+        {
+            Width = 320,
+            Height = 120,
+            Content = expander
+        };
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+
+            Assert.Equal(HorizontalAlignment.Stretch, expander.HorizontalAlignment);
+            Assert.Equal(HorizontalAlignment.Stretch, expander.HorizontalContentAlignment);
+            Assert.Equal(window.ClientSize.Width, expander.Bounds.Width);
+        }
+        finally
+        {
+            window.Close();
+        }
+    }
+
     [AvaloniaTheory]
     [MemberData(nameof(ViewTypes))]
     public void AllParameterlessViews_ConstructAttachAndCompleteLayout(Type viewType)

@@ -28,6 +28,12 @@
 
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
         <StyleInclude Source="avares://OngekiFumenEditor.Avalonia/UI/Themes/TextBlock.axaml" />
+
+        <!-- Expanders are full-width containers by default; local values can still opt out. -->
+        <Style Selector="Expander">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>

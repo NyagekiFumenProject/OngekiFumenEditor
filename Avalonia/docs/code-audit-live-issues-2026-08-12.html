@@ -114,6 +114,8 @@
     }
 
     .status-open { color: var(--danger); background: var(--danger-soft); }
+    .status-fixed { color: var(--success); background: var(--success-soft); }
+    .status-outdated { color: var(--muted); background: #e8ebee; }
     .severity-high { color: var(--danger); background: var(--danger-soft); }
     .severity-medium { color: var(--warning); background: var(--warning-soft); }
     .confidence-confirmed { color: var(--success); background: var(--success-soft); }
@@ -203,12 +205,13 @@
   <header>
     <h1>OngekiFumenEditor 持续代码审计问题台账</h1>
     <p>记录能够从当前代码和调用关系中证明的隐藏缺陷，并为后续修复、验证和回归测试保留稳定编号。</p>
-    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-13 · 基线提交：<code>59725782</code> · 状态：持续审计中</p>
+    <p class="meta">建立日期：2026-08-12 · 最近更新：2026-08-24 · 基线提交：<code>59725782</code>（复核对照：<code>f9c57aad</code>） · 状态：持续审计中</p>
     <div class="summary" aria-label="审计摘要">
       <div class="metric"><strong>70</strong><span>已编号问题</span></div>
-      <div class="metric"><strong>70</strong><span>未修复</span></div>
+      <div class="metric"><strong>64</strong><span>未修复</span></div>
       <div class="metric"><strong>36 / 34</strong><span>高 / 中严重度</span></div>
-      <div class="metric"><strong>18</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>19</strong><span>已完成审计批次</span></div>
+      <div class="metric"><strong>6</strong><span>已修复</span></div>
     </div>
   </header>
 
@@ -343,7 +346,7 @@
         <tr>
           <td><a href="#ca-012"><code>CA-012</code></a></td>
           <td><span class="severity severity-high">高</span></td>
-          <td><span class="status status-open">未修复</span></td>
+          <td><span class="status status-fixed">已修复</span></td>
           <td><span class="exposure exposure-active">活动</span></td>
           <td>Shell / 文档关闭</td>
           <td>“文件 → 关闭”绕过脏文档确认并直接销毁编辑器</td>
@@ -676,7 +679,7 @@
         <tr>
           <td><a href="#ca-049"><code>CA-049</code></a></td>
           <td><span class="severity severity-medium">中</span></td>
-          <td><span class="status status-open">未修复</span></td>
+          <td><span class="status status-fixed">已修复</span></td>
           <td><span class="exposure exposure-active">条件活动</span></td>
           <td>项目加载 / 最近记录</td>
           <td>最近记录写入失败会把已挂载成功的项目误判为打开失败</td>
@@ -703,7 +706,7 @@
         <tr>
           <td><a href="#ca-052"><code>CA-052</code></a></td>
           <td><span class="severity severity-medium">中</span></td>
-          <td><span class="status status-open">未修复</span></td>
+          <td><span class="status status-fixed">已修复</span></td>
           <td><span class="exposure exposure-active">活动</span></td>
           <td>Shell / 打开菜单</td>
           <td>“打开文件”错误使用 CanCreateNew 过滤，唯一项目 Provider 不会出现在菜单和工具栏</td>
@@ -757,7 +760,7 @@
         <tr>
           <td><a href="#ca-058"><code>CA-058</code></a></td>
           <td><span class="severity severity-high">高</span></td>
-          <td><span class="status status-open">未修复</span></td>
+          <td><span class="status status-fixed">已修复</span></td>
           <td><span class="exposure exposure-active">条件活动</span></td>
           <td>项目加载 / 异常回滚</td>
           <td>零 BPM 在资源交接后触发异常，编辑器会保留播放器并引用已释放项目句柄</td>
@@ -766,7 +769,7 @@
         <tr>
           <td><a href="#ca-059"><code>CA-059</code></a></td>
           <td><span class="severity severity-medium">中</span></td>
-          <td><span class="status status-open">未修复</span></td>
+          <td><span class="status status-fixed">已修复</span></td>
           <td><span class="exposure exposure-active">条件活动</span></td>
           <td>项目加载 / 音频时长</td>
           <td>打开项目时信任旧 AudioDuration，替换音频后时间轴仍被旧长度裁剪或拉长</td>
@@ -847,7 +850,7 @@
         <tr>
           <td><a href="#ca-068"><code>CA-068</code></a></td>
           <td><span class="severity severity-medium">中</span></td>
-          <td><span class="status status-open">未修复</span></td>
+          <td><span class="status status-fixed">已修复</span></td>
           <td><span class="exposure exposure-active">活动</span></td>
           <td>OGKR / BPM_DEF 往返</td>
           <td>保存器与解析器采用相反列序，最大 BPM 和最小 BPM 每次保存重载都会互换</td>
@@ -880,7 +883,7 @@
     <div class="issue-head">
       <div>
         <h2><code>CA-001</code> 图片加载队列存在丢失唤醒竞态</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -931,7 +934,7 @@ isProcessing = false;                                                // 99</code
     <div class="issue-head">
       <div>
         <h2><code>CA-002</code> 图片加载处理器门闩非原子，并发上限可失效</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -979,7 +982,7 @@ var currentTaskRunningCount = 0;           // 61</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-003</code> OPFS 预览与普通下载长期保留 Blob URL</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1033,7 +1036,7 @@ globalThis.addEventListener?.("beforeunload", () =&gt; { // 846
     <div class="issue-head">
       <div>
         <h2><code>CA-004</code> 渲染初始化异常会进入应用级崩溃流程</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1082,7 +1085,7 @@ catch (Exception exception)                     // Drawing: 1002
     <div class="issue-head">
       <div>
         <h2><code>CA-005</code> 调度器时间字典永久保留已移除实例</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1131,7 +1134,7 @@ schedulers.Remove(s);                               // 111
     <div class="issue-head">
       <div>
         <h2><code>CA-006</code> 调度器后台枚举与前台增删存在集合竞态</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1179,7 +1182,7 @@ schedulers.Remove(s);                                // 111</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-007</code> 非正自动保存间隔会触发无延迟调度</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1222,7 +1225,7 @@ DateTime.Now - lastCall &gt;= ScheduleCallLoopInterval   // Scheduler: 49
     <div class="issue-head">
       <div>
         <h2><code>CA-008</code> 单例绘制目标在每个编辑器中重复加载并保留纹理</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1273,7 +1276,7 @@ drawingTargets = [];                                // Drawing VM: 1189</code></
     <div class="issue-head">
       <div>
         <h2><code>CA-009</code> Hold 绘制目标重复订阅全局设置事件</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1324,7 +1327,7 @@ foreach (var drawTarget in drawingTargets)
     <div class="issue-head">
       <div>
         <h2><code>CA-010</code> 批量模式快捷键丢失异步命令的任务与异常</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1376,7 +1379,7 @@ return Task.CompletedTask;                          // 实际异步操作仍可�
     <div class="issue-head">
       <div>
         <h2><code>CA-011</code> 编辑器设置延迟保存失败会终止桌面应用</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1432,11 +1435,11 @@ finally { Environment.Exit(-1); }                    // Program: 147-149</code><
     <div class="issue-head">
       <div>
         <h2><code>CA-012</code> 文件关闭命令绕过脏文档保存确认</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
-        <span class="status status-open">未修复</span>
+        <span class="status status-fixed">已修复</span>
         <span class="confidence confidence-confirmed">静态确认</span>
         <span class="exposure exposure-active">活动</span>
       </div>
@@ -1488,13 +1491,16 @@ public override async void CloseDockable(IDockable dockable)
       <li>增加脏文档测试，分别模拟保存、放弃和取消，覆盖菜单命令与标签页按钮；取消后文档、资源和活动状态必须保持不变。</li>
       <li>现有测试只把 <code>CloseDocumentAsync</code> 用作清理，没有验证脏文档保护。</li>
     </ul>
+
+    <h3>复核记录（2026-08-24）</h3>
+    <p>已修复（Gekimini <code>51db1e0</code>/<code>abb2dcf</code>，2026-08-22）：Shell 引入统一文档关闭协议，<code>CloseFileCommandHandler.Run</code> 现调用 <code>shell.TryCloseDocumentAsync(ActiveDocument)</code>，其内部 <code>ConfirmCloseDocumentAsync</code> 对脏持久化文档弹出保存/放弃/取消对话框（取消返回 Cancelled 且不关闭）。原“绕过确认直接销毁”的路径不复存在。</p>
   </section>
 
   <section id="ca-013" class="issue high">
     <div class="issue-head">
       <div>
         <h2><code>CA-013</code> 属性浏览器在文档切换后保留上一谱面的编辑上下文</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1555,7 +1561,7 @@ private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, ...)
     <div class="issue-head">
       <div>
         <h2><code>CA-014</code> 属性浏览器修改不再进入撤销栈</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1613,7 +1619,7 @@ referenceEditor.UndoRedoManager.ExecuteAction(
     <div class="issue-head">
       <div>
         <h2><code>CA-015</code> 文档切换清理会与新文档播放准备争用同一单例状态</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1669,7 +1675,7 @@ events.Clear();</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-016</code> 禁用音效多重播放后混音回调与调度线程并发写字典</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1721,7 +1727,7 @@ private void SoundMixer_MixerInputEnded(...)
     <div class="issue-head">
       <div>
         <h2><code>CA-017</code> 谱面元信息编辑绕过脏状态，关闭文档可静默丢失修改</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1775,7 +1781,7 @@ public void OnTimeSignatureListChanged()
     <div class="issue-head">
       <div>
         <h2><code>CA-018</code> 首拍号保存值与当前运行时状态不同步</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1829,7 +1835,7 @@ if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
     <div class="issue-head">
       <div>
         <h2><code>CA-019</code> 保存完成会把保存期间的新修改错误标记为已保存</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -1882,7 +1888,7 @@ IsDirty = false;                                      // 不检查保存后的�
     <div class="issue-head">
       <div>
         <h2><code>CA-020</code> 初始刷新未完成时关闭 OPFS 窗口会遗留后台轮询</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1942,7 +1948,7 @@ private void StartPolling()
     <div class="issue-head">
       <div>
         <h2><code>CA-021</code> OPFS 导航期间新路径会与旧文件列表同时显示</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -1995,7 +2001,7 @@ private Task OpenEntryAsync(BrowserOpfsEntryViewModel entry)
     <div class="issue-head">
       <div>
         <h2><code>CA-022</code> 调色板 ID 可编辑但字典键不会随之更新</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2056,7 +2062,7 @@ private void OnPalletePropChanged(object sender, PropertyChangedEventArgs e)
     <div class="issue-head">
       <div>
         <h2><code>CA-023</code> 调色板整数索引器自调用会导致进程栈溢出</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2097,7 +2103,7 @@ private void OnPalletePropChanged(object sender, PropertyChangedEventArgs e)
     <div class="issue-head">
       <div>
         <h2><code>CA-024</code> 个人变速区域改组后会留在旧分桶并逃过删除</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2153,7 +2159,7 @@ public void Remove(IndividualSoflanArea isf)
     <div class="issue-head">
       <div>
         <h2><code>CA-025</code> 空间索引删除后仍永久保留个人变速区域</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2214,7 +2220,7 @@ tree.Build(registerObjects);</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-026</code> 重复时间键范围查询会从最后一个重复项开始</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2274,7 +2280,7 @@ maxIndex = maxIndex &lt; 0 ? ~maxIndex : maxIndex + 1;</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-027</code> Soflan 点位列表不会随 Soflan 或 BPM 编辑刷新</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2331,7 +2337,7 @@ OnPropertyChanged(nameof(DisplaySoflanPointList));</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-028</code> 过期渲染控制重建任务可在同一编辑器上重复回写</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2396,7 +2402,7 @@ private async Task RebuildItemsAsync(bool sortByDefault)
     <div class="issue-head">
       <div>
         <h2><code>CA-029</code> 渲染控制重排在文档切换后无法撤销</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2457,7 +2463,7 @@ private void ApplyControlItemOrder(IReadOnlyList&lt;RenderControlItem&gt; order)
     <div class="issue-head">
       <div>
         <h2><code>CA-030</code> 空轨道引用会被检查器重复报告和计数</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2515,7 +2521,7 @@ public bool Contains(TValue obj)
     <div class="issue-head">
       <div>
         <h2><code>CA-031</code> OGKR 数值格式随区域设置变化并可静默损坏谱面</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2569,7 +2575,7 @@ public IEnumerable Parser(IEnumerable&lt;string&gt; inputs)
     <div class="issue-head">
       <div>
         <h2><code>CA-032</code> Nyageki 小数逗号会破坏自身坐标语法</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2624,7 +2630,7 @@ return new XGrid(float.Parse(data[0]), int.Parse(data[1]));</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-033</code> OGKR 自定义 Bell 随机偏移读取错列</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2675,7 +2681,7 @@ bell.RandomOffsetRange = args.GetData&lt;int&gt;(10); // 实际应读取 9</code
     <div class="issue-head">
       <div>
         <h2><code>CA-034</code> Lane 合并撤销只迁回第一个子节点</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2738,7 +2744,7 @@ public ConnectableObjectBase PrevObject
     <div class="issue-head">
       <div>
         <h2><code>CA-035</code> Lane 合并未验证两条独立且首尾有序的轨道</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2792,7 +2798,7 @@ editor.Fumen.RemoveObject(laterStart);</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-036</code> 彩色轨道子节点复制时丢失颜色和亮度</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2847,7 +2853,7 @@ public override void Copy(OngekiObjectBase fromObj)
     <div class="issue-head">
       <div>
         <h2><code>CA-037</code> “清空复制列表”提示没有清空剪贴板</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -2896,7 +2902,7 @@ this.sourceEditor = default;</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-038</code> 直接粘贴混用画布像素与谱面坐标并使 Tap/Hold 脱轨</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -2961,7 +2967,7 @@ dockable.ReferenceLaneStart = pickLane;</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-039</code> 跨文档粘贴会破坏同 ID 子弹模板及其撤销状态</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3023,7 +3029,7 @@ if (isAppend)
     <div class="issue-head">
       <div>
         <h2><code>CA-040</code> 纯轨道按选区镜像时使用空集合中心</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3071,7 +3077,7 @@ X max = keySelector(first);</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-041</code> Lane 复制不会保留透明标志</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3108,7 +3114,7 @@ X max = keySelector(first);</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-042</code> Beam 复制会丢失宽度和斜向源参数</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3169,7 +3175,7 @@ foreach (var child in from.Children)
     <div class="issue-head">
       <div>
         <h2><code>CA-043</code> OGKR 会丢弃多数对象 XGrid 的 Grid 分量</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3226,7 +3232,7 @@ $"...\t{tap.XGrid.Unit}\t{tap.XGrid.Grid}"</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-044</code> Soflan 分组界面状态无法无损保存</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3280,7 +3286,7 @@ var itemGroup = root.Children
     <div class="issue-head">
       <div>
         <h2><code>CA-045</code> 缺少墙体时左侧 LaneBlock 保存后会翻成右侧</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3332,7 +3338,7 @@ if (refLaneStart != refLaneEnd) { ... }</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-046</code> OPFS 回退下载的完整暂存副本不会按成功生命周期清理</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3388,7 +3394,7 @@ await root.removeEntry(stagingDirectoryName, { recursive: true });</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-047</code> OPFS 下载在清单构建和校验阶段无法取消</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3447,7 +3453,7 @@ await downloadTask; // JS 遍历返回前无法结束</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-048</code> 取消或失败打开后会永久累积全局设置订阅</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3506,11 +3512,11 @@ public void Dispose()
     <div class="issue-head">
       <div>
         <h2><code>CA-049</code> 最近记录写入失败会推翻已经成功的项目加载</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
-        <span class="status status-open">未修复</span>
+        <span class="status status-fixed">已修复</span>
         <span class="confidence confidence-confirmed">提交顺序确认</span>
         <span class="exposure exposure-active">条件活动</span>
       </div>
@@ -3559,13 +3565,16 @@ catch (Exception exception)
       <li>如果产品明确要求最近记录是事务的一部分，则异常时必须完整卸载新项目、释放音频与目录并恢复旧编辑器状态，不能只返回 false。</li>
       <li>分别让 <code>PostRecent</code> 和 <code>UpdateRecent</code> 抛错，断言项目仍可打开、错误只作为非阻断提示；同时测试真正的解析/音频失败仍返回 false 并释放资源。</li>
     </ul>
+
+    <h3>复核记录（2026-08-24）</h3>
+    <p>已修复（<code>859b6a85</code>，2026-08-16）：项目 IO 已迁移到 <code>FumenVisualEditorProvider.ProjectIO.cs</code>，最近记录写入被显式非致命化——<code>TryStoreRecentFromContextAsync</code> 与 <code>TryUpdateRecentProject</code> 均 catch 全部异常仅记 warn（注释明确“does not fail the open”），挂载成功后记录写入失败不再推翻打开结果。原触发路径消失。</p>
   </section>
 
   <section id="ca-050" class="issue high">
     <div class="issue-head">
       <div>
         <h2><code>CA-050</code> 未知格式命令会在首次保存时被静默删除</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3622,7 +3631,7 @@ sb.AppendLine($"VERSION\t{1}\t{7}\t{0}");</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-051</code> 删除 Lane 后复用 RecordId 会让旧物件静默改绑</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3679,11 +3688,11 @@ tap.ReferenceLaneStart = refLaneStart;         // 命中新建的同 ID Lane</co
     <div class="issue-head">
       <div>
         <h2><code>CA-052</code> “打开文件”菜单错误过滤掉唯一项目 Provider</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
-        <span class="status status-open">未修复</span>
+        <span class="status status-fixed">已修复</span>
         <span class="confidence confidence-confirmed">注册与菜单链确认</span>
         <span class="exposure exposure-active">活动</span>
       </div>
@@ -3725,13 +3734,16 @@ public Task&lt;bool&gt; TryOpen(IDocumentViewModel document)
       <li>“新建”列表继续使用 <code>CanCreateNew</code>，不能为了修复打开菜单而让当前 Provider 出现在不支持的新建入口。</li>
       <li>命令测试用一个 <code>CanCreateNew=false</code>、可打开的假 Provider，断言打开列表包含它、新建列表排除它；集成检查菜单和工具栏均出现当前项目类型。</li>
     </ul>
+
+    <h3>复核记录（2026-08-24）</h3>
+    <p>已修复（Gekimini <code>b35dc58</code>，2026-08-18）：当前 <code>OpenFileCommandListHandler.Populate</code> 已删除 <code>CanCreateNew</code> 过滤，按 Provider 的 FileTypes 无条件枚举打开项；<code>Run</code> 经 <code>TryOpen</code> 失败时对 IDisposable 编辑器执行 Dispose。唯一项目 Provider 现出现在文件菜单与工具栏。</p>
   </section>
 
   <section id="ca-053" class="issue medium">
     <div class="issue-head">
       <div>
         <h2><code>CA-053</code> 最近项目暂时缺失一次就不再自动复检</h2>
-        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-12</p>
+        <p class="meta">首次记录：2026-08-12 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3789,7 +3801,7 @@ private Task&lt;bool&gt; CheckIsValid(..., bool forceFresh = false)
     <div class="issue-head">
       <div>
         <h2><code>CA-054</code> 拖动未选对象会移动旧选择集</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3845,7 +3857,7 @@ else if (mouseDownHitObject is not null)
     <div class="issue-head">
       <div>
         <h2><code>CA-055</code> PointerReleased 的最终拖拽坐标会被立即回退</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -3901,7 +3913,7 @@ public void ExecuteAction(IUndoableAction action)
     <div class="issue-head">
       <div>
         <h2><code>CA-056</code> 拖拽出画布后释放会留下无撤销记录的模型修改</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -3962,7 +3974,7 @@ public void OnMouseUp(ActionExecutionContext e)
     <div class="issue-head">
       <div>
         <h2><code>CA-057</code> 撤销历史滑杆的当前值少一格</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -4018,11 +4030,11 @@ for (var i = 1; i &lt;= UndoRedoManager.ActionStack.Count; i++)
     <div class="issue-head">
       <div>
         <h2><code>CA-058</code> 项目晚期异常会留下播放器和已释放文件的半挂载状态</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
-        <span class="status status-open">未修复</span>
+        <span class="status status-fixed">已修复</span>
         <span class="confidence confidence-confirmed">可构造晚期异常链确认</span>
         <span class="exposure exposure-active">条件活动</span>
       </div>
@@ -4072,17 +4084,20 @@ catch
       <li>解析和模型入口还应拒绝非有限或小于等于 0 的 BPM，但这不能替代加载事务，因为其他回调和换算仍可能抛错。</li>
       <li>用可观察播放器/文件句柄和零 BPM 模型测试失败路径，断言旧状态不变、候选资源恰好释放一次、VM 不引用已释放项目；另让 LoadingFinished 抛错验证相同回滚协议。</li>
     </ul>
+
+    <h3>复核记录（2026-08-24）</h3>
+    <p>已修复（<code>aafe2c47</code>，2026-08-18）：加载重构为 <code>TryAttachProjectAsync</code> 候选-提交协议——音频先解码到局部 <code>preparedAudioPlayer</code>，<code>AudioPlayer</code>/<code>EditorContext</code> 赋值即所有权提交点，提交前失败恢复旧播放器并重抛，提交后的换算/滚动/<code>LoadingFinished</code> 异常被 <code>RunPostAttachAction</code> 隔离为 warn；外层不再对已接管项目调用 Dispose。零 BPM 等晚期异常不再产生半挂载状态。</p>
   </section>
 
   <section id="ca-059" class="issue medium">
     <div class="issue-head">
       <div>
         <h2><code>CA-059</code> 打开项目不会用实际音频刷新持久化时长</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
-        <span class="status status-open">未修复</span>
+        <span class="status status-fixed">已修复</span>
         <span class="confidence confidence-confirmed">时长真值链确认</span>
         <span class="exposure exposure-active">条件活动</span>
       </div>
@@ -4124,13 +4139,16 @@ editorProjectData.AudioDuration = audioPlayer.Duration;</code></pre>
       <li>派生字段自动校正不应在打开瞬间被误当成用户内容修改；可记录“项目元数据需在下次保存更新”，但画布和播放必须立即使用真实值。</li>
       <li>测试让项目字段分别短于和长于假播放器时长，断言加载后总高度、CurrentPlayTime 钳制和放置边界都以播放器为准，并验证后续保存写入新时长。</li>
     </ul>
+
+    <h3>复核记录（2026-08-24）</h3>
+    <p>已修复（<code>aafe2c47</code>，2026-08-18）：<code>TryAttachProjectAsync</code> 在音频成功解码后立即执行 <code>context.ProjectData.AudioDuration = preparedAudioPlayer.Duration</code>（发布 EditorContext 之前），持久化旧时长不再参与运行时真值；<code>ScrollTo</code> 钳制与画布高度随之使用真实时长。原“打开时信任旧 AudioDuration”的路径消失。</p>
   </section>
 
   <section id="ca-060" class="issue medium">
     <div class="issue-head">
       <div>
         <h2><code>CA-060</code> 项目模型自带的 EditorSetting 永不释放</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -4193,7 +4211,7 @@ public void DisposeRuntimeFiles()
     <div class="issue-head">
       <div>
         <h2><code>CA-061</code> 被拒绝的 HoldEnd 拖放仍会改写并保存关系</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4249,7 +4267,7 @@ sb.AppendLine($"{h.IDShortName}\t...\t{end?.TGrid.Serialize()}\t...");</code></p
     <div class="issue-head">
       <div>
         <h2><code>CA-062</code> 越界快速新增会制造空撤销记录并清空选择</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -4303,7 +4321,7 @@ UndoRedoManager.ExecuteAction(combinedAction); // 写入历史并触发 IsDirty<
     <div class="issue-head">
       <div>
         <h2><code>CA-063</code> 磁吸后子点时刻可与轨道链顺序相反</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4361,7 +4379,7 @@ foreach (var child in laneStart.Children)          // 原样保存列表顺序
     <div class="issue-head">
       <div>
         <h2><code>CA-064</code> 快捷新增会不可逆地覆盖已有 HoldEnd</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4419,7 +4437,7 @@ this.holdEnd = end;                    // 没有 old.RefHold = null</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-065</code> 非法 RecordId 输入会在导入时静默破坏轨道关系</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4479,7 +4497,7 @@ tap.ReferenceLaneStart = refLaneStart;        // 重复 ID 永远取第一个</c
     <div class="issue-head">
       <div>
         <h2><code>CA-066</code> Nyageki SVG 字体名可注入并覆盖同一命令的字段</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4535,7 +4553,7 @@ svg.Scale = ParseSingle(Required(fields, "Scale"), "Scale");</code></pre>
     <div class="issue-head">
       <div>
         <h2><code>CA-067</code> 零时刻普通 BPM/Meter 事件会在保存时被静默删除</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4595,11 +4613,11 @@ fumen.MeterChanges
     <div class="issue-head">
       <div>
         <h2><code>CA-068</code> OGKR 保存重载会交换 BPM_DEF 的最大值和最小值</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
-        <span class="status status-open">未修复</span>
+        <span class="status status-fixed">已修复</span>
         <span class="confidence confidence-confirmed">自身往返链确认</span>
         <span class="exposure exposure-active">活动</span>
       </div>
@@ -4648,13 +4666,16 @@ fumen.MetaInfo.BpmDefinition = new FumenMetaInfo.BpmDef
       <li>元信息编辑和加载阶段增加 <code>Minimum &lt;= Maximum</code> 校验，阻止明显反向值继续覆盖文件。</li>
       <li>往返测试必须使用不同的非对称值，例如 <code>Minimum=100, Maximum=300</code>，分别断言 OGKR 和 Nyageki 保存一次、连续保存两次后的字段值。</li>
     </ul>
+
+    <h3>复核记录（2026-08-24）</h3>
+    <p>已修复（<code>735cf0c5</code>，2026-08-18）：当前保存端写出 <code>BPM_DEF\tFirst\tCommon\tMinimum\tMaximum</code> 并附注释“Keep the serialized order aligned with BpmDefinitionCommandParser”，与解析端（索引 1=First、2=Common、3=Minimum、4=Maximum）一致；自身往返不再交换最大/最小 BPM。</p>
   </section>
 
   <section id="ca-069" class="issue medium">
     <div class="issue-head">
       <div>
         <h2><code>CA-069</code> 曲线子点选择的插值器不会随谱面保存</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-medium">中</span>
@@ -4716,7 +4737,7 @@ CurveControlPoint : recordId : laneName : childIndex : CurvePrecision : PathCont
     <div class="issue-head">
       <div>
         <h2><code>CA-070</code> 单独删除个人变速区域尾点后无法撤销</h2>
-        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-13</p>
+        <p class="meta">首次记录：2026-08-13 · 状态最后确认：2026-08-24</p>
       </div>
       <div class="badges">
         <span class="severity severity-high">高</span>
@@ -4870,6 +4891,11 @@ expectedObjects.ForEach(Fumen.AddObject); // AddObject 没有尾点分支</code>
       <div>
         审查画布 Delete 命令、复合显示对象的选择身份、Fumen 容器添加/删除分派及撤销重插入。记录 <code>CA-070</code>。
         曲线控制点和 Connectable 子点已有按父对象与原索引插回的专门路径；同时删除整条轨道及其子点时，父对象仍持有内部拓扑，撤销重新加入父对象即可恢复，因此未重复编号。Soflan/LaneBlock 尾点当前只会形成无效历史，作为同一根因的次要表现记录在 <code>CA-070</code>，不拆成独立问题。
+      </div>
+      <time datetime="2026-08-24">2026-08-24 / A19</time>
+      <div>
+        对照当前 HEAD <code>f9c57aad</code>（基线 <code>59725782</code> 后 54 个提交）全量复核 <code>CA-001</code> 至 <code>CA-070</code> 的 70 条记录：64 条缺陷证据仍在原位，维持“未修复”；6 条确认已修复并更新状态与复核记录——<code>CA-012</code> 关闭命令改走 Shell 统一脏文档确认协议（Gekimini <code>51db1e0</code>/<code>abb2dcf</code>）、<code>CA-049</code> 最近记录写入非致命化（<code>859b6a85</code>）、<code>CA-052</code> 打开菜单删除 CanCreateNew 过滤（Gekimini <code>b35dc58</code>）、<code>CA-058</code>/<code>CA-059</code> 项目挂载重构为候选-提交协议并在解码后刷新音频时长（<code>aafe2c47</code>）、<code>CA-068</code> BPM_DEF 列序对齐解析器（<code>735cf0c5</code>）。未发现因功能整体移除而失效的过时记录。
+        复核同时确认基线后的日志门面迁移、ISimpleFile 抽象、流式音频加载和 Injectio 注册等重构没有顺带修复其余在账缺陷；相关文件移动（如 ProjectIO 并入 Provider、SplashScreen 拆分 Base/Desktop/Browser）已在各条复核记录中按符号重新定位。
       </div>
     </div>
   </section>
