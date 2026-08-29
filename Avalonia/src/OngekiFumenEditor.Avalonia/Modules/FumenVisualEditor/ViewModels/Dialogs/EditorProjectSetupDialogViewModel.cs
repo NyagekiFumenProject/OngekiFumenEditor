@@ -339,7 +339,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
                 return;
             selectedAudio = ResolveProjectOwnedCapability(selectedAudio);
 
-            var inspection = await AcbPackageInspector.InspectAsync(selectedAudio);
+            var inspection = await AcbPackageInspector.InspectAsync(selectedAudio, selectedAwb);
             if (!inspection.IsValid)
                 throw new InvalidDataException(inspection.ErrorMessage);
 
@@ -766,8 +766,8 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
         foreach (var file in root.ChildFiles)
             yield return file;
         foreach (var directory in root.ChildDictionaries)
-        foreach (var file in EnumerateFiles(directory))
-            yield return file;
+            foreach (var file in EnumerateFiles(directory))
+                yield return file;
     }
 
     private static bool IsSamePhysicalFile(ISimpleFile left, ISimpleFile right)

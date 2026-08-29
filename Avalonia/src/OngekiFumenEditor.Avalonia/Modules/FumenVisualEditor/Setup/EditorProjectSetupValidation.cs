@@ -128,6 +128,7 @@ public static class AcbPackageInspector
 {
     public static async Task<AcbPackageInspection> InspectAsync(
         ISimpleFile audioFile,
+        ISimpleFile? extendAwbAudioFile = default,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(audioFile);

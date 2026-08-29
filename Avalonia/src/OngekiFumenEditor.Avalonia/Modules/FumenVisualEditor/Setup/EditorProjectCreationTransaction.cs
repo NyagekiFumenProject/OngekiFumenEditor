@@ -133,6 +133,7 @@ public sealed class EditorProjectCreationTransaction : IDisposable
             Report(progress, EditorProjectCreationPhase.InspectingAudioPackage, selection.AudioFile.FileName);
             var packageInspection = await AcbPackageInspector.InspectAsync(
                 selection.AudioFile,
+                selection.AudioAwbFile,
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             ValidateAudioPackage(selection, packageInspection);
