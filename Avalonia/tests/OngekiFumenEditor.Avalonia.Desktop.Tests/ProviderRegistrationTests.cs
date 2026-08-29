@@ -22,6 +22,6 @@ public sealed class ProviderRegistrationTests
         Assert.IsType<DefaultDesktopFumenVisualEditorProvider>(editorProvider);
         Assert.Same(editorProvider, fumenProvider);
         Assert.True(editorProvider.CanCreateNew);
-        Assert.Single(editorProvider.FileTypes);
+        Assert.Same(FumenVisualEditorProviderBase.FileType, Assert.Single(editorProvider.FileTypes));
     }
 }

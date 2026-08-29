@@ -123,6 +123,52 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base
 			}
 		}
 
+		// Loads a fumen/audio context that intentionally has no project descriptor, such as
+		// a chart opened from the Ogki list browser and later restored from Recent Files.
+		internal static async Task<EditorContext> TryLoadFumenFromContextAsync(
+			EditorFileAccessContext context,
+			CancellationToken cancellationToken = default,
+			IFumenParserManager parserManager = null)
+		{
+			ArgumentNullException.ThrowIfNull(context);
+			var contextTransferred = false;
+			EditorContext editorContext = null;
+			try
+			{
+				context.ThrowIfDisposed();
+				var fumenFile = context.FumenFile
+					?? throw new InvalidDataException("The editor context has no fumen file.");
+				_ = context.AudioFile
+					?? throw new InvalidDataException("The editor context has no audio file.");
+				var deserializer = (parserManager ?? IoC.Get<IFumenParserManager>())
+					.GetDeserializer(fumenFile.FileName)
+					?? throw new NotSupportedException($"{Lang.DeserializeFumenFileNotSupport}{fumenFile.FileName}");
+
+				await using var fumenStream = await fumenFile.OpenReadAsync(cancellationToken);
+				var fumen = await deserializer.DeserializeAsync(fumenStream)
+					?? throw new InvalidDataException($"The fumen parser returned no data for '{fumenFile.FileName}'.");
+				cancellationToken.ThrowIfCancellationRequested();
+
+				editorContext = new EditorContext
+				{
+					Fumen = fumen,
+					FileAccessContext = context
+				};
+				contextTransferred = true;
+				return editorContext;
+			}
+			finally
+			{
+				if (!contextTransferred)
+				{
+					if (editorContext is null)
+						context.Dispose();
+					else
+						editorContext.Dispose();
+				}
+			}
+		}
+
 		private static async Task ValidateAcbDependencyAsync(
 			ISimpleFile audioFile,
 			ISimpleFile audioAwbFile,

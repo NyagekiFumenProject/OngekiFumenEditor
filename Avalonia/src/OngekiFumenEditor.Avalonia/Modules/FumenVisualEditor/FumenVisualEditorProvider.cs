@@ -18,13 +18,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 public abstract partial class FumenVisualEditorProviderBase : IFumenVisualEditorProvider
 {
     public const string FILE_EXTENSION_NAME = ".nyagekiProj";
-    public static EditorFileType[] SupportFileTypes { get; } =
-    [
+    public static EditorFileType FileType { get; } =
         new("FumenVisualEditorProject", "Fumen Visual Editor Project".ToLocalizedStringByRawText())
         {
             Patterns = [$"*{FILE_EXTENSION_NAME}"],
             MimeTypes = ["application/octet-stream"]
-        }
+        };
+
+    public static EditorFileType[] SupportFileTypes { get; } =
+    [
+        FileType
     ];
 
     private IServiceProvider ServiceProvider => IoC.Get<IServiceProvider>();

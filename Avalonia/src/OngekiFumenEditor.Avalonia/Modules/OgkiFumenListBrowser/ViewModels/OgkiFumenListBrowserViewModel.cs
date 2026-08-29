@@ -528,33 +528,11 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             }
         }
 
-        // Providers without bookmarks receive independent in-memory capabilities. The
-        // browser's root can then be refreshed or disposed without invalidating the editor.
-        MemorySimpleFile? copiedFumen = null;
-        MemorySimpleFile? copiedAudio = null;
-        MemorySimpleFile? copiedAwb = null;
-        try
-        {
-            copiedFumen = new MemorySimpleFile(fumenFile.FileName, await fumenFile.ReadAllBytesAsync());
-            copiedAudio = new MemorySimpleFile(audioFile.FileName, await audioFile.ReadAllBytesAsync());
-            if (awbFile is not null)
-                copiedAwb = new MemorySimpleFile(awbFile.FileName, await awbFile.ReadAllBytesAsync());
-
-            var context = EditorFileAccessContext.Create(
-                fumenFile: copiedFumen,
-                audioFile: copiedAudio,
-                audioAwbFile: copiedAwb);
-            copiedFumen = null;
-            copiedAudio = null;
-            copiedAwb = null;
-            return context;
-        }
-        finally
-        {
-            copiedFumen?.Dispose();
-            copiedAudio?.Dispose();
-            copiedAwb?.Dispose();
-        }
+        var context = EditorFileAccessContext.Create(
+            fumenFile: fumenFile,
+            audioFile: audioFile,
+            audioAwbFile: awbFile);
+        return context;
     }
 
     private async Task<ISimpleDirectory> CloneRootFromBookmarkAsync(IBookmarkableSimpleFileSystemItem bookmarkable)
@@ -593,11 +571,14 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             return;
         try
         {
-            var fileType = new EditorFileType("OgkiFumenListBrowser.Fumen", Lang.B.OgkiFumenListBrowser.ToLocalizedString());
             var name = editor is FumenVisualEditorViewModel viewModel
                 ? viewModel.DisplayName
                 : diff.RefSet.Title;
-            recentFilesManager.PostRecent(fileType, name, diff.FumenLocator, recentData);
+            recentFilesManager.PostRecent(
+                FumenVisualEditorProviderBase.FileType,
+                name,
+                diff.FumenLocator,
+                recentData);
         }
         catch (Exception exception)
         {
@@ -792,29 +773,6 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(Count)));
             OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-        }
-    }
-
-    private sealed class MemorySimpleFile : ISimpleFile
-    {
-        private readonly byte[] data;
-        public MemorySimpleFile(string fileName, byte[] data)
-        {
-            FileName = fileName;
-            this.data = data;
-        }
-
-        public ISimpleDirectory? ParentDictionary => null;
-        public string FullPath => FileName;
-        public string? LocalPath => null;
-        public string FileName { get; }
-        public long FileLength => data.LongLength;
-        public ValueTask<string[]> ReadAllLines() => ValueTask.FromResult(System.Text.Encoding.UTF8.GetString(data).Split(["\r\n", "\n"], StringSplitOptions.None));
-        public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(data.ToArray());
-        public Task<Stream> OpenRead() => Task.FromResult<Stream>(new MemoryStream(data, writable: false));
-        public Task<Stream> OpenWrite() => throw new NotSupportedException();
-        public void Dispose()
-        {
         }
     }
 

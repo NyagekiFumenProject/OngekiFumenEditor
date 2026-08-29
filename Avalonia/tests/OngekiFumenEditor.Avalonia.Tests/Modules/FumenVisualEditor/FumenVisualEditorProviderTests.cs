@@ -10,6 +10,17 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenVisualEditor;
 
 public sealed class FumenVisualEditorProviderTests
 {
+    [Fact]
+    public void FileTypes_ExposeCanonicalFumenVisualEditorFileType()
+    {
+        var provider = new TestProvider(canCreateNew: false);
+
+        var fileType = Assert.Single(provider.FileTypes);
+
+        Assert.Same(FumenVisualEditorProviderBase.FileType, fileType);
+        Assert.Equal("FumenVisualEditorProject", fileType.Id);
+    }
+
     [AvaloniaFact]
     public async Task TryNew_WhenCreationIsDisabled_ReturnsFalse()
     {

@@ -1,6 +1,9 @@
 using System.Text;
+using Avalonia.Headless.XUnit;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
 
@@ -118,6 +121,33 @@ public sealed class EditorFileAccessContextSnapshotTests
         Assert.Equal(1, audioFile.DisposeCount);
     }
 
+    [AvaloniaFact]
+    public async Task TryLoadFumenFromContextAsync_MissingProjectFile_LoadsAndTransfersOwnership()
+    {
+        var expectedFumen = new OngekiFumen();
+        var fumenFile = new TrackingFile("fumen.ogkr", [0x01]);
+        var audioFile = new TrackingFile("audio.wav", [0x02]);
+        var fileContext = new EditorFileAccessContext
+        {
+            FumenFile = fumenFile,
+            AudioFile = audioFile
+        };
+
+        using (var editorContext = await EditorProjectDataUtils.TryLoadFumenFromContextAsync(
+            fileContext,
+            parserManager: new StubParserManager(expectedFumen)))
+        {
+            Assert.Same(expectedFumen, editorContext.Fumen);
+            Assert.Same(fileContext, editorContext.FileAccessContext);
+            Assert.Null(editorContext.ProjectFile);
+            Assert.Equal(0, fumenFile.DisposeCount);
+            Assert.Equal(0, audioFile.DisposeCount);
+        }
+
+        Assert.Equal(1, fumenFile.DisposeCount);
+        Assert.Equal(1, audioFile.DisposeCount);
+    }
+
     private sealed class TrackingFile : ISimpleFile
     {
         private readonly byte[] content;
@@ -163,5 +193,27 @@ public sealed class EditorFileAccessContextSnapshotTests
             isDisposed = true;
             DisposeCount++;
         }
+    }
+
+    private sealed class StubParserManager(OngekiFumen fumen) : IFumenParserManager
+    {
+        public IFumenSerializable GetSerializer(string saveFilePath) =>
+            throw new NotSupportedException();
+
+        public IFumenDeserializable GetDeserializer(string loadFilePath) =>
+            new StubDeserializer(fumen);
+
+        public IEnumerable<(string desc, string[] fileFormat)> GetSerializerDescriptions() => [];
+
+        public IEnumerable<(string desc, string[] fileFormat)> GetDeserializerDescriptions() => [];
+    }
+
+    private sealed class StubDeserializer(OngekiFumen fumen) : IFumenDeserializable
+    {
+        public string FileFormatName => "stub";
+
+        public string[] SupportFumenFileExtensions => [".ogkr"];
+
+        public Task<OngekiFumen> DeserializeAsync(Stream stream) => Task.FromResult(fumen);
     }
 }

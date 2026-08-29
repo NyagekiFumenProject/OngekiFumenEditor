@@ -78,10 +78,7 @@ public abstract partial class FumenVisualEditorProviderBase
                     var contextForLoad = fileAccessContext;
                     fileAccessContext = null;
                     projectContext = await EditorProjectDataUtils.TryLoadFromContextAsync(contextForLoad);
-                    if (!await TryTransferContextToEditorAsync(
-                            editor,
-                            projectContext,
-                            selectedProject.File.FileName))
+                    if (!await TryTransferContextToEditorAsync(editor, projectContext))
                     {
                         return false;
                     }
@@ -156,14 +153,12 @@ public abstract partial class FumenVisualEditorProviderBase
                     return false;
                 }
 
-                // TryLoadFromContextAsync consumes the context: it disposes the context on its own
-                // failure and transfers ownership into the returned EditorContext on success. From
-                // that point the EditorContext dispose releases the restored handles.
-                var projectContext = await EditorProjectDataUtils.TryLoadFromContextAsync(fileAccessContext);
-                if (!await TryTransferContextToEditorAsync(
-                        editor,
-                        projectContext,
-                        projectContext.ProjectFile?.FileName ?? string.Empty))
+                // Both loaders consume the file context: failure disposes its capabilities,
+                // while success transfers them into the returned EditorContext.
+                var projectContext = fileAccessContext.ProjectFile is null
+                    ? await EditorProjectDataUtils.TryLoadFumenFromContextAsync(fileAccessContext)
+                    : await EditorProjectDataUtils.TryLoadFromContextAsync(fileAccessContext);
+                if (!await TryTransferContextToEditorAsync(editor, projectContext))
                 {
                     return false;
                 }
@@ -214,14 +209,13 @@ public abstract partial class FumenVisualEditorProviderBase
         }
     }
 
-    private static async Task<bool> TryTransferContextToEditorAsync(
+    private async Task<bool> TryTransferContextToEditorAsync(
         FumenVisualEditorViewModel editor,
-        EditorContext context,
-        string sourcePath)
+        EditorContext context)
     {
         try
         {
-            if (await editor.LoadProjectAsync(context, sourcePath))
+            if (await TryOpen(editor, context))
                 return true;
         }
         catch
@@ -266,7 +260,7 @@ public abstract partial class FumenVisualEditorProviderBase
         {
             var updated = RecentFilesManager.UpdateRecent(
                 recordInfo.RecordId,
-                projectContext.ProjectFile?.FileName ?? recordInfo.LocationDescription,
+                projectContext.ProjectFile?.FileName ?? recordInfo.Name,
                 recordInfo.LocationDescription,
                 snapshot.Serialize());
             projectContext.RecentRecordId = updated.RecordId;
@@ -321,15 +315,14 @@ public abstract partial class FumenVisualEditorProviderBase
     {
         var audioFile = context.AudioFile ??
             throw new InvalidDataException("The project file binding has no audio file.");
-        var inspection = await Setup.AcbPackageInspector.InspectAsync(audioFile);
-        if (!inspection.IsValid)
-            throw new InvalidDataException(inspection.ErrorMessage);
-        if (inspection.Kind != Setup.SetupAudioPackageKind.AcbWithExternalAwb)
-            return true;
-
         // A snapshot may already carry an external AWB bookmark. Keep that capability
         // instead of replacing it with a sibling alias and losing its ownership reference.
         if (context.AudioAwbFile is not null)
+            return true;
+        var inspection = await Setup.AcbPackageInspector.InspectAsync(audioFile, context.AudioAwbFile);
+        if (!inspection.IsValid)
+            throw new InvalidDataException(inspection.ErrorMessage);
+        if (inspection.Kind != Setup.SetupAudioPackageKind.AcbWithExternalAwb)
             return true;
 
         var expectedAwbFileName = inspection.RequiredExternalAwbLeafName!;
@@ -389,7 +382,7 @@ public abstract partial class FumenVisualEditorProviderBase
         EditorFileAccessContextSnapshot snapshot)
     {
         var serialized = snapshot.Serialize();
-        var fileType = SupportFileTypes[0];
+        var fileType = FileType;
         var existing = RecentFilesManager.RecentRecordInfos.FirstOrDefault(record =>
             record.EditorFileTypeId.Equals(fileType.Id, StringComparison.OrdinalIgnoreCase) &&
             TryReadSnapshot(record, out var stored) &&
