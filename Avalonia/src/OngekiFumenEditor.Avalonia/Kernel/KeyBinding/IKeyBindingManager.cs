@@ -1,9 +1,15 @@
 using Avalonia.Input;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 
-internal interface IKeyBindingManager
+public interface IKeyBindingManager
 {
+    /// <summary>
+    /// Initializes the platform key binding store and completes after persisted bindings are loaded.
+    /// </summary>
+    Task Initialize();
+
     bool CheckKeyBinding(KeyBindingDefinition defination, KeyEventArgs e);
 
     void ChangeKeyBinding(KeyBindingDefinition definition, Key newKey, KeyModifiers newModifier);

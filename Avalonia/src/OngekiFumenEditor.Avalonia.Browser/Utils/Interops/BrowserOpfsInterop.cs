@@ -3,13 +3,16 @@
 using System;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Versioning;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.FileSystem.BrowserOpfs;
+namespace OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 
 [SupportedOSPlatform("browser")]
 internal static partial class BrowserOpfsInterop
 {
+    private static int nextWriteBufferHandle;
+
     [JSImport("globalThis.BrowserOpfsInterop.isAvailable")]
     public static partial bool IsAvailable();
 
@@ -43,6 +46,9 @@ internal static partial class BrowserOpfsInterop
     [JSImport("globalThis.BrowserOpfsInterop.closeRead")]
     public static partial void CloseRead(int handle);
 
+    [JSImport("globalThis.BrowserOpfsInterop.readFile")]
+    public static partial Task<JSObject> ReadFileAsync(string relativePath);
+
     [JSImport("globalThis.BrowserOpfsInterop.setWriteBuffer")]
     public static partial void SetWriteBuffer(
         int handle,
@@ -51,6 +57,9 @@ internal static partial class BrowserOpfsInterop
 
     [JSImport("globalThis.BrowserOpfsInterop.releaseWriteBuffer")]
     public static partial void ReleaseWriteBuffer(int handle);
+
+    [JSImport("globalThis.BrowserOpfsInterop.writeFile")]
+    public static partial Task WriteFileAsync(string relativePath, int handle);
 
     [JSImport("globalThis.BrowserOpfsInterop.queueDownloadBuffer")]
     public static partial void QueueDownloadBuffer(int outputHandle, int bufferHandle);
@@ -66,4 +75,7 @@ internal static partial class BrowserOpfsInterop
 
     [JSImport("globalThis.BrowserOpfsInterop.abortDownload")]
     public static partial Task AbortDownloadAsync(int outputHandle);
+
+    public static int AllocateWriteBufferHandle() =>
+        Interlocked.Increment(ref nextWriteBufferHandle);
 }

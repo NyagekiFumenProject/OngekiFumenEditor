@@ -6,13 +6,13 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
+using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.FileSystem.BrowserOpfs;
 
 [SupportedOSPlatform("browser")]
 internal sealed class BrowserOpfsOutputStream : Stream
 {
-    private static int nextBufferHandle;
     private readonly int outputHandle;
     private bool completed;
     private long position;
@@ -59,7 +59,7 @@ internal sealed class BrowserOpfsOutputStream : Stream
         if (count == 0)
             return;
 
-        int bufferHandle = Interlocked.Increment(ref nextBufferHandle);
+        int bufferHandle = BrowserOpfsInterop.AllocateWriteBufferHandle();
         try
         {
             BrowserOpfsInterop.SetWriteBuffer(bufferHandle, buffer.AsSpan(offset, count), count);
@@ -96,7 +96,7 @@ internal sealed class BrowserOpfsOutputStream : Stream
         if (buffer.Length == 0)
             return;
 
-        int bufferHandle = Interlocked.Increment(ref nextBufferHandle);
+        int bufferHandle = BrowserOpfsInterop.AllocateWriteBufferHandle();
         try
         {
             SetInteropBuffer(bufferHandle, buffer);

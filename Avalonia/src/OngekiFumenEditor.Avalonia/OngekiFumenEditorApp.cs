@@ -7,6 +7,7 @@ using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using Gekimini.Avalonia.Platforms.Services.Window;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
+using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
@@ -49,7 +50,7 @@ public abstract class OngekiFumenEditorApp : App
         InitializeMainWindowTitleAndIcon();
 
         Dispatcher.UIThread.Post(
-            AttachEditorKeyBindingRouter,
+            () => _ = AttachEditorKeyBindingRouterAsync(),
             DispatcherPriority.Background);
 
         Dispatcher.UIThread.Post(
@@ -77,10 +78,11 @@ public abstract class OngekiFumenEditorApp : App
         }
     }
 
-    private void AttachEditorKeyBindingRouter()
+    private async Task AttachEditorKeyBindingRouterAsync()
     {
         try
         {
+            await ServiceProvider.GetRequiredService<IKeyBindingManager>().Initialize();
             ServiceProvider.GetRequiredService<IEditorKeyBindingRouter>().Attach(TopLevel);
         }
         catch (Exception exception)

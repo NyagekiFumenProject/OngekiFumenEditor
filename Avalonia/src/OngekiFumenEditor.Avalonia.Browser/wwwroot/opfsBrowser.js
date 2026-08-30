@@ -326,6 +326,16 @@ function requireWriteBuffer(handle) {
     return bytes;
 }
 
+async function abortWritableSilently(writable) {
+    try {
+        if (typeof writable.abort === "function") {
+            await writable.abort();
+        }
+    } catch {
+        // Preserve the original OPFS write error.
+    }
+}
+
 function requireReadHandle(handle) {
     const state = readHandles.get(handle);
     if (state === undefined) {
@@ -760,6 +770,19 @@ export async function openRead(relativePath, expectedSize, expectedLastModified)
     return handle;
 }
 
+export async function readFile(relativePath) {
+    const normalizedPath = normalizePath(relativePath);
+    try {
+        const file = await (await resolveFile(normalizedPath)).getFile();
+        return { data: new Uint8Array(await file.arrayBuffer()) };
+    } catch (error) {
+        if (isNotFound(error)) {
+            return { data: null };
+        }
+        throw error;
+    }
+}
+
 export async function readChunk(handle, maximumByteLength) {
     const state = requireReadHandle(handle);
     if (!Number.isSafeInteger(maximumByteLength) || maximumByteLength <= 0) {
@@ -788,6 +811,24 @@ export function setWriteBuffer(handle, data, byteLength) {
 
 export function releaseWriteBuffer(handle) {
     writeBuffers.delete(handle);
+}
+
+export async function writeFile(relativePath, handle) {
+    const bytes = requireWriteBuffer(handle);
+    const normalizedPath = normalizePath(relativePath);
+    const resolved = await resolveParent(normalizedPath);
+    const fileHandle = await resolved.parent.getFileHandle(resolved.name, { create: true });
+    const writable = await fileHandle.createWritable();
+    let committed = false;
+    try {
+        await writable.write(bytes);
+        await writable.close();
+        committed = true;
+    } finally {
+        if (!committed) {
+            await abortWritableSilently(writable);
+        }
+    }
 }
 
 export function queueDownloadBuffer(outputHandle, bufferHandle) {
@@ -860,10 +901,12 @@ globalThis.BrowserOpfsInterop = Object.freeze({
     buildManifest,
     validateManifest,
     openRead,
+    readFile,
     readChunk,
     closeRead,
     setWriteBuffer,
     releaseWriteBuffer,
+    writeFile,
     queueDownloadBuffer,
     writeDownloadBuffer,
     flushDownload,

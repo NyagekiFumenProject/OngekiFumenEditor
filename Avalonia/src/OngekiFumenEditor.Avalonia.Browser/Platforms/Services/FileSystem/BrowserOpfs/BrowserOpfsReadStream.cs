@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Versioning;
 using System.Threading;
 using System.Threading.Tasks;
+using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.FileSystem.BrowserOpfs;
 

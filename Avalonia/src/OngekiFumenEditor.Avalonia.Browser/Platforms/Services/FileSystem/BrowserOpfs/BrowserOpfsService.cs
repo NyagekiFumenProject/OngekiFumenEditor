@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Browser.Modules.BrowserOpfsBrowser;
+using OngekiFumenEditor.Avalonia.Browser.Utils.Interops;
 
 namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.FileSystem.BrowserOpfs;
 
