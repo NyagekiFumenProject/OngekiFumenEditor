@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.MainWindow;
 [RegisterSingleton<IPlatformMainWindow>]
 public partial class BrowserPlatformMainWindow : ObservableObject, IPlatformMainWindow
 {
+    // The versioned URL makes a newly deployed favicon observable even when the
+    // browser has an older favicon.ico response in its HTTP cache.
     private const string BrowserIconPath = "./favicon.ico";
 
     private string mainWindowTitle = "Ongeki Fumen Editor";

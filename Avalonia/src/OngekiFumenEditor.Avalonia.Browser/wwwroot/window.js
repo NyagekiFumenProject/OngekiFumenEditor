@@ -28,9 +28,13 @@
                 return;
             }
 
-            let link = head.querySelector('link[data-browser-icon="true"]');
+            let link = document.getElementById("favicon");
+            if (!link) {
+                link = head.querySelector('link[data-browser-icon="true"]');
+            }
             if (!link) {
                 link = document.createElement("link");
+                link.id = "favicon";
                 link.setAttribute("data-browser-icon", "true");
                 head.appendChild(link);
             }
