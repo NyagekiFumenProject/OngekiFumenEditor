@@ -221,6 +221,65 @@ public sealed class BrowserOpfsBrowserContractTests
     }
 
     [Fact]
+    public void BrowserHost_ExposesApplicationTitleAndFaviconThroughTheDocument()
+    {
+        string repositoryRoot = FindRepositoryRoot();
+        string index = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "wwwroot",
+            "index.html");
+        string windowScript = ReadBrowserScript(repositoryRoot, "window.js");
+        string interop = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Utils",
+            "Interops",
+            "WindowInterop.cs");
+        string platformMainWindow = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Platforms",
+            "Services",
+            "MainWindow",
+            "BrowserPlatformMainWindow.cs");
+
+        Assert.Contains("<title>Ongeki Fumen Editor</title>", index, StringComparison.Ordinal);
+        Assert.Contains(
+            "<link rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\" data-browser-icon=\"true\" />",
+            index,
+            StringComparison.Ordinal);
+        Assert.Contains("globalThis.WindowInterop.setTitle", interop, StringComparison.Ordinal);
+        Assert.Contains("globalThis.WindowInterop.setIcon", interop, StringComparison.Ordinal);
+        Assert.Contains("function setTitle(title)", windowScript, StringComparison.Ordinal);
+        Assert.Contains("function setIcon(url)", windowScript, StringComparison.Ordinal);
+        Assert.Contains("setTitle,", windowScript, StringComparison.Ordinal);
+        Assert.Contains("setIcon,", windowScript, StringComparison.Ordinal);
+        Assert.True(
+            index.IndexOf("./window.js", StringComparison.Ordinal) <
+            index.IndexOf("./main.js", StringComparison.Ordinal));
+        Assert.Contains("WindowInterop.SetTitle(nextTitle)", platformMainWindow, StringComparison.Ordinal);
+        Assert.Contains("WindowInterop.SetIcon(BrowserIconPath)", platformMainWindow, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "BrowserPlatformMainWindow not support get/set Title",
+            platformMainWindow,
+            StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            "BrowserPlatformMainWindow not support get/set Icon",
+            platformMainWindow,
+            StringComparison.Ordinal);
+        Assert.True(File.Exists(Path.Combine(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "wwwroot",
+            "favicon.ico")));
+    }
+
+    [Fact]
     public void BrowserKeyBindingManager_UsesSharedBrowserOpfsInteropAndIsInitializedBeforeRouting()
     {
         string repositoryRoot = FindRepositoryRoot();
