@@ -12,11 +12,13 @@ public sealed class AudioAdjustmentTransactionTests
     {
         var events = new List<string>();
         var service = new StubWavAudioOffsetService(() => events.Add("audio-complete"));
+        using var input = new StubSimpleFile("input.wav");
+        using var output = new StubSimpleFile("output.wav");
 
         var result = await AudioAdjustmentTransaction.ExecuteAsync(
             service,
-            "input.wav",
-            "output.wav",
+            input,
+            output,
             TimeSpan.FromSeconds(1),
             () => events.Add("undo-commit"));
 
@@ -31,11 +33,13 @@ public sealed class AudioAdjustmentTransactionTests
         var undoCommitCount = 0;
         var service = new StubWavAudioOffsetService(
             () => throw new InvalidDataException("invalid wave"));
+        using var input = new StubSimpleFile("input.wav");
+        using var output = new StubSimpleFile("output.wav");
 
         var result = await AudioAdjustmentTransaction.ExecuteAsync(
             service,
-            "input.wav",
-            "output.wav",
+            input,
+            output,
             TimeSpan.FromSeconds(-1),
             () => undoCommitCount++);
 
@@ -79,34 +83,12 @@ public sealed class AudioAdjustmentTransactionTests
             return Task.CompletedTask;
         }
 
-        public Task OffsetAsync(
-            string inputWavFilePath,
-            ISimpleFile outputWavFile,
-            TimeSpan offset,
-            CancellationToken cancellationToken = default)
-        {
-            LastOverload = "path-to-simple-file";
-            operation();
-            return Task.CompletedTask;
-        }
-
-        public Task OffsetAsync(
-            string inputWavFilePath,
-            string outputWavFilePath,
-            TimeSpan offset,
-            CancellationToken cancellationToken = default)
-        {
-            LastOverload = "paths";
-            operation();
-            return Task.CompletedTask;
-        }
     }
 
     private sealed class StubSimpleFile(string fileName) : ISimpleFile
     {
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => fileName;
-        public string? LocalPath => null;
         public string FileName => fileName;
         public long FileLength => 0;
 

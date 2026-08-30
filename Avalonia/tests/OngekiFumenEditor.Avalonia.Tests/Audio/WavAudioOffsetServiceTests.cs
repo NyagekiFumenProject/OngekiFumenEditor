@@ -27,9 +27,6 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_PositiveFractionalOffset_QuantizesToBlockAlignAndPreservesOddChunkPadding()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        var outputPath = directory.File("output.wav");
         var sourceFrames = new byte[] { 0x11, 0x12, 0x21, 0x22, 0x31, 0x32 };
         var input = CreateWave(
             formatTag: 1,
@@ -38,12 +35,13 @@ public sealed class WavAudioOffsetServiceTests
             bitsPerSample: 16,
             data: sourceFrames,
             chunksBeforeData: [new TestChunk("JUNK", [0xA1, 0xA2, 0xA3], 0x7E)]);
-        await File.WriteAllBytesAsync(inputPath, input);
+        using var inputFile = new TestSimpleFile("input.wav", input);
+        using var outputFile = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(inputPath, outputPath, TimeSpan.FromMilliseconds(375));
+        await service.OffsetAsync(inputFile, outputFile, TimeSpan.FromMilliseconds(375));
 
-        var output = await File.ReadAllBytesAsync(outputPath);
+        var output = outputFile.Content;
         var chunks = ReadChunks(output);
         var dataChunk = Assert.Single(chunks, chunk => chunk.Id == "data");
         var junkChunk = Assert.Single(chunks, chunk => chunk.Id == "JUNK");
@@ -70,8 +68,6 @@ public sealed class WavAudioOffsetServiceTests
         Assert.Equal(new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 }, data);
         Assert.Equal(1, input.OpenReadCount);
         Assert.Equal(1, output.OpenWriteCount);
-        Assert.Null(input.LocalPath);
-        Assert.Null(output.LocalPath);
     }
 
     [Fact]
@@ -88,6 +84,27 @@ public sealed class WavAudioOffsetServiceTests
         Assert.Equal(new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 }, data);
         Assert.Equal(1, file.OpenReadCount);
         Assert.Equal(1, file.OpenWriteCount);
+    }
+
+    [Fact]
+    public async Task OffsetAsync_SameFullPathAcrossFileInstances_StagesOutput()
+    {
+        using var input = new TestSimpleFile(
+            "input.wav",
+            CreateWave(1, 1, 4, 16, [0x11, 0x12, 0x21, 0x22]),
+            "provider://shared/same.wav");
+        using var output = new TestSimpleFile(
+            "output.wav",
+            [],
+            "provider://shared/same.wav",
+            () => input.HasActiveRead);
+
+        var service = new DefaultWavAudioOffsetService();
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(250));
+
+        Assert.False(output.WasWriteOpenedWhileProbeWasTrue);
+        var data = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data").Data;
+        Assert.Equal(new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 }, data);
     }
 
     [Fact]
@@ -112,11 +129,9 @@ public sealed class WavAudioOffsetServiceTests
     }
 
     [Fact]
-    public async Task OffsetAsync_LocalInputAndSimpleOutput_WritesToStorageStream()
+    public async Task OffsetAsync_SimpleFiles_WritesToStorageStream()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        await File.WriteAllBytesAsync(inputPath, CreateWave(
+        using var input = new TestSimpleFile("input.wav", CreateWave(
             1,
             1,
             4,
@@ -125,7 +140,7 @@ public sealed class WavAudioOffsetServiceTests
         using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(inputPath, output, TimeSpan.FromMilliseconds(-250));
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(-250));
 
         var data = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data").Data;
         Assert.Equal(new byte[] { 0x21, 0x22, 0x31, 0x32 }, data);
@@ -153,26 +168,21 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_NegativeFractionalOffset_RemovesOnlyWholeFramesFromStart()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        var outputPath = directory.File("output.wav");
         var sourceFrames = new byte[] { 0x11, 0x12, 0x21, 0x22, 0x31, 0x32 };
-        await File.WriteAllBytesAsync(inputPath, CreateWave(1, 1, 4, 16, sourceFrames));
+        using var input = new TestSimpleFile("input.wav", CreateWave(1, 1, 4, 16, sourceFrames));
+        using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(inputPath, outputPath, TimeSpan.FromMilliseconds(-375));
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(-375));
 
-        var output = await File.ReadAllBytesAsync(outputPath);
-        var dataChunk = Assert.Single(ReadChunks(output), chunk => chunk.Id == "data");
+        var dataChunk = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data");
         Assert.Equal(new byte[] { 0x21, 0x22, 0x31, 0x32 }, dataChunk.Data);
         Assert.Equal(0, dataChunk.Data.Length % 2);
     }
 
     [Fact]
-    public async Task OffsetAsync_ZeroOffsetAndSamePath_PreservesEveryInputByte()
+    public async Task OffsetAsync_ZeroOffsetAndSameFile_PreservesEveryInputByte()
     {
-        using var directory = new TemporaryDirectory();
-        var wavePath = directory.File("in-place.wav");
         var original = CreateWave(
             formatTag: 1,
             channels: 1,
@@ -182,32 +192,30 @@ public sealed class WavAudioOffsetServiceTests
             chunksBeforeData: [new TestChunk("JUNK", [0x01, 0x02, 0x03], 0x7E)],
             chunksAfterData: [new TestChunk("LIST", [0x41, 0x42, 0x43], 0x55)],
             dataPaddingByte: 0xAB);
-        await File.WriteAllBytesAsync(wavePath, original);
+        using var file = new TestSimpleFile("in-place.wav", original);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(wavePath, wavePath, TimeSpan.Zero);
+        await service.OffsetAsync(file, file, TimeSpan.Zero);
 
-        Assert.Equal(original, await File.ReadAllBytesAsync(wavePath));
+        Assert.Equal(original, file.Content);
     }
 
     [Fact]
     public async Task OffsetAsync_NegativeOffsetBeyondDuration_ProducesEmptyDataAndPreservesFollowingChunks()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        var outputPath = directory.File("output.wav");
-        await File.WriteAllBytesAsync(inputPath, CreateWave(
+        using var input = new TestSimpleFile("input.wav", CreateWave(
             formatTag: 1,
             channels: 1,
             sampleRate: 4,
             bitsPerSample: 16,
             data: [0x11, 0x12, 0x21, 0x22],
             chunksAfterData: [new TestChunk("LIST", [0x51, 0x52, 0x53], 0x6A)]));
+        using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(inputPath, outputPath, TimeSpan.FromSeconds(-10));
+        await service.OffsetAsync(input, output, TimeSpan.FromSeconds(-10));
 
-        var chunks = ReadChunks(await File.ReadAllBytesAsync(outputPath));
+        var chunks = ReadChunks(output.Content);
         Assert.Empty(Assert.Single(chunks, chunk => chunk.Id == "data").Data);
         var listChunk = Assert.Single(chunks, chunk => chunk.Id == "LIST");
         Assert.Equal(new byte[] { 0x51, 0x52, 0x53 }, listChunk.Data);
@@ -217,17 +225,14 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_PositiveOffsetOnStereoFloat_PrependsOneZeroValuedSampleFrame()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        var outputPath = directory.File("output.wav");
         var sourceFrames = FloatBytes(0.25f, -0.5f, 1.0f, -1.0f);
-        await File.WriteAllBytesAsync(inputPath, CreateWave(3, 2, 2, 32, sourceFrames));
+        using var input = new TestSimpleFile("input.wav", CreateWave(3, 2, 2, 32, sourceFrames));
+        using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(inputPath, outputPath, TimeSpan.FromMilliseconds(500));
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(500));
 
-        var output = await File.ReadAllBytesAsync(outputPath);
-        var chunks = ReadChunks(output);
+        var chunks = ReadChunks(output.Content);
         var format = Assert.Single(chunks, chunk => chunk.Id == "fmt ").Data;
         var data = Assert.Single(chunks, chunk => chunk.Id == "data").Data;
         Assert.Equal((ushort)3, BinaryPrimitives.ReadUInt16LittleEndian(format));
@@ -240,82 +245,63 @@ public sealed class WavAudioOffsetServiceTests
     [Fact]
     public async Task OffsetAsync_PositiveOffsetOnEightBitPcm_UsesUnsignedSilenceLevel()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        var outputPath = directory.File("output.wav");
-        await File.WriteAllBytesAsync(inputPath, CreateWave(1, 1, 2, 8, [0x70, 0x90]));
+        using var input = new TestSimpleFile("input.wav", CreateWave(1, 1, 2, 8, [0x70, 0x90]));
+        using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
-        await service.OffsetAsync(inputPath, outputPath, TimeSpan.FromMilliseconds(500));
+        await service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(500));
 
-        var data = Assert.Single(ReadChunks(await File.ReadAllBytesAsync(outputPath)), chunk => chunk.Id == "data").Data;
+        var data = Assert.Single(ReadChunks(output.Content), chunk => chunk.Id == "data").Data;
         Assert.Equal(new byte[] { 0x80, 0x70, 0x90 }, data);
     }
 
     [Fact]
     public async Task OffsetAsync_MisalignedPcmData_ThrowsAndPreservesExistingTarget()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("invalid.wav");
-        var outputPath = directory.File("existing.wav");
         var originalTarget = new byte[] { 0xDE, 0xAD, 0xBE, 0xEF };
-        await File.WriteAllBytesAsync(inputPath, CreateWave(1, 1, 4, 16, [0x01, 0x02, 0x03]));
-        await File.WriteAllBytesAsync(outputPath, originalTarget);
+        using var input = new TestSimpleFile("invalid.wav", CreateWave(1, 1, 4, 16, [0x01, 0x02, 0x03]));
+        using var output = new TestSimpleFile("existing.wav", originalTarget);
 
         var service = new DefaultWavAudioOffsetService();
         var exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            service.OffsetAsync(inputPath, outputPath, TimeSpan.FromSeconds(1)));
+            service.OffsetAsync(input, output, TimeSpan.FromSeconds(1)));
 
         Assert.Contains("BlockAlign", exception.Message, StringComparison.Ordinal);
-        Assert.Equal(originalTarget, await File.ReadAllBytesAsync(outputPath));
-        Assert.Empty(directory.FindTemporaryFilesFor(outputPath));
+        Assert.Equal(originalTarget, output.Content);
+        Assert.Equal(0, output.OpenWriteCount);
     }
 
     [Fact]
     public async Task OffsetAsync_UnsupportedCompressedFormat_ThrowsAndDoesNotCreateTarget()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("unsupported.wav");
-        var outputPath = directory.File("output.wav");
-        await File.WriteAllBytesAsync(inputPath, CreateWave(6, 1, 8_000, 8, [0x01, 0x02]));
+        using var input = new TestSimpleFile("unsupported.wav", CreateWave(6, 1, 8_000, 8, [0x01, 0x02]));
+        using var output = new TestSimpleFile("output.wav", []);
 
         var service = new DefaultWavAudioOffsetService();
         var exception = await Assert.ThrowsAsync<NotSupportedException>(() =>
-            service.OffsetAsync(inputPath, outputPath, TimeSpan.Zero));
+            service.OffsetAsync(input, output, TimeSpan.Zero));
 
         Assert.Contains("0x0006", exception.Message, StringComparison.Ordinal);
-        Assert.False(File.Exists(outputPath));
-        Assert.Empty(directory.FindTemporaryFilesFor(outputPath));
+        Assert.Equal(0, output.OpenWriteCount);
+        Assert.Empty(output.Content);
     }
 
     [Fact]
-    public async Task OffsetAsync_CommitFails_LeavesExistingTargetUntouchedAndRemovesCompletedTemporaryFile()
+    public async Task OffsetAsync_OutputWriteFails_LeavesExistingTargetUntouched()
     {
-        using var directory = new TemporaryDirectory();
-        var inputPath = directory.File("input.wav");
-        var outputPath = directory.File("existing.wav");
         var sourceFrames = new byte[] { 0x11, 0x12, 0x21, 0x22 };
         var originalTarget = new byte[] { 0xCA, 0xFE, 0xBA, 0xBE };
-        await File.WriteAllBytesAsync(inputPath, CreateWave(1, 1, 4, 16, sourceFrames));
-        await File.WriteAllBytesAsync(outputPath, originalTarget);
-        byte[]? completedTemporaryFile = null;
+        using var input = new TestSimpleFile("input.wav", CreateWave(1, 1, 4, 16, sourceFrames));
+        using var output = new FailingWriteSimpleFile("existing.wav", originalTarget);
 
-        var service = new DefaultWavAudioOffsetService((temporaryPath, destinationPath) =>
-        {
-            completedTemporaryFile = File.ReadAllBytes(temporaryPath);
-            throw new IOException($"Simulated failure replacing {destinationPath}");
-        });
+        var service = new DefaultWavAudioOffsetService();
 
         var exception = await Assert.ThrowsAsync<IOException>(() =>
-            service.OffsetAsync(inputPath, outputPath, TimeSpan.FromMilliseconds(250)));
+            service.OffsetAsync(input, output, TimeSpan.FromMilliseconds(250)));
 
         Assert.Contains("Simulated failure", exception.Message, StringComparison.Ordinal);
-        Assert.NotNull(completedTemporaryFile);
-        Assert.Equal(
-            new byte[] { 0x00, 0x00, 0x11, 0x12, 0x21, 0x22 },
-            Assert.Single(ReadChunks(completedTemporaryFile), chunk => chunk.Id == "data").Data);
-        Assert.Equal(originalTarget, await File.ReadAllBytesAsync(outputPath));
-        Assert.Empty(directory.FindTemporaryFilesFor(outputPath));
+        Assert.Equal(originalTarget, output.Content);
+        Assert.Equal(1, output.WriteCount);
     }
 
     private static byte[] CreateWave(
@@ -418,7 +404,6 @@ public sealed class WavAudioOffsetServiceTests
 
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => fullPath ?? $"virtual/{fileName}";
-        public string? LocalPath => null;
         public string FileName => fileName;
         public long FileLength => content.LongLength;
         public byte[] Content => content.ToArray();
@@ -452,6 +437,23 @@ public sealed class WavAudioOffsetServiceTests
             OpenWriteCount++;
             WasWriteOpenedWhileProbeWasTrue = writeProbe?.Invoke() ?? false;
             return Task.FromResult<Stream>(new CommitMemoryStream(bytes => content = bytes));
+        }
+
+        public async Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(writer);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (activeReadCount != 0)
+                throw new IOException("The backing file cannot be opened for writing while it is being read.");
+
+            OpenWriteCount++;
+            WasWriteOpenedWhileProbeWasTrue = writeProbe?.Invoke() ?? false;
+            await using var stream = new MemoryStream();
+            await writer(stream, cancellationToken);
+            await stream.FlushAsync(CancellationToken.None);
+            content = stream.ToArray();
         }
 
         public void Dispose()
@@ -492,26 +494,39 @@ public sealed class WavAudioOffsetServiceTests
         }
     }
 
-    private sealed class TemporaryDirectory : IDisposable
+    private sealed class FailingWriteSimpleFile(string fileName, byte[] initialContent) : ISimpleFile
     {
-        public string RootPath { get; } = Path.Combine(
-            Path.GetTempPath(),
-            "OngekiFumenEditor.WavOffsetTests",
-            Guid.NewGuid().ToString("N"));
+        private readonly byte[] originalContent = initialContent.ToArray();
 
-        public TemporaryDirectory() => Directory.CreateDirectory(RootPath);
+        public ISimpleDirectory? ParentDictionary => null;
+        public string FullPath => $"virtual/{fileName}";
+        public string FileName => fileName;
+        public long FileLength => originalContent.LongLength;
+        public byte[] Content => originalContent.ToArray();
+        public int WriteCount { get; private set; }
 
-        public string File(string fileName) => Path.Combine(RootPath, fileName);
+        public ValueTask<string[]> ReadAllLines() =>
+            ValueTask.FromResult(Encoding.UTF8.GetString(originalContent).Split(["\r\n", "\n"], StringSplitOptions.None));
 
-        public string[] FindTemporaryFilesFor(string outputPath) => Directory.GetFiles(
-            RootPath,
-            $".{Path.GetFileName(outputPath)}.*.tmp",
-            SearchOption.TopDirectoryOnly);
+        public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Content);
+
+        public Task<Stream> OpenRead() => Task.FromResult<Stream>(new MemoryStream(originalContent, writable: false));
+
+        public Task<Stream> OpenWrite() => throw new IOException("Simulated failure replacing output.");
+
+        public async Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(writer);
+            WriteCount++;
+            await using var staged = new MemoryStream();
+            await writer(staged, cancellationToken);
+            throw new IOException("Simulated failure replacing output.");
+        }
 
         public void Dispose()
         {
-            if (Directory.Exists(RootPath))
-                Directory.Delete(RootPath, recursive: true);
         }
     }
 }
