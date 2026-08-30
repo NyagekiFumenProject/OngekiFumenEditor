@@ -12,11 +12,6 @@ public interface ISimpleFile : IDisposable
     string FullPath { get; }
 
     /// <summary>
-    ///     The local file-system path when the backing provider exposes one.
-    /// </summary>
-    string? LocalPath { get; }
-
-    /// <summary>
     ///     A file name such as "myFile.txt".
     /// </summary>
     string FileName { get; }
@@ -63,8 +58,7 @@ public interface ISimpleFile : IDisposable
     /// </summary>
     Task WriteAsync(
         Func<Stream, CancellationToken, Task> writer,
-        CancellationToken cancellationToken = default) =>
-        SimpleFileWriteTransaction.WriteAsync(this, writer, cancellationToken);
+        CancellationToken cancellationToken = default);
 
     Task WriteAllBytesAsync(
         ReadOnlyMemory<byte> data,

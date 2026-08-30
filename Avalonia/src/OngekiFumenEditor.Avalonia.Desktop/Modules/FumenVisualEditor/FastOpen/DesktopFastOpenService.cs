@@ -60,25 +60,17 @@ public sealed class DesktopFastOpenService
         await TryOpenAsync(fumenFile);
     }
 
-    public async Task<bool> TryOpenAsync(string ogkrFilePath)
-    {
-        if (!IsSupportedFumenFile(Path.GetFileName(ogkrFilePath)))
-            return false;
-
-        return await TryOpenAsync(new LocalSimpleFile(ogkrFilePath));
-    }
-
-    private async Task<bool> TryOpenAsync(ISimpleFile ogkrFile)
+    public async Task<bool> TryOpenAsync(ISimpleFile file)
     {
         EditorContext context = null;
         var ownershipTransferred = false;
         try
         {
-            context = await TryCreateContextAsync(ogkrFile);
+            context = await TryCreateContextAsync(file);
             if (context is null)
                 return false;
 
-            var documentName = await FormatOpenFileNameAsync(ogkrFile);
+            var documentName = await FormatOpenFileNameAsync(file);
             var editor = editorProvider.Create();
             try
             {
@@ -119,7 +111,7 @@ public sealed class DesktopFastOpenService
                 // 构造前抛出则谱面文件仍归调用方所有，需要在此释放。
                 context?.Dispose();
                 if (context is null)
-                    ogkrFile.Dispose();
+                    file.Dispose();
             }
         }
     }
@@ -130,10 +122,10 @@ public sealed class DesktopFastOpenService
         ISimpleFile audioAwbFile = null;
         try
         {
-            var audioFilePath = string.IsNullOrWhiteSpace(ogkrFile.LocalPath)
+            var audioFilePath = string.IsNullOrWhiteSpace(ogkrFile.FullPath)
                 ? null
                 : await DesktopFastOpenAudioResolver.TryResolveAudioFilePathAsync(
-                    ogkrFile.LocalPath,
+                    ogkrFile.FullPath,
                     audioManager.SupportAudioFileExtensionList
                         .Select(x => x.fileExt.TrimStart('.'))
                         .ToArray());
@@ -211,7 +203,7 @@ public sealed class DesktopFastOpenService
         if (siblingMatches.Length == 1)
             return siblingMatches[0];
 
-        if (audioFile.LocalPath is not { } localPath)
+        if (audioFile.FullPath is not { } localPath)
             return null;
 
         var externalAwbPath = DesktopFastOpenAudioResolver
@@ -241,10 +233,10 @@ public sealed class DesktopFastOpenService
     private static async Task<string> FormatOpenFileNameAsync(ISimpleFile ogkrFile)
     {
         var result = ogkrFile.FileName;
-        if (!string.IsNullOrWhiteSpace(ogkrFile.LocalPath))
+        if (!string.IsNullOrWhiteSpace(ogkrFile.FullPath))
         {
             var musicXmlFilePath = Path.Combine(
-                Path.GetDirectoryName(ogkrFile.LocalPath) ?? string.Empty, "Music.xml");
+                Path.GetDirectoryName(ogkrFile.FullPath) ?? string.Empty, "Music.xml");
             if (File.Exists(musicXmlFilePath))
             {
                 await using var xmlStream = File.OpenRead(musicXmlFilePath);

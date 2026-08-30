@@ -45,22 +45,22 @@ public sealed class StandardizeFormatOutputService : IStandardizeFormatOutputSer
 
     public async Task<bool> RevealOutputDirectoryAsync(ISimpleFile outputFile)
     {
-        Log.LogInfo($"Revealing output directory for '{outputFile?.LocalPath ?? "(unknown)"}'.");
+        Log.LogInfo($"Revealing output directory for '{outputFile?.FullPath ?? "(unknown)"}'.");
         if (!TryGetOutputDirectory(outputFile, out var outputDirectory) ||
             TryGetTopLevel() is not { } topLevel)
         {
-            Log.LogWarn($"Cannot reveal output directory for '{outputFile?.LocalPath ?? "(unknown)"}'.");
+            Log.LogWarn($"Cannot reveal output directory for '{outputFile?.FullPath ?? "(unknown)"}'.");
             return false;
         }
 
         var launched = await topLevel.Launcher.LaunchDirectoryInfoAsync(new DirectoryInfo(outputDirectory));
-        Log.LogInfo($"Reveal output directory result for '{outputFile.LocalPath}': {launched}.");
+        Log.LogInfo($"Reveal output directory result for '{outputFile.FullPath}': {launched}.");
         return launched;
     }
 
     internal static bool TryGetOutputDirectory(ISimpleFile outputFile, out string outputDirectory)
     {
-        outputDirectory = outputFile?.LocalPath is { } localPath
+        outputDirectory = outputFile?.FullPath is { } localPath
             ? Path.GetDirectoryName(localPath)
             : null;
         return !string.IsNullOrWhiteSpace(outputDirectory);

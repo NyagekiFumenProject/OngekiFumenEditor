@@ -256,8 +256,6 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
 
     private static string GetDisplayPath(ISimpleFile file)
     {
-        if (!string.IsNullOrWhiteSpace(file.LocalPath))
-            return file.LocalPath;
         if (!string.IsNullOrWhiteSpace(file.FullPath))
             return file.FullPath;
         return file.FileName;

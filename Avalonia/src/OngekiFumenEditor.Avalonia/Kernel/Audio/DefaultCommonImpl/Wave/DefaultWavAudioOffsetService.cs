@@ -193,21 +193,21 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         if (ReferenceEquals(inputFile, outputFile))
             return true;
 
-        if (!string.IsNullOrWhiteSpace(inputFile.LocalPath) &&
-            !string.IsNullOrWhiteSpace(outputFile.LocalPath))
+        if (!string.IsNullOrWhiteSpace(inputFile.FullPath) &&
+            !string.IsNullOrWhiteSpace(outputFile.FullPath))
         {
-            return PathsEqual(inputFile.LocalPath, outputFile.LocalPath);
+            return PathsEqual(inputFile.FullPath, outputFile.FullPath);
         }
 
-        return string.IsNullOrWhiteSpace(inputFile.LocalPath) &&
-               string.IsNullOrWhiteSpace(outputFile.LocalPath) &&
+        return string.IsNullOrWhiteSpace(inputFile.FullPath) &&
+               string.IsNullOrWhiteSpace(outputFile.FullPath) &&
                string.Equals(inputFile.FullPath, outputFile.FullPath, StringComparison.Ordinal);
     }
 
     private static bool RefersToSameFile(string inputFilePath, ISimpleFile outputFile)
     {
-        return !string.IsNullOrWhiteSpace(outputFile.LocalPath) &&
-               PathsEqual(inputFilePath, outputFile.LocalPath);
+        return !string.IsNullOrWhiteSpace(outputFile.FullPath) &&
+               PathsEqual(inputFilePath, outputFile.FullPath);
     }
 
     private static bool PathsEqual(string left, string right)

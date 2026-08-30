@@ -26,7 +26,6 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
         ParentDictionary = parent;
         FileName = fileName;
         FileLength = fileLength;
-        LocalPath = file.TryGetLocalPath();
         standaloneFullPath = parent is null ? file.Path.ToString() : null;
         this.file = file;
     }
@@ -36,8 +35,6 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
     public string FullPath => ParentDictionary is null
         ? standaloneFullPath!
         : Path.Combine(ParentDictionary.FullPath, FileName);
-
-    public string? LocalPath { get; }
 
     public string FileName { get; }
 
@@ -140,61 +137,45 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
         var storageFile = GetStorageFile();
 
         long fileLength;
-        if (LocalPath is { } localPath)
+        cancellationToken.ThrowIfCancellationRequested();
+        data = null;
+        try
         {
-            fileLength = await SimpleFileWriteTransaction
-                .WriteLocalAsync(
-                    localPath,
-                    writer,
-                    cancellationToken,
-                    (temporaryPath, expectedLength) => CommitReplacementThroughProviderAsync(
-                        storageFile,
-                        temporaryPath,
-                        expectedLength))
-                .ConfigureAwait(false);
-        }
-        else
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            data = null;
-            try
+            long? streamLength;
+            await using (var stream = await storageFile.OpenWriteAsync().ConfigureAwait(false))
             {
-                long? streamLength;
-                await using (var stream = await storageFile.OpenWriteAsync().ConfigureAwait(false))
+                if (stream.CanSeek)
                 {
-                    if (stream.CanSeek)
+                    stream.Position = 0;
+                    try
                     {
-                        stream.Position = 0;
-                        try
-                        {
-                            stream.SetLength(0);
-                        }
-                        catch (NotSupportedException)
-                        {
-                            // Some providers expose a seekable stream without supporting truncation.
-                        }
+                        stream.SetLength(0);
                     }
-
-                    await writer(stream, cancellationToken).ConfigureAwait(false);
-                    await stream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
-                    streamLength = stream.CanSeek ? stream.Length : null;
+                    catch (NotSupportedException)
+                    {
+                        // Some providers expose a seekable stream without supporting truncation.
+                    }
                 }
 
-                fileLength = await GetFileLength(storageFile, streamLength).ConfigureAwait(false);
+                await writer(stream, cancellationToken).ConfigureAwait(false);
+                await stream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+                streamLength = stream.CanSeek ? stream.Length : null;
+            }
+
+            fileLength = await GetFileLength(storageFile, streamLength).ConfigureAwait(false);
+        }
+        catch
+        {
+            try
+            {
+                await RefreshFileLength(storageFile).ConfigureAwait(false);
             }
             catch
             {
-                try
-                {
-                    await RefreshFileLength(storageFile).ConfigureAwait(false);
-                }
-                catch
-                {
-                    // The original write exception is more useful than a metadata refresh failure.
-                }
-
-                throw;
+                // The original write exception is more useful than a metadata refresh failure.
             }
+
+            throw;
         }
 
         data = null;

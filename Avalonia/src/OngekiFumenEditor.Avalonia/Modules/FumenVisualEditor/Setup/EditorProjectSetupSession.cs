@@ -232,7 +232,7 @@ public sealed class EditorProjectSetupSession : IDisposable
         ReferenceEquals(left, right) ||
         IsDescendantOf(left, right) ||
         IsDescendantOf(right, left) ||
-        AreOverlappingLocalPaths(left.LocalPath, right.LocalPath);
+        AreOverlappingLocalPaths(left.FullPath, right.FullPath);
 
     private static bool AreOverlappingLocalPaths(string? left, string? right)
     {

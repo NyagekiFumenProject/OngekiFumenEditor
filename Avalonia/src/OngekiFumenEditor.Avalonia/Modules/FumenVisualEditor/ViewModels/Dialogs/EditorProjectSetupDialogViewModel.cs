@@ -772,7 +772,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
 
     private static bool IsSamePhysicalFile(ISimpleFile left, ISimpleFile right)
     {
-        if (left.LocalPath is not { } leftPath || right.LocalPath is not { } rightPath)
+        if (left.FullPath is not { } leftPath || right.FullPath is not { } rightPath)
             return false;
         try
         {
@@ -888,8 +888,6 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
     {
         if (file is null)
             return string.Empty;
-        if (!string.IsNullOrWhiteSpace(file.LocalPath))
-            return file.LocalPath;
         if (!string.IsNullOrWhiteSpace(file.FullPath))
             return file.FullPath;
         return file.FileName;

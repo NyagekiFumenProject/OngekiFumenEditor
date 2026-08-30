@@ -242,7 +242,7 @@ public sealed class EditorFileAccessContext : IDisposable
             {
                 if (IsDescendantOf(distinct[i], distinct[j]) ||
                     IsDescendantOf(distinct[j], distinct[i]) ||
-                    AreOverlappingLocalPaths(distinct[i].LocalPath, distinct[j].LocalPath))
+                    AreOverlappingLocalPaths(distinct[i].FullPath, distinct[j].FullPath))
                 {
                     throw new ArgumentException(
                         "Directory roots cannot overlap or contain one another.");

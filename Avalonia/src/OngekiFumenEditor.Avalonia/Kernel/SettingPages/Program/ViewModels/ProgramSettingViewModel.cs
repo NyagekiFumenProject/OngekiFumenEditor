@@ -62,10 +62,10 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     {
         Log.LogInfo("SelectDumpFolderAsync triggered.");
         using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.CrashDumpFileOutput);
-        if (string.IsNullOrWhiteSpace(folder?.LocalPath))
+        if (string.IsNullOrWhiteSpace(folder?.FullPath))
             return;
 
-        Setting.DumpFileDirPath = folder.LocalPath;
+        Setting.DumpFileDirPath = folder.FullPath;
         ApplyChanges();
     }
 

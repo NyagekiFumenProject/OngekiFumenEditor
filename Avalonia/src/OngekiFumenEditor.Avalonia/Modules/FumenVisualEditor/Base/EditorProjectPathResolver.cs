@@ -225,7 +225,7 @@ public static class EditorProjectPathResolver
     {
         normalized = string.Empty;
         error = string.Empty;
-        if (string.IsNullOrWhiteSpace(root.LocalPath))
+        if (string.IsNullOrWhiteSpace(root.FullPath))
         {
             error = "An absolute dependency locator cannot be migrated on this platform.";
             return false;
@@ -233,7 +233,7 @@ public static class EditorProjectPathResolver
 
         try
         {
-            var rootPath = Path.GetFullPath(root.LocalPath);
+            var rootPath = Path.GetFullPath(root.FullPath);
             var targetPath = Path.GetFullPath(locator);
             var relative = Path.GetRelativePath(rootPath, targetPath);
             if (!TryNormalizeRootRelativeLocator(relative, out normalized, out error))

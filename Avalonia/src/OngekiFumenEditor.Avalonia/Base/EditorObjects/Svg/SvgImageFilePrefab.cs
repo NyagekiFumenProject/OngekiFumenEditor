@@ -23,7 +23,7 @@ public sealed class SvgImageFilePrefab : SvgPrefabBase
             if (ReferenceEquals(svgFile, value))
                 return;
 
-            SetSvgFilePath(value?.LocalPath ?? value?.FullPath ?? string.Empty);
+            SetSvgFilePath(value?.FullPath ?? string.Empty);
             SetSvgFile(value is null ? null : new SvgFileLease(value, ownsFile: true));
         }
     }
@@ -38,11 +38,14 @@ public sealed class SvgImageFilePrefab : SvgPrefabBase
             if (!SetSvgFilePath(locator))
                 return;
 
+            //todo:
+            /*
             SetSvgFile(
                 string.IsNullOrWhiteSpace(locator)
                     ? null
                     : new SvgFileLease(new SerializedSvgFileLocator(locator), ownsFile: true),
                 reload: false);
+            */
         }
     }
 
@@ -154,41 +157,6 @@ public sealed class SvgImageFilePrefab : SvgPrefabBase
 
     private bool SetSvgFilePath(string value) =>
         SetProperty(ref svgFilePath, value ?? string.Empty, nameof(SvgFilePath));
-
-    private sealed class SerializedSvgFileLocator : ISimpleFile
-    {
-        public SerializedSvgFileLocator(string locator)
-        {
-            FullPath = locator;
-            LocalPath = Path.IsPathFullyQualified(locator) ? locator : null;
-            FileName = Path.GetFileName(locator);
-        }
-
-        public ISimpleDirectory? ParentDictionary => null;
-        public string FullPath { get; }
-        public string? LocalPath { get; }
-        public string FileName { get; }
-        public long FileLength => 0;
-
-        public ValueTask<string[]> ReadAllLines() =>
-            throw CreateUnboundException();
-
-        public ValueTask<byte[]> ReadAllBytes() =>
-            throw CreateUnboundException();
-
-        public Task<Stream> OpenRead() =>
-            throw CreateUnboundException();
-
-        public Task<Stream> OpenWrite() =>
-            throw CreateUnboundException();
-
-        public void Dispose()
-        {
-        }
-
-        private InvalidOperationException CreateUnboundException() =>
-            new($"SVG locator '{FullPath}' has not been bound to an authorized project file.");
-    }
 
     private sealed class SvgFileLease : IDisposable
     {

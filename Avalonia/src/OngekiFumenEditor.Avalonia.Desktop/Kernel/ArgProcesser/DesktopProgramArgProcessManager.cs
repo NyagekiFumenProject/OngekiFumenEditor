@@ -5,6 +5,7 @@ using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.Reflection;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Kernel.ArgProcesser;
@@ -41,7 +42,7 @@ internal class DesktopProgramArgProcessManager : IProgramArgProcessManager
                 // 所有已注册的谱面解析器都走同一套 Desktop FastOpen 逻辑。
                 var isFumenFile = parserManager.GetDeserializer(filePath) is not null;
                 _ = isFumenFile
-                    ? await fastOpenService.TryOpenAsync(filePath)
+                    ? await fastOpenService.TryOpenAsync(new LocalSimpleFile(filePath))
                     : await DesktopDocumentOpenService.TryOpenAsync(filePath);
             });
         }

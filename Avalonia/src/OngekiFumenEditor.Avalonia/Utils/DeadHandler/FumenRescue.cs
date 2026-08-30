@@ -116,7 +116,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 					var savedFolder = await Rescue(editor, cancellationToken);
 					if (savedFolder is not null)
 					{
-						var savedFolderPath = savedFolder.LocalPath ?? savedFolder.FullPath;
+						var savedFolderPath = savedFolder.FullPath;
 						Log.LogInfo($"Rescue fumen/proj file successfully: {savedFolderPath}");
 						list.Add(savedFolderPath);
 						//return savedFolderPath;

@@ -1,5 +1,6 @@
 using Gekimini.Avalonia.Framework.Commands;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen;
 
@@ -16,7 +17,7 @@ public class FastOpenFumenCommandHandler : CommandHandlerBase<FastOpenFumenComma
     public override async Task Run(Command command)
     {
         if (command?.Tag is string filePath && !string.IsNullOrWhiteSpace(filePath))
-            await fastOpenService.TryOpenAsync(filePath);
+            await fastOpenService.TryOpenAsync(new LocalSimpleFile(filePath));
         else
             await fastOpenService.OpenAsync();
     }

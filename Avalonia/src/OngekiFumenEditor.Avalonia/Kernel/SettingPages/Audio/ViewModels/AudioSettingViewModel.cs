@@ -144,10 +144,10 @@ public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
     {
         Log.LogInfo("SelectSoundFolderAsync triggered.");
         using var folder = await FileDialogHelper.OpenDirectoryAsync(Lang.SoundFolderPath);
-        if (string.IsNullOrWhiteSpace(folder?.LocalPath))
+        if (string.IsNullOrWhiteSpace(folder?.FullPath))
             return;
 
-        Setting.SoundFolderPath = folder.LocalPath;
+        Setting.SoundFolderPath = folder.FullPath;
         ApplyChanges();
     }
 }

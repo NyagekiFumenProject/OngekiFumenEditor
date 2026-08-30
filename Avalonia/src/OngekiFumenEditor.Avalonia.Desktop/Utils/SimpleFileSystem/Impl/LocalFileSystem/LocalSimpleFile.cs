@@ -1,6 +1,10 @@
 #nullable enable
 
+using System;
+using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 
@@ -16,7 +20,17 @@ public sealed class LocalSimpleFile : ISimpleFile
         FileName = Path.GetFileName(FullPath);
     }
 
-    public ISimpleDirectory? ParentDictionary => null;
+    ISimpleDirectory? parentDirectory = default;
+
+    public ISimpleDirectory? ParentDictionary => parentDirectory ??= TryCreateParentDictionary();
+
+    private ISimpleDirectory? TryCreateParentDictionary()
+    {
+        var parentDir = Path.GetDirectoryName(FullPath);
+        //todo: create LocalSimpleDirectory
+        return default;
+    }
+
     public string FullPath { get; }
     public string? LocalPath => FullPath;
     public string FileName { get; }

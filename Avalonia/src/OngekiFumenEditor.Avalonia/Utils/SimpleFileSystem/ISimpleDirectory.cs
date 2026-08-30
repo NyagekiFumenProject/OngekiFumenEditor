@@ -16,11 +16,6 @@ public interface ISimpleDirectory : IDisposable
     string FullPath { get; }
 
     /// <summary>
-    ///     The local file-system path when the backing provider exposes one.
-    /// </summary>
-    string? LocalPath { get; }
-
-    /// <summary>
     ///     A directory name such as "MyFolderA".
     /// </summary>
     string DirectoryName { get; }

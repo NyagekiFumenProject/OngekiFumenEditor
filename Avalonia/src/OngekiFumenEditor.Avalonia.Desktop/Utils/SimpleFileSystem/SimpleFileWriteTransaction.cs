@@ -1,5 +1,10 @@
 #nullable enable
 
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 
 internal static class SimpleFileWriteTransaction
@@ -13,12 +18,6 @@ internal static class SimpleFileWriteTransaction
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(writer);
-
-        if (file.LocalPath is { } localPath)
-        {
-            await WriteLocalAsync(localPath, writer, cancellationToken).ConfigureAwait(false);
-            return;
-        }
 
         cancellationToken.ThrowIfCancellationRequested();
         await using var stream = await file.OpenWrite().ConfigureAwait(false);
