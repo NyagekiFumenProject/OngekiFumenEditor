@@ -24,6 +24,7 @@ public sealed class AxamlSmokeTests
     private static readonly Type[] AllViewTypes =
     [
         typeof(global::OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.Views.AudioSettingView),
+        typeof(global::OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.Views.ProgramInfoSettingView),
         typeof(global::OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorColorSettingView),
         typeof(global::OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView),
         typeof(global::OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.Dialogs.ConfigKeyBindingDialog),
@@ -85,9 +86,9 @@ public sealed class AxamlSmokeTests
     }
 
     [Fact]
-    public void ViewInventory_ContainsAllFiftyFourUniqueParameterlessTypes()
+    public void ViewInventory_ContainsAllFiftyFiveUniqueParameterlessTypes()
     {
-        Assert.Equal(54, AllViewTypes.Length);
+        Assert.Equal(55, AllViewTypes.Length);
         Assert.Equal(AllViewTypes.Length, AllViewTypes.Distinct().Count());
         Assert.All(AllViewTypes, static type =>
         {

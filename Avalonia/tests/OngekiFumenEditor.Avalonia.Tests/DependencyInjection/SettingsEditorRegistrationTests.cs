@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.Views;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.ViewModels;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.Views;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.KeyBinding.ViewModels;
@@ -31,7 +33,8 @@ public sealed class SettingsEditorRegistrationTests
         typeof(FumenVisualEditorGlobalSettingViewModel),
         typeof(KeyBindingSettingViewModel),
         typeof(LogsSettingViewModel),
-        typeof(ProgramSettingViewModel)
+        typeof(ProgramSettingViewModel),
+        typeof(ProgramInfoSettingViewModel)
     ];
 
     [Fact]
@@ -68,7 +71,8 @@ public sealed class SettingsEditorRegistrationTests
             (typeof(KeyBindingSettingViewModel), Lang.KeyMap, Lang.TabDocument, typeof(KeyBindingSettingView)),
             (typeof(FumenVisualEditorGlobalSettingViewModel), Lang.TabEditor, Lang.TabDocument, typeof(FumenVisualEditorGlobalSettingView)),
             (typeof(FumenVisualEditorColorSettingViewModel), Lang.VisualEditorLaneColorSettings, Lang.TabDocument + "\\" + Lang.TabEditor, typeof(FumenVisualEditorColorSettingView)),
-            (typeof(AudioSettingViewModel), Lang.TabAudio, Lang.TabSound, typeof(AudioSettingView))
+            (typeof(AudioSettingViewModel), Lang.TabAudio, Lang.TabSound, typeof(AudioSettingView)),
+            (typeof(ProgramInfoSettingViewModel), Lang.ProgramInformation, Lang.Debug, typeof(ProgramInfoSettingView))
         };
 
         Assert.Equal(ExpectedEditorTypes.Length, editors.Length);
@@ -80,7 +84,7 @@ public sealed class SettingsEditorRegistrationTests
         });
 
         var settings = new SettingsViewModel(editors);
-        Assert.Equal(3, settings.Pages.Count);
+        Assert.Equal(4, settings.Pages.Count);
 
         var environmentPage = GetRequiredPage(settings.Pages, Lang.TabEnviorment);
         AssertEditor<ProgramSettingViewModel>(GetRequiredPage(environmentPage.Children, Lang.TabProgram));
@@ -95,6 +99,10 @@ public sealed class SettingsEditorRegistrationTests
 
         var soundPage = GetRequiredPage(settings.Pages, Lang.TabSound);
         AssertEditor<AudioSettingViewModel>(GetRequiredPage(soundPage.Children, Lang.TabAudio));
+
+        var debugPage = GetRequiredPage(settings.Pages, Lang.Debug);
+        AssertEditor<ProgramInfoSettingViewModel>(
+            GetRequiredPage(debugPage.Children, Lang.ProgramInformation));
 
         var viewLocator = application.ServiceProvider.GetRequiredService<ViewLocator>();
         Assert.All(expectedEditors, expected =>
@@ -165,6 +173,67 @@ public sealed class SettingsEditorRegistrationTests
 
         Assert.True(pathTextBox.IsReadOnly);
         Assert.Equal(effectivePath, pathTextBox.Text);
+    }
+
+    [AvaloniaFact]
+    public void ProgramInfoSettingViewModel_FormatsPositiveAndUnlimitedFpsLimits()
+    {
+        var setting = EditorGlobalSetting.Default;
+        var originalLimit = setting.LimitFPS;
+
+        try
+        {
+            setting.LimitFPS = 144;
+            var viewModel = new ProgramInfoSettingViewModel();
+
+            Assert.Equal("144", viewModel.Snapshot.EditorFpsLimit);
+
+            setting.LimitFPS = 0;
+            viewModel.RefreshCommand.Execute(null);
+            Assert.Equal(Lang.Unlimited, viewModel.Snapshot.EditorFpsLimit);
+
+            setting.LimitFPS = -1;
+            viewModel.RefreshCommand.Execute(null);
+            Assert.Equal(Lang.Unlimited, viewModel.Snapshot.EditorFpsLimit);
+        }
+        finally
+        {
+            setting.LimitFPS = originalLimit;
+        }
+    }
+
+    [AvaloniaFact]
+    public void ProgramInfoSettingViewModel_RefreshCommandReadsCurrentRuntimeSettings()
+    {
+        var setting = EditorGlobalSetting.Default;
+        var originalLimit = setting.LimitFPS;
+
+        try
+        {
+            setting.LimitFPS = 60;
+            var viewModel = new ProgramInfoSettingViewModel();
+            var initialSnapshot = viewModel.Snapshot;
+
+            setting.LimitFPS = 240;
+            viewModel.RefreshCommand.Execute(null);
+
+            Assert.Equal("240", viewModel.Snapshot.EditorFpsLimit);
+            Assert.NotSame(initialSnapshot, viewModel.Snapshot);
+        }
+        finally
+        {
+            setting.LimitFPS = originalLimit;
+        }
+    }
+
+    [AvaloniaFact]
+    public void ProgramInfoSettingViewModel_WithoutAttachedViewReportsRendererUnavailable()
+    {
+        var viewModel = new ProgramInfoSettingViewModel();
+
+        Assert.Equal(Lang.Unavailable, viewModel.Snapshot.AvaloniaRenderer);
+        Assert.NotEmpty(viewModel.Snapshot.RuntimeBackgroundThreads);
+        Assert.NotEmpty(viewModel.Snapshot.AvaloniaRenderLoopBackgroundThreads);
     }
 
     private static SettingsPageViewModel GetRequiredPage(
