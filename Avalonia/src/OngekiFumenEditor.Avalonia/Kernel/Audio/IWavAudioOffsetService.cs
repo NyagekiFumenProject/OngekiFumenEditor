@@ -12,16 +12,4 @@ public interface IWavAudioOffsetService
         ISimpleFile outputWavFile,
         TimeSpan offset,
         CancellationToken cancellationToken = default);
-
-    Task OffsetAsync(
-        string inputWavFilePath,
-        ISimpleFile outputWavFile,
-        TimeSpan offset,
-        CancellationToken cancellationToken = default);
-
-    Task OffsetAsync(
-        string inputWavFilePath,
-        string outputWavFilePath,
-        TimeSpan offset,
-        CancellationToken cancellationToken = default);
 }

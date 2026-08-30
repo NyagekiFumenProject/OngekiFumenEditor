@@ -11,19 +11,6 @@ internal static class AudioAdjustmentTransaction
 {
     public static Task<(bool isSuccess, string msg)> ExecuteAsync(
         IWavAudioOffsetService audioOffsetService,
-        string inputWavFilePath,
-        string outputWavFilePath,
-        TimeSpan offset,
-        Action? commitOnSuccess = null)
-    {
-        ArgumentNullException.ThrowIfNull(audioOffsetService);
-        return ExecuteCoreAsync(
-            () => audioOffsetService.OffsetAsync(inputWavFilePath, outputWavFilePath, offset),
-            commitOnSuccess);
-    }
-
-    public static Task<(bool isSuccess, string msg)> ExecuteAsync(
-        IWavAudioOffsetService audioOffsetService,
         ISimpleFile inputWavFile,
         ISimpleFile outputWavFile,
         TimeSpan offset,
@@ -32,19 +19,6 @@ internal static class AudioAdjustmentTransaction
         ArgumentNullException.ThrowIfNull(audioOffsetService);
         return ExecuteCoreAsync(
             () => audioOffsetService.OffsetAsync(inputWavFile, outputWavFile, offset),
-            commitOnSuccess);
-    }
-
-    public static Task<(bool isSuccess, string msg)> ExecuteAsync(
-        IWavAudioOffsetService audioOffsetService,
-        string inputWavFilePath,
-        ISimpleFile outputWavFile,
-        TimeSpan offset,
-        Action? commitOnSuccess = null)
-    {
-        ArgumentNullException.ThrowIfNull(audioOffsetService);
-        return ExecuteCoreAsync(
-            () => audioOffsetService.OffsetAsync(inputWavFilePath, outputWavFile, offset),
             commitOnSuccess);
     }
 

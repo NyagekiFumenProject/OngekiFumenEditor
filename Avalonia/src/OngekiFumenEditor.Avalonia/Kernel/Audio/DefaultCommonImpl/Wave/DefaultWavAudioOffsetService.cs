@@ -24,19 +24,6 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
     private static readonly Guid IeeeFloatSubFormat = new(
         0x00000003, 0x0000, 0x0010, 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71);
 
-    private readonly Action<string, string> commitTemporaryFile;
-
-    public DefaultWavAudioOffsetService()
-        : this(CommitTemporaryFile)
-    {
-    }
-
-    internal DefaultWavAudioOffsetService(Action<string, string> commitTemporaryFile)
-    {
-        ArgumentNullException.ThrowIfNull(commitTemporaryFile);
-        this.commitTemporaryFile = commitTemporaryFile;
-    }
-
     public async Task OffsetAsync(
         ISimpleFile inputWavFile,
         ISimpleFile outputWavFile,
@@ -56,73 +43,8 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
             return;
         }
 
-        await using var input = await inputWavFile.OpenRead();
+        await using var input = await inputWavFile.OpenReadAsync(cancellationToken);
         await OffsetToStorageFileAsync(input, outputWavFile, offset, cancellationToken);
-    }
-
-    public async Task OffsetAsync(
-        string inputWavFilePath,
-        ISimpleFile outputWavFile,
-        TimeSpan offset,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(inputWavFilePath);
-        ArgumentNullException.ThrowIfNull(outputWavFile);
-
-        if (RefersToSameFile(inputWavFilePath, outputWavFile))
-        {
-            await using var stagedOutput = await RenderToMemoryAsync(
-                inputWavFilePath,
-                offset,
-                cancellationToken);
-            await CommitStagedOutputAsync(stagedOutput, outputWavFile, cancellationToken);
-            return;
-        }
-
-        await using var input = OpenInput(Path.GetFullPath(inputWavFilePath));
-        await OffsetToStorageFileAsync(input, outputWavFile, offset, cancellationToken);
-    }
-
-    public async Task OffsetAsync(
-        string inputWavFilePath,
-        string outputWavFilePath,
-        TimeSpan offset,
-        CancellationToken cancellationToken = default)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(inputWavFilePath);
-        ArgumentException.ThrowIfNullOrWhiteSpace(outputWavFilePath);
-
-        var inputPath = Path.GetFullPath(inputWavFilePath);
-        var outputPath = Path.GetFullPath(outputWavFilePath);
-        string? temporaryPath = null;
-        var isCommitted = false;
-
-        try
-        {
-            await using (var input = OpenInput(inputPath))
-            {
-                var operation = await PrepareOffsetAsync(input, offset, cancellationToken);
-                var outputDirectory = Path.GetDirectoryName(outputPath)!;
-                Directory.CreateDirectory(outputDirectory);
-
-                await using (var output = CreateTemporaryOutput(outputPath, out temporaryPath))
-                {
-                    await WriteOffsetAsync(input, output, operation, cancellationToken);
-
-                    await output.FlushAsync(cancellationToken);
-                    output.Flush(flushToDisk: true);
-                }
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-            commitTemporaryFile(temporaryPath!, outputPath);
-            isCommitted = true;
-        }
-        finally
-        {
-            if (!isCommitted && temporaryPath is not null)
-                TryDeleteTemporaryFile(temporaryPath);
-        }
     }
 
     private static async Task OffsetToStorageFileAsync(
@@ -144,16 +66,7 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         TimeSpan offset,
         CancellationToken cancellationToken)
     {
-        await using var input = await inputWavFile.OpenRead();
-        return await RenderToMemoryAsync(input, offset, cancellationToken);
-    }
-
-    private static async Task<MemoryStream> RenderToMemoryAsync(
-        string inputWavFilePath,
-        TimeSpan offset,
-        CancellationToken cancellationToken)
-    {
-        await using var input = OpenInput(Path.GetFullPath(inputWavFilePath));
+        await using var input = await inputWavFile.OpenReadAsync(cancellationToken);
         return await RenderToMemoryAsync(input, offset, cancellationToken);
     }
 
@@ -193,29 +106,9 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
         if (ReferenceEquals(inputFile, outputFile))
             return true;
 
-        if (!string.IsNullOrWhiteSpace(inputFile.FullPath) &&
-            !string.IsNullOrWhiteSpace(outputFile.FullPath))
-        {
-            return PathsEqual(inputFile.FullPath, outputFile.FullPath);
-        }
-
-        return string.IsNullOrWhiteSpace(inputFile.FullPath) &&
-               string.IsNullOrWhiteSpace(outputFile.FullPath) &&
+        return !string.IsNullOrWhiteSpace(inputFile.FullPath) &&
+               !string.IsNullOrWhiteSpace(outputFile.FullPath) &&
                string.Equals(inputFile.FullPath, outputFile.FullPath, StringComparison.Ordinal);
-    }
-
-    private static bool RefersToSameFile(string inputFilePath, ISimpleFile outputFile)
-    {
-        return !string.IsNullOrWhiteSpace(outputFile.FullPath) &&
-               PathsEqual(inputFilePath, outputFile.FullPath);
-    }
-
-    private static bool PathsEqual(string left, string right)
-    {
-        var comparison = OperatingSystem.IsWindows()
-            ? StringComparison.OrdinalIgnoreCase
-            : StringComparison.Ordinal;
-        return string.Equals(Path.GetFullPath(left), Path.GetFullPath(right), comparison);
     }
 
     private static async Task<OffsetOperation> PrepareOffsetAsync(
@@ -254,63 +147,6 @@ internal sealed class DefaultWavAudioOffsetService : IWavAudioOffsetService
                 operation.Layout,
                 operation.Adjustment,
                 cancellationToken);
-        }
-    }
-
-    private static FileStream OpenInput(string path) => new(
-        path,
-        FileMode.Open,
-        FileAccess.Read,
-        FileShare.Read,
-        StreamBufferSize,
-        FileOptions.Asynchronous | FileOptions.SequentialScan);
-
-    private static FileStream CreateTemporaryOutput(string outputPath, out string temporaryPath)
-    {
-        var outputDirectory = Path.GetDirectoryName(outputPath)!;
-        var outputFileName = Path.GetFileName(outputPath);
-
-        for (var attempt = 0; attempt < 10; attempt++)
-        {
-            var candidate = Path.Combine(
-                outputDirectory,
-                $".{outputFileName}.{Guid.NewGuid():N}.tmp");
-
-            try
-            {
-                var stream = new FileStream(
-                    candidate,
-                    FileMode.CreateNew,
-                    FileAccess.Write,
-                    FileShare.None,
-                    StreamBufferSize,
-                    FileOptions.Asynchronous | FileOptions.SequentialScan);
-                temporaryPath = candidate;
-                return stream;
-            }
-            catch (IOException) when (File.Exists(candidate))
-            {
-            }
-        }
-
-        throw new IOException($"Unable to create a temporary WAV file beside '{outputPath}'.");
-    }
-
-    private static void CommitTemporaryFile(string temporaryPath, string outputPath)
-    {
-        // The temporary file is created in the destination directory so this overwrite is a same-volume rename.
-        File.Move(temporaryPath, outputPath, overwrite: true);
-    }
-
-    private static void TryDeleteTemporaryFile(string temporaryPath)
-    {
-        try
-        {
-            File.Delete(temporaryPath);
-        }
-        catch
-        {
-            // The destination was never replaced; cleanup failure must not hide the original exception.
         }
     }
 

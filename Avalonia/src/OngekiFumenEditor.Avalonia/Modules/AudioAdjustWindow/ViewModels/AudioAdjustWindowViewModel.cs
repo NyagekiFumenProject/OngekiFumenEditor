@@ -281,14 +281,12 @@ public partial class AudioAdjustWindowViewModel : WindowViewModelBase, IAudioAdj
         GC.SuppressFinalize(this);
     }
 
-    public Task<(bool isSuccess, string msg)> OffsetAudioFile(string inputWavFilePath, string saveWavFilePath, TimeSpan offset)
+    public Task<(bool isSuccess, string msg)> OffsetAudioFile(ISimpleFile inputWavFile, ISimpleFile outputWavFile, TimeSpan offset)
     {
-        // The temporary migration fallback kept original bytes only when no offset was requested.
-        // The platform-neutral service preserves that byte-exact path and handles frame-aligned offsets.
         return AudioAdjustmentTransaction.ExecuteAsync(
             wavAudioOffsetService,
-            inputWavFilePath,
-            saveWavFilePath,
+            inputWavFile,
+            outputWavFile,
             offset);
     }
 }
