@@ -12,6 +12,13 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.BrowserOpfsBrowser;
 
 public sealed class BrowserOpfsBrowserViewModelTests
 {
+    static BrowserOpfsBrowserViewModelTests()
+    {
+        // Plain unit tests do not create the Avalonia TestApplication, while the view model
+        // logs through the application-wide facade.
+        OngekiFumenEditor.Avalonia.Utils.Log.Initialize(new OngekiFumenEditor.Avalonia.Utils.Log([]));
+    }
+
     [Fact]
     public async Task RefreshNowAsync_AppliesIncrementalChangesWithoutResetAndPreservesExistingRowState()
     {

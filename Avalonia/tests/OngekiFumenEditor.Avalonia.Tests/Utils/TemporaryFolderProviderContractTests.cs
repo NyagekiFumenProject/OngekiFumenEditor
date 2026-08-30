@@ -213,13 +213,11 @@ public sealed class TemporaryFolderProviderContractTests
     }
 
     [Fact]
-    public async Task GetRequiredLocalPath_WhenBackendHasNoLocalPath_ThrowsExplicitly()
+    public async Task GetRequiredLocalPath_ReturnsVirtualFullPath()
     {
         var provider = new InMemoryTemporaryFolderProvider();
         var file = await provider.Root.GetOrCreateFileAsync("browser-like.dat");
 
-        var exception = Assert.Throws<PlatformNotSupportedException>(file.GetRequiredLocalPath);
-
-        Assert.Contains(file.FullPath, exception.Message, StringComparison.Ordinal);
+        Assert.Equal(file.FullPath, file.GetRequiredLocalPath());
     }
 }

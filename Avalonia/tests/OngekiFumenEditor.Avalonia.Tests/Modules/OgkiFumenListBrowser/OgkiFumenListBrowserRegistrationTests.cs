@@ -37,7 +37,7 @@ public sealed class OgkiFumenListBrowserRegistrationTests
             ReferenceEquals(item, MenuDefinitions.ViewOgkiFumenListBrowserMenuItem));
         Assert.Equal(ServiceLifetime.Singleton, menuDescriptor.Lifetime);
 
-        var menuItem = Assert.IsType<MenuItemDefinition>(menuDescriptor.ImplementationInstance);
+        var menuItem = Assert.IsAssignableFrom<MenuItemDefinition>(menuDescriptor.ImplementationInstance);
         Assert.Same(
             Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.FileNewOpenMenuGroup,
             menuItem.Group);

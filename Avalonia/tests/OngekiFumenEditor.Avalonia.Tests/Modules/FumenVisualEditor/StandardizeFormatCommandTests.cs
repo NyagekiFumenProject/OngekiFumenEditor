@@ -242,8 +242,8 @@ public sealed class StandardizeFormatCommandTests
 
         var result = StandardizeFormatOutputService.TryGetOutputDirectory(outputFile, out var outputDirectory);
 
-        Assert.Equal(expectedDirectory is not null, result);
-        Assert.Equal(expectedDirectory, outputDirectory);
+        Assert.Equal(!string.IsNullOrWhiteSpace(expectedDirectory), result);
+        Assert.Equal(expectedDirectory ?? string.Empty, outputDirectory);
     }
 
     private static StandardizeFormatCommandHandler CreateHandler(

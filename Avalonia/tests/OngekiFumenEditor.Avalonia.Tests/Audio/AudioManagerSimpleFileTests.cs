@@ -58,6 +58,9 @@ public sealed class AudioManagerSimpleFileTests
             "test://audio/sound.wav",
             CreateWaveFile());
 
+        await using (var probe = await file.OpenRead())
+            Assert.Equal(AudioStreamFormat.Wav, await AudioStreamFormatDetector.DetectAsync(probe));
+
         using var sound = await manager.LoadSoundAsync(file);
 
         Assert.NotNull(sound);

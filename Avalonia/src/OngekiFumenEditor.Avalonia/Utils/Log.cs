@@ -86,7 +86,7 @@ public class Log
           .Append(':').Append(Thread.CurrentThread.ManagedThreadId).Append(']');
 
         var prefix = record.Prefix;
-        var filePath = record.FilePath;
+        var filePath = Path.GetFileNameWithoutExtension(record.FilePath);
 
         var hasFilePath = !string.IsNullOrWhiteSpace(filePath);
         var hasPrefix = !string.IsNullOrWhiteSpace(prefix);

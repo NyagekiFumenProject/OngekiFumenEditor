@@ -1,7 +1,7 @@
 Remove-Item -Path "bin" -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -Path "obj" -Recurse -Force -ErrorAction SilentlyContinue
 
-dotnet publish -c Release -o "bin/publish" OngekiFumenEditor.Avalonia.Browser.csproj
+dotnet publish -c Release -o "bin/publish" --no-restore -m:8 OngekiFumenEditor.Avalonia.Browser.csproj
 
 Push-Location "bin/publish/wwwroot"
 try {

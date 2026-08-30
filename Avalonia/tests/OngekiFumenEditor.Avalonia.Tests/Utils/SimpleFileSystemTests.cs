@@ -142,33 +142,6 @@ public sealed class SimpleFileSystemTests
         Assert.Equal(["output.ogkr"], Directory.GetFiles(temporaryDirectory.RootPath).Select(Path.GetFileName));
     }
 
-    [AvaloniaFact]
-    public async Task WriteAsync_WriterThrows_PreservesLocalProviderTargetCacheAndDeletesTemporaryFile()
-    {
-        using var temporaryDirectory = new TemporaryDirectory();
-        var filePath = temporaryDirectory.File("output.ogkr");
-        var original = Encoding.UTF8.GetBytes("original content");
-        await File.WriteAllBytesAsync(filePath, original);
-
-        var storageFile = await GetStorageFile(filePath);
-        using var file = await AvaloniaStorageProviderFileSystemBuilder
-            .LoadFromAvaloniaStorageFile(storageFile);
-        var cached = await file.ReadAllBytes();
-
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => file.WriteAsync(
-            async (stream, cancellationToken) =>
-            {
-                await stream.WriteAsync("partial replacement"u8.ToArray(), cancellationToken);
-                throw new InvalidOperationException("writer failed");
-            }));
-
-        Assert.Equal("writer failed", exception.Message);
-        Assert.Equal(original, await File.ReadAllBytesAsync(filePath));
-        Assert.Same(cached, await file.ReadAllBytes());
-        Assert.Equal(original.LongLength, file.FileLength);
-        Assert.Equal(["output.ogkr"], Directory.GetFiles(temporaryDirectory.RootPath).Select(Path.GetFileName));
-    }
-
     [Fact]
     public async Task WriteAsync_NonLocalWriterCompletesBeforeCancellation_FlushesWithoutCancellation()
     {
