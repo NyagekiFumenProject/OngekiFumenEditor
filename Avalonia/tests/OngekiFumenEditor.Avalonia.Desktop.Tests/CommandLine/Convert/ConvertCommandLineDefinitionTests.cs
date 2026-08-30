@@ -1,6 +1,9 @@
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using Xunit;
@@ -13,7 +16,8 @@ public sealed class ConvertCommandLineDefinitionTests
     public async Task Invoke_AllOptions_BindsStronglyTypedOptionsAndCallsInjectedHandler()
     {
         var handler = new RecordingHandler(27);
-        var definition = new ConvertCommandLineDefinition(handler);
+        var output = new RecordingOutput();
+        var definition = new ConvertCommandLineDefinition(handler, output);
         var inputPath = Path.GetFullPath(Path.Combine("input charts", "source.nyageki"));
         var outputPath = Path.GetFullPath(Path.Combine("output charts", "result.ogkr"));
 
@@ -28,9 +32,46 @@ public sealed class ConvertCommandLineDefinitionTests
 
         Assert.Equal(27, result.ExitCode);
         var options = Assert.IsType<FumenConvertOption>(handler.Options);
-        Assert.Equal(inputPath, options.InputFumenFilePath);
-        Assert.Equal(outputPath, options.OutputFumenFilePath);
+        var inputFile = Assert.IsType<LocalSimpleFile>(options.InputFumenFile);
+        var outputFile = Assert.IsType<LocalSimpleFile>(options.OutputFumenFile);
+        Assert.Equal(inputPath, inputFile.FullPath);
+        Assert.Equal(Path.GetFileName(inputPath), inputFile.FileName);
+        Assert.Equal(outputPath, outputFile.FullPath);
+        Assert.Equal(Path.GetFileName(outputPath), outputFile.FileName);
         Assert.True(options.IsStandarizeFumen);
+        await Assert.ThrowsAsync<ObjectDisposedException>(() => inputFile.OpenRead());
+        await Assert.ThrowsAsync<ObjectDisposedException>(() =>
+            ((ISimpleFile)outputFile).WriteAllBytesAsync(Array.Empty<byte>()));
+        Assert.Empty(output.Errors);
+        Assert.Equal(string.Empty, result.Error);
+    }
+
+    [Theory]
+    [InlineData("input")]
+    [InlineData("output")]
+    public async Task Invoke_RelativePath_DoesNotCallHandler(string relativePath)
+    {
+        var handler = new RecordingHandler(0);
+        var output = new RecordingOutput();
+        var definition = new ConvertCommandLineDefinition(handler, output);
+        var inputPath = relativePath == "input"
+            ? "source.nyageki"
+            : Path.GetFullPath("source.nyageki");
+        var outputPath = relativePath == "output"
+            ? "result.ogkr"
+            : Path.GetFullPath("result.ogkr");
+
+        var result = await InvokeAsync(
+            definition,
+            "convert",
+            "--inputFile",
+            inputPath,
+            "--outputFile",
+            outputPath);
+
+        Assert.Equal(ConvertCommandLineDefinition.RelativePathExitCode, result.ExitCode);
+        Assert.Null(handler.Options);
+        Assert.Contains(Lang.CliArgumentNotAbsolutePath, Assert.Single(output.Errors), StringComparison.Ordinal);
         Assert.Equal(string.Empty, result.Error);
     }
 
@@ -40,7 +81,7 @@ public sealed class ConvertCommandLineDefinitionTests
     public async Task Invoke_MissingRequiredOption_DoesNotCallHandler(string suppliedOption)
     {
         var handler = new RecordingHandler(0);
-        var definition = new ConvertCommandLineDefinition(handler);
+        var definition = new ConvertCommandLineDefinition(handler, new RecordingOutput());
         var value = Path.GetFullPath("chart.ogkr");
 
         var result = await InvokeAsync(definition, "convert", suppliedOption, value);
@@ -57,7 +98,7 @@ public sealed class ConvertCommandLineDefinitionTests
     public async Task Invoke_UnknownOption_DoesNotCallHandler()
     {
         var handler = new RecordingHandler(0);
-        var definition = new ConvertCommandLineDefinition(handler);
+        var definition = new ConvertCommandLineDefinition(handler, new RecordingOutput());
 
         var result = await InvokeAsync(
             definition,
@@ -99,6 +140,17 @@ public sealed class ConvertCommandLineDefinitionTests
         {
             Options = options;
             return Task.FromResult(exitCode);
+        }
+    }
+
+    private sealed class RecordingOutput : ICommandLineOutput
+    {
+        public List<string> Errors { get; } = [];
+
+        public Task WriteErrorLineAsync(string message)
+        {
+            Errors.Add(message);
+            return Task.CompletedTask;
         }
     }
 

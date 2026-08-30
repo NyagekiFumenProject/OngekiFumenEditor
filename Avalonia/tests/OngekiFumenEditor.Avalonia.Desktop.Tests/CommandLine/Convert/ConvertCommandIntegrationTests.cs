@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
@@ -7,12 +8,40 @@ using OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
 using OngekiFumenEditor.Avalonia.Parser;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Tests.CommandLine.Convert;
 
 public sealed class ConvertCommandIntegrationTests
 {
+    [Fact]
+    public async Task GenerateAsync_MissingInputFile_ReturnsNoFumenInput()
+    {
+        using var provider = CreateProvider();
+        using var outputFile = new TestSimpleFile("converted.ogkr");
+
+        var result = await provider.GetRequiredService<IFumenConvertService>().GenerateAsync(
+            new FumenConvertOption { OutputFumenFile = outputFile });
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(Lang.NoFumenInput, result.Message);
+        Assert.Equal(0, outputFile.WriteAsyncCount);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_MissingOutputFile_ReturnsOutputNotSelected()
+    {
+        using var provider = CreateProvider();
+
+        var result = await provider.GetRequiredService<IFumenConvertService>().GenerateAsync(
+            new FumenConvertOption(),
+            new OngekiFumen());
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(Lang.OutputFumenFileNotSelect, result.Message);
+    }
+
     [Fact]
     public void AddOngekiFumenEditorDesktopCommandLine_RegistersDefinitionHandlerAndExecutorAsSingletons()
     {
@@ -82,11 +111,14 @@ public sealed class ConvertCommandIntegrationTests
         var firstOutputPath = directory.File("standardized-first.ogkr");
         var secondOutputPath = directory.File("standardized-second.ogkr");
         var service = provider.GetRequiredService<IFumenConvertService>();
+        using var inputFile = new LocalSimpleFile(fixturePath);
+        using var firstOutputFile = new LocalSimpleFile(firstOutputPath);
+        using var secondOutputFile = new LocalSimpleFile(secondOutputPath);
 
         var firstResult = await service.GenerateAsync(new FumenConvertOption
         {
-            InputFumenFilePath = fixturePath,
-            OutputFumenFilePath = firstOutputPath,
+            InputFumenFile = inputFile,
+            OutputFumenFile = firstOutputFile,
             IsStandarizeFumen = true
         });
 
@@ -100,7 +132,7 @@ public sealed class ConvertCommandIntegrationTests
         var secondResult = await service.GenerateAsync(
             new FumenConvertOption
             {
-                OutputFumenFilePath = secondOutputPath,
+                OutputFumenFile = secondOutputFile,
                 IsStandarizeFumen = true
             },
             firstStandardizedFumen);
@@ -131,8 +163,9 @@ public sealed class ConvertCommandIntegrationTests
         var result = await provider.GetRequiredService<IFumenConvertService>().GenerateAsync(options);
 
         Assert.True(result.IsSuccess, result.Message);
-        Assert.Null(input.LocalPath);
-        Assert.Null(output.LocalPath);
+        Assert.Equal("picker/minimal.nyageki", input.FullPath);
+        Assert.Equal("picker/converted.ogkr", output.FullPath);
+        Assert.Equal(1, input.OpenReadAsyncCount);
         Assert.Equal(1, output.WriteAsyncCount);
         Assert.True(output.Content.Length > 100);
 
@@ -144,6 +177,25 @@ public sealed class ConvertCommandIntegrationTests
         Assert.Equal("Avalonia migration test", converted.MetaInfo.Creator);
         Assert.Single(converted.Lanes);
         Assert.Single(converted.Taps);
+    }
+
+    [Fact]
+    public async Task GenerateAsync_UsesOutputFileNameForConverterFormat()
+    {
+        var converter = new RecordingConverter();
+        var service = new DefaultFumenConvertService(
+            new UnusedParserManager(),
+            converter,
+            []);
+        using var output = new TestSimpleFile("result.ogkr");
+
+        var result = await service.GenerateAsync(
+            new FumenConvertOption { OutputFumenFile = output },
+            new OngekiFumen());
+
+        Assert.True(result.IsSuccess, result.Message);
+        Assert.Equal(output.FileName, converter.SavePathOrFormat);
+        Assert.Equal(1, output.WriteAsyncCount);
     }
 
     [Fact]
@@ -183,10 +235,10 @@ public sealed class ConvertCommandIntegrationTests
             new UnusedParserManager(),
             new CancelingConverter(cancellation),
             []);
+        using var outputFile = new LocalSimpleFile(outputPath);
         var options = new FumenConvertOption
         {
-            InputFumenFilePath = directory.File("unused.nyageki"),
-            OutputFumenFilePath = outputPath
+            OutputFumenFile = outputFile
         };
 
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
@@ -233,22 +285,40 @@ public sealed class ConvertCommandIntegrationTests
         public IEnumerable<(string desc, string[] fileFormat)> GetDeserializerDescriptions() => [];
     }
 
+    private sealed class RecordingConverter : IFumenConverter
+    {
+        public string? SavePathOrFormat { get; private set; }
+
+        public Task<byte[]> ConvertFumenAsync(OngekiFumen fumen, string savePathOrFormat)
+        {
+            SavePathOrFormat = savePathOrFormat;
+            return Task.FromResult<byte[]>([0x01, 0x02]);
+        }
+    }
+
     private sealed class TestSimpleFile(string fileName, byte[]? initialContent = null) : ISimpleFile
     {
         private byte[] content = initialContent?.ToArray() ?? [];
 
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => $"picker/{fileName}";
-        public string? LocalPath => null;
         public string FileName => fileName;
         public long FileLength => content.LongLength;
         public byte[] Content => content.ToArray();
         public int WriteAsyncCount { get; private set; }
+        public int OpenReadAsyncCount { get; private set; }
 
         public ValueTask<string[]> ReadAllLines() => throw new NotSupportedException();
         public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Content);
         public Task<Stream> OpenRead() =>
             Task.FromResult<Stream>(new MemoryStream(content, writable: false));
+
+        public Task<Stream> OpenReadAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OpenReadAsyncCount++;
+            return OpenRead();
+        }
 
         public Task<Stream> OpenWrite() =>
             throw new InvalidOperationException("The conversion service must use WriteAsync.");
