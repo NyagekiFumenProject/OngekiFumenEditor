@@ -1,3 +1,28 @@
+# Fumen 转换 ISimpleFile 统一：本轮测试计划
+
+更新时间：2026-08-30
+
+## 阶段
+
+1. 修改选项模型和 `DefaultFumenConvertService`，删除路径回退与原子写辅助方法。
+2. 修改 CLI Definition/Handler，迁移绝对路径校验、`LocalSimpleFile` 生命周期和退出码职责。
+3. 更新 Definition、Handler、集成测试，所有直接服务调用改用 `ISimpleFile`。
+4. 运行 Desktop 转换测试、源码静态约束检查和项目构建，修复编译或行为回归。
+
+## 要求到证据映射
+
+| 要求 | 计划测试/证据 |
+| --- | --- |
+| CLI 原始绝对路径转换为 `LocalSimpleFile` | `ConvertCommandLineDefinitionTests.Invoke_AllOptions_BindsStronglyTypedOptionsAndCallsInjectedHandler` |
+| CLI 相对路径返回 `-3` 且不调用 Handler | `ConvertCommandLineDefinitionTests.Invoke_RelativePath_DoesNotCallHandler` |
+| Handler 仅映射服务成功、失败和异常 | `ConvertCommandLineHandlerTests.HandleAsync_ServiceSuccess_ReturnsZeroWithoutWritingError`、`...ServiceFailure...`、`...ServiceThrows...` |
+| Handler 在已取消令牌下继续抛出取消 | `ConvertCommandLineHandlerTests.HandleAsync_CancellationRequested_RethrowsCancellationWithoutWritingError` |
+| 非本地 ISimpleFile 转换往返及异步读写入口 | `ConvertCommandIntegrationTests.GenerateAsync_NonLocalSimpleFiles_UsesTransactionalWriteAndRoundTrips` |
+| 输出格式使用 `OutputFumenFile.FileName` | `ConvertCommandIntegrationTests.GenerateAsync_UsesOutputFileNameForConverterFormat` |
+| 缺少输入/输出句柄返回既有错误 | `ConvertCommandIntegrationTests.GenerateAsync_MissingInputFile_ReturnsNoFumenInput`、`...MissingOutputFile...` |
+| 标准化幂等与取消保留目标 | `ConvertCommandIntegrationTests.StandardizeFixture_Twice_ProducesIdenticalOutput`、`...CancellationAfterConversion...` |
+| 核心服务无直接系统文件操作 | `rg -n 'File\\.|Directory\\.' DefaultFumenConvertService.cs` 结果为空 |
+
 # 15B 测试实施计划
 
 更新时间：2026-08-02 01:26 +08:00
@@ -648,3 +673,9 @@ service 收到同一个 option 实例和完全相等的 token，返回 0 且 std
 | Locator safety | `RelativePath_RejectsAbsoluteUriDriveAndRootEscape` |
 | DI/menu registration | `AddOngekiFumenEditorAvalonia_RegistersWindowCommandMenuAndInterface` |
 | View construction/layout and static IO constraint | `AxamlSmokeTests.AllParameterlessViews_ConstructAttachAndCompleteLayout`, `ProductionModule_UsesSimpleFileCapabilitiesInsteadOfHostFileApis` |
+
+## Fumen 转换 ISimpleFile 统一：验证记录（2026-08-30）
+
+- 三个 Convert 测试文件通过临时隔离测试项目运行：21/21 通过，0 失败，0 跳过。
+- Desktop 项目 Debug 构建通过：0 错误，26 个既有警告。
+- 正式 Desktop 测试项目的剩余编译错误仅涉及不在本轮范围内的 `LocalPath` 迁移引用，未修改。

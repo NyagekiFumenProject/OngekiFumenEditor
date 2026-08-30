@@ -1,3 +1,30 @@
+# Fumen 转换 ISimpleFile 统一：本轮测试研究
+
+更新时间：2026-08-30
+
+## 目标范围
+
+- `src/OngekiFumenEditor.Avalonia/Modules/FumenConverter/FumenConvertOption.cs`
+- `src/OngekiFumenEditor.Avalonia/Modules/FumenConverter/Kernel/DefaultFumenConvertService.cs`
+- `src/OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/Convert/ConvertCommandLineDefinition.cs`
+- `src/OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/Convert/ConvertCommandLineHandler.cs`
+- 对应 Desktop 转换定义、处理器和集成测试。
+
+## 现有约定
+
+- 产品测试项目为 SDK-style xUnit `net10.0-windows10.0.19041.0`，通过 `Microsoft.NET.Test.Sdk` 使用 VSTest 命令模式。
+- `ISimpleFile.OpenReadAsync(CancellationToken)`、`WriteAllBytesAsync(ReadOnlyMemory<byte>, CancellationToken)` 是文件访问边界；`LocalSimpleFile` 位于 Desktop 路径适配边界。
+- CLI 使用 `System.CommandLine`，路径非法时通过 `ICommandLineOutput` 输出错误并返回命令约定的负退出码。
+- 静态配对扫描（Find-UntestedSources.cs，2026-08-30）识别 2694 个源文件、264 个测试文件；本目标已由 `ConvertCommandIntegrationTests.cs` 等文件覆盖。该结果仅为配对启发式。
+
+## 验收清单
+
+- `FumenConvertOption` 只保留两个 `ISimpleFile`、标准化开关，不再暴露字符串路径。
+- 核心服务只通过 `ISimpleFile` 读写，缺少输入/输出文件时返回既有结果，源码不再有转换相关 `File.*`/`Directory.*` 调用。
+- CLI Definition 校验两个原始路径、返回 `-3`，通过后创建并在异步 Handler 完成后释放两个 `LocalSimpleFile`。
+- Handler 删除路径校验，只负责核心调用、异常处理和 `-4` 映射。
+- 测试覆盖绝对路径绑定、相对路径阻止调用、ISimpleFile 往返、标准化幂等、取消时目标保留及临时文件清理。
+
 # 15B 测试研究
 
 更新时间：2026-08-02 00:50 +08:00

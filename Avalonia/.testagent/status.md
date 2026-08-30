@@ -346,3 +346,21 @@ Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT 
 - `git diff --check`: passed.
 - ACB handling only requires a same-stem sibling `.awb`; no `AcbPackageInspector` call remains in the scanner.
 - Repository `Resources/ui_jacket_0666` was decoded through `TexturePlugin.TextureEncoderDecoder` and loaded as a non-empty Avalonia `Bitmap`; decoded PNG bytes use a weak in-memory cache and best-effort temporary-folder cache.
+
+## Fumen 转换 ISimpleFile 统一：本轮最终质量审查（2026-08-30）
+
+- 生产实现已删除 `FumenConvertOption` 的两个字符串路径属性；`DefaultFumenConvertService` 只通过 `ISimpleFile` 的 `OpenReadAsync`/`WriteAllBytesAsync`，并移除直接系统文件操作与 `WriteAtomicallyAsync`。
+- CLI Definition 负责绝对路径校验、`-3` 返回码、本地句柄创建和异步生命周期；Handler 仅保留服务调用、异常处理与 `-4` 映射。
+- 新增/更新 Convert 测试覆盖：LocalSimpleFile 绑定与释放、输入/输出相对路径、服务成功/失败/异常/取消、缺失句柄、输出 `FileName` 格式、非本地往返、标准化幂等和取消时目标/临时文件行为。
+- 断言质量审查：新增测试均包含结果、类型、异常、状态或副作用断言；未发现无断言或仅空值/恒真断言的测试。
+- 测试缺口审查：本轮请求的每个公开分支均有对应测试；未对不相关的 LocalPath/平台迁移行为扩展范围。
+- 静态约束：`rg '\b(File|Directory)\.' src/OngekiFumenEditor.Avalonia/Modules/FumenConverter/Kernel/DefaultFumenConvertService.cs` 无匹配；`git diff --check` 通过。
+- 验证阻塞：`dotnet test .\\tests\\OngekiFumenEditor.Avalonia.Desktop.Tests\\OngekiFumenEditor.Avalonia.Desktop.Tests.csproj -c Debug --filter "FullyQualifiedName~CommandLine.Convert" -v:minimal` 未能进入测试执行，因工作树中并行进行的 SimpleFileSystem 迁移暂时导致核心项目缺少 `SimpleFileWriteTransaction` 且旧代码仍引用已移除的 `ISimpleDirectory.LocalPath`。这些文件未在本轮回退或修改。
+
+## Fumen 转换 ISimpleFile 统一：迁移完成后验证（2026-08-30）
+
+- 为避开正式 Desktop 测试项目中不相关的 `LocalPath` 编译错误，临时建立仅包含三个 Convert 测试文件的测试项目；该临时项目已在测试后删除。
+- Convert 测试结果：`失败 0，通过 21，已跳过 0，总计 21`。
+- Desktop 项目构建结果：`dotnet build src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj -c Debug --no-restore`，`0 个错误，26 个警告`。
+- 正式 `OngekiFumenEditor.Avalonia.Desktop.Tests` 项目仍无法编译，剩余 3 个错误全部来自 `DesktopTemporaryFolderProviderTests` 对已移除 `ISimpleFile/ISimpleDirectory.LocalPath` 的引用；按用户要求未修改这些文件。
+- 静态检查仍通过：核心转换服务无 `File.*`/`Directory.*` 调用，转换范围内无旧路径属性或 `WriteAtomicallyAsync` 引用，`git diff --check` 无输出。
