@@ -220,6 +220,73 @@ public sealed class BrowserOpfsBrowserContractTests
         Assert.Contains("[CollectTypeForActivator(typeof(IView))]", browserViewActivator, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void BrowserKeyBindingManager_UsesSharedBrowserOpfsInteropAndIsInitializedBeforeRouting()
+    {
+        string repositoryRoot = FindRepositoryRoot();
+        string manager = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Platforms",
+            "Services",
+            "KeyBinding",
+            "BrowserKeyBindingManager.cs");
+        string interop = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Utils",
+            "Interops",
+            "BrowserOpfsInterop.cs");
+        string script = ReadBrowserScript(repositoryRoot, "opfsBrowser.js");
+        string main = ReadBrowserScript(repositoryRoot, "main.js");
+        string app = ReadSource(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia",
+            "OngekiFumenEditorApp.cs");
+
+        Assert.Contains("[RegisterSingleton<IKeyBindingManager>]", manager, StringComparison.Ordinal);
+        Assert.Contains("ConfigFilePath = \"opfs:/keybind.json\"", manager, StringComparison.Ordinal);
+        Assert.Contains(".ReadFileAsync(KeyBindingFileName)", manager, StringComparison.Ordinal);
+        Assert.Contains(".WriteFileAsync(KeyBindingFileName, handle)", manager, StringComparison.Ordinal);
+        Assert.Contains("namespace OngekiFumenEditor.Avalonia.Browser.Utils.Interops;", interop, StringComparison.Ordinal);
+        Assert.Contains("globalThis.BrowserOpfsInterop.readFile", interop, StringComparison.Ordinal);
+        Assert.Contains("globalThis.BrowserOpfsInterop.writeFile", interop, StringComparison.Ordinal);
+        Assert.Contains("export async function readFile(relativePath)", script, StringComparison.Ordinal);
+        Assert.Contains("return { data: null }", script, StringComparison.Ordinal);
+        Assert.Contains("export async function writeFile(relativePath, handle)", script, StringComparison.Ordinal);
+        Assert.Contains("readFile,", script, StringComparison.Ordinal);
+        Assert.Contains("writeFile,", script, StringComparison.Ordinal);
+        Assert.Contains("initializeBrowserOpfs(),", main, StringComparison.Ordinal);
+        Assert.DoesNotContain("keyBindingFileSystem", main, StringComparison.Ordinal);
+        Assert.False(File.Exists(Path.Combine(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Platforms",
+            "Services",
+            "FileSystem",
+            "BrowserOpfs",
+            "BrowserOpfsInterop.cs")));
+        Assert.False(File.Exists(Path.Combine(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "wwwroot",
+            "keyBindingFileSystem.js")));
+        Assert.False(File.Exists(Path.Combine(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia.Browser",
+            "Platforms",
+            "Services",
+            "KeyBinding",
+            "BrowserKeyBindingFileSystemInterop.cs")));
+        Assert.Contains("await ServiceProvider.GetRequiredService<IKeyBindingManager>().Initialize()", app, StringComparison.Ordinal);
+    }
+
     private static string ReadBrowserScript(string repositoryRoot, string fileName) =>
         ReadSource(
             repositoryRoot,

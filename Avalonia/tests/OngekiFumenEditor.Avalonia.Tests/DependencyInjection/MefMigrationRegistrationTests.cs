@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectOperationImplement;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator.ObjectsOperationImplement;
@@ -113,6 +114,16 @@ public sealed class MefMigrationRegistrationTests
         var second = provider.GetRequiredService<IPerfomenceMonitor>();
 
         Assert.NotSame(first, second);
+    }
+
+    [Fact]
+    public void AddOngekiFumenEditorAvalonia_DoesNotRegisterPlatformKeyBindingManager()
+    {
+        var services = CreateServices();
+
+        Assert.DoesNotContain(
+            services,
+            service => service.ServiceType == typeof(IKeyBindingManager));
     }
 
     private static ServiceCollection CreateServices()

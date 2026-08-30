@@ -138,6 +138,8 @@ public sealed class KeyBindingConflictResolutionTests
         public int SaveCount { get; private set; }
         public IEnumerable<KeyBindingDefinition> KeyBindingDefinations => definitions;
 
+        public Task Initialize() => Task.CompletedTask;
+
         public bool CheckKeyBinding(KeyBindingDefinition defination, KeyEventArgs e) => false;
 
         public void ChangeKeyBinding(

@@ -239,6 +239,8 @@ public sealed class EditorKeyBindingRouterTests
 
         public IEnumerable<KeyBindingDefinition> KeyBindingDefinations { get; }
 
+        public Task Initialize() => Task.CompletedTask;
+
         public bool CheckKeyBinding(KeyBindingDefinition defination, KeyEventArgs e)
         {
             CheckCallCount++;

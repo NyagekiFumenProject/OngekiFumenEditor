@@ -9,6 +9,7 @@ using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
+using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Platforms.Services.FileSystem.Providers;
 
 namespace OngekiFumenEditor.Avalonia.Tests;
@@ -38,6 +39,7 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
         var services = new ServiceCollection();
         RegisterServices(services);
         services.AddOngekiFumenEditorAvalonia();
+        services.AddSingleton<IKeyBindingManager, TestKeyBindingManager>();
         services.AddTypeCollectedActivator(
             global::OngekiFumenEditor.Avalonia.ViewTypeCollectedActivator.Default);
         services.AddTypeCollectedActivator(
@@ -73,6 +75,20 @@ public sealed class TestApplication : global::OngekiFumenEditor.Avalonia.App
             JsonTypeInfo<T> jsonTypeInfo) where T : new()
         {
             return (T)values.GetOrAdd(typeof(T), static _ => new T());
+        }
+    }
+
+    private sealed class TestKeyBindingManager(IEnumerable<KeyBindingDefinition> definitions)
+        : KeyBindingManagerBase(definitions)
+    {
+        public override Task Initialize() => Task.CompletedTask;
+
+        public override void SaveConfig()
+        {
+        }
+
+        public override void LoadConfig()
+        {
         }
     }
 }
