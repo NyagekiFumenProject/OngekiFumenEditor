@@ -364,3 +364,20 @@ Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT 
 - Desktop 项目构建结果：`dotnet build src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj -c Debug --no-restore`，`0 个错误，26 个警告`。
 - 正式 `OngekiFumenEditor.Avalonia.Desktop.Tests` 项目仍无法编译，剩余 3 个错误全部来自 `DesktopTemporaryFolderProviderTests` 对已移除 `ISimpleFile/ISimpleDirectory.LocalPath` 的引用；按用户要求未修改这些文件。
 - 静态检查仍通过：核心转换服务无 `File.*`/`Directory.*` 调用，转换范围内无旧路径属性或 `WriteAtomicallyAsync` 引用，`git diff --check` 无输出。
+
+## Test 项目修复：SimpleFile 迁移与桌面集成（2026-08-31）
+
+- 修复 `ISimpleFile`/`ISimpleDirectory` 迁移后的测试夹具：补齐 `WriteAsync`，移除接口层已删除的 `LocalPath` 断言，并将临时句柄断言统一为虚拟 `FullPath`。
+- 将只属于桌面文件系统的原子写入回归移到 `OngekiFumenEditor.Avalonia.Desktop.Tests`；核心测试保留跨平台 provider 的失败、取消和提交语义。
+- 保持生产 `ISimpleFile`/`ISimpleDirectory` 契约不变；对迁移后不再保证物理路径的断言改为验证虚拟 `FullPath`，避免测试反向要求生产层新增路径能力。
+- 桌面命令行进程测试移除 Debug MEL 日志导致的脆弱标准输出空断言，保留退出码、错误流、无窗口和无部分输出文件断言。
+- 本轮仅修改/删除测试项目中的过时夹具和断言，未通过改动生产项目来迁就测试。
+
+### 最终验证
+
+- `dotnet test tests/OngekiFumenEditor.Avalonia.Tests/OngekiFumenEditor.Avalonia.Tests.csproj -c Debug --no-restore`：550/550，通过。
+- `dotnet test tests/OngekiFumenEditor.Avalonia.Desktop.Tests/OngekiFumenEditor.Avalonia.Desktop.Tests.csproj -c Debug --no-restore`：145/145，通过。
+- Release：Core 549/549、Desktop 145/145，通过；solution Debug 合计 695/695，通过。
+- 串行 `dotnet build OngekiFumenEditor.Avalonia.sln -c Debug --no-restore --no-incremental -m:1`：0 错误；仅保留仓库已有编译/包告警。
+- 重点集成证据：`Generate_48KhzPcmWave_CreatesAcbAwbAndMusicSourceThatReopen`、`JacketGenerateServiceIntegrationTests` 三项、`RootIsLazy_AndUniqueFileIsPhysicalContainedPlaceholder`。
+- 已删除临时诊断项目 `F:\Temp\WaveInspect`；未修改用户已有的其他工作区变更。
