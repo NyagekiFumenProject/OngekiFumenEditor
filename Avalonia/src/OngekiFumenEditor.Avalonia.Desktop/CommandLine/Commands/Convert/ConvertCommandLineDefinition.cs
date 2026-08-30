@@ -2,6 +2,7 @@ using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Modules.FumenConverter;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 
@@ -10,11 +11,17 @@ namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 [RegisterSingleton<ICommandLineDefinition>]
 internal sealed class ConvertCommandLineDefinition : ICommandLineDefinition
 {
-    private readonly ICommandLineHandler<FumenConvertOption> handler;
+    internal const int RelativePathExitCode = -3;
 
-    public ConvertCommandLineDefinition(ICommandLineHandler<FumenConvertOption> handler)
+    private readonly ICommandLineHandler<FumenConvertOption> handler;
+    private readonly ICommandLineOutput output;
+
+    public ConvertCommandLineDefinition(
+        ICommandLineHandler<FumenConvertOption> handler,
+        ICommandLineOutput output)
     {
         this.handler = handler;
+        this.output = output;
     }
 
     public Command CreateCommand()
@@ -38,16 +45,27 @@ internal sealed class ConvertCommandLineDefinition : ICommandLineDefinition
         command.Options.Add(inputFileOption);
         command.Options.Add(outputFileOption);
         command.Options.Add(standardizeOption);
-        command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+        command.SetAction(async (ParseResult parseResult, CancellationToken cancellationToken) =>
         {
+            var inputFilePath = parseResult.GetValue(inputFileOption) ?? string.Empty;
+            var outputFilePath = parseResult.GetValue(outputFileOption) ?? string.Empty;
+            if (!Path.IsPathFullyQualified(inputFilePath) ||
+                !Path.IsPathFullyQualified(outputFilePath))
+            {
+                await output.WriteErrorLineAsync(Lang.CliArgumentNotAbsolutePath);
+                return RelativePathExitCode;
+            }
+
+            using var inputFile = new LocalSimpleFile(inputFilePath);
+            using var outputFile = new LocalSimpleFile(outputFilePath);
             var options = new FumenConvertOption
             {
-                InputFumenFilePath = parseResult.GetValue(inputFileOption) ?? string.Empty,
-                OutputFumenFilePath = parseResult.GetValue(outputFileOption) ?? string.Empty,
+                InputFumenFile = inputFile,
+                OutputFumenFile = outputFile,
                 IsStandarizeFumen = parseResult.GetValue(standardizeOption)
             };
 
-            return handler.HandleAsync(options, cancellationToken);
+            return await handler.HandleAsync(options, cancellationToken);
         });
 
         return command;

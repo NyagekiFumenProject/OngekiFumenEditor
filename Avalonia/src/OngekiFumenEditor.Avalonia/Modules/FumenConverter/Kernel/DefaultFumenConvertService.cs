@@ -3,7 +3,6 @@ using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Avalonia.Parser;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.Ogkr;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenConverter.Kernel;
@@ -36,16 +35,17 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
         OngekiFumen fumen;
         if (inMemoryFumen is null)
         {
-            var inputFileName = option.InputFumenFile?.FileName ?? option.InputFumenFilePath;
+            if (option.InputFumenFile is not { } input)
+                return new(false, Lang.NoFumenInput);
+
+            var inputFileName = input.FileName;
             if (string.IsNullOrWhiteSpace(inputFileName))
                 return new(false, Lang.NoFumenInput);
 
             if (parserManager.GetDeserializer(inputFileName) is not { } deserializable)
                 return new(false, Lang.FumenFileDeserializeNotSupport);
 
-            await using var inputStream = option.InputFumenFile is null
-                ? File.OpenRead(option.InputFumenFilePath)
-                : await option.InputFumenFile.OpenRead();
+            await using var inputStream = await input.OpenReadAsync(cancellationToken);
             fumen = await deserializable.DeserializeAsync(inputStream);
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -54,7 +54,10 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
             fumen = inMemoryFumen;
         }
 
-        var outputFileName = option.OutputFumenFile?.FileName ?? option.OutputFumenFilePath;
+        if (option.OutputFumenFile is not { } target)
+            return new(false, Lang.OutputFumenFileNotSelect);
+
+        var outputFileName = target.FileName;
         if (string.IsNullOrWhiteSpace(outputFileName))
             return new(false, Lang.OutputFumenFileNotSelect);
 
@@ -75,10 +78,7 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
         try
         {
             var output = await converter.ConvertFumenAsync(fumen, outputFileName);
-            if (option.OutputFumenFile is null)
-                await WriteAtomicallyAsync(option.OutputFumenFilePath, output, cancellationToken);
-            else
-                await WriteToSimpleFileAsync(option.OutputFumenFile, output, cancellationToken);
+            await target.WriteAllBytesAsync(output, cancellationToken);
         }
         catch (FumenConvertException exception)
         {
@@ -86,40 +86,5 @@ public sealed class DefaultFumenConvertService : IFumenConvertService
         }
 
         return new(true);
-    }
-
-    private static async Task WriteToSimpleFileAsync(
-        ISimpleFile outputFile,
-        ReadOnlyMemory<byte> output,
-        CancellationToken cancellationToken)
-    {
-        await outputFile.WriteAsync(
-            (outputStream, token) => outputStream.WriteAsync(output, token).AsTask(),
-            cancellationToken);
-    }
-
-    private static async Task WriteAtomicallyAsync(
-        string outputPath,
-        byte[] output,
-        CancellationToken cancellationToken)
-    {
-        var fullOutputPath = Path.GetFullPath(outputPath);
-        var outputDirectory = Path.GetDirectoryName(fullOutputPath)
-            ?? throw new IOException($"Unable to determine the output directory for '{outputPath}'.");
-        var temporaryPath = Path.Combine(
-            outputDirectory,
-            $".{Path.GetFileName(fullOutputPath)}.{Guid.NewGuid():N}.tmp");
-
-        try
-        {
-            await File.WriteAllBytesAsync(temporaryPath, output, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            File.Move(temporaryPath, fullOutputPath, overwrite: true);
-        }
-        finally
-        {
-            if (File.Exists(temporaryPath))
-                File.Delete(temporaryPath);
-        }
     }
 }

@@ -9,7 +9,6 @@ namespace OngekiFumenEditor.Avalonia.Desktop.CommandLine.Commands.Convert;
 [RegisterSingleton<ICommandLineHandler<FumenConvertOption>>]
 internal sealed class ConvertCommandLineHandler : ICommandLineHandler<FumenConvertOption>
 {
-    internal const int RelativePathExitCode = -3;
     internal const int ConversionFailedExitCode = -4;
 
     private readonly IFumenConvertService convertService;
@@ -24,13 +23,6 @@ internal sealed class ConvertCommandLineHandler : ICommandLineHandler<FumenConve
     public async Task<int> HandleAsync(FumenConvertOption options, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(options);
-
-        if (!Path.IsPathFullyQualified(options.InputFumenFilePath) ||
-            !Path.IsPathFullyQualified(options.OutputFumenFilePath))
-        {
-            await output.WriteErrorLineAsync(Lang.CliArgumentNotAbsolutePath);
-            return RelativePathExitCode;
-        }
 
         try
         {
