@@ -4,6 +4,8 @@
         <LangVersion>preview</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <!-- The debug program-information page reads Avalonia's render timer and platform renderer. -->
+        <AvaloniaAccessUnstablePrivateApis>true</AvaloniaAccessUnstablePrivateApis>
     </PropertyGroup>
 
 

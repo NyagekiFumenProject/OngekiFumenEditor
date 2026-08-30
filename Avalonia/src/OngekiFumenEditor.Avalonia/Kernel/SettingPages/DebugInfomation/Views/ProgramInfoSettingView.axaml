@@ -1,0 +1,220 @@
+<gekViews:ViewBase
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.ViewModels"
+    xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
+    x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.Views.ProgramInfoSettingView"
+    x:CompileBindings="True"
+    x:DataType="vm:ProgramInfoSettingViewModel"
+    d:Background="White"
+    d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type=vm:ProgramInfoSettingViewModel}"
+    d:DesignHeight="700"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <Grid Margin="5" ColumnDefinitions="*,Auto">
+                <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.ProgramInformation}}" />
+                <Button
+                    x:Name="RefreshButton"
+                    Grid.Column="1"
+                    Padding="16,4"
+                    Command="{CompiledBinding RefreshCommand}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.Refresh}}" />
+            </Grid>
+
+            <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.BuildInformation}}">
+                <StackPanel Margin="10">
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.ApplicationVersion}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.ApplicationVersion}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.ProductVersion}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.ProductVersion}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.BuildConfiguration}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.BuildConfiguration}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.BuildTime}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.BuildTime}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitHash}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.CommitHash}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitDate}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.CommitDate}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </controls:GroupBox>
+
+            <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.PlatformAndRuntime}}">
+                <StackPanel Margin="10">
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.OperatingSystem}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.OperatingSystem}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.ProcessArchitecture}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.ProcessArchitecture}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.DotNetRuntime}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.DotNetRuntime}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.AvaloniaVersion}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.AvaloniaVersion}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.LogicalProcessorCount}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.LogicalProcessorCount}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </controls:GroupBox>
+
+            <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Rendering}}">
+                <StackPanel Margin="10">
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.EditorFpsLimit}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.EditorFpsLimit}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.GraphicsBackend}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.GraphicsBackend}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.AvaloniaRenderer}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.AvaloniaRenderer}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.PlatformRenderInterface}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.PlatformRenderInterface}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.RenderTimer}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.RenderTimer}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </controls:GroupBox>
+
+            <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Threading}}">
+                <StackPanel Margin="10">
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.RuntimeBackgroundThreads}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.RuntimeBackgroundThreads}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.AvaloniaRenderLoopBackgroundThreads}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{CompiledBinding Snapshot.AvaloniaRenderLoopBackgroundThreads}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                </StackPanel>
+            </controls:GroupBox>
+
+            <TextBlock
+                Margin="10,2,10,10"
+                HorizontalAlignment="Right"
+                Text="{CompiledBinding Snapshot.LastRefreshed}"
+                TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+</gekViews:ViewBase>
