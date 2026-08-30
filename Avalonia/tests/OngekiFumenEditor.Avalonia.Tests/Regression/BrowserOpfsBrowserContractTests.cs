@@ -249,13 +249,15 @@ public sealed class BrowserOpfsBrowserContractTests
 
         Assert.Contains("<title>Ongeki Fumen Editor</title>", index, StringComparison.Ordinal);
         Assert.Contains(
-            "<link rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\" data-browser-icon=\"true\" />",
+            "<link id=\"favicon\" rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\" data-browser-icon=\"true\" />",
             index,
             StringComparison.Ordinal);
         Assert.Contains("globalThis.WindowInterop.setTitle", interop, StringComparison.Ordinal);
         Assert.Contains("globalThis.WindowInterop.setIcon", interop, StringComparison.Ordinal);
         Assert.Contains("function setTitle(title)", windowScript, StringComparison.Ordinal);
         Assert.Contains("function setIcon(url)", windowScript, StringComparison.Ordinal);
+        Assert.Contains("document.getElementById(\"favicon\")", windowScript, StringComparison.Ordinal);
+        Assert.Contains("link.id = \"favicon\"", windowScript, StringComparison.Ordinal);
         Assert.Contains("setTitle,", windowScript, StringComparison.Ordinal);
         Assert.Contains("setIcon,", windowScript, StringComparison.Ordinal);
         Assert.True(
@@ -263,6 +265,10 @@ public sealed class BrowserOpfsBrowserContractTests
             index.IndexOf("./main.js", StringComparison.Ordinal));
         Assert.Contains("WindowInterop.SetTitle(nextTitle)", platformMainWindow, StringComparison.Ordinal);
         Assert.Contains("WindowInterop.SetIcon(BrowserIconPath)", platformMainWindow, StringComparison.Ordinal);
+        Assert.Contains(
+            "private const string BrowserIconPath = \"./favicon.ico\";",
+            platformMainWindow,
+            StringComparison.Ordinal);
         Assert.DoesNotContain(
             "BrowserPlatformMainWindow not support get/set Title",
             platformMainWindow,
@@ -271,12 +277,21 @@ public sealed class BrowserOpfsBrowserContractTests
             "BrowserPlatformMainWindow not support get/set Icon",
             platformMainWindow,
             StringComparison.Ordinal);
-        Assert.True(File.Exists(Path.Combine(
+        string browserFavicon = Path.Combine(
             repositoryRoot,
             "src",
             "OngekiFumenEditor.Avalonia.Browser",
             "wwwroot",
-            "favicon.ico")));
+            "favicon.ico");
+        string applicationIcon = Path.Combine(
+            repositoryRoot,
+            "src",
+            "OngekiFumenEditor.Avalonia",
+            "Resources",
+            "Icons",
+            "logo32.ico");
+        Assert.True(File.Exists(browserFavicon));
+        Assert.Equal(File.ReadAllBytes(applicationIcon), File.ReadAllBytes(browserFavicon));
     }
 
     [Fact]
