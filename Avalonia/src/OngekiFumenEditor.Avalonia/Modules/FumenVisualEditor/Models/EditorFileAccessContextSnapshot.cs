@@ -70,13 +70,13 @@ public sealed class EditorFileAccessContextSnapshot
             projectDirectory = await OpenDirectoryAsync(
                 storageProvider,
                 ProjectDirectoryBookmark,
-                nameof(ProjectDirectoryBookmark)).ConfigureAwait(false);
+                nameof(ProjectDirectoryBookmark));
             foreach (var bookmark in AdditionDirectoryBookmarks)
             {
                 additionDirectories.Add(await OpenDirectoryAsync(
                     storageProvider,
                     bookmark,
-                    nameof(AdditionDirectoryBookmarks)).ConfigureAwait(false));
+                    nameof(AdditionDirectoryBookmarks)));
             }
 
             if (!string.IsNullOrWhiteSpace(ProjectFileBookmark))
@@ -84,17 +84,17 @@ public sealed class EditorFileAccessContextSnapshot
                 projectFile = await OpenFileAsync(
                     storageProvider,
                     ProjectFileBookmark,
-                    nameof(ProjectFileBookmark)).ConfigureAwait(false);
+                    nameof(ProjectFileBookmark));
             }
 
             fumenFile = await OpenFileAsync(
                 storageProvider,
                 FumenFileBookmark,
-                nameof(FumenFileBookmark)).ConfigureAwait(false);
+                nameof(FumenFileBookmark));
             audioFile = await OpenFileAsync(
                 storageProvider,
                 AudioFileBookmark,
-                nameof(AudioFileBookmark)).ConfigureAwait(false);
+                nameof(AudioFileBookmark));
 
             if (!string.IsNullOrWhiteSpace(AudioAwbFileBookmark))
             {
@@ -105,7 +105,7 @@ public sealed class EditorFileAccessContextSnapshot
                     audioAwbFile = await OpenFileAsync(
                         storageProvider,
                         AudioAwbFileBookmark,
-                        nameof(AudioAwbFileBookmark)).ConfigureAwait(false);
+                        nameof(AudioAwbFileBookmark));
                 }
                 catch (Exception exception) when (
                     exception is IOException or
@@ -162,27 +162,27 @@ public sealed class EditorFileAccessContextSnapshot
 
         var additionBookmarks = new List<string>(context.AdditionDirectories.Count);
         foreach (var directory in context.AdditionDirectories)
-            additionBookmarks.Add(await SaveRequiredBookmarkAsync(directory, "additional directory").ConfigureAwait(false));
+            additionBookmarks.Add(await SaveRequiredBookmarkAsync(directory, "additional directory"));
 
         return new EditorFileAccessContextSnapshot
         {
             ProjectDirectoryBookmark = await SaveRequiredBookmarkAsync(
                 projectDirectory,
-                "project directory").ConfigureAwait(false),
+                "project directory"),
             AdditionDirectoryBookmarks = additionBookmarks,
             ProjectFileBookmark = context.ProjectFile is null
                 ? null
-                : await SaveRequiredBookmarkAsync(context.ProjectFile, "project file").ConfigureAwait(false),
+                : await SaveRequiredBookmarkAsync(context.ProjectFile, "project file"),
             FumenFileBookmark = await SaveRequiredBookmarkAsync(
                 fumenFile,
-                "fumen file").ConfigureAwait(false),
+                "fumen file"),
             AudioFileBookmark = await SaveRequiredBookmarkAsync(
                 audioFile,
-                "audio file").ConfigureAwait(false),
+                "audio file"),
             AudioAwbFileBookmark = context.AudioAwbFile is { } audioAwbFile
                 ? await SaveRequiredBookmarkAsync(
                     audioAwbFile,
-                    "external AWB file").ConfigureAwait(false)
+                    "external AWB file")
                 : null
         };
     }
@@ -199,7 +199,7 @@ public sealed class EditorFileAccessContextSnapshot
         if (item is not IBookmarkableSimpleFileSystemItem bookmarkable || !bookmarkable.CanBookmark)
             throw new InvalidOperationException($"The {role} does not support bookmarks.");
 
-        var bookmark = await bookmarkable.SaveBookmarkAsync().ConfigureAwait(false);
+        var bookmark = await bookmarkable.SaveBookmarkAsync();
         if (string.IsNullOrWhiteSpace(bookmark))
             throw new InvalidOperationException($"The {role} did not produce a bookmark.");
 
@@ -211,7 +211,7 @@ public sealed class EditorFileAccessContextSnapshot
         string bookmark,
         string propertyName)
     {
-        var folder = await storageProvider.OpenFolderBookmarkAsync(bookmark).ConfigureAwait(false)
+        var folder = await storageProvider.OpenFolderBookmarkAsync(bookmark)
             ?? throw new IOException($"The directory bookmark in {propertyName} is no longer available.");
         return AvaloniaStorageProviderFileSystemBuilder.LoadRootFromAvaloniaStorageFolder(folder);
     }
@@ -221,11 +221,11 @@ public sealed class EditorFileAccessContextSnapshot
         string bookmark,
         string propertyName)
     {
-        var file = await storageProvider.OpenFileBookmarkAsync(bookmark).ConfigureAwait(false)
+        var file = await storageProvider.OpenFileBookmarkAsync(bookmark)
             ?? throw new IOException($"The file bookmark in {propertyName} is no longer available.");
         return await AvaloniaStorageProviderFileSystemBuilder
             .LoadFromAvaloniaStorageFile(file)
-            .ConfigureAwait(false);
+            ;
     }
 }
 

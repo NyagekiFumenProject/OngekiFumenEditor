@@ -240,20 +240,20 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
         try
         {
             var cancellationToken = cancellationSource.Token;
-            var sampleData = await player.GetSamplesAsync().WaitAsync(cancellationToken).ConfigureAwait(false);
+            var sampleData = await player.GetSamplesAsync().WaitAsync(cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (sampleData is null)
                 return;
 
             // Peak generation is CPU-bound. Cancellation prevents stale data from being published
             // even though the legacy ISamplePeak contract itself has no cancellation parameter.
-            var peaks = await Task.Run(() => samplePeak.GetPeakValues(sampleData), cancellationToken).ConfigureAwait(false);
+            var peaks = await Task.Run(() => samplePeak.GetPeakValues(sampleData), cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             if (version != Volatile.Read(ref waveformVersion))
                 return;
 
             Volatile.Write(ref rawPeakData, peaks);
-            await ResampleAsync(peaks, version, cancellationToken).ConfigureAwait(false);
+            await ResampleAsync(peaks, version, cancellationToken);
         }
         finally
         {
@@ -275,7 +275,7 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
             var resampleSize = Math.Max(0, stateProvider().ResampleSize);
             var result = resampleSize == 0
                 ? rawData
-                : await rawData.GenerateSimplfiedAsync(resampleSize, cancellationSource.Token).ConfigureAwait(false);
+                : await rawData.GenerateSimplfiedAsync(resampleSize, cancellationSource.Token);
             cancellationSource.Token.ThrowIfCancellationRequested();
 
             if (version == Volatile.Read(ref waveformVersion))

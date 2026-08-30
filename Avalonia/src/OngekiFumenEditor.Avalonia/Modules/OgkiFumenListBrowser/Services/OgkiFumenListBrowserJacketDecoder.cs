@@ -35,13 +35,13 @@ public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJac
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
-        var sourceBytes = await sourceFile.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false);
+        var sourceBytes = await sourceFile.ReadAllBytesAsync(cancellationToken);
         var cacheKey = Convert.ToHexString(SHA256.HashData(sourceBytes));
 
         if (memoryCache.TryGetValue(cacheKey, out var weak) && weak.TryGetTarget(out var memoryBytes))
             return memoryBytes;
 
-        var cached = await TryReadCacheAsync(cacheKey, cancellationToken).ConfigureAwait(false);
+        var cached = await TryReadCacheAsync(cacheKey, cancellationToken);
         if (cached is not null)
         {
             Remember(cacheKey, cached);
@@ -55,13 +55,13 @@ public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJac
         }
         else
         {
-            await AssetBundleDecodeGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await AssetBundleDecodeGate.WaitAsync(cancellationToken);
             try
             {
                 pngBytes = await DecodeAssetBundleAsync(
                     sourceBytes,
                     sourceFile.FileName,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
             }
             finally
             {
@@ -72,7 +72,7 @@ public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJac
             return null;
 
         Remember(cacheKey, pngBytes);
-        await TryWriteCacheAsync(cacheKey, pngBytes, cancellationToken).ConfigureAwait(false);
+        await TryWriteCacheAsync(cacheKey, pngBytes, cancellationToken);
         return pngBytes;
     }
 
@@ -87,13 +87,13 @@ public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJac
         {
             var cacheDirectory = await temporaryFolderProvider.Root
                 .GetOrCreateDirectoryAsync("OgkiFumenListBrowserJackets", cancellationToken)
-                .ConfigureAwait(false);
+                ;
             var cacheFile = await cacheDirectory.TryGetFileAsync(
                 cacheKey + ".png",
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken);
             return cacheFile is null
                 ? null
-                : await cacheFile.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false);
+                : await cacheFile.ReadAllBytesAsync(cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -118,11 +118,11 @@ public sealed class OgkiFumenListBrowserJacketDecoder : IOgkiFumenListBrowserJac
         {
             var cacheDirectory = await temporaryFolderProvider.Root
                 .GetOrCreateDirectoryAsync("OgkiFumenListBrowserJackets", cancellationToken)
-                .ConfigureAwait(false);
+                ;
             var cacheFile = await cacheDirectory.GetOrCreateFileAsync(
                 cacheKey + ".png",
-                cancellationToken).ConfigureAwait(false);
-            await cacheFile.WriteAllBytesAsync(pngBytes, cancellationToken).ConfigureAwait(false);
+                cancellationToken);
+            await cacheFile.WriteAllBytesAsync(pngBytes, cancellationToken);
         }
         catch (OperationCanceledException)
         {

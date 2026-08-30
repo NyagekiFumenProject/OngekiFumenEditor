@@ -74,12 +74,12 @@ public interface ISimpleDirectory : IDisposable
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
-        ISimpleFile? existing = await TryGetFileAsync(fileName, cancellationToken).ConfigureAwait(false);
+        ISimpleFile? existing = await TryGetFileAsync(fileName, cancellationToken);
         if (existing is not null)
             return existing;
-        if (await TryGetDirectoryAsync(fileName, cancellationToken).ConfigureAwait(false) is not null)
+        if (await TryGetDirectoryAsync(fileName, cancellationToken) is not null)
             throw new IOException($"A directory already exists at '{fileName}'.");
-        return await CreateFileAsync(fileName, cancellationToken).ConfigureAwait(false);
+        return await CreateFileAsync(fileName, cancellationToken);
     }
 
     Task DeleteAsync(CancellationToken cancellationToken = default) =>

@@ -51,12 +51,12 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
         if (data is not null && data.TryGetTarget(out var cached))
             return cached;
 
-        await using var stream = await storageFile.OpenReadAsync().ConfigureAwait(false);
+        await using var stream = await storageFile.OpenReadAsync();
         if (stream.CanSeek)
             FileLength = stream.Length;
         else
-            await RefreshFileLength(storageFile).ConfigureAwait(false);
-        var bytes = await ReadToEndAsync(stream, FileLength).ConfigureAwait(false);
+            await RefreshFileLength(storageFile);
+        var bytes = await ReadToEndAsync(stream, FileLength);
         FileLength = bytes.LongLength;
         data = new WeakReference<byte[]>(bytes);
         return bytes;
@@ -64,14 +64,14 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
 
     public async ValueTask<string[]> ReadAllLines()
     {
-        var text = Encoding.UTF8.GetString(await ReadAllBytes().ConfigureAwait(false));
+        var text = Encoding.UTF8.GetString(await ReadAllBytes());
         return text.Split(LineSeparators, StringSplitOptions.None);
     }
 
     public async Task<Stream> OpenRead()
     {
         var storageFile = GetStorageFile();
-        var stream = await storageFile.OpenReadAsync().ConfigureAwait(false);
+        var stream = await storageFile.OpenReadAsync();
         if (stream.CanSeek)
         {
             FileLength = stream.Length;
@@ -80,19 +80,19 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
 
         try
         {
-            await RefreshFileLength(storageFile).ConfigureAwait(false);
+            await RefreshFileLength(storageFile);
             return new SeekableStream(stream, FileLength);
         }
         catch
         {
-            await stream.DisposeAsync().ConfigureAwait(false);
+            await stream.DisposeAsync();
             throw;
         }
     }
 
     public async Task<Stream> OpenWrite()
     {
-        var stream = await GetStorageFile().OpenWriteAsync().ConfigureAwait(false);
+        var stream = await GetStorageFile().OpenWriteAsync();
         try
         {
             data = null;
@@ -114,7 +114,7 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
         }
         catch
         {
-            await stream.DisposeAsync().ConfigureAwait(false);
+            await stream.DisposeAsync();
             throw;
         }
     }
@@ -123,7 +123,7 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
     {
         var storageFile = GetStorageFile();
         cancellationToken.ThrowIfCancellationRequested();
-        await storageFile.DeleteAsync().ConfigureAwait(false);
+        await storageFile.DeleteAsync();
         if (ParentDictionary is AvaloniaStorageProviderSimpleDirectory parent)
             parent.RemoveFile(this);
         Dispose();
@@ -142,7 +142,7 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
         try
         {
             long? streamLength;
-            await using (var stream = await storageFile.OpenWriteAsync().ConfigureAwait(false))
+            await using (var stream = await storageFile.OpenWriteAsync())
             {
                 if (stream.CanSeek)
                 {
@@ -157,18 +157,18 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
                     }
                 }
 
-                await writer(stream, cancellationToken).ConfigureAwait(false);
-                await stream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+                await writer(stream, cancellationToken);
+                await stream.FlushAsync(CancellationToken.None);
                 streamLength = stream.CanSeek ? stream.Length : null;
             }
 
-            fileLength = await GetFileLength(storageFile, streamLength).ConfigureAwait(false);
+            fileLength = await GetFileLength(storageFile, streamLength);
         }
         catch
         {
             try
             {
-                await RefreshFileLength(storageFile).ConfigureAwait(false);
+                await RefreshFileLength(storageFile);
             }
             catch
             {
@@ -201,12 +201,12 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
 
     private async Task RefreshFileLength(IStorageFile storageFile)
     {
-        FileLength = await GetFileLength(storageFile).ConfigureAwait(false);
+        FileLength = await GetFileLength(storageFile);
     }
 
     private static async Task<long> GetFileLength(IStorageFile storageFile, long? fallback = null)
     {
-        var properties = await storageFile.GetBasicPropertiesAsync().ConfigureAwait(false);
+        var properties = await storageFile.GetBasicPropertiesAsync();
         return properties.Size is { } size
             ? checked((long)size)
             : fallback ?? 0;
@@ -224,17 +224,17 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
             FileShare.Read,
             81_920,
             FileOptions.Asynchronous | FileOptions.SequentialScan);
-        await using var target = await storageFile.OpenWriteAsync().ConfigureAwait(false);
+        await using var target = await storageFile.OpenWriteAsync();
         if (target.CanSeek)
         {
             target.Position = 0;
             target.SetLength(0);
         }
 
-        await source.CopyToAsync(target, CancellationToken.None).ConfigureAwait(false);
+        await source.CopyToAsync(target, CancellationToken.None);
         if (target.CanSeek)
             target.SetLength(expectedLength);
-        await target.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+        await target.FlushAsync(CancellationToken.None);
     }
 
     private static async Task<byte[]> ReadToEndAsync(Stream stream, long expectedLength)
@@ -245,7 +245,7 @@ public sealed class AvaloniaStorageProviderSimpleFile : ISimpleFile, IBookmarkab
         using var buffer = expectedLength > 0
             ? new MemoryStream(checked((int)expectedLength))
             : new MemoryStream();
-        await stream.CopyToAsync(buffer).ConfigureAwait(false);
+        await stream.CopyToAsync(buffer);
         return buffer.ToArray();
     }
 }

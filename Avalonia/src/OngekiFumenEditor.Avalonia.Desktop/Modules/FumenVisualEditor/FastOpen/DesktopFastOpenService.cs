@@ -98,7 +98,7 @@ public sealed class DesktopFastOpenService
         }
         catch (Exception exception)
         {
-            Log.LogError($"FastOpen failed: {exception}");
+            Log.LogError($"FastOpen failed: {exception}", exception);
             await dialogManager.ShowMessageDialog(
                 $"{DesktopLang.CantFastOpenFumen}{exception.Message}", DialogMessageType.Error);
             return false;

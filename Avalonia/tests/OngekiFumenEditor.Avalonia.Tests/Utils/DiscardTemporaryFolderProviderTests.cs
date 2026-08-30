@@ -24,7 +24,7 @@ public sealed class DiscardTemporaryFolderProviderTests
 
         Assert.False(provider.IsAvailable);
         Assert.True(producerRan);
-        Assert.Null(file.LocalPath);
+        Assert.False(Path.IsPathRooted(file.FullPath));
         Assert.Null(await provider.Root.TryGetDirectoryAsync("discarded"));
         Assert.Null(await folder.TryGetFileAsync("data.bin"));
         await Assert.ThrowsAsync<FileNotFoundException>(() => file.GetLengthAsync());

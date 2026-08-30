@@ -84,7 +84,7 @@ internal sealed class SeekableStream : Stream
             return 0;
 
         var targetPosition = Math.Min(length, checked(position + buffer.Length));
-        await EnsureCachedAsync(targetPosition, cancellationToken).ConfigureAwait(false);
+        await EnsureCachedAsync(targetPosition, cancellationToken);
         return ReadFromCache(buffer.Span);
     }
 
@@ -184,7 +184,7 @@ internal sealed class SeekableStream : Stream
                 var requested = (int)Math.Min(buffer.Length, targetPosition - cache.Length);
                 var bytesRead = await baseStream
                     .ReadAsync(buffer.AsMemory(0, requested), cancellationToken)
-                    .ConfigureAwait(false);
+                    ;
                 if (bytesRead == 0)
                 {
                     endOfStream = true;
@@ -193,7 +193,7 @@ internal sealed class SeekableStream : Stream
 
                 await cache
                     .WriteAsync(buffer.AsMemory(0, bytesRead), cancellationToken)
-                    .ConfigureAwait(false);
+                    ;
             }
         }
         finally

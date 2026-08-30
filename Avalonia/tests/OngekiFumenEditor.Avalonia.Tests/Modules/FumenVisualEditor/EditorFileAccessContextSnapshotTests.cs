@@ -162,7 +162,6 @@ public sealed class EditorFileAccessContextSnapshotTests
         public int DisposeCount { get; private set; }
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => $"memory://{FileName}";
-        public string? LocalPath => null;
         public string FileName { get; }
         public long FileLength => content.LongLength;
 
@@ -185,6 +184,11 @@ public sealed class EditorFileAccessContextSnapshotTests
         }
 
         public Task<Stream> OpenWrite() => throw new NotSupportedException();
+
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
 
         public void Dispose()
         {

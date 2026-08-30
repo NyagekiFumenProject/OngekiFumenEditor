@@ -73,14 +73,14 @@ public sealed class BrowserKeyBindingManager : KeyBindingManagerBase
 
     private async Task LoadAfterAsync(Task previousOperation)
     {
-        await IgnoreFailureAsync(previousOperation).ConfigureAwait(false);
-        await LoadConfigCoreAsync().ConfigureAwait(false);
+        await IgnoreFailureAsync(previousOperation);
+        await LoadConfigCoreAsync();
     }
 
     private async Task SaveAfterAsync(Task previousOperation, string json)
     {
-        await IgnoreFailureAsync(previousOperation).ConfigureAwait(false);
-        await SaveConfigCoreAsync(json).ConfigureAwait(false);
+        await IgnoreFailureAsync(previousOperation);
+        await SaveConfigCoreAsync(json);
     }
 
     private async Task LoadConfigCoreAsync()
@@ -95,7 +95,7 @@ public sealed class BrowserKeyBindingManager : KeyBindingManagerBase
 
             using JSObject result = await BrowserOpfsInterop
                 .ReadFileAsync(KeyBindingFileName)
-                .ConfigureAwait(false);
+                ;
             byte[]? bytes = result.GetPropertyAsByteArray("data");
             if (bytes is null || bytes.Length == 0)
             {
@@ -124,14 +124,14 @@ public sealed class BrowserKeyBindingManager : KeyBindingManagerBase
             }
 
             byte[] data = Encoding.UTF8.GetBytes(json);
-            await MutationGate.WaitAsync().ConfigureAwait(false);
+            await MutationGate.WaitAsync();
             try
             {
                 int handle = BrowserOpfsInterop.AllocateWriteBufferHandle();
                 try
                 {
                     BrowserOpfsInterop.SetWriteBuffer(handle, data, data.Length);
-                    await BrowserOpfsInterop.WriteFileAsync(KeyBindingFileName, handle).ConfigureAwait(false);
+                    await BrowserOpfsInterop.WriteFileAsync(KeyBindingFileName, handle);
                 }
                 finally
                 {
@@ -169,7 +169,7 @@ public sealed class BrowserKeyBindingManager : KeyBindingManagerBase
     {
         try
         {
-            await operation.ConfigureAwait(false);
+            await operation;
         }
         catch (Exception exception)
         {

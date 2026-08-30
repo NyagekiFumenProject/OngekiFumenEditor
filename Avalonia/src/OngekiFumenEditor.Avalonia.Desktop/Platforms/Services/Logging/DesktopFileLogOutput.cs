@@ -102,7 +102,7 @@ public sealed class DesktopFileLogOutput : ILogOutput, IFileLogOutput
                 return null;
 
             await File.AppendAllTextAsync(filePath, IFileLogOutput.BeginFileLogOutputMarker, Encoding.UTF8)
-                .ConfigureAwait(false);
+                ;
             return filePath;
         }
         catch (Exception exception)
@@ -155,8 +155,8 @@ public sealed class DesktopFileLogOutput : ILogOutput, IFileLogOutput
 
     private async Task AppendAfterAsync(Task previousWrite, string content)
     {
-        await previousWrite.ConfigureAwait(false);
-        var filePath = await file.Value.ConfigureAwait(false);
+        await previousWrite;
+        var filePath = await file.Value;
         if (filePath is null)
             return;
 
@@ -169,8 +169,8 @@ public sealed class DesktopFileLogOutput : ILogOutput, IFileLogOutput
                 FileShare.Read,
                 BufferSize,
                 FileOptions.Asynchronous | FileOptions.SequentialScan);
-            await stream.WriteAsync(Encoding.UTF8.GetBytes(content)).ConfigureAwait(false);
-            await stream.FlushAsync().ConfigureAwait(false);
+            await stream.WriteAsync(Encoding.UTF8.GetBytes(content));
+            await stream.FlushAsync();
         }
         catch (Exception exception)
         {

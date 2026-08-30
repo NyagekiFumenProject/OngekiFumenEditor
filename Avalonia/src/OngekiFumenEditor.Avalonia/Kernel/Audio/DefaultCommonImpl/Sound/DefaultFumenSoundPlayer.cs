@@ -63,7 +63,7 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
             }
             catch (Exception e)
             {
-                Log.LogError($"Can't load {sound} sound file '{fileName}', reason: {e.Message}");
+                Log.LogError($"Can't load {sound} sound file '{fileName}', reason: {e.Message}", e);
                 noError = false;
             }
         }
@@ -211,13 +211,13 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
                 sounds |= obj switch
                 {
                     Tap { ReferenceLaneStart: { IsWallLane: true }, IsCritical: false } or Hold
-                        { ReferenceLaneStart: { IsWallLane: true }, IsCritical: false } => SoundControl.WallTap,
+                    { ReferenceLaneStart: { IsWallLane: true }, IsCritical: false } => SoundControl.WallTap,
                     Tap { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } or Hold
-                        { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } => SoundControl.CriticalWallTap,
+                    { ReferenceLaneStart: { IsWallLane: true }, IsCritical: true } => SoundControl.CriticalWallTap,
                     Tap { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } or Hold
-                        { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } => SoundControl.Tap,
+                    { ReferenceLaneStart: { IsWallLane: false }, IsCritical: false } => SoundControl.Tap,
                     Tap { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } or Hold
-                        { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } => SoundControl.CriticalTap,
+                    { ReferenceLaneStart: { IsWallLane: false }, IsCritical: true } => SoundControl.CriticalTap,
                     Tap { ReferenceLaneStart: null, IsCritical: false } or Hold { ReferenceLaneStart: null, IsCritical: false } => SoundControl.Tap,
                     Tap { ReferenceLaneStart: null, IsCritical: true } or Hold { ReferenceLaneStart: null, IsCritical: true } => SoundControl.CriticalTap,
                     Bell => SoundControl.Bell,

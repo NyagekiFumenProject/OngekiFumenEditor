@@ -62,7 +62,7 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        int kind = await BrowserTemporaryFileSystemInterop.GetEntryKindAsync(relativePath).ConfigureAwait(false);
+        int kind = await BrowserTemporaryFileSystemInterop.GetEntryKindAsync(relativePath);
         return kind switch
         {
             0 => TemporaryEntryKind.Missing,
@@ -103,7 +103,7 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         cancellationToken.ThrowIfCancellationRequested();
         double length = await BrowserTemporaryFileSystemInterop
             .GetFileLengthAsync(relativePath)
-            .ConfigureAwait(false);
+            ;
         return checked((long)length);
     }
 
@@ -114,7 +114,7 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         cancellationToken.ThrowIfCancellationRequested();
         using var result = await BrowserTemporaryFileSystemInterop
             .ReadFileAsync(relativePath)
-            .ConfigureAwait(false);
+            ;
         return result.GetPropertyAsByteArray("data")
                ?? throw new IOException($"OPFS returned no byte data for '{relativePath}'.");
     }
@@ -123,7 +123,7 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         string relativePath,
         CancellationToken cancellationToken)
     {
-        byte[] data = await ReadAllBytesCoreAsync(relativePath, cancellationToken).ConfigureAwait(false);
+        byte[] data = await ReadAllBytesCoreAsync(relativePath, cancellationToken);
         return new MemoryStream(data, writable: false);
     }
 
@@ -134,18 +134,18 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
     {
         cancellationToken.ThrowIfCancellationRequested();
         await using var buffer = new MemoryStream();
-        await writer(buffer, cancellationToken).ConfigureAwait(false);
+        await writer(buffer, cancellationToken);
         byte[] data = buffer.ToArray();
 
         // The writer completed successfully. Waiting for and executing commit no longer observes cancellation.
-        await MutationGate.WaitAsync(CancellationToken.None).ConfigureAwait(false);
+        await MutationGate.WaitAsync(CancellationToken.None);
         try
         {
             await CommitBufferAsync(
                     relativePath,
                     data,
                     BrowserTemporaryFileSystemInterop.WriteFileAsync)
-                .ConfigureAwait(false);
+                ;
         }
         finally
         {
@@ -159,14 +159,14 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await MutationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await MutationGate.WaitAsync(cancellationToken);
         try
         {
             await CommitBufferAsync(
                     relativePath,
                     data.ToArray(),
                     BrowserTemporaryFileSystemInterop.AppendFileAsync)
-                .ConfigureAwait(false);
+                ;
         }
         finally
         {
@@ -196,7 +196,7 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         try
         {
             BrowserTemporaryFileSystemInterop.SetWriteBuffer(handle, data, data.Length);
-            await commit(relativePath, handle).ConfigureAwait(false);
+            await commit(relativePath, handle);
         }
         finally
         {
@@ -207,10 +207,10 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
     private static async Task RunMutationAsync(Func<Task> operation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await MutationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await MutationGate.WaitAsync(cancellationToken);
         try
         {
-            await operation().ConfigureAwait(false);
+            await operation();
         }
         finally
         {
@@ -223,10 +223,10 @@ internal sealed class OpfsTemporaryFolderProvider : TemporaryFolderProviderBase
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await MutationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await MutationGate.WaitAsync(cancellationToken);
         try
         {
-            return await operation().ConfigureAwait(false);
+            return await operation();
         }
         finally
         {

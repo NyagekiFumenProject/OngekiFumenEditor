@@ -20,7 +20,6 @@ internal sealed class StubAwbFile : ISimpleFile
 
     public string FullPath { get; }
 
-    public string? LocalPath => null;
 
     public string FileName { get; }
 
@@ -84,7 +83,6 @@ internal sealed class StubAwbDirectory(string name) : ISimpleDirectory
 
     public string FullPath => $"memory://{name}";
 
-    public string? LocalPath => null;
 
     public string DirectoryName => name;
 
@@ -132,7 +130,6 @@ internal sealed class BrokenOpenFile(string fileName, byte[] content) : ISimpleF
 {
     public ISimpleDirectory? ParentDictionary => null;
     public string FullPath => $"memory://{fileName}";
-    public string? LocalPath => null;
     public string FileName => fileName;
     public long FileLength => content.LongLength;
     public ValueTask<string[]> ReadAllLines() => ValueTask.FromResult(Array.Empty<string>());
@@ -141,6 +138,10 @@ internal sealed class BrokenOpenFile(string fileName, byte[] content) : ISimpleF
     public Task<Stream> OpenRead() => throw new IOException("The source stream cannot be opened.");
 
     public Task<Stream> OpenWrite() => throw new NotSupportedException();
+    public Task WriteAsync(
+        Func<Stream, CancellationToken, Task> writer,
+        CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException();
     public void Dispose()
     {
     }

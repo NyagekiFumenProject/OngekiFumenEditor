@@ -257,7 +257,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         var acquiredRefreshGate = false;
         try
         {
-            await refreshGate.WaitAsync(token).ConfigureAwait(false);
+            await refreshGate.WaitAsync(token);
             acquiredRefreshGate = true;
             await InvokeOnUiThreadAsync(() =>
             {
@@ -267,7 +267,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 ErrorMessage = string.Empty;
             });
             var scanner = new OgkiFumenListBrowserScanner(audioManager);
-            var result = await scanner.ScanAsync(root, token).ConfigureAwait(false);
+            var result = await scanner.ScanAsync(root, token);
             if (isDisposed || version != refreshVersion || token.IsCancellationRequested)
                 return;
 
@@ -346,7 +346,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         {
             loaded = await AvaloniaStorageProviderFileSystemBuilder
                 .LoadFromAvaloniaStorageFolder(ownedStorageFolder, CancellationToken.None)
-                .ConfigureAwait(false);
+                ;
             await InvokeOnUiThreadAsync(() => ReplaceRoot(loaded));
             loaded = null;
 
@@ -355,7 +355,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             string bookmark = string.Empty;
             if (saveBookmark && rootDirectory is IBookmarkableSimpleFileSystemItem bookmarkable && bookmarkable.CanBookmark)
             {
-                bookmark = await bookmarkable.SaveBookmarkAsync().ConfigureAwait(false) ?? string.Empty;
+                bookmark = await bookmarkable.SaveBookmarkAsync() ?? string.Empty;
             }
             if (saveBookmark)
             {
@@ -456,7 +456,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 Fumen = fumen,
                 FileAccessContext = await CreateEditorFileAccessContextAsync(diff)
             };
-            recentData = await TryCreateRecentDataAsync(context.FileAccessContext).ConfigureAwait(false);
+            recentData = await TryCreateRecentDataAsync(context.FileAccessContext);
             editor = editorProvider.Create();
             if (!await editorProvider.TryOpen(editor, context))
             {
@@ -500,7 +500,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         {
             try
             {
-                var contextRoot = await CloneRootFromBookmarkAsync(bookmarkable).ConfigureAwait(false);
+                var contextRoot = await CloneRootFromBookmarkAsync(bookmarkable);
                 var clonedFumen = OgkiFumenListBrowserPath.ResolveFile(contextRoot, diff.FumenLocator);
                 var clonedAudio = OgkiFumenListBrowserPath.ResolveFile(contextRoot, diff.RefSet.AudioLocator);
                 var clonedAwb = diff.RefSet.AudioAwbLocator is { } awbLocator
@@ -539,12 +539,12 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     {
         var storageProvider = (Application.Current as App)?.TopLevel.StorageProvider
             ?? throw new InvalidOperationException("No active storage provider is available.");
-        var bookmark = await bookmarkable.SaveBookmarkAsync().ConfigureAwait(false)
+        var bookmark = await bookmarkable.SaveBookmarkAsync()
             ?? throw new IOException("The selected directory could not be bookmarked.");
-        var folder = await storageProvider.OpenFolderBookmarkAsync(bookmark).ConfigureAwait(false)
+        var folder = await storageProvider.OpenFolderBookmarkAsync(bookmark)
             ?? throw new IOException("The selected directory bookmark is no longer available.");
         return await AvaloniaStorageProviderFileSystemBuilder.LoadFromAvaloniaStorageFolder(folder)
-            .ConfigureAwait(false);
+            ;
     }
 
     private static async Task<byte[]?> TryCreateRecentDataAsync(EditorFileAccessContext? context)
@@ -553,7 +553,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
             return null;
         try
         {
-            return (await context.ToSnapshotAsync().ConfigureAwait(false)).Serialize();
+            return (await context.ToSnapshotAsync()).Serialize();
         }
         catch (Exception exception)
         {
@@ -599,11 +599,11 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
             if (jacketBitmapCache.TryGetValue(set.JacketLocator, out var weak) && weak.TryGetTarget(out var cached))
             {
-                await PublishJacketBitmapAsync(set, cached, version, disposeWhenStale: false).ConfigureAwait(false);
+                await PublishJacketBitmapAsync(set, cached, version, disposeWhenStale: false);
                 return;
             }
 
-            var bytes = await jacketDecoder.LoadPngBytesAsync(set.JacketFile, cancellationToken).ConfigureAwait(false);
+            var bytes = await jacketDecoder.LoadPngBytesAsync(set.JacketFile, cancellationToken);
             if (bytes is null or { Length: 0 })
                 return;
 
@@ -615,7 +615,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 return;
             }
 
-            if (await PublishJacketBitmapAsync(set, bitmap, version, disposeWhenStale: true).ConfigureAwait(false) &&
+            if (await PublishJacketBitmapAsync(set, bitmap, version, disposeWhenStale: true) &&
                 IsJacketRequestCurrent(set, version))
             {
                 jacketBitmapCache[set.JacketLocator] = new WeakReference<Bitmap>(bitmap);
@@ -652,7 +652,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
             set.JacketBitmap = bitmap;
             published = true;
-        }).GetTask().ConfigureAwait(false);
+        }).GetTask();
         return published;
     }
 

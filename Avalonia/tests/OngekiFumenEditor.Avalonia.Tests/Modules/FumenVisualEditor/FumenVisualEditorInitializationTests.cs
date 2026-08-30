@@ -12,7 +12,7 @@ using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
+using OngekiFumenEditor.Avalonia.Tests.Utils;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenVisualEditor;
@@ -444,11 +444,11 @@ public sealed class FumenVisualEditorInitializationTests
     [AvaloniaFact]
     public async Task Save_SuccessfullyWritesProjectAndFumenAndClearsDirty()
     {
-        using var temporaryDirectory = new TemporaryDirectory();
-        var projectPath = temporaryDirectory.File("project.nyagekiProj");
-        var fumenPath = temporaryDirectory.File("chart.nyageki");
-        await File.WriteAllBytesAsync(projectPath, []);
-        await File.WriteAllBytesAsync(fumenPath, []);
+        var temporaryProvider = new InMemoryTemporaryFolderProvider();
+        var projectFile = await temporaryProvider.Root.CreateFileAsync("project.nyagekiProj");
+        var fumenFile = await temporaryProvider.Root.CreateFileAsync("chart.nyageki");
+        await projectFile.WriteAllBytesAsync(ReadOnlyMemory<byte>.Empty);
+        await fumenFile.WriteAllBytesAsync(ReadOnlyMemory<byte>.Empty);
 
         var fumen = new OngekiFumen();
         var project = new EditorProjectDataModel
@@ -461,8 +461,8 @@ public sealed class FumenVisualEditorInitializationTests
             Fumen = fumen,
             FileAccessContext = new EditorFileAccessContext
             {
-                ProjectFile = new LocalSimpleFile(projectPath),
-                FumenFile = new LocalSimpleFile(fumenPath)
+                ProjectFile = projectFile,
+                FumenFile = fumenFile
             }
         };
         var editor = new FumenVisualEditorViewModel()
@@ -479,8 +479,8 @@ public sealed class FumenVisualEditorInitializationTests
             Assert.True(await editor.Save());
             await Dispatcher.UIThread.InvokeAsync(static () => { });
             Assert.False(editor.IsDirty);
-            Assert.True(new FileInfo(projectPath).Length > 0);
-            Assert.True(new FileInfo(fumenPath).Length > 0);
+            Assert.NotEmpty(await projectFile.ReadAllBytesAsync());
+            Assert.NotEmpty(await fumenFile.ReadAllBytesAsync());
             Assert.NotNull(editor.Toast);
             Assert.True(editor.Toast!.IsVisible);
             Assert.Equal(Lang.SaveProjectFileAndFumenFile, editor.Toast.Message);
@@ -489,28 +489,6 @@ public sealed class FumenVisualEditorInitializationTests
         {
             editor.OnViewBeforeUnload(view);
             context.Dispose();
-        }
-    }
-
-    private sealed class TemporaryDirectory : IDisposable
-    {
-        public TemporaryDirectory()
-        {
-            RootPath = Path.Combine(
-                Path.GetTempPath(),
-                "OngekiFumenEditor.EditorContext.FumenVisualEditor.Tests",
-                Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(RootPath);
-        }
-
-        public string RootPath { get; }
-
-        public string File(string relativePath) => Path.Combine(RootPath, relativePath);
-
-        public void Dispose()
-        {
-            if (Directory.Exists(RootPath))
-                Directory.Delete(RootPath, recursive: true);
         }
     }
 

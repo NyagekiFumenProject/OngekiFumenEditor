@@ -62,7 +62,7 @@ public sealed class OgkiFumenListBrowserScanner
         var audioResources = await RunBoundedAsync(
             audioEntries,
             (entry, token) => TryReadAudioResourceAsync(entry.Capability, entry.Locator, token),
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
         foreach (var resource in audioResources)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -73,7 +73,7 @@ public sealed class OgkiFumenListBrowserScanner
         var fumenSets = await RunBoundedAsync(
             musicEntries,
             (entry, token) => TryReadFumenSetAsync(entry.Capability, entry.Locator, token),
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
 
         var result = new List<OngekiFumenSet>(fumenSets.Length);
         foreach (var set in fumenSets)
@@ -116,7 +116,7 @@ public sealed class OgkiFumenListBrowserScanner
         XDocument musicXml;
         try
         {
-            musicXml = Parse(await musicFile.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false));
+            musicXml = Parse(await musicFile.ReadAllBytesAsync(cancellationToken));
         }
         catch (OperationCanceledException)
         {
@@ -158,7 +158,7 @@ public sealed class OgkiFumenListBrowserScanner
                 cancellationToken);
         }
 
-        var diffs = await Task.WhenAll(diffTasks).ConfigureAwait(false);
+        var diffs = await Task.WhenAll(diffTasks);
         foreach (var diff in diffs)
         {
             if (diff is not null)
@@ -197,7 +197,7 @@ public sealed class OgkiFumenListBrowserScanner
             FumenFile = fumenFile,
             FumenLocator = fumenLocator
         };
-        await ReadFumenInfoAsync(diff, cancellationToken).ConfigureAwait(false);
+        await ReadFumenInfoAsync(diff, cancellationToken);
         return diff;
     }
 
@@ -209,7 +209,7 @@ public sealed class OgkiFumenListBrowserScanner
         XDocument sourceXml;
         try
         {
-            sourceXml = Parse(await musicSourceFile.ReadAllBytesAsync(cancellationToken).ConfigureAwait(false));
+            sourceXml = Parse(await musicSourceFile.ReadAllBytesAsync(cancellationToken));
         }
         catch (OperationCanceledException)
         {
@@ -259,13 +259,13 @@ public sealed class OgkiFumenListBrowserScanner
     {
         try
         {
-            await using var stream = await diff.FumenFile.OpenReadAsync(cancellationToken).ConfigureAwait(false);
+            await using var stream = await diff.FumenFile.OpenReadAsync(cancellationToken);
             using var reader = new StreamReader(
                 stream,
                 Encoding.UTF8,
                 detectEncodingFromByteOrderMarks: true,
                 bufferSize: 4096);
-            while (await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false) is { } line)
+            while (await reader.ReadLineAsync(cancellationToken) is { } line)
             {
                 if (diff.Bpm <= 0 && BpmRegex.Match(line) is { Success: true } bpmMatch &&
                     float.TryParse(
@@ -449,8 +449,8 @@ public sealed class OgkiFumenListBrowserScanner
             },
             async (index, token) =>
             {
-                results[index] = await operation(items[index], token).ConfigureAwait(false);
-            }).ConfigureAwait(false);
+                results[index] = await operation(items[index], token);
+            });
         return results;
     }
 

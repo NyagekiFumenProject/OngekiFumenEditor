@@ -162,10 +162,10 @@ public sealed class DesktopTemporaryFolderProvider : TemporaryFolderProviderBase
                              BufferSize,
                              FileOptions.Asynchronous | FileOptions.SequentialScan))
             {
-                await writer(stream, cancellationToken).ConfigureAwait(false);
+                await writer(stream, cancellationToken);
 
                 // The writer completed. Commit must now run to completion even if cancellation is requested.
-                await stream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+                await stream.FlushAsync(CancellationToken.None);
             }
 
             File.Move(temporaryPath, targetPath, overwrite: true);
@@ -192,8 +192,8 @@ public sealed class DesktopTemporaryFolderProvider : TemporaryFolderProviderBase
             FileShare.Read,
             BufferSize,
             FileOptions.Asynchronous | FileOptions.SequentialScan);
-        await stream.WriteAsync(data, cancellationToken).ConfigureAwait(false);
-        await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+        await stream.WriteAsync(data, cancellationToken);
+        await stream.FlushAsync(cancellationToken);
     }
 
     protected override Task DeleteFileCoreAsync(string relativePath, CancellationToken cancellationToken)

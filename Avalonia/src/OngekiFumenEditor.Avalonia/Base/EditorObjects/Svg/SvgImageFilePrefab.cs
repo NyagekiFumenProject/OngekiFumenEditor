@@ -108,7 +108,7 @@ public sealed class SvgImageFilePrefab : SvgPrefabBase
 
         try
         {
-            await using var stream = await file.OpenRead().ConfigureAwait(false);
+            await using var stream = await file.OpenRead();
             cancellationToken.ThrowIfCancellationRequested();
             ApplySvgContent(stream);
             SetSvgFilePath(locator);

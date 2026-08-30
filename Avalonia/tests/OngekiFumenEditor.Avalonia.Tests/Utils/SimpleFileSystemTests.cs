@@ -11,7 +11,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Utils;
@@ -34,14 +33,14 @@ public sealed class SimpleFileSystemTests
 
         Assert.Null(root.ParentDictionary);
         Assert.Equal(string.Empty, root.DirectoryName);
-        Assert.Equal(Path.GetFullPath(temporaryDirectory.RootPath), root.LocalPath);
+        Assert.Equal(string.Empty, root.FullPath);
         Assert.True(root.ExistsDirectory("charts"));
         Assert.True(root.ExistsFile("README.TXT"));
 
         var charts = SimpleIO.FindDirectory(root, @"CHARTS\.\Empty\..");
         Assert.NotNull(charts);
         Assert.Equal("Charts", charts.DirectoryName);
-        Assert.Equal(Path.GetFullPath(chartsPath), charts.LocalPath);
+        Assert.Equal("Charts", charts.FullPath);
         Assert.True(SimpleIO.ExistFile(root, "charts/SONG.OGKR"));
         Assert.Equal(
             [Path.Combine("Charts", "song.ogkr")],
@@ -49,7 +48,7 @@ public sealed class SimpleFileSystemTests
         Assert.Equal(["first", "second", ""], await SimpleIO.ReadAllLines(root, "charts/song.ogkr"));
 
         var file = Assert.IsAssignableFrom<ISimpleFile>(SimpleIO.FindFile(root, "charts/song.ogkr"));
-        Assert.Equal(Path.GetFullPath(Path.Combine(chartsPath, "song.ogkr")), file.LocalPath);
+        Assert.Equal(Path.Combine("Charts", "song.ogkr"), file.FullPath);
         Assert.Equal(songContent, await file.ReadAllBytes());
         await using (var stream = await file.OpenRead())
         {
@@ -77,7 +76,7 @@ public sealed class SimpleFileSystemTests
         using var root = AvaloniaStorageProviderFileSystemBuilder
             .LoadRootFromAvaloniaStorageFolder(storageRoot);
 
-        Assert.Equal(Path.GetFullPath(temporaryDirectory.RootPath), root.LocalPath);
+        Assert.Equal(string.Empty, root.FullPath);
         Assert.Empty(root.ChildDictionaries);
         Assert.Empty(root.ChildFiles);
     }
@@ -108,7 +107,6 @@ public sealed class SimpleFileSystemTests
         Assert.Equal(expectedFullPath, file.FullPath);
         Assert.Equal(expectedSecondFullPath, secondFile.FullPath);
         Assert.NotEqual(file.FullPath, secondFile.FullPath);
-        Assert.Equal(Path.GetFullPath(filePath), file.LocalPath);
         Assert.Equal(content.LongLength, file.FileLength);
         Assert.Equal(content, await file.ReadAllBytes());
 
@@ -172,51 +170,6 @@ public sealed class SimpleFileSystemTests
     }
 
     [Fact]
-    public async Task WriteAsync_WriterCancels_PreservesLocalTargetAndDeletesTemporaryFile()
-    {
-        using var temporaryDirectory = new TemporaryDirectory();
-        var filePath = temporaryDirectory.File("output.ogkr");
-        var original = Encoding.UTF8.GetBytes("original content");
-        await File.WriteAllBytesAsync(filePath, original);
-        using var file = new LocalSimpleFile(filePath);
-        using var cancellation = new CancellationTokenSource();
-
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => file.WriteAsync(
-            async (stream, cancellationToken) =>
-            {
-                await stream.WriteAsync("partial replacement"u8.ToArray(), cancellationToken);
-                cancellation.Cancel();
-                cancellationToken.ThrowIfCancellationRequested();
-            },
-            cancellation.Token));
-
-        Assert.Equal(original, await File.ReadAllBytesAsync(filePath));
-        Assert.Equal(["output.ogkr"], Directory.GetFiles(temporaryDirectory.RootPath).Select(Path.GetFileName));
-    }
-
-    [Fact]
-    public async Task WriteAsync_WriterCompletesBeforeCancellation_CommitsLocalTarget()
-    {
-        using var temporaryDirectory = new TemporaryDirectory();
-        var filePath = temporaryDirectory.File("output.ogkr");
-        await File.WriteAllTextAsync(filePath, "original content");
-        using var file = new LocalSimpleFile(filePath);
-        using var cancellation = new CancellationTokenSource();
-        var replacement = Encoding.UTF8.GetBytes("replacement");
-
-        await file.WriteAsync(async (stream, cancellationToken) =>
-        {
-            await stream.WriteAsync(replacement, cancellationToken);
-            cancellation.Cancel();
-        }, cancellation.Token);
-
-        Assert.True(cancellation.IsCancellationRequested);
-        Assert.Equal(replacement, await File.ReadAllBytesAsync(filePath));
-        Assert.Equal(replacement.LongLength, file.FileLength);
-        Assert.Equal(["output.ogkr"], Directory.GetFiles(temporaryDirectory.RootPath).Select(Path.GetFileName));
-    }
-
-    [Fact]
     public async Task WriteAsync_NonLocalWriterCompletesBeforeCancellation_FlushesWithoutCancellation()
     {
         var providerFile = new NonLocalWritableSimpleFile();
@@ -240,7 +193,7 @@ public sealed class SimpleFileSystemTests
     {
         using var root = new AvaloniaStorageProviderSimpleDirectory(null, string.Empty);
 
-        Assert.Null(root.LocalPath);
+        Assert.Equal(string.Empty, root.FullPath);
         Assert.True(SimpleIO.ExistDirectory(root, null));
         Assert.False(SimpleIO.ExistFile(root, null));
         Assert.Null(SimpleIO.FindDirectory(root, ".."));
@@ -504,7 +457,7 @@ public sealed class SimpleFileSystemTests
         using var firstImport = await SvgProjectFileImporter.ImportAsync(root, firstSource);
         using var secondImport = await SvgProjectFileImporter.ImportAsync(root, secondSource);
 
-        Assert.Null(firstImport.LocalPath);
+        Assert.False(Path.IsPathRooted(firstImport.FullPath));
         Assert.StartsWith("autoImport/svgFiles/first.", firstImport.FullPath, StringComparison.Ordinal);
         Assert.EndsWith(".svg", firstImport.FullPath, StringComparison.Ordinal);
         Assert.Equal(firstImport.FullPath, secondImport.FullPath);
@@ -602,7 +555,6 @@ public sealed class SimpleFileSystemTests
 
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => "provider://container/output.ogkr";
-        public string? LocalPath => null;
         public string FileName => "output.ogkr";
         public long FileLength => stream.Length;
         public CancellationToken? FlushCancellationToken => stream.FlushCancellationToken;
@@ -612,6 +564,16 @@ public sealed class SimpleFileSystemTests
         public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Content);
         public Task<Stream> OpenRead() => throw new NotSupportedException();
         public Task<Stream> OpenWrite() => Task.FromResult<Stream>(stream);
+
+        public async Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(writer);
+            cancellationToken.ThrowIfCancellationRequested();
+            await writer(stream, cancellationToken).ConfigureAwait(false);
+            await stream.FlushAsync(CancellationToken.None).ConfigureAwait(false);
+        }
 
         public void Dispose()
         {

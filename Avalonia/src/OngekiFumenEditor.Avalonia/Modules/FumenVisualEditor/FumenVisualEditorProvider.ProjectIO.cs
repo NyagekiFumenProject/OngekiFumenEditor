@@ -98,7 +98,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogError($"Failed to open a project folder: {exception.Message}");
+            Log.LogError($"Failed to open a project folder: {exception.Message}", exception);
             await DialogManager.ShowMessageDialog(
                 $"Unable to open the selected project: {exception.Message}",
                 DialogMessageType.Error);
@@ -170,7 +170,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogError($"Failed to open recent project record {recordInfo.RecordId:N}: {exception.Message}");
+            Log.LogError($"Failed to open recent project record {recordInfo.RecordId:N}: {exception.Message}", exception);
             await DialogManager.ShowMessageDialog(
                 $"Unable to open the recent project: {exception.Message}",
                 DialogMessageType.Error);

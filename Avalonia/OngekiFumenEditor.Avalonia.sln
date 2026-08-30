@@ -73,6 +73,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Avalonia.UpdaterStub", "tests\OngekiFumenEditor.Avalonia.UpdaterStub\OngekiFumenEditor.Avalonia.UpdaterStub.csproj", "{D706F7AD-C99A-4740-A451-4E36FD8B5F0A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NAudio", "NAudio", "{84F7DC6C-E9B1-4794-AD8D-E1FE937495B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NAudio.BrowserAudioWorklet", "Dependencies\NAudio.BrowserAudioWorklet\src\NAudio.BrowserAudioWorklet\NAudio.BrowserAudioWorklet.csproj", "{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -419,6 +423,18 @@ Global
 		{D706F7AD-C99A-4740-A451-4E36FD8B5F0A}.Release|x64.Build.0 = Release|Any CPU
 		{D706F7AD-C99A-4740-A451-4E36FD8B5F0A}.Release|x86.ActiveCfg = Release|Any CPU
 		{D706F7AD-C99A-4740-A451-4E36FD8B5F0A}.Release|x86.Build.0 = Release|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Debug|x64.Build.0 = Debug|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Debug|x86.Build.0 = Debug|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Release|x64.ActiveCfg = Release|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Release|x64.Build.0 = Release|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Release|x86.ActiveCfg = Release|Any CPU
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -453,6 +469,8 @@ Global
 		{1325AF8C-6092-4F87-9540-7605889030E1} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{001D8A1C-1FDB-4594-95A5-644D946701C7} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{D706F7AD-C99A-4740-A451-4E36FD8B5F0A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{84F7DC6C-E9B1-4794-AD8D-E1FE937495B0} = {609F40C5-C560-40E6-76C7-691311A42DF0}
+		{A488D8DE-A0C9-80F1-7575-55ECAB3B4974} = {84F7DC6C-E9B1-4794-AD8D-E1FE937495B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FB1035A3-F108-4C5A-ACCC-60360EAB0F20}

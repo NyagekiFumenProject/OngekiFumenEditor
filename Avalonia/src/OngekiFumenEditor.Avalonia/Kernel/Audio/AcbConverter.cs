@@ -18,24 +18,24 @@ public static class AcbConverter
         ArgumentNullException.ThrowIfNull(acbInputStream);
         ArgumentNullException.ThrowIfNull(outputWavFile);
 
-        await locker.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await locker.WaitAsync(cancellationToken);
         try
         {
             Log.LogInfo("Decode ACB audio into a WAV file.");
 
             var acbStream = await EnsureSeekableReadAsync(
                 acbInputStream,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken);
             try
             {
-                if (AudioStreamFormatDetector.Detect(acbStream) != AudioStreamFormat.Acb)
+                if ((await AudioStreamFormatDetector.DetectAsync(acbStream)) != AudioStreamFormat.Acb)
                     throw new InvalidDataException("The first stream is not an ACB file.");
 
                 if (externalAwbInputStream is not null)
                 {
                     var externalAwbStream = await EnsureSeekableReadAsync(
                         externalAwbInputStream,
-                        cancellationToken).ConfigureAwait(false);
+                        cancellationToken);
                     try
                     {
                         using var externalAwb = new Afs2Archive(
@@ -50,7 +50,7 @@ public static class AcbConverter
                             externalAwb,
                             externalAwbStream,
                             outputWavFile,
-                            cancellationToken).ConfigureAwait(false);
+                            cancellationToken);
                         if (!converted)
                             throw new InvalidDataException(
                                 "The external AWB did not produce decodable audio.");
@@ -59,7 +59,7 @@ public static class AcbConverter
                     finally
                     {
                         if (!ReferenceEquals(externalAwbStream, externalAwbInputStream))
-                            await externalAwbStream.DisposeAsync().ConfigureAwait(false);
+                            await externalAwbStream.DisposeAsync();
                     }
                 }
 
@@ -88,7 +88,7 @@ public static class AcbConverter
                             internalAwb,
                             acb.Stream,
                             outputWavFile,
-                            cancellationToken).ConfigureAwait(false);
+                            cancellationToken);
                         if (!converted)
                             throw new InvalidDataException(
                                 "The embedded AWB did not produce decodable audio.");
@@ -103,7 +103,7 @@ public static class AcbConverter
             finally
             {
                 if (!ReferenceEquals(acbStream, acbInputStream))
-                    await acbStream.DisposeAsync().ConfigureAwait(false);
+                    await acbStream.DisposeAsync();
             }
         }
         finally
@@ -132,7 +132,7 @@ public static class AcbConverter
                 dataStream.Position = record.FileOffsetAligned;
                 await dataStream.ReadExactlyAsync(
                     buffer.AsMemory(0, checked((int)record.FileLength)),
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
 
                 using var fileData = new MemoryStream(
                     buffer,
@@ -152,7 +152,7 @@ public static class AcbConverter
                 await outputWavFile.WriteAsync(
                     (outputStream, writerCancellationToken) =>
                         DecodeHcaAsync(fileData, outputStream, writerCancellationToken),
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
                 return true;
             }
             finally
@@ -180,13 +180,13 @@ public static class AcbConverter
             {
                 var read = await hcaStream.ReadAsync(
                     buffer.AsMemory(),
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
                 if (read == 0)
                     break;
 
                 await waveStream.WriteAsync(
                     buffer.AsMemory(0, read),
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
             }
         }
         finally
@@ -207,7 +207,7 @@ public static class AcbConverter
         }
 
         var buffer = new MemoryStream();
-        await sourceStream.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+        await sourceStream.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
         return buffer;
     }

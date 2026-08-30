@@ -68,7 +68,7 @@ public class __BrowserSettingManager : ISettingManager
                 }
                 catch (Exception e)
                 {
-                    Log.LogError($"Can't load browser settings : {e.Message}");
+                    Log.LogError($"Can't load browser settings : {e.Message}", e);
                     settingMap = new Dictionary<string, string>();
                 }
         }

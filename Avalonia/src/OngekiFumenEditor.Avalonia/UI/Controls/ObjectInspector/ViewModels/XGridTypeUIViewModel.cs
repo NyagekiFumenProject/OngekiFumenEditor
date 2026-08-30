@@ -70,7 +70,7 @@ public partial class XGridTypeUIViewModel : CommonUIViewModelBase<XGrid>
         }
         catch (Exception e)
         {
-            Log.LogError($"Can't set null for prop {PropertyInfo.DisplayPropertyName}: {e.Message}");
+            Log.LogError($"Can't set null for prop {PropertyInfo.DisplayPropertyName}: {e.Message}", e);
             TypedProxyValue = rollback;
         }
     }

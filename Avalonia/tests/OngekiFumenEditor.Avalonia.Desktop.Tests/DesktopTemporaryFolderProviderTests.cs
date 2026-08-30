@@ -31,7 +31,7 @@ public sealed class DesktopTemporaryFolderProviderTests
 
         var nested = await root.GetOrCreateDirectoryAsync("nested");
         var file = await provider.CreateUniqueFileAsync("asset", ".bin", nested);
-        string localPath = Assert.IsType<string>(file.LocalPath);
+        string localPath = GetPhysicalPath(rootPath, file);
         string relativeToRoot = Path.GetRelativePath(rootPath, localPath);
 
         Assert.True(provider.IsAvailable);
@@ -39,7 +39,7 @@ public sealed class DesktopTemporaryFolderProviderTests
         Assert.False(Path.IsPathRooted(file.FullPath));
         Assert.Equal($"nested/{file.FileName}", file.FullPath);
         Assert.DoesNotContain("..", relativeToRoot.Split(Path.DirectorySeparatorChar));
-        Assert.Equal(Path.GetFullPath(rootPath), Path.GetFullPath(Assert.IsType<string>(root.LocalPath)));
+        Assert.Equal(string.Empty, root.FullPath);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public sealed class DesktopTemporaryFolderProviderTests
                 .Select(_ => provider.CreateUniqueFileAsync("parallel", ".tmp")));
 
         Assert.Equal(files.Length, files.Select(file => file.FileName).Distinct().Count());
-        Assert.All(files, file => Assert.True(File.Exists(file.LocalPath)));
+        Assert.All(files, file => Assert.True(File.Exists(GetPhysicalPath(providerRoot: directory.PathFor("provider"), file))));
     }
 
     [Fact]
@@ -154,5 +154,11 @@ public sealed class DesktopTemporaryFolderProviderTests
             if (Directory.Exists(RootPath))
                 Directory.Delete(RootPath, recursive: true);
         }
+    }
+
+    private static string GetPhysicalPath(string providerRoot, ISimpleFile file)
+    {
+        var relativePath = file.FullPath.Replace('/', Path.DirectorySeparatorChar);
+        return Path.GetFullPath(Path.Combine(providerRoot, relativePath));
     }
 }

@@ -104,13 +104,16 @@ public sealed class OgkiFumenListBrowserViewScrollTests
     {
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => fileName;
-        public string? LocalPath => null;
         public string FileName => fileName;
         public long FileLength => 0;
         public ValueTask<string[]> ReadAllLines() => ValueTask.FromResult(Array.Empty<string>());
         public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Array.Empty<byte>());
         public Task<Stream> OpenRead() => Task.FromResult<Stream>(new MemoryStream());
         public Task<Stream> OpenWrite() => Task.FromResult<Stream>(new MemoryStream());
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
         public void Dispose()
         {
         }

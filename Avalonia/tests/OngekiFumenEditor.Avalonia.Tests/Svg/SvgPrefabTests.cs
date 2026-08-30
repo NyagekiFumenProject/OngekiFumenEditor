@@ -21,7 +21,6 @@ using OngekiFumenEditor.Avalonia.Parser.Ogkr;
 using OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl.Editor;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
 using SkiaSharp;
 using Xunit;
 
@@ -134,7 +133,7 @@ public sealed class SvgPrefabTests
             Path.GetTempPath(),
             $"音寄-SVG-不存在-{Guid.NewGuid():N}",
             "车道图.svg"));
-        using var source = new SvgImageFilePrefab { SvgFile = new LocalSimpleFile(missingPath) };
+        using var source = new SvgImageFilePrefab { SvgFilePath = missingPath };
         ConfigureCommonFields(source);
         var fumen = new OngekiFumen();
         fumen.AddObject(source);
@@ -149,9 +148,8 @@ public sealed class SvgPrefabTests
         var actual = Assert.IsType<SvgImageFilePrefab>(Assert.Single(reparsed.SvgPrefabs));
 
         AssertCommonFields(source, actual);
-        Assert.NotNull(actual.SvgFile);
-        Assert.Equal(missingPath, actual.SvgFile.FullPath, ignoreCase: true);
-        Assert.False(File.Exists(actual.SvgFile.LocalPath));
+        Assert.Equal(missingPath, actual.SvgFilePath, ignoreCase: true);
+        Assert.Null(actual.SvgFile);
         Assert.Null(actual.Picture);
     }
 
@@ -231,7 +229,7 @@ public sealed class SvgPrefabTests
         {
             using var svg = new SvgImageFilePrefab
             {
-                SvgFile = new LocalSimpleFile(path),
+                SvgFilePath = path,
                 ShowOriginColor = true
             };
 
@@ -301,7 +299,7 @@ public sealed class SvgPrefabTests
         {
             using var svg = new SvgImageFilePrefab
             {
-                SvgFile = new LocalSimpleFile(path),
+                SvgFilePath = path,
                 EnableColorfulLaneSimilar = false,
                 ColorSimilar = { CurrentValue = 50 },
                 CurveInterpolaterFactory = DefaultCurveInterpolaterFactory.Default,
@@ -364,7 +362,6 @@ public sealed class SvgPrefabTests
 
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => "picker/embedded.svg";
-        public string? LocalPath => null;
         public string FileName => "embedded.svg";
         public long FileLength => content.LongLength;
         public int OpenReadCount { get; private set; }
@@ -393,6 +390,11 @@ public sealed class SvgPrefabTests
         }
 
         public Task<Stream> OpenWrite() => throw new NotSupportedException();
+
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
 
         public void Dispose()
         {

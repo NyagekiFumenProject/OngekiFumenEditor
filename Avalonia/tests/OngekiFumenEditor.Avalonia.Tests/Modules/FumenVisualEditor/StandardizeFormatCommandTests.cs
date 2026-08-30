@@ -236,9 +236,9 @@ public sealed class StandardizeFormatCommandTests
     [Theory]
     [InlineData("C:\\charts\\standardized.ogkr", "C:\\charts")]
     [InlineData(null, null)]
-    public void TryGetOutputDirectory_UsesOnlyLocalPaths(string? localPath, string? expectedDirectory)
+    public void TryGetOutputDirectory_UsesFullPath(string? fullPath, string? expectedDirectory)
     {
-        var outputFile = new StubSimpleFile("standardized.ogkr", localPath);
+        var outputFile = new StubSimpleFile("standardized.ogkr", fullPath);
 
         var result = StandardizeFormatOutputService.TryGetOutputDirectory(outputFile, out var outputDirectory);
 
@@ -326,13 +326,11 @@ public sealed class StandardizeFormatCommandTests
         }
     }
 
-    private sealed class StubSimpleFile(string fileName, string? localPath = null) : ISimpleFile
+    private sealed class StubSimpleFile(string fileName, string? fullPath = null) : ISimpleFile
     {
         public ISimpleDirectory? ParentDictionary => null;
 
-        public string FullPath => localPath ?? fileName;
-
-        public string? LocalPath => localPath;
+        public string FullPath => fullPath ?? fileName;
 
         public string FileName => fileName;
 
@@ -347,6 +345,11 @@ public sealed class StandardizeFormatCommandTests
         public Task<Stream> OpenRead() => Task.FromResult<Stream>(new MemoryStream());
 
         public Task<Stream> OpenWrite() => Task.FromResult<Stream>(new MemoryStream());
+
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
 
         public void Dispose() => IsDisposed = true;
     }

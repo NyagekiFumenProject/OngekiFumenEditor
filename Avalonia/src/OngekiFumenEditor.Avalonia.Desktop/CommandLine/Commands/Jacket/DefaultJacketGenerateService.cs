@@ -115,7 +115,7 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         }
         catch (Exception exception)
         {
-            Log.LogError($"AcbGenerateProgram.Generate() throw exception:{exception.Message}\n{exception.StackTrace}");
+            Log.LogError($"AcbGenerateProgram.Generate() throw exception:{exception.Message}\n{exception.StackTrace}", exception);
             return new(false, $"{Lang.ThrowExceptionWhenConvert}{exception.Message}");
         }
     }
@@ -129,8 +129,8 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
         var bundlesCount = 0;
         var bundlesList = new List<(int id, string name, int[] dependencies)>();
 
-            var tempRoot = await temporaryFolderProvider.Root
-            .GetOrCreateDirectoryAsync("assets.bytes", cancellationToken);
+        var tempRoot = await temporaryFolderProvider.Root
+        .GetOrCreateDirectoryAsync("assets.bytes", cancellationToken);
         var tmpFileEntry = await temporaryFolderProvider.CreateUniqueFileAsync(
             "assets",
             ".bytes",
@@ -523,7 +523,7 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
                 }
                 catch (Exception exception)
                 {
-                    Log.LogError($"Can't decode .ab image: {exception.Message} filePath:{filePath} format:{format}");
+                    Log.LogError($"Can't decode .ab image: {exception.Message} filePath:{filePath} format:{format}", exception);
                     return default;
                 }
             }

@@ -161,7 +161,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             }
             catch (Exception e)
             {
-                Log.LogError($"load json content failed:{e.Message}, drawing targets will use default configs.");
+                Log.LogError($"load json content failed:{e.Message}, drawing targets will use default configs.", e);
                 map = new();
             }
         }
@@ -200,7 +200,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         }
         catch (Exception e)
         {
-            Log.LogError($"save json content failed:{e.Message}");
+            Log.LogError($"save json content failed:{e.Message}", e);
             map = new();
         }
     }

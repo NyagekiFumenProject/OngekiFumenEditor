@@ -39,7 +39,7 @@ public sealed class TemporaryFolderProviderContractTests
                 .Select(_ => provider.CreateUniqueFileAsync("asset", ".bin", parent)));
 
         Assert.Equal(string.Empty, provider.Root.FullPath);
-        Assert.Null(provider.Root.LocalPath);
+        Assert.False(Path.IsPathRooted(provider.Root.FullPath));
         Assert.Equal(0, await first.GetLengthAsync());
         Assert.NotNull(await parent.TryGetFileAsync(first.FileName));
         Assert.StartsWith("asset.", first.FileName, StringComparison.Ordinal);

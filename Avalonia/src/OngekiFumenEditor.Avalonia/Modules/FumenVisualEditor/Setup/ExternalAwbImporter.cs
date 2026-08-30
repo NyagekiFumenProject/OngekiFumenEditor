@@ -77,7 +77,7 @@ public static class ExternalAwbImporter
 
         // An existing project AWB that decodes cleanly is reused as-is; nothing is imported.
         if (existing is not null &&
-            await TryVerifyDecodableAsync(verifier, acbFile, existing, cancellationToken).ConfigureAwait(false))
+            await TryVerifyDecodableAsync(verifier, acbFile, existing, cancellationToken))
         {
             Log.LogInfo($"External AWB import bound existing AWB '{existing.FileName}' for '{acbFile.FileName}'.");
             return new ExternalAwbImportResult(AwbImportAction.BindExisting, existing);
@@ -85,7 +85,7 @@ public static class ExternalAwbImporter
 
         // No usable project AWB: the user must supply the authoritative external AWB. Its name
         // has to match the ACB declaration exactly; the picker contract enforces that.
-        var picked = await callbacks.PickExternalAwbAsync(expectedAwbFileName, cancellationToken).ConfigureAwait(false);
+        var picked = await callbacks.PickExternalAwbAsync(expectedAwbFileName, cancellationToken);
         if (picked is null)
         {
             Log.LogInfo("External AWB import canceled: no external AWB file was picked.");
@@ -102,12 +102,12 @@ public static class ExternalAwbImporter
         {
             staging = await storage
                 .CreateUniqueFileAsync("awbStaging", ".awb", cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            await picked.CopyContentToAsync(staging, cancellationToken).ConfigureAwait(false);
+                ;
+            await picked.CopyContentToAsync(staging, cancellationToken);
 
             try
             {
-                await VerifyWithStreamsAsync(verifier, acbFile, staging, cancellationToken).ConfigureAwait(false);
+                await VerifyWithStreamsAsync(verifier, acbFile, staging, cancellationToken);
             }
             catch (OperationCanceledException)
             {
@@ -124,7 +124,7 @@ public static class ExternalAwbImporter
             {
                 var contentsEqual = await AwbContentComparer
                     .AreContentsEqualAsync(staging, existing, cancellationToken)
-                    .ConfigureAwait(false);
+                    ;
                 if (contentsEqual)
                 {
                     // Identical bytes mean the earlier verification failure was transient;
@@ -137,16 +137,16 @@ public static class ExternalAwbImporter
                     new AwbReplaceCandidate(
                         existing.FullPath,
                         picked.FullPath,
-                        await GetLengthOrZeroAsync(existing, cancellationToken).ConfigureAwait(false),
-                        await GetLengthOrZeroAsync(picked, cancellationToken).ConfigureAwait(false)),
-                    cancellationToken).ConfigureAwait(false);
+                        await GetLengthOrZeroAsync(existing, cancellationToken),
+                        await GetLengthOrZeroAsync(picked, cancellationToken)),
+                    cancellationToken);
                 if (!confirmed)
                     return null;
 
                 // CopyTo + Delete replacement: the transactional commit keeps the old content
                 // on failure, and the staging file is removed after a successful commit.
-                await staging.CopyContentToAsync(existing, cancellationToken).ConfigureAwait(false);
-                await DeleteQuietlyAsync(staging).ConfigureAwait(false);
+                await staging.CopyContentToAsync(existing, cancellationToken);
+                await DeleteQuietlyAsync(staging);
                 staging = null;
                 Log.LogInfo($"External AWB import replaced existing AWB '{existing.FileName}' for '{acbFile.FileName}'.");
                 return new ExternalAwbImportResult(AwbImportAction.ReplaceExisting, existing);
@@ -154,9 +154,9 @@ public static class ExternalAwbImporter
 
             createdTarget = await parentDirectory
                 .CreateFileAsync(expectedAwbFileName, cancellationToken)
-                .ConfigureAwait(false);
-            await staging.CopyContentToAsync(createdTarget, cancellationToken).ConfigureAwait(false);
-            await DeleteQuietlyAsync(staging).ConfigureAwait(false);
+                ;
+            await staging.CopyContentToAsync(createdTarget, cancellationToken);
+            await DeleteQuietlyAsync(staging);
             staging = null;
             Log.LogInfo($"External AWB import committed new AWB '{createdTarget.FileName}' for '{acbFile.FileName}'.");
             return new ExternalAwbImportResult(AwbImportAction.CommitNew, createdTarget);
@@ -167,13 +167,13 @@ public static class ExternalAwbImporter
             // Q5: never leave a half-written project AWB behind. Replacing commits keep the old
             // content by themselves; only the newly created placeholder needs explicit rollback.
             if (createdTarget is not null)
-                await DeleteQuietlyAsync(createdTarget).ConfigureAwait(false);
+                await DeleteQuietlyAsync(createdTarget);
             throw;
         }
         finally
         {
             if (staging is not null)
-                await DeleteQuietlyAsync(staging).ConfigureAwait(false);
+                await DeleteQuietlyAsync(staging);
         }
     }
 
@@ -185,7 +185,7 @@ public static class ExternalAwbImporter
     {
         try
         {
-            await VerifyWithStreamsAsync(verifier, acbFile, awbFile, cancellationToken).ConfigureAwait(false);
+            await VerifyWithStreamsAsync(verifier, acbFile, awbFile, cancellationToken);
             return true;
         }
         catch (OperationCanceledException)
@@ -206,9 +206,9 @@ public static class ExternalAwbImporter
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await using var acbStream = await acbFile.OpenReadAsync(cancellationToken).ConfigureAwait(false);
-        await using var awbStream = await awbFile.OpenReadAsync(cancellationToken).ConfigureAwait(false);
-        await verifier(acbStream, awbStream, cancellationToken).ConfigureAwait(false);
+        await using var acbStream = await acbFile.OpenReadAsync(cancellationToken);
+        await using var awbStream = await awbFile.OpenReadAsync(cancellationToken);
+        await verifier(acbStream, awbStream, cancellationToken);
     }
 
     private static async Task DefaultVerifyDecodableAsync(
@@ -222,18 +222,18 @@ public static class ExternalAwbImporter
 
         var wavOutput = await temporaryFolderProvider
             .CreateUniqueFileAsync("awbVerify", ".wav", cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
+            ;
         try
         {
             await AcbConverter.ConvertAcbFileToWavAsync(
                 acbStream,
                 awbStream,
                 wavOutput,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken);
         }
         finally
         {
-            await DeleteQuietlyAsync(wavOutput).ConfigureAwait(false);
+            await DeleteQuietlyAsync(wavOutput);
         }
     }
 
@@ -247,7 +247,7 @@ public static class ExternalAwbImporter
     {
         try
         {
-            await file.DeleteAsync(CancellationToken.None).ConfigureAwait(false);
+            await file.DeleteAsync(CancellationToken.None);
         }
         catch (Exception exception)
         {

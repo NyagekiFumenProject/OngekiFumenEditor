@@ -24,12 +24,12 @@ public static class SimpleFileCopyExtensions
             {
                 await using var input = await source
                     .OpenReadAsync(writerCancellationToken)
-                    .ConfigureAwait(false);
+                    ;
                 await input.CopyToAsync(
                     output,
                     StreamBufferLength,
-                    writerCancellationToken).ConfigureAwait(false);
+                    writerCancellationToken);
             },
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
     }
 }

@@ -1,8 +1,10 @@
 using System.Reflection;
+using Avalonia.Controls;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 using OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Services;
 using OngekiFumenEditor.Avalonia.Tests.Utils;
-using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.LocalFileSystem;
+using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem.Impl.AvaloniaStorageProvider;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Modules.OgkiFumenListBrowser;
@@ -33,7 +35,8 @@ public sealed class OgkiFumenListBrowserJacketDecoderTests
         Assert.True(File.Exists(pluginPath), pluginPath);
         Assembly.LoadFrom(pluginPath);
 
-        using var source = new LocalSimpleFile(bundlePath);
+        using var source = await AvaloniaStorageProviderFileSystemBuilder
+            .LoadFromAvaloniaStorageFile(await GetStorageFile(bundlePath));
         var temporaryFolderProvider = new InMemoryTemporaryFolderProvider();
         var decoder = new OgkiFumenListBrowserJacketDecoder(temporaryFolderProvider);
         var pngBytes = await decoder.LoadPngBytesAsync(source);
@@ -49,5 +52,12 @@ public sealed class OgkiFumenListBrowserJacketDecoderTests
         using var bitmap = new Bitmap(new MemoryStream(pngBytes!, writable: false));
         Assert.True(bitmap.PixelSize.Width > 0);
         Assert.True(bitmap.PixelSize.Height > 0);
+    }
+
+    private static async Task<IStorageFile> GetStorageFile(string path)
+    {
+        var window = new Window();
+        return await window.StorageProvider.TryGetFileFromPathAsync(path)
+            ?? throw new InvalidOperationException($"Unable to create a storage file for '{path}'.");
     }
 }

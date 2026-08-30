@@ -62,7 +62,7 @@ public sealed class DiscardTemporaryFolderProvider : TemporaryFolderProviderBase
     {
         cancellationToken.ThrowIfCancellationRequested();
         await using var buffer = new MemoryStream();
-        await writer(buffer, cancellationToken).ConfigureAwait(false);
+        await writer(buffer, cancellationToken);
     }
 
     protected override Task AppendFileCoreAsync(

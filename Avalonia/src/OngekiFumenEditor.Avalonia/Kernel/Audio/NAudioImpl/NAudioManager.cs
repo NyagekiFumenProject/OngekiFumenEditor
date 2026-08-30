@@ -172,7 +172,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
             catch (Exception e)
             {
                 newOutputDevice?.Dispose();
-                Log.LogError($"Can't create audio output device: {e.Message}");
+                Log.LogError($"Can't create audio output device: {e.Message}", e);
                 throw;
             }
 
@@ -268,7 +268,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         var seekableStream = await AudioStreamFormatDetector.EnsureSeekableAsync(stream);
         try
         {
-            var format = AudioStreamFormatDetector.Detect(seekableStream);
+            var format = await AudioStreamFormatDetector.DetectAsync(seekableStream);
             if (format == AudioStreamFormat.Acb)
                 return await LoadAcbAudioAsync(seekableStream, externalAwbStream);
 
@@ -376,7 +376,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
         var seekableStream = await AudioStreamFormatDetector.EnsureSeekableAsync(stream);
         try
         {
-            var format = AudioStreamFormatDetector.Detect(seekableStream);
+            var format = await AudioStreamFormatDetector.DetectAsync(seekableStream);
             Log.LogInfo($"Load sound stream: {format}");
             using var audioFileReader = audioFileReaderFactory.CreateAudioFileReader(seekableStream, format);
             return await CreateSoundPlayerAsync(audioFileReader);

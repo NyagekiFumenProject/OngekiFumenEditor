@@ -89,14 +89,14 @@ public sealed class BrowserFileLogOutput : ILogOutput, IFileLogOutput
         try
         {
             string prefix = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture);
-            string? fileName = await TryCreateUniqueFileAsync(prefix, ".log", CancellationToken.None).ConfigureAwait(false);
+            string? fileName = await TryCreateUniqueFileAsync(prefix, ".log", CancellationToken.None);
             if (fileName is null)
                 return null;
 
             await AppendCoreAsync(
                 fileName,
                 Encoding.UTF8.GetBytes(IFileLogOutput.BeginFileLogOutputMarker),
-                CancellationToken.None).ConfigureAwait(false);
+                CancellationToken.None);
             return fileName;
         }
         catch (Exception exception)
@@ -108,14 +108,14 @@ public sealed class BrowserFileLogOutput : ILogOutput, IFileLogOutput
 
     private async Task AppendAfterAsync(Task previousWrite, string content)
     {
-        await previousWrite.ConfigureAwait(false);
-        var currentFileName = await file.Value.ConfigureAwait(false);
+        await previousWrite;
+        var currentFileName = await file.Value;
         if (currentFileName is null)
             return;
 
         try
         {
-            await AppendCoreAsync(currentFileName, Encoding.UTF8.GetBytes(content), CancellationToken.None).ConfigureAwait(false);
+            await AppendCoreAsync(currentFileName, Encoding.UTF8.GetBytes(content), CancellationToken.None);
         }
         catch (Exception exception)
         {
@@ -132,7 +132,7 @@ public sealed class BrowserFileLogOutput : ILogOutput, IFileLogOutput
         ValidateFileNamePart(prefix, nameof(prefix));
         ValidateFileNamePart(extension, nameof(extension));
 
-        await MutationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await MutationGate.WaitAsync(cancellationToken);
         try
         {
             for (int suffix = 0; ; suffix++)
@@ -141,7 +141,7 @@ public sealed class BrowserFileLogOutput : ILogOutput, IFileLogOutput
                 string fileName = suffix == 0
                     ? $"{prefix}{extension}"
                     : $"{prefix}_{suffix}{extension}";
-                if (await BrowserLogFileSystemInterop.TryCreateFileAsync(fileName).ConfigureAwait(false))
+                if (await BrowserLogFileSystemInterop.TryCreateFileAsync(fileName))
                     return fileName;
             }
         }
@@ -157,14 +157,14 @@ public sealed class BrowserFileLogOutput : ILogOutput, IFileLogOutput
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        await MutationGate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await MutationGate.WaitAsync(cancellationToken);
         try
         {
             int handle = Interlocked.Increment(ref nextWriteBufferHandle);
             try
             {
                 BrowserLogFileSystemInterop.SetWriteBuffer(handle, data, data.Length);
-                await BrowserLogFileSystemInterop.AppendFileAsync(fileName, handle).ConfigureAwait(false);
+                await BrowserLogFileSystemInterop.AppendFileAsync(fileName, handle);
             }
             finally
             {

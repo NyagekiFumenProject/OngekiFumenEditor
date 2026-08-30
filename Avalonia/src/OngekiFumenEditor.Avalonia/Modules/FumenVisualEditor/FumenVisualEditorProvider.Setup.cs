@@ -57,7 +57,7 @@ public abstract partial class FumenVisualEditorProviderBase
         }
         catch (Exception exception)
         {
-            Log.LogError($"Failed to create a project: {exception.Message}");
+            Log.LogError($"Failed to create a project: {exception.Message}", exception);
             await DialogManager.ShowMessageDialog(
                 $"Unable to create the project: {exception.Message}",
                 DialogMessageType.Error);

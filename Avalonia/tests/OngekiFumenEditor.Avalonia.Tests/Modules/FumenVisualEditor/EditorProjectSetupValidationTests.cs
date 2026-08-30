@@ -264,7 +264,6 @@ public sealed class EditorProjectSetupValidationTests
         public ISimpleDirectory[] ChildDictionaries => [];
         public ISimpleFile[] ChildFiles => [];
         public string FullPath => $"memory://{name}";
-        public string? LocalPath => null;
         public string DirectoryName => name;
         public bool ExistsDirectory(string dirName) => false;
         public bool ExistsFile(string fileName) => false;
@@ -284,13 +283,16 @@ public sealed class EditorProjectSetupValidationTests
     {
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => $"memory://{fileName}";
-        public string? LocalPath => null;
         public string FileName => fileName;
         public long FileLength => 0;
         public ValueTask<string[]> ReadAllLines() => ValueTask.FromResult(Array.Empty<string>());
         public ValueTask<byte[]> ReadAllBytes() => ValueTask.FromResult(Array.Empty<byte>());
         public Task<Stream> OpenRead() => Task.FromResult<Stream>(new MemoryStream());
         public Task<Stream> OpenWrite() => throw new NotSupportedException();
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
         public void Dispose()
         {
         }

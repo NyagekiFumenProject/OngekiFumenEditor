@@ -94,19 +94,18 @@ public sealed class EditorProjectLoadOwnershipTests
         private readonly TrackingFile projectFile;
         private bool isDisposed;
 
-        public TrackingDirectory(TrackingFile projectFile, string? localPath = null)
+        public TrackingDirectory(TrackingFile projectFile, string? fullPath = null)
         {
             this.projectFile = projectFile;
             projectFile.ParentDictionary = this;
-            LocalPath = localPath;
+            FullPath = fullPath ?? "memory://project";
         }
 
         public int DisposeCount { get; private set; }
         public ISimpleDirectory? ParentDictionary => null;
         public ISimpleDirectory[] ChildDictionaries => [];
         public ISimpleFile[] ChildFiles => [projectFile];
-        public string FullPath => "memory://project";
-        public string? LocalPath { get; }
+        public string FullPath { get; }
         public string DirectoryName => string.Empty;
 
         public bool ExistsDirectory(string dirName) => false;
@@ -149,7 +148,6 @@ public sealed class EditorProjectLoadOwnershipTests
         public int DisposeCount { get; private set; }
         public ISimpleDirectory? ParentDictionary { get; set; }
         public string FullPath => $"memory://project/{FileName}";
-        public string? LocalPath => null;
         public string FileName { get; }
         public long FileLength => content.LongLength;
 
@@ -173,6 +171,11 @@ public sealed class EditorProjectLoadOwnershipTests
         }
 
         public Task<Stream> OpenWrite() => throw new NotSupportedException();
+
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
 
         public void Dispose()
         {

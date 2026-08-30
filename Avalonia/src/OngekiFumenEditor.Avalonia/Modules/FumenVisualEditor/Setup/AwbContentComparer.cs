@@ -25,22 +25,22 @@ public static class AwbContentComparer
         ArgumentNullException.ThrowIfNull(left);
         ArgumentNullException.ThrowIfNull(right);
 
-        var leftLength = await left.GetLengthAsync(cancellationToken).ConfigureAwait(false);
-        var rightLength = await right.GetLengthAsync(cancellationToken).ConfigureAwait(false);
+        var leftLength = await left.GetLengthAsync(cancellationToken);
+        var rightLength = await right.GetLengthAsync(cancellationToken);
         if (leftLength != rightLength)
             return false;
         if (leftLength == 0)
             return true;
 
-        await using var leftStream = await left.OpenReadAsync(cancellationToken).ConfigureAwait(false);
-        await using var rightStream = await right.OpenReadAsync(cancellationToken).ConfigureAwait(false);
+        await using var leftStream = await left.OpenReadAsync(cancellationToken);
+        await using var rightStream = await right.OpenReadAsync(cancellationToken);
 
         if (leftStream.CanSeek && rightStream.CanSeek && leftLength > LargeFileThreshold &&
             await HasSamplingMismatchAsync(
                 leftStream,
                 rightStream,
                 leftLength,
-                cancellationToken).ConfigureAwait(false))
+                cancellationToken))
         {
             return false;
         }
@@ -48,7 +48,7 @@ public static class AwbContentComparer
         return await StreamsAreEqualAsync(
             leftStream,
             rightStream,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
     }
 
     private static async Task<bool> HasSamplingMismatchAsync(
@@ -77,8 +77,8 @@ public static class AwbContentComparer
 
                 leftStream.Seek(offset, SeekOrigin.Begin);
                 rightStream.Seek(offset, SeekOrigin.Begin);
-                var leftRead = await ReadFilledAsync(leftStream, rentedLeft, cancellationToken).ConfigureAwait(false);
-                var rightRead = await ReadFilledAsync(rightStream, rentedRight, cancellationToken).ConfigureAwait(false);
+                var leftRead = await ReadFilledAsync(leftStream, rentedLeft, cancellationToken);
+                var rightRead = await ReadFilledAsync(rightStream, rentedRight, cancellationToken);
                 if (leftRead != rightRead ||
                     !rentedLeft.AsSpan(0, leftRead).SequenceEqual(rentedRight.AsSpan(0, rightRead)))
                 {
@@ -112,10 +112,10 @@ public static class AwbContentComparer
                 cancellationToken.ThrowIfCancellationRequested();
                 var leftRead = await leftStream.ReadAsync(
                     rentedLeft.AsMemory(0, StreamBufferLength),
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
                 var rightRead = await rightStream.ReadAsync(
                     rentedRight.AsMemory(0, StreamBufferLength),
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken);
                 if (leftRead != rightRead)
                     return false;
                 if (leftRead == 0)
@@ -141,7 +141,7 @@ public static class AwbContentComparer
         {
             var read = await stream.ReadAsync(
                 buffer.AsMemory(total, SampleLength - total),
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken);
             if (read == 0)
                 break;
             total += read;

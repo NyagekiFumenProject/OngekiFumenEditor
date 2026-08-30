@@ -90,7 +90,6 @@ public sealed class AudioManagerSimpleFileTests
     {
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => fullPath;
-        public string? LocalPath => null;
         public string FileName => fileName;
         public long FileLength => content.LongLength;
 
@@ -99,6 +98,10 @@ public sealed class AudioManagerSimpleFileTests
         public Task<Stream> OpenRead() =>
             Task.FromResult<Stream>(new MemoryStream(content, writable: false));
         public Task<Stream> OpenWrite() => throw new NotSupportedException();
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
         public void Dispose()
         {
         }

@@ -66,7 +66,7 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, I
     {
         ObjectDisposedException.ThrowIf(isDisposed, this);
         var entries = new List<SimpleDirectoryEntry>();
-        await foreach (var item in GetStorageFolder().GetItemsAsync().ConfigureAwait(false))
+        await foreach (var item in GetStorageFolder().GetItemsAsync())
         {
             try
             {
@@ -98,7 +98,7 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, I
         if (matches.Length > 1)
             throw new IOException($"Directory '{directoryName}' has a case-insensitive name conflict.");
 
-        var folder = await GetStorageFolder().CreateFolderAsync(directoryName).ConfigureAwait(false)
+        var folder = await GetStorageFolder().CreateFolderAsync(directoryName)
             ?? throw new IOException($"Unable to create directory '{directoryName}'.");
         var directory = new AvaloniaStorageProviderSimpleDirectory(this, folder.Name, folder);
         directories.Add(directory);
@@ -115,11 +115,11 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, I
         if (files.Any(x => x.FileName.Equals(fileName, StringComparison.OrdinalIgnoreCase)))
             throw new IOException($"File '{fileName}' already exists.");
 
-        var storageFile = await GetStorageFolder().CreateFileAsync(fileName).ConfigureAwait(false)
+        var storageFile = await GetStorageFolder().CreateFileAsync(fileName)
             ?? throw new IOException($"Unable to create file '{fileName}'.");
         try
         {
-            var properties = await storageFile.GetBasicPropertiesAsync().ConfigureAwait(false);
+            var properties = await storageFile.GetBasicPropertiesAsync();
             var file = new AvaloniaStorageProviderSimpleFile(
                 this,
                 storageFile.Name,
@@ -132,7 +132,7 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, I
         {
             try
             {
-                await storageFile.DeleteAsync().ConfigureAwait(false);
+                await storageFile.DeleteAsync();
             }
             catch
             {

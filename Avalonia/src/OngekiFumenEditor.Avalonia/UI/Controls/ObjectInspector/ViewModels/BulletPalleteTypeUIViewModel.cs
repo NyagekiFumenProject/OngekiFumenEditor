@@ -87,7 +87,7 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
         }
         catch (Exception e)
         {
-            Log.LogError($"Can't set null for prop {PropertyInfo.DisplayPropertyName}: {e.Message}");
+            Log.LogError($"Can't set null for prop {PropertyInfo.DisplayPropertyName}: {e.Message}", e);
             TypedProxyValue = rollback;
         }
     }

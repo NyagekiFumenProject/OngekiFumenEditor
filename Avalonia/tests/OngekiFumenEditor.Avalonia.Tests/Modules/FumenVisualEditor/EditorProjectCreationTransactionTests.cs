@@ -352,7 +352,6 @@ public sealed class EditorProjectCreationTransactionTests
         public ISimpleDirectory[] ChildDictionaries => [];
         public ISimpleFile[] ChildFiles => files.Cast<ISimpleFile>().ToArray();
         public string FullPath => $"memory://{name}";
-        public string? LocalPath => null;
         public string DirectoryName => name;
         public bool ExistsDirectory(string dirName) => false;
         public bool ExistsFile(string fileName) =>
@@ -438,7 +437,6 @@ public sealed class EditorProjectCreationTransactionTests
         public string FullPath => parent is null
             ? $"memory://source/{FileName}"
             : $"{parent.FullPath}/{FileName}";
-        public string? LocalPath => null;
         public string FileName { get; }
         public long FileLength => content.LongLength;
 

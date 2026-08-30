@@ -46,7 +46,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             string name = $"{prefix}.{Guid.NewGuid():N}{normalizedExtension}";
             TemporaryEntryName.Validate(name);
             string relativePath = TemporaryEntryName.Combine(folder.RelativePath, name);
-            if (await TryCreateFileCoreAsync(relativePath, cancellationToken).ConfigureAwait(false))
+            if (await TryCreateFileCoreAsync(relativePath, cancellationToken))
             {
                 var file = new TemporaryFile(this, name, relativePath, folder, 0);
                 folder.TrackFile(file);
@@ -71,7 +71,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             string name = $"{prefix}_{Guid.NewGuid():N}";
             TemporaryEntryName.Validate(name);
             string relativePath = TemporaryEntryName.Combine(folder.RelativePath, name);
-            if (await TryCreateFolderCoreAsync(relativePath, cancellationToken).ConfigureAwait(false))
+            if (await TryCreateFolderCoreAsync(relativePath, cancellationToken))
             {
                 var child = new TemporaryFolder(this, name, relativePath, folder);
                 folder.TrackFolder(child);
@@ -84,7 +84,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
 
     public async Task ClearAsync(CancellationToken cancellationToken = default)
     {
-        await ClearCoreAsync(cancellationToken).ConfigureAwait(false);
+        await ClearCoreAsync(cancellationToken);
         ((TemporaryFolder)Root).ClearTrackedEntries();
     }
 
@@ -159,10 +159,10 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
         Func<Task<T>> action)
     {
         SemaphoreSlim gate = fileMutationLocks.GetOrAdd(relativePath, static _ => new SemaphoreSlim(1, 1));
-        await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await gate.WaitAsync(cancellationToken);
         try
         {
-            return await action().ConfigureAwait(false);
+            return await action();
         }
         finally
         {
@@ -179,7 +179,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             cancellationToken,
             async () =>
             {
-                await action().ConfigureAwait(false);
+                await action();
                 return true;
             });
 
@@ -224,7 +224,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
         {
             long length = await Provider
                 .GetFileLengthCoreAsync(RelativePath, cancellationToken)
-                .ConfigureAwait(false);
+                ;
             Interlocked.Exchange(ref fileLength, length);
             return length;
         }
@@ -233,7 +233,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
         {
             byte[] bytes = await Provider
                 .ReadAllBytesCoreAsync(RelativePath, cancellationToken)
-                .ConfigureAwait(false);
+                ;
             Interlocked.Exchange(ref fileLength, bytes.LongLength);
             return bytes;
         }
@@ -242,7 +242,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
         {
             Stream stream = await Provider
                 .OpenReadCoreAsync(RelativePath, cancellationToken)
-                .ConfigureAwait(false);
+                ;
             if (stream.CanSeek)
             {
                 try
@@ -280,9 +280,9 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
                 {
                     await Provider
                         .WriteFileCoreAsync(RelativePath, writer, cancellationToken)
-                        .ConfigureAwait(false);
-                    await RefreshCachedLengthAsync().ConfigureAwait(false);
-                }).ConfigureAwait(false);
+                        ;
+                    await RefreshCachedLengthAsync();
+                });
         }
 
         public Task WriteAllBytesAsync(
@@ -304,9 +304,9 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
                 {
                     await Provider
                         .AppendFileCoreAsync(RelativePath, data, cancellationToken)
-                        .ConfigureAwait(false);
-                    await RefreshCachedLengthAsync().ConfigureAwait(false);
-                }).ConfigureAwait(false);
+                        ;
+                    await RefreshCachedLengthAsync();
+                });
         }
 
         public async Task DeleteAsync(CancellationToken cancellationToken = default)
@@ -314,14 +314,14 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             await Provider.WithFileMutationLockAsync(
                 RelativePath,
                 cancellationToken,
-                () => Provider.DeleteFileCoreAsync(RelativePath, cancellationToken)).ConfigureAwait(false);
+                () => Provider.DeleteFileCoreAsync(RelativePath, cancellationToken));
             Interlocked.Exchange(ref fileLength, 0);
             Parent?.UntrackFile(this);
         }
 
         private async ValueTask<string[]> ReadAllLinesAsync()
         {
-            var text = Encoding.UTF8.GetString(await ReadAllBytesAsync().ConfigureAwait(false));
+            var text = Encoding.UTF8.GetString(await ReadAllBytesAsync());
             return text.Split(LineSeparators, StringSplitOptions.None);
         }
 
@@ -331,7 +331,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             {
                 long length = await Provider
                     .GetFileLengthCoreAsync(RelativePath, CancellationToken.None)
-                    .ConfigureAwait(false);
+                    ;
                 Interlocked.Exchange(ref fileLength, length);
             }
             catch (FileNotFoundException)
@@ -388,7 +388,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
                 throw new IOException($"An entry already exists at temporary path '{TemporaryEntryName.Combine(RelativePath, fileName)}'.");
 
             string childPath = TemporaryEntryName.Combine(RelativePath, fileName);
-            await Provider.CreateFileCoreAsync(childPath, cancellationToken).ConfigureAwait(false);
+            await Provider.CreateFileCoreAsync(childPath, cancellationToken);
             var file = new TemporaryFile(Provider, fileName, childPath, this, 0);
             TrackFile(file);
             return file;
@@ -400,7 +400,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
         {
             TemporaryEntryName.Validate(name);
             string childPath = TemporaryEntryName.Combine(RelativePath, name);
-            if (await Provider.GetEntryKindCoreAsync(childPath, cancellationToken).ConfigureAwait(false)
+            if (await Provider.GetEntryKindCoreAsync(childPath, cancellationToken)
                 != TemporaryEntryKind.File)
             {
                 return null;
@@ -408,7 +408,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
 
             long length = await Provider
                 .GetFileLengthCoreAsync(childPath, cancellationToken)
-                .ConfigureAwait(false);
+                ;
             if (files.TryGetValue(name, out var existing))
             {
                 existing.SetCachedLength(length);
@@ -426,7 +426,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
         {
             TemporaryEntryName.Validate(name);
             string childPath = TemporaryEntryName.Combine(RelativePath, name);
-            if (await Provider.GetEntryKindCoreAsync(childPath, cancellationToken).ConfigureAwait(false)
+            if (await Provider.GetEntryKindCoreAsync(childPath, cancellationToken)
                 != TemporaryEntryKind.Folder)
             {
                 return null;
@@ -448,17 +448,17 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             string childPath = TemporaryEntryName.Combine(RelativePath, name);
             TemporaryEntryKind kind = await Provider
                 .GetEntryKindCoreAsync(childPath, cancellationToken)
-                .ConfigureAwait(false);
+                ;
             if (kind == TemporaryEntryKind.Folder)
                 throw new IOException($"A folder already exists at temporary path '{childPath}'.");
 
             long length = 0;
             if (kind == TemporaryEntryKind.Missing)
-                await Provider.CreateFileCoreAsync(childPath, cancellationToken).ConfigureAwait(false);
+                await Provider.CreateFileCoreAsync(childPath, cancellationToken);
             else
                 length = await Provider
                     .GetFileLengthCoreAsync(childPath, cancellationToken)
-                    .ConfigureAwait(false);
+                    ;
 
             if (files.TryGetValue(name, out var existing))
             {
@@ -479,11 +479,11 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
             string childPath = TemporaryEntryName.Combine(RelativePath, name);
             TemporaryEntryKind kind = await Provider
                 .GetEntryKindCoreAsync(childPath, cancellationToken)
-                .ConfigureAwait(false);
+                ;
             if (kind == TemporaryEntryKind.File)
                 throw new IOException($"A file already exists at temporary path '{childPath}'.");
             if (kind == TemporaryEntryKind.Missing)
-                await Provider.CreateFolderCoreAsync(childPath, cancellationToken).ConfigureAwait(false);
+                await Provider.CreateFolderCoreAsync(childPath, cancellationToken);
 
             if (folders.TryGetValue(name, out var existing))
                 return existing;
@@ -495,7 +495,7 @@ public abstract class TemporaryFolderProviderBase : ITemporaryFolderProvider
 
         public async Task DeleteAsync(CancellationToken cancellationToken = default)
         {
-            await Provider.DeleteFolderCoreAsync(RelativePath, cancellationToken).ConfigureAwait(false);
+            await Provider.DeleteFolderCoreAsync(RelativePath, cancellationToken);
             ClearTrackedEntries();
             Parent?.UntrackFolder(this);
         }

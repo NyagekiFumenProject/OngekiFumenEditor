@@ -40,7 +40,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var properties = await storageFile.GetBasicPropertiesAsync().ConfigureAwait(false);
+            var properties = await storageFile.GetBasicPropertiesAsync();
             cancellationToken.ThrowIfCancellationRequested();
             var fileLength = properties.Size is { } size
                 ? checked((long)size)
@@ -69,7 +69,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         ArgumentNullException.ThrowIfNull(rootStorageFolder);
 
         using var context = new BuildContext(cancellationToken);
-        var root = await BuildDirectory(null, rootStorageFolder, context).ConfigureAwait(false);
+        var root = await BuildDirectory(null, rootStorageFolder, context);
         root.DirectoryName = string.Empty;
         return root;
     }
@@ -85,20 +85,20 @@ public static class AvaloniaStorageProviderFileSystemBuilder
             if (parent is null && IsLocalLink(folder))
                 throw new IOException("The selected project root cannot be a symbolic link, junction, or mount point.");
 
-            var items = await EnumerateItemsAsync(folder, context).ConfigureAwait(false);
+            var items = await EnumerateItemsAsync(folder, context);
             var childTasks = items
                 .Select((item, index) => BuildChildAsync(directory, item, index, context))
                 .ToArray();
             BuildChildResult[] children;
             try
             {
-                children = await Task.WhenAll(childTasks).ConfigureAwait(false);
+                children = await Task.WhenAll(childTasks);
             }
             catch
             {
                 try
                 {
-                    await Task.WhenAll(childTasks).ConfigureAwait(false);
+                    await Task.WhenAll(childTasks);
                 }
                 catch
                 {
@@ -135,13 +135,13 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         IStorageFolder folder,
         BuildContext context)
     {
-        await context.StorageGate.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+        await context.StorageGate.WaitAsync(context.CancellationToken);
         try
         {
             var items = new List<IStorageItem>();
             try
             {
-                await foreach (var item in folder.GetItemsAsync().ConfigureAwait(false))
+                await foreach (var item in folder.GetItemsAsync())
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();
                     items.Add(item);
@@ -172,7 +172,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         try
         {
             context.CancellationToken.ThrowIfCancellationRequested();
-            await context.StorageGate.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            await context.StorageGate.WaitAsync(context.CancellationToken);
             try
             {
                 if (IsLocalLink(item))
@@ -185,7 +185,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
                 {
                     case IStorageFile childFile:
                     {
-                        var properties = await childFile.GetBasicPropertiesAsync().ConfigureAwait(false);
+                        var properties = await childFile.GetBasicPropertiesAsync();
                         var fileLength = properties.Size is { } size
                             ? checked((long)size)
                             : 0;
@@ -210,7 +210,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
 
             ownershipTransferred = true;
             var childDirectory = await BuildDirectory(parent, (IStorageFolder)item, context)
-                .ConfigureAwait(false);
+                ;
             return new BuildChildResult(index, childDirectory, null);
         }
         finally

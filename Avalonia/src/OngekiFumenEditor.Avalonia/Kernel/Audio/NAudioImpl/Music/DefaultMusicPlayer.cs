@@ -94,7 +94,7 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         }
         catch (Exception e)
         {
-            Log.LogError($"Load audio file ({audioFile}) failed : {e.Message}");
+            Log.LogError($"Load audio file ({audioFile}) failed : {e.Message}", e);
             Dispose();
         }
     }
@@ -112,7 +112,7 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         }
         catch (Exception e)
         {
-            Log.LogError($"Load audio file ({audioFile.FullPath}) failed : {e.Message}");
+            Log.LogError($"Load audio file ({audioFile.FullPath}) failed : {e.Message}", e);
             Dispose();
         }
     }
@@ -127,7 +127,7 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
             var seekableStream = await AudioStreamFormatDetector.EnsureSeekableAsync(audioStream);
             try
             {
-                var format = AudioStreamFormatDetector.Detect(seekableStream);
+                var format = await AudioStreamFormatDetector.DetectAsync(seekableStream);
                 using var rawStream = audioFileReaderFactory.CreateAudioFileReader(seekableStream, format);
                 await LoadCore(rawStream, targetSampleRate);
             }
@@ -139,7 +139,7 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         }
         catch (Exception e)
         {
-            Log.LogError($"Load audio stream failed : {e.Message}");
+            Log.LogError($"Load audio stream failed : {e.Message}", e);
             Dispose();
         }
     }

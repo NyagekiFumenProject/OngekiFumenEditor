@@ -40,6 +40,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Audio.NAudioImpl.Utils
 
 			return newBuf;
 		}
+
 		public static byte[] ToArray(this IWaveProvider waveProvider)
 		{
 			var buffer = ArrayPool<byte>.Shared.Rent(1024_000);

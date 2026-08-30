@@ -80,7 +80,6 @@ public sealed class ProjectFileBindingDialogViewModelTests
         public int DisposeCount { get; private set; }
         public ISimpleDirectory? ParentDictionary => null;
         public string FullPath => $"memory:///{FileName}";
-        public string? LocalPath => null;
         public string FileName { get; } = fileName;
         public long FileLength => 0;
 
@@ -91,6 +90,11 @@ public sealed class ProjectFileBindingDialogViewModelTests
         public Task<Stream> OpenRead() => throw new NotSupportedException();
 
         public Task<Stream> OpenWrite() => throw new NotSupportedException();
+
+        public Task WriteAsync(
+            Func<Stream, CancellationToken, Task> writer,
+            CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
 
         public void Dispose()
         {

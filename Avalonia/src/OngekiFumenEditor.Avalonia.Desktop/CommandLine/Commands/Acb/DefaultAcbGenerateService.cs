@@ -91,7 +91,7 @@ internal sealed class DefaultAcbGenerateService : IAcbGenerateService
         }
         catch (Exception exception)
         {
-            Log.LogError($"AcbGenerateProgram.Generate() throw exception:{exception.Message}\n{exception.StackTrace}");
+            Log.LogError($"AcbGenerateProgram.Generate() throw exception:{exception.Message}\n{exception.StackTrace}", exception);
             return new(false, $"{Lang.ThrowExceptionWhenConvert}{exception.Message}");
         }
     }

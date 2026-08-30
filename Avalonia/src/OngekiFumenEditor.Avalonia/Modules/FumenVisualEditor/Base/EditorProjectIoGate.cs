@@ -8,7 +8,7 @@ public static class EditorProjectIoGate
 
     public static async ValueTask<IDisposable> EnterAsync(CancellationToken cancellationToken = default)
     {
-        await Gate.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await Gate.WaitAsync(cancellationToken);
         return new Releaser();
     }
 

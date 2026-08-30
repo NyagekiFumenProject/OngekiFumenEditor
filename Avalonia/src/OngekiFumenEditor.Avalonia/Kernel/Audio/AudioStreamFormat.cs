@@ -12,7 +12,7 @@ public enum AudioStreamFormat
 
 public static class AudioStreamFormatDetector
 {
-    public static AudioStreamFormat Detect(Stream stream)
+    public static async Task<AudioStreamFormat> DetectAsync(Stream stream)
     {
         ArgumentNullException.ThrowIfNull(stream);
         if (!stream.CanSeek)
@@ -21,11 +21,13 @@ public static class AudioStreamFormatDetector
         var originalPosition = stream.Position;
         try
         {
-            Span<byte> header = stackalloc byte[12];
+            var header = new byte[12];
             var read = 0;
             while (read < header.Length)
             {
-                var count = stream.Read(header[read..]);
+                // Range indexing on a byte array creates a copy. Use a Memory slice so
+                // the asynchronous read writes directly into the header we inspect below.
+                var count = await stream.ReadAsync(header.AsMemory(read));
                 if (count == 0)
                     break;
                 read += count;
@@ -79,7 +81,7 @@ public static class AudioStreamFormatDetector
         }
 
         var buffer = new MemoryStream();
-        await stream.CopyToAsync(buffer, cancellationToken).ConfigureAwait(false);
+        await stream.CopyToAsync(buffer, cancellationToken);
         buffer.Position = 0;
         return buffer;
     }

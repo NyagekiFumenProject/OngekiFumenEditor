@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using OngekiFumenEditor.Avalonia.Utils;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
-using System.Text;
-using System.Threading.Tasks;
-using Gekimini.Avalonia;
+﻿using Gekimini.Avalonia;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Platforms.Services.Settings;
 using Gekimini.Avalonia.Utils;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Utils;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Settings;
 
@@ -130,7 +130,7 @@ public class DesktopSettingManager : ISettingManager
         }
         catch (Exception e)
         {
-            Log.LogError($"Can't load setting.json : {e.Message}");
+            Log.LogError($"Can't load setting.json : {e.Message}", e);
             Task.Run(async () =>
             {
                 await dialogManager.ShowMessageDialog(

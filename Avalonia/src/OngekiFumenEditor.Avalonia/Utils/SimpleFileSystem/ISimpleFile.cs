@@ -31,7 +31,7 @@ public interface ISimpleFile : IDisposable
     async Task<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        byte[] bytes = await ReadAllBytes().ConfigureAwait(false);
+        byte[] bytes = await ReadAllBytes();
         cancellationToken.ThrowIfCancellationRequested();
         return bytes;
     }
@@ -41,7 +41,7 @@ public interface ISimpleFile : IDisposable
     async Task<Stream> OpenReadAsync(CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return await OpenRead().ConfigureAwait(false);
+        return await OpenRead();
     }
 
     /// <summary>
@@ -72,13 +72,13 @@ public interface ISimpleFile : IDisposable
         ReadOnlyMemory<byte> data,
         CancellationToken cancellationToken = default)
     {
-        byte[] existing = await ReadAllBytesAsync(cancellationToken).ConfigureAwait(false);
+        byte[] existing = await ReadAllBytesAsync(cancellationToken);
         await WriteAsync(
             async (stream, writerCancellationToken) =>
             {
-                await stream.WriteAsync(existing, writerCancellationToken).ConfigureAwait(false);
-                await stream.WriteAsync(data, writerCancellationToken).ConfigureAwait(false);
+                await stream.WriteAsync(existing, writerCancellationToken);
+                await stream.WriteAsync(data, writerCancellationToken);
             },
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken);
     }
 }
