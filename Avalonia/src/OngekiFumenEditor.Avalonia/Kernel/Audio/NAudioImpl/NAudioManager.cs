@@ -331,8 +331,7 @@ internal sealed class NAudioManager : ObservableObject, IAudioManager
                 schedulerManager,
                 audioFileReaderFactory);
             ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-            await using var outputStream = await outputFile.OpenRead();
-            await player.Load(outputStream, targetSampleRate);
+            await player.Load(outputFile, targetSampleRate);
             if (!player.IsAvaliable)
             {
                 player.Dispose();

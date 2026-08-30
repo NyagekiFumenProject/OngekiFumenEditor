@@ -357,7 +357,7 @@ public partial class EditorProjectSetupDialogViewModel : WindowViewModelBase, ID
                 }
             }
 
-            await using var audioStream = await selectedAudio.OpenRead();
+            await using var audioStream = await selectedAudio.CopyToNewMemoryStreamAsync();
             using var player = selectedAwb is null
                 ? await audioManager.LoadAudioAsync(
                     audioStream)

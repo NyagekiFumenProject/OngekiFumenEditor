@@ -215,7 +215,7 @@ public sealed class DesktopFastOpenService
         ISimpleFile audioFile,
         ISimpleFile externalAwbFile)
     {
-        await using var audioStream = await audioFile.OpenRead();
+        await using var audioStream = await audioFile.CopyToNewMemoryStreamAsync();
         using var audio = externalAwbFile is null
             ? await audioManager.LoadAudioAsync(audioStream)
             : await LoadAudioWithExternalAwbAsync(audioStream, externalAwbFile);

@@ -32,4 +32,17 @@ public static class SimpleFileCopyExtensions
             },
             cancellationToken);
     }
+
+    public static async Task<Stream> CopyToNewMemoryStreamAsync(
+        this ISimpleFile source,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+
+        var memoryStream = new MemoryStream();
+        await using var fs = await source.OpenReadAsync(cancellationToken);
+        await fs.CopyToAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+        return memoryStream;
+    }
 }

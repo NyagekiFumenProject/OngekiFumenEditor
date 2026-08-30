@@ -259,7 +259,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         try
         {
             var audioManager = IoC.Get<IAudioManager>();
-            await using var audioStream = await audioFile.OpenRead();
+            await using var audioStream = await audioFile.CopyToNewMemoryStreamAsync();
+
             if (context.AudioAwbFile is { } audioAwbFile)
             {
                 await using var externalAwbStream = await audioAwbFile.OpenRead();

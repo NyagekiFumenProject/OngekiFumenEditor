@@ -455,7 +455,8 @@ public sealed class EditorProjectCreationTransaction : IDisposable
         cancellationToken.ThrowIfCancellationRequested();
         try
         {
-            await using var audioStream = await selection.AudioFile.OpenRead();
+            await using var audioStream = await selection.AudioFile.CopyToNewMemoryStreamAsync();
+
             IAudioPlayer player;
             if (selection.AudioAwbFile is { } externalAwbFile)
             {

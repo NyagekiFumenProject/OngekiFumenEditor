@@ -81,24 +81,6 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         OnPlaybackFinished?.Invoke();
     }
 
-    public async Task Load(string audioFile, int targetSampleRate)
-    {
-        //release resource before loading new one.
-        Dispose();
-
-        try
-        {
-            Log.LogInfo($"Load audio file: {audioFile}");
-            using var rawStream = audioFileReaderFactory.CreateAudioFileReader(audioFile);
-            await LoadCore(rawStream, targetSampleRate);
-        }
-        catch (Exception e)
-        {
-            Log.LogError($"Load audio file ({audioFile}) failed : {e.Message}", e);
-            Dispose();
-        }
-    }
-
     public async Task Load(ISimpleFile audioFile, int targetSampleRate)
     {
         ArgumentNullException.ThrowIfNull(audioFile);
@@ -107,7 +89,7 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         try
         {
             Log.LogInfo($"Load audio file: {audioFile.FullPath}");
-            await using var sourceStream = await audioFile.OpenRead();
+            await using var sourceStream = await audioFile.CopyToNewMemoryStreamAsync();
             await Load(sourceStream, targetSampleRate);
         }
         catch (Exception e)
