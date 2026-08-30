@@ -9,5 +9,5 @@ public static class MenuDefinitions
     [RegisterStaticObject]
     public static MenuItemDefinition ViewOgkiFumenListBrowserMenuItem =
         new CommandMenuItemDefinition<ViewOgkiFumenListBrowserCommandDefinition>(
-            Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.ViewToolsMenuGroup, 8);
+            Gekimini.Avalonia.Modules.MainMenu.MenuDefinitions.FileNewOpenMenuGroup, 2);
 }
