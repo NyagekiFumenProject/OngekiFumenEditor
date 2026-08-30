@@ -15,6 +15,12 @@ public partial class WindowInterop
 
     [JSImport("globalThis.WindowInterop.openURL")]
     public static partial bool OpenURL(string url);
+
+    [JSImport("globalThis.WindowInterop.setTitle")]
+    public static partial void SetTitle(string title);
+
+    [JSImport("globalThis.WindowInterop.setIcon")]
+    public static partial void SetIcon(string url);
     
     [JSImport("globalThis.WindowInterop.getDPI")]
     public static partial double getDPI();

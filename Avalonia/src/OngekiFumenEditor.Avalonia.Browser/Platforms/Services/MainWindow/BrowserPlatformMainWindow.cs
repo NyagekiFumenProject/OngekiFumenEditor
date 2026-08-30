@@ -12,8 +12,10 @@ namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.MainWindow;
 [RegisterSingleton<IPlatformMainWindow>]
 public partial class BrowserPlatformMainWindow : ObservableObject, IPlatformMainWindow
 {
-    [ObservableProperty]
-    private string mainWindowTitle = "Gekimini.Avalonia for Browser";
+    private const string BrowserIconPath = "./favicon.ico";
+
+    private string mainWindowTitle = "Ongeki Fumen Editor";
+    private WindowIcon mainWindowIcon;
 
     public bool IsFullScreen
     {
@@ -30,12 +32,19 @@ public partial class BrowserPlatformMainWindow : ObservableObject, IPlatformMain
 
     public string Title
     {
-        get
+        get => mainWindowTitle;
+        set
         {
-            Log.LogWarn($"BrowserPlatformMainWindow not support get/set {nameof(Title)}");
-            return default;
+            var nextTitle = value ?? string.Empty;
+            var changed = !string.Equals(
+                mainWindowTitle,
+                nextTitle,
+                System.StringComparison.Ordinal);
+            mainWindowTitle = nextTitle;
+            Utils.Interops.WindowInterop.SetTitle(nextTitle);
+            if (changed)
+                OnPropertyChanged();
         }
-        set => Log.LogWarn($"BrowserPlatformMainWindow not support get/set {nameof(Title)}");
     }
 
     public Rect? WindowRect
@@ -50,11 +59,14 @@ public partial class BrowserPlatformMainWindow : ObservableObject, IPlatformMain
 
     public WindowIcon Icon
     {
-        get
+        get => mainWindowIcon;
+        set
         {
-            Log.LogWarn($"BrowserPlatformMainWindow not support get/set {nameof(Icon)}");
-            return default;
+            mainWindowIcon = value;
+            // Avalonia's browser icon loader is a stub because there is no native
+            // window to update. Keep the browser tab icon on the host page instead.
+            Utils.Interops.WindowInterop.SetIcon(BrowserIconPath);
+            OnPropertyChanged();
         }
-        set => Log.LogWarn($"BrowserPlatformMainWindow not support get/set {nameof(Icon)}");
     }
 }
