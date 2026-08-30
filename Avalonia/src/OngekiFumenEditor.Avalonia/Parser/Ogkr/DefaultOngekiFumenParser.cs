@@ -46,9 +46,12 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
 			var commandArg = new CommandArgs(argValueConverters);
 
-			while (!reader.EndOfStream)
+			while (true)
 			{
 				var line = await reader.ReadLineAsync();
+				if (line is null)
+					break;
+
 				commandArg.Line = line;
 
 				var cmdName = commandArg.GetData<string>(0)?.Trim();
