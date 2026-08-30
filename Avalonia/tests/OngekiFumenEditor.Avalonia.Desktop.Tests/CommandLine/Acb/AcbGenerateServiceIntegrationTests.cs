@@ -111,7 +111,7 @@ public sealed class AcbGenerateServiceIntegrationTests
     private static DefaultAcbGenerateService CreateService(string temporaryRootPath)
     {
         Log.Initialize(new Log([]));
-        return new DefaultAcbGenerateService(new DesktopTemporaryFolderProvider(temporaryRootPath));
+        return new DefaultAcbGenerateService(new TestLocalTemporaryFolderProvider(temporaryRootPath));
     }
 
     private static void AssertAcbCanBeReopened(string acbPath, string awbPath)

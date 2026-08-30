@@ -108,7 +108,7 @@ public sealed class JacketGenerateServiceIntegrationTests
     private static DefaultJacketGenerateService CreateService(string temporaryRootPath)
     {
         Log.Initialize(new Log([]));
-        return new DefaultJacketGenerateService(new DesktopTemporaryFolderProvider(temporaryRootPath));
+        return new DefaultJacketGenerateService(new TestLocalTemporaryFolderProvider(temporaryRootPath));
     }
 
     private static async Task CreateInputImageAsync(string filePath)
