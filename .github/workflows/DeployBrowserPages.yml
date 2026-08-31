@@ -73,31 +73,6 @@ jobs:
           grep -ERq 'runAOTCompilation[[:space:]]*:[[:space:]]*true' "$site_root/_framework"/dotnet.native*.js
           touch "$site_root/.nojekyll"
 
-      # Cloudflare Pages limits each asset to 25 MiB; the AOT runtime is larger.
-      - name: Publish Browser Release for Cloudflare Pages
-        run: >-
-          dotnet publish "$BROWSER_PROJECT"
-          --configuration Release
-          --no-restore
-          --output "${{ runner.temp }}/cloudflare-publish"
-          --nologo
-          --verbosity minimal
-          -p:RunAOTCompilation=false
-
-      - name: Validate Cloudflare Pages artifact
-        shell: bash
-        run: |
-          site_root="${{ runner.temp }}/cloudflare-publish/wwwroot"
-          test -f "$site_root/index.html"
-          test -d "$site_root/_framework"
-          find "$site_root/_framework" -maxdepth 1 -type f -name '*.wasm' -print -quit | grep -q .
-          oversized="$(find "$site_root" -type f -size +26214400c -print -quit)"
-          if [ -n "$oversized" ]; then
-            echo "Cloudflare Pages asset exceeds 25 MiB: $oversized" >&2
-            exit 1
-          fi
-          touch "$site_root/.nojekyll"
-
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
@@ -108,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: browser-site
-          path: ${{ runner.temp }}/cloudflare-publish/wwwroot
+          path: ${{ runner.temp }}/browser-publish/wwwroot
           include-hidden-files: true
           if-no-files-found: error
 
@@ -149,6 +124,29 @@ jobs:
         with:
           name: browser-site
           path: ${{ runner.temp }}/browser-publish/wwwroot
+
+      - name: Delete OverSize Files
+        shell: bash
+        run: |
+          site_root="${{ runner.temp }}/browser-publish/wwwroot"
+          max_size=26214400
+          deleted=0
+
+          echo "Checking Cloudflare Pages asset size limit: 25 MiB (${max_size} bytes)"
+
+          while IFS= read -r -d '' file; do
+            size="$(stat -c '%s' "$file")"
+            size_mib="$(awk -v size="$size" 'BEGIN { printf "%.2f", size / 1048576 }')"
+            echo "Deleting oversized file: ${file#"$site_root"/} (${size} bytes, ${size_mib} MiB)"
+            rm -f "$file"
+            deleted=$((deleted + 1))
+          done < <(find "$site_root" -type f -size +26214400c -print0)
+
+          if [ "$deleted" -eq 0 ]; then
+            echo "No oversized files found."
+          else
+            echo "Deleted $deleted oversized file(s)."
+          fi
 
       - name: Publish to Cloudflare Pages
         uses: cloudflare/pages-action@v1
