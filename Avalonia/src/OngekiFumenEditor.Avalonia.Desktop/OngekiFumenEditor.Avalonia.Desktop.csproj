@@ -77,4 +77,9 @@
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj" />
         <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Platforms\Services\FileSystem\ResourceFolderProvider\" />
+      <Folder Include="Utils\Logging\" />
+    </ItemGroup>
 </Project>

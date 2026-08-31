@@ -494,3 +494,11 @@ Type、String、Collection、Comparison、Negative、State/Side-effect、Structu
 - Production targets: simple-file scanner, relative locator guard, Unity AssetBundle jacket conversion, weak/temporary cover caching, window lifecycle, storage bookmarks, editor-context ownership, and compiled XAML view.
 - Existing conventions: SDK-style net10.0 xUnit tests with `Avalonia.Headless.XUnit`; storage fixtures are wrapped through `AvaloniaStorageProviderFileSystemBuilder`.
 - Acceptance evidence is recorded in the Ogki-specific test classes under `tests/OngekiFumenEditor.Avalonia.Tests/Modules/OgkiFumenListBrowser`.
+
+## Browser AudioWorklet and Global Settings Reset (2026-08-31)
+
+- The Browser factory previously selected the fixed `Interactive` profile. The implementation now loads a Browser-local setting and maps it to explicit `BrowserAudioWorkletOptions` for each newly created player.
+- Browser persistence is isolated from the core project. The loader normalizes duration to 20..5000 ms and initial frames to 128..8192, restores defaults for malformed/type-invalid JSON, and performs at most one corrective write per load.
+- `ISettingsEditor.ResetDefault()` is implemented by every registered editor. `ISettingsResetService` re-enumerates `ISettingsEditor` instances on every call and invokes each once in registration order.
+- Browser settings UI and language resources are included in the remaining ordinary Browser project; core tests link only platform-independent setting logic. The LLVM project was removed and is out of scope.
+- Static source/test pairing was rerun for this broad change: 2,699 production sources, 269 test sources, 704 paired, 1,995 unpaired. This is a heuristic inventory, not coverage evidence.

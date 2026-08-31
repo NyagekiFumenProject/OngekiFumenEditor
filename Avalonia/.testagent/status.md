@@ -381,3 +381,28 @@ Debug xUnit 验证项目图和托管生成链；主流程另用真实 NativeAOT 
 - 串行 `dotnet build OngekiFumenEditor.Avalonia.sln -c Debug --no-restore --no-incremental -m:1`：0 错误；仅保留仓库已有编译/包告警。
 - 重点集成证据：`Generate_48KhzPcmWave_CreatesAcbAwbAndMusicSourceThatReopen`、`JacketGenerateServiceIntegrationTests` 三项、`RootIsLazy_AndUniqueFileIsPhysicalContainedPlaceholder`。
 - 已删除临时诊断项目 `F:\Temp\WaveInspect`；未修改用户已有的其他工作区变更。
+
+## Browser AudioWorklet and Global Settings Reset (2026-08-31)
+
+### Implementation status
+
+- Completed the shared reset contract, reset coordinator, editor migrations, Browser setting model/store/provider, Browser settings view/localization, and per-player factory mapping.
+- Added focused tests for Browser normalization/storage/options and reset-service enumeration. Existing registration tests now assert MainMenu singleton behavior and view resolution.
+
+### Verification status
+
+- Focused Browser setting tests: 8/8 passed.
+- Focused reset-service tests: 3/3 passed.
+- Focused settings registration tests (including MainMenu singleton/view): passed after correcting the test to resolve the interface registration.
+- Ordinary Browser Debug build: 0 errors; existing WebAssembly/source-generator warnings remain.
+- Full core test pass: 569/569 passed.
+- Ordinary Browser Debug and Release builds: 0 errors; existing WebAssembly/source-generator warnings remain.
+- NAudio BrowserAudioWorklet .NET tests: 91/91 passed.
+- NAudio BrowserAudioWorklet JavaScript tests: 14/14 passed; `music-decoder.js` syntax check passed.
+- LLVM was removed from the workspace and was intentionally not built or included in this verification.
+- The nested Browser solution still contains the removed LLVM project entry; it was left untouched per scope, so verification used the existing Browser `.csproj` directly.
+- The Browser contract test was updated to inspect only the remaining ordinary Browser project.
+
+### Assertion-quality review
+
+- New tests assert concrete defaults, bounds, normalized values, serialized write-back count/content, exception behavior, mapped option values, reset order, re-enumeration, singleton identity, and view resolution. They do not rely on assertion-free smoke checks or self-referential expected values.

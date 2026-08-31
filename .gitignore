@@ -11,6 +11,8 @@
 .dotnet_cli_home/
 .nuget-packages/
 .sandbox_home/
+tmpgen-core/
+.testagent/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

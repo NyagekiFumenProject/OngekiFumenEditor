@@ -679,3 +679,15 @@ service 收到同一个 option 实例和完全相等的 token，返回 0 且 std
 - 三个 Convert 测试文件通过临时隔离测试项目运行：21/21 通过，0 失败，0 跳过。
 - Desktop 项目 Debug 构建通过：0 错误，26 个既有警告。
 - 正式 Desktop 测试项目的剩余编译错误仅涉及不在本轮范围内的 `LocalPath` 迁移引用，未修改。
+
+## Browser AudioWorklet and Global Settings Reset Plan (2026-08-31)
+
+| Requirement | Planned evidence |
+| --- | --- |
+| Shared `ISettingsEditor.ResetDefault()` contract and ordered global reset service | Core registration/reset-service tests plus a full core test run |
+| Main-menu singleton and owned-field reset semantics | DI descriptor test and MainMenu reset implementation review |
+| Browser setting defaults, bounds, malformed JSON recovery, one corrective write, and options mapping | `BrowserAudioWorkletSettingTests` with fake storage callbacks |
+| Browser-only settings view, localization, and factory wiring | Ordinary Browser Debug/Release builds and source-generated XAML/DI inputs; LLVM is out of scope because its project was removed |
+| Existing audio behavior remains compatible | NAudio .NET 91/91 and JavaScript 14/14 regression suites; `music-decoder.js` syntax check |
+
+The implementation keeps settings changes pending until the normal settings-window OK action; reset is the explicit exception and saves immediately. A running player is not rebuilt.
