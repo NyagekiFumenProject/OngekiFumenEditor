@@ -73,7 +73,7 @@ jobs:
           grep -ERq 'runAOTCompilation[[:space:]]*:[[:space:]]*true' "$site_root/_framework"/dotnet.native*.js
           touch "$site_root/.nojekyll"
 
-      - name: Upload GitHub Pages artifact
+      - name: Upload Browser artifact for Github Pages
         uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ runner.temp }}/browser-publish/wwwroot
@@ -106,19 +106,8 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      actions: read
-      contents: read
-    environment:
-      name: cloudflare-pages
-      url: https://ongekifumeneditor.mikirasora.workers.dev/
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-
       - name: Download Browser artifact
         uses: actions/download-artifact@v4
         with:
