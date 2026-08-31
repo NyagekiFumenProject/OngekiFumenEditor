@@ -9,7 +9,6 @@
     xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.ViewModels"
     xmlns:controls="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls"
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.Views.ProgramInfoSettingView"
-    x:CompileBindings="True"
     x:DataType="vm:ProgramInfoSettingViewModel"
     d:Background="White"
     d:DataContext="{d:DesignInstance IsDesignTimeCreatable=False, Type=vm:ProgramInfoSettingViewModel}"
@@ -24,7 +23,7 @@
                     x:Name="RefreshButton"
                     Grid.Column="1"
                     Padding="16,4"
-                    Command="{CompiledBinding RefreshCommand}"
+                    Command="{Binding RefreshCommand}"
                     Content="{markup:Translate {x:Static languages:Lang+B.Refresh}}" />
             </Grid>
 
@@ -35,7 +34,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.ApplicationVersion}"
+                            Text="{Binding Snapshot.ApplicationVersion}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -44,7 +43,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.ProductVersion}"
+                            Text="{Binding Snapshot.ProductVersion}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -53,34 +52,16 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.BuildConfiguration}"
-                            TextWrapping="WrapWithOverflow"
-                            VerticalAlignment="Center" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.BuildTime}}" TextWrapping="Wrap" />
-                        <TextBlock
-                            Grid.Column="1"
-                            FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.BuildTime}"
-                            TextWrapping="WrapWithOverflow"
-                            VerticalAlignment="Center" />
-                    </Grid>
-                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitHash}}" TextWrapping="Wrap" />
-                        <TextBlock
-                            Grid.Column="1"
-                            FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.CommitHash}"
+                            Text="{Binding Snapshot.BuildConfiguration}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
                     <Grid ColumnDefinitions="220,*">
-                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitDate}}" TextWrapping="Wrap" />
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitHash}}" TextWrapping="Wrap" />
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.CommitDate}"
+                            Text="{Binding Snapshot.CommitHash}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -94,7 +75,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.OperatingSystem}"
+                            Text="{Binding Snapshot.OperatingSystem}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -103,7 +84,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.ProcessArchitecture}"
+                            Text="{Binding Snapshot.ProcessArchitecture}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -112,7 +93,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.DotNetRuntime}"
+                            Text="{Binding Snapshot.DotNetRuntime}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -121,7 +102,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.AvaloniaVersion}"
+                            Text="{Binding Snapshot.AvaloniaVersion}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -130,7 +111,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.LogicalProcessorCount}"
+                            Text="{Binding Snapshot.LogicalProcessorCount}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -144,7 +125,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.EditorFpsLimit}"
+                            Text="{Binding Snapshot.EditorFpsLimit}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -153,7 +134,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.GraphicsBackend}"
+                            Text="{Binding Snapshot.GraphicsBackend}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -162,7 +143,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.AvaloniaRenderer}"
+                            Text="{Binding Snapshot.AvaloniaRenderer}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -171,7 +152,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.PlatformRenderInterface}"
+                            Text="{Binding Snapshot.PlatformRenderInterface}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -180,7 +161,7 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.RenderTimer}"
+                            Text="{Binding Snapshot.RenderTimer}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
@@ -194,27 +175,85 @@
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.RuntimeBackgroundThreads}"
+                            Text="{Binding Snapshot.RuntimeBackgroundThreads}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
-                    <Grid ColumnDefinitions="220,*">
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
                         <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.AvaloniaRenderLoopBackgroundThreads}}" TextWrapping="Wrap" />
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
-                            Text="{CompiledBinding Snapshot.AvaloniaRenderLoopBackgroundThreads}"
+                            Text="{Binding Snapshot.AvaloniaRenderLoopBackgroundThreads}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.MainThreadId}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.MainThreadId}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.UIThreadId}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.UIThreadId}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.RenderThreadId}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.RenderThreadId}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CoopHeader}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.CoopHeader}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CoepHeader}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.CoepHeader}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.SharedArrayBuffer}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.SharedArrayBuffer}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.WasmEnableThreads}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.WasmEnableThreads}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
                 </StackPanel>
             </controls:GroupBox>
 
-            <TextBlock
-                Margin="10,2,10,10"
-                HorizontalAlignment="Right"
-                Text="{CompiledBinding Snapshot.LastRefreshed}"
-                TextWrapping="Wrap" />
         </StackPanel>
     </ScrollViewer>
 </gekViews:ViewBase>

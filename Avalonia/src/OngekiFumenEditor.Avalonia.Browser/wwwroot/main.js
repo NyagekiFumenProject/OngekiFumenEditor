@@ -8,6 +8,7 @@ import {
     isAvailable as isLogStorageAvailable,
 } from './logFileSystem.js';
 import {initialize as initializeBrowserOpfs} from './opfsBrowser.js';
+import {initialize as initializeThreading} from './threading.js';
 
 const startup = globalThis.__startupProgress;
 let currentPhase = "启动入口";
@@ -58,6 +59,8 @@ async function loadDotnetModule() {
 }
 
 async function startBrowserApplication() {
+    await initializeThreading();
+
     phaseStart("temporary-file-system", "正在初始化 OPFS 临时与日志存储...", 8);
     trackResourceStart("./opfs.js", "OPFS 基础存储模块");
     await initializeOpfs();
@@ -111,6 +114,8 @@ async function startBrowserApplication() {
     phaseStart("dotnet-runtime", "正在下载并创建 .NET runtime...", 38);
     const dotnetRuntime = await dotnetBuilder.create();
     phaseComplete("dotnet-runtime", ".NET runtime 已创建，正在启动 Avalonia...", 84);
+    globalThis.__ongekiWasmEnableThreads =
+        dotnetRuntime?.runtimeBuildInfo?.wasmEnableThreads;
 
     const config = dotnetRuntime.getConfig();
     if (!config?.mainAssemblyName) {

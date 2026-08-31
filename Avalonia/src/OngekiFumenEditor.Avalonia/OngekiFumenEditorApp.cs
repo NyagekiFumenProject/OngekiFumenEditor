@@ -9,6 +9,7 @@ using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
@@ -21,6 +22,9 @@ public abstract class OngekiFumenEditorApp : App
     protected OngekiFumenEditorApp(bool isGUIMode = true)
         : base(isGUIMode)
     {
+        // Keep a stable managed ID even when the host does not expose a
+        // conventional Program.Main entry point (for example headless tests).
+        ThreadingDiagnosticsRuntime.CaptureMainThread();
     }
 
     protected override void RegisterServices(IServiceCollection serviceCollection)

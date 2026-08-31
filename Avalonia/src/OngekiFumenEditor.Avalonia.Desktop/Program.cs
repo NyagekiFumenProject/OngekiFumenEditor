@@ -12,6 +12,7 @@ using OngekiFumenEditor.Avalonia.Desktop.UI.Dialogs;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.DeadHandler;
 using OngekiFumenEditor.Avalonia.Desktop.Platforms.Services.Logging;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation;
 using OngekiFumenEditor.Avalonia.Utils.DeadHandler;
 using OngekiFumenEditor.Avalonia.Utils;
 
@@ -30,6 +31,7 @@ internal class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        ThreadingDiagnosticsRuntime.CaptureMainThread();
         StartupArgs = args ?? [];
 
 #if !DEBUG
