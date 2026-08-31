@@ -1,4 +1,4 @@
-name: Deploy Browser to GitHub Pages
+name: Deploy Browser to GitHub and Cloudflare Pages
 
 on:
   push:
@@ -74,11 +74,44 @@ jobs:
           grep -ERq 'runAOTCompilation[[:space:]]*:[[:space:]]*true' "$site_root/_framework"/dotnet.native*.js
           touch "$site_root/.nojekyll"
 
+      # Cloudflare Pages limits each asset to 25 MiB; the AOT runtime is larger.
+      - name: Publish Browser Release for Cloudflare Pages
+        run: >-
+          dotnet publish "$BROWSER_PROJECT"
+          --configuration Release
+          --no-restore
+          --output "${{ runner.temp }}/cloudflare-publish"
+          --nologo
+          --verbosity minimal
+          -p:RunAOTCompilation=false
+
+      - name: Validate Cloudflare Pages artifact
+        shell: bash
+        run: |
+          site_root="${{ runner.temp }}/cloudflare-publish/wwwroot"
+          test -f "$site_root/index.html"
+          test -d "$site_root/_framework"
+          find "$site_root/_framework" -maxdepth 1 -type f -name '*.wasm' -print -quit | grep -q .
+          oversized="$(find "$site_root" -type f -size +26214400c -print -quit)"
+          if [ -n "$oversized" ]; then
+            echo "Cloudflare Pages asset exceeds 25 MiB: $oversized" >&2
+            exit 1
+          fi
+          touch "$site_root/.nojekyll"
+
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
           path: ${{ runner.temp }}/browser-publish/wwwroot
           include-hidden-files: true
+
+      - name: Upload Browser artifact for Cloudflare Pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-site
+          path: ${{ runner.temp }}/cloudflare-publish/wwwroot
+          include-hidden-files: true
+          if-no-files-found: error
 
   deploy:
     name: Deploy GitHub Pages
@@ -93,3 +126,39 @@ jobs:
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+  deploy-cloudflare:
+    name: Deploy Cloudflare Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: read
+    environment:
+      name: cloudflare-pages
+      url: https://ongekifumeneditor.mikirasora0409.workers.dev/
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - name: Download Browser artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: browser-site
+          path: ${{ runner.temp }}/browser-publish/wwwroot
+
+      - name: Deploy Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_PAGE_WRITE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4"
+          command: >-
+            pages deploy
+            "${{ runner.temp }}/browser-publish/wwwroot"
+            --branch="${{ github.ref_name }}"
+            --project-name=ongekifumeneditor
