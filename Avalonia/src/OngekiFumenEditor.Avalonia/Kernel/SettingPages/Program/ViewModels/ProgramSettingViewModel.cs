@@ -5,7 +5,9 @@ using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Settings;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages;
 using OngekiFumenEditor.Avalonia.Models.Settings;
+using Microsoft.Extensions.DependencyInjection;
 using SimpleTypedLocalizer;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
@@ -13,6 +15,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.SettingPages.Program.ViewModels;
 [RegisterSingleton<ISettingsEditor>]
 public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
 {
+    private readonly ISettingsResetService settingsResetService;
 
     public ProgramSetting Setting => ProgramSetting.Default;
 
@@ -21,12 +24,25 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     public string SettingsPagePath => Lang.TabEnviorment;
 
     public ProgramSettingViewModel()
+        : this(null)
     {
+    }
+
+    [ActivatorUtilitiesConstructor]
+    public ProgramSettingViewModel(ISettingsResetService settingsResetService)
+    {
+        this.settingsResetService = settingsResetService;
         Setting.PropertyChanged += (_, e) => Log.LogDebug($"program setting property changed : {e.PropertyName}");
     }
 
     public void ApplyChanges()
     {
+        Setting.Save();
+    }
+
+    public void ResetDefault()
+    {
+        Setting.Reset();
         Setting.Save();
     }
 
@@ -37,22 +53,7 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
         if (!await IoC.Get<IDialogManager>().ShowComfirmDialog(Lang.ResetAllSettingComfirm, Lang.Warning))
             return;
 
-        var settingList = new ISettingModel[]
-        {
-            AudioPlayerToolViewerSetting.Default,
-            AudioSetting.Default,
-            EditorGlobalSetting.Default,
-            LogSetting.Default,
-            ProgramSetting.Default,
-            KeyBindingSetting.Default,
-            DefaultWaveformSettings.Default,
-        };
-
-        foreach (var setting in settingList)
-        {
-            setting.Reset();
-            setting.Save();
-        }
+        (settingsResetService ?? IoC.Get<ISettingsResetService>()).ResetAll();
 
         await IoC.Get<IDialogManager>().ShowMessageDialog(Lang.ResetCompleted);
     }
@@ -100,4 +101,3 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
     }
 
 }
-

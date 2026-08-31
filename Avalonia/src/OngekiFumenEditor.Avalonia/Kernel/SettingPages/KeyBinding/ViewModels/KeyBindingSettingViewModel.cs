@@ -58,6 +58,15 @@ public partial class KeyBindingSettingViewModel : ViewModelBase, ISettingsEditor
         keybindingManager.SaveConfig();
     }
 
+    public void ResetDefault()
+    {
+        foreach (var definition in definitions)
+            keybindingManager.DefaultKeyBinding(definition);
+
+        keybindingManager.SaveConfig();
+        UpdateDisplayList();
+    }
+
     [RelayCommand]
     private async Task ChangeKeybindAsync(KeyBindingDefinition definition)
     {

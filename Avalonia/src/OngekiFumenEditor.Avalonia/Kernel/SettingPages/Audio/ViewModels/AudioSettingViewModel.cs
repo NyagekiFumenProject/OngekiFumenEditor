@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Gekimini.Avalonia.Modules.Settings;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
+using OngekiFumenEditor.Avalonia.Models.Settings;
 using CommunityToolkit.Mvvm.Input;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -95,6 +96,19 @@ public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
         saveSettings();
     }
 
+    public void ResetDefault()
+    {
+        Setting.Reset();
+        PlayerSetting.Reset();
+        DefaultWaveformSettings.Default.Reset();
+
+        // Resetting the output setting can change the effective backend. Keep
+        // the editor selection and fallback message in sync before persisting.
+        LoadOutputSelection();
+        saveSettings();
+        DefaultWaveformSettings.Default.Save();
+    }
+
     private void OnSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         Log.LogDebug($"audio setting property changed : {e.PropertyName}");
@@ -151,4 +165,3 @@ public partial class AudioSettingViewModel : ViewModelBase, ISettingsEditor
         ApplyChanges();
     }
 }
-

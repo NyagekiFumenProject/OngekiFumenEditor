@@ -36,6 +36,12 @@ public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase, ISe
         EditorGlobalSetting.Default.Save();
     }
 
+    // Color settings are part of EditorGlobalSetting and are reset by the
+    // sibling global-settings editor. Avoid resetting and saving the model twice.
+    public void ResetDefault()
+    {
+    }
+
     [RelayCommand]
     private Task SelectColorAsync(ColorPropertyWrapper colorProperty)
     {
@@ -51,4 +57,3 @@ public partial class FumenVisualEditorColorSettingViewModel : ViewModelBase, ISe
         return IoC.Get<IWindowManager>().ShowWindowAsync(dialog);
     }
 }
-

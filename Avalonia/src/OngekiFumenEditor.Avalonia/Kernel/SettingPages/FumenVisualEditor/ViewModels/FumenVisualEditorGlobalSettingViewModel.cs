@@ -43,6 +43,12 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
         EditorGlobalSetting.Default.Save();
     }
 
+    public void ResetDefault()
+    {
+        EditorGlobalSetting.Default.Reset();
+        EditorGlobalSetting.Default.Save();
+    }
+
     [RelayCommand]
     private Task SelectBackgroundColorAsync()
     {
@@ -82,4 +88,3 @@ public partial class FumenVisualEditorGlobalSettingViewModel : ViewModelBase, IS
         return IoC.Get<IWindowManager>().ShowWindowAsync(new CommonColorPickerViewModel(getter, setter, title));
     }
 }
-
