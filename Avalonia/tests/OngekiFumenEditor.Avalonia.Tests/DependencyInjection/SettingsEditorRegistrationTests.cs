@@ -1,13 +1,18 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
+using Avalonia.Rendering;
+using Gekimini.Avalonia.Assets.Languages;
 using Gekimini.Avalonia.Modules.Settings;
 using Gekimini.Avalonia.Modules.Settings.ViewModels;
+using Gekimini.Avalonia.Modules.MainMenu.ViewModels;
+using Gekimini.Avalonia.Modules.MainMenu.Views;
 using Gekimini.Avalonia.Views;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.Audio.Views;
+using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.ViewModels;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation.Views;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.ViewModels;
@@ -116,6 +121,25 @@ public sealed class SettingsEditorRegistrationTests
     }
 
     [AvaloniaFact]
+    public void MainMenuSettingsEditorIsSingletonAndResolvesItsView()
+    {
+        var application = Assert.IsAssignableFrom<global::Gekimini.Avalonia.App>(Application.Current);
+        var first = Assert.IsType<MainMenuSettingsViewModel>(application.ServiceProvider
+            .GetServices<ISettingsEditor>().Single(editor => editor is MainMenuSettingsViewModel));
+        var second = Assert.IsType<MainMenuSettingsViewModel>(application.ServiceProvider
+            .GetServices<ISettingsEditor>().Single(editor => editor is MainMenuSettingsViewModel));
+        var editor = Assert.IsAssignableFrom<ISettingsEditor>(first);
+
+        Assert.Same(first, second);
+        Assert.Equal(ProgramLanguages.SettingsPageGeneral, editor.SettingsPageName);
+        Assert.Equal(ProgramLanguages.SettingsPathEnvironment, editor.SettingsPagePath);
+
+        var view = application.ServiceProvider.GetRequiredService<ViewLocator>().Build(editor);
+        Assert.IsType<MainMenuSettingsView>(view);
+        Assert.Same(editor, view.DataContext);
+    }
+
+    [AvaloniaFact]
     public void FumenVisualEditorGlobalSettingView_UndoLimitControlsUseTwoWayBindings()
     {
         var setting = EditorGlobalSetting.Default;
@@ -176,25 +200,30 @@ public sealed class SettingsEditorRegistrationTests
     }
 
     [AvaloniaFact]
-    public void ProgramInfoSettingViewModel_FormatsPositiveAndUnlimitedFpsLimits()
+    public void ProgramInfoSettingViewModel_ReportsAvaloniaRenderTimerLimit()
     {
         var setting = EditorGlobalSetting.Default;
         var originalLimit = setting.LimitFPS;
+        var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>();
+        Assert.NotNull(renderTimer);
 
         try
         {
             setting.LimitFPS = 144;
             var viewModel = new ProgramInfoSettingViewModel();
+            var expectedLimit = renderTimer is DefaultRenderTimer defaultRenderTimer
+                ? defaultRenderTimer.FramesPerSecond.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : Lang.PlatformControlled;
 
-            Assert.Equal("144", viewModel.Snapshot.EditorFpsLimit);
+            Assert.Equal(expectedLimit, viewModel.Snapshot.EditorFpsLimit);
 
             setting.LimitFPS = 0;
             viewModel.RefreshCommand.Execute(null);
-            Assert.Equal(Lang.Unlimited, viewModel.Snapshot.EditorFpsLimit);
+            Assert.Equal(expectedLimit, viewModel.Snapshot.EditorFpsLimit);
 
             setting.LimitFPS = -1;
             viewModel.RefreshCommand.Execute(null);
-            Assert.Equal(Lang.Unlimited, viewModel.Snapshot.EditorFpsLimit);
+            Assert.Equal(expectedLimit, viewModel.Snapshot.EditorFpsLimit);
         }
         finally
         {
@@ -203,22 +232,25 @@ public sealed class SettingsEditorRegistrationTests
     }
 
     [AvaloniaFact]
-    public void ProgramInfoSettingViewModel_RefreshCommandReadsCurrentRuntimeSettings()
+    public void ProgramInfoSettingViewModel_RefreshCommandKeepsRenderTimerLimitIndependentOfEditorSetting()
     {
         var setting = EditorGlobalSetting.Default;
         var originalLimit = setting.LimitFPS;
+        var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>();
+        Assert.NotNull(renderTimer);
 
         try
         {
             setting.LimitFPS = 60;
             var viewModel = new ProgramInfoSettingViewModel();
-            var initialSnapshot = viewModel.Snapshot;
+            var expectedLimit = renderTimer is DefaultRenderTimer defaultRenderTimer
+                ? defaultRenderTimer.FramesPerSecond.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                : Lang.PlatformControlled;
 
             setting.LimitFPS = 240;
             viewModel.RefreshCommand.Execute(null);
 
-            Assert.Equal("240", viewModel.Snapshot.EditorFpsLimit);
-            Assert.NotSame(initialSnapshot, viewModel.Snapshot);
+            Assert.Equal(expectedLimit, viewModel.Snapshot.EditorFpsLimit);
         }
         finally
         {
@@ -234,6 +266,36 @@ public sealed class SettingsEditorRegistrationTests
         Assert.Equal(Lang.Unavailable, viewModel.Snapshot.AvaloniaRenderer);
         Assert.NotEmpty(viewModel.Snapshot.RuntimeBackgroundThreads);
         Assert.NotEmpty(viewModel.Snapshot.AvaloniaRenderLoopBackgroundThreads);
+        Assert.Equal(Lang.Unavailable, viewModel.Snapshot.CoopHeader);
+        Assert.Equal(Lang.Unavailable, viewModel.Snapshot.CoepHeader);
+        Assert.Equal(Lang.Unavailable, viewModel.Snapshot.SharedArrayBuffer);
+        Assert.Equal(Lang.Unavailable, viewModel.Snapshot.WasmEnableThreads);
+        Assert.NotEmpty(viewModel.Snapshot.MainThreadId);
+        Assert.NotEmpty(viewModel.Snapshot.UIThreadId);
+        Assert.NotEmpty(viewModel.Snapshot.RenderThreadId);
+    }
+
+    [AvaloniaFact]
+    public void ProgramInfoSettingViewModel_FormatsThreadingDiagnosticsByCapabilityKind()
+    {
+        var viewModel = new ProgramInfoSettingViewModel(
+            threadingDiagnostics: new StubThreadingDiagnostics(
+                new ThreadingDiagnosticsSnapshot(
+                    CoopHeaderEnabled: true,
+                    CoepHeaderEnabled: false,
+                    SharedArrayBufferSupported: true,
+                    WasmEnableThreadsEnabled: false,
+                    MainThreadId: 11,
+                    UIThreadId: 22,
+                    RenderThreadId: 33)));
+
+        Assert.Equal(Lang.Enabled, viewModel.Snapshot.CoopHeader);
+        Assert.Equal(Lang.Disabled, viewModel.Snapshot.CoepHeader);
+        Assert.Equal(Lang.Supported, viewModel.Snapshot.SharedArrayBuffer);
+        Assert.Equal(Lang.Disabled, viewModel.Snapshot.WasmEnableThreads);
+        Assert.Equal("11", viewModel.Snapshot.MainThreadId);
+        Assert.Equal("22", viewModel.Snapshot.UIThreadId);
+        Assert.Equal("33", viewModel.Snapshot.RenderThreadId);
     }
 
     private static SettingsPageViewModel GetRequiredPage(
@@ -256,5 +318,11 @@ public sealed class SettingsEditorRegistrationTests
         public void WriteLog(ILogOutput.Severity severity, string content)
         {
         }
+    }
+
+    private sealed class StubThreadingDiagnostics(ThreadingDiagnosticsSnapshot snapshot)
+        : IThreadingDiagnostics
+    {
+        public ThreadingDiagnosticsSnapshot GetSnapshot() => snapshot;
     }
 }
