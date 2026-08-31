@@ -13,14 +13,10 @@ namespace OngekiFumenEditor.Avalonia.Browser.Platforms.Services.Audio;
 internal sealed class BrowserNAudioWavePlayerFactory : INAudioWavePlayerFactory
 {
     private readonly IAudioPlatformCapabilities platformCapabilities;
-    private readonly IBrowserAudioWorkletSettingProvider settingProvider;
 
-    public BrowserNAudioWavePlayerFactory(
-        IAudioPlatformCapabilities platformCapabilities,
-        IBrowserAudioWorkletSettingProvider settingProvider = null)
+    public BrowserNAudioWavePlayerFactory(IAudioPlatformCapabilities platformCapabilities)
     {
         this.platformCapabilities = platformCapabilities ?? throw new ArgumentNullException(nameof(platformCapabilities));
-        this.settingProvider = settingProvider;
     }
 
     public Task<IWavePlayer> CreateDefaultWavePlayer()
@@ -40,8 +36,7 @@ internal sealed class BrowserNAudioWavePlayerFactory : INAudioWavePlayerFactory
                 $"{platformCapabilities.Profile}; using {resolution.EffectiveBackend}.");
         }
 
-        var setting = settingProvider?.Load() ?? new BrowserAudioWorkletSetting();
-        var options = BrowserAudioWorkletSettingRules.ToOptions(setting);
+        var options = BrowserAudioWorkletSettingRules.ToOptions(BrowserAudioWorkletSetting.Default);
         return Task.FromResult<IWavePlayer>(new BrowserAudioWorkletPlayer(options));
     }
 }

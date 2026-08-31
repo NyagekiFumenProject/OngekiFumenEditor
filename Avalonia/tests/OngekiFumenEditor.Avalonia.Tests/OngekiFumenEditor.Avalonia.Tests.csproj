@@ -47,12 +47,12 @@
                  Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsDirectoryNodeViewModel.cs" />
         <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\ViewModels\BrowserOpfsEntryViewModel.cs"
                  Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsEntryViewModel.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia\Models\Settings\SettingModelBase.cs"
+                 Link="Settings\SettingModelBase.cs" />
         <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Platforms\Services\Audio\BrowserAudioWorkletSetting.cs"
                  Link="BrowserAudioWorklet\BrowserAudioWorkletSetting.cs" />
         <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Platforms\Services\Audio\BrowserAudioWorkletSettingRules.cs"
                  Link="BrowserAudioWorklet\BrowserAudioWorkletSettingRules.cs" />
-        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Platforms\Services\Audio\BrowserAudioWorkletSettingStore.cs"
-                 Link="BrowserAudioWorklet\BrowserAudioWorkletSettingStore.cs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -11,17 +11,14 @@ namespace OngekiFumenEditor.Avalonia.Browser.Kernel.SettingPages.Audio.ViewModel
 [RegisterSingleton<ISettingsEditor>]
 public partial class BrowserAudioWorkletSettingViewModel : ViewModelBase, ISettingsEditor
 {
-    private readonly IBrowserAudioWorkletSettingProvider settingProvider;
     private readonly BrowserAudioWorkletSetting setting;
     private decimal? bufferDurationMillisecondsValue;
     private decimal? initialBufferFrameCountValue;
     private bool useDeviceSampleRate;
 
-    public BrowserAudioWorkletSettingViewModel(
-        IBrowserAudioWorkletSettingProvider settingProvider = null)
+    public BrowserAudioWorkletSettingViewModel()
     {
-        this.settingProvider = settingProvider ?? new BrowserAudioWorkletSettingProvider();
-        setting = this.settingProvider.Load() ?? new BrowserAudioWorkletSetting();
+        setting = BrowserAudioWorkletSetting.Default;
         BrowserAudioWorkletSettingRules.Normalize(setting, out _);
         RefreshEditorValues();
     }
@@ -94,16 +91,14 @@ public partial class BrowserAudioWorkletSettingViewModel : ViewModelBase, ISetti
         // more before persisting in case a caller set the model directly.
         BrowserAudioWorkletSettingRules.Normalize(setting, out _);
         RefreshEditorValues();
-        settingProvider.Save(setting);
+        setting.Save();
     }
 
     public void ResetDefault()
     {
-        setting.BufferDurationMilliseconds = BrowserAudioWorkletSetting.DefaultBufferDurationMilliseconds;
-        setting.InitialBufferFrameCount = BrowserAudioWorkletSetting.DefaultInitialBufferFrameCount;
-        setting.UseDeviceSampleRate = BrowserAudioWorkletSetting.DefaultUseDeviceSampleRate;
+        setting.Reset();
         RefreshEditorValues();
-        settingProvider.Save(setting);
+        setting.Save();
     }
 
     private void RefreshEditorValues()
