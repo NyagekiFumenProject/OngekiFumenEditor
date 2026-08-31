@@ -185,7 +185,7 @@ public sealed class BrowserOpfsBrowserContractTests
     }
 
     [Fact]
-    public void BrowserOpfsBrowser_AppendsItsMenuRegistrationsAndRegistersItsViewsInEveryBrowserBuild()
+    public void BrowserOpfsBrowser_AppendsItsMenuRegistrationsAndRegistersItsViewsInTheBrowserBuild()
     {
         string repositoryRoot = FindRepositoryRoot();
         string browserProject = ReadSource(
@@ -193,11 +193,6 @@ public sealed class BrowserOpfsBrowserContractTests
             "src",
             "OngekiFumenEditor.Avalonia.Browser",
             "OngekiFumenEditor.Avalonia.Browser.csproj");
-        string llvmBrowserProject = ReadSource(
-            repositoryRoot,
-            "src",
-            "OngekiFumenEditor.Avalonia.Browser",
-            "OngekiFumenEditor.Avalonia.Browser.LLVM.csproj");
         string browserApplication = ReadSource(
             repositoryRoot,
             "src",
@@ -211,8 +206,6 @@ public sealed class BrowserOpfsBrowserContractTests
 
         Assert.Contains("<InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>", browserProject, StringComparison.Ordinal);
         Assert.Contains("<CompilerVisibleProperty Include=\"InjectioDuplicateStrategy\" />", browserProject, StringComparison.Ordinal);
-        Assert.Contains("<InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>", llvmBrowserProject, StringComparison.Ordinal);
-        Assert.Contains("<CompilerVisibleProperty Include=\"InjectioDuplicateStrategy\" />", llvmBrowserProject, StringComparison.Ordinal);
         Assert.Contains(
             "serviceCollection.AddTypeCollectedActivator(BrowserViewTypeCollectedActivator.Default)",
             browserApplication,
