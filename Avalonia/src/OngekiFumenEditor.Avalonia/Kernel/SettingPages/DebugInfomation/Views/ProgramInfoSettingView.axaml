@@ -56,12 +56,30 @@
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
+                    <Grid Margin="0,0,0,6" ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.BuildTime}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.BuildTime}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
                     <Grid ColumnDefinitions="220,*">
                         <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitHash}}" TextWrapping="Wrap" />
                         <TextBlock
                             Grid.Column="1"
                             FontWeight="Bold"
                             Text="{Binding Snapshot.CommitHash}"
+                            TextWrapping="WrapWithOverflow"
+                            VerticalAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="220,*">
+                        <TextBlock VerticalAlignment="Center" Text="{markup:Translate {x:Static languages:Lang+B.CommitDate}}" TextWrapping="Wrap" />
+                        <TextBlock
+                            Grid.Column="1"
+                            FontWeight="Bold"
+                            Text="{Binding Snapshot.CommitDate}"
                             TextWrapping="WrapWithOverflow"
                             VerticalAlignment="Center" />
                     </Grid>
