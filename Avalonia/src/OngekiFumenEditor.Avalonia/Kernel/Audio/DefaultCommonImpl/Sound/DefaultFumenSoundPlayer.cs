@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree;
@@ -27,8 +28,7 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     private LinkedListNode<MeterAction> meterActionsItor;
     private int currentMeterHitCount;
 
-    private CancellationTokenSource updateCts;
-    private Task updateTask;
+    private readonly DispatcherTimer updateTimer;
 
     private IAudioPlayer player;
     private FumenVisualEditorViewModel editor;
@@ -44,6 +44,11 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     public DefaultFumenSoundPlayer()
     {
         InitSounds();
+        updateTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromMilliseconds(1)
+        };
+        updateTimer.Tick += OnUpdateTimerTick;
     }
 
     private void InitSounds() => loadTask = LoadSoundsAsync();
@@ -102,15 +107,12 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     {
         await loadTask;
 
-        await StopUpdateLoopAsync();
+        StopUpdateLoop();
 
         this.player = player;
         this.editor = editor;
 
         RebuildEvents();
-
-        updateCts = new CancellationTokenSource();
-        updateTask = Task.Run(() => OnUpdate(updateCts.Token), updateCts.Token);
     }
 
     private static IEnumerable<TGrid> CalculateHoldTicks(Hold x, OngekiFumen fumen)
@@ -281,9 +283,9 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         currentMeterHitCount = 0;
     }
 
-    private void UpdateInternal(CancellationToken token)
+    private void UpdateInternal()
     {
-        if ((itor is null && meterActionsItor is null) || player is null || token.IsCancellationRequested)
+        if ((itor is null && meterActionsItor is null) || player is null)
             return;
 
         if (!IsPlaying)
@@ -362,20 +364,21 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         }
     }
 
-    private async Task OnUpdate(CancellationToken cancel)
+    private void OnUpdateTimerTick(object sender, EventArgs e)
     {
-        while (!cancel.IsCancellationRequested)
-        {
-            UpdateInternal(cancel);
-            try
-            {
-                await Task.Delay(1, cancel);
-            }
-            catch (TaskCanceledException)
-            {
-                break;
-            }
-        }
+        UpdateInternal();
+    }
+
+    private void StartUpdateLoop()
+    {
+        if (!updateTimer.IsEnabled)
+            updateTimer.Start();
+    }
+
+    private void StopUpdateLoop()
+    {
+        if (updateTimer.IsEnabled)
+            updateTimer.Stop();
     }
 
     private void PlaySoundsOnce(SoundControl sounds)
@@ -438,8 +441,9 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
 
     public void Stop()
     {
-        StopAllLoop();
         isPlaying = false;
+        StopUpdateLoop();
+        StopAllLoop();
     }
 
     private void PlayInternal()
@@ -447,6 +451,7 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
         if (player is null)
             return;
         isPlaying = true;
+        StartUpdateLoop();
     }
 
     public void Play()
@@ -463,46 +468,27 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     public void Pause()
     {
         isPlaying = false;
+        StopUpdateLoop();
         StopAllLoop();
     }
 
     public void Dispose()
     {
-        _ = StopUpdateLoopAsync();
+        Stop();
+        updateTimer.Tick -= OnUpdateTimerTick;
         foreach (var sound in cacheSounds.Values)
             sound.Dispose();
     }
 
-    public async Task Clean()
+    public Task Clean()
     {
         Stop();
-        await StopUpdateLoopAsync();
         player = default;
         editor = default;
         events.Clear();
+        return Task.CompletedTask;
     }
 
-    private async Task StopUpdateLoopAsync()
-    {
-        if (updateCts is null)
-            return;
-
-        updateCts.Cancel();
-        if (updateTask is not null)
-        {
-            try
-            {
-                await updateTask;
-            }
-            catch (OperationCanceledException)
-            {
-            }
-        }
-
-        updateTask = default;
-        updateCts.Dispose();
-        updateCts = default;
-    }
 
     public float? GetVolume(SoundControl sound)
     {
