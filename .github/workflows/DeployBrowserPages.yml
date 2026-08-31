@@ -3,7 +3,6 @@ name: Deploy Browser to GitHub and Cloudflare Pages
 on:
   push:
     branches:
-      - master
       - avalonia
   workflow_dispatch:
 
@@ -137,7 +136,7 @@ jobs:
       contents: read
     environment:
       name: cloudflare-pages
-      url: https://ongekifumeneditor.mikirasora0409.workers.dev/
+      url: https://ongekifumeneditor.mikirasora.workers.dev/
 
     steps:
       - name: Checkout repository
@@ -151,14 +150,11 @@ jobs:
           name: browser-site
           path: ${{ runner.temp }}/browser-publish/wwwroot
 
-      - name: Deploy Cloudflare Pages
-        uses: cloudflare/wrangler-action@v4
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_PAGE_WRITE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          wranglerVersion: "4"
-          command: >-
-            pages deploy
-            "${{ runner.temp }}/browser-publish/wwwroot"
-            --branch="${{ github.ref_name }}"
-            --project-name=ongekifumeneditor
+          projectName: ongeki-fumen-editor
+          directory: "${{ runner.temp }}/browser-publish/wwwroot"
+          wranglerVersion: '3'
