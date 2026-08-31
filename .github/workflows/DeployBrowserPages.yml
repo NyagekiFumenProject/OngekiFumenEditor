@@ -51,7 +51,7 @@ jobs:
         uses: actions/configure-pages@v6
 
       - name: Restore Browser project
-        run: dotnet restore "$BROWSER_PROJECT" --nologo --verbosity minimal
+        run: dotnet restore "$BROWSER_PROJECT" --nologo -r browser-wasm --verbosity minimal
 
       - name: Publish Browser Release AOT
         run: >-
@@ -60,6 +60,7 @@ jobs:
           --no-restore
           --output "${{ runner.temp }}/browser-publish"
           --nologo
+          -r browser-wasm
           --verbosity minimal
           -p:RunAOTCompilation=true
 
