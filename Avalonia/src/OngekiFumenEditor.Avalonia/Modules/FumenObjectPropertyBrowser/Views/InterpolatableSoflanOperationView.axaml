@@ -21,7 +21,7 @@
             Background="Transparent"
             BorderBrush="DarkSalmon"
             BorderThickness="1,1,25,1"
-            Command="{CompiledBinding InterpolateCommand}"
+            Command="{Binding InterpolateCommand}"
             ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.InterpolateToCreateKeyframeSoflansTipText}}">
             <TextBlock
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"

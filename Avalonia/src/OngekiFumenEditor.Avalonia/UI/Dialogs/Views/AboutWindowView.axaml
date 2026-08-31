@@ -1,6 +1,5 @@
 <views:WindowViewBase
     x:Class="OngekiFumenEditor.Avalonia.UI.Dialogs.Views.AboutWindowView"
-    x:CompileBindings="True"
     x:DataType="vm:AboutWindowViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -47,11 +46,11 @@
 
             <Label VerticalAlignment="Center" FontSize="15">Product Version</Label>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <StackPanel Orientation="Horizontal" IsVisible="{CompiledBinding IsNotifyUpdateSuccess}">
+                <StackPanel Orientation="Horizontal" IsVisible="{Binding IsNotifyUpdateSuccess}">
                     <Label
                         VerticalAlignment="Center"
                         d:Content="1.5.0"
-                        Content="{CompiledBinding SourceVersion}"
+                        Content="{Binding SourceVersion}"
                         FontSize="15"
                         FontWeight="Bold" />
                     <Label
@@ -63,7 +62,7 @@
                 <Label
                     VerticalAlignment="Center"
                     d:Content="1.5.0"
-                    Content="{CompiledBinding ProductVersion}"
+                    Content="{Binding ProductVersion}"
                     FontSize="15"
                     FontWeight="Bold" />
             </StackPanel>
@@ -79,7 +78,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 d:Content="abcdefg"
-                Content="{CompiledBinding CommitHash}"
+                Content="{Binding CommitHash}"
                 FontSize="15"
                 FontWeight="Bold" />
 
@@ -94,7 +93,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 d:Content="abcdefg"
-                Content="{CompiledBinding CommitDate}"
+                Content="{Binding CommitDate}"
                 FontSize="15"
                 FontWeight="Bold" />
 
@@ -109,7 +108,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 d:Content="abcdefg"
-                Content="{CompiledBinding BuildTime}"
+                Content="{Binding BuildTime}"
                 FontSize="15"
                 FontWeight="Bold" />
 
@@ -124,7 +123,7 @@
                 Grid.Column="1"
                 VerticalAlignment="Center"
                 d:Content="abcdefg"
-                Content="{CompiledBinding BuildConfiguration}"
+                Content="{Binding BuildConfiguration}"
                 FontSize="15"
                 FontWeight="Bold" />
         </Grid>

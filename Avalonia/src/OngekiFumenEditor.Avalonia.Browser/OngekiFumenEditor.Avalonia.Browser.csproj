@@ -46,6 +46,10 @@
     <ItemGroup>
         <AdditionalFiles Include="Modules\BrowserOpfsBrowser\Assets\Languages\*.json" />
         <AdditionalFiles Include="Modules\BrowserOpfsBrowser\Views\*.axaml" />
+        <AdditionalFiles Include="Assets\Languages\BrowserAudioWorkletLang.json" />
+        <AdditionalFiles Include="Assets\Languages\BrowserAudioWorkletLang.zh-Hans.json" />
+        <AdditionalFiles Include="Assets\Languages\BrowserAudioWorkletLang.ja.json" />
+        <AdditionalFiles Include="Kernel\SettingPages\Audio\Views\BrowserAudioWorkletSettingView.axaml" />
         <AvaloniaResource Include="Assets\**"/>
     </ItemGroup>
 

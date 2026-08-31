@@ -6,7 +6,6 @@
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     xmlns:viewModels="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.AwbReplaceConfirmationDialogView"
-    x:CompileBindings="True"
     x:DataType="viewModels:AwbReplaceConfirmationDialogViewModel"
     Title="Replace AWB file"
     Width="560"

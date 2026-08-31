@@ -20,10 +20,11 @@
     mc:Ignorable="d">
     <splash:SplashScreenCommonView>
         <splash:SplashScreenCommonView.AdditionalActions>
-        <!-- 编译绑定基类视图的 DataType 中没有 FastOpenCommand，这里使用反射绑定。 -->
+        <!-- Override the common view's DataType so the desktop-only command remains typed. -->
         <Button
             Classes="ActionCard"
-            Command="{ReflectionBinding FastOpenCommand}"
+            x:DataType="vm:DesktopSplashScreenViewModel"
+            Command="{Binding FastOpenCommand}"
             Margin="0,0,0,5"
             HorizontalAlignment="Stretch">
             <Border>

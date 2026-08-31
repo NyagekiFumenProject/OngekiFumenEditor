@@ -1,7 +1,6 @@
 <gekViews:ViewBase
     xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditorSettings.Views.FumenVisualEditorSettingsView"
-    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:cal="http://caliburnmicro.com"

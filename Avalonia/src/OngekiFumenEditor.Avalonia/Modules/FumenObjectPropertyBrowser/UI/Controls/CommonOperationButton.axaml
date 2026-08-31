@@ -1,7 +1,6 @@
 ﻿<UserControl
     x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UI.Controls.CommonOperationButton"
-    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="https://github.com/avaloniaui/design"

@@ -115,7 +115,7 @@
         </Style>
     </views:WindowViewBase.Styles>
 
-    <Grid Margin="16" RowDefinitions="Auto,*" IsEnabled="{CompiledBinding !IsBusy}">
+    <Grid Margin="16" RowDefinitions="Auto,*" IsEnabled="{Binding !IsBusy}">
         <Border Grid.Row="0"
                 Padding="12"
                 Background="{DynamicResource BrowserSurfaceBrush}"
@@ -133,18 +133,18 @@
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                         <TextBlock Classes="eyebrow" Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserGameRoot}}" />
-                        <TextBlock IsVisible="{CompiledBinding HasRootFolder}"
+                        <TextBlock IsVisible="{Binding HasRootFolder}"
                                    FontWeight="SemiBold"
-                                   Text="{CompiledBinding RootFolderDisplayName}"
+                                   Text="{Binding RootFolderDisplayName}"
                                    TextTrimming="CharacterEllipsis"
-                                   ToolTip.Tip="{CompiledBinding RootFolderDisplayName}" />
-                        <TextBlock IsVisible="{CompiledBinding ShowNoRootState}"
+                                   ToolTip.Tip="{Binding RootFolderDisplayName}" />
+                        <TextBlock IsVisible="{Binding ShowNoRootState}"
                                    Classes="meta"
                                    Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserNoRootSelected}}" />
                     </StackPanel>
                     <Button Grid.Column="2"
                             Classes="secondary-action"
-                            Command="{CompiledBinding SelectFolderCommand}">
+                            Command="{Binding SelectFolderCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <Image Width="16"
                                    Height="16"
@@ -163,28 +163,28 @@
                     </Border>
                     <TextBox Grid.Column="1"
                              Classes="search-box"
-                             Text="{CompiledBinding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                             Text="{Binding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordFilter}}">
                         <TextBox.KeyBindings>
-                            <KeyBinding Command="{CompiledBinding ApplyKeywordsCommand}" Gesture="Enter" />
+                            <KeyBinding Command="{Binding ApplyKeywordsCommand}" Gesture="Enter" />
                         </TextBox.KeyBindings>
                     </TextBox>
                     <Button Grid.Column="2"
                             Classes="icon-button"
-                            IsVisible="{CompiledBinding HasKeywords}"
+                            IsVisible="{Binding HasKeywords}"
                             AutomationProperties.Name="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserClearFilter}}"
-                            Command="{CompiledBinding ClearKeywordsCommand}"
+                            Command="{Binding ClearKeywordsCommand}"
                             ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserClearFilter}}">
                         <icons:FluentIcon Icon="Dismiss" IconSize="Size16" />
                     </Button>
                     <Button Grid.Column="3"
                             Classes="secondary-action"
-                            Command="{CompiledBinding ApplyKeywordsCommand}"
+                            Command="{Binding ApplyKeywordsCommand}"
                             Content="{markup:Translate {x:Static languages:Lang+B.Filter}}" />
                     <Button Grid.Column="4"
                             Classes="icon-button"
                             AutomationProperties.Name="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRefresh}}"
-                            Command="{CompiledBinding RefreshListCommand}"
+                            Command="{Binding RefreshListCommand}"
                             ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRefresh}}">
                         <icons:FluentIcon Icon="ArrowSync" IconSize="Size20" />
                     </Button>
@@ -193,7 +193,7 @@
         </Border>
 
         <Grid Grid.Row="1" Margin="0,12,0,0">
-            <Border IsVisible="{CompiledBinding ShowErrorState}"
+            <Border IsVisible="{Binding ShowErrorState}"
                     Padding="34"
                     Background="{DynamicResource BrowserSurfaceBrush}"
                     BorderBrush="{DynamicResource BrowserBorderBrush}"
@@ -211,12 +211,12 @@
                                Source="avares://OngekiFumenEditor.Avalonia/Resources/Icons/notication.png" />
                     </Border>
                     <TextBlock HorizontalAlignment="Center"
-                               Text="{CompiledBinding ErrorMessage}"
+                               Text="{Binding ErrorMessage}"
                                TextAlignment="Center"
                                TextWrapping="Wrap" />
                     <Button HorizontalAlignment="Center"
                             Classes="primary-action"
-                            Command="{CompiledBinding RetryCommand}">
+                            Command="{Binding RetryCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <icons:FluentIcon Icon="ArrowSync" IconSize="Size16" />
                             <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRetry}}" />
@@ -225,7 +225,7 @@
                 </StackPanel>
             </Border>
 
-            <Border IsVisible="{CompiledBinding ShowNoRootState}"
+            <Border IsVisible="{Binding ShowNoRootState}"
                     Padding="34"
                     Background="{DynamicResource BrowserSurfaceBrush}"
                     BorderBrush="{DynamicResource BrowserBorderBrush}"
@@ -248,7 +248,7 @@
                                Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserEmptyRootTitle}}" />
                     <Button HorizontalAlignment="Center"
                             Classes="primary-action"
-                            Command="{CompiledBinding SelectFolderCommand}">
+                            Command="{Binding SelectFolderCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="7">
                             <Image Width="16"
                                    Height="16"
@@ -259,7 +259,7 @@
                 </StackPanel>
             </Border>
 
-            <Border IsVisible="{CompiledBinding ShowNoResultsState}"
+            <Border IsVisible="{Binding ShowNoResultsState}"
                     Padding="34"
                     Background="{DynamicResource BrowserSurfaceBrush}"
                     BorderBrush="{DynamicResource BrowserBorderBrush}"
@@ -282,18 +282,18 @@
                                Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserNoMatchesTitle}}" />
                     <Button HorizontalAlignment="Center"
                             Classes="secondary-action"
-                            Command="{CompiledBinding ClearKeywordsCommand}">
+                            Command="{Binding ClearKeywordsCommand}">
                         <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserClearFilter}}" />
                     </Button>
                 </StackPanel>
             </Border>
 
-            <ScrollViewer IsVisible="{CompiledBinding ShowResults}"
+            <ScrollViewer IsVisible="{Binding ShowResults}"
                           IsTabStop="False"
                           ScrollViewer.BringIntoViewOnFocusChange="False"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{CompiledBinding DisplayFumenSets}">
+                <ItemsControl ItemsSource="{Binding DisplayFumenSets}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <!-- Expanders change item height; keep pixel offsets stable while they open. -->
@@ -318,9 +318,9 @@
                                                                FontSize="20"
                                                                FontWeight="SemiBold"
                                                                Foreground="{DynamicResource BrowserAccentBrush}"
-                                                               Text="{CompiledBinding MusicId, StringFormat='#{0:0000}'}" />
+                                                               Text="{Binding MusicId, StringFormat='#{0:0000}'}" />
                                                     <Image EffectiveViewportChanged="OnJacketImageEffectiveViewportChanged"
-                                                           Source="{CompiledBinding JacketBitmap}"
+                                                           Source="{Binding JacketBitmap}"
                                                            Stretch="UniformToFill" />
                                                 </Grid>
                                             </Border>
@@ -331,19 +331,19 @@
                                                 <TextBlock Classes="eyebrow"
                                                            Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserMusic}}" />
                                                 <TextBlock Classes="meta"
-                                                           Text="{CompiledBinding MusicId, StringFormat='{}{0:0000}'}" />
+                                                           Text="{Binding MusicId, StringFormat='{}{0:0000}'}" />
                                                 <TextBlock FontSize="17"
                                                            FontWeight="SemiBold"
-                                                           Text="{CompiledBinding Title}"
+                                                           Text="{Binding Title}"
                                                            TextTrimming="CharacterEllipsis"
-                                                           ToolTip.Tip="{CompiledBinding Title}" />
+                                                           ToolTip.Tip="{Binding Title}" />
                                                 <TextBlock Classes="meta"
-                                                           Text="{CompiledBinding Artist}"
+                                                           Text="{Binding Artist}"
                                                            TextTrimming="CharacterEllipsis" />
                                                 <StackPanel Orientation="Horizontal" Spacing="10">
-                                                    <TextBlock Classes="meta" Text="{CompiledBinding Genre}" />
+                                                    <TextBlock Classes="meta" Text="{Binding Genre}" />
                                                     <TextBlock Classes="meta"
-                                                               Text="{CompiledBinding Difficults.Count}" />
+                                                               Text="{Binding Difficults.Count}" />
                                                     <TextBlock Classes="meta"
                                                                Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserChartsLabel}}" />
                                                 </StackPanel>
@@ -358,7 +358,7 @@
                                                 <TextBlock HorizontalAlignment="Right"
                                                            FontSize="24"
                                                            FontWeight="SemiBold"
-                                                           Text="{CompiledBinding Difficults.Count}" />
+                                                           Text="{Binding Difficults.Count}" />
                                             </StackPanel>
                                         </Grid>
                                     </Expander.Header>
@@ -371,7 +371,7 @@
                                                 <TextBlock Classes="eyebrow"
                                                            Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserAvailableDifficulties}}" />
                                             </Grid>
-                                            <ItemsControl ItemsSource="{CompiledBinding Difficults}">
+                                            <ItemsControl ItemsSource="{Binding Difficults}">
                                                 <ItemsControl.ItemsPanel>
                                                     <ItemsPanelTemplate>
                                                         <WrapPanel Orientation="Horizontal" />
@@ -388,10 +388,10 @@
                                                                     <TextBlock FontSize="14"
                                                                                FontWeight="SemiBold"
                                                                                Foreground="{DynamicResource BrowserAccentBrush}"
-                                                                               Text="{CompiledBinding DiffName}" />
+                                                                               Text="{Binding DiffName}" />
                                                                     <TextBlock Grid.Column="1"
                                                                                Classes="meta"
-                                                                               Text="{CompiledBinding DiffIdx, StringFormat='#{0}'}" />
+                                                                               Text="{Binding DiffIdx, StringFormat='#{0}'}" />
                                                                 </Grid>
                                                                 <StackPanel Grid.Row="1"
                                                                             Orientation="Horizontal"
@@ -401,27 +401,27 @@
                                                                                Text="{markup:Translate {x:Static languages:Lang+B.DiffLevel}}" />
                                                                     <TextBlock FontSize="20"
                                                                                FontWeight="SemiBold"
-                                                                               Text="{CompiledBinding Level, StringFormat='{}{0:0.##}'}" />
+                                                                               Text="{Binding Level, StringFormat='{}{0:0.##}'}" />
                                                                 </StackPanel>
                                                                 <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="8">
                                                                     <StackPanel Spacing="1">
                                                                         <TextBlock Classes="eyebrow"
                                                                                    Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserBpm}}" />
-                                                                        <TextBlock Text="{CompiledBinding Bpm, StringFormat='{}{0:0.##}'}" />
+                                                                        <TextBlock Text="{Binding Bpm, StringFormat='{}{0:0.##}'}" />
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Column="1" Spacing="1">
                                                                         <TextBlock Classes="eyebrow"
                                                                                    Text="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserCreator}}" />
                                                                         <TextBlock Classes="meta"
-                                                                                   Text="{CompiledBinding Creator}"
+                                                                                   Text="{Binding Creator}"
                                                                                    TextTrimming="CharacterEllipsis"
-                                                                                   ToolTip.Tip="{CompiledBinding Creator}" />
+                                                                                   ToolTip.Tip="{Binding Creator}" />
                                                                     </StackPanel>
                                                                 </Grid>
                                                                 <Button Grid.Row="3"
                                                                         Classes="load-button"
                                                                         Command="{Binding $parent[local:OgkiFumenListBrowserView].((vm:OgkiFumenListBrowserViewModel)DataContext).LoadFumenCommand}"
-                                                                        CommandParameter="{CompiledBinding}">
+                                                                        CommandParameter="{Binding}">
                                                                     <StackPanel Orientation="Horizontal" Spacing="6">
                                                                         <TextBlock Text=">" />
                                                                         <TextBlock Text="{markup:Translate {x:Static languages:Lang+B.LoadFumen}}" />
@@ -441,7 +441,7 @@
                 </ItemsControl>
             </ScrollViewer>
 
-            <Border IsVisible="{CompiledBinding IsBusy}"
+            <Border IsVisible="{Binding IsBusy}"
                     Background="#B8000000"
                     CornerRadius="14"
                     ZIndex="10">

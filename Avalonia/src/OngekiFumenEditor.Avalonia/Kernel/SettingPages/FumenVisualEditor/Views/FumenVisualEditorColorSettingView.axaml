@@ -1,7 +1,6 @@
 <gekViews:ViewBase
     xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorColorSettingView"
-    x:CompileBindings="True"
     x:Name="Root"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

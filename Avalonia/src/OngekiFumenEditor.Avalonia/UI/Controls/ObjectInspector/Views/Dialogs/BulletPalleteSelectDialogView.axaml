@@ -2,7 +2,6 @@
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.Views.Dialogs.BulletPalleteSelectDialogView"
     x:Name="Root"
-    x:CompileBindings="True"
     x:DataType="dialog:BulletPalleteSelectDialogViewModel"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

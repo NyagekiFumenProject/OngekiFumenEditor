@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <AvaloniaAccessUnstablePrivateApis>true</AvaloniaAccessUnstablePrivateApis>
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,6 +28,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
+        <ProjectReference Include="..\..\Dependencies\NAudio.BrowserAudioWorklet\src\NAudio.BrowserAudioWorklet\NAudio.BrowserAudioWorklet.csproj" />
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj" />
     </ItemGroup>
 
@@ -45,10 +47,19 @@
                  Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsDirectoryNodeViewModel.cs" />
         <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\ViewModels\BrowserOpfsEntryViewModel.cs"
                  Link="BrowserOpfsBrowser\ViewModels\BrowserOpfsEntryViewModel.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Platforms\Services\Audio\BrowserAudioWorkletSetting.cs"
+                 Link="BrowserAudioWorklet\BrowserAudioWorkletSetting.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Platforms\Services\Audio\BrowserAudioWorkletSettingRules.cs"
+                 Link="BrowserAudioWorklet\BrowserAudioWorkletSettingRules.cs" />
+        <Compile Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Platforms\Services\Audio\BrowserAudioWorkletSettingStore.cs"
+                 Link="BrowserAudioWorklet\BrowserAudioWorkletSettingStore.cs" />
     </ItemGroup>
 
     <ItemGroup>
         <AdditionalFiles Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Modules\BrowserOpfsBrowser\Assets\Languages\*.json" />
+        <AdditionalFiles Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Assets\Languages\BrowserAudioWorkletLang.json" />
+        <AdditionalFiles Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Assets\Languages\BrowserAudioWorkletLang.zh-Hans.json" />
+        <AdditionalFiles Include="..\..\src\OngekiFumenEditor.Avalonia.Browser\Assets\Languages\BrowserAudioWorkletLang.ja.json" />
     </ItemGroup>
 
     <ItemGroup>

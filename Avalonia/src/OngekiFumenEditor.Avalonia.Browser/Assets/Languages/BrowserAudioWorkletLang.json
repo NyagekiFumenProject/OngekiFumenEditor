@@ -1,0 +1,9 @@
+{
+    "NAudioBrowserAudioWorklet": "NAudio Browser AudioWorklet",
+    "BrowserAudioWorkletBufferDuration": "Buffer duration",
+    "BrowserAudioWorkletInitialBufferFrameCount": "Initial buffer frames",
+    "BrowserAudioWorkletUseDeviceSampleRate": "Use device sample rate",
+    "BrowserAudioWorkletMilliseconds": "ms",
+    "BrowserAudioWorkletFrames": "frames",
+    "BrowserAudioWorkletResetDefault": "Reset to defaults"
+}

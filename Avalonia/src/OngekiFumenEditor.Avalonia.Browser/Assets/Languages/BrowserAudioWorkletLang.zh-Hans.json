@@ -1,0 +1,9 @@
+{
+    "NAudioBrowserAudioWorklet": "NAudio 浏览器 AudioWorklet",
+    "BrowserAudioWorkletBufferDuration": "缓冲时长",
+    "BrowserAudioWorkletInitialBufferFrameCount": "初始缓冲帧数",
+    "BrowserAudioWorkletUseDeviceSampleRate": "使用设备采样率",
+    "BrowserAudioWorkletMilliseconds": "毫秒",
+    "BrowserAudioWorkletFrames": "帧",
+    "BrowserAudioWorkletResetDefault": "恢复默认值"
+}

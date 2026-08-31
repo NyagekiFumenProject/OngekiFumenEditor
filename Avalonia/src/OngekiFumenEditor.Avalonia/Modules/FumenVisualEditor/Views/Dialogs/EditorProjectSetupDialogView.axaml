@@ -6,7 +6,6 @@
     xmlns:views="clr-namespace:Gekimini.Avalonia.Modules.Window.Views;assembly=Gekimini.Avalonia"
     xmlns:local="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.Dialogs.EditorProjectSetupDialogView"
-    x:CompileBindings="True"
     x:DataType="local:EditorProjectSetupDialogViewModel"
     Title="Project Setup"
     Width="760"
@@ -23,7 +22,7 @@
             Padding="0,0,20,0"
             HorizontalScrollBarVisibility="Disabled"
             VerticalScrollBarVisibility="Auto"
-            IsVisible="{CompiledBinding IsEditing}">
+            IsVisible="{Binding IsEditing}">
             <StackPanel Spacing="18">
                 <StackPanel Spacing="8">
                     <TextBlock FontSize="16" FontWeight="SemiBold" Text="Project" />
@@ -38,14 +37,14 @@
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
-                            Text="{CompiledBinding ProjectDirectoryDisplayName}"
+                            Text="{Binding ProjectDirectoryDisplayName}"
                             TextTrimming="CharacterEllipsis"
-                            ToolTip.Tip="{CompiledBinding ProjectDirectoryDisplayName}" />
+                            ToolTip.Tip="{Binding ProjectDirectoryDisplayName}" />
                         <Button
                             Grid.Row="0"
                             Grid.Column="2"
                             MinWidth="88"
-                            Command="{CompiledBinding SelectProjectDirectoryCommand}"
+                            Command="{Binding SelectProjectDirectoryCommand}"
                             Content="Browse..." />
 
                         <TextBlock
@@ -57,7 +56,7 @@
                             Grid.Row="1"
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
-                            Text="{CompiledBinding ProjectName, Mode=TwoWay}" />
+                            Text="{Binding ProjectName, Mode=TwoWay}" />
 
                         <TextBlock
                             Grid.Row="2"
@@ -69,7 +68,7 @@
                             Grid.Column="1"
                             Grid.ColumnSpan="2"
                             VerticalAlignment="Center"
-                            Text="{CompiledBinding ProjectFileNamePreview}"
+                            Text="{Binding ProjectFileNamePreview}"
                             TextTrimming="CharacterEllipsis" />
                     </Grid>
                 </StackPanel>
@@ -89,19 +88,19 @@
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
-                            Text="{CompiledBinding AudioFileDisplayName}"
+                            Text="{Binding AudioFileDisplayName}"
                             TextTrimming="CharacterEllipsis"
-                            ToolTip.Tip="{CompiledBinding AudioFileDisplayName}" />
+                            ToolTip.Tip="{Binding AudioFileDisplayName}" />
                         <Button
                             Grid.Row="0"
                             Grid.Column="2"
                             MinWidth="88"
-                            Command="{CompiledBinding SelectAudioFileCommand}"
+                            Command="{Binding SelectAudioFileCommand}"
                             Content="Browse..." />
                         <Button
                             Grid.Row="0"
                             Grid.Column="3"
-                            Command="{CompiledBinding ClearAudioFileCommand}"
+                            Command="{Binding ClearAudioFileCommand}"
                             Content="Clear" />
 
                         <TextBlock
@@ -113,7 +112,7 @@
                             Grid.Row="1"
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
-                            Text="{CompiledBinding TargetAudioFileName, Mode=TwoWay}" />
+                            Text="{Binding TargetAudioFileName, Mode=TwoWay}" />
 
                         <TextBlock
                             Grid.Row="2"
@@ -125,12 +124,12 @@
                             Grid.Column="1"
                             Grid.ColumnSpan="3"
                             VerticalAlignment="Center"
-                            Text="{CompiledBinding AudioDurationDisplay}" />
+                            Text="{Binding AudioDurationDisplay}" />
 
                         <TextBlock
                             Grid.Row="3"
                             VerticalAlignment="Center"
-                            IsVisible="{CompiledBinding RequiresExternalAwb}"
+                            IsVisible="{Binding RequiresExternalAwb}"
                             Text="External AWB"
                             ToolTip.Tip="External AWB archive required by this ACB. The matching archive is copied or bound using the shown target name." />
                         <StackPanel
@@ -138,13 +137,13 @@
                             Grid.Column="1"
                             Grid.ColumnSpan="3"
                             Spacing="3"
-                            IsVisible="{CompiledBinding RequiresExternalAwb}">
+                            IsVisible="{Binding RequiresExternalAwb}">
                             <TextBlock
                                 HorizontalAlignment="Stretch"
-                                Text="{CompiledBinding AudioAwbDisplayName}"
+                                Text="{Binding AudioAwbDisplayName}"
                                 TextTrimming="CharacterEllipsis"
-                                ToolTip.Tip="{CompiledBinding AudioAwbDisplayName}" />
-                            <TextBlock Opacity="0.72" Text="{CompiledBinding TargetAudioAwbFileName}" />
+                                ToolTip.Tip="{Binding AudioAwbDisplayName}" />
+                            <TextBlock Opacity="0.72" Text="{Binding TargetAudioAwbFileName}" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -156,11 +155,11 @@
                     <StackPanel Orientation="Horizontal" Spacing="20">
                         <RadioButton
                             GroupName="FumenMode"
-                            IsChecked="{CompiledBinding IsCreateNewFumenMode, Mode=TwoWay}"
+                            IsChecked="{Binding IsCreateNewFumenMode, Mode=TwoWay}"
                             Content="Create new" />
                         <RadioButton
                             GroupName="FumenMode"
-                            IsChecked="{CompiledBinding IsExistingFumenMode, Mode=TwoWay}"
+                            IsChecked="{Binding IsExistingFumenMode, Mode=TwoWay}"
                             Content="Use existing" />
                     </StackPanel>
 
@@ -169,7 +168,7 @@
                         RowDefinitions="Auto,Auto"
                         ColumnSpacing="10"
                         RowSpacing="8"
-                        IsVisible="{CompiledBinding IsExistingFumenMode}">
+                        IsVisible="{Binding IsExistingFumenMode}">
                         <TextBlock
                             Grid.Row="0"
                             VerticalAlignment="Center"
@@ -180,19 +179,19 @@
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Center"
-                            Text="{CompiledBinding ExistingFumenDisplayName}"
+                            Text="{Binding ExistingFumenDisplayName}"
                             TextTrimming="CharacterEllipsis"
-                            ToolTip.Tip="{CompiledBinding ExistingFumenDisplayName}" />
+                            ToolTip.Tip="{Binding ExistingFumenDisplayName}" />
                         <Button
                             Grid.Row="0"
                             Grid.Column="2"
                             MinWidth="88"
-                            Command="{CompiledBinding SelectExistingFumenCommand}"
+                            Command="{Binding SelectExistingFumenCommand}"
                             Content="Browse..." />
                         <Button
                             Grid.Row="0"
                             Grid.Column="3"
-                            Command="{CompiledBinding ClearExistingFumenCommand}"
+                            Command="{Binding ClearExistingFumenCommand}"
                             Content="Clear" />
                         <TextBlock
                             Grid.Row="1"
@@ -203,7 +202,7 @@
                             Grid.Row="1"
                             Grid.Column="1"
                             HorizontalAlignment="Stretch"
-                            Text="{CompiledBinding ExistingFumenTargetFileName, Mode=TwoWay}" />
+                            Text="{Binding ExistingFumenTargetFileName, Mode=TwoWay}" />
                     </Grid>
 
                     <Grid
@@ -211,7 +210,7 @@
                         RowDefinitions="Auto,Auto,Auto"
                         ColumnSpacing="10"
                         RowSpacing="8"
-                        IsVisible="{CompiledBinding IsCreateNewFumenMode}">
+                        IsVisible="{Binding IsCreateNewFumenMode}">
                         <TextBlock
                             Grid.Row="0"
                             VerticalAlignment="Center"
@@ -220,12 +219,12 @@
                         <TextBox
                             Grid.Row="0"
                             Grid.Column="1"
-                            Text="{CompiledBinding NewFumenStem, Mode=TwoWay}" />
+                            Text="{Binding NewFumenStem, Mode=TwoWay}" />
                         <ComboBox
                             Grid.Row="0"
                             Grid.Column="2"
-                            ItemsSource="{CompiledBinding FumenFormatOptions}"
-                            SelectedItem="{CompiledBinding SelectedFumenFormat, Mode=TwoWay}" />
+                            ItemsSource="{Binding FumenFormatOptions}"
+                            SelectedItem="{Binding SelectedFumenFormat, Mode=TwoWay}" />
                         <TextBlock
                             Grid.Row="1"
                             VerticalAlignment="Center"
@@ -236,7 +235,7 @@
                             Grid.Column="1"
                             Grid.ColumnSpan="2"
                             VerticalAlignment="Center"
-                            Text="{CompiledBinding FumenFileNamePreview}"
+                            Text="{Binding FumenFileNamePreview}"
                             TextTrimming="CharacterEllipsis" />
                         <TextBlock
                             Grid.Row="2"
@@ -248,7 +247,7 @@
                             Grid.Column="1"
                             Width="160"
                             HorizontalAlignment="Left"
-                            Text="{CompiledBinding BaseBpmText, Mode=TwoWay}" />
+                            Text="{Binding BaseBpmText, Mode=TwoWay}" />
                     </Grid>
                 </StackPanel>
 
@@ -257,10 +256,10 @@
                     BorderBrush="{DynamicResource SystemControlErrorTextForegroundBrush}"
                     BorderThickness="1"
                     CornerRadius="4"
-                    IsVisible="{CompiledBinding HasValidationErrors}">
+                    IsVisible="{Binding HasValidationErrors}">
                     <TextBlock
                         Foreground="{DynamicResource SystemControlErrorTextForegroundBrush}"
-                        Text="{CompiledBinding ValidationMessage}"
+                        Text="{Binding ValidationMessage}"
                         TextWrapping="Wrap" />
                 </Border>
             </StackPanel>
@@ -271,26 +270,26 @@
             VerticalAlignment="Center"
             RowDefinitions="Auto,Auto,Auto"
             RowSpacing="10"
-            IsVisible="{CompiledBinding IsBusy}">
+            IsVisible="{Binding IsBusy}">
             <TextBlock
                 FontSize="17"
                 FontWeight="SemiBold"
                 AutomationProperties.Name="Project creation status"
-                Text="{CompiledBinding ProgressText}"
+                Text="{Binding ProgressText}"
                 TextWrapping="Wrap" />
             <TextBlock
                 Grid.Row="1"
                 MinHeight="24"
                 Opacity="0.72"
-                Text="{CompiledBinding ProgressFileName}"
+                Text="{Binding ProgressFileName}"
                 TextTrimming="CharacterEllipsis" />
             <ProgressBar
                 Grid.Row="2"
                 Height="8"
                 AutomationProperties.Name="Project creation progress"
-                IsIndeterminate="{CompiledBinding IsProgressIndeterminate}"
-                Maximum="{CompiledBinding ProgressMaximum}"
-                Value="{CompiledBinding ProgressValue}" />
+                IsIndeterminate="{Binding IsProgressIndeterminate}"
+                Maximum="{Binding ProgressMaximum}"
+                Value="{Binding ProgressValue}" />
         </Grid>
 
         <Border
@@ -302,21 +301,21 @@
                 <TextBlock
                     VerticalAlignment="Center"
                     Opacity="0.72"
-                    IsVisible="{CompiledBinding IsEditing}"
+                    IsVisible="{Binding IsEditing}"
                     Text="Files already in the project folder are bound directly."
                     TextWrapping="Wrap" />
                 <Button
                     Grid.Column="1"
                     MinWidth="96"
-                    IsEnabled="{CompiledBinding CanCancel}"
-                    Command="{CompiledBinding CancelCommand}"
+                    IsEnabled="{Binding CanCancel}"
+                    Command="{Binding CancelCommand}"
                     Content="Cancel" />
                 <Button
                     Grid.Column="2"
                     MinWidth="112"
-                    IsVisible="{CompiledBinding IsEditing}"
-                    IsEnabled="{CompiledBinding CanCreate}"
-                    Command="{CompiledBinding CreateCommand}"
+                    IsVisible="{Binding IsEditing}"
+                    IsEnabled="{Binding CanCreate}"
+                    Command="{Binding CreateCommand}"
                     Content="Create" />
             </Grid>
         </Border>

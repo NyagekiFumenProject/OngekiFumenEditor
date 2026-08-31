@@ -27,7 +27,7 @@
                     Margin="0,5,0,5"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    IsChecked="{CompiledBinding IsUseInputFile, Mode=TwoWay}">
+                    IsChecked="{Binding IsUseInputFile, Mode=TwoWay}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,10,0"
@@ -39,14 +39,14 @@
                             Width="280"
                             VerticalAlignment="Center"
                             Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-                            Text="{CompiledBinding InputFumenFilePath}"
+                            Text="{Binding InputFumenFilePath}"
                             TextTrimming="CharacterEllipsis"
-                            ToolTip.Tip="{CompiledBinding InputFumenFilePath}">
+                            ToolTip.Tip="{Binding InputFumenFilePath}">
                         </TextBlock>
                         <Button
                             Margin="10,0,0,0"
                             Padding="20,2,20,2"
-                            Command="{CompiledBinding OpenSelectInputFileCommand}"
+                            Command="{Binding OpenSelectInputFileCommand}"
                             Content="{markup:Translate {x:Static languages:Lang+B.Browser}}"
                             Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
                     </StackPanel>
@@ -55,7 +55,7 @@
                     Margin="0,5,0,5"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    IsChecked="{CompiledBinding IsCurrentEditorAsInputFumen, Mode=TwoWay}">
+                    IsChecked="{Binding IsCurrentEditorAsInputFumen, Mode=TwoWay}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,10,0"
@@ -63,7 +63,7 @@
                             Foreground="{StaticResource EditorToolWindowForegroundBrush}"
                             Text="{markup:Translate {x:Static languages:Lang+B.LoadFromCurrentEditor}}">
                         </TextBlock>
-                        <TextBlock Foreground="{StaticResource EditorToolWindowForegroundBrush}" Text="{CompiledBinding CurrentEditorName}">
+                        <TextBlock Foreground="{StaticResource EditorToolWindowForegroundBrush}" Text="{Binding CurrentEditorName}">
                         </TextBlock>
                     </StackPanel>
                 </RadioButton>
@@ -85,14 +85,14 @@
                     Width="280"
                     VerticalAlignment="Center"
                     Foreground="{StaticResource EditorToolWindowForegroundBrush}"
-                    Text="{CompiledBinding OutputFumenFilePath}"
+                    Text="{Binding OutputFumenFilePath}"
                     TextTrimming="CharacterEllipsis"
-                    ToolTip.Tip="{CompiledBinding OutputFumenFilePath}">
+                    ToolTip.Tip="{Binding OutputFumenFilePath}">
                 </TextBlock>
                 <Button
                     Margin="10,0,0,0"
                     Padding="20,2,20,2"
-                    Command="{CompiledBinding OpenSelectOutputFileCommand}"
+                    Command="{Binding OpenSelectOutputFileCommand}"
                     Content="{markup:Translate {x:Static languages:Lang+B.Browser}}"
                     Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
             </StackPanel>
@@ -101,7 +101,7 @@
         <Button
             Margin="5,10,5,5"
             Padding="0,10,0,10"
-            Command="{CompiledBinding ExecuteConverterCommand}"
+            Command="{Binding ExecuteConverterCommand}"
             Content="{markup:Translate {x:Static languages:Lang+B.Execute}}"
             Foreground="{StaticResource EditorToolWindowForegroundBrush}" />
     </StackPanel>

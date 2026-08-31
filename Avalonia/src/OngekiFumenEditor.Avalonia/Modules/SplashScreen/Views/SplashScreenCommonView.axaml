@@ -53,7 +53,7 @@
                 Margin="0,0,5,0"
                 HorizontalAlignment="Right"
                 Text="{markup:Translate {x:Static languages:Lang+B.RequestRestartProgram}}"
-                IsVisible="{CompiledBinding IsRequestRestartProgram}">
+                IsVisible="{Binding IsRequestRestartProgram}">
             </TextBlock>
             <StackPanel
                 Grid.Column="1"
@@ -68,8 +68,8 @@
                     Height="25"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    ItemsSource="{CompiledBinding Languages}"
-                    SelectedItem="{CompiledBinding SelectedLanguage, Mode=TwoWay}" />
+                    ItemsSource="{Binding Languages}"
+                    SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" />
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
@@ -110,16 +110,16 @@
                     <ItemsControl
                         Background="Transparent"
                         BorderBrush="Transparent"
-                        ItemsSource="{CompiledBinding GroupedItems}">
+                        ItemsSource="{Binding GroupedItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate x:DataType="vm:GroupedItem">
-                                <Expander Header="{CompiledBinding Name}" IsExpanded="True">
-                                    <ItemsControl Margin="10,5,10,5" ItemsSource="{CompiledBinding Recents}">
+                                <Expander Header="{Binding Name}" IsExpanded="True">
+                                    <ItemsControl Margin="10,5,10,5" ItemsSource="{Binding Recents}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="vm:RecentFileItemViewModel">
                                                 <Button
                                                     Classes="RecentFile"
-                                                    Command="{CompiledBinding OpenCommand}">
+                                                    Command="{Binding OpenCommand}">
                                                     <Grid Margin="2,5">
                                                         <Grid.ColumnDefinitions>
                                                             <ColumnDefinition Width="Auto" />
@@ -131,8 +131,8 @@
                                                         </Border>
 
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <Label Content="{CompiledBinding Name}" />
-                                                            <Label Content="{CompiledBinding LocationDescription}" />
+                                                            <Label Content="{Binding Name}" />
+                                                            <Label Content="{Binding LocationDescription}" />
                                                         </StackPanel>
 
                                                         <TextBlock
@@ -140,7 +140,7 @@
                                                             Width="100"
                                                             Margin="5,0,0,0"
                                                             VerticalAlignment="Center"
-                                                            Text="{CompiledBinding LastAccessTimeText}" />
+                                                            Text="{Binding LastAccessTimeText}" />
                                                     </Grid>
                                                 </Button>
                                             </DataTemplate>
@@ -165,11 +165,11 @@
 
                         <Button
                             Classes="ActionCard"
-                            Command="{CompiledBinding CreateNewProjectCommand}"
+                            Command="{Binding CreateNewProjectCommand}"
                             Margin="0,5,0,5"
                             HorizontalAlignment="Stretch"
-                            IsVisible="{CompiledBinding CanCreateNew}"
-                            IsEnabled="{CompiledBinding CanCreateNew}">
+                            IsVisible="{Binding CanCreateNew}"
+                            IsEnabled="{Binding CanCreateNew}">
                             <Border>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -199,7 +199,7 @@
                         </Button>
                         <Button
                             Classes="ActionCard"
-                            Command="{CompiledBinding OpenProjectCommand}"
+                            Command="{Binding OpenProjectCommand}"
                             Margin="0,0,0,5"
                             HorizontalAlignment="Stretch">
                             <Border>
@@ -238,7 +238,7 @@
                             Fill="LightGray" />
                         <Button
                             Classes="ActionCard"
-                            Command="{CompiledBinding OpenTutorialCommand}"
+                            Command="{Binding OpenTutorialCommand}"
                             Margin="0,0,0,5"
                             HorizontalAlignment="Stretch">
                             <Border>
@@ -277,7 +277,7 @@
                     Grid.Row="2"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    IsChecked="{CompiledBinding DisableShowSplashScreenAfterBoot, Mode=TwoWay}">
+                    IsChecked="{Binding DisableShowSplashScreenAfterBoot, Mode=TwoWay}">
                     <TextBlock FontSize="15" Text="{markup:Translate {x:Static languages:Lang+B.NotShowAnymore}}" />
                 </CheckBox>
             </Grid>

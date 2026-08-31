@@ -33,6 +33,16 @@
         <WasmExtraFilesToDeploy Include="wwwroot\**" />
     </ItemGroup>
     <ItemGroup>
+        <!-- Keep browser-only XAML and localization inputs visible to the source generators. -->
+        <AdditionalFiles Include="Modules\BrowserOpfsBrowser\Assets\Languages\*.json" />
+        <AdditionalFiles Include="Modules\BrowserOpfsBrowser\Views\*.axaml" />
+        <AdditionalFiles Include="Modules\SplashScreen\Views\*.axaml" />
+        <AdditionalFiles Include="Assets\Languages\BrowserAudioWorkletLang.json" />
+        <AdditionalFiles Include="Assets\Languages\BrowserAudioWorkletLang.zh-Hans.json" />
+        <AdditionalFiles Include="Assets\Languages\BrowserAudioWorkletLang.ja.json" />
+        <AdditionalFiles Include="Kernel\SettingPages\Audio\Views\BrowserAudioWorkletSettingView.axaml" />
+    </ItemGroup>
+    <ItemGroup>
         <PackageReference Include="Avalonia.Browser" />
         <PackageReference Include="Avalonia.Fonts.Inter" />
         <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" />
@@ -57,6 +67,9 @@
         <ProjectReference OutputItemType="Analyzer"
                           ReferenceOutputAssembly="false"
                           Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
+        <ProjectReference OutputItemType="Analyzer"
+                          ReferenceOutputAssembly="false"
+                          Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\SimpleTypedLocalizer\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator\SimpleTypedLocalizer.SourceGenerator.csproj" />
         <ProjectReference Include="..\OngekiFumenEditor.Avalonia\OngekiFumenEditor.Avalonia.csproj" />
     </ItemGroup>
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

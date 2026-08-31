@@ -1,0 +1,71 @@
+<gekViews:ViewBase
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="https://github.com/avaloniaui/design"
+    xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
+    xmlns:languages="clr-namespace:OngekiFumenEditor.Avalonia.Browser.Assets.Languages"
+    xmlns:markup="clr-namespace:Gekimini.Avalonia.Framework.Markup;assembly=Gekimini.Avalonia"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Avalonia.Browser.Kernel.SettingPages.Audio.ViewModels"
+    x:Class="OngekiFumenEditor.Avalonia.Browser.Kernel.SettingPages.Audio.Views.BrowserAudioWorkletSettingView"
+    x:DataType="vm:BrowserAudioWorkletSettingViewModel"
+    d:DesignHeight="220"
+    d:DesignWidth="620"
+    mc:Ignorable="d">
+    <Design.DataContext>
+        <vm:BrowserAudioWorkletSettingViewModel />
+    </Design.DataContext>
+
+    <StackPanel Margin="8" Spacing="10">
+        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+            <TextBlock
+                Grid.Row="0"
+                VerticalAlignment="Center"
+                Text="{markup:Translate {x:Static languages:BrowserAudioWorkletLang+B.BrowserAudioWorkletBufferDuration}}" />
+            <NumericUpDown
+                x:Name="BufferDurationNumericUpDown"
+                Grid.Row="0"
+                Grid.Column="1"
+                Width="150"
+                Margin="12,0,6,0"
+                FormatString="0"
+                Increment="1"
+                Maximum="5000"
+                Minimum="20"
+                Value="{Binding BufferDurationMillisecondsValue, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="0"
+                Grid.Column="2"
+                VerticalAlignment="Center"
+                Text="{markup:Translate {x:Static languages:BrowserAudioWorkletLang+B.BrowserAudioWorkletMilliseconds}}" />
+
+            <TextBlock
+                Grid.Row="1"
+                Margin="0,10,0,0"
+                VerticalAlignment="Center"
+                Text="{markup:Translate {x:Static languages:BrowserAudioWorkletLang+B.BrowserAudioWorkletInitialBufferFrameCount}}" />
+            <NumericUpDown
+                x:Name="InitialBufferFrameCountNumericUpDown"
+                Grid.Row="1"
+                Grid.Column="1"
+                Width="150"
+                Margin="12,10,6,0"
+                FormatString="0"
+                Increment="1"
+                Maximum="8192"
+                Minimum="128"
+                Value="{Binding InitialBufferFrameCountValue, Mode=TwoWay}" />
+            <TextBlock
+                Grid.Row="1"
+                Grid.Column="2"
+                Margin="0,10,0,0"
+                VerticalAlignment="Center"
+                Text="{markup:Translate {x:Static languages:BrowserAudioWorkletLang+B.BrowserAudioWorkletFrames}}" />
+        </Grid>
+
+        <CheckBox
+            x:Name="UseDeviceSampleRateCheckBox"
+            Content="{markup:Translate {x:Static languages:BrowserAudioWorkletLang+B.BrowserAudioWorkletUseDeviceSampleRate}}"
+            IsChecked="{Binding UseDeviceSampleRate, Mode=TwoWay}" />
+    </StackPanel>
+</gekViews:ViewBase>

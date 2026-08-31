@@ -2,7 +2,6 @@
     xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Name="Root"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.FumenVisualEditorView"
-    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls1="clr-namespace:OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI"

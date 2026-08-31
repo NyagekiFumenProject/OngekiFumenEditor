@@ -24,7 +24,7 @@
             Background="Transparent"
             BorderBrush="DarkGray"
             BorderThickness="1,1,25,1"
-            Command="{CompiledBinding CombineLanesCommand}">
+            Command="{Binding CombineLanesCommand}">
             <TextBlock
                 Foreground="{DynamicResource EditorToolWindowForegroundBrush}"
                 Text="{markup:Translate {x:Static languages:Lang+B.CombineLanes}}"

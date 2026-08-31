@@ -1,0 +1,9 @@
+{
+    "NAudioBrowserAudioWorklet": "NAudio ブラウザー AudioWorklet",
+    "BrowserAudioWorkletBufferDuration": "バッファー時間",
+    "BrowserAudioWorkletInitialBufferFrameCount": "初期バッファーフレーム数",
+    "BrowserAudioWorkletUseDeviceSampleRate": "デバイスのサンプルレートを使用",
+    "BrowserAudioWorkletMilliseconds": "ミリ秒",
+    "BrowserAudioWorkletFrames": "フレーム",
+    "BrowserAudioWorkletResetDefault": "既定値に戻す"
+}

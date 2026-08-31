@@ -2,7 +2,6 @@
     xmlns:gekViews="clr-namespace:Gekimini.Avalonia.Views;assembly=Gekimini.Avalonia"
     x:Class="OngekiFumenEditor.Avalonia.Modules.FumenTimeSignatureListViewer.Views.FumenTimeSignatureListViewerView"
     x:Name="Root"
-    x:CompileBindings="True"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:behaviors="clr-namespace:OngekiFumenEditor.Avalonia.UI.Behaviors"

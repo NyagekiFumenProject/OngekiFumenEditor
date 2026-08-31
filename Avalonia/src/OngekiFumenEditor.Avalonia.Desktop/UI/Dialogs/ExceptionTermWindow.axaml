@@ -1,6 +1,5 @@
 <Window
     x:Class="OngekiFumenEditor.Avalonia.Desktop.UI.Dialogs.ExceptionTermWindow"
-    x:CompileBindings="True"
     x:Name="Root"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
