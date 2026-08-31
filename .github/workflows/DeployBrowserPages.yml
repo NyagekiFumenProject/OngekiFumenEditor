@@ -3,7 +3,6 @@ name: Deploy Browser to GitHub and Cloudflare Pages
 on:
   push:
     branches:
-      - master
       - avalonia
   workflow_dispatch:
 
@@ -137,7 +136,7 @@ jobs:
       contents: read
     environment:
       name: cloudflare-pages
-      url: https://ongekifumeneditor.mikirasora0409.workers.dev/
+      url: https://ongekifumeneditor.mikirasora.workers.dev/
 
     steps:
       - name: Checkout repository
