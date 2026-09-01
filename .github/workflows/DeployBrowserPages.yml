@@ -54,10 +54,21 @@ jobs:
         run: >-
           dotnet publish "$BROWSER_PROJECT"
           --configuration Release
-          --output "${{ runner.temp }}/browser-publish"
+          --output "${{ runner.temp }}/browser-publish/mt"
           --nologo
           --verbosity minimal
           -p:RunAOTCompilation=true
+          -p:WasmEnableThreads=true
+
+      - name: Publish Browser Release AOT
+        run: >-
+          dotnet publish "$BROWSER_PROJECT"
+          --configuration Release
+          --output "${{ runner.temp }}/browser-publish/st"
+          --nologo
+          --verbosity minimal
+          -p:RunAOTCompilation=true
+          -p:WasmEnableThreads=false
 
       - name: Dump Publish Build Files/Directories
         shell: bash
@@ -125,10 +136,20 @@ jobs:
 
           echo "========================================"
 
-      - name: Validate Pages artifact
+      - name: Validate Github Pages artifact
         shell: bash
         run: |
-          site_root="${{ runner.temp }}/browser-publish/wwwroot"
+          site_root="${{ runner.temp }}/browser-publish/st/wwwroot"
+          test -f "$site_root/index.html"
+          test -d "$site_root/_framework"
+          find "$site_root/_framework" -maxdepth 1 -type f -name '*.wasm' -print -quit | grep -q .
+          grep -ERq 'runAOTCompilation[[:space:]]*:[[:space:]]*true' "$site_root/_framework"/dotnet.native*.js
+          touch "$site_root/.nojekyll"
+          
+      - name: Validate Cloudflare Pages artifact
+        shell: bash
+        run: |
+          site_root="${{ runner.temp }}/browser-publish/mt/wwwroot"
           test -f "$site_root/index.html"
           test -d "$site_root/_framework"
           find "$site_root/_framework" -maxdepth 1 -type f -name '*.wasm' -print -quit | grep -q .
@@ -138,14 +159,14 @@ jobs:
       - name: Upload Browser artifact for Github Pages
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ${{ runner.temp }}/browser-publish/wwwroot
+          path: ${{ runner.temp }}/browser-publish/st/wwwroot
           include-hidden-files: true
 
       - name: Upload Browser artifact for Cloudflare Pages
         uses: actions/upload-artifact@v4
         with:
           name: browser-site
-          path: ${{ runner.temp }}/browser-publish/wwwroot
+          path: ${{ runner.temp }}/browser-publish/mt/wwwroot
           include-hidden-files: true
           if-no-files-found: error
 
