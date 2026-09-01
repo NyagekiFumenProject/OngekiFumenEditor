@@ -57,6 +57,7 @@ jobs:
         run: >-
           dotnet publish "$BROWSER_PROJECT"
           --configuration Release
+          --no-restore
           --output "${{ runner.temp }}/browser-publish"
           --nologo
           --verbosity minimal
