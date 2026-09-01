@@ -59,6 +59,72 @@ jobs:
           --verbosity minimal
           -p:RunAOTCompilation=true
 
+      - name: Dump Publish Build Files/Directories
+        shell: bash
+        run: |
+          root="${{ runner.temp }}/browser-publish"
+
+          echo "========================================"
+          echo "Publish Build Directory Tree"
+          echo "Root: $root"
+          echo "========================================"
+
+          format_size() {
+            local size="$1"
+
+            if [ "$size" -lt 1024 ]; then
+              printf "%d B" "$size"
+            elif [ "$size" -lt 1048576 ]; then
+              awk -v size="$size" 'BEGIN { printf "%.2f KB", size / 1024 }'
+            elif [ "$size" -lt 1073741824 ]; then
+              awk -v size="$size" 'BEGIN { printf "%.2f MB", size / 1048576 }'
+            else
+              awk -v size="$size" 'BEGIN { printf "%.2f GB", size / 1073741824 }'
+            fi
+          }
+
+          dump_tree() {
+            local dir="$1"
+            local prefix="$2"
+
+            local entries=()
+            while IFS= read -r -d '' entry; do
+              entries+=("$entry")
+            done < <(find "$dir" -mindepth 1 -maxdepth 1 -print0 | sort -z)
+
+            local count="${#entries[@]}"
+            local index=0
+
+            for entry in "${entries[@]}"; do
+              index=$((index + 1))
+
+              if [ "$index" -eq "$count" ]; then
+                branch="└── "
+                child_prefix="${prefix}    "
+              else
+                branch="├── "
+                child_prefix="${prefix}│   "
+              fi
+
+              name="$(basename "$entry")"
+
+              if [ -d "$entry" ]; then
+                echo "${prefix}${branch}${name}/"
+                dump_tree "$entry" "$child_prefix"
+              elif [ -f "$entry" ]; then
+                size="$(stat -c '%s' "$entry")"
+                echo "${prefix}${branch}${name} ($(format_size "$size"))"
+              else
+                echo "${prefix}${branch}${name}"
+              fi
+            done
+          }
+
+          echo "browser-publish/"
+          dump_tree "$root" ""
+
+          echo "========================================"
+
       - name: Validate Pages artifact
         shell: bash
         run: |
