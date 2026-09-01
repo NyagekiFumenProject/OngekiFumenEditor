@@ -4,6 +4,10 @@
 ## 简介
 ![image](https://github.com/NyagekiFumenProject/OngekiFumenEditor/assets/7549173/a495c5a2-0d6b-4995-8730-e5ee4e10b56a)
 
+## 在线网页版体验(Work in Progress)
+[Cloudflare Page(正式，采用多线程)](https://avalonia.ongeki-fumen-editor.pages.dev/)
+[Github Page(备用，禁止多线程)](https://nyagekifumenproject.github.io/OngekiFumenEditor/)
+
 ## 编译&下载&Wiki
 [![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)<br/>
 [*下载最新最热制谱器*](https://next.nageki-net.com/fumen/editor/get)<br/>
@@ -55,8 +59,9 @@
 * 更好的CLI支持
 * 自定义快捷键按键绑定
 * 实现分组变速功能
-* 提供更好的变速工具/界面 **<--- we are here! ---**
+* ~~提供更好的变速工具/界面~~
 * 实现[MCP Server](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/Tutorial_16(zh-CN)),支持AI辅助写谱
+* 实现网页版质谱器 **<--- we are here! ---**
 * 塞小功能&修BUG....
 ....、
 
