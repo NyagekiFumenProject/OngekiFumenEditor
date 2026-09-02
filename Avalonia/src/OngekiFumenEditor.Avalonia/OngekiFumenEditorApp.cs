@@ -19,6 +19,7 @@ namespace OngekiFumenEditor.Avalonia;
 
 public abstract class OngekiFumenEditorApp : App
 {
+    private Task keyBindingInitializationTask = Task.CompletedTask;
     protected OngekiFumenEditorApp(bool isGUIMode = true)
         : base(isGUIMode)
     {
@@ -26,10 +27,23 @@ public abstract class OngekiFumenEditorApp : App
         // conventional Program.Main entry point (for example headless tests).
         ThreadingDiagnosticsRuntime.CaptureMainThread();
     }
-
     public override void Initialize()
     {
         base.Initialize();
+
+        global::OngekiFumenEditor.Avalonia.Utils.Log.Initialize(
+            ServiceProvider.GetRequiredService<global::OngekiFumenEditor.Avalonia.Utils.Log>());
+
+        if (!IsGUIMode)
+            return;
+
+        // 对齐 WPF AppBootstrapper：启动调度循环（性能统计/自动保存等任务依赖它）。
+        _ = ServiceProvider.GetRequiredService<ISchedulerManager>().Init();
+
+        // Browser 的实现会异步读取 OPFS；在这里启动并保存任务，不能阻塞同步的
+        // Application.Initialize()，真正依赖 TopLevel 的路由器稍后再等待它完成。
+        keyBindingInitializationTask =
+            ServiceProvider.GetRequiredService<IKeyBindingManager>().Initialize();
     }
 
     protected override void RegisterServices(IServiceCollection serviceCollection)
@@ -46,15 +60,8 @@ public abstract class OngekiFumenEditorApp : App
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
-
-        global::OngekiFumenEditor.Avalonia.Utils.Log.Initialize(
-            ServiceProvider.GetRequiredService<global::OngekiFumenEditor.Avalonia.Utils.Log>());
-
         if (!IsGUIMode)
             return;
-
-        // 对齐 WPF AppBootstrapper：启动调度循环（性能统计/自动保存等任务依赖它）。
-        _ = ServiceProvider.GetRequiredService<ISchedulerManager>().Init();
 
         InitializeMainWindowTitleAndIcon();
 
@@ -91,7 +98,7 @@ public abstract class OngekiFumenEditorApp : App
     {
         try
         {
-            await ServiceProvider.GetRequiredService<IKeyBindingManager>().Initialize();
+            await keyBindingInitializationTask;
             ServiceProvider.GetRequiredService<IEditorKeyBindingRouter>().Attach(TopLevel);
         }
         catch (Exception exception)

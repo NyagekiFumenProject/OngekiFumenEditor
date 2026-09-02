@@ -58,7 +58,7 @@ public class OngekiFumenEditorBrowserApp : OngekiFumenEditorApp
 
         InitializeProgramVersion();
 
-        var shell = ServiceProvider.GetService<IShell>();
+        var shell = ServiceProvider.GetRequiredService<IShell>();
 
         shell.DockableOpened += AutoSaveLayout;
         shell.DockableClosed += AutoSaveLayout;

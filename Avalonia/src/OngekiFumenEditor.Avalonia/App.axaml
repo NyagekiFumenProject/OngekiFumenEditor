@@ -9,6 +9,7 @@
     xmlns:windowManager="clr-namespace:Iciclecreek.Avalonia.WindowManager;assembly=Iciclecreek.Avalonia.WindowManager"
     xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.ValueConverters">
     <Application.Styles>
+        <FluentTheme />
         <!-- Application XAML resources are not inherited from Gekimini.Avalonia.App. -->
         <dialogHostAvalonia:DialogHostStyles />
         <DockFluentTheme />

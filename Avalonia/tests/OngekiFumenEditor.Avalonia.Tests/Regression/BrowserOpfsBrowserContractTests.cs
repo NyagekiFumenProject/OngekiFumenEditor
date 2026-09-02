@@ -351,7 +351,16 @@ public sealed class BrowserOpfsBrowserContractTests
             "Services",
             "KeyBinding",
             "BrowserKeyBindingFileSystemInterop.cs")));
-        Assert.Contains("await ServiceProvider.GetRequiredService<IKeyBindingManager>().Initialize()", app, StringComparison.Ordinal);
+        // 按键配置必须在路由器附加前初始化：Application.Initialize() 先启动异步初始化
+        // 并保存任务，路由器附加前必须等待该任务完成（Browser 的实现要读 OPFS）。
+        var initializeStart = app.IndexOf("keyBindingInitializationTask =", StringComparison.Ordinal);
+        var routerAwait = app.IndexOf("await keyBindingInitializationTask", StringComparison.Ordinal);
+        var routerAttach = app.IndexOf(".Attach(TopLevel)", StringComparison.Ordinal);
+        Assert.True(initializeStart >= 0, "Key binding initialization must start in Application.Initialize().");
+        Assert.True(routerAwait >= 0, "Router attach must await the key binding initialization task.");
+        Assert.True(routerAttach >= 0, "Router attach call must exist.");
+        Assert.True(initializeStart < routerAwait, "Initialization must be started before the router awaits it.");
+        Assert.True(routerAwait < routerAttach, "Initialization must complete before routing is attached.");
     }
 
     private static string ReadBrowserScript(string repositoryRoot, string fileName) =>

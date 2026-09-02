@@ -37,6 +37,29 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         this.commandLineArgs = commandLineArgs ?? [];
     }
 
+    public override void Initialize()
+    {
+        base.Initialize();
+
+#if !DEBUG
+        Program.InstallDispatcherExceptionHandler();
+#endif
+
+        // 原生顶层过滤器：托管管道覆盖不到的原生崩溃（P/Invoke 访问冲突等）也写出 minidump。
+        // 需在 DI 容器构建完成后执行，Init 内部要读取 ProgramSetting。
+        if (OperatingSystem.IsWindows())
+        {
+            try
+            {
+                DumpFileHelper.Init();
+            }
+            catch (Exception exception)
+            {
+                Log.LogError("Failed to install native unhandled exception filter.", exception);
+            }
+        }
+    }
+
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
         base.RegisterServices(serviceCollection);
@@ -64,24 +87,6 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
-
-#if !DEBUG
-        Program.InstallDispatcherExceptionHandler();
-#endif
-
-        // 原生顶层过滤器：托管管道覆盖不到的原生崩溃（P/Invoke 访问冲突等）也写出 minidump。
-        // 需在 DI 容器构建完成后执行，Init 内部要读取 ProgramSetting。
-        if (OperatingSystem.IsWindows())
-        {
-            try
-            {
-                DumpFileHelper.Init();
-            }
-            catch (Exception exception)
-            {
-                Log.LogError("Failed to install native unhandled exception filter.", exception);
-            }
-        }
 
         if (!IsGUIMode)
         {
