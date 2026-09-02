@@ -160,9 +160,9 @@ public partial class ProgramInfoSettingViewModel : ViewModelBase, ISettingsEdito
         try
         {
             var topLevel = TopLevel.GetTopLevel(loadedView);
-            return topLevel is IRenderRoot renderRoot
-                ? GetTypeName(renderRoot.Renderer)
-                : Lang.Unavailable;
+            return topLevel is null
+                ? Lang.Unavailable
+                : GetTypeName(GetRenderer(topLevel));
         }
         catch (Exception)
         {
@@ -181,12 +181,19 @@ public partial class ProgramInfoSettingViewModel : ViewModelBase, ISettingsEdito
             return Lang.Unavailable;
         }
     }
+    private static object GetRenderer(TopLevel topLevel)
+    {
+        var rendererProperty = typeof(TopLevel).GetProperty(
+            "Renderer",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        return rendererProperty?.GetValue(topLevel);
+    }
 
     private static (string Name, string FpsLimit, string BackgroundThreads) GetRenderTimerInfo()
     {
         try
         {
-            var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>();
+            var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>() ?? GetRenderTimerFromRenderLoop();
             if (renderTimer is null)
                 return (Lang.Unavailable, Lang.Unavailable, Lang.Unavailable);
 
@@ -199,6 +206,15 @@ public partial class ProgramInfoSettingViewModel : ViewModelBase, ISettingsEdito
         {
             return (Lang.Unavailable, Lang.Unavailable, Lang.Unavailable);
         }
+    }
+
+    private static IRenderTimer GetRenderTimerFromRenderLoop()
+    {
+        var renderLoop = AvaloniaLocator.Current.GetService<IRenderLoop>();
+        var timerProperty = renderLoop?.GetType().GetProperty(
+            "Timer",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        return timerProperty?.GetValue(renderLoop) as IRenderTimer;
     }
 
     private static string FormatRenderFpsLimit(IRenderTimer renderTimer)
@@ -219,7 +235,7 @@ public partial class ProgramInfoSettingViewModel : ViewModelBase, ISettingsEdito
 
     private static bool SupportsRuntimeBackgroundThreads()
     {
-        // The net10 reference assemblies used by this solution do not expose
+        // The net11 reference assemblies used by this solution do not expose
         // Thread.IsThreadStartSupported. Browser runtimes are the known target
         // where the normal managed background-thread model is unavailable.
         return !OperatingSystem.IsBrowser();

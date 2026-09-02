@@ -87,6 +87,7 @@ public abstract class DataGridRowReorderBehavior<TItem> : DataGridRowReorderBeha
 
     private readonly DispatcherTimer autoScrollTimer;
     private Point pointerPressedPosition;
+    private PointerPressedEventArgs pointerPressedEvent;
     private TItem pointerPressedItem;
     private IReadOnlyList<TItem> draggingItems;
     private string activeDragToken;
@@ -147,11 +148,12 @@ public abstract class DataGridRowReorderBehavior<TItem> : DataGridRowReorderBeha
 
         pointerPressedPosition = e.GetPosition(grid);
         pointerPressedItem = item;
+        pointerPressedEvent = e;
     }
 
     private async void OnPointerMoved(object sender, PointerEventArgs e)
     {
-        if (isDragging || pointerPressedItem is null || !e.Properties.IsLeftButtonPressed)
+        if (isDragging || pointerPressedItem is null || pointerPressedEvent is null || !e.Properties.IsLeftButtonPressed)
             return;
 
         var position = e.GetPosition(AssociatedObject);
@@ -179,7 +181,7 @@ public abstract class DataGridRowReorderBehavior<TItem> : DataGridRowReorderBeha
 
         try
         {
-            await DragDrop.DoDragDropAsync(e, dataTransfer, DragDropEffects.Move);
+            await DragDrop.DoDragDropAsync(pointerPressedEvent, dataTransfer, DragDropEffects.Move);
         }
         finally
         {
@@ -470,6 +472,7 @@ public abstract class DataGridRowReorderBehavior<TItem> : DataGridRowReorderBeha
     private void ResetPointerState()
     {
         pointerPressedItem = null;
+        pointerPressedEvent = null;
         pointerPressedPosition = default;
     }
 

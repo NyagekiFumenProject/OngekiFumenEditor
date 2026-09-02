@@ -487,10 +487,10 @@ public sealed class EditorUiRegressionTests
         public TestToolbarItemView()
         {
             Icon = new AvaloniaImage { Width = 16, Height = 16 };
-            Icon.Bind(AvaloniaImage.SourceProperty, new global::Avalonia.Data.Binding(nameof(TestToolbarItemViewModel.IconSource)));
+            Icon.Bind(AvaloniaImage.SourceProperty, new global::Avalonia.Data.ReflectionBinding(nameof(TestToolbarItemViewModel.IconSource)));
 
             Button = new Button();
-            Button.Bind(Button.CommandProperty, new global::Avalonia.Data.Binding(nameof(TestToolbarItemViewModel.Command)));
+            Button.Bind(Button.CommandProperty, new global::Avalonia.Data.ReflectionBinding(nameof(TestToolbarItemViewModel.Command)));
             Button.Content = Icon;
             Content = Button;
         }

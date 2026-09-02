@@ -23,11 +23,11 @@ public partial class HoldOperationView : ViewBase
 
     private void OnPointerMoved(object sender, PointerEventArgs e)
     {
-        if (!dragSession.TryConsume(e) || DataContext is not HoldOperationViewModel viewModel)
+        if (!dragSession.TryConsume(e, out var triggerEvent) || DataContext is not HoldOperationViewModel viewModel)
             return;
 
         _ = IoC.Get<IDragDropManager>().StartDragDropEvent(
-            e,
+            triggerEvent,
             viewModel.CreateHoldEndDropAction(),
             DragDropEffects.Move);
     }

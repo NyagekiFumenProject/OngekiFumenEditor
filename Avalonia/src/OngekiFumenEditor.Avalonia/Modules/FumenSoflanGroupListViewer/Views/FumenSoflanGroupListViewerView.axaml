@@ -142,9 +142,9 @@
                                             <Border Width="19" />
                                             <RadioButton
                                                 Margin="5,0"
-                                                Checked="OnItemChecked"
                                                 GroupName="ILOVE2857IsSelected"
-                                                IsChecked="{Binding IsSelected}" />
+                                                IsChecked="{Binding IsSelected}"
+                                                IsCheckedChanged="OnItemChecked" />
                                             <TextBlock Text="{Binding DisplayName}" />
                                         </StackPanel>
                                     </DataTemplate>
@@ -184,9 +184,9 @@
                                     <DataTemplate DataType="editorObjects:SoflanGroupWrapItem" x:DataType="editorObjects:SoflanGroupWrapItem">
                                         <RadioButton
                                             Margin="2,5,2,5"
-                                            Checked="OnDisplaySoflanItemChecked"
                                             GroupName="ILOVE2857IsDisplaySoflanDesignMode"
-                                            IsChecked="{Binding IsDisplaySoflanDesignMode}" />
+                                            IsChecked="{Binding IsDisplaySoflanDesignMode}"
+                                            IsCheckedChanged="OnDisplaySoflanItemChecked" />
                                     </DataTemplate>
                                 </ContentControl.DataTemplates>
                             </ContentControl>

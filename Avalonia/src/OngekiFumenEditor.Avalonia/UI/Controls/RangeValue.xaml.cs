@@ -1,7 +1,7 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using System.ComponentModel;
-
 namespace OngekiFumenEditor.Avalonia.UI.Controls;
 
 public partial class RangeValue : UserControl, INotifyPropertyChanged
@@ -62,7 +62,19 @@ public partial class RangeValue : UserControl, INotifyPropertyChanged
     public RangeValue()
     {
         InitializeComponent();
-        this.GetObservable(CurrentValueProperty).Subscribe(_ =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentIntValue))));
+        this.GetObservable(CurrentValueProperty).Subscribe(new AnonymousObserver<double>(_ =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentIntValue)))));
+    }
+    private sealed class AnonymousObserver<T>(Action<T> onNext) : IObserver<T>
+    {
+        public void OnCompleted()
+        {
+        }
+
+        public void OnError(Exception error)
+        {
+        }
+
+        public void OnNext(T value) => onNext(value);
     }
 }

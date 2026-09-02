@@ -1,10 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <!--If you are willing to use Windows/MacOS native APIs you will need to create 3 projects.
-    One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
-        <TargetFramework Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">net10.0</TargetFramework>
-        <TargetFramework Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' ">net10.0-windows10.0.19041.0</TargetFramework>
+        <!-- Native platform APIs require platform-specific desktop projects when non-Windows targets are added. -->
+        <TargetFramework Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">net11.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' ">net11.0-windows10.0.19041.0</TargetFramework>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <ImplicitUsings>enable</ImplicitUsings>
         <InjectioDuplicateStrategy>Append</InjectioDuplicateStrategy>

@@ -87,7 +87,7 @@ public sealed class DesktopCommandLineHostProcessTests
             "OngekiFumenEditor.Avalonia.CommandLine",
             "bin",
             configuration,
-            "net10.0-windows10.0.19041.0",
+            "net11.0-windows10.0.19041.0",
             "OngekiFumenEditor.Avalonia.CommandLine.exe");
     }
 

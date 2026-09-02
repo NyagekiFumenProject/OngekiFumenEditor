@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
+        <TargetFramework>net11.0</TargetFramework>
         <LangVersion>preview</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -59,6 +59,7 @@
         <AvaloniaResource Include="Resources\**" />
     </ItemGroup>
 
+
     <ItemGroup>
         <!-- Single-instance IPC and command-line forwarding are deferred for this migration round. -->
         <Compile Remove="Startup.cs" />
@@ -77,7 +78,6 @@
         <Compile Remove="UI\Controls\ObjectPoolItemsControl.cs" />
         <Compile Remove="UI\Controls\StoryboardWrapper.cs" />
     </ItemGroup>
-
     <ItemGroup>
         <ProjectReference Include="..\..\..\Dependences\earcut.net\src\Earcut.csproj" />
         <ProjectReference Include="..\..\..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj" />
@@ -85,6 +85,7 @@
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Attributes\Injectio.Attributes.csproj" />
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Injectio\src\Injectio.Generators\Injectio.Generators.csproj" />
         <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia\Gekimini.Avalonia.csproj" />
+        <ProjectReference Include="..\..\Dependencies\Gekimini.Avalonia\Dependencies\Avalonia.Controls.ToolBar\Avalonia.Controls.ToolBar.csproj" />
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="true" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Attributes\Gekimini.Avalonia.Attributes.csproj" />
         <ProjectReference OutputItemType="Analyzer" ReferenceOutputAssembly="false" Include="..\..\Dependencies\Gekimini.Avalonia\src\Gekimini.Avalonia.Generator\Gekimini.Avalonia.Generator.csproj" />
     </ItemGroup>
@@ -108,6 +109,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Avalonia.HarfBuzz" />
         <PackageReference Include="Avalonia.Skia" />
         <PackageReference Include="Avalonia.Controls.ColorPicker" />
         <PackageReference Include="Avalonia.Controls.DataGrid" />

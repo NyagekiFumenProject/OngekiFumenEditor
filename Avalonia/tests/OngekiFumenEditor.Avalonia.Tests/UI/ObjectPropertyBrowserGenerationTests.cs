@@ -11,7 +11,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser.UIGenerator;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ViewModels;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace OngekiFumenEditor.Avalonia.Tests.UI;
 

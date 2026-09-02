@@ -1,6 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
     <PropertyGroup>
-        <TargetFramework>net10.0-browser</TargetFramework>
+        <TargetFramework>net11.0-browser</TargetFramework>
+        <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
         <OutputType>Exe</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <LangVersion>preview</LangVersion>
@@ -21,7 +22,6 @@
         <RunAOTCompilation>true</RunAOTCompilation>
         <PublishTrimmed>true</PublishTrimmed>
         <TrimMode>full</TrimMode>
-        <WasmEnableThreads>true</WasmEnableThreads>
     </PropertyGroup>
 
     <ItemGroup>
@@ -29,6 +29,10 @@
         <PackageReference Include="HarfBuzzSharp.NativeAssets.WebAssembly" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug"/>
         <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <NativeFileReference Include="..\..\Dependencies\EmscriptenCompatibility\legacy-setjmp.c" />
     </ItemGroup>
 
 
@@ -80,4 +84,22 @@
             <Private>true</Private>
         </Reference>
     </ItemGroup>
+    <!--
+        SkiaSharp.NativeAssets.WebAssembly 3.119.4 still contains a small
+        legacy exception-handling section built with Emscripten 3.1.56.
+        .NET 11 links the runtime with the standardized exception proposal;
+        translate that legacy section after the SDK link and before publish
+        assets are hashed.  This keeps the generated dotnet.js integrity
+        metadata consistent with the served WASM file.
+    -->
+    <Target Name="TranslateLegacySkiaWebAssemblyExceptions"
+            AfterTargets="WasmAfterLinkSteps"
+            Condition="'$(WasmBuildNative)' == 'true' and
+                       '$(WasmEnableExceptionHandling)' == 'true' and
+                       Exists('$(_WasmIntermediateOutputPath)dotnet.native.wasm')">
+        <Message Text="Translating legacy SkiaSharp WebAssembly exception sections." Importance="High" />
+        <Exec Command="wasm-opt$(_ExeExt) --enable-simd --enable-exception-handling --enable-reference-types --enable-multivalue --enable-bulk-memory --enable-nontrapping-float-to-int --translate-to-exnref &quot;$(_WasmIntermediateOutputPath)dotnet.native.wasm&quot; -o &quot;$(_WasmIntermediateOutputPath)dotnet.native.wasm&quot;"
+              EnvironmentVariables="@(WasmToolchainEnvVars)"
+              IgnoreStandardErrorWarningFormat="true" />
+    </Target>
 </Project>

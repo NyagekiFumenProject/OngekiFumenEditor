@@ -41,14 +41,14 @@ public partial class ConnectableObjectOperationView : ViewBase
 
     private void TryStartDrag(PointerEventArgs e, ConnectableObjectOperationViewModel.DragActionType actionType)
     {
-        if (!dragSession.TryConsume(e) ||
+        if (!dragSession.TryConsume(e, out var triggerEvent) ||
             DataContext is not ConnectableObjectOperationViewModel viewModel ||
             viewModel.CreateDropAction(actionType) is not { } dropAction)
         {
             return;
         }
 
-        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(e, dropAction, DragDropEffects.Move);
+        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(triggerEvent, dropAction, DragDropEffects.Move);
     }
 }
 
@@ -56,27 +56,32 @@ internal sealed class PointerDragSession
 {
     private bool isArmed;
     private Point startPosition;
+    private PointerPressedEventArgs triggerEvent;
 
     public void Arm(PointerPressedEventArgs e)
     {
         if (!e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
         {
             isArmed = false;
+            triggerEvent = null;
             return;
         }
 
         startPosition = e.GetPosition(null);
+        triggerEvent = e;
         isArmed = true;
     }
 
-    public bool TryConsume(PointerEventArgs e)
+    public bool TryConsume(PointerEventArgs e, out PointerPressedEventArgs pressedEvent)
     {
+        pressedEvent = null;
         if (!isArmed)
             return false;
 
         if (!e.GetCurrentPoint(null).Properties.IsLeftButtonPressed)
         {
             isArmed = false;
+            triggerEvent = null;
             return false;
         }
 
@@ -87,7 +92,9 @@ internal sealed class PointerDragSession
             return false;
         }
 
+        pressedEvent = triggerEvent;
+        triggerEvent = null;
         isArmed = false;
-        return true;
+        return pressedEvent is not null;
     }
 }

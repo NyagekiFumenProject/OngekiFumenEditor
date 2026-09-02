@@ -41,11 +41,12 @@ jobs:
             Avalonia/Dependencies/Gekimini.Avalonia \
             Avalonia/Dependencies/NAudio.BrowserAudioWorklet
 
-      - name: Setup .NET 10 with WebAssembly tools
+      - name: Setup .NET 11 with WebAssembly tools
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: 10.0.x
-          workloads: wasm-tools
+          dotnet-version: 11.0.100-preview.7.26381.103
+      - name: Install WebAssembly tools workload
+        run: dotnet workload install wasm-tools --include-previews
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6

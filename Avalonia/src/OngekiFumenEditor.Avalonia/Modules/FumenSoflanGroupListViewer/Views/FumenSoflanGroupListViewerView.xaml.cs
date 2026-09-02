@@ -16,7 +16,7 @@ public partial class FumenSoflanGroupListViewerView : ViewBase
 
     private void OnItemChecked(object sender, RoutedEventArgs e)
     {
-        if (sender is Control { DataContext: SoflanGroupWrapItem item } &&
+        if (sender is RadioButton { IsChecked: true, DataContext: SoflanGroupWrapItem item } &&
             DataContext is FumenSoflanGroupListViewerViewModel viewModel)
         {
             viewModel.OnItemChecked(item);
@@ -25,7 +25,7 @@ public partial class FumenSoflanGroupListViewerView : ViewBase
 
     private void OnDisplaySoflanItemChecked(object sender, RoutedEventArgs e)
     {
-        if (sender is Control { DataContext: SoflanGroupWrapItem item } &&
+        if (sender is RadioButton { IsChecked: true, DataContext: SoflanGroupWrapItem item } &&
             DataContext is FumenSoflanGroupListViewerViewModel viewModel)
         {
             viewModel.OnDisplaySoflanItemChecked(item);

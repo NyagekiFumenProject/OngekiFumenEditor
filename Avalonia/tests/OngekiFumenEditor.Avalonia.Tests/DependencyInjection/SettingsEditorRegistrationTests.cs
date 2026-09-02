@@ -1,3 +1,4 @@
+using System.Reflection;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
@@ -204,7 +205,7 @@ public sealed class SettingsEditorRegistrationTests
     {
         var setting = EditorGlobalSetting.Default;
         var originalLimit = setting.LimitFPS;
-        var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>();
+        var renderTimer = GetRenderTimer();
         Assert.NotNull(renderTimer);
 
         try
@@ -236,7 +237,7 @@ public sealed class SettingsEditorRegistrationTests
     {
         var setting = EditorGlobalSetting.Default;
         var originalLimit = setting.LimitFPS;
-        var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>();
+        var renderTimer = GetRenderTimer();
         Assert.NotNull(renderTimer);
 
         try
@@ -324,5 +325,17 @@ public sealed class SettingsEditorRegistrationTests
         : IThreadingDiagnostics
     {
         public ThreadingDiagnosticsSnapshot GetSnapshot() => snapshot;
+    }
+    private static IRenderTimer? GetRenderTimer()
+    {
+        var renderTimer = AvaloniaLocator.Current.GetService<IRenderTimer>();
+        if (renderTimer is not null)
+            return renderTimer;
+
+        var renderLoop = AvaloniaLocator.Current.GetService<IRenderLoop>();
+        var timerProperty = renderLoop?.GetType().GetProperty(
+            "Timer",
+            BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        return timerProperty?.GetValue(renderLoop) as IRenderTimer;
     }
 }

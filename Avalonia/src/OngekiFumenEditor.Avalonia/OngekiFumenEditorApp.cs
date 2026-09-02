@@ -27,6 +27,11 @@ public abstract class OngekiFumenEditorApp : App
         ThreadingDiagnosticsRuntime.CaptureMainThread();
     }
 
+    public override void Initialize()
+    {
+        base.Initialize();
+    }
+
     protected override void RegisterServices(IServiceCollection serviceCollection)
     {
         base.RegisterServices(serviceCollection);

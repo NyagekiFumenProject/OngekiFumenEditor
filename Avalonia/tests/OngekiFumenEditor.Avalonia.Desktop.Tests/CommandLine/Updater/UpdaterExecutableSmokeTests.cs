@@ -17,7 +17,7 @@ public sealed class UpdaterExecutableSmokeTests
             "OngekiFumenEditor.Avalonia.CommandLine",
             "bin",
             configuration,
-            "net10.0-windows10.0.19041.0",
+            "net11.0-windows10.0.19041.0",
             "OngekiFumenEditor.Avalonia.CommandLine.exe");
         var stubOutputPath = Path.Combine(
             repositoryRoot,
@@ -25,7 +25,7 @@ public sealed class UpdaterExecutableSmokeTests
             "OngekiFumenEditor.Avalonia.UpdaterStub",
             "bin",
             configuration,
-            "net10.0-windows10.0.19041.0");
+            "net11.0-windows10.0.19041.0");
         Assert.True(File.Exists(commandLineExecutable), $"CommandLine executable was not built: {commandLineExecutable}");
         Assert.True(Directory.Exists(stubOutputPath), $"Updater stub was not built: {stubOutputPath}");
 

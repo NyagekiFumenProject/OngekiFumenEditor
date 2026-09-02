@@ -1,4 +1,4 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
@@ -161,7 +161,7 @@ public sealed class AxamlSmokeTests
             window.Show();
             window.UpdateLayout();
 
-            Assert.Same(window, control.GetVisualRoot());
+            Assert.Same(window, TopLevel.GetTopLevel(control));
             if (control is Toast)
             {
                 Assert.False(control.IsVisible);

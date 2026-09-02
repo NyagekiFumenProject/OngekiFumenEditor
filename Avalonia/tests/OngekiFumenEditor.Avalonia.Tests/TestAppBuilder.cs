@@ -13,8 +13,10 @@ public static class TestAppBuilder
         return AppBuilder.Configure<TestApplication>()
             .UseHeadless(new AvaloniaHeadlessPlatformOptions
             {
-                UseHeadlessDrawing = false
+                UseHeadlessDrawing = false,
+                ShouldRenderOnUIThread = true
             })
-            .UseSkia();
+            .UseSkia()
+            .UseHarfBuzz();
     }
 }

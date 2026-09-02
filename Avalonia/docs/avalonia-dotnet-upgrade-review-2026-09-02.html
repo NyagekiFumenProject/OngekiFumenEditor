@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Avalonia / .NET 11 升级流程变更审查</title>
+  <style>
+    :root { color-scheme: light; --ink:#1f2937; --muted:#5b6472; --line:#d9dee7; --bg:#f6f8fb; --card:#fff; --blue:#155eef; --red:#b42318; --orange:#b54708; --green:#067647; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif; }
+    main { max-width:1320px; margin:0 auto; padding:28px 30px 60px; }
+    h1 { margin:0 0 8px; font-size:30px; line-height:1.25; }
+    h2 { margin:34px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--line); font-size:22px; }
+    h3 { margin:24px 0 8px; font-size:18px; }
+    p { margin:8px 0 12px; }
+    .subtitle,.muted { color:var(--muted); }
+    .verdict { margin:22px 0; padding:16px 20px; background:#fff7ed; border-left:5px solid var(--orange); border-radius:6px; }
+    .ok { color:var(--green); font-weight:600; }
+    .risk { color:var(--red); font-weight:600; }
+    .warn { color:var(--orange); font-weight:600; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin:16px 0; }
+    .metric { background:var(--card); border:1px solid var(--line); border-radius:7px; padding:14px 16px; }
+    .metric strong { display:block; font-size:23px; line-height:1.2; }
+    .metric span { color:var(--muted); font-size:13px; }
+    table { width:100%; border-collapse:collapse; margin:10px 0 18px; background:var(--card); }
+    th,td { border:1px solid var(--line); padding:8px 10px; vertical-align:top; text-align:left; }
+    th { background:#eef2f7; font-weight:600; }
+    code { padding:1px 4px; border-radius:3px; background:#eef2f7; font-family:Consolas,"Cascadia Mono",monospace; font-size:.92em; }
+    pre { overflow:auto; padding:12px 14px; background:#111827; color:#e5e7eb; border-radius:6px; font:13px/1.5 Consolas,"Cascadia Mono",monospace; }
+    details { margin:9px 0; padding:0 12px 8px; background:var(--card); border:1px solid var(--line); border-radius:6px; }
+    summary { cursor:pointer; padding:8px 0; font-weight:600; }
+    ul { margin-top:6px; }
+    .tag { display:inline-block; margin-right:5px; padding:1px 7px; border-radius:10px; background:#e8f1ff; color:#174ea6; font-size:12px; }
+    @media (max-width:700px) { main { padding:18px 14px 40px; } h1 { font-size:25px; } th,td { padding:6px; } }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Avalonia / .NET 11 升级流程变更审查</h1>
+  <p class="subtitle">审查日期：2026-09-02　|　仓库：<code>F:\Source\OngekiFumenEditor</code>　|　项目：<code>Avalonia</code></p>
+
+  <div class="verdict">
+    <strong>结论：技术链路已经打通，但当前工作区不具备可直接合并/发布的可复现条件。</strong>
+    <p>普通 restore、solution build、全部测试以及浏览器 Release+AOT publish 均成功；然而根目录的 <code>global.json</code>、WebAssembly 兼容 C 文件、Gekimini 的本地 ToolBar 项目尚未纳入 Git，多个递归子模块处于 dirty 状态，且本次使用 .NET 11 preview。另有 272 个普通 build 警告、223 个浏览器发布警告。建议先解决可复现性和高风险运行时行为，再批准升级。</p>
+  </div>
+
+  <div class="grid">
+    <div class="metric"><strong class="ok">成功</strong><span>restore：成功；仅 NU1507</span></div>
+    <div class="metric"><strong class="ok">711 / 711</strong><span>测试通过，失败 0，跳过 0</span></div>
+    <div class="metric"><strong class="ok">成功</strong><span>solution build；272 warnings</span></div>
+    <div class="metric"><strong class="ok">成功</strong><span>browser Release+AOT；223 warnings</span></div>
+    <div class="metric"><strong class="risk">必须处理</strong><span>untracked SDK/兼容层/ToolBar 文件</span></div>
+    <div class="metric"><strong class="warn">Preview</strong><span>.NET SDK 11.0.100-preview.7</span></div>
+  </div>
+
+  <h2>1. 审查范围与基线</h2>
+  <p>审查对象是当前 Git HEAD 与工作树差异，以及 Avalonia 目录下递归子模块的工作树差异。Git 根目录为 <code>F:\Source\OngekiFumenEditor</code>，当前 HEAD 为：</p>
+  <pre>16a59ad3f9ed1bf9666161699a7205441dfc9983
+refactor(browser): unify AudioWorklet setting model
+2026-09-01 07:23:06 +0800</pre>
+  <table>
+    <tr><th>维度</th><th>升级前（工作树基线）</th><th>升级后</th><th>审查判断</th></tr>
+    <tr><td>Avalonia</td><td>11.3.18</td><td>12.1.1</td><td>主升级目标，包版本整体一致。</td></tr>
+    <tr><td>DataGrid</td><td>11.3.13</td><td>12.1.2</td><td>与 Avalonia 12 对齐。</td></tr>
+    <tr><td>.NET SDK / TFM</td><td>.NET 10；<code>net10.0*</code></td><td>11.0.100-preview.7；<code>net11.0*</code></td><td>工具链本身仍是预览版，不能视作稳定版升级。</td></tr>
+    <tr><td>测试平台</td><td>xUnit 2 + VSTest 形态</td><td>xUnit v3 + Microsoft Testing Platform；测试项目 <code>OutputType=Exe</code></td><td>已成功执行，但 CI runner 配置必须随提交固定。</td></tr>
+    <tr><td>浏览器运行时</td><td><code>net10.0-browser</code>、线程开关开启</td><td><code>net11.0-browser</code>、<code>browser-wasm</code>、旧 SjLj 兼容层、移除 <code>WasmEnableThreads</code></td><td>发布成功；线程语义和兼容层仍需浏览器实测。</td></tr>
+  </table>
+
+  <h2>2. 验证证据</h2>
+  <table>
+    <tr><th>命令/对象</th><th>结果</th><th>审查含义</th></tr>
+    <tr><td><code>dotnet --version</code></td><td><code>11.0.100-preview.7.26381.103</code></td><td>本机使用了新 SDK；根 <code>global.json</code> 当前未跟踪。</td></tr>
+    <tr><td><code>dotnet restore OngekiFumenEditor.Avalonia.sln --nologo --verbosity minimal</code></td><td class="ok">成功；1 个 NU1507</td><td>两个 NuGet 源未设置 package source mapping：<code>api.nuget.org</code>、<code>dotnet-experimental</code>。</td></tr>
+    <tr><td><code>dotnet build ... --no-restore</code></td><td class="ok">成功；约 84.6 秒；272 warnings</td><td>编译链路成功，但 nullable、private API、xUnit analyzer、XAML runtime loader、trim 相关警告未清零。</td></tr>
+    <tr><td><code>dotnet test ... --no-restore</code></td><td class="ok">711 passed / 0 failed / 0 skipped</td><td>核心 Avalonia 测试 566 个，Desktop 测试 145 个。</td></tr>
+    <tr><td><code>dotnet publish ... Browser ... -c Release -p:RunAOTCompilation=true</code></td><td class="ok">成功；约 643 秒；223 warnings</td><td>生成 421 个文件、约 168,386,765 bytes；有 <code>wwwroot/index.html</code> 和 <code>wwwroot/_framework/*.wasm</code>。</td></tr>
+    <tr><td>Desktop Release/AOT publish</td><td class="warn">未执行</td><td>不能据此声称 Windows AOT、安装包和升级器发布链路已验证。</td></tr>
+  </table>
+  <p>浏览器发布警告中包含大量 ILLink/trim 警告，涉及反射绑定、XAML behaviors、动态类型解析、JSON serializer、DereTore 以及 Avalonia DataGrid。发布成功只证明链接器完成，并不证明所有被裁剪的运行时功能在浏览器中可用。</p>
+
+  <h2>3. 根项目变更与改动原因</h2>
+  <h3>3.1 包管理与 SDK 版本</h3>
+  <table>
+    <tr><th>文件</th><th>变更</th><th>原因（证据性质）</th><th>风险/验证</th></tr>
+    <tr><td><code>Avalonia/Directory.Packages.props</code></td><td>Avalonia 11.3.18→12.1.1；DataGrid 11.3.13→12.1.2；SkiaSharp 3.119.2→3.119.4；XamlMcp preview.2→preview.3。</td><td><span class="tag">直接版本差异</span>完成 Avalonia 12 主线升级并配套 Skia。</td><td>restore/build/publish 成功；需处理 trim/private API 警告。</td></tr>
+    <tr><td>同上</td><td>Microsoft.Extensions/System 10.0.1→11.0.0-preview.7.26381.103。</td><td><span class="tag">直接版本差异</span>与 .NET 11 TFM/SDK 配套。</td><td><span class="risk">预览版生产风险</span>；需固定来源并评估正式版迁移。</td></tr>
+    <tr><td>同上</td><td>新增 <code>Avalonia.HarfBuzz</code>；AvaloniaDialogs 3.7.0→3.7.1；DiagnosticsSupport 2.1.1→2.2.3；DialogHost 0.10.3→0.12.3；FluentIcons 1.2.313→2.1.337；StatusBar 0.0.2→0.0.3；Xaml.Behaviors 11.3.9→12.0.7。</td><td><span class="tag">直接版本差异</span><span class="tag">API适配推断</span>为 Avalonia 12 兼容和字体 shaping 配套。</td><td>测试使用 <code>UseHarfBuzz()</code>；仍需跨平台字体/UI 回归。</td></tr>
+    <tr><td>同上</td><td>移除 <code>AvaloniaControlsToolBar</code> 包版本项；移除未实际使用的 <code>Avalonia.Diagnostics</code> 版本项。</td><td><span class="tag">直接 diff</span>ToolBar 改为本地 ProjectReference；诊断功能使用 DiagnosticsSupport。</td><td>本地 ToolBar 目录未跟踪，缺失时干净 clone 将无法构建。</td></tr>
+    <tr><td><code>Avalonia/src/Directory.Packages.props</code></td><td>Microsoft.Build 17.7.2→18.0.2；XML 编码改为 UTF-8。</td><td><span class="tag">直接版本差异</span>配套新 SDK/MSBuild。</td><td>构建成功。</td></tr>
+    <tr><td><code>Avalonia/tests/Directory.Packages.props</code></td><td><code>xunit</code> 2.9.3→<code>xunit.v3</code> 3.2.2。</td><td><span class="tag">直接版本差异</span>配合 Microsoft Testing Platform。</td><td>711 个测试全部通过；仍有 xUnit1051 analyzer 警告。</td></tr>
+  </table>
+
+  <h3>3.2 TFM、项目和发布设置</h3>
+  <ul>
+    <li><code>src/OngekiFumenEditor.Avalonia</code>、Desktop、CommandLine、tests、UpdaterStub 以及相关项目由 <code>net10.0</code> 升为 <code>net11.0</code>；Windows TFM 为 <code>net11.0-windows10.0.19041.0</code>；Browser 为 <code>net11.0-browser</code>。</li>
+    <li>Desktop/CommandLine 保留 AOT 和非 AOT 条件 TFM；Browser 新增 <code>RuntimeIdentifier=browser-wasm</code>。</li>
+    <li>Browser Release 保留 <code>RunAOTCompilation=true</code>、<code>PublishTrimmed=true</code>、<code>TrimMode=full</code>。原有 <code>WasmEnableThreads</code> 被移除，原因与 .NET 11/Avalonia 浏览器工具链兼容性有关，但其对应用线程语义的影响没有在变更中证明。</li>
+    <li><code>src/OngekiFumenEditor.Avalonia.csproj</code> 新增本地 ToolBar ProjectReference 和 <code>Avalonia.HarfBuzz</code> PackageReference。</li>
+  </ul>
+
+  <h3>3.3 WebAssembly 兼容层</h3>
+  <p><code>Avalonia/src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditor.Avalonia.Browser.csproj</code> 和 <code>Dependencies/Directory.Build.targets</code> 新增对 <code>Dependencies/EmscriptenCompatibility/legacy-setjmp.c</code> 的 <code>NativeFileReference</code>。同一 targets 文件删除了原先只针对 NAudio.BrowserAudioWorklet 的 NAudio 2→3 兼容源码注入（<code>NAudioBrowserCompatDirectory</code>、数组 provider 和扩展替换）；兼容逻辑现在随 NAudio 子模块源码本身升级。Browser 项目定义了自定义 target <code>TranslateLegacySkiaWebAssemblyExceptions</code>，在 <code>WasmAfterLinkSteps</code> 后调用 <code>wasm-opt --translate-to-exnref</code>，目标是把旧 Emscripten/Skia 异常段转换为 .NET 11 使用的标准异常 proposal。</p>
+  <p>代码注释明确说明它保留 Emscripten 3.1.56 的 <code>saveSetjmp/testSetjmp</code> ABI，而 Emscripten 6 重命名了入口。上述兼容目的有直接注释证据；“必须这样做才能链接 .NET 11”是根据链接配置和成功发布结果作出的工程推断。</p>
+  <table>
+    <tr><th>风险点</th><th>审查意见</th></tr>
+    <tr><td><code>realloc</code> 返回值未检查</td><td>内存不足时可能丢失原指针并继续解引用。</td></tr>
+    <tr><td><code>size *= 2</code></td><td>可能溢出或在异常初值下无法增长。</td></tr>
+    <tr><td><code>table[i + 1]</code></td><td>依赖调用方分配 sentinel 空间；契约未在 C 函数中验证。</td></tr>
+    <tr><td>wasm-opt 输入/输出链路</td><td>当前 publish 成功，说明本次工具可执行；仍应确认原地覆盖、哈希/压缩顺序和 CI 环境一致性。</td></tr>
+  </table>
+
+  <h3>3.4 Avalonia 12 API 适配</h3>
+  <table>
+    <tr><th>文件/区域</th><th>具体改动</th><th>原因与风险</th></tr>
+    <tr><td><code>App.axaml</code></td><td>资源从 <code>Avalonia.Controls.ToolBar.axaml</code> 改为 <code>ToolBarControls.Avalonia.axaml</code>；大部分差异为 CRLF→LF/编码。</td><td>匹配本地 ToolBar 项目；应避免把换行噪声误认为逻辑改动。</td></tr>
+    <tr><td><code>ProgramInfoSettingViewModel.cs</code></td><td>Avalonia 12 不再公开 <code>IRenderRoot.Renderer</code> 后，改用反射读取 <code>TopLevel.Renderer</code>；缺少 <code>IRenderTimer</code> 服务时反射读取 <code>IRenderLoop.Timer</code>。</td><td><span class="tag">直接API适配</span>保持 Debug 渲染信息页；<span class="risk">反射依赖内部 API，裁剪和后续版本脆弱</span>。</td></tr>
+    <tr><td>拖放调用方：BulletPalette、Beam、Connectable、Hold、Wall、DataGrid reorder</td><td>在 PointerPressed 时保存 <code>PointerPressedEventArgs</code>，PointerMoved 达到阈值后把 pressed event 传给 <code>DragDrop.DoDragDropAsync</code> 或自定义 manager。</td><td><span class="tag">直接API适配</span>Avalonia 12 drag/drop 要求 pressed event；缓存事件跨事件生命周期，需桌面和浏览器真实拖放回归。</td></tr>
+    <tr><td><code>FumenSoflanGroupListViewer</code></td><td>XAML 从 <code>Checked=</code> 改为 <code>IsCheckedChanged=</code>；处理器只接受 <code>RadioButton { IsChecked: true, ... }</code>。</td><td>适配 Avalonia 12 事件；避免取消选中时重复触发业务。</td></tr>
+    <tr><td><code>OgkiFumenListBrowserView.axaml</code></td><td><code>TextBox.Watermark</code>→<code>PlaceholderText</code>。</td><td>Avalonia 12 属性名称适配。</td></tr>
+    <tr><td><code>RangeValue.xaml.cs</code></td><td>从 <code>Subscribe(Action&lt;T&gt;)</code> 改为自定义 <code>AnonymousObserver&lt;T&gt;</code>。</td><td><span class="tag">直接API适配推断</span>适应 Rx/Avalonia overload 变化；<span class="risk">OnError 为空实现，会吞掉异常，降低故障可见性</span>。</td></tr>
+    <tr><td><code>DesktopNAudioFileReaderFactory.cs</code></td><td>MP3 从 <code>Mp3FileReader</code> 改为 <code>AudioFileReader</code>（文件和 stream 路径）。</td><td><span class="tag">API兼容推断</span>配合 NAudio 3；这改变实际解码路径，应验证 ID3、采样率、定位、释放和异常行为。</td></tr>
+  </table>
+
+  <h3>3.5 测试适配</h3>
+  <ul>
+    <li><code>new Binding(...)</code> 改为 <code>new ReflectionBinding(...)</code>；<code>GetVisualRoot()</code> 断言改为 <code>TopLevel.GetTopLevel(control)</code>。</li>
+    <li>Headless 配置增加 <code>ShouldRenderOnUIThread=true</code>；测试 AppBuilder 增加 <code>UseHarfBuzz()</code>。</li>
+    <li>测试项目改为 <code>OutputType=Exe</code>，采用 xUnit v3/Microsoft Testing Platform；一处 <code>[Fact]</code> 改为 <code>[AvaloniaFact]</code>。</li>
+    <li><code>TestApplication</code> 每次建容器时额外 reset <code>ProgrammableDialogManager.Instance</code>，与已有的 WeakReferenceMessenger reset 一起避免进程级状态污染。</li>
+    <li>结构测试的 net10 输出路径改为 net11，并改用项目 Include 路径判定；Desktop/Updater smoke test 的目标路径同步更新。</li>
+  </ul>
+
+  <h2>4. 依赖与递归子模块变更</h2>
+  <p>下列依赖不是已提交的一级 gitlink 升级。它们在当前工作树有本地改动；递归状态和 dirty 内容必须在提交中明确处理，否则其他开发者无法由 gitlink 复现本次构建。</p>
+  <table>
+    <tr><th>依赖</th><th>变更内容</th><th>改动原因</th><th>状态/风险</th></tr>
+    <tr><td><code>Dependencies/AcbGeneratorFuck</code></td><td>NativeAOT TFM <code>net10.0→net11.0</code>；README/docs 输出路径同步；无业务代码改变。</td><td><span class="tag">直接版本差异</span>配套 .NET 11。</td><td>子模块工作树 dirty；需提交或记录明确 commit。</td></tr>
+    <tr><td><code>Dependencies/Gekimini.Avalonia</code></td><td>Avalonia/Skia/Microsoft 版本升到主项目版本；example TFM 全部 net10→net11，Browser 为 net11-browser；移除 ToolBar NuGet；删除 <code>BindingPlugins.DataValidators.Clear()</code>；<code>GotFocusEventArgs→FocusChangedEventArgs</code>；drag/drop 保存 pressed event；AdaptiveToolBar 字段 nullable。</td><td><span class="tag">直接API适配</span>对应 Avalonia 12 删除/变更的 binding plugins、focus 和 drag/drop API。</td><td>约 16 个已修改文件；约 18 个本地 ToolBar 文件未跟踪；AdaptiveToolBar 在未启用 nullable 的项目中产生 CS8632。</td></tr>
+    <tr><td><code>Gekimini.Avalonia/Dependencies/Dock</code></td><td>保留 net6/net8/net10 并增加 net11 target；System.Text.Json、Microsoft.Extensions DI、xunit.v3 更新；构建脚本/README 更新；另有多项 CI、AOT sourcegen sample、snupkg、docs/leak/nightly workflow 改动。</td><td><span class="tag">直接 diff</span>配套新框架；CI 等部分超出主项目升级的最小范围。</td><td>当前 commit <code>cc08602d</code> 相对 gitlink <code>de3d927</code> 且 dirty；不应把无关 CI 变更默认为主升级必要条件。</td></tr>
+    <tr><td><code>Gekimini.Avalonia/Dependencies/Iciclecreek.Avalonia.WindowManager</code></td><td>TFM net8→net11；Avalonia 12.0.1→12.1.1；移除 Porta.Pty ProjectReference；ManagedWindow 增加 UI thread checks/dispatch；新增可 await 的 <code>CloseAsync</code>，<code>Close()</code> 改为 fire-and-forget；ResizeAnimation 增加跨线程调度。</td><td><span class="tag">直接代码变更</span>解决跨线程与异步关闭配合 Avalonia 12。</td><td><span class="risk">约 30 个 warning</span>，包括 nullable、CS4014、未使用事件；Close fire-and-forget 的异常和关闭竞态需专项测试。</td></tr>
+    <tr><td><code>Gekimini.Avalonia/Dependencies/SimpleTypedLocalizer</code></td><td><code>global.json</code> 从 .NET 9/latestMinor/no prerelease 改为 .NET 11 preview、禁止 roll forward、允许 prerelease。</td><td><span class="tag">直接工具链差异</span>与主项目 SDK 对齐。</td><td>子模块 dirty；无生产代码改动。</td></tr>
+    <tr><td><code>Dependencies/NAudio.BrowserAudioWorklet</code></td><td>TFM net10/net10-browser→net11/net11-browser；NAudio Core 2.3.0→3.0.0-preview.19；Avalonia 11.3.12→12.1.1；samples/docs/CI 更新；<code>ISampleProvider.Read(Span&lt;float&gt;)</code> 成为主实现，数组 overload 委托到 Span；播放器和 latency helper 改用 Span；测试从引用检查改为 <code>UsedSpanRead</code>。</td><td><span class="tag">直接API适配</span>适配 NAudio 3 的 Span 调用契约与 Avalonia 12。</td><td>子模块 dirty；NAudio 仍为 preview；应验证浏览器音频 buffer、延迟、数组兼容和释放语义。</td></tr>
+  </table>
+
+  <h2>5. 工作区可复现性和文件清单</h2>
+  <p>根状态显示 39 个已跟踪文件修改，另有两个根级未跟踪对象；三个一级依赖子模块以及 Gekimini 的三个嵌套子模块存在 dirty 内容。</p>
+  <table>
+    <tr><th>对象</th><th>状态</th><th>为什么是门禁问题</th></tr>
+    <tr><td><code>global.json</code>（根）</td><td class="risk">未跟踪</td><td>它固定 SDK <code>11.0.100-preview.7.26381.103</code> 和 Microsoft Testing Platform runner；不提交则本地/CI 可能使用不同 SDK/runner。</td></tr>
+    <tr><td><code>Avalonia/Dependencies/EmscriptenCompatibility/legacy-setjmp.c</code></td><td class="risk">未跟踪</td><td>Browser 项目直接引用；不提交则浏览器发布缺少 native compatibility source。</td></tr>
+    <tr><td><code>Gekimini.Avalonia/Dependencies/Avalonia.Controls.ToolBar/</code></td><td class="risk">目录和项目文件均未跟踪</td><td>主项目已从 NuGet 改为 ProjectReference；缺文件时 clean clone 立即失败。</td></tr>
+    <tr><td>AcbGeneratorFuck / Gekimini / NAudio</td><td class="warn">一级 gitlink dirty</td><td>父仓库 diff 只显示 gitlink 状态，未自动保存工作树内部 patch。</td></tr>
+    <tr><td>Dock / WindowManager / SimpleTypedLocalizer</td><td class="warn">嵌套子模块 dirty；部分 commit 偏离父 gitlink</td><td>无法仅凭父仓库 checkout 得到当前依赖源码；需要提交依赖 commit、更新 gitlink，或保留可应用 patch。</td></tr>
+  </table>
+  <details>
+    <summary>根项目已跟踪改动文件（完整路径清单）</summary>
+    <ul>
+      <li><code>.github/workflows/BuildProgram.yml</code>；<code>.github/workflows/DeployBrowserPages.yml</code></li>
+      <li><code>Avalonia/Dependencies/Directory.Build.targets</code>；<code>Avalonia/Directory.Packages.props</code>；<code>Avalonia/src/Directory.Packages.props</code>；<code>Avalonia/tests/Directory.Packages.props</code></li>
+      <li><code>Avalonia/src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditor.Avalonia.Browser.csproj</code>；<code>Avalonia/src/OngekiFumenEditor.Avalonia.CommandLine/OngekiFumenEditor.Avalonia.CommandLine.csproj</code>；<code>Avalonia/src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj</code>；<code>Avalonia/tests/OngekiFumenEditor.Avalonia.UpdaterStub/OngekiFumenEditor.Avalonia.UpdaterStub.csproj</code>；<code>Avalonia/src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia.csproj</code></li>
+      <li><code>Avalonia/src/OngekiFumenEditor.Avalonia.Desktop/Platforms/Services/Audio/DesktopNAudioFileReaderFactory.cs</code></li>
+      <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/App.axaml</code>；<code>Kernel/SettingPages/DebugInfomation/ViewModels/ProgramInfoSettingViewModel.cs</code>；<code>UI/Behaviors/DataGridRowReorderBehavior.cs</code>；<code>UI/Controls/RangeValue.xaml.cs</code></li>
+      <li><code>Modules/FumenBulletPalleteListViewer/ViewModels/FumenBulletPalleteListViewerViewModel.cs</code>；<code>Modules/FumenObjectPropertyBrowser/Views/BeamOperationView.xaml.cs</code>；<code>ConnectableObjectOperationView.xaml.cs</code>；<code>HoldOperationView.xaml.cs</code>；<code>WallOperationView.xaml.cs</code></li>
+      <li><code>Modules/FumenSoflanGroupListViewer/Views/FumenSoflanGroupListViewerView.axaml</code>；<code>FumenSoflanGroupListViewerView.xaml.cs</code>；<code>Modules/OgkiFumenListBrowser/Views/OgkiFumenListBrowserView.axaml</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Tests/</code> 下的测试项目、<code>TestAppBuilder.cs</code>、<code>TestApplication.cs</code>、DependencyInjection/Regression/UI 测试；<code>Avalonia/tests/OngekiFumenEditor.Avalonia.Desktop.Tests/</code> 下的项目和 CommandLine/Updater 测试。</li>
+    </ul>
+    <p class="muted">其中 App.axaml、多个 csproj、依赖 App.axaml.cs/Commands/StatusBar 等有大量 CRLF→LF 或编码重写；应在 review 中按逻辑 diff 检查，避免格式噪声掩盖升级行为。</p>
+  </details>
+  <details>
+    <summary>Gekimini 本地 ToolBar 未跟踪文件</summary>
+    <p><code>Dependencies/Avalonia.Controls.ToolBar/</code> 下包含项目文件、ToolBar/Overflow/Tray/Panel/Thumb 控件代码、事件参数、<code>OverflowMode.cs</code>、<code>Themes/Controls/ToolBar.axaml</code>、<code>Themes/ToolBarControls.Avalonia.axaml</code> 和 <code>Utils/DoubleUtil.cs</code>。这些不是可忽略的生成物，而是当前 ProjectReference 的源代码。</p>
+  </details>
+  <details>
+    <summary>测试文件精确清单</summary>
+    <ul>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Desktop.Tests/OngekiFumenEditor.Avalonia.Desktop.Tests.csproj</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Desktop.Tests/CommandLine/CommandLineProjectStructureTests.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Desktop.Tests/CommandLine/DesktopCommandLineHostProcessTests.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Desktop.Tests/CommandLine/Updater/UpdaterExecutableSmokeTests.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Tests/OngekiFumenEditor.Avalonia.Tests.csproj</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Tests/DependencyInjection/SettingsEditorRegistrationTests.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Tests/Regression/EditorUiRegressionTests.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Tests/TestAppBuilder.cs</code>；<code>TestApplication.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.Tests/UI/AxamlSmokeTests.cs</code>；<code>DialogViewModelTests.cs</code>；<code>ObjectPropertyBrowserGenerationTests.cs</code></li>
+      <li><code>Avalonia/tests/OngekiFumenEditor.Avalonia.UpdaterStub/OngekiFumenEditor.Avalonia.UpdaterStub.csproj</code></li>
+    </ul>
+  </details>
+  <details>
+    <summary>依赖子模块已跟踪改动文件清单</summary>
+    <p><strong>AcbGeneratorFuck：</strong><code>README.md</code>、<code>docs/native-aot.md</code>、<code>src/AcbGeneratorFuck.NativeAot/AcbGeneratorFuck.NativeAot.csproj</code>。</p>
+    <p><strong>Gekimini.Avalonia：</strong><code>Directory.Packages.props</code>、三个 examples csproj、<code>src/Gekimini.Avalonia/App.axaml</code>、<code>App.axaml.cs</code>、<code>Framework/Commands/CommandManager.cs</code>、<code>Framework/DragDrops/Behaviors/DragDataContextOutBehavior.cs</code>、<code>Framework/DragDrops/DefaultImpl/DefaultDragDropManager.cs</code>、<code>Gekimini.Avalonia.csproj</code>、<code>Modules/StatusBar/IStatusBar.cs</code>、<code>Modules/ToolBars/Controls/AdaptiveToolBar.cs</code>，以及 <code>.github/workflows/buildAndDeploy.yml</code> 和上述嵌套子模块 gitlink。</p>
+    <p><strong>NAudio.BrowserAudioWorklet：</strong><code>Directory.Build.props</code>、<code>README.md</code>、<code>.github/workflows/deploy-pages.yml</code>、三个 sample csproj、<code>samples/BrowserMusicPlayerDemo/PcmSampleProvider.cs</code>、<code>src/NAudio.BrowserAudioWorklet/BrowserAudioWorkletPlayer.cs</code>、<code>LatencyMeasureHelper.cs</code>、项目文件、README，以及 tests 项目、<code>BrowserAudioWorkletPlayerLatencyTests.cs</code>、<code>TestSampleProvider.cs</code>；同时删除 <code>artifacts/packages/.gitkeep</code>。</p>
+    <p><strong>Dock：</strong><code>Directory.Packages.props</code>、<code>global.json</code>、<code>README.md</code>、<code>build/Avalonia.props</code>、<code>build/Dock.Avalonia.v11.props</code>、<code>build/build/_build.csproj</code>，以及 19 个 <code>src/*/*.csproj</code> 的 net11 条件版本调整；另有 workflow/build/docs 等 dirty 改动。</p>
+    <p><strong>Iciclecreek.Avalonia.WindowManager：</strong><code>src/Iciclecreek.Avalonia.WindowManager/Iciclecreek.Avalonia.WindowManager.csproj</code>、<code>ManagedWindow.axaml.cs</code>；<strong>SimpleTypedLocalizer：</strong>仅 <code>global.json</code>。</p>
+  </details>
+
+  <h2>6. 风险分级</h2>
+  <table>
+    <tr><th>级别</th><th>问题</th><th>影响</th><th>建议</th></tr>
+    <tr><td class="risk">阻塞</td><td>根 <code>global.json</code>、<code>legacy-setjmp.c</code>、本地 ToolBar 未跟踪。</td><td>干净 clone 不能保证使用相同 SDK、浏览器兼容源和 ToolBar 程序。</td><td>提交这些文件或把依赖恢复为已发布包/已记录 commit；在干净 clone 重跑 restore/build/test/publish。</td></tr>
+    <tr><td class="risk">高</td><td>递归子模块 dirty、gitlink 与当前内容不一致。</td><td>升级结果不可审计、不可复现，依赖代码可能混入与升级无关的 CI/docs 变更。</td><td>逐个依赖建立可引用 commit，更新 gitlink；拆分无关变更。</td></tr>
+    <tr><td class="risk">高</td><td>.NET 11 preview + System/Microsoft preview 包。</td><td>预览 API、工具链和供应链不稳定；未来 SDK 更新可能改变 AOT/测试行为。</td><td>确认发布必须使用 preview 的理由；等待稳定版本或锁定内部 SDK/workload 镜像。</td></tr>
+    <tr><td class="risk">高</td><td>legacy SjLj C 层、<code>wasm-opt --translate-to-exnref</code>。</td><td>native 内存错误、ABI 变化或工具版本变化可能导致浏览器启动/异常处理故障。</td><td>补充 C 单元/链接契约检查；固定 Emscripten/wasm-opt 版本；浏览器运行时验证异常、音频和 OPFS。</td></tr>
+    <tr><td class="risk">高</td><td>WindowManager 的 <code>Close()</code> fire-and-forget、跨线程 dispatch、约 30 warnings。</td><td>关闭异常可能未观察；窗口动画/cleanup 可能有竞态或死锁。</td><td>覆盖主窗体、子窗体、取消关闭、动画和异常路径；消除 CS4014/nullable 警告。</td></tr>
+    <tr><td class="warn">中</td><td>完整发布仍有 223 trim warnings，普通构建 272 warnings。</td><td>反射绑定、XAML behaviors、JSON、动态类型和旧 DLL 可能在 full trim 后运行时缺成员。</td><td>建立 warning baseline；对实际入口加 DynamicDependency/JsonTypeInfo/compiled binding，并做发布产物冒烟测试。</td></tr>
+    <tr><td class="warn">中</td><td>ProgramInfo 使用反射访问 Renderer/Timer；RangeValue OnError 吞异常。</td><td>调试页可能随 Avalonia 内部变化失效；故障难以发现。</td><td>优先寻找公开服务接口；OnError 至少记录日志或转发。</td></tr>
+    <tr><td class="warn">中</td><td>拖放缓存 pressed event；DefaultDragDropManager 对非 pressed event 静默返回。</td><td>拖放可能在特定输入设备、浏览器或取消路径失效，调用方误以为已开始。</td><td>覆盖 mouse/touch/触控板/浏览器拖放，并明确失败返回/日志语义。</td></tr>
+    <tr><td class="warn">中</td><td>MP3 解码从 Mp3FileReader 改为 AudioFileReader；NAudio 3 为 preview。</td><td>格式识别、采样格式、seek、ID3、资源生命周期可能变化。</td><td>加入真实 MP3/stream/损坏文件和多采样率回归。</td></tr>
+    <tr><td>低</td><td>NU1507、Gekimini AdaptiveToolBar CS8632、若干既有 nullable/unused warning。</td><td>当前不阻止构建，但会掩盖升级回归。</td><td>设置 package source mapping；开启/统一 nullable；逐步清理 warning。</td></tr>
+  </table>
+
+  <h2>7. 合并前行动清单</h2>
+  <ol>
+    <li>把根 <code>global.json</code>、<code>legacy-setjmp.c</code> 和全部 ToolBar 源文件纳入版本控制。</li>
+    <li>为 AcbGeneratorFuck、Gekimini、NAudio 以及 Dock、WindowManager、SimpleTypedLocalizer 记录可复现 commit；审查并拆分 Dock 的无关 CI/docs 改动。</li>
+    <li>在干净 clone、CI 同版本 SDK/workload 中执行 restore、build、test 和 browser publish；确认 NuGet source mapping 与 preview 包源。</li>
+    <li>执行 Browser 实机冒烟：启动、XAML 加载、字体、拖放、音频播放/延迟、异常传播、OPFS，并验证压缩文件和哈希清单。</li>
+    <li>执行 Desktop Release/AOT publish 和升级器/命令行 smoke test；当前普通测试通过不能替代发布验证。</li>
+    <li>专项审查 WindowManager CloseAsync、MP3 AudioFileReader、ProgramInfo 反射、RangeValue OnError 和 legacy-setjmp 的异常/资源生命周期。</li>
+    <li>建立并解释 warning baseline；至少处理 trim 入口、CS4014、CS8632、NU1507 以及 Avalonia private API 警告。</li>
+  </ol>
+
+  <h2>8. 审查说明</h2>
+  <p>本报告依据工作树 Git diff、递归子模块状态、项目文件/源代码检查以及上述命令输出生成。表中标注“直接版本差异/直接 API 适配”的项目可从 diff 或代码注释直接确认；标注“推断”的原因是根据 Avalonia/.NET/NAudio API 变化、构建行为和成功链接结果推导，仍应要求升级提交者提供上游 issue、release note 或设计说明作为最终依据。</p>
+  <p>本报告文件本身位于 <code>docs/avalonia-dotnet-upgrade-review-2026-09-02.html</code>。发布目录 <code>artifacts/review-browser-publish</code> 是本次验证产生的构建产物，不应误加入源代码提交。</p>
+</main>
+</body>
+</html>

@@ -33,13 +33,13 @@ public partial class WallOperationView : ViewBase
 
     private void TryStartDrag(PointerEventArgs e, ConnectableObjectOperationViewModel.DragActionType actionType)
     {
-        if (!dragSession.TryConsume(e) ||
+        if (!dragSession.TryConsume(e, out var triggerEvent) ||
             DataContext is not WallOperationViewModel viewModel ||
             viewModel.CreateDropAction(actionType) is not { } dropAction)
         {
             return;
         }
 
-        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(e, dropAction, DragDropEffects.Move);
+        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(triggerEvent, dropAction, DragDropEffects.Move);
     }
 }

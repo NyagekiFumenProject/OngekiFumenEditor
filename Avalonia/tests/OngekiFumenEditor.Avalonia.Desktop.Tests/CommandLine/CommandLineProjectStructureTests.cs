@@ -62,16 +62,15 @@ public sealed class CommandLineProjectStructureTests
 
         var coreReference = Assert.Single(
             coreTestProject.Descendants("ProjectReference"),
-            reference => !string.Equals(
-                reference.Attribute("ReferenceOutputAssembly")?.Value,
-                "false",
+            reference => NormalizePath(reference.Attribute("Include")?.Value).EndsWith(
+                Path.Combine("OngekiFumenEditor.Avalonia", "OngekiFumenEditor.Avalonia.csproj"),
                 StringComparison.OrdinalIgnoreCase));
         Assert.EndsWith(
             Path.Combine("OngekiFumenEditor.Avalonia", "OngekiFumenEditor.Avalonia.csproj"),
             NormalizePath(coreReference.Attribute("Include")?.Value),
             StringComparison.OrdinalIgnoreCase);
         Assert.Equal(
-            "net10.0-windows10.0.19041.0",
+            "net11.0-windows10.0.19041.0",
             desktopTestProject.Descendants("TargetFramework").Single().Value.Trim());
         Assert.Contains(
             desktopTestProject.Descendants("ProjectReference"),

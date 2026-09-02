@@ -71,7 +71,7 @@ public sealed class DialogViewModelTests
         Assert.Equal("Lane color", viewModel.Title);
     }
 
-    [Fact]
+[AvaloniaFact]
     public void CommonColorPickerViewModel_SelectColorCommand_ParsesArgbAndIgnoresInvalidValue()
     {
         var selectedColor = Colors.Black;

@@ -27,6 +27,7 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
     private BulletPalleteList observedPalleteList;
     private bool draggingItem;
     private Point mouseStartPosition;
+    private PointerPressedEventArgs pointerPressedEvent;
     private BulletPallete selectingPallete;
 
     public string Filter
@@ -129,48 +130,66 @@ public partial class FumenBulletPalleteListViewerViewModel : ToolViewModelBase, 
 
     public void OnCreateBulletPointerMoved(PointerEventArgs pointerEventArgs)
     {
-        if (!TryBeginDrag(pointerEventArgs))
+        if (!TryBeginDrag(pointerEventArgs, out var triggerEvent))
             return;
 
         var dropParam = new OngekiObjectDropParam(() => new Bullet
         {
             ReferenceBulletPallete = selectingPallete
         });
-        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(pointerEventArgs, dropParam, DragDropEffects.Move);
+        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(triggerEvent, dropParam, DragDropEffects.Move);
         draggingItem = false;
     }
 
     public void OnCreateBellPointerMoved(PointerEventArgs pointerEventArgs)
     {
-        if (!TryBeginDrag(pointerEventArgs))
+        if (!TryBeginDrag(pointerEventArgs, out var triggerEvent))
             return;
 
         var dropParam = new OngekiObjectDropParam(() => new Bell
         {
             ReferenceBulletPallete = selectingPallete
         });
-        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(pointerEventArgs, dropParam, DragDropEffects.Move);
+        _ = IoC.Get<IDragDropManager>().StartDragDropEvent(triggerEvent, dropParam, DragDropEffects.Move);
         draggingItem = false;
     }
 
-    private bool TryBeginDrag(PointerEventArgs pointerEventArgs)
+    private bool TryBeginDrag(PointerEventArgs pointerEventArgs, out PointerPressedEventArgs triggerEvent)
     {
-        if (!draggingItem || !pointerEventArgs.Properties.IsLeftButtonPressed)
+        triggerEvent = null;
+        if (!draggingItem || pointerPressedEvent is null)
             return false;
 
+        if (!pointerEventArgs.Properties.IsLeftButtonPressed)
+        {
+            draggingItem = false;
+            pointerPressedEvent = null;
+            return false;
+        }
+
         var diff = mouseStartPosition - pointerEventArgs.GetPosition(null);
-        return Math.Abs(diff.X) > DragDataContextOutBehavior.MinimumHorizontalDragDistance ||
-               Math.Abs(diff.Y) > DragDataContextOutBehavior.MinimumVerticalDragDistance;
+        if (Math.Abs(diff.X) <= DragDataContextOutBehavior.MinimumHorizontalDragDistance &&
+            Math.Abs(diff.Y) <= DragDataContextOutBehavior.MinimumVerticalDragDistance)
+        {
+            return false;
+        }
+
+        triggerEvent = pointerPressedEvent;
+        pointerPressedEvent = null;
+        return true;
     }
 
-    public void OnCreateObjectPointerPressed(Control source, PointerEventArgs pointerEventArgs)
+    public void OnCreateObjectPointerPressed(Control source, PointerPressedEventArgs pointerEventArgs)
     {
+        draggingItem = false;
+        pointerPressedEvent = null;
         if (!pointerEventArgs.Properties.IsLeftButtonPressed ||
             source.DataContext is not BulletPallete pallete)
             return;
 
         mouseStartPosition = pointerEventArgs.GetPosition(null);
         selectingPallete = pallete;
+        pointerPressedEvent = pointerEventArgs;
         draggingItem = true;
     }
 

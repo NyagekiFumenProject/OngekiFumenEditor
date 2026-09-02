@@ -164,7 +164,7 @@
                     <TextBox Grid.Column="1"
                              Classes="search-box"
                              Text="{Binding Keywords, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Watermark="{markup:Translate {x:Static languages:Lang+B.KeywordFilter}}">
+                             PlaceholderText="{markup:Translate {x:Static languages:Lang+B.KeywordFilter}}">
                         <TextBox.KeyBindings>
                             <KeyBinding Command="{Binding ApplyKeywordsCommand}" Gesture="Enter" />
                         </TextBox.KeyBindings>

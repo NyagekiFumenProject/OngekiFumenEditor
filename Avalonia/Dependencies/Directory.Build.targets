@@ -1,27 +1,5 @@
 <Project>
-  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'NAudio.BrowserAudioWorklet' Or '$(MSBuildProjectName)' == 'NAudio.BrowserAudioWorklet.Tests'">
-    <NAudioBrowserCompatDirectory>$(MSBuildThisFileDirectory)NAudio.BrowserAudioWorklet.NAudio3Compat\</NAudioBrowserCompatDirectory>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'NAudio.BrowserAudioWorklet' Or '$(MSBuildProjectName)' == 'NAudio.BrowserAudioWorklet.Tests'">
-    <PackageReference Update="NAudio.Core" Version="3.0.0-preview.19" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'NAudio.BrowserAudioWorklet'">
-    <!-- The pinned upstream source targets NAudio 2.3. Keep the git submodule clean and
-         carry the small NAudio 3 API adaptation in files tracked by this repository. -->
-    <Compile Remove="$(MSBuildProjectDirectory)\LatencyMeasureHelper.cs" />
-    <Compile Include="$(NAudioBrowserCompatDirectory)ISampleProviderExtensions.cs"
-             Link="NAudio3Compat\ISampleProviderExtensions.cs" />
-    <Compile Include="$(NAudioBrowserCompatDirectory)LegacyArraySampleProvider.cs"
-             Link="NAudio3Compat\LegacyArraySampleProvider.cs" />
-    <Compile Include="$(NAudioBrowserCompatDirectory)LatencyMeasureHelper.cs"
-             Link="LatencyMeasureHelper.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(MSBuildProjectName)' == 'NAudio.BrowserAudioWorklet.Tests'">
-    <Compile Remove="$(MSBuildProjectDirectory)\TestSampleProvider.cs" />
-    <Compile Include="$(NAudioBrowserCompatDirectory)TestSampleProvider.cs"
-             Link="TestSampleProvider.cs" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net11.0-browser'">
+    <NativeFileReference Include="$(MSBuildThisFileDirectory)EmscriptenCompatibility\legacy-setjmp.c" />
   </ItemGroup>
 </Project>

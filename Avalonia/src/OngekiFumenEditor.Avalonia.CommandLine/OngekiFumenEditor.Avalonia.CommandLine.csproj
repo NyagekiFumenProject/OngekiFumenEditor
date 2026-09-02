@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">net10.0</TargetFramework>
-        <TargetFramework Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' ">net10.0-windows10.0.19041.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' == 'true' Or '$(PublishProfile)' == 'win-x64-aot' ">net11.0</TargetFramework>
+        <TargetFramework Condition=" '$(PublishAot)' != 'true' And '$(PublishProfile)' != 'win-x64-aot' ">net11.0-windows10.0.19041.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsAotCompatible>true</IsAotCompatible>
