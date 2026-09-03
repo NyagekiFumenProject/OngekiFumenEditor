@@ -288,7 +288,10 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            return PathControls.AsEnumerable<IDisplayableObject>().Append(this);
+            for (var i = 0; i < pathControls.Count; i++)
+                yield return pathControls[i];
+
+            yield return this;
         }
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)

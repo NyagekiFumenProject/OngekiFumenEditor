@@ -1,7 +1,7 @@
 # WPF → Avalonia 迁移状态报告
 
 - **检查日期**：2026-08-01
-- **文档更新日期**：2026-08-01（第三次更新）
+- **文档更新日期**：2026-09-04（新增 3a P0 增量状态；原始检查基线仍为 2026-08-01）
 - **检查基线**：工作树未提交快照（分支 `avalonia`，含 XAML 清零批次①~⑦全部改动）
 - **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal`
 - **构建结果**：**成功**。全解决方案（核心 + Desktop + Browser）完整重建 **0 错误**、87 个警告
@@ -14,13 +14,24 @@
 
 ## 结论
 
-当前迁移处于“**编译清零完成、运行验证未开始**”的阶段。
+当前迁移处于“**编译清零完成、应用运行验证未开始；3a P0 模型行为回归已完成**”的阶段。
 
 - C# 编译 0 错误（此前轮次完成）；
 - Avalonia XAML 编译 0 错误（本轮完成，从 2190 个唯一 AVLN 错误清零）；
 - Desktop / Browser 入口项目也首次通过完整重建。
 
 下一步的阻塞从“编译”转为“运行时”：视图 XAML 加载（`InitializeComponent` 缺失）、资源键运行时缺失、`pack://` 图片 URI、快捷键宿主、音频后端等问题只会在启动和操作时才暴露。当前版本应视为**能构建但不能保证能启动**的 pre-alpha 快照。
+
+## 3a P0 算法、架构与性能补充审计（已完成）
+
+> 本节对应审计报告 3a 表中的两个 P0 行。本批次只覆盖空间索引和 Connectable 显示对象展开；更新器 P0 及其他 P1/P2/P3 项仍按原计划保留。
+
+| P0 项目 | 状态 | Avalonia 落点与验收证据 |
+| --- | --- | --- |
+| QuadTree 空树/删除正确性 | **已完成** | `NotQuadTreeWrapper`/`NotQuadTree` 已覆盖空集合安全读取、惰性构建、注册表真实删除、属性变更重建、端点正规化、闭区间查询和退化对象深度上限；`IndividualSoflanAreaListMap` 已同步泛型构造参数。回归：[`QuadTreeWrapperTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Base/Collections/QuadTreeWrapperTests.cs)。 |
+| Connectable 显示对象重复枚举 | **已完成** | child 按控制点顺序后输出自身一次，start 按 child 顺序展开且不追加重复 child；顶层聚合调用方保持不变，SVG prefab 禁用边界保持不变。回归：[`ConnectableDisplayableObjectTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Base/OngekiObjects/ConnectableDisplayableObjectTests.cs)。 |
+
+验收结果（Release、`--no-restore`）：`QuadTreeWrapperTests` 6/6、`ConnectableDisplayableObjectTests` 5/5、`SvgPrefabTests` 13/13；完整测试项目 576/576；Release 核心项目编译 0 errors。应用启动、UI、音频等运行时验收仍属于后续范围。
 
 ## 状态总览
 
@@ -34,7 +45,7 @@
 | 谱面渲染 | 已接入、待运行验证 | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译 |
 | 音频 | 不可用 | NAudio 后端被排除编译，保留实现明确标记为未迁移 |
 | 功能模块 | 不完整 | 3 个完整模块尚未迁移，另有少量模块文件缺失 |
-| 自动化验证 | 未开始 | 应用源码中没有测试项目或测试文件 |
+| 自动化验证 | 部分完成 | 新增两个模型级回归测试文件；QuadTree 6/6、Connectable 5/5、SVG 13/13，完整测试 576/576；应用启动、UI、音频等仍未验收 |
 | 仓库可复现性 | 高风险 | XAML 清零批次①~⑦的全部改动（数百个文件）尚未提交 |
 
 ## 检查基准
@@ -175,10 +186,11 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 
 ### 自动化测试
 
-应用 `src` 目录中：
+当前 Avalonia 测试资产：
 
-- 测试项目数量：0；
-- 可识别测试文件数量：0。
+- 测试项目数量：1（`OngekiFumenEditor.Avalonia.Tests`）；
+- 本轮新增测试文件：2（QuadTree 与 Connectable 显示对象回归）；
+- 本批次模型级回归与 SVG 禁用边界验证已完成；应用启动、主要视图加载、音频和编辑闭环仍未验收。
 
 依赖仓库中的测试不能替代本应用的迁移测试。至少需要覆盖：
 

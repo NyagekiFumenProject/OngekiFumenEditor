@@ -21,6 +21,8 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
             x => (float)x.TGrid.TotalUnit,
             x => (float)x.EndIndicator.XGrid.TotalUnit,
             x => (float)x.EndIndicator.TGrid.TotalUnit,
+            1f,
+            1f,
             nameof(IndividualSoflanArea.TGrid),
             nameof(IndividualSoflanArea.EndIndicator.TGrid),
             nameof(IndividualSoflanArea.XGrid),
@@ -124,7 +126,7 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
             return QuerySoflanGroup(obj.XGrid, obj.TGrid);
         }
 
-        public string DebugFindDataQueryPath(IndividualSoflanArea isf)
+        public string? DebugFindDataQueryPath(IndividualSoflanArea isf)
         {
             return cacheTotalTree.DebugFindDataQueryPath(isf);
         }

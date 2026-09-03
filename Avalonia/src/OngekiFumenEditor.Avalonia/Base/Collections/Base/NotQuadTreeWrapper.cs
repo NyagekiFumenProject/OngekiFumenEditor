@@ -8,99 +8,176 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
     public class NotQuadTreeWrapper<TX, TY, TValue> : IReadOnlyCollection<TValue> where TValue : INotifyPropertyChanged where TX : IDivisionOperators<TX, float, TX>, IAdditionOperators<TX, TX, TX>, ISubtractionOperators<TX, TX, TX>, IComparable<TX>
         where TY : IDivisionOperators<TY, float, TY>, IAdditionOperators<TY, TY, TY>, ISubtractionOperators<TY, TY, TY>, IComparable<TY>
     {
-        private NotQuadTree<TX, TY, TValue> tree;
+        private NotQuadTree<TX, TY, TValue>? tree;
         private readonly HashSet<string> rebuildProperties;
 
         private readonly Func<TValue, TX> xStartValueMap;
         private readonly Func<TValue, TY> yStartValueMap;
         private readonly Func<TValue, TX> xEndValueMap;
         private readonly Func<TValue, TY> yEndValueMap;
+        private readonly TX minimumWidth;
+        private readonly TY minimumHeight;
 
-        private HashSet<TValue> registerObjects = new();
+        private readonly HashSet<TValue> registerObjects = new();
+        private readonly object locker = new();
 
-        private object locker = new();
-
-        public IEnumerator<TValue> GetEnumerator() => tree.TotalValues.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public int Count => tree.TotalCount;
-
-        public NotQuadTreeWrapper(Func<TValue, TX> xStartValueMap, Func<TValue, TY> yStartValueMap,
-            Func<TValue, TX> xEndValueMap, Func<TValue, TY> yEndValueMap, params string[] rebuildProperties)
+        public IEnumerator<TValue> GetEnumerator()
         {
-            this.rebuildProperties = rebuildProperties.ToHashSet();
+            CheckAndBuild();
+            var currentTree = tree;
+            return (currentTree?.TotalValues ?? Enumerable.Empty<TValue>()).GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public int Count
+        {
+            get
+            {
+                CheckAndBuild();
+                return tree?.TotalCount ?? 0;
+            }
+        }
+
+        public NotQuadTreeWrapper(
+            Func<TValue, TX> xStartValueMap,
+            Func<TValue, TY> yStartValueMap,
+            Func<TValue, TX> xEndValueMap,
+            Func<TValue, TY> yEndValueMap,
+            TX minimumWidth,
+            TY minimumHeight,
+            params string[] rebuildProperties)
+        {
+            this.rebuildProperties = rebuildProperties.ToHashSet(StringComparer.Ordinal);
             this.xStartValueMap = xStartValueMap;
             this.yStartValueMap = yStartValueMap;
             this.xEndValueMap = xEndValueMap;
             this.yEndValueMap = yEndValueMap;
+            this.minimumWidth = minimumWidth;
+            this.minimumHeight = minimumHeight;
         }
 
         public void Add(TValue obj)
         {
-            tree = default;
-            registerObjects.Add(obj);
+            lock (locker)
+            {
+                if (!registerObjects.Add(obj))
+                    return;
 
-            obj.PropertyChanged += OnItemPropChanged;
+                obj.PropertyChanged += OnItemPropChanged;
+                tree = null;
+            }
         }
 
-        private void OnItemPropChanged(object sender, PropertyChangedEventArgs e)
+        private void OnItemPropChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (rebuildProperties.Contains(e.PropertyName))
+            if (e.PropertyName is not string propertyName || !rebuildProperties.Contains(propertyName))
+                return;
+
+            lock (locker)
             {
-                tree = default;
+                if (sender is TValue value && registerObjects.Contains(value))
+                    tree = null;
             }
         }
 
         public void Remove(TValue obj)
         {
-            tree = default;
-            obj.PropertyChanged -= OnItemPropChanged;
+            lock (locker)
+            {
+                if (!registerObjects.Remove(obj))
+                    return;
+
+                obj.PropertyChanged -= OnItemPropChanged;
+                tree = null;
+            }
         }
 
         public IEnumerable<TValue> Query(TX x, TY y)
         {
-            if (registerObjects.Count == 0)
-                return Enumerable.Empty<TValue>();
-
             CheckAndBuild();
-
-            return tree.Query(x, y);
+            return tree?.Query(x, y) ?? Enumerable.Empty<TValue>();
         }
 
         private void CheckAndBuild()
         {
-            if (tree == null)
+            if (tree is not null)
+                return;
+
+            lock (locker)
             {
-                lock (locker)
+                if (tree is not null || registerObjects.Count == 0)
+                    return;
+
+                var boundedObjects = new List<NotQuadTree<TX, TY, TValue>.BoundedObject>(registerObjects.Count);
+                var hasBounds = false;
+                TX minX = default!;
+                TX maxX = default!;
+                TY minY = default!;
+                TY maxY = default!;
+
+                foreach (var obj in registerObjects)
                 {
-                    if (tree == null)
+                    var bounded = new NotQuadTree<TX, TY, TValue>.BoundedObject(
+                        obj,
+                        xStartValueMap(obj),
+                        yStartValueMap(obj),
+                        xEndValueMap(obj),
+                        yEndValueMap(obj));
+                    boundedObjects.Add(bounded);
+
+                    if (!hasBounds)
                     {
-                        //rebuild quadtree
-                        var minX = registerObjects.Min(xStartValueMap);
-                        var maxX = registerObjects.Max(xEndValueMap);
-                        var minY = registerObjects.Min(yStartValueMap);
-                        var maxY = registerObjects.Max(yEndValueMap);
-
-                        var rect = new NotQuadTree<TX, TY, TValue>.Rectangle(minX, minY, maxX - minX, maxY - minY);
-
-                        var tree = new NotQuadTree<TX, TY, TValue>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap, 0);
-                        tree.Build(registerObjects);
-
-                        this.tree = tree;
+                        minX = bounded.StartX;
+                        maxX = bounded.EndX;
+                        minY = bounded.StartY;
+                        maxY = bounded.EndY;
+                        hasBounds = true;
+                        continue;
                     }
+
+                    if (bounded.StartX.CompareTo(minX) < 0)
+                        minX = bounded.StartX;
+                    if (bounded.EndX.CompareTo(maxX) > 0)
+                        maxX = bounded.EndX;
+                    if (bounded.StartY.CompareTo(minY) < 0)
+                        minY = bounded.StartY;
+                    if (bounded.EndY.CompareTo(maxY) > 0)
+                        maxY = bounded.EndY;
                 }
+
+                if (!hasBounds)
+                    return;
+
+                var width = maxX - minX;
+                if (width.CompareTo(minimumWidth) < 0)
+                    width = minimumWidth;
+                var height = maxY - minY;
+                if (height.CompareTo(minimumHeight) < 0)
+                    height = minimumHeight;
+
+                var builtTree = new NotQuadTree<TX, TY, TValue>(
+                    new NotQuadTree<TX, TY, TValue>.Rectangle(minX, minY, width, height),
+                    xStartValueMap,
+                    yStartValueMap,
+                    xEndValueMap,
+                    yEndValueMap,
+                    level: 0);
+                builtTree.Build(boundedObjects);
+                tree = builtTree;
             }
         }
 
-        public string DebugFindDataQueryPath(TValue data)
+        public string? DebugFindDataQueryPath(TValue data)
         {
             CheckAndBuild();
-            return tree.DebugFindDataQueryPath(data);
+            return tree?.DebugFindDataQueryPath(data);
         }
 
         public void DebugDump()
         {
             CheckAndBuild();
-            tree.DebugDump();
+            tree?.DebugDump();
         }
     }
 }

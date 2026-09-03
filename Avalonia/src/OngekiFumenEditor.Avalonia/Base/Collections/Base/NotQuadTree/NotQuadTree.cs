@@ -32,36 +32,28 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
                 Height = height;
             }
 
-            public override string ToString()
-            {
-                return $"({X}, {Y}) ({X + Width}, {Y + Height})";
-            }
+            public override string ToString() => $"({X}, {Y}) ({X + Width}, {Y + Height})";
         }
 
-        private const int DefaultMaxObjects = 10;
+        private const int DefaultMaxObjects = 8;
+        private const int MaxDepth = 8;
 
         private readonly int maxObjects;
         private readonly int level;
-
         private readonly Rectangle bounds;
         private readonly Func<TData, TX> xStartValueMap;
         private readonly Func<TData, TY> yStartValueMap;
         private readonly Func<TData, TX> xEndValueMap;
         private readonly Func<TData, TY> yEndValueMap;
-
-        private NotQuadTree<TX, TY, TData>[] childTrees = new NotQuadTree<TX, TY, TData>[4];
+        private readonly NotQuadTree<TX, TY, TData>?[] childTrees = new NotQuadTree<TX, TY, TData>?[4];
         private readonly List<BoundedObject> objects = new();
 
-        private struct BoundedObject : IBounded<TX, TY, TData>
+        internal readonly struct BoundedObject : IBounded<TX, TY, TData>
         {
             public TData Data { get; }
-
             public TX X { get; }
-
             public TY Y { get; }
-
             public TX Width { get; }
-
             public TY Height { get; }
 
             public TX StartX => X;
@@ -69,19 +61,34 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
             public TY StartY => Y;
             public TY EndY => Y + Height;
 
-            public BoundedObject(TData data, TX x, TY y, TX width, TY height)
+            public BoundedObject(TData data, TX startX, TY startY, TX endX, TY endY)
             {
+                if (startX.CompareTo(endX) <= 0)
+                {
+                    X = startX;
+                    Width = endX - startX;
+                }
+                else
+                {
+                    X = endX;
+                    Width = startX - endX;
+                }
+
+                if (startY.CompareTo(endY) <= 0)
+                {
+                    Y = startY;
+                    Height = endY - startY;
+                }
+                else
+                {
+                    Y = endY;
+                    Height = startY - endY;
+                }
+
                 Data = data;
-                X = x;
-                Y = y;
-                Width = width;
-                Height = height;
             }
 
-            public override string ToString()
-            {
-                return $"({StartX}, {StartY}) ({EndX}, {EndY})";
-            }
+            public override string ToString() => $"({StartX}, {StartY}) ({EndX}, {EndY})";
         }
 
         public NotQuadTree(Rectangle bounds,
@@ -90,145 +97,128 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
             int maxObjects = DefaultMaxObjects, int level = 0)
         {
             this.bounds = bounds;
-
             this.xStartValueMap = xStartValueMap;
             this.yStartValueMap = yStartValueMap;
             this.xEndValueMap = xEndValueMap;
             this.yEndValueMap = yEndValueMap;
-            this.maxObjects = maxObjects;
+            this.maxObjects = maxObjects > 0 ? maxObjects : DefaultMaxObjects;
             this.level = level;
         }
 
         public void Build(IEnumerable<TData> dataList)
         {
-            var bounds = dataList.Select(data =>
+            var boundedObjects = new List<BoundedObject>();
+            foreach (var data in dataList)
             {
-                var endX = xEndValueMap(data);
-                var endY = yEndValueMap(data);
-                var startY = yStartValueMap(data);
-                var startX = xStartValueMap(data);
+                boundedObjects.Add(new BoundedObject(
+                    data,
+                    xStartValueMap(data),
+                    yStartValueMap(data),
+                    xEndValueMap(data),
+                    yEndValueMap(data)));
+            }
 
-                return new BoundedObject(data, startX, startY, endX - startX, endY - startY);
-            }).ToList();
-
-            Build(bounds);
+            Build(boundedObjects);
         }
 
         private int CalculateQuadrant(TX x, TY y)
         {
             if (x.CompareTo(bounds.CenterX) <= 0 && y.CompareTo(bounds.CenterY) >= 0)
-            {
                 return 0;
-            }
-            else if (x.CompareTo(bounds.CenterX) >= 0 && y.CompareTo(bounds.CenterY) >= 0)
-            {
+
+            if (x.CompareTo(bounds.CenterX) >= 0 && y.CompareTo(bounds.CenterY) >= 0)
                 return 1;
-            }
-            else if (x.CompareTo(bounds.CenterX) <= 0 && y.CompareTo(bounds.CenterY) <= 0)
-            {
+
+            if (x.CompareTo(bounds.CenterX) <= 0 && y.CompareTo(bounds.CenterY) <= 0)
                 return 2;
-            }
 
             return 3;
         }
 
-        private void Build(List<BoundedObject> dataList)
+        private int? TryGetContainingQuadrant(BoundedObject data)
         {
-            if (dataList.Count < maxObjects)
+            var quadrant = CalculateQuadrant(data.StartX, data.StartY);
+            if (quadrant != CalculateQuadrant(data.EndX, data.StartY)
+                || quadrant != CalculateQuadrant(data.StartX, data.EndY)
+                || quadrant != CalculateQuadrant(data.EndX, data.EndY))
             {
-                objects.AddRange(dataList);
+                return null;
             }
-            else
+
+            return quadrant;
+        }
+
+        internal void Build(IReadOnlyList<BoundedObject> dataList)
+        {
+            if (dataList.Count <= maxObjects || level >= MaxDepth)
             {
-                var childDataList = new List<BoundedObject>[4];
+                for (var i = 0; i < dataList.Count; i++)
+                    objects.Add(dataList[i]);
 
-                foreach (var data in dataList)
+                UpdateCounts();
+                return;
+            }
+
+            var childDataLists = new List<BoundedObject>?[4];
+            for (var i = 0; i < dataList.Count; i++)
+            {
+                var data = dataList[i];
+                if (TryGetContainingQuadrant(data) is int quadrant)
                 {
-                    int? beforeQuadrant = default;
-
-                    foreach (var (x, y) in new[]{
-                    (data.X,data.Y),
-                    (data.X+ data.Width, data.Y),
-                    (data.X, data.Y+data.Height),
-                    (data.X+ data.Width, data.Y+data.Height),
-                })
-                    {
-                        var curQuadrant = CalculateQuadrant(x, y);
-
-                        if (beforeQuadrant is int bq)
-                        {
-                            //不在同一个象限
-                            if (curQuadrant != bq)
-                            {
-                                beforeQuadrant = null;
-                                break;//跨象限了，不需要分配到子树了
-                            }
-                        }
-                        else
-                        {
-                            beforeQuadrant = curQuadrant;
-                        }
-                    }
-
-                    if (beforeQuadrant is int quadrant)
-                    {
-                        var childrenList = childDataList[quadrant] ?? (childDataList[quadrant] = new List<BoundedObject>());
-
-                        childrenList.Add(data);
-                    }
-                    else
-                    {
-                        objects.Add(data);
-                    }
+                    (childDataLists[quadrant] ??= new List<BoundedObject>()).Add(data);
                 }
-
-                //分配到子树
-                for (int quadrant = 0; quadrant < 4; quadrant++)
+                else
                 {
-                    var children = childDataList[quadrant];
-                    if (children is null)
-                        continue;
-
-                    var rect = quadrant switch
-                    {
-                        //第二象限
-                        0 => new Rectangle(bounds.X, bounds.CenterY, bounds.HalfWidth, bounds.HalfHeight),
-                        //第一象限
-                        1 => new Rectangle(bounds.CenterX, bounds.CenterY, bounds.HalfWidth, bounds.HalfHeight),
-                        //第三象限
-                        2 => new Rectangle(bounds.X, bounds.Y, bounds.HalfWidth, bounds.HalfHeight),
-                        //第四象限
-                        _ => new Rectangle(bounds.CenterX, bounds.Y, bounds.HalfWidth, bounds.HalfHeight),
-                    };
-
-                    var tree = childTrees[quadrant] = new NotQuadTree<TX, TY, TData>(rect, xStartValueMap, yStartValueMap, xEndValueMap, yEndValueMap, maxObjects, level + 1);
-
-                    tree.Build(children);
+                    objects.Add(data);
                 }
             }
 
+            for (var quadrant = 0; quadrant < childDataLists.Length; quadrant++)
+            {
+                var childDataList = childDataLists[quadrant];
+                if (childDataList is null)
+                    continue;
+
+                var childBounds = quadrant switch
+                {
+                    //第二象限
+                    0 => new Rectangle(bounds.X, bounds.CenterY, bounds.HalfWidth, bounds.HalfHeight),
+                    //第一象限
+                    1 => new Rectangle(bounds.CenterX, bounds.CenterY, bounds.HalfWidth, bounds.HalfHeight),
+                    //第三象限
+                    2 => new Rectangle(bounds.X, bounds.Y, bounds.HalfWidth, bounds.HalfHeight),
+                    //第四象限
+                    _ => new Rectangle(bounds.CenterX, bounds.Y, bounds.HalfWidth, bounds.HalfHeight),
+                };
+
+                var childTree = childTrees[quadrant] = new NotQuadTree<TX, TY, TData>(
+                    childBounds,
+                    xStartValueMap,
+                    yStartValueMap,
+                    xEndValueMap,
+                    yEndValueMap,
+                    maxObjects,
+                    level + 1);
+                childTree.Build(childDataList);
+            }
+
+            UpdateCounts();
+        }
+
+        private void UpdateCounts()
+        {
             LocalCount = objects.Count;
-            TotalCount = LocalCount + childTrees.Sum(n => n?.TotalCount ?? 0);
-
-            //todo 优化一下，极端情况下会出现一条很长很长链条的树枝
-            //裁剪
-            for (int quadrant = 0; quadrant < 4; quadrant++)
-            {
-                if (childTrees[quadrant] is NotQuadTree<TX, TY, TData> childTree)
-                {
-                    if (childTree.childTrees.FilterNull().IsOnlyOne(out var onlyTree))
-                    {
-                        //childTrees[quadrant] = onlyTree;
-                    }
-                }
-            }
+            var totalCount = LocalCount;
+            for (var i = 0; i < childTrees.Length; i++)
+                totalCount += childTrees[i]?.TotalCount ?? 0;
+            TotalCount = totalCount;
         }
 
         private static bool CheckInBound(BoundedObject bounded, TX x, TY y)
         {
-            if (x.CompareTo(bounded.X) < 0 || x.CompareTo(bounded.X + bounded.Width) > 0)
+            if (x.CompareTo(bounded.StartX) < 0 || x.CompareTo(bounded.EndX) > 0)
                 return false;
-            if (y.CompareTo(bounded.Y) < 0 || y.CompareTo(bounded.Y + bounded.Height) > 0)
+            if (y.CompareTo(bounded.StartY) < 0 || y.CompareTo(bounded.EndY) > 0)
                 return false;
             return true;
         }
@@ -241,56 +231,73 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
             if (y.CompareTo(bounds.Y) < 0 || y.CompareTo(bounds.Y + bounds.Height) > 0)
                 yield break;
 
-            foreach (var bound in objects)
+            for (var i = 0; i < objects.Count; i++)
             {
+                var bound = objects[i];
                 if (CheckInBound(bound, x, y))
                     yield return bound.Data;
             }
 
             var quadrant = CalculateQuadrant(x, y);
+            var childTree = childTrees[quadrant];
+            if (childTree is null)
+                yield break;
 
-            if (childTrees[quadrant] is NotQuadTree<TX, TY, TData> childTree)
-            {
-                foreach (var data in childTree.Query(x, y))
-                    yield return data;
-            }
+            foreach (var data in childTree.Query(x, y))
+                yield return data;
         }
 
-        public int LocalCount { get; private set; } = 0;
-        public int TotalCount { get; private set; } = 0;
+        public int LocalCount { get; private set; }
+        public int TotalCount { get; private set; }
 
-        public IEnumerable<TData> TotalValues => objects.Select(n => n.Data).Concat(childTrees.SelectMany(n => n?.TotalValues ?? Enumerable.Empty<TData>()));
-
-        public override string ToString()
+        public IEnumerable<TData> TotalValues
         {
-            return $"Bound:{bounds} Locals:{LocalCount} Children:{childTrees[0]?.TotalCount ?? 0}/{childTrees[1]?.TotalCount ?? 0}/{childTrees[2]?.TotalCount ?? 0}/{childTrees[3]?.TotalCount ?? 0}";
-        }
+            get
+            {
+                for (var i = 0; i < objects.Count; i++)
+                    yield return objects[i].Data;
 
-        internal void DebugDump(int tabLength = 0)
-        {
-            var tabContent = new string(' ', tabLength * 2);
-            void output(string content)
-            {
-                Console.WriteLine($"{tabContent}{content}");
-            }
-            output($"Dumping NotQuadTree at level {level} with bounds {bounds}");
-            output($"Local Count: {LocalCount}, Total Count: {TotalCount}");
-            output("Local Objects:");
-            foreach (var obj in objects)
-            {
-                output($"* {obj} {obj.Data}");
-            }
-            for (int i = 0; i < childTrees.Length; i++)
-            {
-                if (childTrees[i] is NotQuadTree<TX, TY, TData> childTree)
+                for (var i = 0; i < childTrees.Length; i++)
                 {
-                    output($"Child Tree {i}:");
-                    childTree.DebugDump(tabLength + 1);
+                    var childTree = childTrees[i];
+                    if (childTree is null)
+                        continue;
+
+                    foreach (var data in childTree.TotalValues)
+                        yield return data;
                 }
             }
         }
 
-        public string DebugFindDataQueryPath(TData value)
+        public override string ToString() =>
+            $"Bound:{bounds} Locals:{LocalCount} Children:{childTrees[0]?.TotalCount ?? 0}/{childTrees[1]?.TotalCount ?? 0}/{childTrees[2]?.TotalCount ?? 0}/{childTrees[3]?.TotalCount ?? 0}";
+
+        internal void DebugDump(int tabLength = 0)
+        {
+            var tabContent = new string(' ', tabLength * 2);
+            void output(string content) => Console.WriteLine($"{tabContent}{content}");
+
+            output($"Dumping NotQuadTree at level {level} with bounds {bounds}");
+            output($"Local Count: {LocalCount}, Total Count: {TotalCount}");
+            output("Local Objects:");
+            for (var i = 0; i < objects.Count; i++)
+            {
+                var obj = objects[i];
+                output($"* {obj} {obj.Data}");
+            }
+
+            for (var i = 0; i < childTrees.Length; i++)
+            {
+                var childTree = childTrees[i];
+                if (childTree is null)
+                    continue;
+
+                output($"Child Tree {i}:");
+                childTree.DebugDump(tabLength + 1);
+            }
+        }
+
+        public string? DebugFindDataQueryPath(TData value)
         {
             var queryList = new Stack<string>();
             if (DebugFindDataQueryPathInternal(value, queryList))
@@ -300,27 +307,28 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.NotQuadTree
 
         private bool DebugFindDataQueryPathInternal(TData value, Stack<string> pathStack)
         {
-            if (objects.Select(x => x.Data).Contains(value))
+            for (var i = 0; i < objects.Count; i++)
             {
-                pathStack.Push("X");
-                return true;
+                if (EqualityComparer<TData>.Default.Equals(objects[i].Data, value))
+                {
+                    pathStack.Push("X");
+                    return true;
+                }
             }
 
-            for (int i = 0; i < childTrees.Length; i++)
+            for (var i = 0; i < childTrees.Length; i++)
             {
                 pathStack.Push(i switch
                 {
                     0 => "↖",
                     1 => "↗",
                     2 => "↙",
-                    3 => "↘",
+                    _ => "↘",
                 });
 
-                if (childTrees[i] != null)
-                {
-                    if (childTrees[i].DebugFindDataQueryPathInternal(value, pathStack))
-                        return true;
-                }
+                var childTree = childTrees[i];
+                if (childTree is not null && childTree.DebugFindDataQueryPathInternal(value, pathStack))
+                    return true;
 
                 pathStack.Pop();
             }

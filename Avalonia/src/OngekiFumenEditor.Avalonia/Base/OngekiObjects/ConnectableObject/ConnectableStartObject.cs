@@ -240,8 +240,15 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
             yield return this;
-            foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
+
+            for (var i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+                for (var j = 0; j < child.PathControls.Count; j++)
+                    yield return child.PathControls[j];
+
                 yield return child;
+            }
         }
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
