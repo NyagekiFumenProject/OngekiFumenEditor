@@ -12,7 +12,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Targ
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Holds;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Soflans;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.UIGenerator;
-using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.DependencyInjection;
@@ -72,32 +71,6 @@ public sealed class MefMigrationRegistrationTests
             service.ImplementationType == typeof(SvgPrefabOperationGenerator));
     }
 
-    [Fact]
-    public void AddOngekiFumenEditorAvalonia_AliasesObjectPoolManagerToSameSchedulableSingleton()
-    {
-        var services = CreateServices();
-        var objectPoolRegistration = Assert.Single(
-            services,
-            service => service.ServiceType == typeof(ObjectPoolManager));
-        var schedulableAliasRegistration = Assert.Single(
-            services,
-            service => service.ServiceType == typeof(ISchedulable) &&
-                       service.ImplementationFactory is not null);
-        Assert.Equal(ServiceLifetime.Singleton, objectPoolRegistration.Lifetime);
-        Assert.Equal(ServiceLifetime.Singleton, schedulableAliasRegistration.Lifetime);
-
-        IServiceCollection isolatedServices = new ServiceCollection();
-        isolatedServices.Add(objectPoolRegistration);
-        isolatedServices.Add(schedulableAliasRegistration);
-
-        using var provider = isolatedServices.BuildServiceProvider();
-        var objectPoolManager = provider.GetRequiredService<ObjectPoolManager>();
-        var schedulable = provider.GetRequiredService<ISchedulable>();
-        var secondSchedulable = provider.GetRequiredService<ISchedulable>();
-
-        Assert.Same(objectPoolManager, schedulable);
-        Assert.Same(schedulable, secondSchedulable);
-    }
 
     [Fact]
     public void AddOngekiFumenEditorAvalonia_RegistersPerformanceMonitorAsTransient()

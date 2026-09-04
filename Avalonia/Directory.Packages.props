@@ -41,6 +41,8 @@
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="$(MsExtVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="$(MsExtVersion)" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="$(MsExtVersion)" />
+    <PackageVersion Include="Collections.Pooled" Version="1.0.82" />
     <PackageVersion Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
     <PackageVersion Include="Nerdbank.GitVersioning" Version="3.9.50" />
 
