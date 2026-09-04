@@ -159,7 +159,7 @@ public static class TGridCalculator
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(FumenVisualEditorViewModel editor) =>
         GetVisbleTimelines_PreviewMode(editor.CurrentDrawingTargetContext.CurrentSoflanList, editor.EditorContext.Fumen.BpmList, editor.EditorContext.Fumen.MeterChanges,
-            editor.CurrentDrawingTargetContext.Rect.MinY, editor.CurrentDrawingTargetContext.Rect.MaxY,
+            editor.CurrentDrawingTargetContext.WorldRect.MinY, editor.CurrentDrawingTargetContext.WorldRect.MaxY,
             editor.Setting.JudgeLineOffsetY, editor.Setting.BeatSplit, editor.Setting.VerticalDisplayScale);
 
     public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(

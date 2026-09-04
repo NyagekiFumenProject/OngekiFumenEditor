@@ -1669,7 +1669,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 if (!drawingContexts.TryGetValue(0, out var drwaingContext))
                     return string.Empty;
                 var canvasX = pos.X;
-                var canvasY = drwaingContext.Rect.MaxY - pos.Y;
+                var canvasY = drwaingContext.WorldRect.MaxY - pos.Y;
                 CurrentCursorPosition = new(canvasX, canvasY);
 
                 var tGrid = default(TGrid);
@@ -1698,7 +1698,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
                 var canvasX = pos.X;
                 var persentY = pos.Y / ViewHeight;
-                var drwaingY = drawingTargetContext.Rect.MaxY - drawingTargetContext.Rect.Height * persentY;
+                var drwaingY = drawingTargetContext.WorldRect.MaxY - drawingTargetContext.WorldRect.Height * persentY;
 
                 var tGrid = default(TGrid);
                 if (IsDesignMode)
@@ -1793,8 +1793,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
         {
-            //rect.Y = rect.Y - CurrentPlayTime;
-            hits[obj] = new Rect(centerPos.X - size.X / 2, centerPos.Y - size.Y / 2, size.X, size.Y);
+            //centerPos is view-relative during rendering; hits are queried in world coordinates
+            var worldCenterY = centerPos.Y + (CurrentDrawingTargetContext?.ViewRelativeOriginY ?? 0);
+            hits[obj] = new Rect(centerPos.X - size.X / 2, worldCenterY - size.Y / 2, size.X, size.Y);
         }
 
         internal void ClearHitObjects() => hits.Clear();

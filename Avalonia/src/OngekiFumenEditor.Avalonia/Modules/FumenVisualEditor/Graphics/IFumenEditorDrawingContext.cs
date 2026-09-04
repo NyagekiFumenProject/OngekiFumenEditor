@@ -24,6 +24,19 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics
         double ConvertToY_DefaultSoflanGroup(double tGridUnit) => ConvertToY(tGridUnit, Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
         double ConvertToY(TGrid tGrid, SoflanList soflans) => ConvertToY(tGrid.TotalUnit, soflans);
         double ConvertToY(double tGridUnit, SoflanList soflans);
+
+        double ConvertToViewRelativeY_DefaultSoflanGroup(TGrid tGrid) => ConvertToViewRelativeY(tGrid.TotalUnit, Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
+        double ConvertToViewRelativeY_DefaultSoflanGroup(double tGridUnit) => ConvertToViewRelativeY(tGridUnit, Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
+        double ConvertToViewRelativeY(TGrid tGrid, SoflanList soflans) => ConvertToViewRelativeY(tGrid.TotalUnit, soflans);
+        double ConvertToViewRelativeY(double tGridUnit, SoflanList soflans)
+        {
+            //deduct the camera origin in the double domain before any float narrowing,
+            //which is the whole point of the camera-relative rendering (catastrophic cancellation fix)
+            var worldY = ConvertToY(tGridUnit, soflans);
+            return CurrentDrawingTargetContext is { } drawingTargetContext
+                ? worldY - drawingTargetContext.ViewRelativeOriginY
+                : worldY;
+        }
     }
 }
 

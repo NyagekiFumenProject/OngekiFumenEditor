@@ -16,12 +16,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing
         public SoflanList CurrentSoflanList { get; set; }
         public SortableCollection<(TGrid minTGrid, TGrid maxTGrid), TGrid> VisibleTGridRanges { get; set; }
         public int SoflanGroupId { get; set; }
-        public VisibleRect Rect { get; set; }
+        public VisibleRect ViewRelativeRect { get; set; }
+        public VisibleRect WorldRect { get; set; }
+        public double ViewRelativeOriginY { get; set; }
         public Matrix4 ViewMatrix { get; set; }
         public Matrix4 ProjectionMatrix { get; set; }
         public float ViewWidth { get; set; }
         public float ViewHeight { get; set; }
     }
 }
-
-
