@@ -1,7 +1,7 @@
 # WPF → Avalonia 迁移状态报告
 
 - **检查日期**：2026-08-01
-- **文档更新日期**：2026-09-04（新增 3a P0 增量状态；原始检查基线仍为 2026-08-01）
+- **文档更新日期**：2026-09-04（新增 3a P0 增量状态并扩充 T-003/T-006 两项；原始检查基线仍为 2026-08-01）
 - **检查基线**：工作树未提交快照（分支 `avalonia`，含 XAML 清零批次①~⑦全部改动）
 - **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal`
 - **构建结果**：**成功**。全解决方案（核心 + Desktop + Browser）完整重建 **0 错误**、87 个警告
@@ -14,7 +14,7 @@
 
 ## 结论
 
-当前迁移处于“**编译清零完成、应用运行验证未开始；3a P0 模型行为回归已完成**”的阶段。
+当前迁移处于“**编译清零完成、应用运行验证未开始；3a P0 四项（T-003~T-006）迁移已完成**”的阶段。
 
 - C# 编译 0 错误（此前轮次完成）；
 - Avalonia XAML 编译 0 错误（本轮完成，从 2190 个唯一 AVLN 错误清零）；
@@ -24,14 +24,16 @@
 
 ## 3a P0 算法、架构与性能补充审计（已完成）
 
-> 本节对应审计报告 3a 表中的两个 P0 行。本批次只覆盖空间索引和 Connectable 显示对象展开；更新器 P0 及其他 P1/P2/P3 项仍按原计划保留。
+> 本节对应审计报告 3a 表中的四个 P0 行：T-004/T-005 为首批（空间索引与 Connectable 显示对象展开），T-003（Bullet/Bell palette null 模型 clean cutover）与 T-006（更新器父进程握手、CWD、布局恢复）为第二批。其余 P1/P2/P3 项仍按原计划保留。
 
 | P0 项目 | 状态 | Avalonia 落点与验收证据 |
 | --- | --- | --- |
 | QuadTree 空树/删除正确性 | **已完成** | `NotQuadTreeWrapper`/`NotQuadTree` 已覆盖空集合安全读取、惰性构建、注册表真实删除、属性变更重建、端点正规化、闭区间查询和退化对象深度上限；`IndividualSoflanAreaListMap` 已同步泛型构造参数。回归：[`QuadTreeWrapperTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Base/Collections/QuadTreeWrapperTests.cs)。 |
 | Connectable 显示对象重复枚举 | **已完成** | child 按控制点顺序后输出自身一次，start 按 child 顺序展开且不追加重复 child；顶层聚合调用方保持不变，SVG prefab 禁用边界保持不变。回归：[`ConnectableDisplayableObjectTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Base/OngekiObjects/ConnectableDisplayableObjectTests.cs)。 |
+| Bullet/Bell palette null 模型 clean cutover | **已完成** | `BulletPallete` 删除 `DummyCustomPallete` 单例，Bullet/Bell 重写为 null-only 委托模型；新增 `StandardizedDefaultBellBulletPalette` marker 与统一只读 attribute；Nyageki 修复 CustomBullet 重复 Speed、ogkr B_PALETTE 跳过 marker 行；删除 `BulletNullPalleteCheckRule` 与 `HideIfDummyPalleteConverter`。回归：[`ProjectilePaletteNullSemanticsTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Base/OngekiObjects/ProjectilePaletteNullSemanticsTests.cs) 15 项、`DefaultToolBoxDropAction_BulletGenerator_LeavesPaletteNull`；全库 `DummyCustomPallete` 0 命中。 |
+| 更新器父进程握手、CWD、布局恢复 | **已完成** | updater 新增可选 `--parentProcessId` 握手（最长 30 秒等待、超时强杀，先于按名扫杀）；重启进程显式 `WorkingDirectory`；Desktop/CLI 启动固定 CWD 到程序目录；`EditorLayoutManager` Stream Save/Load 经 `GekiminiSetting.ShellLayout` 实装。Browser 不适用。回归：`Update_WithParentProcessId_WaitsForParentBeforeKillingOthers`、[`ToolLayoutRestorationTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/UI/ToolLayoutRestorationTests.cs) 流式往返用例；CLI `--help` 与桌面 GUI 启动冒烟通过。 |
 
-验收结果（Release、`--no-restore`）：`QuadTreeWrapperTests` 6/6、`ConnectableDisplayableObjectTests` 5/5、`SvgPrefabTests` 13/13；完整测试项目 576/576；Release 核心项目编译 0 errors。应用启动、UI、音频等运行时验收仍属于后续范围。
+验收结果（Release、`--no-restore`）：`QuadTreeWrapperTests` 6/6、`ConnectableDisplayableObjectTests` 5/5、`SvgPrefabTests` 13/13；完整测试项目 576/576；Release 核心项目编译 0 errors。T-003/T-006 批次验收：`OngekiFumenEditor.Avalonia.Tests` 306/306、`OngekiFumenEditor.Avalonia.Desktop.Tests` 148/148（0 失败），CLI/GUI 冒烟通过。应用启动、UI、音频等整体运行时验收仍属于后续范围。
 
 ## 状态总览
 

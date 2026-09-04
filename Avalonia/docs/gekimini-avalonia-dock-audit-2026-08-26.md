@@ -129,6 +129,8 @@ Browser 没有可靠的进程退出时机时，用户的布局变化在页面刷
 
 ### P1：`EditorLayoutManager` 的流式导入/导出和“建议布局”菜单是静默无操作
 
+> **2026-09-04 更新**：流式导入/导出部分已解决（commit `3adc4e58`）——`SaveLayout(Stream)` 现在把 `GekiminiSetting.ShellLayout` 写入输出流，`LoadLayout(Stream)` 读取流内容回写设置后恢复布局，回归见 `ToolLayoutRestorationTests.EditorLayoutManager_StreamRoundTrip_RestoresTool`。“应用建议布局”（`suggestLayout.bin` 嵌入资源）仍按原计划延后，下文描述仅对该延后部分继续成立。
+
 **证据**
 
 - `LoadLayout(Stream)` 明确记录“ignores stream payload”，随后丢弃输入流并调用 Shell 的设置加载：`src/OngekiFumenEditor.Avalonia/Kernel/EditorLayout/EditorLayoutManager.cs:10-17`。
