@@ -1,6 +1,7 @@
 using Avalonia.Headless.XUnit;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Modules.Shell;
+using OngekiFumenEditor.Avalonia.Kernel.EditorLayout;
 using OngekiFumenEditor.Avalonia.Modules.FumenObjectPropertyBrowser;
 using Xunit;
 
@@ -30,5 +31,25 @@ public sealed class ToolLayoutRestorationTests
         // 恢复后再次从菜单打开同一工具，不应出现重复面板。
         shell.ShowTool((IToolViewModel)browser);
         Assert.Single(shell.Tools);
+    }
+
+    [AvaloniaFact]
+    public async Task EditorLayoutManager_StreamRoundTrip_RestoresTool()
+    {
+        var shell = IoC.Get<IShell>();
+        var layoutManager = IoC.Get<IEditorLayoutManager>();
+        var browser = IoC.Get<IFumenObjectPropertyBrowser>();
+
+        await shell.ResetLayout();
+        shell.ShowTool((IToolViewModel)browser);
+
+        using var ms = new MemoryStream();
+        Assert.True(await layoutManager.SaveLayout(ms));
+
+        ms.Position = 0;
+        await shell.ResetLayout();
+        Assert.True(await layoutManager.LoadLayout(ms));
+
+        Assert.Same(browser, Assert.Single(shell.Tools));
     }
 }

@@ -46,6 +46,9 @@ public sealed class ProgramUpdateServiceTests
         Assert.Equal(
             new[] { "--wait", "--notifySucess", "--sourceVersion", fixture.Options.SourceVersion },
             fixture.ProcessEnvironment.StartedArguments);
+        Assert.Equal(
+            fixture.TargetPath,
+            fixture.ProcessEnvironment.StartedWorkingDirectory);
     }
 
     [Fact]
@@ -149,6 +152,49 @@ public sealed class ProgramUpdateServiceTests
         Assert.Equal(
             new[] { "--wait", "--notifySucess", "--sourceVersion", "9.8.7.6" },
             fixture.ProcessEnvironment.StartedArguments);
+        Assert.Equal(
+            fixture.TargetPath,
+            fixture.ProcessEnvironment.StartedWorkingDirectory);
+    }
+
+    [Fact]
+    public async Task Update_WithParentProcessId_WaitsForParentBeforeKillingOthers()
+    {
+        using var fixture = new UpdateFixture();
+        var sourceFile = fixture.AddSourceFile(
+            DefaultProgramUpdateService.DesktopExecutableName,
+            "stub");
+        fixture.Options.ParentProcessId = 5;
+        fixture.ProcessEnvironment.ProcessIds =
+        [
+            fixture.ProcessEnvironment.CurrentProcessId,
+            101,
+            202
+        ];
+
+        var result = await fixture.CreateService([sourceFile]).UpdateAsync(fixture.Options);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Equal(new[] { (5, 30_000) }, fixture.ProcessEnvironment.WaitForExitCalls);
+        Assert.Equal(new[] { 101, 202 }, fixture.ProcessEnvironment.KilledProcessIds);
+        Assert.Equal(
+            new[] { "WaitForExit:5", "Kill:101", "Kill:202", "StartProcess" },
+            fixture.ProcessEnvironment.CallOrder);
+    }
+
+    [Fact]
+    public async Task Update_WithParentProcessIdEqualToCurrent_DoesNotWait()
+    {
+        using var fixture = new UpdateFixture();
+        var sourceFile = fixture.AddSourceFile(
+            DefaultProgramUpdateService.DesktopExecutableName,
+            "stub");
+        fixture.Options.ParentProcessId = fixture.ProcessEnvironment.CurrentProcessId;
+
+        var result = await fixture.CreateService([sourceFile]).UpdateAsync(fixture.Options);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Empty(fixture.ProcessEnvironment.WaitForExitCalls);
     }
 
     private sealed class UpdateFixture : IDisposable
@@ -248,7 +294,10 @@ public sealed class ProgramUpdateServiceTests
         public int? KillFailureProcessId { get; set; }
         public string? RequestedProcessName { get; private set; }
         public List<int> KilledProcessIds { get; } = [];
+        public List<(int ProcessId, int Timeout)> WaitForExitCalls { get; } = [];
+        public List<string> CallOrder { get; } = [];
         public string? StartedFileName { get; private set; }
+        public string? StartedWorkingDirectory { get; private set; }
         public string[]? StartedArguments { get; private set; }
 
         public IEnumerable<int> GetProcessIdsByName(string processName)
@@ -259,14 +308,23 @@ public sealed class ProgramUpdateServiceTests
 
         public void KillProcess(int processId)
         {
+            CallOrder.Add($"Kill:{processId}");
             if (KillFailureProcessId == processId)
                 throw new InvalidOperationException("Injected kill failure.");
             KilledProcessIds.Add(processId);
         }
 
-        public void StartProcess(string fileName, IReadOnlyList<string> arguments)
+        public void WaitForProcessExit(int processId, int timeoutMilliseconds)
         {
+            CallOrder.Add($"WaitForExit:{processId}");
+            WaitForExitCalls.Add((processId, timeoutMilliseconds));
+        }
+
+        public void StartProcess(string fileName, string workingDirectory, IReadOnlyList<string> arguments)
+        {
+            CallOrder.Add("StartProcess");
             StartedFileName = fileName;
+            StartedWorkingDirectory = workingDirectory;
             StartedArguments = arguments.ToArray();
         }
     }

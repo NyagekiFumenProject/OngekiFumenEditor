@@ -102,17 +102,20 @@ JIT 使用 ReadyToRun 处理 `TexturePlugin.dll`；Native AOT 额外以 `CopyToP
 
 ### 3.4 `updater`
 
-必填内部参数：`--sourceFolder`、`--targetFolder`、`--sourceVersion`。
+必填内部参数：`--sourceFolder`、`--targetFolder`、`--sourceVersion`；可选内部参数：
+`--parentProcessId <pid>`（默认 `0`）。将来 GUI 发起更新时由调用方传入自身 PID 并自行退出。
 
 保留的旧版行为：
 
 1. 递归枚举源目录文件，大小写不敏感地排除 `.log`、`.xml`、`.dmp`。
-2. 按进程名 `OngekiFumenEditor.Avalonia.Desktop` 终止除当前 PID 外的实例。
-3. 将既有目标移动为随机 `.bak_*` 备份。
-4. 以不覆盖方式复制新文件。
-5. 备份或复制失败时执行旧版回滚；复制失败可能保留新目标和 `.bak_*`，这是被测试锁定的旧行为。
-6. 成功后删除备份；删除失败只记录日志，仍返回成功。
-7. 启动 `OngekiFumenEditor.Avalonia.Desktop.exe`，参数固定为
+2. `--parentProcessId` 大于 `0` 且不等于当前 PID 时，先等待父编辑器进程退出（最长 30 秒，
+   超时后强制结束父进程），再动任何文件。
+3. 按进程名 `OngekiFumenEditor.Avalonia.Desktop` 终止除当前 PID 外的实例。
+4. 将既有目标移动为随机 `.bak_*` 备份。
+5. 以不覆盖方式复制新文件。
+6. 备份或复制失败时执行旧版回滚；复制失败可能保留新目标和 `.bak_*`，这是被测试锁定的旧行为。
+7. 成功后删除备份；删除失败只记录日志，仍返回成功。
+8. 启动 `OngekiFumenEditor.Avalonia.Desktop.exe`（工作目录为目标目录），参数固定为
    `--wait --notifySucess --sourceVersion <version>`。
 
 退出码：终止进程失败 `-1`、备份失败 `-2`、复制失败 `-3`、成功 `0`。

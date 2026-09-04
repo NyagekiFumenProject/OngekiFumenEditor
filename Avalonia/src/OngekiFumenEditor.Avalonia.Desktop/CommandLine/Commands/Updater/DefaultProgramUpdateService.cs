@@ -8,6 +8,7 @@ internal sealed class DefaultProgramUpdateService : IProgramUpdateService
 {
     internal const string DesktopProcessName = "OngekiFumenEditor.Avalonia.Desktop";
     internal const string DesktopExecutableName = "OngekiFumenEditor.Avalonia.Desktop.exe";
+    private const int ParentProcessExitTimeoutMilliseconds = 30_000;
 
     private readonly IProgramUpdateFileSystem fileSystem;
     private readonly IProgramUpdateProcessEnvironment processEnvironment;
@@ -75,6 +76,10 @@ internal sealed class DefaultProgramUpdateService : IProgramUpdateService
             }
             Log.LogInfo("rollback end");
         }
+
+        //wait for the parent editor process to exit before touching any file
+        if (option.ParentProcessId > 0 && option.ParentProcessId != processEnvironment.CurrentProcessId)
+            processEnvironment.WaitForProcessExit(option.ParentProcessId, ParentProcessExitTimeoutMilliseconds);
 
         //setup enviorment
         //kill others editor processes
@@ -156,6 +161,7 @@ internal sealed class DefaultProgramUpdateService : IProgramUpdateService
         var targetProgram = Path.Combine(targetFolder, DesktopExecutableName);
         processEnvironment.StartProcess(
             targetProgram,
+            targetFolder,
             ["--wait", "--notifySucess", "--sourceVersion", sourceVersion]);
 
         return Task.FromResult(new ProgramUpdateResult(0));

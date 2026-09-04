@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -31,6 +32,7 @@ internal class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        Directory.SetCurrentDirectory(AppContext.BaseDirectory);
         ThreadingDiagnosticsRuntime.CaptureMainThread();
         StartupArgs = args ?? [];
 

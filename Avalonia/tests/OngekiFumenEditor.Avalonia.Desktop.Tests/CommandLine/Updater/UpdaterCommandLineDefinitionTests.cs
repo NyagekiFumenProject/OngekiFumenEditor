@@ -28,6 +28,7 @@ public sealed class UpdaterCommandLineDefinitionTests
         Assert.Equal(sourceFolder, options.SourceFolder);
         Assert.Equal(targetFolder, options.TargetFolder);
         Assert.Equal("1.2.3.4", options.SourceVersion);
+        Assert.Equal(0, options.ParentProcessId);
         Assert.Equal(string.Empty, result.Error);
     }
 
@@ -54,6 +55,25 @@ public sealed class UpdaterCommandLineDefinitionTests
         Assert.NotEqual(0, result.ExitCode);
         Assert.Null(handler.Options);
         Assert.Contains(missingOption, result.Error, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Invoke_ExplicitParentProcessId_BindsValue()
+    {
+        var handler = new RecordingHandler(0);
+        var definition = new UpdaterCommandLineDefinition(handler);
+
+        var result = await InvokeAsync(
+            definition,
+            "updater",
+            "--sourceFolder", Path.GetFullPath("source"),
+            "--targetFolder", Path.GetFullPath("target"),
+            "--sourceVersion", "1.2.3.4",
+            "--parentProcessId", "123");
+
+        Assert.Equal(0, result.ExitCode);
+        var options = Assert.IsType<UpdaterOption>(handler.Options);
+        Assert.Equal(123, options.ParentProcessId);
     }
 
     private static async Task<InvocationResult> InvokeAsync(
