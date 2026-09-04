@@ -10,6 +10,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
 		private string line = string.Empty;
 		private Dictionary<Type, Array> cacheDataArray = new Dictionary<Type, Array>();
+		private string[] tokenCache;
 		private readonly Dictionary<Type, IArgValueConverter> converters;
 
 		public CommandArgs()
@@ -43,6 +44,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 			set
 			{
 				cacheDataArray.Clear();
+				tokenCache = null;
 				line = value;
 			}
 		}
@@ -54,12 +56,18 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
 		public string GetRawData(int index)
 		{
-			return GetRawDataArray().ElementAtOrDefault(index);
+			var tokens = GetTokens();
+			return (uint)index < (uint)tokens.Length ? tokens[index] : default;
 		}
 
 		public string[] GetRawDataArray()
 		{
-			return line.Trim().Split(SplitEmptyCharArray);
+			return (string[])GetTokens().Clone();
+		}
+
+		private string[] GetTokens()
+		{
+			return tokenCache ??= line.Trim().Split(SplitEmptyCharArray);
 		}
 
 		public T[] GetDataArray<T>()
@@ -68,16 +76,14 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 			if (cacheDataArray.TryGetValue(type, out var array))
 				return (T[])array;
 
-			T[] arr = default;
-			var inputs = line.Trim().Split(SplitEmptyCharArray);
-
 			if (!converters.TryGetValue(type, out var argConverter))
 				throw new InvalidOperationException($"No OGKR argument converter is registered for '{type.FullName}'.");
 
-			arr = argConverter.Parser(inputs).OfType<T>().ToArray();
+			var inputs = GetTokens();
+			var result = argConverter.Parser(inputs).OfType<T>().ToArray();
 
-			cacheDataArray[type] = arr;
-			return arr;
+			cacheDataArray[type] = result;
+			return result;
 		}
 	}
 }

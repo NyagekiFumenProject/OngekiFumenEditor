@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
             var bell = new Bell();
             var data = seg[1].Split(":");
 
-            using var d = data[0].GetValuesMapWithDisposable(out var map);
+            var map = data[0].GetValuesMap();
             bell.TGrid = map["T"].ParseToTGrid();
             bell.XGrid = map["X"].ParseToXGrid();
 

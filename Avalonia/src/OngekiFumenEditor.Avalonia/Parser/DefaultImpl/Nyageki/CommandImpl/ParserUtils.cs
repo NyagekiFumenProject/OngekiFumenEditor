@@ -1,23 +1,26 @@
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Utils;
-using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl
 {
-	internal static class ParserUtils
+	internal static partial class ParserUtils
 	{
-		public static IDisposable GetValuesMapWithDisposable(this string paramsDataStr, out Dictionary<string, string> map)
+		public static Dictionary<string, string> GetValuesMap(this string paramsDataStr)
 		{
-			return ParseParams(paramsDataStr).ToDictionaryWithObjectPool(x => x.name, x => x.value, out map);
+			var map = new Dictionary<string, string>();
+			foreach (var (name, value) in ParseParams(paramsDataStr))
+				map[name] = value;
+
+			return map;
 		}
 
-		private static Regex s = new Regex(@"(\w+)\[(.*?)\]\s*(,|$)");
+		[GeneratedRegex(@"(\w+)\[(.*?)\]\s*(,|$)")]
+		private static partial Regex ParamRegex();
 
 		public static IEnumerable<(string name, string value)> ParseParams(string content)
 		{
-			foreach (Match m in s.Matches(content))
+			foreach (Match m in ParamRegex().Matches(content))
 				yield return (m.Groups[1].Value, m.Groups[2].Value);
 		}
 

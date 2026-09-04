@@ -27,6 +27,11 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 		IEnumerable<TValue> Query(TKey from, TKey to);
 
 		/// <summary>
+		/// Performs a range query and writes all overlapping items into the given output collection.
+		/// </summary>
+		void QueryInto(TKey from, TKey to, ICollection<TValue> output);
+
+		/// <summary>
 		/// Adds the specified item.
 		/// </summary>
 		void Add(TKey from, TKey to, TValue value);

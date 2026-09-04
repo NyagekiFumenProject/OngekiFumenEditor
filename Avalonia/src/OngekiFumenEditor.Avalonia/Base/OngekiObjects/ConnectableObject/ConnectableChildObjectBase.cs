@@ -119,16 +119,13 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
 
         internal void NotifyRefreshPaths()
         {
-            ObjectPool<List<(Vector2 pos, bool isVaild)>>.Return(cacheGeneratedPath);
             cacheGeneratedPath = default;
             cachedIsVaild = default;
         }
 
         private void RegeneratePaths()
         {
-            if (cacheGeneratedPath is null)
-                cacheGeneratedPath = ObjectPool<List<(Vector2 pos, bool isVaild)>>.Get();
-            cacheGeneratedPath.Clear();
+            cacheGeneratedPath = new List<(Vector2 pos, bool isVaild)>();
 
             var isVaild = true;
             foreach (var p in GenerateConnectionPaths())
@@ -168,7 +165,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
                 return Math.Sign(b.Y - a.Y);
             }
 
-            using var d = GridBasePoints.ToListWithObjectPool(out var points);
+            using var points = GridBasePoints.ToListWithObjectPool();
             if (points.Count <= 2)
             {
                 var fromP = points[0];

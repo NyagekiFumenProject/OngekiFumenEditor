@@ -28,9 +28,11 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 
 			childObj.CurvePrecision = curvePrecision;
 
-			var maps = curPathData.Split("...").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
+			var maps = curPathData.Split("...")
+				.Select(x => x.Trim().TrimStart('(').TrimEnd(')').GetValuesMap())
+				.ToArray();
 
-			foreach (var curPointData in maps.Select(x => x.d))
+			foreach (var curPointData in maps)
 			{
 				var laneCurvePathControl = new LaneCurvePathControlObject();
 				laneCurvePathControl.TGrid = curPointData["T"].ParseToTGrid();
@@ -39,8 +41,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 				childObj.AddControlObject(laneCurvePathControl);
 			}
 
-			foreach ((var d, _) in maps)
-				d.Dispose();
 		}
 	}
 }

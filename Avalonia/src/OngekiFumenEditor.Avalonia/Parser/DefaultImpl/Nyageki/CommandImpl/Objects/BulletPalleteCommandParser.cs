@@ -17,7 +17,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
             var bpl = new BulletPallete();
 
             var data = seg[1].Split(":");
-            using var d = data[1].GetValuesMapWithDisposable(out var map);
+            var map = data[1].GetValuesMap();
 
             bpl.StrID = data[0].Trim();
             bpl.ShooterValue = Enum.Parse<Shooter>(map["Shooter"]);

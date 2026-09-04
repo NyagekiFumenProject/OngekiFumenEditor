@@ -26,8 +26,9 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 			hold.ReferenceLaneStart = refLane;
 			hold.IsCritical = bool.Parse(commData[1]);
 
-			var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
-			var notes = maps.Select(x => x.d).ToArray();
+			var notes = data[1].Split("->")
+				.Select(x => x.Trim().TrimStart('(').TrimEnd(')').GetValuesMap())
+				.ToArray();
 
 			hold.TGrid = notes[0]["T"].ParseToTGrid();
 			hold.XGrid = notes[0]["X"].ParseToXGrid();
@@ -41,8 +42,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 				hold.SetHoldEnd(end);
 			}
 
-			foreach ((var d, _) in maps)
-				d.Dispose();
 
 			fumen.AddObject(hold);
 		}

@@ -73,6 +73,14 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 			return root.Query(from, to);
 		}
 
+		public void QueryInto(TKey from, TKey to, ICollection<TValue> output)
+		{
+			if (!isInSync)
+				RebuildInternal();
+
+			root.QueryInto(from, to, output);
+		}
+
 		public void Add(TKey from, TKey to, TValue value)
 		{
 			if (comparer.Compare(from, to) > 0)

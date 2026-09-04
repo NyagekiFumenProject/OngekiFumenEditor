@@ -16,7 +16,7 @@ public sealed class SvgPrefabCommandParser : INyagekiCommandParser
         if (seg.Length < 2)
             throw new FormatException("SvgPrefab command has no field payload.");
 
-        using var scope = seg[1].GetValuesMapWithDisposable(out var fields);
+        var fields = seg[1].GetValuesMap();
         var type = Required(fields, "Type");
         SvgPrefabBase svg = type switch
         {

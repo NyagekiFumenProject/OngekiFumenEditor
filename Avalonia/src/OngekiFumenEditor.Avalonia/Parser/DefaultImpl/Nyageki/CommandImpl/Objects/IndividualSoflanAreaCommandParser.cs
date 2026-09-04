@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
             isf.XGrid = xgridRange[0];
             isf.EndIndicator.XGrid = xgridRange[1];
 
-            using var d = data.LastOrDefault().GetValuesMapWithDisposable(out var map);
+            var map = data.LastOrDefault().GetValuesMap();
             if (map.TryGetValue("SoflanGroup", out var soflanGroupStr))
             {
                 if (int.TryParse(soflanGroupStr, out var soflanGroup))

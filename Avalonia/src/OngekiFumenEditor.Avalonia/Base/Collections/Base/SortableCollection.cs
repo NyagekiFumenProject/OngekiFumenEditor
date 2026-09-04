@@ -85,8 +85,9 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
 
         public IEnumerable<T> BinaryFindRange(X min, X max)
         {
-            var range = BinaryFindRangeIndex(min, max);
-            return Enumerable.Range(range.minIndex, range.maxIndex - range.minIndex).Select(i => items[i]);
+            var (minIndex, maxIndex) = BinaryFindRangeIndex(min, max);
+            for (var i = minIndex; i < maxIndex; i++)
+                yield return items[i];
         }
 
         public int BinarySearchBy(X key)

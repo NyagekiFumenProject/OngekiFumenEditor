@@ -63,11 +63,10 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
             var minTGrid = obj.TGrid;
             var maxTGrid = obj.NextObject.TGrid;
 
-            using var _ = fumen.GetAllDisplayableObjects(minTGrid, maxTGrid)
+            using var dockables = fumen.GetAllDisplayableObjects(minTGrid, maxTGrid)
                 .OfType<ILaneDockable>()
                 .Where(x => x.ReferenceLaneStrId == refLaneId)
-                .Where(x => !((ISelectableObject)x).IsSelected)
-                .ToHashSetWithObjectPool(out var dockables);
+                .Where(x => !((ISelectableObject)x).IsSelected).ToHashSetWithObjectPool();
 
             foreach (var dockable in dockables)
             {

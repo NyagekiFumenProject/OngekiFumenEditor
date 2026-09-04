@@ -19,14 +19,13 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 
 			blk.Direction = Enum.Parse<LaneBlockArea.BlockDirection>(data[0]);
 
-			var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
-			var notes = maps.Select(x => x.d).ToArray();
+			var notes = data[1].Split("->")
+				.Select(x => x.Trim().TrimStart('(').TrimEnd(')').GetValuesMap())
+				.ToArray();
 
 			blk.TGrid = notes[0]["T"].ParseToTGrid();
 			blk.EndIndicator.TGrid = notes[1]["T"].ParseToTGrid();
 
-			foreach ((var d, _) in maps)
-				d.Dispose();
 
 			fumen.AddObject(blk);
 		}

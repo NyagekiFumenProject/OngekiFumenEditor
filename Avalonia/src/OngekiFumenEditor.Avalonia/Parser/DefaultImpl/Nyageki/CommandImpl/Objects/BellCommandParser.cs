@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 			var strId = data[0].Trim();
 			bell.ReferenceBulletPallete = fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == strId);
 
-			using var d = data[1].GetValuesMapWithDisposable(out var map);
+			var map = data[1].GetValuesMap();
 			bell.TGrid = map["T"].ParseToTGrid();
 			bell.XGrid = map["X"].ParseToXGrid();
 

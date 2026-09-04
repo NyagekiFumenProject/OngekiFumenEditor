@@ -20,8 +20,9 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
             var data = seg[1].Split(":");
 
             var recordId = int.Parse(data[0]);
-            var maps = data[1].Split("->").Select(x => x.Trim().TrimStart('(').TrimEnd(')')).Select(x => (x.GetValuesMapWithDisposable(out var d), d)).ToArray();
-            var notes = maps.Select(x => x.d).ToArray();
+            var notes = data[1].Split("->")
+                .Select(x => x.Trim().TrimStart('(').TrimEnd(')').GetValuesMap())
+                .ToArray();
 
             void buildCommon(ConnectableObjectBase obj, Dictionary<string, string> map)
             {
@@ -59,8 +60,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
                 startObject.AddChildObject(childObject);
             }
 
-            foreach ((var d, _) in maps)
-                d.Dispose();
 
             fumen.AddObject(startObject);
         }

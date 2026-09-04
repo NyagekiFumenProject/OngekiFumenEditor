@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 			soflan.TGrid = tgridRange[0];
 			soflan.EndTGrid = tgridRange[1];
 
-            using var d = data.LastOrDefault().GetValuesMapWithDisposable(out var map);
+            var map = data.LastOrDefault().GetValuesMap();
 			if (map.TryGetValue("SoflanGroup",out var soflanGroupStr))
 			{
 				if (int.TryParse(soflanGroupStr,out var soflanGroup))
@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 			Apply(soflan, seg);
 			var data = seg[1].Split(":");
 
-			using var d = data[2].GetValuesMapWithDisposable(out var map);
+			var map = data[2].GetValuesMap();
 			soflan.Easing = Enum.Parse<EasingTypes>(map["Easing"]);
 			((InterpolatableSoflan.InterpolatableSoflanIndicator)soflan.EndIndicator).Speed = float.Parse(map["EndSpeed"]);
 

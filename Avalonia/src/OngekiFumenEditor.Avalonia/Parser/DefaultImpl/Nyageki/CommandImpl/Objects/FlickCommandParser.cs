@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 			//$"Flick:X[{flick.XGrid.Unit},{flick.XGrid.Grid}],T[{flick.TGrid.Unit},{flick.TGrid.Grid}],C[{flick.IsCritical}],D[{flick.Direction}]"
 			var flick = new Flick();
 
-			using var d = seg[1].GetValuesMapWithDisposable(out var map);
+			var map = seg[1].GetValuesMap();
 
 			flick.TGrid = map["T"].ParseToTGrid();
 			flick.XGrid = map["X"].ParseToXGrid();

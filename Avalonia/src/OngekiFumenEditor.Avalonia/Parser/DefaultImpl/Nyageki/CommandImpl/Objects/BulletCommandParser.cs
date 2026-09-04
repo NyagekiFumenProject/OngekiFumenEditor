@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
 			var strId = data[0].Trim();
 			bullet.ReferenceBulletPallete = fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == strId);
 
-			using var d = data[1].GetValuesMapWithDisposable(out var map);
+			var map = data[1].GetValuesMap();
 			bullet.TGrid = map["T"].ParseToTGrid();
 			bullet.XGrid = map["X"].ParseToXGrid();
 			bullet.BulletDamageTypeValue = Enum.Parse<BulletDamageType>(map["D"]);
