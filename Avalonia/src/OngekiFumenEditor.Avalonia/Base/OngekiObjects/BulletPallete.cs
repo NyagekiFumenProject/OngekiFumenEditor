@@ -7,17 +7,6 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects
     {
         public static int RandomSeed { get; set; } = DateTime.Now.ToString().GetHashCode();
 
-        public static BulletPallete DummyCustomPallete { get; } = new BulletPallete()
-        {
-            StrID = "----",
-            EditorName = "自定义无模板",
-        };
-
-        static BulletPallete()
-        {
-            DummyCustomPallete.PropertyChanged += (s, e) => throw new InvalidOperationException("DummyCustomPallete can't be modify");
-        }
-
         private string strID = string.Empty;
         public string StrID
         {

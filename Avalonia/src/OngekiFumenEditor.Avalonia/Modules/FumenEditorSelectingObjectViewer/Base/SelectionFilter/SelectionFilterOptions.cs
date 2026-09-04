@@ -496,7 +496,6 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
         nullPaletteItem = new BulletPaletteFilterItem(null);
         Items.Add(nullPaletteItem);
-        Items.Add(new BulletPaletteFilterItem(BulletPallete.DummyCustomPallete));
         foreach (var p in palettes)
             Items.Add(new BulletPaletteFilterItem(p));
 
@@ -527,7 +526,11 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         if (obj is not IBulletPalleteReferencable bullet)
             return;
 
-        var item = bullet.ReferenceBulletPallete == null ? nullPaletteItem : paletteTable[bullet.ReferenceBulletPallete];
+        var item = bullet.ReferenceBulletPallete == null
+            ? nullPaletteItem
+            : paletteTable.TryGetValue(bullet.ReferenceBulletPallete, out var tableItem) ? tableItem : null;
+        if (item is null)
+            return;
         if (bullet is Bullet)
             item.BulletCount++;
         else if (bullet is Bell)
@@ -605,9 +608,7 @@ public sealed class BulletPaletteFilterItem(BulletPallete? palette) : Observable
         {
             var baseText = Palette is null
                 ? Lang.NoBulletPalette
-                : Palette == BulletPallete.DummyCustomPallete
-                    ? Palette.EditorName
-                    : $"{Palette.StrID} {Palette.EditorName}";
+                : $"{Palette.StrID} {Palette.EditorName}";
             return $"{baseText} ({BulletCount} | {BellCount})";
         }
     }

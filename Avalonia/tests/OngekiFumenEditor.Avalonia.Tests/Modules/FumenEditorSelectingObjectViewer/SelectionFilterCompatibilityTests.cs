@@ -354,7 +354,7 @@ public sealed class SelectionFilterCompatibilityTests
 
     private static BulletPallete[] GetChartPalettes(BulletPaletteFilterOption option) => option.Items
         .Select(item => item.Palette)
-        .Where(palette => palette is not null && !ReferenceEquals(palette, BulletPallete.DummyCustomPallete))
+        .Where(palette => palette is not null)
         .Cast<BulletPallete>()
         .ToArray();
 

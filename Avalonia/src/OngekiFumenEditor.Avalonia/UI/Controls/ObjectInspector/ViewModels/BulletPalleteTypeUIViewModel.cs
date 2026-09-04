@@ -57,8 +57,7 @@ public partial class BulletPalleteTypeUIViewModel : CommonUIViewModelBase<Bullet
         if (editor is null)
             return;
 
-        var bplList = editor.EditorContext.Fumen.BulletPalleteList.Prepend(BulletPallete.DummyCustomPallete).ToArray();
-        await OpenSelectListCoreAsync(bplList, IoC.Get<IWindowManager>());
+        await OpenSelectListCoreAsync(editor.EditorContext.Fumen.BulletPalleteList, IoC.Get<IWindowManager>());
     }
 
     internal async Task<bool> OpenSelectListCoreAsync(

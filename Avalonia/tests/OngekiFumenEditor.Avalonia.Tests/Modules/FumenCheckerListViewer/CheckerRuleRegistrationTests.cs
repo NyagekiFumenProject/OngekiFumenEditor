@@ -10,7 +10,6 @@ public sealed class CheckerRuleRegistrationTests
 {
     private static readonly string[] ExpectedRuleNames =
     [
-        "BulletNullPalleteCheckRule",
         "ColorIdCheckRule",
         "ColorfulLaneBrightnessCheckRule",
         "CommonObjectOverlapCheckRule",
@@ -30,7 +29,6 @@ public sealed class CheckerRuleRegistrationTests
 
     private static readonly string[] ExpectedOngekiRuleNames =
     [
-        "BulletNullPalleteCheckRule",
         "ColorIdCheckRule",
         "ColorfulLaneBrightnessCheckRule",
         "HeaderConstCheckRule",

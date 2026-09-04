@@ -11,6 +11,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.Ogkr;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -265,6 +266,10 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
             foreach (var bpl in fumen.BulletPalleteList.OrderBy(x => x.StrID))
             {
+                // The default bell palette gets created during standardization if a bell has default projectile properties.
+                // The fumen doesn't need it, so we skip it
+                if (bpl is StandardizedDefaultBellBulletPalette)
+                    continue;
                 var shoot = bpl.ShooterValue switch
                 {
                     Shooter.TargetHead => "UPS",
@@ -405,10 +410,10 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
                     _ => default
                 };
 
-                if (u.ReferenceBulletPallete != null && u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (u.ReferenceBulletPallete is not null)
                 {
                     //serialize normal bullet
-                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete?.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
+                    sb.AppendLine($"{u.IDShortName}\t{u.ReferenceBulletPallete.StrID}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}");
                 }
                 else
                 {
@@ -476,10 +481,9 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
             foreach (var u in fumen.Bells.OrderBy(x => x.TGrid))
             {
-                //Considering that the bell may not need BulletPallete, we only need to determine whether it is a DummyCustomPallete
-                if (u.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (u.ReferenceBulletPallete is not null)
                 {
-                    sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete?.StrID ?? "--"}");
+                    sb.AppendLine($"{u.IDShortName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{u.ReferenceBulletPallete.StrID}");
                 }
                 else
                 {

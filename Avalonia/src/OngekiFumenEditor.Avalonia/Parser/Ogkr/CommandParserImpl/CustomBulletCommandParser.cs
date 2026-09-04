@@ -1,6 +1,5 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using System;
@@ -19,8 +18,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
             //sb.AppendLine($"{idName}\t{u.TGrid.Serialize()}\t{u.XGrid.Serialize()}\t{damage}\t{shoot}\t{u.PlaceOffset}\t{target}\t{u.Speed}\t{size}\t{type}\t{u.RandomOffsetRange}");
             var dataArr = args.GetDataArray<float>();
             var bullet = new Bullet();
-
-            bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
 
             bullet.TGrid.Unit = dataArr[1];
             bullet.TGrid.Grid = (int)dataArr[2];

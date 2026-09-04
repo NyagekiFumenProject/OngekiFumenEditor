@@ -1,6 +1,5 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -19,8 +18,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Obje
             //Bullet:{bullet.ReferenceBulletPallete?.StrID}:X[{bullet.XGrid.Unit},{bullet.XGrid.Grid}],T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}],D[{bullet.BulletDamageTypeValue}]
             var bullet = new Bullet();
             var data = seg[1].Split(":");
-
-            bullet.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
 
             using var d = data[0].GetValuesMapWithDisposable(out var map);
             bullet.TGrid = map["T"].ParseToTGrid();

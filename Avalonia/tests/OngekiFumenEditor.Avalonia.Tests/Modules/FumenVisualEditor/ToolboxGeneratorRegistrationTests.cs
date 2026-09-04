@@ -107,13 +107,13 @@ public sealed class ToolboxGeneratorRegistrationTests
     }
 
     [Fact]
-    public void DefaultToolBoxDropAction_BulletGenerator_PreservesCustomPaletteInitialization()
+    public void DefaultToolBoxDropAction_BulletGenerator_LeavesPaletteNull()
     {
         var action = new ExposedDefaultToolBoxDropAction(new BulletToolboxGenerator());
 
         var bullet = Assert.IsType<Bullet>(action.CreateDisplayObject());
 
-        Assert.Same(BulletPallete.DummyCustomPallete, bullet.ReferenceBulletPallete);
+        Assert.Null(bullet.ReferenceBulletPallete);
     }
 
     private static ServiceCollection CreateServices()

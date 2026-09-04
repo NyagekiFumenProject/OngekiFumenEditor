@@ -7,18 +7,15 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
     //[DontShowPropertyInfoAttrbute]
     public partial class Bullet : OngekiMovableObjectBase, IBulletPalleteReferencable, IProjectile
     {
-        bool IsUsePalleteValue => ReferenceBulletPallete != null && ReferenceBulletPallete != BulletPallete.DummyCustomPallete;
-
-        private BulletPallete referenceBulletPallete;
         [LocalizableObjectPropertyBrowserAlias("BulletPalleteDisplayName")]
         public BulletPallete ReferenceBulletPallete
         {
-            get { return referenceBulletPallete; }
+            get;
             set
             {
                 //Log.LogDebug($"bullet(id:{Id})'s pallete has been changed from {referenceBulletPallete?.StrID} to {value?.StrID}");
-                this.RegisterOrUnregisterPropertyChangeEvent(referenceBulletPallete, value, ReferenceBulletPallete_PropertyChanged);
-                SetProperty(ref referenceBulletPallete, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(field, value, ReferenceBulletPallete_PropertyChanged);
+                SetProperty(ref field, value);
 
                 OnPropertyChanged(nameof(Speed));
                 OnPropertyChanged(nameof(PlaceOffset));
@@ -29,7 +26,7 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
                 OnPropertyChanged(nameof(RandomOffsetRange));
                 OnPropertyChanged(nameof(IsEnableSoflan));
             }
-        }
+        } = null;
 
         private void ReferenceBulletPallete_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
@@ -64,72 +61,65 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
             }
         }
 
-        private float localSpeed = 1f;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public float Speed
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.Speed : localSpeed;
-            set => SetProperty(ref localSpeed, value);
-        }
+            get => ReferenceBulletPallete?.Speed ?? field;
+            set => SetProperty(ref field, value);
+        } = 1f;
 
-        private int localRandomOffsetRange = 0;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public int RandomOffsetRange
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.RandomOffsetRange : localRandomOffsetRange;
-            set => SetProperty(ref localRandomOffsetRange, value);
-        }
+            get => ReferenceBulletPallete?.RandomOffsetRange ?? field;
+            set => SetProperty(ref field, value);
+        } = 0;
 
-        private int localPlaceOffset = 0;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public int PlaceOffset
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.PlaceOffset : localPlaceOffset;
-            set => SetProperty(ref localPlaceOffset, value);
-        }
+            get => ReferenceBulletPallete?.PlaceOffset ?? field;
+            set => SetProperty(ref field, value);
+        } = 0;
 
-        private BulletType localTypeValue = BulletType.Circle;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public BulletType TypeValue
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.TypeValue : localTypeValue;
-            set => SetProperty(ref localTypeValue, value);
-        }
+            get => ReferenceBulletPallete?.TypeValue ?? field;
+            set => SetProperty(ref field, value);
+        } = BulletType.Circle;
 
-        private Target localTargetValue = Target.FixField;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public Target TargetValue
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.TargetValue : localTargetValue;
+            get => ReferenceBulletPallete?.TargetValue ?? field;
             set
             {
-                SetProperty(ref localTargetValue, value);
+                SetProperty(ref field, value);
                 OnPropertyChanged(nameof(IsEnableSoflan));
             }
-        }
+        } = Target.FixField;
 
-        private Shooter localShooterValue = Shooter.TargetHead;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public Shooter ShooterValue
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.ShooterValue : localShooterValue;
-            set => SetProperty(ref localShooterValue, value);
-        }
+            get => ReferenceBulletPallete?.ShooterValue ?? field;
+            set => SetProperty(ref field, value);
+        } = Shooter.TargetHead;
 
-        private BulletSize localSizeValue = BulletSize.Normal;
         [ObjectPropertyBrowserShow]
-        [BulletPropertyBrowserReadOnlyForPalleteIsValid]
+        [ProjectilePropertyBrowserReadOnlyForPalleteIsSet]
         public BulletSize SizeValue
         {
-            get => IsUsePalleteValue ? ReferenceBulletPallete.SizeValue : localSizeValue;
-            set => SetProperty(ref localSizeValue, value);
-        }
+            get => ReferenceBulletPallete?.SizeValue ?? field;
+            set => SetProperty(ref field, value);
+        } = BulletSize.Normal;
 
         public bool IsEnableSoflan => ReferenceBulletPallete?.IsEnableSoflan ?? (TargetValue != Target.Player);
 
@@ -147,17 +137,22 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles
             if (fromObj is not Bullet from)
                 return;
 
-            ReferenceBulletPallete = from.ReferenceBulletPallete;
-            BulletDamageTypeValue = from.BulletDamageTypeValue;
+            if (from.ReferenceBulletPallete is null)
+            {
+                PlaceOffset = from.PlaceOffset;
+                RandomOffsetRange = from.RandomOffsetRange;
+                ShooterValue = from.ShooterValue;
+                SizeValue = from.SizeValue;
+                Speed = from.Speed;
+                TargetValue = from.TargetValue;
+                TypeValue = from.TypeValue;
+            }
+            else
+            {
+                ReferenceBulletPallete = from.ReferenceBulletPallete;
+            }
 
-            localPlaceOffset = from.localPlaceOffset;
-            localRandomOffsetRange = from.localRandomOffsetRange;
-            localShooterValue = from.localShooterValue;
-            localSizeValue = from.localSizeValue;
-            localSpeed = from.localSpeed;
-            localTargetValue = from.localTargetValue;
-            localTypeValue = from.localTypeValue;
+            BulletDamageTypeValue = from.BulletDamageTypeValue;
         }
     }
 }
-

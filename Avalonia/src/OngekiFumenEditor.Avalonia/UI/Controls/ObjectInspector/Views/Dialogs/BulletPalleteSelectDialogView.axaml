@@ -14,7 +14,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:objects="clr-namespace:OngekiFumenEditor.Avalonia.Base.OngekiObjects"
     xmlns:res="clr-namespace:OngekiFumenEditor.Avalonia.Properties"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector.ValueConverters"
     Title="{markup:Translate {x:Static languages:Lang+B.BulletPalleteSelectDialogTitle}}"
     Width="400"
     Height="300"
@@ -22,9 +21,6 @@
     Background="{StaticResource EditorWindowBackgroundBrush}"
     SizeToContent="Width"
     mc:Ignorable="d">
-    <views:WindowViewBase.Resources>
-        <valueconverters:HideIfDummyPalleteConverter x:Key="HideIfDummyPalleteConverter" />
-    </views:WindowViewBase.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -72,14 +68,9 @@
                     <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootSource}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="ShooterValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding ShooterValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -87,14 +78,9 @@
                     <DataGridTemplateColumn Width="80" Header="{markup:Translate {x:Static languages:Lang+B.ShootOffset}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="PlaceOffset" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding PlaceOffset}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -102,14 +88,9 @@
                     <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.ShootTarget}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="TargetValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding TargetValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -117,14 +98,9 @@
                     <DataGridTemplateColumn Width="60" Header="{markup:Translate {x:Static languages:Lang+B.BulletSpeed}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="Speed" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding Speed}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -132,14 +108,9 @@
                     <DataGridTemplateColumn Width="100" Header="{markup:Translate {x:Static languages:Lang+B.BulletSize}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="SizeValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding SizeValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -147,14 +118,9 @@
                     <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.BulletType}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="TypeValue" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding TypeValue}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -162,14 +128,9 @@
                     <DataGridTemplateColumn Width="75" Header="{markup:Translate {x:Static languages:Lang+B.RandomOffsetRange}}">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate x:DataType="objects:BulletPallete">
-                                <TextBlock HorizontalAlignment="Center">
-                                    <TextBlock.Text>
-                                        <MultiBinding Converter="{StaticResource HideIfDummyPalleteConverter}">
-                                            <Binding Path="RandomOffsetRange" />
-                                            <Binding Path="." />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    Text="{Binding RandomOffsetRange}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>

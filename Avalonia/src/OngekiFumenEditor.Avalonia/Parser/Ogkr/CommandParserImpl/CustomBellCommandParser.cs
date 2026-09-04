@@ -1,6 +1,5 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
-using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using System;
@@ -20,8 +19,6 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
 
             var dataArr = args.GetDataArray<float>();
             var bell = new Bell();
-
-            bell.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
 
             bell.TGrid.Unit = dataArr[1];
             bell.TGrid.Grid = (int)dataArr[2];
