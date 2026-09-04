@@ -24,7 +24,7 @@
 
 ## 3a P0 算法、架构与性能补充审计（已完成）
 
-> 本节对应审计报告 3a 表中的四个 P0 行：T-004/T-005 为首批（空间索引与 Connectable 显示对象展开），T-003（Bullet/Bell palette null 模型 clean cutover）与 T-006（更新器父进程握手、CWD、布局恢复）为第二批。其余 P1/P2/P3 项仍按原计划保留。
+> 本节对应审计报告 3a 表中的 P0 项：T-004/T-005 为首批（空间索引与 Connectable 显示对象展开），T-003/T-006 为第二批（palette null cutover 与更新器/布局），T-001（可渲染命令列表与双帧生命周期）与 T-002（相机相对坐标与大 TGrid 稳定性）为第三批。其余 P1/P2/P3 项仍按原计划保留。
 
 | P0 项目 | 状态 | Avalonia 落点与验收证据 |
 | --- | --- | --- |
@@ -33,7 +33,10 @@
 | Bullet/Bell palette null 模型 clean cutover | **已完成** | `BulletPallete` 删除 `DummyCustomPallete` 单例，Bullet/Bell 重写为 null-only 委托模型；新增 `StandardizedDefaultBellBulletPalette` marker 与统一只读 attribute；Nyageki 修复 CustomBullet 重复 Speed、ogkr B_PALETTE 跳过 marker 行；删除 `BulletNullPalleteCheckRule` 与 `HideIfDummyPalleteConverter`。回归：[`ProjectilePaletteNullSemanticsTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Base/OngekiObjects/ProjectilePaletteNullSemanticsTests.cs) 15 项、`DefaultToolBoxDropAction_BulletGenerator_LeavesPaletteNull`；全库 `DummyCustomPallete` 0 命中。 |
 | 更新器父进程握手、CWD、布局恢复 | **已完成** | updater 新增可选 `--parentProcessId` 握手（最长 30 秒等待、超时强杀，先于按名扫杀）；重启进程显式 `WorkingDirectory`；Desktop/CLI 启动固定 CWD 到程序目录；`EditorLayoutManager` Stream Save/Load 经 `GekiminiSetting.ShellLayout` 实装。Browser 不适用。回归：`Update_WithParentProcessId_WaitsForParentBeforeKillingOthers`、[`ToolLayoutRestorationTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/UI/ToolLayoutRestorationTests.cs) 流式往返用例；CLI `--help` 与桌面 GUI 启动冒烟通过。 |
 
-验收结果（Release、`--no-restore`）：`QuadTreeWrapperTests` 6/6、`ConnectableDisplayableObjectTests` 5/5、`SvgPrefabTests` 13/13；完整测试项目 576/576；Release 核心项目编译 0 errors。T-003/T-006 批次验收：`OngekiFumenEditor.Avalonia.Tests` 306/306、`OngekiFumenEditor.Avalonia.Desktop.Tests` 148/148（0 失败），CLI/GUI 冒烟通过。应用启动、UI、音频等整体运行时验收仍属于后续范围。
+| 可渲染命令列表与双帧生命周期 | **已完成** | Kernel/Graphics/DrawCommands 全套（DrawCommand/Builder/List/FrameState/ContextSlots、23 个 sealed 命令、池化、状态命令去重、front/back 双帧槽）+ SkiaDrawCommandListReplay；`IRenderManagerImpl` 以 CreateDrawCommandListBuilder/Post/Swap/Present 替代 11 个即时绘制属性；editor/waveform 全部 targets 与 Editors helper 改 builder 录制后 Post。回归：[`DrawCommandListTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Kernel/Graphics/DrawCommandListTests.cs) 14 项、`SkiaRenderSmokeTests` headless 像素断言。 |
+| 相机相对坐标与大 TGrid 稳定性 | **已完成** | `DrawingTargetContext` 拆 ViewRelativeRect/WorldRect/ViewRelativeOriginY；`ConvertToViewRelativeY` 系列（CPU double 域扣减相机原点）；tap/flick/hold/lane/beam/SVG/grid/effect/projectile 顶点 Y 全量转 view-relative，view 矩阵去全球化为常量平移；design-mode 选区/鼠标反算经 WorldRect±OriginY 往返修复。回归：[`CameraRelativeCoordinateTests.cs`](../tests/OngekiFumenEditor.Avalonia.Tests/Modules/FumenVisualEditor/CameraRelativeCoordinateTests.cs) 6 项（含 1e7 大 TGrid float 相消对照）。 |
+
+验收结果（Release、`--no-restore`）：`QuadTreeWrapperTests` 6/6、`ConnectableDisplayableObjectTests` 5/5、`SvgPrefabTests` 13/13；完整测试项目 576/576；Release 核心项目编译 0 errors。T-003/T-006 批次验收：`OngekiFumenEditor.Avalonia.Tests` 306/306、`OngekiFumenEditor.Avalonia.Desktop.Tests` 148/148（0 失败），CLI/GUI 冒烟通过。T-001/T-002 批次验收：主测试项目 **326/326**（含新增 DrawCommandListTests 14 项与 CameraRelativeCoordinateTests 6 项）、全解决方案 0 error、CLI 冒烟通过。应用启动、UI、音频等整体运行时验收仍属于后续范围。
 
 ## 状态总览
 
