@@ -1,10 +1,11 @@
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using SixLabors.Fonts;
 using SkiaSharp;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.StringDrawing;
 
-internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IDisposable
+internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IStringMeasure, IDisposable
 {
     private sealed class FontHandle : IStringDrawing.IFontHandle
     {
@@ -40,6 +41,33 @@ internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing,
             })
             .Where(x => x?.FilePath is not null)
             .ToArray();
+    }
+
+    public Vector2 MeasureString(
+        string text,
+        Vector2 scale,
+        int fontSize,
+        IStringDrawing.StringStyle style,
+        IStringDrawing.IFontHandle handle)
+    {
+        text ??= string.Empty;
+
+        using var paint = new SKPaint();
+        using var font = new SKFont();
+
+        var isBold = style.HasFlag(IStringDrawing.StringStyle.Bold);
+        var isItalic = style.HasFlag(IStringDrawing.StringStyle.Italic);
+        var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
+        using var typeface = SKTypeface.FromFamilyName(
+            typefaceName,
+            isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
+            SKFontStyleWidth.Normal,
+            isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright);
+
+        font.Typeface = typeface;
+        font.Size = fontSize;
+        font.MeasureText(System.Runtime.InteropServices.MemoryMarshal.Cast<char, ushort>(text.AsSpan()), out var bounds, paint);
+        return new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
     }
 
     public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, IStringDrawing.StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)

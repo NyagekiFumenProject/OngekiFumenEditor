@@ -52,7 +52,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         convertToY = (tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor);
 
     private string displayFPS = "";
-    private readonly Dictionary<IFumenEditorDrawingTarget, Dictionary<DrawingTargetContext, List<OngekiObjectBase>>> drawMap = new();
+    private readonly Dictionary<IFumenEditorDrawingTarget, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>> drawMap = new();
     private IFumenEditorDrawingTarget[] drawTargetOrder;
     private readonly IPerfomenceMonitor dummyPerformenceMonitor = new DummyPerformenceMonitor();
     private bool enablePlayFieldDrawing;
@@ -370,7 +370,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             if (IsPreviewMode)
             {
                 //Preview Mode
-                var ranges =
+                using var ranges =
                     pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, EditorContext.Fumen.BpmList,
                         Setting.VerticalDisplayScale);
                 foreach (var x in ranges)
@@ -422,47 +422,56 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         #endregion
 
         // objType -> soflanGroup -> obj[]
-        var map = ObjectPool<Dictionary<string, Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>>.Get();
-        map.Clear();
+        var drawingCollectionDisposables = ObjectPool.GetPooledList<IDisposable>();
+        var map = ObjectPool.GetPooledDictionary<string, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>>();
+        var usedDrawingContexts = ObjectPool.GetPooledSet<int>();
+        var unusedSoflanGroups = ObjectPool.GetPooledList<int>();
 
-        var usedDrawingContexts = ObjectPool<HashSet<int>>.Get();
-        usedDrawingContexts.Clear();
-        //always draw default soflan group
-        usedDrawingContexts.Add(0);
+        try
+        {
+            //always draw default soflan group
+            usedDrawingContexts.Add(0);
 
         //Prepare objects we will draw them.
         //get&register all visible objects for every drawingContext(soflanGroup)
-        var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
-        var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges).OfType<OngekiTimelineObjectBase>();
-        foreach (var obj in visibleObjects)
-        {
-            if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
+            //Prepare objects we will draw them.
+            //get&register all visible objects for every drawingContext(soflanGroup)
+            var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
+            using var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges);
+            foreach (var displayable in visibleObjects)
             {
-                soflanGroupObjectMap = map[obj.IDShortName] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiTimelineObjectBase>>>.Get();
-                soflanGroupObjectMap.Clear();
-            }
+                if (displayable is not OngekiTimelineObjectBase obj)
+                    continue;
 
-            _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
-
-            if (!CheckSoflanGroupVisible(soflanGroup))
-                continue;
-
-            if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
-            {
-                if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
+                if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
                 {
-                    list = soflanGroupObjectMap[drawingContext] = ObjectPool<List<OngekiTimelineObjectBase>>.Get();
-                    list.Clear();
+                    var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
+                    drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
+                    soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
                 }
 
-                list.Add(obj);
-                usedDrawingContexts.Add(soflanGroup);
+                _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+
+                if (!CheckSoflanGroupVisible(soflanGroup))
+                    continue;
+
+                if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
+                {
+                    if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
+                    {
+                        var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
+                        drawingCollectionDisposables.Add(listPool);
+                        list = soflanGroupObjectMap[drawingContext] = listPool;
+                    }
+
+                    list.Add(obj);
+                    usedDrawingContexts.Add(soflanGroup);
+                }
+                else
+                {
+                    //todo log it
+                }
             }
-            else
-            {
-                //todo log it
-            }
-        }
 
         foreach (var objGroup in map)
         {
@@ -474,13 +483,15 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             {
                 if (!drawMap.TryGetValue(drawingTarget, out var enums))
                 {
-                    var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
-                    r.Clear();
+                    var resultMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                    drawingCollectionDisposables.Add(resultMapPool);
+                    var resultMap = drawMap[drawingTarget] = resultMapPool;
                     foreach (var pair in soflanGroupObjectMap)
                     {
-                        var rr = r[pair.Key] = ObjectPool<List<OngekiObjectBase>>.Get();
-                        rr.Clear();
-                        rr.AddRange(pair.Value);
+                        var objectListPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                        drawingCollectionDisposables.Add(objectListPool);
+                        var objectList = resultMap[pair.Key] = objectListPool;
+                        objectList.AddRange(pair.Value);
                     }
                 }
                 else
@@ -489,8 +500,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                     {
                         if (!enums.TryGetValue(pair.Key, out var rr))
                         {
-                            rr = enums[pair.Key] = ObjectPool<List<OngekiObjectBase>>.Get();
-                            rr.Clear();
+                            var objectListPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                            drawingCollectionDisposables.Add(objectListPool);
+                            rr = enums[pair.Key] = objectListPool;
                         }
 
                         rr.AddRange(pair.Value);
@@ -499,12 +511,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             }
         }
 
-        //remove unused drawingContexts
-        var unusedSoflanGroups = ObjectPool.Get<List<int>>();
-        unusedSoflanGroups.Clear();
-        unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
-        foreach (var soflanGroupId in unusedSoflanGroups)
-            drawingContexts.TryRemove(soflanGroupId, out _);
+            //remove unused drawingContexts
+            unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
+            foreach (var soflanGroupId in unusedSoflanGroups)
+                drawingContexts.TryRemove(soflanGroupId, out _);
 
         RecalculateMagaticXGridLines();
 
@@ -542,20 +552,24 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
             {
                 //todo 优化一下
-                var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
-                r.Clear();
-                var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
-                rr.Clear();
-                rr.AddRange(blts);
+                var resultMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                drawingCollectionDisposables.Add(resultMapPool);
+                var resultMap = drawMap[drawingTarget] = resultMapPool;
+                var objectListPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                drawingCollectionDisposables.Add(objectListPool);
+                var objectList = resultMap[defaultDrawingTargetContext] = objectListPool;
+                objectList.AddRange(blts);
             }
             foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
             {
                 //todo 优化一下
-                var r = drawMap[drawingTarget] = ObjectPool<Dictionary<DrawingTargetContext, List<OngekiObjectBase>>>.Get();
-                r.Clear();
-                var rr = r[defaultDrawingTargetContext] = ObjectPool<List<OngekiObjectBase>>.Get();
-                rr.Clear();
-                rr.AddRange(bels);
+                var resultMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                drawingCollectionDisposables.Add(resultMapPool);
+                var resultMap = drawMap[drawingTarget] = resultMapPool;
+                var objectListPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                drawingCollectionDisposables.Add(objectListPool);
+                var objectList = resultMap[defaultDrawingTargetContext] = objectListPool;
+                objectList.AddRange(bels);
             }
         }
 
@@ -628,26 +642,19 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         PostDrawCommandList(builder);
 
-        //clean up
-        foreach (var list in map.Values)
-        {
-            foreach (var item in list)
-                ObjectPool.Return(item.Value);
-            ObjectPool.Return(list);
+            #endregion
         }
-
-        foreach (var list in drawMap.Values)
+        finally
         {
-            foreach (var item in list)
-                ObjectPool.Return(item.Value);
-            ObjectPool.Return(list);
+            for (var i = drawingCollectionDisposables.Count - 1; i >= 0; i--)
+                drawingCollectionDisposables[i].Dispose();
+
+            unusedSoflanGroups.Dispose();
+            usedDrawingContexts.Dispose();
+            map.Dispose();
+            drawingCollectionDisposables.Dispose();
+            drawMap.Clear();
         }
-
-        ObjectPool.Return(map);
-        ObjectPool.Return(usedDrawingContexts);
-        ObjectPool.Return(unusedSoflanGroups);
-
-        #endregion
 
     End:
         builder?.Dispose();
@@ -661,14 +668,23 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     {
         if (builder is null)
             return;
+
         var drawCommandList = builder.GetDrawCommandList();
-        try
-        {
-            RenderContext?.PostDrawCommandList(drawCommandList, autoDispose: true);
-        }
-        finally
+        var renderContext = RenderContext;
+        if (renderContext is null)
         {
             drawCommandList.Dispose();
+            return;
+        }
+
+        try
+        {
+            renderContext.PostDrawCommandList(drawCommandList, autoDispose: true);
+        }
+        catch
+        {
+            drawCommandList.Dispose();
+            throw;
         }
     }
 
@@ -792,86 +808,98 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         return drawTargetMap.TryGetValue(name, out var drawingTarget) ? drawingTarget : default;
     }
 
-    private IEnumerable<IDisplayableObject> EnumerateAllDisplayableObjects(OngekiFumen fumen,
+    private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(OngekiFumen fumen,
         IEnumerable<(TGrid min, TGrid max)> visibleRanges)
     {
-        var containBeams = fumen.Beams.Any();
-        var judgeTGrid = GetCurrentTGrid();
-
-        var objects = visibleRanges.SelectMany(x =>
+        var result = ObjectPool.GetPooledList<IDisplayableObject>();
+        try
         {
-            var (min, max) = x;
+            var containBeams = fumen.Beams.Any();
+            var judgeTGrid = GetCurrentTGrid();
+            var isPreviewMode = IsPreviewMode;
 
-            var playableObjects = Enumerable.Empty<OngekiMovableObjectBase>()
-            .Concat(fumen.Flicks.BinaryFindRange(min, max))
-            .Concat(fumen.Taps.BinaryFindRange(min, max));
-
-            var playableDurationObjects = fumen.Holds.GetVisibleStartObjects(min, max);
-
-            if (IsPreviewMode)
+            foreach (var (min, max) in visibleRanges)
             {
-                playableObjects = playableObjects.Where(x => x.TGrid > judgeTGrid);
-                playableDurationObjects = playableDurationObjects.Where(x => x.EndTGrid > judgeTGrid);
-            }
+                AppendDisplayables(result, fumen.MeterChanges.Skip(1)); //not show first meter
+                AppendDisplayables(result, fumen.BpmList.Skip(1)); //not show first bpm
+                AppendDisplayables(result, fumen.ClickSEs.BinaryFindRange(min, max));
+                AppendDisplayables(result, fumen.LaneBlocks.GetVisibleStartObjects(min, max));
+                AppendDisplayables(result, fumen.Comments.BinaryFindRange(min, max));
 
-            var r = Enumerable.Empty<IDisplayableObject>()
-                .Concat(fumen.MeterChanges.Skip(1)) //not show first meter
-                .Concat(fumen.BpmList.Skip(1)) //not show first bpm
-                .Concat(fumen.ClickSEs.BinaryFindRange(min, max))
-                .Concat(fumen.LaneBlocks.GetVisibleStartObjects(min, max))
-                .Concat(fumen.Comments.BinaryFindRange(min, max))
-                .Concat(fumen.SoflansMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
-                .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x.GetVisibleStartObjects(min, max)))
-                .Concat(fumen.EnemySets.BinaryFindRange(min, max))
+                foreach (var soflan in fumen.SoflansMap.Values)
+                    AppendDisplayables(result, soflan.GetVisibleStartObjects(min, max));
+                foreach (var area in fumen.IndividualSoflanAreaMap.Values)
+                    AppendDisplayables(result, area.GetVisibleStartObjects(min, max));
+
+                AppendDisplayables(result, fumen.EnemySets.BinaryFindRange(min, max));
                 // SVG prefabs are temporarily excluded from the editor drawing/object-selection pipeline.
-                // .Concat(fumen.SvgPrefabs.BinaryFindRange(min, max))
-                .Concat(fumen.Lanes.GetVisibleStartObjects(min, max))
-                .Concat(playableDurationObjects)
-                .Concat(playableObjects);
+                // AppendDisplayables(result, fumen.SvgPrefabs.BinaryFindRange(min, max));
+                AppendDisplayables(result, fumen.Lanes.GetVisibleStartObjects(min, max));
 
-            if (containBeams)
-            {
-                var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
-                    TGridCalculator.ConvertTGridToAudioTime(min, this) -
-                    TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), this);
-                var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
-                    TGridCalculator.ConvertTGridToAudioTime(max, this) +
-                    TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), this);
+                foreach (var hold in fumen.Holds.GetVisibleStartObjects(min, max))
+                {
+                    if (isPreviewMode && !(hold.EndTGrid > judgeTGrid))
+                        continue;
+                    AppendOne(result, hold);
+                }
 
-                r = r.Concat(fumen.Beams.GetVisibleStartObjects(leadInTGrid, leadOutTGrid));
+                foreach (var flick in fumen.Flicks.BinaryFindRange(min, max))
+                {
+                    if (isPreviewMode && !(flick.TGrid > judgeTGrid))
+                        continue;
+                    AppendOne(result, flick);
+                }
+
+                foreach (var tap in fumen.Taps.BinaryFindRange(min, max))
+                {
+                    if (isPreviewMode && !(tap.TGrid > judgeTGrid))
+                        continue;
+                    AppendOne(result, tap);
+                }
+
+                if (containBeams)
+                {
+                    var leadInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
+                        TGridCalculator.ConvertTGridToAudioTime(min, this) -
+                        TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), this);
+                    var leadOutTGrid = TGridCalculator.ConvertAudioTimeToTGrid(
+                        TGridCalculator.ConvertTGridToAudioTime(max, this) +
+                        TimeSpan.FromMilliseconds(BeamStart.LEAD_OUT_DURATION), this);
+                    AppendDisplayables(result, fumen.Beams.GetVisibleStartObjects(leadInTGrid, leadOutTGrid));
+                }
+
+                /*
+                 * 这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
+                 */
+                if (!isPreviewMode)
+                {
+                    foreach (var bell in fumen.Bells.BinaryFindRange(min, max))
+                        AppendOne(result, bell);
+                    foreach (var bullet in fumen.Bullets.BinaryFindRange(min, max))
+                        AppendOne(result, bullet);
+                }
             }
 
-            return r;
-        });
-
-        /*
-         * 这里考虑到有spd<1的子弹/Bell会提前出现的情况，因此得分状态分别去选择
-         */
-        var objs = Enumerable.Empty<IDisplayableObject>();
-        if (Editor.IsPreviewMode)
-        {
-            /*
-            var r = fumen.Bells
-                .AsEnumerable<IBulletPalleteReferencable>()
-                .Concat(fumen.Bullets);
-
-            objs = objs.Concat(r);
-            */
+            return result;
         }
-        else
+        catch
         {
-            foreach (var item in visibleRanges)
-            {
-                var (min, max) = item;
-                var blts = fumen.Bullets.BinaryFindRange(min, max);
-                var bels = fumen.Bells.BinaryFindRange(min, max);
-
-                objs = objs.Concat(bels);
-                objs = objs.Concat(blts);
-            }
+            result.Dispose();
+            throw;
         }
+    }
 
-        return objects.Concat(objs).SelectMany(x => x.GetDisplayableObjects());
+    private static void AppendDisplayables<T>(IPooledList<IDisplayableObject> list, IEnumerable<T> objects)
+        where T : IDisplayableObject
+    {
+        foreach (var obj in objects)
+            AppendOne(list, obj);
+    }
+
+    private static void AppendOne(IPooledList<IDisplayableObject> list, IDisplayableObject obj)
+    {
+        foreach (var displayable in obj.GetDisplayableObjects())
+            list.Add(displayable);
     }
 
     private System.Numerics.Vector4 GetCleanColor()

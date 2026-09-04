@@ -81,8 +81,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 minDispAlpha = maxDispAlpha;
             var eDisp = target.Editor.RectInDesignMode.Width - transDisp;
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            using var list = ObjectPool.GetPooledList<LineVertex>();
 
             var displayAudioTime = target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime;
 

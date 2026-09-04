@@ -14,7 +14,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, List<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
         {
             if (start is null)
                 return;
@@ -24,8 +24,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             //var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
 
-            var tempVertices = ObjectPool<List<LineVertex>>.Get();
-            tempVertices.Clear();
+            using var tempVertices = ObjectPool.GetPooledList<LineVertex>();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint2(double tGridUnit, double xGridUnit, bool isVailed)
@@ -60,13 +59,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             var minIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MinTGrid, x => x.TGrid);
             var maxIdx = soflanPositionList.LastOrDefaultIndexByBinarySearch(start.MaxTGrid, x => x.TGrid);
 
-            //enumerate all SoflanPoint which lane affected
-            var affectedSoflanPoints = ObjectPool<List<SoflanPoint>>.Get();
-            affectedSoflanPoints.Clear();
-
-            //make reverse manually to optimze List::RemoveAt()
-            for (int i = maxIdx; i >= minIdx + 1; i--)
-                affectedSoflanPoints.Add(soflanPositionList[i]);
+            var affectedSoflanPointIdx = minIdx + 1;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void CheckIfSoflanChanged(TGrid currentTGrid, bool isVailed)
@@ -77,9 +70,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                  Check if there is any SoflanPoint before connectable object
                  If exist, just interpolate a new point to insert
                  */
-                while (affectedSoflanPoints.Count > 0)
+                while (affectedSoflanPointIdx <= maxIdx)
                 {
-                    var checkTGrid = affectedSoflanPoints[^1].TGrid;
+                    var checkTGrid = soflanPositionList[affectedSoflanPointIdx].TGrid;
                     var diff = checkTGrid.TotalUnit - totalTGrid;
 
                     if (diff > 0)
@@ -92,7 +85,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             PostPoint(checkTGrid, xGrid, isVailed);
                     }
 
-                    affectedSoflanPoints.RemoveAt(affectedSoflanPoints.Count - 1);
+                    affectedSoflanPointIdx++;
                 }
             }
 
@@ -159,10 +152,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
 
             //add remain vertices
-            outVertices.AddRange(tempVertices.Skip(idx));
-
-            ObjectPool<List<SoflanPoint>>.Return(affectedSoflanPoints);
-            ObjectPool<List<LineVertex>>.Return(tempVertices);
+            for (; idx < tempVertices.Count; idx++)
+                outVertices.Add(tempVertices[idx]);
         }
     }
 }

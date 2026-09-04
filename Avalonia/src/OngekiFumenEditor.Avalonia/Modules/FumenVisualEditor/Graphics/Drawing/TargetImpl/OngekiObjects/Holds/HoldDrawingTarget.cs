@@ -108,8 +108,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     return false;
                 }
 
-                using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-                list.Clear();
+                using var list = ObjectPool.GetPooledList<LineVertex>();
                 VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, soflanList, VertexDash.Solider, color, list);
                 if (list.Count > 0)
                 {

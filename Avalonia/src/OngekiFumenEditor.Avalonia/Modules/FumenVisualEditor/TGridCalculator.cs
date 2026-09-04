@@ -120,8 +120,12 @@ public static class TGridCalculator
 
     public static IEnumerable<TGrid> ConvertYToTGrid_PreviewMode(double pickY, SoflanList soflanList, BpmList bpmList, double scale)
     {
-        var ranges = soflanList.GetVisibleRanges_PreviewMode(pickY, 0, 0, bpmList, scale);
-        return ranges.OrderBy(x => x.minTGrid).Select(x => x.minTGrid);
+        using var ranges = soflanList.GetVisibleRanges_PreviewMode(pickY, 0, 0, bpmList, scale);
+        var result = new List<TGrid>(ranges.Count);
+        for (var i = 0; i < ranges.Count; i++)
+            result.Add(ranges[i].minTGrid);
+        result.Sort();
+        return result;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -165,7 +169,7 @@ public static class TGridCalculator
     public static IEnumerable<(TGrid tGrid, double y, int beatIndex, MeterChange meter, BPMChange bpm)> GetVisbleTimelines_PreviewMode(
         SoflanList soflans, BpmList bpmList, MeterChangeList meterList, double currentY, double viewHeight, double judgeLineOffsetY, int beatSplit, double scale)
     {
-        var tGridRanges = soflans.GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale);
+        using var tGridRanges = soflans.GetVisibleRanges_PreviewMode(currentY, viewHeight, judgeLineOffsetY, bpmList, scale);
 
         foreach (var range in tGridRanges)
         {

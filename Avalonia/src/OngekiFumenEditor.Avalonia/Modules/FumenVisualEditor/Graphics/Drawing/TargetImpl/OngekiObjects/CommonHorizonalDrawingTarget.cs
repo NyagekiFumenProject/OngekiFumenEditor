@@ -5,7 +5,9 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using Injectio.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -31,7 +33,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             "MET","BPM","EST","CLK","LBK","[LBK_End]","[CMT]"
         ];
 
-        private Dictionary<string, FSColor> colors = new()
+        private static readonly Dictionary<string, FSColor> colors = new()
         {
             {"MET", FSColor.LightGreen },
             {"SFL", FSColor.LightCyan },
@@ -47,52 +49,83 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             {"[SFL_End]", FSColor.LightCyan },
         };
 
+        private static readonly IComparer<RegisterDrawingInfo> colorComparer =
+            Comparer<RegisterDrawingInfo>.Create((a, b) =>
+                colors[a.TimelineObject.IDShortName].PackedValue
+                    .CompareTo(colors[b.TimelineObject.IDShortName].PackedValue));
+
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<OngekiTimelineObjectBase> objs)
         {
-            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToViewRelativeY_DefaultSoflanGroup(x.TGrid))).ToListWithObjectPool(out var objects);
+            using var buckets = ObjectPool.GetPooledDictionary<int, IPooledList<RegisterDrawingInfo>>();
 
-            foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
+            // 一次扫描进桶,替代 Select.ToList + GroupBy + 每组 ToList 的三层枚举与分配。
+            foreach (var obj in objs)
             {
-                var tGrid = g.FirstOrDefault().TimelineObject.TGrid;
-                using var d3 = g.ToListWithObjectPool(out var actualItems);
-                if (!target.CheckVisible(tGrid))
+                var key = obj.TGrid.TotalGrid;
+                if (!buckets.TryGetValue(key, out var bucket))
                 {
-                    actualItems.RemoveAll(x => x.TimelineObject switch
-                    {
-                        LaneBlockArea or LaneBlockArea.LaneBlockAreaEndIndicator or Soflan or Soflan.SoflanEndIndicator => false,
-                        _ => true
-                    });
-                    if (actualItems.Count == 0)
-                        continue;
+                    bucket = ObjectPool.GetPooledList<RegisterDrawingInfo>();
+                    buckets[key] = bucket;
                 }
+                bucket.Add(new RegisterDrawingInfo(obj, target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid)));
+            }
 
-                var y = (float)g.FirstOrDefault().Y;
-                using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool(out var regColors);
-                var per = 1.0f * target.CurrentDrawingTargetContext.ViewRelativeRect.Width / regColors.Count;
-                var lineVertices = new List<LineVertex>();
-                for (int i = 0; i < regColors.Count; i++)
+            foreach (var kv in buckets)
+            {
+                var actualItems = kv.Value;
+                try
                 {
-                    var c = regColors[i];
-                    lineVertices.Add(new(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider));
-                    lineVertices.Add(new(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider));
-                }
-                builder.DrawSimpleLines(lineVertices, 2);
-
-                //draw range line if need
-                foreach (var obj in actualItems)
-                {
-                    switch (obj.TimelineObject)
+                    var tGrid = actualItems[0].TimelineObject.TGrid;
+                    if (!target.CheckVisible(tGrid))
                     {
-                        default:
-                            break;
+                        FilterToHeaderOnly(actualItems);
+                        if (actualItems.Count == 0)
+                            continue;
                     }
-                }
 
-                DrawDescText(target, builder, y, actualItems);
+                    actualItems.Sort(colorComparer);
+
+                    var y = (float)actualItems[0].Y;
+                    using var lineVertices = ObjectPool.GetPooledList<LineVertex>();
+                    var per = 1.0f * target.CurrentDrawingTargetContext.ViewRelativeRect.Width / actualItems.Count;
+                    for (var i = 0; i < actualItems.Count; i++)
+                    {
+                        var c = colors[actualItems[i].TimelineObject.IDShortName];
+                        var color = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
+                        lineVertices.Add(new(new(per * i, y), color, VertexDash.Solider));
+                        lineVertices.Add(new(new(per * (i + 1), y), color, VertexDash.Solider));
+                    }
+                    builder.DrawSimpleLines(lineVertices, 2);
+
+                    DrawDescText(target, builder, y, actualItems);
+                }
+                finally
+                {
+                    actualItems.Dispose();
+                }
             }
         }
 
-        private void DrawDescText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, float y, IEnumerable<RegisterDrawingInfo> group)
+        // CheckVisible 失败时,只保留 LaneBlockArea/Soflan 头尾指示器(原 RemoveAll 反向语义)。
+        private static void FilterToHeaderOnly(IPooledList<RegisterDrawingInfo> items)
+        {
+            var writeIdx = 0;
+            for (var readIdx = 0; readIdx < items.Count; readIdx++)
+            {
+                var keep = items[readIdx].TimelineObject is
+                    LaneBlockArea or LaneBlockArea.LaneBlockAreaEndIndicator
+                    or Soflan or Soflan.SoflanEndIndicator;
+                if (!keep)
+                    continue;
+                if (writeIdx != readIdx)
+                    items[writeIdx] = items[readIdx];
+                writeIdx++;
+            }
+            while (items.Count > writeIdx)
+                items.RemoveAt(items.Count - 1);
+        }
+
+        private void DrawDescText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, float y, IPooledList<RegisterDrawingInfo> sortedItems)
         {
             string formatObj(OngekiObjectBase s) => s switch
             {
@@ -112,10 +145,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             };
 
             var x = 0f;
-            var i = 0;
-            foreach ((var obj, var c) in group.Select(x => (x.TimelineObject, colors[x.TimelineObject.IDShortName])).OrderBy(x => x.Item2.PackedValue))
+            // sortedItems 已经按 color.PackedValue 排好序;不再 Select+OrderBy。
+            for (var idx = 0; idx < sortedItems.Count; idx++)
             {
-                if (i != 0)
+                var obj = sortedItems[idx].TimelineObject;
+                var c = colors[obj.IDShortName];
+
+                if (idx != 0)
                 {
                     var slashSize = builder.MeasureString("/", Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
                     builder.DrawString(
@@ -161,7 +197,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     }, 1);
                 }
                 x += size.X;
-                i++;
             }
         }
     }

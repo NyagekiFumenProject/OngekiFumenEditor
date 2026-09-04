@@ -263,14 +263,24 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
                 return;
             }
 
-            foreach (var instance in instanceList)
+            var ownershipTransferred = false;
+            try
             {
-                ArgumentOutOfRangeException.ThrowIfLessThan(instance.Radius, 0, "instance.Radius");
-                ArgumentOutOfRangeException.ThrowIfLessThan(instance.HollowLineWidth, 0, "instance.HollowLineWidth");
-            }
+                foreach (var instance in instanceList)
+                {
+                    ArgumentOutOfRangeException.ThrowIfLessThan(instance.Radius, 0, "instance.Radius");
+                    ArgumentOutOfRangeException.ThrowIfLessThan(instance.HollowLineWidth, 0, "instance.HollowLineWidth");
+                }
 
-            commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instanceList));
-            ClearShortLastDrawCommandLocationMap();
+                commands.Add(RentCommand<DrawCirclesCommand>().Initialize(instanceList));
+                ownershipTransferred = true;
+                ClearShortLastDrawCommandLocationMap();
+            }
+            finally
+            {
+                if (!ownershipTransferred)
+                    instanceList.Dispose();
+            }
         }
 
         public void DrawPolygon(Primitive primitive, IEnumerable<PolygonVertex> vertices)
@@ -440,8 +450,16 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
                 throw new ArgumentNullException(paramName);
 
             var list = ObjectPool.GetPooledList<T>();
-            list.AddRange(source);
-            return list;
+            try
+            {
+                list.AddRange(source);
+                return list;
+            }
+            catch
+            {
+                list.Dispose();
+                throw;
+            }
         }
 
         private static TCommand RentCommand<TCommand>()

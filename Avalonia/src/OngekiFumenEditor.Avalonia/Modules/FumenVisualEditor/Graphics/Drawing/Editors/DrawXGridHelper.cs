@@ -29,8 +29,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             if (target.Editor.IsPreviewMode)
                 return;
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            using var list = ObjectPool.GetPooledList<LineVertex>();
 
             foreach (var result in drawLines)
             {

@@ -26,8 +26,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             var color = GetLanePointColor(start);
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            using var list = ObjectPool.GetPooledList<LineVertex>();
             VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, target.CurrentDrawingTargetContext.CurrentSoflanList, invailedDash, color, list);
             builder.DrawSimpleLines(list, LineWidth);
         }

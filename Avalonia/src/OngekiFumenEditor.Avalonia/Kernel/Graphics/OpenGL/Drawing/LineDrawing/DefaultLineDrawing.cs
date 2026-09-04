@@ -74,12 +74,11 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 
 		private int UpdateBuffer(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
 		{
-			using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
-			vecList.Clear();
+			using var vecList = ObjectPool.GetPooledList<Vec2>();
 
 			var color = points.FirstOrDefault().Color;
 
-			using var d2 = points.Select(x => new Vec2() { x = x.Point.X, y = x.Point.Y }).ToListWithObjectPool(out var inputVecList);
+			using var inputVecList = points.Select(x => new Vec2() { x = x.Point.X, y = x.Point.Y }).ToListWithObjectPool();
 
 			var genVertices = Polyline2D.Create(vecList, inputVecList, lineWidth,
 				Polyline2D.JointStyle.ROUND,

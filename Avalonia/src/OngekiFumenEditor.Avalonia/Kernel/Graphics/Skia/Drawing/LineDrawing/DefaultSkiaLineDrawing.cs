@@ -100,8 +100,7 @@ internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISi
     private void PostDraw()
     {
         var itor = postedPoints.GetEnumerator();
-        var points = ObjectPool.Get<List<SKPoint>>();
-        points.Clear();
+        using var points = ObjectPool.GetPooledList<SKPoint>();
 
         if (itor.MoveNext())
         {
@@ -137,11 +136,9 @@ internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISi
                 DrawPath(points, paint);
             }
         }
-
-        ObjectPool.Return(points);
     }
 
-    private void DrawPath(List<SKPoint> points, SKPaint paint)
+    private void DrawPath(IList<SKPoint> points, SKPaint paint)
     {
         if (points.Count <= 1)
             return;

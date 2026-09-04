@@ -75,12 +75,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<IndividualSoflanArea> isfList)
         {
-            var lineVertex = ObjectPool<List<LineVertex>>.Get();
-            lineVertex.Clear();
-            var texList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
-            texList.Clear();
-            var hightTexList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
-            hightTexList.Clear();
+            using var lineVertex = ObjectPool.GetPooledList<LineVertex>();
+            using var texList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
+            using var hightTexList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
 
             var dash = new VertexDash(8, 2);
             var texSize = 14;
@@ -104,7 +101,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var rightX = (float)XGridCalculator.ConvertXGridToX(maxXGrid, target.Editor);
                 var bottomY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(minTGrid);
 
-                lineVertex.Add(new LineVertex(lineVertex.LastOrDefault()?.Point ?? default, transparent, dash));
+                lineVertex.Add(new LineVertex(lineVertex.Count > 0 ? lineVertex[lineVertex.Count - 1].Point : default, transparent, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), transparent, dash));
 
                 //画一个方框
@@ -163,10 +160,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             builder.DrawSimpleLines(lineVertex, 1.5f);
             builder.DrawHighlightBatchTexture(texture, hightTexList);
             builder.DrawTexture(texture, texList);
-
-            ObjectPool.Return(lineVertex);
-            ObjectPool.Return(texList);
-            ObjectPool.Return(hightTexList);
         }
     }
 }

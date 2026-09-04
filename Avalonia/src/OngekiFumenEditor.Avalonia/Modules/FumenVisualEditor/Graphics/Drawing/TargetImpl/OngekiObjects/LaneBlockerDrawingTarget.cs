@@ -101,8 +101,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 }
                 else
                 {
-                    using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var list, out _);
-                    list.Clear();
+                    using var list = ObjectPool.GetPooledList<Vector2>();
 
                     foreach ((var gridVec2, var isVaild) in obj.GetConnectionPaths().Where(x => x.pos.Y <= maxTotalGrid && x.pos.Y >= minTotalGrid))
                     {

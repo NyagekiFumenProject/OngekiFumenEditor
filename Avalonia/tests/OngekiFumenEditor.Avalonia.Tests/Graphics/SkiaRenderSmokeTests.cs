@@ -69,6 +69,23 @@ public sealed class SkiaRenderSmokeTests
             await manager.GetRenderContext(unrelatedControl));
     }
 
+    [Fact]
+    public void SkiaRenderManager_ProvidesStringMeasurerToCommandBuilder()
+    {
+        var manager = new DefaultSkiaDrawingManagerImpl();
+        using var builder = manager.CreateDrawCommandListBuilder();
+
+        var size = builder.MeasureString(
+            "F",
+            Vector2.One,
+            40,
+            IStringDrawing.StringStyle.Normal,
+            null!);
+
+        Assert.True(size.X > 0);
+        Assert.True(size.Y > 0);
+    }
+
     [AvaloniaFact]
     public async Task SkiaRenderControl_CleanFrame_ProducesExpectedNonTransparentPixels()
     {

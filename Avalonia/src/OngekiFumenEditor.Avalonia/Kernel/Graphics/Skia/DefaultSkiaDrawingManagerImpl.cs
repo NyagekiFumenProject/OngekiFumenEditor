@@ -62,7 +62,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 
     public IDrawCommandListBuilder CreateDrawCommandListBuilder()
     {
-        return new DrawCommandListBuilder();
+        return new DrawCommandListBuilder(new DefaultSkiaStringDrawing(this));
     }
 
     public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
