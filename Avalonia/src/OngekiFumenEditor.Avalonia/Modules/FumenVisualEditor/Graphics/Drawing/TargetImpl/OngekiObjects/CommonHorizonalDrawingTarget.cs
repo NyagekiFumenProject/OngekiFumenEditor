@@ -3,6 +3,7 @@ using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using Injectio.Attributes;
 using System.Collections.Generic;
@@ -20,13 +21,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         public override int DefaultRenderOrder => 1500;
         public override DrawingVisible DefaultVisible => DrawingVisible.Design; //only design
 
-        private IStringDrawing stringDrawing;
-        private ISimpleLineDrawing lineDrawing;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
-            stringDrawing = impl.StringDrawing;
         }
 
         public override IEnumerable<string> DrawTargetID { get; } =
@@ -50,9 +47,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             {"[SFL_End]", FSColor.LightCyan },
         };
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiTimelineObjectBase> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<OngekiTimelineObjectBase> objs)
         {
-            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToY_DefaultSoflanGroup(x.TGrid))).ToListWithObjectPool(out var objects);
+            using var d4 = objs.Select(x => new RegisterDrawingInfo(x, target.ConvertToViewRelativeY_DefaultSoflanGroup(x.TGrid))).ToListWithObjectPool(out var objects);
 
             foreach (var g in objects.GroupBy(x => x.TimelineObject.TGrid.TotalGrid))
             {
@@ -71,15 +68,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                 var y = (float)g.FirstOrDefault().Y;
                 using var d = actualItems.Select(x => colors[x.TimelineObject.IDShortName]).OrderBy(x => x.PackedValue).ToListWithObjectPool(out var regColors);
-                var per = 1.0f * target.CurrentDrawingTargetContext.Rect.Width / regColors.Count;
-                lineDrawing.Begin(target, 2);
+                var per = 1.0f * target.CurrentDrawingTargetContext.ViewRelativeRect.Width / regColors.Count;
+                var lineVertices = new List<LineVertex>();
                 for (int i = 0; i < regColors.Count; i++)
                 {
                     var c = regColors[i];
-                    lineDrawing.PostPoint(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider);
+                    lineVertices.Add(new(new(per * i, y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider));
+                    lineVertices.Add(new(new(per * (i + 1), y), new(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f), VertexDash.Solider));
                 }
-                lineDrawing.End();
+                builder.DrawSimpleLines(lineVertices, 2);
 
                 //draw range line if need
                 foreach (var obj in actualItems)
@@ -91,11 +88,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     }
                 }
 
-                DrawDescText(target, y, actualItems);
+                DrawDescText(target, builder, y, actualItems);
             }
         }
 
-        private void DrawDescText(IFumenEditorDrawingContext target, float y, IEnumerable<RegisterDrawingInfo> group)
+        private void DrawDescText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, float y, IEnumerable<RegisterDrawingInfo> group)
         {
             string formatObj(OngekiObjectBase s) => s switch
             {
@@ -120,51 +117,50 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             {
                 if (i != 0)
                 {
-                    stringDrawing.Draw(
+                    var slashSize = builder.MeasureString("/", Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                    builder.DrawString(
                     "/",
                     new Vector2(x, y + 12),
                     Vector2.One, 16, 0,
                     Vector4.One,
                     new(0, 0.5f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out var s);
+                    default);
 
-                    x += s.Value.X;
+                    x += slashSize.X;
                 }
 
                 var text = " " + formatObj(obj) + " ";
                 var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
-                stringDrawing.Draw(
+                var size = builder.MeasureString(text, Vector2.One, 16, IStringDrawing.StringStyle.Normal, default);
+                builder.DrawString(
                     text,
                     new Vector2(x, y + 12),
                     Vector2.One, 16, 0,
                     fontColor,
                     new(0, 0.5f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out var size);
-                var borderPos = new Vector2(x + size.Value.X / 2, y + size.Value.Y / 2 + 1);
+                    default);
+                var borderPos = new Vector2(x + size.X / 2, y + size.Y / 2 + 1);
 
-                target.RegisterSelectableObject(obj, borderPos, size ?? default);
+                target.RegisterSelectableObject(obj, borderPos, size);
                 if (obj.IsSelected)
                 {
                     var bx = borderPos.X;
                     var by = borderPos.Y;
-                    var hw = size.Value.X / 2;
-                    var hh = size.Value.Y / 2;
+                    var hw = size.X / 2;
+                    var hh = size.Y / 2;
 
-                    lineDrawing.Begin(target, 1);
-                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx + hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx + hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx - hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.PostPoint(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider);
-                    lineDrawing.End();
+                    builder.DrawSimpleLines(new[]
+                    {
+                        new LineVertex(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider),
+                        new LineVertex(new(bx + hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider),
+                        new LineVertex(new(bx + hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider),
+                        new LineVertex(new(bx - hw, by - hh), new(1, 1, 0, 1), VertexDash.Solider),
+                        new LineVertex(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider),
+                    }, 1);
                 }
-                x += size.Value.X;
+                x += size.X;
                 i++;
             }
         }

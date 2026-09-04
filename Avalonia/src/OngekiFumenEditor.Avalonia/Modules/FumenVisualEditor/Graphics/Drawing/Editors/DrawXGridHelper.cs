@@ -1,4 +1,5 @@
 ﻿using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
@@ -18,16 +19,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             public override string ToString() => $"X:{X:F3} XGridTotalUnit:{XGridTotalUnit:F3} Display:{XGridTotalUnitDisplay}";
         }
 
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
 
         public void Initalize(IRenderManagerImpl renderImpl)
         {
-            stringDrawing = renderImpl.StringDrawing;
-            lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
+        public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.IsPreviewMode)
                 return;
@@ -50,30 +47,28 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 list.Add(new(new(result.X, 0 + target.Editor.ViewHeight), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
-            lineDrawing.PushOverrideViewMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
-            lineDrawing.Draw(target, list, 1);
-            lineDrawing.PopOverrideViewMatrix(out _);
+            builder.PushViewMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
+            builder.DrawSimpleLines(list, 1);
+            builder.PopViewMatrix();
         }
 
-        public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
+        public void DrawXGridText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.IsPreviewMode)
                 return;
 
             foreach (var pair in drawLines)
-                stringDrawing.Draw(
+                builder.DrawString(
                     pair.XGridTotalUnitDisplay,
                     new(pair.X,
-                    target.Editor.RectInDesignMode.MaxY),
+                    target.CurrentDrawingTargetContext.ViewRelativeRect.MaxY),
                     Vector2.One,
                     12,
                     0,
                     Vector4.One,
                     new(0, 0f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out _
+                    default
             );
         }
     }

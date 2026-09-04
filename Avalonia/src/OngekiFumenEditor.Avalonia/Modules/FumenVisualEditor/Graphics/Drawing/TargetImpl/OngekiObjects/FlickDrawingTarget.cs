@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using Injectio.Attributes;
 using System;
@@ -26,8 +27,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         private List<(Vector2, Vector2, float, Vector4)> selectedFlickList = new();
         private List<(Vector2, Vector2, float, Vector4)> normalFlichList = new();
 
-        private IBatchTextureDrawing batchTextureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "FLK", "CFK" };
 
@@ -46,17 +45,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;
 
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
+
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Flick> objs)
         {
             foreach (var obj in objs)
             {
                 var x = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
                 var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                var y = target.ConvertToY(obj.TGrid, soflanList) + 24;
+                var y = target.ConvertToViewRelativeY(obj.TGrid, soflanList) + 24;
                 var pos = new Vector2((float)x, (float)y);
                 var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
                 normalFlichList.Add((size, pos, 0f, Vector4.One));
@@ -83,9 +81,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 target.RegisterSelectableObject(obj, pos, size);
             }
 
-            highlightDrawing.Draw(target, texture, selectedFlickList);
-            batchTextureDrawing.Draw(target, texture, normalFlichList);
-            batchTextureDrawing.Draw(target, exFlickEffTexture, exFlickList);
+            builder.DrawHighlightBatchTexture(texture, selectedFlickList);
+            builder.DrawBatchTexture(texture, normalFlichList);
+            builder.DrawBatchTexture(exFlickEffTexture, exFlickList);
 
             exFlickList.Clear();
             selectedFlickList.Clear();

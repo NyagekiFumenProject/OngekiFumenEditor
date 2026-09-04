@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System;
@@ -23,16 +24,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         private List<CacheDrawTimeLineResult> drawLines = new();
 
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
 
         public void Initalize(IRenderManagerImpl renderImpl)
         {
-            stringDrawing = renderImpl.StringDrawing;
-            lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target)
+        public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             drawLines.Clear();
 
@@ -107,7 +104,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     Y = y
                 });
 
-                var fy = (float)y;
+                //timelines carry world Y; rendering needs view-relative Y
+                var viewRelativeY = y - target.CurrentDrawingTargetContext.ViewRelativeOriginY;
+                var fy = (float)viewRelativeY;
 
                 var maxAlpha = maxDispAlpha;
                 var minAlpha = minDispAlpha;
@@ -126,10 +125,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 list.Add(new(new(target.Editor.RectInDesignMode.Width, fy), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
-            lineDrawing.Draw(target, list, 1);
+            builder.DrawSimpleLines(list, 1);
         }
 
-        public void DrawTimeSigntureText(IFumenEditorDrawingContext target)
+        public void DrawTimeSigntureText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             var rightColor = Vector4.One;
             var leftColor = new Vector4(1, 1, 1, 0);
@@ -150,7 +149,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             if (rightColor.W > 0)
             {
                 foreach (var pair in drawLines)
-                    stringDrawing.Draw(
+                    builder.DrawString(
                     pair.Display,
                     new(target.Editor.ViewWidth - 2,
                     (float)pair.Y + 10),
@@ -160,16 +159,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     rightColor,
                     new(1, 0.5f),
                     IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out _
+                    default
                 );
             }
 
             if (leftColor.W > 0)
             {
                 foreach (var pair in drawLines)
-                    stringDrawing.Draw(
+                    builder.DrawString(
                         pair.Display,
                         new(0 + 2,
                         (float)pair.Y + 10),
@@ -179,9 +176,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                         leftColor,
                         new(0, 0.5f),
                         IStringDrawing.StringStyle.Normal,
-                        target,
-                        default,
-                        out _
+                        default
                     );
             }
         }

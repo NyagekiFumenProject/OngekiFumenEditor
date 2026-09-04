@@ -4,6 +4,8 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
@@ -17,7 +19,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     [RegisterSingleton<IFumenEditorDrawingTarget>]
     internal class LaneBlockerDrawingTarget : CommonDrawTargetBase<OngekiTimelineObjectBase>
     {
-        private IPolygonDrawing polygonDrawing;
         private readonly HashSet<int> overdrawingDefferSet = new();
 
         public override IEnumerable<string> DrawTargetID { get; } = new[]
@@ -29,16 +30,15 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            polygonDrawing = impl.PolygonDrawing;
         }
 
-        public override void Begin(IFumenEditorDrawingContext target)
+        public override void Begin(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            base.Begin(target);
+            base.Begin(target, builder);
             overdrawingDefferSet.Clear();
         }
 
-        public override void Draw(IFumenEditorDrawingContext target, OngekiTimelineObjectBase obj)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, OngekiTimelineObjectBase obj)
         {
             var lbk = obj switch
             {
@@ -63,17 +63,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             var colorF = color;
             colorF.W = 0f;
             (double, double) lastP = default;
+            using var polygonVertices = ObjectPool.GetPooledList<PolygonVertex>();
 
             #region Generate LBK lines
 
             void PostPointByXTGrid(double xGridTotalUnit, double tGridTotalUnit, SoflanList soflanList, Vector4? specifyColor = default)
             {
                 var x = (float)XGridCalculator.ConvertXGridToX(xGridTotalUnit, target.Editor);
-                var y = (float)target.ConvertToY(tGridTotalUnit, soflanList);
+                var y = (float)target.ConvertToViewRelativeY(tGridTotalUnit, soflanList);
 
                 //lineDrawing.PostPoint(new(x, y), specifyColor ?? color);
-                polygonDrawing.PostPoint(new(x, y), Vector4.One);
-                polygonDrawing.PostPoint(new(x + offsetX, y), colorF);
+                polygonVertices.Add(new PolygonVertex(new(x, y), Vector4.One));
+                polygonVertices.Add(new PolygonVertex(new(x + offsetX, y), colorF));
 
                 lastP = (tGridTotalUnit, xGridTotalUnit);
             }
@@ -120,7 +121,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             void ProcessWallLane(LaneStartBase wallStartLane, TGrid minTGrid, TGrid maxTGrid)
             {
-                polygonDrawing.Begin(target, Primitive.TriangleStrip);
+                polygonVertices.Clear();
                 foreach (var child in wallStartLane.Children)
                 {
                     if (child.TGrid < minTGrid)
@@ -133,7 +134,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                     ProcessConnectable(child, childMinTGrid, childMaxTGrid);
                 }
-                polygonDrawing.End();
+                builder.DrawPolygon(Primitive.TriangleStrip, polygonVertices);
             }
 
             #endregion

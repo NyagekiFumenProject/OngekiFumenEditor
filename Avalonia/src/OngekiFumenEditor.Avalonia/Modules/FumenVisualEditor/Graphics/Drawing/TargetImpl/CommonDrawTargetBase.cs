@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl
@@ -7,6 +8,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     public abstract class CommonDrawTargetBase : IFumenEditorDrawingTarget
     {
         protected IFumenEditorDrawingContext target;
+        protected IDrawCommandListBuilder builder;
 
         public abstract IEnumerable<string> DrawTargetID { get; }
         public abstract int DefaultRenderOrder { get; }
@@ -30,10 +32,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
         }
 
-        public virtual void Begin(IFumenEditorDrawingContext target)
+        public virtual void Begin(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             this.target = target;
+            this.builder = builder;
         }
 
         public abstract void Post(OngekiObjectBase ongekiObject);
@@ -42,6 +45,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             target.PerfomenceMonitor.OnAfterTargetDrawing(this);
             target = default;
+            builder = default;
         }
 
         public abstract void Initialize(IRenderManagerImpl impl);
@@ -49,19 +53,19 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
     public abstract class CommonDrawTargetBase<T> : CommonDrawTargetBase where T : OngekiObjectBase
     {
-        public abstract void Draw(IFumenEditorDrawingContext target, T obj);
-        public override void Post(OngekiObjectBase ongekiObject) => Draw(target, (T)ongekiObject);
+        public abstract void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, T obj);
+        public override void Post(OngekiObjectBase ongekiObject) => Draw(target, builder, (T)ongekiObject);
     }
 
     public abstract class CommonBatchDrawTargetBase<T> : CommonDrawTargetBase where T : OngekiObjectBase
     {
         private List<T> drawObjects = new();
 
-        public abstract void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> objs);
+        public abstract void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> objs);
 
         public override void End()
         {
-            DrawBatch(target, drawObjects);
+            DrawBatch(target, builder, drawObjects);
             drawObjects.Clear();
 
             base.End();
@@ -73,5 +77,3 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         }
     }
 }
-
-

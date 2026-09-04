@@ -4,10 +4,13 @@ using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
-using SkiaSharp;
+using System.Numerics;
+using NumericsVector4 = System.Numerics.Vector4;
 
 namespace OngekiFumenEditor.Avalonia.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls;
 
@@ -24,14 +27,18 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
         Flick = 8,
     }
 
-    private static readonly SKColor IndirectorColor = new(255, 255, 0);
-    private static readonly SKColor BeatColor = new(255, 0, 0);
-    private static readonly SKColor ObjectPlaceColor = new(255, 255, 0);
-    private static readonly SKColor HoldColor = new(255, 255, 0, 191);
-    private static readonly SKColor WaveformFillColor = new(100, 149, 237);
+    private static readonly NumericsVector4 IndirectorColor = new(1, 1, 0, 1);
+    private static readonly NumericsVector4 BeatColor = new(1, 0, 0, 1);
+    private static readonly ILineDrawing.VertexDash SoliderDash = ILineDrawing.VertexDash.Solider;
+    private static readonly NumericsVector4 ObjectPlaceColor = new(1, 1, 0, 1);
+    private static readonly NumericsVector4 HoldColor = new(1, 1, 0, 0.75f);
+    private static readonly NumericsVector4 WaveformFillColor = new(100 / 255f, 149 / 255f, 237 / 255f, 1);
+    private static readonly NumericsVector4 TransparentColor = new(0, 0, 0, 0);
+    private static readonly NumericsVector4 WhiteColor = new(1, 1, 1, 1);
 
     private readonly List<(float X, string Text)> cachedPostDrawList = [];
-    private readonly List<(SKPoint Point, SKColor Color)> cachedCircleDrawList = [];
+    private readonly List<ILineDrawing.LineVertex> cachedLineDrawList = [];
+    private readonly List<CircleInstance> cachedCircleDrawList = [];
     private readonly Dictionary<TGrid, ObjType> cachedObjTimeMap = [];
     private readonly DefaultWaveformOption option;
     private SoflanList dummySoflanList;
@@ -58,13 +65,12 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
         isInitialized = true;
     }
 
-    public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData)
+    public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData, IDrawCommandListBuilder builder)
     {
         if (!isInitialized
-            || target.RenderContext is not DefaultSkiaRenderContext { Canvas: { } canvas }
             || !WaveformGeometry.TryCreateViewport(
-                target.CurrentDrawingTargetContext.Rect.Width,
-                target.CurrentDrawingTargetContext.Rect.Height,
+                target.CurrentDrawingTargetContext.ViewRelativeRect.Width,
+                target.CurrentDrawingTargetContext.ViewRelativeRect.Height,
                 target.CurrentTime,
                 target.CurrentTimeXOffset,
                 target.DurationMsPerPixel,
@@ -75,39 +81,31 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
 
         cachedPostDrawList.Clear();
         string currentTimeText = null;
-        canvas.Save();
-        try
-        {
-            canvas.Translate(viewport.Width / 2, viewport.Height / 2);
-            canvas.Scale(1, -1);
 
-            //绘制波形
-            if (option.ShowWaveform && peakData is not null && peakData.Count != 0)
-                DrawWaveform(canvas, target, peakData, viewport);
+        //绘制波形
+        if (option.ShowWaveform && peakData is not null && peakData.Count != 0)
+            DrawWaveform(builder, target, peakData, viewport);
 
-            //绘制节奏线
-            if (target.EditorViewModel is FumenVisualEditorViewModel editor && editor.EditorContext.Fumen is not null)
-                currentTimeText = DrawEditorOverlays(canvas, target, editor, viewport);
+        //绘制节奏线
+        if (target.EditorViewModel is FumenVisualEditorViewModel editor && editor.EditorContext.Fumen is not null)
+            currentTimeText = DrawEditorOverlays(builder, target, editor, viewport);
 
-            //绘制当前播放时间游标
-            DrawCurrentTimeIndicator(canvas, viewport);
-        }
-        finally
-        {
-            canvas.Restore();
-        }
+        //绘制当前播放时间游标
+        DrawCurrentTimeIndicator(builder, viewport);
 
-        DrawOverlayText(canvas, viewport, currentTimeText);
+        if (cachedPostDrawList.Count > 0 || !string.IsNullOrEmpty(currentTimeText))
+            DrawOverlayText(builder, viewport, currentTimeText);
     }
 
-    private static void DrawWaveform(
-        SKCanvas canvas,
+    private void DrawWaveform(
+        IDrawCommandListBuilder builder,
         IWaveformDrawingContext target,
         PeakPointCollection peakData,
         WaveformViewport viewport)
     {
         (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(viewport.FromTime, viewport.ToTime);
-        using var path = new SKPath();
+
+        cachedLineDrawList.Clear();
         var hasPoint = false;
 
         for (var i = minIndex; i < maxIndex; i++)
@@ -127,25 +125,23 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
             // 单声道在中心线两侧镜像；双声道分别占据上、下半区。
             if (!hasPoint)
             {
-                path.MoveTo(x, top);
+                cachedLineDrawList.Add(new(new(x, top), WaveformFillColor, SoliderDash));
                 hasPoint = true;
             }
             else
             {
-                path.LineTo(x, top);
+                cachedLineDrawList.Add(new(new(x, top), WaveformFillColor, SoliderDash));
             }
-            path.LineTo(x, bottom);
+            cachedLineDrawList.Add(new(new(x, bottom), WaveformFillColor, SoliderDash));
         }
 
-        if (!hasPoint)
-            return;
-
-        using var paint = CreateStrokePaint(WaveformFillColor, 1);
-        canvas.DrawPath(path, paint);
+        if (hasPoint)
+            builder.DrawSimpleLines(cachedLineDrawList, 1);
+        cachedLineDrawList.Clear();
     }
 
     private string DrawEditorOverlays(
-        SKCanvas canvas,
+        IDrawCommandListBuilder builder,
         IWaveformDrawingContext target,
         FumenVisualEditorViewModel editor,
         WaveformViewport viewport)
@@ -167,24 +163,22 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
 
         cachedObjTimeMap.Clear();
         if (option.ShowObjectPlaceLine)
-            DrawObjectPlaceLines(canvas, editor, viewport, beginTGrid, endTGrid);
+            DrawObjectPlaceLines(builder, editor, viewport, beginTGrid, endTGrid);
 
         if (option.ShowTimingLine)
-            DrawTimingLines(canvas, editor, viewport, beginTime, endTime, target.CurrentTime, currentMeter, currentBpm);
+            DrawTimingLines(builder, editor, viewport, beginTime, endTime, target.CurrentTime, currentMeter, currentBpm);
 
         cachedObjTimeMap.Clear();
         return $"{currentMeter.BunShi}/{currentMeter.Bunbo} BPM:{currentBpm.BPM}";
     }
 
     private void DrawObjectPlaceLines(
-        SKCanvas canvas,
+        IDrawCommandListBuilder builder,
         FumenVisualEditorViewModel editor,
         WaveformViewport viewport,
         TGrid beginTGrid,
         TGrid endTGrid)
     {
-        cachedCircleDrawList.Clear();
-
         void ApplyObjectCounting(IEnumerable<ITimelineObject> timelineObjects, ObjType type)
         {
             foreach (var timeObject in timelineObjects)
@@ -209,57 +203,63 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
             return viewport.ProjectX(time);
         }
 
-        using (var holdPaint = CreateStrokePaint(HoldColor, 4))
+        cachedLineDrawList.Clear();
+        foreach (var hold in fumen.Holds.GetVisibleStartObjects(beginTGrid, endTGrid))
         {
-            foreach (var hold in fumen.Holds.GetVisibleStartObjects(beginTGrid, endTGrid))
-            {
-                var previousType = cachedObjTimeMap.TryGetValue(hold.TGrid, out var value)
-                    ? value
-                    : ObjType.None;
-                cachedObjTimeMap[hold.TGrid] = previousType | ObjType.Default;
-                if (hold?.HoldEnd?.TGrid is not TGrid end)
-                    continue;
+            var previousType = cachedObjTimeMap.TryGetValue(hold.TGrid, out var value)
+                ? value
+                : ObjType.None;
+            cachedObjTimeMap[hold.TGrid] = previousType | ObjType.Default;
+            if (hold?.HoldEnd?.TGrid is not TGrid end)
+                continue;
 
-                canvas.DrawLine(CalculateX(hold.TGrid), 0, CalculateX(end), 0, holdPaint);
-            }
+            var fromX = CalculateX(hold.TGrid);
+            var toX = CalculateX(end);
+            //连线首尾各放一个透明端点，避免与前后线段误连
+            cachedLineDrawList.Add(new(new(fromX, 0), TransparentColor, SoliderDash));
+            cachedLineDrawList.Add(new(new(fromX, 0), HoldColor, SoliderDash));
+            cachedLineDrawList.Add(new(new(toX, 0), HoldColor, SoliderDash));
+            cachedLineDrawList.Add(new(new(toX, 0), TransparentColor, SoliderDash));
         }
+        builder.DrawSimpleLines(cachedLineDrawList, 4);
+        cachedLineDrawList.Clear();
 
         const float beatHeightWeight = 0.75f;
         var topY = viewport.Height / 2 * beatHeightWeight;
         var bottomY = -topY;
-        using (var objectPaint = CreateStrokePaint(ObjectPlaceColor, 2))
-        {
-            foreach (var (tGrid, type) in cachedObjTimeMap)
-            {
-                var x = CalculateX(tGrid);
-                if (type.HasFlag(ObjType.Default))
-                    canvas.DrawLine(x, bottomY, x, topY, objectPaint);
 
-                if (type.HasFlag(ObjType.Bullet))
-                    cachedCircleDrawList.Add((new(x, bottomY - 10), new(255, 0, 255)));
-                if (type.HasFlag(ObjType.Bell))
-                    cachedCircleDrawList.Add((new(x, topY + 10), new(255, 255, 0)));
-                if (type.HasFlag(ObjType.Flick))
-                {
-                    //todo
-                }
+        cachedLineDrawList.Clear();
+        cachedCircleDrawList.Clear();
+        foreach (var (tGrid, type) in cachedObjTimeMap)
+        {
+            var x = CalculateX(tGrid);
+            if (type.HasFlag(ObjType.Default))
+            {
+                cachedLineDrawList.Add(new(new(x, bottomY), TransparentColor, SoliderDash));
+                cachedLineDrawList.Add(new(new(x, bottomY), ObjectPlaceColor, SoliderDash));
+                cachedLineDrawList.Add(new(new(x, topY), ObjectPlaceColor, SoliderDash));
+                cachedLineDrawList.Add(new(new(x, topY), TransparentColor, SoliderDash));
+            }
+
+            if (type.HasFlag(ObjType.Bullet))
+                cachedCircleDrawList.Add(new CircleInstance(new(x, bottomY - 10), new(1, 0, 1, 1), true, 5f, 0));
+
+            if (type.HasFlag(ObjType.Bell))
+                cachedCircleDrawList.Add(new CircleInstance(new(x, topY + 10), new(1, 1, 0, 1), true, 5f, 0));
+
+            if (type.HasFlag(ObjType.Flick))
+            {
+                //todo
             }
         }
-
-        foreach (var (point, color) in cachedCircleDrawList)
-        {
-            using var circlePaint = new SKPaint
-            {
-                Color = color,
-                IsAntialias = true,
-                Style = SKPaintStyle.Fill
-            };
-            canvas.DrawCircle(point, 5, circlePaint);
-        }
+        builder.DrawSimpleLines(cachedLineDrawList, 2);
+        builder.DrawCircles(cachedCircleDrawList);
+        cachedLineDrawList.Clear();
+        cachedCircleDrawList.Clear();
     }
 
     private void DrawTimingLines(
-        SKCanvas canvas,
+        IDrawCommandListBuilder builder,
         FumenVisualEditorViewModel editor,
         WaveformViewport viewport,
         TimeSpan beginTime,
@@ -272,8 +272,8 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
         var previousMeter = currentMeter;
         var previousBpm = currentBpm;
         var bpmList = editor.EditorContext.Fumen.BpmList;
-        using var beatPaint = CreateStrokePaint(BeatColor, 2);
 
+        cachedLineDrawList.Clear();
         foreach ((var tGrid, var timeMilliseconds, var beatIndex, var meter, var bpm) in
             TGridCalculator.GetVisbleTimelines_DesignMode(
                 dummySoflanList,
@@ -289,7 +289,10 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
             var beatHeightWeight = beatIndex == 0 ? 0.75f : 0.5f;
             beatHeightWeight = cachedObjTimeMap.ContainsKey(tGrid) ? 0.1f : beatHeightWeight;
             var topY = viewport.Height / 2 * beatHeightWeight;
-            canvas.DrawLine(x, -topY, x, topY, beatPaint);
+            cachedLineDrawList.Add(new(new(x, -topY), TransparentColor, SoliderDash));
+            cachedLineDrawList.Add(new(new(x, -topY), BeatColor, SoliderDash));
+            cachedLineDrawList.Add(new(new(x, topY), BeatColor, SoliderDash));
+            cachedLineDrawList.Add(new(new(x, topY), TransparentColor, SoliderDash));
 
             var text = string.Empty;
             if (previousMeter != meter)
@@ -302,62 +305,33 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
             previousMeter = meter;
             previousBpm = bpm;
         }
+        builder.DrawSimpleLines(cachedLineDrawList, 2);
+        cachedLineDrawList.Clear();
     }
 
-    private static void DrawCurrentTimeIndicator(SKCanvas canvas, WaveformViewport viewport)
+    private static void DrawCurrentTimeIndicator(IDrawCommandListBuilder builder, WaveformViewport viewport)
     {
-        using var paint = CreateStrokePaint(IndirectorColor, 2);
-        canvas.DrawRect(
-            new SKRect(
-                viewport.CurrentTimeX - 1.5f,
-                -viewport.Height / 2,
-                viewport.CurrentTimeX + 1.5f,
-                viewport.Height / 2),
-            paint);
+        var left = viewport.CurrentTimeX - 1.5f;
+        var right = viewport.CurrentTimeX + 1.5f;
+        var top = viewport.Height / 2;
+        var bottom = -top;
+
+        builder.DrawPolygon(Primitive.TriangleStrip,
+        [
+            new PolygonVertex(new(left, bottom), IndirectorColor),
+            new PolygonVertex(new(right, bottom), IndirectorColor),
+            new PolygonVertex(new(left, top), IndirectorColor),
+            new PolygonVertex(new(right, top), IndirectorColor),
+        ]);
     }
 
-    private void DrawOverlayText(
-        SKCanvas canvas,
-        WaveformViewport viewport,
-        string currentTimeText)
+    private void DrawOverlayText(IDrawCommandListBuilder builder, WaveformViewport viewport, string currentTimeText)
     {
-        if (cachedPostDrawList.Count == 0 && string.IsNullOrEmpty(currentTimeText))
-            return;
-
-        using var paint = new SKPaint
-        {
-            Color = IndirectorColor,
-            IsAntialias = true
-        };
-        using var font = new SKFont
-        {
-            Typeface = SKTypeface.Default,
-            Size = 15
-        };
-
         //绘制提示
         foreach (var (x, text) in cachedPostDrawList)
-            canvas.DrawText(text, x + viewport.Width / 2, viewport.Height - 4, font, paint);
+            builder.DrawString(text, new Vector2(x + viewport.Width / 2, viewport.Height - 4), Vector2.One, 15, 0, IndirectorColor, new Vector2(0, 0), IStringDrawing.StringStyle.Normal, default);
 
         if (!string.IsNullOrEmpty(currentTimeText))
-        {
-            canvas.DrawText(
-                currentTimeText,
-                viewport.CurrentTimeX + viewport.Width / 2 + 4,
-                16,
-                font,
-                paint);
-        }
-    }
-
-    private static SKPaint CreateStrokePaint(SKColor color, float width)
-    {
-        return new()
-        {
-            Color = color,
-            IsAntialias = true,
-            Style = SKPaintStyle.Stroke,
-            StrokeWidth = width
-        };
+            builder.DrawString(currentTimeText, new Vector2(viewport.CurrentTimeX + viewport.Width / 2 + 4, 16), Vector2.One, 15, 0, IndirectorColor, new Vector2(0, 0), IStringDrawing.StringStyle.Normal, default);
     }
 }

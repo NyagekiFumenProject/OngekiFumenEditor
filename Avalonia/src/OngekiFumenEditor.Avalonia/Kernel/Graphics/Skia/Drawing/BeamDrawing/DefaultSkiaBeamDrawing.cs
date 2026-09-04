@@ -19,7 +19,7 @@ public class DefaultSkiaBeamDrawing : CommonSkiaDrawingBase, IBeamDrawing
         OnBegin(target);
 
         var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
-        var height = target.CurrentDrawingTargetContext.Rect.Height;
+        var height = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
         var alpha = MathUtils.SmoothStep(-1f, 0f, progress) * (1 - MathUtils.SmoothStep(1f, 2f, progress));
         var actualWidth = alpha * width;
         var angle = MathUtils.RadianToAngle(rotate);

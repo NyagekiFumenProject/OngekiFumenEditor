@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using Injectio.Attributes;
 using System.Collections.Generic;
 
@@ -20,7 +21,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             tapDraw.Initialize(impl);
         }
 
-        public override void Draw(IFumenEditorDrawingContext target, Hold hold)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, Hold hold)
         {
             var start = hold.ReferenceLaneStart;
             var holdEnd = hold.HoldEnd;
@@ -30,10 +31,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             //draw taps
             if (target.CheckDrawingVisible(tapDraw.Visible))
             {
-                tapDraw.Begin(target);
-                tapDraw.Draw(target, laneType, hold, hold.IsCritical, soflanGroup);
+                tapDraw.Begin(target, builder);
+                tapDraw.Draw(target, builder, laneType, hold, hold.IsCritical, soflanGroup);
                 if (holdEnd != null)
-                    tapDraw.Draw(target, laneType, holdEnd, false, soflanGroup);
+                    tapDraw.Draw(target, builder, laneType, holdEnd, false, soflanGroup);
                 tapDraw.End();
             }
         }

@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Injectio.Attributes;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.BeamDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.LineDrawing;
@@ -14,34 +15,12 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 {
     private readonly TaskCompletionSource initTaskSource = new();
+    private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
 
     public string Name { get; } = "Skia";
 
-    public ICircleDrawing CircleDrawing { get; }
-    public ILineDrawing LineDrawing { get; }
-    public ISimpleLineDrawing SimpleLineDrawing { get; }
-    public IStaticVBODrawing StaticVBODrawing { get; }
-    public IStringDrawing StringDrawing { get; }
-    public ITextureDrawing TextureDrawing { get; }
-    public IBatchTextureDrawing BatchTextureDrawing { get; }
-    public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; }
-    public IPolygonDrawing PolygonDrawing { get; }
-    public IBeamDrawing BeamDrawing { get; }
-    public ISvgDrawing SvgDrawing { get; }
-
     public DefaultSkiaDrawingManagerImpl()
     {
-        CircleDrawing = new DefaultSkiaCircleDrawing(this);
-        LineDrawing = new DefaultSkiaLineDrawing(this);
-        SimpleLineDrawing = new DefaultSkiaLineDrawing(this);
-        StaticVBODrawing = (IStaticVBODrawing)SimpleLineDrawing;
-        StringDrawing = new DefaultSkiaStringDrawing(this);
-        TextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
-        BatchTextureDrawing = (IBatchTextureDrawing)TextureDrawing;
-        HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
-        PolygonDrawing = new Drawing.PolygonDrawing.DefaultSkiaPolygonDrawing(this);
-        BeamDrawing = new DefaultSkiaBeamDrawing(this);
-        SvgDrawing = new DefaultSkiaSvgDrawing(this);
     }
 
     public Task WaitForInitializationIsDone(CancellationToken cancellation = default)
@@ -72,14 +51,51 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         return new Base.SkiaImage(image);
     }
 
-    public Control CreateRenderControl()
-    {
-        return new AvaloniaSkiaRenderControl();
-    }
-
     public void ReleaseRenderControl(Control renderControl)
     {
         if (renderControl is AvaloniaSkiaRenderControl skiaRenderControl)
+        {
             skiaRenderControl.RenderContext.StopRendering();
+            drawCommandListContextSlots.Remove(skiaRenderControl.RenderContext);
+        }
+    }
+
+    public IDrawCommandListBuilder CreateDrawCommandListBuilder()
+    {
+        return new DrawCommandListBuilder();
+    }
+
+    public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+    {
+        drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+    }
+
+    public Control CreateRenderControl()
+    {
+        var control = new AvaloniaSkiaRenderControl();
+        control.RenderContext.AttachManager(this);
+        return control;
+    }
+
+    public bool SwapDrawCommandList(IRenderContext context)
+    {
+        return drawCommandListContextSlots.Swap(context);
+    }
+
+    public void PresentDrawCommandList(IRenderContext context)
+    {
+        //the canvas is only valid during the lease of the current frame presentation
+        if (context is not DefaultSkiaRenderContext { Canvas: { } canvas })
+            return;
+
+        var replay = new SkiaDrawCommandListReplay(this, context, canvas);
+        try
+        {
+            drawCommandListContextSlots.Present(context, list => replay.Present(list.Commands, list.FrameState));
+        }
+        finally
+        {
+            replay.Dispose();
+        }
     }
 }

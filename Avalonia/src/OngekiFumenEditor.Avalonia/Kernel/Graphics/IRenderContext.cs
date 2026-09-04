@@ -1,14 +1,18 @@
 using System.Numerics;
 
-namespace OngekiFumenEditor.Avalonia.Kernel.Graphics;
-
-public interface IRenderContext
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+namespace OngekiFumenEditor.Avalonia.Kernel.Graphics
 {
-    event Action<TimeSpan> OnRender;
+    public interface IRenderContext
+    {
+        event Action<IRenderContext, TimeSpan> OnRender;
 
-    void BeforeRender(IDrawingContext context);
-    void AfterRender(IDrawingContext context);
-    void CleanRender(IDrawingContext context, Vector4 cleanColor);
-    void StartRendering();
-    void StopRendering();
+        /// <summary>
+        /// Submits a command list into the back slot of this render context; it is presented after the current frame callback returns.
+        /// </summary>
+        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
+
+        void StartRendering();
+        void StopRendering();
+    }
 }

@@ -1,7 +1,8 @@
-﻿using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using Injectio.Attributes;
 using System;
@@ -37,9 +38,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> exList = new();
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> selectTapList = new();
 
-        private IBatchTextureDrawing batchTextureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-
         public override void Initialize(IRenderManagerImpl impl)
         {
             void init(ref IImage texture, string resourceName)
@@ -73,12 +71,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
-
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
         {
             var texture = laneType switch
             {
@@ -101,7 +96,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
             var soflanList = specifySoflanList ?? target.Editor._cacheSoflanGroupRecorder.GetCache(tap);
-            var y = target.ConvertToY(tap.TGrid, soflanList);
+            var y = target.ConvertToViewRelativeY(tap.TGrid, soflanList);
 
             var pos = new Vector2((float)x, (float)y);
             normalList[texture].Add((size, pos, 0f, Vector4.One));
@@ -162,20 +157,20 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             wallTexture?.Dispose();
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
-                Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
+                Draw(target, builder, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void draw(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var item in map)
-                    batchTextureDrawing.Draw(target, item.Key, item.Value);
+                    builder.DrawBatchTexture(item.Key, item.Value);
             }
 
             foreach (var item in selectTapList)
-                highlightDrawing.Draw(target, item.Key, item.Value);
+                builder.DrawHighlightBatchTexture(item.Key, item.Value);
             draw(exList);
             draw(normalList);
 
@@ -183,6 +178,3 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         }
     }
 }
-
-
-

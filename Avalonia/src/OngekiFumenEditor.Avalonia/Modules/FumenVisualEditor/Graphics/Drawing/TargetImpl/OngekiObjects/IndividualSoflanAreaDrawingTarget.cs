@@ -1,6 +1,8 @@
 ﻿using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using Injectio.Attributes;
@@ -18,11 +20,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     [RegisterSingleton<IFumenEditorDrawingTarget>]
     internal class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-        private ITextureDrawing textureDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
         private IImage texture;
         private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
@@ -34,12 +31,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            textureDrawing = impl.TextureDrawing;
-            polygonDrawing = impl.PolygonDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/tri.png");
         }
 
@@ -82,7 +73,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             return cacheColor[soflanGroup] = color;
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<IndividualSoflanArea> isfList)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<IndividualSoflanArea> isfList)
         {
             var lineVertex = ObjectPool<List<LineVertex>>.Get();
             lineVertex.Clear();
@@ -108,10 +99,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var maxTGrid = isf.EndIndicator.TGrid;
 
                 var leftX = (float)XGridCalculator.ConvertXGridToX(minXGrid, target.Editor);
-                var topY = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
+                var topY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(maxTGrid);
 
                 var rightX = (float)XGridCalculator.ConvertXGridToX(maxXGrid, target.Editor);
-                var bottomY = (float)target.ConvertToY_DefaultSoflanGroup(minTGrid);
+                var bottomY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(minTGrid);
 
                 lineVertex.Add(new LineVertex(lineVertex.LastOrDefault()?.Point ?? default, transparent, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), transparent, dash));
@@ -132,7 +123,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
                 target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
 
-                stringDrawing.Draw($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out _);
+                builder.DrawString($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), IStringDrawing.StringStyle.Normal, default);
 
                 if (isf.IsSelected || isf.EndIndicator.IsSelected)
                 {
@@ -142,19 +133,18 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     var rectColor = color;
                     rectColor.W = 0.35f;
 
-                    polygonDrawing.Begin(target, Primitive.TriangleStrip);
+                    builder.DrawPolygon(Primitive.TriangleStrip, new[]
                     {
-                        polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(leftX, topY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(rightX, topY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(rightX, bottomY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
-                    }
-                    polygonDrawing.End();
+                        new PolygonVertex(new(leftX, bottomY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(leftX, topY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(rightX, topY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(rightX, bottomY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(leftX, bottomY), rectColor),
+                    });
 
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
                         bottomLeftTriPos + new Vector2(highlightScale, highlightScale), 0, Vector4.One));
@@ -170,9 +160,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 }
             }
 
-            lineDrawing.Draw(target, lineVertex, 1.5f);
-            highlightDrawing.Draw(target, texture, hightTexList);
-            textureDrawing.Draw(target, texture, texList);
+            builder.DrawSimpleLines(lineVertex, 1.5f);
+            builder.DrawHighlightBatchTexture(texture, hightTexList);
+            builder.DrawTexture(texture, texList);
 
             ObjectPool.Return(lineVertex);
             ObjectPool.Return(texList);

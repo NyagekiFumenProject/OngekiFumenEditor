@@ -181,6 +181,22 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IDisposable GetWithUsingDisposable<T>(out T obj, out bool isNewObject) where T : new()
             => ObjectPool<T>.GetWithUsingDisposable(out obj, out isNewObject);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IPooledList<T> GetPooledList<T>()
+        {
+            var list = ObjectPool<PooledList<T>>.Get();
+            list.Rent();
+            return list;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static IPooledDictionary<TKey, TValue> GetPooledDictionary<TKey, TValue>()
+        {
+            var dictionary = ObjectPool<PooledDictionary<TKey, TValue>>.Get();
+            dictionary.Rent();
+            return dictionary;
+        }
     }
 }
 

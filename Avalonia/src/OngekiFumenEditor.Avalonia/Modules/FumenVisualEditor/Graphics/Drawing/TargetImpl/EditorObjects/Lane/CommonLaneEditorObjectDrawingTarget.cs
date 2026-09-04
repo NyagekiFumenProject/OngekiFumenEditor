@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,8 +13,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         public override int DefaultRenderOrder => 2000;
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
 
-        private IBatchTextureDrawing textureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
 
         public abstract IImage StartEditorTexture { get; }
         public abstract IImage NextEditorTexture { get; }
@@ -27,9 +26,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            textureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneNext", out nextSize, out _))
@@ -38,9 +34,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 endSize = new Vector2(16, 16);
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<ConnectableStartObject> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<ConnectableStartObject> objs)
         {
-            target.PerfomenceMonitor.OnBeginTargetDrawing(this);
             {
                 void drawEditorTap(IImage texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
                 {
@@ -51,7 +46,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                         var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
                         var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(item);
-                        var y = (float)target.ConvertToY(item.TGrid, soflanList);
+                        var y = (float)target.ConvertToViewRelativeY(item.TGrid, soflanList);
 
                         var pos = new Vector2(x, y);
                         drawList.Add((size, pos, 0f, Vector4.One));
@@ -61,9 +56,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     }
 
                     if (selectList.Count > 0)
-                        highlightDrawing.Draw(target, texture, selectList);
+                        builder.DrawHighlightBatchTexture(texture, selectList);
                     if (drawList.Count > 0)
-                        textureDrawing.Draw(target, texture, drawList);
+                        builder.DrawBatchTexture(texture, drawList);
 
                     selectList.Clear();
                     drawList.Clear();
@@ -72,7 +67,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 drawEditorTap(NextEditorTexture, nextSize, objs.SelectMany(x => x.Children.OfType<ConnectableChildObjectBase>()));
                 //drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
             }
-            target.PerfomenceMonitor.OnAfterTargetDrawing(this);
         }
     }
 }

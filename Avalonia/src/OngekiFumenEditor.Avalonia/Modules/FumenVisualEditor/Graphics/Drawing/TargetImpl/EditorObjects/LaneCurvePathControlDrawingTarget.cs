@@ -1,5 +1,6 @@
 ﻿using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using Injectio.Attributes;
 using System;
@@ -14,10 +15,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     public class LaneCurvePathControlDrawingTarget : CommonBatchDrawTargetBase<LaneCurvePathControlObject>, IDisposable
     {
         private IImage texture;
-        private ITextureDrawing textureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
         private Vector2 size;
         private static readonly Vector4 Transparent = new Vector4(0, 0, 0, 0);
         private static readonly VertexDash LineDash = new(6, 3);
@@ -32,11 +29,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/commonCircle.png");
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
                 size = new Vector2(16, 16);
-
-            textureDrawing = impl.TextureDrawing;
-            stringDrawing = impl.StringDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public void Dispose()
@@ -45,11 +37,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             texture.Dispose();
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<LaneCurvePathControlObject> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<LaneCurvePathControlObject> objs)
         {
             var isAlwaysShow = target.Editor.IsShowCurveControlAlways;
             using var d = objs.Where(x => x.RefCurveObject.IsSelected || x.RefCurveObject.IsAnyControlSelecting || isAlwaysShow).Select(x => (
-                (float)target.ConvertToY_DefaultSoflanGroup(x.TGrid),
+                (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(x.TGrid),
                 (float)XGridCalculator.ConvertXGridToX(x.XGrid, target.Editor),
                 x
             )).ToListWithObjectPool<(float y, float x, LaneCurvePathControlObject obj)>(out var list);
@@ -68,30 +60,30 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     var color = new Vector4((((hash >> 16) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, (((hash >> 8) & 0xFF) ^ alpha) / 255f / 2 + 0.5f, ((hash & 0xFF) ^ alpha) / 255f / 2 + 0.5f, 1f);
                     //var color = new Vector4(1, 1, 1, 1f);
 
-                    var ry = (float)target.ConvertToY_DefaultSoflanGroup(refConnectableObject.TGrid);
+                    var ry = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(refConnectableObject.TGrid);
                     var rx = (float)XGridCalculator.ConvertXGridToX(refConnectableObject.XGrid, target.Editor);
                     yield return new LineVertex(new(rx, ry), Transparent, LineDash);
                     yield return new LineVertex(new(rx, ry), color, LineDash);
                     foreach (var curve in item.OrderBy(x => x.obj.Index).Reverse())
                         yield return new LineVertex(new(curve.x, curve.y), color, LineDash);
                     var parentConnectableObject = refConnectableObject.PrevObject;
-                    var rpy = (float)target.ConvertToY_DefaultSoflanGroup(parentConnectableObject.TGrid);
+                    var rpy = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(parentConnectableObject.TGrid);
                     var rpx = (float)XGridCalculator.ConvertXGridToX(parentConnectableObject.XGrid, target.Editor);
                     yield return new LineVertex(new(rpx, rpy), color, LineDash);
                     yield return new LineVertex(new(rpx, rpy), Transparent, LineDash);
                 }
                 return gen();
             });
-            lineDrawing.Draw(target, lineVertices, 2);
+            builder.DrawSimpleLines(lineVertices, 2);
 
-            highlightDrawing.Draw(target, texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f, Vector4.One)));
-            textureDrawing.Draw(target, texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f, Vector4.One)));
+            builder.DrawHighlightBatchTexture(texture, list.Where(x => x.obj.IsSelected).Select(x => (size * 1.25f, new Vector2(x.x, x.y), 0f, Vector4.One)));
+            builder.DrawTexture(texture, list.Select(x => (size, new Vector2(x.x, x.y), 0f, Vector4.One)));
             foreach ((var y, var x, var obj) in list)
                 target.RegisterSelectableObject(obj, new Vector2(x, y), size);
 
             foreach (var item in list)
-                stringDrawing.Draw(item.obj.Index.ToString(), new(item.x, item.y + 4), Vector2.One, 15, 0, new(1, 0, 1, 1), new(0.5f, 0.5f),
-                     IStringDrawing.StringStyle.Bold, target, default, out _);
+                builder.DrawString(item.obj.Index.ToString(), new(item.x, item.y + 4), Vector2.One, 15, 0, new(1, 0, 1, 1), new(0.5f, 0.5f),
+                     IStringDrawing.StringStyle.Bold, default);
         }
     }
 }

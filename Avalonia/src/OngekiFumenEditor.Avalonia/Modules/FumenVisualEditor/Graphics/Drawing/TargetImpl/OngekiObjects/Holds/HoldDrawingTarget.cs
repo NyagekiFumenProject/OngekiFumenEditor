@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using Injectio.Attributes;
@@ -20,7 +21,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override int DefaultRenderOrder => 500;
 
-        private ILineDrawing lineDrawing;
 
         private Vector4 colorHoldLeft;
         private Vector4 colorHoldCenter;
@@ -30,8 +30,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.LineDrawing;
-
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();
         }
@@ -62,7 +60,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             //Log.LogInfo($"hold color has been rebuild.");
         }
 
-        public override void Draw(IFumenEditorDrawingContext target, Hold hold)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, Hold hold)
         {
             var start = hold.ReferenceLaneStart;
             var holdEnd = hold.HoldEnd;
@@ -84,7 +82,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 Vector2 PostPoint2(double tGridUnit, double xGridUnit)
                 {
                     var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
-                    var y = (float)target.ConvertToY(tGridUnit, soflanList);
+                    var y = (float)target.ConvertToViewRelativeY(tGridUnit, soflanList);
 
                     return new(x, y);
                 }
@@ -144,7 +142,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
                 }
 
-                lineDrawing.Draw(target, list, 13);
+                builder.DrawLines(list, 13);
             }
         }
     }

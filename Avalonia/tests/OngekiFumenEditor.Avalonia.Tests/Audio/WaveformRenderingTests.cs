@@ -137,7 +137,7 @@ public sealed class WaveformRenderingTests
             using var bitmap = SKBitmap.Decode(encodedFrame);
             Assert.NotNull(bitmap);
 
-            var targetRect = session.CurrentDrawingTargetContext.Rect;
+            var targetRect = session.CurrentDrawingTargetContext.ViewRelativeRect;
             var dominantColors = string.Join(", ", bitmap.Pixels
                 .GroupBy(static color => color)
                 .OrderByDescending(static group => group.Count())
@@ -164,7 +164,7 @@ public sealed class WaveformRenderingTests
             window.UpdateLayout();
             using (var resizedFrame = window.CaptureRenderedFrame())
                 Assert.NotNull(resizedFrame);
-            Assert.True(session.CurrentDrawingTargetContext.Rect.Width > initialWidth,
+            Assert.True(session.CurrentDrawingTargetContext.ViewRelativeRect.Width > initialWidth,
                 "The waveform drawing target did not follow the product control resize.");
 
             var renderedFrameCount = session.RenderedFrameCount;

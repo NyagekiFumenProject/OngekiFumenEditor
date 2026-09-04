@@ -2,6 +2,7 @@
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System.Collections.Generic;
 using System.Numerics;
@@ -13,31 +14,29 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     public abstract class CommonLinesDrawTargetBase<T> : CommonBatchDrawTargetBase<T> where T : ConnectableStartObject
     {
         public virtual int LineWidth { get; } = 2;
-        private ISimpleLineDrawing lineDrawing;
         private static VertexDash invailedDash = new VertexDash(6, 3);
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public void FillLine(IFumenEditorDrawingContext target, T start)
+        public void FillLine(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, T start)
         {
             var color = GetLanePointColor(start);
 
             using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
             list.Clear();
             VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, target.CurrentDrawingTargetContext.CurrentSoflanList, invailedDash, color, list);
-            lineDrawing.Draw(target, list, LineWidth);
+            builder.DrawSimpleLines(list, LineWidth);
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> starts)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> starts)
         {
             foreach (var laneStart in starts)
             {
-                FillLine(target, laneStart);
+                FillLine(target, builder, laneStart);
             }
         }
     }

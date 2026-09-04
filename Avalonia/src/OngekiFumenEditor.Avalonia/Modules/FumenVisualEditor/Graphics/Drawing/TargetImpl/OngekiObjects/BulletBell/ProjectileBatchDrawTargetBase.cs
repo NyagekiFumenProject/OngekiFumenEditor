@@ -7,6 +7,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Avalonia.Utils;
 using System;
@@ -28,18 +29,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         protected List<(Vector2 pos, string str)> drawStrList = new();
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
-        private IStringDrawing stringDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
-        private IBatchTextureDrawing batchTextureDrawing;
         private ParallelOptions parallelOptions;
         private int parallelCountLimit;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             parallelOptions = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2),
@@ -61,16 +55,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         private void DrawDesignMode(IFumenEditorDrawingContext target, T obj)
         {
             var toX = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
-            var toTime = target.ConvertToY_DefaultSoflanGroup(obj.TGrid);
+            var toTime = target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid);
 
             var pos = new Vector2((float)toX, (float)toTime);
             DrawVisibleObject_DesignMode(target, obj, pos, 0);
         }
 
-        private void DrawPallateStr(IDrawingContext target)
+        private void DrawPallateStr(IDrawCommandListBuilder builder)
         {
             foreach ((var pos, var str) in drawStrList)
-                stringDrawing.Draw($"{str}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, target, default, out _);
+                builder.DrawString($"{str}", new(pos.X, pos.Y + 5), Vector2.One, 16, 0, Vector4.One, new(0.5f, 0.5f), default, default);
         }
 
         private void ClearDrawList()
@@ -86,12 +80,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var baseY = Math.Min(target.CurrentDrawingTargetContext.Rect.MinY, target.CurrentDrawingTargetContext.Rect.MaxY) + judgeOffset;
+            var baseY = Math.Min(target.CurrentDrawingTargetContext.WorldRect.MinY, target.CurrentDrawingTargetContext.WorldRect.MaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
             var bpmList = target.Editor.EditorContext.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
             //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
-            var height = target.CurrentDrawingTargetContext.Rect.Height;
+            var height = target.CurrentDrawingTargetContext.WorldRect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
@@ -112,7 +106,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToY(TGrid tgrid, SoflanList soflans)
             {
-                return target.ConvertToY(tgrid, soflans);
+                return target.ConvertToViewRelativeY(tgrid, soflans);
             }
 
             var randomSeed = BulletPallete.RandomSeed;
@@ -158,10 +152,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var precent = (currentTime - fromTime) / appearOffsetTime;
                 var timeY = baseY + height * (1 - precent);
 
-                if (timeY > target.CurrentDrawingTargetContext.Rect.MaxY)
+                if (timeY > target.CurrentDrawingTargetContext.WorldRect.MaxY)
                     return;
                 //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
-                if (timeY < target.CurrentDrawingTargetContext.Rect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                if (timeY < target.CurrentDrawingTargetContext.WorldRect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -227,7 +221,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var toX = convertToX(toXUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                if (!(target.CurrentDrawingTargetContext.Rect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.Rect.MaxX))
+                if (!(target.CurrentDrawingTargetContext.WorldRect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.WorldRect.MaxX))
                     return;
 
                 var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
@@ -252,7 +246,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> objs)
         {
             if (target.Editor.IsDesignMode)
             {
@@ -265,12 +259,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
 
             foreach (var item in selectedDrawList)
-                highlightDrawing.Draw(target, item.Key, item.Value.OrderBy(x => x.Item2.Y));
+                builder.DrawHighlightBatchTexture(item.Key, item.Value.OrderBy(x => x.Item2.Y));
             foreach (var item in normalDrawList)
-                batchTextureDrawing.Draw(target, item.Key, item.Value.OrderBy(x => x.Item2.Y));
+                builder.DrawBatchTexture(item.Key, item.Value.OrderBy(x => x.Item2.Y));
 
             if (target.Editor.IsDesignMode)
-                DrawPallateStr(target);
+                DrawPallateStr(builder);
 
             ClearDrawList();
         }

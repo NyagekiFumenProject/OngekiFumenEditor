@@ -192,10 +192,14 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
         frameLimiter.Reset();
     }
 
-    public void Render(TimeSpan elapsed)
+    void IDrawingContext.Render(TimeSpan ts)
+    {
+    }
+
+    public void Render(IRenderContext renderContext, TimeSpan elapsed)
     {
         var context = RenderContext;
-        if (context is null)
+        if (context is null || !ReferenceEquals(context, renderContext))
             return;
 
         var state = stateProvider();
@@ -208,27 +212,23 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
         RenderedFrameCount++;
 
         performanceMonitor.PostUIRenderTime(elapsed);
-        performanceMonitor.OnBeforeRender();
-        var renderStateSaved = false;
+
+        var builder = renderManager.CreateDrawCommandListBuilder();
         try
         {
-            context.BeforeRender(this);
-            renderStateSaved = true;
-            context.CleanRender(this, BackgroundColor);
+            builder.SetCleanColor(BackgroundColor);
+            builder.SetViewport(viewWidth, viewHeight);
+            builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+            builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
+            builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
             if (state.IsWaveformVisible)
-                waveformDrawing.Draw(this, Volatile.Read(ref usingPeakData));
+                waveformDrawing.Draw(this, Volatile.Read(ref usingPeakData), builder);
+
+            RenderContext.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
         }
         finally
         {
-            try
-            {
-                if (renderStateSaved)
-                    context.AfterRender(this);
-            }
-            finally
-            {
-                performanceMonitor.OnAfterRender();
-            }
+            builder.Dispose();
         }
     }
 
@@ -328,7 +328,9 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
         CurrentDrawingTargetContext.ProjectionMatrix = width > 0 && height > 0
             ? Matrix4.CreateOrthographic(width, height, -1, 1)
             : Matrix4.Identity;
-        CurrentDrawingTargetContext.Rect = new VisibleRect(new(width, 0), new(0, height));
+        CurrentDrawingTargetContext.ViewRelativeRect = new VisibleRect(new(width, 0), new(0, height));
+        CurrentDrawingTargetContext.WorldRect = CurrentDrawingTargetContext.ViewRelativeRect;
+        CurrentDrawingTargetContext.ViewRelativeOriginY = 0;
         CurrentDrawingTargetContext.ViewWidth = width;
         CurrentDrawingTargetContext.ViewHeight = height;
     }

@@ -3,6 +3,8 @@ using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System;
@@ -26,10 +28,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         static readonly Vector4 debugLeftColor = new Vector4(1, 51f / 255, 51f / 255, 0.75f);
         static readonly Vector4 debugRightColor = new Vector4(0, 204f / 255, 102f / 255, 0.75f);
 
-        private ILineDrawing lineDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private ICircleDrawing circleDrawing;
-        private IStringDrawing stringDrawing;
 
         private Vector4 playFieldForegroundColor;
         private bool enablePlayFieldDrawing;
@@ -39,10 +37,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         public void Initalize(IRenderManagerImpl impl)
         {
             Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
-            polygonDrawing = impl.PolygonDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            circleDrawing = impl.CircleDrawing;
-            stringDrawing = impl.StringDrawing;
 
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -67,21 +61,21 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             if (target.Editor.IsDesignMode)
-                DrawAudioDuration(target);
+                DrawAudioDuration(target, builder);
         }
 
-        private void DrawAudioDuration(IFumenEditorDrawingContext target)
+        private void DrawAudioDuration(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.Editor.TotalDurationHeight;
+            var y = (float)(target.Editor.TotalDurationHeight - target.CurrentDrawingTargetContext.ViewRelativeOriginY);
 
             var color = new Vector4(1, 0, 0, 1);
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
-            vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
+            vertices[1] = new(new(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, y), color, VertexDash.Solider);
 
-            lineDrawing.Draw(target, vertices, 3);
+            builder.DrawSimpleLines(vertices, 3);
         }
 
         /// <summary>
@@ -90,7 +84,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         /// <param name="target"></param>
         /// <param name="fieldMinTGrid"></param>
         /// <param name="fieldMaxTGrid"></param>
-        public void DrawPlayField(IFumenEditorDrawingContext target, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
+        public void DrawPlayField(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
         {
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
@@ -146,7 +140,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 if (i == rangeInfos.Count - 2)
                     flag |= FieldRangeParam.LastRange;
 
-                DrawPlayFieldInternal(target, segMinTGrid, segMaxTGrid, flag);
+                DrawPlayFieldInternal(target, builder, segMinTGrid, segMaxTGrid, flag);
             }
 
             ObjectPool<List<(TGrid, double)>>.Return(rangeInfos);
@@ -162,7 +156,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             LastRange = 2,
         }
 
-        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
+        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
         {
             /*
 			 画游戏(黑色可移动)区域
@@ -206,7 +200,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 void appendPoint2(List<Vector2> list, float totalXGrid, float totalTGrid)
                 {
                     var px = (float)XGridCalculator.ConvertXGridToX(totalXGrid / XGrid.DEFAULT_RES_X, target.Editor);
-                    var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
+                    var py = (float)target.ConvertToViewRelativeY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
 
                     appendPoint3(list, px, py, list.Count);
                 }
@@ -325,7 +319,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
-                    var tGrids = TGridCalculator.ConvertYToTGrid_PreviewMode(actualY, target.Editor);
+                    //actualY is view-relative; reconstruct the world Y for the TGrid lookup
+                    var actualWorldY = actualY + target.CurrentDrawingTargetContext.ViewRelativeOriginY;
+                    var tGrids = TGridCalculator.ConvertYToTGrid_PreviewMode(actualWorldY, target.Editor);
 
                     isPickLane = false;
                     var pickables = tGrids.SelectMany(tGrid => fumen.Lanes
@@ -333,8 +329,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             .Where(x => x.LaneType == type)
                             .Where(x =>
                             {
-                                var laneMinY = target.ConvertToY(x.MinTGrid, soflanGroup);
-                                var laneMaxY = target.ConvertToY(x.MaxTGrid, soflanGroup);
+                                var laneMinY = target.ConvertToViewRelativeY(x.MinTGrid, soflanGroup);
+                                var laneMaxY = target.ConvertToViewRelativeY(x.MaxTGrid, soflanGroup);
 
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
@@ -354,7 +350,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                         {
                             var cur = itor.Current.pos;
 
-                            var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                            var curPy = (float)target.ConvertToViewRelativeY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                             if (/*cur.Y > tGrid.TotalGrid*/curPy > actualY)
                             {
@@ -366,7 +362,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                                    var prevPy = (float)target.ConvertToViewRelativeY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                                     var nowPy = actualY;
                                     var nowPx = (float)MathUtils.CalculateXFromTwoPointFormFormula(nowPy, prevPx, prevPy, curPx, curPy);
@@ -437,8 +433,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                 if (fieldFlag.HasFlag(FieldRangeParam.LastRange) && currentTGrid <= maxTGrid)
                 {
-                    var maxY = (float)target.ConvertToY(maxTGrid, soflanGroup);
-                    var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
+                    var maxY = (float)target.ConvertToViewRelativeY(maxTGrid, soflanGroup);
+                    var actualMaxY = target.CurrentDrawingTargetContext.ViewRelativeRect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
                     IEnumerable<float> calcYArr = maxDiff > 0 ? [actualMaxY, maxY] : [maxY, actualMaxY];
@@ -452,8 +448,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                 if (fieldFlag.HasFlag(FieldRangeParam.FirstRange) && minTGrid <= currentTGrid)
                 {
-                    var minY = (float)target.ConvertToY(minTGrid, soflanGroup);
-                    var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
+                    var minY = (float)target.ConvertToViewRelativeY(minTGrid, soflanGroup);
+                    var actualMinY = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
                     IEnumerable<float> calcYArr = minDiff > 0 ? [minY, actualMinY] : [actualMinY, minY];
@@ -512,7 +508,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             EnumeratePoints(true, rightPoints);
 
             //解决左右墙交叉处理问题, 确保左墙的点永远在右墙点的左侧
-            AdjustLaneIntersection(target, leftPoints, rightPoints);
+            AdjustLaneIntersection(target, builder, leftPoints, rightPoints);
 
             //合并提交，准备进行三角剖分
             foreach (var pos in leftPoints)
@@ -531,7 +527,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             tessellateList.Clear();
             Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
 
-            polygonDrawing.Begin(target, Primitive.Triangles);
+            using var polygonVertices = ObjectPool.GetPooledList<PolygonVertex>();
             {
                 var i = 0;
                 foreach (var seq in tessellateList.SequenceWrap(3))
@@ -547,24 +543,24 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                         var x = (float)tessellatePoints[idx * 2 + 0];
                         var y = (float)tessellatePoints[idx * 2 + 1];
 
-                        polygonDrawing.PostPoint(new(x, y), color);
+                        polygonVertices.Add(new PolygonVertex(new(x, y), color));
                     }
                     i++;
                 }
             }
-            polygonDrawing.End();
+            builder.DrawPolygon(Primitive.Triangles, polygonVertices);
 
-            debugDrawEnumeratedPoints(target, tessellatePoints, leftPoints, rightPoints, tessellateList);
+            debugDrawEnumeratedPoints(target, builder, tessellatePoints, leftPoints, rightPoints, tessellateList);
 
             ObjectPool<List<int>>.Return(tessellateList);
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, List<double> tessellatePoints, List<Vector2> leftPoints, List<Vector2> rightPoints, List<int> tessellateList)
+        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, List<double> tessellatePoints, List<Vector2> leftPoints, List<Vector2> rightPoints, List<int> tessellateList)
         {
             playFieldForegroundColor.W = 0.4f;
-            lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
-            lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
+            builder.DrawSimpleLines(leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
+            builder.DrawSimpleLines(rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
             {
                 var i = 0;
                 foreach (var seq in tessellateList.SequenceWrap(3))
@@ -572,7 +568,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     var (r, g, b) = Hsl2Rgb(Math.Abs($"{i}{i}".GetHashCode()) % 360f, 1f, 0.5f);
                     var color = new Vector4(r, g, b, 0.9f);
 
-                    lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
+                    builder.DrawSimpleLines(seq.Append(seq.FirstOrDefault())
                         .Select(idx => new LineVertex(new((float)tessellatePoints[idx * 2 + 0], (float)tessellatePoints[idx * 2 + 1]), color, new(6, 4))), 2);
 
                     i += 3;
@@ -580,10 +576,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
             void printPoints(IEnumerable<Vector2> data, Vector4 color, bool isRight)
             {
-                circleDrawing.Begin(target);
-                foreach (var pos in data)
-                    circleDrawing.Post(pos, color, false, 10);
-                circleDrawing.End();
+                builder.DrawCircles(data.Select(pos => new CircleInstance(pos, color, false, 10, 0)));
                 var prevY = 0f;
                 var prevR = 0;
                 foreach (var pos in data)
@@ -595,7 +588,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     prevY = pos.Y;
 
                     color.W = 1;
-                    stringDrawing.Draw(
+                    builder.DrawString(
                         $"({pos.X}, {pos.Y})",
                         pos - new Vector2(isRight ? -10 : 10, -prevR * 10),
                         Vector2.One,
@@ -604,9 +597,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                         color,
                         new(isRight ? 0 : 1, prevR),
                         default,
-                        target,
-                        default,
-                        out _
+                        default
                         );
                 }
             }
@@ -615,7 +606,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             printPoints(rightPoints, debugRightColor, true);
         }
 
-        private void AdjustLaneIntersection(IDrawingContext target, List<Vector2> leftPoints, List<Vector2> rightPoints)
+        private void AdjustLaneIntersection(IDrawingContext target, IDrawCommandListBuilder builder, List<Vector2> leftPoints, List<Vector2> rightPoints)
         {
             using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempLeft, out _);
             using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempRight, out _);
@@ -797,7 +788,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             intersectResult = GetLinesIntersection(prevLeftLine.from, prevLeftLine.to, rightLine.from, rightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(rightPoints, rightIdx, intersectPoint);
                                 rightIdx++;
@@ -810,7 +801,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, prevRightLine.from, prevRightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(leftPoints, leftIdx, intersectPoint);
                                 leftIdx++;
@@ -823,7 +814,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             intersectResult = GetLinesIntersection(nextLeftLine.from, nextLeftLine.to, rightLine.from, rightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(rightPoints, rightIdx, intersectPoint);
                                 rightIdx++;
@@ -836,7 +827,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, nextRightLine.from, nextRightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(leftPoints, leftIdx, intersectPoint);
                                 leftIdx++;
@@ -848,7 +839,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                 if (intersectResult is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
                 {
-                    debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectionPoint);
+                    debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectionPoint);
                     intersectionPoints.Add(intersectionPoint);
 
                     var isCross = !(intersectionPoint == leftLine.from ||
@@ -1053,13 +1044,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawIntersectionPoint(IDrawingContext target, int leftIdx, int rightIdx, Vector2 intersectionPoint)
+        private void debugDrawIntersectionPoint(IDrawingContext target, IDrawCommandListBuilder builder, int leftIdx, int rightIdx, Vector2 intersectionPoint)
         {
             var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX*/true;
-            circleDrawing.Begin(target);
-            circleDrawing.Post(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
-            circleDrawing.End();
-            stringDrawing.Draw(
+            builder.DrawCircle(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
+            builder.DrawString(
                 $"[{leftIdx}, {rightIdx}]",
                 intersectionPoint - new Vector2(isShowLeft ? -10 : 10, 10),
                 Vector2.One,
@@ -1068,9 +1057,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 new(1, 1, 0, 1),
                 new(isShowLeft ? 0 : 1, 1),
                 default,
-                target,
-                default,
-                out _
+                default
                 );
         }
 
@@ -1127,10 +1114,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         public void Dispose()
         {
             Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
-            polygonDrawing = null;
-            lineDrawing = null;
-            circleDrawing = null;
-            stringDrawing = null;
         }
     }
 }

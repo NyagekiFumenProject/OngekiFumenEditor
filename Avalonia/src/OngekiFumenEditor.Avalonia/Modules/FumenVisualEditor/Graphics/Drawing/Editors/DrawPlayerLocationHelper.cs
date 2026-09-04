@@ -5,6 +5,7 @@ using System.Numerics;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
@@ -13,15 +14,12 @@ public class DrawPlayerLocationHelper : IDisposable
 {
     private (Vector2 size, Vector2 position, float rotation, Vector4 color)[] arr = { default };
     private IImage texture;
-    private ITextureDrawing textureDrawing;
     private bool enableShowPlayerLocation;
     private Vector2 size;
 
     public void Initalize(IRenderManagerImpl impl)
     {
         Reset();
-        textureDrawing = impl.TextureDrawing;
-        arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromResource(impl, "editor/playerLoc.png");
         if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("playerLoc", out size, out _))
@@ -48,7 +46,7 @@ public class DrawPlayerLocationHelper : IDisposable
         }
     }
 
-    public void Draw(IFumenEditorDrawingContext target)
+    public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
     {
         if (target.Editor.IsDesignMode)
             return;
@@ -59,12 +57,12 @@ public class DrawPlayerLocationHelper : IDisposable
         var tGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
-        var y = target.ConvertToY(tGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
+        var y = target.ConvertToViewRelativeY(tGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
 
         arr[0].position = new Vector2((float)x, (float)y);
         arr[0].size = size;
 
-        textureDrawing.Draw(target, texture, arr);
+        builder.DrawTexture(texture, arr);
     }
 
     public void Dispose()
@@ -77,7 +75,6 @@ public class DrawPlayerLocationHelper : IDisposable
         Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
         texture?.Dispose();
         texture = null;
-        textureDrawing = null;
     }
 }
 

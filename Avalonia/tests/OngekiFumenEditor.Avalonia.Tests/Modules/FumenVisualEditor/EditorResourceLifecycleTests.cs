@@ -5,6 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using OngekiFumenEditor.Avalonia.Kernel.Audio;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
@@ -224,17 +225,6 @@ public sealed class EditorResourceLifecycleTests
         public int ReleaseCount { get; private set; }
         public Control? ReleasedControl { get; private set; }
 
-        public ICircleDrawing CircleDrawing => drawingManager.CircleDrawing;
-        public ILineDrawing LineDrawing => drawingManager.LineDrawing;
-        public ISimpleLineDrawing SimpleLineDrawing => drawingManager.SimpleLineDrawing;
-        public IStaticVBODrawing StaticVBODrawing => drawingManager.StaticVBODrawing;
-        public IStringDrawing StringDrawing => drawingManager.StringDrawing;
-        public ITextureDrawing TextureDrawing => drawingManager.TextureDrawing;
-        public IBatchTextureDrawing BatchTextureDrawing => drawingManager.BatchTextureDrawing;
-        public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing => drawingManager.HighlightBatchTextureDrawing;
-        public IPolygonDrawing PolygonDrawing => drawingManager.PolygonDrawing;
-        public IBeamDrawing BeamDrawing => drawingManager.BeamDrawing;
-        public ISvgDrawing SvgDrawing => drawingManager.SvgDrawing;
 
         public Task WaitForInitializationIsDone(CancellationToken cancellation = default) => Task.CompletedTask;
 
@@ -252,6 +242,15 @@ public sealed class EditorResourceLifecycleTests
         public Task<IRenderContext> GetRenderContext(Control renderControl, CancellationToken cancellation = default) =>
             Task.FromResult<IRenderContext>(Context);
 
+        public IDrawCommandListBuilder CreateDrawCommandListBuilder() => drawingManager.CreateDrawCommandListBuilder();
+
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true) =>
+            drawingManager.PostDrawCommandList(context, drawCommandList, autoDispose);
+
+        public bool SwapDrawCommandList(IRenderContext context) => drawingManager.SwapDrawCommandList(context);
+
+        public void PresentDrawCommandList(IRenderContext context) => drawingManager.PresentDrawCommandList(context);
+
         public IImage LoadImageFromStream(Stream stream) => Image;
 
         public Control CreateRenderControl() => new Panel();
@@ -266,9 +265,9 @@ public sealed class EditorResourceLifecycleTests
 
     private sealed class TrackingRenderContext : IRenderContext
     {
-        private Action<TimeSpan>? render;
+        private Action<IRenderContext, TimeSpan>? render;
 
-        public event Action<TimeSpan> OnRender
+        public event Action<IRenderContext, TimeSpan> OnRender
         {
             add => render += value;
             remove => render -= value;
@@ -279,17 +278,10 @@ public sealed class EditorResourceLifecycleTests
         public int StopCount { get; private set; }
         public bool IsRendering { get; private set; }
 
-        public void BeforeRender(IDrawingContext context)
+        public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
         {
         }
 
-        public void AfterRender(IDrawingContext context)
-        {
-        }
-
-        public void CleanRender(IDrawingContext context, Vector4 cleanColor)
-        {
-        }
 
         public void StartRendering()
         {

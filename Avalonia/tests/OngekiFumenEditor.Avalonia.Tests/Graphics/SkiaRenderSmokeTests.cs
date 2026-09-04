@@ -7,6 +7,8 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
@@ -81,7 +83,7 @@ public sealed class SkiaRenderSmokeTests
             Content = renderControl
         };
         IRenderContext? renderContext = null;
-        Action<TimeSpan>? renderFrame = null;
+        Action<IRenderContext, TimeSpan>? renderFrame = null;
 
         try
         {
@@ -90,7 +92,13 @@ public sealed class SkiaRenderSmokeTests
             await manager.InitializeRenderControl(renderControl);
             await manager.WaitForInitializationIsDone();
             renderContext = await manager.GetRenderContext(renderControl);
-            renderFrame = _ => renderContext.CleanRender(null!, new Vector4(1, 0, 1, 1));
+            renderFrame = (ctx, _) =>
+            {
+                var builder = manager.CreateDrawCommandListBuilder();
+                builder.SetCleanColor(new Vector4(1, 0, 1, 1));
+                ctx.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
+                builder.Dispose();
+            };
             renderContext.OnRender += renderFrame;
             renderContext.StartRendering();
 
@@ -153,7 +161,7 @@ public sealed class SkiaRenderSmokeTests
             Content = content
         };
         IRenderContext? renderContext = null;
-        Action<TimeSpan>? renderFrame = null;
+        Action<IRenderContext, TimeSpan>? renderFrame = null;
 
         try
         {
@@ -161,7 +169,13 @@ public sealed class SkiaRenderSmokeTests
             window.UpdateLayout();
             await manager.InitializeRenderControl(renderControl);
             renderContext = await manager.GetRenderContext(renderControl);
-            renderFrame = _ => renderContext.CleanRender(null!, new Vector4(1, 0, 1, 1));
+            renderFrame = (ctx, _) =>
+            {
+                var builder = manager.CreateDrawCommandListBuilder();
+                builder.SetCleanColor(new Vector4(1, 0, 1, 1));
+                ctx.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
+                builder.Dispose();
+            };
             renderContext.OnRender += renderFrame;
             renderContext.StartRendering();
 
@@ -220,7 +234,7 @@ public sealed class SkiaRenderSmokeTests
             Content = renderControl
         };
         IRenderContext? renderContext = null;
-        Action<TimeSpan>? renderFrame = null;
+        Action<IRenderContext, TimeSpan>? renderFrame = null;
 
         try
         {
@@ -229,21 +243,32 @@ public sealed class SkiaRenderSmokeTests
             await manager.InitializeRenderControl(renderControl);
             renderContext = await manager.GetRenderContext(renderControl);
             var drawingContext = new TestDrawingContext(renderContext, width, height);
-            renderFrame = elapsed =>
+            renderFrame = (ctx, _) =>
             {
-                renderContext.CleanRender(drawingContext, new Vector4(0, 0, 0, 1));
-                manager.StringDrawing.Draw(
-                    "F",
-                    new Vector2(-12, 0),
-                    Vector2.One,
-                    40,
-                    0,
-                    new Vector4(1, 1, 1, 1),
-                    new Vector2(0, 1),
-                    IStringDrawing.StringStyle.Normal,
-                    drawingContext,
-                    null!,
-                    out _);
+                var builder = manager.CreateDrawCommandListBuilder();
+                try
+                {
+                    builder.SetCleanColor(new Vector4(0, 0, 0, 1));
+                    builder.SetViewport(width, height);
+                    builder.SetCurrentViewMatrix(drawingContext.CurrentDrawingTargetContext.ViewMatrix);
+                    builder.SetCurrentProjectionMatrix(drawingContext.CurrentDrawingTargetContext.ProjectionMatrix);
+                    builder.SetCurrentRect(drawingContext.CurrentDrawingTargetContext.ViewRelativeRect);
+                    builder.DrawString(
+                        "F",
+                        new Vector2(-12, 0),
+                        Vector2.One,
+                        40,
+                        0,
+                        new Vector4(1, 1, 1, 1),
+                        new Vector2(0, 1),
+                        IStringDrawing.StringStyle.Normal,
+                        null!);
+                    renderContext.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
+                }
+                finally
+                {
+                    builder.Dispose();
+                }
             };
             renderContext.OnRender += renderFrame;
             renderContext.StartRendering();

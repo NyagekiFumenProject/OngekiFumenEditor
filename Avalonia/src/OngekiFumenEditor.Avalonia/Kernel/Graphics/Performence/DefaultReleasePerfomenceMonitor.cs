@@ -90,6 +90,16 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public void OnBeginDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
+		{
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+		public void OnEndDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
+		{
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public void OnBeginTargetDrawing(IDrawingTarget drawing)
 		{
 

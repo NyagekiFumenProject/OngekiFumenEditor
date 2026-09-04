@@ -1,6 +1,7 @@
 ﻿using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
 using Injectio.Attributes;
 using System;
@@ -14,7 +15,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     [RegisterSingleton<IFumenEditorDrawingTarget>]
     internal class BeamLazerDrawingTarget : CommonDrawTargetBase<BeamStart>, IDisposable
     {
-        private IBeamDrawing lazerDrawing;
         private IImage textureBody;
         private IImage pixelImg;
         private IImage textureWarn;
@@ -24,9 +24,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override int DefaultRenderOrder => 300;
 
-        public override void Draw(IFumenEditorDrawingContext target, BeamStart obj)
+        public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, BeamStart obj)
         {
-            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.CurrentDrawingTargetContext.Rect.Width, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
+            var xGridWidth = XGridCalculator.CalculateXUnitSize(target.Editor.Setting.XGridDisplayMaxUnit, target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.Editor.Setting.XGridUnitSpace) / target.Editor.Setting.XGridUnitSpace;
             //var width = xGridWidth * 3f * obj.WidthId.Id;
             var width = xGridWidth * obj.WidthId.WidthDraw;
 
@@ -98,9 +98,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var curObliqueTopXGrid = obj.XGrid.TotalUnit + curBeamObj.ObliqueSourceXGridOffset.TotalUnit;
 
                 //beam not support SoflanGroup
-                var currentY = target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid());
+                var currentY = target.ConvertToViewRelativeY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid());
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
-                var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.Rect.Height;
+                var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
                 x = (obliqueTopX + currentX) / 2;
 
@@ -119,12 +119,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                 warnProgress = (float)MathUtils.Normalize(leadInTGrid.TotalGrid, beginTGrid.TotalGrid, curTGrid.TotalGrid);
                 var a = MathUtils.SmoothStep(0.0f, 0.25f, warnProgress);
-                var warnColor = new OpenTK.Mathematics.Vector4(1, 215 / 255.0f, 0, 0.5f * a);
+                var warnColor = new Vector4(1, 215 / 255.0f, 0, 0.5f * a);
 
-                lazerDrawing.Draw(target, pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
+                builder.DrawBeam(pixelImg, (int)width, x, (float)warnProgress, warnColor, rotate, judgeOffset);
             }
 
-            lazerDrawing.Draw(target, textureBody, (int)width, x, (float)progress, OpenTK.Mathematics.Vector4.One, rotate, judgeOffset);
+            builder.DrawBeam(textureBody, (int)width, x, (float)progress, Vector4.One, rotate, judgeOffset);
             //Log.LogDebug($"a\nx:{x:F2}, progress:{progress:F2}, warnProgress:{warnProgress:F2}, rotate:{rotate:F2}");
         }
 
@@ -142,8 +142,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lazerDrawing = impl.BeamDrawing;
-
             IImage load(string name) => ResourceUtils.OpenReadTextureFromResource(impl, "editor/" + name);
 
             textureBody = load("beamBody.png");

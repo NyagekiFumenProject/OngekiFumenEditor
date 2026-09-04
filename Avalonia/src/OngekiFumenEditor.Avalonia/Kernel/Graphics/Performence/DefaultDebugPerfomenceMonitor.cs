@@ -158,6 +158,14 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 			data.SetOnBeginDrawingTicks(Stopwatch.GetTimestamp());
 		}
 
+		public void OnBeginDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
+		{
+		}
+
+		public void OnEndDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
+		{
+		}
+
 		public void OnBeginDrawing(IDrawing drawing)
 		{
 			var data = GetDrawingPerformenceData(drawing);

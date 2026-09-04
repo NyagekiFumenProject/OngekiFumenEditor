@@ -86,6 +86,14 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 		{
 		}
 
+		public void OnBeginDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
+		{
+		}
+
+		public void OnEndDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
+		{
+		}
+
 		public void PostUIRenderTime(TimeSpan ts)
 		{
 		}

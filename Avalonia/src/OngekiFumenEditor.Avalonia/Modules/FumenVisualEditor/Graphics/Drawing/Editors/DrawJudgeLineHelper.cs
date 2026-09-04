@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
@@ -11,8 +12,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 {
     public class DrawJudgeLineHelper
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
         private Vector4 color = new(1, 1, 0, 1);
         private Vector4 spdColor = new(Colors.LightCyan.R / 255.0f, Colors.LightCyan.G / 255.0f, Colors.LightCyan.B / 255.0f, Colors.LightCyan.A / 255.0f);
 
@@ -20,18 +19,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public void Initalize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
+            var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
 
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.Editor.ViewWidth, y), color, VertexDash.Solider);
 
-            lineDrawing.Draw(target, vertices, 1);
+            builder.DrawSimpleLines(vertices, 1);
             var t = target.Editor.GetCurrentTGrid();
 
             var bpmList = target.Editor.EditorContext.Fumen.BpmList;
@@ -45,7 +42,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             else
                 str = t.ToString();
 
-            stringDrawing.Draw(
+            builder.DrawString(
                     str,
                     new(target.Editor.ViewWidth - 50,
                     y + 10f),
@@ -55,9 +52,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     color,
                     new(1, 0.5f),
                     IStringDrawing.StringStyle.Bold,
-                    target,
-                    default,
-                    out _
+                    default
             );
 
             void PrintSpeed(int soflanGroup, SoflanList soflanList, Vector2 pos, Vector4 color)
@@ -67,7 +62,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 {
                     var speedStr = $"[{soflanGroup}]{speed:F2}x";
 
-                    stringDrawing.Draw(
+                    builder.DrawString(
                             speedStr,
                             pos,
                             Vector2.One,
@@ -76,9 +71,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             spdColor,
                             new(1, 1.5f),
                             IStringDrawing.StringStyle.Bold,
-                            target,
-                            default,
-                            out _
+                            default
                     );
                 }
             }

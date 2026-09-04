@@ -1,19 +1,20 @@
 using Avalonia.Media;
 using Avalonia.Skia;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using SkiaSharp;
 using System.Diagnostics;
-using System.Numerics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 
 public class DefaultSkiaRenderContext : IRenderContext
 {
     private readonly AvaloniaSkiaRenderControl renderControl;
+    private DefaultSkiaDrawingManagerImpl manager;
     private int frameInProgress;
     private long previousTimestamp;
     private volatile bool isStart;
 
-    public event Action<TimeSpan> OnRender;
+    public event Action<IRenderContext, TimeSpan> OnRender;
 
     public SKCanvas Canvas { get; private set; }
 
@@ -24,40 +25,37 @@ public class DefaultSkiaRenderContext : IRenderContext
         this.renderControl = renderControl;
     }
 
-    public void AfterRender(IDrawingContext context)
+    internal void AttachManager(DefaultSkiaDrawingManagerImpl drawingManager)
     {
-        Canvas?.Restore();
+        manager = drawingManager;
     }
 
-    public void BeforeRender(IDrawingContext context)
+    public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
     {
-        Canvas?.Save();
-    }
+        if (manager is null)
+            throw new InvalidOperationException("The render context has not been attached to a render manager yet.");
 
-    public void CleanRender(IDrawingContext context, Vector4 cleanColor)
-    {
-        Canvas?.DrawColor(
-            new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W),
-            SKBlendMode.Src);
+        manager.PostDrawCommandList(this, drawCommandList, autoDispose);
     }
 
     public void StartRendering()
     {
-        if (isStart)
-            return;
-
+        previousTimestamp = 0;
         isStart = true;
-        previousTimestamp = Stopwatch.GetTimestamp();
-        renderControl.InvalidateVisual();
     }
 
     public void StopRendering()
     {
-        if (!isStart)
-            return;
-
         isStart = false;
-        renderControl.InvalidateVisual();
+    }
+
+    private void SwapAndPresentDrawCommandList()
+    {
+        if (manager is null)
+            return;
+        if (!manager.SwapDrawCommandList(this))
+            return;
+        manager.PresentDrawCommandList(this);
     }
 
     internal void RenderFrame(ImmediateDrawingContext drawingContext)
@@ -89,7 +87,8 @@ public class DefaultSkiaRenderContext : IRenderContext
                     ? TimeSpan.Zero
                     : Stopwatch.GetElapsedTime(previousTimestamp, timestamp);
                 previousTimestamp = timestamp;
-                OnRender?.Invoke(elapsed);
+                OnRender?.Invoke(this, elapsed);
+                SwapAndPresentDrawCommandList();
             }
             finally
             {

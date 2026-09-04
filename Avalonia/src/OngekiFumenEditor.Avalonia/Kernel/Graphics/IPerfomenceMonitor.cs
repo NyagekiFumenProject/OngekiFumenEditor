@@ -26,6 +26,8 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics
 		void OnBeforeRender();
 		void OnBeginDrawing(IDrawing drawing);
 		void OnBeginTargetDrawing(IDrawingTarget drawing);
+		void OnBeginDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command);
+		void OnEndDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command);
 
 		void CountDrawCall(IDrawing drawing);
 
