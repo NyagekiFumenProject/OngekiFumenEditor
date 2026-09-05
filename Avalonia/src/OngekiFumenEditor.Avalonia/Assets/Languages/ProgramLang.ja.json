@@ -51,6 +51,8 @@
     "Cancel":  "キャンセル",
     "CancelProjectSaveByFumenSaveFail":  "譜面の保存に失敗したため，プロジェクトの保存はキャンセルされました。",
     "CancelSelected":  "選択解除",
+    "SelectOnlyItemsOfSelectedType":  "選択した種類のみ選択",
+    "DeselectItemsOfSelectedType":  "選択した種類を選択解除",
     "CantCreateProject":  "新しいプロジェクトを作成できません：",
     "CantLoadFumen":  "譜面を読み込めませんでした：",
     "CantLoadProject":  "プロジェクトを読み込めませんでした：",
@@ -526,6 +528,9 @@
     "HideWallLaneWhenEnablePlayField":  "プレビューモードでプレイフィールド描画が有効な場合、すべての壁レーンを非表示にする",
     "KeyBindingConflictDetect":  "{0} のキー割り当てと競合しています",
     "KeywordFilter":  "キーワードフィルター:",
+    "BpmFilter":  "BPM範囲:",
+    "BpmMin":  "最小:",
+    "BpmMax":  "最大:",
     "MenuMirrorSelectionLaneColors":  "レーンの色を反転",
     "Millisecond":  "ミリ秒",
     "NewItemGroup":  "新しいグループ",
@@ -578,5 +583,6 @@
     "Unlimited":  "無制限",
     "PlatformControlled":  "描画実装による制御（例: 垂直同期/ディスプレイ更新レート）",
     "Unavailable":  "利用不可",
+    "BpmChange":  "BPM変更",
     "LastRefreshed":  "最終更新"
 }

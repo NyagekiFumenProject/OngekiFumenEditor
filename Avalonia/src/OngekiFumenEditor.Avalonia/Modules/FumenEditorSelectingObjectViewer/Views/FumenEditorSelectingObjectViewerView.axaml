@@ -50,8 +50,15 @@
             </Interaction.Behaviors>
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).RefreshCommand}" Header="{markup:Translate {x:Static languages:Lang+B.Refresh}}" />
-                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).CancelSelectedObjectsCommand}" Header="{markup:Translate {x:Static languages:Lang+B.CancelSelected}}" />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).SelectOnlyItemsOfSelectedTypeCommand}"
+                              Header="{markup:Translate {x:Static languages:Lang+B.SelectOnlyItemsOfSelectedType}}" />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).DeselectItemsOfSelectedTypeCommand}"
+                              Header="{markup:Translate {x:Static languages:Lang+B.DeselectItemsOfSelectedType}}" />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).CancelSelectedObjectsCommand}"
+                              Header="{markup:Translate {x:Static languages:Lang+B.CancelSelected}}" />
+                    <Separator />
+                    <MenuItem Command="{Binding #Root.((vm:FumenEditorSelectingObjectViewerViewModel)DataContext).RefreshCommand}"
+                              Header="{markup:Translate {x:Static languages:Lang+B.Refresh}}" />
                 </ContextMenu>
             </DataGrid.ContextMenu>
             <DataGrid.Styles>

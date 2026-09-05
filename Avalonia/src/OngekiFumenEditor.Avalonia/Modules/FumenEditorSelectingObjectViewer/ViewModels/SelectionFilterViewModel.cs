@@ -167,8 +167,9 @@ public partial class SelectionFilterViewModel : ViewModelBase
                 new() { Text = Lang.InterpolatableSoflan, Types = [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)] },
                 new() { Text = Lang.KeyframeSoflan, Types = [typeof(KeyframeSoflan)] },
                 new() { Text = Lang.DurationSoflan, Types = [typeof(IDurationSoflan)] },
+                new() { Text = Lang.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] },
                 new() { Text = Lang.MeterChange, Types = [typeof(MeterChange)] },
-                new() { Text = Lang.IndividualSoflanArea, Types = [typeof(IndividualSoflanArea)] }
+                new() { Text = Lang.BpmChange, Types = [typeof(BPMChange)] }
             ]),
             new(this, Lang.SelectionFilterObjectCategoryMisc, [
                 new() { Text = Lang.SvgPrefabFile, Types = [typeof(SvgImageFilePrefab)] },

@@ -109,6 +109,42 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
     }
 
+    [RelayCommand]
+    private void SelectOnlyItemsOfSelectedType()
+    {
+        if (Editor is null)
+            return;
+
+        var selectedTypes = SelectedItems
+            .Select(item => item.Object.GetType())
+            .ToHashSet();
+        foreach (var item in Editor.SelectObjects.ToArray())
+        {
+            if (!selectedTypes.Contains(item.GetType()))
+                item.IsSelected = false;
+        }
+
+        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+    }
+
+    [RelayCommand]
+    private void DeselectItemsOfSelectedType()
+    {
+        if (Editor is null)
+            return;
+
+        var selectedTypes = SelectedItems
+            .Select(item => item.Object.GetType())
+            .ToHashSet();
+        foreach (var item in Editor.SelectObjects.ToArray())
+        {
+            if (selectedTypes.Contains(item.GetType()))
+                item.IsSelected = false;
+        }
+
+        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+    }
+
     public void OnItemSingleClick(ISelectableObject item)
     {
         if (Editor is null || item is null)

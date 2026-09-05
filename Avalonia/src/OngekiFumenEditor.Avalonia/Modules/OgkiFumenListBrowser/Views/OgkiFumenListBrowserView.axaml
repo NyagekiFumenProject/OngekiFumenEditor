@@ -122,7 +122,7 @@
                 BorderBrush="{DynamicResource BrowserBorderBrush}"
                 BorderThickness="1"
                 CornerRadius="12">
-            <Grid RowDefinitions="Auto,Auto" RowSpacing="10">
+            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
                 <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
                     <Border Width="34"
                             Height="34"
@@ -188,6 +188,24 @@
                             ToolTip.Tip="{markup:Translate {x:Static languages:Lang+B.OgkiBrowserRefresh}}">
                         <icons:FluentIcon Icon="ArrowSync" IconSize="Size20" />
                     </Button>
+                </Grid>
+                <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,*" ColumnSpacing="8">
+                    <TextBlock VerticalAlignment="Center"
+                               Classes="eyebrow"
+                               Text="{markup:Translate {x:Static languages:Lang+B.BpmFilter}}" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{markup:Translate {x:Static languages:Lang+B.BpmMin}}" />
+                    <TextBox Grid.Column="2"
+                             Classes="search-box"
+                             Text="{Binding BpmMin, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Grid.Column="3"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Text="–" />
+                    <TextBox Grid.Column="4"
+                             Classes="search-box"
+                             Text="{Binding BpmMax, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </Grid>
             </Grid>
         </Border>

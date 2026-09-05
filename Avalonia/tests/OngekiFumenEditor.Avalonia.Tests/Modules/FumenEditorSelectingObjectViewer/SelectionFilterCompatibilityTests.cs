@@ -23,13 +23,13 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenEditorSelectingObjectVie
 public sealed class SelectionFilterCompatibilityTests
 {
     [AvaloniaFact]
-    public void Constructor_RestoresOriginalObjectTypesAndFourteenOptions()
+    public void Constructor_RestoresOriginalObjectTypesAndFifteenOptions()
     {
         using var context = new ViewerContext();
         var filter = context.Viewer.SelectionFilter;
 
         Assert.Equal(5, filter.FilterTypeCategories.Count);
-        Assert.Equal(25, filter.FilterTypeCategories.Sum(category => category.Items.Count));
+        Assert.Equal(26, filter.FilterTypeCategories.Sum(category => category.Items.Count));
         AssertCategory(filter.FilterTypeCategories[0], Lang.SelectionFilterObjectCategoryLane,
             (Lang.WallLeft, [typeof(WallLeftNext), typeof(WallLeftStart)]),
             (Lang.LaneLeft, [typeof(LaneLeftNext), typeof(LaneLeftStart)]),
@@ -54,15 +54,16 @@ public sealed class SelectionFilterCompatibilityTests
             (Lang.InterpolatableSoflan, [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)]),
             (Lang.KeyframeSoflan, [typeof(KeyframeSoflan)]),
             (Lang.DurationSoflan, [typeof(IDurationSoflan)]),
+            (Lang.IndividualSoflanArea, [typeof(IndividualSoflanArea)]),
             (Lang.MeterChange, [typeof(MeterChange)]),
-            (Lang.IndividualSoflanArea, [typeof(IndividualSoflanArea)]));
+            (Lang.BpmChange, [typeof(BPMChange)]));
         AssertCategory(filter.FilterTypeCategories[4], Lang.SelectionFilterObjectCategoryMisc,
             (Lang.SvgPrefabFile, [typeof(SvgImageFilePrefab)]),
             (Lang.SvgPrefabText, [typeof(SvgStringPrefab)]),
             (Lang.Comment, [typeof(Comment)]));
 
         Assert.Equal(5, filter.OptionCategories.Count);
-        Assert.Equal(14, filter.OptionCategories.Sum(category => category.Options.Count));
+        Assert.Equal(15, filter.OptionCategories.Sum(category => category.Options.Count));
         AssertOptionCategory(filter.OptionCategories[0], Lang.SelectionFilter_OptionTabGeneral,
             (Lang.SelectionFilter_OptionLabelTag, typeof(TextWithRegexOption)));
         AssertOptionCategory(filter.OptionCategories[1], Lang.SelectionFilter_OptionTabLanes,
@@ -180,6 +181,48 @@ public sealed class SelectionFilterCompatibilityTests
         {
             browser.RefreshSelected((FumenVisualEditorViewModel)null!);
         }
+    }
+
+    [AvaloniaFact]
+    public void SelectOnlyItemsOfSelectedTypeCommand_RestrictsEditorSelection()
+    {
+        var tap = new Tap { IsSelected = true };
+        var bell = new Bell { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.AddObject(tap);
+        fumen.AddObject(bell);
+
+        using var context = new ViewerContext(fumen);
+        context.Viewer.RefreshCommand.Execute(null);
+        context.Viewer.SelectedItems.Add(Assert.Single(
+            context.Viewer.EditorSelectObjects.Cast<SelectedObjectRow>(),
+            row => ReferenceEquals(row.Object, tap)));
+
+        context.Viewer.SelectOnlyItemsOfSelectedTypeCommand.Execute(null);
+
+        Assert.True(tap.IsSelected);
+        Assert.False(bell.IsSelected);
+    }
+
+    [AvaloniaFact]
+    public void DeselectItemsOfSelectedTypeCommand_RemovesOnlySelectedTypes()
+    {
+        var tap = new Tap { IsSelected = true };
+        var bell = new Bell { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.AddObject(tap);
+        fumen.AddObject(bell);
+
+        using var context = new ViewerContext(fumen);
+        context.Viewer.RefreshCommand.Execute(null);
+        context.Viewer.SelectedItems.Add(Assert.Single(
+            context.Viewer.EditorSelectObjects.Cast<SelectedObjectRow>(),
+            row => ReferenceEquals(row.Object, tap)));
+
+        context.Viewer.DeselectItemsOfSelectedTypeCommand.Execute(null);
+
+        Assert.False(tap.IsSelected);
+        Assert.True(bell.IsSelected);
     }
 
     private static FilterScenario CreateScenario(ViewerContext context, string scenarioName)

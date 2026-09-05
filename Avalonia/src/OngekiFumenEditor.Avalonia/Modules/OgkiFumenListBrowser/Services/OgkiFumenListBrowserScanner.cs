@@ -13,11 +13,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.OgkiFumenListBrowser.Services;
 /// <summary>
 /// Scans one selected simple-file-system root. The scanner never falls back to a local path.
 /// </summary>
-public sealed class OgkiFumenListBrowserScanner
+public sealed partial class OgkiFumenListBrowserScanner
 {
     private const int MaxParallelOperations = 4;
-    private static readonly Regex BpmRegex = new(@"BPM_DEF\s*([\d.]+)", RegexOptions.Compiled);
-    private static readonly Regex CreatorRegex = new(@"CREATOR\s*(.+)", RegexOptions.Compiled);
+    [GeneratedRegex(@"BPM_DEF\s*([\d.]+)")]
+    private static partial Regex BpmRegex();
+    [GeneratedRegex(@"CREATOR\s*(.+)")]
+    private static partial Regex CreatorRegex();
     private readonly HashSet<string> supportedAudioExtensions;
 
     public OgkiFumenListBrowserScanner(IEnumerable<string> supportedAudioExtensions)
@@ -267,7 +269,7 @@ public sealed class OgkiFumenListBrowserScanner
                 bufferSize: 4096);
             while (await reader.ReadLineAsync(cancellationToken) is { } line)
             {
-                if (diff.Bpm <= 0 && BpmRegex.Match(line) is { Success: true } bpmMatch &&
+                if (diff.Bpm <= 0 && BpmRegex().Match(line) is { Success: true } bpmMatch &&
                     float.TryParse(
                         bpmMatch.Groups[1].Value,
                         NumberStyles.Float,
@@ -276,7 +278,7 @@ public sealed class OgkiFumenListBrowserScanner
                 {
                     diff.Bpm = bpm;
                 }
-                if (string.IsNullOrWhiteSpace(diff.Creator) && CreatorRegex.Match(line) is { Success: true } creatorMatch)
+                if (string.IsNullOrWhiteSpace(diff.Creator) && CreatorRegex().Match(line) is { Success: true } creatorMatch)
                     diff.Creator = creatorMatch.Groups[1].Value.Trim();
                 if (diff.Bpm > 0 && !string.IsNullOrWhiteSpace(diff.Creator))
                     break;

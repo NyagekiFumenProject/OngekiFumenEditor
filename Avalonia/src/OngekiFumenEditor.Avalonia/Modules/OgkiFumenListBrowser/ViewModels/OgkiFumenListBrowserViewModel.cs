@@ -2,6 +2,7 @@
 
 // Injectio registration is intentionally kept on this concrete window model.
 
+using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -95,6 +96,12 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     public partial string Keywords { get; set; } = string.Empty;
 
     [ObservableProperty]
+    public partial string BpmMin { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string BpmMax { get; set; } = string.Empty;
+
+    [ObservableProperty]
     public partial bool IsBusy { get; private set; }
 
     [ObservableProperty]
@@ -183,6 +190,19 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 .OrderBy(x => x.Distance)
                 .ThenBy(x => x.Set.MusicId)
                 .Select(x => x.Set);
+        }
+
+        var minBpm = float.TryParse(BpmMin, NumberStyles.Float, CultureInfo.InvariantCulture, out var minValue)
+            ? (float?)minValue
+            : null;
+        var maxBpm = float.TryParse(BpmMax, NumberStyles.Float, CultureInfo.InvariantCulture, out var maxValue)
+            ? (float?)maxValue
+            : null;
+        if (minBpm.HasValue || maxBpm.HasValue)
+        {
+            result = result.Where(set => set.Difficults.Any(diff =>
+                (!minBpm.HasValue || diff.Bpm >= minBpm.Value) &&
+                (!maxBpm.HasValue || diff.Bpm <= maxBpm.Value)));
         }
 
         displayFumenSets.ReplaceAll(result);
