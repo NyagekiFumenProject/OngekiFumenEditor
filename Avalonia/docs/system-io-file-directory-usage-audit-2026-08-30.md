@@ -139,9 +139,9 @@ Browser 环境通常没有 `LocalPath`，会继续使用 Avalonia StorageProvide
 
 该文件当前活动分支中的 `Path.IsPathFullyQualified` 和 `Path.GetFileName` 只是路径字符串处理。
 
-### 5.2 已排除的旧 OpenGL 字体实现
+### 5.2 已删除的旧 OpenGL 字体实现
 
-[`DefaultStringDrawing.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/OpenGL/Drawing/StringDrawing/DefaultStringDrawing.cs) 包含 `Directory.GetFiles` 和 `File.ReadAllBytes`，但整个 `Kernel/Graphics/OpenGL/**/*.cs` 已在核心项目文件中通过 `Compile Remove` 排除，因此不计入当前编译结果。
+旧 `DefaultStringDrawing.cs` 已随 `Kernel/Graphics/OpenGL` 源码目录删除，因此不属于当前源码或编译统计。
 
 ### 5.3 注释中的 File 调用
 

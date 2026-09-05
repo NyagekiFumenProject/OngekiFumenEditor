@@ -48,14 +48,6 @@
                     Unloaded="OnWaveformHostUnloaded">
                 </ContentControl>
 
-                <!--<wpf:GLWpfControl
-                    x:Name="glView"
-                    Height="150"
-                    Margin="0,0,0,5"
-                    Ready="GLWpfControl_Ready"
-                    SizeChanged="GLWpfControl_SizeChanged">
-                </wpf:GLWpfControl>-->
-
                 <StackPanel Margin="0,5,0,5">
                     <controls:GroupBox Foreground="{StaticResource EditorToolWindowForegroundBrush}" Header="{markup:Translate {x:Static languages:Lang+B.VisualizerRenderOption}}">
                         <StackPanel>

@@ -138,9 +138,9 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 
 ### 不支持的 backend
 
-- `Kernel/Graphics/OpenGL`、Skia D3D/GL context、旧 Skia RenderControls、CPU/OpenGL/DirectX backend 枚举均通过主项目 `Compile Remove` 排除；
+- `Kernel/Graphics/OpenGL` 已从 Avalonia 源码树删除；Skia D3D/GL context、旧 Skia RenderControls、CPU/OpenGL/DirectX backend 枚举仍通过主项目 `Compile Remove` 排除；
 - 主项目不再引用 Vortice Direct3D/DXGI 包，程序设置页也不再暴露 render manager 或 Skia backend 选择；
-- 旧 backend 源码保留在工作区以保留迁移历史和注释，但不属于当前 Avalonia 构建产物，也不应作为运行时 fallback；
+- OpenGL backend 不再保留源码；其余未启用 backend 源码保留在工作区以保留迁移历史和注释，但不属于当前 Avalonia 构建产物，也不应作为运行时 fallback；
 - 当前核心项目的依赖图为 `Avalonia.Skia 11.3.10` + `SkiaSharp 2.88.9`。Gekimini 依赖项目仍解析到 `SkiaSharp 2.88.3` 并产生独立漏洞警告，后续需要单独统一依赖版本。
 
 编译虽已清零，但仍缺少桌面启动后的人工渲染冒烟验证，暂不能把画面显示标记为已验收。

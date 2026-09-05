@@ -65,7 +65,6 @@
         <Compile Remove="Startup.cs" />
         <Compile Remove="Utils\IPCHelper.cs" />
         <!-- Rendering is provided exclusively through Avalonia.Skia's leased SKCanvas. -->
-        <Compile Remove="Kernel\Graphics\OpenGL\**\*.cs" />
         <Compile Remove="Kernel\Graphics\Skia\D3dContexts\**\*.cs" />
         <Compile Remove="Kernel\Graphics\Skia\GlContexts\**\*.cs" />
         <Compile Remove="Kernel\Graphics\Skia\RenderBackendType.cs" />

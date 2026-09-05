@@ -34,10 +34,10 @@ Core 通过 `ISettingManager`、`INAudioFileReaderFactory` 等接口发起的平
 
 | 范围 | 显式 `File.*` / `Directory.*` 调用行 | 涉及源文件 |
 | --- | ---: | ---: |
-| Core 源码（排除平台目录并剔除字符串误报） | 63 | 25 |
+| Core 源码（当前活动源码，排除平台目录并剔除字符串误报） | 61 | 24 |
 | 其中参与当前 Core 编译的源码 | 61 | 24 |
 
-源码口径包含已被项目文件排除编译的旧 OpenGL 字体实现，其中有 2 行、1 个文件；当前编译口径已扣除这部分。两种数字均不包含 `FileInfo.Open`、原生 Win32 API、NAudio、Skia 等间接 I/O，因此应视为显式调用下限，而不是完整的运行时系统调用次数。部分代码当前没有调用者，详见第 7 节。
+旧 OpenGL 字体实现此前在审计扫描中额外命中 2 行、1 个文件；该源码目录现已删除，因此当前统计以活动源码为准。两种数字均不包含 `FileInfo.Open`、原生 Win32 API、NAudio、Skia 等间接 I/O，因此应视为显式调用下限，而不是完整的运行时系统调用次数。部分代码当前没有调用者，详见第 7 节。
 
 ## 3. I/O 意图分类
 
@@ -282,7 +282,6 @@ Core [项目文件](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia
 - [`SKPixelComparer.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/Utils/SKPixelComparer.cs) 的路径重载通过 Skia 读取图片，但没有外部调用者；
 - [`DumpFileHelper.cs`](../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/DumpFileHelper.cs) 和 [`FumenRescue.cs`](../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs) 已编译，但当前没有初始化或外部调用点；
 - `Utils/IPCHelper.cs` 使用命名 `MemoryMappedFile`，但已被 Core 项目文件 `Compile Remove`；
-- 旧 OpenGL 字体实现会枚举系统字体目录并读取字体文件，但整个 `Kernel/Graphics/OpenGL/**/*.cs` 已被排除编译；
 - `ConsoleWindowHelper` 创建的 `FileStream` 包装标准输入、输出和错误句柄，属于控制台 I/O，不是磁盘文件 I/O；
 - 谱面解析器内部的 `StreamReader` 以及格式化器内部的 `StreamWriter` 只操作调用方流或 `MemoryStream`，磁盘归属由上层打开文件的位置决定。
 
