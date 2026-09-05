@@ -98,7 +98,11 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 		public void Remove(TValue value)
 		{
 			NotifyDirty();
-			items = items.Where(l => !l.Value.Equals(value)).ToList();
+			for (var i = items.Count - 1; i >= 0; i--)
+			{
+				if (items[i].Value.Equals(value))
+					items.RemoveAt(i);
+			}
 		}
 
 		public void Remove(IEnumerable<TValue> items)

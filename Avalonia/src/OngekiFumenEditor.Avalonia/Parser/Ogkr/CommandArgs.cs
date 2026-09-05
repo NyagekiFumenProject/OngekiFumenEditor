@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 		private static readonly char[] SplitEmptyCharArray = new[] {/* ' ',*/ '\t' };
 
 		private string line = string.Empty;
-		private Dictionary<Type, Array> cacheDataArray = new Dictionary<Type, Array>();
+		private readonly Dictionary<Type, Array> cacheDataArray = new();
 		private string[] tokenCache;
 		private readonly Dictionary<Type, IArgValueConverter> converters;
 
@@ -51,7 +51,8 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 
 		public T GetData<T>(int index)
 		{
-			return GetDataArray<T>().ElementAtOrDefault(index);
+			var data = GetDataArray<T>();
+			return (uint)index < (uint)data.Length ? data[index] : default;
 		}
 
 		public string GetRawData(int index)
