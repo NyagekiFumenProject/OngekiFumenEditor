@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     [RegisterSingleton<IFumenEditorDrawingTarget>]
     public class CommonHorizonalDrawingTarget : CommonBatchDrawTargetBase<OngekiTimelineObjectBase>
     {
-        public record RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);
+        public readonly record struct RegisterDrawingInfo(OngekiTimelineObjectBase TimelineObject, double Y);
 
         public override int DefaultRenderOrder => 1500;
         public override DrawingVisible DefaultVisible => DrawingVisible.Design; //only design
@@ -58,23 +58,26 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         {
             using var buckets = ObjectPool.GetPooledDictionary<int, IPooledList<RegisterDrawingInfo>>();
 
-            // 一次扫描进桶,替代 Select.ToList + GroupBy + 每组 ToList 的三层枚举与分配。
-            foreach (var obj in objs)
+            try
             {
-                var key = obj.TGrid.TotalGrid;
-                if (!buckets.TryGetValue(key, out var bucket))
+                // 一次扫描进桶,替代 Select.ToList + GroupBy + 每组 ToList 的三层枚举与分配。
+                foreach (var obj in objs)
                 {
-                    bucket = ObjectPool.GetPooledList<RegisterDrawingInfo>();
-                    buckets[key] = bucket;
+                    var key = obj.TGrid.TotalGrid;
+                    if (!buckets.TryGetValue(key, out var bucket))
+                    {
+                        bucket = ObjectPool.GetPooledList<RegisterDrawingInfo>();
+                        buckets[key] = bucket;
+                    }
+                    bucket.Add(new RegisterDrawingInfo(obj, target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid)));
                 }
-                bucket.Add(new RegisterDrawingInfo(obj, target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid)));
-            }
 
-            foreach (var kv in buckets)
-            {
-                var actualItems = kv.Value;
-                try
+                foreach (var kv in buckets)
                 {
+                    var actualItems = kv.Value;
+                    if (actualItems.Count == 0)
+                        continue;
+
                     var tGrid = actualItems[0].TimelineObject.TGrid;
                     if (!target.CheckVisible(tGrid))
                     {
@@ -99,10 +102,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
                     DrawDescText(target, builder, y, actualItems);
                 }
-                finally
-                {
-                    actualItems.Dispose();
-                }
+            }
+            finally
+            {
+                // Return every bucket even when visibility or drawing callbacks fail.
+                foreach (var kv in buckets)
+                    kv.Value.Dispose();
             }
         }
 
