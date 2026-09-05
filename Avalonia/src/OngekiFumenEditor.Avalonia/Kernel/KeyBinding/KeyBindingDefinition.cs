@@ -72,7 +72,8 @@ public partial class KeyBindingDefinition : ObservableObject
         return FormatToExpression(definition.Key, definition.Modifiers);
     }
 
-    private static readonly Regex regex = new(@"(\s*\w+\s*\+\s*)?(\w+)");
+    [GeneratedRegex(@"(\s*\w+\s*\+\s*)?(\w+)")]
+    private static partial Regex KeybindRegex();
 
     public static bool TryParseExpression(string keybindExpr, out Key key, out KeyModifiers modifier)
     {
@@ -82,7 +83,7 @@ public partial class KeyBindingDefinition : ObservableObject
         if (string.IsNullOrWhiteSpace(keybindExpr))
             return true;
 
-        var match = regex.Match(keybindExpr);
+        var match = KeybindRegex().Match(keybindExpr);
         if (!match.Success)
             return false;
 

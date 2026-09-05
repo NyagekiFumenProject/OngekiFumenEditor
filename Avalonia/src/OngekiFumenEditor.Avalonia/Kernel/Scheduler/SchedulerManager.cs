@@ -1,6 +1,7 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Utils;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 
@@ -8,53 +9,70 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Scheduler;
 internal class SchedulerManager : ISchedulerManager
 {
     private readonly List<ISchedulable> schedulers = [];
-    private readonly ConcurrentDictionary<ISchedulable, DateTime> schedulersCallTime = [];
+    private readonly ConcurrentDictionary<ISchedulable, long> schedulersCallTime = [];
 
-    private CancellationTokenSource runCts;
-    private Task runTask;
+    private CancellationTokenSource? runCts;
+    private Task? runTask;
 
     public IEnumerable<ISchedulable> Schedulers => schedulers;
 
     public Task Init()
     {
-        foreach (var s in IoC.GetAll<ISchedulable>())
-            _ = AddScheduler(s);
+        foreach (var scheduler in IoC.GetAll<ISchedulable>())
+            _ = AddScheduler(scheduler);
 
         runCts = new CancellationTokenSource();
         runTask = Task.Run(() => Run(runCts.Token), runCts.Token);
         return Task.CompletedTask;
     }
 
-    public Task AddScheduler(ISchedulable s)
+    public Task AddScheduler(ISchedulable scheduler)
     {
-        if (s is null || schedulers.Any(x => x.SchedulerName.Equals(s.SchedulerName)))
+        if (scheduler is null)
         {
-            Log.LogWarning($"Can't add scheduler : {s?.SchedulerName} is null/exist.");
+            Log.LogWarning("Can't add a null scheduler.");
             return Task.CompletedTask;
         }
 
-        schedulers.Add(s);
-        schedulersCallTime[s] = DateTime.MinValue;
-        Log.LogDebug("Added new scheduler: " + s.SchedulerName);
+        foreach (var existing in schedulers)
+        {
+            if (existing.SchedulerName.Equals(scheduler.SchedulerName, StringComparison.Ordinal))
+            {
+                Log.LogWarning($"Can't add scheduler : {scheduler.SchedulerName} is already registered.");
+                return Task.CompletedTask;
+            }
+        }
+
+        schedulers.Add(scheduler);
+        schedulersCallTime[scheduler] = 0;
+        Log.LogDebug("Added new scheduler: " + scheduler.SchedulerName);
         return Task.CompletedTask;
     }
 
     private async Task Run(CancellationToken cancellationToken)
     {
+        var pending = new List<Task>(16);
+
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                var pending = Schedulers
-                    .Where(x => x is not null && DateTime.Now - schedulersCallTime[x] >= x.ScheduleCallLoopInterval)
-                    .Select(async x =>
-                    {
-                        await x.OnScheduleCall(cancellationToken);
-                        schedulersCallTime[x] = DateTime.Now;
-                    })
-                    .ToArray();
+                pending.Clear();
+                var nowTimestamp = Stopwatch.GetTimestamp();
 
-                if (pending.Length > 0)
+                foreach (var scheduler in schedulers)
+                {
+                    if (scheduler is null)
+                        continue;
+
+                    var lastTimestamp = schedulersCallTime[scheduler];
+                    if (Stopwatch.GetElapsedTime(lastTimestamp, nowTimestamp) < scheduler.ScheduleCallLoopInterval)
+                        continue;
+
+                    pending.Add(InvokeAndStamp(scheduler, cancellationToken));
+                }
+
+                if (pending.Count > 0)
                     await Task.WhenAll(pending);
                 else
                     await Task.Delay(10, cancellationToken);
@@ -63,10 +81,22 @@ internal class SchedulerManager : ISchedulerManager
             {
                 break;
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                Log.LogError($"scheduler loop throw exception:{e}", e);
+                Log.LogError($"scheduler loop throw exception:{exception}", exception);
             }
+        }
+    }
+
+    private async Task InvokeAndStamp(ISchedulable scheduler, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await scheduler.OnScheduleCall(cancellationToken);
+        }
+        finally
+        {
+            schedulersCallTime[scheduler] = Stopwatch.GetTimestamp();
         }
     }
 
@@ -89,8 +119,8 @@ internal class SchedulerManager : ISchedulerManager
             }
 
             runCts.Dispose();
-            runCts = default;
-            runTask = default;
+            runCts = null;
+            runTask = null;
         }
 
         foreach (var scheduler in Schedulers)
@@ -100,16 +130,33 @@ internal class SchedulerManager : ISchedulerManager
         }
     }
 
-    public Task RemoveScheduler(ISchedulable s)
+    public Task RemoveScheduler(ISchedulable scheduler)
     {
-        if (s is null || schedulers.All(x => !x.SchedulerName.Equals(s.SchedulerName)))
+        if (scheduler is null)
         {
-            Log.LogWarning($"Can't remove scheduler : {s?.SchedulerName} is null or not exist.");
+            Log.LogWarning("Can't remove a null scheduler.");
             return Task.CompletedTask;
         }
 
-        schedulers.Remove(s);
-        Log.LogDebug("Remove scheduler: " + s.SchedulerName);
+        var removed = false;
+        for (var index = 0; index < schedulers.Count; index++)
+        {
+            if (!schedulers[index].SchedulerName.Equals(scheduler.SchedulerName, StringComparison.Ordinal))
+                continue;
+
+            schedulers.RemoveAt(index);
+            schedulersCallTime.TryRemove(scheduler, out _);
+            removed = true;
+            break;
+        }
+
+        if (!removed)
+        {
+            Log.LogWarning($"Can't remove scheduler : {scheduler.SchedulerName} is not registered.");
+            return Task.CompletedTask;
+        }
+
+        Log.LogDebug("Remove scheduler: " + scheduler.SchedulerName);
         return Task.CompletedTask;
     }
 }

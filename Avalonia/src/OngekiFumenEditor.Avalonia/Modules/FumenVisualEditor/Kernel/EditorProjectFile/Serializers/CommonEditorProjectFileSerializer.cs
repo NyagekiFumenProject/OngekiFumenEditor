@@ -15,18 +15,45 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 		private static readonly JsonTypeInfo<T> jsonTypeInfo =
 			EditorProjectJsonSerialization.GetTypeInfo<T>();
 
-		public override Task<bool> CheckParsableAsync(byte[] buffer)
-		{
-			using var document = JsonDocument.Parse(buffer);
-			var isMatch = document.RootElement.TryGetProperty(
-				nameof(EditorProjectDataModelBase.Version),
-				out var versionElement) &&
-				versionElement.ValueKind == JsonValueKind.String &&
-				System.Version.TryParse(versionElement.GetString(), out var version) &&
-				version.Equals(Version);
+        public override Task<bool> CheckParsableAsync(byte[] buffer)
+        {
+            return Task.FromResult(TryReadTopLevelVersion(buffer, out var version) && version == Version);
+        }
 
-			return Task.FromResult(isMatch);
-		}
+        private static bool TryReadTopLevelVersion(ReadOnlySpan<byte> buffer, out Version version)
+        {
+            version = null!;
+            try
+            {
+                var reader = new Utf8JsonReader(buffer, isFinalBlock: true, state: default);
+                if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject)
+                    return false;
+
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.EndObject && reader.CurrentDepth == 0)
+                        return false;
+
+                    if (reader.TokenType != JsonTokenType.PropertyName || reader.CurrentDepth != 1)
+                        continue;
+
+                    if (!reader.ValueTextEquals("Version"u8))
+                    {
+                        reader.Skip();
+                        continue;
+                    }
+
+                    if (!reader.Read() || reader.TokenType != JsonTokenType.String)
+                        return false;
+                    return Version.TryParse(reader.GetString(), out version);
+                }
+            }
+            catch (JsonException)
+            {
+            }
+
+            return false;
+        }
 
 		public override async Task<T> ParseAsync(byte[] buffer)
 		{

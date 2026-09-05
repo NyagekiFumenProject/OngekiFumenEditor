@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
 			var bpl = new BulletPallete();
 
 			bpl.StrID = dataStrArr.ElementAtOrDefault(1);
-			bpl.ShooterValue = dataStrArr.ElementAtOrDefault(2)?.ToUpper() switch
+            bpl.ShooterValue = dataStrArr.ElementAtOrDefault(2)?.ToUpperInvariant() switch
 			{
 				"UPS" => Shooter.TargetHead,
 				"ENE" => Shooter.Enemy,
@@ -30,19 +30,19 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
 				_ => WarnAndDefault("Shooter", dataStrArr.ElementAtOrDefault(2), Shooter.TargetHead),
 			};
 			bpl.PlaceOffset = dataIntArr.ElementAtOrDefault(3);
-			bpl.TargetValue = dataStrArr.ElementAtOrDefault(4)?.ToUpper() switch
+            bpl.TargetValue = dataStrArr.ElementAtOrDefault(4)?.ToUpperInvariant() switch
 			{
 				"PLR" => Target.Player,
 				"FIX" => Target.FixField,
 				_ => WarnAndDefault("Target", dataStrArr.ElementAtOrDefault(4), Target.Player),
 			};
 			bpl.Speed = dataFloatArr.ElementAtOrDefault(5);
-			bpl.SizeValue = dataStrArr.ElementAtOrDefault(6)?.ToUpper() switch
+            bpl.SizeValue = dataStrArr.ElementAtOrDefault(6)?.ToUpperInvariant() switch
 			{
 				"L" => BulletSize.Large,
 				"N" or _ => BulletSize.Normal,
 			};
-			bpl.TypeValue = dataStrArr.ElementAtOrDefault(7)?.ToUpper() switch
+            bpl.TypeValue = dataStrArr.ElementAtOrDefault(7)?.ToUpperInvariant() switch
 			{
 				"SQR" => BulletType.Square,
 				"NDL" => BulletType.Needle,

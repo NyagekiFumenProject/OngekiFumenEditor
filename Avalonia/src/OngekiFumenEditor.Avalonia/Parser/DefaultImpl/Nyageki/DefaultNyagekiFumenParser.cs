@@ -1,6 +1,7 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Objects;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,12 +18,14 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 		public static readonly string[] FumenFileExtensions = new[] { ".nyageki" };
 		public string[] SupportFumenFileExtensions => FumenFileExtensions;
 
-		Dictionary<string, INyagekiCommandParser> commandParsers;
+    private readonly Dictionary<string, INyagekiCommandParser> commandParsers;
 
-				public DefaultNyagekiFumenParser(IEnumerable<INyagekiCommandParser> commandParsers)
-		{
-			this.commandParsers = commandParsers.ToDictionary(x => x.CommandName.Trim().ToLower(), x => x);
-		}
+    public DefaultNyagekiFumenParser(IEnumerable<INyagekiCommandParser> commandParsers)
+    {
+        this.commandParsers = new Dictionary<string, INyagekiCommandParser>(StringComparer.OrdinalIgnoreCase);
+        foreach (var parser in commandParsers)
+            this.commandParsers[parser.CommandName.Trim()] = parser;
+    }
 
 		public async Task<OngekiFumen> DeserializeAsync(Stream stream)
 		{
@@ -37,8 +40,8 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki
 				if (line is null)
 					break;
 
-				var seg = line.Split(':', 2);
-				var commandName = seg[0].ToLower().Trim();
+                var seg = line.Split(':', 2);
+                var commandName = seg[0].Trim();
 
 				if (commandParsers.TryGetValue(commandName, out var commandParser))
 				{

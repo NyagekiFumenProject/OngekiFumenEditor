@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
             bell.TGrid.Grid = (int)dataArr[2];
             bell.XGrid.Unit = dataArr[3];
 
-            var shoot = args.GetData<string>(4)?.ToUpper();
+            var shoot = args.GetData<string>(4)?.ToUpperInvariant();
             bell.ShooterValue = shoot switch
             {
                 "UPS" => Shooter.TargetHead,
@@ -35,7 +35,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
 
             bell.PlaceOffset = args.GetData<int>(5);
 
-            var target = args.GetData<string>(6)?.ToUpper();
+            var target = args.GetData<string>(6)?.ToUpperInvariant();
             bell.TargetValue = target switch
             {
                 "PLR" => Target.Player,
@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl
 
             bell.Speed = args.GetData<float>(7);
 
-            var size = args.GetData<string>(8)?.ToUpper();
+            var size = args.GetData<string>(8)?.ToUpperInvariant();
             bell.SizeValue = size switch
             {
                 "N" => BulletSize.Normal,

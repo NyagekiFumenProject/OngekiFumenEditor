@@ -62,12 +62,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel.EditorProj
 			return await Load(stream, cancellationToken);
 		}
 
-		public async Task<EditorProjectDataModel> Clone(EditorProjectDataModel proj)
-		{
-			var ms = new MemoryStream();
-			await manager.Save(ms, proj, typeof(EditorProjectDataModel));
-			return await manager.Load<EditorProjectDataModel>(ms.ToArray());
-		}
+        public async Task<EditorProjectDataModel> Clone(EditorProjectDataModel proj)
+        {
+            using var ms = new MemoryStream(256 * 1024);
+            await manager.Save(ms, proj, typeof(EditorProjectDataModel));
+            return await manager.Load<EditorProjectDataModel>(ms.ToArray());
+        }
 
 		public Task Save(
 			string filePath,
