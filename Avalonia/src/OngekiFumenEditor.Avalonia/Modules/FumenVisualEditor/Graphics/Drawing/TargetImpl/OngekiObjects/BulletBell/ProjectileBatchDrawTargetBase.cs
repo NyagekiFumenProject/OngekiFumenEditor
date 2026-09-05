@@ -8,25 +8,38 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
-using OngekiFumenEditor.Avalonia.UI.Controls.ObjectInspector;
 using OngekiFumenEditor.Avalonia.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Controls;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     public abstract class ProjectileBatchDrawTargetBase<T> : CommonBatchDrawTargetBase<T>, IDisposable where T : OngekiMovableObjectBase, IProjectile
     {
-        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
-        protected Dictionary<IImage, ConcurrentBag<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
+        public sealed class DrawBuffer
+        {
+            public Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> Normal;
+            public Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> Selected;
+            public List<(Vector2 pos, string str)> StrList;
+        }
+
+        private const int InitialListCapacity = 256;
+
+        protected Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> normalDrawList = new();
+        protected Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> selectedDrawList = new();
         protected List<(Vector2 pos, string str)> drawStrList = new();
+
+        private DrawBuffer mainBuffer;
+        private readonly Stack<DrawBuffer> bufferPool = new();
+
+        private static readonly Comparison<(Vector2, Vector2, float, Vector4)> _yCompare =
+            static (a, b) => a.Item2.Y.CompareTo(b.Item2.Y);
 
         private readonly SoflanList nonSoflanList = new([new Soflan() { TGrid = TGrid.Zero, Speed = 1 }]);
         private ParallelOptions parallelOptions;
@@ -34,6 +47,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public override void Initialize(IRenderManagerImpl impl)
         {
+            ResetDrawResources();
+
             parallelOptions = new ParallelOptions()
             {
                 MaxDegreeOfParallelism = Math.Max(2, Environment.ProcessorCount - 2),
@@ -42,15 +57,22 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             Log.LogDebug($"BulletDrawingTarget.MaxDegreeOfParallelism = {parallelOptions.MaxDegreeOfParallelism}");
 
             parallelCountLimit = Properties.EditorGlobalSetting.Default.ParallelCountLimit;
+
+            mainBuffer = new DrawBuffer
+            {
+                Normal = normalDrawList,
+                Selected = selectedDrawList,
+                StrList = drawStrList,
+            };
         }
 
         public virtual void Dispose()
         {
-            ClearDrawList();
+            ResetDrawResources();
         }
 
-        public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
-        public abstract void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate);
+        public abstract void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate, DrawBuffer buffer);
+        public abstract void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, T obj, Vector2 pos, float rotate, DrawBuffer buffer);
 
         private void DrawDesignMode(IFumenEditorDrawingContext target, T obj)
         {
@@ -58,7 +80,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             var toTime = target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid);
 
             var pos = new Vector2((float)toX, (float)toTime);
-            DrawVisibleObject_DesignMode(target, obj, pos, 0);
+            DrawVisibleObject_DesignMode(target, obj, pos, 0, mainBuffer);
         }
 
         private void DrawPallateStr(IDrawCommandListBuilder builder)
@@ -76,16 +98,95 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             drawStrList.Clear();
         }
 
+        private void ResetDrawResources()
+        {
+            foreach (var texture in normalDrawList.Keys)
+                texture.Dispose();
+
+            normalDrawList.Clear();
+            selectedDrawList.Clear();
+            drawStrList.Clear();
+
+            lock (bufferPool)
+            {
+                bufferPool.Clear();
+            }
+        }
+
+        private DrawBuffer CreateThreadLocalBuffer()
+        {
+            var normal = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(normalDrawList.Count);
+            foreach (var key in normalDrawList.Keys)
+                normal[key] = new List<(Vector2, Vector2, float, Vector4)>(InitialListCapacity);
+            var selected = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(selectedDrawList.Count);
+            foreach (var key in selectedDrawList.Keys)
+                selected[key] = new List<(Vector2, Vector2, float, Vector4)>(InitialListCapacity);
+            return new DrawBuffer { Normal = normal, Selected = selected, StrList = null };
+        }
+
+        private DrawBuffer RentBuffer()
+        {
+            lock (bufferPool)
+            {
+                while (bufferPool.TryPop(out var buf))
+                {
+                    if (IsBufferCompatible(buf))
+                    {
+                        foreach (var list in buf.Normal.Values)
+                            list.Clear();
+                        foreach (var list in buf.Selected.Values)
+                            list.Clear();
+                        return buf;
+                    }
+                }
+            }
+            return CreateThreadLocalBuffer();
+        }
+
+        private bool IsBufferCompatible(DrawBuffer buffer)
+        {
+            return buffer.Normal.Count == normalDrawList.Count
+                && buffer.Selected.Count == selectedDrawList.Count
+                && normalDrawList.Keys.All(buffer.Normal.ContainsKey)
+                && selectedDrawList.Keys.All(buffer.Selected.ContainsKey);
+        }
+
+        private void MergeAndReturnBuffer(DrawBuffer local)
+        {
+            lock (normalDrawList)
+            {
+                foreach (var (key, list) in local.Normal)
+                {
+                    if (list.Count > 0 && normalDrawList.TryGetValue(key, out var dst))
+                        dst.AddRange(list);
+                }
+                foreach (var (key, list) in local.Selected)
+                {
+                    if (list.Count > 0 && selectedDrawList.TryGetValue(key, out var dst))
+                        dst.AddRange(list);
+                }
+            }
+            lock (bufferPool)
+            {
+                bufferPool.Push(local);
+            }
+        }
+
         private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
             var currentTGrid = TGridCalculator.ConvertAudioTimeToTGrid(target.CurrentPlayTime, target.Editor);
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
-            var baseY = Math.Min(target.CurrentDrawingTargetContext.WorldRect.MinY, target.CurrentDrawingTargetContext.WorldRect.MaxY) + judgeOffset;
+            var rect = target.CurrentDrawingTargetContext.ViewRelativeRect;
+            var rectMinX = rect.MinX;
+            var rectMaxX = rect.MaxX;
+            var rectMinY = rect.MinY;
+            var rectMaxY = rect.MaxY;
+            var baseY = Math.Min(rectMinY, rectMaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
             var bpmList = target.Editor.EditorContext.Fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
             //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
-            var height = target.CurrentDrawingTargetContext.WorldRect.Height;
+            var height = rect.Height;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             double convertToYNonSoflan(TGrid tgrid)
@@ -111,10 +212,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             var randomSeed = BulletPallete.RandomSeed;
 
-            void _Draw(T obj)
+            void _Draw(T obj, DrawBuffer buffer)
             {
                 /*
-                --------------------------- toTime 
+                --------------------------- toTime
                         \
                          \
                           \
@@ -130,8 +231,13 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 ---------------------------- fromTime = toTime - appearOffsetTime
                  */
 
-                //计算向量化的物件运动时间
-                var appearOffsetTime = height / obj.Speed;
+                //一次性读取 obj 的热点属性到本地，避免反复走 virtual getter + pallete 三元判断
+                var objSpeed = obj.Speed;
+                var objTGrid = obj.TGrid;
+                var objXGrid = obj.XGrid;
+
+                //子弹完全经过画面所需的运动时间
+                var appearOffsetTime = height / objSpeed;
 
                 var toTime = 0d;
                 var currentTime = 0d;
@@ -139,12 +245,12 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 if (obj.IsEnableSoflan)
                 {
                     var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                    toTime = convertToY(obj.TGrid, soflanList);
+                    toTime = convertToY(objTGrid, soflanList);
                     currentTime = convertToY(currentTGrid, soflanList);
                 }
                 else
                 {
-                    toTime = convertToYNonSoflan(obj.TGrid);
+                    toTime = convertToYNonSoflan(objTGrid);
                     currentTime = nonSoflanCurrentTime;
                 }
 
@@ -152,10 +258,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var precent = (currentTime - fromTime) / appearOffsetTime;
                 var timeY = baseY + height * (1 - precent);
 
-                if (timeY > target.CurrentDrawingTargetContext.WorldRect.MaxY)
+                if (timeY > rectMaxY)
                     return;
-                //todo CheckVisible()这里是考虑到光焰那个Bell会残留，因为画轴速度太快（感觉是个bug但后面有精力再坐牢吧）
-                if (timeY < target.CurrentDrawingTargetContext.WorldRect.MinY || (precent > 1 && !target.CheckVisible(obj.TGrid)))
+                if (timeY < rectMinY || (precent > 1 && !target.CheckVisible(objTGrid)))
                     return;
 
                 var fromXUnit = 0d;
@@ -168,17 +273,17 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 switch (obj.TargetValue)
                 {
                     case Target.Player:
-                        var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(obj.Speed, 1));
-                        var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
+                        var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(objSpeed, 1));
+                        var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(objTGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
                         if (targetAudioTime < TimeSpan.Zero)
                             targetAudioTime = TimeSpan.Zero;
 
                         toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
-                        toXUnit += obj.XGrid.TotalUnit;
+                        toXUnit += objXGrid.TotalUnit;
                         break;
                     case Target.FixField:
                     default:
-                        toXUnit = obj.XGrid.TotalUnit;
+                        toXUnit = objXGrid.TotalUnit;
                         break;
                 }
 
@@ -186,7 +291,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 if (rosr > 0)
                 {
                     var id = obj.Id;
-                    //不想用Random类，直接异或计算吧
+                    //不使用Random类，避免随机数干扰
                     var seed = Math.Abs((randomSeed * id + 123) * id ^ id);
                     var actualRandomOffset = (-rosr) + (seed % (rosr - (-rosr) + 1));
                     toXUnit += actualRandomOffset;
@@ -202,10 +307,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                         fromXUnit = toXUnit;
                         break;
                     case Shooter.Enemy:
-                        var tGrid = obj.TGrid;
-                        var enemyLane = fumen.Lanes.GetVisibleStartObjects(tGrid, tGrid).OfType<EnemyLaneStart>().LastOrDefault();
-                        var xGrid = enemyLane?.CalulateXGrid(tGrid);
-                        fromXUnit = xGrid?.TotalUnit ?? obj.XGrid.TotalUnit;
+                        var enemyLane = fumen.Lanes.GetVisibleStartObjects(objTGrid, objTGrid).OfType<EnemyLaneStart>().LastOrDefault();
+                        var xGrid = enemyLane?.CalulateXGrid(objTGrid);
+                        fromXUnit = xGrid?.TotalUnit ?? objXGrid.TotalUnit;
                         break;
                     case Shooter.Center:
                     default:
@@ -221,28 +325,38 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var toX = convertToX(toXUnit);
                 var timeX = MathUtils.CalculateXFromTwoPointFormFormula(currentTime, fromX, fromTime, toX, toTime);
 
-                if (!(target.CurrentDrawingTargetContext.WorldRect.MinX <= timeX && timeX <= target.CurrentDrawingTargetContext.WorldRect.MaxX))
+                if (!(rectMinX <= timeX && timeX <= rectMaxX))
                     return;
 
-                var rotate = (float)Math.Atan((toX - fromX) / (toTime - fromTime));
+                var rotate = (float)Math.Atan2(toX - fromX, height);
                 var pos = new Vector2((float)timeX, (float)timeY);
 
-                DrawVisibleObject_PreviewMode(target, obj, pos, rotate);
+                DrawVisibleObject_PreviewMode(target, obj, pos, rotate, buffer);
             }
 
             /*
-             存在spd < 1或者soflan影响的子弹/bell物件。因此无法简单的使用二分法快速枚举筛选物件
-             使用并行计算，将所有bell/bullet全部判断，当然判断的结果也能直接拿来做计算
-             //todo 还能优化
+             由于spd < 1或者soflan影响下的子弹/bell的轨迹是无法简单地使用二分法或者枚举筛选出来
+             使用并行计算，对所有bell/bullet全部判断，虽然判断的结果也只直接传给后续绘制
+             //todo 进一步优化
              */
-            if (objs.Count() < parallelCountLimit)
+            var totalCount = (objs as ICollection<T>)?.Count ?? objs.Count();
+            if (totalCount < parallelCountLimit)
             {
                 foreach (var obj in objs)
-                    _Draw(obj);
+                    _Draw(obj, mainBuffer);
             }
             else
             {
-                Parallel.ForEach(objs, parallelOptions, _Draw);
+                Parallel.ForEach(
+                    objs,
+                    parallelOptions,
+                    RentBuffer,
+                    (obj, _, local) =>
+                    {
+                        _Draw(obj, local);
+                        return local;
+                    },
+                    MergeAndReturnBuffer);
             }
         }
 
@@ -258,10 +372,22 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 DrawPreviewMode(target, objs);
             }
 
-            foreach (var item in selectedDrawList)
-                builder.DrawHighlightBatchTexture(item.Key, item.Value.OrderBy(x => x.Item2.Y));
-            foreach (var item in normalDrawList)
-                builder.DrawBatchTexture(item.Key, item.Value.OrderBy(x => x.Item2.Y));
+            foreach (var (texture, list) in selectedDrawList)
+            {
+                if (list.Count == 0)
+                    continue;
+                var span = CollectionsMarshal.AsSpan(list);
+                span.Sort(_yCompare);
+                builder.DrawHighlightBatchTexture(texture, list);
+            }
+            foreach (var (texture, list) in normalDrawList)
+            {
+                if (list.Count == 0)
+                    continue;
+                var span = CollectionsMarshal.AsSpan(list);
+                span.Sort(_yCompare);
+                builder.DrawBatchTexture(texture, list);
+            }
 
             if (target.Editor.IsDesignMode)
                 DrawPallateStr(builder);
@@ -270,5 +396,3 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         }
     }
 }
-
-
