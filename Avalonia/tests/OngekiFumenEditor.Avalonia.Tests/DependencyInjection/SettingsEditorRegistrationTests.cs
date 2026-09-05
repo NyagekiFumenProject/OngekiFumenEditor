@@ -185,6 +185,65 @@ public sealed class SettingsEditorRegistrationTests
     }
 
     [AvaloniaFact]
+    public void TimingOffsetAndHoldWidthControlsUseBoundedTwoWayBindings()
+    {
+        var editorSetting = EditorGlobalSetting.Default;
+        var audioSetting = AudioSetting.Default;
+        var originalEditorOffset = editorSetting.EditorOffsetMs;
+        var originalSoundOffset = audioSetting.SoundOffsetMs;
+        var originalHoldBodyWidth = editorSetting.HoldBodyWidth;
+
+        try
+        {
+            editorSetting.EditorOffsetMs = 0;
+            audioSetting.SoundOffsetMs = 0;
+            editorSetting.HoldBodyWidth = 13;
+
+            var editorView = new FumenVisualEditorGlobalSettingView
+            {
+                DataContext = new FumenVisualEditorGlobalSettingViewModel()
+            };
+            var audioView = new AudioSettingView
+            {
+                DataContext = new AudioSettingViewModel()
+            };
+
+            var editorOffset = Assert.IsType<NumericUpDown>(
+                editorView.FindControl<NumericUpDown>("EditorOffsetNumericUpDown"));
+            var soundOffset = Assert.IsType<NumericUpDown>(
+                audioView.FindControl<NumericUpDown>("SoundOffsetNumericUpDown"));
+            var holdBodyWidth = Assert.IsType<NumericUpDown>(
+                editorView.FindControl<NumericUpDown>("HoldBodyWidthNumericUpDown"));
+
+            Assert.Equal(int.MinValue, editorOffset.Minimum);
+            Assert.Equal(int.MaxValue, editorOffset.Maximum);
+            Assert.Equal(int.MinValue, soundOffset.Minimum);
+            Assert.Equal(int.MaxValue, soundOffset.Maximum);
+            Assert.Equal(1, holdBodyWidth.Minimum);
+            Assert.Equal(50, holdBodyWidth.Maximum);
+
+            editorOffset.Value = -275;
+            soundOffset.Value = 340;
+            holdBodyWidth.Value = 99;
+
+            Assert.Equal(-275, editorSetting.EditorOffsetMs);
+            Assert.Equal(340, audioSetting.SoundOffsetMs);
+            Assert.Equal(50, editorSetting.HoldBodyWidth);
+
+            editorSetting.EditorOffsetMs = 125;
+            audioSetting.SoundOffsetMs = -90;
+            Assert.Equal(125, editorOffset.Value);
+            Assert.Equal(-90, soundOffset.Value);
+        }
+        finally
+        {
+            editorSetting.EditorOffsetMs = originalEditorOffset;
+            audioSetting.SoundOffsetMs = originalSoundOffset;
+            editorSetting.HoldBodyWidth = originalHoldBodyWidth;
+        }
+    }
+
+    [AvaloniaFact]
     public void LogsSettingView_ShowsEffectivePlatformFolderAsReadOnly()
     {
         const string effectivePath = "opfs:/logs";

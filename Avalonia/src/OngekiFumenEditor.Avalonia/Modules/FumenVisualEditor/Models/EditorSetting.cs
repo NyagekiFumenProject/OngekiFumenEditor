@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Utils;
 using System;
 using System.Threading.Tasks;
@@ -329,6 +329,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Models
                 case nameof(Properties.EditorGlobalSetting.IsEnableUndoActionSavingLimit):
                 case nameof(Properties.EditorGlobalSetting.UndoActionSavingLimit):
                 case nameof(Properties.EditorGlobalSetting.RecoveryCurrentTimeAfterExecuteAction):
+                case nameof(Properties.EditorGlobalSetting.EditorOffsetMs):
+                case nameof(Properties.EditorGlobalSetting.HoldBodyWidth):
                     break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");

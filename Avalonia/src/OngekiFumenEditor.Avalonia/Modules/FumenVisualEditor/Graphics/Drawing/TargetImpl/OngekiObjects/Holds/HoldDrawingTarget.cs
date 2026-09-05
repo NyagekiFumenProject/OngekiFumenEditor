@@ -27,20 +27,33 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         private Vector4 colorHoldRight;
         private Vector4 colorHoldWallLeft;
         private Vector4 colorHoldWallRight;
+        private int holdBodyWidth;
+
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+            var setting = Properties.EditorGlobalSetting.Default;
+            setting.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            setting.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();
+            RebuildHoldBodyWidth();
         }
+
 
         private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (!e.PropertyName.StartsWith("ColorHold"))
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.HoldBodyWidth))
+            {
+                RebuildHoldBodyWidth();
+                return;
+            }
+
+            if (e.PropertyName is not { } propertyName || !propertyName.StartsWith("ColorHold", StringComparison.Ordinal))
                 return;
 
             RebuildColors();
         }
+
 
         private void RebuildColors()
         {
@@ -59,6 +72,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             //Log.LogInfo($"hold color has been rebuild.");
         }
+        private void RebuildHoldBodyWidth()
+        {
+            holdBodyWidth = Properties.EditorGlobalSetting.Default.HoldBodyWidth;
+        }
+
 
         public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, Hold hold)
         {
@@ -141,7 +159,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
                 }
 
-                builder.DrawLines(list, 13);
+                builder.DrawLines(list, holdBodyWidth);
             }
         }
     }

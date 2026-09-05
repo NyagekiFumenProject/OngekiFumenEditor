@@ -296,6 +296,10 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
 
         var currentTime = player.CurrentTime;
 
+        var soundOffsetMs = AudioSetting.Default.SoundOffsetMs;
+        if (soundOffsetMs != 0)
+            currentTime += TimeSpan.FromMilliseconds(soundOffsetMs);
+
         while (itor is not null)
         {
             var ct = currentTime.TotalMilliseconds - itor.Value.Time.TotalMilliseconds;

@@ -348,7 +348,17 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         //计算可以显示的TGrid范围以及像素范围
 
-        var tGrid = GetCurrentTGrid();
+        var tGrid = GetViewportTGrid();
+        var editorOffsetMs = EditorGlobalSetting.Default.EditorOffsetMs;
+        if (editorOffsetMs != 0)
+        {
+            var adjustedViewportAudioTime = GetViewportAudioTime() + TimeSpan.FromMilliseconds(editorOffsetMs);
+            if (adjustedViewportAudioTime < TimeSpan.Zero)
+                adjustedViewportAudioTime = TimeSpan.Zero;
+            tGrid = TGridCalculator.ConvertAudioTimeToTGrid(adjustedViewportAudioTime, fumen.BpmList);
+        }
+
+        tGrid ??= TGrid.Zero;
 
         #region prepare drawing contexts' for every soflan groups 
 

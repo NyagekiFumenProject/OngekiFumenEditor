@@ -69,6 +69,30 @@ public sealed class EditorUiRegressionTests
     }
 
     [Fact]
+    public void TimingOffsetsAndHoldWidth_RoundTripThroughGeneratedJsonMetadata()
+    {
+        var editorJson = JsonSerializer.Serialize(
+            new EditorGlobalSetting { EditorOffsetMs = -275, HoldBodyWidth = 22 },
+            EditorGlobalSetting.JsonTypeInfo);
+        var audioJson = JsonSerializer.Serialize(
+            new AudioSetting { SoundOffsetMs = 340 },
+            AudioSetting.JsonTypeInfo);
+
+        var editorRoundTrip = JsonSerializer.Deserialize(editorJson, EditorGlobalSetting.JsonTypeInfo);
+        var audioRoundTrip = JsonSerializer.Deserialize(audioJson, AudioSetting.JsonTypeInfo);
+
+        Assert.NotNull(editorRoundTrip);
+        Assert.NotNull(audioRoundTrip);
+        Assert.Equal(-275, editorRoundTrip.EditorOffsetMs);
+        Assert.Equal(22, editorRoundTrip.HoldBodyWidth);
+        Assert.Equal(340, audioRoundTrip.SoundOffsetMs);
+
+        var invalidWidth = JsonSerializer.Deserialize("{\"HoldBodyWidth\":999}", EditorGlobalSetting.JsonTypeInfo);
+        Assert.NotNull(invalidWidth);
+        Assert.Equal(50, invalidWidth.HoldBodyWidth);
+    }
+
+    [Fact]
     public void EditorGlobalSetting_OnDeserialized_RestoresLegacyEmptyHoldColors()
     {
         var setting = new EditorGlobalSetting

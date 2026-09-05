@@ -30,6 +30,19 @@ public partial class EditorGlobalSetting : SettingModelBase<EditorGlobalSetting>
     public partial double JudgeLineOffsetY { get; set; } = 50;
 
     [ObservableProperty]
+    public partial int EditorOffsetMs { get; set; } = 0;
+
+    private const int HoldBodyWidthMin = 1;
+    private const int HoldBodyWidthMax = 50;
+    private int holdBodyWidth = 13;
+
+    public int HoldBodyWidth
+    {
+        get => holdBodyWidth;
+        set => SetProperty(ref holdBodyWidth, Math.Clamp(value, HoldBodyWidthMin, HoldBodyWidthMax));
+    }
+
+    [ObservableProperty]
     public partial bool DisableXGridMagneticDock { get; set; } = false;
 
     [ObservableProperty]

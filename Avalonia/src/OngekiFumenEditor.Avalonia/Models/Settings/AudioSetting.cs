@@ -30,6 +30,9 @@ public partial class AudioSetting : SettingModelBase<AudioSetting>
     public partial bool EnableSoundMultiPlay { get; set; } = true;
 
     [ObservableProperty]
+    public partial int SoundOffsetMs { get; set; } = 0;
+
+    [ObservableProperty]
     public partial bool EnableVarspeed { get; set; } = false;
 
     [ObservableProperty]

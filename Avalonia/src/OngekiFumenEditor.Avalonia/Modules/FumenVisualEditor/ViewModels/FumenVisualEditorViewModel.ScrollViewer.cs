@@ -1,4 +1,4 @@
-﻿using Gekimini.Avalonia.Framework;
+using Gekimini.Avalonia.Framework;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Utils;
 using System;
@@ -102,8 +102,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
 		#endregion
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TGrid GetViewportTGrid() => GetCurrentTGrid();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public TimeSpan GetViewportAudioTime() => CurrentPlayTime;
 	}
 }
 
