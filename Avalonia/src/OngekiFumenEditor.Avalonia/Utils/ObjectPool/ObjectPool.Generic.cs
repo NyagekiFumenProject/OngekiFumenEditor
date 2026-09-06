@@ -48,14 +48,6 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
             obj = pool.Get();
         }
 
-#if DEBUG
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Get(string rentMark, out T obj) => Get(out obj);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Get(string rentMark) => Get();
-#endif
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get()
         {

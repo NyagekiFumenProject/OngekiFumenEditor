@@ -9,12 +9,6 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
         public static void Return<T>(T obj) where T : class, new()
             => ObjectPool<T>.Return(obj);
 
-#if DEBUG
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Get<T>(string rentMark) where T : class, new()
-            => ObjectPool<T>.Get(rentMark);
-#endif
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Get<T>() where T : class, new()
             => ObjectPool<T>.Get();

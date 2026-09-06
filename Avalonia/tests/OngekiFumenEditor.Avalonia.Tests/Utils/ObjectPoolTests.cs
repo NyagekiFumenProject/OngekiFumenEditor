@@ -1,3 +1,4 @@
+using IResettable = Microsoft.Extensions.ObjectPool.IResettable;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using Xunit;
 
@@ -123,15 +124,43 @@ public sealed class ObjectPoolTests
     }
 
     [Fact]
-    public void Return_Null_DoesNothing()
+    public void GenericPool_ReturnResetsStateAndRejectsUnresettableObjects()
     {
-        var exception = Record.Exception(() => ObjectPool<ReturnItem>.Return(null!));
+        var item = ObjectPool<ResettableItem>.Get();
+        item.Value = 42;
+        ObjectPool<ResettableItem>.Return(item);
 
-        Assert.Null(exception);
+        var reusable = ObjectPool<ResettableItem>.Get();
+        Assert.Equal(0, reusable.Value);
+        reusable.CanReset = false;
+        ObjectPool<ResettableItem>.Return(reusable);
+
+        var next = ObjectPool<ResettableItem>.Get();
+        try
+        {
+            Assert.NotSame(reusable, next);
+            Assert.True(next.CanReset);
+        }
+        finally
+        {
+            ObjectPool<ResettableItem>.Return(next);
+        }
     }
 
     public sealed class WrapperItem { }
     public sealed class LeaseItem { }
     public sealed class ConcurrentItem { }
-    public sealed class ReturnItem { }
+    public sealed class ResettableItem : IResettable
+    {
+        public int Value { get; set; }
+        public bool CanReset { get; set; } = true;
+
+        public bool TryReset()
+        {
+            if (!CanReset)
+                return false;
+            Value = 0;
+            return true;
+        }
+    }
 }
