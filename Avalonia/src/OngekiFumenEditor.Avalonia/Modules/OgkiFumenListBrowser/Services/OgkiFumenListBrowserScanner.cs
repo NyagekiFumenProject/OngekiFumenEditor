@@ -39,7 +39,8 @@ public sealed partial class OgkiFumenListBrowserScanner
 
     public async Task<IReadOnlyList<OngekiFumenSet>> ScanAsync(
         ISimpleDirectory root,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        string? rootDirectoryName = null)
     {
         ArgumentNullException.ThrowIfNull(root);
         // Keep the scan index limited to metadata and jacket candidates. Large game
@@ -50,14 +51,14 @@ public sealed partial class OgkiFumenListBrowserScanner
         var audioBySourceId = new Dictionary<int, AudioResource>();
         var jacketsByMusicId = new Dictionary<int, JacketResource>();
 
-        foreach (var entry in EnumerateFiles(root, cancellationToken))
+        foreach (var entry in EnumerateFiles(root, cancellationToken, directoryName: rootDirectoryName))
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (entry.Capability.FileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase))
                 audioEntries.Add(entry);
             else if (entry.Capability.FileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase))
                 musicEntries.Add(entry);
-            else if (TryParseJacket(entry.Capability.FileName, entry.Locator, out var musicId))
+            else if (TryParseJacket(entry.Capability.FileName, out var musicId))
                 jacketsByMusicId.TryAdd(musicId, new JacketResource(entry.Capability, entry.Locator));
         }
 
@@ -81,13 +82,16 @@ public sealed partial class OgkiFumenListBrowserScanner
         foreach (var set in fumenSets)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (set is null || !audioBySourceId.TryGetValue(set.MusicSourceId, out var audio))
+            if (set is null)
                 continue;
 
-            set.AudioFile = audio.File;
-            set.AudioLocator = audio.Locator;
-            set.AudioAwbFile = audio.ExternalAwbFile;
-            set.AudioAwbLocator = audio.ExternalAwbLocator;
+            if (audioBySourceId.TryGetValue(set.MusicSourceId, out var audio))
+            {
+                set.AudioFile = audio.File;
+                set.AudioLocator = audio.Locator;
+                set.AudioAwbFile = audio.ExternalAwbFile;
+                set.AudioAwbLocator = audio.ExternalAwbLocator;
+            }
             if (jacketsByMusicId.TryGetValue(set.MusicId, out var jacket))
             {
                 set.JacketFile = jacket.File;
@@ -107,8 +111,9 @@ public sealed partial class OgkiFumenListBrowserScanner
     public static Task<IReadOnlyList<OngekiFumenSet>> ScanAsync(
         ISimpleDirectory root,
         IEnumerable<string> supportedAudioExtensions,
-        CancellationToken cancellationToken = default) =>
-        new OgkiFumenListBrowserScanner(supportedAudioExtensions).ScanAsync(root, cancellationToken);
+        CancellationToken cancellationToken = default,
+        string? rootDirectoryName = null) =>
+        new OgkiFumenListBrowserScanner(supportedAudioExtensions).ScanAsync(root, cancellationToken, rootDirectoryName);
 
     private async Task<OngekiFumenSet?> TryReadFumenSetAsync(
         ISimpleFile musicFile,
@@ -143,10 +148,10 @@ public sealed partial class OgkiFumenListBrowserScanner
             FindValue(musicXml, "ArtistName", "str") ?? string.Empty,
             FindValue(musicXml, "Genre", "str") ?? string.Empty);
 
-        var fumenEntries = musicXml
-            .Descendants("FumenData")
-            .Where(x => x.Element("FumenFile") is not null)
-            .ToArray();
+        var fumenEntries = musicXml.Root?
+            .Element("FumenData")?
+            .Elements("FumenData")
+            .ToArray() ?? [];
         var diffTasks = new Task<OngekiFumenDiff?>[fumenEntries.Length];
         for (var index = 0; index < fumenEntries.Length; index++)
         {
@@ -228,6 +233,10 @@ public sealed partial class OgkiFumenListBrowserScanner
         if (sourceId is null || string.IsNullOrWhiteSpace(audioLocatorValue))
             return null;
 
+        var parentLocator = GetParentLocator(locator);
+        if (!OgkiFumenListBrowserPath.TryCombineRelative(parentLocator, audioLocatorValue, out var audioLocator))
+            return null;
+
         var audioFile = ResolveFromFileParent(musicSourceFile, audioLocatorValue);
         if (audioFile is null || !supportedAudioExtensions.Contains(GetExtension(audioFile.FileName)))
             return null;
@@ -240,17 +249,14 @@ public sealed partial class OgkiFumenListBrowserScanner
             var expectedAwbName = audioFile.FileName[..^audioExtension.Length] + ".awb";
             awbFile = audioFile.ParentDictionary?.ChildFiles.FirstOrDefault(file =>
                 file.FileName.Equals(expectedAwbName, StringComparison.OrdinalIgnoreCase));
-            if (awbFile is null)
-                return null;
-
-            awbLocator = BuildLocator(awbFile);
-            if (string.IsNullOrEmpty(awbLocator))
-                return null;
+            if (awbFile is not null)
+            {
+                var audioParentLocator = GetParentLocator(audioLocator);
+                awbLocator = string.IsNullOrEmpty(audioParentLocator)
+                    ? awbFile.FileName
+                    : audioParentLocator + "/" + awbFile.FileName;
+            }
         }
-
-        var parentLocator = GetParentLocator(locator);
-        if (!OgkiFumenListBrowserPath.TryCombineRelative(parentLocator, audioLocatorValue, out var audioLocator))
-            return null;
 
         return new AudioResource(sourceId.Value, audioFile, audioLocator, awbFile, awbLocator);
     }
@@ -267,9 +273,11 @@ public sealed partial class OgkiFumenListBrowserScanner
                 Encoding.UTF8,
                 detectEncodingFromByteOrderMarks: true,
                 bufferSize: 4096);
+            var isBpmSetup = false;
+            var isCreatorSetup = false;
             while (await reader.ReadLineAsync(cancellationToken) is { } line)
             {
-                if (diff.Bpm <= 0 && BpmRegex().Match(line) is { Success: true } bpmMatch &&
+                if (!isBpmSetup && BpmRegex().Match(line) is { Success: true } bpmMatch &&
                     float.TryParse(
                         bpmMatch.Groups[1].Value,
                         NumberStyles.Float,
@@ -277,10 +285,14 @@ public sealed partial class OgkiFumenListBrowserScanner
                         out var bpm))
                 {
                     diff.Bpm = bpm;
+                    isBpmSetup = true;
                 }
-                if (string.IsNullOrWhiteSpace(diff.Creator) && CreatorRegex().Match(line) is { Success: true } creatorMatch)
-                    diff.Creator = creatorMatch.Groups[1].Value.Trim();
-                if (diff.Bpm > 0 && !string.IsNullOrWhiteSpace(diff.Creator))
+                if (!isCreatorSetup && CreatorRegex().Match(line) is { Success: true } creatorMatch)
+                {
+                    diff.Creator = creatorMatch.Groups[1].Value;
+                    isCreatorSetup = true;
+                }
+                if (isBpmSetup && isCreatorSetup)
                     break;
             }
         }
@@ -298,11 +310,21 @@ public sealed partial class OgkiFumenListBrowserScanner
     private static IEnumerable<FileEntry> EnumerateFiles(
         ISimpleDirectory directory,
         CancellationToken cancellationToken,
-        string locator = "")
+        string locator = "",
+        bool inMusic = false,
+        bool inMusicSource = false,
+        string? directoryName = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        directoryName ??= directory.DirectoryName;
+        inMusic |= directoryName.Equals("music", StringComparison.OrdinalIgnoreCase);
+        inMusicSource |= directoryName.Equals("musicsource", StringComparison.OrdinalIgnoreCase);
+        var isAssets = directoryName.Equals("assets", StringComparison.OrdinalIgnoreCase);
         foreach (var file in directory.ChildFiles
-                     .Where(static file => IsRelevantFileName(file.FileName))
+                     .Where(file =>
+                         (inMusic && file.FileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase)) ||
+                         (inMusicSource && file.FileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase)) ||
+                         (isAssets && TryParseJacket(file.FileName, out _)))
                      .OrderBy(x => x.FileName, StringComparer.OrdinalIgnoreCase))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -312,15 +334,11 @@ public sealed partial class OgkiFumenListBrowserScanner
         foreach (var child in directory.ChildDictionaries.OrderBy(x => x.DirectoryName, StringComparer.OrdinalIgnoreCase))
         {
             var childLocator = string.IsNullOrEmpty(locator) ? child.DirectoryName : locator + "/" + child.DirectoryName;
-            foreach (var entry in EnumerateFiles(child, cancellationToken, childLocator))
+            foreach (var entry in EnumerateFiles(child, cancellationToken, childLocator, inMusic, inMusicSource))
                 yield return entry;
         }
     }
 
-    private static bool IsRelevantFileName(string fileName) =>
-        fileName.Equals("Music.xml", StringComparison.OrdinalIgnoreCase) ||
-        fileName.Equals("MusicSource.xml", StringComparison.OrdinalIgnoreCase) ||
-        fileName.StartsWith("ui_jacket_", StringComparison.OrdinalIgnoreCase);
 
     private static ISimpleFile? ResolveFromFileParent(ISimpleFile sourceFile, string relativePath)
     {
@@ -366,14 +384,6 @@ public sealed partial class OgkiFumenListBrowserScanner
         return null;
     }
 
-    private static string BuildLocator(ISimpleFile file)
-    {
-        var parts = new Stack<string>();
-        parts.Push(file.FileName);
-        for (var parent = file.ParentDictionary; parent is not null && !string.IsNullOrEmpty(parent.DirectoryName); parent = parent.ParentDictionary)
-            parts.Push(parent.DirectoryName);
-        return string.Join('/', parts);
-    }
 
     private static string GetParentLocator(string locator)
     {
@@ -381,25 +391,17 @@ public sealed partial class OgkiFumenListBrowserScanner
         return slash < 0 ? string.Empty : locator[..slash];
     }
 
-    private static bool TryParseJacket(string fileName, string locator, out int musicId)
+    private static bool TryParseJacket(string fileName, out int musicId)
     {
         musicId = 0;
         const string prefix = "ui_jacket_";
-        if (!fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+        const string suffix = "_s";
+        if (fileName.Length <= prefix.Length + suffix.Length ||
+            !fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ||
+            !fileName.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
             return false;
 
-        var parentLocator = locator[..Math.Max(0, locator.LastIndexOf('/'))];
-        var isAssetsEntry = parentLocator
-            .Split('/', StringSplitOptions.RemoveEmptyEntries)
-            .Any(x => x.Equals("assets", StringComparison.OrdinalIgnoreCase));
-        if (!isAssetsEntry)
-            return false;
-
-        var tail = fileName[prefix.Length..];
-        var suffixIndex = tail.IndexOf("_s", StringComparison.OrdinalIgnoreCase);
-        if (suffixIndex < 0)
-            return false;
-        var idText = tail[..suffixIndex];
+        var idText = fileName.AsSpan(prefix.Length, fileName.Length - prefix.Length - suffix.Length);
         return int.TryParse(idText, NumberStyles.Integer, CultureInfo.InvariantCulture, out musicId);
     }
 

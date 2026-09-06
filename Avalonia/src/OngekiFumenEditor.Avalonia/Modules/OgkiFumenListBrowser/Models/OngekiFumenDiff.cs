@@ -19,7 +19,7 @@ public sealed class OngekiFumenDiff
 
     public float Bpm { get; set; }
 
-    public string Creator { get; set; } = string.Empty;
+    public string? Creator { get; set; }
 
     /// <summary>
     /// The chart capability owned by the selected directory tree.

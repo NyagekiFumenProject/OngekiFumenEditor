@@ -12,5 +12,6 @@ public interface IOgkiFumenListBrowser
 
     Task<IReadOnlyList<OngekiFumenSet>> SearchFumenSet(
         ISimpleDirectory root,
-        CancellationToken cancellationToken = default);
+        CancellationToken cancellationToken = default,
+        string? rootDirectoryName = null);
 }

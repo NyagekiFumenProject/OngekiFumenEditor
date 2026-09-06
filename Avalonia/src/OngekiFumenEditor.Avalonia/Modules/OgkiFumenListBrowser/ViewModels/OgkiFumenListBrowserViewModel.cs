@@ -2,7 +2,6 @@
 
 // Injectio registration is intentionally kept on this concrete window model.
 
-using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -180,7 +179,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     [RelayCommand]
     private void ApplyKeywords()
     {
-        var keyword = Keywords?.Trim() ?? string.Empty;
+        var keyword = Keywords?.ToLowerInvariant() ?? string.Empty;
         IEnumerable<OngekiFumenSet> result = fumenSets;
         if (!string.IsNullOrWhiteSpace(keyword))
         {
@@ -188,14 +187,13 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                 .Select(set => (Distance: FuzzyDistance(set, keyword), Set: set))
                 .Where(x => x.Distance < 5)
                 .OrderBy(x => x.Distance)
-                .ThenBy(x => x.Set.MusicId)
                 .Select(x => x.Set);
         }
 
-        var minBpm = float.TryParse(BpmMin, NumberStyles.Float, CultureInfo.InvariantCulture, out var minValue)
+        var minBpm = float.TryParse(BpmMin, out var minValue)
             ? (float?)minValue
             : null;
-        var maxBpm = float.TryParse(BpmMax, NumberStyles.Float, CultureInfo.InvariantCulture, out var maxValue)
+        var maxBpm = float.TryParse(BpmMax, out var maxValue)
             ? (float?)maxValue
             : null;
         if (minBpm.HasValue || maxBpm.HasValue)
@@ -248,8 +246,9 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     public Task<IReadOnlyList<OngekiFumenSet>> SearchFumenSet(
         ISimpleDirectory root,
-        CancellationToken cancellationToken = default) =>
-        new OgkiFumenListBrowserScanner(audioManager).ScanAsync(root, cancellationToken);
+        CancellationToken cancellationToken = default,
+        string? rootDirectoryName = null) =>
+        new OgkiFumenListBrowserScanner(audioManager).ScanAsync(root, cancellationToken, rootDirectoryName);
 
     public async Task RefreshAsync(CancellationToken cancellationToken = default)
     {
@@ -285,9 +284,14 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
                     return;
                 IsBusy = true;
                 ErrorMessage = string.Empty;
+                foreach (var set in fumenSets)
+                    set.JacketBitmap = null;
+                ClearJacketCache();
             });
             var scanner = new OgkiFumenListBrowserScanner(audioManager);
-            var result = await scanner.ScanAsync(root, token);
+            if (root is AvaloniaStorageProviderSimpleDirectory storageRoot)
+                await storageRoot.RefreshAsync(token);
+            var result = await scanner.ScanAsync(root, token, RootFolderDisplayName);
             if (isDisposed || version != refreshVersion || token.IsCancellationRequested)
                 return;
 
@@ -332,8 +336,15 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
     private async Task RestoreSavedRootAsync()
     {
         var bookmark = OgkiFumenListBrowserSetting.Default.RootFolderBookmark;
-        if (string.IsNullOrWhiteSpace(bookmark) || isDisposed)
+        if (isDisposed)
             return;
+
+        if (string.IsNullOrWhiteSpace(bookmark))
+        {
+            RootFolderDisplayName = string.Empty;
+            await RefreshAsync();
+            return;
+        }
 
         try
         {
@@ -364,9 +375,7 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
         ISimpleDirectory? loaded = null;
         try
         {
-            loaded = await AvaloniaStorageProviderFileSystemBuilder
-                .LoadFromAvaloniaStorageFolder(ownedStorageFolder, CancellationToken.None)
-                ;
+            loaded = AvaloniaStorageProviderFileSystemBuilder.LoadRootFromAvaloniaStorageFolder(ownedStorageFolder);
             await InvokeOnUiThreadAsync(() => ReplaceRoot(loaded));
             loaded = null;
 
@@ -454,8 +463,16 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     private async Task OpenFumenAsync(OngekiFumenDiff diff)
     {
-        if (diff?.FumenFile is null || diff.RefSet.AudioFile is null || isDisposed)
+        if (diff?.FumenFile is null || isDisposed)
             return;
+
+        if (diff.RefSet.AudioFile is null)
+        {
+            await dialogManager.ShowMessageDialog(
+                Lang.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title),
+                DialogMessageType.Error);
+            return;
+        }
 
         IsBusy = true;
         EditorContext? context = null;
@@ -684,27 +701,20 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     private static int FuzzyDistance(OngekiFumenSet set, string keyword)
     {
-        var best = int.MaxValue;
-        if (!string.IsNullOrWhiteSpace(set.Artist))
-        {
-            best = Math.Min(best, LevenshteinDistance(set.Artist, keyword));
-            if (best == 0)
-                return best;
-        }
+        var best = LevenshteinDistance(set.Artist.ToLowerInvariant(), keyword);
+        if (best == 0)
+            return best;
 
-        if (!string.IsNullOrWhiteSpace(set.Title))
-        {
-            best = Math.Min(best, LevenshteinDistance(set.Title, keyword));
-            if (best == 0)
-                return best;
-        }
+        best = Math.Min(best, LevenshteinDistance(set.Title.ToLowerInvariant(), keyword));
+        if (best == 0)
+            return best;
 
         foreach (var diff in set.Difficults)
         {
-            if (string.IsNullOrWhiteSpace(diff.Creator))
+            if (diff.Creator is null)
                 continue;
 
-            best = Math.Min(best, LevenshteinDistance(diff.Creator, keyword));
+            best = Math.Min(best, LevenshteinDistance(diff.Creator.ToLowerInvariant(), keyword));
             if (best == 0)
                 return best;
         }
@@ -714,16 +724,9 @@ public partial class OgkiFumenListBrowserViewModel : WindowViewModelBase, IOgkiF
 
     private static int LevenshteinDistance(string left, string right)
     {
-        if (left.Length == 0)
-            return right.Length;
-        if (right.Length == 0)
-            return left.Length;
-
         if (left.Contains(right, StringComparison.InvariantCultureIgnoreCase) ||
             right.Contains(left, StringComparison.InvariantCultureIgnoreCase))
             return 0;
-        left = left.ToLowerInvariant();
-        right = right.ToLowerInvariant();
         if (right.Length > left.Length)
             (left, right) = (right, left);
 

@@ -82,51 +82,58 @@ public static class AvaloniaStorageProviderFileSystemBuilder
         var directory = new AvaloniaStorageProviderSimpleDirectory(parent, folder.Name, folder);
         try
         {
-            if (parent is null && IsLocalLink(folder))
-                throw new IOException("The selected project root cannot be a symbolic link, junction, or mount point.");
+            await PopulateDirectoryAsync(directory, folder, context);
+            return directory;
+        }
+        catch
+        {
+            directory.Dispose();
+            throw;
+        }
+    }
 
-            var items = await EnumerateItemsAsync(folder, context);
-            var childTasks = items
-                .Select((item, index) => BuildChildAsync(directory, item, index, context))
-                .ToArray();
-            BuildChildResult[] children;
-            try
-            {
-                children = await Task.WhenAll(childTasks);
-            }
-            catch
-            {
-                try
-                {
-                    await Task.WhenAll(childTasks);
-                }
-                catch
-                {
-                    // The original child failure is rethrown below. Awaiting all children
-                    // first ensures successful sibling ownerships can be released here.
-                }
+    internal static async Task RefreshDirectoryAsync(
+        AvaloniaStorageProviderSimpleDirectory directory,
+        IStorageFolder folder,
+        CancellationToken cancellationToken)
+    {
+        using var context = new BuildContext(cancellationToken);
+        await PopulateDirectoryAsync(directory, folder, context);
+    }
 
-                foreach (var childTask in childTasks)
-                {
-                    if (childTask is { IsCompletedSuccessfully: true })
-                        DisposeChild(childTask.Result);
-                }
+    private static async Task PopulateDirectoryAsync(
+        AvaloniaStorageProviderSimpleDirectory directory,
+        IStorageFolder folder,
+        BuildContext context)
+    {
+        if (directory.ParentDictionary is null && IsLocalLink(folder))
+            throw new IOException("The selected project root cannot be a symbolic link, junction, or mount point.");
 
-                throw;
-            }
-            foreach (var child in children.OrderBy(static child => child.Index))
+        var items = await EnumerateItemsAsync(folder, context);
+        var childTasks = items
+            .Select(item => BuildChildAsync(directory, item, context))
+            .ToArray();
+        try
+        {
+            var children = await Task.WhenAll(childTasks);
+            context.CancellationToken.ThrowIfCancellationRequested();
+            directory.ClearChildren();
+            foreach (var child in children)
             {
                 if (child.Directory is not null)
                     directory.AddDirectory(child.Directory);
                 else if (child.File is not null)
                     directory.AddFile(child.File);
             }
-
-            return directory;
         }
         catch
         {
-            directory.Dispose();
+            // WhenAll has settled every child, including successful siblings whose handles we own.
+            foreach (var childTask in childTasks)
+            {
+                if (childTask is { IsCompletedSuccessfully: true })
+                    DisposeChild(childTask.Result);
+            }
             throw;
         }
     }
@@ -165,7 +172,6 @@ public static class AvaloniaStorageProviderFileSystemBuilder
     private static async Task<BuildChildResult> BuildChildAsync(
         AvaloniaStorageProviderSimpleDirectory parent,
         IStorageItem item,
-        int index,
         BuildContext context)
     {
         var ownershipTransferred = false;
@@ -178,7 +184,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
                 if (IsLocalLink(item))
                 {
                     Log.LogWarn($"Skip linked project entry '{item.Name}'.");
-                    return new BuildChildResult(index, null, null);
+                    return new BuildChildResult(null, null);
                 }
 
                 switch (item)
@@ -195,12 +201,12 @@ public static class AvaloniaStorageProviderFileSystemBuilder
                             fileLength,
                             childFile);
                         ownershipTransferred = true;
-                        return new BuildChildResult(index, null, file);
+                        return new BuildChildResult(null, file);
                     }
                     case IStorageFolder childFolder:
                         break;
                     default:
-                        return new BuildChildResult(index, null, null);
+                        return new BuildChildResult(null, null);
                 }
             }
             finally
@@ -211,7 +217,7 @@ public static class AvaloniaStorageProviderFileSystemBuilder
             ownershipTransferred = true;
             var childDirectory = await BuildDirectory(parent, (IStorageFolder)item, context)
                 ;
-            return new BuildChildResult(index, childDirectory, null);
+            return new BuildChildResult(childDirectory, null);
         }
         finally
         {
@@ -236,7 +242,6 @@ public static class AvaloniaStorageProviderFileSystemBuilder
     }
 
     private readonly record struct BuildChildResult(
-        int Index,
         AvaloniaStorageProviderSimpleDirectory? Directory,
         AvaloniaStorageProviderSimpleFile? File);
 

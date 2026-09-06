@@ -165,16 +165,30 @@ public sealed class AvaloniaStorageProviderSimpleDirectory : ISimpleDirectory, I
         files.Remove(file);
     }
 
+    internal Task RefreshAsync(CancellationToken cancellationToken)
+    {
+        ObjectDisposedException.ThrowIf(isDisposed, this);
+        return AvaloniaStorageProviderFileSystemBuilder.RefreshDirectoryAsync(this, GetStorageFolder(), cancellationToken);
+    }
+
+    internal void ClearChildren()
+    {
+        ObjectDisposedException.ThrowIf(isDisposed, this);
+        foreach (var childDirectory in directories)
+            childDirectory.Dispose();
+        foreach (var childFile in files)
+            childFile.Dispose();
+        directories.Clear();
+        files.Clear();
+    }
+
     public void Dispose()
     {
         if (isDisposed)
             return;
 
+        ClearChildren();
         isDisposed = true;
-        foreach (var childDirectory in directories)
-            childDirectory.Dispose();
-        foreach (var childFile in files)
-            childFile.Dispose();
 
         storageFolder?.Dispose();
         storageFolder = null;
