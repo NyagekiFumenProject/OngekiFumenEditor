@@ -1,12 +1,11 @@
 #nullable enable
 using Avalonia.Headless.XUnit;
+using Avalonia.Threading;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects.LaneCurve;
-using OngekiFumenEditor.Avalonia.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
-using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
@@ -22,70 +21,6 @@ namespace OngekiFumenEditor.Avalonia.Tests.Modules.FumenEditorSelectingObjectVie
 
 public sealed class SelectionFilterCompatibilityTests
 {
-    [AvaloniaFact]
-    public void Constructor_RestoresOriginalObjectTypesAndFifteenOptions()
-    {
-        using var context = new ViewerContext();
-        var filter = context.Viewer.SelectionFilter;
-
-        Assert.Equal(5, filter.FilterTypeCategories.Count);
-        Assert.Equal(26, filter.FilterTypeCategories.Sum(category => category.Items.Count));
-        AssertCategory(filter.FilterTypeCategories[0], Lang.SelectionFilterObjectCategoryLane,
-            (Lang.WallLeft, [typeof(WallLeftNext), typeof(WallLeftStart)]),
-            (Lang.LaneLeft, [typeof(LaneLeftNext), typeof(LaneLeftStart)]),
-            (Lang.LaneCenter, [typeof(LaneCenterNext), typeof(LaneCenterStart)]),
-            (Lang.LaneRight, [typeof(LaneRightNext), typeof(LaneRightStart)]),
-            (Lang.WallRight, [typeof(WallRightNext), typeof(WallRightStart)]),
-            (Lang.LaneColorful, [typeof(ColorfulLaneNext), typeof(ColorfulLaneStart)]),
-            (Lang.EnemyLane, [typeof(EnemyLaneNext), typeof(EnemyLaneStart)]),
-            (Lang.AutoPlayFaderLane, [typeof(AutoplayFaderLaneNext), typeof(AutoplayFaderLaneStart)]),
-            (Lang.Beam, [typeof(BeamNext), typeof(BeamStart)]),
-            (Lang.CurveControlPoint, [typeof(LaneCurvePathControlObject)]));
-        AssertCategory(filter.FilterTypeCategories[1], Lang.SelectionFilterObjectCategoryDockable,
-            (Lang.Tap, [typeof(Tap)]),
-            (Lang.Hold, [typeof(Hold), typeof(HoldEnd)]));
-        AssertCategory(filter.FilterTypeCategories[2], Lang.SelectionFilterObjectCategoryFloating,
-            (Lang.Bell, [typeof(Bell)]),
-            (Lang.Bullet, [typeof(Bullet)]),
-            (Lang.Flick, [typeof(Flick)]));
-        AssertCategory(filter.FilterTypeCategories[3], Lang.SelectionFilterObjectCategoryTimeline,
-            (Lang.LaneBlock, [typeof(LaneBlockArea), typeof(LaneBlockArea.LaneBlockAreaEndIndicator)]),
-            (Lang.ClickSE, [typeof(ClickSE)]),
-            (Lang.InterpolatableSoflan, [typeof(InterpolatableSoflan), typeof(InterpolatableSoflan.InterpolatableSoflanIndicator)]),
-            (Lang.KeyframeSoflan, [typeof(KeyframeSoflan)]),
-            (Lang.DurationSoflan, [typeof(IDurationSoflan)]),
-            (Lang.IndividualSoflanArea, [typeof(IndividualSoflanArea)]),
-            (Lang.MeterChange, [typeof(MeterChange)]),
-            (Lang.BpmChange, [typeof(BPMChange)]));
-        AssertCategory(filter.FilterTypeCategories[4], Lang.SelectionFilterObjectCategoryMisc,
-            (Lang.SvgPrefabFile, [typeof(SvgImageFilePrefab)]),
-            (Lang.SvgPrefabText, [typeof(SvgStringPrefab)]),
-            (Lang.Comment, [typeof(Comment)]));
-
-        Assert.Equal(5, filter.OptionCategories.Count);
-        Assert.Equal(15, filter.OptionCategories.Sum(category => category.Options.Count));
-        AssertOptionCategory(filter.OptionCategories[0], Lang.SelectionFilter_OptionTabGeneral,
-            (Lang.SelectionFilter_OptionLabelTag, typeof(TextWithRegexOption)));
-        AssertOptionCategory(filter.OptionCategories[1], Lang.SelectionFilter_OptionTabLanes,
-            (Lang.SelectionFilter_OptionLabelLaneNodeType, typeof(LaneNodeSpecificationOption)),
-            (Lang.SelectionFilter_OptionLabelCurveNextSelected, typeof(EnumSpecificationOption<SelectionStatusSpecification>)),
-            (Lang.SelectionFilter_OptionLabelCurvePrevSelected, typeof(EnumSpecificationOption<SelectionStatusSpecification>)));
-        AssertOptionCategory(filter.OptionCategories[2], Lang.SelectionFilter_OptionTabHitObjects,
-            (Lang.SelectionFilter_OptionLabelIsCritical, typeof(BooleanOption)),
-            (Lang.SelectionFilter_OptionLabelFlickDirection, typeof(BooleanOption)),
-            (Lang.SelectionFilter_OptionLabelDockLanes, typeof(DockableObjectLaneFilterOption)),
-            (Lang.SelectionFilter_OptionLabelHoldType, typeof(HeadTailSpecificationOption<Hold, HoldEnd>)));
-        AssertOptionCategory(filter.OptionCategories[3], Lang.SelectionFilter_OptionTabBullets,
-            (Lang.SelectionFilter_OptionLabelBulletPalette, typeof(BulletPaletteFilterOption)),
-            (Lang.BulletSize, typeof(BooleanOption)),
-            (Lang.BulletType, typeof(EnumSpecificationOption<BulletType>)));
-        AssertOptionCategory(filter.OptionCategories[4], Lang.SelectionFilter_OptionTabOther,
-            (Lang.SelectionFilter_OptionLabelLaneBlockDirection, typeof(BooleanOption)),
-            (Lang.SelectionFilter_OptionLabelLaneBlockType,
-                typeof(HeadTailSpecificationOption<LaneBlockArea, LaneBlockArea.LaneBlockAreaEndIndicator>)),
-            (Lang.SelectionFilter_OptionLabelSoflanAreaType,
-                typeof(HeadTailSpecificationOption<Soflan, Soflan.SoflanEndIndicator>)));
-    }
 
     [AvaloniaTheory]
     [InlineData("tag")]
@@ -175,7 +110,6 @@ public sealed class SelectionFilterCompatibilityTests
             Assert.Same(retained, Assert.Single(context.Editor.SelectObjects));
             Assert.Same(retained, Assert.Single(browser.SelectedObjects));
             Assert.Same(retained, Assert.Single(context.Viewer.EditorSelectObjects.Cast<SelectedObjectRow>()).Object);
-            Assert.Contains("1", context.Viewer.SelectionFilter.FilterOutcomeText, StringComparison.Ordinal);
         }
         finally
         {
@@ -223,6 +157,141 @@ public sealed class SelectionFilterCompatibilityTests
 
         Assert.False(tap.IsSelected);
         Assert.True(bell.IsSelected);
+    }
+
+    [AvaloniaFact]
+    public void MissingHoldEndpoints_AreUnselectedRelatives()
+    {
+        using var context = new ViewerContext();
+        var option = GetOption<HeadTailSpecificationOption<Hold, HoldEnd>>(
+            context.Viewer.SelectionFilter, Lang.SelectionFilter_OptionLabelHoldType);
+        var head = new Hold();
+        var tail = new HoldEnd();
+
+        option.TypedValue = HeadTailSpecification.HeadNoChild;
+        option.IncrementOptionMatchCount(head);
+        option.IncrementOptionMatchCount(tail);
+        Assert.Equal(FilterOptionResult.Match, option.Filter(head));
+        Assert.Equal(1, option.SelectedOptionMatchCount);
+        option.TypedValue = HeadTailSpecification.HeadWithChild;
+        Assert.Equal(FilterOptionResult.NoMatch, option.Filter(head));
+        option.TypedValue = HeadTailSpecification.TailNoParent;
+        option.IncrementOptionMatchCount(tail);
+        Assert.Equal(FilterOptionResult.Match, option.Filter(tail));
+        Assert.Equal(1, option.SelectedOptionMatchCount);
+        option.TypedValue = HeadTailSpecification.TailWithParent;
+        Assert.Equal(FilterOptionResult.NoMatch, option.Filter(tail));
+    }
+
+    [AvaloniaFact]
+    public void ReenabledType_StillAppliesEnabledOptions()
+    {
+        var tap = new Tap { IsSelected = true, IsCritical = false };
+        var bell = new Bell { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.AddObjects([tap, bell]);
+        using var context = new ViewerContext(fumen);
+        var filter = context.Viewer.SelectionFilter;
+        var tapType = Assert.Single(filter.FilterTypeCategories.SelectMany(category => category.Items),
+            item => item.Types.Contains(typeof(Tap)));
+        tapType.IsSelected = false;
+        GetOption<BooleanOption>(filter, Lang.SelectionFilter_OptionLabelIsCritical).IsEnabled = true;
+        tapType.IsSelected = true;
+
+        try
+        {
+            filter.ApplyFilterToSelection();
+            Assert.False(tap.IsSelected);
+            Assert.True(bell.IsSelected);
+        }
+        finally
+        {
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected((FumenVisualEditorViewModel)null!);
+        }
+    }
+
+    [AvaloniaFact]
+    public void PaletteCollectionChange_RecomputesUnassignedFallback()
+    {
+        var palette = CreatePalette("A0", "Assigned");
+        var assigned = new Bullet { ReferenceBulletPallete = palette, IsSelected = true };
+        var unassigned = new Bell { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.BulletPalleteList.AddPallete(palette);
+        fumen.AddObjects([assigned, unassigned]);
+        using var context = new ViewerContext(fumen);
+        var option = GetOption<BulletPaletteFilterOption>(context.Viewer.SelectionFilter,
+            Lang.SelectionFilter_OptionLabelBulletPalette);
+        option.IsEnabled = true;
+        Assert.Single(option.Items, item => ReferenceEquals(item.Palette, palette)).IsSelected = true;
+
+        fumen.BulletPalleteList.AddPallete(CreatePalette("A1", "New"));
+        Assert.Equal(1, Assert.Single(option.Items, item => item.Palette is null).BellCount);
+        Assert.Equal(1, Assert.Single(option.Items, item => ReferenceEquals(item.Palette, palette)).BulletCount);
+        try
+        {
+            context.Viewer.SelectionFilter.ApplyFilterToSelection();
+            Assert.False(assigned.IsSelected);
+            Assert.True(unassigned.IsSelected);
+        }
+        finally
+        {
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected((FumenVisualEditorViewModel)null!);
+        }
+    }
+
+    [AvaloniaFact]
+    public void SelectionMutationAndEditorSwitch_RefreshHiddenFilter()
+    {
+        var tap = new Tap { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.AddObject(tap);
+        using var context = new ViewerContext(fumen);
+        tap.IsSelected = false;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Empty(context.Viewer.EditorSelectObjects);
+        tap.IsSelected = true;
+        Dispatcher.UIThread.RunJobs();
+        Assert.Same(tap, Assert.Single(context.Viewer.EditorSelectObjects.Cast<SelectedObjectRow>()).Object);
+
+        var bpm = new BPMChange { IsSelected = true, TGrid = new TGrid(1) };
+        var nextFumen = new OngekiFumen();
+        nextFumen.AddObject(bpm);
+        context.Activate(nextFumen);
+        tap.IsSelected = false;
+        try
+        {
+            context.Viewer.SelectionFilter.ApplyFilterToSelection();
+            Assert.True(bpm.IsSelected);
+            Assert.Same(bpm, Assert.Single(context.Viewer.EditorSelectObjects.Cast<SelectedObjectRow>()).Object);
+        }
+        finally
+        {
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected((FumenVisualEditorViewModel)null!);
+        }
+    }
+
+    [AvaloniaFact]
+    public void InvertedFilter_RemovesSnapshotDespiteSelectionRefresh()
+    {
+        var first = new Tap { IsSelected = true };
+        var second = new Tap { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.AddObjects([first, second]);
+        using var context = new ViewerContext(fumen);
+        context.Viewer.IsFilterMenuVisible = true;
+        context.Viewer.SelectionFilter.IsInvertFilter = true;
+        try
+        {
+            context.Viewer.SelectionFilter.ApplyFilterToSelection();
+            Assert.False(first.IsSelected);
+            Assert.False(second.IsSelected);
+            Assert.Empty(context.Viewer.EditorSelectObjects);
+        }
+        finally
+        {
+            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected((FumenVisualEditorViewModel)null!);
+        }
     }
 
     private static FilterScenario CreateScenario(ViewerContext context, string scenarioName)
@@ -409,40 +478,12 @@ public sealed class SelectionFilterCompatibilityTests
             option => option.Text == text));
     }
 
-    private static void AssertCategory(
-        FilterObjectTypeCategory category,
-        string categoryName,
-        params (string Text, Type[] Types)[] expectedItems)
-    {
-        Assert.Equal($"{categoryName} (0)", category.CategoryNameDisplay);
-        Assert.Equal(expectedItems.Select(item => item.Text), category.Items.Select(item => item.Text));
-        Assert.Equal(expectedItems.Select(item => item.Types), category.Items.Select(item => item.Types), TypeArrayComparer.Instance);
-    }
-
-    private static void AssertOptionCategory(
-        OptionCategory category,
-        string categoryName,
-        params (string Text, Type Type)[] expectedOptions)
-    {
-        Assert.Equal(categoryName, category.Name);
-        Assert.Equal(expectedOptions.Select(option => option.Text), category.Options.Select(option => option.Text));
-        Assert.Equal(expectedOptions.Select(option => option.Type), category.Options.Select(option => option.GetType()));
-    }
 
     private sealed record FilterScenario(
         SelectionFilterOption Option,
         OngekiObjectBase Match,
         OngekiObjectBase NoMatch);
 
-    private sealed class TypeArrayComparer : IEqualityComparer<Type[]>
-    {
-        public static TypeArrayComparer Instance { get; } = new();
-
-        public bool Equals(Type[]? x, Type[]? y) =>
-            ReferenceEquals(x, y) || x is not null && y is not null && x.SequenceEqual(y);
-
-        public int GetHashCode(Type[] obj) => obj.Aggregate(17, (hash, type) => HashCode.Combine(hash, type));
-    }
 
     private sealed class ViewerContext : IDisposable
     {

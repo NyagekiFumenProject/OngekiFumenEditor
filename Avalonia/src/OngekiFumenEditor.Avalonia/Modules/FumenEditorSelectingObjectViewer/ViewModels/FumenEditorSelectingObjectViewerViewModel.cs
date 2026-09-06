@@ -1,3 +1,4 @@
+using Avalonia.Threading;
 using Dock.Model.Core;
 using Avalonia.Collections;
 using CommunityToolkit.Mvvm.Input;
@@ -22,6 +23,8 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
     public ObservableCollection<SelectedObjectRow> SelectedItems { get; } = [];
     private readonly ObservableCollection<SelectedObjectRow> editorSelectObjectSource = [];
     private DataGridCollectionView editorSelectObjects;
+    private OngekiFumen subscribedFumen;
+    private bool refreshPending;
     public DataGridCollectionView EditorSelectObjects =>
         editorSelectObjects ??= new DataGridCollectionView(editorSelectObjectSource);
 
@@ -36,6 +39,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
             if (SetProperty(ref field, value))
             {
                 SelectionFilter.OnEditorChanged(value);
+                UpdateFumenSubscription();
                 Refresh();
             }
         }
@@ -71,15 +75,45 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         if (e.PropertyName == nameof(FumenVisualEditorViewModel.EditorContext))
         {
             SelectionFilter.OnEditorFumenChanged(Editor);
+            UpdateFumenSubscription();
             Refresh();
         }
         else if (e.PropertyName == nameof(FumenVisualEditorViewModel.SelectObjects))
             Refresh();
     }
 
+    private void UpdateFumenSubscription()
+    {
+        var fumen = Editor?.EditorContext?.Fumen;
+        if (ReferenceEquals(subscribedFumen, fumen))
+            return;
+
+        if (subscribedFumen is not null)
+            subscribedFumen.ObjectModifiedChanged -= OnFumenObjectModified;
+        subscribedFumen = fumen;
+        if (subscribedFumen is not null)
+            subscribedFumen.ObjectModifiedChanged += OnFumenObjectModified;
+    }
+
+    private void OnFumenObjectModified(OngekiObjectBase obj, PropertyChangedEventArgs args)
+    {
+        if (refreshPending || (args.PropertyName != nameof(ISelectableObject.IsSelected) && obj is not ISelectableObject { IsSelected: true }))
+            return;
+
+        refreshPending = true;
+        Dispatcher.UIThread.Post(RefreshIfPending, DispatcherPriority.Background);
+    }
+
+    internal void RefreshIfPending()
+    {
+        if (refreshPending)
+            Refresh();
+    }
+
     [RelayCommand]
     private void Refresh()
     {
+        refreshPending = false;
         Log.LogInfo("Refresh triggered.");
         var selectedObjects = SelectedItems
             .Select(x => x.Object)
@@ -95,8 +129,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
                 SelectedItems.Add(row);
         }
 
-        if (IsFilterMenuVisible)
-            SelectionFilter.OnSelectedItemsRefreshed();
+        SelectionFilter.OnSelectedItemsRefreshed();
     }
 
     [RelayCommand]

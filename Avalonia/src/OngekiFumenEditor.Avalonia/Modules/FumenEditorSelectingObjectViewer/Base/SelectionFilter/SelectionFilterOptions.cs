@@ -327,8 +327,8 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
     where THead : OngekiObjectBase, ISelectableObject
     where TTail : OngekiObjectBase, ISelectableObject
 {
-    public delegate THead HeadGetter(TTail obj);
-    public delegate TTail TailGetter(THead obj);
+    public delegate THead? HeadGetter(TTail obj);
+    public delegate TTail? TailGetter(THead obj);
 
     public HeadTailSpecificationOption(string text, HeadGetter headGetter, TailGetter tailGetter,
         Dictionary<HeadTailSpecification, string>? selectionsText = null)
@@ -350,7 +350,7 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
                     {
                         HeadTailSpecification.Head => FilterOptionResult.Match,
                         HeadTailSpecification.HeadNoChild when tailObj is null || !tailObj.IsSelected => FilterOptionResult.Match,
-                        HeadTailSpecification.HeadWithChild when tailObj.IsSelected => FilterOptionResult.Match,
+                        HeadTailSpecification.HeadWithChild when tailObj is { IsSelected: true } => FilterOptionResult.Match,
                         _ => FilterOptionResult.NoMatch
                     };
                 }
@@ -360,8 +360,8 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
                     return input switch
                     {
                         HeadTailSpecification.Tail => FilterOptionResult.Match,
-                        HeadTailSpecification.TailNoParent when !headObj.IsSelected => FilterOptionResult.Match,
-                        HeadTailSpecification.TailWithParent when headObj.IsSelected => FilterOptionResult.Match,
+                        HeadTailSpecification.TailNoParent when headObj is null || !headObj.IsSelected => FilterOptionResult.Match,
+                        HeadTailSpecification.TailWithParent when headObj is { IsSelected: true } => FilterOptionResult.Match,
                         _ => FilterOptionResult.NoMatch
                     };
                 }
@@ -443,9 +443,17 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
         Items.CollectionChanged += (_, e) =>
         {
             foreach (var i in e.NewItems?.Cast<BulletPaletteFilterItem>() ?? [])
+            {
                 i.PropertyChanged += handler;
+                if (i.Palette is not null)
+                    i.Palette.PropertyChanged += OnPalettePropertyChanged;
+            }
             foreach (var i in e.OldItems?.Cast<BulletPaletteFilterItem>() ?? [])
+            {
                 i.PropertyChanged -= handler;
+                if (i.Palette is not null)
+                    i.Palette.PropertyChanged -= OnPalettePropertyChanged;
+            }
 
             OnPropertyChanged(nameof(IsAllSelected));
             OnPropertyChanged(nameof(SelectionSummary));
@@ -492,7 +500,8 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
     private void UpdateOptionsCore(IEnumerable<BulletPallete> palettes)
     {
-        Items.Clear();
+        while (Items.Count > 0)
+            Items.RemoveAt(Items.Count - 1);
 
         nullPaletteItem = new BulletPaletteFilterItem(null);
         Items.Add(nullPaletteItem);
@@ -500,11 +509,18 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
             Items.Add(new BulletPaletteFilterItem(p));
 
         paletteTable = Items.Where(i => i != nullPaletteItem && i.Palette is not null).ToDictionary(i => i.Palette!, i => i);
+        NotifyOptionValueChanged();
     }
 
     private void BulletPaletteCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         UpdateOptions((BulletPalleteList)sender!);
+    }
+
+    private void OnPalettePropertyChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        if (sender is BulletPallete palette && paletteTable.TryGetValue(palette, out var item))
+            item.RefreshText();
     }
 
     public override FilterOptionResult Filter(OngekiObjectBase obj)
@@ -612,6 +628,8 @@ public sealed class BulletPaletteFilterItem(BulletPallete? palette) : Observable
             return $"{baseText} ({BulletCount} | {BellCount})";
         }
     }
+
+    internal void RefreshText() => OnPropertyChanged(nameof(Text));
 }
 
 public sealed class DockableObjectLaneFilterOption : SelectionFilterOption

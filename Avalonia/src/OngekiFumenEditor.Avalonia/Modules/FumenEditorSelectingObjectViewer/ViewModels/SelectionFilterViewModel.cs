@@ -30,6 +30,7 @@ public partial class SelectionFilterViewModel : ViewModelBase
     public ObservableCollection<FilterObjectTypeCategory> FilterTypeCategories { get; } = [];
     public ObservableCollection<ISelectableObject> OptionFilterRemovals { get; } = [];
     private BulletPaletteFilterOption bulletPaletteOption = null!;
+    private List<ISelectableObject>? finalFilterMatchCache;
 
     public bool IsInvertFilter
     {
@@ -61,9 +62,6 @@ public partial class SelectionFilterViewModel : ViewModelBase
         foreach (var item in FilterTypeCategories.SelectMany(c => c.Items))
             item.MatchingObjects.Clear();
 
-        foreach (var option in OptionCategories.SelectMany(c => c.Options))
-            option.ResetOptionMatchCount();
-
         if (Editor is not null)
         {
             foreach (var item in Editor.SelectObjects)
@@ -73,8 +71,6 @@ public partial class SelectionFilterViewModel : ViewModelBase
 
                 matchingItem?.MatchingObjects.Add(item);
 
-                foreach (var option in OptionCategories.SelectMany(c => c.Options))
-                    option.IncrementOptionMatchCount((OngekiObjectBase)item);
             }
         }
 
@@ -82,14 +78,17 @@ public partial class SelectionFilterViewModel : ViewModelBase
         {
             foreach (var item in category.Items)
                 item.IsSelected = item.MatchingObjects.Count > 0;
+            category.UpdateCategoryNameDisplay();
         }
 
+        RefreshOptionMatchCounts();
         UpdateOptionFilterRemovals();
         UpdateFilterOutcomeText();
     }
 
     public void OnTypeFilterEnabledChanged(FilterObjectTypesItem _)
     {
+        UpdateOptionFilterRemovals();
         UpdateFilterOutcomeText();
     }
 
@@ -106,22 +105,36 @@ public partial class SelectionFilterViewModel : ViewModelBase
 
     private void OnOptionUpdated()
     {
+        RefreshOptionMatchCounts();
         UpdateOptionFilterRemovals();
         UpdateFilterOutcomeText();
+    }
+
+    private void RefreshOptionMatchCounts()
+    {
+        foreach (var option in GetAllOptions())
+            option.ResetOptionMatchCount();
+
+        foreach (var item in Editor?.SelectObjects ?? [])
+        {
+            foreach (var option in GetAllOptions())
+                option.IncrementOptionMatchCount((OngekiObjectBase)item);
+        }
     }
 
     private void UpdateFilterOutcomeText()
     {
         var matches = GetAllFilterMatches();
         FilterOutcomeText = IsInvertFilter
-            ? Lang.SelectionFilter_ResultsLabelRemoveMode.Format(matches.Count())
-            : Lang.SelectionFilter_ResultsLabelReplaceMode.Format(matches.Count());
+            ? Lang.SelectionFilter_ResultsLabelRemoveMode.Format(matches.Count)
+            : Lang.SelectionFilter_ResultsLabelReplaceMode.Format(matches.Count);
     }
 
     private IEnumerable<SelectionFilterOption> GetAllOptions() => OptionCategories.SelectMany(c => c.Options);
 
     private void UpdateOptionFilterRemovals()
     {
+        finalFilterMatchCache = null;
         OptionFilterRemovals.Clear();
         var enabledOptions = GetAllOptions().Where(o => o.IsEnabled).ToArray();
         foreach (var obj in GetAllMatchingTypeObjects().Where(obj => enabledOptions.Any(opt => opt.Filter((OngekiObjectBase)obj) == FilterOptionResult.NoMatch)))
@@ -131,8 +144,8 @@ public partial class SelectionFilterViewModel : ViewModelBase
     private IEnumerable<ISelectableObject> GetAllMatchingTypeObjects()
         => FilterTypeCategories.SelectMany(c => c.Items).Where(i => i.IsSelected).SelectMany(i => i.MatchingObjects);
 
-    private IEnumerable<ISelectableObject> GetAllFilterMatches()
-        => GetAllMatchingTypeObjects().Except(OptionFilterRemovals);
+    private IReadOnlyList<ISelectableObject> GetAllFilterMatches()
+        => finalFilterMatchCache ??= [.. GetAllMatchingTypeObjects().Except(OptionFilterRemovals)];
 
     private void InitObjectTypeFilter()
     {
@@ -297,16 +310,14 @@ public partial class SelectionFilterViewModel : ViewModelBase
         if (Editor is null)
             return;
 
-        if (IsInvertFilter)
-        {
-            foreach (var selectableObject in GetAllFilterMatches())
-                selectableObject.IsSelected = false;
-        }
-        else
-        {
-            foreach (var selectedObject in Editor.SelectObjects.Except(GetAllFilterMatches()))
-                selectedObject.IsSelected = false;
-        }
+        SelectionViewerTool.RefreshIfPending();
+
+        var matches = GetAllFilterMatches();
+        var removals = IsInvertFilter
+            ? matches
+            : Editor.SelectObjects.Except(matches).ToArray();
+        foreach (var selectableObject in removals)
+            selectableObject.IsSelected = false;
 
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
 
