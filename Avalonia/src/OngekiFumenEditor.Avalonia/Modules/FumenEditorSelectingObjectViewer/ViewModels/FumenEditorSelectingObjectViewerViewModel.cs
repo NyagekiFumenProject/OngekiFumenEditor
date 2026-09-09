@@ -60,9 +60,19 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
 
         Dock = DockMode.Right;
         SelectionFilter = new SelectionFilterViewModel(this);
+        SelectedItems.CollectionChanged += (_, _) => NotifySelectionCommandsCanExecuteChanged();
 
         editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
         Editor = editorDocumentManager.CurrentActivatedEditor;
+    }
+
+    private bool CanModifySelection() => Editor is not null && SelectedItems.Count > 0;
+
+    private void NotifySelectionCommandsCanExecuteChanged()
+    {
+        CancelSelectedObjectsCommand.NotifyCanExecuteChanged();
+        SelectOnlyItemsOfSelectedTypeCommand.NotifyCanExecuteChanged();
+        DeselectItemsOfSelectedTypeCommand.NotifyCanExecuteChanged();
     }
 
     private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -130,19 +140,23 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         }
 
         SelectionFilter.OnSelectedItemsRefreshed();
+        NotifySelectionCommandsCanExecuteChanged();
     }
 
-    [RelayCommand]
+
+    [RelayCommand(CanExecute = nameof(CanModifySelection))]
     private void CancelSelectedObjects()
     {
         Log.LogInfo("CancelSelectedObjects triggered.");
+        if (Editor is null)
+            return;
         foreach (var item in SelectedItems.ToArray())
             item.Object.IsSelected = false;
 
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanModifySelection))]
     private void SelectOnlyItemsOfSelectedType()
     {
         if (Editor is null)
@@ -160,7 +174,7 @@ public partial class FumenEditorSelectingObjectViewerViewModel : ToolViewModelBa
         IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanModifySelection))]
     private void DeselectItemsOfSelectedType()
     {
         if (Editor is null)

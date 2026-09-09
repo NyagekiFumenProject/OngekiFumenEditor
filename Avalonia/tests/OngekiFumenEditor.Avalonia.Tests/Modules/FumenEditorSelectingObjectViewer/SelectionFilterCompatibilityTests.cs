@@ -160,6 +160,29 @@ public sealed class SelectionFilterCompatibilityTests
     }
 
     [AvaloniaFact]
+    public void SelectionCommands_TrackSelectedRows()
+    {
+        var tap = new Tap { IsSelected = true };
+        var fumen = new OngekiFumen();
+        fumen.AddObject(tap);
+
+        using var context = new ViewerContext(fumen);
+        Assert.False(context.Viewer.CancelSelectedObjectsCommand.CanExecute(null));
+        Assert.False(context.Viewer.SelectOnlyItemsOfSelectedTypeCommand.CanExecute(null));
+        Assert.False(context.Viewer.DeselectItemsOfSelectedTypeCommand.CanExecute(null));
+
+        var row = Assert.Single(context.Viewer.EditorSelectObjects.Cast<SelectedObjectRow>());
+        context.Viewer.SelectedItems.Add(row);
+
+        Assert.True(context.Viewer.CancelSelectedObjectsCommand.CanExecute(null));
+        Assert.True(context.Viewer.SelectOnlyItemsOfSelectedTypeCommand.CanExecute(null));
+        Assert.True(context.Viewer.DeselectItemsOfSelectedTypeCommand.CanExecute(null));
+
+        context.Viewer.SelectedItems.Clear();
+        Assert.False(context.Viewer.CancelSelectedObjectsCommand.CanExecute(null));
+    }
+
+    [AvaloniaFact]
     public void MissingHoldEndpoints_AreUnselectedRelatives()
     {
         using var context = new ViewerContext();
