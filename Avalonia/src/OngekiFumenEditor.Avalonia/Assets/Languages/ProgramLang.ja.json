@@ -587,5 +587,6 @@
     "PlatformControlled":  "描画実装による制御（例: 垂直同期/ディスプレイ更新レート）",
     "Unavailable":  "利用不可",
     "BpmChange":  "BPM変更",
-    "LastRefreshed":  "最終更新"
+    "LastRefreshed":  "最終更新",
+    "ReleasePreviewNotice":  "本プロジェクトは体験プレビューテスト段階です。\n完全版を利用するには Windows WPF 版をダウンロードしてください。\nダウンロード先：{0}"
 }

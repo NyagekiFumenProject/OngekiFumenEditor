@@ -770,5 +770,6 @@
     "Unlimited":  "Unlimited",
     "PlatformControlled":  "Implementation controlled (for example, VSync/display refresh)",
     "Unavailable":  "Unavailable",
-    "LastRefreshed":  "Last refreshed"
+    "LastRefreshed":  "Last refreshed",
+    "ReleasePreviewNotice":  "This project is in the experience preview testing phase.\nPlease download the Windows WPF version for the full version.\nDownload: {0}"
 }

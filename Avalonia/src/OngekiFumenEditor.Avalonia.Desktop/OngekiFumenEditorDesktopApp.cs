@@ -3,11 +3,13 @@ using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using Gekimini.Avalonia;
+using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Platforms.Services.MainWindow;
 using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.DeadHandler;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -25,6 +27,7 @@ namespace OngekiFumenEditor.Avalonia.Desktop;
 public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
 {
     private readonly string[] commandLineArgs;
+    private const string FullVersionDownloadUrl = "https://next.nageki-net.com/fumen/editor/get";
 
     public OngekiFumenEditorDesktopApp()
         : this(isGUIMode: true)
@@ -163,6 +166,23 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         catch (Exception exception)
         {
             Log.LogError("Failed to process the startup arguments.", exception);
+        }
+
+#if !DEBUG
+        await ShowReleasePreviewNoticeAsync();
+#endif
+    }
+
+    private async Task ShowReleasePreviewNoticeAsync()
+    {
+        try
+        {
+            await ServiceProvider.GetRequiredService<IDialogManager>().ShowMessageDialog(
+                Lang.ReleasePreviewNotice.Format(FullVersionDownloadUrl));
+        }
+        catch (Exception exception)
+        {
+            Log.LogError("Failed to show the release preview notice.", exception);
         }
     }
 

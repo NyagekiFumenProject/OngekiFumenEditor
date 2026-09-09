@@ -764,5 +764,6 @@
     "Unlimited":  "不限帧",
     "PlatformControlled":  "由渲染实现控制（例如垂直同步/显示器刷新率）",
     "Unavailable":  "不可用",
-    "LastRefreshed":  "上次刷新"
+    "LastRefreshed":  "上次刷新",
+    "ReleasePreviewNotice":  "本项目属于体验预览测试阶段。\n完整版需要下载 Windows WPF 版本。\n下载链接：{0}"
 }
