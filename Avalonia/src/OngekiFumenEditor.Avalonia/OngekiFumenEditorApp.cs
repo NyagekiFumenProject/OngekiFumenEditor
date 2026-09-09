@@ -1,4 +1,5 @@
 using Gekimini.Avalonia;
+using Gekimini.Avalonia.Framework.Dialogs;
 using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -9,16 +10,19 @@ using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Kernel.KeyBinding;
 using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
+using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages.DebugInfomation;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Modules.SplashScreen;
 
 namespace OngekiFumenEditor.Avalonia;
 
 public abstract class OngekiFumenEditorApp : App
 {
+    private const string FullVersionDownloadUrl = "https://next.nageki-net.com/fumen/editor/get";
     private Task keyBindingInitializationTask = Task.CompletedTask;
     protected OngekiFumenEditorApp(bool isGUIMode = true)
         : base(isGUIMode)
@@ -76,6 +80,10 @@ public abstract class OngekiFumenEditorApp : App
         Dispatcher.UIThread.Post(
             () => _ = ShowSplashScreenAfterBootAsync(),
             DispatcherPriority.Background);
+
+        Dispatcher.UIThread.Post(
+            () => _ = ShowReleasePreviewNoticeAfterBootAsync(),
+            DispatcherPriority.ApplicationIdle);
     }
 
     private void InitializeMainWindowTitleAndIcon()
@@ -219,6 +227,22 @@ public abstract class OngekiFumenEditorApp : App
         {
             Log.LogError("Failed to show the splash screen after boot.", exception);
         }
+    }
+
+    private async Task ShowReleasePreviewNoticeAfterBootAsync()
+    {
+#if !DEBUG
+        try
+        {
+            await WaitForSplashScreenHostReadyAsync();
+            await ServiceProvider.GetRequiredService<IDialogManager>().ShowMessageDialog(
+                Lang.ReleasePreviewNotice.Format(FullVersionDownloadUrl));
+        }
+        catch (Exception exception)
+        {
+            Log.LogError("Failed to show the release preview notice.", exception);
+        }
+#endif
     }
 }
 
