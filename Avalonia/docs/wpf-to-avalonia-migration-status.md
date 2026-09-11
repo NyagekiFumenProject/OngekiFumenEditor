@@ -76,6 +76,20 @@ dotnet build .\OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:mi
 
 历史错误数变化轨迹：126 → 83 →（虚报 5，实际约 361）→ 77 → 17 → C# 0（XAML 阶段暴露 2190 AVLN）→ 122 → 6 → 2 → **0（CS + AVLN 全部清零）**。
 
+### 测试命令
+
+完整覆盖（含全部 `[AvaloniaFact]` headless / UI / 像素测试）需要在 Release 下直接运行测试可执行文件：
+
+```powershell
+dotnet build .\tests\OngekiFumenEditor.Avalonia.Tests\OngekiFumenEditor.Avalonia.Tests.csproj -c Release
+.\tests\OngekiFumenEditor.Avalonia.Tests\bin\Release\net11.0\OngekiFumenEditor.Avalonia.Tests.exe
+```
+
+- 2026-09-11 实测：Release 全量 **689/689 通过**（含 `SkiaRenderSmokeTests` 像素断言、`DrawPlayableAreaHelperTests`、`EditorUiRegressionTests` 等全部 headless 用例）；Desktop 测试项目 `-c Debug` 148/148 通过。
+- **`dotnet test`（VSTest 适配器路径）不会执行 `[AvaloniaFact]` 测试**：实测 689 项中只运行普通的 `[Fact]`/`[Theory]`（约 350 项），被跳过的部分也不出现在任何报告里。CI 若要覆盖 UI / 像素 / headless 用例，需要改用上面的 Release 直跑方式。
+- Debug 配置下同一进程只能初始化一个 headless 应用：`Gekimini.Avalonia.App.Initialize()` 在 `#if DEBUG` 下调用 `AttachDeveloperTools()`，第二个应用会抛 `Developer tools have already been attached. Multiple attachments are not supported.`。因此 Debug 直跑会在首个测试类之后大量报 session 错误，需要连续运行多个类时请用 Release。
+- 依赖 IoC/全局设置的测试必须标 `[AvaloniaFact]`（例如 `ProjectFileBindingDialogViewModelTests` 里会经 `Log` 走 `IoC` 的两条用例）；普通 `[Fact]` 只能靠"别的测试先把 App 初始化好"而偶然通过，属于顺序敏感的隐患。
+
 ## XAML 清零批次明细（本轮）
 
 第二版记录的 2190 个唯一 AVLN 错误已全部消除。处理按批次进行：

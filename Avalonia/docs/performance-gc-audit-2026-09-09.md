@@ -21,7 +21,7 @@
 
 ## 3. 优先处理顺序
 
-1. **先处理全部 21 项 P1：** PERF-RND-001/002/003/017、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
+1. **先处理 P1 项**（原 21 项，PERF-RND-002 已于 2026-09-11 修复）：PERF-RND-001/003/017、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
 2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。
 3. **P3、条件项和 dormant 项必须先用真实负载验证，不应与活动热路径混改。**
 
@@ -32,7 +32,7 @@
 ### 保留发现
 
 - **PERF-RND-001 / RND-01 — P1，CPU/几何展开。** `S/Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/VisibleLineVerticesQuery.cs:45-46,92-118` 一旦范围相交就设置 `alwaysDrawing=true`，随后仍变换并发出每个 child/curve point，即使点已在视口外；调用方为 `S/.../CommonLinesDrawTargetBase.cs:25-39`、`S/.../Holds/HoldDrawingTarget.cs:129-130`。应保留跨界端点但对内部 child segment 做裁剪。
-- **PERF-RND-002 / RND-02 — P1，O(n²) 列表移动。** `S/.../OngekiObjects/Holds/HoldDrawingTarget.cs:129-145` 先完整展开 lane 顶点，再反复 `RemoveAt(0)`；长 Hold 的屏外前缀会在每帧产生二次移动。改为索引窗口、一次压缩或直接查询有界几何。
+- **PERF-RND-002 / RND-02 — P1，O(n²) 列表移动。**〔**2026-09-11 已修复**，见下方「已修复项」〕`S/.../OngekiObjects/Holds/HoldDrawingTarget.cs:129-145` 先完整展开 lane 顶点，再反复 `RemoveAt(0)`；长 Hold 的屏外前缀会在每帧产生二次移动。改为索引窗口、一次压缩或直接查询有界几何。
 - **PERF-RND-003 / RND-03+04（合并）— P1，原生纹理生命周期。** `S/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs:232-235,1078` 在编辑器重新挂接时重新初始化全局 singleton target；`TextureLaneEditorObjectDrawingTarget.cs:27-34`、`LaneCurvePathControlDrawingTarget.cs:39-50`、`Kernel/Graphics/Skia/DefaultSkiaDrawingManagerImpl.cs:48-51` 覆盖旧 `SKImage`/纹理而未先释放，Tap map 还会强引用旧图片。`TapDrawingTarget.Initialize.cs:43-49,64-74`、`TapDrawingTarget.cs:152-158`、`FlickDrawingTarget.cs:33-49,93-97`、`IndividualSoflanAreaDrawingTarget.cs:32-35` 显示 Dispose 不完整；`Drawing.cs:1270-1278` 只清引用不处置 target，`LaneCurvePathControlDrawingTarget.cs:46-50` 还存在先置 null 后 Dispose 的路径。应让每一代 target 有明确 owner，在替换/Detach/Dispose 时释放所有图片和 map。
 - **PERF-RND-004 / RND-05 — P2，帧节流后的空表面风险。**〔**2026-09-11 已修复**，见下方「已修复项」〕`S/Kernel/Graphics/AvaloniaSkiaRenderControl.cs:28-39`、`DefaultSkiaRenderContext.cs:52-59` 与 `S/Modules/FumenVisualEditor/.../Drawing.cs:313-320,669-670` 在 FPS cap 下可能构建命令后跳过提交/调度，而 custom surface 已被清理；需保留上一帧或明确 present 语义，避免空白/闪烁。
 - **PERF-RND-005 / RND-06 — P2，逐实例纹理绘制。**〔**2026-09-11 已修复**，见下方「已修复项」〕`S/Kernel/Graphics/Skia/SkiaDrawCommandListReplay.cs:144-152` 到 `DefaultTextureDrawing.cs:23-56` 每个 `DrawTexture` 都 Save/变换/创建 `SKPaint`/DrawImage；`LaneCurvePathControlDrawingTarget.cs:126-128` 对每个控制点调用。可在语义允许时批量化并缓存 paint/变换状态。
@@ -40,14 +40,14 @@
 - **PERF-RND-007 / RND-08 — P2，合并可见范围重复静态对象。** `S/Modules/FumenVisualEditor/Graphics/Drawing/Drawing.cs:449-450,486-520,831-891` 对每个 merged visible range 重复枚举 Meter/BPM、Soflan/IndividualSoflan 并 AddRange 到 target/context map。应按 frame 缓存静态数据并去重。
 - **PERF-RND-008 / RND-09 — P2，投射物查询范围过宽。** `Drawing.cs:542-583` 每帧从当前 TGrid 查询到 `TGrid.MaxValue`；`ProjectileBatchDrawTargetBase.cs:175-360` 还逐项检查并可能 `Parallel.ForEach`，`:304-312` 对每个敌方投射物重复查 lane。应按外观/视口上界限制并缓存 lane 查找。
 - **PERF-RND-009 / RND-10 — P2，PlayableArea 多重扫描。** `DrawPlayableAreaHelper.cs:179-223,445-452` 为每个采样点构建 area sample，`:458-484` 扫所有候选墙 lane，`:501-543` 又调用 `GetChildObjectsFromTGrid/IsPathVaild` 并遍历 children；长墙成本为 samples×lanes×children。应缓存区间游标/有效路径。
-- **PERF-RND-010 / RND-11 — P3，绘制命令粒度。** `CommonLinesDrawTargetBase.cs:25-39` 每 lane 发一个 `DrawSimpleLines`，replay `SkiaDrawCommandListReplay.cs:141-143` 与 `DefaultSkiaLineDrawing.cs:48-54` 每命令建立/结束路径。只有确认后端支持断开 strip 且基准证实后才聚合。
-- **PERF-RND-011 / RND-12 — P3，paint/path effect 创建。** `DefaultSkiaLineDrawing.cs:72-97` 在 style 变化时创建/处置 `SKPaint` 和 dash `SKPathEffect`，`:43-45` 每次结束重置；可缓存常用 style，但需先测量。
-- **PERF-RND-012 / RND-13 — P2，后端性能数据失真。** `SkiaDrawCommandListReplay.cs:214-226` 使用 `DummyPerformenceMonitor`，因此 `Drawing.cs:328-329,619-638` 的编辑器监控不能看到 replay 的实际 draw call/时间。传入真实 monitor 或公开 replay 指标。
+- **PERF-RND-010 / RND-11 — P3，绘制命令粒度。** `CommonLinesDrawTargetBase.cs:25-39` 每 lane 发一个 `DrawSimpleLines`，replay `SkiaDrawCommandListReplay.cs:141-143` 与 `NewSkiaLineDrawing.DrawPolylineOrSegmentsRun` 每命令建立/结束路径。只有确认后端支持断开 strip 且基准证实后才聚合。
+- **PERF-RND-011 / RND-12 — P3，paint/path effect 创建。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultSkiaLineDrawing.cs:72-97` 在 style 变化时创建/处置 `SKPaint` 和 dash `SKPathEffect`，`:43-45` 每次结束重置；可缓存常用 style，但需先测量。
+- **PERF-RND-012 / RND-13 — P2，后端性能数据失真。**〔**2026-09-11 已修复**，见下方「已修复项」〕`SkiaDrawCommandListReplay.cs:214-226` 使用 `DummyPerformenceMonitor`，因此 `Drawing.cs:328-329,619-638` 的编辑器监控不能看到 replay 的实际 draw call/时间。传入真实 monitor 或公开 replay 指标。
 - **PERF-RND-013 / RND-16 — P2，预览尺寸使用陈旧状态。** `DrawTimeSignatureHelper.cs:58-69,72,82` 在 preview 使用 `RectInDesignMode`，而 `Drawing.cs:429-430` 只在 design mode 赋值；preview 可能拿到默认/旧尺寸，导致错误范围和无效工作。改用当前 context/ViewWidth/Height。
 - **PERF-RND-014 / RND-17 — P2，文字绘制高频 native 分配。** `DefaultSkiaStringDrawing.cs:46-70,73-99` 每次 Measure/Draw 创建 `SKPaint/SKFont/SKTypeface`；`DurationSoflanDrawingTarget.cs:217-230`、`CommonHorizonalDrawingTarget.cs:161-184` 在每帧大量调用。缓存字体、metrics 和 style。
 - **PERF-RND-015 / RND-18 — P2，标记颜色错误兼性能浪费。** `DrawPlayerLocationHelper.cs:15` 默认 tuple 的 color 为 `Vector4.Zero`，`:62-65` 只更新位置/尺寸；`DefaultTextureDrawing.cs:48-51` 直接使用该颜色，marker 完全透明但仍被 replay。初始化非零颜色并避免无效命令。
-- **PERF-RND-016 / RND-19 — P2，Stopwatch 单位错误。** `DefaultDebugPerfomenceMonitor.cs:149-199` 记录 `Stopwatch.GetTimestamp` 差值，`:318-319` 当作 `TimeSpan` ticks；`DefaultReleasePerfomenceMonitor.cs:65-69,118` 对 `Stopwatch.ElapsedTicks` 做同样转换。频率不等于 10,000,000 时 FPS/ms 全部缩放错误。使用 `Stopwatch.GetElapsedTime` 或显式除以 `Stopwatch.Frequency`。
-- **PERF-RND-017 / RND-20 — P1，replay engine 每帧创建。** `DefaultSkiaDrawingManagerImpl.cs:85-99` 每次 present `new SkiaDrawCommandListReplay`；其构造 `SkiaDrawCommandListReplay.cs:20-35,41-60` 创建 target/drawing context、8 个 backend 对象和 3 个 `Stack<Matrix4>`，`DefaultSkiaLineDrawing.cs:9-16` 还创建 List；`SkiaDrawCommandListReplay.Dispose:210-212` 为空。应按 render context 缓存 replay，逐帧 reset 矩阵/stack/state，并在 context 销毁时释放。
+- **PERF-RND-016 / RND-19 — P2，Stopwatch 单位错误。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultDebugPerfomenceMonitor.cs:149-199` 记录 `Stopwatch.GetTimestamp` 差值，`:318-319` 当作 `TimeSpan` ticks；`DefaultReleasePerfomenceMonitor.cs:65-69,118` 对 `Stopwatch.ElapsedTicks` 做同样转换。频率不等于 10,000,000 时 FPS/ms 全部缩放错误。使用 `Stopwatch.GetElapsedTime` 或显式除以 `Stopwatch.Frequency`。
+- **PERF-RND-017 / RND-20 — P1，replay engine 每帧创建。** `DefaultSkiaDrawingManagerImpl.cs:85-99` 每次 present `new SkiaDrawCommandListReplay`；其构造 `SkiaDrawCommandListReplay.cs:20-35,41-60` 创建 target/drawing context、8 个 backend 对象和 3 个 `Stack<Matrix4>`，`NewSkiaLineDrawing` 还创建 List/paint/池；`SkiaDrawCommandListReplay.Dispose:210-213` 现只释放 line drawing。应按 render context 缓存 replay，逐帧 reset 矩阵/stack/state，并在 context 销毁时释放。
 
 ### 已修复项
 
@@ -87,7 +87,28 @@
 
     原实现恰为 48 B/顶点；2048 顶点时 Gen0 5.86 次/千次、Gen1 2.62 次/千次，新实现均为 0。`with` 表达式路径 17.7 ns/48 B → 3.9 ns/0 B。此为合成基准，真实可见顶点数下的绝对值仍需实测。
   - **验证：** `CommonHorizonalDrawingTargetTests`（真实 `DrawSimpleLines` 命令 + 顶点断言）与 `DrawCommandListTests`（含顶点构造与命令缓冲）全绿；headless `SkiaRenderControl_CleanFrame_*` 通过。
-  - **行为差异（已核对，无调用点依赖）：** `VertexDash` 由引用相等变为值相等，`DefaultSkiaLineDrawing` 的 `dash == VertexDash.Solider` 现按值匹配（`(100,0)` 即视作 solid）；`default(LineVertex).Dash` 从 null 变为零值。
+  - **行为差异（已核对，无调用点依赖）：** `VertexDash` 由引用相等变为值相等，线绘制的 `dash == VertexDash.Solider` 现按值匹配（`(100,0)` 即视作 solid，见 `NewSkiaLineDrawing.IsDashed`）；`default(LineVertex).Dash` 从 null 变为零值。
+
+- **PERF-RND-002 / RND-02 — 已修复（2026-09-11）：Hold 顶点裁剪改为索引窗口 + 池化裁剪列表。**
+  - **根因（静态确认）：** `HoldDrawingTarget.Draw` 对完整展开的 lane 顶点反复 `RemoveAt(0)`/`RemoveAt(Count-1)` 并 `Insert(0, ...)`，长 Hold 的屏外前缀/后缀每帧产生 O(n²) 搬移（与 WPF `459f72177` 同源）。
+  - **处理：** 按 WPF 终态改为 `startIdx`/`endIdx` 索引窗口，只对窗口内顶点做水平丢弃判定；用池化 `clippedList` 一次拼出 `[holdPoint, ...窗口, holdEndPoint]` 交给 `builder.DrawLines`；`list.Count == 0` 分支不变。
+  - **验证：** 20 万组随机输入的新旧算法属性对照：所有正常 Hold（`holdEnd.Y ≥ holdPoint.Y`）输出逐点一致；唯一差异是退化的"倒置 Hold"（end 早于 start），旧实现只剩 1 个不可见顶点，新实现（与 WPF 终态一致）输出 2 点线段。Release 全量 689/689 通过。
+
+- **PERF-RND-011 / RND-12 — 已修复（2026-09-11）：线绘制切换为 WPF 终态的池化实现。**
+  - **根因（静态确认）：** 原 `DefaultSkiaLineDrawing` 每次 `DrawPath` `new SKPath()`，每次样式变化新建 `SKPaint` 与 dash `SKPathEffect`；WPF 终态 replay 早已使用带 `Stack<SKPath>` 池、dash effect 缓存、Run 合并与 Mesh 渐变回退的实现，Avalonia 未迁移。
+  - **处理：** 移植 `Kernel/Graphics/Skia/Drawing/LineDrawing/NewSkiaLineDrawing.cs`（`pathPool`/`MaxPooledPaths=32`、`dashPathEffectCache`、`BuildSegmentsAndRuns` 合并、`MeshGradientSegmentThreshold=256` 三角网回退、单实例 `strokePaint`/`meshPaint`），replay 改用它并在 `Dispose` 中释放；删除旧 `DefaultSkiaLineDrawing`。
+  - **验证：** 新增 headless 像素测试 `SkiaLineDrawing_RendersSolidAndDashedLinesThroughReplay`（经真实 replay 画实线 + 虚线，断言两条带像素与未触及区域背景），通过；`(100,0)` 仍按 solid 处理（`IsDashed` 语义与删除前一致）。
+
+- **PERF-RND-012 / RND-13 — 已修复（2026-09-11）：replay 接入 render context 上的真实 monitor。**
+  - **根因（静态确认）：** `SkiaDrawCommandListReplay` 的 `ReplayDrawingContext` 硬编码 `new DummyPerformenceMonitor()`，且 `IRenderContext` 没有 monitor 属性，编辑器监控看不到 replay 的 draw call 与耗时。
+  - **处理：** `IRenderContext` 增加 `IPerfomenceMonitor PerfomenceMonitor { get; set; }`（`DefaultSkiaRenderContext` 默认 `DummyPerformenceMonitor.Instance`）；编辑器在 `StartRenderContext` 与 `IsDisplayFPS` 切换时安装自身 monitor，`StopRenderContext` 复位为 Dummy；replay 统一读 `RenderContext.PerfomenceMonitor ?? Dummy`；`DummyPerformenceMonitor` 新增共享 `Instance`。
+  - **验证：** 新增 `SkiaLineDrawing_ReplayDrawCallsReachInstalledPerfomenceMonitor`：在 context 上安装 `DefaultReleasePerfomenceMonitor`，经真实 replay 画线后断言 `AveDrawCall > 0`。
+  - **未做/后续：** WPF 终态的 `OnBeforePresent/OnAfterPresent` 与 `RenderPerfomenceMeasurePanel` 仍缺；present 阶段计数目前与构建阶段共用同一批样本，面板落地时需成对补齐。
+
+- **PERF-RND-016 / RND-19 — 已修复（2026-09-11）：监视器计时单位与空样本 NRE。**
+  - **根因（静态确认）：** 两个默认 monitor 把 `Stopwatch` 频率单位的原始差值当作 `TimeSpan.Ticks` 记录（debug：`GetTimestamp` 差值；release：`timer.ElapsedTicks - currentBeginRenderTick`），频率非 10,000,000 时 FPS/ms 全部缩放错误。
+  - **处理：** debug 侧绘制/目标绘制/整帧三处改用 `Stopwatch.GetElapsedTime(...).Ticks`；release 侧改用 `timer.Elapsed.Ticks` 并删除恒为 0 的 `currentBeginRenderTick`；同时把 release 侧 `MostUIRenderSpendTicks`/`MostSpendTicks` 的 `GroupBy(...).FirstOrDefault().Key` 换成空安全的 `MostFrequentValue`（安装后无样本时不再 NRE）。
+  - **验证：** 全解决方案重建 0 error；Release 全量主测试项目 689/689、Desktop 测试项目 148/148 通过（测试命令与 headless 运行限制见 `wpf-to-avalonia-migration-status.md` 的「测试命令」）。
 
 ### Dormant/合并项
 
