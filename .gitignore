@@ -13,6 +13,7 @@
 .sandbox_home/
 tmpgen-core/
 .testagent/
+.workbuddy/
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
