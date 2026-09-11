@@ -12,8 +12,11 @@ namespace OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen;
 ///     谱面位于 package 树内时允许在 package 根内递归查找。
 ///     返回 null 表示自动发现失败，需要用户手动选择音频。
 /// </summary>
-public static class DesktopFastOpenAudioResolver
+public static partial class DesktopFastOpenAudioResolver
 {
+    [GeneratedRegex(@"(\d+)_\d+")]
+    private static partial Regex MusicIdFromFileNameRegex();
+
     internal static IReadOnlyList<string> GetExternalAwbFileNameCandidates(
         string acbFileName)
     {
@@ -130,7 +133,7 @@ public static class DesktopFastOpenAudioResolver
 
     private static int? ReadMusicIdFromFileName(string ogkrFilePath)
     {
-        var match = new Regex(@"(\d+)_\d+").Match(Path.GetFileNameWithoutExtension(ogkrFilePath));
+        var match = MusicIdFromFileNameRegex().Match(Path.GetFileNameWithoutExtension(ogkrFilePath));
         if (match.Success && int.TryParse(match.Groups[1].Value, out var parsed) && parsed >= 0)
             return parsed;
 
