@@ -20,6 +20,7 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -1098,26 +1099,37 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             RebuildObjectSoflanGroupRecord();
         }
 
+        // 复用同一份并行配置,避免每次重建 SoflanGroup 缓存都分配一个 ParallelOptions。
+        // 并发度维持 1(与迁移前一致):重建体还会读取惰性构建的空间索引,
+        // 放开并行度前需先确认其查询可安全并发。
+        private static readonly ParallelOptions rebuildSoflanGroupParallelOption = new()
+        {
+            MaxDegreeOfParallelism = 1
+        };
+
         private void RebuildObjectSoflanGroupRecord()
         {
             _cacheSoflanGroupRecorder.Clear();
 
             //if (IsPreviewMode)
             {
-                var objs = EditorContext.Fumen.GetAllDisplayableObjects().OfType<OngekiMovableObjectBase>();
-                objs = objs.Where(x => x switch
+                // 单次遍历进池化列表,替代 OfType/Where 的两次延迟枚举,并且不再为每次重建分配 ParallelOptions。
+                using var objs = ObjectPool.GetPooledList<OngekiMovableObjectBase>();
+                foreach (var displayable in EditorContext.Fumen.GetAllDisplayableObjects())
                 {
-                    IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
-                    or ConnectableObjectBase => false, //轨道由依附的物件去决定
-                    _ => true
-                });
+                    if (displayable is not OngekiMovableObjectBase obj)
+                        continue;
+                    //轨道由依附的物件去决定
+                    if (obj is IndividualSoflanArea
+                        or IndividualSoflanArea.IndividualSoflanAreaEndIndicator
+                        or ConnectableObjectBase)
+                        continue;
+                    objs.Add(obj);
+                }
                 //recache all objects
 
                 _cacheSoflanGroupRecorder.SetDefault(EditorContext.Fumen.SoflansMap.DefaultSoflanList);
-                Parallel.ForEach(objs, new ParallelOptions()
-                {
-                    MaxDegreeOfParallelism = 1
-                }, obj =>
+                Parallel.ForEach(objs, rebuildSoflanGroupParallelOption, obj =>
                 {
                     var soflanGroup = EditorContext.Fumen.IndividualSoflanAreaMap.QuerySoflanGroup(obj);
                     if (!EditorContext.Fumen.SoflansMap.TryGetValue(soflanGroup, out var soflanList))
@@ -1145,7 +1157,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
                 _cacheSoflanGroupRecorder.Freeze();
 #if DEBUG
                 //print current selected objects' SoflanGroup
-                if (objs.Any())
+                if (objs.Count > 0)
                 {
                     Log.LogDebug($"----Print Selected Objects' SoflanGroup----");
                     foreach (var obj in SelectObjects.OfType<OngekiObjectBase>().OrderBy(x => x.Id))

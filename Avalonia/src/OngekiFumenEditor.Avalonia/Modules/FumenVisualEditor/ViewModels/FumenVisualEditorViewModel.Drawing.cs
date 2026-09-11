@@ -105,6 +105,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         {
             SetProperty(ref isDisplayFPS, value);
             PerfomenceMonitor = value ? actualPerformenceMonitor : dummyPerformenceMonitor;
+            if (RenderContext is { } context)
+                context.PerfomenceMonitor = PerfomenceMonitor;
         }
     }
 
@@ -1211,6 +1213,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             StopRenderContext();
 
         RenderContext = renderContext;
+        //The replay records its draw calls and timings into this monitor; keep it in sync with the
+        //editor's FPS/statistics switch so present-time work is visible to the same monitor.
+        renderContext.PerfomenceMonitor = PerfomenceMonitor;
         renderContext.OnRender -= OnRenderFrame;
         renderContext.OnRender += OnRenderFrame;
         renderContext.StartRendering();
@@ -1223,6 +1228,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         if (renderContext is null)
             return;
 
+        renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
         renderContext.OnRender -= OnRenderFrame;
         renderContext.StopRendering();
     }

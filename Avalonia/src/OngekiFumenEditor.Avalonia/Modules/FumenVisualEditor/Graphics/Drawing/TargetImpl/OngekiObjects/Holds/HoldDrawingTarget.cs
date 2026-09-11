@@ -130,36 +130,47 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, soflanList, VertexDash.Solider, color, list);
                 if (list.Count > 0)
                 {
-                    while (list.Count > 0 && holdPoint.Y > list[0].Point.Y)
-                        list.RemoveAt(0);
-                    if (list.Count >= 2)
+                    //索引窗口裁剪: 头部/尾部只移动下标, 避免对 list[0]/list[^1] 反复 RemoveAt/Insert 造成的二次搬移。
+                    var startIdx = 0;
+                    while (startIdx < list.Count && holdPoint.Y > list[startIdx].Point.Y)
+                        startIdx++;
+
+                    if (list.Count - startIdx >= 2)
                     {
-                        var outSide = list[0];
-                        var inSide = list[1];
+                        var outSide = list[startIdx];
+                        var inSide = list[startIdx + 1];
 
                         if (checkDiscardByHorizon(inSide.Point, holdPoint, outSide.Point))
-                            list.RemoveAt(0);
+                            startIdx++;
                     }
-                    list.Insert(0, new LineVertex(holdPoint, color, VertexDash.Solider));
-                    while (list.Count > 0 && holdEndPoint.Y < list[list.Count - 1].Point.Y)
-                        list.RemoveAt(list.Count - 1);
-                    if (list.Count >= 2)
-                    {
-                        var outSide = list[list.Count - 1];
-                        var inSide = list[list.Count - 2];
 
-                        if (checkDiscardByHorizon(inSide.Point, holdEndPoint, outSide.Point))
-                            list.RemoveAt(list.Count - 1);
+                    var endIdx = list.Count - 1;
+                    while (endIdx >= startIdx && holdEndPoint.Y < list[endIdx].Point.Y)
+                        endIdx--;
+
+                    if (endIdx >= startIdx)
+                    {
+                        var outSide = list[endIdx];
+                        var inSidePoint = endIdx > startIdx ? list[endIdx - 1].Point : holdPoint;
+
+                        if (checkDiscardByHorizon(inSidePoint, holdEndPoint, outSide.Point))
+                            endIdx--;
                     }
-                    list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
+
+                    using var clippedList = ObjectPool.GetPooledList<LineVertex>();
+                    clippedList.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
+                    for (var i = startIdx; i <= endIdx; i++)
+                        clippedList.Add(list[i]);
+                    clippedList.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
+
+                    builder.DrawLines(clippedList, holdBodyWidth);
                 }
                 else
                 {
                     list.Add(new LineVertex(holdPoint, color, VertexDash.Solider));
                     list.Add(new LineVertex(holdEndPoint, color, VertexDash.Solider));
+                    builder.DrawLines(list, holdBodyWidth);
                 }
-
-                builder.DrawLines(list, holdBodyWidth);
             }
         }
     }

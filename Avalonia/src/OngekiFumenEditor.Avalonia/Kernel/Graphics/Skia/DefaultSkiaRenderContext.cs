@@ -1,6 +1,7 @@
 using Avalonia.Media;
 using Avalonia.Skia;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using SkiaSharp;
 using System.Diagnostics;
 
@@ -17,6 +18,9 @@ public class DefaultSkiaRenderContext : IRenderContext
     public event Action<IRenderContext, TimeSpan> OnRender;
 
     public SKCanvas Canvas { get; private set; }
+
+    /// <inheritdoc />
+    public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
 
     internal bool IsRendering => isStart;
 

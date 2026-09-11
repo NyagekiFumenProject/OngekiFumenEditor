@@ -22,7 +22,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 		private FixedSizeCycleCollection<long> TotalDrawCall { get; } = new(RECORD_LENGTH);
 
 		private long currentDrawCall = 0;
-		private long currentBeginRenderTick = 0;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
 		public void Clear() { }
@@ -49,10 +48,16 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 			{
 				AveSpendTicks = RenderSpendTicks.Average(),
 				AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
-				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
+				MostUIRenderSpendTicks = MostFrequentValue(UIRenderSpendTicks),
+				MostSpendTicks = MostFrequentValue(RenderSpendTicks),
 				AveDrawCall = (int)TotalDrawCall.Average()
 			};
+		}
+
+		private static long MostFrequentValue(IEnumerable<long> values)
+		{
+			var group = values.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault();
+			return group?.Key ?? 0;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -65,7 +70,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 		public void OnAfterRender()
 		{
 			timer.Stop();
-			RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
+			RenderSpendTicks.Enqueue(timer.Elapsed.Ticks);
 			TotalDrawCall.Enqueue(currentDrawCall);
 		}
 
@@ -80,7 +85,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 		{
 			timer.Restart();
 			currentDrawCall = 0;
-			currentBeginRenderTick = 0;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

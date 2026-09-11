@@ -182,21 +182,18 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 		public void OnAfterDrawing(IDrawing drawing)
 		{
 			var data = GetDrawingPerformenceData(drawing);
-			var tickDiff = Stopwatch.GetTimestamp() - data.OnBeginDrawingTicks;
-			data.RecordDrawing(tickDiff);
+			data.RecordDrawing(Stopwatch.GetElapsedTime(data.OnBeginDrawingTicks).Ticks);
 		}
 
 		public void OnAfterTargetDrawing(IDrawingTarget drawing)
 		{
 			var data = GetDrawingTargetPerformenceData(drawing);
-			var tickDiff = Stopwatch.GetTimestamp() - data.OnBeginDrawingTicks;
-			data.RecordTargetDrawing(tickDiff);
+			data.RecordTargetDrawing(Stopwatch.GetElapsedTime(data.OnBeginDrawingTicks).Ticks);
 		}
 
 		public void OnAfterRender()
 		{
-			var tickDiff = Stopwatch.GetTimestamp() - Volatile.Read(ref currentBeginRenderTick);
-			Volatile.Read(ref renderSpendTicks).Enqueue(tickDiff);
+			Volatile.Read(ref renderSpendTicks).Enqueue(Stopwatch.GetElapsedTime(Volatile.Read(ref currentBeginRenderTick)).Ticks);
 			Volatile.Read(ref totalDrawCall).Enqueue(Volatile.Read(ref currentDrawCall));
 
 			foreach (var data in Volatile.Read(ref drawDataMap).Values)

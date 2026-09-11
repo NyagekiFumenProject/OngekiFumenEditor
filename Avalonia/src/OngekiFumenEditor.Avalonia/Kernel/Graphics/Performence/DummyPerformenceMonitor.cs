@@ -8,6 +8,12 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
 {
 	public class DummyPerformenceMonitor : IPerfomenceMonitor
 	{
+		/// <summary>
+		/// Shared no-op monitor used as the render context default and as the fallback when no
+		/// monitor is installed on a context.
+		/// </summary>
+		public static readonly DummyPerformenceMonitor Instance = new();
+
 		private class DummyDrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
 		{
 			private PerformenceItem[] items = new PerformenceItem[0];

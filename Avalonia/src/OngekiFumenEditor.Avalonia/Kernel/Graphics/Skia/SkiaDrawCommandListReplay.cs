@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
     {
         private readonly ReplayDrawingContext drawingContext;
         private readonly DrawingTargetContext targetContext;
-        private readonly DefaultSkiaLineDrawing lineDrawing;
+        private readonly NewSkiaLineDrawing lineDrawing;
         private readonly DefaultSkiaTextureDrawing textureDrawing;
         private readonly DefaultSkiaBatchTextureDrawing batchTextureDrawing;
         private readonly DefaultSkiaHighlightBatchTextureDrawing highlightBatchTextureDrawing;
@@ -50,7 +50,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
             targetContext = new DrawingTargetContext();
             drawingContext = new ReplayDrawingContext(renderContext, targetContext);
 
-            lineDrawing = new DefaultSkiaLineDrawing(manager);
+            lineDrawing = new NewSkiaLineDrawing(manager);
             textureDrawing = new DefaultSkiaTextureDrawing(manager);
             batchTextureDrawing = new DefaultSkiaBatchTextureDrawing(manager);
             highlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(manager);
@@ -209,6 +209,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
 
         public void Dispose()
         {
+            lineDrawing.Dispose();
         }
 
         private sealed class ReplayDrawingContext : IDrawingContext
@@ -223,7 +224,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
 
             public DrawingTargetContext CurrentDrawingTargetContext => currentDrawingTargetContext;
 
-            public IPerfomenceMonitor PerfomenceMonitor { get; } = new DummyPerformenceMonitor();
+            public IPerfomenceMonitor PerfomenceMonitor => RenderContext.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
 
             public IRenderContext RenderContext { get; }
 

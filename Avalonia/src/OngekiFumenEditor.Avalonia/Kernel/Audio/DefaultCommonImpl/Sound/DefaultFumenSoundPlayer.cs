@@ -57,42 +57,57 @@ public class DefaultFumenSoundPlayer : IFumenSoundPlayer, IDisposable
     {
         var audioManager = IoC.Get<IAudioManager>();
 
-        bool noError = true;
-
-        async Task Load(SoundControl sound, string fileName)
+        // 原本 17 个文件顺序 await,等待时间累加;改为 Task.WhenAll 并行加载。
+        // 单个加载只读取自有资源流并交给音频后端,结果由主流程串行写入 cacheSounds,
+        // 避免并发写 Dictionary。
+        static async Task<(SoundControl sound, ISoundPlayer player, bool ok)> Load(IAudioManager audioManager, SoundControl sound, string fileName)
         {
             try
             {
                 await using var stream = OpenSoundStream(fileName);
-                cacheSounds[sound] = await audioManager.LoadSoundAsync(stream);
+                return (sound, await audioManager.LoadSoundAsync(stream), true);
             }
             catch (Exception e)
             {
                 Log.LogError($"Can't load {sound} sound file '{fileName}', reason: {e.Message}", e);
-                noError = false;
+                return (sound, null, false);
             }
         }
 
         foreach (var sound in cacheSounds.Values)
             sound.Dispose();
         cacheSounds.Clear();
-        await Load(SoundControl.Tap, "tap.wav");
-        await Load(SoundControl.Bell, "bell.wav");
-        await Load(SoundControl.CriticalTap, "extap.wav");
-        await Load(SoundControl.WallTap, "wall.wav");
-        await Load(SoundControl.CriticalWallTap, "exwall.wav");
-        await Load(SoundControl.Flick, "flick.wav");
-        await Load(SoundControl.Bullet, "bullet.wav");
-        await Load(SoundControl.CriticalFlick, "exflick.wav");
-        await Load(SoundControl.HoldEnd, "holdend.wav");
-        await Load(SoundControl.ClickSE, "clickse.wav");
-        await Load(SoundControl.HoldTick, "holdtick.wav");
-        await Load(SoundControl.BeamPrepare, "beamprepare.wav");
-        await Load(SoundControl.BeamLoop, "beamlooping.wav");
-        await Load(SoundControl.BeamEnd, "beamend.wav");
-        await Load(SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav");
-        await Load(SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav");
-        await Load(SoundControl.BossWave, "bossWave.wav");
+
+        var results = await Task.WhenAll(
+            Load(audioManager, SoundControl.Tap, "tap.wav"),
+            Load(audioManager, SoundControl.Bell, "bell.wav"),
+            Load(audioManager, SoundControl.CriticalTap, "extap.wav"),
+            Load(audioManager, SoundControl.WallTap, "wall.wav"),
+            Load(audioManager, SoundControl.CriticalWallTap, "exwall.wav"),
+            Load(audioManager, SoundControl.Flick, "flick.wav"),
+            Load(audioManager, SoundControl.Bullet, "bullet.wav"),
+            Load(audioManager, SoundControl.CriticalFlick, "exflick.wav"),
+            Load(audioManager, SoundControl.HoldEnd, "holdend.wav"),
+            Load(audioManager, SoundControl.ClickSE, "clickse.wav"),
+            Load(audioManager, SoundControl.HoldTick, "holdtick.wav"),
+            Load(audioManager, SoundControl.BeamPrepare, "beamprepare.wav"),
+            Load(audioManager, SoundControl.BeamLoop, "beamlooping.wav"),
+            Load(audioManager, SoundControl.BeamEnd, "beamend.wav"),
+            Load(audioManager, SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav"),
+            Load(audioManager, SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav"),
+            Load(audioManager, SoundControl.BossWave, "bossWave.wav"));
+
+        var noError = true;
+        foreach (var (sound, player, ok) in results)
+        {
+            if (!ok)
+            {
+                noError = false;
+                continue;
+            }
+
+            cacheSounds[sound] = player;
+        }
 
         if (!noError)
             Log.LogWarning("Some sounds failed to load.");
