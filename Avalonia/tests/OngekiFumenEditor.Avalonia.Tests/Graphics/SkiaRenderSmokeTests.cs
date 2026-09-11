@@ -428,6 +428,178 @@ public sealed class SkiaRenderSmokeTests
         }
     }
 
+    [AvaloniaFact]
+    public async Task SkiaLineDrawing_RendersSolidAndDashedLinesThroughReplay()
+    {
+        const int width = 96;
+        const int height = 96;
+        var manager = new DefaultSkiaDrawingManagerImpl();
+        var renderControl = manager.CreateRenderControl();
+        renderControl.HorizontalAlignment = HorizontalAlignment.Stretch;
+        renderControl.VerticalAlignment = VerticalAlignment.Stretch;
+        var window = new Window
+        {
+            Width = width,
+            Height = height,
+            Content = renderControl
+        };
+        IRenderContext? renderContext = null;
+        Action<IRenderContext, TimeSpan>? renderFrame = null;
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            await manager.InitializeRenderControl(renderControl);
+            renderContext = await manager.GetRenderContext(renderControl);
+            var drawingContext = new TestDrawingContext(renderContext, width, height);
+            renderFrame = (ctx, _) =>
+            {
+                var builder = manager.CreateDrawCommandListBuilder();
+                try
+                {
+                    builder.SetCleanColor(new Vector4(0, 0, 0, 1));
+                    builder.SetViewport(width, height);
+                    builder.SetCurrentViewMatrix(drawingContext.CurrentDrawingTargetContext.ViewMatrix);
+                    builder.SetCurrentProjectionMatrix(drawingContext.CurrentDrawingTargetContext.ProjectionMatrix);
+                    builder.SetCurrentRect(drawingContext.CurrentDrawingTargetContext.ViewRelativeRect);
+                    // View origin maps to the canvas center (48,48) with Y up; the solid line sits
+                    // at canvas y=32 and the dashed one at canvas y=64.
+                    builder.DrawSimpleLines(
+                        [
+                            new ILineDrawing.LineVertex(new Vector2(-40, 16), new Vector4(1, 0, 0, 1), ILineDrawing.VertexDash.Solider),
+                            new ILineDrawing.LineVertex(new Vector2(40, 16), new Vector4(1, 0, 0, 1), ILineDrawing.VertexDash.Solider)
+                        ], 8);
+                    builder.DrawSimpleLines(
+                        [
+                            new ILineDrawing.LineVertex(new Vector2(-40, -16), new Vector4(1, 0, 0, 1), new ILineDrawing.VertexDash(6, 6)),
+                            new ILineDrawing.LineVertex(new Vector2(40, -16), new Vector4(1, 0, 0, 1), new ILineDrawing.VertexDash(6, 6))
+                        ], 8);
+                    ctx.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
+                }
+                finally
+                {
+                    builder.Dispose();
+                }
+            };
+            renderContext.OnRender += renderFrame;
+            renderContext.StartRendering();
+
+            using var capturedFrame = window.CaptureRenderedFrame();
+            Assert.NotNull(capturedFrame);
+            using var encodedFrame = new MemoryStream();
+            capturedFrame!.Save(encodedFrame);
+            encodedFrame.Position = 0;
+            using var bitmap = SKBitmap.Decode(encodedFrame);
+            Assert.NotNull(bitmap);
+
+            var solidPixels = CountMatchingPixels(bitmap, 4, width - 4, 26, 38, IsRed);
+            var dashedPixels = CountMatchingPixels(bitmap, 4, width - 4, 58, 70, IsRed);
+            var backgroundPixels = CountMatchingPixels(bitmap, 4, width - 4, 4, 20,
+                static color => color.Alpha >= 250 && color.Red <= 15 && color.Green <= 15 && color.Blue <= 15);
+
+            // A continuous 80x8 line covers ~640 pixels; allow generous slack for antialiasing
+            // while still failing on a dropped line, a broken save/restore stack or a bad transform.
+            Assert.True(solidPixels >= 400,
+                $"Expected a solid line across the frame, but found only {solidPixels} lit pixels.");
+            Assert.True(dashedPixels >= 100,
+                $"Expected a dashed line across the frame, but found only {dashedPixels} lit pixels.");
+            Assert.True(solidPixels > dashedPixels,
+                $"Expected the dashed line to cover fewer pixels than the solid one, but got {dashedPixels}/{solidPixels}.");
+            Assert.True(backgroundPixels > 8 * (width - 8) * 3 / 4,
+                $"Expected the clean color to fill untouched rows, but found only {backgroundPixels} background pixels.");
+        }
+        finally
+        {
+            if (renderContext is not null)
+            {
+                renderContext.StopRendering();
+                if (renderFrame is not null)
+                    renderContext.OnRender -= renderFrame;
+            }
+
+            window.Close();
+        }
+    }
+
+    [AvaloniaFact]
+    public async Task SkiaLineDrawing_ReplayDrawCallsReachInstalledPerfomenceMonitor()
+    {
+        const int width = 96;
+        const int height = 96;
+        var manager = new DefaultSkiaDrawingManagerImpl();
+        var renderControl = manager.CreateRenderControl();
+        renderControl.HorizontalAlignment = HorizontalAlignment.Stretch;
+        renderControl.VerticalAlignment = VerticalAlignment.Stretch;
+        var window = new Window
+        {
+            Width = width,
+            Height = height,
+            Content = renderControl
+        };
+        IRenderContext? renderContext = null;
+        Action<IRenderContext, TimeSpan>? renderFrame = null;
+        var monitor = new DefaultReleasePerfomenceMonitor();
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            await manager.InitializeRenderControl(renderControl);
+            renderContext = await manager.GetRenderContext(renderControl);
+            // This is what the editor does when it attaches its render loop.
+            renderContext.PerfomenceMonitor = monitor;
+            var drawingContext = new TestDrawingContext(renderContext, width, height);
+            renderFrame = (ctx, _) =>
+            {
+                var builder = manager.CreateDrawCommandListBuilder();
+                try
+                {
+                    builder.SetCleanColor(new Vector4(0, 0, 0, 1));
+                    builder.SetViewport(width, height);
+                    builder.SetCurrentViewMatrix(drawingContext.CurrentDrawingTargetContext.ViewMatrix);
+                    builder.SetCurrentProjectionMatrix(drawingContext.CurrentDrawingTargetContext.ProjectionMatrix);
+                    builder.SetCurrentRect(drawingContext.CurrentDrawingTargetContext.ViewRelativeRect);
+                    builder.DrawSimpleLines(
+                        [
+                            new ILineDrawing.LineVertex(new Vector2(-40, 0), new Vector4(1, 0, 0, 1), ILineDrawing.VertexDash.Solider),
+                            new ILineDrawing.LineVertex(new Vector2(40, 0), new Vector4(1, 0, 0, 1), ILineDrawing.VertexDash.Solider)
+                        ], 8);
+                    ctx.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
+                }
+                finally
+                {
+                    builder.Dispose();
+                }
+            };
+            renderContext.OnRender += renderFrame;
+            renderContext.StartRendering();
+
+            monitor.OnBeforeRender();
+            monitor.PostUIRenderTime(TimeSpan.FromMilliseconds(1));
+            using var capturedFrame = window.CaptureRenderedFrame();
+            monitor.OnAfterRender();
+
+            var render = monitor.GetRenderPerformenceData();
+            Assert.True(render.AveDrawCall > 0,
+                $"Expected the replay to report draw calls to the monitor installed on the context, but AveDrawCall was {render.AveDrawCall}.");
+        }
+        finally
+        {
+            if (renderContext is not null)
+            {
+                renderContext.StopRendering();
+                if (renderFrame is not null)
+                    renderContext.OnRender -= renderFrame;
+            }
+
+            window.Close();
+        }
+    }
+
+    private static bool IsRed(SKColor color) =>
+        color.Alpha >= 200 && color.Red >= 180 && color.Green <= 80 && color.Blue <= 80;
+
     private sealed class TestDrawingContext : IDrawingContext
     {
         public TestDrawingContext(IRenderContext renderContext, float width, float height)

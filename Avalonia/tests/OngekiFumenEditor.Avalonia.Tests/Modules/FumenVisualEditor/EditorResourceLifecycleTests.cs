@@ -267,6 +267,8 @@ public sealed class EditorResourceLifecycleTests
     {
         private Action<IRenderContext, TimeSpan>? render;
 
+        public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+
         public event Action<IRenderContext, TimeSpan> OnRender
         {
             add => render += value;

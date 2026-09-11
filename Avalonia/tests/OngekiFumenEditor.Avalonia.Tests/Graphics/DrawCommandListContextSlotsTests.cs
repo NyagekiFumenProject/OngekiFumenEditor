@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.Graphics;
@@ -67,6 +68,8 @@ public sealed class DrawCommandListContextSlotsTests
 
     private sealed class StubRenderContext : IRenderContext
     {
+        public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+
         public event Action<IRenderContext, TimeSpan> OnRender
         {
             add { }

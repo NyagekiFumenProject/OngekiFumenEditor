@@ -1,3 +1,4 @@
+using Avalonia.Headless.XUnit;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Avalonia.Utils.SimpleFileSystem;
 using Xunit;
@@ -31,7 +32,7 @@ public sealed class ProjectFileBindingDialogViewModelTests
         Assert.Equal(0, audioFile.DisposeCount);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public async Task Dispose_ReleasesBrowsedFilesThatWereNotTransferred()
     {
         var fumenFile = new TrackingFile("external.nyageki");
@@ -51,7 +52,7 @@ public sealed class ProjectFileBindingDialogViewModelTests
         Assert.Equal(1, audioFile.DisposeCount);
     }
 
-    [Fact]
+    [AvaloniaFact]
     public async Task TakeSelection_TransfersBrowsedFileOwnership()
     {
         var fumenFile = new TrackingFile("external.nyageki");

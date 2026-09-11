@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using System.Numerics;
 using Xunit;
 using OngekiFumenEditor.Avalonia.Utils;
@@ -308,6 +309,8 @@ public sealed class DrawCommandListTests
 
     private sealed class StubRenderContext : IRenderContext
     {
+        public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+
         public event Action<IRenderContext, TimeSpan>? OnRender;
 
         public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
