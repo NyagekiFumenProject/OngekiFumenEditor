@@ -144,7 +144,7 @@ public sealed class DrawCommandListTests
     }
 
     [Fact]
-    public void ContextSlots_PostSwapPresentCycleClearsFront()
+    public void ContextSlots_PostSwapPresentRetainsFrontUntilSuperseded()
     {
         var slots = new DrawCommandListContextSlots();
         var context = new StubRenderContext();
@@ -161,10 +161,23 @@ public sealed class DrawCommandListTests
         }
 
         Assert.NotNull(presented);
-        // front slot was cleared and auto-disposed after present
-        Assert.True(presented.IsDisposed);
-        // second swap without a new post fails
+        // the front slot is retained after present and stays re-presentable
+        Assert.False(presented.IsDisposed);
         Assert.False(slots.Swap(context));
+
+        DrawCommandList? presentedAgain = null;
+        slots.Present(context, list => presentedAgain = list);
+        Assert.Same(presented, presentedAgain);
+
+        // a newer frame supersedes and releases the retained one
+        using var replacementBuilder = new DrawCommandListBuilder();
+        replacementBuilder.DrawSimpleLines([Vertex(0, 0)], 1);
+        slots.Post(context, replacementBuilder.GetDrawCommandList(), autoDispose: true);
+        Assert.True(slots.Swap(context));
+        Assert.True(presented.IsDisposed);
+
+        // dropping the context releases the current frame
+        Assert.True(slots.Remove(context));
     }
 
     [Fact]
@@ -255,7 +268,7 @@ public sealed class DrawCommandListTests
     }
 
     [Fact]
-    public void ContextSlots_PresentException_AutoDisposesFrontList()
+    public void ContextSlots_PresentException_RetainsFrontUntilContextRemoved()
     {
         var slots = new DrawCommandListContextSlots();
         var context = new StubRenderContext();
@@ -268,8 +281,13 @@ public sealed class DrawCommandListTests
         Assert.Throws<InvalidOperationException>(() =>
             slots.Present(context, _ => throw new InvalidOperationException("present")));
 
-        Assert.True(list.IsDisposed);
+        // a failed presentation keeps the frame retained instead of disposing it
+        Assert.False(list.IsDisposed);
         Assert.False(slots.Swap(context));
+
+        // the context slot owns the last reference and releases it on removal
+        Assert.True(slots.Remove(context));
+        Assert.True(list.IsDisposed);
     }
 
     private sealed class StubImage : IImage
