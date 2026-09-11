@@ -327,6 +327,107 @@ public sealed class SkiaRenderSmokeTests
         }
     }
 
+    [AvaloniaFact]
+    public async Task SkiaTextureDrawing_ReusesArtistAcrossInstancesWithoutChangingPixels()
+    {
+        const int width = 96;
+        const int height = 96;
+        var manager = new DefaultSkiaDrawingManagerImpl();
+        var renderControl = manager.CreateRenderControl();
+        renderControl.HorizontalAlignment = HorizontalAlignment.Stretch;
+        renderControl.VerticalAlignment = VerticalAlignment.Stretch;
+        var window = new Window
+        {
+            Width = width,
+            Height = height,
+            Content = renderControl
+        };
+        IRenderContext? renderContext = null;
+        Action<IRenderContext, TimeSpan>? renderFrame = null;
+
+        // Opaque white texture so the per-instance paint color fully determines the result.
+        using var textureBitmap = new SKBitmap(16, 16);
+        using (var textureCanvas = new SKCanvas(textureBitmap))
+            textureCanvas.Clear(SKColors.White);
+        using var png = new MemoryStream();
+        using (var encoded = SKImage.FromBitmap(textureBitmap).Encode(SKEncodedImageFormat.Png, 100))
+            encoded.SaveTo(png);
+        png.Position = 0;
+        var texture = manager.LoadImageFromStream(png);
+
+        try
+        {
+            window.Show();
+            window.UpdateLayout();
+            await manager.InitializeRenderControl(renderControl);
+            renderContext = await manager.GetRenderContext(renderControl);
+            var drawingContext = new TestDrawingContext(renderContext, width, height);
+            var instances = new (Vector2 size, Vector2 position, float rotation, Vector4 color)[]
+            {
+                // View origin maps to the canvas center (48,48) with Y up; these land the
+                // sprites at canvas (24,48) and (72,48).
+                (new Vector2(16, 16), new Vector2(-24, 0), 0f, new Vector4(1, 0, 0, 1)),
+                (new Vector2(16, 16), new Vector2(24, 0), 0f, new Vector4(0, 0, 1, 1)),
+            };
+            renderFrame = (ctx, _) =>
+            {
+                var builder = manager.CreateDrawCommandListBuilder();
+                try
+                {
+                    builder.SetCleanColor(new Vector4(0, 0, 0, 1));
+                    builder.SetViewport(width, height);
+                    builder.SetCurrentViewMatrix(drawingContext.CurrentDrawingTargetContext.ViewMatrix);
+                    builder.SetCurrentProjectionMatrix(drawingContext.CurrentDrawingTargetContext.ProjectionMatrix);
+                    builder.SetCurrentRect(drawingContext.CurrentDrawingTargetContext.ViewRelativeRect);
+                    builder.DrawTexture(texture, instances);
+                    ctx.PostDrawCommandList(builder.GetDrawCommandList(), autoDispose: true);
+                }
+                finally
+                {
+                    builder.Dispose();
+                }
+            };
+            renderContext.OnRender += renderFrame;
+            renderContext.StartRendering();
+
+            using var capturedFrame = window.CaptureRenderedFrame();
+            Assert.NotNull(capturedFrame);
+            using var encodedFrame = new MemoryStream();
+            capturedFrame!.Save(encodedFrame);
+            encodedFrame.Position = 0;
+            using var bitmap = SKBitmap.Decode(encodedFrame);
+            Assert.NotNull(bitmap);
+
+            // SkiaSharp 3.x does not tint DrawImage with SKPaint.Color, so the sprites keep the
+            // source texture pixels (white). This guards that the shared-artist refactor still
+            // draws every instance at its own position with a balanced canvas save stack.
+            var leftSpritePixels = CountMatchingPixels(bitmap, 0, width / 2, 0, height,
+                static color => color.Alpha >= 200 && color.Red >= 200 && color.Green >= 200 && color.Blue >= 200);
+            var rightSpritePixels = CountMatchingPixels(bitmap, width / 2, width, 0, height,
+                static color => color.Alpha >= 200 && color.Red >= 200 && color.Green >= 200 && color.Blue >= 200);
+            var backgroundPixels = CountMatchingPixels(bitmap, 0, width, 0, height,
+                static color => color.Alpha >= 250 && color.Red <= 15 && color.Green <= 15 && color.Blue <= 15);
+
+            Assert.True(leftSpritePixels >= 200,
+                $"Expected a sprite in the left half, but found {leftSpritePixels} lit pixels.");
+            Assert.True(rightSpritePixels >= 200,
+                $"Expected a sprite in the right half, but found {rightSpritePixels} lit pixels.");
+            Assert.True(backgroundPixels > width * height / 2,
+                $"Expected the clean color to fill the frame, but found only {backgroundPixels} background pixels.");
+        }
+        finally
+        {
+            if (renderContext is not null)
+            {
+                renderContext.StopRendering();
+                if (renderFrame is not null)
+                    renderContext.OnRender -= renderFrame;
+            }
+
+            window.Close();
+        }
+    }
+
     private sealed class TestDrawingContext : IDrawingContext
     {
         public TestDrawingContext(IRenderContext renderContext, float width, float height)
