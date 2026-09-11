@@ -39,7 +39,7 @@
 - **PERF-RND-006 / RND-07 — P2，顶点堆分配。**〔**2026-09-11 已修复**，见下方「已修复项」〕`S/Kernel/Graphics/ILineDrawing.cs:8-14` 将 `LineVertex` 定义为 record class；`VisibleLineVerticesQuery.cs:29-36` 为 lane child/curve point 逐个 `new`，调用方为 `CommonLinesDrawTargetBase.cs:25-39`、`HoldDrawingTarget.cs:129-162`。若 ABI/可变性允许，改为 readonly record struct 或复用值型缓冲。
 - **PERF-RND-007 / RND-08 — P2，合并可见范围重复静态对象。** `S/Modules/FumenVisualEditor/Graphics/Drawing/Drawing.cs:449-450,486-520,831-891` 对每个 merged visible range 重复枚举 Meter/BPM、Soflan/IndividualSoflan 并 AddRange 到 target/context map。应按 frame 缓存静态数据并去重。
 - **PERF-RND-008 / RND-09 — P2，投射物查询范围过宽。** `Drawing.cs:542-583` 每帧从当前 TGrid 查询到 `TGrid.MaxValue`；`ProjectileBatchDrawTargetBase.cs:175-360` 还逐项检查并可能 `Parallel.ForEach`，`:304-312` 对每个敌方投射物重复查 lane。应按外观/视口上界限制并缓存 lane 查找。
-- **PERF-RND-009 / RND-10 — P2，PlayableArea 多重扫描。** `DrawPlayableAreaHelper.cs:179-223,445-452` 为每个采样点构建 area sample，`:458-484` 扫所有候选墙 lane，`:501-543` 又调用 `GetChildObjectsFromTGrid/IsPathVaild` 并遍历 children；长墙成本为 samples×lanes×children。应缓存区间游标/有效路径。
+- **PERF-RND-009 / RND-10 — P2，PlayableArea 多重扫描。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DrawPlayableAreaHelper.cs:179-223,445-452` 为每个采样点构建 area sample，`:458-484` 扫所有候选墙 lane，`:501-543` 又调用 `GetChildObjectsFromTGrid/IsPathVaild` 并遍历 children；长墙成本为 samples×lanes×children。应缓存区间游标/有效路径。
 - **PERF-RND-010 / RND-11 — P3，绘制命令粒度。** `CommonLinesDrawTargetBase.cs:25-39` 每 lane 发一个 `DrawSimpleLines`，replay `SkiaDrawCommandListReplay.cs:141-143` 与 `NewSkiaLineDrawing.DrawPolylineOrSegmentsRun` 每命令建立/结束路径。只有确认后端支持断开 strip 且基准证实后才聚合。
 - **PERF-RND-011 / RND-12 — P3，paint/path effect 创建。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultSkiaLineDrawing.cs:72-97` 在 style 变化时创建/处置 `SKPaint` 和 dash `SKPathEffect`，`:43-45` 每次结束重置；可缓存常用 style，但需先测量。
 - **PERF-RND-012 / RND-13 — P2，后端性能数据失真。**〔**2026-09-11 已修复**，见下方「已修复项」〕`SkiaDrawCommandListReplay.cs:214-226` 使用 `DummyPerformenceMonitor`，因此 `Drawing.cs:328-329,619-638` 的编辑器监控不能看到 replay 的实际 draw call/时间。传入真实 monitor 或公开 replay 指标。
@@ -109,6 +109,27 @@
   - **根因（静态确认）：** 两个默认 monitor 把 `Stopwatch` 频率单位的原始差值当作 `TimeSpan.Ticks` 记录（debug：`GetTimestamp` 差值；release：`timer.ElapsedTicks - currentBeginRenderTick`），频率非 10,000,000 时 FPS/ms 全部缩放错误。
   - **处理：** debug 侧绘制/目标绘制/整帧三处改用 `Stopwatch.GetElapsedTime(...).Ticks`；release 侧改用 `timer.Elapsed.Ticks` 并删除恒为 0 的 `currentBeginRenderTick`；同时把 release 侧 `MostUIRenderSpendTicks`/`MostSpendTicks` 的 `GroupBy(...).FirstOrDefault().Key` 换成空安全的 `MostFrequentValue`（安装后无样本时不再 NRE）。
   - **验证：** 全解决方案重建 0 error；Release 全量主测试项目 689/689、Desktop 测试项目 148/148 通过（测试命令与 headless 运行限制见 `wpf-to-avalonia-migration-status.md` 的「测试命令」）。
+
+- **PERF-RND-009 / RND-10 — 已修复（2026-09-11）：帧内缓存墙轨边界描述符 + 无分配子节点区间查询。**
+  - **根因（静态确认 + 基准确认）：** `S/.../DrawPlayableAreaHelper.cs` 的 `QueryBoundaryXGridUnit` 对每个采样点线性扫过全部候选墙轨，活跃边再调 `CalculateBoundaryXGridUnit`；后者每次执行 `lane.GetChildObjectsFromTGrid(tGrid)`（有效路径下 `children.GetRange(...)` 分配 List）**且**再调一次 `lane.IsPathVaild()`（`children.All(...)`，O(子节点数)），而 `GetChildObjectsFromTGrid` 内部本身又调一次 `IsPathVaild()`。采样点数正比于候选墙轨子节点总数（`AddWallCandidateSamples` 把每条候选墙的每个 child TGrid 都加入采样集），故长墙成本为 samples×lanes×children，并伴随每 (墙, 采样, 边) 约 1 个 List + 2 个装箱枚举器的分配。
+  - **处理：**
+    1. `Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs`：抽出无分配的 `TryGetValidPathChildRange(tGrid, out start, out count)` 与 `GetChildObjectAt(index)`；`GetChildObjectsFromTGrid` 改为复用前者（返回 `List` 与无效路径 LINQ 分支保持原样），使选择逻辑单一来源。
+    2. `DrawPlayableAreaHelper.cs`：新增 `WallBoundaryCandidate` 描述符，`FieldAreaFrameContext` 构造时对每条候选墙轨只算一次 `IsPathVaild()` 与 `MinTGrid/MaxTGrid.TotalGrid`；`IsActiveAtBoundaryEdge` 与边界查询改用描述符。
+    3. 有效路径新增 `CalculateValidPathBoundaryXGridUnit`：走 `TryGetValidPathChildRange` + `GetChildObjectAt`，去掉 `GetRange` 分配与重复 `IsPathVaild()`；无效路径保留原 `CalculateBoundaryXGridUnitLegacy`，行为不变。
+  - **基准**（新增 `benchmarks/.../DrawPlayableAreaProductionBenchmarks.cs`，直接驱动真实 `DrawPlayableAreaHelper.DrawPlayField`；合成墙轨图，恒等 TGrid→Y 映射使屏幕补采样保持惰性；Release / ShortRun / 同机同参数，优化前后各一次）：
+
+    | 墙数 | 子节点/墙 | 优化前 | 优化后 | 时间比 | 优化前分配 | 优化后分配 |
+    |---:|---:|---:|---:|---:|---:|---:|
+    | 2 | 16 | 12.97 µs | 8.19 µs | 0.63× | 19.6 KB | 14.2 KB |
+    | 2 | 64 | 68.83 µs | 30.06 µs | 0.44× | 73.6 KB | 51.7 KB |
+    | 2 | 256 | 649.25 µs | 124.47 µs | 0.19× | 289.6 KB | 201.7 KB |
+    | 8 | 16 | 36.50 µs | 15.76 µs | 0.43× | 37.5 KB | 15.7 KB |
+    | 8 | 64 | 227.10 µs | 63.78 µs | 0.28× | 141.0 KB | 53.2 KB |
+    | 8 | 256 | 2,399.60 µs | 352.49 µs | 0.15× | 555.0 KB | 203.2 KB |
+
+    最坏组合 2.40 ms → 0.35 ms（约 6.8×），分配 555 KB → 203 KB（−63%），Gen0/千次 33.2 → 12.2。残余分配主要来自每采样点的 `TGrid.FromTotalGrid` 与 `CalulateXGrid` 内的 `new XGrid`，属算法固有，需 A2（区间游标/累加器）或值类型化才能再降。
+  - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawPlayableAreaHelperTests.cs` 24 项行为契约（真实 editor + stub `IFumenEditorDrawingContext` + 真实 `DrawCommandListBuilder`，断言实际发出的多边形顶点：默认/多墙取最外、斜墙插值、节点处 Prev 取首/Next 取末、区间半开进出、共线合并且端点保留、可见 Y 裁剪、曲线多段、无效路径退化、门控与非法区间），另加 `tests/.../Base/OngekiObjects/ConnectableStartObjectChildRangeTests.cs` 2 项区间一致性。Release 全量 **692/692 通过**。
+  - **未做/后续：** 每个采样点仍线性扫过全部候选墙轨（samples×lanes），本次只消除 children 因子与分配；墙轨数占主导时再按区间游标/累加器优化。WPF 侧同算法文件 `DrawPlayableAreaHelper_new` 仅存在于 `.tmp` 草稿（未进入 WPF 工程），WPF 应用仍用原版 Earcut/交点实现，若其落地可复用本修复。
 
 ### Dormant/合并项
 

@@ -85,10 +85,12 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Tests\OngekiFumenEditor.Avalonia
 .\tests\OngekiFumenEditor.Avalonia.Tests\bin\Release\net11.0\OngekiFumenEditor.Avalonia.Tests.exe
 ```
 
-- 2026-09-11 实测：Release 全量 **689/689 通过**（含 `SkiaRenderSmokeTests` 像素断言、`DrawPlayableAreaHelperTests`、`EditorUiRegressionTests` 等全部 headless 用例）；Desktop 测试项目 `-c Debug` 148/148 通过。
-- **`dotnet test`（VSTest 适配器路径）不会执行 `[AvaloniaFact]` 测试**：实测 689 项中只运行普通的 `[Fact]`/`[Theory]`（约 350 项），被跳过的部分也不出现在任何报告里。CI 若要覆盖 UI / 像素 / headless 用例，需要改用上面的 Release 直跑方式。
+- 2026-09-11 实测：Release 全量 **692/692 通过**（含 `SkiaRenderSmokeTests` 像素断言、`DrawPlayableAreaHelperTests`、`ConnectableStartObjectChildRangeTests`、`EditorUiRegressionTests` 等全部 headless 用例）；Desktop 测试项目 `-c Debug` 148/148 通过。
+- **`dotnet test`（VSTest 适配器路径）不会执行 `[AvaloniaFact]` 测试**：实测 692 项中只运行普通的 `[Fact]`/`[Theory]`（约 350 项），被跳过的部分也不出现在任何报告里。CI 若要覆盖 UI / 像素 / headless 用例，需要改用上面的 Release 直跑方式。
 - Debug 配置下同一进程只能初始化一个 headless 应用：`Gekimini.Avalonia.App.Initialize()` 在 `#if DEBUG` 下调用 `AttachDeveloperTools()`，第二个应用会抛 `Developer tools have already been attached. Multiple attachments are not supported.`。因此 Debug 直跑会在首个测试类之后大量报 session 错误，需要连续运行多个类时请用 Release。
 - 依赖 IoC/全局设置的测试必须标 `[AvaloniaFact]`（例如 `ProjectFileBindingDialogViewModelTests` 里会经 `Log` 走 `IoC` 的两条用例）；普通 `[Fact]` 只能靠"别的测试先把 App 初始化好"而偶然通过，属于顺序敏感的隐患。
+- **PlayableArea（可击打区域）实现状态**：Avalonia 走的是重构后的「新」算法（TGrid 采样 + 四边形裁剪，见 `src/.../Graphics/Drawing/Editors/DrawPlayableAreaHelper.cs`，T-009 落地），并非 WPF 已提交原版（`FieldRangeParam` + `AdjustLaneIntersection` + EarcutNet）；WPF 侧同算法的 `DrawPlayableAreaHelper_new` 仅存在于 `.tmp` 草稿、未进入 WPF 工程。两端几何算法**尚未对齐**，交点/变速反折场景的视觉等价性未验证。
+- 2026-09-11 性能：`PERF-RND-009 / RND-10`（PlayableArea 多重扫描）已修复（帧内缓存墙轨描述符 + 无分配子节点区间查询），新增基准 `benchmarks/.../DrawPlayableAreaProductionBenchmarks.cs`；最坏 8×256 墙由 2.40 ms / 555 KB 降至 0.35 ms / 203 KB（Release / ShortRun）。详见 `performance-gc-audit-2026-09-09.md` 的「已修复项」。
 
 ## XAML 清零批次明细（本轮）
 
