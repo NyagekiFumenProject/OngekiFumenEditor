@@ -35,7 +35,7 @@
 - **PERF-RND-002 / RND-02 — P1，O(n²) 列表移动。** `S/.../OngekiObjects/Holds/HoldDrawingTarget.cs:129-145` 先完整展开 lane 顶点，再反复 `RemoveAt(0)`；长 Hold 的屏外前缀会在每帧产生二次移动。改为索引窗口、一次压缩或直接查询有界几何。
 - **PERF-RND-003 / RND-03+04（合并）— P1，原生纹理生命周期。** `S/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs:232-235,1078` 在编辑器重新挂接时重新初始化全局 singleton target；`TextureLaneEditorObjectDrawingTarget.cs:27-34`、`LaneCurvePathControlDrawingTarget.cs:39-50`、`Kernel/Graphics/Skia/DefaultSkiaDrawingManagerImpl.cs:48-51` 覆盖旧 `SKImage`/纹理而未先释放，Tap map 还会强引用旧图片。`TapDrawingTarget.Initialize.cs:43-49,64-74`、`TapDrawingTarget.cs:152-158`、`FlickDrawingTarget.cs:33-49,93-97`、`IndividualSoflanAreaDrawingTarget.cs:32-35` 显示 Dispose 不完整；`Drawing.cs:1270-1278` 只清引用不处置 target，`LaneCurvePathControlDrawingTarget.cs:46-50` 还存在先置 null 后 Dispose 的路径。应让每一代 target 有明确 owner，在替换/Detach/Dispose 时释放所有图片和 map。
 - **PERF-RND-004 / RND-05 — P2，帧节流后的空表面风险。**〔**2026-09-11 已修复**，见下方「已修复项」〕`S/Kernel/Graphics/AvaloniaSkiaRenderControl.cs:28-39`、`DefaultSkiaRenderContext.cs:52-59` 与 `S/Modules/FumenVisualEditor/.../Drawing.cs:313-320,669-670` 在 FPS cap 下可能构建命令后跳过提交/调度，而 custom surface 已被清理；需保留上一帧或明确 present 语义，避免空白/闪烁。
-- **PERF-RND-005 / RND-06 — P2，逐实例纹理绘制。** `S/Kernel/Graphics/Skia/SkiaDrawCommandListReplay.cs:144-152` 到 `DefaultTextureDrawing.cs:23-56` 每个 `DrawTexture` 都 Save/变换/创建 `SKPaint`/DrawImage；`LaneCurvePathControlDrawingTarget.cs:126-128` 对每个控制点调用。可在语义允许时批量化并缓存 paint/变换状态。
+- **PERF-RND-005 / RND-06 — P2，逐实例纹理绘制。**〔**2026-09-11 已修复**，见下方「已修复项」〕`S/Kernel/Graphics/Skia/SkiaDrawCommandListReplay.cs:144-152` 到 `DefaultTextureDrawing.cs:23-56` 每个 `DrawTexture` 都 Save/变换/创建 `SKPaint`/DrawImage；`LaneCurvePathControlDrawingTarget.cs:126-128` 对每个控制点调用。可在语义允许时批量化并缓存 paint/变换状态。
 - **PERF-RND-006 / RND-07 — P2，顶点堆分配。** `S/Kernel/Graphics/ILineDrawing.cs:8-14` 将 `LineVertex` 定义为 record class；`VisibleLineVerticesQuery.cs:29-36` 为 lane child/curve point 逐个 `new`，调用方为 `CommonLinesDrawTargetBase.cs:25-39`、`HoldDrawingTarget.cs:129-162`。若 ABI/可变性允许，改为 readonly record struct 或复用值型缓冲。
 - **PERF-RND-007 / RND-08 — P2，合并可见范围重复静态对象。** `S/Modules/FumenVisualEditor/Graphics/Drawing/Drawing.cs:449-450,486-520,831-891` 对每个 merged visible range 重复枚举 Meter/BPM、Soflan/IndividualSoflan 并 AddRange 到 target/context map。应按 frame 缓存静态数据并去重。
 - **PERF-RND-008 / RND-09 — P2，投射物查询范围过宽。** `Drawing.cs:542-583` 每帧从当前 TGrid 查询到 `TGrid.MaxValue`；`ProjectileBatchDrawTargetBase.cs:175-360` 还逐项检查并可能 `Parallel.ForEach`，`:304-312` 对每个敌方投射物重复查 lane。应按外观/视口上界限制并缓存 lane 查找。
@@ -59,6 +59,21 @@
     3. `DefaultSkiaRenderContext.SwapAndPresentDrawCommandList` 不再以 `Swap` 返回值拦截呈现：有则换新帧，无则重放保留帧，保证任何合成回调都有像素。
   - **未做/后续：** FPS cap 现在只省下构建/几何枚举，被节流帧仍会重放保留的命令列表，且 `PresentDrawCommandList` 每次 `new SkiaDrawCommandListReplay`（见 PERF-RND-017/RND-20，P1）。落地“按 render context 缓存 replay”后重放成本才会降到可忽略；在此之前该项与 RND-20 应成对评审。同路径的其余缺陷未在本轮一并处理：`OnEditorRender` 在 cap 判断前创建 `DrawCommandListBuilder`（`:313,670`）、跳过帧调用 `OnAfterRender` 但无配对 `OnBeforeRender`（`:329,672`）、`WaveformRenderSession.Render:206-207` 同构跳过。
   - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawCommandListContextSlotsTests.cs`，固定“呈现保留帧、Swap 时释放旧帧、Remove 释放末尾帧”的契约。Avalonia 是否保留未变脏 surface、以及真实节流是否仍闪烁，仍需按第 20 节未决问题 1/2 在真实负载下测量。
+
+- **PERF-RND-005 / RND-06 — 已修复（2026-09-11）：非批量纹理绘制按命令复用 artist 状态与 paint。**
+  - **根因（静态确认 + 基准确认）：** `DefaultSkiaTextureDrawing.Draw`（`S/Kernel/Graphics/Skia/Drawing/TextureDrawing/DefaultTextureDrawing.cs:23-57`）对每个实例调用私有 `Draw`，每个实例都执行一次 `OnBegin/OnEnd`（`CommonSkiaDrawingBase.cs:18-53`：`canvas.Save` + 完整 MVP 矩阵合成 + `Concat`）并 `new SKPaint()`。同文件的批量路径 `DefaultSkiaBatchTextureDrawing.cs:19-67` 与高亮批量路径已把 `OnBegin/OnEnd` 与单个 `SKPaint` 提到循环外，只有非批量路径没有。剩余非批量调用点为 `LaneCurvePathControlDrawingTarget.cs:128`（主纹理，N=可见控制点）与 `IndividualSoflanAreaDrawingTarget.cs:162`。
+  - **处理：** `DefaultSkiaTextureDrawing.Draw` 把 `OnBegin/OnEnd` 与 `SKPaint` 提到实例循环外（`try/finally` 保证 `OnEnd`），使非批量路径与既有 batch 路径同构；每实例只保留一次 `Save/Translate/Rotate/Scale/DrawImage/Restore`。顺带在 texture 非 `SkiaImage` 时提前返回，避免 `OnBegin` 已 Save 后抛异常导致 canvas save 栈失衡。各实例自身 `Save/Restore` 平衡，外层一次性 `Save+Concat` 与逐实例执行净变换相同，像素输出不变。
+  - **基准**（新增 `benchmarks/OngekiFumenEditor.Avalonia.Benchmark/Benchmarks/SkiaTextureDrawingBenchmarks.cs`；ShortRun/InProcessNoEmit；24×24 白纹理、1920×1080 CPU 画布；`Original_PerInstanceArtist` vs `Optimized_HoistedArtist`，`Reference_ExistingBatchPose` 为既有 batch 参照）：
+
+    | 实例数 | 原实现 | 新实现 | 时间比 | 原分配 | 新分配 |
+    |---:|---:|---:|---:|---:|---:|
+    | 64 | 95.00 µs | 66.78 µs | 0.70× | 5,632 B | 88 B |
+    | 512 | 1,461.22 µs | 859.41 µs | 0.59× | 45,056 B | 88 B |
+    | 2048 | 3,557.16 µs | 2,225.86 µs | 0.63× | 180,224 B | 88 B |
+
+    原实现恰为 88 B/实例（来自 `new SKPaint()`），新实现整条命令固定 88 B，分配由 O(N) 降为 O(1)；时间约 −30%~−41%。注：`SKMatrix44` 在 SkiaSharp 3.x 为 `struct`，无堆分配，MVP 合成是纯 CPU 成本。此为合成基准，真实控制点数/GPU 后端下的绝对值仍需实测。
+  - **验证：** 新增 headless 像素测试 `SkiaRenderSmokeTests.SkiaTextureDrawing_ReusesArtistAcrossInstancesWithoutChangingPixels`：经真实 replay 绘制一条含 2 个实例的 `DrawTextureCommand`，断言两枚 sprite 落在左右两半且 clean color 完整填充背景（可捕捉实例丢失/变换累积/save 栈失衡）。`SkiaRenderControl_CleanFrame_*` 与 `SkiaStringDrawing_*` 单独运行通过。
+  - **附带发现：** 该像素测试实证当前 SkiaSharp 3.x 下 `SKPaint.Color` 不调制 `DrawImage` 输出（白纹理不会被染成红/蓝）。这影响 PERF-RND-015 / RND-18 关于“marker 因 `color=Zero` 而完全透明”的推断，应按真实 `DrawPlayerLocationHelper` 路径复核后另行处理。
 
 ### Dormant/合并项
 
@@ -364,6 +379,6 @@
 ## 21. 交付状态
 
 - 报告已按分区写入本文件；审核轮次（2026-09-09）未修改业务源代码。
-- **2026-09-11 后续修复：** PERF-RND-004 / RND-05 已按“保留前端帧 + Swap/Remove 时释放”处理，并补回归测试（见第 4 节「已修复项」）。这是本报告发布后首个落地的修复项，其余发现状态不变。
+- **2026-09-11 后续修复：** PERF-RND-004 / RND-05 已按“保留前端帧 + Swap/Remove 时释放”处理；PERF-RND-005 / RND-06 已把非批量纹理绘制的 `OnBegin/OnEnd` 与 `SKPaint` 提到实例循环外，并附基准对比（分配 O(N)→O(1)，时间约 −30%~−41%）。两项均补回归测试，见第 4 节「已修复项」。这是本报告发布后落地的修复项，其余发现状态不变。
 - 本轮没有 P0；P1 优先项已在第 3 节列出，P2/P3、条件项、撤销项和健康模式均已区分。
 - 下一步应是针对 P1 集合建立小型可重复 benchmark/smoke corpus，再按测量结果实施修复；不要在没有 profile 的情况下同时改动所有 P2/P3 项。
