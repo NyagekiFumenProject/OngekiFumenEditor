@@ -313,53 +313,79 @@ namespace OngekiFumenEditor.Avalonia.Base.OngekiObjects.ConnectableObject
             if (IsPathVaild())
             {
                 //path is vaild, means children are sorted by TGrid, just find by binary search
-                if (children.Count > 1)
-                {
-                    var idx = children.BinarySearchBy(tGrid, x => x.TGrid);
-                    var actualIdx = idx < 0 ? ~idx : idx;
-                    var fixedIdx = (actualIdx == children.Count - 1 && tGrid > children[actualIdx].TGrid)
-                        ? -1
-                        : actualIdx++;
-
-                    if (fixedIdx < 0 || fixedIdx >= children.Count)
-                        return Enumerable.Empty<ConnectableChildObjectBase>();
-
-                    var selectedTGrid = children[fixedIdx].TGrid;
-
-                    var minIdx = fixedIdx;
-                    while (minIdx > 0 && children[minIdx - 1].TGrid == selectedTGrid)
-                        minIdx--;
-
-                    var maxIdx = fixedIdx;
-                    while (maxIdx < children.Count - 1 && children[maxIdx + 1].TGrid == selectedTGrid)
-                        maxIdx++;
-
-                    return children.GetRange(minIdx, maxIdx - minIdx + 1);
-                }
-                else
-                {
-                    var child = children[0];
-                    if (tGrid > child.TGrid)
-                        return Enumerable.Empty<ConnectableChildObjectBase>();
-                    return [child];
-                }
+                return TryGetValidPathChildRange(tGrid, out var start, out var count)
+                    ? children.GetRange(start, count)
+                    : Enumerable.Empty<ConnectableChildObjectBase>();
             }
-            else
+
+            return EnumerateInvalidPathChildObjects(tGrid);
+        }
+
+        /// <summary>
+        /// 在有效路径下定位 tGrid 对应子物体的索引区间（等价于 <see cref="GetChildObjectsFromTGrid"/> 的有效路径分支），
+        /// 但不分配 List，供每帧高频查询复用。
+        /// </summary>
+        public bool TryGetValidPathChildRange(TGrid tGrid, out int start, out int count)
+        {
+            start = 0;
+            count = 0;
+
+            if (tGrid is null || tGrid < TGrid || children.Count == 0)
+                return false;
+
+            if (children.Count > 1)
             {
-                var seqs = Children
-                    .AsEnumerable<ConnectableObjectBase>()
-                    .Prepend(this)
-                    .SequenceConsecutivelyWrap(2)
-                    .Select(x => (x[0], x[1]))
-                    .SkipWhile(seq => seq.Item2.TGrid < tGrid);
+                var idx = children.BinarySearchBy(tGrid, x => x.TGrid);
+                var actualIdx = idx < 0 ? ~idx : idx;
+                var fixedIdx = (actualIdx == children.Count - 1 && tGrid > children[actualIdx].TGrid)
+                    ? -1
+                    : actualIdx++;
 
-                var seq2 = seqs
-                    .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
-                var result = seq2
-                    .Select(x => x.Item2 as ConnectableChildObjectBase);
+                if (fixedIdx < 0 || fixedIdx >= children.Count)
+                    return false;
 
-                return result;
+                var selectedTGrid = children[fixedIdx].TGrid;
+
+                var minIdx = fixedIdx;
+                while (minIdx > 0 && children[minIdx - 1].TGrid == selectedTGrid)
+                    minIdx--;
+
+                var maxIdx = fixedIdx;
+                while (maxIdx < children.Count - 1 && children[maxIdx + 1].TGrid == selectedTGrid)
+                    maxIdx++;
+
+                start = minIdx;
+                count = maxIdx - minIdx + 1;
+                return true;
             }
+
+            var child = children[0];
+            if (tGrid > child.TGrid)
+                return false;
+
+            start = 0;
+            count = 1;
+            return true;
+        }
+
+        /// <summary>
+        /// 按索引访问子物体；配合 <see cref="TryGetValidPathChildRange"/> 可无分配地读取区间元素。
+        /// </summary>
+        public ConnectableChildObjectBase GetChildObjectAt(int index) => children[index];
+
+        private IEnumerable<ConnectableChildObjectBase> EnumerateInvalidPathChildObjects(TGrid tGrid)
+        {
+            var seqs = Children
+                .AsEnumerable<ConnectableObjectBase>()
+                .Prepend(this)
+                .SequenceConsecutivelyWrap(2)
+                .Select(x => (x[0], x[1]))
+                .SkipWhile(seq => seq.Item2.TGrid < tGrid);
+
+            var seq2 = seqs
+                .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
+            return seq2
+                .Select(x => x.Item2 as ConnectableChildObjectBase);
         }
 
         public XGrid CalulateXGrid(TGrid tGrid)

@@ -68,6 +68,33 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         private readonly record struct BoundarySample(double Prev, double Next);
 
         /// <summary>
+        /// 单次绘制内缓存的墙轨边界候选：把每条采样都要重算的路径有效性、区间边界提前到帧初计算一次。
+        /// </summary>
+        private readonly struct WallBoundaryCandidate
+        {
+            public WallBoundaryCandidate(LaneStartBase lane)
+            {
+                Lane = lane;
+                IsPathValid = lane.IsPathVaild();
+                MinTotalTGrid = lane.MinTGrid.TotalGrid;
+                MaxTotalTGrid = lane.MaxTGrid.TotalGrid;
+            }
+
+            public LaneStartBase Lane { get; }
+            public bool IsPathValid { get; }
+            public int MinTotalTGrid { get; }
+            public int MaxTotalTGrid { get; }
+        }
+
+        private static WallBoundaryCandidate[] BuildBoundaryCandidates(IReadOnlyList<LaneStartBase> lanes)
+        {
+            var result = new WallBoundaryCandidate[lanes.Count];
+            for (var i = 0; i < result.Length; i++)
+                result[i] = new WallBoundaryCandidate(lanes[i]);
+            return result;
+        }
+
+        /// <summary>
         /// 单次绘制内共享的上下文，缓存本次可见范围内可能用到的墙轨。
         /// </summary>
         private sealed class FieldAreaFrameContext : IDisposable
@@ -96,6 +123,9 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             break;
                     }
                 }
+
+                LeftBoundaryCandidates = BuildBoundaryCandidates(LeftWallCandidates);
+                RightBoundaryCandidates = BuildBoundaryCandidates(RightWallCandidates);
             }
 
             public IFumenEditorDrawingContext Target { get; }
@@ -104,6 +134,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             public int MaxTotalTGrid { get; }
             public IPooledList<LaneStartBase> LeftWallCandidates { get; }
             public IPooledList<LaneStartBase> RightWallCandidates { get; }
+            public WallBoundaryCandidate[] LeftBoundaryCandidates { get; }
+            public WallBoundaryCandidate[] RightBoundaryCandidates { get; }
 
             /// <summary>
             /// 释放本次绘制租用的候选墙轨列表。
@@ -445,8 +477,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         private static PlayFieldAreaSample BuildAreaSample(FieldAreaFrameContext context, int totalTGrid)
         {
             var tGrid = TGrid.FromTotalGrid(totalTGrid);
-            var left = QueryBoundaryXGridUnit(context.LeftWallCandidates, LaneType.WallLeft, tGrid) ?? new(DefaultLeftXGridUnit, DefaultLeftXGridUnit);
-            var right = QueryBoundaryXGridUnit(context.RightWallCandidates, LaneType.WallRight, tGrid) ?? new(DefaultRightXGridUnit, DefaultRightXGridUnit);
+            var left = QueryBoundaryXGridUnit(context.LeftBoundaryCandidates, LaneType.WallLeft, tGrid) ?? new(DefaultLeftXGridUnit, DefaultLeftXGridUnit);
+            var right = QueryBoundaryXGridUnit(context.RightBoundaryCandidates, LaneType.WallRight, tGrid) ?? new(DefaultRightXGridUnit, DefaultRightXGridUnit);
             var isValid = IsValueValid(left.Prev) && IsValueValid(left.Next) && IsValueValid(right.Prev) && IsValueValid(right.Next);
 
             return new(totalTGrid, left.Prev, left.Next, right.Prev, right.Next, isValid);
@@ -455,22 +487,22 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         /// <summary>
         /// 查询指定墙侧在一个时间点上的 Prev/Next 边界。
         /// </summary>
-        private static BoundarySample? QueryBoundaryXGridUnit(IReadOnlyList<LaneStartBase> candidates, LaneType laneType, TGrid tGrid)
+        private static BoundarySample? QueryBoundaryXGridUnit(IReadOnlyList<WallBoundaryCandidate> candidates, LaneType laneType, TGrid tGrid)
         {
             // 同一时间可能有多条墙轨，左墙取最左，右墙取最右。
             double? prev = null;
             double? next = null;
             for (var i = 0; i < candidates.Count; i++)
             {
-                var lane = candidates[i];
-                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Prev)
-                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Prev) is double prevValue)
+                var candidate = candidates[i];
+                if (IsActiveAtBoundaryEdge(candidate, tGrid, BoundaryEdge.Prev)
+                    && CalculateBoundaryXGridUnit(candidate, tGrid, BoundaryEdge.Prev) is double prevValue)
                 {
                     prev = MergeBoundary(laneType, prev, prevValue);
                 }
 
-                if (IsActiveAtBoundaryEdge(lane, tGrid, BoundaryEdge.Next)
-                    && CalculateBoundaryXGridUnit(lane, tGrid, BoundaryEdge.Next) is double nextValue)
+                if (IsActiveAtBoundaryEdge(candidate, tGrid, BoundaryEdge.Next)
+                    && CalculateBoundaryXGridUnit(candidate, tGrid, BoundaryEdge.Next) is double nextValue)
                 {
                     next = MergeBoundary(laneType, next, nextValue);
                 }
@@ -486,19 +518,50 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
         /// <summary>
         /// 判断墙轨在指定时间点是否参与 Prev 或 Next 边界。
         /// </summary>
-        private static bool IsActiveAtBoundaryEdge(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
+        private static bool IsActiveAtBoundaryEdge(in WallBoundaryCandidate candidate, TGrid tGrid, BoundaryEdge edge)
         {
             var totalGrid = tGrid.TotalGrid;
             // Prev/Next 使用相反的开闭区间，避免在节点处重复连接同一段。
             return edge == BoundaryEdge.Prev
-                ? lane.MinTGrid.TotalGrid < totalGrid && totalGrid <= lane.MaxTGrid.TotalGrid
-                : lane.MinTGrid.TotalGrid <= totalGrid && totalGrid < lane.MaxTGrid.TotalGrid;
+                ? candidate.MinTotalTGrid < totalGrid && totalGrid <= candidate.MaxTotalTGrid
+                : candidate.MinTotalTGrid <= totalGrid && totalGrid < candidate.MaxTotalTGrid;
         }
 
         /// <summary>
         /// 计算单条墙轨在指定时间点上的边界 XGrid。
         /// </summary>
-        private static double? CalculateBoundaryXGridUnit(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
+        private static double? CalculateBoundaryXGridUnit(in WallBoundaryCandidate candidate, TGrid tGrid, BoundaryEdge edge)
+        {
+            return candidate.IsPathValid
+                ? CalculateValidPathBoundaryXGridUnit(candidate.Lane, tGrid, edge)
+                : CalculateBoundaryXGridUnitLegacy(candidate.Lane, tGrid, edge);
+        }
+
+        /// <summary>
+        /// 有效路径下的边界求值：复用帧内缓存的索引区间，避免逐次 GetChildObjectsFromTGrid 的 List 分配
+        /// 与 IsPathVaild 的 O(子节点数) 扫描。
+        /// </summary>
+        private static double? CalculateValidPathBoundaryXGridUnit(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
+        {
+            if (lane.TryGetValidPathChildRange(tGrid, out var start, out var count))
+            {
+                // 节点正好落在采样点上时，Prev 取前侧 child，Next 取后侧 child。
+                if (lane.GetChildObjectAt(start).TGrid.TotalGrid == tGrid.TotalGrid)
+                {
+                    var child = edge == BoundaryEdge.Prev
+                        ? lane.GetChildObjectAt(start)
+                        : lane.GetChildObjectAt(start + count - 1);
+                    return child.XGrid.TotalUnit;
+                }
+
+                return lane.GetChildObjectAt(start).CalulateXGrid(tGrid)?.TotalUnit;
+            }
+
+            var x = lane.CalulateXGrid(tGrid)?.TotalUnit ?? lane.XGrid?.TotalUnit ?? double.NaN;
+            return double.IsNaN(x) ? null : x;
+        }
+
+        private static double? CalculateBoundaryXGridUnitLegacy(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
         {
             // 节点正好落在采样点上时，Prev 取前侧 child，Next 取后侧 child。
             var children = lane.GetChildObjectsFromTGrid(tGrid);
