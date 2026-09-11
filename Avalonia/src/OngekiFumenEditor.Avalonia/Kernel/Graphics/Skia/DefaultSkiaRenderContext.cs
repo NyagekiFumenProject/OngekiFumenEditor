@@ -53,8 +53,11 @@ public class DefaultSkiaRenderContext : IRenderContext
     {
         if (manager is null)
             return;
-        if (!manager.SwapDrawCommandList(this))
-            return;
+
+        // Promote a newly built frame when one is queued. When the frame was throttled and
+        // nothing new was posted, PresentDrawCommandList re-presents the retained front so
+        // the custom draw surface is never left empty.
+        manager.SwapDrawCommandList(this);
         manager.PresentDrawCommandList(this);
     }
 

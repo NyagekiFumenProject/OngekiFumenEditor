@@ -31,7 +31,9 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
         }
 
         /// <summary>
-        /// Moves the back slot to the front slot for the specified context.
+        /// Moves the back slot to the front slot for the specified context and releases the
+        /// front slot it supersedes. The promoted list stays alive afterwards as the retained
+        /// frame.
         /// </summary>
         public bool Swap(IRenderContext context)
         {
@@ -55,7 +57,9 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
         }
 
         /// <summary>
-        /// Presents and clears the current front slot for the specified context.
+        /// Presents the current front slot for the specified context and keeps it as the
+        /// retained frame. The list is not released here: it stays re-presentable until it
+        /// is superseded by <see cref="Swap"/> or the slot is dropped by <see cref="Remove"/>.
         /// </summary>
         public void Present(IRenderContext context, Action<DrawCommandList> presentCommands)
         {
@@ -64,36 +68,22 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
             if (presentCommands is null)
                 throw new ArgumentNullException(nameof(presentCommands));
 
-            DrawCommandListSlot? front = null;
-
             if (!contextSlots.TryGetValue(context, out var slot))
                 return;
-
-            front = slot.Front;
-            slot.Front = null;
-
-            if (front is not { } value)
+            if (slot.Front is not { } value)
                 return;
 
             var drawCommandList = value.DrawCommandList;
+            if (!drawCommandList.TryBeginPresent())
+                return;
+
             try
             {
-                if (!drawCommandList.TryBeginPresent())
-                    return;
-
-                try
-                {
-                    presentCommands(drawCommandList);
-                }
-                finally
-                {
-                    drawCommandList.EndPresent();
-                }
+                presentCommands(drawCommandList);
             }
             finally
             {
-                if (value.AutoDispose)
-                    drawCommandList.Dispose();
+                drawCommandList.EndPresent();
             }
         }
 
