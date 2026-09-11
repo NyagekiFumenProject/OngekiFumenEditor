@@ -168,6 +168,19 @@ public sealed class DrawPlayableAreaHelperTests
     }
 
     [AvaloniaFact]
+    public void DrawPlayField_OverlappingLeftWalls_MergePerSample()
+    {
+        var host = new PlayFieldHost(new OngekiFumen());
+        AddLeftWall(host.Fumen, 1, (0, -10), (5, -10));  // active over [0,5]
+        AddLeftWall(host.Fumen, 2, (5, -30), (10, -30)); // active over [5,10]
+
+        var result = RunPlayField(host, 0, 10);
+
+        Assert.Equal(X(host, -10), LeftXAt(result, 0), 4);
+        Assert.Equal(X(host, -30), LeftXAt(result, 10), 4);
+    }
+
+    [AvaloniaFact]
     public void DrawPlayField_LeftAndRightWalls_AreIndependent()
     {
         var host = new PlayFieldHost(new OngekiFumen());
@@ -301,7 +314,8 @@ public sealed class DrawPlayableAreaHelperTests
     public void DrawPlayField_CurvedWall_ProducesMultipleQuads()
     {
         var host = new PlayFieldHost(new OngekiFumen());
-        AddLeftWallWithCurve(host.Fumen, 1, (0, 0), (100, 0), control: (50, 40));
+        var lane = AddLeftWallWithCurve(host.Fumen, 1, (0, 0), (100, 0), control: (50, 40));
+        Assert.True(lane.IsPathVaild());
 
         var result = RunPlayField(host, 0, 100);
 
@@ -332,7 +346,8 @@ public sealed class DrawPlayableAreaHelperTests
     {
         var host = new PlayFieldHost(new OngekiFumen());
         // Control point beyond the child produces a TGrid reversal => IsPathVaild() == false.
-        AddLeftWallWithCurve(host.Fumen, 1, (0, -2), (10, -10), control: (20, -40));
+        var lane = AddLeftWallWithCurve(host.Fumen, 1, (0, -2), (10, -10), control: (20, -40));
+        Assert.False(lane.IsPathVaild());
 
         var result = RunPlayField(host, 0, 10);
 
