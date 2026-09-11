@@ -22,38 +22,48 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.TextureDrawing
 
         public void Draw(IDrawingContext target, IImage texture, IEnumerable<(Vector2 size, Vector2 position, float rotation, Vector4 color)> instances)
         {
-            foreach ((var size, var position, var rotation, var color) in instances)
-                Draw(target, texture as SkiaImage, size, position, rotation, color);
-        }
+            var tex = texture as SkiaImage;
+            if (tex?.Image is null)
+                return;
 
-        private void Draw(IDrawingContext target, SkiaImage tex, Vector2 size, Vector2 position, float rotation, Vector4 color)
-        {
+            // Artist setup (canvas save + MVP composition) and the paint are shared across
+            // all sprites of this command, matching DefaultSkiaBatchTextureDrawing. This only
+            // creates one SKPaint instead of one per instance and avoids re-composing the MVP
+            // matrix for every sprite.
             OnBegin(target);
-            var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
+            try
+            {
+                var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
 
-            var adjustSize = new Vector2(Math.Abs(size.X), Math.Abs(size.Y));
+                using var paint = new SKPaint();
+                foreach ((var size, var position, var rotation, var color) in instances)
+                {
+                    paint.Color = color.ToSKColor();
 
-            canvas.Save();
+                    var adjustSize = new Vector2(Math.Abs(size.X), Math.Abs(size.Y));
 
-            var adjustPosition = position.ToSkiaSharpPoint();
+                    canvas.Save();
 
-            canvas.Translate(adjustPosition.X, adjustPosition.Y);
-            canvas.RotateRadians(rotation);
-            canvas.Scale(Math.Sign(size.X), -1 * Math.Sign(size.Y));
-            var rect = SKRect.Create(-adjustSize.X / 2,
-                -adjustSize.Y / 2,
-                adjustSize.X,
-                adjustSize.Y);
+                    var adjustPosition = position.ToSkiaSharpPoint();
 
-            using var paint = new SKPaint();
-            paint.Color = color.ToSKColor();
+                    canvas.Translate(adjustPosition.X, adjustPosition.Y);
+                    canvas.RotateRadians(rotation);
+                    canvas.Scale(Math.Sign(size.X), -1 * Math.Sign(size.Y));
+                    var rect = SKRect.Create(-adjustSize.X / 2,
+                        -adjustSize.Y / 2,
+                        adjustSize.X,
+                        adjustSize.Y);
 
-            canvas.DrawImage(tex.Image, rect, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+                    canvas.DrawImage(tex.Image, rect, paint);
+                    target.PerfomenceMonitor.CountDrawCall(this);
 
-            canvas.Restore();
-
-            OnEnd();
+                    canvas.Restore();
+                }
+            }
+            finally
+            {
+                OnEnd();
+            }
         }
     }
 }
