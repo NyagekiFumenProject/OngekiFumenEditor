@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             if (duration == 0)
                 return;
 
-            var curTGrid = target.Editor.GetCurrentTGrid();
+            var curTGrid = target.FrameTGrid;
 
             /* ^  -- leadOutTGrid
              * |  |
@@ -98,7 +98,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var curObliqueTopXGrid = obj.XGrid.TotalUnit + curBeamObj.ObliqueSourceXGridOffset.TotalUnit;
 
                 //beam not support SoflanGroup
-                var currentY = target.ConvertToViewRelativeY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid());
+                var currentY = target.ConvertToViewRelativeY_DefaultSoflanGroup(target.FrameTGrid);
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
                 var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 

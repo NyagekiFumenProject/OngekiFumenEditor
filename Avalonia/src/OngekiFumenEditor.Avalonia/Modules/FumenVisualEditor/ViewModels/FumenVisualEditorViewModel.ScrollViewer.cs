@@ -104,12 +104,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public TGrid GetCurrentTGrid() => TGridCalculator.ConvertAudioTimeToTGrid(CurrentPlayTime, this);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TGrid GetViewportTGrid() => GetCurrentTGrid();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public TimeSpan GetViewportAudioTime() => CurrentPlayTime;
 	}
 }
 

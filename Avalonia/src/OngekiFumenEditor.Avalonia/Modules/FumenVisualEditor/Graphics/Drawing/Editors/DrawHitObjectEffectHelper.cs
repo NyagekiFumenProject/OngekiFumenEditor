@@ -39,11 +39,11 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
             var durationMs = 300;
 
-            var maxTGrid = target.Editor.GetCurrentTGrid();
+            var maxTGrid = target.FrameTGrid;
             if (maxTGrid is null)
                 return;
 
-            var minAudioTime = target.Editor.CurrentPlayTime - TimeSpan.FromMilliseconds(durationMs);
+            var minAudioTime = target.FrameTime - TimeSpan.FromMilliseconds(durationMs);
             var minTGrid = TGridCalculator.ConvertAudioTimeToTGrid(minAudioTime, target.Editor);
             if (minTGrid is null)
                 minTGrid = TGrid.Zero;

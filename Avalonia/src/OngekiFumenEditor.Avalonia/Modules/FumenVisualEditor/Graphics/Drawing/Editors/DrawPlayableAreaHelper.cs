@@ -283,7 +283,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 ref prevContextTotalTGrid,
                 ref nextContextTotalTGrid);
 
-            var currentTGrid = context.Target.Editor.GetCurrentTGrid();
+            var currentTGrid = context.Target.FrameTGrid;
             if (currentTGrid is not null)
                 AddSampleOrContext(
                     currentTGrid.TotalGrid,

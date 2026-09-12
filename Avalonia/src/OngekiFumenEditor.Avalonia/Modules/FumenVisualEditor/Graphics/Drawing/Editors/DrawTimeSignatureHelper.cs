@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             }
             else
             {
-                var currentY = TGridCalculator.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime, target.Editor);
+                var currentY = TGridCalculator.ConvertAudioTimeToY_PreviewMode(target.FrameTime, target.Editor);
                 //todo 暂时显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.SoflansMap.DefaultSoflanList,

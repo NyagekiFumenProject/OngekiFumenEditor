@@ -351,17 +351,23 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         //计算可以显示的TGrid范围以及像素范围
 
-        var tGrid = GetViewportTGrid();
+        // 帧首唯一一次读取播放时间：整帧（原点、裁判线、特效、拍线……）都基于同一快照，
+        // 避免 UI 线程在渲染过程中推进 CurrentPlayTime 导致同帧内两处读数不一致。
+        var frameTime = CurrentPlayTime;
+        var frameTGrid = TGridCalculator.ConvertAudioTimeToTGrid(frameTime, this);
+
+        var tGrid = frameTGrid;
         var editorOffsetMs = EditorGlobalSetting.Default.EditorOffsetMs;
         if (editorOffsetMs != 0)
         {
-            var adjustedViewportAudioTime = GetViewportAudioTime() + TimeSpan.FromMilliseconds(editorOffsetMs);
+            var adjustedViewportAudioTime = frameTime + TimeSpan.FromMilliseconds(editorOffsetMs);
             if (adjustedViewportAudioTime < TimeSpan.Zero)
                 adjustedViewportAudioTime = TimeSpan.Zero;
             tGrid = TGridCalculator.ConvertAudioTimeToTGrid(adjustedViewportAudioTime, fumen.BpmList);
         }
 
         tGrid ??= TGrid.Zero;
+        frameTGrid ??= TGrid.Zero;
 
         #region prepare drawing contexts' for every soflan groups 
 
@@ -418,6 +424,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                 ViewRelativeRect = viewRelativeRect,
                 WorldRect = worldRect,
                 ViewRelativeOriginY = minY,
+                CurrentTime = frameTime,
+                CurrentTGrid = frameTGrid,
                 ViewMatrix = viewMatrix,
                 ProjectionMatrix = projectionMatrix,
                 ViewWidth = ViewWidth,

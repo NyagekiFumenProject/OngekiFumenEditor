@@ -23,13 +23,14 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
 
         public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
+            // 线与文字共用同一个帧快照，避免两处读数不一致。
+            var t = target.FrameTGrid;
+            var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(t.TotalUnit);
 
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.Editor.ViewWidth, y), color, VertexDash.Solider);
 
             builder.DrawSimpleLines(vertices, 1);
-            var t = target.Editor.GetCurrentTGrid();
 
             var bpmList = target.Editor.EditorContext.Fumen.BpmList;
 

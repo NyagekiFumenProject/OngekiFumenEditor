@@ -23,5 +23,16 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing
         public Matrix4 ProjectionMatrix { get; set; }
         public float ViewWidth { get; set; }
         public float ViewHeight { get; set; }
+
+        /// <summary>
+        /// 本帧统一的时间快照，由 OnEditorRender 在帧首读取一次。
+        /// 渲染期不得再读取 editor 的实时播放时间，否则会出现同帧内时间不一致。
+        /// </summary>
+        public TimeSpan CurrentTime { get; set; }
+
+        /// <summary>
+        /// 本帧统一的当前 TGrid 快照（不套用 EditorOffsetMs，语义等同 editor.GetCurrentTGrid()）。
+        /// </summary>
+        public TGrid CurrentTGrid { get; set; }
     }
 }
