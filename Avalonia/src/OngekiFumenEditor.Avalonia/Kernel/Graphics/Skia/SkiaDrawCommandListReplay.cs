@@ -210,6 +210,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
         public void Dispose()
         {
             lineDrawing.Dispose();
+            stringDrawing.Dispose();
         }
 
         private sealed class ReplayDrawingContext : IDrawingContext

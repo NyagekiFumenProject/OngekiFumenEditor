@@ -393,6 +393,8 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
             viewMatrixStack = null;
             projectionMatrixStack?.Dispose();
             projectionMatrixStack = null;
+
+            (stringMeasurer as IDisposable)?.Dispose();
             stringMeasurer = null;
         }
 
