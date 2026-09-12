@@ -44,7 +44,7 @@
 - **PERF-RND-011 / RND-12 — P3，paint/path effect 创建。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultSkiaLineDrawing.cs:72-97` 在 style 变化时创建/处置 `SKPaint` 和 dash `SKPathEffect`，`:43-45` 每次结束重置；可缓存常用 style，但需先测量。
 - **PERF-RND-012 / RND-13 — P2，后端性能数据失真。**〔**2026-09-11 已修复**，见下方「已修复项」〕`SkiaDrawCommandListReplay.cs:214-226` 使用 `DummyPerformenceMonitor`，因此 `Drawing.cs:328-329,619-638` 的编辑器监控不能看到 replay 的实际 draw call/时间。传入真实 monitor 或公开 replay 指标。
 - **PERF-RND-013 / RND-16 — P2，预览尺寸使用陈旧状态。**〔**2026-09-12 已修复**，见下方「已修复项」〕`DrawTimeSignatureHelper.cs:58-69,72,82` 在 preview 使用 `RectInDesignMode`，而 `Drawing.cs:429-430` 只在 design mode 赋值；preview 可能拿到默认/旧尺寸，导致错误范围和无效工作。改用当前 context/ViewWidth/Height。
-- **PERF-RND-014 / RND-17 — P2，文字绘制高频 native 分配。** `DefaultSkiaStringDrawing.cs:46-70,73-99` 每次 Measure/Draw 创建 `SKPaint/SKFont/SKTypeface`；`DurationSoflanDrawingTarget.cs:217-230`、`CommonHorizonalDrawingTarget.cs:161-184` 在每帧大量调用。缓存字体、metrics 和 style。
+- **PERF-RND-014 / RND-17 — P2，文字绘制高频 native 分配。**〔**2026-09-12 已修复**，见下方「已修复项」〕`DefaultSkiaStringDrawing.cs:46-70,73-99` 每次 Measure/Draw 创建 `SKPaint/SKFont/SKTypeface`；`DurationSoflanDrawingTarget.cs:217-230`、`CommonHorizonalDrawingTarget.cs:161-184` 在每帧大量调用。缓存字体、metrics 和 style。
 - **PERF-RND-015 / RND-18 — P2，标记颜色错误兼性能浪费。** `DrawPlayerLocationHelper.cs:15` 默认 tuple 的 color 为 `Vector4.Zero`，`:62-65` 只更新位置/尺寸；`DefaultTextureDrawing.cs:48-51` 直接使用该颜色，marker 完全透明但仍被 replay。初始化非零颜色并避免无效命令。
 - **PERF-RND-016 / RND-19 — P2，Stopwatch 单位错误。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultDebugPerfomenceMonitor.cs:149-199` 记录 `Stopwatch.GetTimestamp` 差值，`:318-319` 当作 `TimeSpan` ticks；`DefaultReleasePerfomenceMonitor.cs:65-69,118` 对 `Stopwatch.ElapsedTicks` 做同样转换。频率不等于 10,000,000 时 FPS/ms 全部缩放错误。使用 `Stopwatch.GetElapsedTime` 或显式除以 `Stopwatch.Frequency`。
 - **PERF-RND-017 / RND-20 — P1，replay engine 每帧创建。** `DefaultSkiaDrawingManagerImpl.cs:85-99` 每次 present `new SkiaDrawCommandListReplay`；其构造 `SkiaDrawCommandListReplay.cs:20-35,41-60` 创建 target/drawing context、8 个 backend 对象和 3 个 `Stack<Matrix4>`，`NewSkiaLineDrawing` 还创建 List/paint/池；`SkiaDrawCommandListReplay.Dispose:210-213` 现只释放 line drawing。应按 render context 缓存 replay，逐帧 reset 矩阵/stack/state，并在 context 销毁时释放。
@@ -135,6 +135,26 @@
   - **根因（静态确认）：** `RectInDesignMode` 只在设计模式赋值（`FumenVisualEditorViewModel.Drawing.cs:432-433`，取自该帧 `defaultDrawingTargetContext.WorldRect`），进入预览后不再刷新。`DrawTimeSignatureHelper.DrawLines` 的预览分支把 `RectInDesignMode.Height` 当作 `viewHeight` 传给 `GetVisbleTimelines_PreviewMode`，横向端点又用 `RectInDesignMode.Width`。若从未进入设计模式，该字段是 `default(VisibleRect)`（宽高 0）：可见窗口退化（`SoflanList_CachedPositionList.cs:269-275` 以 `viewHeight/scale` 构造 `[minY, minY+height]`），拍线枚举不出来且端点全部落在 x=0；若曾进入设计模式，则取到旧尺寸 → 预览窗口/端点错位，并可能枚举过多变速段做无效工作。
   - **处理：** `DrawTimeSignatureHelper.DrawLines` 改从 `target.CurrentDrawingTargetContext` 取尺寸——design 分支用 `WorldRect.MinY/MaxY`，preview 分支用 `ViewHeight`，横向用 `ViewRelativeRect.Width`（== 当帧 `ViewWidth`）；`RectInDesignMode` 不再参与渲染（其设计模式语义保留给交互代码）。顺带修复同文件缺陷：`DrawTimeSigntureText` 原先直接使用世界 Y（`drawLines` 存 `y`），而拍线顶点已减 `ViewRelativeOriginY`，滚动后文字整体偏移一个相机原点；现 `drawLines` 存视口相对 Y，文字与线同空间。
   - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawTimeSignatureHelperTests.cs` 3 项：预览且从未设置 design rect 时仍产出拍线且最大 X == `ViewWidth`（旧实现为 0 / 无命令）；设计模式忽略被置为离屏空窗的陈旧 `RectInDesignMode`；`DrawTimeSigntureText` 文本 Y == 拍线 Y + 10（视口相对）。Release 全量 **695/695 通过**。
+
+- **PERF-RND-014 / RND-17 — 已修复（2026-09-12）：静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`，稳定态零 native 对象构造。**
+  - **根因（静态确认 + 基准确认）：** `DefaultSkiaStringDrawing.MeasureString` 与 `Draw` 每次调用都 `new SKPaint()`、`new SKFont()`，并按 `(family, bold, italic)` 再执行一次 `SKTypeface.FromFamilyName(...)`（字体匹配 + 新包装 + 引用计数）；`Draw` 还额外为字符串重复测量一次（`out measureTextSize` 在 replay 被丢弃，`SkiaDrawCommandListReplay.cs:160` 的 `out _`），Underline/Strike 再加一个 `SKPaint`。两个实例（builder 的 measurer 由 `DefaultSkiaDrawingManagerImpl.cs:65` 每帧新建、replay 的 drawer 由 `SkiaDrawCommandListReplay.cs:59` 每次 present 新建）都是短命对象，因此"实例字段缓存"必须先补齐释放接线。
+  - **处理：**
+    1. `DefaultSkiaStringDrawing`：新增进程级 `ConcurrentDictionary<TypefaceKey, SKTypeface>`（键 = 解析后的 family + bold + italic，键空间有界；`SKTypeface` 不可变、可跨帧跨线程共享）；实例持有复用的 `SKFont`、填充 `SKPaint`、装饰线 `SKPaint`，每次调用只重设 `Typeface/Size` 与 `ColorF/Color/StrokeWidth`（标量写入）；`Dispose()` 实装为幂等释放这三个 native 对象。语义与原实现逐点对齐（含 null 文本、`FromFamilyName(null)` 回退、装饰线 paint 的默认 Fill/非抗锯齿）。
+    2. 释放接线：`SkiaDrawCommandListReplay.Dispose()` 追加 `stringDrawing.Dispose()`；`DrawCommandListBuilder.Dispose()` 在置空 `stringMeasurer` 前 `(stringMeasurer as IDisposable)?.Dispose()`（builder 由工厂独占持有该 measurer，`StubStringMeasure` 等非 IDisposable 不受影响）。
+  - **基准**（新增 `benchmarks/.../SkiaStringDrawingBenchmarks.cs`，真实 `SKBitmap`/`SKCanvas` 逐行复刻修复前后核心循环，字符串形态取自 `CommonHorizonalDrawingTarget`/`DurationSoflanDrawingTarget`；Release / DefaultJob + ShortRun(InProcess)，同机同参数，`[Params]` 16/64/256）：
+
+    | 字符串数 | 方法 | 优化前 | 优化后 | 时间比 | 优化前分配 | 优化后分配 |
+    | --- | --- | ---: | ---: | ---: | ---: | ---: |
+    | 64 | Measure | 241.9 µs | 18.5 µs | 0.08× | 22.0 KB | 0 B |
+    | 64 | Draw | 472.6 µs | 192.2 µs | 0.41× | 32.0 KB | 10.0 KB |
+    | 64 | Frame（Measure+Draw） | 696.6 µs | 212.5 µs | 0.31× | 54.0 KB | 10.0 KB |
+    | 256 | Measure | 789.2 µs | 63.1 µs | 0.08× | 88.0 KB | 0 B |
+    | 256 | Draw | 1,547.5 µs | 681.9 µs | 0.44× | 128.0 KB | 40.0 KB |
+    | 256 | Frame（Measure+Draw） | 2,371.8 µs | 760.3 µs | 0.32× | 216.0 KB | 40.0 KB |
+
+    每字符串分配：Measure 由 352 B 降至 0 B；Draw 由 512 B 降至 160 B（残量来自 `SKCanvas.DrawText(string,...)` 的文本编码，非本次目标）。16 字符串行同比例（Measure 0.08× / Draw 0.44×）。
+  - **验证：** Release 全量 **698/698 通过**，含 `SkiaRenderSmokeTests.SkiaStringDrawing_RendersAsymmetricGlyphUpright` 像素断言（复用后字形/朝向不变）与 `CommonHorizonalDrawingTargetTests`。
+  - **未做/后续：** `Draw` 仍逐字符串经 `SKCanvas.DrawText(string,...)` 分配（~160 B/字符串），改走 `SKTextBlob` 或 `ReadOnlySpan<ushort>` 重载可消除；`MeasureString` 与 `Draw` 仍各测量一次同一字符串，实例级有界 memoize 可再省一次 shaping（需限制容量，避免 Comment 等可变文本无界增长）。实例级缓存与 PERF-RND-017/RND-20（replay 每帧新建）成对评审：RND-020 落地后这些缓存才真正跨帧存活。
 
 - **渲染帧时间快照（2026-09-12，非审计项／正确性修复）：多线程渲染下裁判线高度抖动。**
   - **根因（静态确认）：** `CurrentPlayTime` 由 UI 线程的 15 ms `DispatcherTimer` 推进（`AudioPlayerToolViewerViewModel.cs:260-274` → `ScrollTo` → `ScrollViewer.cs:89-92`），而 `OnEditorRender` 在 Avalonia 渲染线程执行（`AvaloniaSkiaRenderControl.SkiaDrawOperation.Render` → `DefaultSkiaRenderContext.RenderFrame`）。同一帧内帧原点取 `GetViewportTGrid()`、裁判线取 `GetCurrentTGrid()`，是两次独立读取；读间被改写时线高 = `JudgeLineOffsetY + (ConvertToY(t2) - ConvertToY(t1))`，随交错情况在两个值之间跳变。

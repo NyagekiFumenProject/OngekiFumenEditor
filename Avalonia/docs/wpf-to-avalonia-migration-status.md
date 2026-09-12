@@ -93,6 +93,7 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Tests\OngekiFumenEditor.Avalonia
 - 2026-09-11 性能：`PERF-RND-009 / RND-10`（PlayableArea 多重扫描）已修复（帧内缓存墙轨描述符 + 无分配子节点区间查询），新增基准 `benchmarks/.../DrawPlayableAreaProductionBenchmarks.cs`；最坏 8×256 墙由 2.40 ms / 555 KB 降至 0.35 ms / 203 KB（Release / ShortRun）。详见 `performance-gc-audit-2026-09-09.md` 的「已修复项」。
 - 2026-09-12：`PERF-RND-013 / RND-16`（预览模式下拍线使用陈旧的 `RectInDesignMode` 尺寸）已修复——渲染改用当帧 `DrawingTargetContext`，并顺带修正 `DrawTimeSigntureText` 的世界/视口 Y 空间混用；新增 `DrawTimeSignatureHelperTests` 3 项。
 - 2026-09-12：修复多线程渲染下裁判线高度抖动——`DrawingTargetContext` 新增帧快照 `CurrentTime`/`CurrentTGrid`，`OnEditorRender` 帧首只读一次播放时间，渲染期全部时间消费者（裁判线、player location、hit effect、拍线、playable area 采样、beam、projectile）改用 `IFumenEditorDrawingContext.FrameTime`/`FrameTGrid`；随之删除失效的 `GetViewportTGrid()`/`GetViewportAudioTime()`。新增 `DrawingFrameSnapshotTests` 3 项。
+- 2026-09-12 性能：`PERF-RND-014 / RND-17`（文字绘制每 Measure/Draw 新建 `SKPaint/SKFont/SKTypeface`）已修复——静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`，并补齐 `DefaultSkiaStringDrawing.Dispose` → builder/replay 的释放接线；新增基准 `benchmarks/.../SkiaStringDrawingBenchmarks.cs`（256 字符串一帧）：Measure 789→63 µs（分配 88 KB→0）、Draw 1547→682 µs（128→40 KB）、Measure+Draw 2372→760 µs（216→40 KB），Release 全量 698/698。详见 `performance-gc-audit-2026-09-09.md` 的「已修复项」。
 
 ## XAML 清零批次明细（本轮）
 
