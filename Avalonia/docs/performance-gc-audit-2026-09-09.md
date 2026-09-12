@@ -136,6 +136,12 @@
   - **处理：** `DrawTimeSignatureHelper.DrawLines` 改从 `target.CurrentDrawingTargetContext` 取尺寸——design 分支用 `WorldRect.MinY/MaxY`，preview 分支用 `ViewHeight`，横向用 `ViewRelativeRect.Width`（== 当帧 `ViewWidth`）；`RectInDesignMode` 不再参与渲染（其设计模式语义保留给交互代码）。顺带修复同文件缺陷：`DrawTimeSigntureText` 原先直接使用世界 Y（`drawLines` 存 `y`），而拍线顶点已减 `ViewRelativeOriginY`，滚动后文字整体偏移一个相机原点；现 `drawLines` 存视口相对 Y，文字与线同空间。
   - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawTimeSignatureHelperTests.cs` 3 项：预览且从未设置 design rect 时仍产出拍线且最大 X == `ViewWidth`（旧实现为 0 / 无命令）；设计模式忽略被置为离屏空窗的陈旧 `RectInDesignMode`；`DrawTimeSigntureText` 文本 Y == 拍线 Y + 10（视口相对）。Release 全量 **695/695 通过**。
 
+- **渲染帧时间快照（2026-09-12，非审计项／正确性修复）：多线程渲染下裁判线高度抖动。**
+  - **根因（静态确认）：** `CurrentPlayTime` 由 UI 线程的 15 ms `DispatcherTimer` 推进（`AudioPlayerToolViewerViewModel.cs:260-274` → `ScrollTo` → `ScrollViewer.cs:89-92`），而 `OnEditorRender` 在 Avalonia 渲染线程执行（`AvaloniaSkiaRenderControl.SkiaDrawOperation.Render` → `DefaultSkiaRenderContext.RenderFrame`）。同一帧内帧原点取 `GetViewportTGrid()`、裁判线取 `GetCurrentTGrid()`，是两次独立读取；读间被改写时线高 = `JudgeLineOffsetY + (ConvertToY(t2) - ConvertToY(t1))`，随交错情况在两个值之间跳变。
+  - **处理：** `DrawingTargetContext` 新增帧快照 `CurrentTime`/`CurrentTGrid`；`OnEditorRender` 帧首只读一次播放时间并写入每个 soflan group 的 context；新增 `IFumenEditorDrawingContext.FrameTime`/`FrameTGrid`（帧外回退活值）。渲染期时间消费者全部改用快照：裁判线、player location、hit effect、拍线、playable area 采样、beam、projectile。随之删除已无调用者的 `GetViewportTGrid()`/`GetViewportAudioTime()`。
+  - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawingFrameSnapshotTests.cs` 3 项（快照覆盖活值、未填充回退、`DrawJudgeLineHelper` 输出取快照而非活时间）；Release 全量 **698/698 通过**。
+  - **未做/后续：** `ViewRelativeOriginY` 仍按套用 `EditorOffsetMs` 的 tGrid 计算，故 `EditorOffsetMs != 0` 时裁判线的常量偏置保持不变（本次只消除抖动）；`Render(TimeSpan)` 与 `RenderFrame` 的互斥、`DrawJudgeLineHelper.vertices` 共享缓冲、`CurrentPlayTime` 的原子发布仍未加固。
+
 ### Dormant/合并项
 
 - `RND-04` 已并入 PERF-RND-003，不重复计数。
