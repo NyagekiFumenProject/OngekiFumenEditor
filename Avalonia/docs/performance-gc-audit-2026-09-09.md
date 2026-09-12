@@ -43,7 +43,7 @@
 - **PERF-RND-010 / RND-11 — P3，绘制命令粒度。** `CommonLinesDrawTargetBase.cs:25-39` 每 lane 发一个 `DrawSimpleLines`，replay `SkiaDrawCommandListReplay.cs:141-143` 与 `NewSkiaLineDrawing.DrawPolylineOrSegmentsRun` 每命令建立/结束路径。只有确认后端支持断开 strip 且基准证实后才聚合。
 - **PERF-RND-011 / RND-12 — P3，paint/path effect 创建。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultSkiaLineDrawing.cs:72-97` 在 style 变化时创建/处置 `SKPaint` 和 dash `SKPathEffect`，`:43-45` 每次结束重置；可缓存常用 style，但需先测量。
 - **PERF-RND-012 / RND-13 — P2，后端性能数据失真。**〔**2026-09-11 已修复**，见下方「已修复项」〕`SkiaDrawCommandListReplay.cs:214-226` 使用 `DummyPerformenceMonitor`，因此 `Drawing.cs:328-329,619-638` 的编辑器监控不能看到 replay 的实际 draw call/时间。传入真实 monitor 或公开 replay 指标。
-- **PERF-RND-013 / RND-16 — P2，预览尺寸使用陈旧状态。** `DrawTimeSignatureHelper.cs:58-69,72,82` 在 preview 使用 `RectInDesignMode`，而 `Drawing.cs:429-430` 只在 design mode 赋值；preview 可能拿到默认/旧尺寸，导致错误范围和无效工作。改用当前 context/ViewWidth/Height。
+- **PERF-RND-013 / RND-16 — P2，预览尺寸使用陈旧状态。**〔**2026-09-12 已修复**，见下方「已修复项」〕`DrawTimeSignatureHelper.cs:58-69,72,82` 在 preview 使用 `RectInDesignMode`，而 `Drawing.cs:429-430` 只在 design mode 赋值；preview 可能拿到默认/旧尺寸，导致错误范围和无效工作。改用当前 context/ViewWidth/Height。
 - **PERF-RND-014 / RND-17 — P2，文字绘制高频 native 分配。** `DefaultSkiaStringDrawing.cs:46-70,73-99` 每次 Measure/Draw 创建 `SKPaint/SKFont/SKTypeface`；`DurationSoflanDrawingTarget.cs:217-230`、`CommonHorizonalDrawingTarget.cs:161-184` 在每帧大量调用。缓存字体、metrics 和 style。
 - **PERF-RND-015 / RND-18 — P2，标记颜色错误兼性能浪费。** `DrawPlayerLocationHelper.cs:15` 默认 tuple 的 color 为 `Vector4.Zero`，`:62-65` 只更新位置/尺寸；`DefaultTextureDrawing.cs:48-51` 直接使用该颜色，marker 完全透明但仍被 replay。初始化非零颜色并避免无效命令。
 - **PERF-RND-016 / RND-19 — P2，Stopwatch 单位错误。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultDebugPerfomenceMonitor.cs:149-199` 记录 `Stopwatch.GetTimestamp` 差值，`:318-319` 当作 `TimeSpan` ticks；`DefaultReleasePerfomenceMonitor.cs:65-69,118` 对 `Stopwatch.ElapsedTicks` 做同样转换。频率不等于 10,000,000 时 FPS/ms 全部缩放错误。使用 `Stopwatch.GetElapsedTime` 或显式除以 `Stopwatch.Frequency`。
@@ -130,6 +130,11 @@
     最坏组合 2.40 ms → 0.35 ms（约 6.8×），分配 555 KB → 203 KB（−63%），Gen0/千次 33.2 → 12.2。残余分配主要来自每采样点的 `TGrid.FromTotalGrid` 与 `CalulateXGrid` 内的 `new XGrid`，属算法固有，需 A2（区间游标/累加器）或值类型化才能再降。
   - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawPlayableAreaHelperTests.cs` 24 项行为契约（真实 editor + stub `IFumenEditorDrawingContext` + 真实 `DrawCommandListBuilder`，断言实际发出的多边形顶点：默认/多墙取最外、斜墙插值、节点处 Prev 取首/Next 取末、区间半开进出、共线合并且端点保留、可见 Y 裁剪、曲线多段、无效路径退化、门控与非法区间），另加 `tests/.../Base/OngekiObjects/ConnectableStartObjectChildRangeTests.cs` 2 项区间一致性。Release 全量 **692/692 通过**。
   - **未做/后续：** 每个采样点仍线性扫过全部候选墙轨（samples×lanes），本次只消除 children 因子与分配；墙轨数占主导时再按区间游标/累加器优化。WPF 侧同算法文件 `DrawPlayableAreaHelper_new` 仅存在于 `.tmp` 草稿（未进入 WPF 工程），WPF 应用仍用原版 Earcut/交点实现，若其落地可复用本修复。
+
+- **PERF-RND-013 / RND-16 — 已修复（2026-09-12）：拍线/拍号文字改用当帧绘制上下文，不再读 design-only 的 `RectInDesignMode`。**
+  - **根因（静态确认）：** `RectInDesignMode` 只在设计模式赋值（`FumenVisualEditorViewModel.Drawing.cs:432-433`，取自该帧 `defaultDrawingTargetContext.WorldRect`），进入预览后不再刷新。`DrawTimeSignatureHelper.DrawLines` 的预览分支把 `RectInDesignMode.Height` 当作 `viewHeight` 传给 `GetVisbleTimelines_PreviewMode`，横向端点又用 `RectInDesignMode.Width`。若从未进入设计模式，该字段是 `default(VisibleRect)`（宽高 0）：可见窗口退化（`SoflanList_CachedPositionList.cs:269-275` 以 `viewHeight/scale` 构造 `[minY, minY+height]`），拍线枚举不出来且端点全部落在 x=0；若曾进入设计模式，则取到旧尺寸 → 预览窗口/端点错位，并可能枚举过多变速段做无效工作。
+  - **处理：** `DrawTimeSignatureHelper.DrawLines` 改从 `target.CurrentDrawingTargetContext` 取尺寸——design 分支用 `WorldRect.MinY/MaxY`，preview 分支用 `ViewHeight`，横向用 `ViewRelativeRect.Width`（== 当帧 `ViewWidth`）；`RectInDesignMode` 不再参与渲染（其设计模式语义保留给交互代码）。顺带修复同文件缺陷：`DrawTimeSigntureText` 原先直接使用世界 Y（`drawLines` 存 `y`），而拍线顶点已减 `ViewRelativeOriginY`，滚动后文字整体偏移一个相机原点；现 `drawLines` 存视口相对 Y，文字与线同空间。
+  - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawTimeSignatureHelperTests.cs` 3 项：预览且从未设置 design rect 时仍产出拍线且最大 X == `ViewWidth`（旧实现为 0 / 无命令）；设计模式忽略被置为离屏空窗的陈旧 `RectInDesignMode`；`DrawTimeSigntureText` 文本 Y == 拍线 Y + 10（视口相对）。Release 全量 **695/695 通过**。
 
 ### Dormant/合并项
 
