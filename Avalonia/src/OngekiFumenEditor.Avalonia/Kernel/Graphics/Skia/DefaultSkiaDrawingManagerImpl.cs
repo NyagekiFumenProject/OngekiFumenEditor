@@ -17,6 +17,14 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     private readonly TaskCompletionSource initTaskSource = new();
     private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
 
+    /// <summary>
+    /// One replay per render context, kept for the lifetime of that context (PERF-RND-017 / RND-20).
+    /// The replay owns the backend drawings together with their pools, dash effect cache and native
+    /// paints; rebuilding it every frame used to throw all of that away, so it is reset per frame
+    /// through <see cref="SkiaDrawCommandListReplay.BeginFrame"/> instead.
+    /// </summary>
+    private readonly Dictionary<IRenderContext, SkiaDrawCommandListReplay> replayCache = new();
+
     public string Name { get; } = "Skia";
 
     public DefaultSkiaDrawingManagerImpl()
@@ -55,8 +63,14 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     {
         if (renderControl is AvaloniaSkiaRenderControl skiaRenderControl)
         {
-            skiaRenderControl.RenderContext.StopRendering();
-            drawCommandListContextSlots.Remove(skiaRenderControl.RenderContext);
+            var renderContext = skiaRenderControl.RenderContext;
+            renderContext.StopRendering();
+            drawCommandListContextSlots.Remove(renderContext);
+
+            // The replay outlives individual frames, so it must be released explicitly here;
+            // otherwise its pools, dash effect cache and native paints would leak past the context.
+            if (replayCache.Remove(renderContext, out var replay))
+                replay.Dispose();
         }
     }
 
@@ -88,14 +102,26 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         if (context is not DefaultSkiaRenderContext { Canvas: { } canvas })
             return;
 
-        var replay = new SkiaDrawCommandListReplay(this, context, canvas);
-        try
+        drawCommandListContextSlots.Present(context, list =>
         {
-            drawCommandListContextSlots.Present(context, list => replay.Present(list.Commands, list.FrameState));
-        }
-        finally
-        {
-            replay.Dispose();
-        }
+            var replay = GetOrCreateReplay(context);
+            replay.BeginFrame(canvas, list.FrameState);
+            try
+            {
+                replay.Present(list.Commands);
+            }
+            finally
+            {
+                replay.EndFrame();
+            }
+        });
+    }
+
+    private SkiaDrawCommandListReplay GetOrCreateReplay(IRenderContext context)
+    {
+        if (!replayCache.TryGetValue(context, out var replay))
+            replay = replayCache[context] = new SkiaDrawCommandListReplay(this, context);
+
+        return replay;
     }
 }

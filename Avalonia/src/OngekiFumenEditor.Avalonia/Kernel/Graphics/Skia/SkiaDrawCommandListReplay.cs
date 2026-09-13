@@ -15,6 +15,17 @@ using OpenTK.Mathematics;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
 {
+    /// <summary>
+    /// Replays a frame's draw commands onto a Skia canvas.
+    /// <para>
+    /// The instance is owned by the render manager and cached per render context
+    /// (PERF-RND-017 / RND-20): constructing it builds the target/drawing contexts, the backend
+    /// drawings and their pools/paints, so rebuilding it every frame both churned allocations and
+    /// reset every cross-frame cache those backends hold. Callers must therefore use the
+    /// <see cref="BeginFrame"/> / <see cref="Present"/> / <see cref="EndFrame"/> sequence per frame
+    /// and let the owning context dispose the instance at teardown.
+    /// </para>
+    /// </summary>
     internal sealed class SkiaDrawCommandListReplay : IDisposable
     {
         private readonly ReplayDrawingContext drawingContext;
@@ -28,7 +39,18 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
         private readonly DefaultSkiaStringDrawing stringDrawing;
         private readonly DefaultSkiaBeamDrawing beamDrawing;
         private readonly IRenderContext renderContext;
-        private readonly SKCanvas canvas;
+
+        /// <summary>
+        /// The leased canvas of the frame currently being presented. Only valid between
+        /// <see cref="BeginFrame"/> and <see cref="EndFrame"/>; cleared afterwards so a cached,
+        /// long-lived replay never roots an expired lease.
+        /// </summary>
+        private SKCanvas canvas;
+
+        /// <summary>
+        /// Clean color captured by <see cref="BeginFrame"/>; null means the target must not be cleared.
+        /// </summary>
+        private System.Numerics.Vector4? frameCleanColor;
 
         private readonly Stack<Matrix4> modelMatrixStack = new();
         private readonly Stack<Matrix4> viewMatrixStack = new();
@@ -38,14 +60,14 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
         private Matrix4 currentViewMatrix;
         private Matrix4 currentProjectionMatrix;
 
-        public SkiaDrawCommandListReplay(DefaultSkiaDrawingManagerImpl manager, IRenderContext renderContext, SKCanvas canvas)
+        private bool disposed;
+
+        public SkiaDrawCommandListReplay(DefaultSkiaDrawingManagerImpl manager, IRenderContext renderContext)
         {
             ArgumentNullException.ThrowIfNull(manager);
             ArgumentNullException.ThrowIfNull(renderContext);
-            ArgumentNullException.ThrowIfNull(canvas);
 
             this.renderContext = renderContext;
-            this.canvas = canvas;
 
             targetContext = new DrawingTargetContext();
             drawingContext = new ReplayDrawingContext(renderContext, targetContext);
@@ -60,12 +82,25 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
             beamDrawing = new DefaultSkiaBeamDrawing(manager);
         }
 
-        public void Present(IReadOnlyList<DrawCommand> commands, DrawCommandListFrameState frameState)
+        /// <summary>
+        /// Binds the frame's canvas and resets all per-frame replay state. Must be called once per
+        /// frame before <see cref="Present"/>.
+        /// <para>
+        /// The matrix stacks are cleared explicitly instead of relying on the command stream being
+        /// balanced: a frame that threw midway used to leave entries behind, and with a shared
+        /// instance those leftovers would otherwise be popped by the next frame.
+        /// </para>
+        /// </summary>
+        public void BeginFrame(SKCanvas canvas, DrawCommandListFrameState frameState)
         {
-            ArgumentNullException.ThrowIfNull(commands);
+            ArgumentNullException.ThrowIfNull(canvas);
 
-            if (frameState.CleanColor is { } cleanColor)
-                canvas.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
+            this.canvas = canvas;
+            frameCleanColor = frameState.CleanColor;
+
+            modelMatrixStack.Clear();
+            viewMatrixStack.Clear();
+            projectionMatrixStack.Clear();
 
             currentModelMatrix = frameState.ModelMatrix;
             currentViewMatrix = frameState.ViewMatrix;
@@ -76,6 +111,26 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
             targetContext.ViewMatrix = currentViewMatrix;
             targetContext.ProjectionMatrix = currentProjectionMatrix;
             targetContext.ViewRelativeRect = new VisibleRect(new Vector2(frameState.ViewWidth, 0), new Vector2(0, frameState.ViewHeight));
+        }
+
+        /// <summary>
+        /// Releases the frame's canvas reference. Call once per frame after <see cref="Present"/>.
+        /// </summary>
+        public void EndFrame()
+        {
+            canvas = null;
+            frameCleanColor = null;
+        }
+
+        public void Present(IReadOnlyList<DrawCommand> commands)
+        {
+            ArgumentNullException.ThrowIfNull(commands);
+
+            if (canvas is null)
+                throw new InvalidOperationException($"{nameof(BeginFrame)} must be called before {nameof(Present)}.");
+
+            if (frameCleanColor is { } cleanColor)
+                canvas.Clear(new SKColorF(cleanColor.X, cleanColor.Y, cleanColor.Z, cleanColor.W));
 
             var perfomenceMonitor = drawingContext.PerfomenceMonitor;
             foreach (var command in commands)
@@ -207,10 +262,23 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
             }
         }
 
+        /// <summary>
+        /// Releases every native resource owned by this replay. Called by the render manager when the
+        /// owning render context is released; the instance is cached across frames, so this is the
+        /// only place those resources are freed.
+        /// </summary>
         public void Dispose()
         {
+            if (disposed)
+                return;
+
+            disposed = true;
+            canvas = null;
+            frameCleanColor = null;
+
             lineDrawing.Dispose();
             stringDrawing.Dispose();
+            textureDrawing.Dispose();
         }
 
         private sealed class ReplayDrawingContext : IDrawingContext

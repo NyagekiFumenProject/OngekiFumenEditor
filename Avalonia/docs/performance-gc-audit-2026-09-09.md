@@ -21,7 +21,7 @@
 
 ## 3. 优先处理顺序
 
-1. **先处理 P1 项**（原 21 项，PERF-RND-002 已于 2026-09-11 修复）：PERF-RND-001/003/017、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
+1. **先处理 P1 项**（原 21 项，PERF-RND-002 已于 2026-09-11 修复、PERF-RND-017 已于 2026-09-13 修复）：PERF-RND-001/003、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
 2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。
 3. **P3、条件项和 dormant 项必须先用真实负载验证，不应与活动热路径混改。**
 
@@ -47,7 +47,7 @@
 - **PERF-RND-014 / RND-17 — P2，文字绘制高频 native 分配。**〔**2026-09-12 已修复**，见下方「已修复项」〕`DefaultSkiaStringDrawing.cs:46-70,73-99` 每次 Measure/Draw 创建 `SKPaint/SKFont/SKTypeface`；`DurationSoflanDrawingTarget.cs:217-230`、`CommonHorizonalDrawingTarget.cs:161-184` 在每帧大量调用。缓存字体、metrics 和 style。
 - **PERF-RND-015 / RND-18 — P2，标记颜色错误兼性能浪费。** `DrawPlayerLocationHelper.cs:15` 默认 tuple 的 color 为 `Vector4.Zero`，`:62-65` 只更新位置/尺寸；`DefaultTextureDrawing.cs:48-51` 直接使用该颜色，marker 完全透明但仍被 replay。初始化非零颜色并避免无效命令。
 - **PERF-RND-016 / RND-19 — P2，Stopwatch 单位错误。**〔**2026-09-11 已修复**，见下方「已修复项」〕`DefaultDebugPerfomenceMonitor.cs:149-199` 记录 `Stopwatch.GetTimestamp` 差值，`:318-319` 当作 `TimeSpan` ticks；`DefaultReleasePerfomenceMonitor.cs:65-69,118` 对 `Stopwatch.ElapsedTicks` 做同样转换。频率不等于 10,000,000 时 FPS/ms 全部缩放错误。使用 `Stopwatch.GetElapsedTime` 或显式除以 `Stopwatch.Frequency`。
-- **PERF-RND-017 / RND-20 — P1，replay engine 每帧创建。** `DefaultSkiaDrawingManagerImpl.cs:85-99` 每次 present `new SkiaDrawCommandListReplay`；其构造 `SkiaDrawCommandListReplay.cs:20-35,41-60` 创建 target/drawing context、8 个 backend 对象和 3 个 `Stack<Matrix4>`，`NewSkiaLineDrawing` 还创建 List/paint/池；`SkiaDrawCommandListReplay.Dispose:210-213` 现只释放 line drawing。应按 render context 缓存 replay，逐帧 reset 矩阵/stack/state，并在 context 销毁时释放。
+- **PERF-RND-017 / RND-20 — P1，replay engine 每帧创建。**〔**2026-09-13 已修复**，见下方「已修复项」〕`DefaultSkiaDrawingManagerImpl.cs:85-99` 每次 present `new SkiaDrawCommandListReplay`；其构造 `SkiaDrawCommandListReplay.cs:20-35,41-60` 创建 target/drawing context、8 个 backend 对象和 3 个 `Stack<Matrix4>`，`NewSkiaLineDrawing` 还创建 List/paint/池；`SkiaDrawCommandListReplay.Dispose:210-213` 现只释放 line drawing。应按 render context 缓存 replay，逐帧 reset 矩阵/stack/state，并在 context 销毁时释放。
 
 ### 已修复项
 
@@ -163,6 +163,24 @@
   - **处理：** `DrawingTargetContext` 新增帧快照 `CurrentTime`/`CurrentTGrid`；`OnEditorRender` 帧首只读一次播放时间并写入每个 soflan group 的 context；新增 `IFumenEditorDrawingContext.FrameTime`/`FrameTGrid`（帧外回退活值）。渲染期时间消费者全部改用快照：裁判线、player location、hit effect、拍线、playable area 采样、beam、projectile。随之删除已无调用者的 `GetViewportTGrid()`/`GetViewportAudioTime()`。
   - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/DrawingFrameSnapshotTests.cs` 3 项（快照覆盖活值、未填充回退、`DrawJudgeLineHelper` 输出取快照而非活时间）；Release 全量 **698/698 通过**。
   - **未做/后续：** `ViewRelativeOriginY` 仍按套用 `EditorOffsetMs` 的 tGrid 计算，故 `EditorOffsetMs != 0` 时裁判线的常量偏置保持不变（本次只消除抖动）；`Render(TimeSpan)` 与 `RenderFrame` 的互斥、`DrawJudgeLineHelper.vertices` 共享缓冲、`CurrentPlayTime` 的原子发布仍未加固。
+
+- **PERF-RND-017 / RND-20 — 已修复（2026-09-13）：replay 改为按 render context 缓存 + 逐帧 `BeginFrame` 重置。**
+  - **根因（静态确认 + 基准确认）：** `DefaultSkiaDrawingManagerImpl.PresentDrawCommandList` 每次 present 都 `new SkiaDrawCommandListReplay(this, context, canvas)` 并在 `finally` 里 `Dispose`。渲染控件自我 invalidate 形成持续合成循环（`DefaultSkiaRenderContext.RenderFrame` → `SwapAndPresentDrawCommandList`），所以这是一次**逐帧固定成本**：构造 target/drawing context、8 个 backend 绘制对象（含 `NewSkiaLineDrawing` 的 `List<LineVertex>(1024)` = 32 KB、`Stack<SKPath>` 池、`Dictionary<VertexDash, SKPathEffect>`、2 个 `SKPaint`，以及 `DefaultSkiaStringDrawing` 的 `SKFont` + 2 个 `SKPaint`）与 3 个 `Stack<Matrix4>`，帧末再全部释放。副作用是 PERF-RND-011/014 建立的**实例级**缓存（`pathPool`、`dashPathEffectCache`、`reusableFont`/`textPaint`/`decorationPaint`）寿命被截断在一帧内——构造时从空开始、帧末清空，跨帧记忆为零，命中率在结构上被钉死。（RND-005 不在此列：它是单条命令内部的摊销，与实例是否跨帧无关；RND-014 的进程级 `static SKTypeface` 字典本就跨帧存活。）
+  - **处理：**
+    1. `SkiaDrawCommandListReplay`：`canvas` 与帧状态从构造函数移出，新增 `BeginFrame(SKCanvas, DrawCommandListFrameState)` / `EndFrame()`。`BeginFrame` 绑定本帧 canvas、捕获清屏色，并**显式清空 3 个矩阵栈**——跨帧复用后不能再依赖命令流 push/pop 自平衡，否则一帧中途抛异常会把栈残留带进下一帧；`EndFrame` 清掉 canvas 与清屏色引用，避免被缓存的长寿命实例 root 住已失效的 lease。帧首状态（viewport / 视图矩阵 / 投影矩阵 / 可见矩形）统一收敛到 `BeginFrame`，`Present(commands)` 只负责重放命令。`Dispose` 补全到全部 `IDisposable` backend（`lineDrawing` / `stringDrawing` / `textureDrawing`）并做成幂等。
+    2. `DefaultSkiaDrawingManagerImpl`：新增 `Dictionary<IRenderContext, SkiaDrawCommandListReplay> replayCache`，`PresentDrawCommandList` 改为取或建后走 `BeginFrame`→`Present`→`EndFrame`；`ReleaseRenderControl`（编辑器 Detach 路径 `FumenVisualEditorViewModel.Drawing.cs:1270`、波形会话 `WaveformRenderSession.cs:180` 都会调用）在既有 `drawCommandListContextSlots.Remove` 之后释放并移除缓存的 replay。**释放接线因此从"每帧兜底"变成显式 teardown**，这是本项能成立的前提。
+  - **基准**（新增 `benchmarks/.../ReplayLifecycleBenchmarks.cs`；`dotnet run -c Release -- --filter '*ReplayLifecycleBenchmarks*'`，产物在 `benchmarks/.../BenchmarkDotNet.Artifacts/results/`）：两侧都用生产类型（通过 `InternalsVisibleTo("OngekiFumenEditor.Avalonia.Benchmark")`）。现状侧复刻修复前行为（每帧 `new` + `Dispose`）；优化侧调用**真实的** `BeginFrame`/`EndFrame`。该成本与命令数无关，命令重放在两侧是同一份代码、同一批命令，作差抵消，故只测生命周期。报告值为 64 帧合计，单帧 = ÷64（DefaultJob；注意本机 `Job.Default` 与类级 `[Config]` 的 ShortRun job 会叠加，数值以 DefaultJob 为准）：
+
+    | 变体 | Mean / 64 帧 | 单帧 | 托管分配 / 帧 | Gen0 /千次 | Gen1 /千次 |
+    |---|---:|---:|---:|---:|---:|
+    | `Original_NewReplayPerFrame` | 201,637 ns | 3.15 µs | 36,504 B | 139.4 | 17.33 |
+    | `Optimized_ReusedReplayBeginFramePerFrame` | 897.8 ns | **14.0 ns** | **0 B** | 0 | 0 |
+    | `Isolate_LineDrawingGraphPerFrame` | 141,515 ns | 2.21 µs | 33,464 B（占 91.7%） | 127.4 | 15.63 |
+    | `Isolate_StringDrawingGraphPerFrame` | 37,494 ns | 0.59 µs | 560 B | 2.14 | 0 |
+
+    时间 201,637 → 897.8 ns（**225×**），单帧 3.15 µs → 14 ns，托管分配 36,504 B → 0 B，Gen0/Gen1 归零。分配主体是 `NewSkiaLineDrawing` 的 `List<LineVertex>(1024)`（`LineVertex` = Vector2(8)+Vector4(16)+VertexDash(8) = 32 B ⇒ 32,768 B），单它一项占 91.7%；`DefaultSkiaStringDrawing` 托管分配仅 560 B 但每帧创建又销毁 `SKFont` + 2 个 `SKPaint` 三个 native 对象（MemoryDiagnoser 不统计 native，按约 300 次/秒计）。**量纲提醒**：单帧 3.15 µs 相对 60 Hz 的 16,667 µs 预算仅 0.019%，本项的**直接**墙钟收益不大；价值在于 (a) 触发频率是合成回调而非 60 Hz、(b) 让 RND-011/014 的实例级缓存第一次真正跨帧存活、(c) 与 RND-004 耦合——节流帧仍要重放保留列表，不缓存 replay 的话"省了构建、却每帧新建重放器"。而修复侧逐帧成本仅 14 ns / 0 B，属风险极低。
+  - **验证：** 新增 `tests/OngekiFumenEditor.Avalonia.Tests/Graphics/ReplayLifecycleTests.cs` 5 项：4 项生命周期契约（未 `BeginFrame` 就 `Present` 抛 `InvalidOperationException`、`BeginFrame` 拒绝 null canvas、`EndFrame` 后 `Present` 抛异常即 canvas 引用确已丢弃、`Dispose` 幂等）+ 1 项 headless 端到端（同一 replay 连续 present 三帧：蓝底+上线 / 品红底+下线 / 蓝底+上线，断言第二帧**不得残留**第一帧的清屏色与几何、第三帧与第一帧逐像素一致）。Release 全量 **703/703 通过**（含全部 `SkiaRenderSmokeTests` 像素断言），Desktop 测试项目 148/148 通过。
+  - **未做/后续：** 本项**只解决 replay 侧那一个实例**。builder 侧的 measurer 是另一个短命实例（`FumenVisualEditorViewModel.Drawing.cs:316`、`WaveformRenderSession.cs:216` 每帧 `CreateDrawCommandListBuilder()` → `new DefaultSkiaStringDrawing`），其每帧新建的 `SKFont`/`SKPaint` 需另找 owner，不要指望 RND-020 一并消除。缓存如今是长寿命状态，需保持有界：`pathPool` 已限 32，但 `dashPathEffectCache` 的键空间由实际用到的 dash 样式决定、理论上无界，极端谱面需留意。同帧内 `pathPool` 是顺序复用池（`RentPath`/`ReturnPath`），跨帧存活省掉的主要是**帧首冷启动**的几次 `new SKPath()`，不是"命中率从 0 变 1"。另：`DefaultSkiaCircleDrawing` 的 `previousPaint` 不是 `IDisposable`，但其 `End()` 每次都会释放并置空（`PresentCircles` 用 try/finally 包裹），故复用后不会漏；本次已评估、未改动。
 
 ### Dormant/合并项
 
@@ -469,5 +487,6 @@
 
 - 报告已按分区写入本文件；审核轮次（2026-09-09）未修改业务源代码。
 - **2026-09-11 后续修复：** PERF-RND-004 / RND-05 已按“保留前端帧 + Swap/Remove 时释放”处理；PERF-RND-005 / RND-06 已把非批量纹理绘制的 `OnBegin/OnEnd` 与 `SKPaint` 提到实例循环外；PERF-RND-006 / RND-07 已把 `LineVertex`/`VertexDash` 改为 `readonly record struct`。三项均附基准对比与回归验证，见第 4 节「已修复项」。其余发现状态不变。
+- **2026-09-12/13 后续修复：** PERF-RND-013 / RND-16（预览拍线改用当帧 `DrawingTargetContext`，不再读 design-only 的 `RectInDesignMode`）、PERF-RND-014 / RND-17（静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`）、PERF-RND-017 / RND-20（replay 按 render context 缓存，`canvas`/帧状态移出构造函数并改为逐帧 `BeginFrame`/`EndFrame`）；另有一项非审计项的正确性修复：多线程渲染下裁判线高度抖动（`DrawingTargetContext` 帧快照 `CurrentTime`/`CurrentTGrid`）。均附基准与回归验证，见第 4 节「已修复项」。Release 全量 **703/703**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - 本轮没有 P0；P1 优先项已在第 3 节列出，P2/P3、条件项、撤销项和健康模式均已区分。
 - 下一步应是针对 P1 集合建立小型可重复 benchmark/smoke corpus，再按测量结果实施修复；不要在没有 profile 的情况下同时改动所有 P2/P3 项。

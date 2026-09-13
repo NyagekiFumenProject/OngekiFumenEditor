@@ -50,6 +50,10 @@
         <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>OngekiFumenEditor.Avalonia.Desktop</_Parameter1>
         </AssemblyAttribute>
+        <!-- Lets the perf benchmarks construct the real internal replay/drawing types instead of replicating them with stand-ins. -->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>OngekiFumenEditor.Avalonia.Benchmark</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
     <!---->
 
