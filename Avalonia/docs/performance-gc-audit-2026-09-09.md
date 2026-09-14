@@ -22,7 +22,7 @@
 ## 3. 优先处理顺序
 
 1. **先处理 P1 项**（原 21 项，PERF-RND-002 已于 2026-09-11 修复、PERF-RND-017 已于 2026-09-13 修复）：PERF-RND-001/003、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
-2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。
+2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。（该范畴内 PERF-DAT-004 / DAT-05 已于 2026-09-11 修复、PERF-DAT-009 / DAT-12 已于 2026-09-14 修复。）
 3. **P3、条件项和 dormant 项必须先用真实负载验证，不应与活动热路径混改。**
 
 ---
@@ -217,12 +217,43 @@
 - **PERF-DAT-006 / DAT-08 — P2，区间树变更触发整树重建。** `S/Base/Collections/Base/IntervalTreeWrapper.cs:40-50` 坐标变更线性 remove/add 并 dirty；`.../RangeTree/IntervalTreeNode.cs:54-105` rebuild 时递归创建 endpoint/inner/left/right lists 和 node，`Release:44-52` 只清引用。拖拽编辑时批量更新或增量维护索引，并复用 scratch。
 - **PERF-DAT-007 / DAT-10 — P2，未使用 interval cache。** `S/Base/Collections/IndividualSoflanAreaListMap.cs:12-17,70-85` 维护 `cacheTree`，但没有查询/读取调用；每个 area 仍付出 RangeValuePair/event subscription 和变更 remove/add。删除 dead cache 或接入真实查询。
 - **PERF-DAT-008 / DAT-11 — P2，默认 RecordId 分配二次复杂度。** `S/Base/Collections/ConnectableObjectList.cs:22-34` 每个负 ID start 都枚举所有 start 并求 Max；批量生成 N 个 lane 为 0+1+… 扫描。维护 max-ID/free-ID allocator。
-- **PERF-DAT-009 / DAT-12 — P2 潜在正确性项（无当前直接 caller）。** `S/Base/Collections/BulletPalleteList.cs:42-44` `this[int] => this[index]` 无限递归，任何 indexer consumer 会 stack overflow。修复 backing ordered list 或移除错误的 `IReadOnlyList` 语义；因未找到直接 caller，不把它当活动热路径。
+- **PERF-DAT-009 / DAT-12 — P2，`BulletPalleteList` 的 int 索引器无限递归（连带每次枚举都重排）。**〔**2026-09-14 已修复**，见下方「已修复项」〕`S/Base/Collections/BulletPalleteList.cs:42-44`（09-09 基线行号）`this[int] => this[index]` 无限递归，任何 indexer consumer 会 stack overflow；同处 `GetEnumerator()` 把 `palleteMap.Values` 每次枚举都重跑一遍 `OrderBy(ConvertIdToInt)`，且每个元素都跑一次含多次分配的 `ConvertIdToInt`。改为按数值 id 升序的 backing 列表，索引器/`Count`/枚举共用它。**注：** WPF 侧同文件 `OngekiFumenEditor/Base/Collections/BulletPalleteList.cs:47` 存在同一处缺陷，本轮未改（本审计范围限定 Avalonia 侧）；解析期的 `FirstOrDefault(x => x.StrID == ...)` 仍是 O(n) 线性查找，见该条的「未做/后续」。
 - **PERF-DAT-010 / DAT-13 — P2，Meter 查询重复排序/线性扫描。** `S/Base/Collections/MeterChangeList.cs:69-86` 每次枚举对已有 sorted list `OrderBy`，GetMeter/GetPrev/GetNext 再线性 Last/First。直接枚举并提供 binary predecessor/successor。
 
 ### 纠正/不单列
 
 `DAT-04` 的 Bezier scratch array 与 `PERF-SVC-002` 合并；`DAT-06` SVG recolor 的 LINQ/closure/iterator 分配仅在 `ENABLE_SVG_PREFAB_OBJECTS` 开启时相关，当前 checkout dormant，列为条件性 P3 opportunity；`DAT-09` 的 `OrderByDescending(...).FirstOrDefault()` 在现代 .NET 对 extremum 有 single-pass 优化，撤销 O(k log k) 结论。`DAT-05` 与第 4 节 `PERF-RND-009 / RND-10` 是同一处发现被同时归入两个分区（同一文件、同一函数），不重复计入修复工作量，已随 `7aa9e41e` 修复，见上一条的批注。
+
+### 已修复项
+
+> 本分区的修复条目体例与第 4 节一致：根因 → 处理 → 行为差异 → 基准 → 验证 → 未做/后续。
+
+- **PERF-DAT-009 / DAT-12 — 已修复（2026-09-14）：`BulletPalleteList` 改为按 id 有序的 backing 列表，索引器不再自递归、枚举不再重排。**
+  - **根因（静态确认）：** `S/Base/Collections/BulletPalleteList.cs:43`（09-09 基线）`public BulletPallete this[int index] => this[index];` —— 索引器无条件调用自身，没有任何终止分支，任何按下标读取都会以**不可捕获**的 `StackOverflowException` 结束进程。该类型同时公开声明实现 `IReadOnlyList<BulletPallete>`，所以这不是"未实现"，而是一个把自己伪装成已实现的炸弹：任何接收 `IReadOnlyList<BulletPallete>` 的消费者（绑定、序列化器、视图层、插件）只要按下标取值就会崩。同一文件的 `:48`（09-09 基线）是 `GetEnumerator() => palleteMap.Values.OrderBy(x => ConvertIdToInt(x.StrID)).GetEnumerator()`，**每次枚举都重新物化并排序**，且每个元素都要跑一次 `ConvertIdToInt`（`ToUpperInvariant` + `Reverse` + `Select` + `Sum`，多次分配）。
+  - **影响范围（静态确认）：** 仓储内没有 `this[int]` 的直接 caller，所以索引器这条是**潜在**崩溃而非当前故障（这正是原条目被标为「无当前直接 caller」的原因）；但**枚举重排**这条有真实 caller，且落在解析热路径上：`Parser/Ogkr/CommandParserImpl/BulletCommandParser.cs:23`、`Parser/DefaultImpl/Nyageki/CommandImpl/Objects/BulletCommandParser.cs:23` 与两个 `BellCommandParser.cs:25/:21` 对**每一条** bullet/bell 命令都执行一次 `BulletPalleteList.FirstOrDefault(x => x.StrID == ...)`，成本 = 命令数 × (n log n + n × `ConvertIdToInt`)。其余 caller：`SelectionFilterOptions.cs:488`、`EditorProjectDataUtils.cs:26,205`、`DefaultOngekiFumenFormatter.cs:267`、`DefaultNyagekiFumenFormatter.cs:180`、`StandardizeFormat.cs:80`。
+  - **处理：** 新增按 `ConvertIdToInt(StrID)` 升序维护的 `List<BulletPallete> orderedPalletes` 作为 backing 列表，`Count` / `this[int]` / `GetEnumerator()` 三者共用它，从而同时得到真正的 `IReadOnlyList<T>` 语义与免排序的枚举；插入用二分定位（`FindOrderedIndex`），顺序与旧 `OrderBy(ConvertIdToInt)` **完全等价**（注意是数值序而非字符串序）。`palleteMap` 保留，继续承担 `this[string]` 的 O(1) 查找与同 id 去重。`RemovePallete` 的退订改为作用于**真正入表**的实例，使订阅与退订严格互逆。
+  - **行为差异（已核对，无调用点依赖）：** 旧 `GetEnumerator` 因 `OrderBy` 立即物化而是**快照**语义；新实现返回 live 的 `List<T>.Enumerator`，边枚举边改会抛 `InvalidOperationException`（标准 .NET 集合语义）。已核对全部 caller（上面列出的 6 处 + 两个解析器）都是只读枚举，且唯一的两个变更入口 `OngekiFumen.cs:172,276` 不处在任何枚举体内。
+  - **基准**（新增 `benchmarks/.../BulletPalleteListAccessBenchmarks.cs`；Release / DefaultJob；旧侧按 `OrderBy` 重排建模——索引器无法真的调用，会崩）：
+
+    | 场景 | n | 原实现 | 现实现 | 时间比 | 原分配 | 现分配 |
+    |---:|---:|---:|---:|---:|---:|---:|
+    | 枚举一次 | 8 | 612.1 ns | 8.6 ns | 0.014× | 1,616 B | 0 B |
+    | 枚举一次 | 64 | 5,711 ns | 52.4 ns | 0.009× | 11,024 B | 0 B |
+    | 枚举一次 | 256 | 22,661 ns | 221.6 ns | 0.010× | 43,280 B | 0 B |
+    | 按下标走一遍 (`for i < Count`) | 8 | 4,693 ns | 6.7 ns | 0.0014× | 12,264 B | 0 B |
+    | 按下标走一遍 | 64 | 324.6 µs | 42.8 ns | 0.00013× | 700.8 KB | 0 B |
+    | 按下标走一遍 | 256 | **5.64 ms** | **209 ns** | **0.000037×** | **11.06 MB** | **0 B** |
+    | 解析期查找（n 条命令） | 8 | 5,717 ns | 291 ns | 0.05× | 13,568 B | 960 B |
+    | 解析期查找 | 64 | 338.7 µs | 11.4 µs | 0.033× | 710.7 KB | 7.7 KB |
+    | 解析期查找 | 256 | **6.00 ms** | **163.7 µs** | **0.027×** | **11.10 MB** | **30.7 KB** |
+
+    枚举与按索引两条路径的分配都归零（旧侧来自 `OrderBy` 的排序缓冲 + 每元素 `ConvertIdToInt` 的 LINQ 分配）；解析期查找只消除了重排，查找本身的 O(n) 未动，故仍留 30.7 KB。
+  - **验证：** 新增 `tests/.../Base/Collections/BulletPalleteListTests.cs` 13 项：索引器与枚举逐项同一（48 个乱序 id）、空列表/越界下标抛 `ArgumentOutOfRangeException`（旧实现此处直接爆栈）、`Count` 与枚举一致、枚举按数值序而非字符串序（`"2"` 先于 `"10"`）、与旧 `OrderBy(ConvertIdToInt)` 顺序在 120 个乱序 id 上逐项等价、200 次插入中每次插入后都校验 `Count`/索引器/枚举三者同步、空 `StrID` 依次分配 `A0`/`A1`、同实例重复添加被忽略且不重复触发事件、同 id 异实例替换旧值、删除后索引器与枚举仍同步、未知实例删除为 no-op、`this[string]` 大小写不敏感且未命中返回 null、`CollectionChanged` 动作序列。Release 全量 **716/716 通过**（原 703 + 新增 13）。
+  - **未做/后续：**
+    1. 解析期的 `FirstOrDefault(x => x.StrID == id)` 仍是 O(n) 线性查找。`this[string]` 已经是 O(1) 字典查找，但语义更宽松（大小写不敏感、未知字符映射为 0），直接替换会改变匹配行为，需先确认导出的 palette id 保证 canonical 才能换。
+    2. `cacheCurrentMaxId` 用**字符串**比较维护"最大 id"（`:114`），与枚举/插入使用的**数值**序不一致（例如 `"10"` 与 `"2"` 在两种序下相反），可能分配出与已有 id 冲突的新 id 并触发同 id 替换；属既有缺陷，本轮未动。
+    3. `OnPalletePropChanged` 是空实现，`AddPallete` 之后改 `StrID` 会同时让 `palleteMap` 与 `orderedPalletes` 的键失效；属既有缺陷，本轮未动。
+    4. WPF 侧 `OngekiFumenEditor/Base/Collections/BulletPalleteList.cs:47` 有同一处索引器自递归，未随本轮修改（本审计范围限定 Avalonia 侧），如需修复需另行评审。
 
 ---
 
@@ -481,13 +512,14 @@
 2. 需要用真实长 Hold、密集 chord、SVG、长音频、ACB/CPK、长 history、browser large download 做 allocation/CPU/heap/handle profile。
 3. 需要确认 `ENABLE_SVG_PREFAB_OBJECTS`、CPK reader 的实际发布可达性、DCK 清单未深读区间的 runtime 版本行为，以及 storage provider 的 file-level bookmark/atomic write contract。
 4. ACB-AUDIO 深层第三方实现的实际 caller/cadence、Opus/NWaves 数组大小和音质/数值契约必须在改动前用回归样本验证。
-5. `RND-018` marker 透明问题、`DAT-012` indexer recursion、`PRS-001`/`AUD-005`/`DAT-001` 等 correctness/infinite-loop 风险应先补最小回归用例，再做池化或并行化。
+5. `RND-018` marker 透明问题、`PRS-001`/`AUD-005`/`DAT-001` 等 correctness/infinite-loop 风险应先补最小回归用例，再做池化或并行化。（`DAT-012` 的 indexer recursion 已按此路径处理：2026-09-14 补了 13 项回归测试并修复，见第 6 节「已修复项」。）
 
 ## 21. 交付状态
 
 - 报告已按分区写入本文件；审核轮次（2026-09-09）未修改业务源代码。
 - **2026-09-11 后续修复（共 8 项，均附基准对比与回归验证，见第 4 节「已修复项」）：** PERF-RND-002 / RND-02（Hold 顶点裁剪改索引窗口 + 池化裁剪列表）；PERF-RND-004 / RND-05（保留前端帧，释放推迟到 Swap/Remove）；PERF-RND-005 / RND-06（非批量纹理绘制的 `OnBegin/OnEnd` 与 `SKPaint` 提到实例循环外）；PERF-RND-006 / RND-07（`LineVertex`/`VertexDash` 改 `readonly record struct`）；PERF-RND-009 / RND-10（帧内缓存墙轨边界描述符 + 无分配子节点区间查询，即第 6 节的 PERF-DAT-004 / DAT-05）；PERF-RND-011 / RND-12（线绘制切换为 WPF 终态的池化实现）；PERF-RND-012 / RND-13（replay 接入 render context 上的真实 monitor）；PERF-RND-016 / RND-19（监视器计时单位与空样本 NRE）。其余发现状态不变。
 - **2026-09-12/13 后续修复：** PERF-RND-013 / RND-16（预览拍线改用当帧 `DrawingTargetContext`，不再读 design-only 的 `RectInDesignMode`）、PERF-RND-014 / RND-17（静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`）、PERF-RND-017 / RND-20（replay 按 render context 缓存，`canvas`/帧状态移出构造函数并改为逐帧 `BeginFrame`/`EndFrame`）；另有一项非审计项的正确性修复：多线程渲染下裁判线高度抖动（`DrawingTargetContext` 帧快照 `CurrentTime`/`CurrentTGrid`）。均附基准与回归验证，见第 4 节「已修复项」。Release 全量 **703/703**、Desktop 测试项目 148/148 通过；其余发现状态不变。
+- **2026-09-14 后续修复：** PERF-DAT-009 / DAT-12（`BulletPalleteList` 的 int 索引器自递归 → 改为按 id 有序的 backing 列表；顺带消除每次枚举的 `OrderBy` 重排与 `ConvertIdToInt` 分配。按下标走一遍 256 项 5.64 ms / 11.06 MB → 209 ns / 0 B；解析期逐命令查找 6.00 ms / 11.10 MB → 163.7 µs / 30.7 KB）。附基准与 13 项回归测试，见第 6 节「已修复项」。Release 全量 **716/716**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - **2026-09-14 文档校正（无代码改动）：** 2026-09-11 那条此前只列了 3 项（004/005/006），现补全当日的 8 项清单；第 6 节的 PERF-DAT-004 / DAT-05 补上已修复批注、重复归区说明与残留（samples×lanes）备注；第 20 节「重复为 0」标明该去重只按标识符；第 6 节「纠正/不单列」补记 DAT-05 与 PERF-RND-009 / RND-10 为同一处发现。
 - 本轮没有 P0；P1 优先项已在第 3 节列出，P2/P3、条件项、撤销项和健康模式均已区分。
 - 下一步应是针对 P1 集合建立小型可重复 benchmark/smoke corpus，再按测量结果实施修复；不要在没有 profile 的情况下同时改动所有 P2/P3 项。

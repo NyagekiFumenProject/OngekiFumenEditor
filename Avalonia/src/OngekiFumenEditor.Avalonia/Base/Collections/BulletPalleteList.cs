@@ -36,17 +36,45 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 			return str.ToUpperInvariant();
 		}
 
-		private Dictionary<int, BulletPallete> palleteMap = new();
+		private readonly Dictionary<int, BulletPallete> palleteMap = new();
+
+		/// <summary>
+		/// 与 <see cref="GetEnumerator"/> 暴露顺序一致的 backing 列表：按 <see cref="ConvertIdToInt"/> 升序。
+		/// 索引器与枚举都走它，使 <see cref="Count"/><c>this[int]</c>/枚举三者互相自洽（真正的
+		/// <see cref="IReadOnlyList{T}"/> 语义），并免掉原先每次枚举都 <c>OrderBy</c> 一遍的排序与分配。
+		/// </summary>
+		private readonly List<BulletPallete> orderedPalletes = new();
+
 		private string cacheCurrentMaxId = null;
 
-		public int Count => palleteMap.Count;
-		public BulletPallete this[int index] => this[index];
+		public int Count => orderedPalletes.Count;
+		public BulletPallete this[int index] => orderedPalletes[index];
 		public BulletPallete this[string strId] => palleteMap.TryGetValue(ConvertIdToInt(strId), out var r) ? r : default;
 
 		public event NotifyCollectionChangedEventHandler CollectionChanged;
 
-		public IEnumerator<BulletPallete> GetEnumerator() => palleteMap.Values.OrderBy(x => ConvertIdToInt(x.StrID)).GetEnumerator();
+		public IEnumerator<BulletPallete> GetEnumerator() => orderedPalletes.GetEnumerator();
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+		/// <summary>
+		/// 按数值 id 在 backing 列表里定位插入点。顺序与旧实现
+		/// <c>palleteMap.Values.OrderBy(x =&gt; ConvertIdToInt(x.StrID))</c> 完全一致
+		/// （注意是按 <see cref="ConvertIdToInt"/> 的数值序，不是字符串序）。
+		/// </summary>
+		private int FindOrderedIndex(int id)
+		{
+			var lo = 0;
+			var hi = orderedPalletes.Count;
+			while (lo < hi)
+			{
+				var mid = lo + ((hi - lo) >> 1);
+				if (ConvertIdToInt(orderedPalletes[mid].StrID) < id)
+					lo = mid + 1;
+				else
+					hi = mid;
+			}
+			return lo;
+		}
 
 		public void AddPallete(BulletPallete pallete)
 		{
@@ -78,7 +106,9 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
 			if (addable)
 			{
-				palleteMap[ConvertIdToInt(pallete.StrID)] = pallete;
+				var id = ConvertIdToInt(pallete.StrID);
+				palleteMap[id] = pallete;
+				orderedPalletes.Insert(FindOrderedIndex(id), pallete);
 
 				pallete.PropertyChanged += OnPalletePropChanged;
 				cacheCurrentMaxId = Comparer<string>.Default.Compare(pallete.StrID, cacheCurrentMaxId) > 0 ? pallete.StrID : cacheCurrentMaxId;
@@ -89,9 +119,12 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
 		public void RemovePallete(BulletPallete pallete)
 		{
-			if (palleteMap.Remove(ConvertIdToInt(pallete.StrID)))
+			if (palleteMap.Remove(ConvertIdToInt(pallete.StrID), out var removed))
 			{
-				pallete.PropertyChanged -= OnPalletePropChanged;
+				// 退订与移除都用真正入表的那一个实例（AddPallete 订阅的就是它），
+				// 保证订阅与退订严格互逆；调用方传入同 id 的另一个实例时也不会漏退订。
+				orderedPalletes.Remove(removed);
+				removed.PropertyChanged -= OnPalletePropChanged;
 				CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
 			}
 		}
