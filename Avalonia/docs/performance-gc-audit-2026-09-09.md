@@ -212,7 +212,7 @@
 - **PERF-DAT-001 / DAT-01 — P1，零步/反向无限循环。** `S/Base/EditorObjects/InterpolatableSoflan.cs:32-35` 接受任意整数，`:109-112` 用 `1920/count` 的截断步长推进。count=0 可除零；count<0 向反方向走；count>1920 步长为 0，循环永不接近终点。校验 `1..1920`，并对持久化/UI 输入做防御性拒绝。
 - **PERF-DAT-002 / DAT-02 — P1，下界错误和 dense-key 扫描。** `S/Base/Collections/Base/SortableCollection.cs:71-83` 用返回“最后一个相等 key”的 `BinarySearchBy` 同时作 min/max；lower bound 会丢掉同 TGrid 的更早对象，且 helper 会扫描整段相等 key。实现独立 lower_bound/upper_bound。
 - **PERF-DAT-003 / DAT-03 — P2，Hold hit-effect 重放历史 tick。** `S/Base/OngekiObjects/Hold.cs:146-169` 从 Hold 起点逐 tick 推到 `minTGrid`；调用 `S/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawHitObjectEffectHelper.cs:118-124` 在 preview effect 开启时每帧触发。按 BPM segment 算首个可见 tick 或缓存 tick positions。
-- **PERF-DAT-004 / DAT-05 — P2，墙 lane 查找重复线性化。** `S/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs:308-337,372` 先 O(children) `IsPathVaild`，再 binary search，再 `GetRange` 分配；`DrawPlayableAreaHelper.cs:194-214,458-477,504-505` 对每个 sample 又扫描/验证。缓存有效性和 index/range view。
+- **PERF-DAT-004 / DAT-05 — P2，墙 lane 查找重复线性化。**〔**2026-09-11 已修复**；与第 4 节 **PERF-RND-009 / RND-10** 是同一处发现被同时归入 RND/DAT 两个分区（同一文件、同一函数），根因/处理/基准/验证见第 4 节「已修复项」，本节行号为 09-09 修复前基线〕`S/Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs:308-337,372` 先 O(children) `IsPathVaild`，再 binary search，再 `GetRange` 分配；`DrawPlayableAreaHelper.cs:194-214,458-477,504-505` 对每个 sample 又扫描/验证。缓存有效性和 index/range view。**残留：**`QueryBoundaryXGridUnit` 仍对每个采样点线性扫过全部候选墙轨（samples×lanes），见第 4 节该条的「未做/后续」。
 - **PERF-DAT-005 / DAT-07 — P2，BPM“缓存”仍遍历全表。** `S/Base/Collections/BpmList.cs:148-159` 每次 `GetCachedAllBpmUniformPositionList` 都对所有 BPM 做 `Aggregate`；调用 `S/Modules/FumenVisualEditor/TGridCalculator.cs:26-34,41-53` 广泛使用。用 monotonic dirty/version，命中时不重算。
 - **PERF-DAT-006 / DAT-08 — P2，区间树变更触发整树重建。** `S/Base/Collections/Base/IntervalTreeWrapper.cs:40-50` 坐标变更线性 remove/add 并 dirty；`.../RangeTree/IntervalTreeNode.cs:54-105` rebuild 时递归创建 endpoint/inner/left/right lists 和 node，`Release:44-52` 只清引用。拖拽编辑时批量更新或增量维护索引，并复用 scratch。
 - **PERF-DAT-007 / DAT-10 — P2，未使用 interval cache。** `S/Base/Collections/IndividualSoflanAreaListMap.cs:12-17,70-85` 维护 `cacheTree`，但没有查询/读取调用；每个 area 仍付出 RangeValuePair/event subscription 和变更 remove/add。删除 dead cache 或接入真实查询。
@@ -222,7 +222,7 @@
 
 ### 纠正/不单列
 
-`DAT-04` 的 Bezier scratch array 与 `PERF-SVC-002` 合并；`DAT-06` SVG recolor 的 LINQ/closure/iterator 分配仅在 `ENABLE_SVG_PREFAB_OBJECTS` 开启时相关，当前 checkout dormant，列为条件性 P3 opportunity；`DAT-09` 的 `OrderByDescending(...).FirstOrDefault()` 在现代 .NET 对 extremum 有 single-pass 优化，撤销 O(k log k) 结论。
+`DAT-04` 的 Bezier scratch array 与 `PERF-SVC-002` 合并；`DAT-06` SVG recolor 的 LINQ/closure/iterator 分配仅在 `ENABLE_SVG_PREFAB_OBJECTS` 开启时相关，当前 checkout dormant，列为条件性 P3 opportunity；`DAT-09` 的 `OrderByDescending(...).FirstOrDefault()` 在现代 .NET 对 extremum 有 single-pass 优化，撤销 O(k log k) 结论。`DAT-05` 与第 4 节 `PERF-RND-009 / RND-10` 是同一处发现被同时归入两个分区（同一文件、同一函数），不重复计入修复工作量，已随 `7aa9e41e` 修复，见上一条的批注。
 
 ---
 
@@ -462,7 +462,7 @@
 
 - 对关键 P1/P2 路径重新读取实现和调用链，核对了上述 file:line 锚点；各分区 reviewer 也按各自 manifest 做了 targeted full-context read。
 - 对 16 份冻结清单重新对账：共 2,878 条路径、2,878 个唯一文件，交叉分区重复为 0、缺失路径为 0；按文件实际逻辑行复算为 319,534 行。
-- 保留发现共 177 项，唯一标识符也是 177 个，重复为 0；每项均有优先级，其中 P1 21 项、P2 140 项、P3 16 项。
+- 保留发现共 177 项，唯一标识符也是 177 个，重复为 0（**注：该去重只按标识符**；2026-09-14 复核发现至少 1 处**跨分区语义重复**——`PERF-DAT-004 / DAT-05` 与 `PERF-RND-009 / RND-10` 描述的是同一处代码的同一处发现，已在第 6 节该项批注中统一，故实际独立发现数少于 177）；每项均有优先级，其中 P1 21 项、P2 140 项、P3 16 项。
 - 对低采样率边界做了独立算术探针：`int(sampleRate * 0.001 * channels)` 在 `499Hz × 2ch` 为 `0`，支持 PERF-AUD-005 的零步风险；这不是应用运行时测试。
 - 对生成器、Parser、BrowserAudioWorklet、ACB 容器的条件编译/项目引用边界做了交叉检查，明确标注 dormant/conditional 项。
 - 没有将一条失败的结构化 agent yield 当作代码证据；所有报告项均来自可重读的源码锚点和已发送的 reviewer 结论。
@@ -486,7 +486,8 @@
 ## 21. 交付状态
 
 - 报告已按分区写入本文件；审核轮次（2026-09-09）未修改业务源代码。
-- **2026-09-11 后续修复：** PERF-RND-004 / RND-05 已按“保留前端帧 + Swap/Remove 时释放”处理；PERF-RND-005 / RND-06 已把非批量纹理绘制的 `OnBegin/OnEnd` 与 `SKPaint` 提到实例循环外；PERF-RND-006 / RND-07 已把 `LineVertex`/`VertexDash` 改为 `readonly record struct`。三项均附基准对比与回归验证，见第 4 节「已修复项」。其余发现状态不变。
+- **2026-09-11 后续修复（共 8 项，均附基准对比与回归验证，见第 4 节「已修复项」）：** PERF-RND-002 / RND-02（Hold 顶点裁剪改索引窗口 + 池化裁剪列表）；PERF-RND-004 / RND-05（保留前端帧，释放推迟到 Swap/Remove）；PERF-RND-005 / RND-06（非批量纹理绘制的 `OnBegin/OnEnd` 与 `SKPaint` 提到实例循环外）；PERF-RND-006 / RND-07（`LineVertex`/`VertexDash` 改 `readonly record struct`）；PERF-RND-009 / RND-10（帧内缓存墙轨边界描述符 + 无分配子节点区间查询，即第 6 节的 PERF-DAT-004 / DAT-05）；PERF-RND-011 / RND-12（线绘制切换为 WPF 终态的池化实现）；PERF-RND-012 / RND-13（replay 接入 render context 上的真实 monitor）；PERF-RND-016 / RND-19（监视器计时单位与空样本 NRE）。其余发现状态不变。
 - **2026-09-12/13 后续修复：** PERF-RND-013 / RND-16（预览拍线改用当帧 `DrawingTargetContext`，不再读 design-only 的 `RectInDesignMode`）、PERF-RND-014 / RND-17（静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`）、PERF-RND-017 / RND-20（replay 按 render context 缓存，`canvas`/帧状态移出构造函数并改为逐帧 `BeginFrame`/`EndFrame`）；另有一项非审计项的正确性修复：多线程渲染下裁判线高度抖动（`DrawingTargetContext` 帧快照 `CurrentTime`/`CurrentTGrid`）。均附基准与回归验证，见第 4 节「已修复项」。Release 全量 **703/703**、Desktop 测试项目 148/148 通过；其余发现状态不变。
+- **2026-09-14 文档校正（无代码改动）：** 2026-09-11 那条此前只列了 3 项（004/005/006），现补全当日的 8 项清单；第 6 节的 PERF-DAT-004 / DAT-05 补上已修复批注、重复归区说明与残留（samples×lanes）备注；第 20 节「重复为 0」标明该去重只按标识符；第 6 节「纠正/不单列」补记 DAT-05 与 PERF-RND-009 / RND-10 为同一处发现。
 - 本轮没有 P0；P1 优先项已在第 3 节列出，P2/P3、条件项、撤销项和健康模式均已区分。
 - 下一步应是针对 P1 集合建立小型可重复 benchmark/smoke corpus，再按测量结果实施修复；不要在没有 profile 的情况下同时改动所有 P2/P3 项。
