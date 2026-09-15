@@ -186,6 +186,8 @@ public sealed class BatchModeInteractionTests
         var position = new Point(100, 100);
         editor.RegisterSelectableObject(tap, new Vector2(100, 100), new Vector2(20, 20));
         editor.RegisterSelectableObject(bell, new Vector2(100, 100), new Vector2(20, 20));
+        // 命中表现在是"帧末发布"的快照，命中查询前需要显式提交一帧
+        editor.CommitHitObjects();
 
         try
         {

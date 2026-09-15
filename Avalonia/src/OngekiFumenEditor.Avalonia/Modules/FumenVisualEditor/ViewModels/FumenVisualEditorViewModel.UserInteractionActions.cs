@@ -21,7 +21,6 @@ using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
-using System.Collections.Immutable;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Gekimini.Avalonia.Framework.Commands;
@@ -29,7 +28,6 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Commands.BatchModeToggle;
 using OngekiFumenEditor.Avalonia.Modules.FumenSoflanGroupListViewer;
-using System.Collections.Concurrent;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
 {
@@ -125,8 +123,30 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
             get => currentCursorPosition;
             set => SetProperty(ref currentCursorPosition, value);
         }
-        // Rendering can run on Avalonia's compositor callback while pointer input is handled on the UI thread.
-        private readonly ConcurrentDictionary<OngekiObjectBase, Rect> hits = new();
+        // Rendering runs on Avalonia's compositor callback while pointer input is handled on the UI thread,
+        // so the hit map is double-buffered instead of shared:
+        //   - the render thread builds into hitBuildBuffer (a plain Dictionary whose backing arrays survive
+        //     Clear(), so a warmed-up frame allocates nothing) and also de-duplicates by object for free;
+        //   - at the end of a successfully drawn frame it is frozen into an immutable, Id-sorted snapshot
+        //     and published with a single Volatile.Write.
+        // The UI thread only ever reads the published snapshot, so it can never observe a half-built frame
+        // (the previous ConcurrentDictionary was cleared and refilled mid-frame, which made clicks during
+        // that window silently miss).
+        private readonly Dictionary<OngekiObjectBase, Rect> hitBuildBuffer = new();
+        private HitEntry[] publishedHits = Array.Empty<HitEntry>();
+
+        private readonly struct HitEntry
+        {
+            public HitEntry(OngekiObjectBase obj, Rect rect)
+            {
+                Object = obj;
+                Rect = rect;
+            }
+
+            public readonly OngekiObjectBase Object;
+            public readonly Rect Rect;
+        }
+
         private OngekiObjectBase mouseDownNextHitObject;
         private Point mouseCanvasStartPosition;
         private double startXOffset;
@@ -170,9 +190,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         public Toast Toast => View?.FindControl<Toast>("mainToast");
 
         public ObjectInteractiveManager InteractiveManager { get; private set; } = new();
-
-        public ImmutableDictionary<OngekiObjectBase, Rect> GetHits() =>
-            hits.ToArray().ToImmutableDictionary(x => x.Key, x => x.Value);
 
         #region provide extra MenuItem by plugins
 
@@ -1805,21 +1822,53 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size)
         {
-            //centerPos is view-relative during rendering; hits are queried in world coordinates
+            //centerPos is view-relative during rendering; hits are queried in world coordinates.
+            //ViewRelativeOriginY is per soflan group, so it must be resolved per registration (not hoisted
+            //to the frame): each group has its own world rect / scroll offset.
             var worldCenterY = centerPos.Y + (CurrentDrawingTargetContext?.ViewRelativeOriginY ?? 0);
-            hits[obj] = new Rect(centerPos.X - size.X / 2, worldCenterY - size.Y / 2, size.X, size.Y);
+            hitBuildBuffer[obj] = new Rect(centerPos.X - size.X / 2, worldCenterY - size.Y / 2, size.X, size.Y);
         }
 
-        internal void ClearHitObjects() => hits.Clear();
+        /// <summary>帧首清空构建缓冲（渲染线程）。已发布的快照不受影响。</summary>
+        internal void ClearHitObjects() => hitBuildBuffer.Clear();
+
+        /// <summary>
+        /// 帧末发布：把本帧登记的命中矩形冻结成按 Id 升序的不可变快照，一次性交给 UI 线程读取。
+        /// 只在正常画完一帧时调用；跳帧（限帧）或中途异常都不发布，保留上一份完整快照。
+        /// </summary>
+        internal void CommitHitObjects()
+        {
+            var count = hitBuildBuffer.Count;
+            if (count == 0)
+            {
+                Volatile.Write(ref publishedHits, Array.Empty<HitEntry>());
+                return;
+            }
+
+            var snapshot = new HitEntry[count];
+            var i = 0;
+            foreach (var pair in hitBuildBuffer)
+                snapshot[i++] = new HitEntry(pair.Key, pair.Value);
+
+            // 排序在发布时做一次，查询侧就不必再 OrderBy（旧实现每次查询都要排序+分配）
+            Array.Sort(snapshot, static (a, b) => a.Object.Id.CompareTo(b.Object.Id));
+
+            Volatile.Write(ref publishedHits, snapshot);
+            hitBuildBuffer.Clear();
+        }
 
         internal List<OngekiObjectBase> QueryHitObjects(Point position)
         {
-            // Materialize before filtering so a concurrent render frame cannot invalidate the input query.
-            return hits.ToArray()
-                .Where(x => x.Value.Contains(position))
-                .Select(x => x.Key)
-                .OrderBy(x => x.Id)
-                .ToList();
+            // 快照不可变且已按 Id 升序，这里只做一次线性扫描，不再 ToArray/Where/Select/OrderBy
+            var snapshot = Volatile.Read(ref publishedHits);
+            var result = new List<OngekiObjectBase>(4);
+            foreach (var entry in snapshot)
+            {
+                if (entry.Rect.Contains(position))
+                    result.Add(entry.Object);
+            }
+
+            return result;
         }
 
         public void ScrollPage(int page)

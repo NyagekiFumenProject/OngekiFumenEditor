@@ -347,7 +347,11 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         var fumen = EditorContext.Fumen;
         if (fumen is null)
+        {
+            // 没有谱面时命中表必须清空（与旧行为一致）：缓冲已在上面 Clear 过，这里直接发布空快照
+            CommitHitObjects();
             goto End;
+        }
 
         //计算可以显示的TGrid范围以及像素范围
 
@@ -676,6 +680,11 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             drawingCollectionDisposables.Dispose();
             drawMap.Clear();
         }
+
+        // Freeze this frame's registered hit rects into an immutable snapshot for the UI thread.
+        // Placed on the success path only: a frame skipped by the FPS gate (goto End) or aborted by an
+        // exception keeps the previous complete snapshot instead of publishing a partial/empty one.
+        CommitHitObjects();
 
     End:
         builder?.Dispose();

@@ -381,6 +381,9 @@ public sealed class EditorUiRegressionTests
                 foreach (var obj in objects)
                     editor.RegisterSelectableObject(obj, Vector2.Zero, new Vector2(16, 16));
 
+                // 帧末发布快照：构建中的帧对 UI 线程不可见
+                editor.CommitHitObjects();
+
                 Thread.Yield();
             }
         });
@@ -391,6 +394,8 @@ public sealed class EditorUiRegressionTests
         {
             var result = editor.QueryHitObjects(new global::Avalonia.Point(0, 0));
             Assert.True(result.SequenceEqual(result.OrderBy(x => x.Id)));
+            // 快照语义：只能读到“完整的一帧”或“还没发布”，绝不会读到半成品
+            Assert.True(result.Count == 0 || result.Count == objects.Length);
             queryCount++;
         } while (!renderTask.IsCompleted);
 

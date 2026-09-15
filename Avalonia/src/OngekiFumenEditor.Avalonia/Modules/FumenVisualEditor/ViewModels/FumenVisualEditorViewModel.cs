@@ -587,7 +587,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IPersis
         Setting.Dispose();
         UndoRedoManager.Clear();
         PlayerLocationRecorder.Clear();
-        hits.Clear();
+        hitBuildBuffer.Clear();
+        publishedHits = Array.Empty<HitEntry>();
         cacheObjectAudioTime.Clear();
         InteractiveManager = null;
         View = null;
