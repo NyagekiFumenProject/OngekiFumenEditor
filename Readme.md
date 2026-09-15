@@ -4,9 +4,11 @@
 ## 简介
 ![image](https://github.com/NyagekiFumenProject/OngekiFumenEditor/assets/7549173/a495c5a2-0d6b-4995-8730-e5ee4e10b56a)
 
-## 在线网页版体验(Work in Progress)
-[**Cloudflare Page(正式，采用多线程)**](https://ongeki-fumen-editor.pages.dev/)<br/>
-[Github Page(备用，禁止多线程)](https://nyagekifumenproject.github.io/OngekiFumenEditor/)
+## 下载
+[**正式版(推荐)**](https://next.nageki-net.com/fumen/editor/get)<br/><br/>
+以下重构版还在开发中(Work in Progress):<br/>
+[Cloudflare Page(采用多线程)](https://ongeki-fumen-editor.pages.dev/)<br/>
+[Github Page(禁止多线程)](https://nyagekifumenproject.github.io/OngekiFumenEditor/)
 
 ## 编译&下载&Wiki
 [![Build Program](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml/badge.svg)](https://github.com/NyagekiFumenProject/OngekiFumenEditor/actions/workflows/BuildProgram.yml)<br/>
