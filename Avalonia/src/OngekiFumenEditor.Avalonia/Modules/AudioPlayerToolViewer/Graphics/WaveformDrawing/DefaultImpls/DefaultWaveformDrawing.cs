@@ -327,11 +327,17 @@ public class DefaultWaveformDrawing : CommonWaveformDrawingBase
 
     private void DrawOverlayText(IDrawCommandListBuilder builder, WaveformViewport viewport, string currentTimeText)
     {
+        // 文字与波形/拍线/游标共用同一套坐标：原点在视口中心、y 轴朝上，±Height/2 就是上下边界。
+        // 所以这里给的是居中坐标 —— 不能再叠加 Width/2，纵向也不能用自顶向下的像素值。
+        // origin 取 (0, 0.5)：pos 即文本框左边中点，与编辑器其它左对齐标签同一口径。
+        var bottomMiddleY = -viewport.Height / 2 + 9f;
+        var topMiddleY = viewport.Height / 2 - 10f;
+
         //绘制提示
         foreach (var (x, text) in cachedPostDrawList)
-            builder.DrawString(text, new Vector2(x + viewport.Width / 2, viewport.Height - 4), Vector2.One, 15, 0, IndirectorColor, new Vector2(0, 0), IStringDrawing.StringStyle.Normal, default);
+            builder.DrawString(text, new Vector2(x, bottomMiddleY), Vector2.One, 15, 0, IndirectorColor, new Vector2(0, 0.5f), IStringDrawing.StringStyle.Normal, default);
 
         if (!string.IsNullOrEmpty(currentTimeText))
-            builder.DrawString(currentTimeText, new Vector2(viewport.CurrentTimeX + viewport.Width / 2 + 4, 16), Vector2.One, 15, 0, IndirectorColor, new Vector2(0, 0), IStringDrawing.StringStyle.Normal, default);
+            builder.DrawString(currentTimeText, new Vector2(viewport.CurrentTimeX + 4, topMiddleY), Vector2.One, 15, 0, IndirectorColor, new Vector2(0, 0.5f), IStringDrawing.StringStyle.Normal, default);
     }
 }
