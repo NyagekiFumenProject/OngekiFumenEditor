@@ -103,6 +103,52 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
             return minIndex;
         }
 
+        /// <summary>
+        /// 返回第一个排序键 &gt;= <paramref name="key"/> 的元素下标。若所有元素的键都 &lt; <paramref name="key"/>，
+        /// 则返回 <see cref="Count"/>。二分查找，O(log n)。
+        /// </summary>
+        public int LowerBoundIndex(X key)
+        {
+#if DEBUG
+            if (IsBatching)
+                throw new Exception("Collection is in batching....");
+#endif
+            var lo = 0;
+            var hi = items.Count;
+            while (lo < hi)
+            {
+                var mid = lo + ((hi - lo) >> 1);
+                if (sortKeySelector(items[mid]).CompareTo(key) < 0)
+                    lo = mid + 1;
+                else
+                    hi = mid;
+            }
+            return lo;
+        }
+
+        /// <summary>
+        /// 返回第一个排序键 &gt; <paramref name="key"/> 的元素下标。若所有元素的键都 &lt;= <paramref name="key"/>，
+        /// 则返回 <see cref="Count"/>。二分查找，O(log n)。
+        /// </summary>
+        public int UpperBoundIndex(X key)
+        {
+#if DEBUG
+            if (IsBatching)
+                throw new Exception("Collection is in batching....");
+#endif
+            var lo = 0;
+            var hi = items.Count;
+            while (lo < hi)
+            {
+                var mid = lo + ((hi - lo) >> 1);
+                if (sortKeySelector(items[mid]).CompareTo(key) <= 0)
+                    lo = mid + 1;
+                else
+                    hi = mid;
+            }
+            return lo;
+        }
+
         public void Clear()
         {
             items.Clear();

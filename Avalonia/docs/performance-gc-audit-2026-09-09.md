@@ -22,7 +22,7 @@
 ## 3. 优先处理顺序
 
 1. **先处理 P1 项**（原 21 项，PERF-RND-002 已于 2026-09-11 修复、PERF-RND-017 已于 2026-09-13 修复）：PERF-RND-001/003、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
-2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。（该范畴内 PERF-DAT-004 / DAT-05 已于 2026-09-11 修复、PERF-DAT-009 / DAT-12 已于 2026-09-14 修复。）
+2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。（该范畴内 PERF-DAT-004 / DAT-05 已于 2026-09-11 修复、PERF-DAT-009 / DAT-12 已于 2026-09-14 修复、PERF-DAT-010 / DAT-13 已于 2026-09-16 修复。）
 3. **P3、条件项和 dormant 项必须先用真实负载验证，不应与活动热路径混改。**
 
 ---
@@ -218,7 +218,7 @@
 - **PERF-DAT-007 / DAT-10 — P2，未使用 interval cache。** `S/Base/Collections/IndividualSoflanAreaListMap.cs:12-17,70-85` 维护 `cacheTree`，但没有查询/读取调用；每个 area 仍付出 RangeValuePair/event subscription 和变更 remove/add。删除 dead cache 或接入真实查询。
 - **PERF-DAT-008 / DAT-11 — P2，默认 RecordId 分配二次复杂度。** `S/Base/Collections/ConnectableObjectList.cs:22-34` 每个负 ID start 都枚举所有 start 并求 Max；批量生成 N 个 lane 为 0+1+… 扫描。维护 max-ID/free-ID allocator。
 - **PERF-DAT-009 / DAT-12 — P2，`BulletPalleteList` 的 int 索引器无限递归（连带每次枚举都重排）。**〔**2026-09-14 已修复**，见下方「已修复项」〕`S/Base/Collections/BulletPalleteList.cs:42-44`（09-09 基线行号）`this[int] => this[index]` 无限递归，任何 indexer consumer 会 stack overflow；同处 `GetEnumerator()` 把 `palleteMap.Values` 每次枚举都重跑一遍 `OrderBy(ConvertIdToInt)`，且每个元素都跑一次含多次分配的 `ConvertIdToInt`。改为按数值 id 升序的 backing 列表，索引器/`Count`/枚举共用它。**注：** WPF 侧同文件 `OngekiFumenEditor/Base/Collections/BulletPalleteList.cs:47` 存在同一处缺陷，本轮未改（本审计范围限定 Avalonia 侧）；解析期的 `FirstOrDefault(x => x.StrID == ...)` 仍是 O(n) 线性查找，见该条的「未做/后续」。
-- **PERF-DAT-010 / DAT-13 — P2，Meter 查询重复排序/线性扫描。** `S/Base/Collections/MeterChangeList.cs:69-86` 每次枚举对已有 sorted list `OrderBy`，GetMeter/GetPrev/GetNext 再线性 Last/First。直接枚举并提供 binary predecessor/successor。
+- **PERF-DAT-010 / DAT-13 — P2，Meter 查询重复排序/线性扫描。**〔**2026-09-16 已修复**，见下方「已修复项」〕`S/Base/Collections/MeterChangeList.cs:69-86`（09-09 基线行号）每次枚举对已有 sorted list `OrderBy`，GetMeter/GetPrev/GetNext 再线性 Last/First。直接枚举并提供 binary predecessor/successor，已照此修复。**注：** 实际有 caller 的是「枚举重排」（经 `GetAllDisplayableObjects` 的 `.Concat(MeterChanges.Skip(1))` 放大到交互/检查/格式化诸路径）与 `GetMeter`（声音重建里**逐 Hold** 调用）；`GetPrevMeter`/`GetNextMeter` 在 Avalonia/src 内没有 caller，属潜在 API 缺陷；WPF 侧同文件存在同一处缺陷，本轮未改（本审计范围限定 Avalonia 侧）。
 
 ### 纠正/不单列
 
@@ -254,6 +254,37 @@
     2. `cacheCurrentMaxId` 用**字符串**比较维护"最大 id"（`:114`），与枚举/插入使用的**数值**序不一致（例如 `"10"` 与 `"2"` 在两种序下相反），可能分配出与已有 id 冲突的新 id 并触发同 id 替换；属既有缺陷，本轮未动。
     3. `OnPalletePropChanged` 是空实现，`AddPallete` 之后改 `StrID` 会同时让 `palleteMap` 与 `orderedPalletes` 的键失效；属既有缺陷，本轮未动。
     4. WPF 侧 `OngekiFumenEditor/Base/Collections/BulletPalleteList.cs:47` 有同一处索引器自递归，未随本轮修改（本审计范围限定 Avalonia 侧），如需修复需另行评审。
+
+- **PERF-DAT-010 / DAT-13 — 已修复（2026-09-16）：`MeterChangeList` 枚举不再重排，`GetMeter`/`GetPrevMeter`/`GetNextMeter` 改为对已升序 backing 的二分前驱/后继。**
+  - **根因（静态确认）：** 两处成本叠在一起。①`S/Base/Collections/MeterChangeList.cs:72`（09-09 基线）的 `GetEnumerator()` 是 `yield return firstMeter; foreach (var item in changedMeterList.OrderBy(x => x.TGrid))`，而 `changedMeterList` 是 `TGridSortList<MeterChange>`（即 `SortableCollection<MeterChange, TGrid>`，`Add` 用二分插入维持升序），所以这个 `OrderBy` **100% 冗余**，却让每次枚举都重新物化并全量排序，还要分配 `OrderedEnumerable` 与排序缓冲；枚举器是惰性的，重排成本在**每次**枚举时被反复支付。②`:78/:82/:86` 的 `GetMeter`/`GetPrevMeter`/`GetNextMeter` 分别写成 `this.LastOrDefault(m => m.TGrid <= time)` / `LastOrDefault(m => m.TGrid < time)` / `FirstOrDefault(m => time < m.TGrid)`；`MeterChangeList` 没有实现 `IList<T>`，`Enumerable` 会走非列表路径，于是**每次调用都先完整枚举一遍（含①的重排）再线性扫描**。`FirstOrDefault` 那条虽然能提前命中，但 `OrderBy` 是迭代器的第一步，必须先排完整个序列才可能吐出首元素——**早退逃不掉排序**。③该类型本来已具备升序结构（`SortableCollection` 提供 `BinarySearchBy`/`BinaryFindLastIndexByKey`/`this[int]`），但所有查询都绕开结构走 `IEnumerable` 面，而那里的工具只有 `OrderBy` 与线性谓词。
+  - **影响范围（静态确认）：** 枚举重排这条有真实且广泛的 caller——`Base/OngekiFumen.cs:395` 的 `GetAllDisplayableObjects(min,max)` 里 `.Concat(MeterChanges.Skip(1))` 使**每次**调用都重排一次 meter 表，而它的消费者包括 `FumenVisualEditorViewModel.UserInteractionActions.cs` 的 8 处（`:118` 选中项、`:215/:227` 全选/反选、`:528/:665` 恢复/受影响对象、`:877`、`:1135`、`:2132` 命中测试，多为逐指针事件或逐帧）、`SelectionArea.cs:88`、4 个 checker 规则（`NotInterpolatedCurveCheckRule.cs:36`、`ColorIdCheckRule.cs:40`、`ColorfulLaneBrightnessCheckRule.cs:40`、`InvalidConnectablePathCheckRule.cs:34`）、`ConnectableObjectBase.cs:66`、`ConnectableObjectInteractiveAction.cs:66`、`AudioAdjustWindowViewModel.cs:192`、`SvgCommandLineHandler.cs:88`、`StandardizeFormat.cs:148`、`DefaultFumenSoundPlayer.cs:212`；两个 formatter（`DefaultOngekiFumenFormatter.cs:316`、`DefaultNyagekiFumenFormatter.cs:209`）还会在枚举器已排序的基础上**再 `OrderBy` 一次**；缓存构建 `UpdateCachedAllTimeSignatureUniformPositionList` 也消费 `this`（`:104` 的 `MergeTwoSortedCollections` 要求升序输入、`:142` 的 `FirstOrDefault`）。`GetMeter` 则落在**声音重建热路径**上：`Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs:137` 的 `CalculateHoldTicks` 在 `:252` 对**每一个 Hold** 调一次 `GetMeter`，而 `RebuildEvents` 在 `:212` 遍历全部 displayable。**注：** `GetPrevMeter`/`GetNextMeter` 在 `Avalonia/src` 内没有任何 caller（grep 只命中定义），属潜在 API 缺陷而非当前故障；`tests` 里该类型此前也是零覆盖。
+  - **处理：** ①`GetEnumerator()` 直接枚举 `changedMeterList`，去掉冗余 `OrderBy`。②给 `Base/Collections/Base/SortableCollection.cs` **新增**两个方法（不改任何既有语义）：`LowerBoundIndex(X key)`（第一个 `key >= value` 的下标）与 `UpperBoundIndex(X key)`（第一个 `key > value` 的下标）；二者都是纯 O(log n)，**没有** `BinarySearchBy` 那条「命中相等段后向前线性扫到最后一个相等」的尾部（正是 PERF-DAT-002 / DAT-02 记的 dense-key 扫描），因此顺带为 DAT-02 备好了基建。③三个查询改用 backing 的二分：`GetMeter` = `UpperBoundIndex(time) - 1`；`GetPrevMeter`（严格 `<`）= `LowerBoundIndex(time) - 1`；`GetNextMeter`（严格 `>`）= `UpperBoundIndex(time)`；各自的 `firstMeter` 退化分支按旧语义单独判断。
+  - **行为等价性（已证明，不是"近似"）：** 旧枚举序是 `[firstMeter, changed(升序)]`，`changed` 整体排在 `firstMeter` 之后且升序，所以「最后一个命中项」若存在**必落在 changed 内**，且就是「最后一个 `TGrid <= time` 的 changed」，即 `UpperBoundIndex(time) - 1`；只有 changed 内不存在命中项时才可能退化为 `firstMeter`（且当且仅当 `firstMeter.TGrid` 满足条件），否则为 `null`。严格前驱/后继同理（`lower_bound - 1` / `upper_bound`）。由于 changed 升序，旧 `Last/FirstOrDefault` 的"前缀/后缀成立"性质使三种查询与旧线性扫描**逐项同实例**——**包括 `firstMeter` 不是列表最小值**这个既有边界情形（此时旧枚举序并非升序，新实现仍与之一致，未"顺手修正"）。**唯一的行为差异**是枚举器由快照（`OrderBy` 立即物化）变为 live：边枚举边改会抛 `InvalidOperationException`（标准 .NET 集合语义），与 PERF-DAT-009 / DAT-12 同款；已核对全部 caller 均为只读枚举，三个变更入口 `Add`/`Remove`/`SetFirstMeter` 都不在任何枚举体内。
+  - **基准**（新增 `benchmarks/.../MeterChangeListQueryBenchmarks.cs`；Release / DefaultJob；**旧侧按 09-09 基线代码逐字 LINQ 复刻建模**，新侧调真实生产类型；4 个类 × 3 档规模 × 2 方法 = 24 case）：
+
+    | 场景 | n | 原实现 | 现实现 | 时间比 | 原分配 | 现分配 |
+    |---:|---:|---:|---:|---:|---:|---:|
+    | 枚举一次 | 8 | 191.65 ns | 64.74 ns | 0.34× | 504 B | 88 B |
+    | 枚举一次 | 64 | 1,408.21 ns | 349.53 ns | 0.25× | 1,624 B | 88 B |
+    | 枚举一次 | 256 | 7,187.71 ns | 1,376.79 ns | 0.19× | 5,464 B | 88 B |
+    | `.Skip(1).FirstOrDefault()`（早退） | 8 | 150.42 ns | 39.94 ns | 0.27× | 560 B | 144 B |
+    | `.Skip(1).FirstOrDefault()` | 64 | 1,089.99 ns | 39.27 ns | 0.04× | 1,680 B | 144 B |
+    | `.Skip(1).FirstOrDefault()` | 256 | 6,253.41 ns | 39.64 ns | **0.006×** | 5,520 B | 144 B |
+    | 逐 Hold `GetMeter`×256 | 8 | 56.853 µs | 2.217 µs | 0.04× | 149,504 B | 0 B |
+    | 逐 Hold `GetMeter`×256 | 64 | 382.017 µs | 3.431 µs | 0.009× | 436,224 B | 0 B |
+    | 逐 Hold `GetMeter`×256 | 256 | **1,986.138 µs** | **4.581 µs** | **0.002×** | **1,419,264 B** | **0 B** |
+    | 逐点 `GetPrev`+`GetNext` | 8 | 3,317.7 ns | 139.3 ns | 0.04× | 9,152 B | 0 B |
+    | 逐点 `GetPrev`+`GetNext` | 64 | 180,801.7 ns | 1,813.0 ns | 0.01× | 216,576 B | 0 B |
+    | 逐点 `GetPrev`+`GetNext` | 256 | 3,745,911.5 ns | 10,210.1 ns | 0.003× | 2,832,384 B | 0 B |
+
+    枚举的分配旧侧随 n 线性增长（504→5,464 B），新侧恒为 88 B（迭代器对象本身）；三个查询从「O(n log n) 重排 + O(n) 扫描 + 每次调用分配」变成 O(log n) **零分配**。早退那条最能说明问题：只要 n 够大，旧实现哪怕只取第二个元素也要先把整表排完（256 档 158×，分配降到 3%）。量纲是**单次调用**（枚举一次 / 早退取一项 / 一遍 N 次查询扫描），不是整帧或整份谱面耗时。
+  - **验证：** 新增 `tests/.../Base/Collections/MeterChangeListTests.cs`（枚举序 `[firstMeter]`+升序、**与逐字复刻的旧实现做对拍**（6 种 shape × 覆盖每个元素 ±0/±1/±半个/±一个 unit 的探针，逐一 `Assert.Same`）、等 TGrid 的 tie 语义、空表、`Add`/`Remove`/`SetFirstMeter` 之后、`firstMeter` 非最小值的边界、live 枚举语义、`BinaryFindRange`/`Contains` 回归）与 `SortableCollectionBoundsTests.cs`（lower/upper bound 语义：空表、全在键下/键上、重复段的两端、与索引器一致；并固定既有 `BinarySearchBy`「最后一个相等」行为与 `BinaryFindLastIndexByKey` 未命中时返回插入点这一旧怪癖不回归）。Release 全量 **752/752 通过**（原 716 + 新增 36），Desktop 测试项目 148/148 通过。
+  - **未做/后续：**
+    1. 枚举器由快照变 live 是**已接受的行为差异**（同上），若将来有 caller 需要边枚举边改，需改为先物化快照。
+    2. `firstMeter` 非最小值时，`GetMeter` 会返回"枚举序最后一个命中项"而**非** TGrid 序的前驱（旧实现即如此，本轮刻意保持等价）。这更像一个语义缺陷而非性能问题，是否改为「按 TGrid 取最大前驱」属独立的行为变更，需单独评审。
+    3. 两个 formatter 的 `.OrderBy(x => x.TGrid)`（`DefaultOngekiFumenFormatter.cs:316`、`DefaultNyagekiFumenFormatter.cs:209`）现在成了唯一一次排序，仍保留未删——保存/导出属非热路径，保留最稳。
+    4. `GetAllDisplayableObjects` 里 meter/bpm 用的是 `.Skip(1)` 全量枚举，而同段落的其它集合多用 `BinaryFindRange(min,max)`；本轮只消除了重排，**未**把 meter/bpm 改成区间查询（那属另一类发现，规模也更小）。
+    5. WPF 侧 `OngekiFumenEditor/Base/Collections/MeterChangeList.cs:72-89` 有同一处缺陷（同 `OrderBy` + 同 `Last/FirstOrDefault`），未随本轮修改（本审计范围限定 Avalonia 侧），如需修复需另行评审。
 
 ---
 
@@ -512,7 +543,7 @@
 2. 需要用真实长 Hold、密集 chord、SVG、长音频、ACB/CPK、长 history、browser large download 做 allocation/CPU/heap/handle profile。
 3. 需要确认 `ENABLE_SVG_PREFAB_OBJECTS`、CPK reader 的实际发布可达性、DCK 清单未深读区间的 runtime 版本行为，以及 storage provider 的 file-level bookmark/atomic write contract。
 4. ACB-AUDIO 深层第三方实现的实际 caller/cadence、Opus/NWaves 数组大小和音质/数值契约必须在改动前用回归样本验证。
-5. `RND-018` marker 透明问题、`PRS-001`/`AUD-005`/`DAT-001` 等 correctness/infinite-loop 风险应先补最小回归用例，再做池化或并行化。（`DAT-012` 的 indexer recursion 已按此路径处理：2026-09-14 补了 13 项回归测试并修复，见第 6 节「已修复项」。）
+5. `RND-018` marker 透明问题、`PRS-001`/`AUD-005`/`DAT-001` 等 correctness/infinite-loop 风险应先补最小回归用例，再做池化或并行化。（`DAT-012` 的 indexer recursion 已按此路径处理：2026-09-14 补了 13 项回归测试并修复；`DAT-013` 的重复排序/线性扫描同样先补了「与旧实现逐字对拍 + 边界回归」再改二分，2026-09-16 修复——两者均见第 6 节「已修复项」。）
 
 ## 21. 交付状态
 
@@ -521,5 +552,6 @@
 - **2026-09-12/13 后续修复：** PERF-RND-013 / RND-16（预览拍线改用当帧 `DrawingTargetContext`，不再读 design-only 的 `RectInDesignMode`）、PERF-RND-014 / RND-17（静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`）、PERF-RND-017 / RND-20（replay 按 render context 缓存，`canvas`/帧状态移出构造函数并改为逐帧 `BeginFrame`/`EndFrame`）；另有一项非审计项的正确性修复：多线程渲染下裁判线高度抖动（`DrawingTargetContext` 帧快照 `CurrentTime`/`CurrentTGrid`）。均附基准与回归验证，见第 4 节「已修复项」。Release 全量 **703/703**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - **2026-09-14 后续修复：** PERF-DAT-009 / DAT-12（`BulletPalleteList` 的 int 索引器自递归 → 改为按 id 有序的 backing 列表；顺带消除每次枚举的 `OrderBy` 重排与 `ConvertIdToInt` 分配。按下标走一遍 256 项 5.64 ms / 11.06 MB → 209 ns / 0 B；解析期逐命令查找 6.00 ms / 11.10 MB → 163.7 µs / 30.7 KB）。附基准与 13 项回归测试，见第 6 节「已修复项」。Release 全量 **716/716**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - **2026-09-14 文档校正（无代码改动）：** 2026-09-11 那条此前只列了 3 项（004/005/006），现补全当日的 8 项清单；第 6 节的 PERF-DAT-004 / DAT-05 补上已修复批注、重复归区说明与残留（samples×lanes）备注；第 20 节「重复为 0」标明该去重只按标识符；第 6 节「纠正/不单列」补记 DAT-05 与 PERF-RND-009 / RND-10 为同一处发现。
+- **2026-09-16 后续修复：** PERF-DAT-010 / DAT-13（`MeterChangeList` 枚举不再对已升序 backing 重复 `OrderBy`；`GetMeter`/`GetPrevMeter`/`GetNextMeter` 改为 lower/upper bound 二分前驱/后继，顺带为 PERF-DAT-002 / DAT-02 在 `SortableCollection` 里补了独立的 lower/upper bound。逐 Hold `GetMeter`×256：**1,986.138 µs / 1,419,264 B → 4.581 µs / 0 B**；早退 `.Skip(1).FirstOrDefault()` 256 档 **6,253.41 ns → 39.64 ns**；枚举一次 256 档 **7,187.71 ns / 5,464 B → 1,376.79 ns / 88 B**）。附基准与 36 项回归测试（含与旧实现逐字对拍），见第 6 节「已修复项」。Release 全量 **752/752**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - 本轮没有 P0；P1 优先项已在第 3 节列出，P2/P3、条件项、撤销项和健康模式均已区分。
 - 下一步应是针对 P1 集合建立小型可重复 benchmark/smoke corpus，再按测量结果实施修复；不要在没有 profile 的情况下同时改动所有 P2/P3 项。

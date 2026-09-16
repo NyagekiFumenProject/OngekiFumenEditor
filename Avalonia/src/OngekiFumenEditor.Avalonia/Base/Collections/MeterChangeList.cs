@@ -69,21 +69,50 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
         public IEnumerator<MeterChange> GetEnumerator()
         {
             yield return firstMeter;
-            foreach (var item in changedMeterList.OrderBy(x => x.TGrid))
+            // changedMeterList 是 TGridSortList<MeterChange>，插入即维持按 TGrid 升序，
+            // 这里不需要再 OrderBy（旧实现在此每次枚举都重排一遍，PERF-DAT-010 / DAT-13）。
+            foreach (var item in changedMeterList)
                 yield return item;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public MeterChange GetMeter(TGrid time) => this.LastOrDefault(meter => meter.TGrid <= time);
+        // 下面三个查询与旧实现的 Last/FirstOrDefault **语义逐项等价**：
+        // 旧枚举序为 [firstMeter, changed(升序)]，故
+        //   - 只要 changed 里存在满足项，“最后一个命中者”必定落在 changed 内 → 二分取边界即可；
+        //   - changed 里不存在时，才可能退化为 firstMeter（单独判断），否则返回 null。
+        // 前驱/后继改用 backing 的 lower/upper bound，替代旧实现「每次完整枚举（含重排）+ 线性扫描」。
+
+        public MeterChange GetMeter(TGrid time)
+        {
+            // 最后一个 TGrid <= time
+            var upper = changedMeterList.UpperBoundIndex(time);
+            if (upper > 0)
+                return changedMeterList[upper - 1];
+            return firstMeter.TGrid <= time ? firstMeter : default;
+        }
 
         public MeterChange GetPrevMeter(MeterChange time) => GetPrevMeter(time.TGrid);
 
-        public MeterChange GetPrevMeter(TGrid time) => this.LastOrDefault(meter => meter.TGrid < time);
+        public MeterChange GetPrevMeter(TGrid time)
+        {
+            // 最后一个 TGrid < time（严格）
+            var lower = changedMeterList.LowerBoundIndex(time);
+            if (lower > 0)
+                return changedMeterList[lower - 1];
+            return firstMeter.TGrid < time ? firstMeter : default;
+        }
 
         public MeterChange GetNextMeter(MeterChange meter) => GetNextMeter(meter.TGrid);
 
-        public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(meter => time < meter.TGrid);
+        public MeterChange GetNextMeter(TGrid time)
+        {
+            // 第一个 TGrid > time（严格）；枚举以 firstMeter 打头，故先看它
+            if (firstMeter.TGrid > time)
+                return firstMeter;
+            var upper = changedMeterList.UpperBoundIndex(time);
+            return upper < changedMeterList.Count ? changedMeterList[upper] : default;
+        }
 
         private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
         private double cachedMetListCacheHash = int.MinValue;
