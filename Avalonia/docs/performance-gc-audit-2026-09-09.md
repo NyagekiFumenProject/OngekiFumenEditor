@@ -22,7 +22,7 @@
 ## 3. 优先处理顺序
 
 1. **先处理 P1 项**（原 21 项，PERF-RND-002 已于 2026-09-11 修复、PERF-RND-017 已于 2026-09-13 修复）：PERF-RND-001/003、PERF-DAT-001/002、PERF-AUD-001/002、PERF-IO-001–005、PERF-SVC-001、PERF-DSK-001–003、PERF-FWK-001、PERF-DCK-001、PERF-ACB-AUDIO-001/006。它们覆盖失控循环/边界错误、文件完整性、UI 阻塞、渲染与音频高频分配，以及资源生命周期。
-2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。（该范畴内 PERF-DAT-004 / DAT-05 已于 2026-09-11 修复、PERF-DAT-009 / DAT-12 已于 2026-09-14 修复、PERF-DAT-010 / DAT-13 已于 2026-09-16 修复。）
+2. **再处理 P2 的确定性 O(n²)/全量复制/跨线程 UI 阻塞：** DAT、PRS、IO、DSK、WEB、FWK、DCK 以及 ACB 容器/编解码分区。（该范畴内 PERF-DAT-004 / DAT-05 已于 2026-09-11 修复、PERF-DAT-009 / DAT-12 已于 2026-09-14 修复、PERF-DAT-010 / DAT-13 与 PERF-PRS-001 / PRS-01 已于 2026-09-16 修复。）
 3. **P3、条件项和 dormant 项必须先用真实负载验证，不应与活动热路径混改。**
 
 ---
@@ -290,7 +290,7 @@
 
 ## 7. PRS：解析、标准化、格式化与 SVG 转换
 
-- **PERF-PRS-001 / PRS-01 — P2，PROGJUDGE_BPM=0 可卡死统计。** `S/Parser/Ogkr/FumenStatisticsCalculator.cs:75-80` 在 Hold + progress BPM 为 0 时以 0 倍增，条件永不结束；输入入口 `S/Parser/Ogkr/CommandParserImpl/MetaInfo/ProgJudgeBpmCommandParsers.cs:11-14` 接受 0。校验有限且正的 judgment BPM，并防 tick 溢出。
+- **PERF-PRS-001 / PRS-01 — P2，非法 PROGJUDGE_BPM 可卡死统计。**〔**2026-09-16 已修复**，见下方「已修复项」〕`S/Parser/Ogkr/FumenStatisticsCalculator.cs:75-80` 在 Hold + progress BPM 为 0 时以 0 倍增，条件永不结束；输入入口 `S/Parser/Ogkr/CommandParserImpl/MetaInfo/ProgJudgeBpmCommandParsers.cs:11-14` 接受 0。校验有限且正的 judgment BPM，并防 tick 溢出。**注：** 实际触发面比原条目更宽——`S/Base/OngekiObjects/Hold.cs:126-144`（09-09 基线）用 log2 闭式写的是**同一个公式的第二份实现**，被 `S/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawHitObjectEffectHelper.cs:124` 在 preview effect 开启时逐帧调用（即 PERF-DAT-003 / DAT-03 那条路径），非法输入同样会卡，影响面不止「有界导出」；两份实现已合并为一处并补上「步长恒 >= 1」的不变量。
 - **PERF-PRS-002 / PRS-02 — P2，同步转换伪异步阻塞 UI。** `S/Modules/FumenConverter/ViewModels/FumenConverterViewModel.cs:127-134` 直接 await conversion；`S/Parser/DefaultImpl/DefaultOngekiFumenFormatter.cs:29-75` 同步统计/格式化/UTF8 后才 `Task.FromResult`；SVG handler `:42` 同样同步。对快照/锁定模型做受控后台 CPU 工作。
 - **PERF-PRS-003 / PRS-03 — P2，引用解析反复全表扫描。** OGKR `TapCommandParser.cs:16-19`、`HoldCommandParser.cs:16-20`、`LaneCommandParser.cs:51-52`、`WallCommandParser.cs:43-44`、`BeamCommandParser.cs:64-65`、`Editor/CurveControlCommand.cs:20-27` 以及 Bell/Bullet/Nyageki 对 lane/palette 做 FirstOrDefault 全扫描；标准化/SVG clone 会再次支付。建立保持 first-duplicate 语义的 RecordId/StrID 索引。
 - **PERF-PRS-004 / PRS-04 — P2，InterpolateAll 二次查找。** `S/Utils/Ogkr/InterpolateAll.cs:15-23` 对每个 laneMap 结果回找 curveStarts，`:27-34` 对每个 tap/hold/end 调 `Any` 并为每个 Hold 分配二项数组；调用 `S/Utils/Ogkr/StandardizeFormat.cs:160-165` 和 command handler `:67-87`。保留 before/generated pair 并用 RecordId HashSet。
@@ -299,6 +299,24 @@
 - **PERF-PRS-007 / PRS-07 — P2，全图 serialize→parse clone。** `S/Utils/Ogkr/StandardizeFormat.cs:29-35` 序列化完整 OGKR 后重新解析；`service.cs:70-81` 又序列化，SVG generator `:29-34` 即使默认 Soflan 不变也 clone。引入 typed snapshot/read-only SVG model，避免双 graph 常驻。
 - **PERF-PRS-008 / PRS-08 — P3，SVG point 字符串/数组。** `S/Modules/PreviewSvgGenerator/Kernel/DefaultPreviewSvgGenerator.cs:112-123,164-175` 每点建字符串/数组再 Join，最终 `:68` ToString+UTF8。改为直接 append 到 builder/writer。
 - **PERF-PRS-009 / PRS-09 — P3，坐标 Split。** `S/Parser/DefaultImpl/Nyageki/CommandImpl/ParserUtils.cs:27-36` trim char[]、Split、substring，调用 `LaneCommandParser.cs:25-32`、`CurveControlPointCommandParser.cs:35-39`。使用 Span/TryParse wrapper。
+
+### 已修复项
+
+> 本分区的修复条目体例与第 4、6 节一致：根因 → 影响范围 → 处理 → 行为差异 → 验证 → 未做/后续。
+
+- **PERF-PRS-001 / PRS-01 — 已修复（2026-09-16）：tick 步长计算补上「恒 >= 1」的不变量并合并为唯一实现，非法 PROGJUDGE_BPM 在入口报错并回落 240。**
+  - **根因（静态确认）：** ①`S/Parser/Ogkr/FumenStatisticsCalculator.cs:61-83`（09-09 基线）的 `CalcHoldTickStepSize` 用**倍增循环**逼近 log2 缩放：`while (bpm < progressJudgeBPM) { standardBeatLen >>= 1; bpm *= 2f; }` 与 `for (progressJudgeBPM *= 2f; progressJudgeBPM <= bpm; progressJudgeBPM *= 2f) { standardBeatLen <<= 1; }`。两个循环的终止都依赖「被倍增的量与另一侧的大小关系最终翻转」：`progressJudgeBPM == 0` 时 `*= 2f` 恒为 0、`bpm == 0` 时同理，条件永真 → **自旋不终止**（原条目记的就是这一支）。②**触发面不止 0**：基准 `standardBeatLen = TRESOLUTION>>2 = 480`，右移分支每轮移一位，`progressJudgeBPM / bpm > 256`（9 次右移）即被移成 0；左移分支约 23 次溢出转负。③只要算出的 step ≤ 0，调用方的 `while (curTGrid < holdEndTGrid) { count++; curTGrid = curTGrid + new GridOffset(0, tickGrid); }` 就**不再推进**——这是同一根因的第二张面孔，也正是原条目「并防 tick 溢出」那句话的实际含义。④`S/Base/OngekiObjects/Hold.cs:126-144`（09-09 基线）用 **log2 闭式**写了**同一个公式的第二份实现**：`0` 输入时 `ratio = ±Inf`、`(int)Math.Ceiling/Floor(±Inf)` 饱和后左移/右移的移位量按 `& 31` 取模，同样可能得到 0/负，汇到同一个不推进的下游循环；且两份实现的分辨率基准本就不一致（一处 `TRESOLUTION>>2`、一处 `DEFAULT_RES_T/4`）。⑤三个输入入口都不校验：`Parser/Ogkr/CommandParserImpl/MetaInfo/ProgJudgeBpmCommandParsers.cs:13`（`args.GetData<float>(1)`）、`Parser/DefaultImpl/Nyageki/CommandImpl/Headers/HeaderCommand.cs:110`（`float.Parse`）、`Modules/FumenMetaInfoBrowser/ViewModels/OngekiFumenModelProxy.cs:234-241`（UI 可直接输入）；默认值 240（`Base/FumenMetaInfo.cs:110`）本身安全。
+  - **影响范围（静态确认）：** ①直接：`IFumenParserManager.Serialize` → `DefaultOngekiFumenFormatter`（.ogkr 的 `IFumenSerializable`）`ProcessHeader` → `FumenStatisticsCalculator.CalculateObjectStatisticsAsync`（`Parser/Ogkr/DefaultOngekiFumenFormatter.cs:253`），即**保存 / 格式转换**时无异常、无日志地卡死。②间接（原条目未记）：`Hold.CalculateJudgeTGrid`（`Base/OngekiObjects/Hold.cs:124-197`）是同一公式的第二份实现，被 `Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawHitObjectEffectHelper.cs:124` 在 preview effect 开启时**逐帧**调用——即 PERF-DAT-003 / DAT-03 描述的那条路径；非法值同样会卡渲染循环，影响面不止「有界导出」。③WPF 侧 `OngekiFumenEditor/Parser/Ogkr/FumenStatisticsCalculator.cs:61` 与 `OngekiFumenEditor/Base/OngekiObjects/Hold.cs:128` 是同一处缺陷。
+  - **处理：** 新增 `S/Base/OngekiObjects/HoldTickStepCalculator.cs` 作为**唯一实现**。`Calculate(bpm, progressJudgeBpm, standardBeatLen)` 用 log2 闭式取代两处倍增/自旋循环，并**用 `long` 移位后夹到 `[1, int.MaxValue]`**——右移过量落到 1（比值超出基准位宽）、左移过量落到 `int.MaxValue`（防溢出成负数让推进反向）；任一侧不是「正的有限值」时不做缩放（`shift = 0`），因此 0 / 负数 / NaN / ±Inf 都落到安全且非 0 的基准步长上。**不变量：返回值恒 >= 1，调用方逐 tick 推进的循环因此必定终止。** 同文件新增 `MinProgJudgeBpm = 1f`（**临界值**）与 `DefaultProgJudgeBpm = 240f`：`CoerceProgJudgeBpm` 对非法值 `Log.LogError` 并回落 240，三个入口（OGKR / Nyageki / UI）统一改为走它。`FumenStatisticsCalculator.CalculateHold` 与 `Hold.CalculateJudgeTGrid` 的本地 `CalcHoldTickStepSize` 都改为委托该实现，各自的基准分辨率参数**原样保留**（见「未做/后续」1）。
+  - **临界值取值依据：** 取 `1`。一方面判定 BPM 小于 1 拍/分钟没有意义；另一方面与清单里对同类边界项的处置口径一致（DAT-01「校验 1..1920」、AUD-05「clamp 至 1」都以 1 作为下界）。它只是**输入侧的语义下界**，真正的终止性由计算侧的 `step >= 1` 不变量保证，与临界值取值无关。
+  - **行为差异（已核对）：** ①对合法的正有限输入，闭式与旧倍增循环**逐值等价**（`while` 分支的迭代次数即 `ceil(log2(progJudge/bpm))`、`for` 分支即 `floor(log2(bpm/progJudge))`，与 `Math.Log2` 闭式一致），已用 240 / 120 / 60 / 480 / 960 五档固定。②旧代码在「右移超过基准位宽」时返回 0、在「左移溢出」时返回负值，新实现改为夹到 `1` / `int.MaxValue`——这正是修复本体。③两侧分辨率基准不一致（`TRESOLUTION>>2` vs `DEFAULT_RES_T/4`）本次**刻意保留**：默认二者都是 480，只有谱面显式设置 TRESOLUTION 时才会分叉。④非法 PROGJUDGE_BPM 现在会在入口被改成 240 并记一条 ERROR：行为由「带着非法值继续」变为「报错 + 回落」，这是需求要求的语义。
+  - **验证：** 新增 `tests/.../Base/OngekiObjects/HoldTickStepTests.cs`（`Calculate` 在 15 组非法/极端输入下恒 `>= 1`；五档与旧闭式逐值等价；右移夹到 1、左移夹到 `int.MaxValue`；`IsValidProgJudgeBpm` 阈值；`CoerceProgJudgeBpm` 回落；`Hold.CalculateJudgeTGrid` 在 `PROGJUDGE_BPM = 0` 时 tick 序列严格递增、正常输入下序列为 `[480, 960, 1440, 1920]`）与 `tests/.../Parser/ProgJudgeBpmValidationTests.cs`（OGKR / Nyageki / UI 三入口非法值回落 240、合法值原样通过；`CalculateObjectStatisticsAsync` 在 `PROGJUDGE_BPM = 0` + 1 个 Hold 时于 15s 内返回并给出 4 个 tick——回归时该线程会自旋，测试必然超时失败，这是唯一能观察到「静默卡死」的方式）。Release 全量 **805/805 通过**（原 752 + 新增 53），Desktop 测试项目 148/148 通过。
+  - **未做/后续：**
+    1. 两处分辨率基准仍不一致（`FumenStatisticsCalculator` 用 `TRESOLUTION>>2`、`Hold` 用 `DEFAULT_RES_T/4`）。默认值同为 480，但谱面显式设置 TRESOLUTION 时会给出不同步长；统一属行为变更，需先确认 TRESOLUTION 的语义边界。
+    2. 只校验了下界，没有上界。极大的判定 BPM 会被夹到 `step = 1`，逐 tick 次数由 Hold 的网格长度兜底（有界，但可能很慢）；是否需要 `MaxProgJudgeBpm` 待实测。
+    3. `HeaderCommand.cs:110` 的 `float.Parse(headerValue)` 对非数字串仍会抛异常（既有行为，本轮未改）。
+    4. 新增观察（本轮未处理，不在 PRS-001 范围）：`Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs:133-158` 的 `CalculateHoldTicks` 用的是**另一套公式**（`resT / met.Bunbo`），它已守卫 `beatCount == 0`，但 `Bunbo` 为负时 `resT / count` 仍可为负 → `stepGrid` 为负 → 下游 `while` 同样不推进。属「计量定义」侧的输入校验问题，应另行立项。
+    5. WPF 侧 `OngekiFumenEditor/Parser/Ogkr/FumenStatisticsCalculator.cs:61` 与 `OngekiFumenEditor/Base/OngekiObjects/Hold.cs:128` 同缺陷，未随本轮修改（本审计范围限定 Avalonia 侧），如需修复需另行评审。
 
 ---
 
@@ -543,7 +561,7 @@
 2. 需要用真实长 Hold、密集 chord、SVG、长音频、ACB/CPK、长 history、browser large download 做 allocation/CPU/heap/handle profile。
 3. 需要确认 `ENABLE_SVG_PREFAB_OBJECTS`、CPK reader 的实际发布可达性、DCK 清单未深读区间的 runtime 版本行为，以及 storage provider 的 file-level bookmark/atomic write contract。
 4. ACB-AUDIO 深层第三方实现的实际 caller/cadence、Opus/NWaves 数组大小和音质/数值契约必须在改动前用回归样本验证。
-5. `RND-018` marker 透明问题、`PRS-001`/`AUD-005`/`DAT-001` 等 correctness/infinite-loop 风险应先补最小回归用例，再做池化或并行化。（`DAT-012` 的 indexer recursion 已按此路径处理：2026-09-14 补了 13 项回归测试并修复；`DAT-013` 的重复排序/线性扫描同样先补了「与旧实现逐字对拍 + 边界回归」再改二分，2026-09-16 修复——两者均见第 6 节「已修复项」。）
+5. `RND-018` marker 透明问题、`AUD-005`/`DAT-001` 等 correctness/infinite-loop 风险应先补最小回归用例，再做池化或并行化。（`PRS-001` 的 PROGJUDGE_BPM 静默卡死已按此路径处理：2026-09-16 先补 53 项回归（含非法输入下步长恒不推进、三入口回落 240）再改实现，见第 7 节「已修复项」；`DAT-012` 的 indexer recursion 于 2026-09-14 补了 13 项回归测试并修复；`DAT-013` 的重复排序/线性扫描同样先补了「与旧实现逐字对拍 + 边界回归」再改二分，2026-09-16 修复——后两者见第 6 节「已修复项」。）
 
 ## 21. 交付状态
 
@@ -552,6 +570,6 @@
 - **2026-09-12/13 后续修复：** PERF-RND-013 / RND-16（预览拍线改用当帧 `DrawingTargetContext`，不再读 design-only 的 `RectInDesignMode`）、PERF-RND-014 / RND-17（静态 `SKTypeface` 缓存 + 实例级复用 `SKFont`/`SKPaint`）、PERF-RND-017 / RND-20（replay 按 render context 缓存，`canvas`/帧状态移出构造函数并改为逐帧 `BeginFrame`/`EndFrame`）；另有一项非审计项的正确性修复：多线程渲染下裁判线高度抖动（`DrawingTargetContext` 帧快照 `CurrentTime`/`CurrentTGrid`）。均附基准与回归验证，见第 4 节「已修复项」。Release 全量 **703/703**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - **2026-09-14 后续修复：** PERF-DAT-009 / DAT-12（`BulletPalleteList` 的 int 索引器自递归 → 改为按 id 有序的 backing 列表；顺带消除每次枚举的 `OrderBy` 重排与 `ConvertIdToInt` 分配。按下标走一遍 256 项 5.64 ms / 11.06 MB → 209 ns / 0 B；解析期逐命令查找 6.00 ms / 11.10 MB → 163.7 µs / 30.7 KB）。附基准与 13 项回归测试，见第 6 节「已修复项」。Release 全量 **716/716**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - **2026-09-14 文档校正（无代码改动）：** 2026-09-11 那条此前只列了 3 项（004/005/006），现补全当日的 8 项清单；第 6 节的 PERF-DAT-004 / DAT-05 补上已修复批注、重复归区说明与残留（samples×lanes）备注；第 20 节「重复为 0」标明该去重只按标识符；第 6 节「纠正/不单列」补记 DAT-05 与 PERF-RND-009 / RND-10 为同一处发现。
-- **2026-09-16 后续修复：** PERF-DAT-010 / DAT-13（`MeterChangeList` 枚举不再对已升序 backing 重复 `OrderBy`；`GetMeter`/`GetPrevMeter`/`GetNextMeter` 改为 lower/upper bound 二分前驱/后继，顺带为 PERF-DAT-002 / DAT-02 在 `SortableCollection` 里补了独立的 lower/upper bound。逐 Hold `GetMeter`×256：**1,986.138 µs / 1,419,264 B → 4.581 µs / 0 B**；早退 `.Skip(1).FirstOrDefault()` 256 档 **6,253.41 ns → 39.64 ns**；枚举一次 256 档 **7,187.71 ns / 5,464 B → 1,376.79 ns / 88 B**）。附基准与 36 项回归测试（含与旧实现逐字对拍），见第 6 节「已修复项」。Release 全量 **752/752**、Desktop 测试项目 148/148 通过；其余发现状态不变。
+- **2026-09-16 后续修复（共 2 项）：** ①PERF-DAT-010 / DAT-13（`MeterChangeList` 枚举不再对已升序 backing 重复 `OrderBy`；`GetMeter`/`GetPrevMeter`/`GetNextMeter` 改为 lower/upper bound 二分前驱/后继，顺带为 PERF-DAT-002 / DAT-02 在 `SortableCollection` 里补了独立的 lower/upper bound。逐 Hold `GetMeter`×256：**1,986.138 µs / 1,419,264 B → 4.581 µs / 0 B**；早退 `.Skip(1).FirstOrDefault()` 256 档 **6,253.41 ns → 39.64 ns**；枚举一次 256 档 **7,187.71 ns / 5,464 B → 1,376.79 ns / 88 B**。附基准与 36 项回归测试（含与旧实现逐字对拍），见第 6 节「已修复项」）。②PERF-PRS-001 / PRS-01（tick 步长计算缺「恒 >= 1」的不变量 → 新增 `HoldTickStepCalculator` 作为唯一实现，合并 `FumenStatisticsCalculator` 的倍增自旋与 `Hold.CalculateJudgeTGrid` 的 log2 闭式；非法 PROGJUDGE_BPM 在 OGKR / Nyageki / UI 三个入口报错并回落 240，临界值取 1。影响面不止导出：Hold 侧同一公式被 `DrawHitObjectEffectHelper` 逐帧调用，即 PERF-DAT-003 / DAT-03 那条路径。附 53 项回归测试（15 组非法/极端输入下步长恒 >= 1、三入口回落 240、统计计算超时守卫），见第 7 节「已修复项」）。Release 全量 **805/805**、Desktop 测试项目 148/148 通过；其余发现状态不变。
 - 本轮没有 P0；P1 优先项已在第 3 节列出，P2/P3、条件项、撤销项和健康模式均已区分。
 - 下一步应是针对 P1 集合建立小型可重复 benchmark/smoke corpus，再按测量结果实施修复；不要在没有 profile 的情况下同时改动所有 P2/P3 项。
