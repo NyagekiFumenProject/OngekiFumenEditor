@@ -70,7 +70,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             12,
                             0,
                             spdColor,
-                            new(1, 1.5f),
+                            // 纵向锚点与相邻的时间文字保持一致：0.5 = pos 即文字中线。
+                            // 旧值 1.5f 来自 WPF OpenGL 后端（那边 origin.Y 的语义不同），
+                            // 在 Skia 实现里 (1 - origin.Y) 会把 1.5 镜像成 -0.5，把标签顶到线的另一侧。
+                            new(1, 0.5f),
                             IStringDrawing.StringStyle.Bold,
                             default
                     );
