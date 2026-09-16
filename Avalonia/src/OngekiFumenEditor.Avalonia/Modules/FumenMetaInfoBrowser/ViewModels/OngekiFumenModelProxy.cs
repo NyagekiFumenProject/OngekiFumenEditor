@@ -1,6 +1,7 @@
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenMetaInfoBrowser.ViewModels;
 
@@ -233,12 +234,12 @@ public class OngekiFumenModelProxy : ObservableObject
 
     public float ProgJudgeBpm
     {
-        get => FumenMetaInfo?.ProgJudgeBpm ?? 240;
+        get => FumenMetaInfo?.ProgJudgeBpm ?? HoldTickStepCalculator.DefaultProgJudgeBpm;
         set
         {
             if (FumenMetaInfo is null)
                 return;
-            FumenMetaInfo.ProgJudgeBpm = value;
+            FumenMetaInfo.ProgJudgeBpm = HoldTickStepCalculator.CoerceProgJudgeBpm(value);
             OnPropertyChanged();
         }
     }

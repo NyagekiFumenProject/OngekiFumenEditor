@@ -59,28 +59,10 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr
 			var timeResolution_ = fumen.MetaInfo.TRESOLUTION;
 
 			int CalcHoldTickStepSize(TGrid time)
-			{
-				var bpm = fumen.BpmList.GetBpm(time).BPM;
-				var progressJudgeBPM = fumen.MetaInfo.ProgJudgeBpm;
-				var standardBeatLen = timeResolution_ >> 2; //取1/4切片长度
-
-				if (bpm < progressJudgeBPM)
-				{
-					while (bpm < progressJudgeBPM)
-					{
-						standardBeatLen >>= 1;
-						bpm *= 2f;
-					}
-				}
-				else
-				{
-					for (progressJudgeBPM *= 2f; progressJudgeBPM <= bpm; progressJudgeBPM *= 2f)
-					{
-						standardBeatLen <<= 1;
-					}
-				}
-				return standardBeatLen;
-			}
+				=> HoldTickStepCalculator.Calculate(
+					fumen.BpmList.GetBpm(time).BPM,
+					fumen.MetaInfo.ProgJudgeBpm,
+					timeResolution_ >> 2); //取1/4切片长度
 
 			var holdStartTGrid = x.TGrid;
 			var holdEndTGrid = x.HoldEnd?.TGrid;

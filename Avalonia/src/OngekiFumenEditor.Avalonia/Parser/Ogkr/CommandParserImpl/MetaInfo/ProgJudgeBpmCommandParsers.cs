@@ -1,5 +1,6 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 
 namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl.MetaInfo
 {
@@ -10,7 +11,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.Ogkr.CommandParserImpl.MetaInfo
 
 		public override void ParseMetaInfo(CommandArgs args, OngekiFumen fumen)
 		{
-			fumen.MetaInfo.ProgJudgeBpm = args.GetData<float>(1);
+			fumen.MetaInfo.ProgJudgeBpm = HoldTickStepCalculator.CoerceProgJudgeBpm(args.GetData<float>(1));
 		}
 	}
 }

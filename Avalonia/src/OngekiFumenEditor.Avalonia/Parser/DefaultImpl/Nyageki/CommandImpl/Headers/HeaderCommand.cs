@@ -1,5 +1,6 @@
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 using System;
 
 namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Headers
@@ -107,7 +108,7 @@ namespace OngekiFumenEditor.Avalonia.Parser.DefaultImpl.Nyageki.CommandImpl.Head
 
 		protected override void ApplyHeaderValue(OngekiFumen fumen, string headerValue)
 		{
-			fumen.MetaInfo.ProgJudgeBpm = float.Parse(headerValue);
+			fumen.MetaInfo.ProgJudgeBpm = HoldTickStepCalculator.CoerceProgJudgeBpm(float.Parse(headerValue));
 		}
 	}
 
