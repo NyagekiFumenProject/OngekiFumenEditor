@@ -56,6 +56,11 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
+# Profiling captures (dotnet-trace / Speedscope)
+*.nettrace
+*.etlx
+*.speedscope.json
+
 *_i.c
 *_p.c
 *_i.h
