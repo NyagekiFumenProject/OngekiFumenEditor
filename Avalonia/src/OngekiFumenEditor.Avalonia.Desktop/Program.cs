@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
+using Avalonia.Win32;
 using Gekimini.Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using OngekiFumenEditor.Avalonia.Desktop.UI.Dialogs;
@@ -312,6 +313,20 @@ internal class Program
     {
         return AppBuilder.Configure(appFactory)
             .UsePlatformDetect()
+            .With(new Win32PlatformOptions
+            {
+                // EXPERIMENT (temporary, not for commit): the default WinUIComposition path paces the
+                // editor's render loop through the Windows.UI.Composition commit clock, which measured
+                // as a bimodal ~100/66 Hz cadence on a 200 Hz display. Try the low-latency DXGI
+                // swapchain instead to see whether the cadence flattens out. Trade-off: no acrylic /
+                // transparency / blur for the window.
+                CompositionMode =
+                [
+                    Win32CompositionMode.LowLatencyDxgiSwapChain,
+                    Win32CompositionMode.DirectComposition,
+                    Win32CompositionMode.RedirectionSurface,
+                ],
+            })
             .WithInterFont()
             .LogToTrace();
     }
