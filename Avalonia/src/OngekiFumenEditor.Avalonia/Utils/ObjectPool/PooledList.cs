@@ -54,6 +54,20 @@ namespace OngekiFumenEditor.Avalonia.Utils.ObjectPool
         public void AddRange(IEnumerable<T> items) => innerList.AddRange(items);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Clear() => innerList.Clear();
+
+        /// <summary>
+        /// Grows the backing buffer to hold at least <paramref name="capacity"/> items.
+        /// <c>Collections.Pooled.PooledList&lt;T&gt;.EnsureCapacity</c> is not public in 1.0.82,
+        /// so the public <see cref="P:Collections.Pooled.PooledList`1.Capacity"/> setter is used —
+        /// it performs the same growth and, unlike the setter's trivial implementation, lets a
+        /// long <see cref="AddRange(IEnumerable{T})"/> run proceed without repeated reallocation.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void EnsureCapacity(int capacity)
+        {
+            if (capacity > innerList.Capacity)
+                innerList.Capacity = capacity;
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Contains(T item) => innerList.Contains(item);
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
