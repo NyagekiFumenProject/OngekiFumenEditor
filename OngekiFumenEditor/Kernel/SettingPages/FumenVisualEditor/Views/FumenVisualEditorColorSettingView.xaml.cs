@@ -1,4 +1,4 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 
 namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
 {
@@ -6,10 +6,10 @@ namespace OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views
     /// FumenVisualEditorColorSettingView.xaml 的交互逻辑
     /// </summary>
     public partial class FumenVisualEditorColorSettingView : UserControl
-	{
-		public FumenVisualEditorColorSettingView()
-		{
-			InitializeComponent();
-		}
-	}
+    {
+        public FumenVisualEditorColorSettingView()
+        {
+            InitializeComponent();
+        }
+    }
 }

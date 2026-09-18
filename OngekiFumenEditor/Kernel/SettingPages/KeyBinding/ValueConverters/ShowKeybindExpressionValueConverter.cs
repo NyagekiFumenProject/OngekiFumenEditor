@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.KeyBinding;
+using OngekiFumenEditor.Kernel.KeyBinding;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

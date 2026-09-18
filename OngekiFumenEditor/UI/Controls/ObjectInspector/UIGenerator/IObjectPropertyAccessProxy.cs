@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator

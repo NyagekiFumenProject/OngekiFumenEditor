@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Base.Collections
             OnSoflanPropertyChangedEvent += OnChilidrenSubPropsChangedEvent;
             foreach (var item in initSoflanChanges ?? [new KeyframeSoflan()
             {
-                TGrid = new TGrid(0,0),
+                TGrid = new TGrid(0, 0),
                 Speed = 1f,
             }])
                 Add(item);
@@ -86,3 +86,4 @@ namespace OngekiFumenEditor.Base.Collections
         }
     }
 }
+

@@ -1,4 +1,4 @@
-锘縰sing OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using System;
@@ -101,7 +101,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public void CopyEntire(Hold from)
         {
-            //鍖呮嫭End涓�璧峰鍒朵簡
+            //包括End一起复制了
             Copy(from);
 
             if (from.HoldEnd != null)
@@ -132,13 +132,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 if (bpm < progressJudgeBpm)
                 {
                     var ratio = progressJudgeBpm / bpm;
-                    var power = (int)Math.Ceiling(Math.Log2(ratio));
+                    var power = (int)Math.Ceiling(Math.Log(ratio, 2));
                     standardBeatLen >>= power;
                 }
                 else
                 {
                     var ratio = bpm / progressJudgeBpm;
-                    var power = (int)Math.Floor(Math.Log2(ratio));
+                    var power = (int)Math.Floor(Math.Log(ratio, 2));
                     standardBeatLen <<= power;
                 }
 

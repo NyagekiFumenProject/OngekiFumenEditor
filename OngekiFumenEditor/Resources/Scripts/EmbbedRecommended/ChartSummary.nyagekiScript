@@ -1,0 +1,152 @@
+using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts;
+using OngekiFumenEditor.Parser.Ogkr;
+using OngekiFumenEditor.Utils;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows;
+
+var editor = ScriptArgs.TargetEditor;
+if (editor is null)
+{
+    var emptyMessage = "No target editor selected.";
+    Log.LogInfo(emptyMessage);
+    MessageBox.Show(emptyMessage, "Chart Summary", MessageBoxButton.OK, MessageBoxImage.Information);
+    return emptyMessage;
+}
+
+var fumen = editor.Fumen;
+var stats = FumenStatisticsCalculator.CalculateObjectStatisticsAsync(fumen);
+var displayableObjects = fumen.GetAllDisplayableObjects().ToArray();
+var timelineObjects = displayableObjects
+    .OfType<ITimelineObject>()
+    .Where(x => x.TGrid is not null)
+    .ToArray();
+
+var maxTGrid = timelineObjects
+    .Select(x => x.TGrid)
+    .DefaultIfEmpty(TGrid.Zero)
+    .OrderByDescending(x => x.TotalGrid)
+    .First();
+var maxAudioTime = editor.ConvertTGridToAudioTime(maxTGrid);
+var currentTGrid = editor.GetCurrentTGrid() ?? TGrid.Zero;
+
+var laneStarts = fumen.Lanes.ToArray();
+var beamStarts = fumen.Beams.ToArray();
+var soflans = fumen.SoflansMap.Values.SelectMany(x => x).ToArray();
+var individualSoflanAreas = fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x).ToArray();
+
+string FormatRow(string name, object value) => $"{name}: {value}";
+
+List<string> BuildSection(string title, params string[] rows)
+{
+    var section = new List<string>
+    {
+        $"[{title}]"
+    };
+
+    section.AddRange(rows);
+    return section;
+}
+
+IEnumerable<string> JoinSections(params List<string>[] sections)
+{
+    for (var i = 0; i < sections.Length; i++)
+    {
+        if (i > 0)
+            yield return string.Empty;
+
+        foreach (var row in sections[i])
+            yield return row;
+    }
+}
+
+string FormatTwoColumns(IEnumerable<string> leftRows, IEnumerable<string> rightRows, int leftWidth = 38)
+{
+    var left = leftRows.ToArray();
+    var right = rightRows.ToArray();
+    var maxLineCount = Math.Max(left.Length, right.Length);
+    var lines = new List<string>(maxLineCount);
+
+    for (var i = 0; i < maxLineCount; i++)
+    {
+        var leftText = i < left.Length ? left[i] : string.Empty;
+        var rightText = i < right.Length ? right[i] : string.Empty;
+        lines.Add(leftText.PadRight(leftWidth) + rightText);
+    }
+
+    return string.Join(Environment.NewLine, lines);
+}
+
+var ogkrStatistics = BuildSection(
+    "OGKR object statistics",
+    FormatRow("T_TOTAL", stats.TotalObjects),
+    FormatRow("T_TAP", stats.TapObjects),
+    FormatRow("T_HOLD", stats.HoldObjects),
+    FormatRow("T_SIDE", stats.SideObjects),
+    FormatRow("T_SHOLD", stats.SideHoldObjects),
+    FormatRow("T_FLICK", stats.FlickObjects),
+    FormatRow("T_BELL", stats.BellObjects));
+
+var rawObjectCounts = BuildSection(
+    "Raw object counts",
+    FormatRow("DisplayableObjects", displayableObjects.Length),
+    FormatRow("TimelineObjects", timelineObjects.Length),
+    FormatRow("SelectedObjects", displayableObjects.OfType<ISelectableObject>().Count(x => x.IsSelected)),
+    FormatRow("CriticalObjects", displayableObjects.OfType<ICriticalableObject>().Count(x => x.IsCritical)),
+    FormatRow("Taps", fumen.Taps.Count),
+    FormatRow("Holds", fumen.Holds.Count),
+    FormatRow("HoldEnds", fumen.Holds.Count(x => x.HoldEnd is not null)),
+    FormatRow("Flicks", fumen.Flicks.Count),
+    FormatRow("Bells", fumen.Bells.Count),
+    FormatRow("Bullets", fumen.Bullets.Count),
+    FormatRow("BulletPalettes", fumen.BulletPalleteList.Count),
+    FormatRow("LaneStarts", laneStarts.Length),
+    FormatRow("LaneChildren", laneStarts.SelectMany(x => x.Children).Count()),
+    FormatRow("BeamStarts", beamStarts.Length),
+    FormatRow("BeamChildren", beamStarts.SelectMany(x => x.Children).Count()),
+    FormatRow("LaneBlocks", fumen.LaneBlocks.Count),
+    FormatRow("Soflans", soflans.Length),
+    FormatRow("IndividualSoflanAreas", individualSoflanAreas.Length),
+    FormatRow("BpmChanges", fumen.BpmList.Count),
+    FormatRow("MeterChanges", fumen.MeterChanges.Count),
+    FormatRow("ClickSEs", fumen.ClickSEs.Count),
+    FormatRow("EnemySets", fumen.EnemySets.Count),
+    FormatRow("Comments", fumen.Comments.Count),
+    FormatRow("SvgPrefabs", fumen.SvgPrefabs.Count));
+
+var timingSummary = BuildSection(
+    "Timing summary",
+    FormatRow("CurrentTGrid", currentTGrid),
+    FormatRow("CurrentTotalGrid", currentTGrid.TotalGrid),
+    FormatRow("CurrentTotalUnit", $"{currentTGrid.TotalUnit:F6}"),
+    FormatRow("MaxTGrid", maxTGrid),
+    FormatRow("MaxTotalGrid", maxTGrid.TotalGrid),
+    FormatRow("MaxTotalUnit", $"{maxTGrid.TotalUnit:F6}"),
+    FormatRow("Duration", $"{maxAudioTime:hh\\:mm\\:ss\\.fff}"));
+
+var metaSummary = BuildSection(
+    "Meta / editor",
+    FormatRow("TRESOLUTION", fumen.MetaInfo.TRESOLUTION),
+    FormatRow("XRESOLUTION", fumen.MetaInfo.XRESOLUTION),
+    FormatRow("TotalDurationHeight", $"{editor.TotalDurationHeight:F2}"));
+
+var report = new List<string>
+{
+    "Chart Summary",
+    FormatRow("File", editor.FileName),
+    FormatRow("Path", editor.FilePath),
+    string.Empty,
+    FormatTwoColumns(
+        JoinSections(ogkrStatistics, timingSummary),
+        JoinSections(rawObjectCounts, metaSummary)),
+};
+
+var output = string.Join(Environment.NewLine, report);
+Log.LogInfo(output);
+MessageBox.Show(output, "Chart Summary", MessageBoxButton.OK, MessageBoxImage.Information);
+return output;

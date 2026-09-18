@@ -1,7 +1,7 @@
-﻿namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Base
 {
-	public interface ISelectableObject
-	{
-		bool IsSelected { get; set; }
-	}
+    public interface ISelectableObject
+    {
+        bool IsSelected { get; set; }
+    }
 }

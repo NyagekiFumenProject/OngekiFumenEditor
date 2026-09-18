@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Commands;
+using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.UI.Dialogs;
 using System.Threading.Tasks;

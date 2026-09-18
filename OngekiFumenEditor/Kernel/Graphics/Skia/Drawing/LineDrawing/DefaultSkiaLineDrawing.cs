@@ -1,6 +1,6 @@
-﻿using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
+using OngekiFumenEditor.Utils;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -10,12 +10,30 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 {
-    internal class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing
+    internal sealed class DefaultSkiaLineDrawing : CommonSkiaDrawingBase, ILineDrawing, ISimpleLineDrawing, IDisposable
     {
+        private sealed class SkiaLineVBOHandle : IStaticVBODrawing.IVBOHandle
+        {
+            public LineVertex[] Points { get; private set; }
+            public float LineWidth { get; private set; }
+
+            public SkiaLineVBOHandle(IEnumerable<LineVertex> points, float lineWidth)
+            {
+                Points = points?.ToArray() ?? [];
+                LineWidth = lineWidth;
+            }
+
+            public void Dispose()
+            {
+                Points = [];
+                LineWidth = default;
+            }
+        }
+
         private SKCanvas canvas;
         private List<LineVertex> postedPoints = new();
         private IDrawingContext target;
-        private int drawcallCount = 0;
+        private readonly Dictionary<VertexDash, WeakReference<SKPathEffect>> dashPathEffectCache = new();
 
         public DefaultSkiaLineDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
@@ -28,9 +46,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             this.target = target;
             canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
-            prevPaintParam = default;
             postedPoints.Clear();
-            drawcallCount = 0;
         }
 
         public void End()
@@ -40,50 +56,46 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
             lineWidth = default;
             canvas = default;
-            prevPaintParam = default;
-            prevPaint?.Dispose();
             postedPoints.Clear();
         }
 
-        private (Vector4 color, VertexDash dash) prevPaintParam = default;
-        private SKPaint prevPaint = default;
+        private SKPaint curPaint = new()
+        {
+            IsAntialias = true,
+            Style = SKPaintStyle.Stroke
+        };
+        private readonly SKPath reusedPath = new();
         private float lineWidth;
 
-        private SKPaint GetPaint(Vector4 color, VertexDash dash, float lineWidth)
+        private void UpdatePaint(Vector4 color, VertexDash dash, float lineWidth)
         {
-            var param = (color, dash);
-            if (param == prevPaintParam && prevPaint != null)
-                return prevPaint;
-
-            prevPaint?.Dispose();
-
             var skColor = new SKColor(
                 (byte)(color.X * 255),
                 (byte)(color.Y * 255),
                 (byte)(color.Z * 255),
                 (byte)(color.W * 255));
 
-            var paint = new SKPaint
-            {
-                Color = skColor,
-                IsAntialias = true,
-                Style = SKPaintStyle.Stroke,
-                StrokeWidth = lineWidth,
-                PathEffect = dash == VertexDash.Solider ? null : SKPathEffect.CreateDash([10, 5], 0)
-            };
+            curPaint.Color = skColor;
+            curPaint.StrokeWidth = lineWidth;
+            curPaint.PathEffect = GetDashPathEffect(dash);
+        }
 
-            prevPaint = paint;
-            prevPaintParam = param;
+        private SKPathEffect GetDashPathEffect(VertexDash dash)
+        {
+            if (dash.DashSize <= 0 || dash.GapSize <= 0)
+                return null;
 
-            return paint;
+            if (!(dashPathEffectCache.TryGetValue(dash, out var pathEffectRef) && pathEffectRef.TryGetTarget(out var pathEffect)))
+                dashPathEffectCache[dash] = new(pathEffect = SKPathEffect.CreateDash([dash.DashSize, dash.GapSize], 0));
+
+            return pathEffect;
         }
 
         private void PostDraw()
         {
             //var path = new SKPath();
             var itor = postedPoints.GetEnumerator();
-            var points = ObjectPool.Get<List<SKPoint>>();
-            points.Clear();
+            using var points = ObjectPool.GetPooledList<SKPoint>();
 
             if (itor.MoveNext())
             {
@@ -104,8 +116,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     else
                     {
                         //draw current path
-                        var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                        DrawPath(points, paint);
+                        UpdatePaint(prev.Color, prev.Dash, lineWidth);
+                        DrawPath(points, curPaint);
 
                         //new path
                         points.Clear();
@@ -119,31 +131,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
                 if (points.Count > 0)
                 {
-                    var paint = GetPaint(prev.Color, prev.Dash, lineWidth);
-                    DrawPath(points, paint);
+                    UpdatePaint(prev.Color, prev.Dash, lineWidth);
+                    DrawPath(points, curPaint);
                 }
             }
 
-            ObjectPool.Return(points);
         }
 
-        private void _DrawPath(List<SKPoint> points, SKPaint paint)
+        private void DrawPath(IList<SKPoint> points, SKPaint paint)
         {
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                var cur = points[i];
-                var next = points[i + 1];
-                if (cur == next)
-                    continue;
-                canvas.DrawLine(cur, next, paint);
-            }
-            target.PerfomenceMonitor.CountDrawCall(this);
-            drawcallCount++;
-        }
-
-        private void DrawPath(List<SKPoint> points, SKPaint paint)
-        {
-            using var path = new SKPath();
+            var path = reusedPath;
+            path.Reset();
             path.MoveTo(points[0]);
             for (int i = 0; i < points.Count - 1; i++)
             {
@@ -154,17 +152,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 path.LineTo(next);
             }
             canvas.DrawPath(path, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
-            drawcallCount++;
-        }
-
-        private void DrawPath(SKPath path, SKPaint paint)
-        {
-            var actualPath = /*path.PointCount > 100 ? path.Simplify() : */path;
-
-            canvas.DrawPath(actualPath, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
-            drawcallCount++;
+            target.RenderContext.PerfomenceMonitor.CountDrawCall();
         }
 
         public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
@@ -197,12 +185,28 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         public IStaticVBODrawing.IVBOHandle GenerateVBOWithPresetPoints(IEnumerable<LineVertex> points, float lineWidth)
         {
-            throw new System.NotImplementedException();
+            return new SkiaLineVBOHandle(points, lineWidth);
         }
 
         public void DrawVBO(IDrawingContext target, IStaticVBODrawing.IVBOHandle vbo)
         {
-            throw new System.NotImplementedException();
+            if (vbo is not SkiaLineVBOHandle handle || handle.Points.Length == 0)
+                return;
+
+            Draw(target, handle.Points, handle.LineWidth);
+        }
+
+        public void Dispose()
+        {
+            curPaint.PathEffect = null;
+            curPaint.Dispose();
+            reusedPath.Dispose();
+
+            foreach (var effectRef in dashPathEffectCache.Values)
+                if (effectRef.TryGetTarget(out var effect))
+                    effect.Dispose();
+
+            dashPathEffectCache.Clear();
         }
     }
 }

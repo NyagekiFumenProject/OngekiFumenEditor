@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Utils;
 
@@ -45,3 +45,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.Beam
         }
     }
 }
+

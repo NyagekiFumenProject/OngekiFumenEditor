@@ -1,8 +1,9 @@
-﻿using AssocSupport;
+using AssocSupport;
 using AssocSupport.Models;
 using Caliburn.Micro;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
@@ -34,6 +35,23 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
         public IEnumerable<string> AvaliableSkiaBackends => Enum.GetNames<RenderBackendType>();
 
+        public IEnumerable<int> D3DRenderQueueFrameCountOptions { get; } = Enumerable.Range(2, 4);
+
+        public int D3DRenderQueueFrameCount
+        {
+            get => Math.Clamp(Setting.D3DRenderQueueFrameCount, 2, 5);
+            set
+            {
+                var clamped = Math.Clamp(value, 2, 5);
+                if (Setting.D3DRenderQueueFrameCount == clamped)
+                    return;
+
+                Setting.D3DRenderQueueFrameCount = clamped;
+                NotifyOfPropertyChange();
+                ApplyChanges();
+            }
+        }
+
         private bool enableAssociateNyagekiProj = true;
         public bool EnableAssociateNyagekiProj
         {
@@ -55,6 +73,13 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             set => Set(ref enableAssociateOgkr, value);
         }
 
+        private bool enableAssociateNyagekiScript = true;
+        public bool EnableAssociateNyagekiScript
+        {
+            get => enableAssociateNyagekiScript;
+            set => Set(ref enableAssociateNyagekiScript, value);
+        }
+
         public ProgramSettingViewModel()
         {
             ProgramUpdater = IoC.Get<IProgramUpdater>();
@@ -64,6 +89,8 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         private void SettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             Log.LogDebug($"logs setting property changed : {e.PropertyName}");
+            if (e.PropertyName == nameof(ProgramSetting.D3DRenderQueueFrameCount))
+                NotifyOfPropertyChange(() => D3DRenderQueueFrameCount);
         }
 
         public string SettingsPageName => Resources.TabProgram;
@@ -81,7 +108,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         {
             using var openFolderDialog = new FolderBrowserDialog();
             openFolderDialog.ShowNewFolderButton = true;
-            openFolderDialog.SelectedPath = Path.GetFullPath(Setting.DumpFileDirPath);
+            openFolderDialog.SelectedPath = Path.GetFullPath(AppDirectoryHelper.ResolveRelative(Setting.DumpFileDirPath));
             if (openFolderDialog.ShowDialog() == DialogResult.OK)
             {
                 var folderPath = openFolderDialog.SelectedPath;
@@ -103,7 +130,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
         public async void RegisterNyagekiAssociations()
         {
-            var iconFolder = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Resources", "FileAssociationIcons");
+            var iconFolder = Path.Combine(AppDirectoryHelper.ExecutableDirectory, "Resources", "FileAssociationIcons");
             var iconFilePath = Path.Combine(iconFolder, "icon.ico");
 
             if (!File.Exists(iconFilePath))
@@ -183,6 +210,26 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
                 });
             }
 
+            if (EnableAssociateNyagekiScript)
+            {
+                software.Identifiers.Add(new ProgrammaticID
+                {
+                    Type = new FileType
+                    {
+                        Extension = ".nyagekiScript",
+                        ContentType = "application/sample",
+                        PerceivedType = PerceivedTypes.Application,
+                    },
+                    Command = new ShellCommand
+                    {
+                        Path = Application.ExecutablePath,
+                        Argument = "%1"
+                    },
+                    Description = "Ongeki Fumen Editor Script File",
+                    Icon = iconFilePath,
+                });
+            }
+
             if (software.Identifiers.Count == 0)
             {
                 MessageBox.Show(Resources.RegisterOneFileTypeAtLeast, Resources.FileAssociation);
@@ -239,6 +286,11 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
         public async Task OpenShowNewVersionDialog(ActionExecutionContext e)
         {
             await IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
+        }
+
+        public async Task OpenRenderPerfomenceMeasurePanel()
+        {
+            await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<IRenderPerfomenceMeasurePanel>());
         }
 
         public void UnRegisterNyagekiAssociations()

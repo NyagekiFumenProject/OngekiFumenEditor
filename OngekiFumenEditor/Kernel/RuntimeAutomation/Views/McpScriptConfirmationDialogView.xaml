@@ -1,0 +1,93 @@
+<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Kernel.RuntimeAutomation.Views.McpScriptConfirmationDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.RuntimeAutomation.ViewModels"
+    Title="{markup:Translate [McpConfirmToolRequestTitle]}"
+    Width="760"
+    Height="560"
+    MinWidth="640"
+    MinHeight="420"
+    d:DataContext="{d:DesignInstance Type=vm:McpScriptConfirmationDialogViewModel, IsDesignTimeCreatable=False}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    ShowInTaskbar="False"
+    Style="{StaticResource MainWindowStyle}"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            FontWeight="SemiBold"
+            Text="{Binding IntroText}"
+            TextWrapping="Wrap" />
+
+        <TextBlock
+            Grid.Row="1"
+            Margin="0,12,0,12"
+            Text="{Binding MetadataText}"
+            TextWrapping="Wrap" />
+
+        <TextBox
+            Grid.Row="2"
+            FontFamily="Consolas"
+            AcceptsReturn="True"
+            AcceptsTab="True"
+            HorizontalScrollBarVisibility="Auto"
+            IsReadOnly="True"
+            Text="{Binding RequestPreview,Mode=OneWay}"
+            TextWrapping="NoWrap"
+            VerticalScrollBarVisibility="Auto" />
+
+        <CheckBox
+            Grid.Row="3"
+            Margin="0,12,0,12"
+            Content="{Binding RememberApprovalText}"
+            IsChecked="{Binding RememberApproval}" />
+
+        <StackPanel
+            Grid.Row="4"
+            Margin="0,0,0,12">
+            <CheckBox
+                Content="{markup:Translate [McpBackupFumenBeforeExecution]}"
+                IsChecked="{Binding BackupFumenBeforeExecution}" />
+            <TextBlock
+                Margin="24,4,0,0"
+                Foreground="DimGray"
+                Text="{markup:Translate [McpBackupFumenHintForNonScriptTool]}"
+                TextWrapping="Wrap"
+                Visibility="{Binding BackupHintVisibility}" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="5"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Width="96"
+                MinHeight="28"
+                Margin="0,0,10,0"
+                IsDefault="True"
+                cal:Message.Attach="[Event Click] = [Action OnAllowButtonClicked()]"
+                Content="{markup:Translate [McpAllow]}" />
+            <Button
+                Width="96"
+                MinHeight="28"
+                IsCancel="True"
+                cal:Message.Attach="[Event Click] = [Action OnCancelButtonClicked()]"
+                Content="{markup:Translate [Cancel]}" />
+        </StackPanel>
+    </Grid>
+</mah:MetroWindow>

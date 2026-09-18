@@ -1,12 +1,14 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -21,11 +23,8 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.Soflans
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class DurationSoflanDrawingTarget : CommonBatchDrawTargetBase<OngekiObjectBase>
+    public sealed class DurationSoflanDrawingTarget : CommonBatchDrawTargetBase<OngekiObjectBase>
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-        private IPolygonDrawing polygonDrawing;
         private SoflanPlaceholdQuery placeholdQuery;
 
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
@@ -40,13 +39,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            polygonDrawing = impl.PolygonDrawing;
             placeholdQuery = new SoflanPlaceholdQuery();
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<OngekiObjectBase> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<OngekiObjectBase> objs)
         {
             var soflans = objs.Select(x => x switch
             {
@@ -61,14 +57,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             float width = 70f;
             var endDash = new VertexDash(7, 5);
 
-            using var _d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var lines, out _);
-            lines.Clear();
-            using var _d3 = ObjectPool<List<(Vector2, Vector4)>>.GetWithUsingDisposable(out var polygonPoints, out _);
-            polygonPoints.Clear();
-            using var _d4 = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var lines2, out _);
-            lines2.Clear();
-            using var _d2 = ObjectPool<List<(string, Vector2, Vector4, OngekiTimelineObjectBase)>>.GetWithUsingDisposable(out var strings, out _);
-            strings.Clear();
+            using var lines = ObjectPool.GetPooledList<LineVertex>();
+            using var polygonPoints = ObjectPool.GetPooledList<(Vector2, Vector4)>();
+            using var lines2 = ObjectPool.GetPooledList<LineVertex>();
+            using var strings = ObjectPool.GetPooledList<(string, Vector2, Vector4, OngekiTimelineObjectBase)>();
 
             void PushLine(LineVertex start, LineVertex end)
             {
@@ -105,8 +97,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void DrawCommonSoflanStart(Soflan soflan, int queryPlaceholdPosIndex)
             {
                 var color = GetSoflanGroupColor(soflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
-                var placeholdY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.TGrid);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var placeholdY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(soflan.TGrid);
 
                 var placeholdLeftX = placeholdCenterX - width / 2;
                 var placeholdRightX = placeholdCenterX + width / 2;
@@ -122,9 +114,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 DrawCommonSoflanStart(soflan, queryPlaceholdPosIndex);
 
                 var color = GetSoflanGroupColor(soflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
-                var startCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.TGrid);
-                var endCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.EndTGrid);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var startCenterY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(soflan.TGrid);
+                var endCenterY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(soflan.EndTGrid);
 
                 var placeholdLeftX = placeholdCenterX - width / 2 * 0.75f;
                 var placeholdRightX = placeholdCenterX + width / 2 * 0.75f;
@@ -161,9 +153,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 DrawCommonSoflanStart(soflan, queryPlaceholdPosIndex);
 
                 var color = GetSoflanGroupColor(soflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
-                var startCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.TGrid);
-                var endCenterY = (float)target.ConvertToY_DefaultSoflanGroup(soflan.EndTGrid);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var startCenterY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(soflan.TGrid);
+                var endCenterY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(soflan.EndTGrid);
 
                 var placeholdLeftX = placeholdCenterX - width / 2 * 0.75f;
                 var placeholdRightX = placeholdCenterX + width / 2 * 0.75f;
@@ -179,8 +171,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             void DrawKeyframeSoflan(KeyframeSoflan keyframeSoflan, int queryPlaceholdPosIndex)
             {
                 var color = GetSoflanGroupColor(keyframeSoflan.SoflanGroup);
-                var placeholdCenterX = target.CurrentDrawingTargetContext.Rect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
-                var placeholdY = (float)target.ConvertToY_DefaultSoflanGroup(keyframeSoflan.TGrid);
+                var placeholdCenterX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - ((queryPlaceholdPosIndex * width + width / 2) + margin);
+                var placeholdY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(keyframeSoflan.TGrid);
 
                 var placeholdLeftX = placeholdCenterX - width / 2;
                 var placeholdRightX = placeholdCenterX + width / 2;
@@ -195,13 +187,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 polygonPoints.Add((new(placeholdCenterX, placeholdY + 10), color));
             }
 
-            using var _d5 =
+            using var visibleSoflanGroups =
                 target.Editor.Fumen.IndividualSoflanAreaMap.Keys.Concat(target.Editor.Fumen.SoflansMap.Keys)
                 .Distinct()
                 .Select(x => target.Editor.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _))
                 .Where(x => x.IsDisplaySoflanDesignMode)
                 .Select(x => x.SoflanGroupId)
-                .ToHashSetWithObjectPool(out var visibleSoflanGroups);
+                .ToHashSetWithObjectPool();
 
             //var queryPlaceholdPosIndex = 0;
             foreach (var s in soflans.Where(x => visibleSoflanGroups.Contains(x.SoflanGroup)))
@@ -227,7 +219,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             foreach (var (str, pos, color, obj) in strings)
             {
-                stringDrawing.Draw(
+                var size = builder.MeasureString(str, Vector2.One, 15, FontStyle.Bold, default);
+                builder.DrawString(
                     str,
                     pos,
                     Vector2.One,
@@ -235,18 +228,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     0,
                     color,
                     new Vector2(0.5f, 0.5f),
-                    IStringDrawing.StringStyle.Bold,
-                    target,
-                    default, out var size);
-                target.RegisterSelectableObject(obj, pos, size ?? Vector2.Zero);
+                    FontStyle.Bold,
+                    default);
+                target.RegisterSelectableObject(obj, pos, size);
 
                 if (obj.IsSelected)
                 {
                     var borderPos = new Vector2(pos.X, pos.Y - 2.8f);
                     var bx = borderPos.X;
                     var by = borderPos.Y;
-                    var hw = size.Value.X / 2 + 4;
-                    var hh = size.Value.Y / 2 + 1.2f;
+                    var hw = size.X / 2 + 4;
+                    var hh = size.Y / 2 + 1.2f;
 
                     lines.Add(new(new(bx - hw, by + hh), new(1, 1, 0, 0), VertexDash.Solider));
                     lines.Add(new(new(bx - hw, by + hh), new(1, 1, 0, 1), VertexDash.Solider));
@@ -258,15 +250,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
             }
 
-            lineDrawing.Draw(target, lines, 2.5f);
-            lineDrawing.Draw(target, lines2, 4f);
-
-            polygonDrawing.Begin(target, Primitive.Triangles);
-            {
-                foreach (var (pos, color) in polygonPoints)
-                    polygonDrawing.PostPoint(pos, color);
-            }
-            polygonDrawing.End();
+            builder.DrawSimpleLines(lines, 2.5f);
+            builder.DrawSimpleLines(lines2, 4f);
+            builder.DrawPolygon(Primitive.Triangles, polygonPoints.Select(x => new PolygonVertex(x.Item1, x.Item2)));
         }
 
         private Vector4 GetSoflanGroupColor(int soflanGroup)

@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System.ComponentModel.Composition;

@@ -18,7 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenConverter.Kernel
             if (parserManager.GetSerializer(savePathOrFormat) is not IFumenSerializable serializable) {
                 throw new FumenConvertException(Resources.OutputFumenNotSupport);
             }
-            
+
             try {
                 return await serializable.SerializeAsync(fumen);
             }

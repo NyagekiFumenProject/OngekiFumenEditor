@@ -1,9 +1,10 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
+using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -14,126 +15,127 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Windows;
-using System.Windows.Media;
 
 namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.ObjectProperty.Operation
 {
-	public class SvgPrefabOperationViewModel : PropertyChangedBase
-	{
-		public SvgPrefabBase SvgPrefab { get; }
+    public class SvgPrefabOperationViewModel : PropertyChangedBase
+    {
+        public SvgPrefabBase SvgPrefab { get; }
 
-		public SvgPrefabOperationViewModel(SvgPrefabBase svgPrefab)
-		{
-			SvgPrefab = svgPrefab;
-		}
+        public SvgPrefabOperationViewModel(SvgPrefabBase svgPrefab)
+        {
+            SvgPrefab = svgPrefab;
+        }
 
-		public void OnGenerateLaneToEditor()
-		{
-			if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
-			{
-				MessageBox.Show(Resources.MustMakeEditorActive);
-				return;
-			}
+        public void OnGenerateLaneToEditor()
+        {
+            SvgPrefabBuildHelper.EnsureBuilt(SvgPrefab);
 
-			if (!editor.IsDesignMode)
-			{
-				MessageBox.Show(Resources.EditorMustBeDesignMode);
-				return;
-			}
+            if (IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor is not FumenVisualEditorViewModel editor)
+            {
+                MessageBox.Show(Resources.MustMakeEditorActive);
+                return;
+            }
 
-			if (SvgPrefab.ProcessingDrawingGroup is not DrawingGroup drawingGroup)
-			{
-				MessageBox.Show(Resources.SvgContentNotSupport);
-				return;
-			}
+            if (!editor.IsDesignMode)
+            {
+                MessageBox.Show(Resources.EditorMustBeDesignMode);
+                return;
+            }
 
-			if (SvgPrefab.ShowOriginColor)
-			{
-				MessageBox.Show(Resources.UncheckShowOriginColor);
-				return;
-			}
+            if (SvgPrefab.ProcessingVectorScene is null)
+            {
+                MessageBox.Show(Resources.SvgContentNotSupport);
+                return;
+            }
 
-			var baseCanvasX = XGridCalculator.ConvertXGridToX(SvgPrefab.XGrid, editor);
-			var baseCanvasY = TGridCalculator.ConvertTGridToY_DesignMode(SvgPrefab.TGrid, editor);
+            if (SvgPrefab.ShowOriginColor)
+            {
+                MessageBox.Show(Resources.UncheckShowOriginColor);
+                return;
+            }
 
-			var segments = SvgPrefab.GenerateLineSegments();
+            var baseCanvasX = XGridCalculator.ConvertXGridToX(SvgPrefab.XGrid, editor);
+            var baseCanvasY = editor.ConvertTGridToY_DesignMode(SvgPrefab.TGrid);
 
-			var genStarts = new List<ConnectableStartObject>();
+            var segments = SvgPrefab.GenerateLineSegments();
 
-			foreach (var seg in segments)
-			{
-				var laneColor = SvgPrefab.PickSimilarLaneColor(seg.Color);
-				var points = seg.RelativePoints;
+            var genStarts = new List<ConnectableStartObject>();
 
-				LaneStartBase targetObject = laneColor?.LaneType switch
-				{
-					LaneType.Left => new LaneLeftStart(),
-					LaneType.Center => new LaneCenterStart(),
-					LaneType.Right => new LaneRightStart(),
-					LaneType.Colorful => new ColorfulLaneStart(),
-					_ => null
-				};
+            foreach (var seg in segments)
+            {
+                var laneColor = SvgPrefab.PickSimilarLaneColor(seg.Color);
+                var points = seg.RelativePoints;
 
-				if (targetObject is null)
-					continue;
+                LaneStartBase targetObject = laneColor?.LaneType switch
+                {
+                    LaneType.Left => new LaneLeftStart(),
+                    LaneType.Center => new LaneCenterStart(),
+                    LaneType.Right => new LaneRightStart(),
+                    LaneType.Colorful => new ColorfulLaneStart(),
+                    _ => null
+                };
 
-				void CommomBuildUp(Vector2 relativePoint, ConnectableObjectBase obj)
-				{
-					var actualCanvasX = baseCanvasX + relativePoint.X;
-					var actualCanvasY = baseCanvasY + relativePoint.Y;
+                if (targetObject is null)
+                    continue;
 
-					//Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)actualCanvasX, (float)actualCanvasY)}");
-					var tGrid = TGridCalculator.ConvertYToTGrid_DesignMode(actualCanvasY, editor);
-					var xGrid = XGridCalculator.ConvertXToXGrid(actualCanvasX, editor);
+                void CommomBuildUp(Vector2 relativePoint, ConnectableObjectBase obj)
+                {
+                    var actualCanvasX = baseCanvasX + relativePoint.X;
+                    var actualCanvasY = baseCanvasY + relativePoint.Y;
 
-					obj.XGrid = xGrid;
-					obj.TGrid = tGrid;
-				}
+                    //Log.LogDebug($"{relativePoint}  ->  {new Vector2((float)actualCanvasX, (float)actualCanvasY)}");
+                    var tGrid = editor.ConvertYToTGrid_DesignMode(actualCanvasY);
+                    var xGrid = XGridCalculator.ConvertXToXGrid(actualCanvasX, editor);
 
-				var firstP = points[0];
-				var startObj = LambdaActivator.CreateInstance(targetObject.GetType()) as ConnectableStartObject;
-				CommomBuildUp(firstP, startObj);
+                    obj.XGrid = xGrid;
+                    obj.TGrid = tGrid;
+                }
 
-				foreach (var childP in points.Skip(1).SkipLast(1))
-				{
-					var nextObj = targetObject.CreateChildObject();
-					CommomBuildUp(childP, nextObj);
-					startObj.AddChildObject(nextObj);
-				}
+                var firstP = points[0];
+                var startObj = LambdaActivator.CreateInstance(targetObject.GetType()) as ConnectableStartObject;
+                CommomBuildUp(firstP, startObj);
 
-				var lastP = points.LastOrDefault();
-				var endObj = targetObject.CreateChildObject();
-				CommomBuildUp(lastP, endObj);
-				startObj.AddChildObject(endObj);
+                foreach (var childP in points.Skip(1).SkipLast(1))
+                {
+                    var nextObj = targetObject.CreateChildObject();
+                    CommomBuildUp(childP, nextObj);
+                    startObj.AddChildObject(nextObj);
+                }
 
-				var r = startObj.InterpolateCurve().ToArray();
+                var lastP = points.LastOrDefault();
+                var endObj = targetObject.CreateChildObject();
+                CommomBuildUp(lastP, endObj);
+                startObj.AddChildObject(endObj);
 
-				var subGenStarts = startObj.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory).ToArray();
-				if (targetObject is IColorfulLane lane)
-				{
-					//染色
-					var colorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Color == laneColor?.Color);
-					var brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
-					subGenStarts
-						.SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>().Append(x))
-						.OfType<IColorfulLane>()
-						.ForEach(x =>
-						{
-							x.ColorId = colorId;
-							x.Brightness = brightness;
-						});
-				}
+                var r = startObj.InterpolateCurve().ToArray();
 
-				genStarts.AddRange(subGenStarts);
-			}
+                var subGenStarts = startObj.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory).ToArray();
+                if (targetObject is IColorfulLane lane)
+                {
+                    //Ⱦɫ
+                    var colorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Color == laneColor?.Color);
+                    var brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
+                    subGenStarts
+                        .SelectMany(x => x.Children.AsEnumerable<ConnectableObjectBase>().Append(x))
+                        .OfType<IColorfulLane>()
+                        .ForEach(x =>
+                        {
+                            x.ColorId = colorId;
+                            x.Brightness = brightness;
+                        });
+                }
 
-			editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SvgGenerateLane, () =>
-			{
-				editor.Fumen.AddObjects(genStarts);
-			}, () =>
-			{
-				editor.Fumen.RemoveObjects(genStarts);
-			}));
-		}
-	}
+                genStarts.AddRange(subGenStarts);
+            }
+
+            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SvgGenerateLane, () =>
+            {
+                editor.Fumen.AddObjects(genStarts);
+            }, () =>
+            {
+                editor.Fumen.RemoveObjects(genStarts);
+            }));
+        }
+    }
 }

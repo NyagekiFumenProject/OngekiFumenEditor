@@ -1,4 +1,4 @@
-﻿using AssetsTools.NET;
+using AssetsTools.NET;
 using AssetsTools.NET.Extra;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
@@ -305,10 +305,10 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
                     d[i * 3 + 0] = x;
                     d[i * 3 + 1] = y;
                     /*
-					d[i * 5 + 2] = 0;
-					d[i * 5 + 3] = u;
-					d[i * 5 + 3] = v;
-					*/
+                    d[i * 5 + 2] = 0;
+                    d[i * 5 + 3] = u;
+                    d[i * 5 + 3] = v;
+                    */
                 }
 
                 setVertexData(floatSpan, 0, -hw, hh);

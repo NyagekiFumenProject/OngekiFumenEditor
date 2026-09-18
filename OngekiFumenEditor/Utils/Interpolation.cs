@@ -1,4 +1,4 @@
-﻿// From https://github.com/ppy/osu-framework/blob/master/osu.Framework/MathUtils/Interpolation.cs
+// From https://github.com/ppy/osu-framework/blob/master/osu.Framework/MathUtils/Interpolation.cs
 /*
 Copyright (c) 2007-2018 ppy Pty Ltd <contact@ppy.sh>.
 
@@ -73,22 +73,18 @@ namespace OngekiFumenEditor.Utils
         {
             var s = easing.ToString();
 
-            var contain_in = s.Contains("In");
-            var contain_out = s.Contains("Out");
+            var containIn = s.Contains("In");
+            var containOut = s.Contains("Out");
 
-            if (contain_in ^ contain_out)
+            if (containIn ^ containOut)
             {
                 var x = s;
 
-                if (contain_in)
-                {
+                if (containIn)
                     x = x.Replace("In", "Out");
-                }
 
-                if (contain_out)
-                {
+                if (containOut)
                     x = x.Replace("Out", "In");
-                }
 
                 return Enum.TryParse(x, out EasingTypes r) ? r : EasingTypes.None;
             }
@@ -107,13 +103,13 @@ namespace OngekiFumenEditor.Utils
 
         public static double ApplyEasing(EasingTypes easing, double normalizedValue)
         {
-            const double elastic_const = 2 * Math.PI / .3;
-            const double elastic_const2 = .3 / 4;
+            const double elasticConst = 2 * Math.PI / .3;
+            const double elasticConst2 = .3 / 4;
 
-            const double back_const = 1.70158;
-            const double back_const2 = back_const * 1.525;
+            const double backConst = 1.70158;
+            const double backConst2 = backConst * 1.525;
 
-            const double bounce_const = 1 / 2.75;
+            const double bounceConst = 1 / 2.75;
 
             switch (easing)
             {
@@ -129,7 +125,8 @@ namespace OngekiFumenEditor.Utils
                     return normalizedValue * (2 - normalizedValue);
 
                 case EasingTypes.InOutQuad:
-                    if (normalizedValue < .5) return normalizedValue * normalizedValue * 2;
+                    if (normalizedValue < .5)
+                        return normalizedValue * normalizedValue * 2;
                     return --normalizedValue * normalizedValue * -2 + 1;
 
                 case EasingTypes.InCubic:
@@ -139,7 +136,8 @@ namespace OngekiFumenEditor.Utils
                     return --normalizedValue * normalizedValue * normalizedValue + 1;
 
                 case EasingTypes.InOutCubic:
-                    if (normalizedValue < .5) return normalizedValue * normalizedValue * normalizedValue * 4;
+                    if (normalizedValue < .5)
+                        return normalizedValue * normalizedValue * normalizedValue * 4;
                     return --normalizedValue * normalizedValue * normalizedValue * 4 + 1;
 
                 case EasingTypes.InQuart:
@@ -149,7 +147,8 @@ namespace OngekiFumenEditor.Utils
                     return 1 - --normalizedValue * normalizedValue * normalizedValue * normalizedValue;
 
                 case EasingTypes.InOutQuart:
-                    if (normalizedValue < .5) return normalizedValue * normalizedValue * normalizedValue * normalizedValue * 8;
+                    if (normalizedValue < .5)
+                        return normalizedValue * normalizedValue * normalizedValue * normalizedValue * 8;
                     return --normalizedValue * normalizedValue * normalizedValue * normalizedValue * -8 + 1;
 
                 case EasingTypes.InQuint:
@@ -159,7 +158,8 @@ namespace OngekiFumenEditor.Utils
                     return --normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue + 1;
 
                 case EasingTypes.InOutQuint:
-                    if (normalizedValue < .5) return normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue * 16;
+                    if (normalizedValue < .5)
+                        return normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue * 16;
                     return --normalizedValue * normalizedValue * normalizedValue * normalizedValue * normalizedValue * 16 + 1;
 
                 case EasingTypes.InSine:
@@ -178,7 +178,8 @@ namespace OngekiFumenEditor.Utils
                     return -Math.Pow(2, -10 * normalizedValue) + 1;
 
                 case EasingTypes.InOutExpo:
-                    if (normalizedValue < .5) return .5 * Math.Pow(2, 20 * normalizedValue - 10);
+                    if (normalizedValue < .5)
+                        return .5 * Math.Pow(2, 20 * normalizedValue - 10);
                     return 1 - .5 * Math.Pow(2, -20 * normalizedValue + 10);
 
                 case EasingTypes.InCirc:
@@ -188,57 +189,60 @@ namespace OngekiFumenEditor.Utils
                     return Math.Sqrt(1 - --normalizedValue * normalizedValue);
 
                 case EasingTypes.InOutCirc:
-                    if ((normalizedValue *= 2) < 1) return .5 - .5 * Math.Sqrt(1 - normalizedValue * normalizedValue);
+                    if ((normalizedValue *= 2) < 1)
+                        return .5 - .5 * Math.Sqrt(1 - normalizedValue * normalizedValue);
                     return .5 * Math.Sqrt(1 - (normalizedValue -= 2) * normalizedValue) + .5;
 
                 case EasingTypes.InElastic:
-                    return -Math.Pow(2, -10 + 10 * normalizedValue) * Math.Sin((1 - elastic_const2 - normalizedValue) * elastic_const);
+                    return -Math.Pow(2, -10 + 10 * normalizedValue) * Math.Sin((1 - elasticConst2 - normalizedValue) * elasticConst);
 
                 case EasingTypes.OutElastic:
-                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((normalizedValue - elastic_const2) * elastic_const) + 1;
+                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((normalizedValue - elasticConst2) * elasticConst) + 1;
 
                 case EasingTypes.OutElasticHalf:
-                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((.5 * normalizedValue - elastic_const2) * elastic_const) + 1;
+                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((.5 * normalizedValue - elasticConst2) * elasticConst) + 1;
 
                 case EasingTypes.OutElasticQuarter:
-                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((.25 * normalizedValue - elastic_const2) * elastic_const) + 1;
+                    return Math.Pow(2, -10 * normalizedValue) * Math.Sin((.25 * normalizedValue - elasticConst2) * elasticConst) + 1;
 
                 case EasingTypes.InOutElastic:
                     if ((normalizedValue *= 2) < 1)
-                        return -.5 * Math.Pow(2, -10 + 10 * normalizedValue) * Math.Sin((1 - elastic_const2 * 1.5 - normalizedValue) * elastic_const / 1.5);
-                    return .5 * Math.Pow(2, -10 * --normalizedValue) * Math.Sin((normalizedValue - elastic_const2 * 1.5) * elastic_const / 1.5) + 1;
+                        return -.5 * Math.Pow(2, -10 + 10 * normalizedValue) * Math.Sin((1 - elasticConst2 * 1.5 - normalizedValue) * elasticConst / 1.5);
+                    return .5 * Math.Pow(2, -10 * --normalizedValue) * Math.Sin((normalizedValue - elasticConst2 * 1.5) * elasticConst / 1.5) + 1;
 
                 case EasingTypes.InBack:
-                    return normalizedValue * normalizedValue * ((back_const + 1) * normalizedValue - back_const);
+                    return normalizedValue * normalizedValue * ((backConst + 1) * normalizedValue - backConst);
 
                 case EasingTypes.OutBack:
-                    return --normalizedValue * normalizedValue * ((back_const + 1) * normalizedValue + back_const) + 1;
+                    return --normalizedValue * normalizedValue * ((backConst + 1) * normalizedValue + backConst) + 1;
 
                 case EasingTypes.InOutBack:
-                    if ((normalizedValue *= 2) < 1) return .5 * normalizedValue * normalizedValue * ((back_const2 + 1) * normalizedValue - back_const2);
-                    return .5 * ((normalizedValue -= 2) * normalizedValue * ((back_const2 + 1) * normalizedValue + back_const2) + 2);
+                    if ((normalizedValue *= 2) < 1)
+                        return .5 * normalizedValue * normalizedValue * ((backConst2 + 1) * normalizedValue - backConst2);
+                    return .5 * ((normalizedValue -= 2) * normalizedValue * ((backConst2 + 1) * normalizedValue + backConst2) + 2);
 
                 case EasingTypes.InBounce:
                     normalizedValue = 1 - normalizedValue;
-                    if (normalizedValue < bounce_const)
+                    if (normalizedValue < bounceConst)
                         return 1 - 7.5625 * normalizedValue * normalizedValue;
-                    if (normalizedValue < 2 * bounce_const)
-                        return 1 - (7.5625 * (normalizedValue -= 1.5 * bounce_const) * normalizedValue + .75);
-                    if (normalizedValue < 2.5 * bounce_const)
-                        return 1 - (7.5625 * (normalizedValue -= 2.25 * bounce_const) * normalizedValue + .9375);
-                    return 1 - (7.5625 * (normalizedValue -= 2.625 * bounce_const) * normalizedValue + .984375);
+                    if (normalizedValue < 2 * bounceConst)
+                        return 1 - (7.5625 * (normalizedValue -= 1.5 * bounceConst) * normalizedValue + .75);
+                    if (normalizedValue < 2.5 * bounceConst)
+                        return 1 - (7.5625 * (normalizedValue -= 2.25 * bounceConst) * normalizedValue + .9375);
+                    return 1 - (7.5625 * (normalizedValue -= 2.625 * bounceConst) * normalizedValue + .984375);
 
                 case EasingTypes.OutBounce:
-                    if (normalizedValue < bounce_const)
+                    if (normalizedValue < bounceConst)
                         return 7.5625 * normalizedValue * normalizedValue;
-                    if (normalizedValue < 2 * bounce_const)
-                        return 7.5625 * (normalizedValue -= 1.5 * bounce_const) * normalizedValue + .75;
-                    if (normalizedValue < 2.5 * bounce_const)
-                        return 7.5625 * (normalizedValue -= 2.25 * bounce_const) * normalizedValue + .9375;
-                    return 7.5625 * (normalizedValue -= 2.625 * bounce_const) * normalizedValue + .984375;
+                    if (normalizedValue < 2 * bounceConst)
+                        return 7.5625 * (normalizedValue -= 1.5 * bounceConst) * normalizedValue + .75;
+                    if (normalizedValue < 2.5 * bounceConst)
+                        return 7.5625 * (normalizedValue -= 2.25 * bounceConst) * normalizedValue + .9375;
+                    return 7.5625 * (normalizedValue -= 2.625 * bounceConst) * normalizedValue + .984375;
 
                 case EasingTypes.InOutBounce:
-                    if (normalizedValue < .5) return .5 - .5 * ApplyEasing(EasingTypes.OutBounce, 1 - normalizedValue * 2);
+                    if (normalizedValue < .5)
+                        return .5 - .5 * ApplyEasing(EasingTypes.OutBounce, 1 - normalizedValue * 2);
                     return ApplyEasing(EasingTypes.OutBounce, (normalizedValue - .5) * 2) * .5 + .5;
 
                 case EasingTypes.OutPow10:
@@ -247,16 +251,27 @@ namespace OngekiFumenEditor.Utils
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double EasingValue(double normalizedValue, double fromValue, double ToValue, EasingTypes easing = EasingTypes.None)
+        public static double EasingValue(double normalizedValue, double fromValue, double toValue, EasingTypes easing = EasingTypes.None)
         {
-            return Lerp(fromValue, ToValue, ApplyEasing(easing, normalizedValue));
+            return Lerp(fromValue, toValue, ApplyEasing(easing, normalizedValue));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double EasingValue(double progress, double fromProgress, double toProgress, double fromValue, double ToValue, EasingTypes easing = EasingTypes.None)
+        public static double EasingValue(double progress, double fromProgress, double toProgress, double fromValue, double toValue, EasingTypes easing = EasingTypes.None)
         {
-            var normalizedProgress = Math.Clamp((progress - fromProgress) / (toProgress - fromProgress), 0, 1);
-            return EasingValue(normalizedProgress, fromValue, ToValue, easing);
+            var normalizedProgress = Clamp((progress - fromProgress) / (toProgress - fromProgress), 0, 1);
+            return EasingValue(normalizedProgress, fromValue, toValue, easing);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double Clamp(double value, double min, double max)
+        {
+            if (value < min)
+                return min;
+            if (value > max)
+                return max;
+            return value;
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Modules.FumenVisualEditor;

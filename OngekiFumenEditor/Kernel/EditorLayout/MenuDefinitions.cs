@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Menus;
+using Gemini.Framework.Menus;
 using OngekiFumenEditor.Kernel.EditorLayout.Commands.ApplySuggestEditorLayout;
 using System.ComponentModel.Composition;
 

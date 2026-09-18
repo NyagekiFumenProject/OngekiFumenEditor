@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Audio;
@@ -23,327 +23,344 @@ using System.Xml.XPath;
 
 namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 {
-	[Export(typeof(IOgkiFumenListBrowser))]
-	public class OgkiFumenListBrowserViewModel : WindowBase, IOgkiFumenListBrowser
-	{
-		private List<OngekiFumenSet> fumenSets = new();
+    [Export(typeof(IOgkiFumenListBrowser))]
+    public sealed class OgkiFumenListBrowserViewModel : WindowBase, IOgkiFumenListBrowser
+    {
+        private List<OngekiFumenSet> fumenSets = new();
 
-		private string rootFolderPath = string.Empty;
-		public string RootFolderPath
-		{
-			get => rootFolderPath;
-			set
-			{
-				Set(ref rootFolderPath, value);
-				RefreshList();
-			}
-		}
+        public string RootFolderPath
+        {
+            get;
+            set
+            {
+                Set(ref field, value);
+                RefreshList();
+            }
+        }
 
-		private bool isBusy = false;
-		public bool IsBusy
-		{
-			get => isBusy;
-			set
-			{
-				Set(ref isBusy, value);
-			}
-		}
+        public bool IsBusy
+        {
+            get;
+            set => Set(ref field, value);
+        }
 
-		private string keywords = string.Empty;
-		public string Keywords
-		{
-			get => keywords;
-			set
-			{
-				Set(ref keywords, value);
-			}
-		}
+        public string Keywords
+        {
+            get;
+            set => Set(ref field, value);
+        }
 
-		public ObservableCollection<OngekiFumenSet> DisplayFumenSets { get; } = new ObservableCollection<OngekiFumenSet>();
+        public string BpmMin
+        {
+            get;
+            set => Set(ref field, value);
+        }
 
-		public OgkiFumenListBrowserViewModel()
-		{
-			DisplayName = Resources.OgkiFumenListBrowser;
-			rootFolderPath = Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
-		}
+        public string BpmMax
+        {
+            get;
+            set => Set(ref field, value);
+        }
 
-		protected override void OnViewLoaded(object view)
-		{
-			base.OnViewLoaded(view);
-			if (Directory.Exists(RootFolderPath))
-				RefreshList();
-		}
+        public ObservableCollection<OngekiFumenSet> DisplayFumenSets { get; } = new ObservableCollection<OngekiFumenSet>();
 
-		private async void RefreshList()
-		{
-			IsBusy = true;
-			fumenSets.Clear();
-			DisplayFumenSets.Clear();
-			
-			var folder = await SearchFumenSet(RootFolderPath);
+        public OgkiFumenListBrowserViewModel()
+        {
+            DisplayName = Resources.OgkiFumenListBrowser;
+            RootFolderPath = OptionGeneratorToolsSetting.Default.LastLoadedGameFolder;
+        }
 
-			fumenSets.AddRange(folder);
-			IsBusy = false;
+        protected override void OnViewLoaded(object view)
+        {
+            base.OnViewLoaded(view);
+            if (Directory.Exists(RootFolderPath))
+                RefreshList();
+        }
 
-			ApplyKeywords();
-		}
+        private async void RefreshList()
+        {
+            fumenSets.Clear();
+            DisplayFumenSets.Clear();
 
-		public void ApplyKeywords()
-		{
-			var keyword = Keywords?.ToLowerInvariant();
+            if (!Directory.Exists(RootFolderPath))
+                return;
 
-			static int LevenshteinDistance(string s1, string s2)
-			{
-				if (s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase) || s2.Contains(s1, StringComparison.InvariantCultureIgnoreCase))
-					return 0;
+            IsBusy = true;
 
-				int[,] dp = new int[s1.Length + 1, s2.Length + 1];
+            var folder = await SearchFumenSet(RootFolderPath);
 
-				for (int i = 0; i <= s1.Length; i++)
-				{
-					dp[i, 0] = i;
-				}
+            fumenSets.AddRange(folder);
+            IsBusy = false;
 
-				for (int j = 0; j <= s2.Length; j++)
-				{
-					dp[0, j] = j;
-				}
+            ApplyKeywords();
+        }
 
-				for (int i = 1; i <= s1.Length; i++)
-				{
-					for (int j = 1; j <= s2.Length; j++)
-					{
-						int cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
-						dp[i, j] = Math.Min(Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1), dp[i - 1, j - 1] + cost);
-					}
-				}
+        public void ApplyKeywords()
+        {
+            var keyword = Keywords?.ToLowerInvariant();
 
-				return dp[s1.Length, s2.Length];
-			}
+            static int LevenshteinDistance(string s1, string s2)
+            {
+                if (s1.Contains(s2, StringComparison.InvariantCultureIgnoreCase) || s2.Contains(s1, StringComparison.InvariantCultureIgnoreCase))
+                    return 0;
 
-			int fuzzyCalc(IEnumerable<string> strs)
-			{
-				var goodVal = int.MaxValue;
+                int[,] dp = new int[s1.Length + 1, s2.Length + 1];
 
-				foreach (var str in strs.FilterNull())
-				{
-					var modCount = LevenshteinDistance(str.ToLowerInvariant(), keyword);
-					goodVal = Math.Min(modCount, goodVal);
-				}
+                for (int i = 0; i <= s1.Length; i++)
+                {
+                    dp[i, 0] = i;
+                }
 
-				return goodVal;
-			}
+                for (int j = 0; j <= s2.Length; j++)
+                {
+                    dp[0, j] = j;
+                }
 
-			DisplayFumenSets.Clear();
+                for (int i = 1; i <= s1.Length; i++)
+                {
+                    for (int j = 1; j <= s2.Length; j++)
+                    {
+                        int cost = (s1[i - 1] == s2[j - 1]) ? 0 : 1;
+                        dp[i, j] = Math.Min(Math.Min(dp[i - 1, j] + 1, dp[i, j - 1] + 1), dp[i - 1, j - 1] + cost);
+                    }
+                }
 
-			var result = string.IsNullOrWhiteSpace(keyword) ? fumenSets : fumenSets.Select(r =>
-			{
-				var provideStrings = new[]
-				{
-					r.Artist,
-					r.Title,
-				}.Concat(r.Difficults.Select(x => x.Creator));
+                return dp[s1.Length, s2.Length];
+            }
 
-				var q = fuzzyCalc(provideStrings);
+            int fuzzyCalc(IEnumerable<string> strs)
+            {
+                var goodVal = int.MaxValue;
 
-				return (q, r);
-			}).Where(x => x.q < 5).OrderBy(x => x.q).Select(x => x.r);
+                foreach (var str in strs.FilterNull())
+                {
+                    var modCount = LevenshteinDistance(str.ToLowerInvariant(), keyword);
+                    goodVal = Math.Min(modCount, goodVal);
+                }
 
-			DisplayFumenSets.AddRange(result);
-		}
+                return goodVal;
+            }
 
-		public void SelectFolder()
-		{
-			if (!FileDialogHelper.OpenDirectory(Resources.SelectGameRootFolder, out var folderPath))
-				return;
+            DisplayFumenSets.Clear();
 
-			RootFolderPath = folderPath;
-			Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder = RootFolderPath;
-			Properties.OptionGeneratorToolsSetting.Default.Save();
-		}
+            var result = string.IsNullOrWhiteSpace(keyword) ? fumenSets : fumenSets.Select(r =>
+            {
+                var provideStrings = new[]
+                {
+                    r.Artist,
+                    r.Title,
+                }.Concat(r.Difficults.Select(x => x.Creator));
 
-		public async Task<Folder> BuildFolder(string folderPath, Dictionary<string, string> resourceMap)
-		{
-			var folder = new Folder();
-			folder.Name = Path.GetFileName(folderPath);
+                var q = fuzzyCalc(provideStrings);
 
-			var subFolderPaths = Directory.GetDirectories(folderPath);
+                return (q, r);
+            }).Where(x => x.q < 5).OrderBy(x => x.q).Select(x => x.r);
 
-			await Task.WhenAll(subFolderPaths.Select(subFolderPath => Task.Run(async () =>
-			{
-				var subFolder = await BuildFolder(subFolderPath, resourceMap);
-				if (!subFolder.IsEmpty)
-					folder.SubFolders.Add(subFolder);
-			})).ToArray());
+            float? minBpm = float.TryParse(BpmMin, out var minVal) ? minVal : null;
+            float? maxBpm = float.TryParse(BpmMax, out var maxVal) ? maxVal : null;
 
-			var folderName = Path.GetFileName(folderPath).ToLowerInvariant();
+            if (minBpm.HasValue || maxBpm.HasValue)
+            {
+                result = result.Where(set => set.Difficults.Any(d =>
+                    (!minBpm.HasValue || d.Bpm >= minBpm.Value) &&
+                    (!maxBpm.HasValue || d.Bpm <= maxBpm.Value)));
+            }
 
-			if (folderName == "music")
-			{
-				var musicFilePaths = Directory.GetFiles(folderPath, "Music.xml", SearchOption.AllDirectories);
-				foreach (var musicFilePath in musicFilePaths)
-				{
-					if ((await BuildFumenSet(musicFilePath)) is OngekiFumenSet set)
-						folder.FumenSets.Add(set);
-				}
-			}
-			else if (folderName == "musicsource")
-			{
-				var musicSourceFilePaths = Directory.GetFiles(folderPath, "MusicSource.xml", SearchOption.AllDirectories);
-				foreach (var musicSourceFilePath in musicSourceFilePaths)
-				{
-					await BuildMusicSource(musicSourceFilePath, resourceMap);
-				}
-			}
-			else if (folderName == "assets")
-			{
-				var files = Directory.GetFiles(folderPath, "ui_jacket_*_s");
-				foreach (var file in files)
-					BuildAssets(file, resourceMap);
-			}
+            DisplayFumenSets.AddRange(result);
+        }
 
-			return folder;
-		}
+        public void SelectFolder()
+        {
+            if (!FileDialogHelper.OpenDirectory(Resources.SelectGameRootFolder, out var folderPath))
+                return;
 
-		private void BuildAssets(string file, Dictionary<string, string> resourceMap)
-		{
-			if (!int.TryParse(Path.GetFileName(file).Replace("ui_jacket_", string.Empty).Replace("_s", string.Empty), out var id))
-				return;
-			lock (resourceMap)
-			{
-				resourceMap["asset_" + id] = file;
-			}
-		}
+            RootFolderPath = folderPath;
+            Properties.OptionGeneratorToolsSetting.Default.LastLoadedGameFolder = RootFolderPath;
+            Properties.OptionGeneratorToolsSetting.Default.Save();
+        }
 
-		private async Task BuildMusicSource(string musicSourceFilePath, Dictionary<string, string> resourceMap)
-		{
-			using var fs = File.OpenRead(musicSourceFilePath);
-			var musicXml = await XDocument.LoadAsync(fs, LoadOptions.None, default);
+        public async Task<Folder> BuildFolder(string folderPath, Dictionary<string, string> resourceMap)
+        {
+            var folder = new Folder();
+            folder.Name = Path.GetFileName(folderPath);
 
-			string GetString(string name, string sub = "str")
-			{
-				var element = musicXml.XPathSelectElement($@"//{name}[1]/{sub}[1]");
-				if (element?.Value is string strValue)
-					return strValue;
-				return string.Empty;
-			}
+            var subFolderPaths = Directory.GetDirectories(folderPath);
 
-			if (!int.TryParse(GetString("Name", "id"), out var id))
-				return;
+            await Task.WhenAll(subFolderPaths.Select(subFolderPath => Task.Run(async () =>
+            {
+                var subFolder = await BuildFolder(subFolderPath, resourceMap);
+                if (!subFolder.IsEmpty)
+                    folder.SubFolders.Add(subFolder);
+            })).ToArray());
 
-			var acbFileName = GetString("acbFile", "path");
-			var acbFilePath = Path.Combine(Path.GetDirectoryName(musicSourceFilePath), acbFileName);
+            var folderName = Path.GetFileName(folderPath).ToLowerInvariant();
 
-			if (!File.Exists(acbFilePath))
-				return;
+            if (folderName == "music")
+            {
+                var musicFilePaths = Directory.GetFiles(folderPath, "Music.xml", SearchOption.AllDirectories);
+                foreach (var musicFilePath in musicFilePaths)
+                {
+                    if ((await BuildFumenSet(musicFilePath)) is OngekiFumenSet set)
+                        folder.FumenSets.Add(set);
+                }
+            }
+            else if (folderName == "musicsource")
+            {
+                var musicSourceFilePaths = Directory.GetFiles(folderPath, "MusicSource.xml", SearchOption.AllDirectories);
+                foreach (var musicSourceFilePath in musicSourceFilePaths)
+                {
+                    await BuildMusicSource(musicSourceFilePath, resourceMap);
+                }
+            }
+            else if (folderName == "assets")
+            {
+                var files = Directory.GetFiles(folderPath, "ui_jacket_*_s");
+                foreach (var file in files)
+                    BuildAssets(file, resourceMap);
+            }
 
-			lock (resourceMap)
-			{
-				resourceMap["audio_" + id] = acbFilePath;
-			}
-		}
+            return folder;
+        }
 
-		private async Task<OngekiFumenSet> BuildFumenSet(string musicXmlFilePath)
-		{
-			if (!File.Exists(musicXmlFilePath))
-				return null;
+        private void BuildAssets(string file, Dictionary<string, string> resourceMap)
+        {
+            if (!int.TryParse(Path.GetFileName(file).Replace("ui_jacket_", string.Empty).Replace("_s", string.Empty), out var id))
+                return;
+            lock (resourceMap)
+            {
+                resourceMap["asset_" + id] = file;
+            }
+        }
 
-			using var fs = File.OpenRead(musicXmlFilePath);
-			var musicXml = await XDocument.LoadAsync(fs, LoadOptions.None, default);
+        private async Task BuildMusicSource(string musicSourceFilePath, Dictionary<string, string> resourceMap)
+        {
+            using var fs = File.OpenRead(musicSourceFilePath);
+            var musicXml = await XDocument.LoadAsync(fs, LoadOptions.None, default);
 
-			string GetString(string name)
-			{
-				var element = musicXml.XPathSelectElement($@"//{name}[1]/str[1]");
-				if (element?.Value is string strValue)
-					return strValue;
-				return string.Empty;
-			}
+            string GetString(string name, string sub = "str")
+            {
+                var element = musicXml.XPathSelectElement($@"//{name}[1]/{sub}[1]");
+                if (element?.Value is string strValue)
+                    return strValue;
+                return string.Empty;
+            }
 
-			int GetId(string name)
-			{
-				var element = musicXml.XPathSelectElement($@"//{name}[1]/id[1]");
-				if (element?.Value is string strValue)
-					return int.Parse(strValue);
-				return 0;
-			}
+            if (!int.TryParse(GetString("Name", "id"), out var id))
+                return;
 
-			var set = new OngekiFumenSet(musicXmlFilePath, musicXml);
+            var acbFileName = GetString("acbFile", "path");
+            var acbFilePath = Path.Combine(Path.GetDirectoryName(musicSourceFilePath), acbFileName);
 
-			return set.Difficults.Count > 0 ? set : default;
-		}
+            if (!File.Exists(acbFilePath))
+                return;
 
-		public async void LoadFumen(OngekiFumenDiff diff)
-		{
-			IsBusy = true;
-			try
-			{
-				using var fs = File.OpenRead(diff.FilePath);
-				var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(diff.FilePath).DeserializeAsync(fs);
+            lock (resourceMap)
+            {
+                resourceMap["audio_" + id] = acbFilePath;
+            }
+        }
 
-				var newProj = new EditorProjectDataModel();
-				newProj.FumenFilePath = diff.FilePath;
-				newProj.Fumen = fumen;
-				newProj.AudioFilePath = diff.RefSet.AudioFilePath;
+        private async Task<OngekiFumenSet> BuildFumenSet(string musicXmlFilePath)
+        {
+            if (!File.Exists(musicXmlFilePath))
+                return null;
 
-				using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
-				if (audio is null)
-				{
-					MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
-					return;
-				}
-				newProj.AudioDuration = audio.Duration;
+            using var fs = File.OpenRead(musicXmlFilePath);
+            var musicXml = await XDocument.LoadAsync(fs, LoadOptions.None, default);
 
-				var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
-				var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
+            string GetString(string name)
+            {
+                var element = musicXml.XPathSelectElement($@"//{name}[1]/str[1]");
+                if (element?.Value is string strValue)
+                    return strValue;
+                return string.Empty;
+            }
+
+            int GetId(string name)
+            {
+                var element = musicXml.XPathSelectElement($@"//{name}[1]/id[1]");
+                if (element?.Value is string strValue)
+                    return int.Parse(strValue);
+                return 0;
+            }
+
+            var set = new OngekiFumenSet(musicXmlFilePath, musicXml);
+
+            return set.Difficults.Count > 0 ? set : default;
+        }
+
+        public async void LoadFumen(OngekiFumenDiff diff)
+        {
+            IsBusy = true;
+            try
+            {
+                using var fs = File.OpenRead(diff.FilePath);
+                var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(diff.FilePath).DeserializeAsync(fs);
+
+                var newProj = new EditorProjectDataModel();
+                newProj.FumenFilePath = diff.FilePath;
+                newProj.Fumen = fumen;
+                newProj.AudioFilePath = diff.RefSet.AudioFilePath;
+
+                using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
+                if (audio is null)
+                {
+                    MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
+                    return;
+                }
+                newProj.AudioDuration = audio.Duration;
+
+                var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
+                var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
                 var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
                 editor.DisplayName = docName;
 
                 var viewAware = (IViewAware)editor;
-				viewAware.ViewAttached += (sender, e) =>
-				{
-					var frameworkElement = (FrameworkElement)e.View;
+                viewAware.ViewAttached += (sender, e) =>
+                {
+                    var frameworkElement = (FrameworkElement)e.View;
 
-					RoutedEventHandler loadedHandler = null;
-					loadedHandler = async (sender2, e2) =>
-					{
-						frameworkElement.Loaded -= loadedHandler;
-						await fumenProvider.Open(editor, newProj);
+                    RoutedEventHandler loadedHandler = null;
+                    loadedHandler = async (sender2, e2) =>
+                    {
+                        frameworkElement.Loaded -= loadedHandler;
+                        await fumenProvider.Open(editor, newProj);
 
-						IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
-					};
-					frameworkElement.Loaded += loadedHandler;
-				};
+                        IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
+                    };
+                    frameworkElement.Loaded += loadedHandler;
+                };
 
-				await IoC.Get<IShell>().OpenDocumentAsync(editor);
-			}
-			catch
-			{
+                await IoC.Get<IShell>().OpenDocumentAsync(editor);
+            }
+            catch
+            {
 
-			}
-			finally
-			{
-				IsBusy = false;
-			}
-		}
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
 
-		public async Task<IEnumerable<OngekiFumenSet>> SearchFumenSet(string searchFolder)
-		{
-			var resourceMap = new Dictionary<string, string>();
-			var sets = new List<OngekiFumenSet>();
-			var folder = await BuildFolder(searchFolder, resourceMap);
+        public async Task<IEnumerable<OngekiFumenSet>> SearchFumenSet(string searchFolder)
+        {
+            var resourceMap = new Dictionary<string, string>();
+            var sets = new List<OngekiFumenSet>();
+            var folder = await BuildFolder(searchFolder, resourceMap);
 
-			IEnumerable<OngekiFumenSet> GetSet(Folder folder) =>
-				folder.FumenSets.Concat(folder.SubFolders.SelectMany(x => GetSet(x)));
+            IEnumerable<OngekiFumenSet> GetSet(Folder folder) =>
+                folder.FumenSets.Concat(folder.SubFolders.SelectMany(x => GetSet(x)));
 
-			Parallel.ForEach(GetSet(folder), s =>
-			{
-				s.JacketFilePath = resourceMap.TryGetValue("asset_" + s.MusicId, out var j) ? j : s.JacketFilePath;
-				s.AudioFilePath = resourceMap.TryGetValue("audio_" + s.MusicSourceId, out var a) ? a : s.AudioFilePath;
-			});
+            Parallel.ForEach(GetSet(folder), s =>
+            {
+                s.JacketFilePath = resourceMap.TryGetValue("asset_" + s.MusicId, out var j) ? j : s.JacketFilePath;
+                s.AudioFilePath = resourceMap.TryGetValue("audio_" + s.MusicSourceId, out var a) ? a : s.AudioFilePath;
+            });
 
-			sets.AddRange(GetSet(folder).OrderBy(x => x.MusicId).DistinctContinuousBy(x => x.MusicId));
+            sets.AddRange(GetSet(folder).OrderBy(x => x.MusicId).DistinctContinuousBy(x => x.MusicId));
 
-			return sets;
-		}
-	}
+            return sets;
+        }
+    }
 }

@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Models;

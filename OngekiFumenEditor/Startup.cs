@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.Settings;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +19,9 @@ namespace OngekiFumenEditor
         [STAThread]
         public static int Main(string[] args)
         {
+            Directory.SetCurrentDirectory(AppDirectoryHelper.ExecutableDirectory);
+            ApplicationSettingsBaseInjector.EnsureInitializedAndInjectedProvider();
+
             IPCHelper.Init(args);
             var app = new App(true);
             app.InitializeComponent();

@@ -1,5 +1,4 @@
-﻿using System;
-using OngekiFumenEditor.Properties;
+using System;
 
 namespace OngekiFumenEditor.Base.Attributes
 {
@@ -22,11 +21,10 @@ namespace OngekiFumenEditor.Base.Attributes
 #if DEBUG
             if (string.IsNullOrWhiteSpace(resourceKey))
                 throw new ArgumentException("cannot use empty string as resource key");
-            if (Resources.ResourceManager.GetString(resourceKey) is null)
-                throw new ArgumentException($"invalid resource key \"{resourceKey}\"");
 #endif
-
-            Alias = Resources.ResourceManager.GetString(resourceKey!) ?? string.Empty;
+            ResourceKey = resourceKey ?? string.Empty;
         }
+
+        public string ResourceKey { get; }
     }
 }

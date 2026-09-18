@@ -1,7 +1,8 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Numerics;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
+    public sealed class FlickDrawingTarget : CommonBatchDrawTargetBase<Flick>, IDisposable
     {
         public override int DefaultRenderOrder => 1000;
 
@@ -26,9 +27,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private List<(Vector2, Vector2, float, Vector4)> exFlickList = new();
         private List<(Vector2, Vector2, float, Vector4)> selectedFlickList = new();
         private List<(Vector2, Vector2, float, Vector4)> normalFlichList = new();
-
-        private IBatchTextureDrawing batchTextureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "FLK", "CFK" };
 
@@ -46,18 +44,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 size = new Vector2(106, 67f);
             exTapEffSize = size;
             selectedEffSize = size * 1.05f;
-
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Flick> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Flick> objs)
         {
             foreach (var obj in objs)
             {
                 var x = XGridCalculator.ConvertXGridToX(obj.XGrid, target.Editor);
                 var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(obj);
-                var y = target.ConvertToY(obj.TGrid, soflanList) + 24;
+                var y = target.ConvertToViewRelativeY(obj.TGrid, soflanList) + 24;
                 var pos = new Vector2((float)x, (float)y);
                 var size = obj.Direction == Flick.FlickDirection.Right ? rightSize : leftSize;
                 normalFlichList.Add((size, pos, 0f, Vector4.One));
@@ -84,9 +79,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 target.RegisterSelectableObject(obj, pos, size);
             }
 
-            highlightDrawing.Draw(target, texture, selectedFlickList);
-            batchTextureDrawing.Draw(target, texture, normalFlichList);
-            batchTextureDrawing.Draw(target, exFlickEffTexture, exFlickList);
+            builder.DrawHighlightBatchTexture(texture, selectedFlickList);
+            builder.DrawBatchTexture(texture, normalFlichList);
+            builder.DrawBatchTexture(exFlickEffTexture, exFlickList);
 
             exFlickList.Clear();
             selectedFlickList.Clear();

@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -104,10 +104,31 @@
                     IsChecked="{Binding Setting.ReturnStartTimeAfterPause}">
                     <TextBlock Text="{markup:Translate [ReturnStartTimeAfterPause]}" TextWrapping="Wrap" />
                 </CheckBox>
+                <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [EditorOffsetMs]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0,5,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Setting.EditorOffsetMs}">
+                    </TextBox>
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Millisecond]}" />
+                </StackPanel>
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
             <StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [HoldBodyWidth]}" />
+                    <TextBox
+                        x:Name="HoldBodyWidthTextBox"
+                        Width="50"
+                        Margin="5,0"
+                        KeyDown="HoldBodyWidthTextBox_KeyDown"
+                        LostKeyboardFocus="HoldBodyWidthTextBox_LostKeyboardFocus"
+                        Text="{Binding HoldBodyWidthText, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock VerticalAlignment="Center" Text="px (1–50)" />
+                </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
                     <TextBlock Text="Limit FPS:" />
                     <TextBox

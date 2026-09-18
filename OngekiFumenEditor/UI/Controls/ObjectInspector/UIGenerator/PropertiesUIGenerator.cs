@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Attributes;
 using System;
 using System.Linq;

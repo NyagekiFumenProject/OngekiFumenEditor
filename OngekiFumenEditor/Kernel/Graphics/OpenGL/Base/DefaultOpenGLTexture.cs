@@ -1,4 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
+using OpenTK.Graphics.OpenGL;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -7,9 +7,9 @@ using System.Numerics;
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 {
     [Serializable]
-    public class DefaultOpenGLTexture : IImage, IDisposable
+    public sealed class DefaultOpenGLTexture : IImage, IDisposable
     {
-        protected int? _id;
+        private int? _id;
         private Vector2 _textureSize;
         public string Name { get; init; }
 
@@ -79,7 +79,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             GL.GenTextures(1, out int id);
             _id = id;
 
-            GL.BindTexture(TextureTarget.Texture2D, ID);
+            OpenGLTextureBindingCache.BindTexture2D(ID);
 
             TextureMinFilter = TextureMinFilter.Linear;
             TextureMagFilter = TextureMagFilter.Linear;
@@ -106,6 +106,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             if (_id is int id)
             {
                 GL.DeleteTexture(id);
+                OpenGLTextureBindingCache.InvalidateTexture(id);
                 _id = null;
             }
         }

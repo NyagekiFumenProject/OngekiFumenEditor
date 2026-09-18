@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
@@ -63,7 +63,7 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels
                 return;
             }
 
-            var bplList = editor.Fumen.BulletPalleteList.Prepend(BulletPallete.DummyCustomPallete);
+            var bplList = editor.Fumen.BulletPalleteList;
             var dialog = new BulletPalleteSelectDialogViewModel(bplList, TypedProxyValue);
             if ((await IoC.Get<IWindowManager>().ShowDialogAsync(dialog)) ?? false)
             {

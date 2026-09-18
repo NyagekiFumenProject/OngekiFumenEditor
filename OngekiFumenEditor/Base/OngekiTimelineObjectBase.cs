@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -8,10 +8,11 @@ namespace OngekiFumenEditor.Base
     public abstract class OngekiTimelineObjectBase : OngekiObjectBase, ITimelineObject, IDisplayableObject, ISelectableObject, IDisposable
     {
         private TGrid tGrid = new TGrid();
+
         [ObjectPropertyBrowserTipText("ObjectTGrid")]
         public virtual TGrid TGrid
         {
-            get { return tGrid; }
+            get => tGrid;
             set
             {
                 this.RegisterOrUnregisterPropertyChangeEvent(tGrid, value);
@@ -60,3 +61,4 @@ namespace OngekiFumenEditor.Base
         }
     }
 }
+

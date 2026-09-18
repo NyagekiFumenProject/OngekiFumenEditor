@@ -1,0 +1,11 @@
+global using OngekiFumenEditor.Utils;
+global using OngekiFumenEditor.Utils.ObjectPool;
+global using OngekiFumenEditor.Utils.Ogkr;
+global using AbortableThread = OngekiFumenEditor.Utils.AbortableThread;
+global using Base64 = OngekiFumenEditor.Utils.Base64;
+global using CacheLambdaActivator = OngekiFumenEditor.Utils.CacheLambdaActivator;
+global using CoreLogLevel = OngekiFumenEditor.Utils.CoreLogLevel;
+global using ICoreLogTarget = OngekiFumenEditor.Utils.ICoreLogTarget;
+global using MathUtils = OngekiFumenEditor.Utils.MathUtils;
+global using TempFileHelper = OngekiFumenEditor.Utils.TempFileHelper;
+global using TGridCalculator = OngekiFumenEditor.Modules.FumenVisualEditor.TGridCalculator;

@@ -1,15 +1,15 @@
-﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Views
 {
-	/// <summary>
-	/// FumenMetaInfoBrowserView.xaml 的交互逻辑
-	/// </summary>
-	public partial class MusicXmlWindowView : MetroWindow
-	{
-		public MusicXmlWindowView()
-		{
-			InitializeComponent();
-		}
-	}
+    /// <summary>
+    /// FumenMetaInfoBrowserView.xaml 的交互逻辑
+    /// </summary>
+    public partial class MusicXmlWindowView : MetroWindow
+    {
+        public MusicXmlWindowView()
+        {
+            InitializeComponent();
+        }
+    }
 }

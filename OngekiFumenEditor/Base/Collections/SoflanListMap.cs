@@ -1,13 +1,8 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.Collections
 {
@@ -54,18 +49,15 @@ namespace OngekiFumenEditor.Base.Collections
             soflans.Add(soflan);
             registeredSoflanId[soflan] = soflan.SoflanGroup;
             soflan.PropertyChanged += Soflan_PropertyChanged;
-
-            //Log.LogDebug($"Add soflan from {soflan.SoflanGroup} : {soflan}");
         }
 
-        private void Soflan_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        private void Soflan_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (sender is not ISoflan soflan)
                 return;
 
             if (e.PropertyName == nameof(ISoflan.SoflanGroup))
             {
-                //Log.LogDebug($"SoflanGroup changed : {soflan}");
                 Remove(soflan);
                 Add(soflan);
             }
@@ -88,10 +80,9 @@ namespace OngekiFumenEditor.Base.Collections
             registeredSoflanId.Remove(soflan);
             soflans.Remove(soflan);
             soflan.PropertyChanged -= Soflan_PropertyChanged;
-            //Log.LogDebug($"Remove soflan from {beforeSoflanGroup} : {soflan}");
         }
 
-        public bool TryGetValue(int key, [MaybeNullWhen(false)] out SoflanList value)
+        public bool TryGetValue(int key, out SoflanList value)
         {
             return soflanListMap.TryGetValue(key, out value);
         }

@@ -1,10 +1,7 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
+using OngekiFumenEditor.Kernel.Graphics.Skia.Base;
 using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing;
-using OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.CPU;
 using OngekiFumenEditor.Kernel.Graphics.Skia.RenderControls.Backends.DirectX;
@@ -16,6 +13,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,47 +22,24 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
+    /// <summary>
+    /// Skia implementation of the render manager.
+    /// </summary>
     [Export(typeof(IRenderManagerImpl))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     {
+        private readonly Dictionary<IRenderContext, ContextSlot> contextSlots = new();
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
         private DpiScale currentDPI;
+        private RenderBackendType backendType;
 
-        public ICircleDrawing CircleDrawing { get; private set; }
-        public ILineDrawing LineDrawing { get; private set; }
-        public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
-        public IStaticVBODrawing StaticVBODrawing { get; private set; }
-        public IStringDrawing StringDrawing { get; private set; }
-        public ISvgDrawing SvgDrawing { get; private set; }
-        public ITextureDrawing TextureDrawing { get; private set; }
-        public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
-        public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
-        public IPolygonDrawing PolygonDrawing { get; private set; }
-        public IBeamDrawing BeamDrawing { get; private set; }
-
+        /// <inheritdoc />
         public string Name { get; } = "Skia";
 
         private void Initialize()
         {
-            #region Create Drawings
-
-            Log.LogInfo("Drawing objects were created.");
-
-            CircleDrawing = new DefaultSkiaCircleDrawing(this);
-            LineDrawing = new DefaultSkiaLineDrawing(this);
-            SimpleLineDrawing = new DefaultSkiaLineDrawing(this);
-            StaticVBODrawing = new DefaultSkiaLineDrawing(this);
-            StringDrawing = new DefaultSkiaStringDrawing(this);
-            TextureDrawing = new DefaultSkiaTextureDrawing(this);
-            PolygonDrawing = new DefaultSkiaPolygonDrawing(this);
-            HighlightBatchTextureDrawing = new DefaultSkiaHighlightBatchTextureDrawing(this);
-            BatchTextureDrawing = new DefaultSkiaBatchTextureDrawing(this);
-            BeamDrawing = new DefaultSkiaBeamDrawing(this);
-
-            #endregion
-
             #region DPI watcher
 
             var mainWindow = Application.Current.MainWindow;
@@ -82,8 +57,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
             #endregion
 
-            backendType = Enum.TryParse<RenderBackendType>(Properties.ProgramSetting.Default.SkiaRenderBackend, out var bt) ? bt : RenderBackendType.CPU;
-
             Log.LogInfo($"Skia Drawing Manager initialized successfully, backendType:{backendType}.");
             initTaskSource.SetResult();
         }
@@ -95,11 +68,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             currentDPI = e.NewDpi;
         }
 
+        /// <inheritdoc />
         public Task WaitForInitializationIsDone(CancellationToken cancellation)
         {
             return initTaskSource.Task;
         }
 
+        /// <inheritdoc />
         public Task InitializeRenderControl(FrameworkElement rc, CancellationToken cancellation = default)
         {
             var renderControl = CheckRenderControl(rc);
@@ -123,8 +98,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         }
 
         Dictionary<FrameworkElement, DefaultSkiaRenderContext> cachedRenderControlMap = new();
-        private RenderBackendType backendType;
 
+        private void RefreshBackendType()
+        {
+            backendType = Enum.TryParse<RenderBackendType>(Properties.ProgramSetting.Default.SkiaRenderBackend, out var bt) ? bt : RenderBackendType.CPU;
+        }
+
+        /// <inheritdoc />
         public IImage LoadImageFromStream(Stream stream)
         {
             CheckInitialization();
@@ -132,12 +112,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return new SkiaImage(SKImage.FromEncodedData(stream));
         }
 
-        public async Task<IRenderContext> GetRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
+        /// <inheritdoc />
+        public async Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
-            return await GetSkiaRenderContext(rc, cancellation);
+            return await GetOrCreateSkiaRenderContext(rc, cancellation);
         }
 
-        public Task<DefaultSkiaRenderContext> GetSkiaRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
+        /// <summary>
+        /// Gets the concrete Skia render context for the specified render control.
+        /// </summary>
+        public Task<DefaultSkiaRenderContext> GetOrCreateSkiaRenderContext(FrameworkElement rc, CancellationToken cancellation = default)
         {
             var renderControl = CheckRenderControl(rc);
 
@@ -147,6 +131,35 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return Task.FromResult(renderContext);
         }
 
+        /// <inheritdoc />
+        public IReadOnlyList<IRenderContext> GetRenderContexts()
+        {
+            return cachedRenderControlMap.Values.Cast<IRenderContext>().ToArray();
+        }
+
+        /// <inheritdoc />
+        public bool RemoveRenderContext(IRenderContext renderContext)
+        {
+            if (renderContext is null)
+                throw new ArgumentNullException(nameof(renderContext));
+
+            if (contextSlots.Remove(renderContext, out var slot))
+            {
+                ReleaseSlot(slot.Front);
+                ReleaseSlot(slot.Back);
+            }
+
+            var pair = cachedRenderControlMap.FirstOrDefault(x => ReferenceEquals(x.Value, renderContext));
+            if (pair.Key is null)
+                return false;
+
+            renderContext.StopRendering();
+            renderContext.Name = default;
+            renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
+
+            return cachedRenderControlMap.Remove(pair.Key);
+        }
+
         private SkiaRenderControlBase CheckRenderControl(FrameworkElement rc)
         {
             if (rc is not SkiaRenderControlBase renderControl)
@@ -154,17 +167,135 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             return renderControl;
         }
 
+        /// <inheritdoc />
         public FrameworkElement CreateRenderControl()
         {
+            RefreshBackendType();
+
             switch (backendType)
             {
                 case RenderBackendType.OpenGL:
                     return new SkiaRenderControl_OpenGL();
                 case RenderBackendType.DirectX:
                     return new SkiaRenderControl_DirectX();
+                case RenderBackendType.DirectX12:
+                    return new SkiaRenderControl_D3D9On12();
                 case RenderBackendType.CPU:
                 default:
                     return new SkiaRenderControl_CPU();
+            }
+        }
+
+        /// <inheritdoc />
+        public IDrawCommandListBuilder CreateDrawCommandListBuilder()
+        {
+            return new DrawCommandListBuilder(new DefaultSkiaStringDrawing(this));
+        }
+
+        /// <inheritdoc />
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+            if (drawCommandList is null)
+                throw new ArgumentNullException(nameof(drawCommandList));
+
+            DrawCommandListSlot? oldBack = null;
+
+            var slot = GetOrCreateSlot(context);
+            oldBack = slot.Back;
+            slot.Back = new DrawCommandListSlot(drawCommandList, autoDispose);
+
+            ReleaseSlot(oldBack);
+        }
+
+        /// <inheritdoc />
+        public bool SwapDrawCommandList(IRenderContext context)
+        {
+            if (context is null)
+                throw new ArgumentNullException(nameof(context));
+
+            DrawCommandListSlot? oldFront = null;
+            var swapped = false;
+
+            var slot = GetOrCreateSlot(context);
+            if (slot.Back is not { } back)
+                return false;
+
+            oldFront = slot.Front;
+            slot.Front = back;
+            slot.Back = null;
+            swapped = true;
+
+            ReleaseSlot(oldFront);
+            return swapped;
+        }
+
+        /// <inheritdoc />
+        public void PresentDrawCommandList(IRenderContext context)
+        {
+            if (context is not ISkiaRenderContext skiaRenderContext)
+                throw new Exception("renderContext must be ISkiaRenderContext object.");
+
+            DrawCommandListSlot? front = null;
+
+            if (!contextSlots.TryGetValue(context, out var slot))
+                return;
+
+            front = slot.Front;
+            slot.Front = null;
+
+            if (front is not { } value)
+                return;
+
+            var drawCommandList = value.DrawCommandList;
+            try
+            {
+                if (!drawCommandList.TryBeginPresent())
+                    return;
+
+                try
+                {
+                    PresentCommands(context, drawCommandList, skiaRenderContext.Canvas);
+                }
+                finally
+                {
+                    drawCommandList.EndPresent();
+                }
+            }
+            finally
+            {
+                if (value.AutoDispose)
+                    drawCommandList.Dispose();
+            }
+        }
+
+        private ContextSlot GetOrCreateSlot(IRenderContext context)
+        {
+            if (!contextSlots.TryGetValue(context, out var slot))
+                slot = contextSlots[context] = new ContextSlot();
+
+            return slot;
+        }
+
+        private static void ReleaseSlot(DrawCommandListSlot? slot)
+        {
+            if (slot is { AutoDispose: true } value)
+                value.DrawCommandList.Dispose();
+        }
+
+        private void PresentCommands(IRenderContext context, DrawCommandList drawCommandList, SKCanvas canvas)
+        {
+            var perfomenceMonitor = context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
+            perfomenceMonitor.OnBeforePresent();
+            try
+            {
+                using var replay = new SkiaDrawCommandListReplay(this, context, drawCommandList.FrameState, canvas);
+                replay.Present(drawCommandList.Commands);
+            }
+            finally
+            {
+                perfomenceMonitor.OnAfterPresent();
             }
         }
     }

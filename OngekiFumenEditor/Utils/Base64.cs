@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 
 namespace OngekiFumenEditor.Utils
@@ -13,3 +13,4 @@ namespace OngekiFumenEditor.Utils
         public static string Encode(byte[] rawContent) => Convert.ToBase64String(rawContent);
     }
 }
+

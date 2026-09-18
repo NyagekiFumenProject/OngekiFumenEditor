@@ -1,7 +1,9 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
 using System.Numerics;
@@ -12,8 +14,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
     public class DrawJudgeLineHelper
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
         private Vector4 color = new(1, 1, 0, 1);
         private Vector4 spdColor = new(Colors.LightCyan.R / 255.0f, Colors.LightCyan.G / 255.0f, Colors.LightCyan.B / 255.0f, Colors.LightCyan.A / 255.0f);
 
@@ -21,32 +21,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
         public void Initalize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.ConvertToY_DefaultSoflanGroup(target.Editor.GetCurrentTGrid().TotalUnit);
+            var viewportTGrid = target.Editor.GetViewportTGrid();
+            var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(viewportTGrid.TotalUnit);
 
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
             vertices[1] = new(new(target.Editor.ViewWidth, y), color, VertexDash.Solider);
 
-            lineDrawing.Draw(target, vertices, 1);
-            var t = target.Editor.GetCurrentTGrid();
+            builder.DrawSimpleLines(vertices, 1);
+            var t = viewportTGrid;
 
             var bpmList = target.Editor.Fumen.BpmList;
 
             string str;
             if (target.Editor.Setting.DisplayTimeFormat == Models.EditorSetting.TimeFormat.AudioTime)
             {
-                var audioTime = TGridCalculator.ConvertTGridToAudioTime(t, target.Editor);
+                var audioTime = target.Editor.ConvertTGridToAudioTime(t);
                 str = $"{audioTime.Minutes,-2}:{audioTime.Seconds,-2}:{audioTime.Milliseconds,-3}";
             }
             else
                 str = t.ToString();
 
-            stringDrawing.Draw(
+            builder.DrawString(
                     str,
                     new(target.Editor.ViewWidth - 50,
                     y + 10f),
@@ -55,10 +54,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     0,
                     color,
                     new(1, 0.5f),
-                    IStringDrawing.StringStyle.Bold,
-                    target,
-                    default,
-                    out _
+                    FontStyle.Bold,
+                    default
             );
 
             void PrintSpeed(int soflanGroup, SoflanList soflanList, Vector2 pos, Vector4 color)
@@ -68,7 +65,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 {
                     var speedStr = $"[{soflanGroup}]{speed:F2}x";
 
-                    stringDrawing.Draw(
+                    builder.DrawString(
                             speedStr,
                             pos,
                             Vector2.One,
@@ -76,10 +73,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             0,
                             spdColor,
                             new(1, 1.5f),
-                            IStringDrawing.StringStyle.Bold,
-                            target,
-                            default,
-                            out _
+                            FontStyle.Bold,
+                            default
                     );
                 }
             }

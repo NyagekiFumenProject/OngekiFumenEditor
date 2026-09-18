@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
@@ -85,7 +85,7 @@ public static class AcbConverter
             var tempFolder = TempFileHelper.GetTempFolderPath(prefix: "decodeAcbFiles", random: false);
             tempAwbFilePath = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(filePath) + ".wav");
             Log.LogInfo($"Extract .acb to .wav and load the later , acb file path : {tempAwbFilePath}");
-            
+
             if (File.Exists(tempAwbFilePath))
             {
                 Log.LogInfo($"use cache file: {tempAwbFilePath}");

@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow
+<mah:MetroWindow
     x:Class="OngekiFumenEditor.Modules.OgkiFumenListBrowser.Views.OgkiFumenListBrowserView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -57,6 +57,24 @@
                     Margin="5,0,0,0"
                     VerticalAlignment="Center"
                     Text="{Binding Keywords}">
+                </TextBox>
+            </StackPanel>
+            <StackPanel Margin="5,0,5,10" Orientation="Horizontal">
+                <Label Content="{markup:Translate [BpmFilter]}" />
+                <Label Content="{markup:Translate [BpmMin]}" VerticalAlignment="Center" />
+                <TextBox
+                    Width="70"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding BpmMin}">
+                </TextBox>
+                <Label Margin="5,0,0,0" VerticalAlignment="Center" Content="–" />
+                <Label Content="{markup:Translate [BpmMax]}" VerticalAlignment="Center" />
+                <TextBox
+                    Width="70"
+                    Margin="5,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding BpmMax}">
                 </TextBox>
             </StackPanel>
             <Button
@@ -201,6 +219,11 @@
                                                             FontSize="14"
                                                             FontWeight="Bold"
                                                             Text="{Binding Level}">
+                                                        </Run>
+                                                    </TextBlock>
+                                                    <TextBlock Foreground="{StaticResource EnvironmentToolWindowText}">
+                                                        <Run>BPM:</Run>
+                                                        <Run Text="{Binding Bpm, Mode=OneTime}">
                                                         </Run>
                                                     </TextBlock>
                                                     <Button

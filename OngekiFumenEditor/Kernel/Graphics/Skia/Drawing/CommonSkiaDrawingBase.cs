@@ -1,4 +1,4 @@
-﻿
+
 using OngekiFumenEditor.Utils;
 using SkiaSharp;
 
@@ -19,14 +19,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
         {
             SkiaUtility.CheckSkiaRenderContext(target?.RenderContext);
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             this.target = target;
             canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             canvas.Save();
 
             var mvp = (GetOverrideModelMatrix() * GetOverrideViewMatrixOrDefault(target.CurrentDrawingTargetContext)).ToSkiaMatrix44();
 
-            var adjustMVP = mvp * SKMatrix44.CreateScale(1, -1, 1) * SKMatrix44.CreateTranslation(target.CurrentDrawingTargetContext.ViewWidth / 2, target.CurrentDrawingTargetContext.ViewHeight / 2, 0);
+            var ctx = target.CurrentDrawingTargetContext;
+            var adjustMVP = mvp
+                * SKMatrix44.CreateScale(1, -1, 1)
+                * SKMatrix44.CreateTranslation(ctx.ViewWidth / 2, ctx.ViewHeight / 2, 0)
+                * SKMatrix44.CreateScale(ctx.RenderScaleX, ctx.RenderScaleY, 1);
 
             canvas.SetMatrix(adjustMVP);
         }
@@ -36,7 +39,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
         {
             canvas.Restore();
 
-            target.PerfomenceMonitor.OnAfterDrawing(this);
             target = default;
             canvas = default;
         }

@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
@@ -19,8 +19,6 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             var bell = new Bell();
             var data = seg[1].Split(":");
 
-            bell.ReferenceBulletPallete = BulletPallete.DummyCustomPallete;
-
             using var d = data[0].GetValuesMapWithDisposable(out var map);
             bell.TGrid = map["T"].ParseToTGrid();
             bell.XGrid = map["X"].ParseToXGrid();
@@ -36,3 +34,4 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
         }
     }
 }
+

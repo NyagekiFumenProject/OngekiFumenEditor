@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Kernel.KeyBinding;
+using OngekiFumenEditor.Kernel.KeyBinding;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
 
         [Export]
-        //[Key Delete] = [Action KeyboardAction_DeleteSelectingObjects]; 
+        //[Key Delete] = [Action KeyboardAction_DeleteSelectingObjects];
         public static KeyBindingDefinition KBD_DeleteSelectingObjects = new KeyBindingDefinition(
             "kbd_editor_DeleteSelectingObjects",
              Key.Delete, layer: KeyBindingLayer.Global);
@@ -96,16 +96,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             layer: KeyBindingLayer.Global);
 
         [Export]
-        //        [Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)]; 
+        //        [Key A] = [Action KeyboardAction_FastAddConnectableChild($executionContext)];
         public static KeyBindingDefinition KBD_FastAddConnectableChild = new KeyBindingDefinition(
             "kbd_editor_FastAddConnectableChild",
              Key.A);
 
         [Export]
-        //        [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)]; 
+        //        [Key F] = [Action KeyboardAction_FastSwitchFlickDirection($executionContext)];
         public static KeyBindingDefinition KBD_FastSwitchFlickDirection = new KeyBindingDefinition(
             "kbd_editor_FastSwitchFlickDirection",
              Key.F);
+
+        [Export]
+        //        [Gesture Shift+E] = [Action MenuItemAction_SelectEntireLane];
+        public static KeyBindingDefinition KBD_SelectEntireLane = new KeyBindingDefinition(
+            "kbd_editor_SelectEntireLane",
+             ModifierKeys.Shift, Key.E);
+
+        [Export]
+        //        [Gesture Shift+V] = [Action MenuItemAction_SelectAttachedCurves];
+        public static KeyBindingDefinition KBD_SelectAttachedCurves = new KeyBindingDefinition(
+            "kbd_editor_SelectAttachedCurves",
+             ModifierKeys.Shift, Key.V);
 
         [Export]
         //        [Gesture Ctrl+C]=[Action MenuItemAction_CopySelectedObjects];

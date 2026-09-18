@@ -1,7 +1,7 @@
-﻿namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Base
 {
-	public interface ICriticalableObject
-	{
-		bool IsCritical { get; set; }
-	}
+    public interface ICriticalableObject
+    {
+        bool IsCritical { get; set; }
+    }
 }

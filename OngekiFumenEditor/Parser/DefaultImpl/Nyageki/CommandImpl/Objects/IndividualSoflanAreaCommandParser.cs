@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
@@ -54,3 +54,4 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
         }
     }
 }
+

@@ -1,59 +1,59 @@
-﻿using FontStashSharp;
+using FontStashSharp;
 using FontStashSharp.Interfaces;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using System;
 using System.Drawing;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.Platform
 {
-    internal class Renderer : IFontStashRenderer2, IDisposable
+    internal sealed class Renderer : IFontStashRenderer2, IDisposable
     {
         private const string frag = @"
             #version 330
-			#ifdef GL_ES
-				#define LOWP lowp
-				precision mediump float;
-			#else
-				#define LOWP
-			#endif
+            #ifdef GL_ES
+                #define LOWP lowp
+                precision mediump float;
+            #else
+                #define LOWP
+            #endif
 
 
-			// Uniforms
-			uniform sampler2D TextureSampler;
+            // Uniforms
+            uniform sampler2D TextureSampler;
 
-			// Varyings
-			in vec4 v_color;
-			in vec2 v_texCoords;
+            // Varyings
+            in vec4 v_color;
+            in vec2 v_texCoords;
 
             out vec4 FragColor;
 
-			void main()
-			{
-				FragColor = v_color * texture2D(TextureSampler, v_texCoords);
-			}
-		";
+            void main()
+            {
+                FragColor = v_color * texture2D(TextureSampler, v_texCoords);
+            }
+        ";
         private const string vert = @"
             #version 330
             // Attributes
             in vec3 a_position;
-			in vec4 a_color;
-			in vec2 a_texCoords0;
+            in vec4 a_color;
+            in vec2 a_texCoords0;
 
-			// Uniforms
-			uniform mat4 MVP;
+            // Uniforms
+            uniform mat4 MVP;
 
-			// Varyings
-			out vec4 v_color;
-			out vec2 v_texCoords;
+            // Varyings
+            out vec4 v_color;
+            out vec2 v_texCoords;
 
-			void main()
-			{
-				v_color = a_color;
-				v_texCoords = a_texCoords0;
-				gl_Position = MVP * vec4(a_position, 1.0);
-			}
-		";
+            void main()
+            {
+                v_color = a_color;
+                v_texCoords = a_texCoords0;
+                gl_Position = MVP * vec4(a_position, 1.0);
+            }
+        ";
 
         private const int MAX_SPRITES = 2048;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
@@ -67,7 +67,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
         private object _lastTexture;
         private int _vertexIndex = 0;
         private IPerfomenceMonitor performenceMonitor;
-        private IDrawing refDrawing;
         private readonly Texture2DManager _textureManager;
 
         public ITexture2DManager TextureManager => _textureManager;
@@ -102,7 +101,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
         ~Renderer() => Dispose(false);
         public void Dispose() => Dispose(true);
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposing)
             {
@@ -115,15 +114,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
             _shader.Dispose();
         }
 
-        public void Begin(Matrix4 mvp, IPerfomenceMonitor perfomenceMonitor, IDrawing refDrawing)
+        public void Begin(Matrix4x4 mvp, IPerfomenceMonitor perfomenceMonitor)
         {
-            performenceMonitor = perfomenceMonitor;
-            this.refDrawing = refDrawing;
+            this.performenceMonitor = perfomenceMonitor;
 
             _shader.Begin();
 
-            _shader.PassUniform("TextureSampler", 0);
-            _shader.PassUniform("MVP", mvp);
+            _shader.PassUniform(_shader.TextureSamplerLocation, 0);
+            _shader.PassUniform(_shader.MvpLocation, mvp);
 
             _vao.Bind();
             _indexBuffer.Bind();
@@ -149,7 +147,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
         {
             FlushBuffer();
 
-            refDrawing = default;
             performenceMonitor = default;
         }
 
@@ -166,7 +163,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing.String.
             texture.Bind();
 
             GL.DrawElements(PrimitiveType.Triangles, _vertexIndex * 6 / 4, DrawElementsType.UnsignedShort, IntPtr.Zero);
-            performenceMonitor.CountDrawCall(refDrawing);
+            performenceMonitor.CountDrawCall();
 
             _vertexIndex = 0;
         }

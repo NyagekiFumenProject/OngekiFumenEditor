@@ -1,4 +1,4 @@
-﻿<UserControl
+<UserControl
     x:Class="OngekiFumenEditor.Kernel.SettingPages.Program.Views.ProgramSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -31,8 +31,29 @@
                     IsChecked="{Binding Setting.DisableShowSplashScreenAfterBoot}" />
                 <CheckBox
                     Margin="10,0,10,10"
-                    Content="Show console window"
+                    Content="{markup:Translate [ShowConsoleWindowInGUIMode]}"
                     IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="{markup:Translate [EnableMcpServerInGUIMode]}"
+                    IsChecked="{Binding Setting.EnableMcpServerInGUIMode}" />
+                <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [McpServerListenPort]}" />
+                    <TextBox
+                        Width="100"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding Setting.McpServerListenPort}" />
+                </StackPanel>
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="{markup:Translate [AllowAnonymousMcpClientUsage]}"
+                    IsChecked="{Binding Setting.AllowAnonymousMcpClientUsage}" />
+                <TextBlock
+                    Margin="10,0,10,10"
+                    Foreground="DarkSlateGray"
+                    Text="{markup:Translate [McpProgramSettingsNote]}"
+                    TextWrapping="Wrap" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">
@@ -120,6 +141,28 @@
                         ItemsSource="{Binding AvaliableSkiaBackends}"
                         SelectedValue="{Binding Setting.SkiaRenderBackend}" />
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate [D3DRenderQueueFrameCount]}" />
+                    <ComboBox
+                        Margin="5,0,5,0"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding D3DRenderQueueFrameCountOptions}"
+                        SelectedValue="{Binding D3DRenderQueueFrameCount}" />
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Foreground="DarkSlateGray"
+                        Text="{markup:Translate [D3DRenderQueueFrameCountHint]}" />
+                </StackPanel>
+                <Button
+                    Margin="10,0,0,0"
+                    Padding="10,5"
+                    HorizontalAlignment="Left"
+                    cal:Message.Attach="OpenRenderPerfomenceMeasurePanel()"
+                    Content="{markup:Translate [OpenRenderPerfomenceMeasurePanel]}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">
@@ -133,6 +176,9 @@
                     </CheckBox>
                     <CheckBox IsChecked="{Binding EnableAssociateOgkr}">
                         <TextBlock Text=".ogkr" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <CheckBox Margin="10,0,0,0" IsChecked="{Binding EnableAssociateNyagekiScript}">
+                        <TextBlock Text=".nyagekiScript" TextWrapping="Wrap" />
                     </CheckBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">

@@ -54,6 +54,8 @@ public class Log
             output.WriteLog(severity, message);
     }
 
+    private static readonly string[] severityNames = { "DEBUG", "INFO", "WARN", "ERROR" };
+
     private static string BuildLogMessage(LogRecord record)
     {
         var prefix = record.Prefix;
@@ -61,11 +63,14 @@ public class Log
             prefix = Path.GetFileNameWithoutExtension(record.FilePath) + prefix;
         prefix += $":{record.LineNumber}";
 
-        using var _d = ObjectPool.ObjectPool.GetWithUsingDisposable<StringBuilder>(out var sb, out _);
+        using var _d = OngekiFumenEditor.Utils.ObjectPool.ObjectPool.GetWithUsingDisposable<StringBuilder>(out var sb);
         sb.Clear();
 
+        var sevIdx = (int)record.Severity;
+        var sevName = (uint)sevIdx < (uint)severityNames.Length ? severityNames[sevIdx] : record.Severity.ToString();
+
         sb.AppendFormat("[{0} {1}:{2}]", record.Time ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") : string.Empty,
-            record.Severity.ToString().ToUpper(), Thread.CurrentThread.ManagedThreadId);
+            sevName, Thread.CurrentThread.ManagedThreadId);
 
         if (!string.IsNullOrWhiteSpace(prefix))
             sb.AppendFormat("<{0}>", prefix);

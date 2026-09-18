@@ -1,5 +1,3 @@
-using System;
-
 namespace OngekiFumenEditor.Base
 {
     public class TGrid : GridBase
@@ -23,13 +21,12 @@ namespace OngekiFumenEditor.Base
 
         public override string ToString() => $"T[{Unit},{Grid}]";
 
-        public TGrid CopyNew() => new(Unit, Grid);
+        public TGrid CopyNew() => new TGrid(Unit, Grid);
 
         public static TGrid FromTotalUnit(float totalUnit)
         {
             var tGrid = new TGrid(totalUnit, 0);
             tGrid.NormalizeSelf();
-
             return tGrid;
         }
 
@@ -37,7 +34,6 @@ namespace OngekiFumenEditor.Base
         {
             var tGrid = new TGrid(0, totalGrid);
             tGrid.NormalizeSelf();
-
             return tGrid;
         }
 
@@ -68,7 +64,7 @@ namespace OngekiFumenEditor.Base
 
             while (grid < 0)
             {
-                unit = unit - 1;
+                unit -= 1;
                 grid = (int)(grid + l.ResT);
             }
 
@@ -89,7 +85,6 @@ namespace OngekiFumenEditor.Base
 
             var t = new TGrid(0, grid);
             t.NormalizeSelf();
-
             return t;
         }
     }

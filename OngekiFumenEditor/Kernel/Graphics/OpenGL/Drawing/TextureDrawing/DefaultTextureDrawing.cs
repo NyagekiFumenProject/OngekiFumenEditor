@@ -1,21 +1,18 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
-using Vector2 = System.Numerics.Vector2;
-using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 {
-    internal class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
+    internal sealed class DefaultTextureDrawing : CommonOpenGLDrawingBase, ITextureDrawing, IDisposable
     {
-        private readonly DefaultOpenGLShader shader;
+        private readonly CommonSpriteShader shader;
         private readonly int vertexVBO;
         private readonly int textureVBO;
         private readonly int vao;
@@ -94,32 +91,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing
 #endif
             var texture = (DefaultOpenGLTexture)tex;
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
             {
                 var modelMatrix =
                     GetOverrideModelMatrix() *
-                    Matrix4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
-                    Matrix4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
-                    Matrix4.CreateRotationZ(rotation) *
-                    Matrix4.CreateTranslation(position.X, position.Y, 0);
+                    Matrix4x4.CreateScale(new Vector3(texture.Width, texture.Height, 1)) *
+                    Matrix4x4.CreateScale(new Vector3(size.X / texture.Width, size.Y / texture.Height, 1)) *
+                    Matrix4x4.CreateRotationZ(rotation) *
+                    Matrix4x4.CreateTranslation(position.X, position.Y, 0);
 
                 shader.Begin();
                 {
-                    shader.PassUniform("Model", modelMatrix);
-                    shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
-                    shader.PassUniform("color", color.ToOpenTKVector4());
-                    shader.PassUniform("diffuse", texture);
+                    shader.PassUniform(shader.ModelLocation, modelMatrix);
+                    shader.PassUniform(shader.ViewProjectionLocation, GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
+                    shader.PassUniform(shader.ColorLocation, color);
+                    shader.PassUniform(shader.DiffuseLocation, texture);
 
                     GL.BindVertexArray(vao);
                     {
                         GL.DrawArrays(PrimitiveType.TriangleFan, 0, 4);
-                        target.PerfomenceMonitor.CountDrawCall(this);
+                        target.RenderContext.PerfomenceMonitor.CountDrawCall();
                     }
                     GL.BindVertexArray(0);
                 }
                 shader.End();
             }
-            target.PerfomenceMonitor.OnAfterDrawing(this);
         }
     }
 }

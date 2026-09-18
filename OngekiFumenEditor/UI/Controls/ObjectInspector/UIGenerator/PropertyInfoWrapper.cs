@@ -1,5 +1,6 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Properties;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -80,8 +81,32 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
             }
         }
 
-        public string DisplayPropertyName => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>()?.Alias ?? PropertyInfo.Name;
-        public string DisplayPropertyTipText => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>()?.TipText ?? string.Empty;
+        public string DisplayPropertyName
+        {
+            get
+            {
+                if (PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAlias>() is not { } attr)
+                    return PropertyInfo.Name;
+
+                if (attr is LocalizableObjectPropertyBrowserAlias localizable && !string.IsNullOrWhiteSpace(localizable.ResourceKey))
+                    return Resources.ResourceManager.GetString(localizable.ResourceKey) ?? attr.Alias ?? PropertyInfo.Name;
+
+                return attr.Alias ?? PropertyInfo.Name;
+            }
+        }
+
+        public string DisplayPropertyTipText
+        {
+            get
+            {
+                if (PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserTipText>() is not { } attr)
+                    return string.Empty;
+
+                return string.IsNullOrWhiteSpace(attr.TipTextResourceKey)
+                    ? string.Empty
+                    : Resources.ResourceManager.GetString(attr.TipTextResourceKey) ?? string.Empty;
+            }
+        }
 
         public bool IsAllowSetNull => PropertyInfo.GetCustomAttribute<ObjectPropertyBrowserAllowSetNull>() is not null;
 

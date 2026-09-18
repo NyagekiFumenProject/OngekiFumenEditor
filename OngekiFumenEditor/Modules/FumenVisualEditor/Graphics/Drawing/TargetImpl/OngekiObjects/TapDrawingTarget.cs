@@ -1,8 +1,9 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Runtime.CompilerServices;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
+    public sealed class TapDrawingTarget : CommonBatchDrawTargetBase<Tap>, IDisposable
     {
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "TAP", "CTP", "XTP" };
 
@@ -37,9 +38,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> normalList = new();
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> exList = new();
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> selectTapList = new();
-
-        private IBatchTextureDrawing batchTextureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
@@ -74,12 +72,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
-
-            batchTextureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
         {
             var texture = laneType switch
             {
@@ -102,7 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var x = XGridCalculator.ConvertXGridToX(tap.XGrid, target.Editor);
             var soflanList = specifySoflanList ?? target.Editor._cacheSoflanGroupRecorder.GetCache(tap);
-            var y = target.ConvertToY(tap.TGrid, soflanList);
+            var y = target.ConvertToViewRelativeY(tap.TGrid, soflanList);
 
             var pos = new Vector2((float)x, (float)y);
             normalList[texture].Add((size, pos, 0f, Vector4.One));
@@ -163,20 +158,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             wallTexture?.Dispose();
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<Tap> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Tap> objs)
         {
             foreach (var tap in objs)
-                Draw(target, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
+                Draw(target, builder, tap.ReferenceLaneStart?.LaneType, tap, tap.IsCritical);
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void draw(Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> map)
             {
                 foreach (var item in map)
-                    batchTextureDrawing.Draw(target, item.Key, item.Value);
+                    builder.DrawBatchTexture(item.Key, item.Value);
             }
 
             foreach (var item in selectTapList)
-                highlightDrawing.Draw(target, item.Key, item.Value);
+                builder.DrawHighlightBatchTexture(item.Key, item.Value);
             draw(exList);
             draw(normalList);
 

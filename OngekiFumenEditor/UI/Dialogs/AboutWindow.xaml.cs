@@ -1,4 +1,4 @@
-﻿using MahApps.Metro.Controls;
+using MahApps.Metro.Controls;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel;

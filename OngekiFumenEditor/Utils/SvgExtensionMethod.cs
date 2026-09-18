@@ -1,4 +1,4 @@
-﻿using Svg;
+using Svg;
 using System;
 using System.Collections.Generic;
 using System.Linq;

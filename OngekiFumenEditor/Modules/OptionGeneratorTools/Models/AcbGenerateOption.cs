@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.CommandExecutor.Attributes;
 using OngekiFumenEditor.Properties;
 

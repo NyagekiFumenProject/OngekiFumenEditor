@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Kernel.Audio
+namespace OngekiFumenEditor.Kernel.Audio
 {
-	public interface ILoopHandle { }
+    public interface ILoopHandle { }
 }

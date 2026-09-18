@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -19,7 +19,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch
         public static extern void soundtouch_destroyInstance(IntPtr h);
 
         /// <summary>
-        /// Get SoundTouch library version string - alternative function for 
+        /// Get SoundTouch library version string - alternative function for
         /// environments that can't properly handle character string as return value
         /// </summary>
         [DllImport("SoundTouch")]
@@ -67,7 +67,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch
         public static extern void soundtouch_setPitch(IntPtr h, float newPitch);
 
         /// <summary>
-        /// Sets pitch change in octaves compared to the original pitch  
+        /// Sets pitch change in octaves compared to the original pitch
         /// (-1.00 .. +1.00);
         /// </summary>
         [DllImport("SoundTouch")]
@@ -150,9 +150,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.SoundTouch
         public static extern int soundtouch_numUnprocessedSamples(IntPtr h);
 
         /// <summary>
-        ///  Adjusts book-keeping so that given number of samples are removed from beginning of the 
-        ///  sample buffer without copying them anywhere. 
-        /// 
+        ///  Adjusts book-keeping so that given number of samples are removed from beginning of the
+        ///  sample buffer without copying them anywhere.
+        ///
         ///  Used to reduce the number of samples in the buffer when accessing the sample buffer directly
         ///  with 'ptrBegin' function.
         /// </summary>

@@ -1,12 +1,13 @@
-﻿using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils;
 using SkiaSharp;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
 {
-    internal class DefaultSkiaPolygonDrawing : CommonSkiaDrawingBase, IPolygonDrawing
+    internal sealed class DefaultSkiaPolygonDrawing : CommonSkiaDrawingBase, IPolygonDrawing
     {
         private IDrawingContext target;
         private Primitive primitive;
@@ -45,8 +46,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
             {
                 Primitive.Triangles => SKVertexMode.Triangles,
                 Primitive.TriangleStrip => SKVertexMode.TriangleStrip,
+                _ => throw new NotSupportedException()
             }, points.ToArray(), colors.ToArray(), paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.RenderContext.PerfomenceMonitor.CountDrawCall();
 
             //clean
             OnEnd();

@@ -1,15 +1,15 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -64,10 +64,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         public DefaultFumenSoundPlayer()
         {
-            InitSounds();
+            // 通过 loadTask 字段(由 InitSoundsAsync 内部赋值)暴露完成信号,
+            // 这里不需要 await,fire-and-forget 即可。
+            _ = InitSoundsAsync();
         }
 
-        private async void InitSounds()
+        private async Task InitSoundsAsync()
         {
             var source = new TaskCompletionSource<bool>();
             loadTask = source.Task;
@@ -85,41 +87,59 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             else
                 Log.LogInfo($"SoundFolderPath : {soundFolderPath} , fullpath : {Path.GetFullPath(soundFolderPath)}");
 
-            bool noError = true;
-
-            async Task load(SoundControl sound, string fileName)
+            // 原本 17 个文件顺序 await,等待时间累加;改为 Task.WhenAll 并行加载。
+            // 单 load 返回结果 + 是否成功,主流程统一写入 cacheSounds 字典,
+            // 避免并发写入普通 Dictionary。
+            async Task<(SoundControl sound, ISoundPlayer player, bool ok)> load(SoundControl sound, string fileName)
             {
                 var fixFilePath = Path.Combine(soundFolderPath, fileName);
 
                 try
                 {
-                    cacheSounds[sound] = await audioManager.LoadSoundAsync(fixFilePath);
+                    var player = await audioManager.LoadSoundAsync(fixFilePath);
+                    return (sound, player, true);
                 }
                 catch (Exception e)
                 {
                     Log.LogError($"Can't load {sound} sound file : {fixFilePath} , reason : {e.Message}");
-                    noError = false;
+                    return (sound, null, false);
                 }
             }
 
             cacheSounds.Clear();
-            await load(SoundControl.Tap, "tap.wav");
-            await load(SoundControl.Bell, "bell.wav");
-            await load(SoundControl.CriticalTap, "extap.wav");
-            await load(SoundControl.WallTap, "wall.wav");
-            await load(SoundControl.CriticalWallTap, "exwall.wav");
-            await load(SoundControl.Flick, "flick.wav");
-            await load(SoundControl.Bullet, "bullet.wav");
-            await load(SoundControl.CriticalFlick, "exflick.wav");
-            await load(SoundControl.HoldEnd, "holdend.wav");
-            await load(SoundControl.ClickSE, "clickse.wav");
-            await load(SoundControl.HoldTick, "holdtick.wav");
-            await load(SoundControl.BeamPrepare, "beamprepare.wav");
-            await load(SoundControl.BeamLoop, "beamlooping.wav");
-            await load(SoundControl.BeamEnd, "beamend.wav");
-            await load(SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav");
-            await load(SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav");
-            await load(SoundControl.BossWave, "bossWave.wav");
+
+            var loads = new[]
+            {
+                load(SoundControl.Tap, "tap.wav"),
+                load(SoundControl.Bell, "bell.wav"),
+                load(SoundControl.CriticalTap, "extap.wav"),
+                load(SoundControl.WallTap, "wall.wav"),
+                load(SoundControl.CriticalWallTap, "exwall.wav"),
+                load(SoundControl.Flick, "flick.wav"),
+                load(SoundControl.Bullet, "bullet.wav"),
+                load(SoundControl.CriticalFlick, "exflick.wav"),
+                load(SoundControl.HoldEnd, "holdend.wav"),
+                load(SoundControl.ClickSE, "clickse.wav"),
+                load(SoundControl.HoldTick, "holdtick.wav"),
+                load(SoundControl.BeamPrepare, "beamprepare.wav"),
+                load(SoundControl.BeamLoop, "beamlooping.wav"),
+                load(SoundControl.BeamEnd, "beamend.wav"),
+                load(SoundControl.MetronomeStrongBeat, "metronomeStrongBeat.wav"),
+                load(SoundControl.MetronomeWeakBeat, "metronomeWeakBeat.wav"),
+                load(SoundControl.BossWave, "bossWave.wav"),
+            };
+            var results = await Task.WhenAll(loads);
+
+            var noError = true;
+            foreach (var (sound, player, ok) in results)
+            {
+                if (!ok)
+                {
+                    noError = false;
+                    continue;
+                }
+                cacheSounds[sound] = player;
+            }
 
             if (!noError)
             {
@@ -222,7 +242,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var evt = ObjectPool<SoundEvent>.Get();
 
                 evt.Sounds = sound;
-                evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
+                evt.Time = editor.ConvertTGridToAudioTime(tGrid);
                 //evt.TGrid = tGrid;
 
                 list.Add(evt);
@@ -234,8 +254,8 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
                 evt.Sounds = sound;
                 evt.LoopId = loopId;
-                evt.Time = TGridCalculator.ConvertTGridToAudioTime(tGrid, editor);
-                evt.EndTime = TGridCalculator.ConvertTGridToAudioTime(endTGrid, editor);
+                evt.Time = editor.ConvertTGridToAudioTime(tGrid);
+                evt.EndTime = editor.ConvertTGridToAudioTime(endTGrid);
                 //evt.TGrid = tGrid;
 
                 durationList.Add(evt);
@@ -252,7 +272,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     AddSound(SoundControl.ClickSE, tGrid);
             }
 
-            using var _d = ObjectPool<HashSet<Type>>.GetWithUsingDisposable(out var typeSet, out _);
+            using var typeSet = ObjectPool.GetPooledSet<Type>();
 
             foreach (var group in soundObjects.GroupBy(x => x.TGrid))
             {
@@ -300,7 +320,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         //generate stop
                         AddSound(SoundControl.BeamEnd, beam.MaxTGrid);
                         AddDurationSound(SoundControl.BeamLoop, beam.TGrid, beam.MaxTGrid, loopId);
-                        var leadBodyInTGrid = TGridCalculator.ConvertAudioTimeToTGrid(TGridCalculator.ConvertTGridToAudioTime(beam.TGrid, editor) - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME), editor);
+                        var leadBodyInTGrid = editor.ConvertAudioTimeToTGrid(editor.ConvertTGridToAudioTime(beam.TGrid) - TGridCalculator.ConvertFrameToAudioTime(BeamStart.LEAD_IN_DURATION_FRAME));
                         if (leadBodyInTGrid is null)
                             leadBodyInTGrid = TGrid.Zero;
                         AddSound(SoundControl.BeamPrepare, leadBodyInTGrid);
@@ -348,8 +368,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             }
 
             var currentTime = player.CurrentTime;
+            var offsetMs = AudioSetting.Default.SoundOffsetMs;
+            if (offsetMs != 0)
+                currentTime = currentTime + TimeSpan.FromMilliseconds(offsetMs);
 
-            //播放物件音效
+            //���������Ч
             while (itor is not null)
             {
                 var nextBeatTime = itor.Value.Time.TotalMilliseconds;
@@ -364,12 +387,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //播放节拍器
+            //���Ž�����
             while (meterActionsItor is not null)
             {
                 var nextActionItor = meterActionsItor.Next;
 
-                //检查当前是否有效
+                //��鵱ǰ�Ƿ���Ч
                 if (meterActionsItor.Value.isSkip)
                 {
                     meterActionsItor = nextActionItor;
@@ -380,7 +403,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var nextBeatTime = meterActionsItor.Value.Time +
                     meterActionsItor.Value.BeatInterval * currentMeterHitCount;
 
-                //检查是否超过下一个
+                //����Ƿ񳬹���һ��
                 if (nextActionItor != null)
                 {
                     if (nextBeatTime > nextActionItor.Value.Time)
@@ -391,7 +414,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     }
                 }
 
-                //没超过就检查了
+                //û�����ͼ����
                 var ct = currentTime.TotalMilliseconds - nextBeatTime.TotalMilliseconds;
                 if (ct >= 0)
                 {
@@ -405,13 +428,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //检查循环音效
+            //���ѭ����Ч
             lock (locker)
             {
                 var queryDurationEvents = durationEvents.Query(currentTime);
                 foreach (var durationEvent in queryDurationEvents)
                 {
-                    //检查是否正在播放了
+                    //����Ƿ����ڲ�����
                     if (!currentPlayingDurationEvents.Contains(durationEvent))
                     {
                         if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
@@ -423,7 +446,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         }
                     }
                 }
-                //检查是否已经播放完成
+                //����Ƿ��Ѿ��������
                 foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
                 {
                     if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
@@ -593,8 +616,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         public async Task<bool> ReloadSoundFiles()
         {
-            InitSounds();
+            _ = InitSoundsAsync();
             return await loadTask;
         }
     }
 }
+

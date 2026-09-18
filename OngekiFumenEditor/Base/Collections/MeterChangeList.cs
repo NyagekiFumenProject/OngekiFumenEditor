@@ -1,6 +1,5 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
@@ -173,7 +172,7 @@ namespace OngekiFumenEditor.Base.Collections
                 yield return currentState;
             }
 
-            cachedTimesignUniformPosition.AddRange(visit().Select(x => (TGridCalculator.ConvertTGridToAudioTime(x.TGrid, bpmList), x.TGrid, x.meter, x.bpm)));
+            cachedTimesignUniformPosition.AddRange(visit().Select(x => (TGridAudioTimeCalculator.ConvertTGridToAudioTime(x.TGrid, bpmList), x.TGrid, x.meter, x.bpm)));
         }
 
         public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(BpmList bpmList)
@@ -199,3 +198,4 @@ namespace OngekiFumenEditor.Base.Collections
             => ((IBinaryFindRangeEnumable<MeterChange, TGrid>)changedMeterList).Contains(obj);
     }
 }
+

@@ -1,4 +1,4 @@
-ï»¿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
 using OngekiFumenEditor.Utils;
@@ -95,7 +95,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
 
             if (list.IsEmpty())
                 return false;
-            //todo ä¸¥æ ¼ä¸€ä¸‹ï¼Ÿ
 
             var propInfo = list.First().PropertyInfo;
             multiWrapper = new MultiObjectsPropertyInfoWrapper(list, propInfo);
@@ -122,13 +121,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
         }
 
         /// <summary>
-        /// å¯èƒ½è¿”å›DependencyProperty.UnsetValueè¡¨ç¤ºä¸åŒçš„å€¼
+        /// ¿ÉÄÜ·µ»ØDependencyProperty.UnsetValue±íÊ¾²»Í¬µÄÖµ
         /// </summary>
         public object ProxyValue
         {
             get
             {
-                //å¦‚æœæ‰€æœ‰å€¼éƒ½æ˜¯ä¸€æ ·çš„ï¼Œé‚£å°±è¿”å›æ­£ç¡®çš„å€¼ï¼Œå¦åˆ™å°±è¿”å›default
+                //Èç¹ûËùÓĞÖµ¶¼ÊÇÒ»ÑùµÄ£¬ÄÇ¾Í·µ»ØÕıÈ·µÄÖµ£¬·ñÔò¾Í·µ»Ødefault
                 var itor = wrappers.GetEnumerator();
                 if (!itor.MoveNext())
                     return DependencyProperty.UnsetValue;

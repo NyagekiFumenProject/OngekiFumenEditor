@@ -13,7 +13,7 @@ public class LambdaTriggerAction : TriggerAction<UIElement>
     {
         Action = action;
     }
-    
+
     protected override void Invoke(object parameter)
     {
         Action.Invoke(parameter);

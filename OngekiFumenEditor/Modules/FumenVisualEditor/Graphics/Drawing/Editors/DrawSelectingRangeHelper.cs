@@ -1,5 +1,7 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -22,18 +24,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private RangeColors DeleteAll = new(new(1, 0.1f, 0.1f, 1), new(1, 0.1f, 0.1f, 0.15f));
         private RangeColors DeleteFiltered = new(new(1, 0.1f, 0.1f, 1), new(0.8f, 0.8f, 0, 0.15f));
 
-        private ISimpleLineDrawing lineDrawing;
-        private IPolygonDrawing polygonDrawing;
-
         private VertexDash dash = new(8,4);
 
         public void Initalize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
-            polygonDrawing = impl.PolygonDrawing;
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             if (target.Editor.SelectionArea is not { } selectionArea || selectionArea.Rect is { Height: 0, Width: 0 } || !selectionArea.IsActive)
                 return;
@@ -66,36 +63,35 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 colors = SelectAll;
             }
 
-            var topY = (float)selectionArea.Rect.Top;
-            var buttomY = (float)selectionArea.Rect.Bottom;
+            var originY = target.CurrentDrawingTargetContext?.ViewRelativeOriginY ?? 0;
+            var topY = (float)(selectionArea.Rect.Top - originY);
+            var buttomY = (float)(selectionArea.Rect.Bottom - originY);
             var rightX = (float)selectionArea.Rect.Right;
             var leftX = (float)selectionArea.Rect.Left;
             var centerX = (leftX + rightX) / 2;
             var centerY = (topY + buttomY) / 2;
 
-            polygonDrawing.Begin(target, Primitive.TriangleStrip);
+            builder.DrawPolygon(Primitive.TriangleStrip, new[]
             {
-                polygonDrawing.PostPoint(new(leftX, buttomY), colors.RectColor);
-                polygonDrawing.PostPoint(new(centerX, centerY), colors.RectColor);
-                polygonDrawing.PostPoint(new(leftX, topY), colors.RectColor);
-                polygonDrawing.PostPoint(new(centerX, centerY), colors.RectColor);
-                polygonDrawing.PostPoint(new(rightX, topY), colors.RectColor);
-                polygonDrawing.PostPoint(new(centerX, centerY), colors.RectColor);
-                polygonDrawing.PostPoint(new(rightX, buttomY), colors.RectColor);
-                polygonDrawing.PostPoint(new(centerX, centerY), colors.RectColor);
-                polygonDrawing.PostPoint(new(leftX, buttomY), colors.RectColor);
-            }
-            polygonDrawing.End();
+                new PolygonVertex(new(leftX, buttomY), colors.RectColor),
+                new PolygonVertex(new(centerX, centerY), colors.RectColor),
+                new PolygonVertex(new(leftX, topY), colors.RectColor),
+                new PolygonVertex(new(centerX, centerY), colors.RectColor),
+                new PolygonVertex(new(rightX, topY), colors.RectColor),
+                new PolygonVertex(new(centerX, centerY), colors.RectColor),
+                new PolygonVertex(new(rightX, buttomY), colors.RectColor),
+                new PolygonVertex(new(centerX, centerY), colors.RectColor),
+                new PolygonVertex(new(leftX, buttomY), colors.RectColor),
+            });
 
-            lineDrawing.Begin(target, 1);
+            builder.DrawSimpleLines(new[]
             {
-                lineDrawing.PostPoint(new(leftX, buttomY), colors.LineColor, dash);
-                lineDrawing.PostPoint(new(leftX, topY), colors.LineColor, dash);
-                lineDrawing.PostPoint(new(rightX, topY), colors.LineColor, dash);
-                lineDrawing.PostPoint(new(rightX, buttomY), colors.LineColor, dash);
-                lineDrawing.PostPoint(new(leftX, buttomY), colors.LineColor, dash);
-            }
-            lineDrawing.End();
+                new LineVertex(new(leftX, buttomY), colors.LineColor, dash),
+                new LineVertex(new(leftX, topY), colors.LineColor, dash),
+                new LineVertex(new(rightX, topY), colors.LineColor, dash),
+                new LineVertex(new(rightX, buttomY), colors.LineColor, dash),
+                new LineVertex(new(leftX, buttomY), colors.LineColor, dash),
+            }, 1);
         }
     }
 }

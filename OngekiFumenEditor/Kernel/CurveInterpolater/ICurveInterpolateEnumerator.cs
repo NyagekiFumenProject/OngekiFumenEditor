@@ -1,8 +1,8 @@
-﻿namespace OngekiFumenEditor.Kernel.CurveInterpolater
+namespace OngekiFumenEditor.Kernel.CurveInterpolater
 {
-	public interface ICurveInterpolateEnumerator
-	{
-		CurvePoint? EnumerateNext();
-		void PushBack(CurvePoint point);
-	}
+    public interface ICurveInterpolateEnumerator
+    {
+        CurvePoint? EnumerateNext();
+        void PushBack(CurvePoint point);
+    }
 }

@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -64,7 +64,6 @@ namespace OngekiFumenEditor.Base
                 var item = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(arg1.SoflanGroup, out var isCreated);
                 if (isCreated)
                 {
-                    Log.LogDebug($"OngekiFumen noticed a new soflanGroupId has been specified, update default groups");
                     if (IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.FirstOrDefault(x => x.DisplayName == "default") is SoflanGroupWrapItemGroup defaultGroup)
                     {
                         defaultGroup.Add(item);
@@ -233,11 +232,10 @@ namespace OngekiFumenEditor.Base
             } is ConnectableObjectBase lane)
             {
                 Lanes.Add(lane);
-                ConnectableObjectBase.RelocateDockableObjects(this, lane);
+                ConnectableObjectDockingHelper.RelocateDockableObjects(this, lane);
             }
             else
             {
-                Log.LogWarn($"add-in list target not found, object type : {obj?.GetType()?.GetTypeName()}");
                 return;
             }
 
@@ -339,12 +337,11 @@ namespace OngekiFumenEditor.Base
 
                 Lanes.Remove(lane);
 
-                ConnectableObjectBase.RelocateDockableObjects(this, prev, refStart);
-                ConnectableObjectBase.RelocateDockableObjects(this, next, refStart);
+                ConnectableObjectDockingHelper.RelocateDockableObjects(this, prev, refStart);
+                ConnectableObjectDockingHelper.RelocateDockableObjects(this, next, refStart);
             }
             else
             {
-                Log.LogWarn($"delete list target not found, object type : {obj?.GetType()?.GetTypeName()}");
                 return;
             }
 
@@ -370,11 +367,9 @@ namespace OngekiFumenEditor.Base
                                 if (Lanes.FirstOrDefault(x => x.RecordId == newRefLaneId) is LaneStartBase newRefLane)
                                 {
                                     dockableObj.ReferenceLaneStart = newRefLane;
-                                    Log.LogInfo($"Change dockable object {dockableObj} ref lane from {beforeRefLane?.RecordId} to {newRefLane?.RecordId}.");
                                 }
                                 else
                                 {
-                                    Log.LogWarn($"Change dockable object {dockableObj} ref failed, LaneId={newRefLaneId} not found.");
                                 }
                             }
                         }
@@ -422,14 +417,13 @@ namespace OngekiFumenEditor.Base
             if (e.PropertyName == nameof(FumenMetaInfo.BpmDefinition))
             {
                 BpmList.FirstBpm = MetaInfo.BpmDefinition.First;
-                Log.LogDebug($"Apply metainfo.firstBpm to bpmList.firstBpm : {BpmList.FirstBpm}");
             }
             if (e.PropertyName == nameof(FumenMetaInfo.MeterDefinition))
             {
                 MeterChanges.FirstMeter.Bunbo = MetaInfo.MeterDefinition.Bunbo;
                 MeterChanges.FirstMeter.BunShi = MetaInfo.MeterDefinition.Bunshi;
-                Log.LogDebug($"Apply metainfo.firstMeter to bpmList.firstMeter : {MeterChanges.FirstMeter.BunShi}/{MeterChanges.FirstMeter.Bunbo}");
             }
         }
     }
 }
+

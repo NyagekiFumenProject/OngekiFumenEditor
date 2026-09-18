@@ -186,6 +186,12 @@
   <data name="AudioOption" xml:space="preserve">
     <value>音频设置</value>
   </data>
+  <data name="AudioSampleRateAutoDetectConfirm" xml:space="preserve">
+    <value>已检测到默认音频设备采样率: {0} Hz。&#xA;是否采用此采样率?</value>
+  </data>
+  <data name="AudioSampleRateAutoDetectFailedUseDefault" xml:space="preserve">
+    <value>获取默认音频设备采样率出错。&#xA;将使用默认采样率: {0} Hz。</value>
+  </data>
   <data name="AudioPlayerToolViewer" xml:space="preserve">
     <value>音频播放</value>
   </data>
@@ -384,6 +390,9 @@
   <data name="CommandInterpolateAllWithXGridLimit" xml:space="preserve">
     <value>插值所有曲线轨道(XGrid限制)</value>
   </data>
+  <data name="CommandCustomFumenList" xml:space="preserve">
+    <value>自制谱列表</value>
+  </data>
   <data name="CommandOpenProjectUrl" xml:space="preserve">
     <value>项目网址</value>
   </data>
@@ -575,6 +584,9 @@
   </data>
   <data name="EditorMouseWheelSpeed_Unit" xml:space="preserve">
     <value>(值越大,滚动跨度越大)</value>
+  </data>
+  <data name="EditorOffsetMs" xml:space="preserve">
+    <value>编辑器时间偏移</value>
   </data>
   <data name="EditorMustBeDesignMode" xml:space="preserve">
     <value>请先将编辑器切换到编辑模式</value>
@@ -810,6 +822,9 @@
   <data name="GenerateScriptProjectFileFail" xml:space="preserve">
     <value>生成脚本项目文件失败.</value>
   </data>
+  <data name="PleaseSaveScriptBeforeVSEdit" xml:space="preserve">
+    <value>使用Visual Studio编辑脚本前必须先将脚本保存为文件，是否立即保存？</value>
+  </data>
   <data name="GenerateSvg" xml:space="preserve">
     <value>生成铺面预览.svg文件</value>
   </data>
@@ -902,6 +917,15 @@
   </data>
   <data name="JustBefore" xml:space="preserve">
     <value>刚刚</value>
+  </data>
+  <data name="BpmFilter" xml:space="preserve">
+    <value>BPM过滤:</value>
+  </data>
+  <data name="BpmMin" xml:space="preserve">
+    <value>最小</value>
+  </data>
+  <data name="BpmMax" xml:space="preserve">
+    <value>最大</value>
   </data>
   <data name="KeywordSortFilter" xml:space="preserve">
     <value>关键词排序:</value>
@@ -1323,8 +1347,8 @@
   <data name="ShowCurveControlAlways" xml:space="preserve">
     <value>一直显示曲线控制点：</value>
   </data>
-  <data name="ShowFPS" xml:space="preserve">
-    <value>显示FPS</value>
+  <data name="ShowDebugInfo" xml:space="preserve">
+    <value>显示调试信息</value>
   </data>
   <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>显示物品放置的位置</value>
@@ -1343,6 +1367,9 @@
   </data>
   <data name="Sound" xml:space="preserve">
     <value>音效</value>
+  </data>
+  <data name="SoundOffsetMs" xml:space="preserve">
+    <value>音效时间偏移</value>
   </data>
   <data name="SoundFolderPath" xml:space="preserve">
     <value>音效文件夹路径:</value>
@@ -2046,6 +2073,27 @@
   <data name="SkiaRenderBackend" xml:space="preserve">
     <value>Skia渲染后端:</value>
   </data>
+  <data name="D3DRenderQueueFrameCount" xml:space="preserve">
+    <value>D3D 渲染队列帧数:</value>
+  </data>
+  <data name="D3DRenderQueueFrameCountHint" xml:space="preserve">
+    <value>2 = 双重缓冲，3 = 三重缓冲</value>
+  </data>
+  <data name="OpenRenderPerfomenceMeasurePanel" xml:space="preserve">
+    <value>打开性能测量面板</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelTitle" xml:space="preserve">
+    <value>渲染性能测量</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoContext" xml:space="preserve">
+    <value>未发现渲染上下文。请先打开编辑器或波形视图后重新打开此面板。</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelNoData" xml:space="preserve">
+    <value>无性能测量数据</value>
+  </data>
+  <data name="RenderPerfomenceMeasurePanelMonitor" xml:space="preserve">
+    <value>性能测量器:</value>
+  </data>
   <data name="ReturnStartTimeAfterPause" xml:space="preserve">
     <value>当播放暂停后, 编辑器时间跳转回播放前</value>
   </data>
@@ -2276,5 +2324,335 @@
   </data>
   <data name="BulletPalleteDisplayName" xml:space="preserve">
     <value>子弹模板</value>
+  </data>
+  <data name="ShowConsoleWindowInGUIMode" xml:space="preserve">
+    <value>显示控制台窗口</value>
+  </data>
+  <data name="EnableMcpServerInGUIMode" xml:space="preserve">
+    <value>启用 MCP 服务器</value>
+  </data>
+  <data name="McpServerListenPort" xml:space="preserve">
+    <value>MCP 监听端口</value>
+  </data>
+  <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
+    <value>允许匿名 MCP 客户端使用</value>
+  </data>
+  <data name="McpProgramSettingsNote" xml:space="preserve">
+    <value>MCP 菜单显示和自动启动的改动会在重启后生效。端口改动会在下次服务器启动时生效。禁用匿名 MCP 使用后，客户端必须提供 clientId 或 requestedBy。</value>
+  </data>
+  <data name="McpMenuTitle" xml:space="preserve">
+    <value>MCP</value>
+  </data>
+  <data name="McpServerUrlMenuText" xml:space="preserve">
+    <value>服务器 URL</value>
+  </data>
+  <data name="McpServerUrlMenuToolTip" xml:space="preserve">
+    <value>显示当前 MCP 服务器 URL。</value>
+  </data>
+  <data name="McpStartServerMenuText" xml:space="preserve">
+    <value>启动 MCP 服务器</value>
+  </data>
+  <data name="McpStartServerMenuToolTip" xml:space="preserve">
+    <value>启动 MCP 服务器。</value>
+  </data>
+  <data name="McpStopServerMenuText" xml:space="preserve">
+    <value>停止 MCP 服务器</value>
+  </data>
+  <data name="McpStopServerMenuToolTip" xml:space="preserve">
+    <value>停止 MCP 服务器。</value>
+  </data>
+  <data name="McpConnectedClientsMenuText" xml:space="preserve">
+    <value>已连接使用的客户端</value>
+  </data>
+  <data name="McpConnectedClientsMenuToolTip" xml:space="preserve">
+    <value>列出使用过 MCP 工具的客户端，并可撤销其授权。</value>
+  </data>
+  <data name="McpServerUrlStatusFormat" xml:space="preserve">
+    <value>服务器 URL：{0}{1}</value>
+  </data>
+  <data name="McpServerStoppedSuffix" xml:space="preserve">
+    <value>（已停止）</value>
+  </data>
+  <data name="McpCopyServerUrlToolTip" xml:space="preserve">
+    <value>点击复制当前 MCP 服务器 URL。</value>
+  </data>
+  <data name="McpCopyServerUrlFailed" xml:space="preserve">
+    <value>复制 MCP 服务器 URL 失败。{0}{0}{1}</value>
+  </data>
+  <data name="McpStartServerFailed" xml:space="preserve">
+    <value>启动 MCP 服务器失败。{0}{0}{1}</value>
+  </data>
+  <data name="McpStopServerFailed" xml:space="preserve">
+    <value>停止 MCP 服务器失败。{0}{0}{1}</value>
+  </data>
+  <data name="McpConnectedClientsMenuTextFormat" xml:space="preserve">
+    <value>已连接使用的客户端 ({0})</value>
+  </data>
+  <data name="McpNone" xml:space="preserve">
+    <value>（无）</value>
+  </data>
+  <data name="McpClientAuthorizedStatus" xml:space="preserve">
+    <value>[已授权]</value>
+  </data>
+  <data name="McpClientNotAuthorizedStatus" xml:space="preserve">
+    <value>[未授权]</value>
+  </data>
+  <data name="McpClientNotAuthorizedToolTip" xml:space="preserve">
+    <value>此客户端当前未获准调用 MCP 工具。</value>
+  </data>
+  <data name="McpClientRevokeAuthorizationToolTipFormat" xml:space="preserve">
+    <value>点击撤销 {0} 的 MCP 工具授权。</value>
+  </data>
+  <data name="McpAnonymousClient" xml:space="preserve">
+    <value>匿名客户端</value>
+  </data>
+  <data name="McpUnknownIdentityKey" xml:space="preserve">
+    <value>未知</value>
+  </data>
+  <data name="McpRevokeAuthorizationConfirmFormat" xml:space="preserve">
+    <value>要撤销该客户端的 MCP 工具授权吗？{0}{0}客户端：{1}{0}身份标识：{2}</value>
+  </data>
+  <data name="McpConfirmToolRequestTitle" xml:space="preserve">
+    <value>确认 MCP 工具请求</value>
+  </data>
+  <data name="McpConfirmToolRequestIntroFormat" xml:space="preserve">
+    <value>即将允许 MCP 工具调用“{0}”。</value>
+  </data>
+  <data name="McpBackupFumenBeforeExecution" xml:space="preserve">
+    <value>每次代码执行前先备份谱面文件</value>
+  </data>
+  <data name="McpBackupFumenHintForNonScriptTool" xml:space="preserve">
+    <value>此选项会应用到后续的 script.run_* 代码执行请求。</value>
+  </data>
+  <data name="McpAllow" xml:space="preserve">
+    <value>允许</value>
+  </data>
+  <data name="McpConfirmationToolLabel" xml:space="preserve">
+    <value>工具</value>
+  </data>
+  <data name="McpConfirmationClientLabel" xml:space="preserve">
+    <value>客户端</value>
+  </data>
+  <data name="McpConfirmationRequestedByLabel" xml:space="preserve">
+    <value>请求来源</value>
+  </data>
+  <data name="McpConfirmationClientIdLabel" xml:space="preserve">
+    <value>客户端 ID</value>
+  </data>
+  <data name="McpConfirmationReviewHint" xml:space="preserve">
+    <value>请先检查下方请求详情，再决定是否继续。</value>
+  </data>
+  <data name="McpRememberApprovalWithIdentity" xml:space="preserve">
+    <value>在本次程序运行期间默认允许此 MCP 客户端的后续请求</value>
+  </data>
+  <data name="McpRememberApprovalAnonymous" xml:space="preserve">
+    <value>在本次程序运行期间默认允许未提供客户端标识的 MCP 请求</value>
+  </data>
+  <data name="SplashWindowTitle" xml:space="preserve">
+    <value>欢迎</value>
+  </data>
+  <data name="ApplicationTitle" xml:space="preserve">
+    <value>Ongeki Fumen Editor</value>
+  </data>
+  <data name="ShowSplashScreenCommand" xml:space="preserve">
+    <value>显示启动窗口</value>
+  </data>
+  <data name="GamePlayControllerWindowTitle" xml:space="preserve">
+    <value>游戏控制</value>
+  </data>
+  <data name="GamePlayControllerConnection" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="GamePlayControllerConnectAddress" xml:space="preserve">
+    <value>地址</value>
+  </data>
+  <data name="GamePlayControllerConnect" xml:space="preserve">
+    <value>连接</value>
+  </data>
+  <data name="GamePlayControllerConnectFailedFormat" xml:space="preserve">
+    <value>连接失败：{0}</value>
+  </data>
+  <data name="GamePlayControllerStatus" xml:space="preserve">
+    <value>状态:</value>
+  </data>
+  <data name="GamePlayControllerStatusNotConnected" xml:space="preserve">
+    <value>未发起连接</value>
+  </data>
+  <data name="GamePlayControllerStatusConnected" xml:space="preserve">
+    <value>已连接</value>
+  </data>
+  <data name="GamePlayControllerStatusDisconnected" xml:space="preserve">
+    <value>连接已断开</value>
+  </data>
+  <data name="GamePlayControllerTutorial" xml:space="preserve">
+    <value>使用教程</value>
+  </data>
+  <data name="GamePlayControllerControl" xml:space="preserve">
+    <value>控制</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSeAfterResume" xml:space="preserve">
+    <value>恢复播放是否先播放节奏音效</value>
+  </data>
+  <data name="GamePlayControllerPlay" xml:space="preserve">
+    <value>播放</value>
+  </data>
+  <data name="GamePlayControllerPause" xml:space="preserve">
+    <value>暂停</value>
+  </data>
+  <data name="GamePlayControllerRestart" xml:space="preserve">
+    <value>重开</value>
+  </data>
+  <data name="GamePlayControllerForceEnd" xml:space="preserve">
+    <value>强制结束</value>
+  </data>
+  <data name="GamePlayControllerAutoPlay" xml:space="preserve">
+    <value>自动游戏</value>
+  </data>
+  <data name="GamePlayControllerPauseOnDamageOrMissBell" xml:space="preserve">
+    <value>受伤或者错失Bell时自动暂停</value>
+  </data>
+  <data name="GamePlayControllerSeek" xml:space="preserve">
+    <value>跳转</value>
+  </data>
+  <data name="GamePlayControllerPlayAfterSeek" xml:space="preserve">
+    <value>是否跳转后自动播放</value>
+  </data>
+  <data name="GamePlayControllerExecuteSeek" xml:space="preserve">
+    <value>执行跳转</value>
+  </data>
+  <data name="GamePlayControllerOgkrSavePath" xml:space="preserve">
+    <value>.ogkr谱面生成路径</value>
+  </data>
+  <data name="GamePlayControllerReloadFumenInGame" xml:space="preserve">
+    <value>游戏重新加载谱面</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPath" xml:space="preserve">
+    <value>获取谱面路径</value>
+  </data>
+  <data name="GamePlayControllerReloadAfterSeek" xml:space="preserve">
+    <value>是否跳转也重新加载谱面</value>
+  </data>
+  <data name="GamePlayControllerPlayGuideSe" xml:space="preserve">
+    <value>播放节奏音效</value>
+  </data>
+  <data name="GamePlayControllerDumpUnfinishedInfo" xml:space="preserve">
+    <value>打印未完成内容</value>
+  </data>
+  <data name="GamePlayControllerPlayCustomCue" xml:space="preserve">
+    <value>播放指定cueId的音效</value>
+  </data>
+  <data name="GamePlayControllerAutoFaderDebugger" xml:space="preserve">
+    <value>AutoFaderTarget 调试器</value>
+  </data>
+  <data name="GamePlayControllerGetAutoFaderData" xml:space="preserve">
+    <value>获取当前AutoFader数据</value>
+  </data>
+  <data name="GamePlayControllerApplyAutoFaderData" xml:space="preserve">
+    <value>设置当前AutoFader数据</value>
+  </data>
+  <data name="GamePlayControllerDumpAutoFaderData" xml:space="preserve">
+    <value>将所有AutoFaderTarget数据转储到文件</value>
+  </data>
+  <data name="GamePlayControllerCurrentAutoFaderTarget" xml:space="preserve">
+    <value>当前 AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerPreviousAutoFaderTarget" xml:space="preserve">
+    <value>前一帧 AutoFaderTarget</value>
+  </data>
+  <data name="GamePlayControllerCurrentFrame" xml:space="preserve">
+    <value>当前帧</value>
+  </data>
+  <data name="GamePlayControllerManualCalcAutoPlayFader" xml:space="preserve">
+    <value>手动调用 calcAutoPlayFader()</value>
+  </data>
+  <data name="GamePlayControllerSelectOgkrSavePathPrompt" xml:space="preserve">
+    <value>请指定供音击程序读取的 .ogkr 保存路径。</value>
+  </data>
+  <data name="GamePlayControllerOgkrFileType" xml:space="preserve">
+    <value>标准音击谱面文件</value>
+  </data>
+  <data name="GamePlayControllerGetFumenPathSuccess" xml:space="preserve">
+    <value>获取成功</value>
+  </data>
+  <data name="GamePlayControllerGenerateOgkrFailedFormat" xml:space="preserve">
+    <value>无法生成谱面并更新到游戏中: {0}</value>
+  </data>
+  <data name="Scripts" xml:space="preserve">
+    <value>脚本(_S)</value>
+  </data>
+  <data name="NewScript" xml:space="preserve">
+    <value>新建脚本</value>
+  </data>
+  <data name="NewScriptToolTip" xml:space="preserve">
+    <value>创建一个新的编辑器脚本。</value>
+  </data>
+  <data name="RecommendedScripts" xml:space="preserve">
+    <value>推荐脚本</value>
+  </data>
+  <data name="RecommendedScriptsToolTip" xml:space="preserve">
+    <value>打开一个内置推荐脚本以便查看和编辑。</value>
+  </data>
+  <data name="RecentScripts" xml:space="preserve">
+    <value>最近脚本</value>
+  </data>
+  <data name="RecentScriptsToolTip" xml:space="preserve">
+    <value>打开最近使用过的脚本。</value>
+  </data>
+  <data name="NoScriptsFound" xml:space="preserve">
+    <value>没有可用脚本</value>
+  </data>
+  <data name="OpenScript" xml:space="preserve">
+    <value>打开脚本</value>
+  </data>
+  <data name="OpenScriptToolTip" xml:space="preserve">
+    <value>在脚本编辑器中打开此脚本。</value>
+  </data>
+  <data name="RunTo" xml:space="preserve">
+    <value>运行到...</value>
+  </data>
+  <data name="RunToToolTip" xml:space="preserve">
+    <value>编译脚本并对选定目标执行。</value>
+  </data>
+  <data name="CurrentActivingEditor" xml:space="preserve">
+    <value>当前激活编辑器</value>
+  </data>
+  <data name="NoEditor" xml:space="preserve">
+    <value>无编辑器</value>
+  </data>
+  <data name="NoOpenedEditors" xml:space="preserve">
+    <value>没有已打开的编辑器</value>
+  </data>
+  <data name="UnnamedEditor" xml:space="preserve">
+    <value>未命名编辑器</value>
+  </data>
+  <data name="ConfirmRunScriptFormat" xml:space="preserve">
+    <value>确认将脚本“{0}”执行到“{1}”？</value>
+  </data>
+  <data name="ScriptExecutionResultFormat" xml:space="preserve">
+    <value>脚本：{0}{1}目标：{2}{1}结果：{3}</value>
+  </data>
+  <data name="ScriptCompileFailedFormat" xml:space="preserve">
+    <value>脚本编译失败：{0}{1}{2}</value>
+  </data>
+  <data name="ScriptExecutionTargetClosed" xml:space="preserve">
+    <value>选定的目标编辑器已关闭。</value>
+  </data>
+  <data name="ScriptExecutionSourceReadFailed" xml:space="preserve">
+    <value>读取脚本源失败。</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptDocumentTitleFormat" xml:space="preserve">
+    <value>[内置/只读]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptRecentDisplayNameFormat" xml:space="preserve">
+    <value>[内置]{0}</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptNotFound" xml:space="preserve">
+    <value>找不到内置推荐脚本。</value>
+  </data>
+  <data name="EmbeddedRecommendedScriptOpenFailed" xml:space="preserve">
+    <value>打开内置推荐脚本失败。</value>
+  </data>
+  <data name="HoldBodyWidth" xml:space="preserve">
+    <value>Hold主体宽度:</value>
   </data>
 </root>

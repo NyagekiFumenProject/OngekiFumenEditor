@@ -1,12 +1,9 @@
-﻿using AngleSharp.Dom;
 using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base.EditorObjects
 {
@@ -17,7 +14,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             Parent = parent;
         }
 
-        private int isUpdatingChildrenCount = 0;
+        private int isUpdatingChildrenCount;
 
         private bool isExpanded = true;
         public virtual bool IsExpanded
@@ -78,9 +75,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
                     {
                         list.Add(item);
                         if (item is SoflanGroupWrapItemGroup childGroup)
-                        {
                             list.AddRange(childGroup.DisplayableItemSource);
-                        }
                     }
                 }
 
@@ -95,7 +90,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             set => Set(ref displayName, value);
         }
 
-        private bool hasChildren = false;
+        private bool hasChildren;
         public bool HasChildren
         {
             get => hasChildren;
@@ -107,41 +102,35 @@ namespace OngekiFumenEditor.Base.EditorObjects
             children.CollectionChanged += Items_CollectionChanged;
         }
 
-        private void Items_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        private void Items_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             switch (e.Action)
             {
                 case NotifyCollectionChangedAction.Add:
+                    foreach (var newItem in e.NewItems)
                     {
-                        foreach (var newItem in e.NewItems)
+                        if (newItem is SoflanGroupDisplayItemListViewBase newChild)
                         {
-                            if (newItem is SoflanGroupDisplayItemListViewBase newChild)
-                            {
-                                newChild.Parent = this;
-                                newChild.Level = Level + 1;
-
-                                newChild.PropertyChanged += OnChildPropertyChangedHandler;
-                            }
+                            newChild.Parent = this;
+                            newChild.Level = Level + 1;
+                            newChild.PropertyChanged += OnChildPropertyChangedHandler;
                         }
-
-                        NotifyItemSourceChanged();
                     }
+
+                    NotifyItemSourceChanged();
                     break;
                 case NotifyCollectionChangedAction.Remove:
+                    foreach (var oldItem in e.OldItems)
                     {
-                        foreach (var oldItem in e.OldItems)
+                        if (oldItem is SoflanGroupDisplayItemListViewBase oldChild)
                         {
-                            if (oldItem is SoflanGroupDisplayItemListViewBase oldChild)
-                            {
-                                oldChild.Parent = default;
-                                oldChild.Level = default;
-
-                                oldChild.PropertyChanged -= OnChildPropertyChangedHandler;
-                            }
+                            oldChild.Parent = default;
+                            oldChild.Level = default;
+                            oldChild.PropertyChanged -= OnChildPropertyChangedHandler;
                         }
-
-                        NotifyItemSourceChanged();
                     }
+
+                    NotifyItemSourceChanged();
                     break;
                 default:
                     break;
@@ -159,14 +148,18 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
         public void Add(SoflanGroupDisplayItemListViewBase item)
         {
-            if (item == null) return;
+            if (item == null)
+                return;
+
             if (!children.Contains(item))
                 children.Add(item);
         }
 
         public void Remove(SoflanGroupDisplayItemListViewBase item)
         {
-            if (item == null) return;
+            if (item == null)
+                return;
+
             if (children.Contains(item))
                 children.Remove(item);
         }
@@ -183,9 +176,8 @@ namespace OngekiFumenEditor.Base.EditorObjects
                 case nameof(SoflanGroupDisplayItemListViewBase.IsDisplayInPreviewMode):
                     if (isUpdatingChildrenCount == 0)
                     {
-                        var beforeValue = IsDisplayInPreviewMode;
                         var newValue = Children.All(c => c.IsDisplayInPreviewMode);
-                        if (beforeValue != newValue)
+                        if (IsDisplayInPreviewMode != newValue)
                         {
                             isDisplayInPreviewMode = newValue;
                             NotifyOfPropertyChange(() => IsDisplayInPreviewMode);
@@ -195,9 +187,8 @@ namespace OngekiFumenEditor.Base.EditorObjects
                 case nameof(SoflanGroupDisplayItemListViewBase.IsDisplayInDesignMode):
                     if (isUpdatingChildrenCount == 0)
                     {
-                        var beforeValue = IsDisplayInDesignMode;
                         var newValue = Children.All(c => c.IsDisplayInDesignMode);
-                        if (beforeValue != newValue)
+                        if (IsDisplayInDesignMode != newValue)
                         {
                             isDisplayInDesignMode = newValue;
                             NotifyOfPropertyChange(() => IsDisplayInDesignMode);
@@ -212,7 +203,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
         public void InsertBefore(SoflanGroupDisplayItemListViewBase item, SoflanGroupWrapItem insertBefore)
         {
             var index = -1;
-            for (int i = 0; i < Children.Count; i++)
+            for (var i = 0; i < Children.Count; i++)
             {
                 if (Children[i] == insertBefore)
                 {
@@ -222,7 +213,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             }
 
             if (index < 0)
-                throw new Exception($"Children not contains insertBefore");
+                throw new Exception("Children not contains insertBefore");
 
             children.Insert(index, item);
         }

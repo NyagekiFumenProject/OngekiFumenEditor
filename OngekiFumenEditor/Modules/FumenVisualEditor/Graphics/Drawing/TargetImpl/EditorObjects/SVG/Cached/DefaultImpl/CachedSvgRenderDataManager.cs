@@ -1,9 +1,9 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.EditorSvgObjectControlProvider;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -16,121 +16,125 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.EditorObjects.SVG.Cached.DefaultImpl
 {
-	[Export(typeof(ICachedSvgRenderDataManager))]
-	[PartCreationPolicy(CreationPolicy.Shared)]
-	public class CachedSvgRenderDataManager : ISchedulable, ICachedSvgRenderDataManager
-	{
-		private class CachedSvgGeneratedData
-		{
-			public SvgPrefabBase SvgPrefab { get; set; }
-			public List<LineVertex> GeneratedPoints { get; set; }
-			public int SvgGeometryHashCode { get; set; } = int.MaxValue;
-			public Vector2 ViewSize { get; set; } = new(int.MinValue);
-			public DateTime LastAccessTime { get; set; }
-			public IDrawingContext Target { get; set; }
-			public Rect Bound { get; set; }
+    [Export(typeof(ICachedSvgRenderDataManager))]
+    [PartCreationPolicy(CreationPolicy.Shared)]
+    public class CachedSvgRenderDataManager : ISchedulable, ICachedSvgRenderDataManager
+    {
+        private class CachedSvgGeneratedData
+        {
+            public SvgPrefabBase SvgPrefab { get; set; }
+            public IPooledList<LineVertex> GeneratedPointsPool { get; set; }
 
-			public void CleanPoints()
-			{
-				ObjectPool<List<LineVertex>>.Return(GeneratedPoints);
-				GeneratedPoints = default;
-			}
-		}
+            public IReadOnlyList<LineVertex> GeneratedPoints => GeneratedPointsPool;
+            public int SvgGeometryHashCode { get; set; } = int.MaxValue;
+            public Vector2 ViewSize { get; set; } = new(int.MinValue);
+            public DateTime LastAccessTime { get; set; }
+            public IDrawingContext Target { get; set; }
+            public Rect Bound { get; set; }
 
-		private Dictionary<SvgPrefabBase, CachedSvgGeneratedData> cachedDataMap = new();
+            public void CleanPoints()
+            {
+                GeneratedPointsPool?.Dispose();
+                GeneratedPointsPool = default;
+            }
+        }
 
-		public string SchedulerName { get; } = "CachedSvgManager";
+        private Dictionary<SvgPrefabBase, CachedSvgGeneratedData> cachedDataMap = new();
 
-		public TimeSpan ScheduleCallLoopInterval { get; } = TimeSpan.FromSeconds(30);
+        public string SchedulerName { get; } = "CachedSvgManager";
 
-		public CachedSvgRenderDataManager()
-		{
-			IoC.Get<ISchedulerManager>().AddScheduler(this);
-		}
+        public TimeSpan ScheduleCallLoopInterval { get; } = TimeSpan.FromSeconds(30);
 
-		public Task OnScheduleCall(CancellationToken cancellationToken)
-		{
-			var curTime = DateTime.Now;
-			foreach (var removeItem in cachedDataMap.Where(x => x.Value.LastAccessTime - curTime > TimeSpan.FromMinutes(10)).ToArray())
-				cachedDataMap.Remove(removeItem.Key);
-			return Task.CompletedTask;
-		}
+        public CachedSvgRenderDataManager()
+        {
+            IoC.Get<ISchedulerManager>().AddScheduler(this);
+        }
 
-		private bool CheckCachedDataVailed(IDrawingContext target, CachedSvgGeneratedData data)
-		{
-			if (!(data.SvgPrefab?.ProcessingDrawingGroup?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
-				return false;
+        public Task OnScheduleCall(CancellationToken cancellationToken)
+        {
+            var curTime = DateTime.Now;
+            foreach (var removeItem in cachedDataMap.Where(x => x.Value.LastAccessTime - curTime > TimeSpan.FromMinutes(10)).ToArray())
+                cachedDataMap.Remove(removeItem.Key);
+            return Task.CompletedTask;
+        }
 
-			if (new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height) != data.ViewSize)
-				return false;
+        private bool CheckCachedDataVailed(IDrawingContext target, CachedSvgGeneratedData data)
+        {
+            if (!(data.SvgPrefab?.ProcessingVectorScene?.GetHashCode() is int curHash && curHash == data.SvgGeometryHashCode))
+                return false;
 
-			return true;
-		}
+            if (new Vector2(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height) != data.ViewSize)
+                return false;
 
-		public void OnSchedulerTerm()
-		{
+            return true;
+        }
 
-		}
+        public void OnSchedulerTerm()
+        {
 
-		private List<LineVertex> GenerateLineVertexData(SvgPrefabBase svgPrefab)
-		{
-			var list = ObjectPool<List<LineVertex>>.Get();
-			list.Clear();
+        }
 
-			var segments = svgPrefab.GenerateLineSegments();
+        private IPooledList<LineVertex> GenerateLineVertexData(SvgPrefabBase svgPrefab)
+        {
+            var list = ObjectPool.GetPooledList<LineVertex>();
 
-			foreach (var seg in segments)
-			{
-				var color = new Vector4(seg.Color.R / 255.0f, seg.Color.G / 255.0f, seg.Color.B / 255.0f, seg.Color.A / 255.0f);
+            var segments = svgPrefab.GenerateLineSegments();
 
-				var itor = seg.RelativePoints.GetEnumerator();
-				if (itor.MoveNext())
-				{
-					var point = itor.Current;
-					list.Add(new(point, Vector4.Zero, VertexDash.Solider));
-					list.Add(new(point, color, VertexDash.Solider));
-					while (itor.MoveNext())
-					{
-						point = itor.Current;
-						list.Add(new(point, color, VertexDash.Solider));
-					}
-					list.Add(new(point, Vector4.Zero, VertexDash.Solider));
-				}
-			}
+            foreach (var seg in segments)
+            {
+                var color = new Vector4(seg.Color.R / 255.0f, seg.Color.G / 255.0f, seg.Color.B / 255.0f, seg.Color.A / 255.0f);
 
-			return list;
-		}
+                var itor = seg.RelativePoints.GetEnumerator();
+                if (itor.MoveNext())
+                {
+                    var point = itor.Current;
+                    list.Add(new(point, Vector4.Zero, VertexDash.Solider));
+                    list.Add(new(point, color, VertexDash.Solider));
+                    while (itor.MoveNext())
+                    {
+                        point = itor.Current;
+                        list.Add(new(point, color, VertexDash.Solider));
+                    }
+                    list.Add(new(point, Vector4.Zero, VertexDash.Solider));
+                }
+            }
 
-		public List<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
-		{
-			var curTime = DateTime.Now;
-			isCached = true;
+            return list;
+        }
 
-			if (!cachedDataMap.TryGetValue(svgPrefab, out var cachedItem))
-			{
-				cachedItem = new CachedSvgGeneratedData();
-				cachedItem.SvgPrefab = svgPrefab;
-				cachedItem.Target = target;
-				cachedDataMap[svgPrefab] = cachedItem;
-				isCached = false;
-			}
+        public IReadOnlyList<LineVertex> GetRenderData(IDrawingContext target, SvgPrefabBase svgPrefab, out bool isCached, out Rect bound)
+        {
+            var curTime = DateTime.Now;
+            isCached = true;
+            SvgPrefabBuildHelper.EnsureBuilt(svgPrefab);
 
-			if (!CheckCachedDataVailed(target, cachedItem))
-			{
-				cachedItem.CleanPoints();
-				var genData = GenerateLineVertexData(svgPrefab);
-				cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingDrawingGroup?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
-				cachedItem.GeneratedPoints = genData;
-				cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.Rect.Width, target.CurrentDrawingTargetContext.Rect.Height);
-				cachedItem.Bound = svgPrefab.ProcessingDrawingGroup?.Bounds ?? default;
-				isCached = false;
-			}
+            if (!cachedDataMap.TryGetValue(svgPrefab, out var cachedItem))
+            {
+                cachedItem = new CachedSvgGeneratedData();
+                cachedItem.SvgPrefab = svgPrefab;
+                cachedItem.Target = target;
+                cachedDataMap[svgPrefab] = cachedItem;
+                isCached = false;
+            }
 
-			//update hashcode and access time
-			cachedItem.LastAccessTime = curTime;
-			bound = cachedItem.Bound;
+            if (!CheckCachedDataVailed(target, cachedItem))
+            {
+                cachedItem.CleanPoints();
+                var genData = GenerateLineVertexData(svgPrefab);
+                cachedItem.SvgGeometryHashCode = svgPrefab.ProcessingVectorScene?.GetHashCode() ?? MathUtils.Random(int.MinValue, int.MaxValue);
+                cachedItem.GeneratedPointsPool = genData;
+                cachedItem.ViewSize = new Vector2(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, target.CurrentDrawingTargetContext.ViewRelativeRect.Height);
+                cachedItem.Bound = svgPrefab.ProcessingVectorScene is VectorScene scene
+                    ? new Rect(scene.Bounds.X, scene.Bounds.Y, scene.Bounds.Width, scene.Bounds.Height)
+                    : default;
+                isCached = false;
+            }
 
-			return cachedItem.GeneratedPoints;
-		}
-	}
+            //update hashcode and access time
+            cachedItem.LastAccessTime = curTime;
+            bound = cachedItem.Bound;
+
+            return cachedItem.GeneratedPoints;
+        }
+    }
 }

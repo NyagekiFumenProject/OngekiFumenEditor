@@ -1,13 +1,6 @@
-﻿using OngekiFumenEditor.Base;
-using OngekiFumenEditor.Utils.ObjectPool;
-using System;
-using System.Buffers;
-using System.Collections;
+using OngekiFumenEditor.Base;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -17,7 +10,7 @@ namespace OngekiFumenEditor.Utils
         {
             var sortedList = list.OrderBy(x => x.minTGrid);
 
-            var itor = sortedList.GetEnumerator();
+            using var itor = sortedList.GetEnumerator();
             if (!itor.MoveNext())
                 yield break;
 
@@ -27,8 +20,8 @@ namespace OngekiFumenEditor.Utils
                 var next = itor.Current;
                 if (next.minTGrid <= cur.maxTGrid)
                 {
-                    //combinable
-                    cur = new(MathUtils.Min(cur.minTGrid, next.minTGrid), MathUtils.Max(cur.maxTGrid, next.maxTGrid));
+                    cur = new(cur.minTGrid > next.minTGrid ? next.minTGrid : cur.minTGrid,
+                        cur.maxTGrid > next.maxTGrid ? cur.maxTGrid : next.maxTGrid);
                 }
                 else
                 {
@@ -36,8 +29,10 @@ namespace OngekiFumenEditor.Utils
                     cur = next;
                 }
             }
+
             if (cur.minTGrid is not null)
                 yield return cur;
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -23,7 +23,7 @@ namespace OngekiFumenEditor.Base.Collections
             nameof(IndividualSoflanArea.EndIndicator.TGrid)
             );
 
-        private NotQuadTreeWrapper<float, float, IndividualSoflanArea> cacheTotalTree = new(
+        private QuadTreeWrapper<IndividualSoflanArea> cacheTotalTree = new(
             x => (float)x.XGrid.TotalUnit,
             x => (float)x.TGrid.TotalUnit,
             x => (float)x.EndIndicator.XGrid.TotalUnit,
@@ -61,8 +61,36 @@ namespace OngekiFumenEditor.Base.Collections
             get
             {
                 if (!isfMap.TryGetValue(pattern, out var list))
+                {
                     isfMap[pattern] = list = new();
+                    list.OnChildPropertyChangedEvent += OnChildPropertyChangedEvent;
+                }
                 return list;
+            }
+        }
+
+        private void OnChildPropertyChangedEvent(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not IndividualSoflanArea isf)
+                return;
+
+            if (e.PropertyName == nameof(IndividualSoflanArea.SoflanGroup))
+            {
+                var oldSoflanGroup = -1;
+                foreach (var pair in isfMap)
+                {
+                    if (pair.Value.Remove(isf))
+                    {
+                        oldSoflanGroup = pair.Key;
+                        break;
+                    }
+                }
+
+                this[isf.SoflanGroup].Add(isf);
+
+                var wrapItem = TryGetOrCreateSoflanGroupWrapItem(isf.SoflanGroup, out var isCreated);
+                if (isCreated)
+                    defaultItemGroup.Add(wrapItem);
             }
         }
 
@@ -89,11 +117,14 @@ namespace OngekiFumenEditor.Base.Collections
             cacheTree.Remove(isf);
             cacheTotalTree.Remove(isf);
 
+            //不需要删除
+            /*
             if (this[isf.SoflanGroup].Count == 0)
             {
                 var item = TryGetOrCreateSoflanGroupWrapItem(isf.SoflanGroup, out _);
                 item.Parent?.Remove(item);
             }
+            */
         }
 
         public SoflanGroupWrapItem TryGetOrCreateSoflanGroupWrapItem(int soflanGroup, out bool isCreated)

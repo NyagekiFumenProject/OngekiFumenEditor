@@ -1,13 +1,12 @@
-﻿using OngekiFumenEditor.Base.Collections.Base;
+using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using PoolFacade = OngekiFumenEditor.Utils.ObjectPool.ObjectPool;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -23,18 +22,13 @@ namespace OngekiFumenEditor.Utils
                     if (result != 0)
                         return result;
                 }
+
                 return 0;
             });
+
             return list.OrderBy(x => x, comparer);
         }
 
-        /// <summary>
-        /// 重复某个元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="o"></param>
-        /// <param name="repeatCount"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> Repeat<T>(this T o, int repeatCount) => Enumerable.Repeat(o, repeatCount);
 
@@ -42,44 +36,33 @@ namespace OngekiFumenEditor.Utils
         {
             if (list is null)
                 return;
+
             foreach (var item in list)
                 fun(item);
         }
 
         public static bool TryElementAt<T>(this T[] list, int idx, out T element)
         {
-            if (list.Length >= (idx + 1))
+            if (list.Length >= idx + 1)
             {
                 element = list[idx];
                 return true;
             }
 
-            element = default(T);
+            element = default;
             return false;
         }
 
-        /// <summary>
-        /// 使用默认比较器，过滤掉重复的元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
         public static void DistinctSelf<T>(this ICollection<T> collection)
         {
-            using var d = collection.Except(collection.Distinct()).ToListWithObjectPool(out var removes);
+            using var removes = collection.Except(collection.Distinct()).ToListWithObjectPool();
             foreach (var rm in removes)
                 collection.Remove(rm);
         }
 
-        /// <summary>
-        /// 使用默认的比较器，根据某个条件进行过滤
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="Y"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="keySelect"></param>
         public static void DistinctBySelf<T, Y>(this ICollection<T> collection, Func<T, Y> keySelect)
         {
-            using var d = collection.Except(collection.DistinctBy(keySelect)).ToListWithObjectPool(out var removes);
+            using var removes = collection.Except(DistinctByCompat(collection, keySelect)).ToListWithObjectPool();
             foreach (var rm in removes)
                 collection.Remove(rm);
         }
@@ -90,40 +73,59 @@ namespace OngekiFumenEditor.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void RemoveRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Remove(x));
 
+        public static int RemoveAll<T>(this IList<T> collection, Predicate<T> match)
+        {
+            var removed = 0;
+            for (var i = collection.Count - 1; i >= 0; i--)
+            {
+                if (!match(collection[i]))
+                    continue;
+
+                collection.RemoveAt(i);
+                removed++;
+            }
+
+            return removed;
+        }
+
+        public static void RemoveRange<T>(this IList<T> collection, int index, int count)
+        {
+            for (var i = 0; i < count; i++)
+                collection.RemoveAt(index);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this Collection<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddRange<T>(this IList<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void AddRange<T>(this HashSet<T> collection, IEnumerable<T> source) => source.ForEach(x => collection.Add(x));
 
-        /*
-        public static IEnumerable<T> DistinctBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
-
-        public static IEnumerable<T> DistinctBy<T>(this IEnumerable<T> collection, Func<T, T, bool> compFunc) => collection.Distinct(new FuncDistinctComparer<T>(compFunc));
-        */
-        /// <summary>
-        /// Distinct continuous same values.
-        /// example : 1,2,3,3,4,1,1,2,3 -> 1,2,3,4,1,2,3
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="compFunc"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IEnumerable<T> DistinctContinuousBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect) => collection.DistinctContinuousBy((a, b) => keySelect(a)?.Equals(keySelect(b)) ?? keySelect(b)?.Equals(keySelect(a)) ?? true);
+        public static IEnumerable<T> DistinctContinuousBy<T, Y>(this IEnumerable<T> collection, Func<T, Y> keySelect)
+            => collection.DistinctContinuousBy((a, b) => Equals(keySelect(a), keySelect(b)));
 
-        /// <summary>
-        /// Distinct continuous same values.
-        /// example : 1,2,3,3,4,1,1,2,3 -> 1,2,3,4,1,2,3
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="compFunc"></param>
-        /// <returns></returns>
+        public static int FirstIndexOf<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+        {
+            int index = 0;
+
+            foreach (var item in source)
+            {
+                if (predicate(item))
+                    return index;
+
+                index++;
+            }
+
+            return -1;
+        }
+
         public static IEnumerable<T> DistinctContinuousBy<T>(this IEnumerable<T> collection, Func<T, T, bool> compFunc)
         {
-            var itor = collection.GetEnumerator();
-            bool isFirst = true;
+            using var itor = collection.GetEnumerator();
+            var isFirst = true;
             var prev = default(T);
 
             while (itor.MoveNext())
@@ -135,7 +137,10 @@ namespace OngekiFumenEditor.Utils
                     isFirst = false;
                 }
                 else if (!compFunc(prev, value))
+                {
                     yield return value;
+                }
+
                 prev = value;
             }
         }
@@ -148,13 +153,14 @@ namespace OngekiFumenEditor.Utils
 
         public static T FindNextOrDefault<T>(this IEnumerable<T> collection, T taget)
         {
-            var itor = collection.GetEnumerator();
+            using var itor = collection.GetEnumerator();
             var prev = default(T);
 
             while (itor.MoveNext())
             {
-                if (taget.Equals(prev))
+                if (Equals(taget, prev))
                     return itor.Current;
+
                 prev = itor.Current;
             }
 
@@ -164,26 +170,28 @@ namespace OngekiFumenEditor.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MinByOrDefault<T>(this IEnumerable<T> collection)
             => collection.MinByOrDefault(x => x, Comparer<T>.Default.Compare);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MinByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
             => collection.MinByOrDefault((a, b) => keySelector(a).CompareTo(keySelector(b)));
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MinByOrDefault<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MinByOrDefault(x => x, comparer);
+
         public static T MinByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
         {
-            var itor = collection.GetEnumerator();
+            using var itor = collection.GetEnumerator();
             if (!itor.MoveNext())
                 return default;
 
             var first = itor.Current;
-            X min = keySelector(first);
-            T minValue = first;
+            var min = keySelector(first);
+            var minValue = first;
 
             while (itor.MoveNext())
             {
                 var item = itor.Current;
-
                 var v = keySelector(item);
                 if (comparer(min, v) > 0)
                 {
@@ -198,26 +206,28 @@ namespace OngekiFumenEditor.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MaxByOrDefault<T>(this IEnumerable<T> collection)
             => collection.MaxByOrDefault(x => x, Comparer<T>.Default.Compare);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MaxByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
             => collection.MaxByOrDefault((a, b) => keySelector(a).CompareTo(keySelector(b)));
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T MaxByOrDefault<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MaxByOrDefault(x => x, comparer);
+
         public static T MaxByOrDefault<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
         {
-            var itor = collection.GetEnumerator();
+            using var itor = collection.GetEnumerator();
             if (!itor.MoveNext())
                 return default;
 
             var first = itor.Current;
-            X max = keySelector(first);
-            T maxValue = first;
+            var max = keySelector(first);
+            var maxValue = first;
 
             while (itor.MoveNext())
             {
                 var item = itor.Current;
-
                 var v = keySelector(item);
                 if (comparer(max, v) < 0)
                 {
@@ -231,65 +241,79 @@ namespace OngekiFumenEditor.Utils
 
         public static T FindPreviousOrDefault<T>(this IEnumerable<T> collection, T taget)
         {
-            var itor = collection.GetEnumerator();
+            using var itor = collection.GetEnumerator();
             var prev = default(T);
 
             while (itor.MoveNext())
             {
-                if (itor.Current.Equals(taget))
+                if (Equals(itor.Current, taget))
                     return prev;
+
                 prev = itor.Current;
             }
 
             return default;
         }
 
-        public static IDisposable ToListWithObjectPool<T>(this IEnumerable<T> collection, out List<T> list)
+        public static IPooledList<T> ToListWithObjectPool<T>(this IEnumerable<T> collection)
         {
-            var disposable = ObjectPool<List<T>>.GetWithUsingDisposable(out list, out _);
-            list.Clear();
+            var list = PoolFacade.GetPooledList<T>();
             list.AddRange(collection);
-            return disposable;
+            return list;
         }
 
-        public static IDisposable ToHashSetWithObjectPool<T>(this IEnumerable<T> collection, out HashSet<T> set)
+        public static IPooledSet<T> ToHashSetWithObjectPool<T>(this IEnumerable<T> collection)
         {
-            var disposable = ObjectPool<HashSet<T>>.GetWithUsingDisposable(out set, out _);
-            set.Clear();
+            var set = PoolFacade.GetPooledSet<T>();
             set.AddRange(collection);
-            return disposable;
+            return set;
         }
 
-        public static IDisposable ToDictionaryWithObjectPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector, out Dictionary<K, V> dic)
+        public static IPooledDictionary<K, V> ToDictionaryWithObjectPool<T, K, V>(this IEnumerable<T> collection, Func<T, K> keySelector, Func<T, V> valueSelector)
         {
-            var disposable = ObjectPool<Dictionary<K, V>>.GetWithUsingDisposable(out dic, out _);
-            dic.Clear();
+            var dic = PoolFacade.GetPooledDictionary<K, V>();
             foreach (var item in collection)
                 dic[keySelector(item)] = valueSelector(item);
-            return disposable;
+            return dic;
+        }
+
+        public static void Sort<T>(this IList<T> list, Func<T, T, int> compFunc)
+        {
+            var comparer = new ComparerWrapper<T>(compFunc);
+
+            if (list is List<T> concreteList)
+            {
+                concreteList.Sort(comparer);
+                return;
+            }
+
+            if (list is IPooledList<T> pooledList)
+            {
+                pooledList.Sort(comparer);
+                return;
+            }
+
+            var sorted = list.OrderBy(x => x, comparer).ToArray();
+            for (var i = 0; i < sorted.Length; i++)
+                list[i] = sorted[i];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Sort<T>(this List<T> list, Func<T, T, int> compFunc) => list.Sort(new ComparerWrapper<T>(compFunc));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SortBy<T, X>(this List<T> list, Func<T, X> keySelect) => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
+        public static void SortBy<T, X>(this IList<T> list, Func<T, X> keySelect)
+            => list.Sort((a, b) => Comparer<X>.Default.Compare(keySelect(a), keySelect(b)));
 
         public static int BinarySearchBy<T, X>(this IList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
         {
-            //https://referencesource.microsoft.com/mscorlib/system/collections/generic/arraysorthelper.cs.html#f3d6c6df965a8a86
-
-            int hi = insertable.Count - 1;
+            var hi = insertable.Count - 1;
             while (lo <= hi)
             {
-                int i = lo + ((hi - lo) >> 1);
+                var i = lo + ((hi - lo) >> 1);
                 var val = keySelect(insertable[i]);
-                int order = val.CompareTo(value);
+                var order = val.CompareTo(value);
 
                 if (order == 0)
                 {
-                    //考虑到出现重复值
-                    for (int r = i + 1; r < insertable.Count; r++)
+                    for (var r = i + 1; r < insertable.Count; r++)
                     {
                         var v = keySelect(insertable[r]);
                         if (v.CompareTo(val) == 0)
@@ -297,16 +321,14 @@ namespace OngekiFumenEditor.Utils
                         else
                             break;
                     }
+
                     return i;
                 }
+
                 if (order < 0)
-                {
                     lo = i + 1;
-                }
                 else
-                {
                     hi = i - 1;
-                }
             }
 
             return ~lo;
@@ -314,19 +336,16 @@ namespace OngekiFumenEditor.Utils
 
         private static int BinarySearchBy<T, X>(this IReadOnlyList<T> insertable, X value, Func<T, X> keySelect, int lo = 0) where X : IComparable<X>
         {
-            //https://referencesource.microsoft.com/mscorlib/system/collections/generic/arraysorthelper.cs.html#f3d6c6df965a8a86
-
-            int hi = insertable.Count - 1;
+            var hi = insertable.Count - 1;
             while (lo <= hi)
             {
-                int i = lo + ((hi - lo) >> 1);
+                var i = lo + ((hi - lo) >> 1);
                 var val = keySelect(insertable[i]);
-                int order = val.CompareTo(value);
+                var order = val.CompareTo(value);
 
                 if (order == 0)
                 {
-                    //考虑到出现重复值
-                    for (int r = i + 1; r < insertable.Count; r++)
+                    for (var r = i + 1; r < insertable.Count; r++)
                     {
                         var v = keySelect(insertable[r]);
                         if (v.CompareTo(val) == 0)
@@ -334,30 +353,19 @@ namespace OngekiFumenEditor.Utils
                         else
                             break;
                     }
+
                     return i;
                 }
+
                 if (order < 0)
-                {
                     lo = i + 1;
-                }
                 else
-                {
                     hi = i - 1;
-                }
             }
 
             return ~lo;
         }
 
-        /// <summary>
-        /// 使用二分法实现LastOrDefault()的选值(假设集合已从小到大排序)
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="X"></typeparam>
-        /// <param name="source"></param>
-        /// <param name="value"></param>
-        /// <param name="keySelect"></param>
-        /// <returns></returns>
         public static T LastOrDefaultByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
         {
             var idx = source.LastOrDefaultIndexByBinarySearch(value, keySelect);
@@ -367,14 +375,13 @@ namespace OngekiFumenEditor.Utils
         public static int LastOrDefaultIndexByBinarySearch<T, X>(this IList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
         {
             var idx = source.BinarySearchBy(value, keySelect);
-            var i = Math.Max(0, idx < 0 ? ((~idx) - 1) : idx);
-            return i;
+            return Math.Max(0, idx < 0 ? (~idx) - 1 : idx);
         }
 
         public static T LastOrDefaultByBinarySearch<T, X>(this IReadOnlyList<T> source, X value, Func<T, X> keySelect) where X : IComparable<X>
         {
             var idx = source.BinarySearchBy(value, keySelect);
-            var i = Math.Max(0, idx < 0 ? ((~idx) - 1) : idx);
+            var i = Math.Max(0, idx < 0 ? (~idx) - 1 : idx);
             return source[i];
         }
 
@@ -383,7 +390,7 @@ namespace OngekiFumenEditor.Utils
             var comparer = Comparer<X>.Default;
             var needInsertKey = keySelect(needInsert);
 
-            for (int i = 0; i < insertable.Count; i++)
+            for (var i = 0; i < insertable.Count; i++)
             {
                 var cmp = comparer.Compare(needInsertKey, keySelect(insertable[i]));
                 if (cmp < 0)
@@ -400,17 +407,20 @@ namespace OngekiFumenEditor.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection)
             => collection.MaxMinBy(x => x, Comparer<T>.Default.Compare);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (T min, T max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector = default) where X : IComparable<X>
             => collection.MaxMinBy((a, b) => keySelector(a).CompareTo(keySelector(b)));
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static (T min, T max) MaxMinBy<T>(this IEnumerable<T> collection, Func<T, T, int> comparer = default)
             => collection.MaxMinBy(x => x, comparer);
+
         public static (X min, X max) MaxMinBy<T, X>(this IEnumerable<T> collection, Func<T, X> keySelector, Func<X, X, int> comparer)
         {
             var first = collection.FirstOrDefault();
-            X min = keySelector(first);
-            X max = keySelector(first);
+            var min = keySelector(first);
+            var max = keySelector(first);
 
             foreach (var item in collection)
             {
@@ -424,18 +434,9 @@ namespace OngekiFumenEditor.Utils
             return (min, max);
         }
 
-        /// <summary>
-        /// 将集合分成一组组的子集合
-        /// [1,2,3,4,5,6,7,8] --3--> [1,2,3],[4,5,6],[7,8]
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="wrapCount">子集合最大数量，若最后数量不够也会返回对应容量的字集合</param>
-        /// <returns></returns>
         public static IEnumerable<IEnumerable<T>> SequenceWrap<T>(this IEnumerable<T> collection, int wrapCount)
         {
             var i = 0;
-
             var arr = new T[wrapCount];
 
             foreach (var item in collection)
@@ -453,123 +454,115 @@ namespace OngekiFumenEditor.Utils
                 yield return arr.Take(i).ToArray();
         }
 
-        /// <summary>
-        /// 将集合分成一组组的子集合,但子集合是连续的
-        /// [1,2,3,4,5] --3--> [1,2,3],[2,3,4],[3,4,5]
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="collection"></param>
-        /// <param name="wrapCount">子集合数量,如果参数collection集合少于此数量则不提供子集合</param>
-        /// <returns></returns>
         public static IEnumerable<T[]> SequenceConsecutivelyWrap<T>(this IEnumerable<T> collection, int wrapCount)
         {
 #if DEBUG
             if (wrapCount < 2)
                 throw new ArgumentException($"wrapCount({wrapCount}) must be >= 2");
 #endif
-            var arr = new T[wrapCount];
 
-            var itor = collection.GetEnumerator();
+            var arr = new T[wrapCount];
+            using var itor = collection.GetEnumerator();
 
             for (var i = 0; i < wrapCount; i++)
             {
                 if (!itor.MoveNext())
-                    yield break; //not enough,just stop all.
+                    yield break;
                 arr[i] = itor.Current;
             }
 
-            yield return arr; //filled, return once
+            yield return arr;
 
             while (itor.MoveNext())
             {
                 Array.Copy(arr, 1, arr, 0, wrapCount - 1);
-                arr[^1] = itor.Current;
+                arr[wrapCount - 1] = itor.Current;
                 yield return arr;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> UnionBy<T, X>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, X> keySelector)
-            => a.Union(b, new EqualsComparerWrapper<T>((x, y) =>
-            {
-                var kx = keySelector(x);
-                var ky = keySelector(y);
-                return (kx?.Equals(ky) ?? false) && (ky?.Equals(kx) ?? false);
-            }));
+            => a.Union(b, BuildEqualsComparer(keySelector));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> UnionBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
             => a.Union(b, new EqualsComparerWrapper<T>(compFunc));
 
         public static IEnumerable<T> ExceptBy<T, X>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, X> keySelector)
-            => a.Union(b, new EqualsComparerWrapper<T>((x, y) =>
-            {
-                var kx = keySelector(x);
-                var ky = keySelector(y);
-                return (kx?.Equals(ky) ?? false) && (ky?.Equals(kx) ?? false);
-            }));
+            => a.Except(b, BuildEqualsComparer(keySelector));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static IEnumerable<T> ExceptBy<T>(this IEnumerable<T> a, IEnumerable<T> b, Func<T, T, bool> compFunc)
             => a.Except(b, new EqualsComparerWrapper<T>(compFunc));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc) =>
-            MathUtils.SplitByTurningGradient(a, valMapFunc);
+        public static IEnumerable<IEnumerable<T>> SplitByTurningGradient<T>(this IEnumerable<T> a, Func<T, float> valMapFunc)
+        {
+            static float CalcGradient(float a, float b)
+            {
+                if (a == b)
+                    return float.MaxValue;
 
-        /// <summary>
-        /// 判断集合是否只有一个元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="a"></param>
-        /// <returns></returns>
+                return -(a - b);
+            }
+
+            using var itor = a.GetEnumerator();
+            if (!itor.MoveNext())
+                yield break;
+
+            var list = new List<T>();
+            var prevPoint = itor.Current;
+            var prevSign = 0;
+
+            while (true)
+            {
+                if (!itor.MoveNext())
+                    break;
+
+                var point = itor.Current;
+                var sign = MathF.Sign(CalcGradient(valMapFunc(prevPoint), valMapFunc(point)));
+
+                if (prevSign != sign && list.Count != 0)
+                {
+                    yield return list;
+                    list = new List<T> { prevPoint };
+                }
+
+                prevPoint = point;
+                prevSign = sign;
+                list.Add(point);
+            }
+
+            if (list.Count > 0)
+                yield return list;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsOnlyOne<T>(this IEnumerable<T> a)
             => IsOnlyOne(a, out _);
 
-        /// <summary>
-        /// 判断集合是否只有一个
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="a"></param>
-        /// <param name="firstElement"></param>
-        /// <returns></returns>
         public static bool IsOnlyOne<T>(this IEnumerable<T> a, out T firstElement)
         {
             firstElement = default;
 
-            var itor = a.GetEnumerator();
+            using var itor = a.GetEnumerator();
             if (!itor.MoveNext())
                 return false;
+
             firstElement = itor.Current;
             return !itor.MoveNext();
         }
 
-        /// <summary>
-        /// 判断集合是否至少有一定数量的元素
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="a"></param>
-        /// <param name="minCount"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AtLeastCount<T>(this IEnumerable<T> a, int minCount)
-        {
-            return a.Take(minCount).Count() == minCount;
-        }
+            => a.Take(minCount).Count() == minCount;
 
-        /// <summary>
-        /// 判断集合数量是否刚好
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="a"></param>
-        /// <param name="minCount"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool AtCount<T>(this IEnumerable<T> a, int minCount)
         {
             var i = 0;
-            var itor = a.GetEnumerator();
+            using var itor = a.GetEnumerator();
 
             while (itor.MoveNext())
             {
@@ -581,23 +574,17 @@ namespace OngekiFumenEditor.Utils
             return minCount == i;
         }
 
-        /// <summary>
-        /// 判断集合是否为空
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="a"></param>
-        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty<T>(this IEnumerable<T> source)
         {
-            if (source is ICollection<T> collectionoft)
-                return collectionoft.Count == 0;
+            if (source is ICollection<T> collectionOfT)
+                return collectionOfT.Count == 0;
 
             if (source is ICollection collection)
                 return collection.Count == 0;
 
-            if (source is IReadOnlyCollection<T> roc)
-                return roc.Count == 0;
+            if (source is IReadOnlyCollection<T> readOnlyCollection)
+                return readOnlyCollection.Count == 0;
 
             return !source.Any();
         }
@@ -605,20 +592,14 @@ namespace OngekiFumenEditor.Utils
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsEmpty<T>(this IEnumerable<T> a, Predicate<T> predicate) => a.Where(x => predicate(x)).IsEmpty();
 
-        public delegate OUT IntervalByProcFunc<IN, OUT>(IN prev, IN cur);
-        /// <summary>
-        /// e.g IntervalBy([1,5,10,20] , (a,b)=>b-a) return [4,5,10]
-        /// </summary>
-        /// <typeparam name="IN"></typeparam>
-        /// <typeparam name="OUT"></typeparam>
-        /// <param name="list"></param>
-        /// <param name="proc"></param>
-        /// <returns></returns>
-        public static IEnumerable<OUT> IntervalBy<IN, OUT>(this IEnumerable<IN> list, IntervalByProcFunc<IN, OUT> proc)
+        public delegate TOut IntervalByProcFunc<TIn, TOut>(TIn prev, TIn cur);
+
+        public static IEnumerable<TOut> IntervalBy<TIn, TOut>(this IEnumerable<TIn> list, IntervalByProcFunc<TIn, TOut> proc)
         {
-            var itor = list.GetEnumerator();
+            using var itor = list.GetEnumerator();
             if (!itor.MoveNext())
                 yield break;
+
             var prev = itor.Current;
             while (itor.MoveNext())
             {
@@ -632,43 +613,56 @@ namespace OngekiFumenEditor.Utils
         public static IEnumerable<(T, int)> WithIndex<T>(this IEnumerable<T> list)
             => list.Select((a, b) => (a, b));
 
-        /// <summary>
-        /// 获取多个集合都存在的元素,比如[[1,2,5,4],[2,5,6],[1,2,4,5,7]] -> [2,5]
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="KEY"></typeparam>
-        /// <param name="list"></param>
-        /// <param name="keySelector"></param>
-        /// <returns></returns>
-        public static IEnumerable<T> IntersectMany<T, KEY>(this IEnumerable<IEnumerable<T>> list)
+        public static IEnumerable<T> IntersectMany<T, TKey>(this IEnumerable<IEnumerable<T>> list)
         {
-            var itor = list.GetEnumerator();
+            using var itor = list.GetEnumerator();
             if (!itor.MoveNext())
                 return Enumerable.Empty<T>();
+
             var cur = itor.Current;
             while (itor.MoveNext())
                 cur = cur.Intersect(itor.Current);
+
             return cur;
         }
 
-        /// <summary>
-        /// 获取多个集合都存在的元素,比如[[1,2,5,4],[2,5,6],[1,2,4,5,7]] -> [2,5]
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <typeparam name="KEY"></typeparam>
-        /// <param name="list"></param>
-        /// <param name="keySelector"></param>
-        /// <returns></returns>
-        public static IEnumerable<T> IntersectManyBy<T, KEY>(this IEnumerable<IEnumerable<T>> list, Func<T, KEY> keySelector)
+        public static IEnumerable<T> IntersectManyBy<T, TKey>(this IEnumerable<IEnumerable<T>> list, Func<T, TKey> keySelector)
         {
-            var itor = list.GetEnumerator();
+            using var itor = list.GetEnumerator();
             if (!itor.MoveNext())
                 return Enumerable.Empty<T>();
 
             var cur = itor.Current;
             while (itor.MoveNext())
-                cur = cur.IntersectBy(itor.Current.Select(keySelector), keySelector);
+                cur = IntersectByCompat(cur, itor.Current.Select(keySelector), keySelector);
+
             return cur;
+        }
+
+        private static IEnumerable<T> DistinctByCompat<T, TKey>(IEnumerable<T> collection, Func<T, TKey> keySelector)
+        {
+            var set = new HashSet<TKey>();
+            foreach (var item in collection)
+            {
+                if (set.Add(keySelector(item)))
+                    yield return item;
+            }
+        }
+
+        private static IEnumerable<T> IntersectByCompat<T, TKey>(IEnumerable<T> source, IEnumerable<TKey> keys, Func<T, TKey> keySelector)
+        {
+            var set = new HashSet<TKey>(keys);
+            foreach (var item in source)
+            {
+                if (set.Remove(keySelector(item)))
+                    yield return item;
+            }
+        }
+
+        private static EqualsComparerWrapper<T> BuildEqualsComparer<T, TKey>(Func<T, TKey> keySelector)
+        {
+            return new EqualsComparerWrapper<T>((x, y) => Equals(keySelector(x), keySelector(y)));
         }
     }
 }
+

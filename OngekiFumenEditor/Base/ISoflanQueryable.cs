@@ -1,5 +1,6 @@
-﻿using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace OngekiFumenEditor.Base
     public interface ISoflanQueryable
     {
         IList<SoflanPoint> GetSoflanPositionList(BpmList bpmList, bool isDesignMode);
-        IEnumerable<VisibleTGridRange> GetVisibleRanges(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale,bool isDesignMode);
+        IPooledList<VisibleTGridRange> GetVisibleRanges(double currentY, double viewHeight, double preOffset, BpmList bpmList, double scale, bool isDesignMode);
         IEnumerable<KeyframeSoflan> GenerateDurationSoflans(BpmList bpmList);
         IEnumerable<KeyframeSoflan> GenerateKeyframeSoflans(BpmList bpmList);
     }

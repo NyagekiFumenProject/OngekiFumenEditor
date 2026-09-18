@@ -1,8 +1,9 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using ICSharpCode.AvalonEdit.CodeCompletion;
 using ICSharpCode.AvalonEdit.Editing;
 using OngekiFumenEditor.Kernel.RecentFiles;
+using OngekiFumenEditor.Modules.EditorScriptExecutor;
 using OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.Views;
 using OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
@@ -25,346 +26,383 @@ using MessageBox = System.Windows.MessageBox;
 
 namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
 {
-	[Export(typeof(EditorScriptDocumentViewModel))]
-	[MapToView(ViewType = typeof(EditorScriptDocumentView))]
-	public class EditorScriptDocumentViewModel : PersistedDocument
-	{
-		public class EditorItem
-		{
-			public string Name => TargetEditor?.DisplayName ?? Resources.NoEditorTarget;
-			public FumenVisualEditorViewModel TargetEditor { get; set; }
-		}
+    [Export(typeof(EditorScriptDocumentViewModel))]
+    [MapToView(ViewType = typeof(EditorScriptDocumentView))]
+    public class EditorScriptDocumentViewModel : PersistedDocument
+    {
+        public class EditorItem
+        {
+            public string Name => TargetEditor?.DisplayName ?? Resources.NoEditorTarget;
+            public FumenVisualEditorViewModel TargetEditor { get; set; }
+        }
 
-		private static EditorItem DefaultEmpty { get; } = new EditorItem { };
+        private static EditorItem DefaultEmpty { get; } = new EditorItem { };
 
-		public ICSharpCode.AvalonEdit.Document.TextDocument ScriptDocument { get; set; } = new();
-		public ObservableCollection<EditorItem> CurrentEditors { get; } = new();
+        public ICSharpCode.AvalonEdit.Document.TextDocument ScriptDocument { get; set; } = new();
+        public ObservableCollection<EditorItem> CurrentEditors { get; } = new();
 
-		private EditorItem currentSelectedEditor = default;
+        private EditorItem currentSelectedEditor = default;
 
-		CompletionWindow completionWindow = default;
-		private IDocumentContext documentContext;
+        CompletionWindow completionWindow = default;
+        private IDocumentContext documentContext;
 
-		public EditorItem CurrentSelectedEditor
-		{
-			get => currentSelectedEditor;
-			set
-			{
-				Set(ref currentSelectedEditor, value);
-				NotifyOfPropertyChange(() => IsEnableRun);
-			}
-		}
+        public EditorItem CurrentSelectedEditor
+        {
+            get => currentSelectedEditor;
+            set
+            {
+                Set(ref currentSelectedEditor, value);
+                NotifyOfPropertyChange(() => IsEnableRun);
+            }
+        }
 
-		public bool IsEnableRun => CurrentSelectedEditor is not null;
+        public bool IsEnableRun => CurrentSelectedEditor is not null;
 
-		private FileSystemWatcher watcher;
-		private string watchingCsFilePath;
-		private string currentProjFilePath;
+        private FileSystemWatcher watcher;
+        private string watchingCsFilePath;
+        private string currentProjFilePath;
+        private string embeddedRecommendedScriptResourceName;
+        private bool IsEmbeddedRecommendedScript => !string.IsNullOrWhiteSpace(embeddedRecommendedScriptResourceName);
 
-		public FileSystemWatcher Watcher
-		{
-			get => watcher;
-			set
-			{
-				if (watcher is not null)
-				{
-					watcher.EnableRaisingEvents = false;
-					watcher.Renamed -= SyncCSFileToScriptTextDocument;
-					Watcher.Changed -= Watcher_Changed;
-					watcher.Error -= Watcher_Error;
-				}
+        public EditorScriptDocumentViewModel()
+        {
+            DisplayName = default;
+        }
 
-				Set(ref watcher, value);
+        public FileSystemWatcher Watcher
+        {
+            get => watcher;
+            set
+            {
+                if (watcher is not null)
+                {
+                    watcher.EnableRaisingEvents = false;
+                    watcher.Renamed -= SyncCSFileToScriptTextDocument;
+                    Watcher.Changed -= Watcher_Changed;
+                    watcher.Error -= Watcher_Error;
+                }
 
-				if (Watcher is not null)
-				{
-					Watcher.Renamed += SyncCSFileToScriptTextDocument;
-					Watcher.Changed += Watcher_Changed;
-					Watcher.Error += Watcher_Error;
-					Watcher.EnableRaisingEvents = true;
-				}
+                Set(ref watcher, value);
 
-				NotifyOfPropertyChange(() => IsUsingWatcher);
-			}
-		}
+                if (Watcher is not null)
+                {
+                    Watcher.Renamed += SyncCSFileToScriptTextDocument;
+                    Watcher.Changed += Watcher_Changed;
+                    Watcher.Error += Watcher_Error;
+                    Watcher.EnableRaisingEvents = true;
+                }
 
-		private void Watcher_Changed(object sender, FileSystemEventArgs e)
-		{
-			if (e.Name == Path.GetFileName(watchingCsFilePath))
-				SyncCsFileToScriptContent();
-		}
+                NotifyOfPropertyChange(() => IsUsingWatcher);
+            }
+        }
 
-		public bool IsUsingWatcher => watchingCsFilePath is not null;
+        private void Watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (e.Name == Path.GetFileName(watchingCsFilePath))
+                SyncCsFileToScriptContent();
+        }
 
-		private void Watcher_Error(object sender, ErrorEventArgs e)
-		{
-			Log.LogError($"CSFile watcher throw error.");
-			Watcher = null;
-		}
+        public bool IsUsingWatcher => watchingCsFilePath is not null;
 
-		public void SyncCsFileToScriptContent()
-		{
-			if (!File.Exists(watchingCsFilePath))
-				return;
+        private void Watcher_Error(object sender, ErrorEventArgs e)
+        {
+            Log.LogError($"CSFile watcher throw error.");
+            Watcher = null;
+        }
 
-			(GetView() as DispatcherObject)?.Dispatcher.Invoke(async () =>
-			{
-				try
-				{
-					ScriptDocument.Text = await File.ReadAllTextAsync(watchingCsFilePath);
-					await DoSave(FilePath);
-					Log.LogInfo($"sync .cs file content to script : {FileName} ({DisplayName})");
-				}
-				catch
-				{
+        public void SyncCsFileToScriptContent()
+        {
+            if (!File.Exists(watchingCsFilePath))
+                return;
 
-				}
-			});
-		}
+            (GetView() as DispatcherObject)?.Dispatcher.Invoke(async () =>
+            {
+                try
+                {
+                    ScriptDocument.Text = await File.ReadAllTextAsync(watchingCsFilePath);
+                    await DoSave(FilePath);
+                    Log.LogInfo($"sync .cs file content to script : {FileName} ({DisplayName})");
+                }
+                catch
+                {
 
-		private void SyncCSFileToScriptTextDocument(object sender, RenamedEventArgs e)
-		{
-			if (e.Name == Path.GetFileName(watchingCsFilePath))
-				SyncCsFileToScriptContent();
-		}
+                }
+            });
+        }
 
-		public async void Init()
-		{
-			documentContext?.Dispose();
-			documentContext = await IoC.Get<IEditorScriptExecutor>().InitDocumentContext();
+        private void SyncCSFileToScriptTextDocument(object sender, RenamedEventArgs e)
+        {
+            if (e.Name == Path.GetFileName(watchingCsFilePath))
+                SyncCsFileToScriptContent();
+        }
 
-			var editorManager = IoC.Get<IEditorDocumentManager>();
-			editorManager.OnNotifyCreated += UpdateCurrentEditorList;
-			editorManager.OnNotifyDestoryed += UpdateCurrentEditorList;
-			UpdateCurrentEditorList();
-		}
+        public async void Init()
+        {
+            documentContext?.Dispose();
+            documentContext = await IoC.Get<IEditorScriptExecutor>().InitDocumentContext();
 
-		private void UpdateCurrentEditorList(FumenVisualEditorViewModel _ = default)
-		{
-			var r = CurrentSelectedEditor;
-			CurrentEditors.Clear();
-			CurrentEditors.Add(DefaultEmpty);
-			foreach (var editor in IoC.Get<IEditorDocumentManager>().GetCurrentEditors())
-				CurrentEditors.Add(new EditorItem() { TargetEditor = editor });
-			if (!CurrentEditors.Contains(CurrentSelectedEditor))
-				CurrentSelectedEditor = default;
-			if (r == DefaultEmpty)
-				CurrentSelectedEditor = DefaultEmpty;
-		}
+            var editorManager = IoC.Get<IEditorDocumentManager>();
+            editorManager.OnNotifyCreated += UpdateCurrentEditorList;
+            editorManager.OnNotifyDestoryed += UpdateCurrentEditorList;
+            UpdateCurrentEditorList();
+        }
 
-		protected override async Task DoLoad(string filePath)
-		{
-			ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
-			Init();
-			IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
-		}
+        private void UpdateCurrentEditorList(FumenVisualEditorViewModel _ = default)
+        {
+            var r = CurrentSelectedEditor;
+            CurrentEditors.Clear();
+            CurrentEditors.Add(DefaultEmpty);
+            foreach (var editor in IoC.Get<IEditorDocumentManager>().GetCurrentEditors())
+                CurrentEditors.Add(new EditorItem() { TargetEditor = editor });
+            if (!CurrentEditors.Contains(CurrentSelectedEditor))
+                CurrentSelectedEditor = default;
+            if (r == DefaultEmpty)
+                CurrentSelectedEditor = DefaultEmpty;
+        }
 
-		protected override async Task DoNew()
-		{
-			Init();
-			try
-			{
-				var asmDirPath = Path.GetDirectoryName(typeof(EditorScriptDocumentViewModel).Assembly.Location);
-				var templateFilePath = Path.Combine(asmDirPath, "Resources", "NewScriptTemplate.nyagekiScript");
-				if (File.Exists(templateFilePath))
-				{
-					ScriptDocument.Text = await File.ReadAllTextAsync(templateFilePath);
-				}
-			}
-			catch (Exception e)
-			{
-				Log.LogDebug($"{Resources.UseTemplateScriptFileFail}{e.Message}");
-			}
-		}
+        protected override async Task DoLoad(string filePath)
+        {
+            embeddedRecommendedScriptResourceName = default;
+            ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
+            Init();
+            DisplayName = default;
+            IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
+        }
 
-		protected override async Task DoSave(string filePath)
-		{
-			try
-			{
-				using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
-				if (string.IsNullOrWhiteSpace(filePath))
-				{
-					await DoSaveAs(this);
-					return;
-				}
-				await File.WriteAllTextAsync(filePath, ScriptDocument.Text);
-				IsDirty = false;
-				IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
-			}
-			catch (Exception e)
-			{
-				MessageBox.Show($"{Resources.CantSaveScriptFile} {e.Message}");
-			}
-		}
+        protected override async Task DoNew()
+        {
+            embeddedRecommendedScriptResourceName = default;
+            Init();
+            try
+            {
+                var templateFilePath = Path.Combine(AppDirectoryHelper.ExecutableDirectory, "Resources", "NewScriptTemplate.nyagekiScript");
+                if (File.Exists(templateFilePath))
+                {
+                    ScriptDocument.Text = await File.ReadAllTextAsync(templateFilePath);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.LogDebug($"{Resources.UseTemplateScriptFileFail}{e.Message}");
+            }
+            DisplayName = default;
+        }
 
-		public void OnTextChanged()
-		{
-			IsDirty = true;
-		}
+        protected override async Task DoSave(string filePath)
+        {
+            try
+            {
+                using var _ = StatusBarHelper.BeginStatus("Fumen saving : " + filePath);
+                if (string.IsNullOrWhiteSpace(filePath))
+                {
+                    await DoSaveAs(this);
+                    return;
+                }
+                await File.WriteAllTextAsync(filePath, ScriptDocument.Text);
+                IsDirty = false;
+                DisplayName = default;
+                embeddedRecommendedScriptResourceName = default;
+                IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"{Resources.CantSaveScriptFile} {e.Message}");
+            }
+        }
 
-		private BuildParam GetBuildParam()
-		{
-			var buildParam = documentContext.CreateBuildParam();
+        public async Task LoadEmbeddedRecommendedScript(string resourceName, string fileName, string content)
+        {
+            await New(fileName);
+            embeddedRecommendedScriptResourceName = resourceName;
+            ScriptDocument.Text = content;
+            DisplayName = string.Format(ScriptMenuResources.EmbeddedRecommendedScriptDocumentTitleFormat, fileName);
+            IsDirty = false;
+        }
 
-			buildParam.Script = ScriptDocument.Text;
-			buildParam.DisplayFileName = FileName;
+        public void OnTextChanged()
+        {
+            IsDirty = true;
+        }
 
-			return buildParam;
-		}
+        private BuildParam GetBuildParam()
+        {
+            var buildParam = documentContext.CreateBuildParam();
 
-		public async void OnCheckButtonClicked()
-		{
-			using var _ = StatusBarHelper.BeginStatus("Script is building ...");
-			var buildResult = await IoC.Get<IEditorScriptExecutor>().Build(GetBuildParam());
+            buildParam.Script = ScriptDocument.Text;
+            buildParam.DisplayFileName = FileName;
 
-			if (buildResult.IsSuccess)
-			{
-				MessageBox.Show(Resources.CompileSuccess);
-				return;
-			}
+            return buildParam;
+        }
 
-			var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
-			MessageBox.Show($"{Resources.CompileError}\n{errorMsg}");
-		}
+        public async void OnCheckButtonClicked()
+        {
+            using var _ = StatusBarHelper.BeginStatus("Script is building ...");
+            var buildResult = await IoC.Get<IEditorScriptExecutor>().Build(GetBuildParam());
 
-		public async void OnRunButtonClicked()
-		{
-			using var _ = StatusBarHelper.BeginStatus("Script is building ...");
-			var buildResult = await IoC.Get<IEditorScriptExecutor>().Build(GetBuildParam());
+            if (buildResult.IsSuccess)
+            {
+                MessageBox.Show(Resources.CompileSuccess);
+                return;
+            }
 
-			if (!buildResult.IsSuccess)
-			{
-				var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
-				MessageBox.Show($"{Resources.CompileError}\n{errorMsg}");
-				return;
-			}
+            var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
+            MessageBox.Show($"{Resources.CompileError}\n{errorMsg}");
+        }
 
-			if (MessageBox.Show(Resources.ComfirmExecuteScript, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
-				return;
+        public async void OnRunButtonClicked()
+        {
+            using var _ = StatusBarHelper.BeginStatus("Script is building ...");
+            var buildResult = await IoC.Get<IEditorScriptExecutor>().Build(GetBuildParam());
 
-			using var _2 = StatusBarHelper.BeginStatus("Script is executing ...");
-			var executeResult = await IoC.Get<IEditorScriptExecutor>().Execute(buildResult, CurrentSelectedEditor?.TargetEditor);
+            if (!buildResult.IsSuccess)
+            {
+                var errorMsg = string.Join(Environment.NewLine, buildResult.Errors);
+                MessageBox.Show($"{Resources.CompileError}\n{errorMsg}");
+                return;
+            }
 
-			MessageBox.Show($"{Resources.Execute}{(executeResult.Success ? Resources.Success : $"{Resources.FailedAndReason}{executeResult.ErrorMessage}")}");
-		}
+            if (MessageBox.Show(Resources.ComfirmExecuteScript, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                return;
 
-		public async void OnReloadFileButtonClicked()
-		{
-			if (File.Exists(FilePath))
-				await DoLoad(FilePath);
-		}
+            using var _2 = StatusBarHelper.BeginStatus("Script is executing ...");
+            var executeResult = await IoC.Get<IEditorScriptExecutor>().Execute(buildResult, CurrentSelectedEditor?.TargetEditor);
 
-		public async void OnVSEditButtonClicked()
-		{
-			if (IsUsingWatcher && File.Exists(currentProjFilePath))
-			{
-				Process.Start(new ProcessStartInfo(currentProjFilePath)
-				{
-					UseShellExecute = true
-				});
+            MessageBox.Show($"{Resources.Execute}{(executeResult.Success ? Resources.Success : $"{Resources.FailedAndReason}{executeResult.ErrorMessage}")}");
+        }
 
-				return;
-			}
+        public async void OnReloadFileButtonClicked()
+        {
+            if (IsEmbeddedRecommendedScript)
+                return;
 
-			var scriptName = Path.GetFileNameWithoutExtension(FilePath) ?? RandomHepler.RandomString(6);
-			var projOutputDirPath = TempFileHelper.GetTempFolderPath("ScriptTempProjects", scriptName);
-			var csFileName = $"Script.{scriptName}.cs";
-			var csFilePath = Path.Combine(projOutputDirPath, csFileName);
+            if (File.Exists(FilePath))
+                await DoLoad(FilePath);
+        }
 
-			Log.LogDebug($"projOutputDirPath = {projOutputDirPath}");
-			Log.LogDebug($"csFileName = {csFileName}");
-			Log.LogDebug($"csFilePath = {csFilePath}");
+        public async void OnVSEditButtonClicked()
+        {
+            if (IsNew || string.IsNullOrWhiteSpace(FilePath))
+            {
+                if (MessageBox.Show(Resources.PleaseSaveScriptBeforeVSEdit, default, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
+                    return;
 
-			Directory.CreateDirectory(projOutputDirPath);
-			await File.WriteAllTextAsync(csFilePath, ScriptDocument.Text, Encoding.UTF8);
+                if (!await DoSaveAs(this))
+                    return;
+            }
+            else if (IsDirty)
+            {
+                await DoSave(FilePath);
+            }
 
-			if (!documentContext.GenerateProjectFile(projOutputDirPath, csFilePath, out var projFilePath))
-			{
-				MessageBox.Show(Resources.GenerateScriptProjectFileFail);
-				return;
-			}
+            if (IsUsingWatcher && File.Exists(currentProjFilePath))
+            {
+                Process.Start(new ProcessStartInfo(currentProjFilePath)
+                {
+                    UseShellExecute = true
+                });
 
-			Log.LogDebug($"projFilePath = {projFilePath}");
+                return;
+            }
 
-			try
-			{
-				//watch new file
-				var watcher = new FileSystemWatcher(Path.GetDirectoryName(csFilePath));
-				watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.CreationTime | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-				watchingCsFilePath = csFilePath;
-				currentProjFilePath = projFilePath;
-				watcher.Filter = "*.cs";
-				Watcher = watcher;
+            var scriptName = Path.GetFileNameWithoutExtension(FilePath) ?? RandomHepler.RandomString(6);
+            var projOutputDirPath = TempFileHelper.GetTempFolderPath("ScriptTempProjects", scriptName);
+            var csFileName = $"Script.{scriptName}.cs";
+            var csFilePath = Path.Combine(projOutputDirPath, csFileName);
 
-				Process.Start(new ProcessStartInfo(projFilePath)
-				{
-					UseShellExecute = true
-				});
-			}
-			catch
-			{
+            Log.LogDebug($"projOutputDirPath = {projOutputDirPath}");
+            Log.LogDebug($"csFileName = {csFileName}");
+            Log.LogDebug($"csFilePath = {csFilePath}");
 
-			}
-		}
+            Directory.CreateDirectory(projOutputDirPath);
+            await File.WriteAllTextAsync(csFilePath, ScriptDocument.Text, Encoding.UTF8);
 
-		internal async void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
-		{
-			if (e.Text == "." || e.Text == " ")
-			{
-				var textArea = sender as TextArea;
+            if (!documentContext.GenerateProjectFile(projOutputDirPath, csFilePath, out var projFilePath))
+            {
+                MessageBox.Show(Resources.GenerateScriptProjectFileFail);
+                return;
+            }
 
-				completionWindow = new CompletionWindow(textArea);
-				IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
+            Log.LogDebug($"projFilePath = {projFilePath}");
 
-				await foreach (var comp in documentContext.CompleteCode(ScriptDocument.Text, textArea.Caret.Offset, true))
-				{
-					data.Add(new DefaultCompletionDataModel(comp));
-				}
+            try
+            {
+                //watch new file
+                var watcher = new FileSystemWatcher(Path.GetDirectoryName(csFilePath));
+                watcher.NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.CreationTime | NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+                watchingCsFilePath = csFilePath;
+                currentProjFilePath = projFilePath;
+                watcher.Filter = "*.cs";
+                Watcher = watcher;
 
-				completionWindow.Closed += delegate
-				{
-					completionWindow = null;
-				};
+                Process.Start(new ProcessStartInfo(projFilePath)
+                {
+                    UseShellExecute = true
+                });
+            }
+            catch
+            {
 
-				completionWindow.Show();
-			}
-		}
+            }
+        }
 
-		internal void TextArea_TextEntering(object sender, TextCompositionEventArgs e)
-		{
-			if (e.Text.Length > 0 && completionWindow != null)
-			{
-				if (!char.IsLetterOrDigit(e.Text[0]))
-				{
-					// Whenever a non-letter is typed while the completion window is open,
-					// insert the currently selected element.
-					completionWindow.CompletionList.RequestInsertion(e);
-				}
-			}
-		}
+        internal async void TextArea_TextEntered(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text == "." || e.Text == " ")
+            {
+                var textArea = sender as TextArea;
 
-		public void OnStopCsFileButtonClicked()
-		{
-			//sync last time.
-			SyncCsFileToScriptContent();
+                completionWindow = new CompletionWindow(textArea);
+                IList<ICompletionData> data = completionWindow.CompletionList.CompletionData;
 
-			currentProjFilePath = null;
-			watchingCsFilePath = null;
-			Watcher = null;
-		}
+                await foreach (var comp in documentContext.CompleteCode(ScriptDocument.Text, textArea.Caret.Offset, true))
+                {
+                    data.Add(new DefaultCompletionDataModel(comp));
+                }
 
-		public void OnSpaceKeyDown(ActionExecutionContext e)
-		{
-			var itor = PresentationSource.CurrentSources.GetEnumerator();
-			if (itor.MoveNext())
-			{
-				/*
+                completionWindow.Closed += delegate
+                {
+                    completionWindow = null;
+                };
+
+                completionWindow.Show();
+            }
+        }
+
+        internal void TextArea_TextEntering(object sender, TextCompositionEventArgs e)
+        {
+            if (e.Text.Length > 0 && completionWindow != null)
+            {
+                if (!char.IsLetterOrDigit(e.Text[0]))
+                {
+                    // Whenever a non-letter is typed while the completion window is open,
+                    // insert the currently selected element.
+                    completionWindow.CompletionList.RequestInsertion(e);
+                }
+            }
+        }
+
+        public void OnStopCsFileButtonClicked()
+        {
+            //sync last time.
+            SyncCsFileToScriptContent();
+
+            currentProjFilePath = null;
+            watchingCsFilePath = null;
+            Watcher = null;
+        }
+
+        public void OnSpaceKeyDown(ActionExecutionContext e)
+        {
+            var itor = PresentationSource.CurrentSources.GetEnumerator();
+            if (itor.MoveNext())
+            {
+                /*
                 (e.View as UIElement).RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, itor.Current as PresentationSource, 0, Key.Space)
                 {
                     RoutedEvent = UIElement.KeyDownEvent
                 });
                 */
-			}
-		}
-	}
+            }
+        }
+    }
 }

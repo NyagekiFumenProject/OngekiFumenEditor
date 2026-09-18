@@ -1,17 +1,25 @@
-﻿using System;
+using System;
 using System.Numerics;
 using System.Windows;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 
 namespace OngekiFumenEditor.Kernel.Graphics
 {
     public interface IRenderContext
     {
-        public event Action<TimeSpan> OnRender;
+        public event Action<IRenderContext, TimeSpan> OnRender;
 
-        void BeforeRender(IDrawingContext context);
-        void AfterRender(IDrawingContext context);
-        void CleanRender(IDrawingContext context, Vector4 cleanColor);
+        int LimitFPS { get; set; }
+
+        IPerfomenceMonitor PerfomenceMonitor { get; set; }
+
+        String Name { get; set; }
+
+        void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true);
+
         void StartRendering();
+
         void StopRendering();
     }
+
 }

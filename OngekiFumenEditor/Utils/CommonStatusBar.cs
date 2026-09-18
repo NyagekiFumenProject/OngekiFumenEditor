@@ -1,4 +1,4 @@
-﻿using Gemini.Modules.StatusBar;
+using Gemini.Modules.StatusBar;
 using Gemini.Modules.StatusBar.ViewModels;
 using System.ComponentModel.Composition;
 using System.Linq;

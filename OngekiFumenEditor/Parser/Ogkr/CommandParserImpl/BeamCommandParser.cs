@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
@@ -19,8 +19,9 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             beam.XGrid = new XGrid(dataArr[4]);
             ob.WidthId = WidthId.ParseFromId((int)dataArr[5]);
 
-            if (dataArr.TryElementAt(6, out var xUnit))
+            if (dataArr.Length > 6)
             {
+                var xUnit = dataArr[6];
                 var xGrid = new XGrid(xUnit, 0);
                 xGrid.NormalizeSelf();
                 ob.ObliqueSourceXGridOffset = xGrid;
@@ -64,7 +65,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             var beamRecordId = args.GetData<int>(1);
             if (fumen.Beams.FirstOrDefault(x => x.RecordId == beamRecordId) is not BeamStart beamStart)
             {
-                Log.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
+                CoreLog.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 return default;
             }
 
@@ -93,3 +94,4 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
         public override string CommandLineHeader => "OBE";
     }
 }
+

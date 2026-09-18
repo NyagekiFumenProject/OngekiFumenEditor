@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ongeki Fumen Editor"
+  short_description: "Work safely in the OngekiFumenEditor repo"
+  default_prompt: "Use $ongeki-fumen-editor to inspect, debug, review, or extend this OngekiFumenEditor repository while preserving its WPF, Gemini, MEF, parser, editor, and MCP patterns."

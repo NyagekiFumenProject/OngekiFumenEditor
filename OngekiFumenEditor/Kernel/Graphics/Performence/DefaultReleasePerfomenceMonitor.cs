@@ -1,115 +1,200 @@
-﻿using OngekiFumenEditor.Base.Collections;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor;
+using static OngekiFumenEditor.Kernel.Graphics.IPerfomenceMonitor.ICategorizedPerformenceStatisticsData;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Performence
 {
-#if !DEBUG
     [Export(typeof(IPerfomenceMonitor))]
-#endif
-	[PartCreationPolicy(CreationPolicy.NonShared)]
-	public class DefaultReleasePerfomenceMonitor : IPerfomenceMonitor
-	{
-		const int RECORD_LENGTH = 10;
-		private Stopwatch timer = new Stopwatch();
+    [PartCreationPolicy(CreationPolicy.NonShared)]
+    public sealed class DefaultReleasePerfomenceMonitor : IPerfomenceMonitor
+    {
+        private const int RECORD_LENGTH = 60;
 
-		private FixedSizeCycleCollection<long> RenderSpendTicks { get; } = new(RECORD_LENGTH);
-		private FixedSizeCycleCollection<long> UIRenderSpendTicks { get; } = new(RECORD_LENGTH);
-		private FixedSizeCycleCollection<long> TotalDrawCall { get; } = new(RECORD_LENGTH);
+        private sealed class SampleWindow
+        {
+            private readonly long[] values = new long[RECORD_LENGTH];
+            private int index;
+            private int count;
+            private long sum;
 
-		private long currentDrawCall = 0;
-		private long currentBeginRenderTick = 0;
+            public double Average => count == 0 ? 0 : (double)sum / count;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void Clear() { }
+            public void Enqueue(long value)
+            {
+                if (count == values.Length)
+                    sum -= values[index];
+                else
+                    count++;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void CountDrawCall(IDrawing drawing) => currentDrawCall++;
+                values[index] = value;
+                sum += value;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public IDrawingPerformenceStatisticsData GetDrawingPerformenceData()
-		{
-			return default;
-		}
+                index = (index + 1) % values.Length;
+            }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData()
-		{
-			return default;
-		}
+            public void Clear()
+            {
+                Array.Clear(values, 0, count);
+                index = 0;
+                count = 0;
+                sum = 0;
+            }
+        }
 
-		[MethodImpl(MethodImplOptions.AggressiveOptimization)]
-		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
-		{
-			return new RenderPerformenceStatisticsData()
-			{
-				AveSpendTicks = RenderSpendTicks.Average(),
-				AveUIRenderSpendTicks = UIRenderSpendTicks.Average(),
-				MostUIRenderSpendTicks = UIRenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-				MostSpendTicks = RenderSpendTicks.GroupBy(x => x).OrderByDescending(x => x.Count()).FirstOrDefault().Key,
-				AveDrawCall = (int)TotalDrawCall.Average()
-			};
-		}
+        private sealed class EmptyCategorizedPerformenceStatisticsData : ICategorizedPerformenceStatisticsData
+        {
+            private static readonly PerformenceItem[] items = [];
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void OnAfterDrawing(IDrawing drawing)
-		{
+            public IEnumerable<PerformenceItem> PerformenceRanks => items;
 
-		}
+            public double AveSpendTicks => 0;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void OnAfterRender()
-		{
-			timer.Stop();
-			RenderSpendTicks.Enqueue(timer.ElapsedTicks - currentBeginRenderTick);
-			TotalDrawCall.Enqueue(currentDrawCall);
-		}
+            public double MostSpendTicks => 0;
+        }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void OnAfterTargetDrawing(IDrawingTarget drawing)
-		{
+        private static readonly ICategorizedPerformenceStatisticsData emptyCategorizedData = new EmptyCategorizedPerformenceStatisticsData();
 
-		}
+        private readonly SampleWindow frameSpendTicks = new();
+        private readonly SampleWindow onRenderSpendTicks = new();
+        private readonly SampleWindow presentSpendTicks = new();
+        private readonly SampleWindow drawCall = new();
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void OnBeforeRender()
-		{
-			timer.Restart();
-			currentDrawCall = 0;
-			currentBeginRenderTick = 0;
-		}
+        private long previousFrameTimestamp;
+        private long renderBeginTimestamp;
+        private long presentBeginTimestamp;
+        private long currentFrameSpendTicks;
+        private int currentDrawCall;
+        private bool isRendering;
+        private bool isPresenting;
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void OnBeginDrawing(IDrawing drawing)
-		{
+        public void OnBeforeRender()
+        {
+            var currentTimestamp = Stopwatch.GetTimestamp();
+            if (previousFrameTimestamp != 0)
+            {
+                currentFrameSpendTicks = Stopwatch.GetElapsedTime(previousFrameTimestamp, currentTimestamp).Ticks;
+                frameSpendTicks.Enqueue(currentFrameSpendTicks);
+            }
+            else
+            {
+                currentFrameSpendTicks = 0;
+            }
 
-		}
+            previousFrameTimestamp = currentTimestamp;
+            renderBeginTimestamp = currentTimestamp;
+            isRendering = true;
+        }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void OnBeginTargetDrawing(IDrawingTarget drawing)
-		{
+        public void OnAfterRender()
+        {
+            if (!isRendering)
+                return;
 
-		}
+            onRenderSpendTicks.Enqueue(Stopwatch.GetElapsedTime(renderBeginTimestamp).Ticks);
+            isRendering = false;
+        }
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-		public void PostUIRenderTime(TimeSpan ts)
-		{
-			UIRenderSpendTicks.Enqueue(ts.Ticks);
-		}
+        public void OnBeforePresent()
+        {
+            currentDrawCall = 0;
+            presentBeginTimestamp = Stopwatch.GetTimestamp();
+            isPresenting = true;
+        }
 
-		public void FormatStatistics(StringBuilder builder)
-		{
-			var render = GetRenderPerformenceData();
+        public void OnAfterPresent()
+        {
+            if (!isPresenting)
+                return;
 
-			string formatFPS(double ticks) => $"{1.0 / TimeSpan.FromTicks((int)ticks).TotalSeconds,7:0.00}";
+            presentSpendTicks.Enqueue(Stopwatch.GetElapsedTime(presentBeginTimestamp).Ticks);
+            drawCall.Enqueue(currentDrawCall);
+            isPresenting = false;
+        }
 
-			builder.AppendLine($"UI.FPS:{formatFPS(render.AveUIRenderSpendTicks)}({formatFPS(render.MostUIRenderSpendTicks)}) / R.FPS {formatFPS(render.AveSpendTicks)}({formatFPS(render.MostSpendTicks)})");
-			builder.AppendLine($"DC:{render.AveDrawCall,6}");
-		}
-	}
+        public void CountDrawCall()
+        {
+            currentDrawCall++;
+        }
+
+        public void OnBeginDrawCommand(DrawCommand command)
+        {
+        }
+
+        public void OnAfterDrawCommand(DrawCommand command)
+        {
+        }
+
+        public void OnBeginTargetDrawing(IDrawingTarget target)
+        {
+        }
+
+        public void OnAfterTargetDrawing(IDrawingTarget target)
+        {
+        }
+
+        public ICategorizedPerformenceStatisticsData GetDrawCommandPerformenceData()
+        {
+            return emptyCategorizedData;
+        }
+
+        public ICategorizedPerformenceStatisticsData GetDrawingTargetPerformenceData()
+        {
+            return emptyCategorizedData;
+        }
+
+        public IRenderPerformenceStatisticsData GetRenderPerformenceData()
+        {
+            var aveFrameSpendTicks = frameSpendTicks.Average;
+            var aveOnRenderSpendTicks = onRenderSpendTicks.Average;
+            var avePresentSpendTicks = presentSpendTicks.Average;
+
+            return new RenderPerformenceStatisticsData()
+            {
+                CurrentFrameSpendTicks = currentFrameSpendTicks,
+                AveFrameSpendTicks = aveFrameSpendTicks,
+                AveFrameFps = ToFps(aveFrameSpendTicks),
+                AveOnRenderSpendTicks = aveOnRenderSpendTicks,
+                AveOnRenderFps = ToFps(aveOnRenderSpendTicks),
+                AvePresentSpendTicks = avePresentSpendTicks,
+                AvePresentFps = ToFps(avePresentSpendTicks),
+                AveDrawCall = drawCall.Average
+            };
+        }
+
+        public void FormatStatistics(StringBuilder builder)
+        {
+            var render = GetRenderPerformenceData();
+
+            string formatFPS(double fps) => $"{fps,7:0.00}";
+            string formatMSec(double ticks) => $"{TimeSpan.FromTicks((long)Math.Max(0, ticks)).TotalMilliseconds:F2}";
+
+            builder.AppendLine($"Frame FPS avg:{formatFPS(render.AveFrameFps)} ({formatMSec(render.AveFrameSpendTicks)}ms avg)");
+            builder.AppendLine($"OnRender FPS avg:{formatFPS(render.AveOnRenderFps)} ({formatMSec(render.AveOnRenderSpendTicks)}ms avg)");
+            builder.AppendLine($"Present  FPS avg:{formatFPS(render.AvePresentFps)} ({formatMSec(render.AvePresentSpendTicks)}ms avg)");
+            builder.AppendLine($"DrawCall avg:{render.AveDrawCall,6:F1}");
+        }
+
+        public void Clear()
+        {
+            frameSpendTicks.Clear();
+            onRenderSpendTicks.Clear();
+            presentSpendTicks.Clear();
+            drawCall.Clear();
+            previousFrameTimestamp = 0;
+            currentFrameSpendTicks = 0;
+            currentDrawCall = 0;
+            isRendering = false;
+            isPresenting = false;
+        }
+
+        private static double ToFps(double ticks)
+        {
+            return ticks > 0 ? TimeSpan.TicksPerSecond / ticks : 0;
+        }
+    }
 }

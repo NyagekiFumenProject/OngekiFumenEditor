@@ -1,5 +1,3 @@
-﻿using Caliburn.Micro;
-using DereTore.Common;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.Svg;
@@ -14,8 +12,6 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
@@ -232,14 +228,14 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
                     {
                         KeyframeSoflan => "KeyframeSoflan",
                         InterpolatableSoflan => "InterpolatableSoflan",
-                        Soflan => "Soflan"
+                        Soflan => "Soflan",
+                        _ => nameof(ISoflan)
                     };
                     sb.Write($"{name}\t:\t{soflan.Speed}\t:\t(T[{soflan.TGrid.Unit},{soflan.TGrid.Grid}])\t->\t(T[{soflan.EndTGrid.Unit},{soflan.EndTGrid.Grid}])");
                     if (soflan is InterpolatableSoflan isf)
                         sb.Write($": EndSpeed[{(isf.EndIndicator as InterpolatableSoflan.InterpolatableSoflanIndicator).Speed}], Easing[{isf.Easing}]");
                     sb.Write($": SoflanGroup[{soflan.SoflanGroup}]");
                     sb.WriteLine();
-                    //todo add soflanGroup
                 }
                 sb.WriteLine();
             }
@@ -291,9 +287,9 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         {
             foreach (var bullet in fumen.Bullets.OrderBy(x => x.TGrid))
             {
-                if (bullet.ReferenceBulletPallete is { } pallete && pallete != BulletPallete.DummyCustomPallete)
+                if (bullet.ReferenceBulletPallete is not null)
                 {
-                    sb.WriteLine($"Bullet\t:\t{bullet.ReferenceBulletPallete?.StrID}\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
+                    sb.WriteLine($"Bullet\t:\t{bullet.ReferenceBulletPallete.StrID}\t:\tX[{bullet.XGrid.Unit},{bullet.XGrid.Grid}], T[{bullet.TGrid.Unit},{bullet.TGrid.Grid}], D[{bullet.BulletDamageTypeValue}]");
                 }
                 else
                 {
@@ -305,7 +301,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
                     sb.Write($", SizeValue[{bullet.SizeValue}]");
                     sb.Write($", ShooterValue[{bullet.ShooterValue}]");
                     sb.Write($", TargetValue[{bullet.TargetValue}]");
-                    sb.WriteLine($", Speed[{bullet.Speed}]");
+                    sb.WriteLine();
                 }
             }
             sb.WriteLine();
@@ -344,7 +340,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         {
             foreach (var bell in fumen.Bells.OrderBy(x => x.TGrid))
             {
-                if (bell.ReferenceBulletPallete != BulletPallete.DummyCustomPallete)
+                if (bell.ReferenceBulletPallete is not null)
                 {
                     sb.WriteLine($"Bell\t:\t{bell.ReferenceBulletPallete?.StrID}\t:\tX[{bell.XGrid.Unit},{bell.XGrid.Grid}], T[{bell.TGrid.Unit},{bell.TGrid.Grid}]");
                 }
@@ -387,3 +383,4 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         }
     }
 }
+

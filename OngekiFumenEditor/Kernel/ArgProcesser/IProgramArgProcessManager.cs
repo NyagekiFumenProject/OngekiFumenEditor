@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.ArgProcesser
 {
-	public interface IProgramArgProcessManager
-	{
-		Task ProcessArgs(string[] args);
+    public interface IProgramArgProcessManager
+    {
+        Task ProcessArgs(string[] args);
     }
 }

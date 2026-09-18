@@ -1,9 +1,9 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Utils.ObjectPool;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -14,31 +14,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     public abstract class CommonLinesDrawTargetBase<T> : CommonBatchDrawTargetBase<T> where T : ConnectableStartObject
     {
         public virtual int LineWidth { get; } = 2;
-        private ISimpleLineDrawing lineDrawing;
         private static VertexDash invailedDash = new VertexDash(6, 3);
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
         }
 
         public abstract Vector4 GetLanePointColor(ConnectableObjectBase obj);
 
-        public void FillLine(IFumenEditorDrawingContext target, T start)
+        public void FillLine(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, T start)
         {
             var color = GetLanePointColor(start);
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            using var list = ObjectPool.GetPooledList<LineVertex>();
             VisibleLineVerticesQuery.QueryVisibleLineVertices(target, start, target.CurrentDrawingTargetContext.CurrentSoflanList, invailedDash, color, list);
-            lineDrawing.Draw(target, list, LineWidth);
+            builder.DrawSimpleLines(list, LineWidth);
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<T> starts)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> starts)
         {
             foreach (var laneStart in starts)
             {
-                FillLine(target, laneStart);
+                FillLine(target, builder, laneStart);
             }
         }
     }

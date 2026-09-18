@@ -1,9 +1,8 @@
-﻿using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.Lane.Base
 {
-	public abstract class LaneNextBase : ConnectableChildObjectBase
-	{
-
-	}
+    public abstract class LaneNextBase : ConnectableChildObjectBase
+    {
+    }
 }

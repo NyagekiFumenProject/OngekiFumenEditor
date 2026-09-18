@@ -1,7 +1,7 @@
-﻿namespace OngekiFumenEditor.Base
+namespace OngekiFumenEditor.Base
 {
-	public interface IHorizonPositionObject
-	{
-		public XGrid XGrid { get; set; }
-	}
+    public interface IHorizonPositionObject
+    {
+        XGrid XGrid { get; set; }
+    }
 }

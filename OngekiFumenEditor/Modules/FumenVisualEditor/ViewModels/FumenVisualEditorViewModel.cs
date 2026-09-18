@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework;
 using Microsoft.Win32;
 using OngekiFumenEditor.Base;
@@ -74,19 +74,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        private IAudioPlayer audioPlayer;
-        public IAudioPlayer AudioPlayer
+        public IAudioPlayer? AudioPlayer
         {
             get
             {
-                return audioPlayer;
+                return field;
             }
             set
             {
-                if (audioPlayer != value)
-                    audioPlayer?.Dispose();
+                if (field != value)
+                    field?.Dispose();
 
-                Set(ref audioPlayer, value);
+                Set(ref field, value);
             }
         }
 
@@ -141,6 +140,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 default:
                     IsDirty = true;
+                    RecalculateScrollMetrics();
                     break;
             }
 
@@ -150,13 +150,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (EditorProjectData?.AudioDuration is TimeSpan timeSpan && timeSpan > TimeSpan.Zero)
             {
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
+                TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
             else
             {
                 timeSpan = AudioPlayer?.Duration ?? TimeSpan.Zero;
-                TotalDurationHeight = ConvertToY(TGridCalculator.ConvertAudioTimeToTGrid(timeSpan, this).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
+                TotalDurationHeight = ConvertToY(ConvertAudioTimeToTGrid(timeSpan).TotalUnit, Fumen.SoflansMap.DefaultSoflanList);
             }
+
+            RecalculateScrollMetrics();
         }
 
         public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) &&
@@ -218,6 +220,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (fumenDeserializer is null)
                         throw new NotSupportedException($"{Resources.DeserializeFumenFileFail}{projectData.FumenFilePath}");
                     var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
+                    Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
                     projectData.Fumen = fumen;
                 }
                 EditorProjectData = dialogViewModel.EditorProjectData;
@@ -262,7 +265,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 EditorProjectData = projModel;
                 AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
 
-                var dispTGrid = TGridCalculator.ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime, this);
+                var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
                 ScrollTo(dispTGrid);
 
                 LoadingFinished?.Invoke(this, new(Fumen));
@@ -287,7 +290,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            EditorProjectData.RememberLastDisplayTime = TGridCalculator.ConvertTGridToAudioTime(GetCurrentTGrid(), this);
+            EditorProjectData.RememberLastDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.
@@ -355,9 +358,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Activation
 
-        protected override async Task OnActivateAsync(CancellationToken cancellationToken)
+        protected override async Task OnActivatedAsync(CancellationToken cancellationToken)
         {
-            await base.OnActivateAsync(cancellationToken);
+            await base.OnActivatedAsync(cancellationToken);
             await IoC.Get<ISchedulerManager>().AddScheduler(this);
             EditorManager.NotifyActivate(this);
         }
@@ -368,11 +371,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
             EditorManager.NotifyDeactivate(this);
             AudioPlayer?.Pause();
+            if (close)
+                DisposeRenderLoop();
         }
 
-        protected override async Task OnInitializeAsync(CancellationToken cancellationToken)
+        protected override async Task OnInitializedAsync(CancellationToken cancellationToken)
         {
-            await base.OnInitializeAsync(cancellationToken);
+            await base.OnInitializedAsync(cancellationToken);
             EditorManager.NotifyCreate(this);
         }
 

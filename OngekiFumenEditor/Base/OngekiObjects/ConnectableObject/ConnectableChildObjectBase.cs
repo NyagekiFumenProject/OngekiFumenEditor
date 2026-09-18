@@ -1,15 +1,11 @@
-﻿using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
+using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Kernel.CurveInterpolater;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
-using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
-using OpenTK.Mathematics;
+using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OngekiFumenEditor.Base.Attributes;
-using OngekiFumenEditor.Properties;
-using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -21,7 +17,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         private float curvePrecision = 0.025f;
 
-        [LocalizableObjectPropertyBrowserAlias(nameof(Resources.CurvePrecisionLabel))]
+        [LocalizableObjectPropertyBrowserAlias("CurvePrecisionLabel")]
         public float CurvePrecision
         {
             get => curvePrecision;
@@ -30,7 +26,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         private ICurveInterpolaterFactory curveInterpolaterFactory = XGridLimitedCurveInterpolaterFactory.Default;
 
-        [LocalizableObjectPropertyBrowserAlias(nameof(Resources.CurveInterpolatorFactoryLabel))]
+        [LocalizableObjectPropertyBrowserAlias("CurveInterpolatorFactoryLabel")]
         public ICurveInterpolaterFactory CurveInterpolaterFactory
         {
             get => curveInterpolaterFactory;
@@ -60,7 +56,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         private int recordId = int.MinValue;
         public override int RecordId { get => ReferenceStartObject?.RecordId ?? recordId; set => Set(ref recordId, value); }
 
-        private List<LaneCurvePathControlObject> pathControls = new();
+        private readonly List<LaneCurvePathControlObject> pathControls = new List<LaneCurvePathControlObject>();
         public IReadOnlyList<LaneCurvePathControlObject> PathControls => pathControls;
 
         public bool IsCurvePath => PathControls.Count > 0;
@@ -75,8 +71,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             }
         }
 
-        private bool cachedIsVaild = false;
-        private List<(Vector2 pos, bool isVaild)> cacheGeneratedPath = default;
+        private bool cachedIsVaild;
+        private List<(Vector2 pos, bool isVaild)> cacheGeneratedPath;
 
         public void SetReferenceStartObject(ConnectableStartObject refStart)
         {
@@ -123,16 +119,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         internal void NotifyRefreshPaths()
         {
-            ObjectPool<List<(Vector2 pos, bool isVaild)>>.Return(cacheGeneratedPath);
             cacheGeneratedPath = default;
             cachedIsVaild = default;
         }
 
         private void RegeneratePaths()
         {
-            if (cacheGeneratedPath is null)
-                cacheGeneratedPath = ObjectPool<List<(Vector2 pos, bool isVaild)>>.Get();
-            cacheGeneratedPath.Clear();
+            cacheGeneratedPath = new List<(Vector2 pos, bool isVaild)>();
 
             var isVaild = true;
             foreach (var p in GenerateConnectionPaths())
@@ -156,11 +149,68 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
 
         public IEnumerable<Vector2> GridBasePoints => PathControls
-            .AsEnumerable<OngekiMovableObjectBase>()
+            .Cast<OngekiMovableObjectBase>()
             .Prepend(PrevObject)
             .Append(this)
             .OfType<OngekiMovableObjectBase>()
             .Select(x => new Vector2(x.XGrid.TotalGrid, x.TGrid.TotalGrid));
+
+        private static Vector2 CalculateBezierPoint(IReadOnlyList<Vector2> points, float t)
+        {
+            var temp = new Vector2[points.Count];
+            for (int i = 0; i < points.Count; i++)
+                temp[i] = points[i];
+
+            for (int depth = 1; depth < points.Count; depth++)
+            {
+                for (int i = 0; i < points.Count - depth; i++)
+                    temp[i] = Vector2.Lerp(temp[i], temp[i + 1], t);
+            }
+
+            return temp[0];
+        }
+
+        private static int BinarySearchByPathY(IReadOnlyList<(Vector2 pos, bool isVaild)> list, double value)
+        {
+            var lo = 0;
+            var hi = list.Count - 1;
+            while (lo <= hi)
+            {
+                var i = lo + ((hi - lo) >> 1);
+                double current = list[i].pos.Y;
+                var order = current.CompareTo(value);
+
+                if (order == 0)
+                {
+                    for (var r = i + 1; r < list.Count; r++)
+                    {
+                        if (((double)list[r].pos.Y).CompareTo(current) == 0)
+                            i = r;
+                        else
+                            break;
+                    }
+                    return i;
+                }
+
+                if (order < 0)
+                    lo = i + 1;
+                else
+                    hi = i - 1;
+            }
+
+            return ~lo;
+        }
+
+        private static double CalculateXFromTwoPointFormFormula(double y, double x1, double y1, double x2, double y2)
+        {
+            var by = y2 - y1;
+            var bx = x2 - x1;
+
+            if (by == 0)
+                return x1;
+
+            return (y - y1) / by * bx + x1;
+        }
 
         public IEnumerable<(Vector2 pos, bool isVaild)> GenerateConnectionPaths()
         {
@@ -172,7 +222,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 return Math.Sign(b.Y - a.Y);
             }
 
-            using var d = GridBasePoints.ToListWithObjectPool(out var points);
+            var points = GridBasePoints.ToList();
             if (points.Count <= 2)
             {
                 var fromP = points[0];
@@ -190,11 +240,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             var t = 0f;
             while (true)
             {
-                var curP = BezierCurve.CalculatePoint(points, t);
+                var curP = CalculateBezierPoint(points, t);
                 var sign = calcSign(prevPos, curP);
 
                 if (prevSign != sign && prevSign != 0)
-                    isVaild = isVaild && false;
+                    isVaild = false;
 
                 prevPos = curP;
                 prevSign = sign;
@@ -204,7 +254,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 if (t >= 1)
                     break;
 
-                t = MathF.Min(1, t + step);
+                t = Math.Min(1f, t + step);
             }
         }
 
@@ -224,62 +274,54 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
                 if (IsVaildPath)
                 {
-                    //path is vaild, just find by binary search
                     var pathList = cacheGeneratedPath;
-
-                    var idx = pathList.BinarySearchBy(totalTGrid, x => x.pos.Y);
+                    var idx = BinarySearchByPathY(pathList, totalTGrid);
                     var actualIdx = idx < 0 ? Math.Max(0, (~idx) - 1) : idx;
 
                     if (actualIdx == pathList.Count - 1)
-                        return pathList[^1].pos.X;
+                        return pathList[pathList.Count - 1].pos.X;
                     if (actualIdx == 0 && pathList[0].pos.Y > totalTGrid)
                         return default;
 
                     var cur = pathList[actualIdx];
                     var next = pathList[actualIdx + 1];
 
-                    var xTotalGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid, cur.pos.X, cur.pos.Y, next.pos.X, next.pos.Y);
-                    return xTotalGrid;
+                    return CalculateXFromTwoPointFormFormula(totalTGrid, cur.pos.X, cur.pos.Y, next.pos.X, next.pos.Y);
                 }
-                else
+
+                foreach (var item in GetConnectionPaths())
                 {
-                    foreach ((var gridVec2, var isVaild) in GetConnectionPaths())
+                    var gridVec2 = item.pos;
+                    var isVaild = item.isVaild;
+                    if (!isVaild)
+                        return default;
+
+                    if (totalTGrid <= gridVec2.Y)
                     {
-                        if (!isVaild)
-                            return default;
+                        prevVec2 = prevVec2 ?? gridVec2;
 
-                        if (totalTGrid <= gridVec2.Y)
-                        {
-                            prevVec2 = prevVec2 ?? gridVec2;
+                        var fromXGrid = prevVec2.Value.X;
+                        var fromTGrid = prevVec2.Value.Y;
+                        var toTGrid = gridVec2.Y;
+                        var toXGrid = gridVec2.X;
 
-                            var fromXGrid = prevVec2.Value.X;
-                            var fromTGrid = prevVec2.Value.Y;
-                            var toTGrid = gridVec2.Y;
-                            var toXGrid = gridVec2.X;
-
-                            var xTotalGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid, fromXGrid, fromTGrid, toXGrid, toTGrid);
-
-                            //Log.LogDebug($"fromXGrid:{fromXGrid} fromTGrid:{fromTGrid} fromTGrid:{fromTGrid} fromTGrid:{fromTGrid} tGrid:{tGrid} -> {xGrid}");
-                            return xTotalGrid;
-                        }
-
-                        prevVec2 = gridVec2;
+                        return CalculateXFromTwoPointFormFormula(totalTGrid, fromXGrid, fromTGrid, toXGrid, toTGrid);
                     }
+
+                    prevVec2 = gridVec2;
                 }
+
                 return default;
             }
-            else
-            {
-                //就在当前[prev,cur]范围内，那么就插值计算咯
-                var xGrid = MathUtils.CalculateXFromTwoPointFormFormula(totalTGrid, PrevObject.XGrid.TotalGrid, PrevObject.TGrid.TotalGrid, XGrid.TotalGrid, TGrid.TotalGrid);
-                return xGrid;
-            }
+
+            return CalculateXFromTwoPointFormFormula(totalTGrid, PrevObject.XGrid.TotalGrid, PrevObject.TGrid.TotalGrid, XGrid.TotalGrid, TGrid.TotalGrid);
         }
 
         public XGrid CalulateXGrid(TGrid tGrid)
         {
             if (CalulateXGridTotalGrid(tGrid.TotalGrid) is not double totalGrid)
                 return default;
+
             var xGrid = new XGrid(0, (int)totalGrid);
             xGrid?.NormalizeSelf();
             return xGrid;
@@ -292,7 +334,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
-            return PathControls.AsEnumerable<IDisplayableObject>().Append(this);
+            for (var i = 0; i < PathControls.Count; i++)
+                yield return PathControls[i];
+            yield return this;
         }
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
@@ -324,7 +368,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public IEnumerable<ConnectableChildObjectBase> InterpolateCurveChildren(ICurveInterpolaterFactory factory = default)
         {
-            var to = ReferenceStartObject.Children.FindNextOrDefault(this);
+            var to = ReferenceStartObject.FindNextChild(this);
             var itor = (factory ?? CurveInterpolaterFactory).CreateInterpolaterForRange(this, to);
 
             while (true)

@@ -1,6 +1,7 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +13,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         public override int DefaultRenderOrder => 2000;
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
-
-        private IBatchTextureDrawing textureDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
 
         public abstract IImage StartEditorTexture { get; }
         public abstract IImage NextEditorTexture { get; }
@@ -28,9 +26,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            textureDrawing = impl.BatchTextureDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
                 startSize = new Vector2(16, 16);
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneNext", out nextSize, out _))
@@ -39,41 +34,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 endSize = new Vector2(16, 16);
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<ConnectableStartObject> objs)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<ConnectableStartObject> objs)
         {
-            target.PerfomenceMonitor.OnBeginTargetDrawing(this);
+            void drawEditorTap(IImage texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
             {
-                void drawEditorTap(IImage texture, Vector2 size, IEnumerable<ConnectableObjectBase> o)
+                foreach (var item in o)
                 {
-                    foreach (var item in o)
-                    {
-                        if (!target.CheckVisible(item.TGrid))
-                            continue;
+                    if (!target.CheckVisible(item.TGrid))
+                        continue;
 
-                        var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
-                        var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(item);
-                        var y = (float)target.ConvertToY(item.TGrid, soflanList);
+                    var x = (float)XGridCalculator.ConvertXGridToX(item.XGrid, target.Editor);
+                    var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(item);
+                    var y = (float)target.ConvertToViewRelativeY(item.TGrid, soflanList);
 
-                        var pos = new Vector2(x, y);
-                        drawList.Add((size, pos, 0f, Vector4.One));
-                        target.RegisterSelectableObject(item, pos, size);
-                        if (item.IsSelected)
-                            selectList.Add((size * 1.5f, pos, 0f, Vector4.One));
-                    }
-
-                    if (selectList.Count > 0)
-                        highlightDrawing.Draw(target, texture, selectList);
-                    if (drawList.Count > 0)
-                        textureDrawing.Draw(target, texture, drawList);
-
-                    selectList.Clear();
-                    drawList.Clear();
+                    var pos = new Vector2(x, y);
+                    drawList.Add((size, pos, 0f, Vector4.One));
+                    target.RegisterSelectableObject(item, pos, size);
+                    if (item.IsSelected)
+                        selectList.Add((size * 1.5f, pos, 0f, Vector4.One));
                 }
-                drawEditorTap(StartEditorTexture, startSize, objs);
-                drawEditorTap(NextEditorTexture, nextSize, objs.SelectMany(x => x.Children.OfType<ConnectableChildObjectBase>()));
-                //drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
+
+                if (selectList.Count > 0)
+                    builder.DrawHighlightBatchTexture(texture, selectList);
+                if (drawList.Count > 0)
+                    builder.DrawBatchTexture(texture, drawList);
+
+                selectList.Clear();
+                drawList.Clear();
             }
-            target.PerfomenceMonitor.OnAfterTargetDrawing(this);
+            drawEditorTap(StartEditorTexture, startSize, objs);
+            drawEditorTap(NextEditorTexture, nextSize, objs.SelectMany(x => x.Children.OfType<ConnectableChildObjectBase>()));
+            //drawEditorTap(EndEditorTexture, editorSize, objs.Select(x => x.Children.LastOrDefault()).OfType<ConnectableEndObject>());
         }
     }
 }

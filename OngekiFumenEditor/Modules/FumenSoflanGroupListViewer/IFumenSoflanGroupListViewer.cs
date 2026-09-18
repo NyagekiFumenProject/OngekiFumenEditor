@@ -1,4 +1,4 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 using OngekiFumenEditor.Base.EditorObjects;
 using System;
 using System.Collections.Generic;

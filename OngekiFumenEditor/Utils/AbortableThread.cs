@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,16 +23,50 @@ namespace OngekiFumenEditor.Utils
         public void Start()
         {
             task.Start();
-            Log.LogDebug($"Thread {Name} started.", prefix: "AbortableThread");
+            CoreLog.LogDebug($"Thread {Name} started.");
         }
 
         public void Abort(bool waitForTask = true)
         {
-            Log.LogDebug($"Begin to abort thread {Name}.", prefix: "AbortableThread");
+            CoreLog.LogDebug($"Begin to abort thread {Name}.");
             cancellationTokenSource.Cancel();
             if (waitForTask)
-                task?.Wait();
-            Log.LogDebug($"Aborted thread {Name}.", prefix: "AbortableThread");
+            {
+                try
+                {
+                    task?.Wait();
+                }
+                catch (AggregateException e) when (IsCancellationException(e))
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
+            CoreLog.LogDebug($"Aborted thread {Name}.");
+        }
+
+        public async Task AbortAsync()
+        {
+            CoreLog.LogDebug($"Begin to abort thread {Name} (async).");
+            cancellationTokenSource.Cancel();
+            if (task is { } t)
+            {
+                try { await t.ConfigureAwait(false); }
+                catch (OperationCanceledException) { }
+            }
+            CoreLog.LogDebug($"Aborted thread {Name} (async).");
+        }
+
+        private static bool IsCancellationException(AggregateException e)
+        {
+            foreach (var inner in e.Flatten().InnerExceptions)
+            {
+                if (inner is not OperationCanceledException)
+                    return false;
+            }
+
+            return true;
         }
     }
 }

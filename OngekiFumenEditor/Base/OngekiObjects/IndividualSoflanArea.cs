@@ -1,11 +1,7 @@
-﻿using OngekiFumenEditor.Base.Attributes;
+using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static OngekiFumenEditor.Base.OngekiObjects.LaneBlockArea;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
@@ -17,7 +13,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             public IndividualSoflanArea RefIndividualSoflanArea { get; internal protected set; }
 
-            public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => IDisplayableObject.Empty;
+            public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => System.Array.Empty<IDisplayableObject>();
 
             private bool tGridHasSet;
 
@@ -34,7 +30,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 }
                 set
                 {
-                    base.TGrid = value is not null ? MathUtils.Max(value, RefIndividualSoflanArea.TGrid.CopyNew()) : value;
+                    base.TGrid = value is not null && value < RefIndividualSoflanArea.TGrid ? RefIndividualSoflanArea.TGrid.CopyNew() : value;
                     tGridHasSet = true;
                 }
             }
@@ -107,3 +103,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
     }
 }
+

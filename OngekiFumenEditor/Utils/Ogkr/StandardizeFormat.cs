@@ -1,4 +1,4 @@
-﻿using AngleSharp.Common;
+using AngleSharp.Common;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -77,11 +77,26 @@ namespace OngekiFumenEditor.Utils.Ogkr
         {
             var bplMap = fumen.BulletPalleteList.GroupBy(bpl => (bpl.PlaceOffset, bpl.SizeValue, bpl.Speed, bpl.ShooterValue, bpl.TargetValue, bpl.TypeValue, bpl.RandomOffsetRange))
                                    .ToDictionary(x => x.Key, x => x.First());
+            StandardizedDefaultBellBulletPalette? defaultBellPalette = null;
 
-            void CheckAndProcess<T>(IEnumerable<T> customProjectiles) where T : IProjectile, IBulletPalleteReferencable
+            StandardizedDefaultBellBulletPalette GetOrCreateDefaultBellPalette()
+            {
+                if (defaultBellPalette is null)
+                    defaultBellPalette = new StandardizedDefaultBellBulletPalette();
+
+                return defaultBellPalette;
+            }
+
+            void CheckAndProcess<T>(IEnumerable<T> customProjectiles) where T : class, IProjectile, IBulletPalleteReferencable
             {
                 foreach (var projectile in customProjectiles)
                 {
+                    if (projectile is Bell bell && bell.IsOngekiDefaultBell())
+                    {
+                        projectile.ReferenceBulletPallete = GetOrCreateDefaultBellPalette();
+                        continue;
+                    }
+
                     var key = (projectile.PlaceOffset, projectile.SizeValue, projectile.Speed, projectile.ShooterValue, projectile.TargetValue, projectile.TypeValue, projectile.RandomOffsetRange);
                     if (!bplMap.TryGetValue(key, out var bpl))
                     {
@@ -96,8 +111,8 @@ namespace OngekiFumenEditor.Utils.Ogkr
                             TypeValue = projectile.TypeValue,
                             RandomOffsetRange = projectile.RandomOffsetRange,
                         };
-
                         fumen.AddObject(bpl);
+
                         //add to map for next lookup
                         bplMap[key] = bpl;
 
@@ -109,8 +124,8 @@ namespace OngekiFumenEditor.Utils.Ogkr
                 }
             }
 
-            CheckAndProcess(fumen.Bells.Where(x => x.ReferenceBulletPallete == BulletPallete.DummyCustomPallete));
-            CheckAndProcess(fumen.Bullets.Where(x => x.ReferenceBulletPallete == BulletPallete.DummyCustomPallete || x.ReferenceBulletPallete == null));
+            CheckAndProcess(fumen.Bells.Where(x => x.ReferenceBulletPallete is null));
+            CheckAndProcess(fumen.Bullets.Where(x => x.ReferenceBulletPallete is null));
         }
 
         public static void RegularizeAllObjectGrids(OngekiFumen fumen)

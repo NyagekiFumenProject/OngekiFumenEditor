@@ -1,4 +1,4 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 using System;
 using System.Threading.Tasks;
 

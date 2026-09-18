@@ -1,4 +1,5 @@
-﻿using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
@@ -22,7 +23,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
         {
             try
             {
-                var logDir = LogSetting.Default.LogFileDirPath;
+                var logDir = AppDirectoryHelper.ResolveRelative(LogSetting.Default.LogFileDirPath);
                 Directory.CreateDirectory(logDir);
                 do
                 {

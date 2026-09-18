@@ -1,4 +1,4 @@
-﻿using Microsoft.CodeAnalysis.Options;
+using Microsoft.CodeAnalysis.Options;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;

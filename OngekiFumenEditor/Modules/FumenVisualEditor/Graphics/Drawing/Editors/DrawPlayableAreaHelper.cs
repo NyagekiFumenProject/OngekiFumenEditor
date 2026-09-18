@@ -1,12 +1,14 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using EarcutNet;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
-using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
+using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,23 +30,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         static readonly Vector4 debugLeftColor = new Vector4(1, 51f / 255, 51f / 255, 0.75f);
         static readonly Vector4 debugRightColor = new Vector4(0, 204f / 255, 102f / 255, 0.75f);
 
-        private ILineDrawing lineDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private ICircleDrawing circleDrawing;
-        private IStringDrawing stringDrawing;
-
         private Vector4 playFieldForegroundColor;
         private bool enablePlayFieldDrawing;
 
         LineVertex[] vertices = new LineVertex[2];
 
+        private readonly List<double> tessellatePoints = new();
+        private readonly List<int> tessellateHoleIndices = new();
+        private readonly List<int> tessellateList = new();
+
+        private static readonly IComparer<(Vector2, Vector2)> PolylineByStartYComparer =
+            Comparer<(Vector2 a, Vector2 b)>.Create(static (x, y) => x.a.Y.CompareTo(y.a.Y));
+
         public void Initalize(IRenderManagerImpl impl)
         {
-            polygonDrawing = impl.PolygonDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            circleDrawing = impl.CircleDrawing;
-            stringDrawing = impl.StringDrawing;
-
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
         }
@@ -68,21 +67,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             playFieldForegroundColor = Color.FromArgb(Properties.EditorGlobalSetting.Default.PlayFieldForegroundColor).ToVector4();
         }
 
-        public void Draw(IFumenEditorDrawingContext target)
+        public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
             if (target.Editor.IsDesignMode)
-                DrawAudioDuration(target);
+                DrawAudioDuration(target, builder);
         }
 
-        private void DrawAudioDuration(IFumenEditorDrawingContext target)
+        private void DrawAudioDuration(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder)
         {
-            var y = (float)target.Editor.TotalDurationHeight;
+            var y = (float)(target.Editor.TotalDurationHeight - target.CurrentDrawingTargetContext.ViewRelativeOriginY);
 
             var color = new Vector4(1, 0, 0, 1);
             vertices[0] = new(new(0, y), color, VertexDash.Solider);
-            vertices[1] = new(new(target.CurrentDrawingTargetContext.Rect.Width, y), color, VertexDash.Solider);
+            vertices[1] = new(new(target.CurrentDrawingTargetContext.ViewRelativeRect.Width, y), color, VertexDash.Solider);
 
-            lineDrawing.Draw(target, vertices, 3);
+            builder.DrawSimpleLines(vertices, 3);
         }
 
         /// <summary>
@@ -91,13 +90,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// <param name="target"></param>
         /// <param name="fieldMinTGrid"></param>
         /// <param name="fieldMaxTGrid"></param>
-        public void DrawPlayField(IFumenEditorDrawingContext target, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
+        public void DrawPlayField(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid fieldMinTGrid, TGrid fieldMaxTGrid)
         {
             if (target.Editor.IsDesignMode || !enablePlayFieldDrawing)
                 return;
 
             var fumen = target.Editor.Fumen;
-            //todo 暂时显示默认的变速组
+            //显示默认的变速组
             var soflanList = fumen.SoflansMap.DefaultSoflanList.GetCachedSoflanPositionList_PreviewMode(fumen.BpmList);
 
             var minIdx = soflanList.LastOrDefaultIndexByBinarySearch(fieldMinTGrid, x => x.TGrid);
@@ -109,8 +108,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             //range between [minT(sp1), sp2], [sp2, sp3] and [sp3, maxT(sp4)] will be calculated and drawn in different range (because speed may reverse)
 
             var curSoflanPoint = soflanList[minIdx];
-            var rangeInfos = ObjectPool<List<(TGrid tGrid, double speed)>>.Get();
-            rangeInfos.Clear();
+            using var rangeInfos = ObjectPool.GetPooledList<(TGrid tGrid, double speed)>();
 
             //like [minT(sp1), sp2]
             rangeInfos.Add((fieldMinTGrid, soflanList[minIdx].Speed));
@@ -147,10 +145,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (i == rangeInfos.Count - 2)
                     flag |= FieldRangeParam.LastRange;
 
-                DrawPlayFieldInternal(target, segMinTGrid, segMaxTGrid, flag);
+                DrawPlayFieldInternal(target, builder, segMinTGrid, segMaxTGrid, flag);
             }
 
-            ObjectPool<List<(TGrid, double)>>.Return(rangeInfos);
         }
 
         [Flags]
@@ -163,35 +160,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             LastRange = 2,
         }
 
-        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
+        private void DrawPlayFieldInternal(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, TGrid minTGrid, TGrid maxTGrid, FieldRangeParam fieldFlag)
         {
             /*
-			 画游戏(黑色可移动)区域
-				1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
-				   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
-				2. 排列 point集合, 然后简化point和补全point
-				3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
-				4. 将左右所有的节点合并成一个多边形，渲染
-			 */
+             画游戏(黑色可移动)区域
+                1. 计算一组轨道，每个轨道的节点都算一个point，如果存在轨道相交，那么相交点也算point
+                   如果一个水平面(即y相同)存在多个轨道头尾节点，那么就会分别算point
+                2. 排列 point集合, 然后简化point和补全point
+                3. 将 points集合两两成线，得到线的range[minY, maxY] , 得到Y对应的轨道以及在范围range内轨道所有节点
+                4. 将左右所有的节点合并成一个多边形，渲染
+             */
 
             const long defaultLeftX = -24 * XGrid.DEFAULT_RES_X;
             const long defaultRightX = 24 * XGrid.DEFAULT_RES_X;
 
             var fumen = target.Editor.Fumen;
-            var currentTGrid = target.Editor.GetCurrentTGrid();
+            var currentTGrid = target.Editor.GetViewportTGrid();
             var soflanGroup = target.CurrentDrawingTargetContext.CurrentSoflanList;
 
-            void EnumeratePoints(bool isRight, List<Vector2> result)
+            void EnumeratePoints(bool isRight, IList<Vector2> result)
             {
                 var defaultX = isRight ? defaultRightX : defaultLeftX;
                 var type = isRight ? LaneType.WallRight : LaneType.WallLeft;
-                using var _d = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
+                using var ranges = CombinableRange<int>.CombineRanges(fumen.Lanes.GetVisibleStartObjects(minTGrid, maxTGrid)
                     .Where(x => x.LaneType == type)
                     .Select(x => new CombinableRange<int>(x.MinTGrid.TotalGrid, x.MaxTGrid.TotalGrid)))
-                    .OrderBy(x => isRight ? x.Max : x.Min).ToListWithObjectPool(out var ranges);
+                    .OrderBy(x => isRight ? x.Max : x.Min).ToListWithObjectPool();
 
-                var points = ObjectPool<HashSet<float>>.Get();
-                points.Clear();
+                using var points = ObjectPool.GetPooledSet<float>();
 
                 var prevX = (float)Random();
                 var prevY = (float)Random();
@@ -204,15 +200,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     return isRight ? calcXGrids.MaxByOrDefault(x => x) : calcXGrids.MinByOrDefault(x => x);
                 }
 
-                void appendPoint2(List<Vector2> list, float totalXGrid, float totalTGrid)
+                void appendPoint2(IList<Vector2> list, float totalXGrid, float totalTGrid)
                 {
                     var px = (float)XGridCalculator.ConvertXGridToX(totalXGrid / XGrid.DEFAULT_RES_X, target.Editor);
-                    var py = (float)target.ConvertToY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
+                    var py = (float)target.ConvertToViewRelativeY(totalTGrid / TGrid.DEFAULT_RES_T, soflanGroup);
 
                     appendPoint3(list, px, py, list.Count);
                 }
 
-                void appendPoint3(List<Vector2> list, float px, float py, int insertIdx)
+                void appendPoint3(IList<Vector2> list, float px, float py, int insertIdx)
                 {
                     var po = list.ElementAtOrDefault(insertIdx);
                     if (po.X == px && po.Y == py)
@@ -224,7 +220,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     //DebugPrintPoint(p, isRight, false, 10);
                 }
 
-                void appendPoint(List<Vector2> list, XGrid xGrid, float y)
+                void appendPoint(IList<Vector2> list, XGrid xGrid, float y)
                 {
                     if (xGrid is null)
                         return;
@@ -234,23 +230,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 for (int i = 0; i < ranges.Count; i++)
                 {
                     var curRange = ranges[i];
-                    var nextRange = ranges.ElementAtOrDefault(i + 1);
 
-                    using var _d2 = fumen.Lanes
+                    using var lanes = fumen.Lanes
                         .GetVisibleStartObjects(TGrid.FromTotalGrid(curRange.Min), TGrid.FromTotalGrid(curRange.Max))
                         .Where(x => x.LaneType == type)
-                        .ToListWithObjectPool(out var lanes);
+                        .ToListWithObjectPool();
 
-                    var polylines = lanes
-                        .SelectMany(x =>
-                            x.GenAllPath()
-                            .Where(x => minTGrid.TotalGrid <= x.pos.Y && x.pos.Y <= maxTGrid.TotalGrid)
-                            .Select(x => x.pos)
-                            .SequenceConsecutivelyWrap(2)
-                            .Select(x => (x.FirstOrDefault(), x.LastOrDefault())))
-                        .ToList();
+                    using var polylines = ObjectPool.GetPooledList<(Vector2, Vector2)>();
+                    var rangeMinY = minTGrid.TotalGrid;
+                    var rangeMaxY = maxTGrid.TotalGrid;
+                    for (int li = 0; li < lanes.Count; li++)
+                    {
+                        var hasPrev = false;
+                        var prev = default(Vector2);
+                        foreach (var (pos, _) in lanes[li].GenAllPath())
+                        {
+                            if (pos.Y < rangeMinY || pos.Y > rangeMaxY)
+                            {
+                                hasPrev = false;
+                                continue;
+                            }
+                            if (hasPrev)
+                                polylines.Add((prev, pos));
+                            prev = pos;
+                            hasPrev = true;
+                        }
+                    }
 
-                    polylines.SortBy(x => x.Item1.Y);
+                    polylines.Sort(PolylineByStartYComparer);
 
                     for (int r = 0; r < polylines.Count; r++)
                     {
@@ -265,21 +272,35 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             if (a.Item2.Y < b.Item1.Y)
                                 break;
 
-                            if (GetLinesIntersection(a.Item1.ToSystemNumericsVector2(), a.Item2.ToSystemNumericsVector2(), b.Item1.ToSystemNumericsVector2(), b.Item2.ToSystemNumericsVector2()) is Vector2 p)
+                            if (GetLinesIntersection(a.Item1, a.Item2, b.Item1, b.Item2) is Vector2 p)
                                 points.Add(p.Y);
                         }
                     }
 
-                    points.AddRange(lanes
-                        .Select(x => (float)x.TGrid.TotalGrid)
-                        .Concat(lanes.Select(x => x.Children.LastOrDefault())
-                        .FilterNull()
-                        .Select(x => (float)x.TGrid.TotalGrid))
-                        .Where(x => curRange.Min <= x && x <= curRange.Max)
-                        );
+                    for (int li = 0; li < lanes.Count; li++)
+                    {
+                        var lane = lanes[li];
+                        var y1 = (float)lane.TGrid.TotalGrid;
+                        if (curRange.Min <= y1 && y1 <= curRange.Max)
+                            points.Add(y1);
+
+                        var children = (IList<ConnectableChildObjectBase>)lane.Children;
+                        if (children.Count > 0)
+                        {
+                            var y2 = (float)children[children.Count - 1].TGrid.TotalGrid;
+                            if (curRange.Min <= y2 && y2 <= curRange.Max)
+                                points.Add(y2);
+                        }
+                    }
                 }
 
-                using var _d3 = points.Where(x => minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid).OrderBy(x => x).ToListWithObjectPool(out var sortedPoints);
+                using var sortedPoints = ObjectPool.GetPooledList<float>();
+                foreach (var x in points)
+                {
+                    if (minTGrid.TotalGrid < x && x < maxTGrid.TotalGrid)
+                        sortedPoints.Add(x);
+                }
+                sortedPoints.Sort(Comparer<float>.Default);
 
                 sortedPoints.InsertBySortBy(minTGrid.TotalGrid, x => x);
                 sortedPoints.InsertBySortBy(maxTGrid.TotalGrid, x => x);
@@ -326,7 +347,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 //解决变速过快过慢导致的精度丢失问题
                 Vector2? interpolate(TGrid tGrid, float actualY, out bool isPickLane)
                 {
-                    var tGrids = TGridCalculator.ConvertYToTGrid_PreviewMode(actualY, target.Editor);
+                    var actualWorldY = actualY + target.CurrentDrawingTargetContext.ViewRelativeOriginY;
+                    var tGrids = target.Editor.ConvertYToTGrid_PreviewMode(actualWorldY);
 
                     isPickLane = false;
                     var pickables = tGrids.SelectMany(tGrid => fumen.Lanes
@@ -334,8 +356,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             .Where(x => x.LaneType == type)
                             .Where(x =>
                             {
-                                var laneMinY = target.ConvertToY(x.MinTGrid, soflanGroup);
-                                var laneMaxY = target.ConvertToY(x.MaxTGrid, soflanGroup);
+                                var laneMinY = target.ConvertToViewRelativeY(x.MinTGrid, soflanGroup);
+                                var laneMaxY = target.ConvertToViewRelativeY(x.MaxTGrid, soflanGroup);
 
                                 return laneMinY <= actualY && actualY <= laneMaxY;
                             })
@@ -349,13 +371,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     if (pickLane is not null)
                     {
                         var itor = pickLane.GenAllPath().GetEnumerator();
-                        var prevOpt = default(OpenTK.Mathematics.Vector2?);
+                        var prevOpt = default(Vector2?);
 
                         while (itor.MoveNext())
                         {
                             var cur = itor.Current.pos;
 
-                            var curPy = (float)target.ConvertToY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                            var curPy = (float)target.ConvertToViewRelativeY(cur.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                             if (/*cur.Y > tGrid.TotalGrid*/curPy > actualY)
                             {
@@ -363,11 +385,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 //           ^
                                 //         tGrid
 
-                                if (prevOpt is OpenTK.Mathematics.Vector2 prev)
+                                if (prevOpt is Vector2 prev)
                                 {
                                     var curPx = (float)XGridCalculator.ConvertXGridToX(cur.X / XGrid.DEFAULT_RES_X, target.Editor);
                                     var prevPx = (float)XGridCalculator.ConvertXGridToX(prev.X / XGrid.DEFAULT_RES_X, target.Editor);
-                                    var prevPy = (float)target.ConvertToY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
+                                    var prevPy = (float)target.ConvertToViewRelativeY(prev.Y / TGrid.DEFAULT_RES_T, soflanGroup);
 
                                     var nowPy = actualY;
                                     var nowPx = (float)MathUtils.CalculateXFromTwoPointFormFormula(nowPy, prevPx, prevPy, curPx, curPy);
@@ -399,7 +421,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             var defaultY = flag switch
                             {
                                 FieldRangeParam.LastRange => result.LastOrDefault().Y,
-                                FieldRangeParam.FirstRange => result.FirstOrDefault().Y
+                                FieldRangeParam.FirstRange => result.FirstOrDefault().Y,
+                                _ => throw new NotSupportedException()
                             };
                             var a = interpolatedPoint;
                             var b = new Vector2((float)XGridCalculator.ConvertXGridToX(defaultX / XGrid.DEFAULT_RES_X, target.Editor), defaultY);
@@ -417,12 +440,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             appendPoint3(result, a.X, a.Y, flag switch
                             {
                                 FieldRangeParam.LastRange => result.Count,
-                                FieldRangeParam.FirstRange => 0
+                                FieldRangeParam.FirstRange => 0,
+                                _ => throw new NotSupportedException()
                             });
                             appendPoint3(result, b.X, b.Y, flag switch
                             {
                                 FieldRangeParam.LastRange => result.Count,
-                                FieldRangeParam.FirstRange => 0
+                                FieldRangeParam.FirstRange => 0,
+                                _ => throw new NotSupportedException()
                             });
                         }
                         else
@@ -430,7 +455,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             appendPoint3(result, interpolatedPoint.X, interpolatedPoint.Y, flag switch
                             {
                                 FieldRangeParam.LastRange => result.Count,
-                                FieldRangeParam.FirstRange => 0
+                                FieldRangeParam.FirstRange => 0,
+                                _ => throw new NotSupportedException()
                             });
                         }
                     }
@@ -438,8 +464,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (fieldFlag.HasFlag(FieldRangeParam.LastRange) && currentTGrid <= maxTGrid)
                 {
-                    var maxY = (float)target.ConvertToY(maxTGrid, soflanGroup);
-                    var actualMaxY = target.CurrentDrawingTargetContext.Rect.TopLeft.Y;
+                    var maxY = (float)target.ConvertToViewRelativeY(maxTGrid, soflanGroup);
+                    var actualMaxY = target.CurrentDrawingTargetContext.ViewRelativeRect.TopLeft.Y;
 
                     var maxDiff = maxY - actualMaxY;
                     IEnumerable<float> calcYArr = maxDiff > 0 ? [actualMaxY, maxY] : [maxY, actualMaxY];
@@ -453,8 +479,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (fieldFlag.HasFlag(FieldRangeParam.FirstRange) && minTGrid <= currentTGrid)
                 {
-                    var minY = (float)target.ConvertToY(minTGrid, soflanGroup);
-                    var actualMinY = target.CurrentDrawingTargetContext.Rect.ButtomRight.Y;
+                    var minY = (float)target.ConvertToViewRelativeY(minTGrid, soflanGroup);
+                    var actualMinY = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.Y;
 
                     var minDiff = minY - actualMinY;
                     IEnumerable<float> calcYArr = minDiff > 0 ? [minY, actualMinY] : [actualMinY, minY];
@@ -495,77 +521,73 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     }
                 }
 
-                ObjectPool<HashSet<float>>.Return(points);
             }
 
-            using var d3 = ObjectPool<List<double>>.GetWithUsingDisposable(out var tessellatePoints, out _);
             tessellatePoints.Clear();
-            using var d4 = ObjectPool<List<int>>.GetWithUsingDisposable(out var idxList, out _);
-            idxList.Clear();
+            tessellateHoleIndices.Clear();
+            tessellateList.Clear();
 
-            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var leftPoints, out _);
-            leftPoints.Clear();
-            using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var rightPoints, out _);
-            rightPoints.Clear();
+            using var leftPoints = ObjectPool.GetPooledList<Vector2>();
+            using var rightPoints = ObjectPool.GetPooledList<Vector2>();
 
             //计算左右墙的点
             EnumeratePoints(false, leftPoints);
             EnumeratePoints(true, rightPoints);
 
             //解决左右墙交叉处理问题, 确保左墙的点永远在右墙点的左侧
-            AdjustLaneIntersection(target, leftPoints, rightPoints);
+            AdjustLaneIntersection(target, builder, leftPoints, rightPoints);
 
             //合并提交，准备进行三角剖分
+            tessellatePoints.EnsureCapacity(2 * (leftPoints.Count + rightPoints.Count));
+
             foreach (var pos in leftPoints)
             {
                 tessellatePoints.Add(pos.X);
                 tessellatePoints.Add(pos.Y);
             }
 
-            foreach (var pos in rightPoints.AsEnumerable().Reverse())
+            for (var i = rightPoints.Count - 1; i >= 0; i--)
             {
+                var pos = rightPoints[i];
                 tessellatePoints.Add(pos.X);
                 tessellatePoints.Add(pos.Y);
             }
 
-            var tessellateList = ObjectPool<List<int>>.Get();
-            tessellateList.Clear();
-            Earcut.Tessellate(tessellatePoints, idxList, tessellateList);
+            Earcut.Tessellate(tessellatePoints, tessellateHoleIndices, tessellateList);
 
-            polygonDrawing.Begin(target, Primitive.Triangles);
+            using var polygonVertices = ObjectPool.GetPooledList<PolygonVertex>();
             {
-                var i = 0;
-                foreach (var seq in tessellateList.SequenceWrap(3))
+                for (var j = 0; j < tessellateList.Count; j += 3)
                 {
                     var color = playFieldForegroundColor;
 #if PLAYFIELD_DEBUG
-                    var (r, g, b) = Hsl2Rgb(Math.Abs($"{i}{i}".GetHashCode()) % 360f, 1f, 0.5f);
+                    var triIdx = j / 3;
+                    var (r, g, b) = Hsl2Rgb(Math.Abs($"{triIdx}{triIdx}".GetHashCode()) % 360f, 1f, 0.5f);
                     color = new Vector4(r, g, b, 0.5f);
 #endif
 
-                    foreach (var idx in seq)
+                    for (var k = 0; k < 3; k++)
                     {
+                        var idx = tessellateList[j + k];
                         var x = (float)tessellatePoints[idx * 2 + 0];
                         var y = (float)tessellatePoints[idx * 2 + 1];
 
-                        polygonDrawing.PostPoint(new(x, y), color);
+                        polygonVertices.Add(new PolygonVertex(new(x, y), color));
                     }
-                    i++;
                 }
             }
-            polygonDrawing.End();
+            builder.DrawPolygon(Primitive.Triangles, polygonVertices);
 
-            debugDrawEnumeratedPoints(target, tessellatePoints, leftPoints, rightPoints, tessellateList);
+            debugDrawEnumeratedPoints(target, builder, tessellatePoints, leftPoints, rightPoints, tessellateList);
 
-            ObjectPool<List<int>>.Return(tessellateList);
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, List<double> tessellatePoints, List<Vector2> leftPoints, List<Vector2> rightPoints, List<int> tessellateList)
+        private void debugDrawEnumeratedPoints(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IList<double> tessellatePoints, IList<Vector2> leftPoints, IList<Vector2> rightPoints, IList<int> tessellateList)
         {
             playFieldForegroundColor.W = 0.4f;
-            lineDrawing.Draw(target, leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
-            lineDrawing.Draw(target, rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
+            builder.DrawSimpleLines(leftPoints.Select(p => new LineVertex(p, debugLeftColor, VertexDash.Solider)), 6);
+            builder.DrawSimpleLines(rightPoints.Select(p => new LineVertex(p, debugRightColor, VertexDash.Solider)), 6);
             {
                 var i = 0;
                 foreach (var seq in tessellateList.SequenceWrap(3))
@@ -573,7 +595,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     var (r, g, b) = Hsl2Rgb(Math.Abs($"{i}{i}".GetHashCode()) % 360f, 1f, 0.5f);
                     var color = new Vector4(r, g, b, 0.9f);
 
-                    lineDrawing.Draw(target, seq.Append(seq.FirstOrDefault())
+                    builder.DrawSimpleLines(seq.Append(seq.FirstOrDefault())
                         .Select(idx => new LineVertex(new((float)tessellatePoints[idx * 2 + 0], (float)tessellatePoints[idx * 2 + 1]), color, new(6, 4))), 2);
 
                     i += 3;
@@ -581,22 +603,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             void printPoints(IEnumerable<Vector2> data, Vector4 color, bool isRight)
             {
-                circleDrawing.Begin(target);
-                foreach (var pos in data)
-                    circleDrawing.Post(pos, color, false, 10);
-                circleDrawing.End();
+                builder.DrawCircles(data.Select(pos => new CircleInstance(pos, color, false, 10, 0)));
                 var prevY = 0f;
                 var prevR = 0;
                 foreach (var pos in data)
                 {
                     if (prevY == pos.Y)
-                        prevR = prevR switch { 1 => 0, 0 => 1 };
+                        prevR = prevR switch { 1 => 0, 0 => 1, _ => throw new NotSupportedException() };
                     else
                         prevR = 0;
                     prevY = pos.Y;
 
                     color.W = 1;
-                    stringDrawing.Draw(
+                    builder.DrawString(
                         $"({pos.X}, {pos.Y})",
                         pos - new Vector2(isRight ? -10 : 10, -prevR * 10),
                         Vector2.One,
@@ -605,9 +624,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         color,
                         new(isRight ? 0 : 1, prevR),
                         default,
-                        target,
-                        default,
-                        out _
+                        default
                         );
                 }
             }
@@ -616,19 +633,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             printPoints(rightPoints, debugRightColor, true);
         }
 
-        private void AdjustLaneIntersection(IDrawingContext target, List<Vector2> leftPoints, List<Vector2> rightPoints)
+        private void AdjustLaneIntersection(IDrawingContext target, IDrawCommandListBuilder builder, IList<Vector2> leftPoints, IList<Vector2> rightPoints)
         {
-            using var d = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempLeft, out _);
-            using var d2 = ObjectPool<List<Vector2>>.GetWithUsingDisposable(out var tempRight, out _);
-            using var d3 = ObjectPool<HashSet<Vector2>>.GetWithUsingDisposable(out var intersectionPoints, out _);
-            intersectionPoints.Clear();
+            using var tempLeft = ObjectPool.GetPooledList<Vector2>();
+            using var tempRight = ObjectPool.GetPooledList<Vector2>();
+            using var intersectionPoints = ObjectPool.GetPooledSet<Vector2>();
 
             tryExchange(0, 0);
 
             var leftIdx = 1;
             var rightIdx = 1;
 
-            bool insert(List<Vector2> list, int idx, Vector2 point)
+            bool insert(IList<Vector2> list, int idx, Vector2 point)
             {
                 if (idx < list.Count)
                     if (list[idx] == point)
@@ -694,8 +710,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 if (!exchangedRemain)
                     return false;
 
-                tempLeft.AddRange(leftPoints[li..]);
-                tempRight.AddRange(rightPoints[ri..]);
+                tempLeft.AddRange(leftPoints.Skip(li));
+                tempRight.AddRange(rightPoints.Skip(ri));
 
                 leftPoints.RemoveRange(li, tempLeft.Count);
                 rightPoints.RemoveRange(ri, tempRight.Count);
@@ -782,7 +798,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                         //             |      |
                         //             |      |
                         //             L      R
-                        bool tryGetLine(List<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
+                        bool tryGetLine(IList<Vector2> linePoints, int lineIdx, out (Vector2 from, Vector2 to) line)
                         {
                             line = default;
 
@@ -798,7 +814,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(prevLeftLine.from, prevLeftLine.to, rightLine.from, rightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(rightPoints, rightIdx, intersectPoint);
                                 rightIdx++;
@@ -811,7 +827,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, prevRightLine.from, prevRightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(leftPoints, leftIdx, intersectPoint);
                                 leftIdx++;
@@ -824,7 +840,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(nextLeftLine.from, nextLeftLine.to, rightLine.from, rightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(rightPoints, rightIdx, intersectPoint);
                                 rightIdx++;
@@ -837,7 +853,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                             intersectResult = GetLinesIntersection(leftLine.from, leftLine.to, nextRightLine.from, nextRightLine.to);
                             if (intersectResult is Vector2 intersectPoint && !intersectionPoints.Contains(intersectPoint))
                             {
-                                debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectPoint);
+                                debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectPoint);
                                 intersectionPoints.Add(intersectPoint);
                                 insert(leftPoints, leftIdx, intersectPoint);
                                 leftIdx++;
@@ -849,7 +865,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 if (intersectResult is Vector2 intersectionPoint && !intersectionPoints.Contains(intersectionPoint))
                 {
-                    debugDrawIntersectionPoint(target, leftIdx, rightIdx, intersectionPoint);
+                    debugDrawIntersectionPoint(target, builder, leftIdx, rightIdx, intersectionPoint);
                     intersectionPoints.Add(intersectionPoint);
 
                     var isCross = !(intersectionPoint == leftLine.from ||
@@ -873,7 +889,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                                 |
                                 |
                              ---x---
-                                | 
+                                |
                                 |
                          */
 
@@ -1054,13 +1070,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
 
         [Conditional("PLAYFIELD_DEBUG")]
-        private void debugDrawIntersectionPoint(IDrawingContext target, int leftIdx, int rightIdx, Vector2 intersectionPoint)
+        private void debugDrawIntersectionPoint(IDrawingContext target, IDrawCommandListBuilder builder, int leftIdx, int rightIdx, Vector2 intersectionPoint)
         {
-            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.Rect.CenterX*/true;
-            circleDrawing.Begin(target);
-            circleDrawing.Post(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
-            circleDrawing.End();
-            stringDrawing.Draw(
+            var isShowLeft = /*intersectionPoint.X <= target.CurrentDrawingTargetContext.ViewRelativeRect.CenterX*/true;
+            builder.DrawCircle(intersectionPoint, new(1, 1, 0, 0.75f), false, 30);
+            builder.DrawString(
                 $"[{leftIdx}, {rightIdx}]",
                 intersectionPoint - new Vector2(isShowLeft ? -10 : 10, 10),
                 Vector2.One,
@@ -1069,9 +1083,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 new(1, 1, 0, 1),
                 new(isShowLeft ? 0 : 1, 1),
                 default,
-                target,
-                default,
-                out _
+                default
                 );
         }
 

@@ -1,0 +1,247 @@
+<UserControl
+    x:Class="OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.Views.OngekiGamePlayControllerViewerView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:avalonia="http://icsharpcode.net/sharpdevelop/avalonedit"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.UI.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.OngekiGamePlayControllerViewer.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vm:OngekiGamePlayControllerViewerViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <valueconverters:EnumToStringConverter x:Key="EnumToStringConverter">
+        </valueconverters:EnumToStringConverter>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="10,5,10,5">
+            </Setter>
+            <Setter Property="Margin" Value="10,5,10,5">
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel>
+            <GroupBox Margin="5">
+                <GroupBox.Header>
+                    <Label Content="{markup:Translate [GamePlayControllerConnection]}" />
+                </GroupBox.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerConnectAddress]}" />
+                        <TextBox
+                            Width="100"
+                            Margin="10,5,10,5"
+                            VerticalAlignment="Center"
+                            Text="{Binding ConnectString}">
+                        </TextBox>
+                        <Button cal:Message.Attach="Connect()" Content="{markup:Translate [GamePlayControllerConnect]}" IsEnabled="{Binding CanConnect}" />
+                        <Label
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center"
+                            Content="{markup:Translate [GamePlayControllerStatus]}" />
+                        <TextBlock
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            FontWeight="Bold"
+                            OverridesDefaultStyle="True">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="NotConnect">
+                                            <Setter Property="Text" Value="{markup:Translate [GamePlayControllerStatusNotConnected]}" />
+                                            <Setter Property="Foreground" Value="Orange" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="Connected">
+                                            <Setter Property="Text" Value="{markup:Translate [GamePlayControllerStatusConnected]}" />
+                                            <Setter Property="Foreground" Value="Green" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding ConnectStatus, Converter={StaticResource EnumToStringConverter}}" Value="Disconnected">
+                                            <Setter Property="Text" Value="{markup:Translate [GamePlayControllerStatusDisconnected]}" />
+                                            <Setter Property="Foreground" Value="red" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button
+                            Margin="20,0,0,0"
+                            VerticalAlignment="Center"
+                            cal:Message.Attach="RefreshUI()"
+                            Content="{markup:Translate [Refresh]}" />
+                    </StackPanel>
+                    <Label
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                        <Hyperlink Click="Hyperlink_RequestNavigate">{markup:Translate [GamePlayControllerTutorial]}</Hyperlink>
+                    </Label>
+                </Grid>
+            </GroupBox>
+            <GroupBox Margin="5">
+                <GroupBox.Header>
+                    <Label Content="{markup:Translate [GamePlayControllerControl]}" />
+                </GroupBox.Header>
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsPlayGuideSEAfterPlay}"
+                            IsEnabled="False">
+                            <TextBlock Text="{markup:Translate [GamePlayControllerPlayGuideSeAfterResume]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <Button cal:Message.Attach="Play()" Content="{markup:Translate [GamePlayControllerPlay]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="Pause()" Content="{markup:Translate [GamePlayControllerPause]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="Restart()" Content="{markup:Translate [GamePlayControllerRestart]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="ForceEnd()" Content="{markup:Translate [GamePlayControllerForceEnd]}" IsEnabled="{Binding IsConnected}" />
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsAutoPlay}">
+                            <TextBlock Text="{markup:Translate [GamePlayControllerAutoPlay]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsPauseIfMissBellOrDamaged}"
+                            IsEnabled="False">
+                            <TextBlock Text="{markup:Translate [GamePlayControllerPauseOnDamageOrMissBell]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerSeek]}" />
+                        <TextBox
+                            Width="100"
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            Text="{Binding SeekTimeMsec}">
+
+                        </TextBox>
+                        <CheckBox
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding IsPlayAfterSeek}">
+                            <TextBlock Text="{markup:Translate [GamePlayControllerPlayAfterSeek]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <Button
+                            VerticalAlignment="Center"
+                            cal:Message.Attach="SeekTo()"
+                            Content="{markup:Translate [GamePlayControllerExecuteSeek]}"
+                            IsEnabled="{Binding IsConnected}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerOgkrSavePath]}" />
+                        <TextBox
+                            Width="350"
+                            Margin="10,5,10,5"
+                            Padding="2"
+                            VerticalAlignment="Center"
+                            IsReadOnly="True"
+                            Text="{Binding OgkrSavePath}">
+                        </TextBox>
+                        <Button cal:Message.Attach="OpenOgkrSavePathDialog()" Content="{markup:Translate [Browser]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="Reload()" Content="{markup:Translate [GamePlayControllerReloadFumenInGame]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="GetOgkrSavePathFromGamePlay()" Content="{markup:Translate [GamePlayControllerGetFumenPath]}" IsEnabled="{Binding IsConnected}" />
+                    </StackPanel>
+                    <CheckBox
+                        Margin="10,5,10,5"
+                        Padding="2"
+                        VerticalAlignment="Center"
+                        VerticalContentAlignment="Center"
+                        IsChecked="{Binding IsReloadAfterSeek}">
+                        <TextBlock Text="{markup:Translate [GamePlayControllerReloadAfterSeek]}" TextWrapping="Wrap" />
+                    </CheckBox>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Margin="5">
+                <GroupBox.Header>
+                    <Label Content="{markup:Translate [Other]}" />
+                </GroupBox.Header>
+                <StackPanel IsEnabled="False">
+                    <StackPanel Orientation="Horizontal">
+                        <Button cal:Message.Attach="PlayGuideSE()" Content="{markup:Translate [GamePlayControllerPlayGuideSe]}" IsEnabled="{Binding IsConnected}" />
+                        <Button cal:Message.Attach="DumpUnfinishInfo()" Content="{markup:Translate [GamePlayControllerDumpUnfinishedInfo]}" IsEnabled="{Binding IsConnected}" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox
+                            Width="100"
+                            Margin="10,0,0,0"
+                            VerticalAlignment="Center"
+                            Text="{Binding CueId}" />
+                        <Button cal:Message.Attach="PlayCustomSound()" Content="{markup:Translate [GamePlayControllerPlayCustomCue]}" IsEnabled="{Binding IsConnected}" />
+                    </StackPanel>
+
+
+                    <GroupBox Margin="5">
+                        <GroupBox.Header>
+                            <Label Content="{markup:Translate [GamePlayControllerAutoFaderDebugger]}" />
+                        </GroupBox.Header>
+                        <StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <Button cal:Message.Attach="GetAutoFaderData()" Content="{markup:Translate [GamePlayControllerGetAutoFaderData]}" IsEnabled="{Binding IsConnected}" />
+                                <Button cal:Message.Attach="ApplyAutoFaderData()" Content="{markup:Translate [GamePlayControllerApplyAutoFaderData]}" IsEnabled="{Binding IsConnected}" />
+                                <Button cal:Message.Attach="DumpAutoFaderTarget()" Content="{markup:Translate [GamePlayControllerDumpAutoFaderData]}" IsEnabled="{Binding IsConnected}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerCurrentAutoFaderTarget]}" />
+                                    <TextBox
+                                        Width="600"
+                                        Margin="10,5,10,5"
+                                        Padding="2"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        AcceptsTab="True"
+                                        Text="{Binding CurAutoFaderTargetDataStr}" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerPreviousAutoFaderTarget]}" />
+                                    <TextBox
+                                        Width="600"
+                                        Margin="10,5,10,5"
+                                        Padding="2"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        AcceptsTab="True"
+                                        Text="{Binding PreAutoFaderTargetDataStr}"
+                                        TextWrapping="NoWrap" />
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <Label VerticalAlignment="Center" Content="{markup:Translate [GamePlayControllerCurrentFrame]}" />
+                                    <TextBox
+                                        Width="100"
+                                        Margin="10,5,10,5"
+                                        Padding="2"
+                                        VerticalAlignment="Center"
+                                        AcceptsReturn="True"
+                                        AcceptsTab="True"
+                                        Text="{Binding CalcCurFrame}" />
+                                    <Button cal:Message.Attach="ManualCallCalcAutoPlayFader()" Content="{markup:Translate [GamePlayControllerManualCalcAutoPlayFader]}" IsEnabled="{Binding IsConnected}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

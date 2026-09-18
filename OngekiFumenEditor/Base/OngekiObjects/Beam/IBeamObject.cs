@@ -1,8 +1,8 @@
-﻿namespace OngekiFumenEditor.Base.OngekiObjects.Beam
+namespace OngekiFumenEditor.Base.OngekiObjects.Beam
 {
-	public interface IBeamObject
-	{
+    public interface IBeamObject
+    {
         WidthId WidthId { get; set; }
-		XGrid ObliqueSourceXGridOffset { get; set; }
-	}
+        XGrid ObliqueSourceXGridOffset { get; set; }
+    }
 }

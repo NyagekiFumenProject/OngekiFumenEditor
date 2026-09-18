@@ -1,9 +1,9 @@
-﻿using Gemini.Framework;
+using Gemini.Framework;
 
 namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser
 {
-	public interface IFumenMetaInfoBrowser : ITool
-	{
+    public interface IFumenMetaInfoBrowser : ITool
+    {
 
-	}
+    }
 }

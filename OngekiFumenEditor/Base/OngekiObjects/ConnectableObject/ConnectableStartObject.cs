@@ -1,14 +1,11 @@
-﻿using OngekiFumenEditor.Kernel.CurveInterpolater;
-using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory;
+using OngekiFumenEditor.Kernel.CurveInterpolater;
 using OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Factory;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
-using SimpleSvg2LineSegementInterpolater;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Numerics;
 
 namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 {
@@ -23,12 +20,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             set => Set(ref curveInterpolaterFactory, value);
         }
 
-        private List<ConnectableChildObjectBase> children = new();
+        private readonly List<ConnectableChildObjectBase> children = new List<ConnectableChildObjectBase>();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
 
         public override ConnectableStartObject ReferenceStartObject => this;
 
-        private TGrid cachedMinTGrid = default;
+        private TGrid cachedMinTGrid;
         public TGrid MinTGrid
         {
             get
@@ -43,7 +40,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         {
                             if (child.IsVaildPath)
                             {
-                                minTGrid = MathUtils.Min(minTGrid, child.TGrid);
+                                if (child.TGrid < minTGrid)
+                                    minTGrid = child.TGrid;
                             }
                             else
                             {
@@ -57,19 +55,18 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         }
                     }
 
-                    cachedMinTGrid = minTGrid;
+                    cachedMinTGrid = minTGrid.CopyNew();
                     cachedMinTGrid.NormalizeSelf();
                 }
                 return cachedMinTGrid;
             }
         }
 
-        private TGrid cachedMaxTGrid = default;
+        private TGrid cachedMaxTGrid;
         public TGrid MaxTGrid
         {
             get
             {
-                //children.Count == 0 ? MinTGrid : children[children.Count - 1].TGrid
                 if (cachedMaxTGrid is null)
                 {
                     var maxTGrid = TGrid;
@@ -88,7 +85,8 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         {
                             if (child.IsVaildPath)
                             {
-                                maxTGrid = MathUtils.Max(maxTGrid, child.TGrid);
+                                if (child.TGrid > maxTGrid)
+                                    maxTGrid = child.TGrid;
                             }
                             else
                             {
@@ -102,7 +100,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         }
                     }
 
-                    cachedMaxTGrid = maxTGrid;
+                    cachedMaxTGrid = maxTGrid.CopyNew();
                     cachedMaxTGrid.NormalizeSelf();
                 }
                 return cachedMaxTGrid;
@@ -114,9 +112,51 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public abstract ConnectableChildObjectBase CreateChildObject();
 
-        public ConnectableStartObject()
+        protected ConnectableStartObject()
         {
             PropertyChanged += OnPropertyChanged;
+        }
+
+        internal ConnectableChildObjectBase FindNextChild(ConnectableChildObjectBase target)
+        {
+            var prev = default(ConnectableChildObjectBase);
+            foreach (var child in children)
+            {
+                if (ReferenceEquals(prev, target))
+                    return child;
+                prev = child;
+            }
+            return default;
+        }
+
+        private static int BinarySearchChildrenByTGrid(IList<ConnectableChildObjectBase> list, TGrid value)
+        {
+            var lo = 0;
+            var hi = list.Count - 1;
+            while (lo <= hi)
+            {
+                var i = lo + ((hi - lo) >> 1);
+                var order = list[i].TGrid.CompareTo(value);
+
+                if (order == 0)
+                {
+                    for (var r = i + 1; r < list.Count; r++)
+                    {
+                        if (list[r].TGrid.CompareTo(list[i].TGrid) == 0)
+                            i = r;
+                        else
+                            break;
+                    }
+                    return i;
+                }
+
+                if (order < 0)
+                    lo = i + 1;
+                else
+                    hi = i - 1;
+            }
+
+            return ~lo;
         }
 
         public void AddChildObject(ConnectableChildObjectBase child)
@@ -130,10 +170,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             {
                 if (idx >= 0)
                 {
-                    var nextObj = children.ElementAtOrDefault(idx);
-                    var prevObj = children.ElementAtOrDefault(idx - 1) ?? this as ConnectableObjectBase;
+                    var nextObj = idx < children.Count ? children[idx] : default;
+                    var prevObj = idx > 0 ? children[idx - 1] : this as ConnectableObjectBase;
 
-                    //build their relations: prev -> cur(child) -> next
                     if (nextObj is not null)
                         nextObj.PrevObject = child;
                     child.PrevObject = prevObj;
@@ -143,7 +182,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 }
                 else
                 {
-                    child.PrevObject = Children.LastOrDefault() ?? this as ConnectableObjectBase;
+                    child.PrevObject = children.LastOrDefault() ?? this as ConnectableObjectBase;
                     children.Add(child);
                 }
                 child.PropertyChanged += OnPropertyChanged;
@@ -192,7 +231,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public void RemoveChildObject(ConnectableChildObjectBase child)
         {
-            var idx = children.IndexOf(child);
             children.Remove(child);
 
             var prev = child.PrevObject;
@@ -220,7 +258,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         child.NextObject?.NotifyRefreshPaths();
                     }
                     else
+                    {
                         NextObject?.NotifyRefreshPaths();
+                    }
                     NotifyRefreshMinMaxTGrid();
                     break;
                 case nameof(XGrid):
@@ -246,8 +286,14 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()
         {
             yield return this;
-            foreach (var child in Children.SelectMany(x => x.GetDisplayableObjects().Append(x)))
+            for (var i = 0; i < children.Count; i++)
+            {
+                var child = children[i];
+                var pcs = child.PathControls;
+                for (var j = 0; j < pcs.Count; j++)
+                    yield return pcs[j];
                 yield return child;
+            }
         }
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
@@ -263,47 +309,47 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public GridRange GetTGridRange()
         {
-            var x = children.AsEnumerable<ITimelineObject>().Append(this).Select(x => x.TGrid).MaxMinBy();
-            return new GridRange()
+            var min = TGrid;
+            var max = TGrid;
+            foreach (var child in children)
             {
-                Max = x.max,
-                Min = x.min,
+                if (child.TGrid < min)
+                    min = child.TGrid;
+                if (child.TGrid > max)
+                    max = child.TGrid;
+            }
+
+            return new GridRange
+            {
+                Max = max,
+                Min = min,
             };
         }
 
         public GridRange GetXGridRange()
         {
-            var x = children.AsEnumerable<IHorizonPositionObject>().Append(this).Select(x => x.XGrid).MaxMinBy();
-            return new GridRange()
+            var min = XGrid;
+            var max = XGrid;
+            foreach (var child in children)
             {
-                Max = x.max,
-                Min = x.min,
+                if (child.XGrid < min)
+                    min = child.XGrid;
+                if (child.XGrid > max)
+                    max = child.XGrid;
+            }
+
+            return new GridRange
+            {
+                Max = max,
+                Min = min,
             };
         }
 
         public ConnectableChildObjectBase GetChildObjectFromTGrid(TGrid tGrid)
         {
-            /*
-            if (tGrid < TGrid)
-                return default;
-
-            foreach (var cur in Children)
-            {
-                if (tGrid <= cur.TGrid)
-                    return cur;
-            }
-
-            return default;
-            */
-
             return GetChildObjectsFromTGrid(tGrid).FirstOrDefault();
         }
 
-        /// <summary>
-        /// 获取范围在tGrid内所有子物体
-        /// </summary>
-        /// <param name="tGrid"></param>
-        /// <returns></returns>
         public IEnumerable<ConnectableChildObjectBase> GetChildObjectsFromTGrid(TGrid tGrid)
         {
             if (tGrid is null || tGrid < TGrid || children.Count == 0)
@@ -311,14 +357,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
             if (IsPathVaild())
             {
-                //path is vaild, means children are sorted by TGrid, just find by binary search
                 if (children.Count > 1)
                 {
-                    var idx = children.BinarySearchBy(tGrid, x => x.TGrid);
+                    var idx = BinarySearchChildrenByTGrid(children, tGrid);
                     var actualIdx = idx < 0 ? ~idx : idx;
                     var fixedIdx = (actualIdx == children.Count - 1 && tGrid > children[actualIdx].TGrid)
                         ? -1
-                        : actualIdx++;
+                        : actualIdx;
 
                     if (fixedIdx < 0 || fixedIdx >= children.Count)
                         return Enumerable.Empty<ConnectableChildObjectBase>();
@@ -335,30 +380,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
                     return children.GetRange(minIdx, maxIdx - minIdx + 1);
                 }
-                else
-                {
-                    var child = children[0];
-                    if (tGrid > child.TGrid)
-                        return Enumerable.Empty<ConnectableChildObjectBase>();
-                    return [child];
-                }
+
+                var child = children[0];
+                if (tGrid > child.TGrid)
+                    return Enumerable.Empty<ConnectableChildObjectBase>();
+                return new[] { child };
             }
-            else
+
+            var result = new List<ConnectableChildObjectBase>();
+            ConnectableObjectBase prev = this;
+            foreach (var child in children)
             {
-                var seqs = Children
-                    .AsEnumerable<ConnectableObjectBase>()
-                    .Prepend(this)
-                    .SequenceConsecutivelyWrap(2)
-                    .Select(x => (x[0], x[1]))
-                    .SkipWhile(seq => seq.Item2.TGrid < tGrid);
-
-                var seq2 = seqs
-                    .TakeWhile(seq => seq.Item1.TGrid <= tGrid && tGrid <= seq.Item2.TGrid);
-                var result = seq2
-                    .Select(x => x.Item2 as ConnectableChildObjectBase);
-
-                return result;
+                if (child.TGrid >= tGrid && prev.TGrid <= tGrid && tGrid <= child.TGrid)
+                    result.Add(child);
+                prev = child;
             }
+
+            return result;
         }
 
         public XGrid CalulateXGrid(TGrid tGrid)
@@ -368,7 +406,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return default;
         }
 
-        public bool IsPathVaild() => children.Count == 0 ? true : children.All(x => x.IsVaildPath) /*GenAllPath().All(x => x.isVaild)*/;
+        public bool IsPathVaild() => children.Count == 0 || children.All(x => x.IsVaildPath);
 
         public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
         {
@@ -399,7 +437,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 () => LambdaActivator.CreateInstance(startType) as ConnectableStartObject,
                 () => LambdaActivator.CreateInstance(nextType) as ConnectableChildObjectBase,
                 factory
-                ).OfType<ConnectableStartObject>();
+            ).OfType<ConnectableStartObject>();
 
         public IEnumerable<START> InterpolateCurve<START, NEXT, END>(ICurveInterpolaterFactory factory = default)
             where START : ConnectableStartObject, new()
@@ -433,13 +471,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     if (traveller.EnumerateNext() is not CurvePoint point)
                         break;
                     var gradient = calcGradient(prevPoint, point);
-                    var sign = MathF.Sign(gradient);
+                    var sign = Math.Sign(gradient);
 
                     if (prevSign != sign && list.Count != 0)
                     {
                         yield return list;
-                        list = new List<CurvePoint>();
-                        list.Add(prevPoint);
+                        list = new List<CurvePoint> { prevPoint };
                     }
 
                     prevPoint = point;
@@ -458,17 +495,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 o.XGrid = p.XGrid;
             }
 
-            foreach (var lineSegment in split().Where(x => x.Count() >= 2))
+            foreach (var lineSegment in split().Where(x => x.Count >= 2))
             {
                 if (calcGradient(lineSegment[0], lineSegment[1]) < 0)
                     lineSegment.Reverse();
 
                 var start = genStartFunc();
                 build(start, lineSegment[0]);
-                foreach (var childPos in lineSegment.Skip(1).SkipLast(1))
+                for (int i = 1; i < lineSegment.Count - 1; i++)
                 {
                     var next = genNextFunc();
-                    build(next, childPos);
+                    build(next, lineSegment[i]);
                     start.AddChildObject(next);
                 }
                 var end = genNextFunc();
@@ -503,3 +540,4 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
         }
     }
 }
+

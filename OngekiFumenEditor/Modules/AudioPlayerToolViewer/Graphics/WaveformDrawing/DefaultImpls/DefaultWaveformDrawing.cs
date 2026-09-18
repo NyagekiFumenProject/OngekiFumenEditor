@@ -1,15 +1,18 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
-using OpenTK.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Numerics;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls
@@ -27,9 +30,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             Flick = 8,
         }
 
-        private ISimpleLineDrawing lineDrawing;
-        private IStringDrawing stringDrawing;
-        private ICircleDrawing circleDrawing;
         private SoflanList dummySoflanList;
         private static readonly VertexDash InvailedLineDash = new VertexDash(2, 2);
 
@@ -41,8 +41,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private static readonly System.Numerics.Vector4 HoldColor = new(1, 1f, 0f, 0.75f);
         private static readonly System.Numerics.Vector4 WaveformFillColor = new(100 / 255.0f, 149 / 255.0f, 237 / 255.0f, 1);
 
+        private static readonly List<LineVertex> cachedLineDrawList = new();
         private static readonly List<(float, string)> cachedPostDrawList = new();
-        private static readonly List<(System.Numerics.Vector2, System.Numerics.Vector4)> cachedCircleDrawList = new();
+        private static readonly List<CircleInstance> cachedCircleDrawList = new();
         private static readonly Dictionary<TGrid, ObjType> cachedObjTimeMap = new();
 
         private DefaultWaveformOption option = new();
@@ -50,22 +51,20 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            lineDrawing = impl.SimpleLineDrawing;
-            stringDrawing = impl.StringDrawing;
-            circleDrawing = impl.CircleDrawing;
-
             dummySoflanList = new SoflanList();
         }
 
-        public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData)
+        public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData, IDrawCommandListBuilder builder)
         {
-            var width = target.CurrentDrawingTargetContext.Rect.Width;
-            var height = target.CurrentDrawingTargetContext.Rect.Height;
+            ArgumentNullException.ThrowIfNull(builder, nameof(builder));
+
+            var width = target.CurrentDrawingTargetContext.ViewRelativeRect.Width;
+            var height = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
             var curTime = target.CurrentTime;
             var fromTime = curTime - TimeSpan.FromMilliseconds(target.CurrentTimeXOffset * target.DurationMsPerPixel);
             var toTime = fromTime + TimeSpan.FromMilliseconds(width * target.DurationMsPerPixel);
-            var curTimeGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
+            var curTimeGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(curTime);
             (_, _, var currentMeter, var currentBpm) = TGridCalculator.GetCurrentTimeSignature(curTimeGrid, target.EditorViewModel.Fumen.BpmList, target.EditorViewModel.Fumen.MeterChanges);
             var durationMs = (toTime - fromTime).TotalMilliseconds;
 
@@ -73,12 +72,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             if (option.ShowWaveform && peakData.Count != 0)
             {
                 (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
-                lineDrawing.PushOverrideModelMatrix(lineDrawing.GetOverrideModelMatrix() * Matrix4.CreateScale(1, target.WaveformVecticalScale, 1f));
-                lineDrawing.Begin(target, 1);
+                builder.PushModelMatrix(Matrix4x4.CreateScale(1, target.WaveformVecticalScale, 1f));
+                cachedLineDrawList.Clear();
+                try
                 {
                     var prevX = 0f;
 
-                    lineDrawing.PostPoint(new(-width / 2, 0), WhiteColor, InvailedLineDash);
+                    cachedLineDrawList.Add(new(new(-width / 2, 0), WhiteColor, InvailedLineDash));
                     for (int i = minIndex; i < maxIndex; i += 1)
                     {
                         var peakPoint = peakData[i];
@@ -88,15 +88,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                         var yButtom = -height / 2 * peakPoint.Amplitudes[1];
 
                         //lineDrawing.PostPoint(new(x, 0), WaveformFillColor, VertexDash.Solider);
-                        lineDrawing.PostPoint(new(x, yTop), WaveformFillColor, VertexDash.Solider);
-                        lineDrawing.PostPoint(new(x, yButtom), WaveformFillColor, VertexDash.Solider);
+                        cachedLineDrawList.Add(new(new(x, yTop), WaveformFillColor, VertexDash.Solider));
+                        cachedLineDrawList.Add(new(new(x, yButtom), WaveformFillColor, VertexDash.Solider));
                         prevX = x;
                     }
-                    lineDrawing.PostPoint(new(prevX, 0), WaveformFillColor, InvailedLineDash);
-                    lineDrawing.PostPoint(new(width / 2, 0), WhiteColor, InvailedLineDash);
+                    cachedLineDrawList.Add(new(new(prevX, 0), WaveformFillColor, InvailedLineDash));
+                    cachedLineDrawList.Add(new(new(width / 2, 0), WhiteColor, InvailedLineDash));
+                    builder.DrawSimpleLines(cachedLineDrawList, 1);
                 }
-                lineDrawing.End();
-                lineDrawing.PopOverrideModelMatrix(out _);
+                finally
+                {
+                    cachedLineDrawList.Clear();
+                    builder.PopModelMatrix();
+                }
             }
 
             //绘制节奏线
@@ -105,9 +109,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 var beginTime = fromTime.TotalSeconds < 0 ? TimeSpan.Zero : fromTime;
                 var endTime = toTime > target.AudioTotalDuration ? target.AudioTotalDuration : toTime;
 
-                var beginTGrid = TGridCalculator.ConvertAudioTimeToTGrid(beginTime, target.EditorViewModel);
-                var endTGrid = TGridCalculator.ConvertAudioTimeToTGrid(endTime, target.EditorViewModel);
-                var curTGrid = TGridCalculator.ConvertAudioTimeToTGrid(curTime, target.EditorViewModel);
+                var beginTGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(beginTime);
+                var endTGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(endTime);
+                var curTGrid = target.EditorViewModel.ConvertAudioTimeToTGrid(curTime);
 
                 var bpmList = editor.Fumen.BpmList;
 
@@ -152,7 +156,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     }
 
                     var beatHeightWeight = 0.75f;
-                    lineDrawing.Begin(target, 4);
+                    cachedLineDrawList.Clear();
                     foreach (var hold in fumen.Holds.GetVisibleStartObjects(beginTGrid, endTGrid))
                     {
                         var t = cachedObjTimeMap.TryGetValue(hold.TGrid, out var _t) ? _t : 0;
@@ -163,15 +167,15 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             var toX = calcX(et);
                             var y = 0;
 
-                            lineDrawing.PostPoint(new(fromX, y), TransparentColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(fromX, y), HoldColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(toX, y), HoldColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(toX, y), TransparentColor, VertexDash.Solider);
+                            cachedLineDrawList.Add(new(new(fromX, y), TransparentColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(fromX, y), HoldColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(toX, y), HoldColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(toX, y), TransparentColor, VertexDash.Solider));
                         }
                     }
-                    lineDrawing.End();
+                    builder.DrawSimpleLines(cachedLineDrawList, 4);
 
-                    lineDrawing.Begin(target, 2);
+                    cachedLineDrawList.Clear();
                     {
                         var topY = height / 2 * beatHeightWeight;
                         var buttomY = -topY;
@@ -185,17 +189,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
                             if (type.HasFlag(ObjType.Default))
                             {
-                                lineDrawing.PostPoint(new(x, buttomY), TransparentColor, VertexDash.Solider);
-                                lineDrawing.PostPoint(new(x, buttomY), ObjectPlaceColor, VertexDash.Solider);
-                                lineDrawing.PostPoint(new(x, topY), ObjectPlaceColor, VertexDash.Solider);
-                                lineDrawing.PostPoint(new(x, topY), TransparentColor, VertexDash.Solider);
+                                cachedLineDrawList.Add(new(new(x, buttomY), TransparentColor, VertexDash.Solider));
+                                cachedLineDrawList.Add(new(new(x, buttomY), ObjectPlaceColor, VertexDash.Solider));
+                                cachedLineDrawList.Add(new(new(x, topY), ObjectPlaceColor, VertexDash.Solider));
+                                cachedLineDrawList.Add(new(new(x, topY), TransparentColor, VertexDash.Solider));
                             }
 
                             if (type.HasFlag(ObjType.Bullet))
-                                cachedCircleDrawList.Add((new(x, buttomY - 10), new(1, 0, 1, 1)));
+                                cachedCircleDrawList.Add(new CircleInstance(new(x, buttomY - 10), new(1, 0, 1, 1), true, 5f, 0));
 
                             if (type.HasFlag(ObjType.Bell))
-                                cachedCircleDrawList.Add((new(x, topY + 10), new(1, 1, 0, 1)));
+                                cachedCircleDrawList.Add(new CircleInstance(new(x, topY + 10), new(1, 1, 0, 1), true, 5f, 0));
 
                             if (type.HasFlag(ObjType.Flick))
                             {
@@ -203,19 +207,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             }
                         }
                     }
-                    lineDrawing.End();
-
-                    circleDrawing.Begin(target);
-                    foreach (var pair in cachedCircleDrawList)
-                        circleDrawing.Post(pair.Item1, pair.Item2, true, 5f);
-                    circleDrawing.End();
+                    builder.DrawSimpleLines(cachedLineDrawList, 2);
+                    builder.DrawCircles(cachedCircleDrawList);
+                    cachedLineDrawList.Clear();
+                    cachedCircleDrawList.Clear();
                 }
 
                 if (option.ShowTimingLine)
                 {
                     cachedPostDrawList.Clear();
+                    cachedLineDrawList.Clear();
 
-                    lineDrawing.Begin(target, 2);
                     {
                         var prevMeter = currentMeter;
                         var prevBpm = currentBpm;
@@ -231,10 +233,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             var buttomY = -topY;
 
 
-                            lineDrawing.PostPoint(new(x, buttomY), TransparentColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(x, buttomY), BeatColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(x, topY), BeatColor, VertexDash.Solider);
-                            lineDrawing.PostPoint(new(x, topY), TransparentColor, VertexDash.Solider);
+                            cachedLineDrawList.Add(new(new(x, buttomY), TransparentColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(x, buttomY), BeatColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(x, topY), BeatColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(x, topY), TransparentColor, VertexDash.Solider));
 
                             var str = "";
                             if (prevMeter != meter)
@@ -248,12 +250,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             prevBpm = bpm;
                         }
                     }
-                    lineDrawing.End();
+                    builder.DrawSimpleLines(cachedLineDrawList, 2);
+                    cachedLineDrawList.Clear();
 
                     //绘制提示
                     foreach ((var x, var str) in cachedPostDrawList)
                     {
-                        stringDrawing.Draw(
+                        builder.DrawString(
                         str,
                         new System.Numerics.Vector2(x, -height / 2),
                         System.Numerics.Vector2.One,
@@ -261,9 +264,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                         0,
                         IndirectorColor,
                         new System.Numerics.Vector2(0, 2),
-                        IStringDrawing.StringStyle.Normal,
-                        target,
-                        default, out _);
+                        FontStyle.Normal,
+                        default);
                     }
                 }
 
@@ -274,17 +276,18 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             {
                 var indirectorX = (float)(width * ((curTime - fromTime).TotalMilliseconds / durationMs) - width / 2);
 
-                lineDrawing.Begin(target, 2);
+                cachedLineDrawList.Clear();
                 {
-                    lineDrawing.PostPoint(new(indirectorX - 1.5f, -height / 2), IndirectorColor, VertexDash.Solider);
-                    lineDrawing.PostPoint(new(indirectorX - 1.5f, +height / 2), IndirectorColor, VertexDash.Solider);
-                    lineDrawing.PostPoint(new(indirectorX + 1.5f, +height / 2), IndirectorColor, VertexDash.Solider);
-                    lineDrawing.PostPoint(new(indirectorX + 1.5f, -height / 2), IndirectorColor, VertexDash.Solider);
-                    lineDrawing.PostPoint(new(indirectorX - 1.5f, -height / 2), IndirectorColor, VertexDash.Solider);
+                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, -height / 2), IndirectorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, +height / 2), IndirectorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX + 1.5f, +height / 2), IndirectorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX + 1.5f, -height / 2), IndirectorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, -height / 2), IndirectorColor, VertexDash.Solider));
                 }
-                lineDrawing.End();
+                builder.DrawSimpleLines(cachedLineDrawList, 2);
+                cachedLineDrawList.Clear();
 
-                stringDrawing.Draw(
+                builder.DrawString(
                     $"{currentMeter.BunShi}/{currentMeter.Bunbo} BPM:{currentBpm.BPM}",
                     new System.Numerics.Vector2(indirectorX + 4, height / 2),
                     System.Numerics.Vector2.One,
@@ -292,9 +295,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     0,
                     IndirectorColor,
                     new System.Numerics.Vector2(0, 0),
-                    IStringDrawing.StringStyle.Normal,
-                    target,
-                    default, out _);
+                    FontStyle.Normal,
+                    default);
             }
         }
     }

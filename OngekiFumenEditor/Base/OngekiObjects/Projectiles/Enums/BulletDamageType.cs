@@ -1,4 +1,4 @@
-﻿namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums
+namespace OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums
 {
     public enum BulletDamageType
     {

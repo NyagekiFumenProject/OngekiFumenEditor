@@ -48,9 +48,6 @@ public class OptionCategory : PropertyChangedBase
     }
 }
 
-/// <summary>
-/// Base class for any filter option.
-/// </summary>
 public abstract class SelectionFilterOption : PropertyChangedBase
 {
     public delegate void OptionValueChangedEventHandler();
@@ -80,9 +77,6 @@ public abstract class SelectionFilterOption : PropertyChangedBase
     }
 }
 
-/// <summary>
-/// A filter option that requires user text input, with a regex option.
-/// </summary>
 public class TextWithRegexOption : SelectionFilterOption
 {
     public delegate FilterOptionResult FilterPredicate(OngekiObjectBase obj, string input, bool regexIsEnabled);
@@ -137,9 +131,6 @@ public class TextWithRegexOption : SelectionFilterOption
     }
 }
 
-/// <summary>
-/// Base class for single-value filter options of value types (ex. bool, int).
-/// </summary>
 public abstract class SelectionFilterOption<T> : SelectionFilterOption
     where T : struct
 {
@@ -167,9 +158,6 @@ public abstract class SelectionFilterOption<T> : SelectionFilterOption
     }
 }
 
-/// <summary>
-/// A filter option that allows for selecting between two values.
-/// </summary>
 public class BooleanOption : SelectionFilterOption<bool>
 {
     public int FalseMatches
@@ -238,9 +226,6 @@ public class BooleanOption : SelectionFilterOption<bool>
     }
 }
 
-/// <summary>
-/// A filter option that allows for selecting a single value of an enum type.
-/// </summary>
 public abstract class EnumSpecificationOption : SelectionFilterOption
 {
     public Dictionary<object, string> SelectionsText { get; }
@@ -256,7 +241,6 @@ public abstract class EnumSpecificationOption : SelectionFilterOption
     }
 }
 
-/// <inheritdoc />
 public class EnumSpecificationOption<T> : EnumSpecificationOption where T : Enum
 {
     public override object Value
@@ -338,14 +322,14 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
     where THead : OngekiObjectBase, ISelectableObject
     where TTail : OngekiObjectBase, ISelectableObject
 {
-    public delegate THead HeadGetter(TTail obj);
-    public delegate TTail TailGetter(THead obj);
+    public delegate THead? HeadGetter(TTail obj);
+    public delegate TTail? TailGetter(THead obj);
 
     public HeadTailSpecificationOption(string text,
         HeadGetter headGetter,
         TailGetter tailGetter,
         Dictionary<HeadTailSpecification, string>? selectionsText = null)
-        : base(text, GetPredicate(headGetter, tailGetter), selectionsText ?? FilterEnumExtensions.HeadTailSpecificationMapStartEnd.ToDictionary())
+        : base(text, GetPredicate(headGetter, tailGetter), selectionsText ?? FilterEnumExtensions.HeadTailSpecificationMapStartEnd.ToDictionary(x => x.Key, x => x.Value))
     { }
 
     private static FilterPredicate GetPredicate(HeadGetter headGetter, TailGetter tailGetter)
@@ -359,7 +343,7 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
                     switch (input) {
                         case HeadTailSpecification.Head:
                         case HeadTailSpecification.HeadNoChild when tailObj is null || !tailObj.IsSelected:
-                        case HeadTailSpecification.HeadWithChild when tailObj.IsSelected:
+                        case HeadTailSpecification.HeadWithChild when tailObj is { IsSelected: true }:
                             return FilterOptionResult.Match;
                         default:
                             return FilterOptionResult.NoMatch;
@@ -370,8 +354,8 @@ public class HeadTailSpecificationOption<THead, TTail> : EnumSpecificationOption
                     var headObj = headGetter(tail);
                     switch (input) {
                         case HeadTailSpecification.Tail:
-                        case HeadTailSpecification.TailNoParent when !headObj.IsSelected:
-                        case HeadTailSpecification.TailWithParent when headObj.IsSelected:
+                        case HeadTailSpecification.TailNoParent when headObj is null || !headObj.IsSelected:
+                        case HeadTailSpecification.TailWithParent when headObj is { IsSelected: true }:
                             return FilterOptionResult.Match;
                         default:
                             return FilterOptionResult.NoMatch;
@@ -476,7 +460,6 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
         NullPaletteItem = new Item(null);
         Items.Add(NullPaletteItem);
-        Items.Add(new(BulletPallete.DummyCustomPallete));
         Items.AddRange(paletteList.Select(p => new Item(p)));
 
         PaletteTable = Items.Except([NullPaletteItem]).ToDictionary(i => i.Palette!, i => i);
@@ -507,7 +490,10 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
 
         var item = bullet.ReferenceBulletPallete == null
             ? NullPaletteItem
-            : PaletteTable[bullet.ReferenceBulletPallete];
+            : PaletteTable.ContainsKey(bullet.ReferenceBulletPallete) ? PaletteTable[bullet.ReferenceBulletPallete] : null;
+
+        if (item is null)
+            return;
 
         if (bullet is Bullet)
             item.BulletCount++;
@@ -568,9 +554,7 @@ public sealed class BulletPaletteFilterOption : SelectionFilterOption
             {
                 var baseText = Palette is null
                     ? Resources.NoBulletPalette
-                    : Palette == BulletPallete.DummyCustomPallete
-                        ? Palette.EditorName
-                        : $"{Palette.StrID} {Palette.EditorName}";
+                    : $"{Palette.StrID} {Palette.EditorName}";
                 return $"{baseText} ({BulletCount} | {BellCount})";
             }
         }

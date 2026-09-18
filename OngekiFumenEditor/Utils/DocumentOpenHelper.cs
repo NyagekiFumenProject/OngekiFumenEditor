@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Results;
 using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Audio;
@@ -19,8 +19,11 @@ using System.Xml.XPath;
 
 namespace OngekiFumenEditor.Utils
 {
-    internal static class DocumentOpenHelper
+    internal static partial class DocumentOpenHelper
     {
+        [GeneratedRegex(@"(\d+)_\d+")]
+        private static partial Regex MusicIdFromFileNameRegex();
+
         public static async Task<bool> TryOpenAsDocument(string filePath)
         {
             if (IoC.GetAll<IEditorProvider>().FirstOrDefault(x => x.Handles(filePath)) is IEditorProvider provider)
@@ -105,6 +108,7 @@ namespace OngekiFumenEditor.Utils
 
             using var fs = File.OpenRead(ogkrFilePath);
             var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(ogkrFilePath).DeserializeAsync(fs);
+            Log.LogInfo($"Fumen file loaded: {ogkrFilePath}");
 
             var newProj = new EditorProjectDataModel();
             newProj.FumenFilePath = ogkrFilePath;
@@ -154,7 +158,7 @@ namespace OngekiFumenEditor.Utils
             if (musicId < 0)
             {
                 //从文件名读取musicId
-                var match = new Regex(@"(\d+)_\d+").Match(Path.GetFileNameWithoutExtension(ogkrFilePath));
+                var match = MusicIdFromFileNameRegex().Match(Path.GetFileNameWithoutExtension(ogkrFilePath));
                 if (match.Success)
                 {
                     musicId = int.Parse(match.Groups[1].Value);

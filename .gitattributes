@@ -1,0 +1,49 @@
+# 默认所有文本文件在提交时归一化为 LF,检出时也保持 LF
+* text=auto eol=lf
+
+# 显式标记常见源码/配置文件为文本,统一 LF
+*.cs       text eol=lf
+*.xaml     text eol=lf
+*.csproj   text eol=lf
+*.sln      text eol=lf
+*.props    text eol=lf
+*.targets  text eol=lf
+*.json     text eol=lf
+*.xml      text eol=lf
+*.md       text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.editorconfig text eol=lf
+*.gitattributes text eol=lf
+*.gitignore     text eol=lf
+
+# 二进制文件,不做行尾转换
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.gif      binary
+*.bmp      binary
+*.ico      binary
+*.cur      binary
+*.tga      binary
+*.psd      binary
+*.dll      binary
+*.exe      binary
+*.so       binary
+*.dylib    binary
+*.lib      binary
+*.a        binary
+*.pdb      binary
+*.zip      binary
+*.7z       binary
+*.rar      binary
+*.pdf      binary
+*.mid      binary
+*.mus      binary
+*.wav      binary
+*.mp3      binary
+*.mp4      binary
+*.ttf      binary
+*.otf      binary
+*.woff     binary
+*.woff2    binary

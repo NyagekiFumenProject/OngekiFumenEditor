@@ -1,8 +1,7 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
-using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateBehaviorImpl;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -13,7 +12,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
     [Export(typeof(IFumenCheckRule))]
     internal class SoflanCheckRule : IFumenCheckRule
     {
-        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, FumenVisualEditorViewModel fumenHostViewModel)
+        public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             foreach (KeyValuePair<int, SoflanList> pair in fumen.SoflansMap)
             {
@@ -22,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 
                 if (r != 1)
                 {
-                    yield return new CommonCheckResult()
+                    yield return new CommonCheckResult
                     {
                         Description = Resources.CheckRuleSoflanProblem.Format(r),
                         LocationDescription = $"SoflanGroup: {pair.Key}, TGrid: {lastTGrid}",
@@ -35,3 +34,4 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
         }
     }
 }
+

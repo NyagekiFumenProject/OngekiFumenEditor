@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Hosting;
 using System.Diagnostics;
@@ -24,13 +24,17 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Utils;
+using OngekiFumenEditor.Utils.ObjectPool;
 using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor;
 using OngekiFumenEditor.Kernel.EditorLayout;
+using OngekiFumenEditor.Kernel.Mcp;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
+using OngekiFumenEditor.Modules.FumenCheckerListViewer.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.SplashScreen;
 using OngekiFumenEditor.Parser;
@@ -45,6 +49,45 @@ namespace OngekiFumenEditor;
 
 public class AppBootstrapper : Gemini.AppBootstrapper
 {
+    /*
+    #region Assembly Force Reference Holders
+    //Costura won't pack some assembly because of this assembly not reference their assembly directly.
+    //If you throw FileNotFoundException for some .dll files when you using CLI, just check here.
+#pragma warning disable
+    private object __forcePackAssemblyHolders = new[] { typeof(Microsoft.Extensions.ObjectPool.ObjectPool).Assembly }.Select(x => x.FullName);
+#pragma warning restore
+    #endregion
+    */
+
+    private sealed class EditorCoreLogTarget : OngekiFumenEditor.Utils.ICoreLogTarget
+    {
+        public void Write(OngekiFumenEditor.Utils.CoreLogLevel level, string message, Exception exception, string memberName, string filePath, int lineNumber)
+        {
+            var actualMessage = string.IsNullOrWhiteSpace(memberName) ? message : $"[{memberName}:{lineNumber}] {message}";
+
+            switch (level)
+            {
+                case OngekiFumenEditor.Utils.CoreLogLevel.Debug:
+                    Log.LogDebug(actualMessage);
+                    break;
+                case OngekiFumenEditor.Utils.CoreLogLevel.Info:
+                    Log.LogInfo(actualMessage);
+                    break;
+                case OngekiFumenEditor.Utils.CoreLogLevel.Warn:
+                    Log.LogWarn(actualMessage);
+                    break;
+                case OngekiFumenEditor.Utils.CoreLogLevel.Error when exception is not null:
+                    Log.LogError(actualMessage, exception);
+                    break;
+                case OngekiFumenEditor.Utils.CoreLogLevel.Error:
+                    Log.LogError(actualMessage);
+                    break;
+            }
+        }
+    }
+
+    private static readonly OngekiFumenEditor.Utils.ICoreLogTarget coreLogTarget = new EditorCoreLogTarget();
+
 #if !DEBUG
     public override bool IsPublishSingleFileHandled => true;
 #endif
@@ -76,8 +119,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         base.BindServices(batch);
 
         //setup Pluigins
-        var exePath = Assembly.GetExecutingAssembly().Location;
-        var exeDir = Path.GetDirectoryName(exePath);
+        var exeDir = AppDirectoryHelper.ExecutableDirectory;
         var pluginsDirPath = Path.Combine(exeDir, "Plugins");
         Directory.CreateDirectory(pluginsDirPath);
         var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);
@@ -123,6 +165,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         FileLogOutput.Init();
         DumpFileHelper.Init();
+        CoreLog.SetResolver(() => coreLogTarget);
         base.Configure();
         var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 
@@ -158,13 +201,16 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         return base.SelectAssemblies()
             .Append(typeof(IOutput).Assembly)
             .Append(typeof(IMainWindow).Assembly)
+            .Append(typeof(IFumenParserManager).Assembly)
             .Distinct();
     }
 
     protected void LogBaseInfos()
     {
         Log.LogInfo(
-            $"Application verison : {GetType().Assembly.GetName().Version} , Product Version+CommitHash : {FileVersionInfo.GetVersionInfo(GetType().Assembly.Location).ProductVersion}");
+            $"Application Verison+CommitHash : {ThisAssembly.AssemblyInformationalVersion}");
+        Log.LogInfo(
+            $"AppContext.BaseDirectory : {AppContext.BaseDirectory}");
         Log.LogInfo(
             $"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
     }
@@ -306,6 +352,9 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (showSplashWindow)
             await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<ISplashScreenWindow>());
         SetAppReady();
+
+        await TryStartMcpServerAsync();
+
         if (ProgramSetting.Default.IsFirstTimeOpenEditor)
         {
             if (MessageBox.Show(Resources.ShouldLoadSuggestLayout, Resources.Suggest, MessageBoxButton.YesNo) == MessageBoxResult.Yes)
@@ -514,10 +563,44 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     protected override async void OnExit(object sender, EventArgs e)
     {
         ipcThread?.Abort();
+        await TryStopMcpServerAsync();
         IoC.Get<IAudioManager>().Dispose();
         await IoC.Get<ISchedulerManager>().Term();
         await Log.WaitForAllLogWriteDone();
-        FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
+        await FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
         base.OnExit(sender, e);
     }
+
+    private static bool ShouldAutoStartMcpServer() => ProgramSetting.Default.EnableMcpServerInGUIMode;
+
+    private static async Task TryStartMcpServerAsync()
+    {
+        if (!ShouldAutoStartMcpServer())
+            return;
+
+        try
+        {
+            await IoC.Get<IMcpServerHost>().StartAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Failed to start MCP server host: {ex}");
+        }
+    }
+
+    private static async Task TryStopMcpServerAsync()
+    {
+        try
+        {
+            var host = IoC.Get<IMcpServerHost>();
+            if (host?.IsRunning ?? false)
+                await host.StopAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Failed to stop MCP server host: {ex}");
+        }
+    }
 }
+
+

@@ -22,3 +22,6 @@
 [submodule "Avalonia/Dependencies/AcbGeneratorFuck"]
 	path = Avalonia/Dependencies/AcbGeneratorFuck
 	url = https://github.com/NyagekiFumenProject/AcbGeneratorFuck
+[submodule "OngekiFumenEditor.wiki"]
+	path = OngekiFumenEditor.wiki
+	url = https://github.com/NyagekiFumenProject/OngekiFumenEditor.wiki.git

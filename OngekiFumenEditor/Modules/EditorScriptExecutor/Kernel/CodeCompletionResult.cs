@@ -1,7 +1,7 @@
-﻿namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel
+namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Kernel
 {
-	public struct CodeCompletionResult
-	{
+    public struct CodeCompletionResult
+    {
 
-	}
+    }
 }

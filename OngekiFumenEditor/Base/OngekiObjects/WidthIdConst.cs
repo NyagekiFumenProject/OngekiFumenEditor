@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
 {
@@ -10,12 +10,13 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static WidthId Id_4 { get; } = new WidthId(4, 16, 12);
         public static WidthId Id_5 { get; } = new WidthId(5, 24, 20);
 
-        public static IEnumerable<WidthId> AllWidthIds { get; } = [
+        public static IEnumerable<WidthId> AllWidthIds { get; } = new[]
+        {
             Id_1,
             Id_2,
             Id_3,
             Id_4,
             Id_5
-        ];
+        };
     }
 }

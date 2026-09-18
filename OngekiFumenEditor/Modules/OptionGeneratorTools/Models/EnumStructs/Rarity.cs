@@ -1,7 +1,11 @@
-﻿namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
+namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Models.EnumStructs
 {
-	public enum Rarity
-	{
-		N, R, SR, SRPlus, SSR
-	}
+    public enum Rarity
+    {
+        N,
+        R,
+        SR,
+        SRPlus,
+        SSR
+    }
 }

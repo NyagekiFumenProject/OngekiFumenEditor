@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Base
 {
-	public interface IKeyframeSoflan : ISoflan
-	{
+    public interface IKeyframeSoflan : ISoflan
+    {
 
-	}
+    }
 }

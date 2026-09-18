@@ -1,4 +1,4 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public class BellDrawingTarget : ProjectileBatchDrawTargetBase<Bell>
+    public sealed class BellDrawingTarget : ProjectileBatchDrawTargetBase<Bell>
     {
         private IImage texture;
         private Vector2 sizeNormal;
@@ -33,34 +33,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             sizeNormal = size;
             sizeLarge = sizeNormal * 1.4f;
 
-            normalDrawList[texture] = new();
-            selectedDrawList[texture] = new();
+            normalDrawList[texture] = new List<(Vector2, Vector2, float, Vector4)>();
+            selectedDrawList[texture] = new List<(Vector2, Vector2, float, Vector4)>();
         }
 
         public override IEnumerable<string> DrawTargetID { get; } = ["BEL"];
         public override int DefaultRenderOrder => 1000;
 
-        public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate)
+        public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate, DrawBuffer buffer)
         {
-            var size = obj.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
+            var size = /*obj.SizeValue is BulletSize.Large ? sizeLarge : */sizeNormal;
             var offsetPos = pos;
 
-            normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
+            buffer.Normal[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
-            if (obj.ReferenceBulletPallete is { } pallete && pallete != BulletPallete.DummyCustomPallete)
-                drawStrList.Add((offsetPos, pallete.StrID));
+                buffer.Selected[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
+            if (obj.ReferenceBulletPallete is { } pallete)
+                buffer.StrList.Add((offsetPos, pallete.StrID));
             target.RegisterSelectableObject(obj, offsetPos, size);
         }
 
-        public override void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate)
+        public override void DrawVisibleObject_PreviewMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate, DrawBuffer buffer)
         {
-            var size = obj.SizeValue is BulletSize.Large ? sizeLarge : sizeNormal;
+            var size = /*obj.SizeValue is BulletSize.Large ? sizeLarge :*/sizeNormal;
             var offsetPos = pos;
 
-            normalDrawList[texture].Add((size, offsetPos, 0, Vector4.One));
+            buffer.Normal[texture].Add((size, offsetPos, 0, Vector4.One));
             if (obj.IsSelected)
-                selectedDrawList[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
+                buffer.Selected[texture].Add((size * 1.3f, offsetPos, 0, Vector4.One));
         }
     }
 }

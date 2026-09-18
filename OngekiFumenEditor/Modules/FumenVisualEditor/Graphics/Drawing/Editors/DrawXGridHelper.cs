@@ -1,6 +1,7 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Utils.ObjectPool;
+using OngekiFumenEditor.Kernel.Graphics.Text;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -19,22 +20,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             public override string ToString() => $"X:{X:F3} XGridTotalUnit:{XGridTotalUnit:F3} Display:{XGridTotalUnitDisplay}";
         }
 
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-
         public void Initalize(IRenderManagerImpl renderImpl)
         {
-            stringDrawing = renderImpl.StringDrawing;
-            lineDrawing = renderImpl.SimpleLineDrawing;
         }
 
-        public void DrawLines(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
+        public void DrawLines(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.IsPreviewMode)
                 return;
 
-            using var d = ObjectPool<List<LineVertex>>.GetWithUsingDisposable(out var list, out _);
-            list.Clear();
+            using var list = ObjectPool.GetPooledList<LineVertex>();
 
             foreach (var result in drawLines)
             {
@@ -51,30 +46,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 list.Add(new(new(result.X, 0 + target.Editor.ViewHeight), new(1, 1, 1, 0), VertexDash.Solider));
             }
 
-            lineDrawing.PushOverrideViewMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
-            lineDrawing.Draw(target, list, 1);
-            lineDrawing.PopOverrideViewMatrix(out _);
+            builder.PushViewMatrix(Matrix4x4.CreateTranslation(-target.Editor.ViewWidth / 2, -target.Editor.ViewHeight / 2, 0));
+            builder.DrawSimpleLines(list, 1);
+            builder.PopViewMatrix();
         }
 
-        public void DrawXGridText(IFumenEditorDrawingContext target, IEnumerable<CacheDrawXLineResult> drawLines)
+        public void DrawXGridText(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<CacheDrawXLineResult> drawLines)
         {
             if (target.Editor.IsPreviewMode)
                 return;
 
             foreach (var pair in drawLines)
-                stringDrawing.Draw(
+                builder.DrawString(
                     pair.XGridTotalUnitDisplay,
                     new(pair.X,
-                    target.Editor.RectInDesignMode.MaxY),
+                    target.CurrentDrawingTargetContext.ViewRelativeRect.MaxY),
                     Vector2.One,
                     12,
                     0,
                     Vector4.One,
                     new(0, 0f),
-                    IStringDrawing.StringStyle.Normal,
-                    target,
-                    default,
-                    out _
+                    FontStyle.Normal,
+                    default
             );
         }
     }

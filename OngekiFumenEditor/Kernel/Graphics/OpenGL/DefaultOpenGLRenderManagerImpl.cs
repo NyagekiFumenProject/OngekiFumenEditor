@@ -1,13 +1,9 @@
-﻿//#define OGL_LOG
+//#define OGL_LOG
 using Caliburn.Micro;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.BeamDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.CircleDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.PolygonDrawing;
 using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.SvgDrawing;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.TextureDrawing;
+using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Utils;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Common;
@@ -30,10 +26,16 @@ using System.Windows.Threading;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
+    /// <summary>
+    /// OpenGL implementation of the render manager.
+    /// </summary>
     [Export(typeof(IRenderManagerImpl))]
     [PartCreationPolicy(CreationPolicy.Shared)]
     public class DefaultOpenGLRenderManagerImpl : IRenderManagerImpl
     {
+        private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
+        private readonly object drawCommandListGate = new();
+
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
         private static extern nint wglGetCurrentDC();
@@ -53,52 +55,18 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         private TaskCompletionSource initTaskSource = new TaskCompletionSource();
         private bool initialized = false;
 
+        /// <summary>
+        /// Gets the current display DPI captured from the main window.
+        /// </summary>
         public DpiScale CurrentDPI { get; private set; }
 
-        public ICircleDrawing CircleDrawing { get; private set; }
-
-        public ILineDrawing LineDrawing { get; private set; }
-
-        public ISimpleLineDrawing SimpleLineDrawing { get; private set; }
-
-        public IStaticVBODrawing StaticVBODrawing { get; private set; }
-
-        public IStringDrawing StringDrawing { get; private set; }
-
-        public ISvgDrawing SvgDrawing { get; private set; }
-
-        public ITextureDrawing TextureDrawing { get; private set; }
-
-        public IBatchTextureDrawing BatchTextureDrawing { get; private set; }
-
-        public IHighlightBatchTextureDrawing HighlightBatchTextureDrawing { get; private set; }
-
-        public IPolygonDrawing PolygonDrawing { get; private set; }
-
-        public IBeamDrawing BeamDrawing { get; private set; }
-
+        /// <inheritdoc />
         public string Name { get; } = "OpenGL";
 
         private void Initialize()
         {
             Log.LogInfo("OpenGL Drawing Manager initializing...");
             InitializeOpenGL();
-
-            #region Create Drawings
-
-            CircleDrawing = new DefaultInstancedCircleDrawing(this);
-            LineDrawing = new DefaultLineDrawing(this);
-            PolygonDrawing = new DefaultPolygonDrawing(this);
-            StaticVBODrawing = SimpleLineDrawing = new DefaultInstancedLineDrawing(this);
-            StringDrawing = new DefaultStringDrawing(this);
-            SvgDrawing = new DefaultSvgDrawing(this);
-            TextureDrawing = BatchTextureDrawing = new DefaultBatchTextureDrawing(this);
-            HighlightBatchTextureDrawing = new DefaultHighlightBatchTextureDrawing(this);
-            BeamDrawing = new DefaultBeamDrawing(this);
-
-            Log.LogInfo("Drawing objects were created.");
-
-            #endregion
 
             #region DPI watcher
 
@@ -167,15 +135,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             Log.LogDebug($"[{source}.{type}]{id}:  {str}");
         }
 
+        /// <inheritdoc />
         public Task WaitForInitializationIsDone(CancellationToken cancellation)
         {
             return initTaskSource.Task;
         }
 
+        /// <inheritdoc />
         public async Task InitializeRenderControl(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
             var glView = CheckRenderControl(renderControl);
-            var renderCtx = (await GetRenderContext(glView, cancellation)) as DefaultOpenGLRenderContext;
+            var renderCtx = (await GetOrCreateRenderContext(glView, cancellation)) as DefaultOpenGLRenderContext;
 
             if (renderCtx.IsInitialized)
                 return;
@@ -224,6 +194,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             renderCtx.IsInitialized = true;
 
+            cacheStringMeasure = new DefaultStringMeasure();
+
             await WaitForInitializationIsDone(cancellation);
         }
 
@@ -234,6 +206,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 throw new Exception("Only able to call after InitializeRenderControl() called.");
         }
 
+        /// <inheritdoc />
         public IImage LoadImageFromStream(Stream stream)
         {
             CheckInitialization();
@@ -243,8 +216,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         }
 
         Dictionary<FrameworkElement, IRenderContext> cachedRenderControlMap = new();
+        private DefaultStringMeasure cacheStringMeasure;
 
-        public Task<IRenderContext> GetRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
+        /// <inheritdoc />
+        public Task<IRenderContext> GetOrCreateRenderContext(FrameworkElement renderControl, CancellationToken cancellation = default)
         {
             var glView = CheckRenderControl(renderControl);
 
@@ -254,6 +229,32 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return Task.FromResult(renderContext);
         }
 
+        /// <inheritdoc />
+        public IReadOnlyList<IRenderContext> GetRenderContexts()
+        {
+            return cachedRenderControlMap.Values.ToArray();
+        }
+
+        /// <inheritdoc />
+        public bool RemoveRenderContext(IRenderContext renderContext)
+        {
+            if (renderContext is null)
+                throw new ArgumentNullException(nameof(renderContext));
+
+            lock (drawCommandListGate)
+                drawCommandListContextSlots.Remove(renderContext);
+
+            var pair = cachedRenderControlMap.FirstOrDefault(x => ReferenceEquals(x.Value, renderContext));
+            if (pair.Key is null)
+                return false;
+
+            renderContext.StopRendering();
+            renderContext.Name = default;
+            renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
+
+            return cachedRenderControlMap.Remove(pair.Key);
+        }
+
         private GLWpfControl CheckRenderControl(FrameworkElement renderControl)
         {
             if (renderControl is not GLWpfControl glView)
@@ -261,6 +262,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             return glView;
         }
 
+        /// <inheritdoc />
         public FrameworkElement CreateRenderControl()
         {
             var glControl = new GLWpfControl()
@@ -269,6 +271,50 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             };
 
             return glControl;
+        }
+
+        /// <inheritdoc />
+        public IDrawCommandListBuilder CreateDrawCommandListBuilder()
+        {
+            return new DrawCommandListBuilder(cacheStringMeasure);
+        }
+
+        /// <inheritdoc />
+        public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true)
+        {
+            lock (drawCommandListGate)
+                drawCommandListContextSlots.Post(context, drawCommandList, autoDispose);
+        }
+
+        /// <inheritdoc />
+        public bool SwapDrawCommandList(IRenderContext context)
+        {
+            lock (drawCommandListGate)
+                return drawCommandListContextSlots.Swap(context);
+        }
+
+        /// <inheritdoc />
+        public void PresentDrawCommandList(IRenderContext context)
+        {
+            if (context is not DefaultOpenGLRenderContext openGLRenderContext)
+                throw new Exception("renderContext must be DefaultOpenGLRenderContext object.");
+
+            lock (drawCommandListGate)
+            {
+                drawCommandListContextSlots.Present(openGLRenderContext, drawCommandList =>
+                {
+                    var perfomenceMonitor = context.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
+                    perfomenceMonitor.OnBeforePresent();
+                    try
+                    {
+                        OpenGLDrawCommandListReplay.Present(this, openGLRenderContext, drawCommandList);
+                    }
+                    finally
+                    {
+                        perfomenceMonitor.OnAfterPresent();
+                    }
+                });
+            }
         }
     }
 }

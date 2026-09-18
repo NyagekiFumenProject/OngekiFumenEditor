@@ -1,8 +1,8 @@
-﻿using FontStashSharp;
+using FontStashSharp;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Utils;
 using SharpVectors.Dom.Svg;
-using SixLabors.Fonts;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -10,11 +10,10 @@ using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using static OngekiFumenEditor.Kernel.Graphics.IStringDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 {
-    internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IDisposable
+    internal sealed class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing, IStringMeasure, IDisposable
     {
         private class FontHandle : IFontHandle
         {
@@ -37,7 +36,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             if (defaultSupportFonts != null)
                 return defaultSupportFonts;
 
-            return defaultSupportFonts = SystemFonts.Collection.Families.Select(x =>
+            return defaultSupportFonts = SixLabors.Fonts.SystemFonts.Collection.Families.Select(x =>
             {
                 if (!x.TryGetPaths(out var paths))
                     return default;
@@ -51,24 +50,52 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             .ToArray();
         }
 
-        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, StringStyle style, IDrawingContext target, IStringDrawing.IFontHandle handle, out Vector2? measureTextSize)
+        public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
+        {
+            text ??= string.Empty;
+
+            using var paint = new SKPaint();
+            paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;
+
+            using var font = new SKFont();
+
+            var isBold = style.HasFlag(FontStyle.Bold);
+            var isItalic = style.HasFlag(FontStyle.Italic);
+            var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
+
+            using var typeface = SKTypeface.FromFamilyName(
+                   typefaceName,
+                   isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
+                   SKFontStyleWidth.Normal,
+                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright);
+
+            font.Typeface = typeface;
+            font.Size = fontSize;
+            font.Edging = paint.IsAntialias ? SKFontEdging.SubpixelAntialias : SKFontEdging.Alias;
+            font.Hinting = SKFontHinting.Full;
+            font.Subpixel = true;
+
+            font.MeasureText(text, out var bounds, paint);
+            return new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
+        }
+
+        public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize)
         {
             text = text ?? string.Empty;
 
             OnBegin(target);
             var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
 
-            canvas.Scale(1, -1);
-
             using var paint = new SKPaint();
+            paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;
             paint.ColorF = new(color.X, color.Y, color.Z, color.W);
 
             using var font = new SKFont();
 
-            var isBold = style.HasFlag(StringStyle.Bold);
-            var isItalic = style.HasFlag(StringStyle.Italic);
-            var isUnderline = style.HasFlag(StringStyle.Underline);
-            var isStrike = style.HasFlag(StringStyle.Strike);
+            var isBold = style.HasFlag(FontStyle.Bold);
+            var isItalic = style.HasFlag(FontStyle.Italic);
+            var isUnderline = style.HasFlag(FontStyle.Underline);
+            var isStrike = style.HasFlag(FontStyle.Strike);
 
             var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
 
@@ -80,22 +107,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 
             font.Typeface = typeface;
             font.Size = fontSize;
+            font.Edging = paint.IsAntialias ? SKFontEdging.SubpixelAntialias : SKFontEdging.Alias;
+            font.Hinting = SKFontHinting.Full;
+            font.Subpixel = true;
 
             font.MeasureText(text, out var bounds, paint);
-            measureTextSize = new Vector2(bounds.Width, bounds.Height);
+            measureTextSize = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
             //adjust pos thought origin and size
 
             var offsetPos = new SKPoint(origin.X * bounds.Width, bounds.Height - origin.Y * bounds.Height);
 
-            var adjustPos = pos.ToSkiaSharpPoint() - offsetPos;
-            adjustPos.Y = -adjustPos.Y;
+            canvas.Scale(1, -1);
+            canvas.Translate(pos.X, -pos.Y);
+            if (rotate != 0)
+                canvas.RotateDegrees(rotate * 180f / MathF.PI);
+            canvas.Scale(scale.X, scale.Y);
 
+            var adjustPos = new SKPoint(-offsetPos.X, offsetPos.Y);
             canvas.DrawText(text, adjustPos, font, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.RenderContext.PerfomenceMonitor.CountDrawCall();
 
             if (isUnderline || isStrike)
             {
                 using var linePaint = new SKPaint();
+                linePaint.IsAntialias = paint.IsAntialias;
                 linePaint.Color = new SKColor((byte)(color.X * 255), (byte)(color.Y * 255), (byte)(color.Z * 255), (byte)(color.W * 255));
                 font.GetFontMetrics(out var metrics);
                 linePaint.StrokeWidth = metrics.UnderlineThickness ?? 2;
@@ -104,13 +139,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
                 {
                     var underlineY = adjustPos.Y + metrics.UnderlinePosition ?? 0;
                     canvas.DrawLine(adjustPos.X, underlineY, adjustPos.X + bounds.Width, underlineY, linePaint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    target.RenderContext.PerfomenceMonitor.CountDrawCall();
                 }
                 else
                 {
                     float strikeY = adjustPos.Y - metrics.XHeight / 2;
                     canvas.DrawLine(adjustPos.X, strikeY, adjustPos.X + bounds.Width, strikeY, linePaint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    target.RenderContext.PerfomenceMonitor.CountDrawCall();
                 }
             }
 

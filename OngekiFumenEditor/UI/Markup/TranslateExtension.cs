@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using Gemini.Framework.Languages;
 using Gemini.Framework.Markup;
 using OngekiFumenEditor.Properties;

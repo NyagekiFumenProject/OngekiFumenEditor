@@ -1,119 +1,169 @@
-﻿using OngekiFumenEditor.Kernel.Graphics.OpenGL;
-using OngekiFumenEditor.Kernel.Graphics.OpenGL.Base;
-using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
+using OngekiFumenEditor.Kernel.Graphics.OpenGL;
 using OpenTK.Graphics.OpenGL;
-using Polyline2DCSharp;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
 using System.Linq;
+using System.Numerics;
+using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.LineDrawing
 {
-    internal class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
-	{
-		private readonly DefaultOpenGLShader shader;
-		private readonly int vbo;
-		private readonly int vao;
-        private DefaultOpenGLRenderManagerImpl defaultDrawingManager;
+    internal sealed class DefaultLineDrawing : CommonOpenGLDrawingBase, ILineDrawing, IDisposable
+    {
+        private const int VertexFloatCount = 2 + 4 + 2;
+        private const int VertexByteSize = VertexFloatCount * sizeof(float);
+        private const float AaRadius = 1.5f;
+
+        private readonly GeometryPolyLineShader shader;
+        private readonly int vbo;
+        private readonly int vao;
+        private int bufferCapacityInBytes;
+        private float[] cacheVertexBuffer = new float[2048];
 
         public DefaultLineDrawing(DefaultOpenGLRenderManagerImpl manager) : base(manager)
         {
-			shader = CommonLineShader.Shared;
+            shader = new GeometryPolyLineShader();
+            shader.Compile();
 
-			vbo = GL.GenBuffer();
-			vao = GL.GenVertexArray();
+            vbo = GL.GenBuffer();
+            vao = GL.GenVertexArray();
 
-			Init();
-		}
+            Init();
+        }
 
         private void Init()
-		{
-			GL.BindVertexArray(vao);
-			{
-				GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
-				{
-					GL.EnableVertexAttribArray(0);
-					GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, sizeof(float) * 6, 0);
+        {
+            GL.BindVertexArray(vao);
+            {
+                GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+                {
+                    GL.EnableVertexAttribArray(0);
+                    GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, VertexByteSize, 0);
 
-					GL.EnableVertexAttribArray(1);
-					GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, sizeof(float) * 6, sizeof(float) * 2);
-				}
-				GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
-			}
-			GL.BindVertexArray(0);
-		}
+                    GL.EnableVertexAttribArray(1);
+                    GL.VertexAttribPointer(1, 4, VertexAttribPointerType.Float, false, VertexByteSize, 2 * sizeof(float));
 
-		public void Draw(IDrawingContext target, IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
-		{
-			target.PerfomenceMonitor.OnBeginDrawing(this);
-			{
-				var count = UpdateBuffer(points, lineWidth);
+                    GL.EnableVertexAttribArray(2);
+                    GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, VertexByteSize, 6 * sizeof(float));
+                }
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            }
+            GL.BindVertexArray(0);
+        }
 
-				shader.Begin();
-				{
-					shader.PassUniform("Model", GetOverrideModelMatrix());
-					shader.PassUniform("ViewProjection", GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext));
-					GL.BindVertexArray(vao);
-					{
-						GL.Enable(EnableCap.PolygonSmooth);
+        public void Draw(IDrawingContext target, IEnumerable<LineVertex> points, float lineWidth)
+        {
+            if (lineWidth <= 0)
+                return;
 
-						GL.DrawArrays(PrimitiveType.Triangles, 0, count);
-						target.PerfomenceMonitor.CountDrawCall(this);
+            var viewportWidth = target.CurrentDrawingTargetContext.ViewRelativeRect.Width;
+            var viewportHeight = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
+            if (viewportWidth <= 0 || viewportHeight <= 0)
+                return;
 
-						GL.Disable(EnableCap.PolygonSmooth);
-					}
-					GL.BindVertexArray(0);
-				}
-				shader.End();
-			}
-			target.PerfomenceMonitor.OnAfterDrawing(this);
-		}
+            {
+                var count = UpdateBuffer(points);
 
-		private int UpdateBuffer(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth)
-		{
-			using var d = ObjectPool<List<Vec2>>.GetWithUsingDisposable(out var vecList, out _);
-			vecList.Clear();
+                shader.Begin();
+                {
+                    var mvpMatrix = GetOverrideModelMatrix() * GetOverrideViewProjectMatrixOrDefault(target.CurrentDrawingTargetContext);
+                    shader.PassUniform(shader.ModelViewProjectionLocation, mvpMatrix);
+                    shader.PassUniform(shader.ViewportSizeLocation, new Vector2(viewportWidth, viewportHeight));
+                    shader.PassUniform(shader.LineWidthLocation, lineWidth);
+                    shader.PassUniform(shader.AaRadiusLocation, AaRadius);
 
-			var color = points.FirstOrDefault().Color;
+                    GL.BindVertexArray(vao);
+                    {
+                        GL.DrawArrays(PrimitiveType.LineStripAdjacency, 0, count);
+                        target.RenderContext.PerfomenceMonitor.CountDrawCall();
+                    }
+                    GL.BindVertexArray(0);
+                }
+                shader.End();
+            }
+        }
 
-			using var d2 = points.Select(x => new Vec2() { x = x.Point.X, y = x.Point.Y }).ToListWithObjectPool(out var inputVecList);
+        private int UpdateBuffer(IEnumerable<LineVertex> points)
+        {
+            void ExtendBufferCapacity(int requiredFloatCount)
+            {
+                var newBuffer = new float[requiredFloatCount];
+                cacheVertexBuffer.CopyTo(newBuffer);
+                cacheVertexBuffer = newBuffer;
+            }
 
-			var genVertices = Polyline2D.Create(vecList, inputVecList, lineWidth,
-				Polyline2D.JointStyle.ROUND,
-				Polyline2D.EndCapStyle.ROUND
-				);
+            void WriteVertex(ref int idx, LineVertex vertex)
+            {
+                if (idx + 8 > cacheVertexBuffer.Length)
+                    ExtendBufferCapacity((idx + 8) * 2);
 
-			var arrBuffer2 = ArrayPool<float>.Shared.Rent(genVertices.Count * 6);
-			var arrBufferIdx2 = 0;
+                cacheVertexBuffer[idx++] = vertex.Point.X;
+                cacheVertexBuffer[idx++] = vertex.Point.Y;
 
-			foreach (var p in genVertices)
-			{
-				arrBuffer2[6 * arrBufferIdx2 + 0] = p.x;
-				arrBuffer2[6 * arrBufferIdx2 + 1] = p.y;
+                cacheVertexBuffer[idx++] = vertex.Color.X;
+                cacheVertexBuffer[idx++] = vertex.Color.Y;
+                cacheVertexBuffer[idx++] = vertex.Color.Z;
+                cacheVertexBuffer[idx++] = vertex.Color.W;
 
-				arrBuffer2[6 * arrBufferIdx2 + 2] = color.X;
-				arrBuffer2[6 * arrBufferIdx2 + 3] = color.Y;
-				arrBuffer2[6 * arrBufferIdx2 + 4] = color.Z;
-				arrBuffer2[6 * arrBufferIdx2 + 5] = color.W;
+                cacheVertexBuffer[idx++] = vertex.Dash.DashSize;
+                cacheVertexBuffer[idx++] = vertex.Dash.GapSize;
+            }
 
-				arrBufferIdx2++;
-			}
+            var vertexCount = 0;
+            var bufferIndex = 0;
 
-			GL.InvalidateBufferData(vbo);
-			GL.NamedBufferData(vbo, new IntPtr(sizeof(float) * arrBufferIdx2 * 6), arrBuffer2, BufferUsageHint.DynamicDraw);
+            if (points is IList<LineVertex> list)
+            {
+                WriteVertex(ref bufferIndex, list[0]);
+                for (var i = 0; i < list.Count; i++)
+                    WriteVertex(ref bufferIndex, list[i]);
+                WriteVertex(ref bufferIndex, list[list.Count - 1]);
+                vertexCount = list.Count + 2;
+            }
+            else
+            {
+                var itor = points.GetEnumerator();
+                if (itor.MoveNext())
+                {
+                    WriteVertex(ref bufferIndex, itor.Current);
+                    vertexCount++;
+                    WriteVertex(ref bufferIndex, itor.Current);
+                    vertexCount++;
 
-			ArrayPool<float>.Shared.Return(arrBuffer2);
+                    var prev = itor.Current;
+                    while (itor.MoveNext())
+                    {
+                        WriteVertex(ref bufferIndex, itor.Current);
+                        vertexCount++;
+                        prev = itor.Current;
+                    }
+                    WriteVertex(ref bufferIndex, prev);
+                    vertexCount++;
+                }
+            }
 
-			return arrBufferIdx2;
-		}
+            var uploadSizeInBytes = vertexCount * VertexByteSize;
+            EnsureVboCapacity(uploadSizeInBytes);
+            GL.NamedBufferSubData(vbo, IntPtr.Zero, new IntPtr(uploadSizeInBytes), cacheVertexBuffer);
 
-		public void Dispose()
-		{
-			GL.DeleteVertexArray(vao);
-			GL.DeleteBuffer(vbo);
-		}
-	}
+            return vertexCount;
+        }
+
+        private void EnsureVboCapacity(int uploadSizeInBytes)
+        {
+            if (uploadSizeInBytes <= bufferCapacityInBytes)
+                return;
+
+            bufferCapacityInBytes = Math.Max(uploadSizeInBytes, bufferCapacityInBytes * 2);
+            GL.NamedBufferData(vbo, new IntPtr(bufferCapacityInBytes), IntPtr.Zero, BufferUsageHint.DynamicDraw);
+        }
+
+        public void Dispose()
+        {
+            shader.Dispose();
+            GL.DeleteVertexArray(vao);
+            GL.DeleteBuffer(vbo);
+        }
+    }
 }

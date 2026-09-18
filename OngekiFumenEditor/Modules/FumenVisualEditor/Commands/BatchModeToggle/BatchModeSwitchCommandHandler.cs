@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.Composition;
+using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;

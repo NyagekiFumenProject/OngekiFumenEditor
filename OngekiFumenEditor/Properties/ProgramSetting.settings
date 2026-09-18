@@ -44,6 +44,15 @@
     <Setting Name="ShowConsoleWindowInGUIMode" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="EnableMcpServerInGUIMode" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="McpServerListenPort" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">39281</Value>
+    </Setting>
+    <Setting Name="AllowAnonymousMcpClientUsage" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
     <Setting Name="DisableStringRendererAntialiasing" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
@@ -52,6 +61,9 @@
     </Setting>
     <Setting Name="SkiaRenderBackend" Type="System.String" Scope="User">
       <Value Profile="(Default)">CPU</Value>
+    </Setting>
+    <Setting Name="D3DRenderQueueFrameCount" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">3</Value>
     </Setting>
     <Setting Name="__NeedUpgradeSetting" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>

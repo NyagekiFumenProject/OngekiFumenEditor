@@ -1,172 +1,147 @@
-﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Enumerator;
-using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Kernel.CurveInterpolater.OgkrImpl.Enumerator
 {
-	public class XGridLimitedCurveInterpolateEnumerator : DefaultCurveInterpolateEnumerator
-	{
-		public XGridLimitedCurveInterpolateEnumerator(ConnectableStartObject start) : base(start)
-		{
+    public class XGridLimitedCurveInterpolateEnumerator : DefaultCurveInterpolateEnumerator
+    {
+        public XGridLimitedCurveInterpolateEnumerator(ConnectableStartObject start) : base(start)
+        {
+        }
 
-		}
+        public XGridLimitedCurveInterpolateEnumerator(ConnectableChildObjectBase from, ConnectableChildObjectBase to = null) : base(from, to)
+        {
+        }
 
-		public XGridLimitedCurveInterpolateEnumerator(ConnectableChildObjectBase from, ConnectableChildObjectBase to = null) : base(from, to)
-		{
+        private static IEnumerable<int> GetIntegersBetweenTwoValues(double from, double to)
+        {
+            var sign = Math.Sign(to - from);
+            var begin = 0;
+            var end = 0;
 
-		}
+            if (sign > 0)
+            {
+                begin = (int)Math.Ceiling(from);
+                end = (int)Math.Floor(to);
+            }
 
-		private IEnumerable<CurvePoint> InterpolateCore(ConnectableChildObjectBase x)
-		{
-			var itor = base.Interpolate(x).GetEnumerator();
-			if (!itor.MoveNext())
-				yield break;
-			yield return itor.Current;
-			var prev = itor.Current;
-			var prevRetY = (float)prev.TGrid.TotalGrid / prev.TGrid.ResT;
-			var prevAppendNewCornerPointFlag = default(float?);
+            if (sign < 0)
+            {
+                begin = (int)Math.Floor(from);
+                end = (int)Math.Ceiling(to);
+            }
 
-			while (itor.MoveNext())
-			{
-				var cur = itor.Current;
+            for (var i = begin; sign > 0 ? i <= end : i >= end; i += sign)
+                yield return i;
+        }
 
-				var prevXunit = prev.XGrid.TotalGrid * 1.0f / prev.XGrid.ResX;
-				var prevXunitInt = (int)prevXunit;
-				var curXunit = cur.XGrid.TotalGrid * 1.0f / cur.XGrid.ResX;
-				var curXunitInt = (int)curXunit;
-				var prevX = prev.XGrid.TotalGrid;
-				var prevY = prev.TGrid.TotalGrid;
-				var curX = cur.XGrid.TotalGrid;
-				var curY = cur.TGrid.TotalGrid;
+        private static double CalculateYFromTwoPointFormFormula(double x, double x1, double y1, double x2, double y2)
+        {
+            var by = y2 - y1;
+            var bx = x2 - x1;
 
-				//Log.LogDebug($"--------------");
-				//Log.LogDebug($"current ({cur})");
+            if (by == 0)
+                return y1;
 
-				#region Append New Corner Point
-				//当有个急转角，那么就判断这个转角的点是否也要补充
-				/**
-                        |     /     |
-                        |    /      |
-                        |   /       |
-                        |  <  <-----|-------这里的转角点就判断是否要保留，如果超出1XGridUnit的75%的话就保留吧
-                        |   \       |
-                        |    \      |
-                        |     \     |
-                        |      \    | 
-                        |       \   |
-                        |        \  |
-                        |         \ |
-                        |          \|
-                        |           |\
-                        |           | \ 
-                        |           |  \
+            return (x - x1) / bx * by + y1;
+        }
 
-                 */
-				var appendNewCornerPointFlag = Math.Sign(curX - prevX);
-				if (prevAppendNewCornerPointFlag is not null)
-				{
-					//转角判断
-					if (appendNewCornerPointFlag * prevAppendNewCornerPointFlag < 0)
-					{
-						var rawXGridUnit = prev.XGrid.TotalGrid * 1.0 / prev.XGrid.ResX;
-						var judge = rawXGridUnit - (int)rawXGridUnit;
-						//转角位置判断是否要补转角点
-						if (Math.Abs(judge) > 0.50)
-						{
-							var newXUnit = (int)rawXGridUnit + (judge > 0 ? 1 : -1);
-							var newPoint = new CurvePoint()
-							{
-								XGrid = new XGrid(newXUnit, 0),
-								TGrid = prev.TGrid.CopyNew()
-							};
-							//Log.LogDebug($"return new corner point ({newPoint})");
-							yield return newPoint;
-						}
-					}
-				}
-				prevAppendNewCornerPointFlag = appendNewCornerPointFlag;
-				#endregion
+        private IEnumerable<CurvePoint> InterpolateCore(ConnectableChildObjectBase x)
+        {
+            using var itor = base.Interpolate(x).GetEnumerator();
+            if (!itor.MoveNext())
+                yield break;
+            yield return itor.Current;
+            var prev = itor.Current;
+            var prevRetY = (float)prev.TGrid.TotalGrid / prev.TGrid.ResT;
+            var prevAppendNewCornerPointFlag = default(float?);
 
-				var isZeroSpecial = prevXunitInt == curXunitInt && curXunitInt == 0 && prevXunit * curXunit < 0;
+            while (itor.MoveNext())
+            {
+                var cur = itor.Current;
 
-				if (curXunit == curXunitInt)
-				{
-					//Log.LogDebug($"return ({cur}) directly because curXunitInt == curXunit");
-					prevRetY = curY * 1f / cur.TGrid.ResT;
-					yield return cur;
-				}
-				else if (prevXunitInt != curXunitInt || isZeroSpecial)
-				{
-					//Log.LogDebug($"begin interpolate from ({prev}) to ({cur})");
+                var prevXunit = prev.XGrid.TotalGrid * 1.0f / prev.XGrid.ResX;
+                var prevXunitInt = (int)prevXunit;
+                var curXunit = cur.XGrid.TotalGrid * 1.0f / cur.XGrid.ResX;
+                var curXunitInt = (int)curXunit;
+                var prevX = prev.XGrid.TotalGrid;
+                var prevY = prev.TGrid.TotalGrid;
+                var curX = cur.XGrid.TotalGrid;
+                var curY = cur.TGrid.TotalGrid;
 
-					foreach (var i in MathUtils.GetIntegersBetweenTwoValues(prevXunit, curXunit))
-					{
-						/*
-                            核心思想，存在两个点prev/cur
-                            这两个点之间刚好穿过一个或者多个xunitLine
-                            那么就通过这两个点构造两点式一次函数,插值算出经过XGridUnit对应的点cp并返回
+                var appendNewCornerPointFlag = Math.Sign(curX - prevX);
+                if (prevAppendNewCornerPointFlag is not null)
+                {
+                    if (appendNewCornerPointFlag * prevAppendNewCornerPointFlag < 0)
+                    {
+                        var rawXGridUnit = prev.XGrid.TotalGrid * 1.0 / prev.XGrid.ResX;
+                        var judge = rawXGridUnit - (int)rawXGridUnit;
+                        if (Math.Abs(judge) > 0.50)
+                        {
+                            var newXUnit = (int)rawXGridUnit + (judge > 0 ? 1 : -1);
+                            var newPoint = new CurvePoint
+                            {
+                                XGrid = new XGrid(newXUnit, 0),
+                                TGrid = prev.TGrid.CopyNew()
+                            };
+                            yield return newPoint;
+                        }
+                    }
+                }
+                prevAppendNewCornerPointFlag = appendNewCornerPointFlag;
 
-                                 calculate there between cp1 and cp2
-                                  |         |
-                                  v         v
-                           
-               CurvePoint2(prev)  |         |        X[2.5,0]
-               -------------o-----|---------|--------o----------------------
-                      X[0.5,0]    |         |          CurvePoint2(cur)
-                                  |         |
-                         xunitLine1 X[1,0]   xunitLine1 X[2,0] 
-                    */
-						var xGrid = new XGrid(i, 0);
-						var y = MathUtils.CalculateYFromTwoPointFormFormula(xGrid.TotalGrid, prevX, prevY, curX, curY);
-						var tunit = (float)(y / prev.TGrid.ResT);
-						var tGrid = new TGrid(tunit, 0);
-						//Log.LogDebug($"interpolate xunit:{i} from ({prev}) to ({cur})");
+                var isZeroSpecial = prevXunitInt == curXunitInt && curXunitInt == 0 && prevXunit * curXunit < 0;
 
-						if (Math.Abs(prevRetY - tunit) > 0.0001)
-						{
-							var point = new CurvePoint()
-							{
-								XGrid = xGrid,
-								TGrid = tGrid,
-							};
-							//Log.LogDebug($"return new interpolated point: ({point})");
-							yield return point;
-						}
-						else
-						{
-							//Log.LogDebug($"return Math.Abs(prevRetY({prevRetY}) - tunit({tunit})) < 0.01");
-						}
-						prevRetY = tunit;
-					}
-				}
-				else
-				{
-					//Log.LogDebug($"return nothing prevXunitInt({prevXunitInt}) == curXunitInt({curXunitInt})");
-				}
+                if (curXunit == curXunitInt)
+                {
+                    prevRetY = curY * 1f / cur.TGrid.ResT;
+                    yield return cur;
+                }
+                else if (prevXunitInt != curXunitInt || isZeroSpecial)
+                {
+                    foreach (var i in GetIntegersBetweenTwoValues(prevXunit, curXunit))
+                    {
+                        var xGrid = new XGrid(i, 0);
+                        var y = CalculateYFromTwoPointFormFormula(xGrid.TotalGrid, prevX, prevY, curX, curY);
+                        var tunit = (float)(y / prev.TGrid.ResT);
+                        var tGrid = new TGrid(tunit, 0);
 
-				prev = cur;
-			}
-			yield return prev;
-		}
+                        if (Math.Abs(prevRetY - tunit) > 0.0001)
+                        {
+                            var point = new CurvePoint
+                            {
+                                XGrid = xGrid,
+                                TGrid = tGrid,
+                            };
+                            yield return point;
+                        }
+                        prevRetY = tunit;
+                    }
+                }
 
-		protected override IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
-		{
-			return InterpolateCore(x);
-		}
+                prev = cur;
+            }
+            yield return prev;
+        }
 
-		public override CurvePoint? EnumerateNext()
-		{
-			if (base.EnumerateNext() is not CurvePoint p)
-				return default;
+        protected override IEnumerable<CurvePoint> Interpolate(ConnectableChildObjectBase x)
+        {
+            return InterpolateCore(x);
+        }
 
-			return new CurvePoint()
-			{
-				TGrid = p.TGrid,
-				XGrid = new XGrid((int)(p.XGrid.TotalGrid * 1.0f / p.XGrid.ResX)),
-			};
-		}
-	}
+        public override CurvePoint? EnumerateNext()
+        {
+            if (base.EnumerateNext() is not CurvePoint p)
+                return default;
+
+            return new CurvePoint
+            {
+                TGrid = p.TGrid,
+                XGrid = new XGrid((int)(p.XGrid.TotalGrid * 1.0f / p.XGrid.ResX)),
+            };
+        }
+    }
 }

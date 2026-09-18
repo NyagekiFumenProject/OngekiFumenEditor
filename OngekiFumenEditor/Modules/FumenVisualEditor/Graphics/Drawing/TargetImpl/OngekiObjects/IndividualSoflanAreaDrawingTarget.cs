@@ -1,10 +1,12 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics;
+using OngekiFumenEditor.Kernel.Graphics.Text;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Utils;
-using OngekiFumenEditor.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -19,13 +21,8 @@ using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects
 {
     [Export(typeof(IFumenEditorDrawingTarget))]
-    internal class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
+    internal sealed class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
-        private IStringDrawing stringDrawing;
-        private ILineDrawing lineDrawing;
-        private ITextureDrawing textureDrawing;
-        private IPolygonDrawing polygonDrawing;
-        private IHighlightBatchTextureDrawing highlightDrawing;
         private IImage texture;
         private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
@@ -37,12 +34,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            stringDrawing = impl.StringDrawing;
-            lineDrawing = impl.SimpleLineDrawing;
-            textureDrawing = impl.TextureDrawing;
-            polygonDrawing = impl.PolygonDrawing;
-            highlightDrawing = impl.HighlightBatchTextureDrawing;
-
             texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\tri.png");
         }
 
@@ -85,14 +76,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             return cacheColor[soflanGroup] = color;
         }
 
-        public override void DrawBatch(IFumenEditorDrawingContext target, IEnumerable<IndividualSoflanArea> isfList)
+        public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<IndividualSoflanArea> isfList)
         {
-            var lineVertex = ObjectPool<List<LineVertex>>.Get();
-            lineVertex.Clear();
-            var texList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
-            texList.Clear();
-            var hightTexList = ObjectPool<List<(Vector2 size, Vector2 position, float rotation, Vector4 color)>>.Get();
-            hightTexList.Clear();
+            using var lineVertex = ObjectPool.GetPooledList<LineVertex>();
+            using var texList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
+            using var hightTexList = ObjectPool.GetPooledList<(Vector2 size, Vector2 position, float rotation, Vector4 color)>();
 
             var dash = new VertexDash(8, 2);
             var texSize = 14;
@@ -111,12 +99,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var maxTGrid = isf.EndIndicator.TGrid;
 
                 var leftX = (float)XGridCalculator.ConvertXGridToX(minXGrid, target.Editor);
-                var topY = (float)target.ConvertToY_DefaultSoflanGroup(maxTGrid);
+                var topY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(maxTGrid);
 
                 var rightX = (float)XGridCalculator.ConvertXGridToX(maxXGrid, target.Editor);
-                var bottomY = (float)target.ConvertToY_DefaultSoflanGroup(minTGrid);
+                var bottomY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(minTGrid);
 
-                lineVertex.Add(new LineVertex(lineVertex.LastOrDefault()?.Point ?? default, transparent, dash));
+                lineVertex.Add(new LineVertex(lineVertex.Count > 0 ? lineVertex[lineVertex.Count - 1].Point : default, transparent, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), transparent, dash));
 
                 //画一个方框
@@ -135,7 +123,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
                 target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
 
-                stringDrawing.Draw($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), IStringDrawing.StringStyle.Normal, target, default, out _);
+                builder.DrawString($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), FontStyle.Normal, default);
 
                 if (isf.IsSelected || isf.EndIndicator.IsSelected)
                 {
@@ -145,19 +133,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     var rectColor = color;
                     rectColor.W = 0.35f;
 
-                    polygonDrawing.Begin(target, Primitive.TriangleStrip);
+                    builder.DrawPolygon(Primitive.TriangleStrip, new[]
                     {
-                        polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(leftX, topY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(rightX, topY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(rightX, bottomY), rectColor);
-                        polygonDrawing.PostPoint(new(centerX, centerY), rectColor);
-                        polygonDrawing.PostPoint(new(leftX, bottomY), rectColor);
-                    }
-                    polygonDrawing.End();
+                        new PolygonVertex(new(leftX, bottomY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(leftX, topY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(rightX, topY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(rightX, bottomY), rectColor),
+                        new PolygonVertex(new(centerX, centerY), rectColor),
+                        new PolygonVertex(new(leftX, bottomY), rectColor),
+                    });
 
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
                         bottomLeftTriPos + new Vector2(highlightScale, highlightScale), 0, Vector4.One));
@@ -173,13 +160,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 }
             }
 
-            lineDrawing.Draw(target, lineVertex, 1.5f);
-            highlightDrawing.Draw(target, texture, hightTexList);
-            textureDrawing.Draw(target, texture, texList);
+            builder.DrawSimpleLines(lineVertex, 1.5f);
+            builder.DrawHighlightBatchTexture(texture, hightTexList);
+            builder.DrawTexture(texture, texList);
 
-            ObjectPool.Return(lineVertex);
-            ObjectPool.Return(texList);
-            ObjectPool.Return(hightTexList);
         }
     }
 }

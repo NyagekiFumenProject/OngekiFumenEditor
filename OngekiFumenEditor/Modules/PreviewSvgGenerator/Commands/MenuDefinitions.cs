@@ -1,4 +1,4 @@
-﻿using Gemini.Framework.Menus;
+using Gemini.Framework.Menus;
 using OngekiFumenEditor.Modules.PreviewSvgGenerator.Commands.GenerateSvg;
 using System.ComponentModel.Composition;
 

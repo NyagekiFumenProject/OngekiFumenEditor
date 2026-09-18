@@ -1,4 +1,4 @@
-﻿using SkiaSharp;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Graphics.Skia.Base
 {
-    public class SkiaImage : IImage
+    public sealed class SkiaImage : IImage
     {
         public SkiaImage(SKImage image)
         {

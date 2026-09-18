@@ -1,4 +1,4 @@
-ï»¿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using System;
@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             bpl.Speed = float.Parse(map["Speed"]);
             bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 
-            //å…¼å®¹è€é“ºé¢
+            //¼æÈİÀÏÆÌÃæ
             if (map.TryGetValue("RandomOffsetRange", out var r))
                 bpl.RandomOffsetRange = int.Parse(r);
 
