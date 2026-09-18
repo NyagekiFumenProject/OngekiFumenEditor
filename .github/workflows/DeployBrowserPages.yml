@@ -36,7 +36,6 @@ jobs:
           # AcbGeneratorFuck is only referenced by Desktop and requires separate repository access.
           git submodule update --init --recursive \
             Dependences/MigratableSerializer \
-            Dependences/Polyline2D.CSharp \
             Dependences/earcut.net \
             Avalonia/Dependencies/Gekimini.Avalonia \
             Avalonia/Dependencies/NAudio.BrowserAudioWorklet
