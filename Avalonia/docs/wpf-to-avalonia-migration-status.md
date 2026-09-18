@@ -38,6 +38,17 @@
 
 验收结果（Release、`--no-restore`）：`QuadTreeWrapperTests` 6/6、`ConnectableDisplayableObjectTests` 5/5、`SvgPrefabTests` 13/13；完整测试项目 576/576；Release 核心项目编译 0 errors。T-003/T-006 批次验收：`OngekiFumenEditor.Avalonia.Tests` 306/306、`OngekiFumenEditor.Avalonia.Desktop.Tests` 148/148（0 失败），CLI/GUI 冒烟通过。T-001/T-002 批次验收：主测试项目 **326/326**（含新增 DrawCommandListTests 14 项与 CameraRelativeCoordinateTests 6 项）、全解决方案 0 error、CLI 冒烟通过。应用启动、UI、音频等整体运行时验收仍属于后续范围。
 
+## 渲染性能测量面板（2026-09-19 已完成）
+
+- 入口：编辑器右键菜单，以及「设置 → 环境 → 程序 → 渲染」中的「打开渲染性能测量面板」。使用 Gekimini 非模态窗口，英文、简体中文、日文资源齐全。
+- 面板每秒枚举所有渲染管理器的存活上下文，分别展示谱面编辑器与音频波形的名称、上下文标识、当前监视器和统计；上下文销毁后移除对应项，窗口关闭时停止刷新并清空引用。关闭面板不会替换上下文的监视器，重新打开保留选择。
+- 每个上下文可独立选择 `DummyPerformenceMonitor`（默认关闭）、`DefaultReleasePerfomenceMonitor`（60 个样本）或 `DefaultDebugPerfomenceMonitor`（165 个样本）；真实监视器不共享实例，两种模式在 Debug/Release 均可使用。
+- 分离 Frame 间隔、OnRender 命令构建、Present 回放的计时；DrawCall 在 Present 结束采样。详细模式按命令类型及绘制目标类型聚合每帧耗时并显示排名。采样、读取和清空同步，空样本 FPS 为有限的 0。
+- 删除 `ShowFPS` / `IsDisplayFPS`、编辑器 FPS 覆盖层及专属定时刷新；监视器切换与帧生命周期由 render context 管理，不再由编辑器覆盖面板选择。
+- 验证：Release 全解决方案与 Debug Desktop 构建通过；主测试 **806/806**、Desktop **148/148**，其中渲染/回放/生命周期定向测试 **59/59**。实际 Windows 桌面冒烟覆盖两处打开入口、无上下文状态、编辑器及波形动态加入、三种监视器切换、同模式实例隔离、关闭/重开保留选择、关闭全部渲染视图后回到无上下文状态。
+- 临时程序另行验证 60/165 样本窗口回卷、同类型命令在同帧内累计 DrawCall、`Clear` 清空全部统计；预热后两种模式连续 1,000 帧的统计写入均分配 **0 字节**。临时程序及隔离的桌面启动目录在验证后移除。
+
+
 ## 状态总览
 
 | 领域 | 状态 | 当前结果 |

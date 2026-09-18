@@ -101,16 +101,16 @@
 
 - **PERF-RND-012 / RND-13 — 已修复（2026-09-11）：replay 接入 render context 上的真实 monitor。**
   - **根因（静态确认）：** `SkiaDrawCommandListReplay` 的 `ReplayDrawingContext` 硬编码 `new DummyPerformenceMonitor()`，且 `IRenderContext` 没有 monitor 属性，编辑器监控看不到 replay 的 draw call 与耗时。
-  - **处理：** `IRenderContext` 增加 `IPerfomenceMonitor PerfomenceMonitor { get; set; }`（`DefaultSkiaRenderContext` 默认 `DummyPerformenceMonitor.Instance`）；编辑器在 `StartRenderContext` 与 `IsDisplayFPS` 切换时安装自身 monitor，`StopRenderContext` 复位为 Dummy；replay 统一读 `RenderContext.PerfomenceMonitor ?? Dummy`；`DummyPerformenceMonitor` 新增共享 `Instance`。
-  - **验证：** 新增 `SkiaLineDrawing_ReplayDrawCallsReachInstalledPerfomenceMonitor`：在 context 上安装 `DefaultReleasePerfomenceMonitor`，经真实 replay 画线后断言 `AveDrawCall > 0`。
-  - **未做/后续：** WPF 终态的 `OnBeforePresent/OnAfterPresent` 与 `RenderPerfomenceMeasurePanel` 仍缺；present 阶段计数目前与构建阶段共用同一批样本，面板落地时需成对补齐。
+  - **2026-09-11 处理：** `IRenderContext` 增加 `IPerfomenceMonitor PerfomenceMonitor { get; set; }`，replay 统一读取该属性，默认使用共享 `DummyPerformenceMonitor.Instance`。当时由编辑器的 `IsDisplayFPS` 安装/复位监视器；该旧路径已于 2026-09-19 由独立面板及上下文生命周期替代。
+  - **验证：** `SkiaLineDrawing_ReplayDrawCallsReachInstalledPerfomenceMonitor` 经真实 replay 画线；2026-09-19 改为直接断言上下文生命周期产生的 `AveDrawCall == 1`，不再手动补发渲染统计事件。
+  - **2026-09-19 后续已完成：** `OnBeforePresent/OnAfterPresent` 与 `RenderPerfomenceMeasurePanel` 成对接入。Frame/OnRender/Present 独立采样，详细模式按命令/目标类型聚合，面板按上下文选择独立监视器。实际桌面验证编辑器与波形同时存在时分别为 138 和 43 次 DrawCall；关闭上下文自动移除，重开面板保留选择。完整主测试 806/806、Desktop 148/148。使用方法见 `wpf-to-avalonia-migration-status.md` 的渲染性能测量面板章节。
 
 - **PERF-RND-016 / RND-19 — 已修复（2026-09-11）：监视器计时单位与空样本 NRE。**
   - **根因（静态确认）：** 两个默认 monitor 把 `Stopwatch` 频率单位的原始差值当作 `TimeSpan.Ticks` 记录（debug：`GetTimestamp` 差值；release：`timer.ElapsedTicks - currentBeginRenderTick`），频率非 10,000,000 时 FPS/ms 全部缩放错误。
   - **处理：** debug 侧绘制/目标绘制/整帧三处改用 `Stopwatch.GetElapsedTime(...).Ticks`；release 侧改用 `timer.Elapsed.Ticks` 并删除恒为 0 的 `currentBeginRenderTick`；同时把 release 侧 `MostUIRenderSpendTicks`/`MostSpendTicks` 的 `GroupBy(...).FirstOrDefault().Key` 换成空安全的 `MostFrequentValue`（安装后无样本时不再 NRE）。
   - **验证：** 全解决方案重建 0 error；Release 全量主测试项目 689/689、Desktop 测试项目 148/148 通过（测试命令与 headless 运行限制见 `wpf-to-avalonia-migration-status.md` 的「测试命令」）。
   - **备注（2026-09-12 复核）：** 本机 `Stopwatch.Frequency == 10000000 == TimeSpan.TicksPerSecond`（实测），因此"原始 Stopwatch ticks 当 TimeSpan ticks"在 Windows 上数值完全等价，缺陷只在频率 ≠ 10^7 的平台（部分 ARM／Linux／macOS／虚拟化）才可观测；其结果是**普通计时测试在本机无法区分修复前后**，本条的验证只能依赖代码审查而非行为测试。复核确认修复点全部在位：debug `DefaultDebugPerfomenceMonitor.cs:185,191,196` 用 `Stopwatch.GetElapsedTime(...).Ticks`；release `DefaultReleasePerfomenceMonitor.cs:73` 用 `timer.Elapsed.Ticks` 且 `currentBeginRenderTick` 已删除；两者格式化为 `TimeSpan.FromTicks`（debug `:315-316`、release `:122`）；release 空样本路径由 `MostFrequentValue` 的 `group?.Key ?? 0`（`:59-60`）与零填充 `FixedSizeCycleCollection` 覆盖，不会抛。
-  - **未做/后续：** `formatFPS`（debug `:315`、release `:122`）在 ticks 为 0 时计算 `1.0 / 0` → 正无穷，启动后尚无样本或整帧耗时为 0 时 FPS 会显示为非数值；两 monitor 同构，未在本轮改动。
+  - **2026-09-19 后续已完成：** 空样本 FPS 统一返回 0，尚未测量时面板显示无数据；两个真实监视器使用有界滚动窗口，采样/读取/清空共享同步边界，`Clear` 重置全部计时及分类样本。原 `MostUIRenderSpendTicks` / `MostSpendTicks` 渲染契约已被 Frame/OnRender/Present 契约替代。
 
 - **PERF-RND-009 / RND-10 — 已修复（2026-09-11）：帧内缓存墙轨边界描述符 + 无分配子节点区间查询。**
   - **根因（静态确认 + 基准确认）：** `S/.../DrawPlayableAreaHelper.cs` 的 `QueryBoundaryXGridUnit` 对每个采样点线性扫过全部候选墙轨，活跃边再调 `CalculateBoundaryXGridUnit`；后者每次执行 `lane.GetChildObjectsFromTGrid(tGrid)`（有效路径下 `children.GetRange(...)` 分配 List）**且**再调一次 `lane.IsPathVaild()`（`children.All(...)`，O(子节点数)），而 `GetChildObjectsFromTGrid` 内部本身又调一次 `IsPathVaild()`。采样点数正比于候选墙轨子节点总数（`AddWallCandidateSamples` 把每条候选墙的每个 child TGrid 都加入采样集），故长墙成本为 samples×lanes×children，并伴随每 (墙, 采样, 边) 约 1 个 List + 2 个装箱枚举器的分配。
