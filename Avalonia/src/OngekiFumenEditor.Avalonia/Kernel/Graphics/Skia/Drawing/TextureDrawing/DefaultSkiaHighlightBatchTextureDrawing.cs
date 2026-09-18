@@ -68,7 +68,7 @@ internal class DefaultSkiaHighlightBatchTextureDrawing : CommonSkiaDrawingBase, 
 
             var rect = SKRect.Create(-adjustSize.X / 2, -adjustSize.Y / 2, adjustSize.X, adjustSize.Y);
             canvas.DrawImage(texture.Image, rect, paint);
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
             canvas.Restore();
         }
     }

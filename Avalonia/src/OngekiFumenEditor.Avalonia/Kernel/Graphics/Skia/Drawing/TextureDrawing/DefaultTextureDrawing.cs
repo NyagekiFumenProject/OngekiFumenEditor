@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.TextureDrawing
                         adjustSize.Y);
 
                     canvas.DrawImage(tex.Image, rect, paint);
-                    target.PerfomenceMonitor.CountDrawCall(this);
+                    target.PerfomenceMonitor.CountDrawCall();
 
                     canvas.Restore();
                 }

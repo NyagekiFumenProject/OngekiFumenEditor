@@ -11,16 +11,29 @@ public class DefaultSkiaRenderContext : IRenderContext
 {
     private readonly AvaloniaSkiaRenderControl renderControl;
     private DefaultSkiaDrawingManagerImpl manager;
-    private int frameInProgress;
+    private readonly object renderSync = new();
+    private IPerfomenceMonitor perfomenceMonitor = DummyPerformenceMonitor.Instance;
     private long previousTimestamp;
     private volatile bool isStart;
 
     public event Action<IRenderContext, TimeSpan> OnRender;
 
+    public string Name { get; set; }
+
     public SKCanvas Canvas { get; private set; }
 
     /// <inheritdoc />
-    public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+    public IPerfomenceMonitor PerfomenceMonitor
+    {
+        get => Volatile.Read(ref perfomenceMonitor);
+        set
+        {
+            // The UI can switch monitors while the compositor is rendering. Do not split a frame
+            // across two monitors, including the backend draw calls made during replay.
+            lock (renderSync)
+                Volatile.Write(ref perfomenceMonitor, value ?? DummyPerformenceMonitor.Instance);
+        }
+    }
 
     internal bool IsRendering => isStart;
 
@@ -44,13 +57,21 @@ public class DefaultSkiaRenderContext : IRenderContext
 
     public void StartRendering()
     {
-        previousTimestamp = 0;
-        isStart = true;
+        lock (renderSync)
+        {
+            if (isStart)
+                return;
+            previousTimestamp = 0;
+            perfomenceMonitor.Clear();
+            isStart = true;
+        }
     }
 
     public void StopRendering()
     {
-        isStart = false;
+        // Returning from Stop guarantees the current lease/replay has finished before release.
+        lock (renderSync)
+            isStart = false;
     }
 
     private void SwapAndPresentDrawCommandList()
@@ -67,24 +88,21 @@ public class DefaultSkiaRenderContext : IRenderContext
 
     internal void RenderFrame(ImmediateDrawingContext drawingContext)
     {
-        if (!isStart || Interlocked.Exchange(ref frameInProgress, 1) != 0)
-            return;
-
-        try
+        lock (renderSync)
         {
+            if (!isStart)
+                return;
+
             if (drawingContext.TryGetFeature(typeof(ISkiaSharpApiLeaseFeature)) is not ISkiaSharpApiLeaseFeature leaseFeature)
                 throw new NotSupportedException("The active Avalonia renderer does not expose the SkiaSharp lease feature.");
 
             using var lease = leaseFeature.Lease();
             var canvas = lease.SkCanvas;
             var saveCount = canvas.Save();
-
             try
             {
                 canvas.ClipRect(
-                    SKRect.Create(
-                        (float)renderControl.Bounds.Width,
-                        (float)renderControl.Bounds.Height),
+                    SKRect.Create((float)renderControl.Bounds.Width, (float)renderControl.Bounds.Height),
                     SKClipOperation.Intersect,
                     antialias: false);
                 Canvas = canvas;
@@ -94,7 +112,18 @@ public class DefaultSkiaRenderContext : IRenderContext
                     ? TimeSpan.Zero
                     : Stopwatch.GetElapsedTime(previousTimestamp, timestamp);
                 previousTimestamp = timestamp;
-                OnRender?.Invoke(this, elapsed);
+
+                var monitor = perfomenceMonitor;
+                monitor.OnBeforeRender();
+                try
+                {
+                    OnRender?.Invoke(this, elapsed);
+                }
+                finally
+                {
+                    monitor.OnAfterRender();
+                }
+
                 SwapAndPresentDrawCommandList();
             }
             finally
@@ -102,10 +131,6 @@ public class DefaultSkiaRenderContext : IRenderContext
                 Canvas = null;
                 canvas.RestoreToCount(saveCount);
             }
-        }
-        finally
-        {
-            Volatile.Write(ref frameInProgress, 0);
         }
     }
 }

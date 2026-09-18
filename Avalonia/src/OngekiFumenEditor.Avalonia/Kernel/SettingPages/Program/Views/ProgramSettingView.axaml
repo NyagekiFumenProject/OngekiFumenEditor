@@ -80,6 +80,11 @@
                     Content="{markup:Translate {x:Static languages:Lang+B.TestDump}}" />
             </StackPanel>
         </controls:GroupBox>
+        <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Rendering}}">
+            <Button Margin="10" Padding="10,5" HorizontalAlignment="Left"
+                    Command="{Binding OpenRenderPerfomenceMeasurePanelCommand}"
+                    Content="{markup:Translate {x:Static languages:Lang+B.OpenRenderPerfomenceMeasurePanel}}" />
+        </controls:GroupBox>
         <controls:GroupBox Margin="5" Header="{markup:Translate {x:Static languages:Lang+B.Other}}">
             <StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">

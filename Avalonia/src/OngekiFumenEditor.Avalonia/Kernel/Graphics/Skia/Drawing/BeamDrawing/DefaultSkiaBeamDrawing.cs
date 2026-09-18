@@ -40,7 +40,7 @@ public class DefaultSkiaBeamDrawing : CommonSkiaDrawingBase, IBeamDrawing
         canvas.RotateDegrees(360 - angle, rect.MidX, pivotY);
         canvas.DrawImage(texture.Image, rect, paint);
         canvas.Restore();
-        target.PerfomenceMonitor.CountDrawCall(this);
+        target.PerfomenceMonitor.CountDrawCall();
 
         OnEnd();
     }

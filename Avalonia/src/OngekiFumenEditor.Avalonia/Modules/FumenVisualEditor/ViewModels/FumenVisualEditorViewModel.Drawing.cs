@@ -2,9 +2,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.Threading;
 using Gekimini.Avalonia.Framework;
 using Gekimini.Avalonia.Views;
+using CommunityToolkit.Mvvm.Input;
+using Gekimini.Avalonia.Platforms.Services.Window;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
@@ -15,7 +16,7 @@ using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
-using OngekiFumenEditor.Avalonia.Kernel.Scheduler;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence.ViewModels;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing;
@@ -32,7 +33,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,23 +42,19 @@ using Vector4 = System.Numerics.Vector4;
 
 namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.ViewModels;
 
-public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedulable, IFumenEditorDrawingContext
+public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenEditorDrawingContext
 {
     private Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
-    private IPerfomenceMonitor actualPerformenceMonitor;
 
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
 
     private Func<double, FumenVisualEditorViewModel, SoflanList, double>
         convertToY = (tUnit, editor, _) => TGridCalculator.ConvertTGridUnitToY_DesignMode(tUnit, editor);
 
-    private string displayFPS = "";
     private readonly Dictionary<IFumenEditorDrawingTarget, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>> drawMap = new();
     private IFumenEditorDrawingTarget[] drawTargetOrder;
-    private readonly IPerfomenceMonitor dummyPerformenceMonitor = new DummyPerformenceMonitor();
     private bool enablePlayFieldDrawing;
 
-    private bool isDisplayFPS;
     private DrawJudgeLineHelper judgeLineHelper;
     private DrawPlayableAreaHelper playableAreaHelper;
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
@@ -68,7 +64,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     private DrawSelectingRangeHelper selectingRangeHelper;
 
-    private readonly StringBuilder stringBuilder = new(2048);
 
     private DrawTimeSignatureHelper timeSignatureHelper;
 
@@ -98,30 +93,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     public PlayerLocationRecorder PlayerLocationRecorder { get; } = new();
 
-    public bool IsDisplayFPS
-    {
-        get => isDisplayFPS;
-        set
-        {
-            SetProperty(ref isDisplayFPS, value);
-            PerfomenceMonitor = value ? actualPerformenceMonitor : dummyPerformenceMonitor;
-            if (RenderContext is { } context)
-                context.PerfomenceMonitor = PerfomenceMonitor;
-        }
-    }
 
     private Stopwatch sw;
     private float actualRenderInterval;
 
-    public string DisplayFPS
-    {
-        get => displayFPS;
-        set
-        {
-            displayFPS = value;
-            OnPropertyChanged();
-        }
-    }
 
     public float ViewWidth
     {
@@ -148,7 +123,11 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     public FumenVisualEditorViewModel Editor => this;
 
-    public IPerfomenceMonitor PerfomenceMonitor { get; private set; } = new DummyPerformenceMonitor();
+    public IPerfomenceMonitor PerfomenceMonitor => RenderContext?.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
+
+    [RelayCommand]
+    private Task OpenRenderPerfomenceMeasurePanelAsync() =>
+        IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<RenderPerfomenceMeasurePanelViewModel>());
 
     public void LoadRenderOrderVisible()
     {
@@ -211,18 +190,13 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
     public void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl renderImpl)
     {
-        PrepareRenderLoop(
-            renderControl,
-            renderImpl,
-            IoC.GetAll<IFumenEditorDrawingTarget>(),
-            IoC.Get<IPerfomenceMonitor>());
+        PrepareRenderLoop(renderControl, renderImpl, IoC.GetAll<IFumenEditorDrawingTarget>());
     }
 
     internal void PrepareRenderLoop(
         FrameworkElement renderControl,
         IRenderManagerImpl renderImpl,
-        IEnumerable<IFumenEditorDrawingTarget> availableDrawingTargets,
-        IPerfomenceMonitor performenceMonitor)
+        IEnumerable<IFumenEditorDrawingTarget> availableDrawingTargets)
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
         ViewWidth = (float)renderControl.Bounds.Width;
@@ -265,9 +239,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         hitObjectEffectHelper = new DrawHitObjectEffectHelper();
         hitObjectEffectHelper.Initalize(renderImpl);
-
-        actualPerformenceMonitor = performenceMonitor;
-        IsDisplayFPS = IsDisplayFPS;
 
         UpdateActualRenderInterval();
         sw = new Stopwatch();
@@ -328,8 +299,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
 
         #region clean and prepare perfomence statistics
 
-        PerfomenceMonitor.PostUIRenderTime(ts);
-        PerfomenceMonitor.OnBeforeRender();
 
         ClearHitObjects();
 
@@ -631,7 +600,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                 builder?.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
                 builder?.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-                PerfomenceMonitor.OnBeginTargetDrawing(drawingTarget);
                 {
                     if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
                     {
@@ -650,7 +618,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
                         }
                     }
                 }
-                PerfomenceMonitor.OnAfterTargetDrawing(drawingTarget);
             }
 
             CurrentDrawingTargetContext = defaultDrawingTargetContext;
@@ -689,7 +656,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
     End:
         builder?.Dispose();
         drawMap.Clear();
-        PerfomenceMonitor.OnAfterRender();
         //set null
         CurrentDrawingTargetContext = default;
     }
@@ -752,63 +718,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         return false;
     }
 
-    public string SchedulerName => "Fumen Previewer Performance Statictis";
-
-    public TimeSpan ScheduleCallLoopInterval => TimeSpan.FromSeconds(1);
-
     public IRenderContext RenderContext { get; private set; }
 
-    public void OnSchedulerTerm()
-    {
-    }
-
-    public async Task OnScheduleCall(CancellationToken cancellationToken)
-    {
-        if (IsDisplayFPS)
-        {
-            stringBuilder.Clear();
-
-            PerfomenceMonitor?.FormatStatistics(stringBuilder);
-#if DEBUG
-            var drawingContextSnapshot = drawingContexts.ToArray();
-            stringBuilder.AppendLine();
-            stringBuilder.AppendLine($"Viewport: {ViewWidth}x{ViewHeight}");
-            stringBuilder.AppendLine($"VisibleRanges ({drawingContextSnapshot.Length} sfl groups):");
-
-            foreach (var item in drawingContextSnapshot.OrderBy(x => x.Key))
-            {
-                var ranges = item.Value?.VisibleTGridRanges;
-                if (ranges != null)
-                {
-                    foreach (var tGridRange in ranges)
-                        stringBuilder.AppendLine($"*[{item.Key}]  {tGridRange.minTGrid}  -  {tGridRange.maxTGrid} -> {item.Value.WorldRect.MinY:F2} -  {item.Value.WorldRect.MaxY:F2}");
-
-                }
-            }
-
-            if (IsPreviewMode)
-            {
-                await Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    stringBuilder.AppendLine();
-                    var defaultDrawingContext = drawingContextSnapshot.FirstOrDefault(x => x.Key == 0).Value;
-                    if (defaultDrawingContext?.WorldRect.MaxY - lastPointerViewPosition.Y is double mouseY)
-                    {
-                        stringBuilder.AppendLine($"MouseY: {mouseY:F2}");
-                        foreach (var tGrid in TGridCalculator.ConvertYToTGrid_PreviewMode(mouseY, this))
-                            stringBuilder.AppendLine($"* {tGrid}");
-                    }
-                });
-            }
-#endif
-
-            var displayText = stringBuilder.ToString();
-            // 调度器在后台线程运行，Avalonia 不会自动封送 INPC，回 UI 线程赋值。
-            Dispatcher.UIThread.Post(() => DisplayFPS = displayText);
-
-            PerfomenceMonitor?.Clear();
-        }
-    }
 
     public override void OnViewAfterLoaded(IView view)
     {
@@ -1058,22 +969,19 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         return InitializeRenderControlAsync(
             contentControl,
             IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl(),
-            IoC.GetAll<IFumenEditorDrawingTarget>(),
-            IoC.Get<IPerfomenceMonitor>());
+            IoC.GetAll<IFumenEditorDrawingTarget>());
     }
 
     internal async Task InitializeRenderControlAsync(
         ContentControl contentControl,
         IRenderManagerImpl newRenderImpl,
         IEnumerable<IFumenEditorDrawingTarget> availableDrawingTargets,
-        IPerfomenceMonitor performenceMonitor,
         CancellationToken cancellationToken = default)
     {
         ObjectDisposedException.ThrowIf(IsDisposed, this);
         ArgumentNullException.ThrowIfNull(contentControl);
         ArgumentNullException.ThrowIfNull(newRenderImpl);
         ArgumentNullException.ThrowIfNull(availableDrawingTargets);
-        ArgumentNullException.ThrowIfNull(performenceMonitor);
 
         if (attachedRenderControl is not null)
             return;
@@ -1098,7 +1006,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             Log.LogDebug($"RenderControl({newRenderControl.GetHashCode()}) is created");
             AttachRenderControlHandlers(newRenderControl);
             contentControl.Content = newRenderControl;
-            PrepareRenderLoop(newRenderControl, newRenderImpl, availableDrawingTargets, performenceMonitor);
+            PrepareRenderLoop(newRenderControl, newRenderImpl, availableDrawingTargets);
         }
         catch (OperationCanceledException) when (
             lifetimeCancellationToken.IsCancellationRequested ||
@@ -1230,9 +1138,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
             StopRenderContext();
 
         RenderContext = renderContext;
-        //The replay records its draw calls and timings into this monitor; keep it in sync with the
-        //editor's FPS/statistics switch so present-time work is visible to the same monitor.
-        renderContext.PerfomenceMonitor = PerfomenceMonitor;
+        renderContext.Name = "FumenVisualEditorViewModel.Render";
         renderContext.OnRender -= OnRenderFrame;
         renderContext.OnRender += OnRenderFrame;
         renderContext.StartRendering();
@@ -1245,7 +1151,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         if (renderContext is null)
             return;
 
-        renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
         renderContext.OnRender -= OnRenderFrame;
         renderContext.StopRendering();
     }
@@ -1306,8 +1211,6 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, ISchedu
         drawingContexts.Clear();
         cachedMagneticXGridLines.Clear();
         CurrentDrawingTargetContext = null;
-        actualPerformenceMonitor = null;
-        PerfomenceMonitor = dummyPerformenceMonitor;
         sw?.Stop();
         sw = null;
         renderInitializationTaskSource.TrySetResult();

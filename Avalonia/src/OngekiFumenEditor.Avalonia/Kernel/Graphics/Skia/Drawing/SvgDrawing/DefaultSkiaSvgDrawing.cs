@@ -18,7 +18,7 @@ internal sealed class DefaultSkiaSvgDrawing : CommonSkiaDrawingBase, ISvgDrawing
         OnBegin(target);
         var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
         DrawToCanvas(canvas, svg, position);
-        target.PerfomenceMonitor.CountDrawCall(this);
+        target.PerfomenceMonitor.CountDrawCall();
         OnEnd();
     }
 

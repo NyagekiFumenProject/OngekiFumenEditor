@@ -123,7 +123,7 @@ internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing,
             canvas.RotateRadians(rotate);
         canvas.Scale(scale.X == 0 ? 1 : scale.X, scale.Y == 0 ? -1 : -scale.Y);
         canvas.DrawText(text, 0, 0, font, textPaint);
-        target.PerfomenceMonitor.CountDrawCall(this);
+        target.PerfomenceMonitor.CountDrawCall();
 
         if (isUnderline || isStrike)
         {
@@ -141,7 +141,7 @@ internal class DefaultSkiaStringDrawing : CommonSkiaDrawingBase, IStringDrawing,
                 var strikeY = -(metrics.XHeight / 2);
                 canvas.DrawLine(0, strikeY, bounds.Width, strikeY, decorationPaint);
             }
-            target.PerfomenceMonitor.CountDrawCall(this);
+            target.PerfomenceMonitor.CountDrawCall();
         }
 
         canvas.Restore();

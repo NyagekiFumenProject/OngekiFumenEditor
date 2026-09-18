@@ -31,7 +31,6 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
     private readonly IWaveformDrawing waveformDrawing;
     private readonly Func<WaveformRenderState> stateProvider;
     private readonly WaveformFrameLimiter frameLimiter = new();
-    private readonly IPerfomenceMonitor performanceMonitor = new DummyPerformenceMonitor();
 
     private ContentControl host;
     private Control renderControl;
@@ -49,7 +48,7 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
     private bool isDisposed;
 
     public DrawingTargetContext CurrentDrawingTargetContext { get; } = new();
-    public IPerfomenceMonitor PerfomenceMonitor => performanceMonitor;
+    public IPerfomenceMonitor PerfomenceMonitor => RenderContext?.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
     public IRenderContext RenderContext { get; private set; }
     public TimeSpan CurrentTime { get; private set; }
     public TimeSpan AudioTotalDuration => currentState.AudioPlayer?.Duration ?? default;
@@ -115,6 +114,7 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
 
             waveformDrawing.Initialize(renderManager);
             RenderContext = context;
+            context.Name = "AudioPlayerToolViewerViewModel.WaveRender";
             context.OnRender += Render;
             frameLimiter.Reset();
             context.StartRendering();
@@ -210,8 +210,6 @@ internal sealed class WaveformRenderSession : IWaveformDrawingContext, IDisposab
         UpdateCurrentTime(state);
         UpdateDrawingContext();
         RenderedFrameCount++;
-
-        performanceMonitor.PostUIRenderTime(elapsed);
 
         var builder = renderManager.CreateDrawCommandListBuilder();
         try

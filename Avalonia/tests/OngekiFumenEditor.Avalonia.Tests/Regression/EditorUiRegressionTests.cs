@@ -405,12 +405,16 @@ public sealed class EditorUiRegressionTests
         Assert.Equal(objects.Length, editor.QueryHitObjects(new global::Avalonia.Point(0, 0)).Count);
     }
 
-#if DEBUG
-    [Fact]
-    public async Task DebugPerformanceMonitor_CanReadAndClearWhileRendering()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task PerformanceMonitor_CanReadAndClearWhileRendering(bool detailed)
     {
-        var monitor = new DefaultDebugPerfomenceMonitor();
-        var drawing = new CommonDrawingBase();
+        IPerfomenceMonitor monitor = detailed ? new DefaultDebugPerfomenceMonitor() : new DefaultReleasePerfomenceMonitor();
+        using var commandBuilder = new OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DrawCommandListBuilder();
+        commandBuilder.SetCurrentViewMatrix(OpenTK.Mathematics.Matrix4.CreateTranslation(1, 0, 0));
+        using var commands = commandBuilder.GetDrawCommandList();
+        var command = Assert.Single(commands.Commands);
         var drawingTarget = new TestDrawingTarget();
 
         var renderTask = Task.Run(() =>
@@ -418,13 +422,14 @@ public sealed class EditorUiRegressionTests
             for (var frame = 0; frame < 1000; frame++)
             {
                 monitor.OnBeforeRender();
-                monitor.OnBeginDrawing(drawing);
                 monitor.OnBeginTargetDrawing(drawingTarget);
-                monitor.CountDrawCall(drawing);
-                monitor.OnAfterDrawing(drawing);
                 monitor.OnAfterTargetDrawing(drawingTarget);
                 monitor.OnAfterRender();
-                monitor.PostUIRenderTime(TimeSpan.FromMilliseconds(1));
+                monitor.OnBeforePresent();
+                monitor.OnBeginDrawCommand(command);
+                monitor.CountDrawCall();
+                monitor.OnAfterDrawCommand(command);
+                monitor.OnAfterPresent();
             }
         });
 
@@ -433,7 +438,8 @@ public sealed class EditorUiRegressionTests
             for (var sample = 0; sample < 1000; sample++)
             {
                 var render = monitor.GetRenderPerformenceData();
-                Assert.True(render.AveSpendTicks >= 0);
+                Assert.True(double.IsFinite(render.AveFrameFps) && render.AveFrameFps >= 0);
+                Assert.InRange(render.AveDrawCall, 0, 1);
 
                 var builder = new StringBuilder();
                 monitor.FormatStatistics(builder);
@@ -442,8 +448,23 @@ public sealed class EditorUiRegressionTests
         });
 
         await Task.WhenAll(renderTask, statisticsTask);
+
+        monitor.Clear();
+        Assert.Equal(0, monitor.GetRenderPerformenceData().AveDrawCall);
+        Assert.Empty(monitor.GetDrawCommandPerformenceData().PerformenceRanks);
+        monitor.OnBeforeRender();
+        monitor.OnAfterRender();
+        monitor.OnBeforePresent();
+        monitor.OnBeginDrawCommand(command);
+        monitor.CountDrawCall();
+        monitor.CountDrawCall();
+        monitor.CountDrawCall();
+        monitor.OnAfterDrawCommand(command);
+        monitor.OnAfterPresent();
+        Assert.Equal(3, monitor.GetRenderPerformenceData().AveDrawCall);
+        if (detailed)
+            Assert.Equal(3, Assert.Single(monitor.GetDrawCommandPerformenceData().PerformenceRanks).AveDrawCall);
     }
-#endif
 
     [AvaloniaTheory]
     [InlineData(typeof(FumenBulletPalleteListViewerView))]
@@ -544,12 +565,10 @@ public sealed class EditorUiRegressionTests
         }
     }
 
-#if DEBUG
     private sealed class TestDrawingTarget : IDrawingTarget
     {
         public void Initialize(IRenderManagerImpl impl)
         {
         }
     }
-#endif
 }

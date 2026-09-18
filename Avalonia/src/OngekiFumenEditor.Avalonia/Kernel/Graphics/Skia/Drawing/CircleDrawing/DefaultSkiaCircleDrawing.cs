@@ -27,7 +27,7 @@ public class DefaultSkiaCircleDrawing : CommonSkiaDrawingBase, ICircleDrawing
     {
         var paint = GetPaint(color, isSolid, hollowLineWidth);
         canvas.DrawCircle(point.X, point.Y, radius, paint);
-        target.PerfomenceMonitor.CountDrawCall(this);
+        target.PerfomenceMonitor.CountDrawCall();
     }
 
     public void End()

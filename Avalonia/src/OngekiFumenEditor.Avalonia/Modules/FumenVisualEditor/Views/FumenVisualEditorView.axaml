@@ -95,9 +95,8 @@
                 </MenuItem>
                 <Separator />
                 <MenuItem
-                    Header="{markup:Translate {x:Static languages:Lang+B.ShowFPS}}"
-                    ToggleType="CheckBox"
-                    IsChecked="{Binding IsDisplayFPS, Mode=TwoWay}" />
+                    Header="{markup:Translate {x:Static languages:Lang+B.OpenRenderPerfomenceMeasurePanel}}"
+                    Command="{Binding OpenRenderPerfomenceMeasurePanelCommand}" />
             </ContextMenu>
         </Grid.ContextMenu>
 
@@ -107,15 +106,6 @@
             DataContext="{Binding BatchModeBehavior}"
             IsVisible="{Binding $parent[views:FumenVisualEditorView].((viewmodels:FumenVisualEditorViewModel)DataContext).IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
 
-        <TextBlock
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            FontWeight="Bold"
-            Foreground="White"
-            IsHitTestVisible="False"
-            Opacity="0.25"
-            Text="{Binding DisplayFPS}"
-            IsVisible="{Binding IsDisplayFPS, Converter={StaticResource BoolToVisibilityConverter}}" />
         <ScrollBar
             Grid.Column="1"
             Maximum="{Binding TotalDurationHeight}"

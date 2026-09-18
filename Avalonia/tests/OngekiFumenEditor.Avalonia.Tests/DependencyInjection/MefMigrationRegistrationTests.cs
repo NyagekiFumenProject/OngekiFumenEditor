@@ -72,22 +72,6 @@ public sealed class MefMigrationRegistrationTests
     }
 
 
-    [Fact]
-    public void AddOngekiFumenEditorAvalonia_RegistersPerformanceMonitorAsTransient()
-    {
-        var services = CreateServices();
-        var descriptor = Assert.Single(
-            services,
-            service => service.ServiceType == typeof(IPerfomenceMonitor));
-
-        Assert.Equal(ServiceLifetime.Transient, descriptor.Lifetime);
-
-        using var provider = services.BuildServiceProvider();
-        var first = provider.GetRequiredService<IPerfomenceMonitor>();
-        var second = provider.GetRequiredService<IPerfomenceMonitor>();
-
-        Assert.NotSame(first, second);
-    }
 
     [Fact]
     public void AddOngekiFumenEditorAvalonia_DoesNotRegisterPlatformKeyBindingManager()

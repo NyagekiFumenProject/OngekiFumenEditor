@@ -1,110 +1,37 @@
-using System;
-using System.Collections.Generic;
 using System.Text;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using static OngekiFumenEditor.Avalonia.Kernel.Graphics.IPerfomenceMonitor;
-using static OngekiFumenEditor.Avalonia.Kernel.Graphics.IPerfomenceMonitor.IDrawingPerformenceStatisticsData;
+using static OngekiFumenEditor.Avalonia.Kernel.Graphics.IPerfomenceMonitor.ICategorizedPerformenceStatisticsData;
 
-namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence
+namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
+
+public sealed class DummyPerformenceMonitor : IPerfomenceMonitor
 {
-	public class DummyPerformenceMonitor : IPerfomenceMonitor
-	{
-		/// <summary>
-		/// Shared no-op monitor used as the render context default and as the fallback when no
-		/// monitor is installed on a context.
-		/// </summary>
-		public static readonly DummyPerformenceMonitor Instance = new();
+    /// <summary>Stateless shared default; real monitors are owned by individual render contexts.</summary>
+    public static readonly DummyPerformenceMonitor Instance = new();
 
-		private class DummyDrawingPerformenceStatisticsData : IDrawingPerformenceStatisticsData
-		{
-			private PerformenceItem[] items = new PerformenceItem[0];
+    internal sealed class CategorizedStatistics : ICategorizedPerformenceStatisticsData
+    {
+        public IEnumerable<PerformenceItem> PerformenceRanks { get; init; } = [];
+        public double AveSpendTicks { get; init; }
+        public double MostSpendTicks { get; init; }
+    }
 
-			public IEnumerable<PerformenceItem> PerformenceRanks => items;
+    internal static readonly ICategorizedPerformenceStatisticsData EmptyCategories = new CategorizedStatistics();
+    private static readonly IRenderPerformenceStatisticsData emptyRender = new RenderPerformenceStatisticsData();
 
-			public double AveSpendTicks => 0;
-
-			public double MostSpendTicks => 0;
-		}
-
-		private class DummyRenderPerformenceStatisticsData : IRenderPerformenceStatisticsData
-		{
-			public double AveSpendTicks => 0;
-
-			public double MostSpendTicks => 0;
-
-			public int AveDrawCall => 0;
-
-			public long MostUIRenderSpendTicks => 0;
-
-			public double AveUIRenderSpendTicks => 0;
-		}
-
-		private IDrawingPerformenceStatisticsData statisticsData = new DummyDrawingPerformenceStatisticsData();
-		private IRenderPerformenceStatisticsData renderData = new DummyRenderPerformenceStatisticsData();
-
-		public void Clear()
-		{
-		}
-
-		public void CountDrawCall(IDrawing drawing)
-		{
-		}
-
-		public void FormatStatistics(StringBuilder builder)
-		{
-		}
-
-		public IDrawingPerformenceStatisticsData GetDrawingPerformenceData()
-		{
-			return statisticsData;
-		}
-
-		public IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData()
-		{
-			return statisticsData;
-		}
-
-		public IRenderPerformenceStatisticsData GetRenderPerformenceData()
-		{
-			return renderData;
-		}
-
-		public void OnAfterDrawing(IDrawing drawing)
-		{
-		}
-
-		public void OnAfterRender()
-		{
-		}
-
-		public void OnAfterTargetDrawing(IDrawingTarget drawing)
-		{
-		}
-
-		public void OnBeforeRender()
-		{
-		}
-
-		public void OnBeginDrawing(IDrawing drawing)
-		{
-		}
-
-		public void OnBeginTargetDrawing(IDrawingTarget drawing)
-		{
-		}
-
-		public void OnBeginDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
-		{
-		}
-
-		public void OnEndDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command)
-		{
-		}
-
-		public void PostUIRenderTime(TimeSpan ts)
-		{
-		}
-	}
+    public void Clear() { }
+    public void CountDrawCall() { }
+    public void FormatStatistics(StringBuilder builder) { }
+    public ICategorizedPerformenceStatisticsData GetDrawCommandPerformenceData() => EmptyCategories;
+    public ICategorizedPerformenceStatisticsData GetDrawingTargetPerformenceData() => EmptyCategories;
+    public IRenderPerformenceStatisticsData GetRenderPerformenceData() => emptyRender;
+    public void OnBeforeRender() { }
+    public void OnAfterRender() { }
+    public void OnBeforePresent() { }
+    public void OnAfterPresent() { }
+    public void OnBeginTargetDrawing(IDrawingTarget target) { }
+    public void OnAfterTargetDrawing(IDrawingTarget target) { }
+    public void OnBeginDrawCommand(DrawCommand command) { }
+    public void OnAfterDrawCommand(DrawCommand command) { }
 }
-
-
-

@@ -7,7 +7,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing
     public class CommonSkiaDrawingBase : CommonDrawingBase
     {
         protected DefaultSkiaDrawingManagerImpl manager;
-        private IDrawingContext target;
         private SKCanvas canvas;
 
         public CommonSkiaDrawingBase(DefaultSkiaDrawingManagerImpl manager)
@@ -19,8 +18,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing
         {
             SkiaUtility.CheckSkiaRenderContext(target?.RenderContext);
 
-            target.PerfomenceMonitor.OnBeginDrawing(this);
-            this.target = target;
             var renderContext = (DefaultSkiaRenderContext)target.RenderContext;
             canvas = renderContext.Canvas;
             canvas.Save();
@@ -47,8 +44,6 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing
         {
             canvas.Restore();
 
-            target.PerfomenceMonitor.OnAfterDrawing(this);
-            target = default;
             canvas = default;
         }
     }

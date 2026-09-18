@@ -3,6 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Gekimini.Avalonia.Framework.Dialogs;
 using Gekimini.Avalonia.Modules.Settings;
+using Gekimini.Avalonia.Platforms.Services.Window;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence.ViewModels;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Kernel.SettingPages;
@@ -45,6 +47,10 @@ public partial class ProgramSettingViewModel : ViewModelBase, ISettingsEditor
         Setting.Reset();
         Setting.Save();
     }
+
+    [RelayCommand]
+    private Task OpenRenderPerfomenceMeasurePanelAsync() =>
+        IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<RenderPerfomenceMeasurePanelViewModel>());
 
     [RelayCommand]
     private async Task ResetAllSettingsAsync()

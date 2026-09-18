@@ -34,11 +34,7 @@ public sealed class EditorResourceLifecycleTests
 
         try
         {
-            await editor.InitializeRenderControlAsync(
-                host,
-                renderManager,
-                [],
-                new DummyPerformenceMonitor());
+            await editor.InitializeRenderControlAsync(host, renderManager, []);
             var renderControl = Assert.IsType<Panel>(host.Content);
             await editor.ActivateRenderControlAsync(renderControl, EventArgs.Empty);
 
@@ -97,11 +93,7 @@ public sealed class EditorResourceLifecycleTests
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager(delayInitialization: true);
 
-        var initializationTask = editor.InitializeRenderControlAsync(
-            host,
-            renderManager,
-            [],
-            new DummyPerformenceMonitor());
+        var initializationTask = editor.InitializeRenderControlAsync(host, renderManager, []);
         await renderManager.InitializationStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
         editor.Dispose();
@@ -122,11 +114,7 @@ public sealed class EditorResourceLifecycleTests
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager(ignoreInitializationCancellation: true);
 
-        var initializationTask = editor.InitializeRenderControlAsync(
-            host,
-            renderManager,
-            [],
-            new DummyPerformenceMonitor());
+        var initializationTask = editor.InitializeRenderControlAsync(host, renderManager, []);
         await renderManager.InitializationStarted.Task.WaitAsync(TimeSpan.FromSeconds(5));
 
         editor.Dispose();
@@ -184,11 +172,7 @@ public sealed class EditorResourceLifecycleTests
         var editor = new FumenVisualEditorViewModel();
         var host = new ContentControl();
         var renderManager = new TrackingRenderManager();
-        editor.InitializeRenderControlAsync(
-            host,
-            renderManager,
-            [],
-            new DummyPerformenceMonitor()).GetAwaiter().GetResult();
+        editor.InitializeRenderControlAsync(host, renderManager, []).GetAwaiter().GetResult();
         var renderControl = Assert.IsType<Panel>(host.Content);
         editorReference = new WeakReference(editor);
 
@@ -242,6 +226,8 @@ public sealed class EditorResourceLifecycleTests
         public Task<IRenderContext> GetRenderContext(Control renderControl, CancellationToken cancellation = default) =>
             Task.FromResult<IRenderContext>(Context);
 
+        public IReadOnlyList<IRenderContext> GetRenderContexts() => ReleaseCount == 0 ? [Context] : [];
+
         public IDrawCommandListBuilder CreateDrawCommandListBuilder() => drawingManager.CreateDrawCommandListBuilder();
 
         public void PostDrawCommandList(IRenderContext context, DrawCommandList drawCommandList, bool autoDispose = true) =>
@@ -268,6 +254,7 @@ public sealed class EditorResourceLifecycleTests
         private Action<IRenderContext, TimeSpan>? render;
 
         public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+        public string Name { get; set; } = string.Empty;
 
         public event Action<IRenderContext, TimeSpan> OnRender
         {

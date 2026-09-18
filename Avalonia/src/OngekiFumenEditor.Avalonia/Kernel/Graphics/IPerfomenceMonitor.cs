@@ -1,49 +1,45 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 
-namespace OngekiFumenEditor.Avalonia.Kernel.Graphics
+namespace OngekiFumenEditor.Avalonia.Kernel.Graphics;
+
+public interface IPerfomenceMonitor
 {
-	public interface IPerfomenceMonitor
-	{
-		public interface IRenderPerformenceStatisticsData
-		{
-			public double AveSpendTicks { get; }
-			public double MostSpendTicks { get; }
-			public int AveDrawCall { get; }
-			public long MostUIRenderSpendTicks { get; }
-			public double AveUIRenderSpendTicks { get; }
-		}
+    public interface IRenderPerformenceStatisticsData
+    {
+        long CurrentFrameSpendTicks { get; }
+        double AveFrameSpendTicks { get; }
+        double AveFrameFps { get; }
+        long CurrentOnRenderSpendTicks { get; }
+        double AveOnRenderSpendTicks { get; }
+        double AveOnRenderFps { get; }
+        long CurrentPresentSpendTicks { get; }
+        double AvePresentSpendTicks { get; }
+        double AvePresentFps { get; }
+        double AveDrawCall { get; }
+    }
 
-		public interface IDrawingPerformenceStatisticsData
-		{
-			public record PerformenceItem(string Name, double AveSpendTicks, int AveDrawCall);
-			public IEnumerable<PerformenceItem> PerformenceRanks { get; }
-			public double AveSpendTicks { get; }
-			public double MostSpendTicks { get; }
-		}
+    public interface ICategorizedPerformenceStatisticsData
+    {
+        public record PerformenceItem(string Name, double AveSpendTicks, double AveDrawCall = 0);
+        IEnumerable<PerformenceItem> PerformenceRanks { get; }
+        double AveSpendTicks { get; }
+        double MostSpendTicks { get; }
+    }
 
-		void OnBeforeRender();
-		void OnBeginDrawing(IDrawing drawing);
-		void OnBeginTargetDrawing(IDrawingTarget drawing);
-		void OnBeginDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command);
-		void OnEndDrawCommand(Kernel.Graphics.DrawCommands.DrawCommand command);
-
-		void CountDrawCall(IDrawing drawing);
-
-		void OnAfterTargetDrawing(IDrawingTarget drawing);
-		void OnAfterDrawing(IDrawing drawing);
-		void OnAfterRender();
-
-		IDrawingPerformenceStatisticsData GetDrawingPerformenceData();
-		IDrawingPerformenceStatisticsData GetDrawingTargetPerformenceData();
-		IRenderPerformenceStatisticsData GetRenderPerformenceData();
-
-		void FormatStatistics(StringBuilder builder);
-
-		void Clear();
-		void PostUIRenderTime(TimeSpan ts);
-	}
+    void OnBeforeRender();
+    void OnAfterRender();
+    void OnBeforePresent();
+    void OnAfterPresent();
+    void OnBeginDrawCommand(DrawCommand command);
+    void OnAfterDrawCommand(DrawCommand command);
+    void OnBeginTargetDrawing(IDrawingTarget target);
+    void OnAfterTargetDrawing(IDrawingTarget target);
+    void CountDrawCall();
+    ICategorizedPerformenceStatisticsData GetDrawCommandPerformenceData();
+    ICategorizedPerformenceStatisticsData GetDrawingTargetPerformenceData();
+    IRenderPerformenceStatisticsData GetRenderPerformenceData();
+    void FormatStatistics(StringBuilder builder);
+    void Clear();
 }
-
-

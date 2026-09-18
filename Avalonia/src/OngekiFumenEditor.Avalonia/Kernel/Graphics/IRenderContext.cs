@@ -7,9 +7,11 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics
     {
         event Action<IRenderContext, TimeSpan> OnRender;
 
+        string Name { get; set; }
+
         /// <summary>
-        /// Performance monitor receiving the draw calls and timings produced while this context
-        /// presents a command list. Replaced by the editor when it attaches its render loop.
+        /// Performance monitor used for both command construction and presentation on this context.
+        /// A change takes effect between frames, keeping every begin/end pair on the same monitor.
         /// </summary>
         IPerfomenceMonitor PerfomenceMonitor { get; set; }
 

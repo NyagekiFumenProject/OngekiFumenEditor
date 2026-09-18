@@ -165,6 +165,7 @@ public class ReplayLifecycleBenchmarks
         }
 
         public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+        public string Name { get; set; } = string.Empty;
 
         public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
         {

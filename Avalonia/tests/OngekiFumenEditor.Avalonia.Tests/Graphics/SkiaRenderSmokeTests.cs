@@ -547,7 +547,7 @@ public sealed class SkiaRenderSmokeTests
             window.UpdateLayout();
             await manager.InitializeRenderControl(renderControl);
             renderContext = await manager.GetRenderContext(renderControl);
-            // This is what the editor does when it attaches its render loop.
+            // The performance panel installs the monitor on the live context.
             renderContext.PerfomenceMonitor = monitor;
             var drawingContext = new TestDrawingContext(renderContext, width, height);
             renderFrame = (ctx, _) =>
@@ -575,14 +575,10 @@ public sealed class SkiaRenderSmokeTests
             renderContext.OnRender += renderFrame;
             renderContext.StartRendering();
 
-            monitor.OnBeforeRender();
-            monitor.PostUIRenderTime(TimeSpan.FromMilliseconds(1));
             using var capturedFrame = window.CaptureRenderedFrame();
-            monitor.OnAfterRender();
 
             var render = monitor.GetRenderPerformenceData();
-            Assert.True(render.AveDrawCall > 0,
-                $"Expected the replay to report draw calls to the monitor installed on the context, but AveDrawCall was {render.AveDrawCall}.");
+            Assert.Equal(1, render.AveDrawCall);
         }
         finally
         {
@@ -594,6 +590,7 @@ public sealed class SkiaRenderSmokeTests
             }
 
             window.Close();
+            manager.ReleaseRenderControl(renderControl);
         }
     }
 

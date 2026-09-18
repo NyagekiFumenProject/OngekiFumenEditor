@@ -11,6 +11,9 @@ public interface IRenderManagerImpl
     Task InitializeRenderControl(Control renderControl, CancellationToken cancellation = default);
     Task<IRenderContext> GetRenderContext(Control renderControl, CancellationToken cancellation = default);
 
+    /// <summary>Gets a snapshot of the live contexts acquired from this manager.</summary>
+    IReadOnlyList<IRenderContext> GetRenderContexts();
+
     IImage LoadImageFromStream(Stream stream);
     Control CreateRenderControl();
     void ReleaseRenderControl(Control renderControl)

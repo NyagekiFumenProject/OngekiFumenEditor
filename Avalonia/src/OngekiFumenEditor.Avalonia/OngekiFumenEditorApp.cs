@@ -41,7 +41,7 @@ public abstract class OngekiFumenEditorApp : App
         if (!IsGUIMode)
             return;
 
-        // 对齐 WPF AppBootstrapper：启动调度循环（性能统计/自动保存等任务依赖它）。
+        // Start background tasks such as autosave and audio updates.
         _ = ServiceProvider.GetRequiredService<ISchedulerManager>().Init();
 
         // Browser 的实现会异步读取 OPFS；在这里启动并保存任务，不能阻塞同步的
@@ -121,7 +121,6 @@ public abstract class OngekiFumenEditorApp : App
         {
             var shell = ServiceProvider.GetRequiredService<IShell>();
             var documentManager = ServiceProvider.GetRequiredService<IEditorDocumentManager>();
-            var schedulerManager = ServiceProvider.GetRequiredService<ISchedulerManager>();
 
             // WPF 版由 FumenVisualEditorViewModel 的 Caliburn 生命周期钩子自行调用
             // NotifyCreate/NotifyActivate/NotifyDestory；Gekimini 没有等价钩子，
@@ -138,17 +137,13 @@ public abstract class OngekiFumenEditorApp : App
                 if (ReferenceEquals(previous, document))
                     return;
                 Log.LogInfo($"Active document changed from {previous?.GetType().FullName ?? "(none)"} to {document?.GetType().FullName ?? "(none)"}.");
-                // 对齐 WPF OnDeactivateAsync：切走编辑器时暂停音频、摘除调度任务。
+                // Pause the previous document's audio when switching away from it.
                 if (previous is not null)
                 {
                     previous.AudioPlayer?.Pause();
-                    if (schedulerManager.Schedulers.Contains(previous))
-                        _ = schedulerManager.RemoveScheduler(previous);
                 }
-                // 对齐 WPF OnActivateAsync：激活编辑器时注册调度任务（性能统计等）。
                 if (document is FumenVisualEditorViewModel editor)
                 {
-                    _ = schedulerManager.AddScheduler(editor);
                     documentManager.NotifyActivate(editor);
                 }
                 else if (previous is not null)
@@ -159,8 +154,6 @@ public abstract class OngekiFumenEditorApp : App
                 Log.LogInfo($"Shell dockable closed: {dockable.GetType().FullName}.");
                 if (dockable is FumenVisualEditorViewModel editor)
                 {
-                    if (schedulerManager.Schedulers.Contains(editor))
-                        _ = schedulerManager.RemoveScheduler(editor);
                     documentManager.NotifyDestory(editor);
                 }
             };
@@ -170,7 +163,6 @@ public abstract class OngekiFumenEditorApp : App
                 documentManager.NotifyCreate(editor);
             if (shell.ActiveDocument is FumenVisualEditorViewModel activeEditor)
             {
-                _ = schedulerManager.AddScheduler(activeEditor);
                 documentManager.NotifyActivate(activeEditor);
             }
         }

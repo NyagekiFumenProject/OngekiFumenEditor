@@ -310,6 +310,7 @@ public sealed class DrawCommandListTests
     private sealed class StubRenderContext : IRenderContext
     {
         public IPerfomenceMonitor PerfomenceMonitor { get; set; } = DummyPerformenceMonitor.Instance;
+        public string Name { get; set; } = string.Empty;
 
         public event Action<IRenderContext, TimeSpan>? OnRender;
 

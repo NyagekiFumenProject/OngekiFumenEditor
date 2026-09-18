@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
+using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.BeamDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.CircleDrawing;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia.Drawing.LineDrawing;
@@ -16,6 +17,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 {
     private readonly TaskCompletionSource initTaskSource = new();
     private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
+    private readonly List<IRenderContext> renderContexts = new();
 
     /// <summary>
     /// One replay per render context, kept for the lifetime of that context (PERF-RND-017 / RND-20).
@@ -50,7 +52,19 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         if (renderControl is not AvaloniaSkiaRenderControl skiaRenderControl)
             throw new ArgumentException("The render control must be an Avalonia Skia render control.", nameof(renderControl));
 
+        lock (renderContexts)
+        {
+            if (!renderContexts.Contains(skiaRenderControl.RenderContext))
+                renderContexts.Add(skiaRenderControl.RenderContext);
+        }
+
         return Task.FromResult<IRenderContext>(skiaRenderControl.RenderContext);
+    }
+
+    public IReadOnlyList<IRenderContext> GetRenderContexts()
+    {
+        lock (renderContexts)
+            return renderContexts.ToArray();
     }
 
     public IImage LoadImageFromStream(Stream stream)
@@ -65,6 +79,10 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         {
             var renderContext = skiaRenderControl.RenderContext;
             renderContext.StopRendering();
+            lock (renderContexts)
+                renderContexts.Remove(renderContext);
+            renderContext.Name = null;
+            renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
             drawCommandListContextSlots.Remove(renderContext);
 
             // The replay outlives individual frames, so it must be released explicitly here;
@@ -106,6 +124,8 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
         {
             var replay = GetOrCreateReplay(context);
             replay.BeginFrame(canvas, list.FrameState);
+            var monitor = context.PerfomenceMonitor;
+            monitor.OnBeforePresent();
             try
             {
                 replay.Present(list.Commands);
@@ -113,6 +133,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
             finally
             {
                 replay.EndFrame();
+                monitor.OnAfterPresent();
             }
         });
     }

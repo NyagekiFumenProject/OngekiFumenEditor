@@ -142,7 +142,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia
                 }
                 finally
                 {
-                    perfomenceMonitor.OnEndDrawCommand(command);
+                    perfomenceMonitor.OnAfterDrawCommand(command);
                 }
             }
         }
