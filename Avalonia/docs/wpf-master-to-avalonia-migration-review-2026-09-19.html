@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>WPF master 到 Avalonia 迁移实现与缺口调查报告</title>
+  <style>
+    :root {
+      --canvas: #f3f5f7;
+      --surface: #fff;
+      --surface-muted: #eef2f5;
+      --text: #20252b;
+      --muted: #5d6873;
+      --border: #cbd3da;
+      --accent: #0b5cab;
+      --accent-soft: #e6f0fa;
+      --success: #176b45;
+      --success-soft: #e7f5ed;
+      --warning: #8a4b00;
+      --warning-soft: #fff4e5;
+      --danger: #a32929;
+      --danger-soft: #fdecec;
+      --purple: #6941c6;
+      --purple-soft: #f1ebff;
+      --code: #f1f3f5;
+      --shadow: 0 8px 28px rgba(28, 39, 49, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--text);
+      font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+      line-height: 1.65;
+    }
+    .skip-link {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      z-index: 10;
+      padding: .55rem .8rem;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 4px;
+    }
+    .skip-link:focus { top: 1rem; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 285px) minmax(0, 1fr);
+      gap: 1.5rem;
+      width: min(1560px, 100%);
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    aside {
+      position: sticky;
+      top: 1.5rem;
+      align-self: start;
+      max-height: calc(100vh - 3rem);
+      overflow: auto;
+      padding: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+    }
+    .toc-title {
+      margin: 0 0 .7rem;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    #toc { display: grid; gap: .15rem; }
+    #toc a {
+      display: block;
+      padding: .28rem .45rem;
+      color: var(--muted);
+      font-size: .86rem;
+      line-height: 1.35;
+      text-decoration: none;
+      border-left: 2px solid transparent;
+    }
+    #toc a:hover, #toc a:focus-visible {
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-left-color: var(--accent);
+      outline: none;
+    }
+    #toc a.level-3 { padding-left: 1rem; font-size: .8rem; }
+    main {
+      min-width: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: var(--shadow);
+    }
+    article { padding: clamp(1.25rem, 3vw, 3.25rem); }
+    h1, h2, h3, h4 { scroll-margin-top: 1rem; line-height: 1.25; }
+    h1 {
+      margin: 0 0 1.25rem;
+      padding-bottom: 1rem;
+      font-size: clamp(1.8rem, 3vw, 2.55rem);
+      border-bottom: 2px solid var(--accent);
+    }
+    h2 {
+      margin: 2.8rem 0 1rem;
+      padding-bottom: .35rem;
+      color: #263746;
+      font-size: 1.55rem;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { margin: 2rem 0 .75rem; color: var(--accent); font-size: 1.15rem; }
+    h4 { margin: 1.25rem 0 .5rem; color: #34495a; font-size: 1rem; }
+    p { margin: .7rem 0; }
+    a { color: var(--accent); }
+    code {
+      padding: .1em .3em;
+      color: #263746;
+      background: var(--code);
+      border: 1px solid #e1e6ea;
+      border-radius: 3px;
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: .9em;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    pre {
+      overflow: auto;
+      padding: 1rem;
+      background: #1f2933;
+      color: #f4f7f9;
+      border-radius: 4px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; border: 0; }
+    blockquote {
+      margin: 1rem 0;
+      padding: .8rem 1rem;
+      color: #3c4a55;
+      background: var(--surface-muted);
+      border-left: 4px solid var(--accent);
+    }
+    .notice, .callout {
+      margin: 1rem 0;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--accent);
+      border-radius: 4px;
+      background: var(--accent-soft);
+    }
+    .notice.success { border-left-color: var(--success); background: var(--success-soft); }
+    .notice.warning { border-left-color: var(--warning); background: var(--warning-soft); }
+    .notice.danger { border-left-color: var(--danger); background: var(--danger-soft); }
+    .notice.purple { border-left-color: var(--purple); background: var(--purple-soft); }
+    .meta { color: var(--muted); font-size: .92rem; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+      gap: .75rem;
+      margin: 1rem 0 1.25rem;
+    }
+    .metric {
+      min-height: 100px;
+      padding: .8rem;
+      background: var(--surface-muted);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+    }
+    .metric strong { display: block; color: var(--accent); font-size: 1.35rem; line-height: 1.2; }
+    .metric span { display: block; margin-top: .25rem; font-weight: 700; }
+    .metric small { display: block; margin-top: .25rem; color: var(--muted); line-height: 1.35; }
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table { width: 100%; min-width: 680px; border-collapse: collapse; font-size: .91rem; }
+    th, td { padding: .58rem .68rem; vertical-align: top; text-align: left; border: 1px solid var(--border); }
+    th { background: var(--surface-muted); font-weight: 700; }
+    tr:nth-child(even) td { background: #fbfcfd; }
+    td.status { white-space: nowrap; font-weight: 700; }
+    .status-done { color: var(--success); }
+    .status-partial { color: var(--warning); }
+    .status-missing { color: var(--danger); }
+    .status-replaced { color: var(--purple); }
+    .pill {
+      display: inline-block;
+      margin: .1rem .2rem .1rem 0;
+      padding: .08rem .45rem;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .pill.done { color: var(--success); background: var(--success-soft); }
+    .pill.partial { color: var(--warning); background: var(--warning-soft); }
+    .pill.missing { color: var(--danger); background: var(--danger-soft); }
+    .pill.replaced { color: var(--purple); background: var(--purple-soft); }
+    .two-col { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--border); border-radius: 5px; background: #fbfcfd; }
+    .card h3, .card h4 { margin-top: 0; }
+    ul, ol { padding-left: 1.5rem; }
+    li + li { margin-top: .25rem; }
+    hr { border: 0; border-top: 1px solid var(--border); }
+    .small { color: var(--muted); font-size: .88rem; }
+    .evidence { color: #34495a; font-size: .9rem; }
+    .evidence code { white-space: normal; }
+    @media (max-width: 900px) {
+      .layout { display: block; padding: .75rem; }
+      aside { position: static; max-height: none; margin-bottom: .75rem; }
+      #toc { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+      main { border-radius: 4px; }
+      article { padding: 1rem; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .layout { display: block; width: auto; padding: 0; }
+      aside { display: none; }
+      main { border: 0; box-shadow: none; }
+      article { padding: 0; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#document">跳到正文</a>
+  <div class="layout">
+    <aside aria-label="文档目录">
+      <p class="toc-title">报告目录</p>
+      <nav id="toc"></nav>
+    </aside>
+    <main id="document" tabindex="-1">
+      <article>
+        <h1>WPF <code>master</code> 到 Avalonia 的迁移实现与缺口调查</h1>
+        <p class="meta">调查对象：本地 WPF <code>master</code> 与远端 <code>origin/master</code> 的差异，并核对当前 <code>avalonia12</code> 项目。报告性质：只读调查记录。本文档是本次明确要求新建的唯一文件；没有迁移或修改任何源代码。</p>
+
+        <div class="notice success">
+          <strong>结论先行：</strong> Avalonia 已经实现了主线改动中最重要的核心模型、解析器、编辑器、选择/检查器、谱面列表、音频、DrawCommand/Skia 渲染、自动保存/项目 I/O、布局和主要命令行工具。但当前仍不是 WPF 全功能等价版本；脚本执行与 RuntimeAutomation、领域 MCP、游戏控制器查看器、OptionGeneratorTools GUI、Save As、Desktop GUI 更新闭环，以及若干视觉/平台行为仍未完整迁移。
+        </div>
+
+        <div class="notice warning">
+          <strong>证据口径：</strong> 本报告的“已迁移”表示当前 Avalonia 源码中存在对应实现或明确的新架构替代；不把同名文件、成功编译或旧报告中的结论单独当作功能等价证明。源码核对使用当前工作树；未在本次文档任务中运行构建、测试或 GUI 冒烟。
+        </div>
+
+        <h2 id="scope">1. 调查范围、基线与方法</h2>
+        <p>比较范围是 Git 的 <code>master..origin/master</code>，不是 Avalonia 分支之间的提交差异。原因是用户要求检查“从本地 master 到远端 master 的这些改动”分别有多少已经迁移到 Avalonia。WPF 主线的文件、提交主题和当前 Avalonia 源码分别核对；对于路径消失但存在替代实现的情况，按行为和调用链判断，不按文件复制数量机械判定。</p>
+        <h3 id="scope-baseline">1.1 当前 Git 基线</h3>
+        <div class="metrics">
+          <div class="metric"><strong>a00e90ab4</strong><span>本地 master</span><small>比较起点</small></div>
+          <div class="metric"><strong>8b2940785</strong><span>origin/master</span><small>远端查询得到的最新 master</small></div>
+          <div class="metric"><strong>1b63794eb</strong><span>当前 HEAD</span><small><code>avalonia12</code></small></div>
+          <div class="metric"><strong>265</strong><span>主线提交差异</span><small>origin/master 独有提交</small></div>
+          <div class="metric"><strong>250 + 15</strong><span>非合并 + 合并</span><small>当前 Git 计数口径</small></div>
+          <div class="metric"><strong>1,346</strong><span>文件差异</span><small>最终路径状态统计</small></div>
+          <div class="metric"><strong>+384,644</strong><span>新增行</span><small><code>git diff --shortstat</code></small></div>
+          <div class="metric"><strong>-85,845</strong><span>删除行</span><small><code>git diff --shortstat</code></small></div>
+        </div>
+        <pre><code>git rev-parse master origin/master HEAD
+# a00e90ab4980079875df3532fcbdc7d5a8a16373
+# 8b2940785e9b16b450e70fe248cfd16fa1d89040
+# 1b63794eb196d374a9ccb4456952713ce237182b
+
+git merge-base master origin/master
+# a00e90ab4980079875df3532fcbdc7d5a8a16373
+
+git rev-list --count master..origin/master
+# 265
+
+git rev-list --count --no-merges master..origin/master
+# 250
+
+git rev-list --merges --count master..origin/master
+# 15
+
+git ls-remote origin refs/heads/master
+# 8b2940785e9b16b450e70fe248cfd16fa1d89040 refs/heads/master</code></pre>
+
+        <h3 id="scope-file-stats">1.2 文件差异统计</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>状态</th><th>数量</th><th>含义</th></tr></thead>
+          <tbody>
+            <tr><td>修改（M）</td><td>1,034</td><td>既有文件在主线发生修改。</td></tr>
+            <tr><td>新增（A）</td><td>276</td><td>主线新增文件，包括 benchmark、MCP、脚本、文档和功能代码。</td></tr>
+            <tr><td>删除（D）</td><td>31</td><td>主线删除的旧路径或废弃实现。</td></tr>
+            <tr><td>纯重命名（R100）</td><td>5</td><td>5 个原生 DLL 从 <code>costura-win-x64</code> 移到 <code>natives</code>。</td></tr>
+            <tr><th>合计</th><th>1,346</th><th>与 <code>git diff --shortstat</code> 的文件数一致。</th></tr>
+          </tbody>
+        </table></div>
+        <h3 id="scope-top-level">1.3 顶层目录分布</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>顶层路径</th><th>文件数</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td><code>OngekiFumenEditor</code></td><td>1,222</td><td>WPF 主项目，是功能核对主体。</td></tr>
+            <tr><td><code>OngekiFumenEditor.Benchmark</code></td><td>96</td><td>大量新增 benchmark 和谱面样本。</td></tr>
+            <tr><td><code>docs</code></td><td>12</td><td>主线审计、设计、NativeAOT/MCP 等文档。</td></tr>
+            <tr><td><code>Dependences</code></td><td>2</td><td>子模块指针变化。</td></tr>
+            <tr><td><code>Tools</code></td><td>2</td><td>工具脚本。</td></tr>
+            <tr><td>其他根目录文件</td><td>12</td><td>CI、工程、README、solution、wiki 等。</td></tr>
+          </tbody>
+        </table></div>
+        <p class="small">上表是当前命令按路径第一段统计的结果；WPF 主项目内部的目录统计另见第 2 节。已有的旧比较 HTML 曾使用过 264 个提交的历史口径；当前直接执行 Git 得到 265 个，因此本报告以当前命令输出为准。</p>
+
+        <h2 id="classification">2. 判定分类与证据规则</h2>
+        <div class="table-wrap"><table>
+          <thead><tr><th>分类</th><th>本报告含义</th><th>判定方式</th></tr></thead>
+          <tbody>
+            <tr><td class="status status-done">已迁移</td><td>Avalonia 有对应领域实现或可追溯的新架构替代。</td><td>必须能在当前 Avalonia 源码中找到类型、服务、ViewModel、命令或渲染链路证据。</td></tr>
+            <tr><td class="status status-partial">部分迁移</td><td>已有入口或核心能力，但行为、算法、UI 表现、平台范围或验证证据不完整。</td><td>明确列出已覆盖和仍不同的部分，不能把部分实现写成完全等价。</td></tr>
+            <tr><td class="status status-missing">未迁移</td><td>WPF 主线存在可达功能，而当前 Avalonia 没有对应模块、服务或入口。</td><td>结合 WPF 变更路径和 Avalonia 缺失目录/符号核对。</td></tr>
+            <tr><td class="status status-replaced">有意替代</td><td>WPF 专用实现没有逐行迁移，但被 Avalonia/Gekimini/Skia/CLI 的不同架构取代。</td><td>记录替代链和行为边界；不能说成“完全没有对应功能”。</td></tr>
+          </tbody>
+        </table></div>
+        <p>报告还区分“源码存在”和“已验收”。本次只读调查没有重新运行全量测试或应用启动；因此即使某项有完整源码，也只称为“源码已迁移”，不把它升级成“运行时完全验收”。</p>
+
+        <h2 id="change-map">3. master 到 origin/master 的功能变化地图</h2>
+        <p>主线差异不是单一迁移批次，而是多个时间段和功能链的叠加。以下按提交主题归纳，便于把 WPF 变更与 Avalonia 落点对应起来。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>阶段/提交主题</th><th>WPF 主线发生的变化</th><th>对 Avalonia 的核对结果</th></tr></thead>
+          <tbody>
+            <tr><td>2025-10 至 2026-02<br>选择和过滤</td><td>Bullet palette 过滤刷新、过滤结果缓存、编辑器切换刷新、无 tail 崩溃修复、BPM 过滤、选择菜单上下文命令。</td><td class="status status-done">已迁移</td></tr>
+            <tr><td>2026-03<br>MCP、脚本、技能</td><td>AkariMindController、MCP tools、MCP resources、skills、i18n、脚本确认窗口，并将文件拆到 Core/RuntimeAutomation。</td><td class="status status-missing">领域 MCP/脚本未迁移</td></tr>
+            <tr><td>2026-03<br>Core 拆分和 parser 迁移</td><td>Base 拆到 Core，QuadTree 重写，Parser/Utils 迁移和命名空间调整。</td><td class="status status-done">已迁移或以 Avalonia Core 重写</td></tr>
+            <tr><td>2026-04 至 2026-05<br>渲染后端和性能</td><td>相机相对渲染、Skia/DX、LineDrawing、DrawCommandList、对象池、波形、性能监控和多项热路径优化。</td><td class="status status-replaced">核心语义已迁移；WPF backend 由 Skia lease 替代</td></tr>
+            <tr><td>2026-05 至 2026-06<br>脚本和编辑器性能</td><td>脚本项目生成、Visual Studio 编辑、推荐脚本校验、可玩区域和投射物绘制优化。</td><td class="status status-partial">渲染优化已迁移；脚本执行链未迁移</td></tr>
+            <tr><td>2026-06<br>游戏控制器</td><td>autoplay RPC、连接/断开防护、发送期间禁止重连、RPC 错误处理。</td><td class="status status-missing">未发现 Avalonia 对应模块</td></tr>
+            <tr><td>2026-07<br>设置、更新器、布局</td><td>HoldBodyWidth、编辑器/音效偏移、Gemini 设置生命周期、更新后布局恢复。</td><td class="status status-done">设置、布局和 CLI updater 已迁移；GUI 更新闭环不完整</td></tr>
+            <tr><td>2026-07 至 2026-08<br>稳定性修复</td><td>检查器 Loaded 空引用、谱面列表无效/空根目录刷新崩溃。</td><td class="status status-done">已有对应保护和列表扫描实现</td></tr>
+            <tr><td>2026-09<br>README 和链接</td><td>README 与链接更新。</td><td class="status status-partial">属于文档同步，不是 Avalonia 功能迁移</td></tr>
+          </tbody>
+        </table></div>
+        <h3 id="change-counts">3.1 WPF 主项目重点目录变更量</h3>
+        <div class="two-col">
+          <div class="card"><h4>Modules</h4><ul>
+            <li><code>FumenVisualEditor</code>：169</li><li><code>FumenObjectPropertyBrowser</code>：47</li><li><code>OptionGeneratorTools</code>：44</li><li><code>FumenCheckerListViewer</code>：33</li><li><code>EditorScriptExecutor</code>：26</li><li><code>AudioPlayerToolViewer</code>：18</li><li><code>OngekiGamePlayControllerViewer</code>：13</li><li><code>FumenEditorSelectingObjectViewer</code>：12</li><li><code>FumenConverter</code>：11</li><li><code>OgkiFumenListBrowser</code>：10</li><li><code>PreviewSvgGenerator</code>：9</li>
+          </ul></div>
+          <div class="card"><h4>Kernel</h4><ul>
+            <li><code>Graphics</code>：150</li><li><code>Audio</code>：36</li><li><code>SettingPages</code>：24</li><li><code>RuntimeAutomation</code>：24</li><li><code>RecentFiles</code>：9</li><li><code>Mcp</code>：8</li><li><code>ProgramUpdater</code>：7</li><li><code>MiscMenu</code>：7</li><li><code>CurveInterpolater</code>：7</li><li><code>EditorLayout</code>：5</li><li><code>Scheduler</code>：3</li>
+          </ul></div>
+        </div>
+
+        <h2 id="migrated">4. 已迁移到 Avalonia 的功能</h2>
+        <p>本节记录当前源码中能够直接核对到的实现，不代表所有平台和 UI 场景均已完成最终验收。</p>
+
+        <h3 id="migrated-core">4.1 核心模型、Parser、数据结构</h3>
+        <p class="status status-done">状态：已迁移（Avalonia 采用独立 Core 命名空间和实现）</p>
+        <ul>
+          <li>基础模型：<code>Base/OngekiFumen.cs</code>、<code>Base/OngekiObjects/**</code>、Lane、Hold、Beam、Projectile、Soflan、BPM、Meter 等。</li>
+          <li>接口和序列化：<code>Parser/IFumenSerializable.cs</code>、<code>IFumenDeserializable.cs</code>、<code>IFumenParserManager.cs</code>、<code>Parser/DefaultImpl/**</code>。</li>
+          <li>OGKR/Nyageki：<code>Parser/Ogkr/**</code> 和 <code>Utils/Ogkr/**</code>。</li>
+          <li>集合和区间：<code>Base/Collections/**</code>、RangeTree、IntervalTree、QuadTree 替代路径。</li>
+          <li>显示对象聚合：Connectable object 的 child 顺序和顶层显示对象展开。</li>
+        </ul>
+        <p class="evidence">证据：Avalonia 的 <a href="../src/OngekiFumenEditor.Avalonia/Base/">Base</a>、<a href="../src/OngekiFumenEditor.Avalonia/Parser/">Parser</a>、<a href="../src/OngekiFumenEditor.Avalonia/Utils/Ogkr/">Ogkr utils</a> 目录存在对应实现。相关迁移提交主题包括 <code>8b5316995</code>（Base 拆分）、<code>ded496d32</code>（Parsers/Utils 迁移）、<code>85f51171</code> 和 <code>ac1a8f6f</code>（parser/runtime hot paths）。</p>
+
+        <h3 id="migrated-palette">4.2 Bullet/Bell palette null 模型</h3>
+        <p class="status status-done">状态：已迁移并完成 clean cutover</p>
+        <ul>
+          <li>删除历史 Dummy palette 作为真实对象的语义，采用 null-only 委托模型。</li>
+          <li>增加标准化默认 Bell/Bullet palette marker。</li>
+          <li>Nyageki 输出中跳过 marker 行，并处理 CustomBullet 重复 Speed 问题。</li>
+          <li>删除旧的 Bullet null 检查规则和 Dummy palette 隐藏 converter。</li>
+        </ul>
+        <p class="evidence">证据：迁移提交 <code>db81b840</code>；当前 Avalonia 仍可在模型、解析器和属性生成器中找到 null palette 语义。旧 WPF 删除的 <code>BulletNullPalleteCheckRule.cs</code>、<code>HideIfDummyPalleteConverter.cs</code> 不应被误认为 Avalonia 缺陷，它们是旧模型切换后的废弃路径。</p>
+
+        <h3 id="migrated-editor">4.3 编辑器、选择、检查器和谱面列表</h3>
+        <p class="status status-done">状态：主要功能已迁移</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>领域</th><th>当前 Avalonia 落点</th><th>已核对行为</th></tr></thead>
+          <tbody>
+            <tr><td>选择过滤</td><td><code>Modules/FumenEditorSelectingObjectViewer/Base/SelectionFilter/**</code>、<code>SelectionFilterViewModel.cs</code></td><td>类型、tag/regex、lane、dockable/floating、timeline、critical/flick、palette、size、BPM 等过滤选项；结果缓存、计数、反选和编辑器切换刷新。</td></tr>
+            <tr><td>选择查看器</td><td><code>FumenEditorSelectingObjectViewerViewModel.cs</code></td><td>选中项同步、上下文命令、删除/聚焦/滚动、DataGrid 多选行为。</td></tr>
+            <tr><td>检查器</td><td><code>Modules/FumenCheckerListViewer/**</code></td><td>错误、问题、建议分类；结果刷新、显示过滤和双击导航；空编辑器/无效状态保护。</td></tr>
+            <tr><td>谱面列表</td><td><code>Modules/OgkiFumenListBrowser/**</code></td><td>Music.xml/MusicSource.xml 扫描、BPM 筛选、标题/艺术家/谱师搜索、难度关联、音频/封面关联、空或无效根目录处理。</td></tr>
+            <tr><td>Bullet palette 列表</td><td><code>Modules/FumenBulletPalleteListViewer/**</code></td><td>过滤、创建、删除、引用导航和选择同步。</td></tr>
+            <tr><td>转换器</td><td><code>Modules/FumenConverter/**</code></td><td>输入/输出文件选择、当前编辑器输入、转换服务调用。</td></tr>
+          </tbody>
+        </table></div>
+        <p class="evidence">证据提交：<code>2bbcbe35</code>（checker/selection/browser）、<code>0fe7b4fd</code>（selection filters）、<code>dba424a8</code>（list browser search）、<code>cc8ee560</code>（selection command state）。</p>
+
+        <h3 id="migrated-project-io">4.4 项目新建、打开、普通保存、自动保存和布局</h3>
+        <p class="status status-done">状态：主要工作流已迁移；Save As 另列为未完成</p>
+        <ul>
+          <li>新建项目：<code>FumenVisualEditorProvider.Setup.cs</code>、<code>EditorProjectCreationTransaction.cs</code>。</li>
+          <li>从文件夹打开：<code>FumenVisualEditorProvider.ProjectIO.cs</code> 的 <code>OpenFromFolderAsync</code>。</li>
+          <li>最近项目恢复：<code>OpenFromRecentAsync</code>、<code>EditorFileAccessContextSnapshot</code> 和 bookmark。</li>
+          <li>普通保存：<code>FumenVisualEditorViewModel.Save()</code>，通过 <code>EditorProjectDataUtils.TrySaveEditorAsync</code> 写回工程和谱面。</li>
+          <li>自动保存：<code>DefaultEditorDocumentManager</code> 根据 <code>AutoSaveTimeInterval</code> 与 <code>IsEnableAutoSave</code> 调度 <code>FumenRescue.SaveRecoverySnapshotAsync</code>。</li>
+          <li>恢复快照删除：普通保存成功和文档释放时删除对应 recovery snapshot。</li>
+          <li>布局：<code>Kernel/EditorLayout/EditorLayoutManager.cs</code> 通过 Shell layout JSON 流式 Save/Load。</li>
+        </ul>
+        <p class="evidence">证据路径：<a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs"><code>FumenVisualEditorViewModel.cs</code></a>、<a href="../src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/FumenVisualEditorProvider.ProjectIO.cs"><code>FumenVisualEditorProvider.ProjectIO.cs</code></a>、<a href="../src/OngekiFumenEditor.Avalonia/Utils/DeadHandler/FumenRescue.cs"><code>FumenRescue.cs</code></a>、<code>EditorLayoutManager.cs</code>。对应迁移提交主题为 <code>3adc4e58</code>（更新器握手、CWD、布局流）。</p>
+
+        <h3 id="migrated-settings">4.5 设置、KeyBinding 和颜色选择</h3>
+        <p class="status status-done">状态：已迁移为 Avalonia/Gekimini/CommunityToolkit 形态</p>
+        <ul>
+          <li><code>EditorOffsetMs</code>：编辑器视口时间偏移，并在绘制时转换当前 TGrid。</li>
+          <li><code>SoundOffsetMs</code>：音效事件时钟偏移，由 <code>DefaultFumenSoundPlayer</code> 消费。</li>
+          <li><code>HoldBodyWidth</code>：设置范围 1..50，并由 Hold 绘制目标动态刷新。</li>
+          <li>KeyBinding 定义、冲突检查、冲突确认和保存。</li>
+          <li>CommonColorPicker 使用 Avalonia <code>ColorView</code>，包括颜色模型、透明度、组件和十六进制输入。</li>
+        </ul>
+        <p class="evidence">证据：<code>Models/Settings/EditorGlobalSetting.cs</code>、<code>Models/Settings/AudioSetting.cs</code>、<code>Kernel/KeyBinding/**</code>、<code>Kernel/SettingPages/**</code>、<code>UI/Dialogs/Views/CommonColorPickerView.axaml</code>。对应主线主题是 <code>ad322e116</code>、<code>54b7d86e0</code>、<code>83b50efc2</code>（Hold width、设置生命周期、偏移）。</p>
+
+        <h3 id="migrated-audio">4.6 音频和 waveform</h3>
+        <p class="status status-done">状态：当前源码已有实现；平台运行时仍需专项验收</p>
+        <ul>
+          <li><code>Kernel/Audio/NAudioImpl/NAudioManager.cs</code> 通过 <code>[RegisterSingleton&lt;IAudioManager&gt;]</code> 注册。</li>
+          <li>NAudio music/sound mixer、播放器、缓存音效、SoundTouch 变速和输出设备工厂均存在。</li>
+          <li>Windows/桌面能力模型包含 NAudio 和 ASIO；Browser 能力模型包含 AudioWorklet。</li>
+          <li><code>AudioAdjustWindow</code> 支持 WAV 输入/输出、按秒或 BPM/GridOffset 计算偏移，以及对当前谱面对象执行可撤销的 TGrid 重算。</li>
+          <li><code>AudioPlayerToolViewer</code> 使用 <code>WaveformRenderSession</code> 和 DrawCommand builder 绘制波形、拍线、对象时间线和覆盖文字。</li>
+        </ul>
+        <p class="evidence">证据路径：<code>Kernel/Audio/NAudioImpl/**</code>、<code>Kernel/Audio/Browser/**</code>、<code>Modules/AudioAdjustWindow/**</code>、<code>Modules/AudioPlayerToolViewer/Graphics/WaveformDrawing/**</code>。旧版 2026-08-01 报告写的“NAudio 不可用”属于过时基线；当前代码已经包含实际注册和实现，不能照抄旧结论。</p>
+
+        <h3 id="migrated-render">4.7 DrawCommand、Skia 渲染和性能迁移</h3>
+        <p class="status status-done">状态：核心架构已迁移为 Avalonia.Skia 单一路径</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>WPF/主线主题</th><th>Avalonia 当前落点</th><th>结果</th></tr></thead>
+          <tbody>
+            <tr><td>DrawCommandList、池化和双帧</td><td><code>Kernel/Graphics/DrawCommands/**</code>、<code>DrawCommandListContextSlots.cs</code></td><td>builder 录制、front/back slot、Swap/Present、自动释放和 frame state。</td></tr>
+            <tr><td>Skia replay</td><td><code>Kernel/Graphics/Skia/SkiaDrawCommandListReplay.cs</code></td><td>按 render context 缓存 replay，帧间复用 line/texture/string drawing 状态。</td></tr>
+            <tr><td>相机相对坐标</td><td><code>DrawingTargetContext.ViewRelativeOriginY</code>、<code>ConvertToViewRelativeY</code></td><td>CPU double 域扣除相机原点，避免大 TGrid 转 float 时相消。</td></tr>
+            <tr><td>Playfield/Projectile/Lane/Hold/Beam</td><td><code>Modules/FumenVisualEditor/Graphics/Drawing/**</code></td><td>各 target 使用 builder 和 view-relative Y。</td></tr>
+            <tr><td>热路径优化</td><td>Meter/BPM bound query、BulletPalleteList backing、字符串绘制缓存、对象池和 benchmark</td><td>已有大量 Avalonia 专属迁移提交和 benchmark。</td></tr>
+          </tbody>
+        </table></div>
+        <p class="evidence">对应提交主题：<code>d1844334</code>（DrawCommandList）、<code>a10bddd1</code>（camera relative）、<code>6b1f3b5c</code>（hot paths）、<code>d1394bbd</code>（replay cache）、<code>1fd41352</code>（string drawing）、<code>19552567</code>（MeterChangeList）、<code>522f0f79</code>（BulletPalleteList）。当前 benchmark 目录为 <code>Avalonia/benchmarks/OngekiFumenEditor.Avalonia.Benchmark/</code>。</p>
+
+        <h3 id="migrated-cli">4.8 Avalonia CLI 和生成工具</h3>
+        <p class="status status-done">状态：命令行功能已迁移；与 WPF GUI 工具不是同一交互形态</p>
+        <p>当前 Desktop/CommandLine 已注册以下命令：</p>
+        <ul>
+          <li><code>convert</code>：谱面格式转换。</li>
+          <li><code>svg</code>：预览 SVG/PNG 生成。</li>
+          <li><code>jacket</code>：封面 AssetBundle 生成和 assets.bytes 更新。</li>
+          <li><code>updater</code>：目录更新、父进程等待、备份/复制/回滚和重启。</li>
+          <li><code>acb</code>：ACB/AWB/XML 生成。</li>
+        </ul>
+        <p class="evidence">证据：<a href="command-line-migration-tracking.md"><code>command-line-migration-tracking.md</code></a> 明确记录五个命令和其契约；命令入口位于 <code>Avalonia/src/OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/**</code>。这部分覆盖了部分原 <code>OptionGeneratorTools</code> 生成功能，但没有恢复原 WPF 生成器窗口。</p>
+        <h2 id="partial">5. 部分迁移：已有入口但尚未达到 WPF 等价</h2>
+        <p>这些领域不能简单标为“没有迁移”，因为 Avalonia 已有可工作的入口或替代实现；同时也不能标为“已完成”，因为算法、UI、平台能力或证据仍有明确差距。</p>
+
+        <h3 id="partial-playfield">5.1 PlayableArea / DrawPlayableAreaHelper 几何算法</h3>
+        <p class="status status-partial">状态：入口和渲染链已迁移，几何实现不是 WPF 的逐项等价实现</p>
+        <ul>
+          <li>WPF 主线的实现以 <code>textFieldRangeParam</code>、<code>AdjustLaneIntersection</code> 和 <code>EarcutNet</code> 三角化路径为中心。</li>
+          <li>当前 Avalonia 的 <code>DrawPlayableAreaHelper</code> 采用可见 TGrid/墙边界采样、lane 边界集合和多边形绘制的另一条路径，并在 frame 内缓存边界。</li>
+          <li>因此 Avalonia 已经能进入 PlayableArea 绘制，但边界采样密度、墙交点、凹多边形分割、极端 lane/soflan 场景不能仅凭同名 helper 认定相等。</li>
+          <li>当前分支已有专门的 contract/child-range 测试和 benchmark 提交，但本报告没有重新运行它们；应把“算法不同”作为后续视觉/几何验收边界。</li>
+        </ul>
+        <p class="evidence">证据：<code>Modules/FumenVisualEditor/Graphics/Drawing/TargetImpl/PlayArea/**</code>（或同目录下的 <code>DrawPlayableAreaHelper</code> 实现）、<code>e88bca1fc</code>（playfield contract）、<code>596448eac</code>（DrawPlayField 行为接管）、<code>DrawPlayableAreaHelperNewP1Benchmarks.cs</code>。这里的结论是“新架构实现并存”，不是 WPF 算法缺失。</p>
+
+        <h3 id="partial-svg">5.2 Preview SVG 生成</h3>
+        <p class="status status-partial">状态：已迁移可用生成器；完整视觉/资源等价尚未证明</p>
+        <ul>
+          <li>Avalonia 有 <code>IPreviewSvgGenerator</code>、<code>DefaultPreviewSvgGenerator</code>、<code>GenerateSvgCommandHandler</code> 和资源图片，能够生成 SVG，并由 Desktop CLI 进一步栅格化 PNG。</li>
+          <li>WPF 主线的 <code>PreviewSvgGenerator</code> 目录有 9 个变更文件，旧生成器包含更长的对象、资源、Soflan 和注释处理路径；当前 Avalonia 实现明显是重新组织的较小实现。</li>
+          <li>尚未据此证明所有对象类型、主题颜色、字体、外部资源、Soflan weighted 模式和 PNG 栅格结果与 WPF 像素等价。</li>
+        </ul>
+        <p class="evidence">证据路径：<a href="../src/OngekiFumenEditor.Avalonia/Modules/PreviewSvgGenerator/"><code>Modules/PreviewSvgGenerator/</code></a>、<code>OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/Svg/</code>、<code>DefaultPreviewSvgGenerator.LegacyCommented.cs</code>。这属于“功能入口迁移 + 视觉验收缺口”。</p>
+
+        <h3 id="partial-dragdrop">5.3 拖放、外部文件拖入和列表交互</h3>
+        <p class="status status-partial">状态：编辑器对象拖放和 ListView 管理器已存在；跨窗口/外部文件行为仍需逐场景核对</p>
+        <ul>
+          <li>当前 Avalonia 有 <code>UI/ListViewDragDropManager/</code>、<code>DragAdorner</code>、<code>Modules/FumenVisualEditor/Base/DropActions/</code>，以及属性浏览器的 connectable object drop actions。</li>
+          <li>编辑器视图已出现 <code>DragEnter</code>/<code>DragOver</code>/<code>Drop</code> 相关处理，说明 WPF 的对象拖入主路径并非完全缺失。</li>
+          <li>WPF 主线还改动了 ListView drag/drop manager、拖放高亮、外部文件拖入和浮动窗口路径；Avalonia 的 Avalonia event routing、DataGrid、Gekimini docking 和外部文件授权语义不同。</li>
+          <li>因此不能仅凭存在 <code>ListViewDragDropManager.cs</code> 宣称所有 WPF 拖放体验已经迁移。</li>
+        </ul>
+        <p class="evidence">证据路径：<code>UI/ListViewDragDropManager/**</code>、<code>Modules/FumenVisualEditor/Base/DropActions/**</code>、<code>Modules/FumenObjectPropertyBrowser/ViewModels/DropActions/**</code>；旧 WPF 对照路径为 <code>OngekiFumenEditor/Kernel/EditorLayout/**</code>、<code>UI/Controls/**</code> 和各模块 View code-behind。</p>
+
+        <h3 id="partial-updater">5.4 ProgramUpdater：CLI 已迁移，Desktop GUI 更新闭环不完整</h3>
+        <p class="status status-partial">状态：服务/命令行迁移；GUI 入口和真实应用更新验收不足</p>
+        <ul>
+          <li>Avalonia 有 <code>Kernel/ProgramUpdater/</code> 的抽象，以及 Desktop <code>CommandLine/Commands/Updater/</code> 的 option、definition、handler。</li>
+          <li>CLI updater 已覆盖父进程等待、目标工作目录、备份、复制失败、重启参数和部分恢复语义。</li>
+          <li>WPF 主线的更新后布局恢复、GUI 更新入口、独立 updater 窗口/进程协作不是同一个层次的功能；当前 Avalonia 没有证据表明所有桌面应用升级触发点都已接线。</li>
+          <li>此前审查中已经用探针验证过独立 updater 的若干进程契约，但这证明的是 updater 服务/命令行，不等同于真实编辑器从 GUI 发起升级的端到端闭环。</li>
+        </ul>
+        <p class="evidence">证据路径：<code>Kernel/ProgramUpdater/**</code>、<code>OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/Updater/**</code>、<code>DefaultProgramUpdateService.cs</code>；WPF 对照为 <code>OngekiFumenEditor/Kernel/ProgramUpdater/**</code> 和 <code>OngekiFumenEditor.CommandLine/**</code>。</p>
+
+        <h3 id="partial-audio-platform">5.5 音频平台和能力矩阵</h3>
+        <p class="status status-partial">状态：实现存在；不同平台的失败语义和真实设备覆盖仍需验收</p>
+        <ul>
+          <li>Desktop NAudio 和 Browser AudioWorklet 已有各自实现，不应再用“没有音频模块”描述当前代码。</li>
+          <li>ASIO、输出设备、浏览器 autoplay、AudioWorklet 初始化、WAV 编解码和资源释放属于平台能力差异；WPF 的 NAudio 直接调用不能照搬到 Browser。</li>
+          <li>当前证据可证明接口注册和主要调用链，不足以证明没有设备、权限拒绝、浏览器用户手势限制、设备切换和异常断开时的统一产品语义。</li>
+        </ul>
+
+        <h2 id="missing">6. 尚未迁移到 Avalonia 的主线变动</h2>
+        <p>以下项目在 WPF <code>master..origin/master</code> 中有明确代码或入口，而当前 Avalonia 源树没有相应完整模块，或只有资源/替代命令行而没有用户可达的等价功能。</p>
+
+        <h3 id="missing-scripts">6.1 EditorScriptExecutor 与 RuntimeAutomation</h3>
+        <p class="status status-missing">状态：未迁移</p>
+        <ul>
+          <li>WPF 主线中 <code>Modules/EditorScriptExecutor</code> 有 26 个变更文件，<code>Kernel/RuntimeAutomation</code> 有 24 个变更文件；内容包括脚本项目/文档、Visual Studio 编辑、脚本执行上下文、推荐脚本校验和自动化入口。</li>
+          <li>当前 Avalonia <code>Modules/</code> 没有 <code>EditorScriptExecutor</code> 模块，<code>Kernel/</code> 没有对应的 <code>RuntimeAutomation</code> 模块。</li>
+          <li>当前仅能找到 <code>Resources/NewScriptTemplate.nyagekiScript</code> 等资源，不能把模板文件当成执行器、编辑器或自动化 API 的迁移。</li>
+          <li>因此脚本安全策略、脚本确认窗口、脚本执行生命周期、Visual Studio/外部编辑器联动都属于未迁移，而不是“已被 Avalonia UI 隐藏”。</li>
+        </ul>
+        <p class="evidence">对照路径：WPF <code>OngekiFumenEditor/Modules/EditorScriptExecutor/**</code>、<code>OngekiFumenEditor/Kernel/RuntimeAutomation/**</code>；Avalonia 仅见 <code>Resources/NewScriptTemplate.nyagekiScript</code>，未见对应模块目录。</p>
+
+        <h3 id="missing-mcp">6.2 领域 MCP Server、Tools、Resources 和 Skills</h3>
+        <p class="status status-missing">状态：未迁移到 Avalonia 产品项目</p>
+        <ul>
+          <li>WPF 主线 <code>Kernel/Mcp</code> 有 8 个变更文件，并扩展了 MCP server、tools、resources、skills、AkariMindController 和本地化资源。</li>
+          <li>当前 Avalonia 核心源树没有对应的领域 MCP 服务注册、tool handler、resource provider 或 skill 目录。</li>
+          <li>不要把 XAML 调试工具 <code>AttachXamlMcp()</code> 或 Gekimini 开发工具当作 WPF 领域 MCP 的迁移；前者是调试辅助，后者不是谱面编辑领域的 MCP contract。</li>
+          <li>因此外部 AI/自动化通过 MCP 读写谱面、调用领域工具和获取资源的主线能力仍未迁移。</li>
+        </ul>
+        <p class="evidence">对照路径：WPF <code>OngekiFumenEditor/Kernel/Mcp/**</code>、<code>Kernel/RuntimeAutomation/**</code>、<code>Resources/Skills/**</code>；Avalonia 目录核对未发现同名领域模块。</p>
+
+        <h3 id="missing-gameplay">6.3 OngekiGamePlayControllerViewer 与 autoplay RPC</h3>
+        <p class="status status-missing">状态：未迁移</p>
+        <ul>
+          <li>WPF <code>Modules/OngekiGamePlayControllerViewer</code> 有 13 个变更文件，包含连接/断开生命周期、autoplay RPC、发送期间禁止重连、RPC 错误处理和控制器查看器 UI。</li>
+          <li>当前 Avalonia <code>Modules/</code> 没有 <code>OngekiGamePlayControllerViewer</code>、BossCard、Jackett 等对应 GUI 模块，也未找到同等 RPC 管理器。</li>
+          <li>因此“游戏控制/自动播放”不是当前 Avalonia 的已迁移能力；不能因为通用命令执行器或网络依赖存在而推断该功能可用。</li>
+        </ul>
+        <p class="evidence">对照路径：<code>OngekiFumenEditor/Modules/OngekiGamePlayControllerViewer/**</code>、<code>OngekiFumenEditor/Kernel/RuntimeAutomation/**</code>；Avalonia 模块清单无对应目录。</p>
+
+        <h3 id="missing-option-gui">6.4 OptionGeneratorTools 的 WPF GUI</h3>
+        <p class="status status-missing">状态：GUI 未迁移；部分生成能力由 CLI 替代</p>
+        <ul>
+          <li>WPF <code>Modules/OptionGeneratorTools</code> 有 44 个变更文件，包含多个生成器窗口、输入模型、状态展示、ACB/Jacket/SVG/资源生成交互。</li>
+          <li>Avalonia 没有 <code>Modules/OptionGeneratorTools</code> 目录。</li>
+          <li><code>convert</code>、<code>svg</code>、<code>jacket</code>、<code>acb</code> 等 CLI 命令覆盖部分生成职责，但命令行不是 WPF 选项生成窗口的直接等价物：没有同一组窗口、预览、批量状态、取消/重试交互或 GUI 错误展示证据。</li>
+        </ul>
+        <p class="evidence">对照路径：WPF <code>OngekiFumenEditor/Modules/OptionGeneratorTools/**</code>；替代路径：<code>Avalonia/src/OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/{Acb,Jacket,Svg}/**</code>。</p>
+
+        <h3 id="missing-saveas">6.5 Save As / 另存为</h3>
+        <p class="status status-missing">状态：未完成</p>
+        <ul>
+          <li>当前 Avalonia 普通 <code>Save()</code>、项目文件夹打开和自动保存路径已存在。</li>
+          <li>当前 <code>FumenVisualEditorViewModel.SaveAs()</code> 仍返回 <code>false</code>，对应命令 handler 的可达行为因此不是完整的另存为流程。</li>
+          <li>这不是文件对话框样式差异，而是用户主路径的真实功能缺口：目标目录/文件选择、工程复制/重定位、最近文件更新、恢复快照关联和 dirty 状态都未形成完整闭环。</li>
+        </ul>
+        <p class="evidence">证据路径：<code>Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs</code> 中的 <code>SaveAs</code>、<code>Commands/SaveAs/**</code>、<code>FumenVisualEditorProvider.ProjectIO.cs</code>。普通 Save 与 Save As 必须分开判定。</p>
+
+        <h3 id="missing-gui-update">6.6 Desktop GUI 更新入口</h3>
+        <p class="status status-missing">状态：用户可达 GUI 闭环未证实，CLI/服务部分已迁移</p>
+        <ul>
+          <li>WPF 主线将更新器、桌面入口、更新后布局恢复和独立进程协作串成用户可达流程。</li>
+          <li>Avalonia 有更新服务和 updater CLI，但当前模块清单没有对应的完整更新对话框/设置入口。</li>
+          <li>如果产品只要求由外部发布脚本调用 updater CLI，则 CLI 部分可算已迁移；若要求从编辑器菜单检查并安装更新，则仍是未迁移。</li>
+        </ul>
+
+        <h2 id="replaced">7. 有意不直接搬运的 WPF 实现</h2>
+        <p>这些内容不应作为“遗漏文件”逐项补拷贝。Avalonia 的目标是保留行为契约，同时采用不同 UI、渲染和平台抽象；但每项仍需有边界和验收证据。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>WPF 实现</th><th>Avalonia 替代</th><th>判定</th><th>仍需注意</th></tr></thead>
+          <tbody>
+            <tr><td>WPF XAML Window/UserControl、依赖属性和命令绑定</td><td>Avalonia AXAML、Gekimini docking、CommunityToolkit MVVM、注册式 module/command</td><td class="status status-replaced">有意替代</td><td>同名 View 不代表行为相同；需按用户路径验收。</td></tr>
+            <tr><td>D3D/OpenGL/CPU WPF render controls</td><td>Skia canvas、DrawCommand recording/replay、platform capability</td><td class="status status-replaced">有意替代</td><td>WPF backend 文件不应直接迁移；要核对像素、资源释放和设备失败语义。</td></tr>
+            <tr><td>WPF Grid/ListView/DataGrid 事件模型</td><td>Avalonia controls、behaviors、DataGrid、drag/drop manager</td><td class="status status-replaced">有意替代/部分</td><td>键盘、焦点、虚拟化、拖放和多选是行为差异高发点。</td></tr>
+            <tr><td>NAudio 直接绑定 WPF 生命周期</td><td>IAudioManager + Desktop NAudio / Browser AudioWorklet</td><td class="status status-replaced">有意替代</td><td>平台 capability、autoplay、设备断开和释放需单独验收。</td></tr>
+            <tr><td>WPF 文件对话框和 Windows 路径 API</td><td>平台文件访问抽象、Desktop provider、Browser capability</td><td class="status status-replaced">有意替代</td><td>授权失败、取消、空路径和浏览器沙箱不能套用 Windows 语义。</td></tr>
+            <tr><td>WPF Visual Studio 脚本编辑联动</td><td>当前没有等价 Avalonia 脚本执行模块</td><td class="status status-missing">不是替代</td><td>需先实现脚本/RuntimeAutomation contract，不能将普通文本资源视为替代。</td></tr>
+          </tbody>
+        </table></div>
+
+        <h2 id="matrix">8. 主线变动到 Avalonia 的逐领域矩阵</h2>
+        <p>本矩阵把“主线确实改过的目录”与“Avalonia 当前证据”放在同一行，便于后续复查；数量是 <code>git diff --name-only master..origin/master</code> 的目录计数，不是功能完成百分比。</p>
+        <div class="table-wrap"><table>
+          <thead><tr><th>WPF 主线领域</th><th>主线变更量</th><th>Avalonia 证据</th><th>结论</th></tr></thead>
+          <tbody>
+            <tr><td><code>FumenVisualEditor</code></td><td>169</td><td><code>Modules/FumenVisualEditor/**</code>，含 Setup、ProjectIO、Graphics、Toolboxes、ViewModels</td><td><span class="pill done">核心已迁移</span><span class="pill partial">PlayableArea/SVG/拖放部分</span></td></tr>
+            <tr><td><code>FumenObjectPropertyBrowser</code></td><td>47</td><td><code>Modules/FumenObjectPropertyBrowser/**</code>，含 UIGenerator、drop actions、AXAML</td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>OptionGeneratorTools</code></td><td>44</td><td>Desktop CLI 的 Acb/Jacket/Svg；无同名 GUI module</td><td><span class="pill partial">CLI 替代</span><span class="pill missing">GUI 缺失</span></td></tr>
+            <tr><td><code>FumenCheckerListViewer</code></td><td>33</td><td><code>Modules/FumenCheckerListViewer/**</code></td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>EditorScriptExecutor</code></td><td>26</td><td>无 Avalonia 同名模块；仅旧模板资源</td><td><span class="pill missing">未迁移</span></td></tr>
+            <tr><td><code>AudioPlayerToolViewer</code></td><td>18</td><td><code>Modules/AudioPlayerToolViewer/**</code>、WaveformRenderSession</td><td><span class="pill done">源码已迁移</span><span class="pill partial">平台验收</span></td></tr>
+            <tr><td><code>OngekiGamePlayControllerViewer</code></td><td>13</td><td>无 Avalonia 对应 module</td><td><span class="pill missing">未迁移</span></td></tr>
+            <tr><td><code>FumenEditorSelectingObjectViewer</code></td><td>12</td><td><code>Modules/FumenEditorSelectingObjectViewer/**</code></td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>FumenConverter</code></td><td>11</td><td><code>Modules/FumenConverter/**</code></td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>OgkiFumenListBrowser</code></td><td>10</td><td><code>Modules/OgkiFumenListBrowser/**</code></td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>PreviewSvgGenerator</code></td><td>9</td><td><code>Modules/PreviewSvgGenerator/**</code></td><td><span class="pill partial">已实现/视觉等价待验收</span></td></tr>
+            <tr><td><code>Graphics</code></td><td>150</td><td><code>Kernel/Graphics/DrawCommands/**</code>、<code>Skia/**</code>、各 target</td><td><span class="pill replaced">Skia/DrawCommand 替代</span></td></tr>
+            <tr><td><code>Audio</code></td><td>36</td><td><code>Kernel/Audio/NAudioImpl/**</code>、Browser、SoundTouch</td><td><span class="pill done">已迁移</span><span class="pill partial">能力矩阵待验收</span></td></tr>
+            <tr><td><code>SettingPages</code></td><td>24</td><td><code>Kernel/SettingPages/**</code>、Models/Settings</td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>RuntimeAutomation</code></td><td>24</td><td>无对应 Avalonia module</td><td><span class="pill missing">未迁移</span></td></tr>
+            <tr><td><code>RecentFiles</code></td><td>9</td><td><code>Kernel/RecentFiles/**</code>、项目 I/O</td><td><span class="pill done">已迁移</span></td></tr>
+            <tr><td><code>Mcp</code></td><td>8</td><td>无领域 MCP server/tools/resources/skills</td><td><span class="pill missing">未迁移</span></td></tr>
+            <tr><td><code>ProgramUpdater</code></td><td>7</td><td><code>Kernel/ProgramUpdater/**</code> + updater CLI</td><td><span class="pill partial">服务/CLI 已迁移，GUI 未闭环</span></td></tr>
+          </tbody>
+        </table></div>
+
+        <h2 id="evidence">9. 证据索引与复核边界</h2>
+        <h3 id="evidence-commands">9.1 本次统计采用的只读命令</h3>
+        <pre><code>git status --short --branch
+git branch -vv
+git remote -v
+git ls-remote origin refs/heads/master
+git rev-list --left-right --count HEAD...origin/master
+git merge-base master origin/master
+git rev-list --count master..origin/master
+git rev-list --count --no-merges master..origin/master
+git rev-list --merges --count master..origin/master
+git diff --shortstat master..origin/master
+git diff --name-status master..origin/master
+git diff --name-only master..origin/master -- OngekiFumenEditor/Modules
+git diff --name-only master..origin/master -- OngekiFumenEditor/Kernel
+git diff --name-only master..origin/master -- OngekiFumenEditor/Parser</code></pre>
+        <h3 id="evidence-current">9.2 当前 Avalonia 重点路径</h3>
+        <ul>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/Base/</code>：模型、集合和对象。</li>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/Parser/</code>：OGKR、Nyageki 和序列化。</li>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/</code>：编辑器、项目 I/O、工具箱、绘制。</li>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/Kernel/Graphics/</code>：DrawCommand、Skia、平台渲染。</li>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/Kernel/Audio/</code>：NAudio、Browser、SoundTouch。</li>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia/Kernel/SettingPages/</code>、<code>Kernel/KeyBinding/</code>：设置和快捷键。</li>
+          <li><code>Avalonia/src/OngekiFumenEditor.Avalonia.Desktop/CommandLine/Commands/</code>：convert、svg、jacket、updater、acb。</li>
+        </ul>
+        <h3 id="evidence-limitations">9.3 已知限制</h3>
+        <ul>
+          <li>本报告没有把 WPF 的每一个 1,346 个文件逐行映射到 Avalonia；目录统计和功能链核对用于缩小范围，具体 API 兼容性仍需按领域继续审查。</li>
+          <li>没有在本任务中运行 build、test、benchmark 或真实 Desktop/Browser GUI；“已迁移”是源码证据结论，不是本轮运行时通过结论。</li>
+          <li>提交主题属于 Git 历史证据；若提交是混合提交，目录数不能直接表示单一功能的变更量。</li>
+          <li>主线远端当前 hash 通过 <code>git ls-remote</code> 核实为 <code>8b2940785e9b...</code>；报告生成后远端若继续前进，需重新生成统计。</li>
+        </ul>
+
+        <h2 id="conclusion">10. 结论与未迁移清单摘要</h2>
+        <div class="notice danger">
+          <strong>明确未迁移：</strong> <code>EditorScriptExecutor</code>、<code>RuntimeAutomation</code>、领域 MCP（server/tools/resources/skills）、<code>OngekiGamePlayControllerViewer</code> 及 autoplay RPC、<code>OptionGeneratorTools</code> 的 WPF GUI、完整 Save As、Desktop GUI 更新入口/端到端闭环。
+        </div>
+        <div class="notice warning">
+          <strong>部分迁移：</strong> PlayableArea 几何算法、Preview SVG 完整视觉等价、拖放和外部文件行为、ProgramUpdater GUI、音频平台能力矩阵。它们已有代码或替代入口，但仍不能声称与 WPF 完全等价。
+        </div>
+        <div class="notice success">
+          <strong>已迁移主干：</strong> Core/Parser/OGKR、palette null 模型、编辑器主路径、属性浏览器、选择和过滤、检查器、谱面列表、转换器、普通保存/自动保存/布局、设置/快捷键、NAudio/Browser 音频基础、DrawCommand/Skia 渲染、主要热路径优化和 CLI 生成/更新命令。
+        </div>
+        <p>因此，若问题是“master 的改动是否已经整体进入 Avalonia”，答案是<strong>没有</strong>；若问题是“编辑器主干和当前性能迁移是否已经覆盖”，答案是<strong>大部分已覆盖</strong>。两者不能混为一个“迁移完成”结论。</p>
+
+        <footer>
+          <hr>
+          <p class="small">报告文件：<code>Avalonia/docs/wpf-master-to-avalonia-migration-review-2026-09-19.html</code>。生成方式：只读 Git/源码调查后新建本报告；未修改 WPF 或 Avalonia 源代码、项目文件、分支引用或远端引用。</p>
+        </footer>
+      </article>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const article = document.querySelector('article');
+      const toc = document.querySelector('#toc');
+      if (!article || !toc) return;
+      article.querySelectorAll('h2, h3').forEach((heading) => {
+        if (!heading.id) return;
+        const link = document.createElement('a');
+        link.href = `#${heading.id}`;
+        link.textContent = heading.textContent || heading.id;
+        link.className = heading.tagName.toLowerCase() === 'h3' ? 'level-3' : 'level-2';
+        toc.appendChild(link);
+      });
+    })();
+  </script>
+</body>
+</html>
