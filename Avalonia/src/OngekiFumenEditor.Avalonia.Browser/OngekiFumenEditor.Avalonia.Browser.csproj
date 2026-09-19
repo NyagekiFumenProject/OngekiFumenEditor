@@ -108,4 +108,32 @@
               EnvironmentVariables="@(WasmToolchainEnvVars)"
               IgnoreStandardErrorWarningFormat="true" />
     </Target>
+
+    <!--
+        Emscripten spawns its pthread workers from
+        new Worker(new URL("dotnet.native.js", import.meta.url)),
+        i.e. the *unhashed* link output name.  The published bundle only ships the
+        content-hashed dotnet.native.<hash>.js, so that URL is missing.  Hosts that
+        answer unknown paths with the SPA document (Cloudflare Pages) return
+        index.html instead, every worker dies before it can initialise, and
+        dotnet.create() never resolves -> the app shows only its background, with
+        no error.  Publish the unhashed copy so the worker URL resolves to the real
+        module (same bytes, and it detects the worker environment on its own).
+    -->
+    <Target Name="PublishEmscriptenPthreadWorkerFile"
+            AfterTargets="Publish"
+            Condition="'$(WasmEnableThreads)' == 'true'">
+        <ItemGroup>
+            <_PthreadWorkerSource Include="$(PublishDir)wwwroot\_framework\dotnet.native.*.js" />
+        </ItemGroup>
+        <Copy SourceFiles="@(_PthreadWorkerSource)"
+              DestinationFiles="$(PublishDir)wwwroot\_framework\dotnet.native.js"
+              SkipUnchangedFiles="true"
+              Condition="'@(_PthreadWorkerSource->Count())' == '1'" />
+        <Message Importance="High"
+                 Text="Published dotnet.native.js as the emscripten pthread worker script (WasmEnableThreads=true)."
+                 Condition="'@(_PthreadWorkerSource->Count())' == '1'" />
+        <Warning Text="Expected exactly one dotnet.native.*.js in the published bundle but found @(_PthreadWorkerSource->Count()); the multithread runtime spawns its workers from dotnet.native.js, which would not resolve."
+                 Condition="'@(_PthreadWorkerSource->Count())' != '1'" />
+    </Target>
 </Project>

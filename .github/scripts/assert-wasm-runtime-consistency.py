@@ -128,11 +128,20 @@ def flavour_of(symbols):
     return MULTI if symbols else SINGLE
 
 
+# A multithread bundle legitimately contains BOTH the content-hashed
+# dotnet.native.<hash>.js and the unhashed dotnet.native.js published for the
+# emscripten pthread worker.  Prefer the hashed one when both are present.
+PLAIN_NAMES = {"dotnet.native.js", "dotnet.native.wasm", "dotnet.runtime.js"}
+
+
 def single_match(pattern, label):
     hits = sorted(glob.glob(pattern))
     if not hits:
         raise SystemExit(f"ERROR: no {label} matching {pattern}")
     if len(hits) > 1:
+        preferred = [hit for hit in hits if os.path.basename(hit) not in PLAIN_NAMES]
+        if len(preferred) == 1:
+            return preferred[0]
         raise SystemExit(f"ERROR: multiple {label} match {pattern}: {hits}")
     return hits[0]
 
@@ -180,7 +189,17 @@ def main():
         print(f"  binds    : {len(bound)} mono_wasm_* symbols")
         print(f"  wasmEnableThreads: {shown}")
         if len(raw_values) > 1:
-            print("  WARNING: conflicting literal values in native JS: {raw_values}")
+            print(f"  WARNING: conflicting literal values in native JS: {raw_values}")
+
+    # Emscripten creates pthread workers with
+    # new Worker(new URL("dotnet.native.js", import.meta.url)) -- the unhashed name.
+    # Without it a host that falls back to the SPA document answers with index.html,
+    # every worker dies before initialising, and dotnet.create() never resolves.
+    framework_dir = args.framework or os.path.dirname(runtime_js)
+    worker_script = os.path.join(framework_dir, "dotnet.native.js")
+    has_worker_script = os.path.isfile(worker_script)
+    print(f"pthread worker: {os.path.basename(worker_script)} "
+          f"{'present' if has_worker_script else 'MISSING'}")
 
     missing = sorted(sym for sym in required if sym not in exported)
     print(f"\nruntime JS resolves {len(required)} mono_wasm_* entry points; "
@@ -201,6 +220,13 @@ def main():
             f"dotnet.native.js declares wasmEnableThreads={str(declared).lower()} ({declared_flavour}) "
             f"but dotnet.runtime.js is {runtime_flavour}"
         )
+    if runtime_flavour == MULTI and not has_worker_script:
+        failures.append(
+            "multithread bundle is missing dotnet.native.js: emscripten spawns its workers from "
+            'new Worker(new URL("dotnet.native.js", import.meta.url)), and hosts that answer unknown '
+            "paths with the SPA document return index.html, so every worker dies and "
+            "dotnet.create() never resolves (blank page, no error)"
+        )
     if args.expect_threads:
         expected = MULTI if args.expect_threads == "true" else SINGLE
         detected = {runtime_flavour, wasm_flavour} | ({declared_flavour} if declared_flavour else set())
@@ -216,8 +242,9 @@ def main():
         for reason in failures:
             print(f"  - {reason}")
         print(
-            "\nThis is a mixed-thread-config bundle. Publish each WasmEnableThreads "
-            "flavour from its own clean intermediate and output tree."
+            "\nFix: publish each WasmEnableThreads flavour from its own clean intermediate "
+            "and output tree, and publish the unhashed dotnet.native.js beside the hashed "
+            "one so the emscripten pthread worker URL resolves."
         )
         return 1
 
