@@ -91,6 +91,12 @@
         translate that legacy section after the SDK link and before publish
         assets are hashed.  This keeps the generated dotnet.js integrity
         metadata consistent with the served WASM file.
+
+        The feature flags must mirror what _RunWasmOptPostLink passes: it adds
+        @(WasmOptConfigurationFlags) on top of the same baseline, and that is where
+        build-shape flags such as enable-threads come from.  Without them wasm-opt
+        rejects a WasmEnableThreads=true module ("shared memory requires threads")
+        because the runtime links with shared memory and atomics.
     -->
     <Target Name="TranslateLegacySkiaWebAssemblyExceptions"
             AfterTargets="WasmAfterLinkSteps"
@@ -98,7 +104,7 @@
                        '$(WasmEnableExceptionHandling)' == 'true' and
                        Exists('$(_WasmIntermediateOutputPath)dotnet.native.wasm')">
         <Message Text="Translating legacy SkiaSharp WebAssembly exception sections." Importance="High" />
-        <Exec Command="wasm-opt$(_ExeExt) --enable-simd --enable-exception-handling --enable-reference-types --enable-multivalue --enable-bulk-memory --enable-nontrapping-float-to-int --translate-to-exnref &quot;$(_WasmIntermediateOutputPath)dotnet.native.wasm&quot; -o &quot;$(_WasmIntermediateOutputPath)dotnet.native.wasm&quot;"
+        <Exec Command="wasm-opt$(_ExeExt) --enable-simd --enable-exception-handling --enable-reference-types --enable-multivalue --enable-bulk-memory --enable-nontrapping-float-to-int @(WasmOptConfigurationFlags, ' ') --translate-to-exnref &quot;$(_WasmIntermediateOutputPath)dotnet.native.wasm&quot; -o &quot;$(_WasmIntermediateOutputPath)dotnet.native.wasm&quot;"
               EnvironmentVariables="@(WasmToolchainEnvVars)"
               IgnoreStandardErrorWarningFormat="true" />
     </Target>
