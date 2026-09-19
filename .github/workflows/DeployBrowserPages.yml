@@ -22,9 +22,32 @@ env:
 
 jobs:
   build:
-    name: Build Browser AOT
+    name: Build Browser AOT (${{ matrix.flavour }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
+
+    # One runner per WasmEnableThreads flavour.
+    #
+    # WasmEnableThreads selects a different runtime pack
+    # (Microsoft.NETCore.App.Runtime.Mono.browser-wasm vs Mono.multithread.browser-wasm),
+    # and dotnet.runtime.js is copied verbatim from that pack.  The two flavours ship
+    # different JS: the multithread one resolves mono_wasm_invoke_jsexport_async_post /
+    # _sync / _sync_send, which only the multithread native module exports.
+    #
+    # WasmEnableThreads is NOT part of the intermediate path, so publishing both flavours
+    # on one runner lets the second publish inherit the first one's staged
+    # dotnet.runtime.js while the native module is relinked for the requested flavour.
+    # That mixed bundle dies in the preRun hook with
+    # "cwrap mono_wasm_invoke_jsexport_async_post not found or not a function".
+    # Separate runners keep obj/bin apart; the Validate step below asserts the result.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - flavour: st
+            threads: 'false'
+          - flavour: mt
+            threads: 'true'
 
     steps:
       - name: Checkout repository
@@ -48,27 +71,18 @@ jobs:
         run: dotnet workload install wasm-tools --include-previews
 
       - name: Configure GitHub Pages
+        if: matrix.flavour == 'st'
         uses: actions/configure-pages@v6
 
-      - name: Publish Browser Release AOT
+      - name: Publish Browser Release AOT (${{ matrix.flavour }})
         run: >-
           dotnet publish "$BROWSER_PROJECT"
           --configuration Release
-          --output "${{ runner.temp }}/browser-publish/mt"
+          --output "${{ runner.temp }}/browser-publish/wwwroot"
           --nologo
           --verbosity minimal
           -p:RunAOTCompilation=true
-          -p:WasmEnableThreads=true
-
-      - name: Publish Browser Release AOT
-        run: >-
-          dotnet publish "$BROWSER_PROJECT"
-          --configuration Release
-          --output "${{ runner.temp }}/browser-publish/st"
-          --nologo
-          --verbosity minimal
-          -p:RunAOTCompilation=true
-          -p:WasmEnableThreads=false
+          -p:WasmEnableThreads=${{ matrix.threads }}
 
       - name: Dump Publish Build Files/Directories
         shell: bash
@@ -136,37 +150,41 @@ jobs:
 
           echo "========================================"
 
-      - name: Validate Github Pages artifact
+      - name: Validate Browser artifact (${{ matrix.flavour }})
         shell: bash
         run: |
-          site_root="${{ runner.temp }}/browser-publish/st/wwwroot"
+          site_root="${{ runner.temp }}/browser-publish/wwwroot"
           test -f "$site_root/index.html"
           test -d "$site_root/_framework"
           find "$site_root/_framework" -maxdepth 1 -type f -name '*.wasm' -print -quit | grep -q .
           grep -ERq 'runAOTCompilation[[:space:]]*:[[:space:]]*true' "$site_root/_framework"/dotnet.native*.js
-          touch "$site_root/.nojekyll"
-          
-      - name: Validate Cloudflare Pages artifact
-        shell: bash
-        run: |
-          site_root="${{ runner.temp }}/browser-publish/mt/wwwroot"
-          test -f "$site_root/index.html"
-          test -d "$site_root/_framework"
-          find "$site_root/_framework" -maxdepth 1 -type f -name '*.wasm' -print -quit | grep -q .
-          grep -ERq 'runAOTCompilation[[:space:]]*:[[:space:]]*true' "$site_root/_framework"/dotnet.native*.js
+
+          # Fail the build when dotnet.runtime.js, dotnet.native.wasm and the embedded
+          # wasmEnableThreads literal do not all agree with the requested flavour.
+          # This is the check that catches a mixed single-thread bundle before it ships.
+          python3 .github/scripts/assert-wasm-runtime-consistency.py \
+            "$site_root/_framework" \
+            --expect-threads ${{ matrix.threads }}
+
           touch "$site_root/.nojekyll"
 
       - name: Upload Browser artifact for Github Pages
+        # Only the single-threaded flavour can run on GitHub Pages: threads need
+        # cross-origin isolation, which needs COOP/COEP response headers that
+        # GitHub Pages cannot serve.
+        if: matrix.flavour == 'st'
         uses: actions/upload-pages-artifact@v5
         with:
-          path: ${{ runner.temp }}/browser-publish/st/wwwroot
+          path: ${{ runner.temp }}/browser-publish/wwwroot
           include-hidden-files: true
 
       - name: Upload Browser artifact for Cloudflare Pages
+        # Cloudflare Pages can serve COOP/COEP, so it gets the multithread flavour.
+        if: matrix.flavour == 'mt'
         uses: actions/upload-artifact@v4
         with:
-          name: browser-site
-          path: ${{ runner.temp }}/browser-publish/mt/wwwroot
+          name: browser-site-mt
+          path: ${{ runner.temp }}/browser-publish/wwwroot
           include-hidden-files: true
           if-no-files-found: error
 
@@ -194,7 +212,7 @@ jobs:
       - name: Download Browser artifact
         uses: actions/download-artifact@v4
         with:
-          name: browser-site
+          name: browser-site-mt
           path: ${{ runner.temp }}/browser-publish/wwwroot
 
       - name: Delete OverSize Files
