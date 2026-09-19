@@ -99,7 +99,15 @@ async function startBrowserApplication() {
 
     let dotnetBuilder = dotnet
         //.withDiagnosticTracing(true)
-        .withApplicationArgumentsFromQuery();
+        .withApplicationArgumentsFromQuery()
+        // .NET 11 preview: with WasmEnableThreads=true the runtime deadlocks inside
+        // create() when it has to spawn pthread workers on demand (diagnostics:
+        // "Failed to find loaded WebWorker, this may deadlock. Please increase the
+        // pthreadPoolInitialSize"), because the loading workers depend on main-thread
+        // messages that never arrive while the main thread is blocked in wasm.
+        // Pre-seed the pool so enough loaded workers exist before that point.
+        // Single-threaded builds have no pthread pool code and ignore this key.
+        .withConfig({ pthreadPoolInitialSize: 24 });
 
     if (typeof dotnetBuilder.withResourceLoader === "function" && startup?.bootResourceLoader) {
         dotnetBuilder = dotnetBuilder.withResourceLoader(startup.bootResourceLoader);
