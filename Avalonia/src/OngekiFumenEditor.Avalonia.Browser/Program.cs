@@ -26,7 +26,12 @@ public partial class Program
                     }
                 }
             })
-            .StartBrowserAppAsync("out");
+            .StartBrowserAppAsync("out", new BrowserPlatformOptions
+            {
+                // Avalonia 12.1.1 does not wake its managed dispatcher when input is queued.
+                // Keep WASM threads and the render worker, but use browser event-loop dispatch.
+                PreferManagedThreadDispatcher = false
+            });
     }
 
     public static AppBuilder BuildAvaloniaApp()
