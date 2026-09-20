@@ -16,7 +16,7 @@
     BorderThickness="0"
     d:DataContext="{d:DesignInstance Type=vm:DesktopSplashScreenViewModel}"
     Background="{StaticResource EditorWindowBackgroundBrush}"
-    CanResize="False"
+    CanResize="True"
     mc:Ignorable="d">
     <splash:SplashScreenCommonView>
         <splash:SplashScreenCommonView.AdditionalActions>
