@@ -264,6 +264,8 @@ internal sealed class DefaultMusicPlayer : ObservableObject, IAudioPlayer, ISche
         if (!IsAvaliable)
             return;
 
+        OngekiFumenEditor.Avalonia.Kernel.Scheduler.UiLatencyDiag.MusicPropsCount++; // temporary latency diagnostics
+
         OnPropertyChanged(nameof(CurrentTime));
         OnPropertyChanged(nameof(Volume));
         OnPropertyChanged(nameof(Speed));
