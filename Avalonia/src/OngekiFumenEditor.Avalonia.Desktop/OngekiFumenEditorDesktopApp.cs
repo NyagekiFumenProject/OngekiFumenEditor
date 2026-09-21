@@ -116,6 +116,7 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
             };
         }
 
+        ApplyCompositorClockBoost();
         ApplyAdminPermissionTitleSuffix();
 
         Dispatcher.UIThread.Post(
@@ -143,6 +144,21 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         {
             Log.LogError("Failed to apply the admin permission title suffix.", exception);
         }
+    }
+
+    /// <summary>
+    /// 请求 Windows 合成器临时提升刷新率,用于验证高刷显示器上编辑器的合成节拍。
+    /// 仅在 GUI 模式下启用;命令行模式没有任何渲染,不需要该请求。
+    /// </summary>
+    private static void ApplyCompositorClockBoost()
+    {
+        if (CompositorClockBoost.TrySetEnabled(true, out var hresult))
+        {
+            Log.LogInfo("Compositor clock boost enabled.");
+            return;
+        }
+
+        Log.LogWarn($"Compositor clock boost is unavailable (HRESULT 0x{hresult:X8}).");
     }
 
     private static void ApplyConsoleVisibility(bool show)
@@ -194,6 +210,8 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
             return;
         desktop.Shutdown(exitCode);
         */
+        // 提升请求必须成对释放:退出后不应再让系统合成器保持高时钟。
+        CompositorClockBoost.TrySetEnabled(false, out _);
         Log.LogInfo("bye.");
         Environment.Exit(exitCode);
     }
