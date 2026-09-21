@@ -31,9 +31,13 @@ public class DefaultSkiaRenderContext : IRenderContext
         set
         {
             // Keep each command-construction or presentation pass on one monitor,
-            // including backend draw calls made during replay.
+            // including backend draw calls made during replay. A monitor must never
+            // carry samples from an earlier context or attachment.
             lock (renderSync)
+            {
+                value?.Clear();
                 Volatile.Write(ref perfomenceMonitor, value ?? DummyPerformenceMonitor.Instance);
+            }
         }
     }
 
@@ -78,7 +82,11 @@ public class DefaultSkiaRenderContext : IRenderContext
     {
         // Returning from Stop guarantees the current lease/replay has finished before release.
         lock (renderSync)
+        {
+            // Statistics must not outlive the rendering they describe.
+            perfomenceMonitor.Clear();
             isStart = false;
+        }
     }
 
     private void SwapAndPresentDrawCommandList()
