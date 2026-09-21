@@ -27,7 +27,6 @@ using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using OpenTK.Mathematics;
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -262,7 +261,24 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
     private void OnRenderFrame(IRenderContext renderContext, TimeSpan ts)
         => OnEditorLoop(ts);
 
-    private readonly ConcurrentDictionary<int, DrawingTargetContext> drawingContexts = new();
+    /// <summary>
+    /// 本帧各 soflan 组的绘制上下文。
+    ///
+    /// 历史：258c32003 曾把它从 Dictionary 换成 ConcurrentDictionary，理由是
+    /// 「渲染跑在 compositor 回调、指针输入跑在 UI 线程」。该前提在当前基线上已不成立：
+    /// 渲染回调与指针输入同在 UI 线程（见 <see cref="OnEditorLoop"/> 的说明，以及
+    /// UserInteractionActions.UpdateCurrentCursorPosition 的调用链），而真正跨线程的命中表
+    /// 后来已改为「帧末发布不可变快照」（ClearHitObjects/CommitHitObjects/QueryHitObjects）。
+    /// 故这里回退为普通 <see cref="Dictionary{TKey, TValue}"/>，写入点全部位于渲染线程。
+    /// </summary>
+    private readonly Dictionary<int, DrawingTargetContext> drawingContexts = new();
+
+    /// <summary>
+    /// 本帧「所有组可见 TGrid 区间」的合并结果（帧首计算一次）。
+    /// <see cref="CheckRangeVisible(TGrid, TGrid)"/> 会被逐个可见子物体调用，
+    /// 不能每次都去遍历 drawingContexts 现算，故这里缓存一份。
+    /// </summary>
+    private readonly List<(TGrid minTGrid, TGrid maxTGrid)> mergedVisibleTGridRanges = new();
     private IRenderManagerImpl renderImpl;
     private ContentControl renderControlHost;
     private FrameworkElement attachedRenderControl;
@@ -303,6 +319,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         ClearHitObjects();
 
         drawingContexts.Clear();
+        mergedVisibleTGridRanges.Clear();
 
         #endregion
 
@@ -430,7 +447,15 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
             //get&register all visible objects for every drawingContext(soflanGroup)
             //Prepare objects we will draw them.
             //get&register all visible objects for every drawingContext(soflanGroup)
-            var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
+            //帧首算一次「所有组的可见区间」并缓存：它同时服务于下面的全局枚举，
+            //以及本帧随后被逐个可见子物体调用的 CheckRangeVisible()。
+            foreach (var ctx in drawingContexts.Values)
+            {
+                foreach (var range in ctx.VisibleTGridRanges)
+                    mergedVisibleTGridRanges.Add(range);
+            }
+
+            var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
             using var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges);
             foreach (var displayable in visibleObjects)
             {
@@ -508,7 +533,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
             //remove unused drawingContexts
             unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
             foreach (var soflanGroupId in unusedSoflanGroups)
-                drawingContexts.TryRemove(soflanGroupId, out _);
+                drawingContexts.Remove(soflanGroupId);
 
             RecalculateMagaticXGridLines();
 
@@ -696,6 +721,11 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         return convertToY(tGridUnit, this, soflanList);
     }
 
+    /// <summary>
+    /// 该 TGrid 是否落在任一 soflan 组的可见区间内。
+    /// 会被逐个可见子物体调用，故只遍历 Dictionary.Values（struct 枚举器，无快照分配、
+    /// 无接口派发），不再为只读枚举付 ConcurrentDictionary 的钱。
+    /// </summary>
     public bool CheckVisible(TGrid tGrid)
     {
         foreach (var ctx in drawingContexts.Values)
@@ -707,11 +737,17 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         return false;
     }
 
+    /// <summary>
+    /// [minTGrid, maxTGrid] 是否与任一 soflan 组的可见区间相交。
+    /// 语义上等价于「遍历所有组的全部可见区间」，因此直接扫描帧首预合并的
+    /// <see cref="mergedVisibleTGridRanges"/>，不必每次都去触碰 drawingContexts。
+    /// </summary>
     public bool CheckRangeVisible(TGrid minTGrid, TGrid maxTGrid)
     {
-        foreach (var ctx in drawingContexts.Values)
+        for (var i = 0; i < mergedVisibleTGridRanges.Count; i++)
         {
-            if (CheckRangeVisible(ctx, minTGrid, maxTGrid))
+            var visibleRange = mergedVisibleTGridRanges[i];
+            if (!(minTGrid > visibleRange.maxTGrid || maxTGrid < visibleRange.minTGrid))
                 return true;
         }
 
@@ -940,6 +976,10 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         }
     }
 
+    /// <summary>
+    /// 单组可见性查询。注意语义与 <see cref="CheckRangeVisible(TGrid, TGrid)"/> 不同：
+    /// 这里只看传入 context 自己的区间，调用方若要「任一组可见」请用无 context 的重载。
+    /// </summary>
     public bool CheckVisible(DrawingTargetContext context, TGrid tGrid)
     {
         foreach (var (minTGrid, maxTGrid) in context.VisibleTGridRanges)
@@ -948,17 +988,13 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         return false;
     }
 
+    /// <summary>
+    /// 保留原重载签名与「忽略 context、查任意组是否可见」的既有语义（调用方
+    /// <see cref="Graphics.Drawing.TargetImpl.OngekiObjects.LaneBlockerDrawingTarget"/> 依赖该语义），
+    /// 但改为扫描帧首预合并的缓存，不再每次 SelectMany 摊平整个字典。
+    /// </summary>
     public bool CheckRangeVisible(DrawingTargetContext context, TGrid minTGrid, TGrid maxTGrid)
-    {
-        foreach (var visibleRange in drawingContexts.SelectMany(x => x.Value.VisibleTGridRanges))
-        {
-            var result = !(minTGrid > visibleRange.maxTGrid || maxTGrid < visibleRange.minTGrid);
-            if (result)
-                return true;
-        }
-
-        return false;
-    }
+        => CheckRangeVisible(minTGrid, maxTGrid);
 
     private ActionExecutionContext CreateExecutionContext(object source, object eventArgs)
         => new() { Source = source, EventArgs = eventArgs, View = View };
@@ -1209,6 +1245,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         drawTargetMap.Clear();
         drawMap.Clear();
         drawingContexts.Clear();
+        mergedVisibleTGridRanges.Clear();
         cachedMagneticXGridLines.Clear();
         CurrentDrawingTargetContext = null;
         sw?.Stop();
