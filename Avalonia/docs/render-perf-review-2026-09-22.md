@@ -26,15 +26,17 @@
 ## 3. 结论摘要
 
 本轮共确认 **16 项**可优化内容，其中 **P1 四项**、**P2 九项**、**P3 三项**。
-截至 2026-09-22，其中 **1 项已修复并签入**（`RND-C1`，含新老实现基准），其余 15 项仍待处理。
+截至 2026-09-22，其中 **2 项已修复并签入**（`RND-C1`、`RND-C2`，均含新老实现基准），其余 14 项仍待处理。
 
 其中 **四项是新发现**（既有审计清单未收录）：`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`。其余十二项为既有条目的**续存确认**，并更新了行号与影响面判断。
 
 最值得先做的三件事：
 
 1. ~~**`RND-C1`（默认帧的可见性判定走 `ConcurrentDictionary` 枚举）**~~ —— **已修复（2026-09-22）**。实测 `CheckRangeVisible` 提升 26.6×–74.0×、`CheckVisible` 提升 1.9×–9.5×（逐调用量纲），分配分别降至 0 B 与 35%–74%。详见 §4.1 对应条目的「状态：已修复」小节。
-2. **`RND-003`（绘制目标是进程级单例，纹理重复加载不释放）** —— 每次挂接编辑器都重新分配全部原生 `SKImage` 而从不释放旧的一份，是唯一的**确定性原生内存增长**项。**当前最优先项。**
-3. **`BPM-C1`（`GetCachedAllBpmUniformPositionList` 的“缓存”仍未命中即全表 `Aggregate`）** —— 名为缓存实为每次全表哈希，且落在逐帧时间签名查询链上。
+2. ~~**`RND-C2`（限帧闸门在分配之后）**~~ —— **已修复（2026-09-22）**。实测被丢弃帧成本 970.4 ns → 1.3 ns（≈770×），分配 896 B → 0 B。详见 §4.1 对应条目。
+3. **`RND-003`（绘制目标是进程级单例，纹理重复加载不释放）** —— 每次挂接编辑器都重新分配全部原生 `SKImage` 而从不释放旧的一份，是唯一的**确定性原生内存增长**项。**当前最优先项。**
+
+次优先：**`BPM-C1` / `DAT-C1`（`GetCachedAllBpmUniformPositionList` 的“缓存”仍未命中即全表 `Aggregate`）** —— 名为缓存实为每次全表哈希，且落在逐帧时间签名查询链上。
 
 ---
 
@@ -146,6 +148,32 @@ return new DrawCommandListBuilder(new DefaultSkiaStringDrawing(this));
 2. **让 builder 按 render context 复用**：给 render context 挂一个长生命周期 builder，逐帧 `ResetFrameState()` 而非重建。这一步能同时消掉 3 个原生对象与全部池租借，但改动面更大，建议先做第 1 步并测量。
 
 **风险.** 第 1 步低（纯控制流重排）；第 2 步中（需保证 `GetDrawCommandList()` 交出所有权后 builder 状态可安全重置，且与 `PERF-RND-017 / RND-20` 的 replay 缓存保持同一套生命周期纪律）。
+
+**状态：已修复（2026-09-22，按方案 1）.**
+
+实施内容（`FumenVisualEditorViewModel.Drawing.cs`，+7/-1）：把限帧闸门整体移到 `CreateDrawCommandListBuilder()` **之前**——先判断是否出帧，通过后才创建 builder；被丢弃的帧直接 `goto End`，builder 保持 `null`。
+
+实现细节（对应上面「注意」里点出的两个坑）：
+- `builder` 的**声明**留在闸门之前（`IDrawCommandListBuilder builder = null;`），赋值移到闸门之后。这是必需的：`goto End`（`:314`）会跳过赋值，若沿用 `var builder = ...` 的写法，编译器在 `End:` 处的 `builder?.Dispose()` 报 **CS0165「使用了未赋值的局部变量」**（实测确实报了，不是理论风险）。声明为 `null` 后 `End:` 的 `builder?.Dispose()` 是空操作，与「被丢弃帧没有 builder」语义一致。
+- 已核对跳过帧的既有行为**保持不变**：`goto End` 仍位于 `ClearHitObjects()`（`:326`）与 `drawingContexts.Clear()`（`:328`）之前，即被丢弃帧照旧不清命中表、不清绘制上下文——改动前后一致。
+- `CreateDrawCommandListBuilder()` 无副作用（只租池对象 + 构造原生对象），移动它不改变任何编辑器状态。
+
+**基准（新增 `benchmarks/.../Benchmarks/EditorRenderFpsGateBenchmarks.cs`）.**
+量纲：**一次被丢弃帧的构建成本**（逐帧量纲）。出帧帧的成本两种实现相同，故只测被丢弃帧这一条路径——这**不是**整帧加速比。基准走**真实生产路径**（真 `DefaultSkiaDrawingManagerImpl.CreateDrawCommandListBuilder()` → 真 `DrawCommandListBuilder` + 真 `DefaultSkiaStringDrawing`），非合成复刻；`Isolate_*` 用于拆分成本来源。因会构造原生 SkiaSharp 对象，按既有 Skia 基准惯例挂 `InProcessNoEmit`（故输出里每个方法有两组 job，数值以 `MediumRun`/DefaultJob 为准，`ShortRun` 仅 3 次迭代可忽略）。
+机器：Ryzen 7 5800X / .NET 11.0.0-preview.7 / `--job medium`。
+
+| 方法 | Mean | 分配 | 说明 |
+|---|---|---|---|
+| `Original_DiscardedFrame` | **970.4 ns** | 896 B | 修复前：先建 builder 再判断丢弃，随后立即 Dispose |
+| `Optimized_DiscardedFrame` | **1.3 ns** | **0 B** | 修复后：闸门先行，根本不创建 |
+| `Isolate_NativeStringDrawingCtor` | 529.9 ns | 552 B | 只量 `DefaultSkiaStringDrawing` 的 3 个原生对象 |
+| `Isolate_PooledBuilderCtor` | 118.7 ns | 344 B | 只量 `DrawCommandListBuilder` 的 6 次池租借 |
+
+- 单次被丢弃帧成本 **970.4 ns → 1.3 ns（≈770×，节省 969 ns）**，分配 **896 B → 0 B**。
+- 成本构成：原生 Skia 对象构造（530 ns）占 **55%**，池租借（119 ns）占 12%，余下约 33% 是 builder 自身分配与随后的释放路径。也就是说**主要代价确实来自原生对象**，正如原分析所推测。
+- 换算：`LimitFPS=60` + 合成器 120Hz 回调（约一半帧被丢弃）→ 每秒消除约 **58 µs** 的无意义构建与 896 B/帧 的分配压力。绝对值不大，但这是**纯浪费**且改动只有一处控制流重排，属于「白拿的收益」。
+
+**验证.** Release 全量测试 808 passed / 0 errors / 0 failed；主工程与基准工程均 0 编译错误。
 
 ---
 
@@ -479,18 +507,19 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 
 1. ~~**`RND-C1`（可见性判定去并发字典枚举）**~~ —— **已完成（2026-09-22）**，含新老实现基准（`VisibleContextCheckBenchmarks`）。见 §4.1。
 2. **`RND-003`（纹理生命周期）** —— 优先做**所有权梳理**（单例 vs 每编辑器），再决定「幂等重载」还是「改注册范围」。这是唯一的确定性原生内存增长项，**当前最优先**。
-3. **`RND-C2`（限帧闸门提前）** —— 半天量级，收益直接（消掉被丢弃帧的全部构建成本），且为后续 builder 复用铺路。
+3. ~~**`RND-C2`（限帧闸门提前）**~~ —— **已完成（2026-09-22）**，含新老实现基准（`EditorRenderFpsGateBenchmarks`）。见 §4.1。
 4. **`AUD-001`（设置落盘 debounce）** —— 拖动卡顿的直接原因，改动局部。
 5. **`DAT-C1`（BPM 版本号）** + **`DAT-005`（区间树批量）** —— 编辑期卡顿的候选来源，需先确认调用方批量语义。
 6. **`RND-008` 的并行区共享查询** —— 其中「并发触发 `IntervalTree.RebuildInternal`」是**正确性风险**，建议不等调优、单独先确认。
-7. 其余 P2/P3 按测量结果排。
+7. **`RND-C3`（`drawMap` 重复 Clear）** —— 已确认第 1 步（删冗余 Clear）纯属清理，可与其它项搭车；第 2 步需先测量。
+8. 其余 P2/P3 按测量结果排。
 
-**不要**在没有 profile 的情况下同时改动多个 P2/P3 项。`RND-C1` 的 benchmark/smoke 已落地（`benchmarks/OngekiFumenEditor.Avalonia.Benchmark/Benchmarks/VisibleContextCheckBenchmarks.cs`，内含新旧实现对拍断言），后续项可参考其体例，也可参考既有 `SkiaTextureDrawingBenchmarks`、`MeterChangeListQueryBenchmarks` 等。
+**不要**在没有 profile 的情况下同时改动多个 P2/P3 项。已落地的 benchmark 可作体例参考：`VisibleContextCheckBenchmarks`（含新旧实现对拍断言）、`EditorRenderFpsGateBenchmarks`（真实生产路径 + `Isolate_*` 成本拆分），另可参考既有 `SkiaTextureDrawingBenchmarks`、`MeterChangeListQueryBenchmarks` 等。
 
 ## 8. 未决问题
 
 1. `RND-003` 的所有权问题（单例是否可能被多编辑器共享）必须先回答，否则修复会引入新缺陷。本报告不预设答案。
 2. `RND-015` 的语义需确认：当前 SkiaSharp 3.x 下 `SKPaint.Color` 不调制 `DrawImage`，因此 `color = Vector4.Zero` 是否真的导致标记不可见，需按真实 `DrawPlayerLocationHelper` 路径复核（既有审计已有此疑问，本轮未在真实负载下验证）。
 3. `RND-008` 中 `Parallel.ForEach` 与 `IntervalTree` 的并发交互需实测确认是否真的会并发进入 `RebuildInternal`（取决于并行体内是否只读、以及是否有其它线程在同一帧内触发脏标记）。
-4. 除 `RND-C1`（已有 `VisibleContextCheckBenchmarks` 实测数据，逐调用量纲）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1` 的数值不能直接当作整帧加速比。
+4. 除 `RND-C1`、`RND-C2`（均有实测数据，分别为逐调用 / 逐被丢弃帧量纲）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1`/`RND-C2` 的数值都不能直接当作整帧加速比。
 5. 本轮未覆盖 Browser/WASM 侧的渲染差异（`src/OngekiFumenEditor.Avalonia.Browser`）与第三方依赖内部（Gekimini/Dock/ToolBar/WindowManager），这些在 09-09 审计中有独立分区，状态未在本轮复核。

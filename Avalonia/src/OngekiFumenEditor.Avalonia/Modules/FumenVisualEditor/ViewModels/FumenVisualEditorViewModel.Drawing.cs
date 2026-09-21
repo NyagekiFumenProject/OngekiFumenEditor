@@ -300,7 +300,12 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
     {
         #region limit fps
 
-        var builder = renderImpl?.CreateDrawCommandListBuilder();
+        // 限帧闸门必须放在创建 builder **之前**：被丢弃的帧既不会生成任何绘制命令，
+        // 也不需要 builder，提前创建只是白付 2 个池化字典 + 4 个池化列表的租借，
+        // 以及 DefaultSkiaStringDrawing 里 3 个原生 SKPaint/SKFont 的构造与析构。
+        // 声明先于闸门是刻意的：goto End 会跳过下面的赋值，End: 处的 builder?.Dispose()
+        // 依赖它此时为 null（被丢弃的帧没有任何 builder 需要释放）。
+        IDrawCommandListBuilder builder = null;
 
         if (actualRenderInterval > 0)
         {
@@ -310,6 +315,8 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
             ts = TimeSpan.FromMilliseconds(ms);
             sw.Restart();
         }
+
+        builder = renderImpl?.CreateDrawCommandListBuilder();
 
         #endregion
 
