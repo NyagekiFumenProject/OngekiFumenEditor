@@ -139,7 +139,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 			CancellationToken cancellationToken = default)
 		{
 			var projFilePath = editor.EditorContext.FilePath;
-			var docName = "NotSavedUnknown-" + RandomHepler.RandomString(10);
+			var docName = "NotSavedUnknown-" + RandomHelper.RandomString(10);
 			if (!string.IsNullOrWhiteSpace(projFilePath))
 				docName = Path.GetFileNameWithoutExtension(projFilePath);
 
@@ -180,7 +180,7 @@ namespace OngekiFumenEditor.Avalonia.Utils.DeadHandler
 				//save fumen file
 				var fumenName = editor.EditorContext.FumenFile?.FileName;
 				if (string.IsNullOrWhiteSpace(fumenName))
-					fumenName = RandomHepler.RandomString() + ".ogkr";
+					fumenName = RandomHelper.RandomString() + ".ogkr";
 				var fumenExtension = Path.GetExtension(fumenName);
 				if (string.IsNullOrWhiteSpace(fumenExtension))
 					fumenExtension = ".ogkr";

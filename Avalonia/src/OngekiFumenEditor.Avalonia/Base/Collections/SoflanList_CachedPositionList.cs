@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
         #region SoflanPositionList
 
-        private int cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+        private int cachedSoflanPositionBpmVersion = NonceGenerator.Next();
 
         private List<SoflanPoint> cachedSoflanPositionList_DesignMode = new();
         private List<SoflanPoint> cachedSoflanPositionList_PreviewMode = new();
@@ -218,24 +218,31 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
         private void CheckAndUpdateSoflanPositionList(BpmList bpmList)
         {
-            var hash = bpmList.cachedBpmContentHash;
+            var version = bpmList.ContentVersion;
 
-            if (cachedSoflanListCacheHash != hash)
+            if (NeedsRebuildSoflanPositionList(version))
             {
                 lock (locker)
                 {
-                    if (cachedSoflanListCacheHash != hash)
+                    if (NeedsRebuildSoflanPositionList(version))
                     {
                         //Log.LogDebug("recalculate all.");
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_DesignMode, true);
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_PreviewMode, false);
                         cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
 
-                        cachedSoflanListCacheHash = hash;
+                        cachedSoflanPositionBpmVersion = version;
                     }
                 }
             }
         }
+
+        /// <summary>
+        /// 缓存是否已失效。入参 <paramref name="version"/> 是锁定前读到的令牌，
+        /// 与旧实现（比较进入时算出的内容哈希）一致：重算期间发生的变更会在下次调用时再触发一次重算。
+        /// </summary>
+        private bool NeedsRebuildSoflanPositionList(int version)
+            => cachedSoflanPositionBpmVersion != version;
 
         public IList<SoflanPoint> GetCachedSoflanPositionList_DesignMode(BpmList bpmList)
         {

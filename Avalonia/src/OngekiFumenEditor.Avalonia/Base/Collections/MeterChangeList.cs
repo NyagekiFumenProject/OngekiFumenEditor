@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
         private void OnChilidrenSubPropsChangedEvent()
         {
-            cachedMetListCacheHash = int.MinValue;
+            cachedTimesignBpmVersion = NonceGenerator.Next();
         }
 
         public void Add(MeterChange meter)
@@ -69,19 +69,11 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
         public IEnumerator<MeterChange> GetEnumerator()
         {
             yield return firstMeter;
-            // changedMeterList 是 TGridSortList<MeterChange>，插入即维持按 TGrid 升序，
-            // 这里不需要再 OrderBy（旧实现在此每次枚举都重排一遍，PERF-DAT-010 / DAT-13）。
             foreach (var item in changedMeterList)
                 yield return item;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        // 下面三个查询与旧实现的 Last/FirstOrDefault **语义逐项等价**：
-        // 旧枚举序为 [firstMeter, changed(升序)]，故
-        //   - 只要 changed 里存在满足项，“最后一个命中者”必定落在 changed 内 → 二分取边界即可；
-        //   - changed 里不存在时，才可能退化为 firstMeter（单独判断），否则返回 null。
-        // 前驱/后继改用 backing 的 lower/upper bound，替代旧实现「每次完整枚举（含重排）+ 线性扫描」。
 
         public MeterChange GetMeter(TGrid time)
         {
@@ -115,7 +107,8 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
         }
 
         private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
-        private double cachedMetListCacheHash = int.MinValue;
+
+        private int cachedTimesignBpmVersion = NonceGenerator.Next();
 
         [Flags]
         private enum ChgEvt
@@ -204,13 +197,15 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
         public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(BpmList bpmList)
         {
-            var hash = HashCode.Combine(bpmList.cachedBpmContentHash);
+            var version = bpmList.ContentVersion;
 
-            if (cachedMetListCacheHash != hash)
+            // 无需比较来源实例：令牌取自进程内全局唯一序列（NonceGenerator.Next()），
+            // 不同 BpmList 实例的当前令牌互不相同 —— 旧实现靠「内容哈希」天然获得同样的性质。
+            if (cachedTimesignBpmVersion != version)
             {
                 //Log.LogDebug("recalculate all time signatures.");
                 UpdateCachedAllTimeSignatureUniformPositionList(bpmList);
-                cachedMetListCacheHash = hash;
+                cachedTimesignBpmVersion = version;
             }
             return cachedTimesignUniformPosition;
         }

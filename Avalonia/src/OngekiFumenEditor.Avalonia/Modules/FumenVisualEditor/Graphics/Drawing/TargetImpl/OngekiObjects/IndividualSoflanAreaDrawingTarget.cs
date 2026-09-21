@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
     internal class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
         private IImage texture;
-        private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
+        private static readonly int colorSeed = RandomHelper.Random(int.MinValue, int.MaxValue);
 
         public override IEnumerable<string> DrawTargetID { get; } = ["ISF"];
 

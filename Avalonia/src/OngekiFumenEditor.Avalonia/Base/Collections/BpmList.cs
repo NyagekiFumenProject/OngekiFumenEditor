@@ -47,9 +47,23 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
                 Add(item);
         }
 
+        #region ContentVersion
+
+        // 内容令牌（DAT-C1）：任何会改变本列表内容的路径（Add / Remove / 任一 BPMChange 的 BPM 或
+        // TGrid 变化，含经转发链上来的 TGrid.Unit/Grid 子属性）都会取一个新的全局唯一值，
+        // 于是下游缓存的命中判断只是一次整数比较，不再像旧实现那样每次调用都对整表
+        // Aggregate 求内容哈希（成本与 BPM 数量线性相关）。
+        // 本字段同时是 MeterChangeList / SoflanList 各自缓存的失效依据：三者都取自
+        // NonceGenerator.Next()，故彼此只做相等比较 —— 既不判新旧，也不比来源实例。
+        private int contentVersion = NonceGenerator.Next();
+        private int cachedBpmUniformPositionVersion = NonceGenerator.Next();
+        internal int ContentVersion => contentVersion;
+
+        #endregion
+
         private void BpmList_OnChangedEvent()
         {
-            cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+            contentVersion = NonceGenerator.Next();
         }
 
         public void Add(BPMChange bpm)
@@ -115,7 +129,6 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
         }
 
         private List<(TimeSpan audioTime, BPMChange bpm)> cachedBpmUniformPosition = new();
-        internal int cachedBpmContentHash = RandomHepler.Random(int.MinValue, int.MaxValue);
 
         private void UpdateCachedAllBpmUniformPositionList()
         {
@@ -147,19 +160,41 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
         public List<(TimeSpan audioTime, BPMChange bpm)> GetCachedAllBpmUniformPositionList()
         {
-            int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.TotalGrid);
-            var hash = this.Aggregate(0, (x, e) => HashCode.Combine(x, calcHash(e)));
-            hash = HashCode.Combine(hash);
+            var version = ContentVersion;
 
-            if (hash != cachedBpmContentHash)
+            if (cachedBpmUniformPositionVersion != version)
             {
                 //Log.LogDebug("recalculate all bpm postions.");
                 UpdateCachedAllBpmUniformPositionList();
-                cachedBpmContentHash = hash;
+                cachedBpmUniformPositionVersion = version;
+#if DEBUG
+                debugLastContentHash = CalculateContentHash();
+#endif
             }
+#if DEBUG
+            else if (debugLastContentHash != CalculateContentHash())
+            {
+                // 版本号方案的前提是「内容一变就递增版本号」。旧实现每次调用都重算内容哈希，
+                // 天然容忍漏掉版本号递增的变更路径；这里把那份哈希留在 DEBUG 下对拍，
+                // 任何未被 PropertyChanged 通知到的内容变更都会立刻暴露（Release 下不参与编译）。
+                throw new InvalidOperationException(
+                    $"{nameof(BpmList)} content changed without bumping {nameof(ContentVersion)}: some mutation path does not raise PropertyChanged.");
+            }
+#endif
 
             return cachedBpmUniformPosition;
         }
+
+#if DEBUG
+        private int debugLastContentHash;
+
+        /// <summary>旧实现每次调用都会重算的那份内容哈希，仅 DEBUG 校验用。</summary>
+        private int CalculateContentHash()
+        {
+            int calcHash(BPMChange e) => HashCode.Combine(e.BPM, e.TGrid.TotalGrid);
+            return HashCode.Combine(this.Aggregate(0, (x, e) => HashCode.Combine(x, calcHash(e))));
+        }
+#endif
 
         public (int minIndex, int maxIndex) BinaryFindRangeIndex(TGrid min, TGrid max)
             => ((IBinaryFindRangeEnumable<BPMChange, TGrid>)changedBpmList).BinaryFindRangeIndex(min, max);

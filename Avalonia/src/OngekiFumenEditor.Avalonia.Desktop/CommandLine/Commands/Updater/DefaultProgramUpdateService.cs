@@ -31,7 +31,7 @@ internal sealed class DefaultProgramUpdateService : IProgramUpdateService
         var sourceVersion = option.SourceVersion;
         var sourceFolder = option.SourceFolder /*Path.GetDirectoryName(typeof(DefaultProgramUpdater).Assembly.Location)*/;
 
-        var bakSuffix = $".bak_{RandomHepler.RandomString(10)}";
+        var bakSuffix = $".bak_{RandomHelper.RandomString(10)}";
         Log.LogInfo($"sourceFolder: {sourceFolder}");
 
         //Dic<full,relative>

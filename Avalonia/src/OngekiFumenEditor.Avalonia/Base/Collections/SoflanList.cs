@@ -3,7 +3,6 @@ using System.ComponentModel;
 using OngekiFumenEditor.Avalonia.Base.Collections.Base;
 using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
-using OngekiFumenEditor.Avalonia.Utils;
 
 namespace OngekiFumenEditor.Avalonia.Base.Collections
 {
@@ -42,7 +41,7 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 
         private void OnChilidrenSubPropsChangedEvent(ISoflan sender, PropertyChangedEventArgs e)
         {
-            cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+            cachedSoflanPositionBpmVersion = NonceGenerator.Next();
         }
 
         public void Add(ISoflan soflan)
@@ -50,7 +49,7 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
             soflans.Add(soflan);
             soflan.PropertyChanged += OnSoflanPropChanged;
             OnCollectionChangedEvent?.Invoke(soflan);
-            cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+            cachedSoflanPositionBpmVersion = NonceGenerator.Next();
         }
 
         private void OnSoflanPropChanged(object sender, PropertyChangedEventArgs e)
@@ -79,7 +78,7 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
             soflans.Remove(soflan);
             soflan.PropertyChanged -= OnSoflanPropChanged;
             OnCollectionChangedEvent?.Invoke(soflan);
-            cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+            cachedSoflanPositionBpmVersion = NonceGenerator.Next();
         }
     }
 }

@@ -424,7 +424,7 @@ internal sealed class DefaultJacketGenerateService : IJacketGenerateService
             0);
 
         var newAssetData = stream.ToArray();
-        var newCabName = $"CAB-{string.Concat(Enumerable.Range(0, 32).Select(_ => CHARS[RandomHepler.Random(CHARS.Length)]))}";
+        var newCabName = $"CAB-{string.Concat(Enumerable.Range(0, 32).Select(_ => CHARS[RandomHelper.Random(CHARS.Length)]))}";
 
         var bundleReplacer = new BundleReplacerFromMemory(
             assetsFile.name,

@@ -26,7 +26,7 @@
 ## 3. 结论摘要
 
 本轮共确认 **16 项**可优化内容，其中 **P1 四项**、**P2 九项**、**P3 三项**。
-截至 2026-09-22，其中 **3 项已修复并签入**（`RND-C1`、`RND-C2`、`RND-C3`，均含新老实现基准），其余 13 项仍待处理。
+截至 2026-09-22，其中 **4 项已修复并签入**（`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`，均含新老实现基准），其余 12 项仍待处理。
 
 其中 **四项是新发现**（既有审计清单未收录）：`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`。其余十二项为既有条目的**续存确认**，并更新了行号与影响面判断。
 
@@ -36,7 +36,7 @@
 2. ~~**`RND-C2`（限帧闸门在分配之后）**~~ —— **已修复（2026-09-22）**。实测被丢弃帧成本 970.4 ns → 1.3 ns（≈770×），分配 896 B → 0 B。详见 §4.1 对应条目。
 3. **`RND-003`（绘制目标是进程级单例，纹理重复加载不释放）** —— 每次挂接编辑器都重新分配全部原生 `SKImage` 而从不释放旧的一份，是唯一的**确定性原生内存增长**项。**当前最优先项。**
 
-次优先：**`BPM-C1` / `DAT-C1`（`GetCachedAllBpmUniformPositionList` 的“缓存”仍未命中即全表 `Aggregate`）** —— 名为缓存实为每次全表哈希，且落在逐帧时间签名查询链上。
+次优先：~~**`BPM-C1` / `DAT-C1`（`GetCachedAllBpmUniformPositionList` 的“缓存”仍未命中即全表 `Aggregate`）**~~ —— **已修复（2026-09-22）**（同一处代码，两个编号一并解决）。实测逐命中调用 14.01 → 1.27 ns 至 6,518.90 → 1.43 ns（BPM 变更数 1–1024，11.0×–4,559×），分配均为 0 B；并更正原文「调用点本身不热」的判断（该调用点在帧内是逐对象发生的）。详见 §4.1 对应条目的「状态：已修复」小节。
 
 ---
 
@@ -255,6 +255,30 @@ return cachedBpmUniformPosition;                                           // :1
 **推荐改法.** 给 `BpmList` 引入单调递增的脏版本号（与 `MeterChangeList` 一致的做法）：在 `Add`/`Remove`/`Clear` 及各 `BPMChange` 的 `TGrid`/`BPM` 变更回调里 `version++`，`GetCachedAllBpmUniformPositionList` 改为比较版本号而非全表哈希。这样命中路径降为 O(1)。注意 `MeterChangeList` 已把 `cachedBpmContentHash` 当失效依据，改造时需同步其语义（把「内容哈希」改为「版本号 + 必要时回退哈希」，或让 Meter 侧改读版本号）。
 
 **风险.** 中。必须确保**所有**能让 BPM 内容变化的路径都递增版本号，否则会出现陈旧缓存。当前 `cachedBpmContentHash` 已是「内容哈希」语义，改造要覆盖 `BpmList` 全部变更入口；建议保留一处 `Log` 或在 DEBUG 下断言。
+
+**状态：已修复（2026-09-22）.**
+
+实施内容（`Base/Collections/`，另含一次类改名）：
+1. `BpmList` 引入**内容令牌** `ContentVersion`：`Add` / `Remove` / 任一 `BPMChange` 的 `BPM` 或 `TGrid` 变化（含经转发链上来的 `TGrid.Unit`/`Grid` 子属性）都取一个新的全局唯一值；令牌原语上移到 `Utils/NonceGenerator.cs`（`Interlocked` 自增，进程内唯一）。`GetCachedAllBpmUniformPositionList` 的命中判断因此降为**一次整数比较**，不再触碰整表。
+2. `MeterChangeList.GetCachedAllTimeSignatureUniformPositionList` 与 `SoflanList` 的两份位置缓存（`SoflanList_CachedPositionList.cs`）改读同一令牌：前者的 `HashCode.Combine(hash)` 取消；后者自有的失效点（`Add` / `Remove` / 子属性变更）改为取新令牌。因令牌全局唯一，**无需再比较来源实例**（旧实现靠内容哈希天然获得该性质），哨兵值一并不需要。
+3. `GetCachedAllBpmUniformPositionList` 保留旧实现的**全表内容哈希对拍**（`#if DEBUG`）：出现「内容已变但令牌未变」的未通知变更路径时直接抛；Release 不参与编译。即原文「建议保留一处 `Log` 或在 DEBUG 下断言」的落地形式。
+4. 顺带修正原文两处不准确：`BpmList` 并无 `Clear()`（令牌只由 `OnChangedEvent` 这一个漏斗抬升）；另把 `RandomHepler` 改名为 `RandomHelper`（拼写修正），随机 API 留在该类，令牌原语独立为 `NonceGenerator`。
+
+**基准（新增 `benchmarks/.../Benchmarks/BpmUniformPositionCacheBenchmarks.cs`）.**
+量纲：**逐命中调用**（单次 `GetCachedAllBpmUniformPositionList()`）；换算单帧总成本需乘该帧调用次数（≈ 参与时间换算的对象数）。**不是整帧加速比**：本项只消除挂在调用点上的 O(n) 哈希，调用点自身紧随其后的线性查找（`TGridCalculator.cs:29/:44` 的 `LastOrDefault`）不属本项、两种实现相同，作差会抵消。基准的 `[GlobalSetup]` 逐条断言：命中路径不重算、初始位置数正确，且 BPM 值 / `TGrid` 替换 / `TGrid` 子属性 / `Add` / `Remove` 五条变更路径都能让新实现重算出与内容相符的结果，同时旧的内容哈希闸门对这些变更同样翻转（不一致直接抛）。机器：Ryzen 7 5800X / .NET 11.0.0-preview.7 / `--job medium`（IterationCount=15, LaunchCount=2, WarmupCount=10）。
+
+| BPM 变更数 | Original（内容哈希闸门） | Optimized（生产方法） | 加速 | 分配 |
+|---|---|---|---|---|
+| 1 | 14.01 ns | 1.27 ns | 11.0× | 0 → 0 B |
+| 16 | 106.97 ns | 1.36 ns | 78.5× | 0 → 0 B |
+| 128 | 817.34 ns | 1.48 ns | 551× | 0 → 0 B |
+| 1024 | 6,518.90 ns | 1.43 ns | 4,559× | 0 → 0 B |
+
+收益归因：隔离项 `Isolate_ContentHashOnly` 与旧闸门同值（13.70 / 109.29 / 847.77 / 6,437.30 ns，差异在噪声内），即旧命中路径的成本**几乎全在那份内容哈希**上；分配两边均为 0 B，本项收益是纯时间，不含 GC 压力。两次独立跑（先「每实例单调版本号」、后「进程级唯一令牌」）结论一致，`Optimized` 侧 1.27–1.55 ns。
+
+**性能影响更正.** 原文「唯一调用点 `TGridCalculator.cs:279`（`GetAllBpmUniformPositionList`）本身不热」判断偏保守：它被 `ConvertTGridToAudioTime` / `ConvertAudioTimeToTGrid`（`TGridCalculator.cs:22-44`）逐次调用，而这两者在帧内是**逐对象**调用的（`DrawJudgeLineHelper.cs:40`、`DrawTimeSignatureHelper.cs:98`、`BeamLazerDrawingTarget.cs:66/75/114/116`、`ProjectileBatchDrawTargetBase.cs:277`、`DrawPlayerLocationHelper.cs:58`、`FumenVisualEditorViewModel.Drawing.cs:354/363`、`DefaultWaveformDrawing.cs:156-158`），故每次时间换算都要付这笔哈希（128 个变更时约 817 ns/次）。
+
+**验证.** Release 全量测试 956 passed / 0 errors / 0 failed；Debug 全量测试 603 passed / 0 failed（Debug 一轮用于让上面的 `#if DEBUG` 对拍实际执行）；主工程、Desktop 工程与基准工程均 0 编译错误。
 
 ---
 
@@ -535,7 +559,7 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 | PERF-FWK-004 | 已修（`CommandManager` copy-on-write 订阅表 + 异常隔离）。 |
 | 命中表（hit rect） | 已改为帧末冻结快照：`FumenVisualEditorViewModel.UserInteractionActions.cs:1823-1854`（`RegisterSelectableObject` 写构建缓冲、`ClearHitObjects` 帧首清、`CommitHitObjects` 帧末排序发布）。**该设计本身健康**，不列为问题。 |
 | `GlobalCacheSoflanGroupRecorder` | `Graphics/GlobalCacheSoflanGroupRecorder.cs:41-51` 用 `FrozenDictionary` 读路径，`GetCache` 为 O(1) 且无分配。**健康**。 |
-| `MeterChangeList.GetCachedAllTimeSignatureUniformPositionList` | `MeterChangeList.cs:205-216` 用 `cachedBpmContentHash` 做 O(1) 失效判断。**健康**（对比 `DAT-C1`）。 |
+| `MeterChangeList.GetCachedAllTimeSignatureUniformPositionList` | 与 BPM 侧共用同一令牌：`BpmList.ContentVersion`（`NonceGenerator.Next()`）做 O(1) 失效判断，命中零分配。**健康**（`DAT-C1` 已修复，详见 §4.1）。 |
 | `DrawCommandListBuilder` 的命令对象 | 已池化：`DrawCommandListBuilder.cs:467-471` `RentCommand<TCommand>()`，`DrawSimpleLines`（`:218`）等均走池。 |
 | `PooledList` | 基于 `Collections.Pooled.PooledList<T>`，`Dispose` 归还数组，且提供 `EnsureCapacity`（`Utils/ObjectPool/PooledList.cs:58-70`）。**健康**。 |
 
@@ -547,7 +571,7 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 2. **`RND-003`（纹理生命周期）** —— 优先做**所有权梳理**（单例 vs 每编辑器），再决定「幂等重载」还是「改注册范围」。这是唯一的确定性原生内存增长项，**当前最优先**。
 3. ~~**`RND-C2`（限帧闸门提前）**~~ —— **已完成（2026-09-22）**，含新老实现基准（`EditorRenderFpsGateBenchmarks`）。见 §4.1。
 4. **`AUD-001`（设置落盘 debounce）** —— 拖动卡顿的直接原因，改动局部。
-5. **`DAT-C1`（BPM 版本号）** + **`DAT-005`（区间树批量）** —— 编辑期卡顿的候选来源，需先确认调用方批量语义。
+5. ~~**`DAT-C1`（BPM 内容令牌）**~~ —— **已完成（2026-09-22）**，含新旧对拍基准（`BpmUniformPositionCacheBenchmarks`）。见 §4.1。**`DAT-005`（区间树批量）** —— 编辑期卡顿的候选来源，需先确认调用方批量语义。
 6. **`RND-008` 的并行区共享查询** —— 其中「并发触发 `IntervalTree.RebuildInternal`」是**正确性风险**，建议不等调优、单独先确认。
 7. ~~**`RND-C3`（`drawMap` 重复 Clear）**~~ —— **第 1 步已完成（2026-09-22）**，含新旧对拍基准（`DrawMapFrameCleanupBenchmarks`）。第 2 步（中间层二级结构）按原文要求**需先测量**，仍未做、仍待排。
 8. 其余 P2/P3 按测量结果排。
@@ -559,5 +583,5 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 1. `RND-003` 的所有权问题（单例是否可能被多编辑器共享）必须先回答，否则修复会引入新缺陷。本报告不预设答案。
 2. `RND-015` 的语义需确认：当前 SkiaSharp 3.x 下 `SKPaint.Color` 不调制 `DrawImage`，因此 `color = Vector4.Zero` 是否真的导致标记不可见，需按真实 `DrawPlayerLocationHelper` 路径复核（既有审计已有此疑问，本轮未在真实负载下验证）。
 3. `RND-008` 中 `Parallel.ForEach` 与 `IntervalTree` 的并发交互需实测确认是否真的会并发进入 `RebuildInternal`（取决于并行体内是否只读、以及是否有其它线程在同一帧内触发脏标记）。
-4. 除 `RND-C1`、`RND-C2`、`RND-C3`（均有实测数据，量纲分别为逐调用 / 逐被丢弃帧 / 逐出帧的池清理）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1`/`RND-C2`/`RND-C3` 的数值都不能直接当作整帧加速比。其中 `RND-C3` 的绝对值还是三者里最小的（其条目本身已声明不是热点），落地价值主要是消除死代码与消除一处易被误解的控制流。
+4. 除 `RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`（均有实测数据，量纲分别为逐可见性查询调用 / 逐被丢弃帧 / 逐出帧的池清理 / 逐 BPM 位置命中调用）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1`/`RND-C2`/`RND-C3` 的数值都不能直接当作整帧加速比。其中 `RND-C3` 的绝对值还是三者里最小的（其条目本身已声明不是热点），落地价值主要是消除死代码与消除一处易被误解的控制流。
 5. 本轮未覆盖 Browser/WASM 侧的渲染差异（`src/OngekiFumenEditor.Avalonia.Browser`）与第三方依赖内部（Gekimini/Dock/ToolBar/WindowManager），这些在 09-09 审计中有独立分区，状态未在本轮复核。

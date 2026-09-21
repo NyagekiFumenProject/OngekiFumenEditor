@@ -14,19 +14,19 @@ public static class MathUtils
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static double Random()
     {
-        return RandomHepler.RandomDouble();
+        return RandomHelper.RandomDouble();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Random(int min, int max)
     {
-        return RandomHepler.Random(min, max);
+        return RandomHelper.Random(min, max);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Random(int max)
     {
-        return RandomHepler.Random(max);
+        return RandomHelper.Random(max);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
