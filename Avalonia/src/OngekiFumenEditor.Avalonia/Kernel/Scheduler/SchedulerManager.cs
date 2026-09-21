@@ -40,8 +40,6 @@ internal class SchedulerManager : ISchedulerManager
             runCts = new CancellationTokenSource();
             var cancellationToken = runCts.Token;
             runTask = Task.Run(() => Run(cancellationToken), CancellationToken.None);
-
-            UiLatencyDiag.Start(); // temporary latency diagnostics
         }
 
         return Task.CompletedTask;
@@ -126,8 +124,6 @@ internal class SchedulerManager : ISchedulerManager
 
             if (!runningSchedulers.TryAdd(entry.Scheduler, 0))
                 return;
-
-            UiLatencyDiag.CountSchedulerQueued(entry.Scheduler.SchedulerName); // temporary latency diagnostics
 
             try
             {
