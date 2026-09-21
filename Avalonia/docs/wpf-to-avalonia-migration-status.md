@@ -168,13 +168,17 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 [`DefaultSkiaDrawingManagerImpl.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/DefaultSkiaDrawingManagerImpl.cs) 与 [`AvaloniaSkiaRenderControl.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Graphics/Skia/AvaloniaSkiaRenderControl.cs) 当前：
 
 - `CreateRenderControl()` 返回专用 `Control`，通过 `DrawingContext.Custom(ICustomDrawOperation)` 接入 Avalonia 渲染树；
+- `Control.Render()` 在 UI 线程调用 `PrepareFrame()` / `OnRender`，完成编辑器状态更新和绘制命令生成；custom draw operation 只在合成线程回放命令，不读取 UI 控件属性；其边界为 UI 线程捕获的不可变逻辑尺寸快照，仅在尺寸变化时替换 operation；
 - `ICustomDrawOperation.Render(ImmediateDrawingContext)` 使用 `TryGetFeature(typeof(ISkiaSharpApiLeaseFeature))` 获取 `ISkiaSharpApiLeaseFeature`，调用 `Lease()` 后只在 lease 有效期间访问 `lease.SkCanvas`；
-- 帧循环不再使用 `Task.Run`，由 `InvalidateVisual()` 驱动 Avalonia 渲染调度，帧间隔使用 `Stopwatch` 计算；
-- `BeforeRender`/`AfterRender` 对画布执行 `Save`/`Restore`，`CleanRender` 使用 Skia 清屏；
+- 帧循环由 `InvalidateVisual()` 驱动，帧间隔使用 `Stopwatch` 计算；`StartRendering()` 主动投递首帧刷新，避免控件已绘制过停止状态后必须 resize 才能显示谱面，后续刷新复用同一委托；
+- 命令槽和 replay 缓存按 context 隔离，使用 `ConcurrentDictionary` 支持不同 context 并发访问，稳定帧查找不新增管理器全局锁；同一 context 的命令生成、回放、停止仍由其自身的同步边界保护；
+- Skia lease 内对画布执行 `Save` / `RestoreToCount`，按尺寸快照裁剪并回放清屏与绘制命令，保留 Avalonia 已有的画布状态；
 - Circle、Beam、Line、Texture、Highlight、Polygon、String 及 CPU-side 缓存形式的静态线条句柄均通过该画布路径绘制（不是独立 CPU Skia backend）；
 - 独立的 `ISvgDrawing` 已明确抛出“不支持”；当前 SVG 编辑器绘制目标实际使用缓存线条与纹理路径，后续仍需单独验收 SVG 显示一致性；
 - custom draw operation 边界按 `RenderScaling` 转换为物理像素；编辑器布局与输入继续使用 Avalonia 逻辑像素，绘制时保留 lease 画布已有的控件偏移、裁剪和 DPI 变换，再叠加编辑器投影矩阵，避免高 DPI 下重复缩放或控件位置丢失；
 - 该实现参考了 [`ReOsuStoryboardPlayer.Avalonia` 的 Skia lease 示例](https://github.com/MikiraSora/ReOsuStoryboardPlayer.Avalonia/blob/master/ReOsuStoryboardPlayer.Avalonia/UI/Controls/StoryboardPlayer.axaml.cs#L379-L421)。
+
+2026-09-21：修复 Browser 多线程打开谱面时的 UI 线程访问异常及首帧黑屏时序。Release/AOT、`WasmEnableThreads=true`、COOP/COEP 开启的 Chromium（DPR=1）已实际验证打开、无需 resize 的首帧显示、连续滚动及关闭后重新打开，未捕获运行时异常。相关渲染测试 45/45 通过；`SkiaRenderSmokeTests` 覆盖后台线程回放、尺寸快照裁剪、节流帧保留及停止态已绘制后的启动首帧，其中首帧用例在补齐刷新前失败、修复后通过。
 
 ### 不支持的 backend
 

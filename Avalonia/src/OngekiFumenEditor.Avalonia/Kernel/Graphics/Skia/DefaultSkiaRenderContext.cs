@@ -1,5 +1,7 @@
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Skia;
+using Avalonia.Threading;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.Performence;
 using SkiaSharp;
@@ -9,9 +11,9 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 
 public class DefaultSkiaRenderContext : IRenderContext
 {
-    private readonly AvaloniaSkiaRenderControl renderControl;
     private DefaultSkiaDrawingManagerImpl manager;
     private readonly object renderSync = new();
+    private readonly Action invalidateVisual;
     private IPerfomenceMonitor perfomenceMonitor = DummyPerformenceMonitor.Instance;
     private long previousTimestamp;
     private volatile bool isStart;
@@ -28,8 +30,8 @@ public class DefaultSkiaRenderContext : IRenderContext
         get => Volatile.Read(ref perfomenceMonitor);
         set
         {
-            // The UI can switch monitors while the compositor is rendering. Do not split a frame
-            // across two monitors, including the backend draw calls made during replay.
+            // Keep each command-construction or presentation pass on one monitor,
+            // including backend draw calls made during replay.
             lock (renderSync)
                 Volatile.Write(ref perfomenceMonitor, value ?? DummyPerformenceMonitor.Instance);
         }
@@ -37,9 +39,9 @@ public class DefaultSkiaRenderContext : IRenderContext
 
     internal bool IsRendering => isStart;
 
-    internal DefaultSkiaRenderContext(AvaloniaSkiaRenderControl renderControl)
+    internal DefaultSkiaRenderContext(Action invalidateVisual)
     {
-        this.renderControl = renderControl;
+        this.invalidateVisual = invalidateVisual;
     }
 
     internal void AttachManager(DefaultSkiaDrawingManagerImpl drawingManager)
@@ -65,7 +67,12 @@ public class DefaultSkiaRenderContext : IRenderContext
             perfomenceMonitor.Clear();
             isStart = true;
         }
+
+        // Loaded can start rendering after the control's initial (stopped) paint.
+        RequestFrame();
     }
+
+    internal void RequestFrame() => Dispatcher.UIThread.Post(invalidateVisual, DispatcherPriority.Background);
 
     public void StopRendering()
     {
@@ -86,7 +93,34 @@ public class DefaultSkiaRenderContext : IRenderContext
         manager.PresentDrawCommandList(this);
     }
 
-    internal void RenderFrame(ImmediateDrawingContext drawingContext)
+    internal void PrepareFrame()
+    {
+        Dispatcher.UIThread.VerifyAccess();
+        lock (renderSync)
+        {
+            if (!isStart)
+                return;
+
+            var timestamp = Stopwatch.GetTimestamp();
+            var elapsed = previousTimestamp == 0
+                ? TimeSpan.Zero
+                : Stopwatch.GetElapsedTime(previousTimestamp, timestamp);
+            previousTimestamp = timestamp;
+
+            var monitor = perfomenceMonitor;
+            monitor.OnBeforeRender();
+            try
+            {
+                OnRender?.Invoke(this, elapsed);
+            }
+            finally
+            {
+                monitor.OnAfterRender();
+            }
+        }
+    }
+
+    internal void RenderFrame(ImmediateDrawingContext drawingContext, Size size)
     {
         lock (renderSync)
         {
@@ -102,28 +136,10 @@ public class DefaultSkiaRenderContext : IRenderContext
             try
             {
                 canvas.ClipRect(
-                    SKRect.Create((float)renderControl.Bounds.Width, (float)renderControl.Bounds.Height),
+                    SKRect.Create((float)size.Width, (float)size.Height),
                     SKClipOperation.Intersect,
                     antialias: false);
                 Canvas = canvas;
-
-                var timestamp = Stopwatch.GetTimestamp();
-                var elapsed = previousTimestamp == 0
-                    ? TimeSpan.Zero
-                    : Stopwatch.GetElapsedTime(previousTimestamp, timestamp);
-                previousTimestamp = timestamp;
-
-                var monitor = perfomenceMonitor;
-                monitor.OnBeforeRender();
-                try
-                {
-                    OnRender?.Invoke(this, elapsed);
-                }
-                finally
-                {
-                    monitor.OnAfterRender();
-                }
-
                 SwapAndPresentDrawCommandList();
             }
             finally

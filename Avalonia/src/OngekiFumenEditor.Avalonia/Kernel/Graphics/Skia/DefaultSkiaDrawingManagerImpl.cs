@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Avalonia.Controls;
 using Injectio.Attributes;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
@@ -25,7 +26,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
     /// paints; rebuilding it every frame used to throw all of that away, so it is reset per frame
     /// through <see cref="SkiaDrawCommandListReplay.BeginFrame"/> instead.
     /// </summary>
-    private readonly Dictionary<IRenderContext, SkiaDrawCommandListReplay> replayCache = new();
+    private readonly ConcurrentDictionary<IRenderContext, SkiaDrawCommandListReplay> replayCache = new();
 
     public string Name { get; } = "Skia";
 
@@ -85,9 +86,8 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
             renderContext.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
             drawCommandListContextSlots.Remove(renderContext);
 
-            // The replay outlives individual frames, so it must be released explicitly here;
-            // otherwise its pools, dash effect cache and native paints would leak past the context.
-            if (replayCache.Remove(renderContext, out var replay))
+            // StopRendering has finished this context's replay; other contexts remain independent.
+            if (replayCache.TryRemove(renderContext, out var replay))
                 replay.Dispose();
         }
     }
@@ -116,7 +116,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 
     public void PresentDrawCommandList(IRenderContext context)
     {
-        //the canvas is only valid during the lease of the current frame presentation
+        // The canvas is only valid during the lease of the current frame presentation.
         if (context is not DefaultSkiaRenderContext { Canvas: { } canvas })
             return;
 
@@ -140,9 +140,7 @@ public class DefaultSkiaDrawingManagerImpl : IRenderManagerImpl
 
     private SkiaDrawCommandListReplay GetOrCreateReplay(IRenderContext context)
     {
-        if (!replayCache.TryGetValue(context, out var replay))
-            replay = replayCache[context] = new SkiaDrawCommandListReplay(this, context);
-
-        return replay;
+        // The context serializes its own replay; steady-state lookup takes no dictionary lock.
+        return replayCache.GetOrAdd(context, static (key, manager) => new SkiaDrawCommandListReplay(manager, key), this);
     }
 }

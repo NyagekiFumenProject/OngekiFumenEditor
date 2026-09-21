@@ -1,15 +1,16 @@
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
 {
     /// <summary>
     /// Maintains front and back draw command list slots independently for each render context.
+    /// Different contexts may be accessed concurrently; callers serialize operations on the same context.
     /// </summary>
     public sealed class DrawCommandListContextSlots
     {
-        private readonly Dictionary<IRenderContext, ContextSlot> contextSlots = new();
+        private readonly ConcurrentDictionary<IRenderContext, ContextSlot> contextSlots = new();
 
         /// <summary>
         /// Posts a command list into the back slot for the specified context.
@@ -95,7 +96,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
             if (context is null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (!contextSlots.Remove(context, out var slot))
+            if (!contextSlots.TryRemove(context, out var slot))
                 return false;
 
             ReleaseSlot(slot.Front);
@@ -105,10 +106,7 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands
 
         private ContextSlot GetOrCreateSlot(IRenderContext context)
         {
-            if (!contextSlots.TryGetValue(context, out var slot))
-                slot = contextSlots[context] = new ContextSlot();
-
-            return slot;
+            return contextSlots.GetOrAdd(context, static _ => new ContextSlot());
         }
 
         private static void ReleaseSlot(DrawCommandListSlot? slot)

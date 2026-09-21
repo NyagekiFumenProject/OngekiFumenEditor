@@ -6,6 +6,9 @@ using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Rendering.SceneGraph;
+using Avalonia.Threading;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
@@ -87,6 +90,68 @@ public sealed class SkiaRenderSmokeTests
     }
 
     [AvaloniaFact]
+    public async Task SkiaRenderControl_WorkerReplay_KeepsUiUpdatesAndClippingOnTheirOwningThread()
+    {
+        var manager = new DefaultSkiaDrawingManagerImpl();
+        var control = manager.CreateRenderControl();
+        control.Measure(new Size(48, 32));
+        control.Arrange(new Rect(0, 0, 48, 32));
+        await manager.InitializeRenderControl(control, TestContext.Current.CancellationToken);
+        var context = (DefaultSkiaRenderContext)await manager.GetRenderContext(control, TestContext.Current.CancellationToken);
+        var status = new TextBlock();
+        var callbackCount = 0;
+        context.OnRender += (ctx, _) =>
+        {
+            // Editor callbacks update bound UI state; they must not run during worker replay.
+            status.Text = $"Frame {++callbackCount}";
+            using var builder = manager.CreateDrawCommandListBuilder();
+            builder.SetCleanColor(new Vector4(1, 0, 1, 1));
+            ctx.PostDrawCommandList(builder.GetDrawCommandList());
+        };
+
+        try
+        {
+            context.StartRendering();
+            using (var uiFrame = new RenderTargetBitmap(new PixelSize(96, 64)))
+            using (var drawing = uiFrame.CreateDrawingContext())
+                control.Render(drawing);
+
+            Assert.Equal("Frame 1", status.Text);
+            var frameSize = control.Bounds.Size;
+            control.Arrange(new Rect(0, 0, 80, 48));
+
+            await Task.Run(() =>
+            {
+                Assert.False(Dispatcher.UIThread.CheckAccess());
+                using var frame = new RenderTargetBitmap(new PixelSize(96, 64));
+                var operation = new RenderContextDrawOperation(context, frameSize);
+                // The second presentation has no newly posted commands (FPS throttling).
+                for (var i = 0; i < 2; i++)
+                {
+                    using (var drawing = frame.CreateDrawingContext())
+                        drawing.Custom(operation);
+
+                    using var encoded = new MemoryStream();
+                    frame.Save(encoded);
+                    encoded.Position = 0;
+                    using var bitmap = SKBitmap.Decode(encoded);
+                    Assert.Equal(SKColors.Magenta, bitmap.GetPixel(24, 16));
+                    Assert.Equal(0, bitmap.GetPixel(60, 16).Alpha);
+                    Assert.Equal(0, bitmap.GetPixel(24, 40).Alpha);
+                }
+            }, TestContext.Current.CancellationToken);
+
+            Assert.Equal(1, callbackCount);
+            Assert.Equal("Frame 1", status.Text);
+        }
+        finally
+        {
+            context.StopRendering();
+            manager.ReleaseRenderControl(control);
+        }
+    }
+
+    [AvaloniaFact]
     public async Task SkiaRenderControl_CleanFrame_ProducesExpectedNonTransparentPixels()
     {
         var manager = new DefaultSkiaDrawingManagerImpl();
@@ -106,6 +171,8 @@ public sealed class SkiaRenderSmokeTests
         {
             window.Show();
             window.UpdateLayout();
+            // The host may already have painted before the editor's Loaded handler starts rendering.
+            using var stoppedFrame = window.CaptureRenderedFrame();
             await manager.InitializeRenderControl(renderControl);
             await manager.WaitForInitializationIsDone();
             renderContext = await manager.GetRenderContext(renderControl);
@@ -596,6 +663,19 @@ public sealed class SkiaRenderSmokeTests
 
     private static bool IsRed(SKColor color) =>
         color.Alpha >= 200 && color.Red >= 180 && color.Green <= 80 && color.Blue <= 80;
+
+    private sealed class RenderContextDrawOperation(DefaultSkiaRenderContext context, Size size) : ICustomDrawOperation
+    {
+        public Rect Bounds { get; } = new(size);
+
+        public void Render(ImmediateDrawingContext drawingContext) => context.RenderFrame(drawingContext, size);
+
+        public bool HitTest(Point point) => Bounds.Contains(point);
+
+        public bool Equals(ICustomDrawOperation? other) => ReferenceEquals(this, other);
+
+        public void Dispose() { }
+    }
 
     private sealed class TestDrawingContext : IDrawingContext
     {

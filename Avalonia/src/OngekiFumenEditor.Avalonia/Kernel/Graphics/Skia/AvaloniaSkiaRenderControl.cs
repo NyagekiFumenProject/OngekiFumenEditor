@@ -2,7 +2,6 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Rendering.SceneGraph;
-using Avalonia.Threading;
 
 namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 
@@ -13,12 +12,11 @@ namespace OngekiFumenEditor.Avalonia.Kernel.Graphics.Skia;
 /// </summary>
 internal sealed class AvaloniaSkiaRenderControl : Control
 {
-    private readonly SkiaDrawOperation drawOperation;
+    private SkiaDrawOperation drawOperation;
 
     public AvaloniaSkiaRenderControl()
     {
-        RenderContext = new DefaultSkiaRenderContext(this);
-        drawOperation = new SkiaDrawOperation(RenderContext);
+        RenderContext = new DefaultSkiaRenderContext(InvalidateVisual);
         ClipToBounds = true;
         Focusable = true;
     }
@@ -32,23 +30,29 @@ internal sealed class AvaloniaSkiaRenderControl : Control
         if (Bounds.Width <= 0 || Bounds.Height <= 0)
             return;
 
-        drawOperation.Bounds = new Rect(Bounds.Size);
+        // Custom operations run on the compositor thread. Publish immutable bounds and
+        // build commands here, while editor callbacks can still access UI-owned state.
+        var bounds = new Rect(Bounds.Size);
+        if (drawOperation is null || drawOperation.Bounds != bounds)
+            drawOperation = new SkiaDrawOperation(RenderContext, bounds);
+        RenderContext.PrepareFrame();
         context.Custom(drawOperation);
 
         if (RenderContext.IsRendering)
-            Dispatcher.UIThread.Post(InvalidateVisual, DispatcherPriority.Background);
+            RenderContext.RequestFrame();
     }
 
     private sealed class SkiaDrawOperation : ICustomDrawOperation
     {
         private readonly DefaultSkiaRenderContext renderContext;
 
-        public SkiaDrawOperation(DefaultSkiaRenderContext renderContext)
+        public SkiaDrawOperation(DefaultSkiaRenderContext renderContext, Rect bounds)
         {
             this.renderContext = renderContext;
+            Bounds = bounds;
         }
 
-        public Rect Bounds { get; set; }
+        public Rect Bounds { get; }
 
         public void Dispose()
         {
@@ -66,7 +70,7 @@ internal sealed class AvaloniaSkiaRenderControl : Control
 
         public void Render(ImmediateDrawingContext context)
         {
-            renderContext.RenderFrame(context);
+            renderContext.RenderFrame(context, Bounds.Size);
         }
     }
 }

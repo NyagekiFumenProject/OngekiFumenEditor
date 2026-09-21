@@ -249,7 +249,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
 
     private void OnEditorLoop(TimeSpan ts)
     {
-        //todo update() not should be in render loop
+        // The render context invokes this command-building callback on the UI thread.
         OnEditorUpdate(ts);
 
         OnEditorRender(ts);
@@ -325,7 +325,7 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
         //计算可以显示的TGrid范围以及像素范围
 
         // 帧首唯一一次读取播放时间：整帧（原点、裁判线、特效、拍线……）都基于同一快照，
-        // 避免 UI 线程在渲染过程中推进 CurrentPlayTime 导致同帧内两处读数不一致。
+        // 命令生成和后续合成线程回放共享这一帧的时间基准。
         var frameTime = CurrentPlayTime;
         var frameTGrid = TGridCalculator.ConvertAudioTimeToTGrid(frameTime, this);
 
