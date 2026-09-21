@@ -26,7 +26,7 @@
 ## 3. 结论摘要
 
 本轮共确认 **16 项**可优化内容，其中 **P1 四项**、**P2 九项**、**P3 三项**。
-截至 2026-09-22，其中 **2 项已修复并签入**（`RND-C1`、`RND-C2`，均含新老实现基准），其余 14 项仍待处理。
+截至 2026-09-22，其中 **3 项已修复并签入**（`RND-C1`、`RND-C2`、`RND-C3`，均含新老实现基准），其余 13 项仍待处理。
 
 其中 **四项是新发现**（既有审计清单未收录）：`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`。其余十二项为既有条目的**续存确认**，并更新了行号与影响面判断。
 
@@ -182,18 +182,56 @@ return new DrawCommandListBuilder(new DefaultSkiaStringDrawing(this));
 **简述.** `drawMap` 是「绘制目标 →（帧内上下文 → 对象列表）」的池化字典映射。它在同一个成功帧内被清空**两次**（`finally` 与 `End:` 标签各一次），且 `finally` 中的 `drawingCollectionDisposables` 已经把所有内层池化对象 `Dispose`（归还对象池）后，`drawMap.Clear()` 只是再清一次外层字典的条目。
 
 **证据.** `ViewModels/FumenVisualEditorViewModel.Drawing.cs`
-- 声明：`:54` `private readonly Dictionary<IFumenEditorDrawingTarget, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>> drawMap = new();`
-- 成功路径：`:641-648` 的 `finally` 逐个 `Dispose` 内层池化对象，随后 `:648 drawMap.Clear()`
-- 紧接着：`:656-658` 的 `End:` 再次 `drawMap.Clear()`
-- 另有 `:1210` 在 `DisposeRenderResources` 中第三次调用
+- 声明：`:53` `private readonly Dictionary<IFumenEditorDrawingTarget, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>> drawMap = new();`
+- 成功路径：`finally` 块在逐个 `Dispose` 内层池化对象之后执行 `drawMap.Clear()`
+- 紧接着：`End:` 标签处再次 `drawMap.Clear()` —— **本项要删掉的那次**
+- 另有 `DisposeRenderResources` 中第三次调用（编辑器关闭时的整体释放）
+
+> 行号为**本报告写作时（RND-C1/C2 修复前）的基线**。RND-C1/C2/C3 落地后：`finally` 的 `drawMap.Clear()` 在 `:680`、`End:` 的那次原为 `:690`（已删除）、`DisposeRenderResources` 的在 `:1253`。实施以该文件当时的实际内容为准。
 
 **性能影响.** 单次 `Dictionary.Clear()` 在条目数少（绘制目标数量级，约 20–40）时成本很小，**两倍仍然很小**——所以这项本身不是热点，列为 P2 的原因在于它揭示了结构问题：外层 `drawMap` 是**普通 `Dictionary` 且永不重建**，而内层 `IPooledDictionary` 每帧从对象池租还。于是每帧都在做「把 N 个池化字典挂到同一个外层字典上，用完再全部摘掉」。这既让外层字典的条目长期无效，也让内层字典的池化收益打折扣（池化字典被反复租还，但外层键值对的生命周期管理成了纯开销）。
 
 **推荐改法.**
-1. 删掉 `End:` 处重复的 `drawMap.Clear()`（`:658`）——`finally` 已覆盖成功与异常两条路径，`End:` 的这次是冗余的（注意 `goto End` 的两个早退分支 `:293`/`:322` **不经过** `finally`，因为 `try` 从 `:424` 才开始，所以 `:658` 只能覆盖「`try` 之前早退」的情形，而那时 `drawMap` 本就为空）。
-2. 更有价值的做法：把「目标 → 帧内上下文 → 列表」的中间层改为帧内固定的二级结构（例如 `drawMap` 复用同一批内层字典，帧首只 `Clear()` 内层而不重新租还），或直接按 (target, context) 建立帧内线性索引。**此项需先测量**绘制目标数与其在各 frame 的出现率，再决定是否值得改。
+1. 删掉 `End:` 处重复的 `drawMap.Clear()` ——`finally` 已覆盖成功与异常两条路径，`End:` 的这次是冗余的。
+   （原文此处写「注意 `goto End` 的两个早退分支 `:293`/`:322` **不经过** `finally`，因为 `try` 从 `:424` 才开始，所以 `:658` 只能覆盖『`try` 之前早退』的情形，而那时 `drawMap` 本就为空」—— 实施时按当时基线复核，结论**相反且更强**：两个早退分支确实不经过 `finally`，但正因为它们早于 `try`，到达 `End:` 时 `drawMap` **必然为空**，所以这次 `Clear()` 在任何可达路径上都不产生效果，是纯粹的冗余，不存在「它覆盖了某种 `finally` 覆盖不到的非空情形」。）
+2. 更有价值的做法：把「目标 → 帧内上下文 → 列表」的中间层改为帧内固定的二级结构（例如 `drawMap` 复用同一批内层字典，帧首只 `Clear()` 内层而不重新租还），或直接按 (target, context) 建立帧内线性索引。**此项需先测量**绘制目标数与其在各 frame 的出现率，再决定是否值得改。（本次**未做**，仍待测量。）
 
 **风险.** 低（第 1 步）；中（第 2 步，涉及池化所有权语义）。
+
+**状态：已修复（按方案 1，2026-09-22）.** 仅实施第 1 步，第 2 步按原文要求「需先测量」暂不动。
+
+改动：`ViewModels/FumenVisualEditorViewModel.Drawing.cs` 的 `End:` 标签处删除 `drawMap.Clear();`，并在 `finally` 的那次 `Clear()` 上补注「这是本帧唯一一处帧末清理」的不变量说明。`DisposeRenderResources` 中的那次（现 `:1253`）保持不变——它是「编辑器关闭时整体释放」，与帧末清理语义不同。
+
+**删除依据（控制流论证，逐条核验）.** 本帧对 `drawMap` 的写入**只**发生在 `try` 块内（现 `:510` / `:514` / `:583` / `:594` 四处）。能到达 `End:` 的路径只有两条：
+- **正常出帧**：`try` 走完 → `finally`（**先**逐个 Dispose 内层、**再** `drawMap.Clear()`）→ `CommitHitObjects()`（不触碰 `drawMap`）→ 自然落入 `End:`。**中间没有任何代码重新填充 `drawMap`**，所以 `End:` 那次 `Clear()` 清的是「刚被 `finally` 清空的字典」——空字典。
+- **`try` 前早退**：`:314`（限帧丢弃）与 `:346`（`fumen` 为 null）两个 `goto End`。此时尚未进入 `try`，`drawMap` 未被本帧触碰、本就为空——同样是空字典。
+- `try` 内抛异常时，`finally` 执行后异常继续向外传播，**不会**落到 `End:`。
+
+故 `finally` 那一处已覆盖全部可达路径；且被删的那一行在所有可达路径上都是 `Dictionary.Clear()` 作用于**空字典**，恒为无操作。
+
+**历史成因（git 考古，纠正原文的成因归属）.**
+- 冗余是 `62957153`（2026-09-05, `perf(avalonia): reduce allocations in editor drawing`）引入的：该 commit 把原先「成功路径内联」的清理（`foreach (var list in drawMap.Values) … ObjectPool.Return(list)`，随后 `drawMap.Clear()`）整体搬进**新引入的 `finally`**，并新增了 `finally` 里的 `drawMap.Clear()`，但**没有删掉 `End:` 标签处原有的那次 `Clear()`**。而同一 commit 里 `try` 已经位于两个 `goto End` 之后（当时 `try` 在 `:441`，两个早退在 `:309` / `:339`），所以 :690 从写下那一刻起就是死代码。
+- **并非 `RND-C2` 造成的**：`RND-C2`（`5de442d4c`）只是把限帧闸门进一步提到 `CreateDrawCommandListBuilder()` 之前，闸门**仍在 `try` 之前**，不改变 `drawMap` 在 `End:` 处是否为空。实施时的静态推理与上述历史核对一致。
+
+**基准（新老实现对拍）.** 新增 `benchmarks/OngekiFumenEditor.Avalonia.Benchmark/Benchmarks/DrawMapFrameCleanupBenchmarks.cs`。按原文的自我判断（「单次 `Clear()` … **两倍仍然很小**」），本项**不是热点**，故基准的定位是把「确实很小」变成有数字的结论；量纲是「256 帧（次出帧清理）的合计」，**不是整帧加速比**。基准用**合成复刻**（只复刻被删/保留两行所操作的数据结构与它们在该时点的字典状态），原因是要真实填充生产 `drawMap` 需先构造 `OngekiObjectBase` 子物体并走完整条绘制目标分发链路，那样测到的会是对象枚举与分发而非字典清理。`[GlobalSetup]` 内置新旧对拍断言：跑完一帧后 `drawMap` 终态必须一致（都为空），并单独核对「早退帧的空 `drawMap` 再 `Clear` 一次」终态不变——即本项改动的核心主张。纯数据基准，按仓库约定只加 `[MemoryDiagnoser]`、不加 `[Config]`。
+
+实施过程中基准迭代了四版，前三版的教训已写进类注释，此处留档以免重犯：
+1. 把 `BuildMap` 重建放进被测区间 → ~250 µs 的重建分配开销淹没 ~30 ns 信号，GC 抖动让方向都测反（ratio 0.68–1.31 乱跳）；
+2. 用 `[IterationSetup]` 移走填充 → BDN 因该特性强制 `RunStrategy=ColdStart / InvocationCount=1`，每迭代仅一个样本，StdDev 达均值 20–50%；
+3. 把 `End:` 的 `Clear` 建模在**满字典**上 → 与真实控制流矛盾（见「删除依据」：它清的是空字典），测的是不存在的开销。
+4. 最终版为忠实建模 + 无分配循环：字典只建一次（`Clear()` 保留容量），帧间用纯赋值的 `RestoreOuter` 把同样的 (target → inner) 条目挂回外层（零分配），两变体的 restore 完全相同（公共项抵消），唯一差异 = 旧实现每帧多一次「对空字典 Clear」。
+
+**基准结果（DefaultJob，Ryzen 7 5800X，2026-09-22）.**
+
+| 量 | 结果 | 读法 |
+|---|---|---|
+| 被删行（`End:` 那次 `Clear`）的绝对成本（`Isolate_ClearOnEmptyMap`） | **0.51–0.54 ns/次，0 B 分配**（130.4–139.4 ns / 256 帧，6 组参数 StdDev 仅 1–2 ns，高度一致） | 该行在所有可达路径上清的是空字典（见「删除依据」），半纳秒、零分配——「从来没做过任何事」的数字答案 |
+| 新旧实现帧清理总成本比（`Optimized_ClearOnce` / `Original_ClearTwice`，256 帧合计） | ratio ≈ **1.00 ± 0.02**：(64,1)=0.995、(64,4)=1.001、(32,4)=0.978、(16,4)=1.020；(16,1)=0.909 与 (32,1)=1.113 为离群（序列首例预热/内存布局效应，同规模的 (16,4)/(32,4) 组均 ≈1.00） | 真实预期差异 ≈ 1.0004–1.0014（= 0.5 ns ÷ 每帧清理总成本），**低于测量分辨率** |
+| 分配 | 两个实现变体稳态均 **0 B**（字典 `Clear()` 保留容量、restore 纯赋值） | 改动无任何分配影响 |
+
+**结论.** 与审计原文自判完全一致：这不是热点，被删的调用恒为对空字典的半纳秒空操作，在帧尺度上测不出成本。本项落地的价值是**消除死代码与一处易被误解的控制流**（外加把「本帧唯一一处帧末清理」的不变量写进注释），而不是可测的提速——这也是为什么它与 `RND-C1`/`RND-C2` 不同，不提供整帧收益数字。`[GlobalSetup]` 的等价性断言（新旧终态一致、早退帧终态不变）在 `--job dry` 与正式跑中均通过。
+
+
 
 ---
 
@@ -511,7 +549,7 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 4. **`AUD-001`（设置落盘 debounce）** —— 拖动卡顿的直接原因，改动局部。
 5. **`DAT-C1`（BPM 版本号）** + **`DAT-005`（区间树批量）** —— 编辑期卡顿的候选来源，需先确认调用方批量语义。
 6. **`RND-008` 的并行区共享查询** —— 其中「并发触发 `IntervalTree.RebuildInternal`」是**正确性风险**，建议不等调优、单独先确认。
-7. **`RND-C3`（`drawMap` 重复 Clear）** —— 已确认第 1 步（删冗余 Clear）纯属清理，可与其它项搭车；第 2 步需先测量。
+7. ~~**`RND-C3`（`drawMap` 重复 Clear）**~~ —— **第 1 步已完成（2026-09-22）**，含新旧对拍基准（`DrawMapFrameCleanupBenchmarks`）。第 2 步（中间层二级结构）按原文要求**需先测量**，仍未做、仍待排。
 8. 其余 P2/P3 按测量结果排。
 
 **不要**在没有 profile 的情况下同时改动多个 P2/P3 项。已落地的 benchmark 可作体例参考：`VisibleContextCheckBenchmarks`（含新旧实现对拍断言）、`EditorRenderFpsGateBenchmarks`（真实生产路径 + `Isolate_*` 成本拆分），另可参考既有 `SkiaTextureDrawingBenchmarks`、`MeterChangeListQueryBenchmarks` 等。
@@ -521,5 +559,5 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 1. `RND-003` 的所有权问题（单例是否可能被多编辑器共享）必须先回答，否则修复会引入新缺陷。本报告不预设答案。
 2. `RND-015` 的语义需确认：当前 SkiaSharp 3.x 下 `SKPaint.Color` 不调制 `DrawImage`，因此 `color = Vector4.Zero` 是否真的导致标记不可见，需按真实 `DrawPlayerLocationHelper` 路径复核（既有审计已有此疑问，本轮未在真实负载下验证）。
 3. `RND-008` 中 `Parallel.ForEach` 与 `IntervalTree` 的并发交互需实测确认是否真的会并发进入 `RebuildInternal`（取决于并行体内是否只读、以及是否有其它线程在同一帧内触发脏标记）。
-4. 除 `RND-C1`、`RND-C2`（均有实测数据，分别为逐调用 / 逐被丢弃帧量纲）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1`/`RND-C2` 的数值都不能直接当作整帧加速比。
+4. 除 `RND-C1`、`RND-C2`、`RND-C3`（均有实测数据，量纲分别为逐调用 / 逐被丢弃帧 / 逐出帧的池清理）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1`/`RND-C2`/`RND-C3` 的数值都不能直接当作整帧加速比。其中 `RND-C3` 的绝对值还是三者里最小的（其条目本身已声明不是热点），落地价值主要是消除死代码与消除一处易被误解的控制流。
 5. 本轮未覆盖 Browser/WASM 侧的渲染差异（`src/OngekiFumenEditor.Avalonia.Browser`）与第三方依赖内部（Gekimini/Dock/ToolBar/WindowManager），这些在 09-09 审计中有独立分区，状态未在本轮复核。

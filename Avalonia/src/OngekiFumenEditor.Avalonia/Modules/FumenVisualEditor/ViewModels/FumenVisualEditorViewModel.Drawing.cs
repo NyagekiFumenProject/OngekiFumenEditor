@@ -677,6 +677,9 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
             usedDrawingContexts.Dispose();
             map.Dispose();
             drawingCollectionDisposables.Dispose();
+            // drawMap 的唯一一处「帧末清理」：本帧填充的池化内层对象已在上面的循环里逐个 Dispose，
+            // 这里只需清掉外层字典的键，使下一帧从空态重新填充（外层字典本身跨帧复用，不重建）。
+            // 成功路径与异常路径都经过本块；try 之前的两个 goto End 早退点不经此处，但那时 drawMap 本就为空。
             drawMap.Clear();
         }
 
@@ -687,7 +690,11 @@ public partial class FumenVisualEditorViewModel : DocumentViewModelBase, IFumenE
 
     End:
         builder?.Dispose();
-        drawMap.Clear();
+        // 这里**不再** drawMap.Clear()：本帧对 drawMap 的写入全部发生在 try 内（:510/:514/:583/:594），
+        // 而到达本标签只有两条路径 —— 正常出帧（先经过 finally 的 Clear）或 try 前早退
+        // （:314 限帧丢弃 / :346 fumen 为 null，此时 drawMap 尚未被本帧触碰、本就为空）。
+        // try 内抛异常时 finally 执行后异常继续上抛，不会落到这里。
+        // 故 finally 那一处已覆盖全部可达路径，此次 Clear 恒为冗余（详见 RND-C3 审计条目）。
         //set null
         CurrentDrawingTargetContext = default;
     }
