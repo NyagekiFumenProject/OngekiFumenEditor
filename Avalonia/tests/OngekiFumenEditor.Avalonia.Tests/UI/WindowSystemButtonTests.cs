@@ -8,27 +8,17 @@ using Xunit;
 
 namespace OngekiFumenEditor.Avalonia.Tests.UI;
 
-public sealed class SplashScreenSystemButtonTests
+public sealed class WindowSystemButtonTests
 {
-    // Splash 窗口已按平台拆分到 Desktop/Browser 程序集，这里用一个与 Splash 窗口
-    // 同配置(CanResize=false)的最小窗口保住系统按钮显隐的回归行为。
-    private sealed class SplashLikeWindow : WindowViewBase
-    {
-        public SplashLikeWindow()
-        {
-            CanResize = false;
-        }
-    }
-
     [AvaloniaFact]
-    public void SplashScreenView_HidesDisabledMinMaxButtons()
+    public void NonResizableWindow_HidesDisabledMinMaxButtons()
     {
         var panel = new WindowsPanel();
         var window = new Window { Content = panel, Width = 900, Height = 700 };
         window.Show();
         try
         {
-            var view = new SplashLikeWindow();
+            var view = new WindowViewBase { CanResize = false };
             panel.Show(view);
 
             window.UpdateLayout();

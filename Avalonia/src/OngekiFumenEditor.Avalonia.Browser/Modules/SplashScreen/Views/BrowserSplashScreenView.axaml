@@ -12,6 +12,7 @@
     Width="1000"
     Height="700"
     BorderThickness="0"
+    ResizeThickness="{DynamicResource ManagedWindow_BorderThickness}"
     d:DataContext="{d:DesignInstance Type=vm:BrowserSplashScreenViewModel}"
     Background="{StaticResource EditorWindowBackgroundBrush}"
     CanResize="True"
