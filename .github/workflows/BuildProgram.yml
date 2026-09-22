@@ -53,8 +53,12 @@ jobs:
         path: .\OngekiFumenEditor\version.json
     - name: Restore dependencies
       run: dotnet restore
+    # The Avalonia solution only carries production projects; the xUnit test projects live
+    # outside it on purpose, so they are invoked explicitly here.
     - name: Test Avalonia
-      run: dotnet test .\Avalonia\OngekiFumenEditor.Avalonia.sln -c ${{env.Configuration}} --nologo -v:minimal
+      run: dotnet test .\Avalonia\tests\OngekiFumenEditor.Avalonia.Tests\OngekiFumenEditor.Avalonia.Tests.csproj -c ${{env.Configuration}} --nologo -v:minimal
+    - name: Test Avalonia Desktop
+      run: dotnet test .\Avalonia\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.Avalonia.Desktop.Tests.csproj -c ${{env.Configuration}} --nologo -v:minimal
     - name: Publish OngekiFumenEditor
       run: dotnet publish .\OngekiFumenEditor\OngekiFumenEditor.csproj --no-restore -c ${{env.Configuration}} -o C:\ogkrEditorBuild\
     - name: Publish OngekiFumenEditor.CommandLine
