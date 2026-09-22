@@ -1,0 +1,303 @@
+using BenchmarkDotNet.Attributes;
+using OngekiFumenEditor.Avalonia.Base;
+using OngekiFumenEditor.Avalonia.Base.Collections;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Avalonia.Benchmark.Infrastructure;
+using OngekiFumenEditor.Avalonia.Models.Settings;
+
+namespace OngekiFumenEditor.Avalonia.Benchmark.Benchmarks;
+
+/// <summary>
+/// 审计项 RND-008（P2）—— 用**真实谱面**量化三件事：
+///   ① 剩余弹幕规模 K（= `BinaryFindRange(curTGrid, TGrid.MaxValue)` 到底捞了多少）；
+///   ② 逐项 lane 查询成本，以及「帧内 TGrid→enemyLane 缓存」（推荐改法 2）能省多少；
+///   ③ 脏树 + 并行查询时 `IntervalTree.RebuildInternal` 被重复触发的代价（推荐改法 3）。
+///
+/// 对照现状：
+///   ViewModels/FumenVisualEditorViewModel.Drawing.cs:532-533  预览模式按 [curTGrid, TGrid.MaxValue] 全量取
+///   TargetImpl/OngekiObjects/BulletBell/ProjectileBatchDrawTargetBase.cs:310  逐项 lane 查询
+///   同文件 :343-360   K ≥ ParallelCountLimit(默认 3000) 时走 Parallel.ForEach（DOP = Max(2, ProcessorCount-2)）
+///   Base/Collections/Base/RangeTree/IntervalTree.cs:68-74 / IntervalTree.cs:132-140 / IntervalTreeNode.cs:44-52
+///        Query 在 isInSync == false 时调 RebuildInternal()，后者先 Release(root) —— 递归地把旧树节点就地清空
+///
+/// 量纲说明（重要）：
+///   Original_LaneQueryPerItem / Optimized_CachedLaneLookupPerItem 是**逐项**（单枚弹丸一次查询）；
+///   Optimized_FrameWithFrameLocalCache 与两个 DirtyStorm_* 是**逐帧**（一帧内 K 项的全部工作）。
+///   它们不是整帧加速比：帧内还有插值、可见性判定、缓冲合并、命令构造等，本项只覆盖 RND-008 所辖部分。
+///
+/// 保真度说明：
+///   谱面来自 Data/FumenSamples（`8090_10.ogkr` / `8089_10.ogkr`），走**真实解析路径**
+///   （`SampleCorpus` + `IFumenParserManager`），lane 树、弹丸 TGrid 序列、BPM 列表都是真实数据；
+///   `DirtyStorm_*` 用一次对称的 `Lanes.Add`/`Remove` 制造脏标记（不改动真实谱面内容），
+///   两个变体差异只在「并行查询前是否先单线程喂一次查询」。
+///   未覆盖：`_Draw` 内部的几何与可见性判定、soflan 变速下的真实可见集合（推荐改法 1 的差分验证需要在编辑器内做）。
+/// </summary>
+[MemoryDiagnoser]
+public class ProjectileBatchRealChartBenchmarks
+{
+    /// <summary>Data/FumenSamples 下的谱面文件名（随 [Params] 分别出数）。</summary>
+    [Params("8090_10.ogkr", "8089_10.ogkr")]
+    public string Chart = null!;
+
+    private int dop;
+    private int parallelCountLimit;
+    private int distinctCount;
+    private ParallelOptions parallelOptions = null!;
+
+    private OngekiFumen fumen = null!;
+
+    /// <summary>50% 播放位置之后的子弹+bell（≈ 生产 `[curTGrid, MaxValue]` 的并集）。</summary>
+    private TGrid[] remainingTGrids = null!;
+
+    /// <summary>帧内缓存（推荐改法 2），预热后用于量命中路径。</summary>
+    private Dictionary<int, EnemyLaneStart?> warmLaneCache = null!;
+
+    private TGrid laneQueryMin;
+    private TGrid laneQueryMax;
+    private EnemyLaneStart dirtyProbe = null!;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        BenchmarkRuntime.EnsureInitialized();
+
+        dop = Math.Max(2, Environment.ProcessorCount - 2);
+        parallelCountLimit = EditorGlobalSetting.Default.ParallelCountLimit;
+
+        var sample = SampleCorpus.AllSamples.FirstOrDefault(x => string.Equals(x.FileName, Chart, StringComparison.OrdinalIgnoreCase))
+            ?? throw new InvalidOperationException($"'{Chart}' not found in Data/FumenSamples (embedded resources).");
+        fumen = SampleCorpus.Deserialize(sample);
+
+        // 查询范围取「整棵 lane 树」：与生产里 GetVisibleStartObjects(t, t) 走同一条 Query 路径。
+        var maxTotalGrid = fumen.Lanes.Select(x => x.MaxTGrid.TotalGrid).DefaultIfEmpty(0).Max();
+        laneQueryMin = TGrid.FromTotalGrid(0);
+        laneQueryMax = TGrid.FromTotalGrid(Math.Max(1, maxTotalGrid));
+        dirtyProbe = new EnemyLaneStart { RecordId = int.MaxValue - 1, TGrid = TGrid.FromTotalGrid(maxTotalGrid + 1920 * 64) };
+
+        var from = TGrid.FromTotalGrid(Math.Max(1, maxTotalGrid / 2));
+        remainingTGrids = EnumerateRemainingProjectiles(from).ToArray();
+        distinctCount = remainingTGrids.Select(x => x.TotalGrid).Distinct().Count();
+        parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = dop };
+
+        warmLaneCache = new Dictionary<int, EnemyLaneStart?>();
+        foreach (var t in remainingTGrids)
+            warmLaneCache[t.TotalGrid] = QueryEnemyLane(t);
+
+        PrintFacts(sample, maxTotalGrid);
+
+        // 等价性：两条路径必须给出同一批 lane（否则耗时对比没有意义）。
+        var direct = CountDirect(remainingTGrids);
+        var cached = CountCached(remainingTGrids);
+        if (direct != cached)
+            throw new InvalidOperationException($"lane lookup mismatch: direct={direct} cached={cached}");
+
+        // 脏风暴：固定形状必须完全正确；现状形状允许因 NRE 丢结果（那正是本项要量出来的缺陷）。
+        var lanesBefore = fumen.Lanes.Count;
+        var expected = CountLanes(laneQueryMin, laneQueryMax);
+        var current = DirtyStorm_CurrentShape();
+        if (fumen.Lanes.Count != lanesBefore)
+            throw new InvalidOperationException("DirtyStorm_CurrentShape left the lane tree modified.");
+        var fixedShape = DirtyStorm_AfterSingleRebuild();
+        if (fixedShape != expected)
+            throw new InvalidOperationException($"DirtyStorm_AfterSingleRebuild returned {fixedShape}, expected {expected}.");
+        if (current > fixedShape)
+            throw new InvalidOperationException($"DirtyStorm_CurrentShape returned {current} > {fixedShape} (impossible).");
+        if (fumen.Lanes.Count != lanesBefore)
+            throw new InvalidOperationException("DirtyStorm_AfterSingleRebuild left the lane tree modified.");
+
+        // 归零，使 GlobalCleanup 的统计只反映正式测量区间。
+        stormCalls = 0;
+        stormExceptions = 0;
+    }
+
+    // =====================================================================
+    // ① 逐项：生产表达式 vs 帧内缓存命中
+    // =====================================================================
+
+    /// <summary>现状：ProjectileBatchDrawTargetBase.cs:310 —— 每枚弹丸一次区间查询 + OfType + LastOrDefault。</summary>
+    [Benchmark(Baseline = true)]
+    public int Original_LaneQueryPerItem() => CountDirect(remainingTGrids);
+
+    /// <summary>推荐改法 2：同一批 TGrid 走帧内缓存（命中路径）。</summary>
+    [Benchmark]
+    public int Optimized_CachedLaneLookupPerItem() => CountCached(remainingTGrids);
+
+    // =====================================================================
+    // ② 逐帧：一帧 K 项的全部工作
+    // =====================================================================
+
+    /// <summary>推荐改法 2 的真实形状：帧内一个 Dictionary，未命中才算（含字典本身的分配）。</summary>
+    [Benchmark]
+    public int Optimized_FrameWithFrameLocalCache()
+    {
+        var cache = new Dictionary<int, EnemyLaneStart?>();
+        var hits = 0;
+        foreach (var t in remainingTGrids)
+        {
+            if (!cache.TryGetValue(t.TotalGrid, out var lane))
+                cache[t.TotalGrid] = lane = QueryEnemyLane(t);
+            if (lane is not null)
+                hits++;
+        }
+        return hits;
+    }
+
+    /// <summary>现状的真实形状：一帧 K 项各自直查（顺序执行；生产的并行形状见 DirtyStorm_*）。</summary>
+    [Benchmark]
+    public int Original_FrameDirectQueries()
+    {
+        var hits = 0;
+        foreach (var t in remainingTGrids)
+            if (QueryEnemyLane(t) is not null)
+                hits++;
+        return hits;
+    }
+
+    /// <summary>现状的真实形状（并行版，DOP = 生产值）：K 项在并行区内各自直查共享 lane 树。</summary>
+    [Benchmark]
+    public int Original_FrameDirectQueriesParallel()
+    {
+        SyncLaneTree();   // 先单线程喂一次，使本项只量「查询」本身，不含重建
+        var hits = 0;
+        Parallel.ForEach(remainingTGrids, parallelOptions, () => 0,
+            (t, _, local) => local + (QueryEnemyLane(t) is null ? 0 : 1),
+            local => Interlocked.Add(ref hits, local));
+        return hits;
+    }
+
+    /// <summary>改法 2+3：并行区之前顺序把 D 个 distinct TGrid 查完（miss），并行体内只读帧内字典。</summary>
+    [Benchmark]
+    public int Optimized_Frame_SequentialMissThenParallelLookup()
+    {
+        SyncLaneTree();
+        var cache = new Dictionary<int, EnemyLaneStart?>(distinctCount);
+        foreach (var t in remainingTGrids)
+            if (!cache.ContainsKey(t.TotalGrid))
+                cache[t.TotalGrid] = QueryEnemyLane(t);
+
+        var hits = 0;
+        Parallel.ForEach(remainingTGrids, parallelOptions, () => 0,
+            (t, _, local) => local + (cache[t.TotalGrid] is null ? 0 : 1),
+            local => Interlocked.Add(ref hits, local));
+        return hits;
+    }
+
+    /// <summary>改法 2（保留并行、miss 也并行）：要求 lane 树可被并发只读——当前不满足（见 DirtyStorm_*）。</summary>
+    [Benchmark]
+    public int Optimized_Frame_ParallelMissAndLookup()
+    {
+        SyncLaneTree();
+        var cache = new System.Collections.Concurrent.ConcurrentDictionary<int, EnemyLaneStart?>();
+        var hits = 0;
+        Parallel.ForEach(remainingTGrids, parallelOptions, () => 0,
+            (t, _, local) => local + (cache.GetOrAdd(t.TotalGrid, _ => QueryEnemyLane(t)) is null ? 0 : 1),
+            local => Interlocked.Add(ref hits, local));
+        return hits;
+    }
+
+    /// <summary>把树的脏状态喂掉：本项只量查询/缓存成本，不含重建（重建成本由 DirtyStorm_* 负责）。</summary>
+    private void SyncLaneTree() => _ = CountLanes(laneQueryMin, laneQueryMax);
+
+    // =====================================================================
+    // ③ 脏树 + 并行查询：重复重建
+    // =====================================================================
+
+    private int stormExceptions;
+    private int stormCalls;
+
+    /// <summary>
+    /// 现状：改树后立刻并行查询 —— 每个工作线程都看到 isInSync == false，各自重建整树；
+    /// 重建的 Release(root) 会把旧树节点就地清空，正在遍历的线程随即在 QueryInto 里 NRE（实测见下方 GlobalCleanup 计数）。
+    /// 这里捕获 NRE 以便把它**量出来**而不是让整个基准进程崩掉；失败线程的结果被丢弃，故返回的命中数是下界。
+    /// </summary>
+    [Benchmark]
+    public int DirtyStorm_CurrentShape()
+    {
+        fumen.Lanes.Add(dirtyProbe);
+        var lastCount = 0;
+        Parallel.For(0, dop, _ =>
+        {
+            try { Interlocked.Exchange(ref lastCount, CountLanes(laneQueryMin, laneQueryMax)); }
+            catch (NullReferenceException) { Interlocked.Increment(ref stormExceptions); }
+        });
+        fumen.Lanes.Remove(dirtyProbe);
+        Interlocked.Increment(ref stormCalls);
+        return lastCount;
+    }
+
+    /// <summary>推荐改法 3 的最小形态：并行前先单线程喂一次查询，把重建收敛成一次（之后 isInSync == true）。</summary>
+    [Benchmark]
+    public int DirtyStorm_AfterSingleRebuild()
+    {
+        fumen.Lanes.Add(dirtyProbe);
+        _ = CountLanes(laneQueryMin, laneQueryMax);
+        var lastCount = 0;
+        Parallel.For(0, dop, _ => Interlocked.Exchange(ref lastCount, CountLanes(laneQueryMin, laneQueryMax)));
+        fumen.Lanes.Remove(dirtyProbe);
+        return lastCount;
+    }
+
+    [GlobalCleanup]
+    public void Cleanup()
+        => Console.WriteLine($"[{Chart}] DirtyStorm_CurrentShape: {stormCalls} 次调用共捕获 {stormExceptions} 次 " +
+                             $"NullReferenceException（IntervalTreeNode 被并发 Release 清空；含 setup 期归零前的调用已排除）");
+
+    // =====================================================================
+
+    private EnemyLaneStart? QueryEnemyLane(TGrid t)
+        => fumen.Lanes.GetVisibleStartObjects(t, t).OfType<EnemyLaneStart>().LastOrDefault();
+
+    private int CountDirect(IReadOnlyList<TGrid> tGrids)
+    {
+        var hits = 0;
+        foreach (var t in tGrids)
+            if (QueryEnemyLane(t) is not null)
+                hits++;
+        return hits;
+    }
+
+    private int CountCached(IReadOnlyList<TGrid> tGrids)
+    {
+        var hits = 0;
+        foreach (var t in tGrids)
+            if (warmLaneCache[t.TotalGrid] is not null)
+                hits++;
+        return hits;
+    }
+
+    private int CountLanes(TGrid min, TGrid max)
+    {
+        var hits = 0;
+        foreach (var _ in fumen.Lanes.GetVisibleStartObjects(min, max))
+            hits++;
+        return hits;
+    }
+
+    /// <summary>生产 `BinaryFindRange(curTGrid, TGrid.MaxValue)` 对子弹与 bell 的并集。</summary>
+    private IEnumerable<TGrid> EnumerateRemainingProjectiles(TGrid from)
+    {
+        foreach (var bullet in fumen.Bullets.BinaryFindRange(from, TGrid.MaxValue))
+            yield return bullet.TGrid;
+        foreach (var bell in fumen.Bells.BinaryFindRange(from, TGrid.MaxValue))
+            yield return bell.TGrid;
+    }
+
+    private void PrintFacts(FumenSample sample, int maxTotalGrid)
+    {
+        Console.WriteLine($"[{Chart}] {sample.Data.Length / 1024} KB  lanes={fumen.Lanes.Count}  " +
+                          $"bullets={fumen.Bullets.Count}  bells={fumen.Bells.Count}  " +
+                          $"bpmChanges={fumen.BpmList.Count}  meters={fumen.MeterChanges.Count}  maxTGrid={maxTotalGrid}");
+        Console.WriteLine($"  ParallelCountLimit={parallelCountLimit}（K 低于该值走顺序路径）  DOP={dop}  " +
+                          $"剩余弹幕输入 K(50%)={remainingTGrids.Length}  distinct TGrid={remainingTGrids.Select(x => x.TotalGrid).Distinct().Count()}");
+
+        foreach (var frac in new[] { 0.0, 0.25, 0.5, 0.75, 1.0 })
+        {
+            var from = TGrid.FromTotalGrid((int)(maxTotalGrid * frac));
+            var list = EnumerateRemainingProjectiles(from).ToArray();
+            var distinct = list.Select(x => x.TotalGrid).Distinct().Count();
+            Console.WriteLine($"    from {frac,4:P0} of chart: K={list.Length,6}  distinct TGrid={distinct,6}  " +
+                              $"D/K={(list.Length == 0 ? 0 : distinct / (double)list.Length):F3}  " +
+                              $"{(list.Length >= parallelCountLimit ? "→ 可能进并行路径" : "→ 顺序路径")}");
+        }
+    }
+}
