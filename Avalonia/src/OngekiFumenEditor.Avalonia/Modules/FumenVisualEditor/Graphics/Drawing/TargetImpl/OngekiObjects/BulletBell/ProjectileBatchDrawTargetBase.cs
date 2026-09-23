@@ -4,11 +4,13 @@ using OngekiFumenEditor.Avalonia.Base.EditorObjects;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects;
 
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics;
 using OngekiFumenEditor.Avalonia.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Avalonia.Utils;
+using OngekiFumenEditor.Avalonia.Utils.ObjectPool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +29,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             public Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> Normal;
             public Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>> Selected;
             public List<(Vector2 pos, string str)> StrList;
+
+            public Dictionary<int, EnemyLaneStart> EnemyLaneCache = new();
         }
 
         private const int InitialListCapacity = 256;
@@ -96,6 +100,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             foreach (var l in selectedDrawList.Values)
                 l.Clear();
             drawStrList.Clear();
+            //帧内缓存只在一次 DrawBatch 内有效，否则下一帧会拿旧 lane 解析结果去算 fromX。
+            mainBuffer.EnemyLaneCache.Clear();
         }
 
         private void ResetDrawResources()
@@ -121,7 +127,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             var selected = new Dictionary<IImage, List<(Vector2, Vector2, float, Vector4)>>(selectedDrawList.Count);
             foreach (var key in selectedDrawList.Keys)
                 selected[key] = new List<(Vector2, Vector2, float, Vector4)>(InitialListCapacity);
-            return new DrawBuffer { Normal = normal, Selected = selected, StrList = null };
+            return new DrawBuffer { Normal = normal, Selected = selected, StrList = null, EnemyLaneCache = new() };
         }
 
         private DrawBuffer RentBuffer()
@@ -136,6 +142,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                             list.Clear();
                         foreach (var list in buf.Selected.Values)
                             list.Clear();
+                        buf.EnemyLaneCache.Clear();
                         return buf;
                     }
                 }
@@ -183,7 +190,8 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
             var rectMaxY = rect.MaxY;
             var baseY = Math.Min(rectMinY, rectMaxY) + judgeOffset;
             var scale = target.Editor.Setting.VerticalDisplayScale;
-            var bpmList = target.Editor.EditorContext.Fumen.BpmList;
+            var fumen = target.Editor.EditorContext.Fumen;
+            var bpmList = fumen.BpmList;
             var nonSoflanCurrentTime = convertToYNonSoflan(currentTGrid);
             //var soflanCurrentTime = convertToY(currentTGrid, target.Editor.EditorContext.Fumen.SoflansMap.DefaultSoflanList);
             var height = rect.Height;
@@ -266,8 +274,6 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                 var fromXUnit = 0d;
                 var toXUnit = 0d;
 
-                var fumen = target.Editor.EditorContext.Fumen;
-
                 #region ToXUnit
 
                 switch (obj.TargetValue)
@@ -307,7 +313,7 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                         fromXUnit = toXUnit;
                         break;
                     case Shooter.Enemy:
-                        var enemyLane = fumen.Lanes.GetVisibleStartObjects(objTGrid, objTGrid).OfType<EnemyLaneStart>().LastOrDefault();
+                        var enemyLane = GetEnemyLane(fumen, objTGrid, buffer);
                         var xGrid = enemyLane?.CalulateXGrid(objTGrid);
                         fromXUnit = xGrid?.TotalUnit ?? objXGrid.TotalUnit;
                         break;
@@ -339,6 +345,10 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
              使用并行计算，对所有bell/bullet全部判断，虽然判断的结果也只直接传给后续绘制
              //todo 进一步优化
              */
+            //改法 3 的廉价形态：lane 索引的重建是单飞的，放在并行区里只会让其余工作线程堵在重建闸门后面，
+            //这里先同步一次，区内就只剩只读查询（未命中仍可在区内发生，见 GetEnemyLane）。
+            fumen.Lanes.EnsureInSync();
+
             var totalCount = (objs as ICollection<T>)?.Count ?? objs.Count();
             if (totalCount < parallelCountLimit)
             {
@@ -358,6 +368,46 @@ namespace OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.
                     },
                     MergeAndReturnBuffer);
             }
+        }
+
+        /// <summary>
+        /// 改法 2：同一帧内相同 TGrid 的敌方投射物共享一次 lane 查询（命中 0 分配）。
+        /// 缓存挂在绘制缓冲上，故每个并行工作线程各自持有、互不加锁；未命中就地查 lane 树
+        /// （<see cref="IntervalTreeWrapper{TKey, TValue}"/> 已支持并发只读），无需先把 miss 串行做完。
+        /// </summary>
+        /// <remarks>
+        /// 缓存键用 <see cref="TGrid.TotalGrid"/> 是等价的：区间树里的比较全部走
+        /// <see cref="GridBase.CompareTo"/>，即只比 TotalGrid。
+        /// </remarks>
+        internal static EnemyLaneStart GetEnemyLane(OngekiFumen fumen, TGrid tGrid, DrawBuffer buffer)
+        {
+            var key = tGrid.TotalGrid;
+            var cache = buffer.EnemyLaneCache;
+            if (cache.TryGetValue(key, out var cachedLane))
+                return cachedLane;
+
+            var lane = QueryEnemyLane(fumen, tGrid);
+            cache[key] = lane;
+            return lane;
+        }
+
+        /// <summary>
+        /// 等价于 <c>fumen.Lanes.GetVisibleStartObjects(t, t).OfType&lt;EnemyLaneStart&gt;().LastOrDefault()</c>，
+        /// 但走零分配的 <c>QueryInto</c>：旧写法每次租一个池化列表再叠两层 LINQ 迭代器。
+        /// </summary>
+        internal static EnemyLaneStart QueryEnemyLane(OngekiFumen fumen, TGrid tGrid)
+        {
+            using var lanes = ObjectPool.GetPooledList<LaneStartBase>();
+            fumen.Lanes.QueryVisibleStartObjectsInto(tGrid, tGrid, lanes);
+
+            //LastOrDefault：查询结果按树的中序遍历给出，倒着找第一个即最后一个 EnemyLaneStart。
+            for (var i = lanes.Count - 1; i >= 0; i--)
+            {
+                if (lanes[i] is EnemyLaneStart enemyLane)
+                    return enemyLane;
+            }
+
+            return null;
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<T> objs)
