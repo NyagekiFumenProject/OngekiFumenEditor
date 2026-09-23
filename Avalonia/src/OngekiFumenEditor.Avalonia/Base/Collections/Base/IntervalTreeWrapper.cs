@@ -78,6 +78,17 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base
 			return tree.Query(min, max);
 		}
 
+		public void QueryInRangeInto(TKey min, TKey max, ICollection<TValue> output)
+		{
+#if DEBUG
+			if (IsBatching)
+				throw new Exception("Collection is in batching....");
+#endif
+			tree.QueryInto(min, max, output);
+		}
+
+		public void EnsureInSync() => tree.EnsureInSync();
+
 		public void BeginBatchAction()
 		{
 			IsBatching = true;

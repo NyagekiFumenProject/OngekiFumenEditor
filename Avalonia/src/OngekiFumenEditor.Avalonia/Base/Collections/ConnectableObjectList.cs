@@ -82,6 +82,22 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections
 			return startObjects.QueryInRange(min, max);
 		}
 
+		/// <summary>
+		/// <see cref="GetVisibleStartObjects"/> 的零分配形态：结果追加到 <paramref name="output"/>。
+		/// </summary>
+		public void QueryVisibleStartObjectsInto(TGrid min, TGrid max, ICollection<START_TYPE> output)
+		{
+			startObjects.QueryInRangeInto(min, max, output);
+		}
+
+		/// <summary>
+		/// 把区间索引更新到最新内容（并行只读区之前调用一次）。
+		/// </summary>
+		public void EnsureInSync()
+		{
+			startObjects.EnsureInSync();
+		}
+
 		public bool Contains(START_TYPE o)
 		{
 			return startObjects.FastContains(o);
