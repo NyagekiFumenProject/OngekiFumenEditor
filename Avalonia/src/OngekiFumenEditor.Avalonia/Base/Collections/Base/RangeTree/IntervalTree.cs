@@ -1,15 +1,26 @@
 //copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
 
 using System.Collections;
+using System.Threading;
 
 namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 {
 	public class IntervalTree<TKey, TValue> : IIntervalTree<TKey, TValue>
 	{
+		private readonly object writeGate = new();
+
+		private readonly object rebuildGate = new();
+
+		private List<RangeValuePair<TKey, TValue>> staging = new();
+
 		private IntervalTreeNode<TKey, TValue> root;
-		private List<RangeValuePair<TKey, TValue>> items;
+
+		private int version;
+		private int syncedVersion;
+
+		private int count;
+
 		private readonly IComparer<TKey> comparer;
-		private bool isInSync;
 
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -19,10 +30,8 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 		{
 			get
 			{
-				if (!isInSync)
-					RebuildInternal();
-
-				return root.Max;
+				EnsureInSync();
+				return Volatile.Read(ref root).Max;
 			}
 		}
 
@@ -30,16 +39,25 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 		{
 			get
 			{
-				if (!isInSync)
-					RebuildInternal();
-
-				return root.Min;
+				EnsureInSync();
+				return Volatile.Read(ref root).Min;
 			}
 		}
 
-		public IEnumerable<TValue> Values => items.Select(i => i.Value);
+		public IEnumerable<TValue> Values
+		{
+			get
+			{
+				//拷贝到调用方私有数组：返回值可能在写者继续 Add/Remove 时被枚举，不能把 staging 交出去。
+				RangeValuePair<TKey, TValue>[] snapshot;
+				lock (writeGate)
+					snapshot = staging.ToArray();
 
-		public int Count => items.Count;
+				return snapshot.Select(i => i.Value);
+			}
+		}
+
+		public int Count => Volatile.Read(ref count);
 
 		/// <summary>
 		/// Initializes an empty tree.
@@ -52,33 +70,35 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 		public IntervalTree(IComparer<TKey> comparer)
 		{
 			this.comparer = comparer ?? Comparer<TKey>.Default;
-			isInSync = true;
-			root = new IntervalTreeNode<TKey, TValue>(this.comparer);
-			items = new List<RangeValuePair<TKey, TValue>>();
+			root = IntervalTreeNode<TKey, TValue>.BuildTree(Array.Empty<RangeValuePair<TKey, TValue>>(), this.comparer);
 		}
 
 		public IEnumerable<TValue> Query(TKey value)
 		{
-			if (!isInSync)
-				RebuildInternal();
+			EnsureInSync();
 
-			return root.Query(value);
+			return Volatile.Read(ref root).Query(value);
 		}
 
 		public IEnumerable<TValue> Query(TKey from, TKey to)
 		{
-			if (!isInSync)
-				RebuildInternal();
+			EnsureInSync();
 
-			return root.Query(from, to);
+			return Volatile.Read(ref root).Query(from, to);
 		}
 
 		public void QueryInto(TKey from, TKey to, ICollection<TValue> output)
 		{
-			if (!isInSync)
-				RebuildInternal();
+			EnsureInSync();
 
-			root.QueryInto(from, to, output);
+			Volatile.Read(ref root).QueryInto(from, to, output);
+		}
+
+		/// <summary>把索引更新到最新内容；已最新时是一次版本比较（两个 volatile 读），不做任何工作。</summary>
+		public void EnsureInSync()
+		{
+			if (Volatile.Read(ref syncedVersion) != Volatile.Read(ref version))
+				RebuildInternal();
 		}
 
 		public void Add(TKey from, TKey to, TValue value)
@@ -91,52 +111,91 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 					throw new ArgumentOutOfRangeException($"{nameof(from)} cannot be larger than {nameof(to)}");
 			}
 
-			NotifyDirty();
-			items.Add(new RangeValuePair<TKey, TValue>(from, to, value));
+			lock (writeGate)
+			{
+				staging.Add(new RangeValuePair<TKey, TValue>(from, to, value));
+				count = staging.Count;
+				version++;
+			}
 		}
 
 		public void Remove(TValue value)
 		{
-			NotifyDirty();
-			for (var i = items.Count - 1; i >= 0; i--)
+			lock (writeGate)
 			{
-				if (items[i].Value.Equals(value))
-					items.RemoveAt(i);
+				for (var i = staging.Count - 1; i >= 0; i--)
+				{
+					if (staging[i].Value.Equals(value))
+						staging.RemoveAt(i);
+				}
+
+				count = staging.Count;
+				version++;
 			}
 		}
 
 		public void Remove(IEnumerable<TValue> items)
 		{
-			NotifyDirty();
-			this.items = this.items.Where(l => !items.Contains(l.Value)).ToList();
+			lock (writeGate)
+			{
+				staging.RemoveAll(l => items.Contains(l.Value));
+				count = staging.Count;
+				version++;
+			}
 		}
 
 		public void Clear()
 		{
-			IntervalTreeNode<TKey, TValue>.Release(root);
-			root = new IntervalTreeNode<TKey, TValue>(comparer);
-			items = new List<RangeValuePair<TKey, TValue>>();
-			isInSync = true;
+			lock (writeGate)
+			{
+				staging.Clear();
+				count = 0;
+				version++;
+			}
 		}
 
 		public IEnumerator<RangeValuePair<TKey, TValue>> GetEnumerator()
 		{
-			if (!isInSync)
-				RebuildInternal();
+			RangeValuePair<TKey, TValue>[] snapshot;
+			lock (writeGate)
+				snapshot = staging.ToArray();
 
-			return items.GetEnumerator();
+			return ((IEnumerable<RangeValuePair<TKey, TValue>>)snapshot).GetEnumerator();
 		}
 
-		public void NotifyDirty() => isInSync = false;
+		public void NotifyDirty()
+		{
+			lock (writeGate)
+				version++;
+		}
 
 		private void RebuildInternal()
 		{
-			if (isInSync)
+			if (Volatile.Read(ref syncedVersion) == Volatile.Read(ref version))
 				return;
 
-			IntervalTreeNode<TKey, TValue>.Release(root);
-			root = IntervalTreeNode<TKey, TValue>.BuildTree(items, comparer);
-			isInSync = true;
+			lock (rebuildGate)
+			{
+				if (Volatile.Read(ref syncedVersion) == Volatile.Read(ref version))
+					return;
+
+				//快照必须在 writeGate 内连同版本号一起取：否则重建期间的新增会被这次发布"合并掉"，
+				//版本比较也就永远追不上（索引静默漏项）。
+				RangeValuePair<TKey, TValue>[] snapshot;
+				int snapshotVersion;
+				lock (writeGate)
+				{
+					snapshot = staging.ToArray();
+					snapshotVersion = version;
+				}
+
+				var newRoot = IntervalTreeNode<TKey, TValue>.BuildTree(snapshot, comparer);
+
+				//发布顺序：先索引后版本；读者先读版本、命中后再读索引，故不会看到"版本已最新但索引还是旧的"。
+				//快照期间发生过的写入会让版本不等，接下来的一次查询会再重建一次，不会丢项。
+				Volatile.Write(ref root, newRoot);
+				Volatile.Write(ref syncedVersion, snapshotVersion);
+			}
 		}
 	}
 }

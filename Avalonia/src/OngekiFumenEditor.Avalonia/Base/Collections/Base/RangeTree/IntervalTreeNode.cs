@@ -8,54 +8,43 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
     ///     A node of the range tree. Given a list of items, it builds
     ///     its subtree. Also contains methods to query the subtree.
     ///     Basically, all interval tree logic is here.
+    ///
+    ///     节点在构建完成后不可变（字段全部 readonly，子树只建不删），因此任意数量的读者可以并发遍历同一棵树。
+    ///     旧实现有一个 <c>Release</c>，重建时把旧节点递归就地清空——正在遍历的线程会解引用被置空的字段（RND-008 的 NRE）。
+    ///     节点从不池化，就地清空省不下任何分配，只会把这个竞争窗口留在那里，故直接删除。
     /// </summary>
-    internal class IntervalTreeNode<TKey, TValue> : IComparer<RangeValuePair<TKey, TValue>>
+    internal sealed class IntervalTreeNode<TKey, TValue>
     {
-        private TKey center;
-        private IComparer<TKey> comparer;
-        private List<RangeValuePair<TKey, TValue>> items;
-        private IntervalTreeNode<TKey, TValue> leftNode;
-        private IntervalTreeNode<TKey, TValue> rightNode;
+        private readonly TKey center;
+        private readonly IComparer<TKey> comparer;
+        private readonly List<RangeValuePair<TKey, TValue>> items;
+        private readonly IntervalTreeNode<TKey, TValue> leftNode;
+        private readonly IntervalTreeNode<TKey, TValue> rightNode;
 
-        public TKey Max { get; private set; }
-        public TKey Min { get; private set; }
+        public TKey Max { get; }
+        public TKey Min { get; }
 
-        public IntervalTreeNode()
-        {
-            ClearValue();
-        }
-
-        public IntervalTreeNode(IComparer<TKey> comparer) : this()
+        private IntervalTreeNode(
+            IComparer<TKey> comparer,
+            TKey center,
+            List<RangeValuePair<TKey, TValue>> items,
+            IntervalTreeNode<TKey, TValue> leftNode,
+            IntervalTreeNode<TKey, TValue> rightNode,
+            TKey min,
+            TKey max)
         {
             this.comparer = comparer ?? Comparer<TKey>.Default;
-        }
-
-        private void ClearValue()
-        {
-            comparer = default;
-            leftNode = default;
-            rightNode = default;
-            center = default;
-            items = default;
-            Min = default;
-            Max = default;
-        }
-
-        public static void Release(IntervalTreeNode<TKey, TValue> unusedObj)
-        {
-            if (unusedObj == null)
-                return;
-
-            Release(unusedObj.leftNode);
-            Release(unusedObj.rightNode);
-            unusedObj.ClearValue();
+            this.center = center;
+            this.items = items;
+            this.leftNode = leftNode;
+            this.rightNode = rightNode;
+            Min = min;
+            Max = max;
         }
 
         public static IntervalTreeNode<TKey, TValue> BuildTree(IEnumerable<RangeValuePair<TKey, TValue>> items, IComparer<TKey> comparer)
         {
-            var node = new IntervalTreeNode<TKey, TValue>();
-            node.comparer = comparer ?? Comparer<TKey>.Default;
-
+            var nodeComparer = comparer ?? Comparer<TKey>.Default;
             var endPoints = new List<TKey>();
             foreach (var item in items)
             {
@@ -63,12 +52,16 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
                 endPoints.Add(item.To);
             }
 
-            endPoints.Sort(node.comparer);
+            endPoints.Sort(nodeComparer);
+
+            var center = default(TKey);
+            var min = default(TKey);
+            var max = default(TKey);
             if (endPoints.Count > 0)
             {
-                node.Min = endPoints[0];
-                node.center = endPoints[endPoints.Count / 2];
-                node.Max = endPoints[endPoints.Count - 1];
+                min = endPoints[0];
+                center = endPoints[endPoints.Count / 2];
+                max = endPoints[endPoints.Count - 1];
             }
 
             var inner = new List<RangeValuePair<TKey, TValue>>();
@@ -77,55 +70,65 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 
             foreach (var value in items)
             {
-                if (node.comparer.Compare(value.To, node.center) < 0)
+                if (nodeComparer.Compare(value.To, center) < 0)
                     left.Add(value);
-                else if (node.comparer.Compare(value.From, node.center) > 0)
+                else if (nodeComparer.Compare(value.From, center) > 0)
                     right.Add(value);
                 else
                     inner.Add(value);
             }
 
+            List<RangeValuePair<TKey, TValue>> innerItems;
             if (inner.Count > 0)
             {
                 if (inner.Count > 1)
-                    inner.Sort(node);
-                node.items = inner;
+                    inner.Sort(new RangeValuePairComparer(nodeComparer));
+                innerItems = inner;
             }
             else
             {
-                node.items = null;
+                innerItems = null;
             }
 
-            if (left.Count > 0)
-                node.leftNode = BuildTree(left, node.comparer);
-            if (right.Count > 0)
-                node.rightNode = BuildTree(right, node.comparer);
+            var leftNode = left.Count > 0 ? BuildTree(left, nodeComparer) : null;
+            var rightNode = right.Count > 0 ? BuildTree(right, nodeComparer) : null;
 
-            return node;
+            return new IntervalTreeNode<TKey, TValue>(nodeComparer, center, innerItems, leftNode, rightNode, min, max);
         }
 
-        int IComparer<RangeValuePair<TKey, TValue>>.Compare(RangeValuePair<TKey, TValue> x, RangeValuePair<TKey, TValue> y)
+        /// <summary>按 (From, To) 排序 inner 列表；与旧实现的显式接口实现等价，只是不再让节点自身承担这个职责。</summary>
+        private sealed class RangeValuePairComparer : IComparer<RangeValuePair<TKey, TValue>>
         {
-            var fromComp = comparer.Compare(x.From, y.From);
-            if (fromComp == 0)
-                return comparer.Compare(x.To, y.To);
-            return fromComp;
+            private readonly IComparer<TKey> comparer;
+
+            public RangeValuePairComparer(IComparer<TKey> comparer) => this.comparer = comparer;
+
+            public int Compare(RangeValuePair<TKey, TValue> x, RangeValuePair<TKey, TValue> y)
+            {
+                var fromComp = comparer.Compare(x.From, y.From);
+                if (fromComp == 0)
+                    return comparer.Compare(x.To, y.To);
+                return fromComp;
+            }
         }
 
         public IEnumerable<TValue> Query(TKey value)
         {
-            if (items != null)
+            var localItems = items;
+            var localComparer = comparer;
+
+            if (localItems != null)
             {
-                foreach (var item in items)
+                foreach (var item in localItems)
                 {
-                    if (comparer.Compare(item.From, value) > 0)
+                    if (localComparer.Compare(item.From, value) > 0)
                         break;
-                    if (comparer.Compare(value, item.From) >= 0 && comparer.Compare(value, item.To) <= 0)
+                    if (localComparer.Compare(value, item.From) >= 0 && localComparer.Compare(value, item.To) <= 0)
                         yield return item.Value;
                 }
             }
 
-            var centerComp = comparer.Compare(value, center);
+            var centerComp = localComparer.Compare(value, center);
             if (leftNode != null && centerComp < 0)
             {
                 foreach (var item in leftNode.Query(value))
@@ -149,22 +152,25 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 
         public void QueryInto(TKey from, TKey to, ICollection<TValue> output)
         {
-            if (items != null)
+            var localItems = items;
+            var localComparer = comparer;
+
+            if (localItems != null)
             {
-                for (int i = 0; i < items.Count; i++)
+                for (int i = 0; i < localItems.Count; i++)
                 {
-                    var item = items[i];
-                    if (comparer.Compare(item.From, to) > 0)
+                    var item = localItems[i];
+                    if (localComparer.Compare(item.From, to) > 0)
                         break;
-                    if (comparer.Compare(to, item.From) >= 0 && comparer.Compare(from, item.To) <= 0)
+                    if (localComparer.Compare(to, item.From) >= 0 && localComparer.Compare(from, item.To) <= 0)
                         output.Add(item.Value);
                 }
             }
 
-            if (leftNode != null && comparer.Compare(from, center) < 0)
+            if (leftNode != null && localComparer.Compare(from, center) < 0)
                 leftNode.QueryInto(from, to, output);
 
-            if (rightNode != null && comparer.Compare(to, center) > 0)
+            if (rightNode != null && localComparer.Compare(to, center) > 0)
                 rightNode.QueryInto(from, to, output);
         }
     }

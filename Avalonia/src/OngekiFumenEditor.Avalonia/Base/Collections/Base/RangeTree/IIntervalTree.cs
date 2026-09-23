@@ -31,6 +31,8 @@ namespace OngekiFumenEditor.Avalonia.Base.Collections.Base.RangeTree
 		/// </summary>
 		void QueryInto(TKey from, TKey to, ICollection<TValue> output);
 
+		void EnsureInSync();
+
 		/// <summary>
 		/// Adds the specified item.
 		/// </summary>
