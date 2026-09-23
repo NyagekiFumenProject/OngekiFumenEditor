@@ -307,3 +307,96 @@ private void RebuildInternal()
 | `benchmarks/OngekiFumenEditor.Avalonia.Benchmark/Benchmarks/ExtremeProjectileScenarioBenchmarks.cs` | 10 方法 × 8 场景，含两条收紧规则、逐量位置对比、脏树并发 |
 
 另：`%TEMP%\rnd008-sim\`（首轮合成模拟，240 lane 的临时脚本，非仓库内容）结论与上表一致，已被本基准取代。
+
+## 11. 落地：改法 2·保持并行 miss（2026-09-23）
+
+本节记录 §8 + §6.2 末行「改法2·保持并行 miss（需 §8）」的**实施结果与实测**。
+（本节的「改前」数字来自上文各表；「改后」数字全部是本机 BenchmarkDotNet 实测，命令与产见文末。）
+
+### 11.1 改了什么
+
+| 文件 | 改动 |
+|---|---|
+| `Base/Collections/Base/RangeTree/IntervalTree.cs` | 写入只改**写者私有的 `staging`**（`writeGate` 保护），重建在 `rebuildGate` 内**单飞**、先建新图再**原子发布**（`Volatile.Write(ref root)` + 版本令牌 `version`/`syncedVersion`）；不再 `Release` 旧树。`Values`/`GetEnumerator` 改为持锁拷贝快照，读者永不触碰 `staging` |
+| `Base/Collections/Base/RangeTree/IntervalTreeNode.cs` | 节点**不可变**（字段全 `readonly`），删除 `Release()`/`ClearValue()`（就是 NRE 根因；节点从不池化，就地清空省不下任何分配） |
+| `Base/Collections/Base/RangeTree/IIntervalTree.cs` | 新增 `EnsureInSync()` |
+| `Base/Collections/Base/IntervalTreeWrapper.cs` | 新增 `EnsureInSync()` 与零分配 `QueryInRangeInto()` |
+| `Base/Collections/ConnectableObjectList.cs` | 新增 `EnsureInSync()` 与零分配 `QueryVisibleStartObjectsInto()` |
+| `.../BulletBell/ProjectileBatchDrawTargetBase.cs` | 帧内 `TGrid→EnemyLaneStart` 缓存挂在 `DrawBuffer` 上（**每个并行工作线程一份**，池化复用、帧末/取用时清空），miss 仍在并行区内就地发生；lane 查询改走零分配 `QueryInto`；进并行区前 `EnsureInSync()` 一次（§6.2 改法 3 的廉价形态） |
+
+关于 §8.4 的两点说明（有意偏离审计原文）：
+1. **没有加「并行只读区里写入就 throw」的 DEBUG 断言**：改造后写入一个正被遍历的树已经是安全的（读者看的是不可变快照），
+   假阳性来源却很实在——`SoflanList.GetCachedSoflanPositionList_PreviewMode` 会在帧内**惰性重建**自己那棵私有区间树（持锁建新树再发布，
+   §8.5 里「其它共享集合」那条的同类形态），把它当成违规会让 DEBUG 构建在正常路径上抛。不变量改由注释 + §11.3 的并发用例固化。
+2. §8.4 的「热点调用点统一走零分配 `QueryInto`」已落：`ProjectileBatchDrawTargetBase.QueryEnemyLane` 现在是池化列表 + 倒序扫描，
+   等价于原 `OfType<EnemyLaneStart>().LastOrDefault()`（见 §11.4 的逐量等价断言）。
+
+### 11.2 验收（§8.5 的三条门槛）
+
+| 门槛 | 结果 | 证据 |
+|---|---|---|
+| ① 脏树 + 14 读线程风暴：异常与结果不一致均为 0 | **通过** | 真实谱面 8090 短跑：`DirtyStorm_CurrentShape` 36 941 次调用 **0 次 NRE**；`GlobalSetup` 硬断言（命中数必须等于干净帧）通过 |
+| ② 边查边改（1 写 + 14 读）：异常为 0 | **通过** | `IntervalTreeConcurrencyBenchmarks.WriteWhileReading_Churn`：512/8192 项下读异常均 **0**；`GlobalSetup` 另断言每次读只能看到「写前完整集合」或「写后完整集合」 |
+| ③ 一轮风暴分配 ÷ 单次重建分配 ≈ 1 | **通过** | 512 项：363 387 B ÷ 356 520 B ≈ **1.02**；8192 项：7 019 293 B ÷ 7 012 300 B ≈ **1.00**（改前实测为 DOP−1 ≈ 11–13）。耗时侧同结论：8192 项风暴 3.91 ms ≈ 单次重建 3.55 ms |
+
+（`IntervalTreeConcurrencyBenchmarks` 的 `[GlobalSetup]` 把 ①② 做成硬断言——非 0 直接抛、整类失败；计数与比值由 RDN 全程复跑。）
+
+### 11.3 性能（`--job short`，8090_10.ogkr，DOP=14，K=13 828 / D=2661，逐帧量纲）
+
+| 方法 | Mean | 分配 | 相对 `Original_FrameDirectQueriesParallel` |
+|---|---|---|---|
+| `Original_LaneQueryPerItem`（逐项直查，基线） | 2 682.0 µs | 1 331 824 B | 3.78× |
+| `Optimized_CachedLaneLookupPerItem`（逐项，缓存命中） | 42.7 µs | 32 B | 0.06× |
+| `Optimized_PooledLaneQueryPerItem`（逐项，**生产**零分配查询） | 1 180.3 µs | 32 B | 1.66× |
+| `Original_FrameDirectQueries`（顺序直查） | 1 812.1 µs | 1 331 792 B | 2.55× |
+| **`Original_FrameDirectQueriesParallel`（改前现状形状）** | **709.6 µs** | **1 336 944 B** | **1.00×** |
+| `Optimized_FrameWithFrameLocalCache`（顺序 + 帧内字典） | 435.3 µs | 355 128 B | 0.61× |
+| `Optimized_Frame_SequentialMissThenParallelLookup`（改法2+3） | 505.2 µs | 301 403 B | 0.71× |
+| `Optimized_Frame_ParallelMissAndLookup`（审计形状：共享 `ConcurrentDictionary` + 先 `SyncLaneTree()`） | 241.5 µs | 1 083 718 B | 0.34× |
+| **`Fix2_ProductionShape_PreSyncThenParallelMiss`（本次落地）** | **151.5 µs** | **135 044 B** | **0.21×** |
+| `Fix2_ParallelMiss_PerThreadCache_NoPreSync_OnDirtyTree`（脏帧、区内重建） | 271.9 µs | 259 810 B | 0.38× |
+| `Fix2_ParallelMiss_SharedConcurrentCache`（对照：全线程共享缓存） | 180.3 µs | 158 631 B | 0.25× |
+| `DirtyStorm_CurrentShape`（脏树 + 并行查询） | 213.1 µs | 136 205 B | 0.30× |
+| `DirtyStorm_AfterSingleRebuild`（先同步再并行） | 146.6 µs | 134 547 B | 0.21× |
+
+结论：
+1. **落地形状比改前快 4.68×、分配降到 1/9.9**（709.6 → 151.5 µs；1 336 944 → 135 044 B），比审计里的并行 miss 形状再快 1.59×、分配降 8×。
+2. **每线程一份缓存优于全线程共享一份**（151.5 µs / 135 KB vs 180.3 µs / 159 KB）：无 CAS 争用，且缓存随 `DrawBuffer` 池化复用，稳态零额外分配。
+3. **零分配 lane 查询本身值 2.27×**（1 180.3 → 42.7 µs 是缓存命中的上限；miss 侧单看查询 2 682.0 → 1 180.3 µs，分配 1.33 MB → 32 B）。
+4. **脏帧的代价是吸收一次重建**（271.9 µs vs 干净帧 151.5 µs，+120 µs ≈ 一次 lane 树重建），故生产路径仍在进并行区前 `EnsureInSync()`；
+   注意审计 §6.2 最后一行「改法2·保持并行 miss 244.3 / 322.5 µs」那条基准**前置了 `SyncLaneTree()`**，
+   量到的是「先显式同步 + 再并行 miss」；本节 `Fix2_ParallelMiss_PerThreadCache_NoPreSync_OnDirtyTree` 才是「并行区自己扛重建」。
+5. 读路径没有退化：干净树全量查询 512 项 4.8 µs / 8192 项 81.0 µs，分配 112 B（池化列表），
+   即读者快路径只多了两次 volatile 读（版本比较），量级上不可见。
+
+### 11.4 测试（新增 11 例，`-c Release` 全量 819/819 通过）
+
+| 文件 | 覆盖 |
+|---|---|
+| `tests/.../Base/Collections/IntervalTreeConcurrencyTests.cs` | 脏树 + 14 并发读者必须都看到完整索引；1 写 + 14 读不抛且只看到完整状态；交错增删后与线性扫描逐量对拍；`EnsureInSync` 语义；`Clear` 不影响已开始的枚举（快照语义）；`QueryInRangeInto` 与 `QueryInRange` 同结果 |
+| `tests/.../Graphics/ProjectileBatchLaneCacheTests.cs` | 生产 `QueryEnemyLane` 与旧表达式 `OfType<EnemyLaneStart>().LastOrDefault()` 在 0..20 000 grid 上**逐一引用相等**；同 TGrid 多发弹丸命中缓存后落点不变；多 lane 命中时「最后一条胜出」与旧语义一致；**串行与并行两种形状坐标完全相同**；同一实例跨帧（含池化缓冲复用）不得残留上一帧的 lane 解析 |
+
+测试全部断言在**可观测输出**上（画出来的坐标、查询返回的集合），不断言实现细节；帧级用例用真实的
+`ProjectileBatchDrawTargetBase<Bullet>.DrawBatch` + 桩绘制上下文（`IsLocked=true` 即预览模式）驱动。
+
+### 11.5 未覆盖 / 有意不做
+
+1. **`SoflanList` 位置列表仍用「锁 + 就地重填同一个 `List`」**（`SoflanList_CachedPositionList.cs`）：并行区内惰性重建时会就地改写
+   读者正在二分查找的列表，属 §8.5 所说的「其它共享集合」同类残留，本次未动（不在 RND-008 的投射物路径上，且改动面同样跨全仓）。
+2. **写密集帧**：若同一帧内持续有写者（编辑线程）在改 lane，则每次查询都会重建一次（与改前行为相同，只是不再有 NRE 与就地清空）；
+   生产上写发生在帧间，本次未做「脏标记合并/节流」。
+3. X 方向裁剪、真实谱面弹速分布、整帧端到端、延迟分位等仍如 §9。
+
+### 11.6 复现命令
+
+```powershell
+# 实现验证（基准，Release）——产物落在 benchmarks/OngekiFumenEditor.Avalonia.Benchmark/BenchmarkDotNet.Artifacts/
+cd benchmarks/OngekiFumenEditor.Avalonia.Benchmark
+dotnet run -c Release -- --job dry  --filter "*ProjectileBatchRealChartBenchmarks*"      # 门槛断言冒烟
+dotnet run -c Release -- --job short --filter "*ProjectileBatchRealChartBenchmarks*8090*" # §11.3 的数字
+dotnet run -c Release -- --job short --filter "*IntervalTreeConcurrencyBenchmarks*"       # §11.2 的 ①②③
+
+# 测试（Release；Debug 全量会混入 headless 隔离噪声）
+dotnet test tests/OngekiFumenEditor.Avalonia.Tests/OngekiFumenEditor.Avalonia.Tests.csproj -c Release --nologo
+```
+
