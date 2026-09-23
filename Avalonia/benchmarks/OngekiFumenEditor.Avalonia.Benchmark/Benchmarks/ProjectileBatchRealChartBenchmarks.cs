@@ -1,9 +1,12 @@
+using System.Collections.Concurrent;
 using BenchmarkDotNet.Attributes;
 using OngekiFumenEditor.Avalonia.Base;
 using OngekiFumenEditor.Avalonia.Base.Collections;
 using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Avalonia.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Avalonia.Benchmark.Infrastructure;
 using OngekiFumenEditor.Avalonia.Models.Settings;
+using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell;
 
 namespace OngekiFumenEditor.Avalonia.Benchmark.Benchmarks;
 
@@ -13,12 +16,12 @@ namespace OngekiFumenEditor.Avalonia.Benchmark.Benchmarks;
 ///   ② 逐项 lane 查询成本，以及「帧内 TGrid→enemyLane 缓存」（推荐改法 2）能省多少；
 ///   ③ 脏树 + 并行查询时 `IntervalTree.RebuildInternal` 被重复触发的代价（推荐改法 3）。
 ///
-/// 对照现状：
+/// 对照与落地：
 ///   ViewModels/FumenVisualEditorViewModel.Drawing.cs:532-533  预览模式按 [curTGrid, TGrid.MaxValue] 全量取
-///   TargetImpl/OngekiObjects/BulletBell/ProjectileBatchDrawTargetBase.cs:310  逐项 lane 查询
-///   同文件 :343-360   K ≥ ParallelCountLimit(默认 3000) 时走 Parallel.ForEach（DOP = Max(2, ProcessorCount-2)）
-///   Base/Collections/Base/RangeTree/IntervalTree.cs:68-74 / IntervalTree.cs:132-140 / IntervalTreeNode.cs:44-52
-///        Query 在 isInSync == false 时调 RebuildInternal()，后者先 Release(root) —— 递归地把旧树节点就地清空
+///   TargetImpl/OngekiFumenEditor.../BulletBell/ProjectileBatchDrawTargetBase.cs  逐项 lane 查询 → 帧内缓存 + 零分配 QueryInto
+///   同文件 DrawPreviewMode   K ≥ ParallelCountLimit(默认 3000) 时走 Parallel.ForEach（DOP = Max(2, ProcessorCount-2)）
+///   Base/Collections/Base/RangeTree/IntervalTree.cs  已按 RND-008 §8 改造：写入只改私有 staging、重建单飞后
+///        「先建新图 → 原子发布」，节点不可变且不再就地 Release —— 并发只读查询安全（修复前实测 NRE 1e-4~1.6e-3 每脏帧）
 ///
 /// 量纲说明（重要）：
 ///   Original_LaneQueryPerItem / Optimized_CachedLaneLookupPerItem 是**逐项**（单枚弹丸一次查询）；
@@ -56,6 +59,11 @@ public class ProjectileBatchRealChartBenchmarks
     private TGrid laneQueryMax;
     private EnemyLaneStart dirtyProbe = null!;
 
+    /// <summary>逐弹丸口径的敌方 lane 命中数（含同 TGrid 的重复项），作为并行 miss 形状的正确性门槛。</summary>
+    private int expectedHits;
+
+    private int missExceptions;
+
     [GlobalSetup]
     public void Setup()
     {
@@ -91,23 +99,45 @@ public class ProjectileBatchRealChartBenchmarks
         if (direct != cached)
             throw new InvalidOperationException($"lane lookup mismatch: direct={direct} cached={cached}");
 
-        // 脏风暴：固定形状必须完全正确；现状形状允许因 NRE 丢结果（那正是本项要量出来的缺陷）。
+        // 生产形状（改法2 + §8）：缓存命中口径必须与逐项查询一致，脏帧里也一样
+        expectedHits = direct;
+        if (CountPooled(remainingTGrids) != expectedHits)
+            throw new InvalidOperationException("pooled lane query (production helper) disagreed with the direct expression.");
+        if (RunParallelMissWithPerThreadCache(preSync: true) != expectedHits)
+            throw new InvalidOperationException("pre-synced parallel miss shape returned the wrong hit count.");
+        if (RunParallelMissWithPerThreadCache(preSync: false) != expectedHits)
+            throw new InvalidOperationException("parallel miss shape (no pre-sync) returned the wrong hit count.");
+        fumen.Lanes.Add(dirtyProbe);
+        try
+        {
+            if (RunParallelMissWithPerThreadCache(preSync: false) != expectedHits)
+                throw new InvalidOperationException("dirty parallel miss shape returned the wrong hit count.");
+        }
+        finally
+        {
+            fumen.Lanes.Remove(dirtyProbe);
+        }
+
+        // 脏风暴：修复后两种形状都必须完全正确，且一次 NRE 都不允许（这是 §8 的验收门槛）。
         var lanesBefore = fumen.Lanes.Count;
         var expected = CountLanes(laneQueryMin, laneQueryMax);
         var current = DirtyStorm_CurrentShape();
         if (fumen.Lanes.Count != lanesBefore)
             throw new InvalidOperationException("DirtyStorm_CurrentShape left the lane tree modified.");
+        if (stormExceptions != 0)
+            throw new InvalidOperationException($"DirtyStorm_CurrentShape threw {stormExceptions} NullReferenceException(s).");
+        if (current != expected)
+            throw new InvalidOperationException($"DirtyStorm_CurrentShape returned {current}, expected {expected}.");
         var fixedShape = DirtyStorm_AfterSingleRebuild();
         if (fixedShape != expected)
             throw new InvalidOperationException($"DirtyStorm_AfterSingleRebuild returned {fixedShape}, expected {expected}.");
-        if (current > fixedShape)
-            throw new InvalidOperationException($"DirtyStorm_CurrentShape returned {current} > {fixedShape} (impossible).");
         if (fumen.Lanes.Count != lanesBefore)
             throw new InvalidOperationException("DirtyStorm_AfterSingleRebuild left the lane tree modified.");
 
         // 归零，使 GlobalCleanup 的统计只反映正式测量区间。
         stormCalls = 0;
         stormExceptions = 0;
+        missExceptions = 0;
     }
 
     // =====================================================================
@@ -195,6 +225,99 @@ public class ProjectileBatchRealChartBenchmarks
         return hits;
     }
 
+    // =====================================================================
+    // ④ 落地形态（改法 2 + §8）：帧内缓存 + 并行 miss + 零分配查询
+    // =====================================================================
+
+    /// <summary>生产实现（<c>ProjectileBatchDrawTargetBase&lt;Bullet&gt;.QueryEnemyLane</c>）：零分配 QueryInto 版 lane 查询（逐项）。</summary>
+    [Benchmark]
+    public int Optimized_PooledLaneQueryPerItem() => CountPooled(remainingTGrids);
+
+    /// <summary>
+    /// 生产形状：进并行区前 <c>EnsureInSync()</c> 一次，区内每个工作线程一份帧内缓存、miss 就地查。
+    /// </summary>
+    [Benchmark]
+    public int Fix2_ProductionShape_PreSyncThenParallelMiss() => RunParallelMissWithPerThreadCache(preSync: true);
+
+    /// <summary>
+    /// 真·§8 形状：脏树 + 并行区内发生重建（不做显式同步），结果仍必须正确。
+    /// 审计文档里那个 <c>Optimized_Frame_ParallelMissAndLookup</c> 前置了 <c>SyncLaneTree()</c>，
+    /// 量到的是「先同步 + 再并行 miss」，这一条才是「并行区自己扛住重建」。
+    /// </summary>
+    [Benchmark]
+    public int Fix2_ParallelMiss_PerThreadCache_NoPreSync_OnDirtyTree()
+    {
+        fumen.Lanes.Add(dirtyProbe);
+        //探针 lane 只落在谱面末尾之外，不该改变任何弹丸的命中数
+        var hits = RunParallelMissWithPerThreadCache(preSync: false);
+        fumen.Lanes.Remove(dirtyProbe);
+        return hits;
+    }
+
+    /// <summary>对照形状：全线程共享一个 <c>ConcurrentDictionary</c> 帧内缓存（审计文档里的形状）。</summary>
+    [Benchmark]
+    public int Fix2_ParallelMiss_SharedConcurrentCache()
+    {
+        fumen.Lanes.EnsureInSync();
+
+        var cache = new ConcurrentDictionary<int, EnemyLaneStart>();
+        var hits = 0;
+        Parallel.ForEach(remainingTGrids, parallelOptions, () => 0,
+            (t, _, local) =>
+            {
+                var key = t.TotalGrid;
+                if (!cache.TryGetValue(key, out var lane))
+                {
+                    lane = ProjectileBatchDrawTargetBase<Bullet>.QueryEnemyLane(fumen, t);
+                    cache.TryAdd(key, lane);
+                }
+
+                return local + (lane is null ? 0 : 1);
+            },
+            local => Interlocked.Add(ref hits, local));
+        return hits;
+    }
+
+    // =====================================================================
+
+    /// <summary>
+    /// 生产形状的并行 miss 执行体：<see cref="Parallel.ForEach{TSource, TLocal}(IEnumerable{TSource}, ParallelOptions, Func{TLocal}, Func{TSource, ParallelLoopState, TLocal, TLocal}, Action{TLocal})"/>
+    /// 的 localInit/localFinally 形状与 <c>ProjectileBatchDrawTargetBase.DrawPreviewMode</c> 一致（每线程一份缓存）。
+    /// </summary>
+    private int RunParallelMissWithPerThreadCache(bool preSync)
+    {
+        if (preSync)
+            fumen.Lanes.EnsureInSync();
+
+        var hits = 0;
+        Parallel.ForEach(remainingTGrids, parallelOptions,
+            static () => (Buffer: new ProjectileBatchDrawTargetBase<Bullet>.DrawBuffer(), Hits: 0),
+            (t, _, local) =>
+            {
+                try
+                {
+                    var lane = ProjectileBatchDrawTargetBase<Bullet>.GetEnemyLane(fumen, t, local.Buffer);
+                    return (local.Buffer, local.Hits + (lane is null ? 0 : 1));
+                }
+                catch (NullReferenceException)
+                {
+                    Interlocked.Increment(ref missExceptions);
+                    return local;
+                }
+            },
+            local => Interlocked.Add(ref hits, local.Hits));
+        return hits;
+    }
+
+    private int CountPooled(IReadOnlyList<TGrid> tGrids)
+    {
+        var hits = 0;
+        foreach (var t in tGrids)
+            if (ProjectileBatchDrawTargetBase<Bullet>.QueryEnemyLane(fumen, t) is not null)
+                hits++;
+        return hits;
+    }
+
     /// <summary>把树的脏状态喂掉：本项只量查询/缓存成本，不含重建（重建成本由 DirtyStorm_* 负责）。</summary>
     private void SyncLaneTree() => _ = CountLanes(laneQueryMin, laneQueryMax);
 
@@ -206,9 +329,9 @@ public class ProjectileBatchRealChartBenchmarks
     private int stormCalls;
 
     /// <summary>
-    /// 现状：改树后立刻并行查询 —— 每个工作线程都看到 isInSync == false，各自重建整树；
-    /// 重建的 Release(root) 会把旧树节点就地清空，正在遍历的线程随即在 QueryInto 里 NRE（实测见下方 GlobalCleanup 计数）。
-    /// 这里捕获 NRE 以便把它**量出来**而不是让整个基准进程崩掉；失败线程的结果被丢弃，故返回的命中数是下界。
+    /// 脏树 + 并行查询：<c>rebuildGate</c> 让重建只发生一次，其余读者等在闸门后直接用新树。
+    /// 修复前这里每个工作线程各自重建整树，并因就地 Release 旧节点而偶发 NRE；
+    /// 现在异常计数必须恒为 0（<see cref="Setup"/> 里已是硬断言），计数只是留作回归证据。
     /// </summary>
     [Benchmark]
     public int DirtyStorm_CurrentShape()
@@ -225,7 +348,7 @@ public class ProjectileBatchRealChartBenchmarks
         return lastCount;
     }
 
-    /// <summary>推荐改法 3 的最小形态：并行前先单线程喂一次查询，把重建收敛成一次（之后 isInSync == true）。</summary>
+    /// <summary>推荐改法 3 的最小形态：并行前先单线程喂一次查询，把重建收敛成一次（之后索引已同步）。</summary>
     [Benchmark]
     public int DirtyStorm_AfterSingleRebuild()
     {
@@ -240,7 +363,8 @@ public class ProjectileBatchRealChartBenchmarks
     [GlobalCleanup]
     public void Cleanup()
         => Console.WriteLine($"[{Chart}] DirtyStorm_CurrentShape: {stormCalls} 次调用共捕获 {stormExceptions} 次 " +
-                             $"NullReferenceException（IntervalTreeNode 被并发 Release 清空；含 setup 期归零前的调用已排除）");
+                             $"NullReferenceException（含 setup 期归零前的调用已排除）  " +
+                             $"并行 miss 形状共捕获 {missExceptions} 次 NRE（两者都应为 0；修复前实测为 1e-4~1.6e-3 每脏帧）");
 
     // =====================================================================
 
