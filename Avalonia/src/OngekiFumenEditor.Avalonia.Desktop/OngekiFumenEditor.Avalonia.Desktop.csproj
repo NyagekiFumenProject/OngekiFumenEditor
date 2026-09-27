@@ -64,6 +64,9 @@
     <ItemGroup>
         <AdditionalFiles Include="Modules\FumenVisualEditor\FastOpen\Assets\Languages\*.json" />
     </ItemGroup>
+    <ItemGroup>
+        <TrimmerRootDescriptor Include="NativeAotRoots.xml" />
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Dependencies\AcbGeneratorFuck\src\AcbGeneratorFuck\AcbGeneratorFuck.csproj" />

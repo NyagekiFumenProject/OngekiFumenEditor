@@ -1,0 +1,7 @@
+<linker>
+  <assembly fullname="SimpleTypedLocalizer">
+    <type fullname="SimpleTypedLocalizer.LocalizerManager/DefaultLocalizedTextSource">
+      <property name="Text" />
+    </type>
+  </assembly>
+</linker>
