@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
@@ -10,13 +9,11 @@ using OngekiFumenEditor.Avalonia.Desktop.CommandLine;
 using OngekiFumenEditor.Avalonia.Desktop.Utils.DeadHandler;
 using OngekiFumenEditor.Avalonia.Desktop.Utils;
 using OngekiFumenEditor.Avalonia;
-using OngekiFumenEditor.Avalonia.Assets.Languages;
 using OngekiFumenEditor.Avalonia.Models.Settings;
 using OngekiFumenEditor.Avalonia.Utils;
 using OngekiFumenEditor.Avalonia.Kernel.ArgProcesser;
 using OngekiFumenEditor.Avalonia.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor;
-using OngekiFumenEditor.Avalonia.Desktop.Modules.FumenVisualEditor.FastOpen.Assets.Languages;
 using Gekimini.Avalonia.Utils;
 using Gekimini.Avalonia.Utils.MethodExtensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -87,10 +84,6 @@ public class OngekiFumenEditorDesktopApp : OngekiFumenEditorApp
         });
     }
 
-    // Conservatively preserve generated localization properties for Desktop AOT.
-    // The reflection binding's concrete text source is rooted in NativeAotRoots.xml.
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(Lang.B))]
-    [DynamicDependency(DynamicallyAccessedMemberTypes.PublicProperties, typeof(DesktopLang.B))]
     public override void OnFrameworkInitializationCompleted()
     {
         base.OnFrameworkInitializationCompleted();
