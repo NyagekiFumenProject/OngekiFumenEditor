@@ -223,6 +223,30 @@ Debug solution 最终结果：Core 144/144，Desktop 96/96，共 240/240，0 失
 使用 `--no-restore` 会出现 NETSDK1005；重新 restore 对应 TFM 即可。本轮最终 solution 测试已执行
 普通 TFM restore，不存在残留失败状态。
 
+### 6.1 Desktop 单文件发布（JIT 与 NativeAOT）
+
+两种 Release flavor 都只产出一个自包含 EXE，差别只在编译模型与原生依赖的处理方式：
+
+| Flavor | profile | 编译 | 原生依赖解压位置 |
+| --- | --- | --- | --- |
+| JIT | `win-x64-jit` | ReadyToRun | SDK 单文件打包器（`PublishSingleFile` + `IncludeNativeLibrariesForSelfExtract`）首次启动解压到 `%TEMP%\.net\OngekiFumenEditor.Avalonia.Desktop\<哈希>\` |
+| NativeAOT | `win-x64-aot` | ILC 原生编译 | SDK 打包器在 `PublishAot=true` 时被跳过，改由项目嵌入 ZIP + SHA-256，启动时解压到 `%LOCALAPPDATA%\OngekiFumenEditor\NativeDependencies\<ZIP 的 SHA-256>\` |
+
+两者共用的约定，由 `DesktopPublish.targets` 与 profile 统一实现：
+
+- 入口脚本：`releaseBuild.ps1 -Flavor Aot|Jit`，输出分别为 `bin/publish-aot`、`bin/publish-jit`；不再删除
+  `bin`/`obj`，改由 SDK 按既有发布清单清理过期产物，并透传 `dotnet` 退出码。
+- 发布目录只允许 EXE：统一剥离 `.pdb`、`Injectio.targets` 等松散项；NativeAOT 额外把原生依赖收进嵌入包、
+  把项目引用卫星资源交给 ILC 内嵌。出现未分类发布项时构建直接报错，而不是静默多出 DLL。
+- PDB/XML 只留在 `bin/Release`；设置（`setting.json`）、日志、工作目录与 `AppContext.BaseDirectory`
+  始终是 EXE 所在目录，与解压缓存无关。
+- 解压实现按 flavor 分工：JIT 完全交给 SDK 宿主；NativeAOT 由 `NativeDependencyBundle.Initialize()`
+  （仅 `NATIVE_AOT` 编译时调用）校验哈希、原子提交缓存，再用 `SetDefaultDllDirectories(DEFAULT_DIRS)`
+  与 `AddDllDirectory` 注册搜索目录，原生库仍保持惰性加载。
+
+边界：CommandLine 的 JIT/AOT 仍是目录发布（CI 把它的输出合并进 Desktop 包），未随本轮改为单文件；
+JIT EXE 因 ReadyToRun + 自包含约 400 MB，如需缩减可评估 `EnableCompressionInSingleFile`。
+
 ## 7. 提交记录
 
 | 批次 | 提交 | 内容 |
