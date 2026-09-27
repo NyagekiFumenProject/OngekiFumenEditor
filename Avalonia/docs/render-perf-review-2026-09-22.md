@@ -1,10 +1,10 @@
-# Avalonia 渲染与性能复审（2026-09-22）
+# Avalonia 渲染与性能复审（2026-09-22；状态更新至 2026-09-24）
 
-> **结论性质：** 本文件是对当前源码基线的**静态复审**，重点覆盖编辑器渲染相关逻辑（渲染循环、可见性判定、缓存与内存占用）。复审期间未修改业务代码。凡标为“静态确认”的结论均有源码行号证据；帧率、分配速率、GC 暂停时长与真实用户可感知影响**仍需实测**。本文件不替代 `performance-gc-audit-2026-09-09.md`，而是对其续接与纠偏。
+> **结论性质：** 本文件最初是对 2026-09-22 源码基线的**静态复审**，重点覆盖编辑器渲染相关逻辑（渲染循环、可见性判定、缓存与内存占用）。本次更新只同步 2026-09-23 至 2026-09-24 已落地的状态、描述和实测结果，不改变原始复审范围。凡标为“静态确认”的结论均有源码行号证据；帧率、分配速率、GC 暂停时长与真实用户可感知影响**仍需实测**。本文件不替代 `performance-gc-audit-2026-09-09.md`，而是对其续接与纠偏。
 
 ## 1. 复审范围与方法
 
-- 基线：当前 `avalonia` 分支工作区（含 2026-09-11 至 2026-09-21 的全部修复）。
+- 基线：`avalonia` 分支工作区；原始复审覆盖 2026-09-11 至 2026-09-21 的修复，状态更新补充 2026-09-23 至 2026-09-24 的 RND-008 落地。
 - 重点目录：
   - `src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/Graphics/`（绘制目标、绘制助手、可见性查询）
   - `src/OngekiFumenEditor.Avalonia/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.Drawing.cs`（帧循环主体）
@@ -25,16 +25,15 @@
 
 ## 3. 结论摘要
 
-本轮共确认 **16 项**可优化内容，其中 **P1 四项**、**P2 九项**、**P3 三项**。
-截至 2026-09-22，其中 **4 项已修复并签入**（`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`，均含新老实现基准），其余 12 项仍待处理。
+本轮共确认 **16 项**可优化内容，其中 **P1 四项**、**P2 九项**、**P3 三项**。截至 2026-09-24，**4 项已完全修复**（`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`），`RND-008` 与其关联的 `DAT-005` 各有一部分已落地，记为 **2 项部分修复**；其余 10 项仍待处理。两项部分修复都涉及同一套区间树改造，但待处理的剩余问题不同：RND-008 是预筛选上界，DAT-005 是脏版本的全树重建成本。
 
 其中 **四项是新发现**（既有审计清单未收录）：`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`。其余十二项为既有条目的**续存确认**，并更新了行号与影响面判断。
 
-最值得先做的三件事：
+当前待处理重点：
 
-1. ~~**`RND-C1`（默认帧的可见性判定走 `ConcurrentDictionary` 枚举）**~~ —— **已修复（2026-09-22）**。实测 `CheckRangeVisible` 提升 26.6×–74.0×、`CheckVisible` 提升 1.9×–9.5×（逐调用量纲），分配分别降至 0 B 与 35%–74%。详见 §4.1 对应条目的「状态：已修复」小节。
-2. ~~**`RND-C2`（限帧闸门在分配之后）**~~ —— **已修复（2026-09-22）**。实测被丢弃帧成本 970.4 ns → 1.3 ns（≈770×），分配 896 B → 0 B。详见 §4.1 对应条目。
-3. **`RND-003`（绘制目标是进程级单例，纹理重复加载不释放）** —— 每次挂接编辑器都重新分配全部原生 `SKImage` 而从不释放旧的一份，是唯一的**确定性原生内存增长**项。**当前最优先项。**
+1. **`RND-003`（绘制目标是进程级单例，纹理重复加载不释放）** —— 每次挂接编辑器都重新分配全部原生 `SKImage` 而从不释放旧的一份，是唯一的**确定性原生内存增长**项。**当前最优先项。**
+2. **`AUD-001`（设置落盘 debounce）** —— 拖动设置时仍可能同步执行序列化、fsync 和文件替换，直接占用 UI 线程。
+3. **`RND-008` 的预筛选范围收紧** —— lane 查询缓存、零分配查询和并发安全已经落地；仍需单独评估安全的 `maxTGrid` 计算，不能用朴素规则替换现有全量范围。
 
 次优先：~~**`BPM-C1` / `DAT-C1`（`GetCachedAllBpmUniformPositionList` 的“缓存”仍未命中即全表 `Aggregate`）**~~ —— **已修复（2026-09-22）**（同一处代码，两个编号一并解决）。实测逐命中调用 14.01 → 1.27 ns 至 6,518.90 → 1.43 ns（BPM 变更数 1–1024，11.0×–4,559×），分配均为 0 B；并更正原文「调用点本身不热」的判断（该调用点在帧内是逐对象发生的）。详见 §4.1 对应条目的「状态：已修复」小节。
 
@@ -348,13 +347,12 @@ return cachedBpmUniformPosition;                                           // :1
 
 #### RND-007 — P2：合并可见范围时重复枚举静态对象
 
-**简述.** 对每个 merged visible range 重复枚举 Meter/BPM 与各类 Soflan，并把结果 `AddRange` 进 target/context map，导致同一对象在多个 range 下被反复登记。
+**简述.** 当前已先把各 soflan 组的范围物化并合并，但 `EnumerateAllDisplayableObjects` 仍对每个 merged visible range 重复枚举 Meter/BPM 与各类 Soflan，再把结果 `AddRange` 进 target/context map；同一对象仍可能在多个 range 下被反复登记。
 
 **证据.** `ViewModels/FumenVisualEditorViewModel.Drawing.cs`
-- `:433` `var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();`
-- `:434` `using var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges);`
-- `:435-468` 逐 displayable 填入 `map`（`obj.IDShortName` → soflanGroup → list）
-- `EnumerateAllDisplayableObjects` `:752-834`：对每个 `(min,max)` range 逐类 `BinaryFindRange`/`GetVisibleStartObjects`，其中 `:767-768` 的 Meter/BPM 还额外 `.Except(filterMeterChange)` / `.Except(filterFirstBpm)`（`Except` 分配 `HashSet` + 迭代器）
+- `:459-466` 先把各组范围追加到 `mergedVisibleTGridRanges`，再 `Merge()` 后调用 `EnumerateAllDisplayableObjects`；中间层的 `SelectMany` 已被帧内范围列表取代，但仍按每个合并后的 range 查询对象。
+- `:467-489` 逐 displayable 填入 `map`（`obj.IDShortName` → soflanGroup → list）。
+- `EnumerateAllDisplayableObjects` `:802-862`：对每个 `(min,max)` range 逐类 `BinaryFindRange`/`GetVisibleStartObjects`，其中 `:817-818` 的 Meter/BPM 还额外 `.Except(filterMeterChange)` / `.Except(filterFirstBpm)`（`Except` 分配 `HashSet` + 迭代器）。
 
 **性能影响.** range 数 = 变速组可见区间之和（多变速组时可达数十）。每 range 都要走一遍全部集合族的区间查询与 `Except`。`Except` 在此为「排除单个首元素」而支付完整 `HashSet` 构建成本。
 
@@ -367,41 +365,46 @@ return cachedBpmUniformPosition;                                           // :1
 
 ---
 
-#### RND-008 — P2：投射物预筛选范围过宽 + 逐项重复 lane 查询（且在并行体内）
+#### RND-008 — P2：投射物预筛选范围仍偏宽；lane 查询与并发重建已修复
 
-**简述.** 预览模式下每帧按 `[curTGrid, TGrid.MaxValue]` 全量取出 bullet/bell，随后逐个判断可见性；敌方投射物还会为每一项重新做一次 lane 区间查询，而这段逻辑运行在 `Parallel.ForEach` 内。
+**简述.** 预览模式仍按 `[curTGrid, TGrid.MaxValue]` 取出 bullet/bell，随后逐个判断可见性，因此预筛选范围过宽的问题仍在。原条目指出的逐项 lane 查询分配和并行触发区间树重复重建，已在 2026-09-23 至 2026-09-24 落地修复。
 
 **证据.**
-- 范围过宽：`ViewModels/FumenVisualEditorViewModel.Drawing.cs:529-534`
+- 范围过宽：`ViewModels/FumenVisualEditorViewModel.Drawing.cs:561-565`
   ```
   var curTGrid = GetCurrentTGrid();
   if (IsPreviewMode) {
-      blts = EditorContext.Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);   // :532
-      bels = EditorContext.Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);     // :533
+      blts = EditorContext.Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);   // :564
+      bels = EditorContext.Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);     // :565
   }
   ```
-- 逐项 soflanGroup 过滤：`:535-544`（两个 `Where` + 闭包）
-- 逐项 lane 查询：`TargetImpl/OngekiObjects/BulletBell/ProjectileBatchDrawTargetBase.cs:310`
+- 逐项 soflanGroup 过滤：`:567-574`（两个 `Where` + 闭包）
+- 当前 lane 查询入口与缓存：`TargetImpl/OngekiObjects/BulletBell/ProjectileBatchDrawTargetBase.cs:348-410`
   ```
-  var enemyLane = fumen.Lanes.GetVisibleStartObjects(objTGrid, objTGrid).OfType<EnemyLaneStart>().LastOrDefault();
+  fumen.Lanes.EnsureInSync();
+  var enemyLane = GetEnemyLane(fumen, objTGrid, buffer);
   ```
-  `GetVisibleStartObjects` → `ConnectableObjectList.cs:80-83` `startObjects.QueryInRange(min,max)` → `IntervalTreeWrapper.cs:72-79` → `IntervalTreeNode.Query(from,to)`（`IntervalTreeNode.cs:141-148`，每次调用租一个 `PooledList` 并递归）
-- 并行执行：同文件 `:342-360`
+  当前未命中路径由 `QueryEnemyLane`（`:398-410`）调用 `ConnectableObjectList.QueryVisibleStartObjectsInto`（`:88-90`）和 `IntervalTree.QueryInto`（`:90-94`）。原实现的 `GetVisibleStartObjects(...).OfType(...).LastOrDefault()` 及其分配链见专项审计 §3，不能再作为当前源码描述。
+- 并行执行（现行入口）：同文件 `:348-370`
   ```
   if (totalCount < parallelCountLimit) { foreach … } else { Parallel.ForEach(objs, parallelOptions, RentBuffer, …, MergeAndReturnBuffer); }
   ```
 
 **性能影响.**
-1. `BinaryFindRange(curTGrid, MaxValue)` 到谱面末尾，返回量随剩余谱面线性增长；这些对象随后才在 `_Draw` 里被可见性剔除。
-2. 每个敌方投射物一次区间查询 + `OfType` + `LastOrDefault`，成本 O(log n + k) 加每次一个 `PooledList` 租还。
-3. **并行体内调用共享集合**：`Parallel.ForEach` 下多线程同时调 `fumen.Lanes.GetVisibleStartObjects`，即对同一个 `IntervalTree` 并发 `Query`。`Query` 在 `isInSync == false` 时会调 `RebuildInternal()`（`IntervalTree.cs:68-74`）——即**并发触发整树重建**。这在渲染线程并行时是真实的数据竞争窗口。
+1. `BinaryFindRange(curTGrid, MaxValue)` 到谱面末尾，返回量随剩余谱面线性增长；这些对象随后才在 `_Draw` 里被可见性剔除，仍是本项的剩余工作。
+2. 当前 `GetEnemyLane` 按 `TGrid.TotalGrid` 使用每个 `DrawBuffer` 的帧内缓存；未命中走 `QueryVisibleStartObjectsInto`，避免原来的池化列表枚举链和 LINQ 分配。
+3. `ProjectileBatchDrawTargetBase` 在进入并行区前调用 `EnsureInSync()`。`IntervalTree` 现在由写者私有 staging、单飞重建、不可变节点和原子发布组成，不再并发就地清空旧树，原先的 NRE 与重复重建窗口已消除。
 
-**推荐改法.**
-1. 范围收紧：按外观/视口上界（含 `appearOffsetTime` 与子弹最高速度）算出真实 `maxTGrid`，而非 `TGrid.MaxValue`。
-2. 缓存 lane 查询：敌方投射物的 lane 只依赖 `objTGrid`，在同一帧内按 `TGrid` 建一个小的 (TGrid → enemyLane) 缓存即可，避免逐项重查（同一 TGrid 常有多发子弹）。
-3. **把并发体内的共享查询移出并行区**（或确认 `Query` 在只读期不会触发 `RebuildInternal`）。这一条比性能更重要——它是正确性问题。
+**剩余工作与限制.**
+1. 预筛选范围收紧仍未落地。专项极端场景对比表明，简单假设 `spd = 1` 或只看默认 soflan 组会漏画；存在低速、静止或倒车段时必须保守处理，必要时继续使用整条范围。
+2. lane 缓存按线程挂在池化 `DrawBuffer` 上，保持了并行输出形状；缓存与零分配查询的生产形态已由 `ProjectileBatchLaneCacheTests` 和 `ProjectileBatchRealChartBenchmarks` 覆盖。
+3. `SoflanList` 的私有位置列表仍可能在惰性重建时就地重填；该残留不属于本条 lane 区间树修复范围，需另行评估。
 
-**风险.** 中–高。范围收紧需保证不漏画（与 `spd < 1`、soflan 变速的提前出现语义耦合）；并行区重排需保持输出顺序。
+**状态：部分修复（2026-09-23 至 2026-09-24）.**
+
+已落地：帧内 `TGrid → EnemyLaneStart` 缓存、零分配 `QueryInto` lane 查询、并行前 `EnsureInSync()`，以及区间树的不可变快照发布和单飞重建。`8090_10.ogkr` 的专项基准为 **709.6 → 151.5 µs/帧（4.68×）**、**1,336,944 → 135,044 B/帧（约 9.9×）**；脏树并行 miss 形态为 271.9 µs，未再出现 NRE。详见 [`rnd-008-projectile-batch-audit-2026-09-22.md`](rnd-008-projectile-batch-audit-2026-09-22.md) §11。
+
+未落地：按视口和弹速安全收紧 `maxTGrid`。该项需要覆盖低速、静止、倒车和多 soflan 组，并用新旧可见集合逐对象对拍后再实施。
 
 ---
 
@@ -467,21 +470,23 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 
 ---
 
-#### DAT-005 — P2：`IntervalTree` 变更触发整树重建
+#### DAT-005 — P2：`IntervalTree` 变更仍触发整树重建（并发安全已改善）
 
-**简述.** 任何区间集合的增删或坐标变更都会把整棵树标记为脏，下次查询时**递归重建**，每个节点分配 4 个 `List`。
+**简述.** 区间集合的增删或坐标变更仍会使索引版本失效；下一次查询需要按 staging 快照递归重建整棵树，每个新节点仍会创建内部列表。RND-008 已把重建改为单飞并原子发布，解决并发重复重建和旧节点就地清空问题，但没有消除“每个脏版本一次全树重建”的成本。
 
 **证据.**
-- 脏标记：`Base/Collections/Base/RangeTree/IntervalTree.cs:94`（`Add` → `NotifyDirty()`）、`:100`（`Remove`）、`:110`（批量 `Remove`）；`NotifyDirty() => isInSync = false;`（`:130`）
-- 查询时重建：`IntervalTree.cs:62-63`（`Query(value)`）、`:70-71`（`Query(from,to)`）、`:78-79`（`QueryInto`）、`:124-125`（`GetEnumerator`）、`:34`/`:24`（`Min`/`Max` 属性）
-- 重建分配：`IntervalTreeNode.cs:54-101` `BuildTree` 每层 `new List<TKey> endPoints` + `new List inner/left/right`（`:59,74,75,76`），并递归建子节点（`:96-99`）；`Release`（`:44-51`）只递归清引用，不复用缓冲
-- 批量入口：`IntervalTreeWrapper.cs:81-90`（`BeginBatchAction`/`EndBatchAction` → `NotifyDirty`），`IsBatching` 期间变更只标记不处理（`:44-45`）
+- 写入和版本失效：`Base/Collections/Base/RangeTree/IntervalTree.cs:104-170`；`Add`/`Remove`/`Clear` 在 `writeGate` 下修改 staging 并递增版本。
+- 查询同步：`IntervalTree.cs:76-102`；`EnsureInSync()` 比较版本，必要时进入 `rebuildGate`，从写者私有快照构建新树并通过 `Volatile.Write` 发布。
+- 重建分配：`IntervalTreeNode.cs:45-96` 的 `BuildTree` 仍递归创建 `endPoints`、`inner`、`left`、`right` 列表；节点改为不可变，不再提供会就地清空旧树的 `Release`。
+- 批量入口：`IntervalTreeWrapper.cs:92-100`（`BeginBatchAction`/`EndBatchAction` → `NotifyDirty`）。批量仍只合并失效通知，不会把多次写入变成增量索引更新。
 
 **性能影响.** 编辑拖拽时对象坐标高频变化 → 每次变化 `Remove`+`Add`（`IntervalTreeWrapper.cs:40-51`）→ 每次查询触发整树重建。重建成本 O(n log n) 加 O(n) 分配（每节点 3–4 个 List）。大谱面（数万对象）下这是编辑期卡顿的候选来源。
 
-**推荐改法.** 优先使用已有的 `BeginBatchAction`/`EndBatchAction` 把一次交互的多处变更合并为一次重建（调用方现状需确认）。进一步可改为增量维护（节点分裂/合并）并复用 scratch 缓冲，但工程量大。
+**推荐改法.** 优先确认拖动等调用方是否完整使用 `BeginBatchAction`/`EndBatchAction`，把一次交互的多处变更合并为一次重建。进一步可改为增量维护（节点分裂/合并）并复用 scratch 缓冲，但工程量大，需单独基准。
 
-**风险.** 中。批量语义已存在，先确认调用方是否已正确使用。
+**风险.** 中。并发发布的正确性已有专项验收；剩余风险集中在批量边界和增量索引语义。
+
+**状态：部分缓解（2026-09-24，随 RND-008 落地）.** 并发读安全、重复重建和旧节点 NRE 已修复；写密集帧仍可能在每次查询前重建一次，条目的核心性能问题仍待处理。
 
 ---
 
@@ -567,14 +572,13 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 
 ## 7. 建议实施顺序
 
-1. ~~**`RND-C1`（可见性判定去并发字典枚举）**~~ —— **已完成（2026-09-22）**，含新老实现基准（`VisibleContextCheckBenchmarks`）。见 §4.1。
-2. **`RND-003`（纹理生命周期）** —— 优先做**所有权梳理**（单例 vs 每编辑器），再决定「幂等重载」还是「改注册范围」。这是唯一的确定性原生内存增长项，**当前最优先**。
-3. ~~**`RND-C2`（限帧闸门提前）**~~ —— **已完成（2026-09-22）**，含新老实现基准（`EditorRenderFpsGateBenchmarks`）。见 §4.1。
-4. **`AUD-001`（设置落盘 debounce）** —— 拖动卡顿的直接原因，改动局部。
-5. ~~**`DAT-C1`（BPM 内容令牌）**~~ —— **已完成（2026-09-22）**，含新旧对拍基准（`BpmUniformPositionCacheBenchmarks`）。见 §4.1。**`DAT-005`（区间树批量）** —— 编辑期卡顿的候选来源，需先确认调用方批量语义。
-6. **`RND-008` 的并行区共享查询** —— 其中「并发触发 `IntervalTree.RebuildInternal`」是**正确性风险**，建议不等调优、单独先确认。
-7. ~~**`RND-C3`（`drawMap` 重复 Clear）**~~ —— **第 1 步已完成（2026-09-22）**，含新旧对拍基准（`DrawMapFrameCleanupBenchmarks`）。第 2 步（中间层二级结构）按原文要求**需先测量**，仍未做、仍待排。
-8. 其余 P2/P3 按测量结果排。
+1. **`RND-003`（纹理生命周期）** —— 优先做**所有权梳理**（单例 vs 每编辑器），再决定「幂等重载」还是「改注册范围」。这是唯一的确定性原生内存增长项，**当前最优先**。
+2. **`AUD-001`（设置落盘 debounce）** —— 拖动卡顿的直接原因，改动局部。
+3. **`RND-008` 剩余的预筛选范围收紧** —— 先用真实谱面统计弹速和 soflan 段，再实现带安全退化的上界计算；lane 缓存和并发区间树修复已完成，不再作为待办。
+4. **`RND-001` / `RND-007`** —— 先分别建立可见点裁剪和多 range 枚举的整帧基准，再决定是否实施。
+5. **`DAT-005`** —— 核对交互批量边界；若仍有写密集重建，再评估增量索引或 scratch 复用。
+6. ~~**已完成项**~~：`RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`（2026-09-22）；`RND-008` 的 lane 缓存、零分配查询和并发安全（2026-09-23 至 2026-09-24）。
+7. 其余 P2/P3 按测量结果排。
 
 **不要**在没有 profile 的情况下同时改动多个 P2/P3 项。已落地的 benchmark 可作体例参考：`VisibleContextCheckBenchmarks`（含新旧实现对拍断言）、`EditorRenderFpsGateBenchmarks`（真实生产路径 + `Isolate_*` 成本拆分），另可参考既有 `SkiaTextureDrawingBenchmarks`、`MeterChangeListQueryBenchmarks` 等。
 
@@ -582,6 +586,7 @@ public override void DrawBatch(…) { foreach (var laneStart in starts) FillLine
 
 1. `RND-003` 的所有权问题（单例是否可能被多编辑器共享）必须先回答，否则修复会引入新缺陷。本报告不预设答案。
 2. `RND-015` 的语义需确认：当前 SkiaSharp 3.x 下 `SKPaint.Color` 不调制 `DrawImage`，因此 `color = Vector4.Zero` 是否真的导致标记不可见，需按真实 `DrawPlayerLocationHelper` 路径复核（既有审计已有此疑问，本轮未在真实负载下验证）。
-3. `RND-008` 中 `Parallel.ForEach` 与 `IntervalTree` 的并发交互需实测确认是否真的会并发进入 `RebuildInternal`（取决于并行体内是否只读、以及是否有其它线程在同一帧内触发脏标记）。
-4. 除 `RND-C1`、`RND-C2`、`RND-C3`、`DAT-C1`（均有实测数据，量纲分别为逐可见性查询调用 / 逐被丢弃帧 / 逐出帧的池清理 / 逐 BPM 位置命中调用）与本报告 §6 中引用既有实测的条目外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外**尚无任何整帧级**（端到端）实测——`RND-C1`/`RND-C2`/`RND-C3` 的数值都不能直接当作整帧加速比。其中 `RND-C3` 的绝对值还是三者里最小的（其条目本身已声明不是热点），落地价值主要是消除死代码与消除一处易被误解的控制流。
-5. 本轮未覆盖 Browser/WASM 侧的渲染差异（`src/OngekiFumenEditor.Avalonia.Browser`）与第三方依赖内部（Gekimini/Dock/ToolBar/WindowManager），这些在 09-09 审计中有独立分区，状态未在本轮复核。
+3. `RND-008` 的剩余问题是预筛选上界：需要真实谱面弹速分布和多 soflan 组数据，并确保低速、静止、倒车段不漏画。并发区间树风险已由 2026-09-24 的实现和专项验收覆盖，不再属于未决项。
+4. `DAT-005` 是否能通过现有批量边界把一次交互压缩为一次重建，仍需结合调用方确认；增量索引尚未设计或基准。
+5. 除已列出实测的条目（包括 RND-008 专项的逐帧基准）外，其余「性能影响」均为静态推理的量纲判断（每次调用/每帧/每对象），**没有**实测的帧时间、分配速率或 GC 数据。另外仍无覆盖整个编辑器的端到端整帧基准；各条目数字不能直接相加为整帧加速比。
+6. 本轮未覆盖 Browser/WASM 侧的渲染差异（`src/OngekiFumenEditor.Avalonia.Browser`）与第三方依赖内部（Gekimini/Dock/ToolBar/WindowManager），这些在 09-09 审计中有独立分区，状态未在本轮复核。
