@@ -1,0 +1,179 @@
+<Project>
+  <PropertyGroup>
+    <_DesktopPublishTargetsFile>$(MSBuildThisFileFullPath)</_DesktopPublishTargetsFile>
+  </PropertyGroup>
+
+  <!-- ===================================================================
+       Single-file publishing for both release flavors.
+
+       JIT (win-x64-jit):     the SDK single-file bundler packs managed assemblies into the apphost
+                              and extracts native libraries on first start.
+       NativeAOT (win-x64-aot): the SDK bundler is skipped for AOT, so the native dependencies are
+                              embedded as a ZIP + SHA-256 resource pair and extracted at startup by
+                              NativeDependencyBundle.
+       =================================================================== -->
+
+  <!-- ZipDirectory preserves filesystem timestamps/order. Fix both so clean builds of the
+       same DLLs have the same cache key, regardless of package extraction timestamps. -->
+  <UsingTask TaskName="CreateNativeDependencyArchive" TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+      <DestinationFile ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.Collections.Generic" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.IO.Compression" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var paths = new SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var item in Files)
+        {
+            var path = item.GetMetadata("FullPath");
+            var name = Path.GetFileName(path);
+            if (!name.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || paths.ContainsKey(name))
+                throw new InvalidDataException("Native dependency bundle requires unique flat DLL names: " + path);
+            paths.Add(name, path);
+        }
+
+        var temporary = DestinationFile + ".tmp";
+        try
+        {
+            using (var output = File.Create(temporary))
+            using (var archive = new ZipArchive(output, ZipArchiveMode.Create))
+            foreach (var pair in paths)
+            {
+                using (var input = File.OpenRead(pair.Value))
+                using (var reader = new BinaryReader(input))
+                {
+                    // Require an AMD64 PE32+ DLL with no CLR header; managed references belong to ILC.
+                    if (input.Length < 64 || reader.ReadUInt16() != 0x5a4d)
+                        throw new InvalidDataException("Not a Windows native DLL: " + pair.Value);
+                    input.Position = 0x3c;
+                    var pe = reader.ReadInt32();
+                    if (pe < 64 || pe > input.Length - 264)
+                        throw new InvalidDataException("Invalid PE header: " + pair.Value);
+                    input.Position = pe;
+                    if (reader.ReadUInt32() != 0x4550 || reader.ReadUInt16() != 0x8664)
+                        throw new InvalidDataException("Native dependency is not Windows x64: " + pair.Value);
+                    input.Position = pe + 22;
+                    if ((reader.ReadUInt16() & 0x2000) == 0 || reader.ReadUInt16() != 0x20b)
+                        throw new InvalidDataException("Native dependency is not a PE32+ DLL: " + pair.Value);
+                    input.Position = pe + 24 + 224;
+                    if (reader.ReadUInt64() != 0)
+                        throw new InvalidDataException("Managed DLL cannot be in the native bundle: " + pair.Value);
+
+                    var entry = archive.CreateEntry(pair.Key, CompressionLevel.Optimal);
+                    entry.LastWriteTime = new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero);
+                    input.Position = 0;
+                    using (var destination = entry.Open())
+                        input.CopyTo(destination);
+                }
+            }
+            File.Delete(DestinationFile);
+            File.Move(temporary, DestinationFile);
+        }
+        finally
+        {
+            File.Delete(temporary);
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!-- NativeAOT: collect the native dependencies that the SDK would otherwise copy loose. -->
+  <Target Name="_CollectNativeDependencyBundle" DependsOnTargets="ResolvePackageAssets"
+          Condition="'$(DesktopAot)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64' and '$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_NativeBundleDirectory>$(IntermediateOutputPath)native-dependencies\</_NativeBundleDirectory>
+      <_NativeBundleZip>$(_NativeBundleDirectory)OngekiFumenEditor.NativeDependencies.zip</_NativeBundleZip>
+      <_NativeBundleHash>$(_NativeBundleDirectory)OngekiFumenEditor.NativeDependencies.sha256</_NativeBundleHash>
+      <_NativeBundleInputs>$(_NativeBundleDirectory)inputs.txt</_NativeBundleInputs>
+    </PropertyGroup>
+    <ItemGroup>
+      <_NativeBundleInput Include="@(NativeCopyLocalItems)"
+                          Condition="'%(NativeCopyLocalItems.Extension)' == '.dll' and '%(NativeCopyLocalItems.CopyLocal)' == 'true'" />
+      <_NativeBundleInput Include="@(Content)" Condition="'%(Content.NativeDependency)' == 'true'" />
+    </ItemGroup>
+    <Error Condition="'@(_NativeBundleInput)' == ''" Text="Windows NativeAOT publishing requires native dependency bundle inputs." />
+    <MakeDir Directories="$(_NativeBundleDirectory)" />
+    <!-- Hashes, not timestamps, detect added/removed/replaced DLLs, even after a timestamp-preserving copy. -->
+    <GetFileHash Files="@(_NativeBundleInput->Distinct())" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_NativeBundleHashedInput" />
+    </GetFileHash>
+    <WriteLinesToFile File="$(_NativeBundleInputs)"
+                      Lines="@(_NativeBundleHashedInput->'%(FullPath)|%(FileHash)')"
+                      Overwrite="true" WriteOnlyWhenDifferent="true" />
+    <ItemGroup>
+      <FileWrites Include="$(_NativeBundleInputs);$(_NativeBundleZip);$(_NativeBundleHash)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_GenerateNativeDependencyBundle" DependsOnTargets="_CollectNativeDependencyBundle"
+          Condition="'$(DesktopAot)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64' and '$(DesignTimeBuild)' != 'true'"
+          Inputs="$(_NativeBundleInputs);$(_DesktopPublishTargetsFile)"
+          Outputs="$(_NativeBundleZip);$(_NativeBundleHash)">
+    <CreateNativeDependencyArchive Files="@(_NativeBundleHashedInput)" DestinationFile="$(_NativeBundleZip)" />
+    <GetFileHash Files="$(_NativeBundleZip)" Algorithm="SHA256">
+      <Output TaskParameter="Hash" PropertyName="_NativeBundleFingerprint" />
+    </GetFileHash>
+    <WriteLinesToFile File="$(_NativeBundleHash)" Lines="$(_NativeBundleFingerprint)" Encoding="ASCII" Overwrite="true" />
+  </Target>
+
+  <!-- Add items even when generation was skipped, before resource names/culture are assigned. -->
+  <Target Name="_EmbedNativeDependencyBundle" BeforeTargets="AssignTargetPaths"
+          DependsOnTargets="_GenerateNativeDependencyBundle"
+          Condition="'$(DesktopAot)' == 'true' and '$(RuntimeIdentifier)' == 'win-x64' and '$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <EmbeddedResource Include="$(_NativeBundleZip)" LogicalName="OngekiFumenEditor.NativeDependencies.zip" WithCulture="false" />
+      <EmbeddedResource Include="$(_NativeBundleHash)" LogicalName="OngekiFumenEditor.NativeDependencies.sha256" WithCulture="false" />
+    </ItemGroup>
+  </Target>
+
+  <!-- A single-file package ships no loose sidecars. Runs again after PrepareForBundle because the
+       bundler puts files it refuses to embed back into ResolvedFileToPublish. -->
+  <Target Name="_StripLooseSingleFilePublishInputs"
+          AfterTargets="ComputeResolvedFilesToPublishList;PrepareForBundle"
+          Condition="'$(DesktopSingleFile)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <!-- NativeAOT: project-reference satellites lack the NuGet AssetType metadata that ILC
+           consumes; ILC embeds them as satellites and removes their loose publish entries itself. -->
+      <ResolvedFileToPublish Condition="'$(DesktopAot)' == 'true' and $([System.String]::Copy('%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)').EndsWith('.resources.dll'))">
+        <AssetType>resources</AssetType>
+      </ResolvedFileToPublish>
+      <!-- NativeAOT: the native dependencies travel inside the embedded bundle. -->
+      <ResolvedFileToPublish Remove="@(_NativeBundleInput)"
+                            Condition="'$(DesktopAot)' == 'true'"
+                            MatchOnMetadata="FullPath" MatchOnMetadataOptions="PathLike" />
+      <!-- Neither flavor ships loose symbols. -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb'" />
+      <!-- Injectio's analyzer project copies this compiler configuration as transitive Content. -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'Injectio.targets'" />
+    </ItemGroup>
+  </Target>
+
+  <!-- Fail instead of silently shipping loose files when something new becomes publishable. -->
+  <Target Name="_CheckSingleFilePublishOutput" AfterTargets="ComputeFilesToPublish"
+          Condition="'$(DesktopSingleFile)' == 'true' and '$(DesignTimeBuild)' != 'true'">
+    <ItemGroup>
+      <_ExpectedSingleFilePublishItem Include="$(NativeBinary)" Condition="'$(DesktopAot)' == 'true'" />
+      <_ExpectedSingleFilePublishItem Include="$(PublishedSingleFilePath)" Condition="'$(DesktopAot)' != 'true'" />
+      <_UnexpectedSingleFilePublishFile Include="@(ResolvedFileToPublish)" Exclude="@(_ExpectedSingleFilePublishItem)" />
+    </ItemGroup>
+    <Error Condition="'@(_UnexpectedSingleFilePublishFile)' != ''"
+           Text="Single-file publishing produced unclassified publish items: @(_UnexpectedSingleFilePublishFile->'%(RelativePath)', ', '). Embed or explicitly exclude them instead of shipping them loose." />
+  </Target>
+
+  <!-- Preserve settings/logs while migrating older publish outputs, including the previous TFM.
+       The SDK restricts these recorded build artifacts to PublishDir before deleting stale files. -->
+  <Target Name="_ReadEarlierPublishOutputs" BeforeTargets="_GetCurrentAndPriorPublishFileWrites"
+          Condition="'$(DesktopSingleFile)' == 'true'">
+    <ItemGroup>
+      <_EarlierPublishManifest Include="$(BaseIntermediateOutputPath)**\PublishOutputs.*.txt" />
+    </ItemGroup>
+    <ReadLinesFromFile File="%(_EarlierPublishManifest.Identity)">
+      <Output TaskParameter="Lines" ItemName="_UnfilteredPriorPublishFileWrites" />
+    </ReadLinesFromFile>
+  </Target>
+</Project>

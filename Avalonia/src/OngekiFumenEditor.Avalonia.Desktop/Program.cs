@@ -311,6 +311,10 @@ internal class Program
 
     internal static AppBuilder BuildAvaloniaApp(Func<OngekiFumenEditorDesktopApp> appFactory)
     {
+#if NATIVE_AOT
+        NativeDependencyBundle.Initialize();
+#endif
+
         return AppBuilder.Configure(appFactory)
             .UsePlatformDetect()
             .With(new Win32PlatformOptions
