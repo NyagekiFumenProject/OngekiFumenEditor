@@ -76,15 +76,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         }
 
         /// <summary>
-        /// 离屏渲染专用构造：接管一个已经创建好的 GL 纹理名。
-        /// <see cref="Dispose"/> 不直接调用 <c>GL.DeleteTexture</c>，而是通过 <paramref name="releaseTexture"/> 释放
-        /// （离屏纹理的删除必须回到有 current 上下文的时机执行，调用方通常传入延迟删除队列的入队委托）。
+        /// Offscreen-only constructor: takes over an already created GL texture name.
+        /// <see cref="Dispose"/> does not call <c>GL.DeleteTexture</c> directly; it releases the texture through
+        /// <paramref name="releaseTexture"/> (deleting an offscreen texture must happen while a context is current, so
+        /// callers usually pass the enqueue delegate of the delayed deletion queue).
         /// </summary>
-        /// <param name="textureId">已存在的 GL 纹理名。</param>
-        /// <param name="width">纹理宽度（设备像素）。</param>
-        /// <param name="height">纹理高度（设备像素）。</param>
-        /// <param name="releaseTexture">纹理释放委托；为 null 时退回直接删除。</param>
-        /// <param name="name">纹理名称（调试用）。</param>
+        /// <param name="textureId">The existing GL texture name.</param>
+        /// <param name="width">Texture width in device pixels.</param>
+        /// <param name="height">Texture height in device pixels.</param>
+        /// <param name="releaseTexture">Texture release delegate; when null, falls back to deleting directly.</param>
+        /// <param name="name">Texture name (for debugging).</param>
         internal DefaultOpenGLTexture(int textureId, int width, int height, Action<int> releaseTexture, string name = "OffscreenTexture") : this(name)
         {
             _id = textureId;

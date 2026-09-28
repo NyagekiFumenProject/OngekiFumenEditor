@@ -8,9 +8,10 @@ using OpenTK.Graphics.OpenGL;
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
     /// <summary>
-    /// OpenGL 离屏渲染上下文：一个 FBO + 每次渲染新建的一张颜色纹理（零拷贝交给调用方）。
-    /// 渲染由 <see cref="DefaultOpenGLRenderManagerImpl.PumpOffscreenRenders"/> 在 GL 控件的渲染回调（上下文 current）内排空执行，
-    /// 因此要求存在处于 <c>StartRendering</c> 且可见的 GL 控件；控件不可见时请求会保持挂起，直到重新可见或被 Dispose/Term 结束。
+    /// OpenGL offscreen render context: one FBO plus a colour texture created per render (handed to the caller with zero copies).
+    /// Renders are drained by <see cref="DefaultOpenGLRenderManagerImpl.PumpOffscreenRenders"/> inside a GL control's render callback
+    /// (with the context current), so an offscreen GL control in <c>StartRendering</c> that is visible must exist;
+    /// while the control is invisible, requests stay pending until it becomes visible again or Dispose/Term ends them.
     /// </summary>
     internal sealed class OpenGLOffscreenRenderContext : IOffscreenRenderContext
     {
@@ -66,7 +67,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                     throw new ObjectDisposedException(nameof(drawCommandList));
 
                 if (!drawCommandList.TryBeginPresent())
-                    throw new InvalidOperationException("命令列表正在被其它渲染流程使用，或已进入释放流程。");
+                    throw new InvalidOperationException("The command list is being used by another render flow, or is already being released.");
 
                 var request = new OpenGLOffscreenRenderRequest(this, drawCommandList, autoDispose, cancellationToken);
                 try
@@ -103,12 +104,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                     manager.EnqueueFramebufferDeletion(fbo);
             }
 
-            // 与 Skia 不同：OpenGL 的推进依赖 UI tick，不能假设它继续 tick，因此取消尚未开始的排队请求；
-            // 正在 drain 中的请求会照常完成并把结果图像交给调用方。
-            queue.CancelQueued(this, new ObjectDisposedException(nameof(OpenGLOffscreenRenderContext), "离屏渲染上下文已释放，未开始的渲染请求被取消。"));
+            // Unlike Skia: OpenGL progress depends on UI ticks, which cannot be assumed to keep coming, so queued requests that
+            // have not started are cancelled; a request already being drained still completes and hands its image to the caller.
+            queue.CancelQueued(this, new ObjectDisposedException(nameof(OpenGLOffscreenRenderContext), "The offscreen render context has been disposed; render requests that had not started were cancelled."));
         }
 
-        /// <summary>在 drain（GL 上下文 current）内执行一次渲染。</summary>
+        /// <summary>Runs one render inside a drain (with the GL context current).</summary>
         internal IImage RenderCore(DefaultOpenGLRenderManagerImpl managerImpl, DrawCommandList drawCommandList)
         {
             Options.EnsureViewportMatches(drawCommandList.FrameState);
@@ -127,9 +128,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
                 var status = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
                 if (status != FramebufferErrorCode.FramebufferComplete)
-                    throw new NotSupportedException($"离屏帧缓冲不完整({status})：像素格式 {Options.PixelFormat} 可能不被当前驱动支持。");
+                    throw new NotSupportedException($"The offscreen framebuffer is incomplete ({status}): pixel format {Options.PixelFormat} may not be supported by the current driver.");
 
-                // flipY：把 GL 纹理行序（t=0 在底部）对齐到 Bitmap/Skia 图像行序，避免结果贴回时上下颠倒。
+                // flipY: align the GL texture row order (t = 0 at the bottom) with the Bitmap/Skia image row order, so that pasted-back results are not upside down.
                 OpenGLDrawCommandListReplay.Present(managerImpl, replayContext, drawCommandList, flipY: true);
 
                 return new DefaultOpenGLTexture(textureId, Options.Width, Options.Height, managerImpl.EnqueueTextureDeletion, "OffscreenTexture");
@@ -189,7 +190,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)OpenTK.Graphics.OpenGL.TextureWrapMode.ClampToEdge);
             GL.TexImage2D(TextureTarget.Texture2D, 0, internalFormat, Options.Width, Options.Height, 0, format, type, IntPtr.Zero);
 
-            // 上面的绑定绕过了纹理单元绑定缓存，必须重置，避免屏幕路径复用失效的绑定。
+            // The binding above bypasses the texture unit binding cache and must be reset, otherwise the on-screen path would reuse a stale binding.
             OpenGLTextureBindingCache.Reset();
 
             return textureId;
@@ -208,12 +209,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 OffscreenPixelFormat.RgbaF32
                     => (PixelInternalFormat.Rgba32f, OpenTK.Graphics.OpenGL.PixelFormat.Rgba, PixelType.Float),
                 OffscreenPixelFormat.Bgra8888
-                    => throw new NotSupportedException("OpenGL 后端不支持 Bgra8888 离屏目标（桌面 core GL 无标准 BGRA8 内部格式）。"),
+                    => throw new NotSupportedException("The OpenGL backend does not support the Bgra8888 offscreen target (desktop core GL has no standard BGRA8 internal format)."),
                 OffscreenPixelFormat.Gray8
-                    => throw new NotSupportedException("OpenGL 后端不支持 Gray8 离屏目标（R8 采样只出红通道，与灰度语义不一致）。"),
+                    => throw new NotSupportedException("The OpenGL backend does not support the Gray8 offscreen target (R8 sampling only returns the red channel, which does not match grayscale semantics)."),
                 OffscreenPixelFormat.Alpha8
-                    => throw new NotSupportedException("OpenGL 后端不支持 Alpha8 离屏目标。"),
-                _ => throw new NotSupportedException($"OpenGL 后端不支持的离屏像素格式: {pixelFormat}。"),
+                    => throw new NotSupportedException("The OpenGL backend does not support the Alpha8 offscreen target."),
+                _ => throw new NotSupportedException($"Unsupported offscreen pixel format for the OpenGL backend: {pixelFormat}."),
             };
         }
     }

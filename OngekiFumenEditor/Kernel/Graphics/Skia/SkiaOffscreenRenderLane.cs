@@ -8,8 +8,9 @@ using OngekiFumenEditor.Utils;
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
     /// <summary>
-    /// Skia 离屏渲染通道：manager 内唯一的后台线程 + <b>无界</b> FIFO 队列。
-    /// 所有离屏上下文共用该线程顺序渲染；线程随 manager 首次创建离屏上下文启动，活到 <c>Term()</c>/进程退出。
+    /// Skia offscreen render lane: the single background thread inside the manager plus an <b>unbounded</b> FIFO queue.
+    /// All offscreen contexts share this thread and render sequentially on it; the thread starts with the manager's first
+    /// offscreen context and lives until <c>Term()</c>/process exit.
     /// </summary>
     internal sealed class SkiaOffscreenRenderLane
     {
@@ -27,10 +28,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             thread.Start();
         }
 
-        /// <summary>是否已进入终止流程（终止后不再接受提交）。</summary>
+        /// <summary>Whether the lane has entered termination (no further submissions are accepted afterwards).</summary>
         public bool IsTerminated => Volatile.Read(ref terminating) != 0;
 
-        /// <summary>提交一个渲染请求。通道已终止时抛 <see cref="ObjectDisposedException"/>。</summary>
+        /// <summary>Submits a render request. Throws <see cref="ObjectDisposedException"/> when the lane has been terminated.</summary>
         public void Submit(SkiaOffscreenRenderRequest request)
         {
             if (request is null)
@@ -42,13 +43,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             }
             catch (InvalidOperationException)
             {
-                throw new ObjectDisposedException(nameof(SkiaOffscreenRenderLane), "离屏渲染通道已关闭，无法提交新的渲染请求。");
+                throw new ObjectDisposedException(nameof(SkiaOffscreenRenderLane), "The offscreen render lane has been closed, no new render requests can be submitted.");
             }
         }
 
         /// <summary>
-        /// 关闭通道并等待返回：尚未开始的排队请求立即结束（取消），在途请求完成后本方法才返回。
-        /// 该方法是同步的（不依赖任何消息泵），可在退出路径上直接调用。
+        /// Closes the lane and waits: queued requests that have not started end immediately (cancelled), and this method only
+        /// returns once in-flight requests have finished. It is synchronous (no message pump involved) and can be called
+        /// directly on the shutdown path.
         /// </summary>
         public void Terminate()
         {
@@ -67,7 +69,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             foreach (var request in queue.GetConsumingEnumerable())
             {
                 if (Volatile.Read(ref terminating) != 0)
-                    request.End(new OperationCanceledException("离屏渲染通道已关闭，排队中的渲染请求被取消。"));
+                    request.End(new OperationCanceledException("The offscreen render lane has been closed; queued render requests were cancelled."));
                 else if (request.CancellationToken.IsCancellationRequested)
                     request.EndCanceled();
                 else
@@ -77,9 +79,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
     }
 
     /// <summary>
-    /// 一次离屏渲染请求。生命周期与 <see cref="DrawCommandList"/> 的 present 状态严格配对：
-    /// 提交线程调用 <c>TryBeginPresent()</c>，渲染通道线程在结束时调用一次 <c>EndPresent()</c>，
-    /// 随后按 <c>autoDispose</c> 释放命令列表。
+    /// One offscreen render request. Its lifetime is strictly paired with the present state of <see cref="DrawCommandList"/>:
+    /// the submitting thread calls <c>TryBeginPresent()</c>, the render lane thread calls <c>EndPresent()</c> exactly once when
+    /// it finishes, and the command list is then released according to <c>autoDispose</c>.
     /// </summary>
     internal sealed class SkiaOffscreenRenderRequest
     {
@@ -103,7 +105,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
 
         public Task<IImage> Task => taskSource.Task;
 
-        /// <summary>在渲染通道线程上执行本次渲染。</summary>
+        /// <summary>Runs this render on the render lane thread.</summary>
         public void Execute()
         {
             if (Interlocked.Exchange(ref completed, 1) != 0)
@@ -125,15 +127,16 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 Finish();
             }
 
-            // 先完成清理再唤醒调用方：调用方观察到任务完成时，autoDispose 的列表必然已经完全释放，
-            // 否则调用方线程（例如 using 块）可能在渲染线程仍处于 DisposeCore 时再次进入 DisposeCore，并发清理同一个池化列表。
+            // Finish the cleanup before waking the caller: when the caller observes the completed task, an autoDispose list must
+            // already be fully released; otherwise the caller thread (e.g. a using block) could enter DisposeCore again while the
+            // render thread is still inside DisposeCore, cleaning up the same pooled list concurrently.
             if (error is null)
                 taskSource.TrySetResult(image);
             else
                 taskSource.TrySetException(error);
         }
 
-        /// <summary>跳过渲染并以指定异常结束（通道关闭等）。</summary>
+        /// <summary>Skips the render and ends with the given exception (lane closed, etc.).</summary>
         public void End(Exception exception)
         {
             if (Interlocked.Exchange(ref completed, 1) != 0)
@@ -143,7 +146,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             taskSource.TrySetException(exception);
         }
 
-        /// <summary>跳过渲染并以取消结束（提交时携带的取消令牌已被触发）。</summary>
+        /// <summary>Skips the render and ends as cancelled (the cancellation token supplied at submission time has been triggered).</summary>
         public void EndCanceled()
         {
             if (Interlocked.Exchange(ref completed, 1) != 0)
@@ -157,9 +160,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         {
             try
             {
-                // 必须在 EndPresent() 之前 Dispose()：此时列表处于 present 中，Dispose 只会置 DisposeRequested，
-                // 真正的释放由随后唯一一次 EndPresent() 完成。反序会让状态短暂回到 Normal，
-                // 使调用方线程的并发 Dispose 也进入 DisposeCore，两个线程同时清理池化列表。
+                // Dispose() must come before EndPresent(): the list is presenting here, so Dispose only sets DisposeRequested and
+                // the single following EndPresent() performs the real release. The reverse order would briefly return the state to
+                // Normal, letting a concurrent Dispose from the caller thread also enter DisposeCore, with both threads cleaning the
+                // same pooled list.
                 if (autoDispose)
                     drawCommandList.Dispose();
 
@@ -167,8 +171,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             }
             catch (Exception ex)
             {
-                // 清理失败不能杀死渲染通道线程，否则后续所有请求都会永久挂起。
-                Log.LogError($"离屏渲染请求清理命令列表失败: {ex.Message}");
+                // A cleanup failure must not kill the render lane thread, otherwise every later request would hang forever.
+                Log.LogError($"Failed to clean up the command list for an offscreen render request: {ex.Message}");
             }
 
             context.OnRequestFinished();

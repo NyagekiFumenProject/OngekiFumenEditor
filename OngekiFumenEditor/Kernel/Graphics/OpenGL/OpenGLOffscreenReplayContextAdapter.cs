@@ -6,9 +6,9 @@ using OpenTK.Graphics.OpenGL;
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
     /// <summary>
-    /// OpenGL 离屏渲染内部使用的 <see cref="IRenderContext"/> 适配器。
-    /// 只承担「给静态重放引擎提供监视器等上下文状态」的职责，不参与控件绘制周期：
-    /// <see cref="OnRender"/> 永不触发，渲染循环相关成员不可用。
+    /// <see cref="IRenderContext"/> adapter used internally by OpenGL offscreen rendering.
+    /// It only supplies context state (such as the performance monitor) to the static replay engine and takes no part in the
+    /// control drawing cycle: <see cref="OnRender"/> never fires and render-loop members are unavailable.
     /// </summary>
     internal sealed class OpenGLOffscreenReplayContextAdapter : IRenderContext
     {
@@ -39,19 +39,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         /// <inheritdoc />
         public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
         {
-            throw new NotSupportedException("离屏渲染上下文不接受延迟提交，请使用 IOffscreenRenderContext.RenderToImageAsync()。");
+            throw new NotSupportedException("The offscreen render context does not accept deferred submissions, use IOffscreenRenderContext.RenderToImageAsync() instead.");
         }
 
         /// <inheritdoc />
         public void StartRendering()
         {
-            throw new NotSupportedException("离屏渲染上下文没有渲染循环。");
+            throw new NotSupportedException("The offscreen render context has no render loop.");
         }
 
         /// <inheritdoc />
         public void StopRendering()
         {
-            throw new NotSupportedException("离屏渲染上下文没有渲染循环。");
+            throw new NotSupportedException("The offscreen render context has no render loop.");
         }
     }
 }

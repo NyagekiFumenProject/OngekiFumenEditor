@@ -10,17 +10,17 @@ using OpenTK.Graphics.OpenGL;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 {
-    /// <summary>一次待执行的 GL 对象删除；两个字段中为 0 的表示没有该类对象。</summary>
+    /// <summary>A pending GL object deletion; a field equal to 0 means no object of that kind.</summary>
     internal readonly record struct OpenGLPendingDeletion(int TextureId, int FramebufferId);
 
     /// <summary>
-    /// OpenGL 离屏渲染共享队列：所有离屏上下文共用同一个队列，
-    /// 渲染在任意活动 GL 控件的渲染回调（OpenGL 上下文 current）内排空执行（drain）。
-    /// 同时承担 GL 对象的<b>延迟删除队列</b>——所有 GL 删除操作都必须回到上下文 current 的时机执行。
+    /// Shared OpenGL offscreen render queue: all offscreen contexts share the same queue, and renders are drained inside the
+    /// render callback of any active GL control (with the OpenGL context current).
+    /// It also serves as the <b>delayed deletion queue</b> for GL objects -- every GL deletion must run while a context is current.
     /// </summary>
     internal sealed class OpenGLOffscreenRenderQueue
     {
-        /// <summary>单次排空的渲染条数上限，避免无界积压把 UI 帧拖长。</summary>
+        /// <summary>Upper bound on renders per drain, so unbounded backlog does not stretch a UI frame.</summary>
         private const int MaxRendersPerDrain = 4;
 
         private readonly ConcurrentQueue<OpenGLOffscreenRenderRequest> requests = new();
@@ -37,30 +37,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             }
         }
 
-        /// <summary>当前排队等待删除的 GL 对象数量。</summary>
+        /// <summary>Number of GL objects currently queued for deletion.</summary>
         public int PendingDeletionCount => pendingDeletions.Count;
 
-        /// <summary>提交一个渲染请求；队列已关闭时抛 <see cref="ObjectDisposedException"/>。</summary>
+        /// <summary>Submits a render request; throws <see cref="ObjectDisposedException"/> when the queue has been closed.</summary>
         public void Submit(OpenGLOffscreenRenderRequest request)
         {
             if (request is null)
                 throw new ArgumentNullException(nameof(request));
 
             if (IsTerminated)
-                throw new ObjectDisposedException(nameof(OpenGLOffscreenRenderQueue), "离屏渲染队列已关闭，无法提交新的渲染请求。");
+                throw new ObjectDisposedException(nameof(OpenGLOffscreenRenderQueue), "The offscreen render queue has been closed, no new render requests can be submitted.");
 
             requests.Enqueue(request);
         }
 
-        /// <summary>登记一个待删除的 GL 对象（下次 drain 或退出时执行）。</summary>
+        /// <summary>Registers a GL object to delete (performed on the next drain or on shutdown).</summary>
         public void EnqueueDeletion(in OpenGLPendingDeletion deletion)
         {
             pendingDeletions.Enqueue(deletion);
         }
 
         /// <summary>
-        /// 在 GL 控件渲染回调（上下文 current）内排空：先执行延迟删除，再执行限量的渲染请求。
-        /// 本方法必须整体处于 try/catch 边界内（渲染异常不得穿透到 WPF 渲染循环）。
+        /// Drains inside a GL control render callback (with the context current): delayed deletions first, then a bounded number of render requests.
+        /// The whole method must sit inside a try/catch boundary (a render exception must not escape into the WPF render loop).
         /// </summary>
         public void Pump(DefaultOpenGLRenderManagerImpl manager)
         {
@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             for (var i = 0; i < MaxRendersPerDrain && requests.TryDequeue(out var request); i++)
             {
                 if (IsTerminated)
-                    request.End(new OperationCanceledException("离屏渲染队列已关闭。"));
+                    request.End(new OperationCanceledException("The offscreen render queue has been closed."));
                 else if (request.CancellationToken.IsCancellationRequested)
                     request.EndCanceled();
                 else
@@ -78,8 +78,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         }
 
         /// <summary>
-        /// 把尚未开始的排队请求以指定异常结束；<paramref name="context"/> 为 null 时处理所有上下文。
-        /// 重新入队的其它请求保持相对顺序（跨上下文的绝对顺序在取消后不保证，各上下文内部仍保序）。
+        /// Ends queued requests that have not started with the given exception; when <paramref name="context"/> is null all contexts are handled.
+        /// Re-queued requests keep their relative order (absolute cross-context order is not guaranteed after a cancellation, but each context stays ordered).
         /// </summary>
         public void CancelQueued(OpenGLOffscreenRenderContext context, Exception exception)
         {
@@ -104,8 +104,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         }
 
         /// <summary>
-        /// 关闭队列：取消排队请求；若当前线程有 current 的 GL 上下文则执行延迟删除，否则放弃并记日志。
-        /// 同步完成，不等待任何渲染 tick（退出路径依赖这一点）。
+        /// Closes the queue: cancels queued requests; runs delayed deletions when the current thread has a current GL context, otherwise drops them and logs.
+        /// Completes synchronously and never waits for a render tick (the shutdown path relies on this).
         /// </summary>
         public void Terminate()
         {
@@ -116,12 +116,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 terminated = true;
             }
 
-            CancelQueued(null, new OperationCanceledException("离屏渲染队列已关闭，排队中的渲染请求被取消。"));
+            CancelQueued(null, new OperationCanceledException("The offscreen render queue has been closed; queued render requests were cancelled."));
 
             if (DefaultOpenGLRenderManagerImpl.HasCurrentGlContext())
                 ExecutePendingDeletions();
             else
-                Log.LogWarn($"离屏渲染队列关闭时没有 current 的 GL 上下文，{pendingDeletions.Count} 个待删除 GL 对象被放弃（随进程退出释放）。");
+                Log.LogWarn($"No current GL context while closing the offscreen render queue; {pendingDeletions.Count} pending GL deletions were dropped (they are released when the process exits).");
         }
 
         private void ExecutePendingDeletions()
@@ -141,8 +141,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
     }
 
     /// <summary>
-    /// 一次 OpenGL 离屏渲染请求。生命周期与 <see cref="DrawCommandList"/> 的 present 状态严格配对：
-    /// 提交线程调用 <c>TryBeginPresent()</c>，drain 线程在结束时调用一次 <c>EndPresent()</c>，随后按 <c>autoDispose</c> 释放命令列表。
+    /// One OpenGL offscreen render request. Its lifetime is strictly paired with the present state of <see cref="DrawCommandList"/>:
+    /// the submitting thread calls <c>TryBeginPresent()</c>, the drain thread calls <c>EndPresent()</c> exactly once when it
+    /// finishes, and the command list is then released according to <c>autoDispose</c>.
     /// </summary>
     internal sealed class OpenGLOffscreenRenderRequest
     {
@@ -167,7 +168,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public Task<IImage> Task => taskSource.Task;
 
-        /// <summary>在 drain（上下文 current）内执行本次渲染。</summary>
+        /// <summary>Runs this render inside a drain (with the context current).</summary>
         public void Execute(DefaultOpenGLRenderManagerImpl manager)
         {
             if (Interlocked.Exchange(ref completed, 1) != 0)
@@ -189,14 +190,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 Finish();
             }
 
-            // 先完成清理再唤醒调用方（理由同 Skia 请求）：任务完成即代表 autoDispose 的列表已释放完毕。
+            // Finish the cleanup before waking the caller (same reasoning as the Skia request): a completed task means the autoDispose list has already been released.
             if (error is null)
                 taskSource.TrySetResult(image);
             else
                 taskSource.TrySetException(error);
         }
 
-        /// <summary>跳过渲染并以指定异常结束（队列关闭、上下文释放等）。</summary>
+        /// <summary>Skips the render and ends with the given exception (queue closed, context disposed, etc.).</summary>
         public void End(Exception exception)
         {
             if (Interlocked.Exchange(ref completed, 1) != 0)
@@ -206,7 +207,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             taskSource.TrySetException(exception);
         }
 
-        /// <summary>跳过渲染并以取消结束（提交时携带的取消令牌已被触发）。</summary>
+        /// <summary>Skips the render and ends as cancelled (the cancellation token supplied at submission time has been triggered).</summary>
         public void EndCanceled()
         {
             if (Interlocked.Exchange(ref completed, 1) != 0)
@@ -220,8 +221,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         {
             try
             {
-                // 与 Skia 请求相同：先 Dispose()（present 中只置 DisposeRequested）再 EndPresent()（唯一一次真正释放），
-                // 避免调用方线程的并发 Dispose 与本次清理同时进入 DisposeCore。
+                // Same as the Skia request: Dispose() first (while presenting it only sets DisposeRequested) and then the single
+                // real EndPresent() release, so a concurrent Dispose from the caller thread cannot enter DisposeCore at the same time.
                 if (autoDispose)
                     drawCommandList.Dispose();
 
@@ -229,8 +230,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             }
             catch (Exception ex)
             {
-                // drain 是 WPF 渲染回调的一部分：清理异常绝不能穿透到 WPF 渲染循环。
-                Log.LogError($"离屏渲染请求清理命令列表失败: {ex.Message}");
+                // A drain is part of the WPF render callback: a cleanup exception must never escape into the WPF render loop.
+                Log.LogError($"Failed to clean up the command list for an offscreen render request: {ex.Message}");
             }
         }
     }

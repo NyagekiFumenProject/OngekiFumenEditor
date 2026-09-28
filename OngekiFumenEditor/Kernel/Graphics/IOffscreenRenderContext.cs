@@ -6,54 +6,57 @@ using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 namespace OngekiFumenEditor.Kernel.Graphics
 {
     /// <summary>
-    /// 离屏渲染目标：固定尺寸/格式、不参与控件绘制周期的渲染上下文。
-    /// 调用方提交 <see cref="DrawCommandList"/> 并等待渲染完成，产出图像即为返回值（每次渲染产出一张独立图像，所有权归调用方）。
+    /// Offscreen render target: a render context with a fixed size/format that is not part of the control drawing cycle.
+    /// The caller submits a <see cref="DrawCommandList"/> and waits for the render to finish; the produced image is the
+    /// result (every render produces its own image, owned by the caller).
     /// </summary>
     /// <remarks>
-    /// 线程契约：
+    /// Threading contract:
     /// <list type="number">
-    /// <item>同一个离屏上下文允许从多线程提交，执行顺序等于入队顺序；</item>
-    /// <item>同一个 <see cref="DrawCommandList"/> 不得并发提交，也不得与 <see cref="IDisposable.Dispose"/> 并发
-    ///（命令列表状态机无锁，违反契约行为未定义）；</item>
-    /// <item>返回的 <see cref="IImage"/>：Skia 后端可在任意线程使用；OpenGL 后端只有 <see cref="IDisposable.Dispose"/>
-    /// 是线程安全的（wrap/filter/ID 等访问需回到 UI 线程）。</item>
+    /// <item>Submissions to one offscreen context may come from multiple threads; execution order equals enqueue order;</item>
+    /// <item>One <see cref="DrawCommandList"/> must not be submitted concurrently, nor concurrently with <see cref="IDisposable.Dispose"/>
+    /// (the command list state machine is lock-free, violating this contract is undefined behavior);</item>
+    /// <item>The returned <see cref="IImage"/>: on the Skia backend it can be used from any thread; on the OpenGL backend only
+    /// <see cref="IDisposable.Dispose"/> is thread-safe (wrap/filter/ID access must go back to the UI thread).</item>
     /// </list>
-    /// Dispose 语义按后端不同：
-    /// Skia —— 已提交的渲染会照常完成（任务正常返回结果）；
-    /// OpenGL —— 尚未开始的排队请求以 <see cref="ObjectDisposedException"/> 结束，正在渲染的请求照常完成。
-    /// 无论哪种后端，Dispose 都不影响已经返回给调用方的图像。
+    /// Dispose semantics differ per backend:
+    /// Skia -- already submitted renders still complete (the task returns its result normally);
+    /// OpenGL -- queued requests that have not started yet end with <see cref="ObjectDisposedException"/>, a render in progress still completes.
+    /// On either backend, Dispose does not affect images already returned to the caller.
     /// </remarks>
     public interface IOffscreenRenderContext : IDisposable
     {
-        /// <summary>创建时使用的请求参数快照（不代表后端实际生效值）。</summary>
+        /// <summary>Snapshot of the request parameters used at creation (not necessarily the values the backend actually applied).</summary>
         OffscreenRenderOptions Options { get; }
 
-        /// <summary>是否已释放。Dispose 后不得再提交渲染。</summary>
+        /// <summary>Whether this context has been disposed. No render may be submitted after Dispose.</summary>
         bool IsDisposed { get; }
 
         /// <summary>
-        /// 提交命令列表，渲染并等待完成，返回本次渲染产出的图像。
-        /// <paramref name="autoDispose"/> 语义与 <see cref="IRenderContext.PostDrawCommandList"/> 一致：
-        /// true 表示本次渲染确定结束后由实现释放该命令列表。
+        /// Submits a command list, renders it, waits for completion and returns the image produced by this render.
+        /// <paramref name="autoDispose"/> has the same semantics as <see cref="IRenderContext.PostDrawCommandList"/>:
+        /// true means the implementation releases the command list once this render has definitely finished.
         /// </summary>
         /// <remarks>
-        /// 取消语义（<paramref name="cancellationToken"/> 只对「尚未开始渲染」的请求生效）：
-        /// 提交时已取消 —— 不排队，立即返回已取消的任务，且 <paramref name="autoDispose"/> 为 true 时立即释放命令列表；
-        /// 排队期间取消 —— 取用时跳过渲染，命令列表按 <paramref name="autoDispose"/> 处理，任务以取消结束；
-        /// 已开始渲染 —— 取消无效，渲染照常完成并返回图像。
+        /// Cancellation semantics (<paramref name="cancellationToken"/> only affects requests that have not started rendering):
+        /// already cancelled when submitted -- not queued, the returned task is cancelled immediately, and the command list is
+        /// released immediately when <paramref name="autoDispose"/> is true;
+        /// cancelled while queued -- rendering is skipped, the command list is handled per <paramref name="autoDispose"/> and the task ends cancelled;
+        /// rendering already started -- cancellation has no effect, the render completes normally and returns the image.
         /// <para>
-        /// 执行位置：Skia 后端在 manager 的离屏渲染线程上执行；OpenGL 后端在 GL 控件的渲染回调内执行，
-        /// 因此**禁止在 UI 线程上同步等待该任务**（<c>.Result</c> / <c>.Wait()</c> 会死锁）。
-        /// OpenGL 后端还要求存在处于可见状态且持续出帧的 GL 控件，否则渲染可能长时间挂起
-        ///（可通过对本上下文 <see cref="IDisposable.Dispose"/> 结束挂起的请求）。
+        /// Execution site: on the Skia backend the render runs on the manager's offscreen render thread; on the OpenGL backend it runs
+        /// inside the GL control's render callback, so <b>never wait for this task synchronously on the UI thread</b>
+        /// (<c>.Result</c> / <c>.Wait()</c> would deadlock).
+        /// The OpenGL backend also requires a visible GL control that keeps producing frames, otherwise a render may stay pending
+        /// for a long time (disposing this context via <see cref="IDisposable.Dispose"/> ends pending requests).
         /// </para>
         /// <para>
-        /// 渲染失败时任务以原异常结束，上下文仍可继续使用；失败帧的目标内容未定义。
+        /// On render failure the task ends with the original exception and the context remains usable; the target contents of a failed frame are undefined.
         /// </para>
         /// </remarks>
-        /// <exception cref="ArgumentNullException"><paramref name="drawCommandList"/> 为 null。</exception>
-        /// <exception cref="ObjectDisposedException">上下文已释放，或命令列表已释放。</exception>
-        /// <exception cref="InvalidOperationException">命令列表正在被其它渲染流程使用。</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="drawCommandList"/> is null.</exception>
+        /// <exception cref="ObjectDisposedException">The context has been disposed, or the command list has been disposed.</exception>
+        /// <exception cref="InvalidOperationException">The command list is being used by another render flow.</exception>
         Task<IImage> RenderToImageAsync(DrawCommandList drawCommandList, bool autoDispose = true, CancellationToken cancellationToken = default);
     }
 }

@@ -8,8 +8,9 @@ using SkiaSharp;
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
     /// <summary>
-    /// Skia 离屏渲染上下文：持有一个 raster <see cref="SKSurface"/>，渲染在 manager 的离屏渲染通道线程上顺序执行，
-    /// 每次渲染通过 <c>SKSurface.Snapshot()</c> 产出一张独立的 <see cref="SkiaImage"/>（所有权归调用方）。
+    /// Skia offscreen render context: holds one raster <see cref="SKSurface"/>; renders run sequentially on the manager's
+    /// offscreen render lane thread, and each render produces its own <see cref="SkiaImage"/> through <c>SKSurface.Snapshot()</c>
+    /// (owned by the caller).
     /// </summary>
     internal sealed class SkiaOffscreenRenderContext : IOffscreenRenderContext
     {
@@ -33,7 +34,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             var imageInfo = CreateImageInfo(options, colorSpace);
 
             surface = SKSurface.Create(imageInfo) ?? throw new InvalidOperationException(
-                $"无法创建离屏 Skia 表面(Width={options.Width}, Height={options.Height}, PixelFormat={options.PixelFormat}, AlphaType={options.AlphaType}, ColorSpace={options.ColorSpace})。");
+                $"Failed to create the offscreen Skia surface (Width={options.Width}, Height={options.Height}, PixelFormat={options.PixelFormat}, AlphaType={options.AlphaType}, ColorSpace={options.ColorSpace}).");
             replayContext = new SkiaOffscreenReplayContextAdapter(this);
         }
 
@@ -50,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             }
         }
 
-        /// <summary>当前表面的画布；仅在渲染通道线程上有效。</summary>
+        /// <summary>Canvas of the current surface; only valid on the render lane thread.</summary>
         internal SKCanvas SurfaceCanvas => surface.Canvas;
 
         /// <inheritdoc />
@@ -76,7 +77,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                     throw new ObjectDisposedException(nameof(drawCommandList));
 
                 if (!drawCommandList.TryBeginPresent())
-                    throw new InvalidOperationException("命令列表正在被其它渲染流程使用，或已进入释放流程。");
+                    throw new InvalidOperationException("The command list is being used by another render flow, or is already being released.");
 
                 pending++;
                 idle.Reset();
@@ -92,7 +93,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                     if (pending == 0)
                         idle.Set();
 
-                    // 与渲染完成路径保持同一顺序：先置 DisposeRequested，再由 EndPresent() 完成释放。
+                    // Keep the same order as the render completion path: set DisposeRequested first, then let EndPresent() do the release.
                     if (autoDispose)
                         drawCommandList.Dispose();
 
@@ -116,21 +117,21 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 disposed = true;
             }
 
-            // Skia 语义：已提交的渲染照常完成（不取消），因此这里等待本上下文的所有请求结算完毕。
+            // Skia semantics: already submitted renders still complete (they are not cancelled), so wait here for all requests of this context to settle.
             idle.Wait();
 
             surface.Dispose();
             colorSpace?.Dispose();
         }
 
-        /// <summary>请求结算记账；由渲染通道线程调用。</summary>
+        /// <summary>Request settlement bookkeeping; called by the render lane thread.</summary>
         internal void OnRequestFinished()
         {
             if (Interlocked.Decrement(ref pending) == 0)
                 idle.Set();
         }
 
-        /// <summary>在渲染通道线程上执行一次渲染。</summary>
+        /// <summary>Runs one render on the render lane thread.</summary>
         internal IImage RenderCore(DrawCommandList drawCommandList)
         {
             Options.EnsureViewportMatches(drawCommandList.FrameState);
@@ -145,7 +146,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             }
             finally
             {
-                // 兜底：无论绘制是否抛异常，都不把矩阵/clip 状态残留给下一次渲染。
+                // Safety net: whatever happens during drawing, never leave matrix/clip state behind for the next render.
                 canvas.RestoreToCount(saveCount);
             }
         }
@@ -158,7 +159,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 OffscreenColorSpace.SrgbLinear => SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Srgb),
                 OffscreenColorSpace.DisplayP3 => SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3),
                 OffscreenColorSpace.Null => null,
-                _ => throw new NotSupportedException($"Skia 后端不支持的离屏颜色空间: {colorSpace}。"),
+                _ => throw new NotSupportedException($"Unsupported offscreen color space for the Skia backend: {colorSpace}."),
             };
         }
 
@@ -174,15 +175,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
                 OffscreenPixelFormat.RgbaF32 => SKColorType.RgbaF32,
                 OffscreenPixelFormat.Gray8 => SKColorType.Gray8,
                 OffscreenPixelFormat.Alpha8 => SKColorType.Alpha8,
-                _ => throw new NotSupportedException($"Skia 后端不支持的离屏像素格式: {options.PixelFormat}。"),
+                _ => throw new NotSupportedException($"Unsupported offscreen pixel format for the Skia backend: {options.PixelFormat}."),
             };
 
             var alphaType = options.AlphaType switch
             {
                 OffscreenAlphaType.Premul => SKAlphaType.Premul,
                 OffscreenAlphaType.Opaque => SKAlphaType.Opaque,
-                OffscreenAlphaType.Unpremul => throw new NotSupportedException("Skia 离屏渲染不支持 Unpremul（该 alpha 类型仅用于输入图像，渲染无法输出）。"),
-                _ => throw new NotSupportedException($"Skia 后端不支持的离屏 alpha 类型: {options.AlphaType}。"),
+                OffscreenAlphaType.Unpremul => throw new NotSupportedException("Skia offscreen rendering does not support Unpremul (that alpha type is only for input images; rendering cannot output it)."),
+                _ => throw new NotSupportedException($"Unsupported offscreen alpha type for the Skia backend: {options.AlphaType}."),
             };
 
             return new SKImageInfo(options.Width, options.Height, colorType, alphaType, colorSpace);

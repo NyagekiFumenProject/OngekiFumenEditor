@@ -12,12 +12,12 @@ namespace OngekiFumenEditor.Kernel.Graphics
         TextureWrapMode TextureWrapS { get; set; }
 
         /// <summary>
-        /// 获取图像宽度（设备像素尺寸）。
+        /// Gets the image width in device pixels.
         /// </summary>
         int Width { get; }
 
         /// <summary>
-        /// 获取图像高度（设备像素尺寸）。
+        /// Gets the image height in device pixels.
         /// </summary>
         int Height { get; }
     }

@@ -332,10 +332,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             lock (offscreenGate)
             {
                 if (offscreenRenderQueue.IsTerminated)
-                    throw new ObjectDisposedException(nameof(DefaultOpenGLRenderManagerImpl), "离屏渲染队列已关闭。");
+                    throw new ObjectDisposedException(nameof(DefaultOpenGLRenderManagerImpl), "The offscreen render queue has been closed.");
 
                 if (activeRenderContexts.Count == 0)
-                    throw new InvalidOperationException("创建 OpenGL 离屏上下文要求至少存在一个已开始渲染（StartRendering）的 GL 控件。");
+                    throw new InvalidOperationException("Creating an OpenGL offscreen context requires at least one GL control that has started rendering (StartRendering).");
             }
 
             return new OpenGLOffscreenRenderContext(this, offscreenRenderQueue, options);
@@ -354,30 +354,30 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         /// <inheritdoc />
         public Task Term()
         {
-            // 同步完成：取消排队请求、（若有 current 上下文）执行延迟删除；绝不等待渲染 tick（退出路径上等 tick 会死锁）。
+            // Completes synchronously: cancels queued requests and (when a context is current) runs delayed deletions; never waits for a render tick (waiting for a tick on the shutdown path would deadlock).
             offscreenRenderQueue.Terminate();
-            Log.LogInfo("[离屏] OpenGL 离屏渲染队列已关闭。");
+            Log.LogInfo("[Offscreen] OpenGL offscreen render queue terminated.");
 
             return Task.CompletedTask;
         }
 
         /// <summary>
-        /// 在 GL 控件渲染回调（上下文 current）内排空离屏渲染队列。
-        /// 每个 tick 都必须调用，包括被 FPS 闸门丢弃的 tick。
+        /// Drains the offscreen render queue inside a GL control render callback (with the context current).
+        /// Must be called on every tick, including ticks dropped by the FPS gate.
         /// </summary>
         internal void PumpOffscreenRenders()
         {
             offscreenRenderQueue.Pump(this);
         }
 
-        /// <summary>登记一个待删除的 GL 纹理（延迟删除：下次 drain 或退出时执行）。</summary>
+        /// <summary>Registers a GL texture to delete (delayed deletion: performed on the next drain or on shutdown).</summary>
         internal void EnqueueTextureDeletion(int textureId)
         {
             if (textureId != 0)
                 offscreenRenderQueue.EnqueueDeletion(new OpenGLPendingDeletion(textureId, 0));
         }
 
-        /// <summary>登记一个待删除的 GL 帧缓冲。</summary>
+        /// <summary>Registers a GL framebuffer to delete.</summary>
         internal void EnqueueFramebufferDeletion(int framebufferId)
         {
             if (framebufferId != 0)
@@ -402,12 +402,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             if (noActiveContext)
             {
-                // 最后一个渲染中的 GL 控件停止后不再产生 tick，挂起中的排队请求必须以异常结束，避免永久等待。
-                offscreenRenderQueue.CancelQueued(null, new OperationCanceledException("没有处于渲染中的 GL 控件，排队中的离屏渲染请求被取消。"));
+                // Once the last rendering GL control stops, no more ticks are produced, so pending queued requests must end with an exception instead of waiting forever.
+                offscreenRenderQueue.CancelQueued(null, new OperationCanceledException("No GL control is rendering; queued offscreen render requests were cancelled."));
             }
         }
 
-        /// <summary>当前线程是否存在 current 的 GL 上下文（用于判断能否安全执行 GL 调用）。</summary>
+        /// <summary>Whether a GL context is current on this thread (used to tell whether GL calls can be made safely).</summary>
         internal static bool HasCurrentGlContext()
         {
             try

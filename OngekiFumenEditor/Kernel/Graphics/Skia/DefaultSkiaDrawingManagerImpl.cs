@@ -330,11 +330,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             lock (offscreenGate)
                 lane = offscreenLane;
 
-            // 同步等待：排队请求被取消、在途请求完成后才返回（不依赖任何消息泵）。
+            // Waits synchronously: queued requests are cancelled and in-flight requests finish before this returns (no message pump involved).
             lane?.Terminate();
 
             if (lane is not null)
-                Log.LogInfo("[离屏] Skia 离屏渲染通道已关闭。");
+                Log.LogInfo("[Offscreen] Skia offscreen render lane terminated.");
 
             return Task.CompletedTask;
         }
@@ -344,7 +344,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
             lock (offscreenGate)
             {
                 if (offscreenLane is { IsTerminated: true })
-                    throw new ObjectDisposedException(nameof(DefaultSkiaDrawingManagerImpl), "离屏渲染通道已关闭。");
+                    throw new ObjectDisposedException(nameof(DefaultSkiaDrawingManagerImpl), "The offscreen render lane has been closed.");
 
                 return offscreenLane ??= new SkiaOffscreenRenderLane("Skia-Offscreen");
             }

@@ -1,22 +1,22 @@
 namespace OngekiFumenEditor.Kernel.Graphics
 {
     /// <summary>
-    /// 离屏目标的颜色空间。
-    /// Skia 后端会真实生效；OpenGL 后端不做颜色管理（不启用 <c>GL_FRAMEBUFFER_SRGB</c>），该值仅记录在
-    /// <see cref="IOffscreenRenderContext.Options"/> 中，以保持与屏幕 GL 渲染一致的观感。
+    /// Color space of the offscreen target.
+    /// It takes effect on the Skia backend; the OpenGL backend does no color management (never enables <c>GL_FRAMEBUFFER_SRGB</c>),
+    /// where the value is only recorded in <see cref="IOffscreenRenderContext.Options"/> to keep the look consistent with on-screen GL rendering.
     /// </summary>
     public enum OffscreenColorSpace
     {
-        /// <summary>sRGB（默认值）。</summary>
+        /// <summary>sRGB (the default).</summary>
         Srgb,
 
-        /// <summary>线性 sRGB 传输函数。</summary>
+        /// <summary>Linear sRGB transfer function.</summary>
         SrgbLinear,
 
-        /// <summary>Display P3 色域。Skia 后端以 sRGB 传输函数 + Display P3 转换矩阵构造。</summary>
+        /// <summary>Display P3 gamut. The Skia backend builds it from the sRGB transfer function plus the Display P3 conversion matrix.</summary>
         DisplayP3,
 
-        /// <summary>无颜色空间信息（Skia：<c>null</c>）。</summary>
+        /// <summary>No color space information (Skia: <c>null</c>).</summary>
         Null,
     }
 }

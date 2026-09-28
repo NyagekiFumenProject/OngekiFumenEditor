@@ -6,9 +6,9 @@ using SkiaSharp;
 namespace OngekiFumenEditor.Kernel.Graphics.Skia
 {
     /// <summary>
-    /// 离屏渲染内部使用的 <see cref="ISkiaRenderContext"/> 适配器。
-    /// 只承担「给重放提供画布与监视器」这一件事，不参与控件绘制周期：
-    /// <see cref="OnRender"/> 永不触发，渲染循环相关成员不可用。
+    /// <see cref="ISkiaRenderContext"/> adapter used internally by offscreen rendering.
+    /// It does one thing only -- provide the canvas and performance monitor for replay -- and takes no part in the control
+    /// drawing cycle: <see cref="OnRender"/> never fires and render-loop members are unavailable.
     /// </summary>
     internal sealed class SkiaOffscreenReplayContextAdapter : ISkiaRenderContext
     {
@@ -42,19 +42,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         /// <inheritdoc />
         public void PostDrawCommandList(DrawCommandList drawCommandList, bool autoDispose = true)
         {
-            throw new NotSupportedException("离屏渲染上下文不接受延迟提交，请使用 IOffscreenRenderContext.RenderToImageAsync()。");
+            throw new NotSupportedException("The offscreen render context does not accept deferred submissions, use IOffscreenRenderContext.RenderToImageAsync() instead.");
         }
 
         /// <inheritdoc />
         public void StartRendering()
         {
-            throw new NotSupportedException("离屏渲染上下文没有渲染循环。");
+            throw new NotSupportedException("The offscreen render context has no render loop.");
         }
 
         /// <inheritdoc />
         public void StopRendering()
         {
-            throw new NotSupportedException("离屏渲染上下文没有渲染循环。");
+            throw new NotSupportedException("The offscreen render context has no render loop.");
         }
     }
 }

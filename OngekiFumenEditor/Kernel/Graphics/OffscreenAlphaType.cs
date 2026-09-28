@@ -1,19 +1,19 @@
 namespace OngekiFumenEditor.Kernel.Graphics
 {
     /// <summary>
-    /// 离屏目标的 alpha 类型。
-    /// Skia 后端：<see cref="Unpremul"/> 不支持（官方限定仅输入图像，渲染无法输出该类型），创建时抛 <see cref="System.NotSupportedException"/>。
-    /// OpenGL 后端：没有 alpha 类型概念，该值仅记录在 <see cref="IOffscreenRenderContext.Options"/> 中，不影响渲染。
+    /// Alpha type of the offscreen target.
+    /// Skia backend: <see cref="Unpremul"/> is not supported (upstream restricts it to input images; rendering cannot output it) and throws <see cref="System.NotSupportedException"/> at creation time.
+    /// OpenGL backend: there is no alpha type concept; the value is only recorded in <see cref="IOffscreenRenderContext.Options"/> and does not affect rendering.
     /// </summary>
     public enum OffscreenAlphaType
     {
-        /// <summary>颜色分量已预乘 alpha（渲染目标的自然格式，默认值）。</summary>
+        /// <summary>Color components are premultiplied by alpha (the natural format for a render target, the default).</summary>
         Premul,
 
-        /// <summary>颜色分量未预乘（Skia 不支持作为渲染输出）。</summary>
+        /// <summary>Color components are not premultiplied (Skia does not support it as render output).</summary>
         Unpremul,
 
-        /// <summary>所有像素不透明。</summary>
+        /// <summary>All pixels are opaque.</summary>
         Opaque,
     }
 }

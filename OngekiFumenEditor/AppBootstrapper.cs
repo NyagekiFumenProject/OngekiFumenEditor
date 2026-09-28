@@ -563,13 +563,14 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     protected override async void OnExit(object sender, EventArgs e)
     {
-        // 必须最先执行且同步完成：OnExit 中第一个 await 之后的代码在进程退出前不会被执行（实测），
-        // 因此渲染后端的后台资源（Skia 离屏渲染线程、GL 离屏队列/延迟删除）只能在这里收口。
+        // Must run first and finish synchronously: code after the first await in OnExit never runs before the process
+        // exits, so render backends close their background resources here (Skia lane, OpenGL queue and delayed deletions).
         foreach (var renderManagerImpl in IoC.GetAll<IRenderManagerImpl>())
         {
             try
             {
-                // 契约要求同步完成：这里不需要 await，签名返回 Task 只为将来可能需要异步的实现在调用点不变。
+                // Term() must complete synchronously, so there is nothing to await here; the Task return type just keeps
+                // the call site stable if an implementation ever needs to become asynchronous.
                 _ = renderManagerImpl.Term();
             }
             catch (Exception ex)

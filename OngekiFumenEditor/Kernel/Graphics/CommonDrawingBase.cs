@@ -104,7 +104,7 @@ namespace OngekiFumenEditor.Kernel.Graphics
             var p = GetOverrideProjectionMatrixOrDefault(ctx);
             var vp = v * p;
 
-            // 离屏渲染（ctx.FlipY）把 NDC y 取反：GL 纹理行序与 Bitmap/Skia 图像行序相反，需要在绘制侧补偿一次。
+            // Offscreen rendering (ctx.FlipY) negates NDC y: the GL texture row order is the opposite of the Bitmap/Skia image row order, so compensate once on the drawing side.
             if (ctx is { FlipY: true })
                 vp *= Matrix4x4.CreateScale(1, -1, 1);
 

@@ -43,8 +43,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         }
 
         /// <summary>
-        /// 重放一个命令列表。<paramref name="flipY"/> 为 true 时，绘制使用的视图投影矩阵会追加一次 Y 轴翻转：
-        /// 离屏渲染用它把「GL 纹理行序（t=0 在底部）」对齐到 Bitmap/Skia 图像行序，避免结果贴回时上下颠倒。
+        /// Replays one command list. When <paramref name="flipY"/> is true the view-projection matrix used for drawing gets an
+        /// extra Y-axis flip: offscreen rendering uses it to align the GL texture row order (t = 0 at the bottom) with the
+        /// Bitmap/Skia image row order, so that pasted-back results are not upside down.
         /// </summary>
         internal static void Present(DefaultOpenGLRenderManagerImpl manager, IRenderContext renderContext, DrawCommandList drawCommandList, bool flipY)
         {

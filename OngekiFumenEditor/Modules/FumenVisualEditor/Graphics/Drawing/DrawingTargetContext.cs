@@ -28,8 +28,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public float RenderScaleY { get; set; } = 1;
 
         /// <summary>
-        /// 为 true 时，<see cref="IDrawing.GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext)"/> 会在视图投影矩阵之后追加一次
-        /// Y 轴翻转（NDC y → -y）。离屏渲染用它把「GL 纹理行序（t=0 在底部）」对齐到 Bitmap/Skia 图像行序，避免结果贴回时上下颠倒。
+        /// When true, <see cref="IDrawing.GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext)"/> appends a single
+        /// Y-axis flip (NDC y → -y) after the view-projection matrix. Offscreen rendering uses it to align the GL texture
+        /// row order (t = 0 at the bottom) with the Bitmap/Skia image row order, so that pasted-back results are not upside down.
         /// </summary>
         public bool FlipY { get; set; }
     }

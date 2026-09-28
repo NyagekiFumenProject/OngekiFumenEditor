@@ -95,7 +95,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             }
             finally
             {
-                // 离屏队列必须在每个 tick 排空——包括被 FPS 闸门丢弃的 tick，否则离屏渲染会被限帧吞掉。
+                // The offscreen queue must be drained on every tick -- including ticks dropped by the FPS gate, otherwise offscreen rendering would be swallowed by frame limiting.
                 manager.PumpOffscreenRenders();
             }
         }
