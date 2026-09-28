@@ -279,6 +279,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         => OnEditorLoop(context, ts);
 
     Dictionary<int, DrawingTargetContext> drawingContexts = new();
+
+    /// <summary>
+    /// 本帧「所有组可见 TGrid 区间」的合并输入（帧首计算一次）。
+    /// <see cref="CheckRangeVisible(TGrid, TGrid)"/> 会被逐个可见子物体调用，
+    /// 不能每次都去遍历 drawingContexts 现算，故这里缓存一份。
+    /// </summary>
+    private readonly List<(TGrid minTGrid, TGrid maxTGrid)> mergedVisibleTGridRanges = new();
+
     private IRenderManagerImpl renderImpl;
 
     private void UpdateActualRenderInterval()
@@ -297,6 +305,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         hits.Clear();
 
         drawingContexts.Clear();
+        mergedVisibleTGridRanges.Clear();
         CurrentDrawingTargetContext = default;
 
         if (RenderContext is null || renderImpl is null)
@@ -406,7 +415,15 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         //Prepare objects we will draw them.
         //get&register all visible objects for every drawingContext(soflanGroup)
-        var allVisibleTGridRanges = drawingContexts.Values.SelectMany(x => x.VisibleTGridRanges).Merge();
+        //帧首算一次「所有组的可见区间」并缓存：它同时服务于下面的全局枚举，
+        //以及本帧随后被逐个可见子物体调用的 CheckRangeVisible()。
+        foreach (var ctx in drawingContexts.Values)
+        {
+            foreach (var range in ctx.VisibleTGridRanges)
+                mergedVisibleTGridRanges.Add(range);
+        }
+
+        var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
         using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges))
         {
             foreach (var displayable in visibleObjects)
@@ -658,11 +675,17 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return false;
     }
 
+    /// <summary>
+    /// [minTGrid, maxTGrid] 是否与任一 soflan 组的可见区间相交。
+    /// 语义上等价于「遍历所有组的全部可见区间」，因此直接扫描帧首预合并的
+    /// <see cref="mergedVisibleTGridRanges"/>，不必每次都去触碰 drawingContexts。
+    /// </summary>
     public bool CheckRangeVisible(TGrid minTGrid, TGrid maxTGrid)
     {
-        foreach (var ctx in drawingContexts.Values)
+        for (var i = 0; i < mergedVisibleTGridRanges.Count; i++)
         {
-            if (CheckRangeVisible(ctx, minTGrid, maxTGrid))
+            var visibleRange = mergedVisibleTGridRanges[i];
+            if (!(minTGrid > visibleRange.maxTGrid || maxTGrid < visibleRange.minTGrid))
                 return true;
         }
 
@@ -961,17 +984,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return false;
     }
 
+    /// <summary>
+    /// 保留原重载签名与「忽略 context、查任意组是否可见」的既有语义，
+    /// 但改为扫描帧首预合并的缓存，不再每次 SelectMany 摊平整个字典。
+    /// </summary>
     public bool CheckRangeVisible(DrawingTargetContext context, TGrid minTGrid, TGrid maxTGrid)
-    {
-        foreach (var visibleRange in drawingContexts.SelectMany(x => x.Value.VisibleTGridRanges))
-        {
-            var result = !(minTGrid > visibleRange.maxTGrid || maxTGrid < visibleRange.minTGrid);
-            if (result)
-                return true;
-        }
-
-        return false;
-    }
+        => CheckRangeVisible(minTGrid, maxTGrid);
 
     public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
     {
