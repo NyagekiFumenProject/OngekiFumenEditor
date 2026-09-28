@@ -2,8 +2,6 @@ name: Deploy Browser to GitHub and Cloudflare Pages
 
 on:
   push:
-    branches:
-      - avalonia
   workflow_dispatch:
 
 permissions:
