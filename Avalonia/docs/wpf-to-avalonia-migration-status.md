@@ -2,6 +2,7 @@
 
 - **检查日期**：2026-08-01
 - **文档更新日期**：2026-09-29（按当前代码复核并修正：工具链版本、音频状态、项目新建/打开/保存、测试项目、缺失模块与依赖风险；原始检查基线仍为 2026-08-01，历史批次记录保留在各节）
+- **同步基线**：见 [`../WPF-MIGRATION-SYNC.md`](../WPF-MIGRATION-SYNC.md) —— 「Avalonia 同步 WPF 到哪个 commit」的唯一权威记录（含待同步清单与复核命令）
 - **检查基线**：工作树未提交快照（分支 `avalonia`，含 XAML 清零批次①~⑦全部改动）
 - **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal`
 - **构建结果**：**成功**。全解决方案（核心 + Desktop + Browser）完整重建 **0 错误**、87 个警告
