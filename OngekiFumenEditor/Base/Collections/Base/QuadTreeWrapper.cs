@@ -51,18 +51,26 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         public void Add(TValue obj)
         {
-            tree = null;
-            registerObjects.Add(obj);
-            obj.PropertyChanged += OnItemPropChanged;
+            lock (locker)
+            {
+                if (!registerObjects.Add(obj))
+                    return;
+
+                obj.PropertyChanged += OnItemPropChanged;
+                tree = null;
+            }
         }
 
         public void Remove(TValue obj)
         {
-            if (!registerObjects.Remove(obj))
-                return;
+            lock (locker)
+            {
+                if (!registerObjects.Remove(obj))
+                    return;
 
-            tree = null;
-            obj.PropertyChanged -= OnItemPropChanged;
+                obj.PropertyChanged -= OnItemPropChanged;
+                tree = null;
+            }
         }
 
         public IEnumerable<TValue> Query(float x, float y)
@@ -71,7 +79,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
                 return Enumerable.Empty<TValue>();
 
             CheckAndBuild();
-            return tree.Query(x, y);
+            return tree?.Query(x, y) ?? Enumerable.Empty<TValue>();
         }
 
         public string DebugFindDataQueryPath(TValue data)
@@ -88,8 +96,14 @@ namespace OngekiFumenEditor.Base.Collections.Base
 
         private void OnItemPropChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (rebuildProperties.Contains(e.PropertyName))
-                tree = null;
+            if (e.PropertyName is not string propertyName || !rebuildProperties.Contains(propertyName))
+                return;
+
+            lock (locker)
+            {
+                if (sender is TValue value && registerObjects.Contains(value))
+                    tree = null;
+            }
         }
 
         private void CheckAndBuild()
