@@ -17,4 +17,4 @@
 
 ## 后续规划(当前暂不实现但要考虑)
 1. 新的渲染线程负责步骤1-6， IRenderContext.OnRender只需要拿到渲染好去更新画面即可
-2. 实现离屏渲染
+2. ~~实现离屏渲染~~（**已实现**：`IRenderManagerImpl.CreateOffscreenToImage` + `IOffscreenRenderContext`，设计与验证见 `docs/offscreen-render-context-design.md`）
