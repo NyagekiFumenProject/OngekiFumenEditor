@@ -6,7 +6,6 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
 {
-    [Serializable]
     public sealed class DefaultOpenGLTexture : IImage, IDisposable
     {
         private int? _id;
@@ -69,7 +68,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             }
         }
 
-        [NonSerialized]
         private readonly Action<int> releaseTexture;
 
         public DefaultOpenGLTexture(string name = "Texture")

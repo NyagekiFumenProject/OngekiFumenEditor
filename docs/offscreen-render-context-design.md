@@ -57,7 +57,7 @@
 
 ### 0.4 中等/低（实现时收口）
 
-1. `DefaultOpenGLTexture` 的 `TextureWrapS/T`、`ID` 等**直接调 GL**，必须在 current 上下文下使用；`[Serializable]` 与释放委托字段并存需注意（M8）。
+1. `DefaultOpenGLTexture` 的 `TextureWrapS/T`、`ID` 等**直接调 GL**，必须在 current 上下文下使用（`[Serializable]` 已在实现阶段确认为历史遗留并删除，见 §0.6）。
 2. `GLUtility.CheckError` 在 DEBUG 抛异常；**drain 必须是 try/catch 边界**，异常不得穿透 WPF 渲染循环；`TaskCompletionSource` 用 `RunContinuationsAsynchronously`（M6）。
 3. 单次 drain 应设**条数上限**，防止无界积压卡住 UI 帧（M4）。
 4. `OpenGLDrawCommandListReplay.Dispose()` 全仓**无调用者**，若 `Term()` 要收口资源需显式接线（L）。
@@ -529,7 +529,7 @@ GL 的「记录性参数」（`AlphaType`、`ColorSpace`）必须在 XML 注释�
 - manager 维护 `pendingTextureDeletes`：所有 GL 对象删除（图像 `Dispose`、FBO 释放、未交出纹理）只入队，
   下一次 drain 在 context current 下执行 `GL.DeleteTexture` + `OpenGLTextureBindingCache.InvalidateTexture`；
 - `Term()`/上下文销毁时清空队列（有上下文则执行，无则放弃并记日志）；
-- **线程约束**（M8）：交出后 `TextureWrapS/T`、`TextureMinFilter/MagFilter`、`ID` 需 current 上下文；`[Serializable]` 与委托字段并存的注意项记入实现注释。
+- **线程约束**（M8）：交出后 `TextureWrapS/T`、`TextureMinFilter/MagFilter`、`ID` 需 current 上下文。
 
 ### GL-5 参数映射与语义差异（P17 + 本轮修订）
 
@@ -687,7 +687,7 @@ GL 状态恢复的具体调用顺序、`DefaultOpenGLTexture` 新构造的参数
 | `Kernel/Graphics/Skia/Drawing/CommonSkiaDrawingBase.cs:23` | 强转改 `ISkiaRenderContext`；`OnBegin` 返回 `bool`（或等价标志）供子类提前 return |
 | `Kernel/Graphics/Skia/SkiaUtility.cs:9-13` | `CheckSkiaRenderContext` 放宽为 `ISkiaRenderContext` |
 | `Kernel/Graphics/Skia/Drawing/**`（9 个子类） | 强转改 `ISkiaRenderContext` + canvas 缺失提前 return：`BeamDrawing/DefaultSkiaBeamDrawing.cs:69`、`CircleDrawing/DefaultSkiaCircleDrawing.cs:24`、`LineDrawing/DefaultSkiaLineDrawing.cs:48`、`LineDrawing/NewSkiaLineDrawing.cs:113`、`PolygonDrawing/DefaultSkiaPolygonDrawing.cs:30`、`StringDrawing/DefaultSkiaStringDrawing.cs:87`、`TextureDrawing/DefaultSkiaBatchTextureDrawing.cs:29`、`TextureDrawing/DefaultSkiaHighlightBatchTextureDrawing.cs:30`、**`TextureDrawing/DefaultSkiaTextureDrawing.cs:32`（文件名已与类型对齐）** |
-| `Kernel/Graphics/OpenGL/Base/DefaultOpenGLTexture.cs` | 新增 internal 构造（外部纹理 + 尺寸 + 释放委托）；`Dispose` 走委托；`[Serializable]` 与委托字段的处理 |
+| `Kernel/Graphics/OpenGL/Base/DefaultOpenGLTexture.cs` | 新增 internal 构造（外部纹理 + 尺寸 + 释放委托）；`Dispose` 走委托；**删除历史遗留的 `[Serializable]`**（全仓唯一一处、从无序列化消费者，详见审计）；无委托时 `Dispose` 退回直接 `GL.DeleteTexture` |
 | `Kernel/Graphics/IImage.cs`（原 `ITexture.cs`） | `IImage` 增加 `Width` / `Height` |
 | `Kernel/Graphics/DrawCommands/DrawCommandList.cs`（可选，取决于 R11） | 若需精确区分 `TryBeginPresent` 失败原因：加 internal 只读查询；否则不改 |
 | `AppBootstrapper.cs:563-572` | `OnExit` **第一条语句**处调用当前 `IRenderManagerImpl.Term()`（必须早于任何 `await`；R6 + `exitpath` 实测） |
