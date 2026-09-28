@@ -12,8 +12,8 @@
 | --- | --- | --- |
 | `8276152f` | 核心命名不符/拼写 | `ITexture.cs→IImage.cs`；`DefaultTextureDrawing.cs→DefaultSkiaTextureDrawing.cs`；`ICacheSvgManager.cs→ICachedSvgRenderDataManager.cs`；`IToolboxGenerator.cs→ToolboxGenerator.cs`；`MapToViewAttubute.cs→MapToViewAttribute.cs`；`ICommandFormater.cs→ICommandFormatter.cs`（并同步设计文档引用） |
 | `ea56b1c0` | 复制粘贴遗留 | 4 模块 `IFumenMetaInfoBrowser.cs→IFumenXxx.cs`；7 模块 `ViewFumenMetaInfoBrowserCommand*.cs→ViewXxxCommand*.cs`；`OgkiFumenListBrowserViewModel.cs→FumenVisualEditorSettingsViewModel.cs` |
-| `3d265914` | 大小写/单复数/模块入口 | `AutoPlayFaderLane*→AutoplayFaderLane*`；`BatchModeCommandHandlers.cs→BatchModeSubmodeCommandHandler.cs`；`DamageCommandParsers.cs→BulletDamageCommandParser.cs`；`BeamStartOperationGenerator.cs→BeamOperationGenerator.cs`；`FumenConverter`/`OgkiFumenListBrowser` 的 `MenuDefinitions.cs→<模块>.cs` |
-| `158dc00a` | 模块入口（补） | `AudioAdjustWindow/MenuDefinitions.cs→AudioAdjustWindow.cs` |
+| `3d265914` | 大小写/单复数 | `AutoPlayFaderLane*→AutoplayFaderLane*`；`BatchModeCommandHandlers.cs→BatchModeSubmodeCommandHandler.cs`；`DamageCommandParsers.cs→BulletDamageCommandParser.cs`；`BeamStartOperationGenerator.cs→BeamOperationGenerator.cs`（其中 `MenuDefinitions.cs` 的两处**已在 §二 修正**） |
+| `158dc00a` | 模块入口（补，**已回退**） | `AudioAdjustWindow/MenuDefinitions.cs→AudioAdjustWindow.cs`（见 §二 修正） |
 | `44ae8e6b` | 类名拼写 | `OptionGeneratorTools` 的 `MenuDefintions→MenuDefinitions`（0 处引用） |
 
 保留（非错误）：`McpMenuCommandDefinitions/Handlers.cs`、`ScriptMenuCommandDefinitions/Handlers.cs`、`ObjectTypeFilter.cs` 等同族聚合文件。
@@ -22,7 +22,21 @@
 
 注意：`CoreLog`、`GLUtility.CheckError` 使用 `[CallerFilePath]`，改名会改变日志中的路径文本（无害）；Windows 大小写不敏感，纯大小写改名需两步 `git mv`。
 
-## 二、Avalonia 侧（待处理）
+## 二、勘误与规则修订（2026-09-28）
+
+**误判**：`AudioAdjustWindow`、`FumenConverter`、`OgkiFumenListBrowser` 三个模块的 `MenuDefinitions.cs` 里声明的类是以模块名命名的（或拼写为 `MenuDefintions`）。首次处理时按"文件名应跟随类名"把它们**改成了 `<模块>.cs`**（提交 `3d265914`、`158dc00a`）。
+
+**复核结论（方向反了）**：仓库里共有 **25 个 `MenuDefinitions.cs`**（`Kernel/**` 与 `Modules/**`），其中 **25/25 的类名都是 `public static class MenuDefinitions`**；不存在任何 `XxxMenuDefinitions.cs` 的命名先例。因此这三个文件**本来就符合约定**，应当改的是**类名**。
+
+**修正**：类名统一为 `MenuDefinitions`、文件名恢复为 `MenuDefinitions.cs`（提交 `refactor: name the module menu holders MenuDefinitions and restore their file names`）。三个类**代码引用数为 0**（此前统计的 30–35 次全是 `namespace ...Modules.<Xxx>` 限定），属于纯重命名；修正后全仓 `MenuDefinitions.cs` 一致性 = 25/25。
+
+**判定规则（更新，供 Avalonia 侧沿用）**：
+
+1. 若文件名符合**仓库既有约定**（如 `MenuDefinitions.cs`、`*.xaml.cs`、`*.Designer.cs`、partial 后缀）→ **改类型名，不要改文件名**；
+2. 只有当文件名是**无约定支撑的遗留/笔误**（如 `ITexture.cs` 里只有 `IImage`、`ICommandFormater.cs` 拼写错误）时，才改文件名；
+3. 改名前先量**真实引用数**：`grep -rnP "(?<![\w.])<Type>\." --include=*.cs` 并排除 `namespace`/`Modules.<Type>` 限定，避免把命名空间限定误当作类引用（本次误判的直接原因）。
+
+## 三、Avalonia 侧（待处理）
 
 共 **A 17 + B 6 + C 4** 处。A/B 建议按 WPF 相同规则改名（纯 `git mv`，零代码影响）；C 建议保留。
 

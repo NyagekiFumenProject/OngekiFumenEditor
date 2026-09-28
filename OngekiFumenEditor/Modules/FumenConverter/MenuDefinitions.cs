@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.FumenConverter
 {
-    public static class FumenConverter
+    public static class MenuDefinitions
     {
         [Export]
         public static MenuItemDefinition ViewFumenConverterMenuItem = new CommandMenuItemDefinition<ViewFumenConverterCommandDefinition>(

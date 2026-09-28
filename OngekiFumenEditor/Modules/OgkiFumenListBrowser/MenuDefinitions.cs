@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser
 {
-    public static class OgkiFumenListBrowser
+    public static class MenuDefinitions
     {
         [Export]
         public static MenuItemDefinition ViewOgkiFumenListBrowserMenuItem = new CommandMenuItemDefinition<ViewOgkiFumenListBrowserCommandDefinition>(

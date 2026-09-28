@@ -4,7 +4,7 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.AudioAdjustWindow
 {
-    public static class AudioAdjustWindow
+    public static class MenuDefinitions
     {
         [Export]
         public static MenuItemDefinition ViewAudioAdjustWindowMenuItem = new CommandMenuItemDefinition<ViewAudioAdjustWindowCommandDefinition>(
