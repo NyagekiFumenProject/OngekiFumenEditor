@@ -15,7 +15,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public bool IsEndObject => NextObject is null;
 
-        private float curvePrecision = 0.025f;
+        private float curvePrecision = Math.Max(0.01f, (float)Properties.EditorGlobalSetting.Default.DefaultCurvePrecision);
 
         [LocalizableObjectPropertyBrowserAlias("CurvePrecisionLabel")]
         public float CurvePrecision

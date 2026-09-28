@@ -270,6 +270,11 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         child2.NextObject?.NotifyRefreshPaths();
                     }
                     break;
+                case nameof(ConnectableChildObjectBase.CurvePrecision):
+                    //曲线精度变化只会影响该子物件自己生成的路径，重新生成即可。
+                    if (sender is ConnectableChildObjectBase curveChangedChild)
+                        curveChangedChild.NotifyRefreshPaths();
+                    break;
                 default:
                     break;
             }
