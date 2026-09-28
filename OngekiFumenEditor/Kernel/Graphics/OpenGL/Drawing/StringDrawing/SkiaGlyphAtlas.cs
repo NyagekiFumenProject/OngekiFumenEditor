@@ -31,28 +31,27 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
         internal readonly struct AtlasKey : IEquatable<AtlasKey>
         {
-            public readonly string FontFilePath;
+            /// <summary>字体 id（由 <see cref="GetFontId"/> 解析），热路径上只比较整数，不做字符串哈希。</summary>
+            public readonly int FontId;
             public readonly int Codepoint;
             public readonly int PixelSize;
             public readonly bool DisableAntialiasing;
 
-            public AtlasKey(string fontFilePath, int codepoint, int pixelSize, bool disableAntialiasing)
+            public AtlasKey(int fontId, int codepoint, int pixelSize, bool disableAntialiasing)
             {
-                FontFilePath = fontFilePath;
+                FontId = fontId;
                 Codepoint = codepoint;
                 PixelSize = pixelSize;
                 DisableAntialiasing = disableAntialiasing;
             }
 
             public bool Equals(AtlasKey other) =>
-                Codepoint == other.Codepoint && PixelSize == other.PixelSize &&
-                DisableAntialiasing == other.DisableAntialiasing &&
-                string.Equals(FontFilePath, other.FontFilePath, StringComparison.OrdinalIgnoreCase);
+                FontId == other.FontId && Codepoint == other.Codepoint && PixelSize == other.PixelSize &&
+                DisableAntialiasing == other.DisableAntialiasing;
 
             public override bool Equals(object obj) => obj is AtlasKey other && Equals(other);
 
-            public override int GetHashCode() => HashCode.Combine(
-                FontFilePath?.ToLowerInvariant(), Codepoint, PixelSize, DisableAntialiasing);
+            public override int GetHashCode() => HashCode.Combine(FontId, Codepoint, PixelSize, DisableAntialiasing);
         }
 
         /// <summary>一个字形在图集中的位置与放置信息（像素单位）。</summary>
@@ -88,7 +87,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         }
 
         private readonly Dictionary<AtlasKey, AtlasEntry> entries = new();
-        private readonly Dictionary<string, SKTypeface> typefaces = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> fontIdMap = new(StringComparer.OrdinalIgnoreCase);
+        private readonly List<SKTypeface> typefaces = new();
         private readonly object syncRoot = new();
 
         private DefaultOpenGLTexture texture;
@@ -98,16 +98,42 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         public DefaultOpenGLTexture Texture => texture;
         public bool IsEmpty => texture == null;
 
-        /// <summary>取字形条目；不存在则光栅化并写进图集。必须在有 GL 上下文的线程上调用。</summary>
-        public AtlasEntry GetGlyph(string fontFilePath, int codepoint, int pixelSize, bool disableAntialiasing)
+        /// <summary>
+        /// 图集写满、即将整体重建（旧条目位图会被清掉）时回调。绘制方必须在这之前把「已收集但还没提交」的字形提交掉，
+        /// 否则那批顶点会采样到已经清空的位置。
+        /// </summary>
+        public Action BeforeReset { get; set; }
+
+        /// <summary>把字体文件路径解析成稳定 id；同 id 的图集条目在一次重建后才失效。</summary>
+        public int GetFontId(string fontFilePath)
         {
-            var key = new AtlasKey(fontFilePath, codepoint, pixelSize, disableAntialiasing);
+            lock (syncRoot)
+            {
+                if (fontIdMap.TryGetValue(fontFilePath, out var id))
+                    return id;
+
+                var typeface = SKTypeface.FromFile(fontFilePath)
+                    ?? throw new InvalidOperationException($"无法加载字体文件：{fontFilePath}");
+
+                id = typefaces.Count;
+                typefaces.Add(typeface);
+                fontIdMap[fontFilePath] = id;
+                return id;
+            }
+        }
+
+        internal SKTypeface GetTypeface(int fontId) => typefaces[fontId];
+
+        /// <summary>取字形条目；不存在则光栅化并写进图集。必须在有 GL 上下文的线程上调用。</summary>
+        public AtlasEntry GetGlyph(int fontId, int codepoint, int pixelSize, bool disableAntialiasing)
+        {
+            var key = new AtlasKey(fontId, codepoint, pixelSize, disableAntialiasing);
             if (entries.TryGetValue(key, out var cached))
                 return cached;
 
             EnsureAtlas();
 
-            var typeface = GetTypeface(fontFilePath);
+            var typeface = GetTypeface(fontId);
             var rendered = Rasterize(typeface, codepoint, pixelSize, disableAntialiasing);
 
             var allocated = Allocate(rendered.Width, rendered.Height);
@@ -130,22 +156,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         }
 
         /// <summary>1x1 白色实心条目（下划线/删除线用）。</summary>
-        public AtlasEntry GetSolid(string fontFilePath) => GetGlyph(fontFilePath, SolidCodepoint, 1, true);
+        public AtlasEntry GetSolid(int fontId) => GetGlyph(fontId, SolidCodepoint, 1, true);
 
-        internal SKTypeface GetTypeface(string fontFilePath)
-        {
-            lock (syncRoot)
-            {
-                if (typefaces.TryGetValue(fontFilePath, out var cached))
-                    return cached;
-
-                var typeface = SKTypeface.FromFile(fontFilePath)
-                    ?? throw new InvalidOperationException($"无法加载字体文件：{fontFilePath}");
-
-                typefaces[fontFilePath] = typeface;
-                return typeface;
-            }
-        }
 
         private readonly struct Rendered
         {
@@ -226,6 +238,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
         private void ResetAtlas()
         {
+            // 交给绘制方先把已收集的字形提交掉：这批顶点采样的是重建前的图集内容。
+            BeforeReset?.Invoke();
+
             entries.Clear();
             shelfX = shelfY = shelfHeight = 0;
             Array.Clear(pixelBuffer, 0, pixelBuffer.Length);
@@ -284,9 +299,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             texture = null;
             pixelBuffer = null;
 
-            foreach (var typeface in typefaces.Values)
+            foreach (var typeface in typefaces)
                 typeface.Dispose();
             typefaces.Clear();
+            fontIdMap.Clear();
             entries.Clear();
         }
     }

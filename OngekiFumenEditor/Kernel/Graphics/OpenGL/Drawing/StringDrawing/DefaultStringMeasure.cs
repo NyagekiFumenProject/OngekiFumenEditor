@@ -22,9 +22,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
     {
         private const int MaxMeasureTextCacheCount = 4096;
 
+        /// <summary>字体实例缓存上限。缩放连续变化会产生大量像素尺寸，超过上限整体丢弃重建。</summary>
+        private const int MaxCachedFontCount = 256;
+
         private readonly Dictionary<(IFontHandle handle, FontStyle style), ResolvedTextStyle> cacheResolvedTextStyles = new();
         private readonly Dictionary<MeasureTextCacheKey, Vector2> cacheMeasureTextSizes = new();
         private readonly Queue<MeasureTextCacheKey> cacheMeasureTextSizeOrder = new();
+        private readonly Dictionary<FontCacheKey, SKFont> cacheFonts = new();
+        private readonly Dictionary<TextSizeCacheKey, Vector2> cacheTextSizes = new();
+        private readonly Queue<TextSizeCacheKey> cacheTextSizeOrder = new();
+
+        /// <summary>测量用画笔（沿用旧行为：只带抗锯齿开关，与字形设置一致）。</summary>
+        private readonly SKPaint measurePaint = new() { IsAntialias = true };
+        private readonly SKPaint measurePaintAliased = new() { IsAntialias = false };
 
         private readonly SkiaGlyphAtlas glyphAtlas = new();
 
@@ -47,7 +57,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 return size;
 
             var filePath = GetFontFilePath(resolvedStyle.FontHandle);
-            using var font = CreateFont(filePath, Math.Max(1, fontSize));
+            var font = GetFont(glyphAtlas.GetFontId(filePath), Math.Max(1, fontSize),
+                ProgramSetting.Default.DisableStringRendererAntialiasing);
             font.MeasureText(text, out var bounds);
 
             size = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
@@ -60,15 +71,61 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             return size;
         }
 
-        /// <summary>按指定像素尺寸创建用于光栅化/度量的 Skia 字体。</summary>
-        internal SKFont CreateFont(string filePath, int pixelSize)
+        /// <summary>
+        /// 取「按最终像素尺寸创建、带 hinting」的字体实例。每次绘制都新建原生 <see cref="SKFont"/>（并随即 Dispose）
+        /// 是文字热路径上最大的一块固定开销，因此按 (字体, 像素尺寸, 抗锯齿) 复用。
+        /// </summary>
+        internal SKFont GetFont(int fontId, int pixelSize, bool disableAntialiasing)
         {
-            return new SKFont(glyphAtlas.GetTypeface(filePath), pixelSize)
+            var key = new FontCacheKey(fontId, pixelSize, disableAntialiasing);
+            if (cacheFonts.TryGetValue(key, out var cached))
+                return cached;
+
+            if (cacheFonts.Count >= MaxCachedFontCount)
+                ClearFontCache();
+
+            var font = new SKFont(glyphAtlas.GetTypeface(fontId), pixelSize)
             {
                 Hinting = SKFontHinting.Full,
-                Edging = ProgramSetting.Default.DisableStringRendererAntialiasing ? SKFontEdging.Alias : SKFontEdging.Antialias,
+                Edging = disableAntialiasing ? SKFontEdging.Alias : SKFontEdging.Antialias,
                 Subpixel = false,
             };
+            cacheFonts[key] = font;
+            return font;
+        }
+
+        /// <summary>测量用画笔；返回的实例只读，调用方不得修改。</summary>
+        internal SKPaint GetMeasurePaint(bool disableAntialiasing) => disableAntialiasing ? measurePaintAliased : measurePaint;
+
+        /// <summary>
+        /// 文本盒尺寸（像素）。绘制路径每帧都会对同一串文字重新求布，而结果只与 (文字, 字体, 像素尺寸, 抗锯齿) 有关。
+        /// </summary>
+        internal Vector2 GetTextBounds(string text, int fontId, int pixelSize, bool disableAntialiasing)
+        {
+            text ??= string.Empty;
+
+            var key = new TextSizeCacheKey(text, fontId, pixelSize, disableAntialiasing);
+            if (cacheTextSizes.TryGetValue(key, out var cached))
+                return cached;
+
+            var font = GetFont(fontId, pixelSize, disableAntialiasing);
+            font.MeasureText(text, out var bounds, GetMeasurePaint(disableAntialiasing));
+            var size = new Vector2(bounds.Width, bounds.Height);
+
+            cacheTextSizes[key] = size;
+            cacheTextSizeOrder.Enqueue(key);
+
+            while (cacheTextSizes.Count > MaxMeasureTextCacheCount && cacheTextSizeOrder.TryDequeue(out var oldKey))
+                cacheTextSizes.Remove(oldKey);
+
+            return size;
+        }
+
+        private void ClearFontCache()
+        {
+            foreach (var font in cacheFonts.Values)
+                font.Dispose();
+            cacheFonts.Clear();
         }
 
         internal static string GetFontFilePath(IFontHandle handle)
@@ -82,6 +139,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             cacheResolvedTextStyles.Clear();
             cacheMeasureTextSizes.Clear();
             cacheMeasureTextSizeOrder.Clear();
+            cacheTextSizes.Clear();
+            cacheTextSizeOrder.Clear();
+            ClearFontCache();
             glyphAtlas.Dispose();
         }
 
@@ -178,12 +238,62 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             public override int GetHashCode() => HashCode.Combine(text, handle, fontSize, scale, style);
         }
 
+        private readonly struct FontCacheKey : IEquatable<FontCacheKey>
+        {
+            private readonly int fontId;
+            private readonly int pixelSize;
+            private readonly bool disableAntialiasing;
+
+            public FontCacheKey(int fontId, int pixelSize, bool disableAntialiasing)
+            {
+                this.fontId = fontId;
+                this.pixelSize = pixelSize;
+                this.disableAntialiasing = disableAntialiasing;
+            }
+
+            public bool Equals(FontCacheKey other) =>
+                fontId == other.fontId && pixelSize == other.pixelSize && disableAntialiasing == other.disableAntialiasing;
+
+            public override bool Equals(object obj) => obj is FontCacheKey other && Equals(other);
+
+            public override int GetHashCode() => HashCode.Combine(fontId, pixelSize, disableAntialiasing);
+        }
+
+        private readonly struct TextSizeCacheKey : IEquatable<TextSizeCacheKey>
+        {
+            private readonly string text;
+            private readonly int fontId;
+            private readonly int pixelSize;
+            private readonly bool disableAntialiasing;
+
+            public TextSizeCacheKey(string text, int fontId, int pixelSize, bool disableAntialiasing)
+            {
+                this.text = text;
+                this.fontId = fontId;
+                this.pixelSize = pixelSize;
+                this.disableAntialiasing = disableAntialiasing;
+            }
+
+            public bool Equals(TextSizeCacheKey other) =>
+                text == other.text && fontId == other.fontId && pixelSize == other.pixelSize &&
+                disableAntialiasing == other.disableAntialiasing;
+
+            public override bool Equals(object obj) => obj is TextSizeCacheKey other && Equals(other);
+
+            public override int GetHashCode() => HashCode.Combine(text, fontId, pixelSize, disableAntialiasing);
+        }
+
         public void Dispose()
         {
             glyphAtlas.Dispose();
             cacheResolvedTextStyles.Clear();
             cacheMeasureTextSizes.Clear();
             cacheMeasureTextSizeOrder.Clear();
+            cacheTextSizes.Clear();
+            cacheTextSizeOrder.Clear();
+            ClearFontCache();
+            measurePaint.Dispose();
+            measurePaintAliased.Dispose();
         }
     }
 }

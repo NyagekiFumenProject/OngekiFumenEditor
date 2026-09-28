@@ -18,6 +18,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         private const int FloatsPerVertex = 2 + 2 + 4;   // pos.xy + uv + color.rgba
         private const int FloatsPerQuad = FloatsPerVertex * 6;   // 两个三角形，不做索引
 
+        /// <summary>单批次顶点上限（约 2MB）：极端帧不至于把动态缓冲撑成超大数组，超出就由调用方先落盘。</summary>
+        private const int MaxBatchFloats = 1 << 19;
+
         private readonly int vao;
         private readonly int vbo;
         private readonly int mvpLocation;
@@ -77,6 +80,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
 
+        /// <summary>本批已收集的顶点是否达到上限，调用方据此先落盘再继续压入。</summary>
+        public bool IsFull => vertexFloatCount >= MaxBatchFloats;
+
+        /// <summary>丢弃已收集但未提交的顶点（不产生 GL 调用）；重放之间用它保证批次不跨帧残留。</summary>
+        public void Discard() => vertexFloatCount = 0;
+
         /// <summary>开始收集顶点；<paramref name="mvp"/> 由调用方按「覆盖模型矩阵 × 视图投影」算好。</summary>
         public void Begin(Matrix4x4 mvp)
         {
@@ -121,7 +130,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             Array.Resize(ref vertices, Math.Max(vertices.Length * 2, vertexFloatCount + extraFloats));
         }
 
-        /// <summary>上传并绘制本批字形；之后着色器解绑。</summary>
+        /// <summary>上传并绘制本批字形；之后着色器解绑，顶点收集重新开始。</summary>
         public void End(DefaultOpenGLTexture texture, IDrawingContext target)
         {
             try
@@ -143,6 +152,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             }
             finally
             {
+                vertexFloatCount = 0;
                 shader.End();
             }
         }
