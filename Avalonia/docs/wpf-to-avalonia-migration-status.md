@@ -67,7 +67,7 @@
 | 谱面渲染 | **已接入、已冒烟** | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译；桌面与浏览器渲染冒烟通过（见 2026-09-19/09-21 记录） |
 | 音频 | **已迁移** | `NAudioManager` 以 `[RegisterSingleton<IAudioManager>]` 注册（csproj 已无 `Kernel\Audio` 排除）；桌面提供 WASAPI(AOT)/ASIO(JIT) 发布配置，Browser 走 AudioWorklet 伴随包；NAudio 3 的 MP3 解码等事项待单独验证 |
 | 功能模块 | 部分完成 | `OgkiFumenListBrowser` 已迁移（14 个文件）；`OptionGeneratorTools`、`EditorScriptExecutor` 两个完整模块尚未迁移 |
-| 自动化验证 | 部分完成 | 两个测试项目（`OngekiFumenEditor.Avalonia.Tests`、`OngekiFumenEditor.Avalonia.Desktop.Tests`，另有 `UpdaterStub`）；最新读数主测试 806/806、Desktop 148/148（2026-09-19），CI 每次推送运行 |
+| 自动化验证 | 部分完成 | 两个测试项目（`OngekiFumenEditor.Avalonia.Tests`、`OngekiFumenEditor.Avalonia.Desktop.Tests`，另有 `UpdaterStub`）；最新读数主测试 806/806、Desktop 148/148（2026-09-19）；`BuildProgram.yml` 暂不运行 Avalonia 步骤（子模块 `AcbGeneratorFuck` 需独立访问），验证暂改本地执行 |
 | 仓库可复现性 | **正常** | XAML 清零批次及后续改动均已提交；仓库根 `global.json` 固定 SDK `11.0.100-preview.7.26381.103` |
 
 ## 检查基准
@@ -238,7 +238,7 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 当前 Avalonia 测试资产：
 
 - 测试项目：`OngekiFumenEditor.Avalonia.Tests`、`OngekiFumenEditor.Avalonia.Desktop.Tests`（另有 `UpdaterStub` 辅助工程）；
-- 最新读数（2026-09-19）：主测试 806/806、Desktop 148/148；CI（`.github/workflows/BuildProgram.yml`）在每次推送时运行两个测试项目；
+- 最新读数（2026-09-19）：主测试 806/806、Desktop 148/148；注：`BuildProgram.yml` 已暂时移除 Avalonia 测试与发布步骤（其 checkout 无法克隆私有子模块 `AcbGeneratorFuck`），Avalonia 验证暂改本地执行；
 - headless UI/像素用例（`SkiaRenderSmokeTests`、`EditorUiRegressionTests` 等）已覆盖启动、渲染与部分编辑闭环；音频与完整编辑闭环仍需补足自动化覆盖。
 
 依赖仓库中的测试不能替代本应用的迁移测试。至少需要覆盖：

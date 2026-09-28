@@ -259,6 +259,8 @@ JIT EXE 因 ReadyToRun + 自包含约 400 MB，如需缩减可评估 `EnableComp
 
 ## 8. CI 验证
 
+> **2026-09-29 状态**：`BuildProgram.yml` 已暂时移除 Avalonia 测试与 CommandLine JIT/AOT 发布、包验证步骤（其 checkout 因私有子模块 `AcbGeneratorFuck` 无法克隆而失败，恢复取决于该仓库的 CI 访问）。下述 CI 验证在恢复前暂不运行，本地复现流程仍按本节执行。
+
 `../../.github/workflows/BuildProgram.yml` 已移除“没有可用命令”的旧占位契约，并增加以下验证：
 
 - 运行 `OngekiFumenEditor.Avalonia.sln` 全量测试。
