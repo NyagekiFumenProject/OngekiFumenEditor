@@ -17,6 +17,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IImage texture;
         private ICachedSvgRenderDataManager cachedSvgRenderDataManager;
         private Vector2 size;
+        private Vector2 sizeBase;
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { SvgStringPrefab.CommandName, SvgImageFilePrefab.CommandName };
         public override DrawingVisible DefaultVisible => DrawingVisible.Design;
@@ -26,10 +27,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void Initialize(IRenderManagerImpl impl)
         {
             texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\commonCircle.png");
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
-                size = new Vector2(16, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out sizeBase, out _))
+                sizeBase = new Vector2(16, 16);
+            RebuildTextureSizes();
 
             cachedSvgRenderDataManager = IoC.Get<ICachedSvgRenderDataManager>();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            size = sizeBase * ResourceUtils.TextureSizeScale;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
         }
 
         public override void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, SvgPrefabBase obj)
@@ -60,6 +76,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public void Dispose()
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
         }
     }
 }

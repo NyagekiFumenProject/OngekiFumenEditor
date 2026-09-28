@@ -18,6 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         private IImage texture;
         private Vector2 size;
+        private Vector2 sizeBase;
         private static readonly Vector4 Transparent = new Vector4(0, 0, 0, 0);
         private static readonly VertexDash LineDash = new(6, 3);
 
@@ -41,12 +42,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override void Initialize(IRenderManagerImpl impl)
         {
             texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\commonCircle.png");
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out size, out _))
-                size = new Vector2(16, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("commonCircle", out sizeBase, out _))
+                sizeBase = new Vector2(16, 16);
+            RebuildTextureSizes();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            size = sizeBase * ResourceUtils.TextureSizeScale;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
         }
 
         public void Dispose()
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
             texture = null;
             texture.Dispose();
         }

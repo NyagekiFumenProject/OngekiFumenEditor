@@ -21,6 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IImage texture;
         private Vector2 sizeNormal;
         private Vector2 sizeLarge;
+        private Vector2 sizeNormalBase;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
@@ -28,13 +29,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\bell.png");
 
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("bell", out var size, out _))
-                size = new Vector2(40, 40);
-            sizeNormal = size;
-            sizeLarge = sizeNormal * 1.4f;
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("bell", out sizeNormalBase, out _))
+                sizeNormalBase = new Vector2(40, 40);
+            RebuildTextureSizes();
 
             normalDrawList[texture] = new List<(Vector2, Vector2, float, Vector4)>();
             selectedDrawList[texture] = new List<(Vector2, Vector2, float, Vector4)>();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            sizeNormal = sizeNormalBase * ResourceUtils.TextureSizeScale;
+            sizeLarge = sizeNormal * 1.4f;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
+        }
+
+        public override void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            base.Dispose();
         }
 
         public override IEnumerable<string> DrawTargetID { get; } = ["BEL"];

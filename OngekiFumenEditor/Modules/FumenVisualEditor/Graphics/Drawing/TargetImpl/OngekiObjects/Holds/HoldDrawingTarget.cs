@@ -28,9 +28,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector4 colorHoldWallLeft;
         private Vector4 colorHoldWallRight;
         private int holdBodyWidth;
+        private float holdBodyOpacity;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
             Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
             RebuildColors();
             RebuildHoldBodyWidth();
@@ -44,6 +46,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 return;
             }
 
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.HoldBodyOpacity))
+            {
+                RebuildColors();
+                return;
+            }
+
             if (!e.PropertyName.StartsWith("ColorHold"))
                 return;
 
@@ -52,18 +60,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void RebuildColors()
         {
-            static void build(ref Vector4 v, System.Drawing.Color c)
+            var opacity = Properties.EditorGlobalSetting.Default.HoldBodyOpacity;
+            holdBodyOpacity = double.IsNaN(opacity)
+                ? 0.75f
+                : (float)Math.Clamp(opacity, 0, 1);
+
+            static void build(ref Vector4 v, System.Drawing.Color c, float opacity)
             {
                 v = c.ToVector4();
-                v.W = 0.75f;
+                v.W = opacity;
             }
 
-            build(ref colorHoldLeft, Properties.EditorGlobalSetting.Default.ColorHoldLeft);
-            build(ref colorHoldCenter, Properties.EditorGlobalSetting.Default.ColorHoldCenter);
-            build(ref colorHoldRight, Properties.EditorGlobalSetting.Default.ColorHoldRight);
+            build(ref colorHoldLeft, Properties.EditorGlobalSetting.Default.ColorHoldLeft, holdBodyOpacity);
+            build(ref colorHoldCenter, Properties.EditorGlobalSetting.Default.ColorHoldCenter, holdBodyOpacity);
+            build(ref colorHoldRight, Properties.EditorGlobalSetting.Default.ColorHoldRight, holdBodyOpacity);
 
-            build(ref colorHoldWallLeft, Properties.EditorGlobalSetting.Default.ColorHoldWallLeft);
-            build(ref colorHoldWallRight, Properties.EditorGlobalSetting.Default.ColorHoldWallRight);
+            build(ref colorHoldWallLeft, Properties.EditorGlobalSetting.Default.ColorHoldWallLeft, holdBodyOpacity);
+            build(ref colorHoldWallRight, Properties.EditorGlobalSetting.Default.ColorHoldWallRight, holdBodyOpacity);
 
             //Log.LogInfo($"hold color has been rebuild.");
         }
@@ -90,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 LaneType.Right => colorHoldRight,
                 LaneType.WallLeft => colorHoldWallLeft,
                 LaneType.WallRight => colorHoldWallRight,
-                _ => new Vector4(1, 1, 1, 0.75f),
+                _ => new Vector4(1, 1, 1, holdBodyOpacity),
             };
 
             if (holdEnd != null)

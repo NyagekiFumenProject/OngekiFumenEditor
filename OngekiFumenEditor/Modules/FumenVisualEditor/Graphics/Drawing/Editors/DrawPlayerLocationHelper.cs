@@ -17,6 +17,7 @@ public class DrawPlayerLocationHelper : IDisposable
     private IImage texture;
     private bool enableShowPlayerLocation;
     private Vector2 size;
+    private Vector2 sizeBase;
 
     public void Initalize(IRenderManagerImpl impl)
     {
@@ -24,11 +25,17 @@ public class DrawPlayerLocationHelper : IDisposable
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\playerLoc.png");
-        if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("playerLoc", out size, out _))
-            size = new Vector2(48, 48);
+        if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("playerLoc", out sizeBase, out _))
+            sizeBase = new Vector2(48, 48);
+        RebuildTextureSize();
 
         UpdateProps();
         Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+    }
+
+    private void RebuildTextureSize()
+    {
+        size = sizeBase * ResourceUtils.TextureSizeScale;
     }
 
     private void UpdateProps()
@@ -42,6 +49,9 @@ public class DrawPlayerLocationHelper : IDisposable
         {
             case nameof(Properties.EditorGlobalSetting.EnableShowPlayerLocation):
                 UpdateProps();
+                break;
+            case nameof(Properties.EditorGlobalSetting.TextureSizeScale):
+                RebuildTextureSize();
                 break;
             default:
                 break;

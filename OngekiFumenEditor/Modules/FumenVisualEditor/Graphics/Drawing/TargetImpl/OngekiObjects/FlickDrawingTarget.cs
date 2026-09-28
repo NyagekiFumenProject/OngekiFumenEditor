@@ -24,6 +24,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector2 exTapEffSize;
         private Vector2 selectedEffSize;
 
+        //贴图基础尺寸(来自配置/默认值)，实际尺寸 = 基础尺寸 * 用户设置的贴图缩放系数。
+        private Vector2 flickSizeBase;
+        private Vector2 exFlickEffSizeBase;
+
         private List<(Vector2, Vector2, float, Vector4)> exFlickList = new();
         private List<(Vector2, Vector2, float, Vector4)> selectedFlickList = new();
         private List<(Vector2, Vector2, float, Vector4)> normalFlichList = new();
@@ -37,13 +41,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("flick", out var size, out _))
                 size = new Vector2(104, 69.333f);
-            leftSize = size;
-            rightSize = size * new Vector2(-1, 1);
+            flickSizeBase = size;
 
             if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exflickEffect", out size, out _))
                 size = new Vector2(106, 67f);
-            exTapEffSize = size;
-            selectedEffSize = size * 1.05f;
+            exFlickEffSizeBase = size;
+
+            RebuildTextureSizes();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            var scale = ResourceUtils.TextureSizeScale;
+            leftSize = flickSizeBase * scale;
+            rightSize = leftSize * new Vector2(-1, 1);
+            exTapEffSize = exFlickEffSizeBase * scale;
+            selectedEffSize = exTapEffSize * 1.05f;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Flick> objs)
@@ -90,6 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public void Dispose()
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
             texture?.Dispose();
             texture = null;
         }

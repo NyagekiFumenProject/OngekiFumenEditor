@@ -1,6 +1,7 @@
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
@@ -13,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public static Vector4 RightWallColor { get; } = new(231 / 255.0f, 149 / 255.0f, 178 / 255.0f, 255 / 255.0f);
 
         public abstract Vector4 WallLaneColor { get; }
-        public override int LineWidth => 6;
+        public override int LineWidth => Math.Clamp(Properties.EditorGlobalSetting.Default.WallLaneLineWidth, 1, 24);
         public override Vector4 GetLanePointColor(ConnectableObjectBase obj) => WallLaneColor;
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<LaneStartBase> starts)

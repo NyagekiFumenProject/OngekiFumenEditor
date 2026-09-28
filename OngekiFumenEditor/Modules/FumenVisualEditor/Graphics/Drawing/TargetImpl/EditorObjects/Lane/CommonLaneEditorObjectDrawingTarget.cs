@@ -21,17 +21,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private Vector2 startSize = new(16, 16);
         private Vector2 nextSize = new(16, 16);
         private Vector2 endSize = new(16, 16);
+
+        //贴图基础尺寸(来自配置/默认值)，实际尺寸 = 基础尺寸 * 用户设置的贴图缩放系数。
+        private Vector2 startSizeBase = new(16, 16);
+        private Vector2 nextSizeBase = new(16, 16);
+        private Vector2 endSizeBase = new(16, 16);
         private List<(Vector2, Vector2, float, Vector4)> selectList = new();
         private List<(Vector2, Vector2, float, Vector4)> drawList = new();
 
         public override void Initialize(IRenderManagerImpl impl)
         {
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSize, out _))
-                startSize = new Vector2(16, 16);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneNext", out nextSize, out _))
-                nextSize = new Vector2(16, 16);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneEnd", out endSize, out _))
-                endSize = new Vector2(16, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneStart", out startSizeBase, out _))
+                startSizeBase = new Vector2(16, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneNext", out nextSizeBase, out _))
+                nextSizeBase = new Vector2(16, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("laneEnd", out endSizeBase, out _))
+                endSizeBase = new Vector2(16, 16);
+
+            RebuildTextureSizes();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            var scale = ResourceUtils.TextureSizeScale;
+            startSize = startSizeBase * scale;
+            nextSize = nextSizeBase * scale;
+            endSize = endSizeBase * scale;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<ConnectableStartObject> objs)

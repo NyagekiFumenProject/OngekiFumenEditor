@@ -28,12 +28,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         private IImage wallExTexture;
         private IImage untagExTexture;
 
-        private Vector2 tapSize = new Vector2(40, 16);
-        private Vector2 exTapEffSize = new Vector2(40, 16);
-        private Vector2 leftWallSize = new Vector2(40, 40);
-        private Vector2 selectWallTapEffSize = new Vector2(39, 39);
-        private Vector2 selectTapEffSize = new Vector2(39, 39);
-        private Vector2 exWallTapEffSize = new Vector2(42, 42);
+        private Vector2 tapSize;
+        private Vector2 exTapEffSize;
+        private Vector2 leftWallSize;
+        private Vector2 selectWallTapEffSize;
+        private Vector2 selectTapEffSize;
+        private Vector2 exWallTapEffSize;
+
+        //贴图基础尺寸(来自配置/默认值)，实际尺寸 = 基础尺寸 * 用户设置的贴图缩放系数。
+        private Vector2 tapSizeBase = new Vector2(40, 16);
+        private Vector2 exTapEffSizeBase = new Vector2(70, 30);
+        private Vector2 leftWallSizeBase = new Vector2(40, 40);
+        private Vector2 selectWallTapEffSizeBase = new Vector2(50, 50);
+        private Vector2 selectTapEffSizeBase = new Vector2(39, 39);
+        private Vector2 exWallTapEffSizeBase = new Vector2(43, 43);
 
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> normalList = new();
         private Dictionary<IImage, List<(Vector2 size, Vector2 pos, float rotate, Vector4 color)>> exList = new();
@@ -49,18 +57,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 selectTapList[texture] = new();
             }
 
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("tap", out tapSize, out _))
-                tapSize = new Vector2(40, 16);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exTapEffect", out exTapEffSize, out _))
-                exTapEffSize = new Vector2(70, 30);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("wall", out leftWallSize, out _))
-                leftWallSize = new Vector2(40, 40);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectWallTapEffect", out selectWallTapEffSize, out _))
-                selectWallTapEffSize = new Vector2(50, 50);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectTapEffect", out selectTapEffSize, out _))
-                selectTapEffSize = tapSize * new Vector2(1.5f, 1.5f);
-            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exWallTapEffect", out exWallTapEffSize, out _))
-                exWallTapEffSize = new Vector2(43, 43);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("tap", out tapSizeBase, out _))
+                tapSizeBase = new Vector2(40, 16);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exTapEffect", out exTapEffSizeBase, out _))
+                exTapEffSizeBase = new Vector2(70, 30);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("wall", out leftWallSizeBase, out _))
+                leftWallSizeBase = new Vector2(40, 40);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectWallTapEffect", out selectWallTapEffSizeBase, out _))
+                selectWallTapEffSizeBase = new Vector2(50, 50);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("selectTapEffect", out selectTapEffSizeBase, out _))
+                selectTapEffSizeBase = tapSizeBase * new Vector2(1.5f, 1.5f);
+            if (!ResourceUtils.OpenReadTextureSizeAnchorByConfigFile("exWallTapEffect", out exWallTapEffSizeBase, out _))
+                exWallTapEffSizeBase = new Vector2(43, 43);
+
+            RebuildTextureSizes();
 
             init(ref redTexture, "redTap.png");
             init(ref greenTexture, "greenTap.png");
@@ -72,6 +82,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             exList[tapExTexture] = new();
             exList[wallExTexture] = new();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            var scale = ResourceUtils.TextureSizeScale;
+            tapSize = tapSizeBase * scale;
+            exTapEffSize = exTapEffSizeBase * scale;
+            leftWallSize = leftWallSizeBase * scale;
+            selectWallTapEffSize = selectWallTapEffSizeBase * scale;
+            selectTapEffSize = selectTapEffSizeBase * scale;
+            exWallTapEffSize = exWallTapEffSizeBase * scale;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
         }
 
         public void Draw(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, LaneType? laneType, OngekiMovableObjectBase tap, bool isCritical, SoflanList specifySoflanList = default)
@@ -152,6 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public void Dispose()
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
             redTexture?.Dispose();
             greenTexture?.Dispose();
             blueTexture?.Dispose();

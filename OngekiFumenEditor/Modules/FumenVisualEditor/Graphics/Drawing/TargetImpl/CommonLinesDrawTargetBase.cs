@@ -4,6 +4,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -13,7 +14,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public abstract class CommonLinesDrawTargetBase<T> : CommonBatchDrawTargetBase<T> where T : ConnectableStartObject
     {
-        public virtual int LineWidth { get; } = 2;
+        public virtual int LineWidth => Math.Clamp(Properties.EditorGlobalSetting.Default.LaneLineWidth, 1, 24);
         private static VertexDash invailedDash = new VertexDash(6, 3);
 
         public override void Initialize(IRenderManagerImpl impl)

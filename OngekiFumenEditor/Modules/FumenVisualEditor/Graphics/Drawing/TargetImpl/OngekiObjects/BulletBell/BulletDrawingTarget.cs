@@ -36,6 +36,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         // [BulletDamageType, BulletType, BulletSize]
         private SpriteInfo[,,] spriteInfoTable;
+        //贴图基础尺寸(来自配置/默认值)，实际 SpriteInfo = 基础尺寸 * 用户设置的贴图缩放系数。
+        private SpriteInfo[,,] spriteInfoTableBase;
 
         public override void Initialize(IRenderManagerImpl impl)
         {
@@ -91,7 +93,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             SetTexture(BulletDamageType.Hard, BulletType.Square, "bulletSquareHard.png", "bulletSquare", size, origOffset, sizeLarge, origOffsetLarge);
             SetTexture(BulletDamageType.Danger, BulletType.Square, "bulletSquareDanger.png", "bulletSquare", size, origOffset, sizeLarge, origOffsetLarge);
 
-            spriteInfoTable = table;
+            spriteInfoTableBase = table;
+            RebuildTextureSizes();
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            Properties.EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void RebuildTextureSizes()
+        {
+            var baseTable = spriteInfoTableBase;
+            if (baseTable is null)
+                return;
+
+            var scale = ResourceUtils.TextureSizeScale;
+            var rebuilt = new SpriteInfo[baseTable.GetLength(0), baseTable.GetLength(1), baseTable.GetLength(2)];
+            for (var i = 0; i < baseTable.GetLength(0); i++)
+                for (var j = 0; j < baseTable.GetLength(1); j++)
+                    for (var k = 0; k < baseTable.GetLength(2); k++)
+                    {
+                        var info = baseTable[i, j, k];
+                        rebuilt[i, j, k] = new SpriteInfo(info.Texture, info.Size * scale, info.OriginOffset * scale);
+                    }
+
+            spriteInfoTable = rebuilt;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Properties.EditorGlobalSetting.TextureSizeScale))
+                RebuildTextureSizes();
+        }
+
+        public override void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+            base.Dispose();
         }
 
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BLT" };

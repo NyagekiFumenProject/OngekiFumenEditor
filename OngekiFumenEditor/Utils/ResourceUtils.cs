@@ -36,6 +36,25 @@ namespace OngekiFumenEditor.Utils
             return impl.LoadImageFromStream(stream);
         }
 
+        private const double TextureSizeScaleMin = 0.25;
+        private const double TextureSizeScaleMax = 3;
+
+        /// <summary>
+        /// 用户设置的贴图尺寸缩放系数，已约束到 [0.25, 3]。绘制目标在 Initialize 时缓存基础尺寸，
+        /// 再乘以此系数得到实际尺寸，避免重复加载纹理。
+        /// </summary>
+        public static float TextureSizeScale
+        {
+            get
+            {
+                var scale = Properties.EditorGlobalSetting.Default.TextureSizeScale;
+                if (double.IsNaN(scale))
+                    return 1f;
+
+                return (float)Math.Clamp(scale, TextureSizeScaleMin, TextureSizeScaleMax);
+            }
+        }
+
         static ResourceUtils()
         {
             var iniFilePath = AppDirectoryHelper.Combine("Resources", "editor", "textureSizeAnchor.ini");
