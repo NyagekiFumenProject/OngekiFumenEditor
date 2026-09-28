@@ -323,6 +323,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                 case nameof(Properties.EditorGlobalSetting.LoopPlayTiming):
                     loopPlayTiming = Properties.EditorGlobalSetting.Default.LoopPlayTiming;
                     break;
+                //以下设置由各自的绘制/工具目标直接读取 EditorGlobalSetting.Default，本身不需要在 EditorSetting 上做包装，
+                //这里补空 case 只是让 default 分支的 LogWarn 不再被无关设置变更刷屏。
+                case nameof(Properties.EditorGlobalSetting.AutoSaveAllDirtyDocuments):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.TextureSizeScale):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.HoldBodyOpacity):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.LaneLineWidth):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.WallLaneLineWidth):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.AutoPlayFaderLineWidth):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.DefaultCurvePrecision):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.InjectDefaultClickSE):
+                    break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
                     break;

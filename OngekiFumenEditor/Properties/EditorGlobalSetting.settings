@@ -131,5 +131,29 @@
     <Setting Name="HoldBodyWidth" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">13</Value>
     </Setting>
+    <Setting Name="AutoSaveAllDirtyDocuments" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="TextureSizeScale" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="HoldBodyOpacity" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.75</Value>
+    </Setting>
+    <Setting Name="LaneLineWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2</Value>
+    </Setting>
+    <Setting Name="WallLaneLineWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">6</Value>
+    </Setting>
+    <Setting Name="AutoPlayFaderLineWidth" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">4</Value>
+    </Setting>
+    <Setting Name="DefaultCurvePrecision" Type="System.Double" Scope="User">
+      <Value Profile="(Default)">0.025</Value>
+    </Setting>
+    <Setting Name="InjectDefaultClickSE" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

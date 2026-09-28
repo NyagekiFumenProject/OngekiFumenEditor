@@ -538,5 +538,101 @@ namespace OngekiFumenEditor.Properties {
                 this["HoldBodyWidth"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoSaveAllDirtyDocuments {
+            get {
+                return ((bool)(this["AutoSaveAllDirtyDocuments"]));
+            }
+            set {
+                this["AutoSaveAllDirtyDocuments"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public double TextureSizeScale {
+            get {
+                return ((double)(this["TextureSizeScale"]));
+            }
+            set {
+                this["TextureSizeScale"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.75")]
+        public double HoldBodyOpacity {
+            get {
+                return ((double)(this["HoldBodyOpacity"]));
+            }
+            set {
+                this["HoldBodyOpacity"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int LaneLineWidth {
+            get {
+                return ((int)(this["LaneLineWidth"]));
+            }
+            set {
+                this["LaneLineWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("6")]
+        public int WallLaneLineWidth {
+            get {
+                return ((int)(this["WallLaneLineWidth"]));
+            }
+            set {
+                this["WallLaneLineWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int AutoPlayFaderLineWidth {
+            get {
+                return ((int)(this["AutoPlayFaderLineWidth"]));
+            }
+            set {
+                this["AutoPlayFaderLineWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.025")]
+        public double DefaultCurvePrecision {
+            get {
+                return ((double)(this["DefaultCurvePrecision"]));
+            }
+            set {
+                this["DefaultCurvePrecision"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool InjectDefaultClickSE {
+            get {
+                return ((bool)(this["InjectDefaultClickSE"]));
+            }
+            set {
+                this["InjectDefaultClickSE"] = value;
+            }
+        }
     }
 }

@@ -34,6 +34,12 @@
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [TimesPerMin]}" />
                 </StackPanel>
+                <CheckBox
+                    Margin="0,10,0,0"
+                    VerticalContentAlignment="Center"
+                    Content="{markup:Translate [AutoSaveAllDirtyDocuments]}"
+                    IsChecked="{Binding Setting.AutoSaveAllDirtyDocuments}"
+                    IsEnabled="{Binding Setting.IsEnableAutoSave}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [UndoRedo]}">
@@ -114,6 +120,11 @@
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Millisecond]}" />
                 </StackPanel>
+                <CheckBox
+                    Margin="0,10,0,0"
+                    VerticalContentAlignment="Center"
+                    Content="{markup:Translate [InjectDefaultClickSE]}"
+                    IsChecked="{Binding Setting.InjectDefaultClickSE}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
@@ -128,6 +139,54 @@
                         LostKeyboardFocus="HoldBodyWidthTextBox_LostKeyboardFocus"
                         Text="{Binding HoldBodyWidthText, UpdateSourceTrigger=PropertyChanged}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–50)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [TextureSizeScale]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.TextureSizeScale}" />
+                    <TextBlock VerticalAlignment="Center" Text="× (0.25–3)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [HoldBodyOpacity]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.HoldBodyOpacity}" />
+                    <TextBlock VerticalAlignment="Center" Text="(0–1)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [LaneLineWidth]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.LaneLineWidth}" />
+                    <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [WallLaneLineWidth]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.WallLaneLineWidth}" />
+                    <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [AutoPlayFaderLineWidth]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.AutoPlayFaderLineWidth}" />
+                    <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
+                </StackPanel>
+                <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [DefaultCurvePrecision]}" />
+                    <TextBox
+                        Width="50"
+                        Margin="5,0"
+                        Text="{Binding Setting.DefaultCurvePrecision}" />
+                    <TextBlock VerticalAlignment="Center" Text="(≥0.01)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
                     <TextBlock Text="Limit FPS:" />
