@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void OnChilidrenSubPropsChangedEvent()
         {
-            cachedMetListCacheHash = int.MinValue;
+            cachedTimesignBpmVersion = NonceGenerator.Next();
         }
 
         public void Add(MeterChange meter)
@@ -110,7 +110,7 @@ namespace OngekiFumenEditor.Base.Collections
         }
 
         private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
-        private double cachedMetListCacheHash = int.MinValue;
+        private int cachedTimesignBpmVersion = NonceGenerator.Next();
 
         [Flags]
         private enum ChgEvt
@@ -199,13 +199,15 @@ namespace OngekiFumenEditor.Base.Collections
 
         public List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meter, BPMChange bpm)> GetCachedAllTimeSignatureUniformPositionList(BpmList bpmList)
         {
-            var hash = HashCode.Combine(bpmList.cachedBpmContentHash);
+            var version = bpmList.ContentVersion;
 
-            if (cachedMetListCacheHash != hash)
+            // 无需比较来源实例：令牌取自进程内全局唯一序列（NonceGenerator.Next()），
+            // 不同 BpmList 实例的当前令牌互不相同 —— 旧实现靠「内容哈希」天然获得同样的性质。
+            if (cachedTimesignBpmVersion != version)
             {
                 //Log.LogDebug("recalculate all time signatures.");
                 UpdateCachedAllTimeSignatureUniformPositionList(bpmList);
-                cachedMetListCacheHash = hash;
+                cachedTimesignBpmVersion = version;
             }
             return cachedTimesignUniformPosition;
         }

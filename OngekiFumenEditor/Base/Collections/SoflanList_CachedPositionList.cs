@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Base.Collections
             public override string ToString() => $"Y:{Y} TGrid:{TGrid} SPD:{Speed} BPM:{Bpm.BPM}";
         }
 
-        private int cachedSoflanListCacheHash = RandomHepler.Random(int.MinValue, int.MaxValue);
+        private int cachedSoflanPositionBpmVersion = NonceGenerator.Next();
         private List<SoflanPoint> cachedSoflanPositionList_DesignMode = new();
         private List<SoflanPoint> cachedSoflanPositionList_PreviewMode = new();
 
@@ -200,18 +200,20 @@ namespace OngekiFumenEditor.Base.Collections
 
         private void CheckAndUpdateSoflanPositionList(BpmList bpmList)
         {
-            var hash = bpmList.cachedBpmContentHash;
+            var version = bpmList.ContentVersion;
 
-            if (cachedSoflanListCacheHash != hash)
+            // 无需比较来源实例：令牌取自进程内全局唯一序列（NonceGenerator.Next()），
+            // 不同 BpmList 实例的当前令牌互不相同 —— 旧实现靠「内容哈希」天然获得同样的性质。
+            if (cachedSoflanPositionBpmVersion != version)
             {
                 lock (locker)
                 {
-                    if (cachedSoflanListCacheHash != hash)
+                    if (cachedSoflanPositionBpmVersion != version)
                     {
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_DesignMode, true);
                         UpdateCachedSoflanPositionList(bpmList, cachedSoflanPositionList_PreviewMode, false);
                         cachePostionList_PreviewMode = RebuildIntervalTreePositionList(cachedSoflanPositionList_PreviewMode);
-                        cachedSoflanListCacheHash = hash;
+                        cachedSoflanPositionBpmVersion = version;
                     }
                 }
             }
