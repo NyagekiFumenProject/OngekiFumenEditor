@@ -13,7 +13,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
     {
         private SkiaImage texture;
         private List<(Vector2, Vector2, float, Vector4 color)> list = new();
-        private SKCanvas canvas;
         private IDrawingContext target;
 
         public DefaultSkiaHighlightBatchTextureDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
@@ -23,11 +22,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 
         public void Begin(IDrawingContext target, IImage texture)
         {
-            OnBegin(target);
+            if (!OnBegin(target))
+                return;
 
             this.texture = texture as SkiaImage;
             list.Clear();
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             this.target = target;
         }
 
@@ -49,6 +48,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 
         private void DoDraw()
         {
+            if (Canvas is not { } canvas)
+                return;
+
             using var paint = new SKPaint();
             using var maskfilter = SKMaskFilter.CreateBlur(SKBlurStyle.Inner, 5f);
             using var colorFilter = SKColorFilter.CreateColorMatrix([

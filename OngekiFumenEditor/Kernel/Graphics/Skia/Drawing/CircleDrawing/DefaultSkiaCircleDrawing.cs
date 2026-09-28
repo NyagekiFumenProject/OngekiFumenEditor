@@ -8,7 +8,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
 {
     internal sealed class DefaultSkiaCircleDrawing : CommonSkiaDrawingBase, ICircleDrawing
     {
-        private SKCanvas canvas;
         private IDrawingContext target;
 
         public DefaultSkiaCircleDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
@@ -18,10 +17,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
 
         public void Begin(IDrawingContext target)
         {
-            OnBegin(target);
+            if (!OnBegin(target))
+                return;
 
             this.target = target;
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             prevPaintParam = default;
         }
 
@@ -30,7 +29,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
             OnEnd();
 
             target = default;
-            canvas = default;
             prevPaintParam = default;
             prevPaint?.Dispose();
         }
@@ -68,6 +66,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.CircleDrawing
 
         public void Post(Vector2 point, Vector4 color, bool isSolid, float radius, float hollowLineWidth)
         {
+            if (Canvas is not { } canvas)
+                return;
+
             var paint = GetPaint(color, isSolid, hollowLineWidth);
             canvas.DrawCircle(point.X, point.Y, radius, paint);
             target.RenderContext.PerfomenceMonitor.CountDrawCall();

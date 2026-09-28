@@ -15,12 +15,21 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
             this.manager = manager;
         }
 
-        protected virtual void OnBegin(IDrawingContext target)
+        protected SKCanvas Canvas => canvas;
+
+        protected virtual bool OnBegin(IDrawingContext target)
         {
             SkiaUtility.CheckSkiaRenderContext(target?.RenderContext);
 
+            if (target?.RenderContext is not ISkiaRenderContext skia || skia.Canvas is not { } targetCanvas)
+            {
+                this.target = default;
+                canvas = default;
+                return false;
+            }
+
             this.target = target;
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
+            canvas = targetCanvas;
             canvas.Save();
 
             var mvp = (GetOverrideModelMatrix() * GetOverrideViewMatrixOrDefault(target.CurrentDrawingTargetContext)).ToSkiaMatrix44();
@@ -32,12 +41,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing
                 * SKMatrix44.CreateScale(ctx.RenderScaleX, ctx.RenderScaleY, 1);
 
             canvas.SetMatrix(adjustMVP);
+            return true;
         }
 
 
         protected virtual void OnEnd()
         {
-            canvas.Restore();
+            canvas?.Restore();
 
             target = default;
             canvas = default;

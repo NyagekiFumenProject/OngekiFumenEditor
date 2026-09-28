@@ -35,7 +35,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
         private SKPoint[] meshPointsBuffer = Array.Empty<SKPoint>();
         private SKColor[] meshColorsBuffer = Array.Empty<SKColor>();
 
-        private SKCanvas canvas;
         private IDrawingContext target;
         private float postedLineWidth;
 
@@ -106,11 +105,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         private void BeginSession(IDrawingContext target, float lineWidth)
         {
-            OnBegin(target);
+            if (!OnBegin(target))
+                return;
 
             this.target = target;
             postedLineWidth = lineWidth;
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
         }
 
         private void EndSession()
@@ -121,13 +120,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             OnEnd();
 
             target = default;
-            canvas = default;
             postedLineWidth = default;
         }
 
         private void PrepareAndDraw(ReadOnlySpan<LineVertex> points, float lineWidth)
         {
-            if (points.Length < 2 || !(lineWidth > 0))
+            if (Canvas is null || points.Length < 2 || !(lineWidth > 0))
                 return;
 
             var maxSegments = points.Length - 1;
@@ -275,7 +273,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     strokePaint.Shader = shader;
                     strokePaint.Color = SKColors.White;
 
-                    canvas.DrawPath(path, strokePaint);
+                    Canvas.DrawPath(path, strokePaint);
                     target.RenderContext.PerfomenceMonitor.CountDrawCall();
                 }
                 finally
@@ -319,7 +317,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                 strokePaint.Shader = null;
                 strokePaint.Color = ToSKColor(color);
 
-                canvas.DrawPath(path, strokePaint);
+                Canvas.DrawPath(path, strokePaint);
                 target.RenderContext.PerfomenceMonitor.CountDrawCall();
             }
             finally
@@ -380,7 +378,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             if (written == 0)
                 return;
 
-            canvas.DrawVertices(SKVertexMode.Triangles, meshPointsBuffer, meshColorsBuffer, meshPaint);
+            Canvas.DrawVertices(SKVertexMode.Triangles, meshPointsBuffer, meshColorsBuffer, meshPaint);
             target.RenderContext.PerfomenceMonitor.CountDrawCall();
         }
 

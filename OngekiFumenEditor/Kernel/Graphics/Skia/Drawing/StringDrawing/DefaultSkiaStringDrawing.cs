@@ -83,8 +83,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
         {
             text = text ?? string.Empty;
 
-            OnBegin(target);
-            var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
+            if (!OnBegin(target))
+            {
+                measureTextSize = default;
+                return;
+            }
+
+            var canvas = Canvas;
 
             using var paint = new SKPaint();
             paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;

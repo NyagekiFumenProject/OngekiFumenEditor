@@ -16,7 +16,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
 
         private void Begin(IDrawingContext target)
         {
-            OnBegin(target);
+            if (!OnBegin(target))
+                return;
         }
 
         private void End()
@@ -65,8 +66,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.BeamDrawing
         {
             Begin(target);
 
+            if (Canvas is not { } canvas)
+            {
+                End();
+                return;
+            }
+
             var texture = (SkiaImage)tex;
-            var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             var height = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
             var alpha = MathUtils.SmoothStep(-1, 0, progress) * (1 - MathUtils.SmoothStep(1, 2, progress));

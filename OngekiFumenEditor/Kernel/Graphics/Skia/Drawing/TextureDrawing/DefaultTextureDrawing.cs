@@ -28,8 +28,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.TextureDrawing
 
         private void Draw(IDrawingContext target, SkiaImage tex, Vector2 size, Vector2 position, float rotation, Vector4 color)
         {
-            OnBegin(target);
-            var canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
+            if (!OnBegin(target))
+                return;
+
+            var canvas = Canvas;
 
             var adjustSize = new Vector2(Math.Abs(size.X), Math.Abs(size.Y));
 

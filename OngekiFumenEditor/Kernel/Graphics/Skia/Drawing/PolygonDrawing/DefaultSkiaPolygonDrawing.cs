@@ -11,7 +11,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
     {
         private IDrawingContext target;
         private Primitive primitive;
-        private SKCanvas canvas;
 
         private List<SKPoint> points = new();
         private List<SKColor> colors = new();
@@ -24,10 +23,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
 
         public void Begin(IDrawingContext target, Primitive primitive)
         {
-            OnBegin(target);
+            if (!OnBegin(target))
+                return;
 
             this.primitive = primitive;
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             points.Clear();
             colors.Clear();
             this.target = target;
@@ -35,24 +34,26 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.PolygonDrawing
 
         public void End()
         {
-            //draw
-            using var paint = new SKPaint()
+            if (Canvas is { } canvas)
             {
-                IsAntialias = true,
-                Color = SKColors.White
-            };
+                //draw
+                using var paint = new SKPaint()
+                {
+                    IsAntialias = true,
+                    Color = SKColors.White
+                };
 
-            canvas.DrawVertices(primitive switch
-            {
-                Primitive.Triangles => SKVertexMode.Triangles,
-                Primitive.TriangleStrip => SKVertexMode.TriangleStrip,
-                _ => throw new NotSupportedException()
-            }, points.ToArray(), colors.ToArray(), paint);
-            target.RenderContext.PerfomenceMonitor.CountDrawCall();
+                canvas.DrawVertices(primitive switch
+                {
+                    Primitive.Triangles => SKVertexMode.Triangles,
+                    Primitive.TriangleStrip => SKVertexMode.TriangleStrip,
+                    _ => throw new NotSupportedException()
+                }, points.ToArray(), colors.ToArray(), paint);
+                target.RenderContext.PerfomenceMonitor.CountDrawCall();
+            }
 
             //clean
             OnEnd();
-            canvas = default;
             target = default;
         }
 

@@ -30,7 +30,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             }
         }
 
-        private SKCanvas canvas;
         private List<LineVertex> postedPoints = new();
         private IDrawingContext target;
         private readonly Dictionary<VertexDash, WeakReference<SKPathEffect>> dashPathEffectCache = new();
@@ -42,10 +41,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         public void Begin(IDrawingContext target)
         {
-            OnBegin(target);
+            if (!OnBegin(target))
+                return;
 
             this.target = target;
-            canvas = ((DefaultSkiaRenderContext)target.RenderContext).Canvas;
             postedPoints.Clear();
         }
 
@@ -55,7 +54,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
             OnEnd();
 
             lineWidth = default;
-            canvas = default;
             postedPoints.Clear();
         }
 
@@ -93,6 +91,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
 
         private void PostDraw()
         {
+            if (Canvas is null)
+                return;
+
             //var path = new SKPath();
             var itor = postedPoints.GetEnumerator();
             using var points = ObjectPool.GetPooledList<SKPoint>();
@@ -151,7 +152,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.LineDrawing
                     continue;
                 path.LineTo(next);
             }
-            canvas.DrawPath(path, paint);
+            Canvas.DrawPath(path, paint);
             target.RenderContext.PerfomenceMonitor.CountDrawCall();
         }
 

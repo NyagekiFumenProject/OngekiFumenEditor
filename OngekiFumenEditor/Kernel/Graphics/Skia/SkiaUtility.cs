@@ -8,8 +8,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia
         [Conditional("DEBUG")]
         public static void CheckSkiaRenderContext(IRenderContext renderContext)
         {
-            if (renderContext is not DefaultSkiaRenderContext)
-                throw new InvalidOperationException("Render context must be of type DefaultSkiaRenderContext.");
+            if (renderContext is not ISkiaRenderContext)
+                throw new InvalidOperationException("Render context must implement ISkiaRenderContext.");
         }
     }
 }
