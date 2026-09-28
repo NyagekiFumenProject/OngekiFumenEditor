@@ -92,6 +92,32 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             if (!Properties.EditorGlobalSetting.Default.IsEnableAutoSave)
                 return;
 
+            if (Properties.EditorGlobalSetting.Default.AutoSaveAllDirtyDocuments)
+            {
+                //批量自动保存跑在调度器后台线程上，无法弹出「另存为」对话框，因此只保存已经拥有
+                //FilePath 的脏文档；没有保存路径的文档需要用户交互选择位置，留给用户手动保存。
+                //先拍快照，避免保存过程中集合被其它线程(创建/关闭文档)修改。
+                var editors = GetCurrentEditors().ToArray();
+                foreach (var dirtyEditor in editors)
+                {
+                    if (!dirtyEditor.IsDirty || string.IsNullOrWhiteSpace(dirtyEditor.FilePath))
+                        continue;
+
+                    try
+                    {
+                        Log.LogInfo($"begin auto save dirty document: {dirtyEditor.FileName}");
+                        await dirtyEditor.Save(dirtyEditor.FilePath);
+                        Log.LogInfo($"auto save dirty document done: {dirtyEditor.FileName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogError($"auto save dirty document failed: {dirtyEditor.FileName}", ex);
+                    }
+                }
+
+                return;
+            }
+
             if (CurrentActivatedEditor is null || string.IsNullOrWhiteSpace(CurrentActivatedEditor.FilePath) || Dispatcher.CurrentDispatcher is not Dispatcher dispatcher)
                 return;
 
