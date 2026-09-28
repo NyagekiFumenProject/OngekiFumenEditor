@@ -236,3 +236,34 @@
 1. **A1 的预览模式语义：** WPF `GetViewportTGrid()`（预览走 `previewScrollPositionMs`）与 `GetCurrentTGrid()`（走 `CurrentPlayTime`）目前由 `SetPreviewScrollPosition` 同步写（`ScrollViewer.cs:176-178`）；回移后如果将来允许两者分离，`FrameTime`/`FrameTGrid` 的回退分支必须明确取哪一个。
 2. **B1 的签名与所有权：** WPF `IIntervalTree.Remove` 的 `bool` 返回值与 Avalonia 的 `void` 不同（保留 `bool` 可避免级联）；`IntervalTreeNode` 改不可变后 WPF 侧是否有依赖 `Release` 的调用方需单独确认。
 3. **A10 与 D1 的边界：** 关闭编辑器时释放资源（A10 可做）与「单例纹理是否可复用/是否应改 `RegisterTransient`」（D1 未决）必须分开决策，Avalonia 文档亦未回答所有权问题（`render-perf-review-2026-09-22.md` §8.1）。
+
+---
+
+## 9. 回移落地记录（2026-09-29）
+
+**决策：** A1–A4、A6–A12 全部回移（**A5 按决策不做**）；B1、B2 回移（B3 暂缓，不做）。逐项独立提交，每项提交前跑 WPF 解决方案构建。
+
+| 项 | WPF 提交 | 说明 / 验证 |
+| --- | --- | --- |
+| 报告 | `b785a155` | 本文件 + `WPF-MIGRATION-SYNC.md` 记录 |
+| A6 | `6f29ea3b` | 有序 backing + 二分插入 + 退订修正；临时冒烟 11 项断言（顺序/索引器/计数自洽、去重、替换、删除、自动 StrID） |
+| A7 | `921afa6e` | 二分查询 + 直接枚举已排序 backing；对旧 LINQ 语义做 14 个探测点的差分断言（含 firstMeter 非最小值的边界） |
+| A8 | `d8031bc7` | `BpmList.ContentVersion` 令牌 + `NonceGenerator` + Debug 全表哈希对拍；冒烟覆盖 BPM 值/TGrid/子属性/Add/Remove 五条失效路径，Debug 对拍未触发 |
+| A3 | `e370ba23` | Meter/BPM 按可见区间枚举；评审核对了 `BinaryFindRange` 闭区间语义与 FirstMeter/首 BPM 的排除关系 |
+| A4 | `3cb8e6b1` + `45afda72` | 帧内合并区间缓存；后续提交按评审意见在剪除未用组后重建缓存（见下方「与 Avalonia 的有意偏差」） |
+| A1 | `f3b5cac3` | 帧时间快照；评审逐条核对了 12 个活跃读取点与快照来源语义，确认与删掉的实时 getter 完全等价 |
+| A2 | `dd66479f` | 拍线几何改读当帧绘制上下文；评审确认设计模式下与 `RectInDesignMode` 等价、预览模式修掉陈旧值 |
+| A11 | `0e1c9615` | 构建器异常安全（`DrawCircles` + `CopyToPooledList`） |
+| A12 | `34b61417` | QuadTree 三处硬化；冒烟覆盖去重、属性失效、移除后不再复活、空区间 |
+| A9 | `66cab9b0` | 沙盘墙边界帧内候选 + `TryGetValidPathChildRange`/`GetChildObjectAt`；对旧算法做 16 探测点 × 2 车道（4 child 含重复 TGrid / 单 child）的差分断言，并逐点比对有效路径边界求值 |
+| A10 | `39742873` | 三个 helper 变 `IDisposable` 且可重复初始化；`DisposeRenderLoop` 释放 helper + 本编辑器的目标映射与帧状态；绘制目标单例不动（RND-003 未决） |
+| B1 | `bbe3bf29` | 区间树分阶段重建 + 不可变节点 + 原子发布；`EnsureInSync`/零分配查询/lane 帧内缓存；冒烟：131 个探测点三种查询与暴力参考一致、`QueryInto` 与 `Query` 顺序一致、4 读者 × 20k 次查询 vs 写者 20k 次增删 0 异常、敌方 lane 查询与旧 LINQ 表达式 37 个探测点一致 |
+| B2 | `e5698abd` | 帧体 try/finally，`drawMap.Clear()` 收敛为一处；`End:` 只保留 builder 释放 |
+
+**验证的边界（如实说明）：** 上述均为构建 + 针对被改代码的临时差分冒烟（脚本已删除），**没有**在真实 WPF 编辑器里做可视化/帧率验收；A1/A2/A3/A4/A9/B2 的最终画面等价性仍以 Avalonia 侧已验收行为 + 逐行核对为依据。
+
+**独立评审结论（只读 reviewer，覆盖 A1–A4 四项回移）：** `overall_correctness: correct`，四项均与 Avalonia 原提交一致、对 WPF 行为保持；唯一发现为低优先级（见下）。
+
+**与 Avalonia 的有意偏差（1 处）：** `45afda72` 在「剪除未用 soflan 组」之后重建帧内可见区间缓存。Avalonia 保留剪除前的区间，于是 `CheckRangeVisible` 可能代表一个已不参与的组回答 `true`，让 `LaneBlocker`/`VisibleLineVerticesQuery` 多做几何提交（评审判定无像素变化、代价有界）。WPF 侧选择与旧实现（调用时现读 `drawingContexts`）完全一致。
+
+**未回移项：** A5（用户决策）、B3（限帧帧保留 front 命令列表：症状在 WPF 结构上不发生，需按后端另行论证）、D 类四项（Avalonia 侧自身尚未落地）。
