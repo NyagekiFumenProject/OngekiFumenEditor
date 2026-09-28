@@ -751,10 +751,13 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             var isPreviewMode = IsPreviewMode;
             var editorIsPreviewMode = Editor.IsPreviewMode;
 
+            IEnumerable<BPMChange> filterFirstBpm = [fumen.BpmList.FirstOrDefault()];
+            IEnumerable<MeterChange> filterMeterChange = [fumen.MeterChanges.FirstMeter];
+
             foreach (var (min, max) in visibleRanges)
             {
-                AppendDisplayables(result, fumen.MeterChanges.Skip(1)); //not show first meter
-                AppendDisplayables(result, fumen.BpmList.Skip(1));      //not show first bpm
+                AppendDisplayables(result, fumen.MeterChanges.BinaryFindRange(min, max).Except(filterMeterChange)); //not show first meter
+                AppendDisplayables(result, fumen.BpmList.BinaryFindRange(min, max).Except(filterFirstBpm)); //not show first bpm
                 AppendDisplayables(result, fumen.ClickSEs.BinaryFindRange(min, max));
                 AppendDisplayables(result, fumen.LaneBlocks.GetVisibleStartObjects(min, max));
                 AppendDisplayables(result, fumen.Comments.BinaryFindRange(min, max));
