@@ -30,6 +30,7 @@ using OngekiFumenEditor.Kernel.ArgProcesser;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.CommandExecutor;
 using OngekiFumenEditor.Kernel.EditorLayout;
+using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Mcp;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.Scheduler;
@@ -562,6 +563,21 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     protected override async void OnExit(object sender, EventArgs e)
     {
+        // 必须最先执行且同步完成：OnExit 中第一个 await 之后的代码在进程退出前不会被执行（实测），
+        // 因此渲染后端的后台资源（Skia 离屏渲染线程、GL 离屏队列/延迟删除）只能在这里收口。
+        foreach (var renderManagerImpl in IoC.GetAll<IRenderManagerImpl>())
+        {
+            try
+            {
+                // 契约要求同步完成：这里不需要 await，签名返回 Task 只为将来可能需要异步的实现在调用点不变。
+                _ = renderManagerImpl.Term();
+            }
+            catch (Exception ex)
+            {
+                Log.LogError($"Terminate render manager impl [{renderManagerImpl.Name}] failed: {ex.Message}");
+            }
+        }
+
         ipcThread?.Abort();
         await TryStopMcpServerAsync();
         IoC.Get<IAudioManager>().Dispose();
