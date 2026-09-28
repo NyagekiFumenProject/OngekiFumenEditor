@@ -428,246 +428,257 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         var map = ObjectPool.GetPooledDictionary<string, IPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>>();
 
         var usedDrawingContexts = ObjectPool.GetPooledSet<int>();
-        //always draw default soflan group
-        usedDrawingContexts.Add(0);
+        var unusedSoflanGroups = ObjectPool.GetPooledList<int>();
 
-        //Prepare objects we will draw them.
-        //get&register all visible objects for every drawingContext(soflanGroup)
-        //帧首算一次「所有组的可见区间」并缓存：它同时服务于下面的全局枚举，
-        //以及本帧随后被逐个可见子物体调用的 CheckRangeVisible()。
-        foreach (var ctx in drawingContexts.Values)
+        try
         {
-            foreach (var range in ctx.VisibleTGridRanges)
-                mergedVisibleTGridRanges.Add(range);
-        }
+            //always draw default soflan group
+            usedDrawingContexts.Add(0);
 
-        var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
-        using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges, frameTGrid))
-        {
-            foreach (var displayable in visibleObjects)
+            //Prepare objects we will draw them.
+            //get&register all visible objects for every drawingContext(soflanGroup)
+            //帧首算一次「所有组的可见区间」并缓存：它同时服务于下面的全局枚举，
+            //以及本帧随后被逐个可见子物体调用的 CheckRangeVisible()。
+            foreach (var ctx in drawingContexts.Values)
             {
-                if (displayable is not OngekiTimelineObjectBase obj)
-                    continue;
-                if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
+                foreach (var range in ctx.VisibleTGridRanges)
+                    mergedVisibleTGridRanges.Add(range);
+            }
+
+            var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
+            using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges, frameTGrid))
+            {
+                foreach (var displayable in visibleObjects)
                 {
-                    var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
-                    drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
-                    soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
-                }
-
-                _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
-
-                if (!CheckSoflanGroupVisible(soflanGroup))
-                    continue;
-
-                if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
-                {
-                    if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
+                    if (displayable is not OngekiTimelineObjectBase obj)
+                        continue;
+                    if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
                     {
-                        var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
-                        drawingCollectionDisposables.Add(listPool);
-                        list = soflanGroupObjectMap[drawingContext] = listPool;
+                        var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
+                        drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
+                        soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
                     }
 
-                    list.Add(obj);
-                    usedDrawingContexts.Add(soflanGroup);
-                }
-                else
-                {
-                    Log.LogWarn($"Soflan group drawing context not found: object={obj.GetType().Name}, objectId={obj.Id}, soflanGroup={soflanGroup}");
+                    _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+
+                    if (!CheckSoflanGroupVisible(soflanGroup))
+                        continue;
+
+                    if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
+                    {
+                        if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
+                        {
+                            var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
+                            drawingCollectionDisposables.Add(listPool);
+                            list = soflanGroupObjectMap[drawingContext] = listPool;
+                        }
+
+                        list.Add(obj);
+                        usedDrawingContexts.Add(soflanGroup);
+                    }
+                    else
+                    {
+                        Log.LogWarn($"Soflan group drawing context not found: object={obj.GetType().Name}, objectId={obj.Id}, soflanGroup={soflanGroup}");
+                    }
                 }
             }
-        }
 
-        foreach (var objGroup in map)
-        {
-            if (GetDrawingTarget(objGroup.Key) is not IFumenEditorDrawingTarget[] drawingTargets)
-                continue;
-            var soflanGroupObjectMap = objGroup.Value;
-
-            foreach (var drawingTarget in drawingTargets)
+            foreach (var objGroup in map)
             {
-                if (!drawMap.TryGetValue(drawingTarget, out var enums))
+                if (GetDrawingTarget(objGroup.Key) is not IFumenEditorDrawingTarget[] drawingTargets)
+                    continue;
+                var soflanGroupObjectMap = objGroup.Value;
+
+                foreach (var drawingTarget in drawingTargets)
                 {
-                    var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
-                    drawingCollectionDisposables.Add(rPool);
-                    var r = drawMap[drawingTarget] = rPool;
-                    foreach (var pair in soflanGroupObjectMap)
+                    if (!drawMap.TryGetValue(drawingTarget, out var enums))
                     {
-                        var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
-                        drawingCollectionDisposables.Add(rrPool);
-                        var rr = r[pair.Key] = rrPool;
-                        rr.AddRange(pair.Value);
-                    }
-                }
-                else
-                {
-                    foreach (var pair in soflanGroupObjectMap)
-                    {
-                        if (!enums.TryGetValue(pair.Key, out var rr))
+                        var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                        drawingCollectionDisposables.Add(rPool);
+                        var r = drawMap[drawingTarget] = rPool;
+                        foreach (var pair in soflanGroupObjectMap)
                         {
                             var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                             drawingCollectionDisposables.Add(rrPool);
-                            rr = enums[pair.Key] = rrPool;
+                            var rr = r[pair.Key] = rrPool;
+                            rr.AddRange(pair.Value);
                         }
+                    }
+                    else
+                    {
+                        foreach (var pair in soflanGroupObjectMap)
+                        {
+                            if (!enums.TryGetValue(pair.Key, out var rr))
+                            {
+                                var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                                drawingCollectionDisposables.Add(rrPool);
+                                rr = enums[pair.Key] = rrPool;
+                            }
 
-                        rr.AddRange(pair.Value);
+                            rr.AddRange(pair.Value);
+                        }
                     }
                 }
             }
-        }
 
-        //remove unused drawingContexts
-        var unusedSoflanGroups = ObjectPool.GetPooledList<int>();
-        unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
-        for (var i = 0; i < unusedSoflanGroups.Count; i++)
-        {
-            var soflanGroupId = unusedSoflanGroups[i];
-            drawingContexts.Remove(soflanGroupId);
-        }
-
-        RecalculateMagaticXGridLines();
-
-        if (IsPreviewMode)
-        {
-            /*
-            (DrawingTargetContext ctx, OngekiTimelineObjectBase obj) Convert(OngekiTimelineObjectBase obj)
+            //remove unused drawingContexts
+            unusedSoflanGroups.AddRange(drawingContexts.Keys.Except(usedDrawingContexts));
+            for (var i = 0; i < unusedSoflanGroups.Count; i++)
             {
-                _cacheSoflanGroupRecorder.GetCache(obj, out var soflanGroup);
-                var drawingContext = drawingContexts.TryGetValue(soflanGroup, out var ctx) ? ctx : drawingContexts[0];
-                return (drawingContext, obj);
+                var soflanGroupId = unusedSoflanGroups[i];
+                drawingContexts.Remove(soflanGroupId);
             }
-            */
 
-            //特殊处理：子弹和Bell
-            var blts = Fumen.Bullets.AsEnumerable();
-            var bels = Fumen.Bells.AsEnumerable();
-            var curTGrid = frameTGrid;
+            RecalculateMagaticXGridLines();
+
             if (IsPreviewMode)
             {
-                blts = Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
-                bels = Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);
-            }
-            bels = bels.Where(x =>
-            {
-                _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
-                return CheckSoflanGroupVisible(soflanGroup);
-            });
-            blts = blts.Where(x =>
-            {
-                _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
-                return CheckSoflanGroupVisible(soflanGroup);
-            });
+                /*
+                (DrawingTargetContext ctx, OngekiTimelineObjectBase obj) Convert(OngekiTimelineObjectBase obj)
+                {
+                    _cacheSoflanGroupRecorder.GetCache(obj, out var soflanGroup);
+                    var drawingContext = drawingContexts.TryGetValue(soflanGroup, out var ctx) ? ctx : drawingContexts[0];
+                    return (drawingContext, obj);
+                }
+                */
 
-            foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
-            {
-                //todo 优化一下
-                var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
-                drawingCollectionDisposables.Add(rPool);
-                var r = drawMap[drawingTarget] = rPool;
-                var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
-                drawingCollectionDisposables.Add(rrPool);
-                var rr = r[defaultDrawingTargetContext] = rrPool;
-                rr.AddRange(blts);
-            }
-            foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
-            {
-                //todo 优化一下
-                var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
-                drawingCollectionDisposables.Add(rPool);
-                var r = drawMap[drawingTarget] = rPool;
-                var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
-                drawingCollectionDisposables.Add(rrPool);
-                var rr = r[defaultDrawingTargetContext] = rrPool;
-                rr.AddRange(bels);
-            }
-        }
+                //特殊处理：子弹和Bell
+                var blts = Fumen.Bullets.AsEnumerable();
+                var bels = Fumen.Bells.AsEnumerable();
+                var curTGrid = frameTGrid;
+                if (IsPreviewMode)
+                {
+                    blts = Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
+                    bels = Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);
+                }
+                bels = bels.Where(x =>
+                {
+                    _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                    return CheckSoflanGroupVisible(soflanGroup);
+                });
+                blts = blts.Where(x =>
+                {
+                    _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
+                    return CheckSoflanGroupVisible(soflanGroup);
+                });
 
-        #region Rendering
-
-        CurrentDrawingTargetContext = defaultDrawingTargetContext;
-        builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
-        builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
-        builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
-
-        foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
-            playableAreaHelper.DrawPlayField(this, builder, minTGrid, maxTGrid);
-
-        playableAreaHelper.Draw(this, builder);
-        timeSignatureHelper.DrawLines(this, builder);
-
-        xGridHelper.DrawLines(this, builder, CachedMagneticXGridLines);
-
-        var prevOrder = int.MinValue;
-        foreach (var drawingTarget in drawTargetOrder.Where(x => CheckDrawingVisible(x.Visible)))
-        {
-            //check render order
-            var order = drawingTarget.CurrentRenderOrder;
-            if (prevOrder > order)
-            {
-                ResortRenderOrder();
-                break;
+                foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
+                {
+                    //todo 优化一下
+                    var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                    drawingCollectionDisposables.Add(rPool);
+                    var r = drawMap[drawingTarget] = rPool;
+                    var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                    drawingCollectionDisposables.Add(rrPool);
+                    var rr = r[defaultDrawingTargetContext] = rrPool;
+                    rr.AddRange(blts);
+                }
+                foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
+                {
+                    //todo 优化一下
+                    var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
+                    drawingCollectionDisposables.Add(rPool);
+                    var r = drawMap[drawingTarget] = rPool;
+                    var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
+                    drawingCollectionDisposables.Add(rrPool);
+                    var rr = r[defaultDrawingTargetContext] = rrPool;
+                    rr.AddRange(bels);
+                }
             }
 
-            prevOrder = order;
+            #region Rendering
 
             CurrentDrawingTargetContext = defaultDrawingTargetContext;
             builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
             builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
             builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-            if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
-            {
-                foreach (var soflanGroupDrawing in drawingObjs)
-                {
-                    CurrentDrawingTargetContext = soflanGroupDrawing.Key;
-                    builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
-                    builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
-                    builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
+            foreach (var (minTGrid, maxTGrid) in CurrentDrawingTargetContext.VisibleTGridRanges)
+                playableAreaHelper.DrawPlayField(this, builder, minTGrid, maxTGrid);
 
-                    drawingTarget.Begin(this, builder);
-                    //all object collection has been sorted within GetDisplayableObjects()
-                    var drawingObjects = soflanGroupDrawing.Value;
-                    for (var i = 0; i < drawingObjects.Count; i++)
+            playableAreaHelper.Draw(this, builder);
+            timeSignatureHelper.DrawLines(this, builder);
+
+            xGridHelper.DrawLines(this, builder, CachedMagneticXGridLines);
+
+            var prevOrder = int.MinValue;
+            foreach (var drawingTarget in drawTargetOrder.Where(x => CheckDrawingVisible(x.Visible)))
+            {
+                //check render order
+                var order = drawingTarget.CurrentRenderOrder;
+                if (prevOrder > order)
+                {
+                    ResortRenderOrder();
+                    break;
+                }
+
+                prevOrder = order;
+
+                CurrentDrawingTargetContext = defaultDrawingTargetContext;
+                builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
+                builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+                builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
+
+                if (drawMap.TryGetValue(drawingTarget, out var drawingObjs))
+                {
+                    foreach (var soflanGroupDrawing in drawingObjs)
                     {
-                        var obj = drawingObjects[i];
-                        drawingTarget.Post(obj);
+                        CurrentDrawingTargetContext = soflanGroupDrawing.Key;
+                        builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
+                        builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+                        builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
+
+                        drawingTarget.Begin(this, builder);
+                        //all object collection has been sorted within GetDisplayableObjects()
+                        var drawingObjects = soflanGroupDrawing.Value;
+                        for (var i = 0; i < drawingObjects.Count; i++)
+                        {
+                            var obj = drawingObjects[i];
+                            drawingTarget.Post(obj);
+                        }
+                        drawingTarget.End();
                     }
-                    drawingTarget.End();
                 }
             }
-        }
 
-        CurrentDrawingTargetContext = defaultDrawingTargetContext;
-        builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
-        builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
-        builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
+            CurrentDrawingTargetContext = defaultDrawingTargetContext;
+            builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
+            builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
+            builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-        timeSignatureHelper.DrawTimeSigntureText(this, builder);
-        xGridHelper.DrawXGridText(this, builder, CachedMagneticXGridLines);
-        judgeLineHelper.Draw(this, builder);
-        hitObjectEffectHelper.Draw(this, builder);
-        playerLocationHelper.Draw(this, builder);
-        selectingRangeHelper.Draw(this, builder);
+            timeSignatureHelper.DrawTimeSigntureText(this, builder);
+            xGridHelper.DrawXGridText(this, builder, CachedMagneticXGridLines);
+            judgeLineHelper.Draw(this, builder);
+            hitObjectEffectHelper.Draw(this, builder);
+            playerLocationHelper.Draw(this, builder);
+            selectingRangeHelper.Draw(this, builder);
 
-        PostDrawCommandList(builder);
+            PostDrawCommandList(builder);
 
         //clean up
-        for (var i = 0; i < drawingCollectionDisposables.Count; i++)
-        {
-            var disposable = drawingCollectionDisposables[i];
-            disposable.Dispose();
         }
-        unusedSoflanGroups.Dispose();
-        usedDrawingContexts.Dispose();
-        map.Dispose();
-        drawingCollectionDisposables.Dispose();
-
+        finally
+        {
+            for (var i = 0; i < drawingCollectionDisposables.Count; i++)
+            {
+                var disposable = drawingCollectionDisposables[i];
+                disposable.Dispose();
+            }
+            unusedSoflanGroups.Dispose();
+            usedDrawingContexts.Dispose();
+            map.Dispose();
+            drawingCollectionDisposables.Dispose();
+            // drawMap 的唯一一处「帧末清理」：本帧填充的池化内层对象已在上面的循环里逐个 Dispose，
+            // 这里只需清掉外层字典的键，使下一帧从空态重新填充（外层字典本身跨帧复用，不重建）。
+            // 成功路径与异常路径都经过本块；try 之前的两个 goto End 早退点不经此处，但那时 drawMap 本就为空。
+            drawMap.Clear();
+        }
         context.PerfomenceMonitor.OnAfterRender();
         #endregion
     End:
         builder?.Dispose();
-        drawMap.Clear();
+        // 这里**不再** drawMap.Clear()：本帧对 drawMap 的写入全部发生在 try 内，而到达本标签只有两条路径 ——
+        // 正常出帧（先经过 finally 的 Clear）或 try 前早退（此时 drawMap 尚未被本帧触碰、本就为空）。
         //set null
         CurrentDrawingTargetContext = default;
     }
