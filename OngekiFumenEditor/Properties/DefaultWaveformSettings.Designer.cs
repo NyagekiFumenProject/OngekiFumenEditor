@@ -58,5 +58,77 @@ namespace OngekiFumenEditor.Properties {
                 this["ShowTimingLine"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("16, 16, 16")]
+        public global::System.Drawing.Color WaveformBackgroundColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformBackgroundColor"]));
+            }
+            set {
+                this["WaveformBackgroundColor"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("100, 149, 237")]
+        public global::System.Drawing.Color WaveformFillColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformFillColor"]));
+            }
+            set {
+                this["WaveformFillColor"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Yellow")]
+        public global::System.Drawing.Color WaveformCursorColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformCursorColor"]));
+            }
+            set {
+                this["WaveformCursorColor"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Red")]
+        public global::System.Drawing.Color WaveformBeatLineColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformBeatLineColor"]));
+            }
+            set {
+                this["WaveformBeatLineColor"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Yellow")]
+        public global::System.Drawing.Color WaveformObjectPlaceLineColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformObjectPlaceLineColor"]));
+            }
+            set {
+                this["WaveformObjectPlaceLineColor"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("191, 255, 255, 0")]
+        public global::System.Drawing.Color WaveformHoldLineColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformHoldLineColor"]));
+            }
+            set {
+                this["WaveformHoldLineColor"] = value;
+            }
+        }
     }
 }

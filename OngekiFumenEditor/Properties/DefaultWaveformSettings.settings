@@ -11,5 +11,23 @@
     <Setting Name="ShowTimingLine" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="WaveformBackgroundColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">16, 16, 16</Value>
+    </Setting>
+    <Setting Name="WaveformFillColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">100, 149, 237</Value>
+    </Setting>
+    <Setting Name="WaveformCursorColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Yellow</Value>
+    </Setting>
+    <Setting Name="WaveformBeatLineColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Red</Value>
+    </Setting>
+    <Setting Name="WaveformObjectPlaceLineColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">Yellow</Value>
+    </Setting>
+    <Setting Name="WaveformHoldLineColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">191, 255, 255, 0</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

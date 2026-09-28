@@ -62,6 +62,41 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             InvalidateWaveformBlocks();
         }
 
+        /// <summary>
+        /// 颜色/线宽/预渲染开关等用户设置变化时使图块失效：
+        /// 关闭预渲染时清空缓存即释放显存，下一帧自动回退到实时绘制。
+        /// </summary>
+        private void OnWaveformSettingsPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(Properties.DefaultWaveformSettings.WaveformBackgroundColor):
+                case nameof(Properties.DefaultWaveformSettings.WaveformFillColor):
+                case nameof(Properties.DefaultWaveformSettings.WaveformCursorColor):
+                case nameof(Properties.DefaultWaveformSettings.WaveformBeatLineColor):
+                case nameof(Properties.DefaultWaveformSettings.WaveformObjectPlaceLineColor):
+                case nameof(Properties.DefaultWaveformSettings.WaveformHoldLineColor):
+                case nameof(Properties.AudioPlayerToolViewerSetting.WaveformBodyLineWidth):
+                case nameof(Properties.AudioPlayerToolViewerSetting.WaveformHoldLineWidth):
+                case nameof(Properties.AudioPlayerToolViewerSetting.WaveformMarkerLineWidth):
+                case nameof(Properties.AudioPlayerToolViewerSetting.EnableWaveformBlockPrerender):
+                    InvalidateWaveformBlocks();
+                    break;
+            }
+        }
+
+        private void AttachWaveformSettingsEvents()
+        {
+            Properties.DefaultWaveformSettings.Default.PropertyChanged += OnWaveformSettingsPropertyChanged;
+            Properties.AudioPlayerToolViewerSetting.Default.PropertyChanged += OnWaveformSettingsPropertyChanged;
+        }
+
+        private void DetachWaveformSettingsEvents()
+        {
+            Properties.DefaultWaveformSettings.Default.PropertyChanged -= OnWaveformSettingsPropertyChanged;
+            Properties.AudioPlayerToolViewerSetting.Default.PropertyChanged -= OnWaveformSettingsPropertyChanged;
+        }
+
         private int resampleSize = Properties.AudioPlayerToolViewerSetting.Default.ResampleSize;
         public int ResampleSize
         {
@@ -159,6 +194,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             await impl.WaitForInitializationIsDone();
             RenderContext = await impl.GetOrCreateRenderContext(renderControl);
+
+            AttachWaveformSettingsEvents();
 
             samplePeak = IoC.Get<ISamplePeak>();
             WaveformDrawing = IoC.Get<IWaveformDrawing>();
@@ -259,7 +296,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                     waveformVisibleBlockFrom = iFrom;
                     waveformVisibleBlockTo = iTo;
 
-                    if (IsWaveformPolylineVisible && TryGetVisibleWaveformBlocks(iFrom, iTo, out var blocks))
+                    if (EnableWaveformBlockPrerender && IsWaveformPolylineVisible && TryGetVisibleWaveformBlocks(iFrom, iTo, out var blocks))
                     {
                         // 图块就绪：只贴回缓存纹理 + 补绘边界标记，波形本体不再逐帧重建。
                         DrawWaveformBlocks(builder, blocks, iFrom, fromTime, toTime);

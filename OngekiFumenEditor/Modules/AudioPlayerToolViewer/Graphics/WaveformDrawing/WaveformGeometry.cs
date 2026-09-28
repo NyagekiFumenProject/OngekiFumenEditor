@@ -19,8 +19,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
     {
         private static readonly VertexDash InvailedLineDash = new(2, 2);
 
-        private static readonly Vector4 WhiteColor = new(1, 1, 1, 1);
-        private static readonly Vector4 WaveformFillColor = new(100 / 255.0f, 149 / 255.0f, 237 / 255.0f, 1);
+        /// <summary>
+        /// 波形左右边界标记的默认颜色。当前没有对应的用户设置，实时绘制与分块贴回补绘共用此常量；
+        /// 保留为参数是为了让本类不依赖任何设置来源。
+        /// </summary>
+        public static readonly Vector4 DefaultEdgeMarkerColor = new(1, 1, 1, 1);
 
         /// <summary>把时间投影为绘制目标的逻辑 x 坐标（原点在中心、y 轴向上）。</summary>
         public static float ProjectX(TimeSpan time, TimeSpan fromTime, double durationMs, float width)
@@ -29,20 +32,22 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         /// <summary>
         /// 完整几何（改造前实时绘制的顶点序列）：左边界标记 → 波形本体 → 末端标记 → 右边界标记。
         /// 图块未就绪时整帧回退到实时绘制，走的就是这条路径。
+        /// <paramref name="waveformColor"/> 为波形本体颜色、<paramref name="edgeMarkerColor"/> 为左右边界标记颜色，
+        /// 两者由调用方从用户设置读取（本类保持纯函数、无状态）。
         /// </summary>
         public static void Build(List<LineVertex> points, PeakPointCollection peakData, TimeSpan fromTime, TimeSpan toTime,
-            float width, float height)
+            float width, float height, Vector4 waveformColor, Vector4 edgeMarkerColor)
         {
             var durationMs = (toTime - fromTime).TotalMilliseconds;
             (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
 
-            points.Add(new(new(-width / 2, 0), WhiteColor, InvailedLineDash));
+            points.Add(new(new(-width / 2, 0), edgeMarkerColor, InvailedLineDash));
 
-            AppendBody(points, peakData, fromTime, durationMs, width, height, minIndex, maxIndex);
+            AppendBody(points, peakData, fromTime, durationMs, width, height, minIndex, maxIndex, waveformColor);
 
             var prevX = maxIndex > minIndex ? ProjectX(peakData[maxIndex - 1].Time, fromTime, durationMs, width) : 0f;
-            points.Add(new(new(prevX, 0), WaveformFillColor, InvailedLineDash));
-            points.Add(new(new(width / 2, 0), WhiteColor, InvailedLineDash));
+            points.Add(new(new(prevX, 0), waveformColor, InvailedLineDash));
+            points.Add(new(new(width / 2, 0), edgeMarkerColor, InvailedLineDash));
         }
 
         /// <summary>
@@ -50,7 +55,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         /// <paramref name="rangeMarginPoints"/> 让范围两端各多纳入若干个峰点，使折线跨过图块边界，消除块缝断线。
         /// </summary>
         public static void BuildBody(List<LineVertex> points, PeakPointCollection peakData, TimeSpan fromTime, TimeSpan toTime,
-            float width, float height, int rangeMarginPoints)
+            float width, float height, int rangeMarginPoints, Vector4 waveformColor)
         {
             var durationMs = (toTime - fromTime).TotalMilliseconds;
             (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
@@ -61,7 +66,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 maxIndex = Math.Min(peakData.Count, maxIndex + rangeMarginPoints);
             }
 
-            AppendBody(points, peakData, fromTime, durationMs, width, height, minIndex, maxIndex);
+            AppendBody(points, peakData, fromTime, durationMs, width, height, minIndex, maxIndex, waveformColor);
         }
 
         /// <summary>
@@ -74,35 +79,36 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         /// 范围内没有峰点时，两条链退化到中轴原点，与实时绘制一致。
         /// </summary>
         public static void BuildEdgeMarkers(List<LineVertex> leftMarker, List<LineVertex> trailingMarkers,
-            PeakPointCollection peakData, TimeSpan fromTime, TimeSpan toTime, float width, float height)
+            PeakPointCollection peakData, TimeSpan fromTime, TimeSpan toTime, float width, float height,
+            Vector4 waveformColor, Vector4 edgeMarkerColor)
         {
             var durationMs = (toTime - fromTime).TotalMilliseconds;
             (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
 
-            leftMarker.Add(new(new(-width / 2, 0), WhiteColor, InvailedLineDash));
+            leftMarker.Add(new(new(-width / 2, 0), edgeMarkerColor, InvailedLineDash));
 
             if (maxIndex > minIndex)
             {
                 var firstPeakPoint = peakData[minIndex];
                 var firstX = ProjectX(firstPeakPoint.Time, fromTime, durationMs, width);
-                leftMarker.Add(new(new(firstX, height / 2 * firstPeakPoint.Amplitudes[0]), WaveformFillColor, VertexDash.Solider));
+                leftMarker.Add(new(new(firstX, height / 2 * firstPeakPoint.Amplitudes[0]), waveformColor, VertexDash.Solider));
 
                 var lastPeakPoint = peakData[maxIndex - 1];
                 var lastX = ProjectX(lastPeakPoint.Time, fromTime, durationMs, width);
-                trailingMarkers.Add(new(new(lastX, -height / 2 * lastPeakPoint.Amplitudes[1]), WaveformFillColor, VertexDash.Solider));
-                trailingMarkers.Add(new(new(lastX, 0), WaveformFillColor, InvailedLineDash));
-                trailingMarkers.Add(new(new(width / 2, 0), WhiteColor, InvailedLineDash));
+                trailingMarkers.Add(new(new(lastX, -height / 2 * lastPeakPoint.Amplitudes[1]), waveformColor, VertexDash.Solider));
+                trailingMarkers.Add(new(new(lastX, 0), waveformColor, InvailedLineDash));
+                trailingMarkers.Add(new(new(width / 2, 0), edgeMarkerColor, InvailedLineDash));
             }
             else
             {
-                leftMarker.Add(new(new(0, 0), WaveformFillColor, InvailedLineDash));
-                trailingMarkers.Add(new(new(0, 0), WaveformFillColor, InvailedLineDash));
-                trailingMarkers.Add(new(new(width / 2, 0), WhiteColor, InvailedLineDash));
+                leftMarker.Add(new(new(0, 0), waveformColor, InvailedLineDash));
+                trailingMarkers.Add(new(new(0, 0), waveformColor, InvailedLineDash));
+                trailingMarkers.Add(new(new(width / 2, 0), edgeMarkerColor, InvailedLineDash));
             }
         }
 
         private static void AppendBody(List<LineVertex> points, PeakPointCollection peakData, TimeSpan fromTime,
-            double durationMs, float width, float height, int minIndex, int maxIndex)
+            double durationMs, float width, float height, int minIndex, int maxIndex, Vector4 waveformColor)
         {
             for (var i = minIndex; i < maxIndex; i += 1)
             {
@@ -112,8 +118,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 var yTop = height / 2 * peakPoint.Amplitudes[0];
                 var yButtom = -height / 2 * peakPoint.Amplitudes[1];
 
-                points.Add(new(new(x, yTop), WaveformFillColor, VertexDash.Solider));
-                points.Add(new(new(x, yButtom), WaveformFillColor, VertexDash.Solider));
+                points.Add(new(new(x, yTop), waveformColor, VertexDash.Solider));
+                points.Add(new(new(x, yButtom), waveformColor, VertexDash.Solider));
             }
         }
     }

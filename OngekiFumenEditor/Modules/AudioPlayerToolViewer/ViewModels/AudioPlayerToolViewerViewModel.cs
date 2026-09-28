@@ -255,6 +255,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             if (FumenSoundPlayer is IFumenSoundPlayer player)
                 player.SoundControl = (SoundControl)sc;
 
+            //持久化音效开关，下次启动/重开面板沿用
+            AudioPlayerToolViewerSetting.Default.SoundControlMask = sc;
+            AudioPlayerToolViewerSetting.Default.Save();
+
             //Log.LogDebug($"Apply sound control:{(SoundControl)sc}");
             NotifyOfPropertyChange(() => SoundControls);
         }

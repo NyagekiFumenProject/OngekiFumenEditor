@@ -32,11 +32,18 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
         private SoflanList dummySoflanList;
 
+        // 说明：除以下固定端点样式外，波形/物件/节拍/游标颜色与线宽均由用户设置驱动，
+        // 在每帧 Draw 时从 DefaultWaveformSettings / AudioPlayerToolViewerSetting 读取。
+        // 透明端点是渐变线段的固定端点颜色，不对外暴露为设置。
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
-        private static readonly System.Numerics.Vector4 IndirectorColor = new(1, 1, 0, 1);
-        private static readonly System.Numerics.Vector4 BeatColor = new(1, 0, 0, 1);
-        private static readonly System.Numerics.Vector4 ObjectPlaceColor = new(1, 1, 0, 1);
-        private static readonly System.Numerics.Vector4 HoldColor = new(1, 1f, 0f, 0.75f);
+        // Bullet/Bell 圆点样式（原内联字面量具名化，不作为设置）。
+        private static readonly System.Numerics.Vector4 BulletCircleColor = new(1, 0, 1, 1);
+        private static readonly System.Numerics.Vector4 BellCircleColor = new(1, 1, 0, 1);
+        private const float ObjectCircleRadius = 5f;
+        private const float ObjectCircleVerticalOffset = 10f;
+        // 当前播放时间游标线宽，不随波形线宽设置变化。
+        private const int CursorLineWidth = 2;
+        private const int MaxWaveformLineWidth = 24;
 
         private static readonly List<LineVertex> cachedLineDrawList = new();
         private static readonly List<(float, string)> cachedPostDrawList = new();
@@ -55,6 +62,20 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
+            // 颜色/线宽逐帧从用户设置读取（默认值与改造前字面量一致），设置页改动经 VM 订阅触发图块作废。
+            var waveformSettings = Properties.DefaultWaveformSettings.Default;
+            var viewerSettings = Properties.AudioPlayerToolViewerSetting.Default;
+
+            var waveformColor = waveformSettings.WaveformFillColor.ToVector4();
+            var cursorColor = waveformSettings.WaveformCursorColor.ToVector4();
+            var beatLineColor = waveformSettings.WaveformBeatLineColor.ToVector4();
+            var objectPlaceLineColor = waveformSettings.WaveformObjectPlaceLineColor.ToVector4();
+            var holdLineColor = waveformSettings.WaveformHoldLineColor.ToVector4();
+
+            var bodyLineWidth = Math.Clamp(viewerSettings.WaveformBodyLineWidth, 1, MaxWaveformLineWidth);
+            var holdLineWidth = Math.Clamp(viewerSettings.WaveformHoldLineWidth, 1, MaxWaveformLineWidth);
+            var markerLineWidth = Math.Clamp(viewerSettings.WaveformMarkerLineWidth, 1, MaxWaveformLineWidth);
+
             var width = target.CurrentDrawingTargetContext.ViewRelativeRect.Width;
             var height = target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 
@@ -72,9 +93,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 cachedLineDrawList.Clear();
                 try
                 {
-                    WaveformGeometry.Build(cachedLineDrawList, peakData, fromTime, toTime, width, height);
+                    WaveformGeometry.Build(cachedLineDrawList, peakData, fromTime, toTime, width, height, waveformColor, WaveformGeometry.DefaultEdgeMarkerColor);
                     if (cachedLineDrawList.Count > 0)
-                        builder.DrawSimpleLines(cachedLineDrawList, 1);
+                        builder.DrawSimpleLines(cachedLineDrawList, bodyLineWidth);
                 }
                 finally
                 {
@@ -148,12 +169,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             var y = 0;
 
                             cachedLineDrawList.Add(new(new(fromX, y), TransparentColor, VertexDash.Solider));
-                            cachedLineDrawList.Add(new(new(fromX, y), HoldColor, VertexDash.Solider));
-                            cachedLineDrawList.Add(new(new(toX, y), HoldColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(fromX, y), holdLineColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(toX, y), holdLineColor, VertexDash.Solider));
                             cachedLineDrawList.Add(new(new(toX, y), TransparentColor, VertexDash.Solider));
                         }
                     }
-                    builder.DrawSimpleLines(cachedLineDrawList, 4);
+                    builder.DrawSimpleLines(cachedLineDrawList, holdLineWidth);
 
                     cachedLineDrawList.Clear();
                     {
@@ -170,16 +191,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             if (type.HasFlag(ObjType.Default))
                             {
                                 cachedLineDrawList.Add(new(new(x, buttomY), TransparentColor, VertexDash.Solider));
-                                cachedLineDrawList.Add(new(new(x, buttomY), ObjectPlaceColor, VertexDash.Solider));
-                                cachedLineDrawList.Add(new(new(x, topY), ObjectPlaceColor, VertexDash.Solider));
+                                cachedLineDrawList.Add(new(new(x, buttomY), objectPlaceLineColor, VertexDash.Solider));
+                                cachedLineDrawList.Add(new(new(x, topY), objectPlaceLineColor, VertexDash.Solider));
                                 cachedLineDrawList.Add(new(new(x, topY), TransparentColor, VertexDash.Solider));
                             }
 
                             if (type.HasFlag(ObjType.Bullet))
-                                cachedCircleDrawList.Add(new CircleInstance(new(x, buttomY - 10), new(1, 0, 1, 1), true, 5f, 0));
+                                cachedCircleDrawList.Add(new CircleInstance(new(x, buttomY - ObjectCircleVerticalOffset), BulletCircleColor, true, ObjectCircleRadius, 0));
 
                             if (type.HasFlag(ObjType.Bell))
-                                cachedCircleDrawList.Add(new CircleInstance(new(x, topY + 10), new(1, 1, 0, 1), true, 5f, 0));
+                                cachedCircleDrawList.Add(new CircleInstance(new(x, topY + ObjectCircleVerticalOffset), BellCircleColor, true, ObjectCircleRadius, 0));
 
                             if (type.HasFlag(ObjType.Flick))
                             {
@@ -187,7 +208,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             }
                         }
                     }
-                    builder.DrawSimpleLines(cachedLineDrawList, 2);
+                    builder.DrawSimpleLines(cachedLineDrawList, markerLineWidth);
                     builder.DrawCircles(cachedCircleDrawList);
                     cachedLineDrawList.Clear();
                     cachedCircleDrawList.Clear();
@@ -214,8 +235,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
 
                             cachedLineDrawList.Add(new(new(x, buttomY), TransparentColor, VertexDash.Solider));
-                            cachedLineDrawList.Add(new(new(x, buttomY), BeatColor, VertexDash.Solider));
-                            cachedLineDrawList.Add(new(new(x, topY), BeatColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(x, buttomY), beatLineColor, VertexDash.Solider));
+                            cachedLineDrawList.Add(new(new(x, topY), beatLineColor, VertexDash.Solider));
                             cachedLineDrawList.Add(new(new(x, topY), TransparentColor, VertexDash.Solider));
 
                             var str = "";
@@ -230,7 +251,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                             prevBpm = bpm;
                         }
                     }
-                    builder.DrawSimpleLines(cachedLineDrawList, 2);
+                    builder.DrawSimpleLines(cachedLineDrawList, markerLineWidth);
                     cachedLineDrawList.Clear();
 
                     //绘制提示
@@ -242,7 +263,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                         System.Numerics.Vector2.One,
                         15,
                         0,
-                        IndirectorColor,
+                        cursorColor,
                         new System.Numerics.Vector2(0, 2),
                         FontStyle.Normal,
                         default);
@@ -258,13 +279,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
                 cachedLineDrawList.Clear();
                 {
-                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, -height / 2), IndirectorColor, VertexDash.Solider));
-                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, +height / 2), IndirectorColor, VertexDash.Solider));
-                    cachedLineDrawList.Add(new(new(indirectorX + 1.5f, +height / 2), IndirectorColor, VertexDash.Solider));
-                    cachedLineDrawList.Add(new(new(indirectorX + 1.5f, -height / 2), IndirectorColor, VertexDash.Solider));
-                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, -height / 2), IndirectorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, -height / 2), cursorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, +height / 2), cursorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX + 1.5f, +height / 2), cursorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX + 1.5f, -height / 2), cursorColor, VertexDash.Solider));
+                    cachedLineDrawList.Add(new(new(indirectorX - 1.5f, -height / 2), cursorColor, VertexDash.Solider));
                 }
-                builder.DrawSimpleLines(cachedLineDrawList, 2);
+                builder.DrawSimpleLines(cachedLineDrawList, CursorLineWidth);
                 cachedLineDrawList.Clear();
 
                 builder.DrawString(
@@ -273,7 +294,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     System.Numerics.Vector2.One,
                     15,
                     0,
-                    IndirectorColor,
+                    cursorColor,
                     new System.Numerics.Vector2(0, 0),
                     FontStyle.Normal,
                     default);

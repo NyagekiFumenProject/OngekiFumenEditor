@@ -94,5 +94,77 @@ namespace OngekiFumenEditor.Properties {
                 this["LimitFPS"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int WaveformBodyLineWidth {
+            get {
+                return ((int)(this["WaveformBodyLineWidth"]));
+            }
+            set {
+                this["WaveformBodyLineWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4")]
+        public int WaveformHoldLineWidth {
+            get {
+                return ((int)(this["WaveformHoldLineWidth"]));
+            }
+            set {
+                this["WaveformHoldLineWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2")]
+        public int WaveformMarkerLineWidth {
+            get {
+                return ((int)(this["WaveformMarkerLineWidth"]));
+            }
+            set {
+                this["WaveformMarkerLineWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool EnableWaveformBlockPrerender {
+            get {
+                return ((bool)(this["EnableWaveformBlockPrerender"]));
+            }
+            set {
+                this["EnableWaveformBlockPrerender"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("4194303")]
+        public int SoundControlMask {
+            get {
+                return ((int)(this["SoundControlMask"]));
+            }
+            set {
+                this["SoundControlMask"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string SoundVolumes {
+            get {
+                return ((string)(this["SoundVolumes"]));
+            }
+            set {
+                this["SoundVolumes"] = value;
+            }
+        }
     }
 }

@@ -20,12 +20,26 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private const int MaxCachedWaveformBlocks = 6;        // 缓存上限
         private const int BlockPrefetchRadius = 1;            // 前后各预取 1 块
         private const int MaxBlockRendersPerFrame = 1;        // 每帧最多烘一块
+        private const int MaxWaveformLineWidth = 24;          // 波形线宽设置上界（与 DefaultWaveformDrawing 一致）
 
-        // 波形视图的清屏色，同时也是图块烘焙的底色：图块不透明，贴回时是 1:1 直拷。
+        // 波形视图的清屏色，同时也是图块烘焙的底色（读自 DefaultWaveformSettings.WaveformBackgroundColor）。
+        // 图块不透明，贴回时是 1:1 直拷。
         // GL 的直线着色器输出「直色 + 覆盖率放在 alpha」，而整条管线用的是 SrcAlpha/OneMinusSrcAlpha 混合，
         // 把这种内容画进透明底会得到 rgb=c*α、alpha=α²（贴回时又被乘一次 α），抗锯齿与重叠笔画的覆盖率会塌掉；
         // 直接烘在当前视图底色上则与实时绘制完全一致，两个后端都不再有 alpha 约定问题。
-        private static readonly Vector4 WaveformViewCleanColor = new(16 / 255f, 16 / 255f, 16 / 255f, 1f);
+        private static Vector4 WaveformViewCleanColor => Properties.DefaultWaveformSettings.Default.WaveformBackgroundColor.ToVector4();
+
+        /// <summary>波形本体折线颜色（DefaultWaveformSettings.WaveformFillColor），烘焙与边界补绘共用。</summary>
+        private static Vector4 WaveformPolylineColor => Properties.DefaultWaveformSettings.Default.WaveformFillColor.ToVector4();
+
+        /// <summary>波形本体线宽（AudioPlayerToolViewerSetting.WaveformBodyLineWidth，clamp 到 1–24）。</summary>
+        private static int WaveformBodyLineWidth => Math.Clamp(Properties.AudioPlayerToolViewerSetting.Default.WaveformBodyLineWidth, 1, MaxWaveformLineWidth);
+
+        /// <summary>
+        /// 是否启用离屏分块预渲染（设置页可关）。关闭时不再烘焙/贴回图块，整帧回退实时绘制，
+        /// 且 VM 会订阅该设置变化以释放已缓存图块。
+        /// </summary>
+        private static bool EnableWaveformBlockPrerender => Properties.AudioPlayerToolViewerSetting.Default.EnableWaveformBlockPrerender;
 
         // 图块缓存与作废图块都由 waveformBlocksLock 保护：失效可能来自 UI 事件线程，烘焙结果来自异步续体。
         private readonly object waveformBlocksLock = new();
@@ -78,6 +92,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             waveformRenderActive = false;
             waveformBlocksDisposed = true;
+
+            DetachWaveformSettingsEvents();
 
             if (waveformDrawing?.Options is { } options)
                 options.PropertyChanged -= OnWaveformDrawingOptionPropertyChanged;
@@ -176,21 +192,21 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             cachedLeftMarkerList.Clear();
             cachedTrailingMarkerList.Clear();
             WaveformGeometry.BuildEdgeMarkers(cachedLeftMarkerList, cachedTrailingMarkerList, peakData, fromTime, toTime,
-                viewWidth, viewHeight);
+                viewWidth, viewHeight, WaveformPolylineColor, WaveformGeometry.DefaultEdgeMarkerColor);
 
             // 与实时绘制同一作用域：标记里的末端竖线带 y 分量，必须同样经过竖直缩放。
             builder.PushModelMatrix(Matrix4x4.CreateScale(1, WaveformVecticalScale, 1f));
             if (cachedLeftMarkerList.Count > 1)
-                builder.DrawSimpleLines(cachedLeftMarkerList, 1);
+                builder.DrawSimpleLines(cachedLeftMarkerList, WaveformBodyLineWidth);
             if (cachedTrailingMarkerList.Count > 1)
-                builder.DrawSimpleLines(cachedTrailingMarkerList, 1);
+                builder.DrawSimpleLines(cachedTrailingMarkerList, WaveformBodyLineWidth);
             builder.PopModelMatrix();
         }
 
         /// <summary>每帧调度：在可见范围±预取半径内按「距当前视图由近及远」烘一块缺失图块。</summary>
         private void ScheduleWaveformBlockRender(int iFrom, int iTo)
         {
-            if (!waveformRenderActive || usingPeakData is null || !IsWaveformPolylineVisible)
+            if (!waveformRenderActive || usingPeakData is null || !IsWaveformPolylineVisible || !EnableWaveformBlockPrerender)
                 return;
 
             var spanMs = WaveformBlockSpanMs;
@@ -270,9 +286,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 builder.PushModelMatrix(Matrix4x4.CreateScale(1, WaveformVecticalScale, 1f));
                 WaveformGeometry.BuildBody(points, peakData,
                     TimeSpan.FromMilliseconds(startMs - bleedMs), TimeSpan.FromMilliseconds(startMs + spanMs + bleedMs),
-                    logicalWidth, viewHeight, rangeMarginPoints: 1);                   // 左右各多画 1 个峰点，消除块缝断线
+                    logicalWidth, viewHeight, rangeMarginPoints: 1, WaveformPolylineColor);   // 左右各多画 1 个峰点，消除块缝断线
                 if (points.Count > 0)
-                    builder.DrawSimpleLines(points, 1);
+                    builder.DrawSimpleLines(points, WaveformBodyLineWidth);
                 builder.PopModelMatrix();
 
                 var list = builder.GetDrawCommandList();

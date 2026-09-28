@@ -14,9 +14,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -47,7 +49,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
         public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
         private static int loopIdGen = 0;
 
-        public SoundControl SoundControl { get; set; } = SoundControl.All;
+        /// <summary>
+        /// 音效开关掩码。初始值读自用户设置 <see cref="AudioPlayerToolViewerSetting.SoundControlMask"/>（clamp 到 <see cref="SoundControl.All"/>）；
+        /// 面板勾选变化由 AudioPlayerToolViewerViewModel 写回设置。
+        /// </summary>
+        public SoundControl SoundControl { get; set; } = (SoundControl)AudioPlayerToolViewerSetting.Default.SoundControlMask & SoundControl.All;
 
         private float volume = 1;
         public float Volume
@@ -140,6 +146,9 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 }
                 cacheSounds[sound] = player;
             }
+
+            // 音效加载完成后重放用户设置的音量（含重载路径）。
+            ApplySavedSoundVolumes();
 
             if (!noError)
             {
@@ -266,7 +275,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             var soundObjects = fumen.GetAllDisplayableObjects().OfType<OngekiTimelineObjectBase>();
 
             //add default clickse objects.
-            if (!fumen.ClickSEs.Any(x => x.TGrid.TotalUnit <= 1))
+            if (EditorGlobalSetting.Default.InjectDefaultClickSE && !fumen.ClickSEs.Any(x => x.TGrid.TotalUnit <= 1))
             {
                 foreach (var tGrid in CalculateDefaultClickSEs(fumen))
                     AddSound(SoundControl.ClickSE, tGrid);
@@ -605,12 +614,67 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         public void SetVolume(SoundControl sound, float volume)
         {
+            var found = false;
             foreach (var item in cacheSounds)
             {
                 if (item.Key == sound)
                 {
                     item.Value.Volume = volume;
+                    found = true;
                 }
+            }
+
+            //面板滑杆调整后写回设置，下次启动/重载沿用。
+            if (found)
+                SaveSoundVolumes();
+        }
+
+        /// <summary>按用户设置 SoundVolumes（格式 <c>Name=0.8;Name2=1</c>）重放各音效音量；未知名/非法值跳过。</summary>
+        private void ApplySavedSoundVolumes()
+        {
+            foreach (var (sound, volume) in ParseSoundVolumes(AudioPlayerToolViewerSetting.Default.SoundVolumes))
+            {
+                if (cacheSounds.TryGetValue(sound, out var soundPlayer))
+                    soundPlayer.Volume = volume;
+            }
+        }
+
+        /// <summary>把当前各音效音量序列化写回用户设置（InvariantCulture，避免小数点随语言变化）。</summary>
+        private void SaveSoundVolumes()
+        {
+            var builder = new StringBuilder();
+            foreach (var (sound, soundPlayer) in cacheSounds)
+            {
+                if (builder.Length > 0)
+                    builder.Append(';');
+                builder.Append(sound).Append('=').Append(soundPlayer.Volume.ToString(CultureInfo.InvariantCulture));
+            }
+
+            var setting = AudioPlayerToolViewerSetting.Default;
+            setting.SoundVolumes = builder.ToString();
+            setting.Save();
+        }
+
+        private static IEnumerable<(SoundControl sound, float volume)> ParseSoundVolumes(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                yield break;
+
+            foreach (var entry in text.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            {
+                var separatorIndex = entry.IndexOf('=');
+                if (separatorIndex <= 0 || separatorIndex == entry.Length - 1)
+                    continue;
+
+                var name = entry[..separatorIndex].Trim();
+                var valueText = entry[(separatorIndex + 1)..].Trim();
+
+                if (!Enum.TryParse<SoundControl>(name, out var sound) || !Enum.IsDefined(sound))
+                    continue;
+                if (!float.TryParse(valueText, NumberStyles.Float, CultureInfo.InvariantCulture, out var volume) || !float.IsFinite(volume))
+                    continue;
+
+                yield return (sound, volume);
             }
         }
 
