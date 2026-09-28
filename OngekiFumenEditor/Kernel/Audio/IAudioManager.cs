@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio
@@ -11,7 +12,7 @@ namespace OngekiFumenEditor.Kernel.Audio
         float MusicSpeed { get; set; }
 
         Task<ISoundPlayer> LoadSoundAsync(string filePath);
-        Task<IAudioPlayer> LoadAudioAsync(string filePath);
+        Task<IAudioPlayer> LoadAudioAsync(string filePath, CancellationToken cancellationToken = default);
 
         IEnumerable<(string fileExt, string extDesc)> SupportAudioFileExtensionList { get; }
     }

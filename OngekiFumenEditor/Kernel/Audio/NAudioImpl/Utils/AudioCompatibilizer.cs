@@ -7,6 +7,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils
@@ -37,19 +38,21 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Utils
             }
         }
 
-        public static async Task<ISampleProvider> CheckCompatible(ISampleProvider waveProvider, int targetSampleRate)
+        public static async Task<ISampleProvider> CheckCompatible(ISampleProvider waveProvider, int targetSampleRate, CancellationToken cancellationToken = default)
         {
             var outProvider = waveProvider;
 
             if (outProvider.WaveFormat.SampleRate != targetSampleRate)
             {
                 Log.LogWarn($"Resample sound audio file from {outProvider.WaveFormat.SampleRate} to {targetSampleRate}");
+                cancellationToken.ThrowIfCancellationRequested();
                 outProvider = await Task.Run(() => ResampleCacheSound(outProvider, targetSampleRate));
             }
 
             if (outProvider.WaveFormat.Channels == 1)
             {
                 Log.LogWarn($"Extend channel from Mono to Stereo");
+                cancellationToken.ThrowIfCancellationRequested();
                 outProvider = await Task.Run(() => MonoToStereoSound(outProvider));
             }
 

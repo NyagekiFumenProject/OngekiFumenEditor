@@ -81,8 +81,10 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
             OnPlaybackFinished?.Invoke();
         }
 
-        public async Task Load(string audio_file, int targetSampleRate)
+        public async Task Load(string audio_file, int targetSampleRate, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             //release resource before loading new one.
             Dispose();
 
@@ -91,7 +93,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                 Log.LogInfo($"Load audio file: {audio_file}");
                 var rawStream = new AudioFileReader(audio_file);
                 duration = rawStream.TotalTime;
-                var processedProvider = await AudioCompatibilizer.CheckCompatible(rawStream, targetSampleRate);
+                var processedProvider = await AudioCompatibilizer.CheckCompatible(rawStream, targetSampleRate, cancellationToken);
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 samples = processedProvider.ToWaveProvider().ToArray();
 
@@ -104,6 +108,11 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 
                 NotifyOfPropertyChange(() => Duration);
                 IsAvaliable = true;
+            }
+            catch (OperationCanceledException)
+            {
+                Dispose();
+                throw;
             }
             catch (Exception e)
             {

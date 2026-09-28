@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
@@ -268,8 +269,10 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             }
         }
 
-        public async Task<IAudioPlayer> LoadAudioAsync(string filePath)
+        public async Task<IAudioPlayer> LoadAudioAsync(string filePath, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (string.IsNullOrWhiteSpace(filePath))
                 return null;
 
@@ -280,9 +283,11 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
                     return null;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var player = new DefaultMusicPlayer(musicMixer, this);
             ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-            await player.Load(filePath, targetSampleRate);
+            await player.Load(filePath, targetSampleRate, cancellationToken);
             return player;
         }
 
