@@ -81,6 +81,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     public IEnumerable<IFumenEditorDrawingTarget> CurrentDrawingTargets => drawingTargets;
 
     private TaskCompletionSource renderInitializationTaskSource = new();
+    private TaskCompletionSource renderFirstFrameTaskSource = new();
 
     private VisibleRect rectInDesignMode;
     public VisibleRect RectInDesignMode
@@ -267,6 +268,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private void OnEditorLoop(IRenderContext context, TimeSpan ts)
     {
+        // 第一帧已进入渲染循环，编辑器加载流程据此判定「已就绪」。
+        renderFirstFrameTaskSource.TrySetResult();
+
         //todo update() not should be in render loop
         using (EnterRenderDataWriteLock())
             OnEditorUpdate(ts);
@@ -1118,6 +1122,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         return renderInitializationTaskSource.Task;
     }
 
+    public Task WaitForFirstRenderFrameIsDone()
+    {
+        return renderFirstFrameTaskSource.Task;
+    }
+
     private void DisposeRenderLoop()
     {
         var context = RenderContext;
@@ -1145,6 +1154,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         cachedMagneticXGridLines.Clear();
         CurrentDrawingTargetContext = default;
         renderInitializationTaskSource.TrySetResult();
+        renderFirstFrameTaskSource.TrySetResult();
     }
 
     /// <summary>

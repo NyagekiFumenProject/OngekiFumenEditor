@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.OgkiFumenListBrowser.Models;
 using OngekiFumenEditor.Parser;
@@ -292,17 +293,20 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
         public async void LoadFumen(OngekiFumenDiff diff)
         {
             IsBusy = true;
+            var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
+            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, docName);
             try
             {
+                session.ReportStep(EditorLoadingStep.Parsing);
                 using var fs = File.OpenRead(diff.FilePath);
-                var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(diff.FilePath).DeserializeAsync(fs);
+                var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(diff.FilePath).DeserializeAsync(fs, session.CancellationToken);
 
                 var newProj = new EditorProjectDataModel();
                 newProj.FumenFilePath = diff.FilePath;
                 newProj.Fumen = fumen;
                 newProj.AudioFilePath = diff.RefSet.AudioFilePath;
 
-                using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath);
+                using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath, session.CancellationToken);
                 if (audio is null)
                 {
                     MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
@@ -312,7 +316,6 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
 
                 var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
                 var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
-                var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
                 editor.DisplayName = docName;
 
                 var viewAware = (IViewAware)editor;
@@ -324,7 +327,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
                     loadedHandler = async (sender2, e2) =>
                     {
                         frameworkElement.Loaded -= loadedHandler;
-                        await fumenProvider.Open(editor, newProj);
+                        await fumenProvider.Open(editor, newProj, session);
 
                         IoC.Get<IEditorRecentFilesManager>().PostRecord(new(diff.FilePath, docName, RecentOpenType.CommandOpen));
                     };
@@ -332,10 +335,12 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
                 };
 
                 await IoC.Get<IShell>().OpenDocumentAsync(editor);
+                await session.Completion;
             }
             catch
             {
-
+                // 取消时 session 已由对话框侧记为 Cancelled，这里的 Complete 只是兜底异常路径，避免对话框滞留。
+                session.Complete(EditorLoadingOutcome.Failed);
             }
             finally
             {

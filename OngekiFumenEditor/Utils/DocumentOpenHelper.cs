@@ -4,6 +4,7 @@ using Gemini.Framework.Services;
 using OngekiFumenEditor.Kernel.Audio;
 using OngekiFumenEditor.Kernel.RecentFiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
@@ -11,6 +12,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -44,36 +46,50 @@ namespace OngekiFumenEditor.Utils
 
         public static async Task<bool> TryOpenOgkrFileAsDocument(string ogkrFilePath)
         {
-            var newProj = await TryCreateEditorProjectDataModel(ogkrFilePath);
-            if (newProj is null)
-                return false;
             var docName = await TryFormatOpenFileName(ogkrFilePath);
-
-            var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
-            editor.DisplayName = docName;
-
-            var viewAware = (IViewAware)editor;
-            viewAware.ViewAttached += (sender, e) =>
+            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, docName);
+            try
             {
-                var frameworkElement = (FrameworkElement)e.View;
+                var newProj = await TryCreateEditorProjectDataModel(ogkrFilePath, session);
+                if (newProj is null)
+                    return false;
+                session.CancellationToken.ThrowIfCancellationRequested();
 
-                RoutedEventHandler loadedHandler = null;
-                loadedHandler = async (sender2, e2) =>
+                var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
+                editor.DisplayName = docName;
+
+                var viewAware = (IViewAware)editor;
+                viewAware.ViewAttached += (sender, e) =>
                 {
-                    frameworkElement.Loaded -= loadedHandler;
-                    await IoC.Get<IFumenVisualEditorProvider>().Open(editor, newProj);
+                    var frameworkElement = (FrameworkElement)e.View;
 
-                    IoC.Get<IEditorRecentFilesManager>().PostRecord(new(ogkrFilePath, docName, RecentOpenType.CommandOpen));
+                    RoutedEventHandler loadedHandler = null;
+                    loadedHandler = async (sender2, e2) =>
+                    {
+                        frameworkElement.Loaded -= loadedHandler;
+                        await IoC.Get<IFumenVisualEditorProvider>().Open(editor, newProj, session);
+
+                        IoC.Get<IEditorRecentFilesManager>().PostRecord(new(ogkrFilePath, docName, RecentOpenType.CommandOpen));
+                    };
+                    frameworkElement.Loaded += loadedHandler;
                 };
-                frameworkElement.Loaded += loadedHandler;
-            };
 
-            await IoC.Get<IShell>().OpenDocumentAsync(editor);
-            return true;
+                await IoC.Get<IShell>().OpenDocumentAsync(editor);
+                var outcome = await session.Completion;
+                return outcome == EditorLoadingOutcome.Ready;
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
         }
 
         public static async Task<bool> TryOpenProject(EditorProjectDataModel proj)
         {
+            var targetName = string.IsNullOrWhiteSpace(proj?.FumenFilePath)
+                ? Resources.EditorLoadingNewProjectName
+                : Path.GetFileName(proj.FumenFilePath);
+            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, targetName);
             var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
             var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
             var viewAware = (IViewAware)editor;
@@ -85,29 +101,35 @@ namespace OngekiFumenEditor.Utils
                 loadedHandler = async (sender2, e2) =>
                 {
                     frameworkElement.Loaded -= loadedHandler;
-                    await fumenProvider.Open(editor, proj);
+                    await fumenProvider.Open(editor, proj, session);
                 };
                 frameworkElement.Loaded += loadedHandler;
             };
 
             await IoC.Get<IShell>().OpenDocumentAsync(editor);
-            return true;
+            var outcome = await session.Completion;
+            return outcome == EditorLoadingOutcome.Ready;
         }
 
-        public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath)
+        public static async Task<EditorProjectDataModel> TryCreateEditorProjectDataModel(string ogkrFilePath, EditorLoadingSession session)
         {
             (var audioFile, var audioDuration) = await GetAudioFilePath(ogkrFilePath);
+            session.CancellationToken.ThrowIfCancellationRequested();
 
             if (!File.Exists(audioFile))
             {
+                session.ReportStep(EditorLoadingStep.SelectingAudio);
                 audioFile = FileDialogHelper.OpenFile(Resources.SelectAudioFileManually, IoC.Get<IAudioManager>().SupportAudioFileExtensionList);
+                session.CancellationToken.ThrowIfCancellationRequested();
                 if (!File.Exists(audioFile))
                     return null;
-                audioDuration = await CalcAudioDuration(audioFile);
+                audioDuration = await CalcAudioDuration(audioFile, session.CancellationToken);
             }
 
+            session.ReportStep(EditorLoadingStep.Parsing);
+            session.CancellationToken.ThrowIfCancellationRequested();
             using var fs = File.OpenRead(ogkrFilePath);
-            var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(ogkrFilePath).DeserializeAsync(fs);
+            var fumen = await IoC.Get<IFumenParserManager>().GetDeserializer(ogkrFilePath).DeserializeAsync(fs, session.CancellationToken);
             Log.LogInfo($"Fumen file loaded: {ogkrFilePath}");
 
             var newProj = new EditorProjectDataModel();
@@ -200,9 +222,10 @@ namespace OngekiFumenEditor.Utils
             return (audioFile, await CalcAudioDuration(audioFile));
         }
 
-        private static async Task<TimeSpan> CalcAudioDuration(string audioFilePath)
+        private static async Task<TimeSpan> CalcAudioDuration(string audioFilePath, CancellationToken cancellationToken = default)
         {
-            using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFilePath);
+            using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFilePath, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             return audio.Duration;
         }
     }

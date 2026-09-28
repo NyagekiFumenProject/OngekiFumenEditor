@@ -212,24 +212,47 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     await TryCloseAsync(false);
                     return;
                 }
+
                 var projectData = dialogViewModel.EditorProjectData;
-                if (File.Exists(projectData.FumenFilePath))
+
+                // 用户看到的是「正在加载：哪个文件」，新工程没有工程名就用所选谱面/音源文件名代替。
+                static string ResolveTargetName(EditorProjectDataModel data)
                 {
-                    using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
-                    var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
-                    if (fumenDeserializer is null)
-                        throw new NotSupportedException($"{Resources.DeserializeFumenFileFail}{projectData.FumenFilePath}");
-                    var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
-                    Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
-                    projectData.Fumen = fumen;
+                    if (!string.IsNullOrWhiteSpace(data.FumenFilePath))
+                        return Path.GetFileName(data.FumenFilePath);
+                    if (!string.IsNullOrWhiteSpace(data.AudioFilePath))
+                        return Path.GetFileName(data.AudioFilePath);
+                    return Resources.EditorLoadingNewProjectName;
                 }
-                EditorProjectData = dialogViewModel.EditorProjectData;
-                AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
-                Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
-                await Dispatcher.Yield();
+
+                using var session = EditorLoadingSession.Begin(EditorLoadingStep.Parsing, ResolveTargetName(projectData));
+                try
+                {
+                    if (File.Exists(projectData.FumenFilePath))
+                    {
+                        using var fumenFileStream = File.OpenRead(projectData.FumenFilePath);
+                        var fumenDeserializer = IoC.Get<IFumenParserManager>().GetDeserializer(projectData.FumenFilePath);
+                        if (fumenDeserializer is null)
+                            throw new NotSupportedException($"{Resources.DeserializeFumenFileFail}{projectData.FumenFilePath}");
+                        var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream, session.CancellationToken);
+                        Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
+                        projectData.Fumen = fumen;
+                    }
+                    await LoadInternalAsync(projectData, session);
+                    Log.LogInfo($"FumenVisualEditorViewModel DoNew()");
+                }
+                catch (OperationCanceledException)
+                {
+                    await AbortLoadingAsync(session);
+                }
+                catch (Exception e)
+                {
+                    await HandleLoadFailureAsync($"{Resources.CantCreateProject}{e.Message}", session);
+                }
             }
             catch (Exception e)
             {
+                // 设置对话框本身失败（此时还没有 session）。
                 var errMsg = $"{Resources.CantCreateProject}{e.Message}";
                 Log.LogError(errMsg);
                 MessageBox.Show(errMsg);
@@ -239,44 +262,87 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoLoad(string filePath)
         {
+            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, Path.GetFileName(filePath));
             try
             {
                 using var _ = StatusBarHelper.BeginStatus("Editor project file loading : " + filePath);
                 Log.LogInfo($"FumenVisualEditorViewModel DoLoad() : {filePath}");
-                var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath);
-                await Load(projectData);
+                session.ReportStep(EditorLoadingStep.Parsing);
+                var projectData = await EditorProjectDataUtils.TryLoadFromFileAsync(filePath, session.CancellationToken);
+                await LoadInternalAsync(projectData, session);
                 ToastNotify(Resources.LoadProjectFileAndFumenFile);
-
                 IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
+            }
+            catch (OperationCanceledException)
+            {
+                await AbortLoadingAsync(session);
             }
             catch (Exception e)
             {
-                var errMsg = $"{Resources.CantLoadProject}{e.Message}";
-                Log.LogError(errMsg);
-                MessageBox.Show(errMsg);
-                await TryCloseAsync(false);
+                await HandleLoadFailureAsync($"{Resources.CantLoadProject}{e.Message}", session);
             }
         }
 
-        public async Task Load(EditorProjectDataModel projModel)
+        public async Task Load(EditorProjectDataModel projModel, EditorLoadingSession session)
         {
             try
             {
-                EditorProjectData = projModel;
-                AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(editorProjectData.AudioFilePath);
-
-                var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
-                ScrollTo(dispTGrid);
-
-                LoadingFinished?.Invoke(this, new(Fumen));
+                await LoadInternalAsync(projModel, session);
+            }
+            catch (OperationCanceledException)
+            {
+                await AbortLoadingAsync(session);
             }
             catch (Exception e)
             {
-                var errMsg = $"{Resources.CantLoadProject}{e.Message}";
-                Log.LogError(errMsg);
-                MessageBox.Show(errMsg);
-                await TryCloseAsync(false);
+                await HandleLoadFailureAsync($"{Resources.CantLoadProject}{e.Message}", session);
             }
+        }
+
+        private async Task HandleLoadFailureAsync(string errorMessage, EditorLoadingSession session)
+        {
+            Log.LogError(errorMessage);
+            MessageBox.Show(errorMessage);
+            session.Complete(EditorLoadingOutcome.Failed);
+            await TryCloseAsync(false);
+        }
+
+        private async Task LoadInternalAsync(EditorProjectDataModel projModel, EditorLoadingSession session)
+        {
+            session.CancellationToken.ThrowIfCancellationRequested();
+            EditorProjectData = projModel;
+            session.ReportStep(EditorLoadingStep.LoadingAudio);
+            AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(projModel.AudioFilePath, session.CancellationToken);
+            session.CancellationToken.ThrowIfCancellationRequested();
+
+            var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
+            ScrollTo(dispTGrid);
+
+            LoadingFinished?.Invoke(this, new(Fumen));
+
+            session.ReportStep(EditorLoadingStep.InitializingRender);
+            await WaitForEditorReadyAsync(session.CancellationToken);
+            session.Complete(EditorLoadingOutcome.Ready);
+        }
+
+        private async Task WaitForEditorReadyAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await Task.WhenAll(WaitForRenderInitializationIsDone(), WaitForFirstRenderFrameIsDone())
+                    .WaitAsync(EditorLoadingSession.EditorReadyTimeout, cancellationToken);
+            }
+            catch (TimeoutException)
+            {
+                Log.LogWarn($"Editor render did not become ready within {EditorLoadingSession.EditorReadyTimeout.TotalSeconds}s; closing the loading dialog anyway.");
+            }
+        }
+
+        private async Task AbortLoadingAsync(EditorLoadingSession session)
+        {
+            Log.LogInfo("Editor loading was cancelled.");
+            session.Complete(EditorLoadingOutcome.Cancelled);
+            await TryCloseAsync(false);
         }
 
         protected override async Task DoSave(string filePath)

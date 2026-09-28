@@ -1,5 +1,6 @@
 using Gemini.Framework;
 using Gemini.Framework.Services;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
@@ -40,6 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 
         public async Task Open(IDocument document, string path) => await (document as FumenVisualEditorViewModel)?.Load(path);
 
-        public async Task Open(IDocument document, EditorProjectDataModel projModel) => await (document as FumenVisualEditorViewModel)?.Load(projModel);
+        public async Task Open(IDocument document, EditorProjectDataModel projModel, EditorLoadingSession session) => await (document as FumenVisualEditorViewModel)?.Load(projModel, session);
     }
 }

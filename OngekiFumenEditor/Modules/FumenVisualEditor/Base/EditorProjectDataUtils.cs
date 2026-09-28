@@ -6,6 +6,7 @@ using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -20,10 +21,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         public static string GetDefaultFumenFilePathForAutoGenerate(string editorProjectFilePath)
             => Path.Combine(Path.GetDirectoryName(editorProjectFilePath), Path.GetFileNameWithoutExtension(editorProjectFilePath) + ".ogkr");
 
-        public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath)
+        public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath, CancellationToken cancellationToken = default)
         {
             Log.LogDebug($"filePath = {filePath}");
             var projectData = await projFileManager.Load(filePath);
+            cancellationToken.ThrowIfCancellationRequested();
 
             projectData.FumenFilePath = projectData.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(filePath);
 
@@ -40,7 +42,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             Log.LogDebug($"fumenDeserializer = {fumenDeserializer}");
             if (fumenDeserializer is null)
                 throw new NotSupportedException($"{Resources.DeserializeFumenFileNotSupport}{projectData.FumenFilePath}");
-            var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream);
+            var fumen = await fumenDeserializer.DeserializeAsync(fumenFileStream, cancellationToken);
             Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
             projectData.Fumen = fumen;
 
