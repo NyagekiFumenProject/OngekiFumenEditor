@@ -108,6 +108,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             currentViewMatrix = frameState.ViewMatrix;
             currentProjectionMatrix = frameState.ProjectionMatrix;
 
+            // 文字批次只在一个命令列表内有效：即使上一帧中途异常退出，也不会带着旧顶点跑到这一帧。
+            stringDrawing.DiscardPendingBatch();
+
             modelMatrixStack.Clear();
             viewMatrixStack.Clear();
             projectionMatrixStack.Clear();
@@ -129,13 +132,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         {
             ArgumentNullException.ThrowIfNull(commands);
 
-            foreach (var command in commands)
+            for (var i = 0; i < commands.Count; i++)
             {
+                var command = commands[i];
                 var perfomenceMonitor = PerfomenceMonitor;
                 perfomenceMonitor.OnBeginDrawCommand(command);
                 try
                 {
                     Present(command);
+
+                    // 连续的文字命令共用一个批次（同一绘制目标 + 同一 MVP），在一串文字的最后一条命令内收尾：
+                    // 既不会越过它后面任何非文字绘制命令（绘制顺序不变），draw call 与耗时也仍然记在 DrawStringCommand 上。
+                    if (command is DrawStringCommand && (i + 1 == commands.Count || commands[i + 1] is not DrawStringCommand))
+                        stringDrawing.Flush();
                 }
                 finally
                 {
