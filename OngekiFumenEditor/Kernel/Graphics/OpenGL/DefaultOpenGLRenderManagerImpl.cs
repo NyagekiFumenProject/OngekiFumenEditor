@@ -105,7 +105,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             GL.ClearColor(System.Drawing.Color.Black);
             GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            // RGB uses ordinary straight-alpha blending. The alpha channel must accumulate linearly (source factor ONE),
+            // otherwise the source alpha multiplies itself (1-a+a^2), and offscreen content rendered over an opaque
+            // background comes back with alpha < 1, so pasting those textures dims every antialiased pixel.
+            GL.BlendFuncSeparate(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha,
+                BlendingFactorSrc.One, BlendingFactorDest.OneMinusSrcAlpha);
 
             Log.LogDebug($"Prepare OpenGL version : {GL.GetInteger(GetPName.MajorVersion)}.{GL.GetInteger(GetPName.MinorVersion)}");
 

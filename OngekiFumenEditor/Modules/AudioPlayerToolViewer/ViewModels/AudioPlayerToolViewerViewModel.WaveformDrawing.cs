@@ -244,7 +244,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 FlushPendingBlockDisposal();
 
                 using var builder = renderImpl.CreateDrawCommandListBuilder();
-                builder.SetCleanColor(new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
+                builder.SetCleanColor(WaveformViewCleanColor);
                 builder.SetViewport(viewWidth, viewHeight, renderScaleX, renderScaleY);
                 builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
                 builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);

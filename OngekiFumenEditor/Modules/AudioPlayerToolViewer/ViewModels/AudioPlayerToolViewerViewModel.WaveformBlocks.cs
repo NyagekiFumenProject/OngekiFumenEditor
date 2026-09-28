@@ -21,6 +21,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private const int BlockPrefetchRadius = 1;            // 前后各预取 1 块
         private const int MaxBlockRendersPerFrame = 1;        // 每帧最多烘一块
 
+        // 波形视图的清屏色，同时也是图块烘焙的底色：图块不透明，贴回时是 1:1 直拷。
+        // GL 的直线着色器输出「直色 + 覆盖率放在 alpha」，而整条管线用的是 SrcAlpha/OneMinusSrcAlpha 混合，
+        // 把这种内容画进透明底会得到 rgb=c*α、alpha=α²（贴回时又被乘一次 α），抗锯齿与重叠笔画的覆盖率会塌掉；
+        // 直接烘在当前视图底色上则与实时绘制完全一致，两个后端都不再有 alpha 约定问题。
+        private static readonly Vector4 WaveformViewCleanColor = new(16 / 255f, 16 / 255f, 16 / 255f, 1f);
+
         // 图块缓存与作废图块都由 waveformBlocksLock 保护：失效可能来自 UI 事件线程，烘焙结果来自异步续体。
         private readonly object waveformBlocksLock = new();
         private readonly Dictionary<int, IImage> waveformBlocks = new();
@@ -253,7 +259,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 blockRenderOffscreenContext = offscreen;
 
                 using var builder = renderImpl.CreateDrawCommandListBuilder();
-                builder.SetCleanColor(new Vector4(0, 0, 0, 0));                        // 透明底（GL 必须清，否则内容未定义）
+                builder.SetCleanColor(WaveformViewCleanColor);                        // 与视图同底色：图块不透明，内容与实时绘制一致
                 builder.SetViewport(logicalWidth, viewHeight, renderScaleX, renderScaleY);
                 builder.SetCurrentViewMatrix(Matrix4x4.Identity);
                 builder.SetCurrentProjectionMatrix(Matrix4x4.CreateOrthographic(logicalWidth, viewHeight, -1, 1));
