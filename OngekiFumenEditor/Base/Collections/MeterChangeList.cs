@@ -71,21 +71,43 @@ namespace OngekiFumenEditor.Base.Collections
         public IEnumerator<MeterChange> GetEnumerator()
         {
             yield return firstMeter;
-            foreach (var item in changedMeterList.OrderBy(x => x.TGrid))
+            // backing 本身按 TGrid 升序维护，直接遍历即可（旧实现的 OrderBy 是纯浪费）
+            foreach (var item in changedMeterList)
                 yield return item;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public MeterChange GetMeter(TGrid time) => this.LastOrDefault(meter => meter.TGrid <= time);
+        public MeterChange GetMeter(TGrid time)
+        {
+            // 最后一个 TGrid <= time
+            var upper = changedMeterList.UpperBoundIndex(time);
+            if (upper > 0)
+                return changedMeterList[upper - 1];
+            return firstMeter.TGrid <= time ? firstMeter : default;
+        }
 
         public MeterChange GetPrevMeter(MeterChange time) => GetPrevMeter(time.TGrid);
 
-        public MeterChange GetPrevMeter(TGrid time) => this.LastOrDefault(meter => meter.TGrid < time);
+        public MeterChange GetPrevMeter(TGrid time)
+        {
+            // 最后一个 TGrid < time（严格）
+            var lower = changedMeterList.LowerBoundIndex(time);
+            if (lower > 0)
+                return changedMeterList[lower - 1];
+            return firstMeter.TGrid < time ? firstMeter : default;
+        }
 
         public MeterChange GetNextMeter(MeterChange meter) => GetNextMeter(meter.TGrid);
 
-        public MeterChange GetNextMeter(TGrid time) => this.FirstOrDefault(meter => time < meter.TGrid);
+        public MeterChange GetNextMeter(TGrid time)
+        {
+            // 第一个 TGrid > time（严格）；枚举以 firstMeter 打头，故先看它
+            if (firstMeter.TGrid > time)
+                return firstMeter;
+            var upper = changedMeterList.UpperBoundIndex(time);
+            return upper < changedMeterList.Count ? changedMeterList[upper] : default;
+        }
 
         private List<(TimeSpan audioTime, TGrid startTGrid, MeterChange meterChange, BPMChange bpmChange)> cachedTimesignUniformPosition = new();
         private double cachedMetListCacheHash = int.MinValue;
