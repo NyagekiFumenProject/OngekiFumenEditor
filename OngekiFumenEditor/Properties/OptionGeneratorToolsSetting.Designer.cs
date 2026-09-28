@@ -34,5 +34,137 @@ namespace OngekiFumenEditor.Properties {
                 this["LastLoadedGameFolder"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Jacket_OutputAssetbundleFolderPath {
+            get {
+                return ((string)(this["Jacket_OutputAssetbundleFolderPath"]));
+            }
+            set {
+                this["Jacket_OutputAssetbundleFolderPath"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Jacket_InputImageFilePath {
+            get {
+                return ((string)(this["Jacket_InputImageFilePath"]));
+            }
+            set {
+                this["Jacket_InputImageFilePath"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("520")]
+        public int Jacket_Width {
+            get {
+                return ((int)(this["Jacket_Width"]));
+            }
+            set {
+                this["Jacket_Width"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("520")]
+        public int Jacket_Height {
+            get {
+                return ((int)(this["Jacket_Height"]));
+            }
+            set {
+                this["Jacket_Height"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("220")]
+        public int Jacket_WidthSmall {
+            get {
+                return ((int)(this["Jacket_WidthSmall"]));
+            }
+            set {
+                this["Jacket_WidthSmall"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("220")]
+        public int Jacket_HeightSmall {
+            get {
+                return ((int)(this["Jacket_HeightSmall"]));
+            }
+            set {
+                this["Jacket_HeightSmall"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool Jacket_UpdateAssetBytesFile {
+            get {
+                return ((bool)(this["Jacket_UpdateAssetBytesFile"]));
+            }
+            set {
+                this["Jacket_UpdateAssetBytesFile"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Acb_InputAudioFilePath {
+            get {
+                return ((string)(this["Acb_InputAudioFilePath"]));
+            }
+            set {
+                this["Acb_InputAudioFilePath"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string Acb_OutputFolderPath {
+            get {
+                return ((string)(this["Acb_OutputFolderPath"]));
+            }
+            set {
+                this["Acb_OutputFolderPath"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("60000")]
+        public int Acb_PreviewBeginTime {
+            get {
+                return ((int)(this["Acb_PreviewBeginTime"]));
+            }
+            set {
+                this["Acb_PreviewBeginTime"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("80000")]
+        public int Acb_PreviewEndTime {
+            get {
+                return ((int)(this["Acb_PreviewEndTime"]));
+            }
+            set {
+                this["Acb_PreviewEndTime"] = value;
+            }
+        }
     }
 }

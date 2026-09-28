@@ -63,6 +63,7 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
         public bool IsEditable => Directory.Exists(GamePath) && !IsBusy;
 
+        //MusicId/Title/Artist/Stage/Genre/BossCard/BossHp/BossLevel/AddVersion/排序等内容类字段描述的是当前正在编辑的歌曲内容本身，不是跨会话复用的环境参数，因此不做持久化；仅 LastLoadedGameFolder 这类环境参数会被记住。
         private MusicXmlGenerateOption musicXmlOption = new();
         public MusicXmlGenerateOption MusicXmlOption
         {

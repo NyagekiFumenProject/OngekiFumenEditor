@@ -5,5 +5,38 @@
     <Setting Name="LastLoadedGameFolder" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="Jacket_OutputAssetbundleFolderPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Jacket_InputImageFilePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Jacket_Width" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">520</Value>
+    </Setting>
+    <Setting Name="Jacket_Height" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">520</Value>
+    </Setting>
+    <Setting Name="Jacket_WidthSmall" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">220</Value>
+    </Setting>
+    <Setting Name="Jacket_HeightSmall" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">220</Value>
+    </Setting>
+    <Setting Name="Jacket_UpdateAssetBytesFile" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="Acb_InputAudioFilePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Acb_OutputFolderPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Acb_PreviewBeginTime" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">60000</Value>
+    </Setting>
+    <Setting Name="Acb_PreviewEndTime" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">80000</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

@@ -39,7 +39,49 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
         public AcbGeneratorWindowViewModel()
         {
+            var setting = Properties.OptionGeneratorToolsSetting.Default;
+            var needSave = false;
 
+            //路径类参数若已失效则回退默认值并清空已存字段，避免下次仍套用无效路径
+            if (!string.IsNullOrWhiteSpace(setting.Acb_InputAudioFilePath))
+            {
+                if (File.Exists(setting.Acb_InputAudioFilePath))
+                    GenerateOption.InputAudioFilePath = setting.Acb_InputAudioFilePath;
+                else
+                {
+                    setting.Acb_InputAudioFilePath = string.Empty;
+                    needSave = true;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(setting.Acb_OutputFolderPath))
+            {
+                if (Directory.Exists(setting.Acb_OutputFolderPath))
+                    GenerateOption.OutputFolderPath = setting.Acb_OutputFolderPath;
+                else
+                {
+                    setting.Acb_OutputFolderPath = string.Empty;
+                    needSave = true;
+                }
+            }
+
+            GenerateOption.PreviewBeginTime = setting.Acb_PreviewBeginTime;
+            GenerateOption.PreviewEndTime = setting.Acb_PreviewEndTime;
+
+            if (needSave)
+                setting.Save();
+        }
+
+        private void SaveGenerateOptionToSetting()
+        {
+            var setting = Properties.OptionGeneratorToolsSetting.Default;
+
+            setting.Acb_InputAudioFilePath = GenerateOption.InputAudioFilePath ?? string.Empty;
+            setting.Acb_OutputFolderPath = GenerateOption.OutputFolderPath ?? string.Empty;
+            setting.Acb_PreviewBeginTime = GenerateOption.PreviewBeginTime;
+            setting.Acb_PreviewEndTime = GenerateOption.PreviewEndTime;
+
+            setting.Save();
         }
 
         public void SelectAcbFilePath()
@@ -72,6 +114,9 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
 
         public async void Generate()
         {
+            //用户在界面上确认参数并点击生成后，把环境类参数写回设置
+            SaveGenerateOptionToSetting();
+
             IsBusy = true;
             var result = await AcbGeneratorFuckWrapper.Generate(GenerateOption);
             if (!result.IsSuccess)
