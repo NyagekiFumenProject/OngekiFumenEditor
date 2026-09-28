@@ -567,6 +567,36 @@
   <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>エディタは指定されたTGridに移動します</value>
   </data>
+  <data name="EditorLoadingCancel" xml:space="preserve">
+    <value>キャンセル</value>
+  </data>
+  <data name="EditorLoadingCancelling" xml:space="preserve">
+    <value>キャンセル中…</value>
+  </data>
+  <data name="EditorLoadingDialogTitle" xml:space="preserve">
+    <value>エディタ読み込み中</value>
+  </data>
+  <data name="EditorLoadingNewProjectName" xml:space="preserve">
+    <value>新規プロジェクト</value>
+  </data>
+  <data name="EditorLoadingStepInitializingRender" xml:space="preserve">
+    <value>エディタ描画を初期化中…</value>
+  </data>
+  <data name="EditorLoadingStepLoadingAudio" xml:space="preserve">
+    <value>音源を読み込み中…</value>
+  </data>
+  <data name="EditorLoadingStepParsing" xml:space="preserve">
+    <value>譜面/プロジェクトを解析中…</value>
+  </data>
+  <data name="EditorLoadingStepPreparing" xml:space="preserve">
+    <value>読み込み準備中…</value>
+  </data>
+  <data name="EditorLoadingStepSelectingAudio" xml:space="preserve">
+    <value>音源ファイルの選択待ち…</value>
+  </data>
+  <data name="EditorLoadingTargetFormat" xml:space="preserve">
+    <value>読み込み中：{0}</value>
+  </data>
   <data name="EditorLock" xml:space="preserve">
     <value>エディタはロックされています</value>
   </data>
@@ -1170,9 +1200,6 @@
   </data>
   <data name="Process" xml:space="preserve">
     <value>処理</value>
-  </data>
-  <data name="ProcessProriotyUpgrade" xml:space="preserve">
-    <value>アプリケーションプロセスの優先度を引き上げ</value>
   </data>
   <data name="ProgramError" xml:space="preserve">
     <value>プログラムエラー</value>
@@ -1992,5 +2019,71 @@
   </data>
   <data name="HoldBodyWidth" xml:space="preserve">
     <value>Hold本体の幅：</value>
+  </data>
+  <data name="DisableStringRendererAntialiasing" xml:space="preserve">
+    <value>テキストのアンチエイリアスを無効化</value>
+  </data>
+  <data name="AutoSaveAllDirtyDocuments" xml:space="preserve">
+    <value>変更された全ドキュメントを自動保存</value>
+  </data>
+  <data name="TextureSizeScale" xml:space="preserve">
+    <value>テクスチャサイズ倍率</value>
+  </data>
+  <data name="HoldBodyOpacity" xml:space="preserve">
+    <value>Hold本体の不透明度</value>
+  </data>
+  <data name="LaneLineWidth" xml:space="preserve">
+    <value>レーン線幅</value>
+  </data>
+  <data name="WallLaneLineWidth" xml:space="preserve">
+    <value>壁レーン線幅</value>
+  </data>
+  <data name="AutoPlayFaderLineWidth" xml:space="preserve">
+    <value>オートプレイフェーダー線幅</value>
+  </data>
+  <data name="DefaultCurvePrecision" xml:space="preserve">
+    <value>新規オブジェクトのカーブ精度</value>
+  </data>
+  <data name="InjectDefaultClickSE" xml:space="preserve">
+    <value>CLKがない場合に既定のクリックSEを自動挿入（最初の小節）</value>
+  </data>
+  <data name="EditorFontFamilyName" xml:space="preserve">
+    <value>エディタフォント</value>
+  </data>
+  <data name="MsaaSampleCount" xml:space="preserve">
+    <value>MSAAサンプル数（OpenGLのみ、要再起動）</value>
+  </data>
+  <data name="ProcessPriorityTier" xml:space="preserve">
+    <value>プロセス優先度</value>
+  </data>
+  <data name="WaveformBackgroundColor" xml:space="preserve">
+    <value>波形の背景色</value>
+  </data>
+  <data name="WaveformFillColor" xml:space="preserve">
+    <value>波形の塗り色</value>
+  </data>
+  <data name="WaveformCursorColor" xml:space="preserve">
+    <value>波形カーソル色</value>
+  </data>
+  <data name="WaveformBeatLineColor" xml:space="preserve">
+    <value>波形ビート線色</value>
+  </data>
+  <data name="WaveformObjectPlaceLineColor" xml:space="preserve">
+    <value>波形オブジェクト線色</value>
+  </data>
+  <data name="WaveformHoldLineColor" xml:space="preserve">
+    <value>波形Hold線色</value>
+  </data>
+  <data name="WaveformBodyLineWidth" xml:space="preserve">
+    <value>波形の線幅</value>
+  </data>
+  <data name="WaveformHoldLineWidth" xml:space="preserve">
+    <value>波形Hold線幅</value>
+  </data>
+  <data name="WaveformMarkerLineWidth" xml:space="preserve">
+    <value>波形マーカー線幅</value>
+  </data>
+  <data name="EnableWaveformBlockPrerender" xml:space="preserve">
+    <value>波形ブロックの事前レンダリング</value>
   </data>
 </root>

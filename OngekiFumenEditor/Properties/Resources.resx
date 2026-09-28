@@ -573,6 +573,36 @@
   <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>Jump to specified TGrid</value>
   </data>
+  <data name="EditorLoadingCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="EditorLoadingCancelling" xml:space="preserve">
+    <value>Cancelling...</value>
+  </data>
+  <data name="EditorLoadingDialogTitle" xml:space="preserve">
+    <value>Editor loading</value>
+  </data>
+  <data name="EditorLoadingNewProjectName" xml:space="preserve">
+    <value>New project</value>
+  </data>
+  <data name="EditorLoadingStepInitializingRender" xml:space="preserve">
+    <value>Initializing the editor renderer...</value>
+  </data>
+  <data name="EditorLoadingStepLoadingAudio" xml:space="preserve">
+    <value>Loading the audio...</value>
+  </data>
+  <data name="EditorLoadingStepParsing" xml:space="preserve">
+    <value>Parsing the fumen/project file...</value>
+  </data>
+  <data name="EditorLoadingStepPreparing" xml:space="preserve">
+    <value>Preparing to load...</value>
+  </data>
+  <data name="EditorLoadingStepSelectingAudio" xml:space="preserve">
+    <value>Waiting for the audio file to be selected...</value>
+  </data>
+  <data name="EditorLoadingTargetFormat" xml:space="preserve">
+    <value>Loading: {0}</value>
+  </data>
   <data name="EditorLock" xml:space="preserve">
     <value>Editor locked</value>
   </data>
@@ -1178,9 +1208,6 @@
   </data>
   <data name="Process" xml:space="preserve">
     <value>Process</value>
-  </data>
-  <data name="ProcessProriotyUpgrade" xml:space="preserve">
-    <value>Upgrade the priority of this application process</value>
   </data>
   <data name="ProgramError" xml:space="preserve">
     <value>Program error</value>
@@ -2687,5 +2714,71 @@
   </data>
   <data name="HoldBodyWidth" xml:space="preserve">
     <value>Hold body width</value>
+  </data>
+  <data name="DisableStringRendererAntialiasing" xml:space="preserve">
+    <value>Disable text antialiasing</value>
+  </data>
+  <data name="AutoSaveAllDirtyDocuments" xml:space="preserve">
+    <value>Auto save all modified documents</value>
+  </data>
+  <data name="TextureSizeScale" xml:space="preserve">
+    <value>Texture size scale</value>
+  </data>
+  <data name="HoldBodyOpacity" xml:space="preserve">
+    <value>Hold body opacity</value>
+  </data>
+  <data name="LaneLineWidth" xml:space="preserve">
+    <value>Lane line width</value>
+  </data>
+  <data name="WallLaneLineWidth" xml:space="preserve">
+    <value>Wall lane line width</value>
+  </data>
+  <data name="AutoPlayFaderLineWidth" xml:space="preserve">
+    <value>AutoPlayFader line width</value>
+  </data>
+  <data name="DefaultCurvePrecision" xml:space="preserve">
+    <value>New object curve precision</value>
+  </data>
+  <data name="InjectDefaultClickSE" xml:space="preserve">
+    <value>Auto inject default click SE (first bar when no CLK)</value>
+  </data>
+  <data name="EditorFontFamilyName" xml:space="preserve">
+    <value>Editor font family</value>
+  </data>
+  <data name="MsaaSampleCount" xml:space="preserve">
+    <value>MSAA samples (OpenGL only, restart required)</value>
+  </data>
+  <data name="ProcessPriorityTier" xml:space="preserve">
+    <value>Process priority</value>
+  </data>
+  <data name="WaveformBackgroundColor" xml:space="preserve">
+    <value>Waveform background color</value>
+  </data>
+  <data name="WaveformFillColor" xml:space="preserve">
+    <value>Waveform fill color</value>
+  </data>
+  <data name="WaveformCursorColor" xml:space="preserve">
+    <value>Waveform cursor color</value>
+  </data>
+  <data name="WaveformBeatLineColor" xml:space="preserve">
+    <value>Waveform beat line color</value>
+  </data>
+  <data name="WaveformObjectPlaceLineColor" xml:space="preserve">
+    <value>Waveform object line color</value>
+  </data>
+  <data name="WaveformHoldLineColor" xml:space="preserve">
+    <value>Waveform hold line color</value>
+  </data>
+  <data name="WaveformBodyLineWidth" xml:space="preserve">
+    <value>Waveform line width</value>
+  </data>
+  <data name="WaveformHoldLineWidth" xml:space="preserve">
+    <value>Waveform hold line width</value>
+  </data>
+  <data name="WaveformMarkerLineWidth" xml:space="preserve">
+    <value>Waveform marker line width</value>
+  </data>
+  <data name="EnableWaveformBlockPrerender" xml:space="preserve">
+    <value>Pre-render waveform blocks</value>
   </data>
 </root>

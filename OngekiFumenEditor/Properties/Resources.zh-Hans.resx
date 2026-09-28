@@ -573,6 +573,36 @@
   <data name="EditorJumpToSpecifyTGrid" xml:space="preserve">
     <value>编辑器跳转到指定的TGrid</value>
   </data>
+  <data name="EditorLoadingCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="EditorLoadingCancelling" xml:space="preserve">
+    <value>正在取消…</value>
+  </data>
+  <data name="EditorLoadingDialogTitle" xml:space="preserve">
+    <value>编辑器加载中</value>
+  </data>
+  <data name="EditorLoadingNewProjectName" xml:space="preserve">
+    <value>新建工程</value>
+  </data>
+  <data name="EditorLoadingStepInitializingRender" xml:space="preserve">
+    <value>正在初始化编辑器渲染…</value>
+  </data>
+  <data name="EditorLoadingStepLoadingAudio" xml:space="preserve">
+    <value>正在加载音频…</value>
+  </data>
+  <data name="EditorLoadingStepParsing" xml:space="preserve">
+    <value>正在解析谱面/工程文件…</value>
+  </data>
+  <data name="EditorLoadingStepPreparing" xml:space="preserve">
+    <value>正在准备加载…</value>
+  </data>
+  <data name="EditorLoadingStepSelectingAudio" xml:space="preserve">
+    <value>等待手动选择音频文件…</value>
+  </data>
+  <data name="EditorLoadingTargetFormat" xml:space="preserve">
+    <value>正在加载：{0}</value>
+  </data>
   <data name="EditorLock" xml:space="preserve">
     <value>编辑器已锁住</value>
   </data>
@@ -1178,9 +1208,6 @@
   </data>
   <data name="Process" xml:space="preserve">
     <value>处理</value>
-  </data>
-  <data name="ProcessProriotyUpgrade" xml:space="preserve">
-    <value>提升本应用进程优先度</value>
   </data>
   <data name="ProgramError" xml:space="preserve">
     <value>程序错误</value>
@@ -2654,5 +2681,71 @@
   </data>
   <data name="HoldBodyWidth" xml:space="preserve">
     <value>Hold主体宽度:</value>
+  </data>
+  <data name="DisableStringRendererAntialiasing" xml:space="preserve">
+    <value>禁用文字抗锯齿</value>
+  </data>
+  <data name="AutoSaveAllDirtyDocuments" xml:space="preserve">
+    <value>自动保存所有已修改的文档</value>
+  </data>
+  <data name="TextureSizeScale" xml:space="preserve">
+    <value>贴图尺寸缩放</value>
+  </data>
+  <data name="HoldBodyOpacity" xml:space="preserve">
+    <value>Hold主体不透明度</value>
+  </data>
+  <data name="LaneLineWidth" xml:space="preserve">
+    <value>轨道线宽</value>
+  </data>
+  <data name="WallLaneLineWidth" xml:space="preserve">
+    <value>墙轨线宽</value>
+  </data>
+  <data name="AutoPlayFaderLineWidth" xml:space="preserve">
+    <value>自动演奏渐变轨道线宽</value>
+  </data>
+  <data name="DefaultCurvePrecision" xml:space="preserve">
+    <value>新建物件曲线精度</value>
+  </data>
+  <data name="InjectDefaultClickSE" xml:space="preserve">
+    <value>无CLK时自动补默认打点音（首小节）</value>
+  </data>
+  <data name="EditorFontFamilyName" xml:space="preserve">
+    <value>编辑器字体</value>
+  </data>
+  <data name="MsaaSampleCount" xml:space="preserve">
+    <value>MSAA采样数（仅OpenGL，需重启）</value>
+  </data>
+  <data name="ProcessPriorityTier" xml:space="preserve">
+    <value>进程优先级</value>
+  </data>
+  <data name="WaveformBackgroundColor" xml:space="preserve">
+    <value>波形背景色</value>
+  </data>
+  <data name="WaveformFillColor" xml:space="preserve">
+    <value>波形填充色</value>
+  </data>
+  <data name="WaveformCursorColor" xml:space="preserve">
+    <value>波形游标颜色</value>
+  </data>
+  <data name="WaveformBeatLineColor" xml:space="preserve">
+    <value>波形节拍线颜色</value>
+  </data>
+  <data name="WaveformObjectPlaceLineColor" xml:space="preserve">
+    <value>波形物件线颜色</value>
+  </data>
+  <data name="WaveformHoldLineColor" xml:space="preserve">
+    <value>波形Hold线颜色</value>
+  </data>
+  <data name="WaveformBodyLineWidth" xml:space="preserve">
+    <value>波形线宽</value>
+  </data>
+  <data name="WaveformHoldLineWidth" xml:space="preserve">
+    <value>波形Hold线宽</value>
+  </data>
+  <data name="WaveformMarkerLineWidth" xml:space="preserve">
+    <value>波形标记线宽</value>
+  </data>
+  <data name="EnableWaveformBlockPrerender" xml:space="preserve">
+    <value>波形分块预渲染</value>
   </data>
 </root>

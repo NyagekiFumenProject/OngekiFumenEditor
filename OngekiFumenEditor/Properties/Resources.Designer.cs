@@ -1943,6 +1943,96 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string EditorLoadingCancel {
+            get {
+                return ResourceManager.GetString("EditorLoadingCancel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cancelling....
+        /// </summary>
+        public static string EditorLoadingCancelling {
+            get {
+                return ResourceManager.GetString("EditorLoadingCancelling", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Editor loading.
+        /// </summary>
+        public static string EditorLoadingDialogTitle {
+            get {
+                return ResourceManager.GetString("EditorLoadingDialogTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to New project.
+        /// </summary>
+        public static string EditorLoadingNewProjectName {
+            get {
+                return ResourceManager.GetString("EditorLoadingNewProjectName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Initializing the editor renderer....
+        /// </summary>
+        public static string EditorLoadingStepInitializingRender {
+            get {
+                return ResourceManager.GetString("EditorLoadingStepInitializingRender", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Loading the audio....
+        /// </summary>
+        public static string EditorLoadingStepLoadingAudio {
+            get {
+                return ResourceManager.GetString("EditorLoadingStepLoadingAudio", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Parsing the fumen/project file....
+        /// </summary>
+        public static string EditorLoadingStepParsing {
+            get {
+                return ResourceManager.GetString("EditorLoadingStepParsing", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Preparing to load....
+        /// </summary>
+        public static string EditorLoadingStepPreparing {
+            get {
+                return ResourceManager.GetString("EditorLoadingStepPreparing", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waiting for the audio file to be selected....
+        /// </summary>
+        public static string EditorLoadingStepSelectingAudio {
+            get {
+                return ResourceManager.GetString("EditorLoadingStepSelectingAudio", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Loading: {0}.
+        /// </summary>
+        public static string EditorLoadingTargetFormat {
+            get {
+                return ResourceManager.GetString("EditorLoadingTargetFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Editor locked.
         /// </summary>
         public static string EditorLock {
@@ -5210,15 +5300,6 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Upgrade the priority of this application process.
-        /// </summary>
-        public static string ProcessProriotyUpgrade {
-            get {
-                return ResourceManager.GetString("ProcessProriotyUpgrade", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Generate ACB audio files.
         /// </summary>
         public static string ProgramCommandAcb {
@@ -7519,6 +7600,204 @@ namespace OngekiFumenEditor.Properties {
         public static string XOffset {
             get {
                 return ResourceManager.GetString("XOffset", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Auto save all modified documents.
+        /// </summary>
+        public static string AutoSaveAllDirtyDocuments {
+            get {
+                return ResourceManager.GetString("AutoSaveAllDirtyDocuments", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Texture size scale.
+        /// </summary>
+        public static string TextureSizeScale {
+            get {
+                return ResourceManager.GetString("TextureSizeScale", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hold body opacity.
+        /// </summary>
+        public static string HoldBodyOpacity {
+            get {
+                return ResourceManager.GetString("HoldBodyOpacity", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane line width.
+        /// </summary>
+        public static string LaneLineWidth {
+            get {
+                return ResourceManager.GetString("LaneLineWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Wall lane line width.
+        /// </summary>
+        public static string WallLaneLineWidth {
+            get {
+                return ResourceManager.GetString("WallLaneLineWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to AutoPlayFader line width.
+        /// </summary>
+        public static string AutoPlayFaderLineWidth {
+            get {
+                return ResourceManager.GetString("AutoPlayFaderLineWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to New object curve precision.
+        /// </summary>
+        public static string DefaultCurvePrecision {
+            get {
+                return ResourceManager.GetString("DefaultCurvePrecision", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Auto inject default click SE (first bar when no CLK).
+        /// </summary>
+        public static string InjectDefaultClickSE {
+            get {
+                return ResourceManager.GetString("InjectDefaultClickSE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Editor font family.
+        /// </summary>
+        public static string EditorFontFamilyName {
+            get {
+                return ResourceManager.GetString("EditorFontFamilyName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to MSAA samples (OpenGL only, restart required).
+        /// </summary>
+        public static string MsaaSampleCount {
+            get {
+                return ResourceManager.GetString("MsaaSampleCount", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Process priority.
+        /// </summary>
+        public static string ProcessPriorityTier {
+            get {
+                return ResourceManager.GetString("ProcessPriorityTier", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform background color.
+        /// </summary>
+        public static string WaveformBackgroundColor {
+            get {
+                return ResourceManager.GetString("WaveformBackgroundColor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform fill color.
+        /// </summary>
+        public static string WaveformFillColor {
+            get {
+                return ResourceManager.GetString("WaveformFillColor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform cursor color.
+        /// </summary>
+        public static string WaveformCursorColor {
+            get {
+                return ResourceManager.GetString("WaveformCursorColor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform beat line color.
+        /// </summary>
+        public static string WaveformBeatLineColor {
+            get {
+                return ResourceManager.GetString("WaveformBeatLineColor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform object line color.
+        /// </summary>
+        public static string WaveformObjectPlaceLineColor {
+            get {
+                return ResourceManager.GetString("WaveformObjectPlaceLineColor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform hold line color.
+        /// </summary>
+        public static string WaveformHoldLineColor {
+            get {
+                return ResourceManager.GetString("WaveformHoldLineColor", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform line width.
+        /// </summary>
+        public static string WaveformBodyLineWidth {
+            get {
+                return ResourceManager.GetString("WaveformBodyLineWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform hold line width.
+        /// </summary>
+        public static string WaveformHoldLineWidth {
+            get {
+                return ResourceManager.GetString("WaveformHoldLineWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Waveform marker line width.
+        /// </summary>
+        public static string WaveformMarkerLineWidth {
+            get {
+                return ResourceManager.GetString("WaveformMarkerLineWidth", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Pre-render waveform blocks.
+        /// </summary>
+        public static string EnableWaveformBlockPrerender {
+            get {
+                return ResourceManager.GetString("EnableWaveformBlockPrerender", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Disable text antialiasing.
+        /// </summary>
+        public static string DisableStringRendererAntialiasing {
+            get {
+                return ResourceManager.GetString("DisableStringRendererAntialiasing", resourceCulture);
             }
         }
     }
