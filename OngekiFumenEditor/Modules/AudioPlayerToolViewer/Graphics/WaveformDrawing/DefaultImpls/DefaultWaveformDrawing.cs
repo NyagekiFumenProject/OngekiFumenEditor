@@ -31,15 +31,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         }
 
         private SoflanList dummySoflanList;
-        private static readonly VertexDash InvailedLineDash = new VertexDash(2, 2);
 
         private static readonly System.Numerics.Vector4 TransparentColor = new(1, 1, 1, 0);
-        private static readonly System.Numerics.Vector4 WhiteColor = new(1, 1, 1, 1);
         private static readonly System.Numerics.Vector4 IndirectorColor = new(1, 1, 0, 1);
         private static readonly System.Numerics.Vector4 BeatColor = new(1, 0, 0, 1);
         private static readonly System.Numerics.Vector4 ObjectPlaceColor = new(1, 1, 0, 1);
         private static readonly System.Numerics.Vector4 HoldColor = new(1, 1f, 0f, 0.75f);
-        private static readonly System.Numerics.Vector4 WaveformFillColor = new(100 / 255.0f, 149 / 255.0f, 237 / 255.0f, 1);
 
         private static readonly List<LineVertex> cachedLineDrawList = new();
         private static readonly List<(float, string)> cachedPostDrawList = new();
@@ -71,30 +68,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             //绘制波形
             if (option.ShowWaveform && peakData.Count != 0)
             {
-                (var minIndex, var maxIndex) = peakData.BinaryFindRangeIndex(fromTime, toTime);
                 builder.PushModelMatrix(Matrix4x4.CreateScale(1, target.WaveformVecticalScale, 1f));
                 cachedLineDrawList.Clear();
                 try
                 {
-                    var prevX = 0f;
-
-                    cachedLineDrawList.Add(new(new(-width / 2, 0), WhiteColor, InvailedLineDash));
-                    for (int i = minIndex; i < maxIndex; i += 1)
-                    {
-                        var peakPoint = peakData[i];
-
-                        var x = (float)(width * ((peakPoint.Time - fromTime).TotalMilliseconds / durationMs) - width / 2);
-                        var yTop = height / 2 * peakPoint.Amplitudes[0];
-                        var yButtom = -height / 2 * peakPoint.Amplitudes[1];
-
-                        //lineDrawing.PostPoint(new(x, 0), WaveformFillColor, VertexDash.Solider);
-                        cachedLineDrawList.Add(new(new(x, yTop), WaveformFillColor, VertexDash.Solider));
-                        cachedLineDrawList.Add(new(new(x, yButtom), WaveformFillColor, VertexDash.Solider));
-                        prevX = x;
-                    }
-                    cachedLineDrawList.Add(new(new(prevX, 0), WaveformFillColor, InvailedLineDash));
-                    cachedLineDrawList.Add(new(new(width / 2, 0), WhiteColor, InvailedLineDash));
-                    builder.DrawSimpleLines(cachedLineDrawList, 1);
+                    WaveformGeometry.Build(cachedLineDrawList, peakData, fromTime, toTime, width, height);
+                    if (cachedLineDrawList.Count > 0)
+                        builder.DrawSimpleLines(cachedLineDrawList, 1);
                 }
                 finally
                 {
