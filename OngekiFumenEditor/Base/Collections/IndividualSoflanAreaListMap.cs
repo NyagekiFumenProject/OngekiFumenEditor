@@ -154,7 +154,11 @@ namespace OngekiFumenEditor.Base.Collections
         public int QuerySoflanGroup(XGrid xGrid, TGrid tGrid)
         {
             var result = cacheTotalTree.Query((float)xGrid.TotalUnit, (float)tGrid.TotalUnit);
-            return result.OrderByDescending(x => x.TGrid).FirstOrDefault()?.SoflanGroup ?? 0;
+            //ISF 归属规则:区域按开始时间升序检查,最先命中的区域生效;T 区间为 [TGrid, EndIndicator.TGrid),结束边界不包含
+            return result
+                .Where(x => tGrid < x.EndIndicator.TGrid)
+                .OrderBy(x => x.TGrid)
+                .FirstOrDefault()?.SoflanGroup ?? 0;
         }
 
         public int QuerySoflanGroup<T>(T obj) where T : IHorizonPositionObject, ITimelineObject
