@@ -62,7 +62,7 @@
 3. 单次 drain 应设**条数上限**，防止无界积压卡住 UI 帧（M4）。
 4. `OpenGLDrawCommandListReplay.Dispose()` 全仓**无调用者**，若 `Term()` 要收口资源需显式接线（L）。
 5. §9.1 载体：BenchmarkDotNet 子进程与 SkiaSharp3 native 已知不兼容（仓库已强制 `InProcessNoEmit`）→ 断言类用例改普通可执行 harness（R9）。
-6. `DefaultSkiaTextureDrawing.cs` 实际文件名是 `DefaultTextureDrawing.cs`（§8.2 笔误）。
+6. 该文件名笔误**已修正**：`TextureDrawing/DefaultTextureDrawing.cs` → `TextureDrawing/DefaultSkiaTextureDrawing.cs`（与类型名一致，见命名审计）。
 7. `RenderControl_UnLoaded`/`DisposeRenderLoop` 已正确调用 `StopRendering()/RemoveRenderContext`（`FumenVisualEditorViewModel.Drawing.cs:1020-1021,1065-1070`）→ P16 的「停止时结束挂起请求」有接线点。
 8. FBO/纹理名是**上下文局部**的（实测未共享上下文时跨回调绑定 → `GL_INVALID_OPERATION`）→ 离屏 GL 对象必须只属于 `sharedContext`；实现里若发现控件未共享上下文，应显式报错而非静默失败。
 9. 渲染回调返回后线程可能**仍保留 current 上下文**（探针在回调外 `DeleteTexture` 也报 `NoError`）→ 「回调外调用 GL 恰好成功」不可作为实现依据；延迟删除必须显式在 drain（context-current）内执行。
@@ -135,7 +135,7 @@ WPF 工程的 `IRenderManagerImpl` 增加离屏渲染入口：调用方显式指
 | `Kernel/Graphics/Skia/Base/SkiaImage.cs:10-30` | **public**：`SKImage Image`、`Width/Height`、`Dispose` 置空 | 结果类型；harness 可读像素 |
 | `Kernel/Graphics/DrawCommands/DrawCommandList.cs:50-100` | `internal TryBeginPresent()/EndPresent()` + 状态机；`Dispose` 在 present 中只置 `DisposeRequested` | **无锁**；`EndPresent` 非幂等（B1/B2） |
 | `Kernel/Graphics/DrawCommands/DrawCommandListBuilder.cs:434` | `ResetState()` 默认 `cleanColor = 不透明黑` | §9 用例「全透明黑」须显式 `SetCleanColor(null)` |
-| `Kernel/Graphics/ITexture.cs:9-13` | `IImage` 只有 `TextureWrapT/S` | 补 `Width/Height`（P6） |
+| `Kernel/Graphics/IImage.cs:9-13`（原 `ITexture.cs`，已改名） | `IImage` 只有 `TextureWrapT/S` | 补 `Width/Height`（P6） |
 | `Modules/AudioPlayerToolViewer/ViewModels/...WaveformDrawing.cs:145-146,218,309` | `viewWidth/Height = ActualWidth/Height`（逻辑）、`renderScale = DpiScaleX/Y` | 视口/缩放约定样张 |
 
 ### 2.2 OpenGL 侧事实（WPF）
@@ -149,7 +149,7 @@ WPF 工程的 `IRenderManagerImpl` 增加离屏渲染入口：调用方显式指
 | `OpenGLDrawCommandListReplay.cs:18-38,40-52,95-116` | **静态单例**（静态 drawings/矩阵栈/`replayGate`）；`Present(manager, IRenderContext, list)` → `EnsureInitialized` → `Reset`（viewport + 按 `CleanColor` 清 color/depth）→ 逐命令 | 离屏复用同一入口；**每次 present 不重建 drawings**（与 Skia 不同） |
 | `DefaultOpenGLTexture.cs:10-18,20-70,77-97,104-112` | `IImage`：`_id`、`Width/Height`；wrap/filter getter+setter **直接调 GL**；Bitmap 路径 `Scan0`（首行=顶部）直接上传；`Dispose → GL.DeleteTexture + InvalidateTexture`（**需 current**） | 结果类型；需延迟删除入口 + 线程约束（GL-4/M8） |
 | `OpenGLTextureBindingCache.cs:12-58` | 纹理单元绑定缓存（`InvalidateTexture`/`Reset`） | 离屏前后需 `Reset()`（GL-6） |
-| `Drawing/TextureDrawing/DefaultTextureDrawing.cs:39-61,80-118` | texcoord(0,0) 对应**上方**顶点 `(-0.5,+0.5)`；frag=`texture*diffuse`，无 Y 翻转 | Bitmap 纹理正向；**FBO 产出的纹理方向相反**（H8/R1） |
+| `Drawing/TextureDrawing/DefaultSkiaTextureDrawing.cs:39-61,80-118`（原 `DefaultTextureDrawing.cs`） | texcoord(0,0) 对应**上方**顶点 `(-0.5,+0.5)`；frag=`texture*diffuse`，无 Y 翻转 | Bitmap 纹理正向；**FBO 产出的纹理方向相反**（H8/R1） |
 | GL 后端全量检索 | 无 `DepthTest`/`Scissor`/`CullFace`；`Blend` 只在 `InitializeOpenGL` 设一次 | 离屏 FBO 无需 depth；混合状态可直接复用 |
 | 上游 `GLWpfControl`（4.3.6≈master） | 回调内绑定**控件 FBO**（id 实测会变：3/2/5）+ 控件像素 viewport；`Samples>1` 时先渲染到 MSAA FBO，回调后 Blit 到共享纹理，再 `BindFramebuffer(0)`、`DXUnlock`；仅 `IsVisible=true` 时挂 `CompositionTarget.Rendering`；`RenderContinuously` **默认 true** → 每个 tick 都 `InvalidateVisual()`（**不受 vsync 限帧**，实测可见时达数百帧/400ms）；`D3dImage==null` 直接 return；`Unloaded → ReleaseFramebufferResources()` | GL-6 恢复目标（B4）；活性与 P16（B6）；MSAA 前提 |
 | `OpenGLDrawCommandListReplay.Dispose()` | 全仓**无调用者** | 静态资源目前永不释放；`Term()` 若要收口需显式接线 |
@@ -686,9 +686,9 @@ GL 状态恢复的具体调用顺序、`DefaultOpenGLTexture` 新构造的参数
 | `Kernel/Graphics/OpenGL/OpenGLDrawCommandListReplay.cs` | 新增 internal「帧状态覆盖」重载（`Present(..., in DrawCommandListFrameState overrideState)`），供离屏 pass 注入 Y 翻转后的 projection/view（R1）；`Dispose()` 接线到 `Term()`（当前全仓无调用者） |
 | `Kernel/Graphics/Skia/Drawing/CommonSkiaDrawingBase.cs:23` | 强转改 `ISkiaRenderContext`；`OnBegin` 返回 `bool`（或等价标志）供子类提前 return |
 | `Kernel/Graphics/Skia/SkiaUtility.cs:9-13` | `CheckSkiaRenderContext` 放宽为 `ISkiaRenderContext` |
-| `Kernel/Graphics/Skia/Drawing/**`（9 个子类） | 强转改 `ISkiaRenderContext` + canvas 缺失提前 return：`BeamDrawing/DefaultSkiaBeamDrawing.cs:69`、`CircleDrawing/DefaultSkiaCircleDrawing.cs:24`、`LineDrawing/DefaultSkiaLineDrawing.cs:48`、`LineDrawing/NewSkiaLineDrawing.cs:113`、`PolygonDrawing/DefaultSkiaPolygonDrawing.cs:30`、`StringDrawing/DefaultSkiaStringDrawing.cs:87`、`TextureDrawing/DefaultSkiaBatchTextureDrawing.cs:29`、`TextureDrawing/DefaultSkiaHighlightBatchTextureDrawing.cs:30`、**`TextureDrawing/DefaultTextureDrawing.cs:32`（原笔误为 `DefaultSkiaTextureDrawing.cs`）** |
+| `Kernel/Graphics/Skia/Drawing/**`（9 个子类） | 强转改 `ISkiaRenderContext` + canvas 缺失提前 return：`BeamDrawing/DefaultSkiaBeamDrawing.cs:69`、`CircleDrawing/DefaultSkiaCircleDrawing.cs:24`、`LineDrawing/DefaultSkiaLineDrawing.cs:48`、`LineDrawing/NewSkiaLineDrawing.cs:113`、`PolygonDrawing/DefaultSkiaPolygonDrawing.cs:30`、`StringDrawing/DefaultSkiaStringDrawing.cs:87`、`TextureDrawing/DefaultSkiaBatchTextureDrawing.cs:29`、`TextureDrawing/DefaultSkiaHighlightBatchTextureDrawing.cs:30`、**`TextureDrawing/DefaultSkiaTextureDrawing.cs:32`（文件名已与类型对齐）** |
 | `Kernel/Graphics/OpenGL/Base/DefaultOpenGLTexture.cs` | 新增 internal 构造（外部纹理 + 尺寸 + 释放委托）；`Dispose` 走委托；`[Serializable]` 与委托字段的处理 |
-| `Kernel/Graphics/ITexture.cs` | `IImage` 增加 `Width` / `Height` |
+| `Kernel/Graphics/IImage.cs`（原 `ITexture.cs`） | `IImage` 增加 `Width` / `Height` |
 | `Kernel/Graphics/DrawCommands/DrawCommandList.cs`（可选，取决于 R11） | 若需精确区分 `TryBeginPresent` 失败原因：加 internal 只读查询；否则不改 |
 | `AppBootstrapper.cs:563-572` | `OnExit` **第一条语句**处调用当前 `IRenderManagerImpl.Term()`（必须早于任何 `await`；R6 + `exitpath` 实测） |
 
