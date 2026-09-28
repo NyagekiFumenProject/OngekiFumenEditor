@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             dummySoflanList = new SoflanList();
         }
 
-        public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData, IDrawCommandListBuilder builder)
+        public override void Draw(IWaveformDrawingContext target, PeakPointCollection peakData, IDrawCommandListBuilder builder, bool drawWaveform = true)
         {
             ArgumentNullException.ThrowIfNull(builder, nameof(builder));
 
@@ -66,7 +66,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             var durationMs = (toTime - fromTime).TotalMilliseconds;
 
             //绘制波形
-            if (option.ShowWaveform && peakData.Count != 0)
+            if (drawWaveform && option.ShowWaveform && peakData.Count != 0)
             {
                 builder.PushModelMatrix(Matrix4x4.CreateScale(1, target.WaveformVecticalScale, 1f));
                 cachedLineDrawList.Clear();
