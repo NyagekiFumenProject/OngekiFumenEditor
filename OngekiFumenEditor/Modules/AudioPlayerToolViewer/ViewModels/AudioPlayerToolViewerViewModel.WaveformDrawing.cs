@@ -5,10 +5,12 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing;
+using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawing.DefaultImpls;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Utils;
 using System;
+using System.ComponentModel;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,8 +43,23 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             get => waveformDrawing;
             set
             {
+                if (waveformDrawing?.Options is { } oldOptions)
+                    oldOptions.PropertyChanged -= OnWaveformDrawingOptionPropertyChanged;
+
                 Set(ref waveformDrawing, value);
+
+                if (waveformDrawing?.Options is { } newOptions)
+                    newOptions.PropertyChanged += OnWaveformDrawingOptionPropertyChanged;
             }
+        }
+
+        /// <summary>波形绘制实现自身选项变化时使图块失效（几何/可见性可能已变）。</summary>
+        private void OnWaveformDrawingOptionPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is not null and not "" and not nameof(DefaultWaveformOption.ShowWaveform))
+                return;
+
+            InvalidateWaveformBlocks();
         }
 
         private int resampleSize = Properties.AudioPlayerToolViewerSetting.Default.ResampleSize;
@@ -64,7 +81,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             get => waveformVecticalScale;
             set
             {
-                Set(ref waveformVecticalScale, value);
+                if (Set(ref waveformVecticalScale, value))
+                    InvalidateWaveformBlocks();
                 Properties.AudioPlayerToolViewerSetting.Default.WaveformVecticalScale = value;
                 Properties.AudioPlayerToolViewerSetting.Default.Save();
             }
@@ -76,7 +94,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             get => durationMsPerPixel;
             set
             {
-                Set(ref durationMsPerPixel, value);
+                if (Set(ref durationMsPerPixel, value))
+                    InvalidateWaveformBlocks();
                 Properties.AudioPlayerToolViewerSetting.Default.DurationMsPerPixel = value;
                 Properties.AudioPlayerToolViewerSetting.Default.Save();
             }
@@ -98,7 +117,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public bool IsShowWaveform
         {
             get => isShowWaveform && Properties.AudioPlayerToolViewerSetting.Default.EnableWaveformDisplay;
-            set => Set(ref isShowWaveform, value);
+            set
+            {
+                if (Set(ref isShowWaveform, value))
+                    InvalidateWaveformBlocks();
+            }
         }
 
         private int limitFPS = Properties.AudioPlayerToolViewerSetting.Default.LimitFPS;
@@ -175,12 +198,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             resampleTaskCancelTokenSource = tokenSource;
 
             if (ResampleSize == 0)
+            {
                 usingPeakData = rawPeakData;
+                InvalidateWaveformBlocks();
+            }
             else
             {
                 var newPeakData = rawPeakData is null ? default : await rawPeakData?.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
-                if (!tokenSource.IsCancellationRequested)
-                    usingPeakData = newPeakData;
+                if (tokenSource.IsCancellationRequested)
+                    return;
+                usingPeakData = newPeakData;
+                InvalidateWaveformBlocks();
             }
         }
 
@@ -190,6 +218,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             loadWaveformTask = null;
             rawPeakData = null;
             usingPeakData = null;
+            InvalidateWaveformBlocks();
         }
 
         public void OnWaveformOptionReset()
@@ -212,6 +241,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             try
             {
                 UpdateDrawingContext();
+                FlushPendingBlockDisposal();
 
                 using var builder = renderImpl.CreateDrawCommandListBuilder();
                 builder.SetCleanColor(new(16 / 255f, 16 / 255f, 16 / 255f, 1f));
@@ -220,7 +250,30 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
                 if (Editor is not null && IsShowWaveform && usingPeakData is not null)
-                    WaveformDrawing.Draw(this, usingPeakData, builder);
+                {
+                    var peakData = usingPeakData;
+                    var fromTime = CurrentTime - TimeSpan.FromMilliseconds(CurrentTimeXOffset * DurationMsPerPixel);
+                    var toTime = fromTime + TimeSpan.FromMilliseconds(viewWidth * DurationMsPerPixel);
+                    var (iFrom, iTo) = GetWaveformBlockRange(fromTime, toTime, WaveformBlockSpanMs);
+
+                    waveformVisibleBlockFrom = iFrom;
+                    waveformVisibleBlockTo = iTo;
+
+                    if (IsWaveformPolylineVisible && TryGetVisibleWaveformBlocks(iFrom, iTo, out var blocks))
+                    {
+                        // 图块就绪：只贴回缓存纹理 + 补绘边界标记，波形本体不再逐帧重建。
+                        DrawWaveformBlocks(builder, blocks, iFrom, fromTime, toTime);
+                        DrawWaveformEdgeMarkers(builder, peakData, fromTime, toTime);
+                        WaveformDrawing.Draw(this, peakData, builder, drawWaveform: false);
+                    }
+                    else
+                    {
+                        // 图块未就绪：整帧回退到实时绘制。
+                        WaveformDrawing.Draw(this, peakData, builder);
+                    }
+
+                    ScheduleWaveformBlockRender(iFrom, iTo);
+                }
 
                 var drawCommandList = builder.GetDrawCommandList();
                 var ownsDrawCommandList = true;
@@ -298,9 +351,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
 
+            var prevHeight = viewHeight;
+            var prevScaleX = renderScaleX;
+            var prevScaleY = renderScaleY;
+
             viewWidth = (float)e.NewSize.Width;
             viewHeight = (float)e.NewSize.Height;
             UpdateRenderScale(renderControl);
+
+            // 只与高度 / 缩放有关的输入才影响图块内容；宽度变化只会平移可见范围。
+            if (viewHeight != prevHeight || renderScaleX != prevScaleX || renderScaleY != prevScaleY)
+                InvalidateWaveformBlocks();
         }
 
         private void UpdateRenderScale(FrameworkElement renderControl)
@@ -315,6 +376,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
+            waveformRenderActive = false;
+            InvalidateWaveformBlocks();
+
             var context = RenderContext;
             if (context is null)
                 return;
@@ -328,6 +392,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
+
+            waveformRenderActive = true;
 
             RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
             RenderContext.Name = "AudioPlayerToolViewerViewModel.WaveRender";

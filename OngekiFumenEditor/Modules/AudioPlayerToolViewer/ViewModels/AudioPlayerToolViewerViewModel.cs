@@ -284,6 +284,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         public void Dispose()
         {
             CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            DisposeWaveformBlocks();
         }
     }
 }
