@@ -21,7 +21,7 @@ Prefer the in-app script document flow when:
 * `Check` compiles the script and shows compile errors in a message box
 * `Run` compiles, asks for confirmation, executes, and shows only success or failure
 * `Reload File` reloads the saved script file from disk
-* `VS Edit` generates a temp `net8.0-windows` project and watches the generated `.cs` file for changes
+* `VS Edit` generates a temp `net10.0-windows` project and watches the generated `.cs` file for changes
 * the target-editor picker is fed from `IEditorDocumentManager.GetCurrentEditors()`, so it reflects live editor open/close events
 
 ## Compilation And Execution Model

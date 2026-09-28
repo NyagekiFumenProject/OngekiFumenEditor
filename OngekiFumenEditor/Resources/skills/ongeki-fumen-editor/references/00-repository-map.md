@@ -9,7 +9,7 @@
 * `UI/`: shared controls, converters, markup helpers, keybinding triggers, dialogs, and theme resources used across modules.
 * `Properties/`: generated settings, generated resource designer files, and localized `.resx` content.
 * `Resources/`: icons, textures, sounds, templates, embedded files, and repo-side skill content.
-* `docs/`: design notes, especially around recent runtime automation and MCP work.
+* `docs/`: design notes now live at the repository root (`docs/`) and under `Avalonia/docs/` (migration notes); the former in-project `OngekiFumenEditor/docs/` folder was removed, so follow those locations for runtime automation and MCP design notes.
 * `Dependencies/`: packaged native and third-party managed binaries referenced by the main project.
 
 ## Task Routing

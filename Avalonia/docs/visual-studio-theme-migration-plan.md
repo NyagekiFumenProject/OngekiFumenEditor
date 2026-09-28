@@ -35,6 +35,8 @@
 
 工具链快照：.NET SDK `10.0.302`、Avalonia `11.3.10`、Avalonia.Controls.ToolBar `11.3.6`、StatusBar.Avalonia `0.0.2`。实施期间版本变化必须新增决策记录并重跑全部主题门禁。
 
+**2026-09-29 复核：快照已过期。** 当前工具链为 .NET SDK `11.0.100-preview.7`（仓库根 `global.json` 固定）、Avalonia `12.1.1`、`SkiaSharp 3.119.4`；Gekimini.Avalonia 子模块当前提交为 `790e0b9b`（本计划记录为 `b059066d`）。G0 尚未开始，实施前需按本节规则更新基线并重跑主题门禁。
+
 ## WPF 默认兜底基线说明
 
 `F:\Source\wpf` 同时包含 Classic、Aero、Aero2、AeroLite、Luna、Royale 和新 Fluent。WPF 文档明确说明：未启用实验性 Fluent `ThemeMode` 时使用默认 Aero2。因此本计划暂定以下可复现定义：

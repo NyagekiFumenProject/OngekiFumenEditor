@@ -5,7 +5,7 @@
 本方案来自 2026-08-21 对"仍未闭环的编辑器迁移功能"审计中的第 2 类缺口（文档安全与撤销语义），并补充了对 WPF 原项目关闭协议的对照分析。核对的一手证据：
 
 - `docs/wpf-avalonia-full-migration-audit-2026-08-07.html`（迁移审计缺口清单）；
-- `docs/code-audit-live-issues-2026-08-12.html` 中的 CA-013、CA-014、CA-017、CA-018、CA-029、CA-034、CA-061、CA-062、CA-064；
+- 原 `code-audit-live-issues-2026-08-12.html`（已删除）中的 CA-013、CA-014、CA-017、CA-018、CA-029、CA-034、CA-061、CA-062、CA-064；
 - 当前 `src/` 与 `Dependencies/Gekimini.Avalonia/` 生产代码；
 - WPF 原项目：`F:/Source/OngekiFumenEditor/OngekiFumenEditor/` 与其定制 Gemini 框架 `F:/Source/OngekiFumenEditor/Dependences/gemini/`。
 

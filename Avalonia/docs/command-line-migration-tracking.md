@@ -1,7 +1,7 @@
 # Avalonia CommandLine 迁移跟踪
 
 > 建立时间：2026-08-02
-> 最后更新：2026-08-03
+> 最后更新：2026-09-29（补齐 §7 批次 4 提交号、修正 §8 路径；§6.1 单文件发布补充见 2026-09-28）
 > 状态：Desktop 迁移完成，`convert`、`svg`、`jacket`、`updater`、`acb` 已实现
 
 ## 1. 最终范围
@@ -255,11 +255,11 @@ JIT EXE 因 ReadyToRun + 自包含约 400 MB，如需缩减可评估 `EnableComp
 | 1 | `bfbe4c72` | 生命周期、薄启动器、框架迁移与 `convert` |
 | 2 | `853b85ea` | `svg`、音频时长与真实 PNG 栅格化 |
 | 3 | `79451f96` | `jacket`、真实模板和原生资源 |
-| 4 | 当前提交 `add updater command line and finalize migration` | `updater`、跨命令测试、发布修正和最终文档 |
+| 4 | `9d8c0b8ae` | `updater`、跨命令测试、发布修正和最终文档 |
 
 ## 8. CI 验证
 
-`../.github/workflows/BuildProgram.yml` 已移除“没有可用命令”的旧占位契约，并增加以下验证：
+`../../.github/workflows/BuildProgram.yml` 已移除“没有可用命令”的旧占位契约，并增加以下验证：
 
 - 运行 `OngekiFumenEditor.Avalonia.sln` 全量测试。
 - CommandLine 使用独立的 `win-x64-jit` 与 `win-x64-aot` profile 发布，分别合入对应 Desktop 包，

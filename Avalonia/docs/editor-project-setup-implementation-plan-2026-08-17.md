@@ -21,7 +21,6 @@
 ## 2. 设计和审计依据
 
 - [Editor File Access Context Live Review](editor_file_access_context_refactory_live_review_2026-08-12.html)
-- [Editor File Access Context 实现审计](editor-file-access-context-refactory-implementation-audit-2026-08-17.md)
 - [Fumen Visual Editor Project Folder I/O 设计](fumen-visual-editor-project-folder-io-design.md)
 - [Editor Project Manifest Redesign Review](editor-project-manifest-redesign-review.md)
 

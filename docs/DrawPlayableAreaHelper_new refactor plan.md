@@ -1,7 +1,7 @@
 # DrawPlayableAreaHelper_new 重构计划
 
 本文档用于记录 `DrawPlayableAreaHelper_new.cs` 的设计决策、问题追踪和实现约束。
-它以 `docs/DrawPlayableAreaHelper source analysis.md` 为当前实现行为基线，并结合
+它以旧实现的源码走读为行为基线，并结合
 `D:\sddt155\docs\field-object-area-shape-algorithm.md` 中记录的 MU3 运行时 FieldObject 算法进行取舍。
 
 ## 当前共识

@@ -1,26 +1,32 @@
 # WPF → Avalonia 迁移状态报告
 
 - **检查日期**：2026-08-01
-- **文档更新日期**：2026-09-04（新增 3a P0 增量状态并扩充 T-003/T-006 两项；原始检查基线仍为 2026-08-01）
+- **文档更新日期**：2026-09-29（按当前代码复核并修正：工具链版本、音频状态、项目新建/打开/保存、测试项目、缺失模块与依赖风险；原始检查基线仍为 2026-08-01，历史批次记录保留在各节）
 - **检查基线**：工作树未提交快照（分支 `avalonia`，含 XAML 清零批次①~⑦全部改动）
 - **验证命令**：`dotnet build OngekiFumenEditor.Avalonia.sln --no-restore -t:Rebuild -m:1 -v:minimal`
 - **构建结果**：**成功**。全解决方案（核心 + Desktop + Browser）完整重建 **0 错误**、87 个警告
 - **检查范围**：当前工作区中的旧 WPF 项目、Avalonia 解决方案、应用源码、XAML、构建结果和测试资产
 - **检查性质**：在只读审查基础上进行了定向迁移清理；本轮完成了 Avalonia XAML 编译清零（批次①~⑦）
 
-> 本报告刻意区分“源码已搬运”“能构建”与“能启动、功能等价”。**编译清零只代表通过了 Roslyn 和 Avalonia XAML IL 两道静态关卡**；应用尚未做过一次启动冒烟，大量视图存在运行时风险（见“编译清零后的已知问题”）。
+> 本报告刻意区分“源码已搬运”“能构建”与“能启动、功能等价”。**编译清零只代表通过了 Roslyn 和 Avalonia XAML IL 两道静态关卡**；后续批次已完成桌面与浏览器启动/渲染冒烟（见“渲染性能测量面板”“渲染状态”），但各视图运行时行为仍需逐项验收（见“编译清零后的已知问题”，部分条目已按后文更新为已解决）。
 >
 > **历史更正回顾**：第二版记录的“5 个错误”是增量构建假象。本轮同样注意：增量构建可能跳过 XAML 编译显示“0 错误”，验收一律以 `-t:Rebuild` 全量重建为准；且 CoreCompile 失败时后续 XAML pass 不执行，AVLN 数必须先确认 CS 为 0 才可采信。
 
 ## 结论
 
-当前迁移处于“**编译清零完成、应用运行验证未开始；3a P0 四项（T-003~T-006）迁移已完成**”的阶段。
+当前迁移处于“**编译清零、冒烟通过、功能逐项验收与补齐**”的阶段；3a P0 四项（T-003~T-006）已完成。
 
-- C# 编译 0 错误（此前轮次完成）；
-- Avalonia XAML 编译 0 错误（本轮完成，从 2190 个唯一 AVLN 错误清零）；
-- Desktop / Browser 入口项目也首次通过完整重建。
+- C# 与 Avalonia XAML 编译 0 错误；
+- 桌面（Windows）与 Browser（WASM）均已构建发布，并完成启动/渲染冒烟（见下文各节）；
+- 音频后端已迁移并注册（`NAudioManager`，`[RegisterSingleton<IAudioManager>]`，见“音频状态”）；
+- 项目新建/打开/保存流程已实现（`FumenVisualEditorProvider.Setup.cs` / `ProjectIO.cs`，接入 `EditorProjectSetupDialogViewModel`）；
+- 编辑器快捷键宿主已实现（`DefaultEditorKeyBindingRouter`），两个测试项目在 CI 中运行。
 
-下一步的阻塞从“编译”转为“运行时”：视图 XAML 加载（`InitializeComponent` 缺失）、资源键运行时缺失、`pack://` 图片 URI、快捷键宿主、音频后端等问题只会在启动和操作时才暴露。当前版本应视为**能构建但不能保证能启动**的 pre-alpha 快照。
+主要剩余缺口（详见 `wpf-master-to-avalonia-migration-review-2026-09-19.html` 与各专项审计）：
+
+- `OptionGeneratorTools`、`EditorScriptExecutor` 两个模块仍未迁移；
+- SVG prefab 工作流按决策延期（`ENABLE_SVG_PREFAB_OBJECTS` 未定义）；
+- 降级项（见“编译清零后的已知问题”）。
 
 ## 3a P0 算法、架构与性能补充审计（已完成）
 
@@ -57,25 +63,25 @@
 | C# 文件搬运 | 较高 | 旧项目 969 个 C# 文件中有 888 个同路径对应，覆盖率约 91.6% |
 | XAML 文件搬运 | 较高 | 旧项目 65 个 WPF XAML 中有 58 个对应 AXAML，覆盖率约 89.2% |
 | Debug 构建 | **通过** | 全解决方案 `-t:Rebuild` 0 错误、87 警告（首次） |
-| Avalonia XAML | **编译通过、运行未验** | 0 AVLN 错误；Trigger/Storyboard/pack URI 残留清零；58 个 code-behind 已全部接入 `InitializeComponent` |
-| 谱面渲染 | 已接入、待运行验证 | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译 |
-| 音频 | 不可用 | NAudio 后端被排除编译，保留实现明确标记为未迁移 |
-| 功能模块 | 不完整 | 3 个完整模块尚未迁移，另有少量模块文件缺失 |
-| 自动化验证 | 部分完成 | 新增两个模型级回归测试文件；QuadTree 6/6、Connectable 5/5、SVG 13/13，完整测试 576/576；应用启动、UI、音频等仍未验收 |
-| 仓库可复现性 | 高风险 | XAML 清零批次①~⑦的全部改动（数百个文件）尚未提交 |
+| Avalonia XAML | **编译通过、已冒烟** | 0 AVLN 错误；Trigger/Storyboard/pack URI 残留清零；58 个 code-behind 已全部接入 `InitializeComponent`；主题资源键已在 `UI/Themes/EditorThemeResources.axaml` 补充定义 |
+| 谱面渲染 | **已接入、已冒烟** | 已固定使用 Avalonia.Skia 的 `SKCanvas` lease；D3D、OpenGL 和独立 CPU Skia backend 不再参与编译；桌面与浏览器渲染冒烟通过（见 2026-09-19/09-21 记录） |
+| 音频 | **已迁移** | `NAudioManager` 以 `[RegisterSingleton<IAudioManager>]` 注册（csproj 已无 `Kernel\Audio` 排除）；桌面提供 WASAPI(AOT)/ASIO(JIT) 发布配置，Browser 走 AudioWorklet 伴随包；NAudio 3 的 MP3 解码等事项待单独验证 |
+| 功能模块 | 部分完成 | `OgkiFumenListBrowser` 已迁移（14 个文件）；`OptionGeneratorTools`、`EditorScriptExecutor` 两个完整模块尚未迁移 |
+| 自动化验证 | 部分完成 | 两个测试项目（`OngekiFumenEditor.Avalonia.Tests`、`OngekiFumenEditor.Avalonia.Desktop.Tests`，另有 `UpdaterStub`）；最新读数主测试 806/806、Desktop 148/148（2026-09-19），CI 每次推送运行 |
+| 仓库可复现性 | **正常** | XAML 清零批次及后续改动均已提交；仓库根 `global.json` 固定 SDK `11.0.100-preview.7.26381.103` |
 
 ## 检查基准
 
 ### 项目版本
 
-- 目标框架：`.NET 10.0`
-- 本次使用的 SDK：`.NET SDK 10.0.302`
-- Avalonia：`11.3.10`（含 `Avalonia.Controls.DataGrid 11.3.10`、`Xaml.Behaviors 11.3.9`，本轮新增引用）
+- 目标框架：`.NET 11`（`net11.0`，见 `OngekiFumenEditor.Avalonia.csproj`）
+- 本次使用的 SDK：由仓库根 `global.json` 固定为 `11.0.100-preview.7.26381.103`
+- Avalonia：`12.1.1`（含 `Avalonia.Controls.DataGrid 12.1.2`）；`SkiaSharp 3.119.4`（见 `Directory.Packages.props`）
 - 主项目：[`OngekiFumenEditor.Avalonia.csproj`](../src/OngekiFumenEditor.Avalonia/OngekiFumenEditor.Avalonia.csproj)
 - Desktop 入口：[`OngekiFumenEditor.Avalonia.Desktop.csproj`](../src/OngekiFumenEditor.Avalonia.Desktop/OngekiFumenEditor.Avalonia.Desktop.csproj)
 - Browser 入口：[`OngekiFumenEditor.Avalonia.Browser.csproj`](../src/OngekiFumenEditor.Avalonia.Browser/OngekiFumenEditor.Avalonia.Browser.csproj)
 
-仓库没有 `global.json`，因此实际 SDK 版本取决于开发机环境。
+仓库根目录已提供 [`global.json`](../../global.json) 固定 SDK 版本（`rollForward: disable`），实际 SDK 不再取决于开发机环境。
 
 ### 构建命令
 
@@ -107,7 +113,7 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 - **`dotnet test`（VSTest 适配器路径）不会执行 `[AvaloniaFact]` 测试**：实测 698 项中只运行普通的 `[Fact]`/`[Theory]`（约 350 项），被跳过的部分也不出现在任何报告里。CI 若要覆盖 UI / 像素 / headless 用例，需要改用上面的 Release 直跑方式。
 - Debug 配置下同一进程只能初始化一个 headless 应用：`Gekimini.Avalonia.App.Initialize()` 在 `#if DEBUG` 下调用 `AttachDeveloperTools()`，第二个应用会抛 `Developer tools have already been attached. Multiple attachments are not supported.`。因此 Debug 直跑会在首个测试类之后大量报 session 错误，需要连续运行多个类时请用 Release。
 - 依赖 IoC/全局设置的测试必须标 `[AvaloniaFact]`（例如 `ProjectFileBindingDialogViewModelTests` 里会经 `Log` 走 `IoC` 的两条用例）；普通 `[Fact]` 只能靠"别的测试先把 App 初始化好"而偶然通过，属于顺序敏感的隐患。
-- **PlayableArea（可击打区域）实现状态**：Avalonia 走的是重构后的「新」算法（TGrid 采样 + 四边形裁剪，见 `src/.../Graphics/Drawing/Editors/DrawPlayableAreaHelper.cs`，T-009 落地），并非 WPF 已提交原版（`FieldRangeParam` + `AdjustLaneIntersection` + EarcutNet）；WPF 侧同算法的 `DrawPlayableAreaHelper_new` 仅存在于 `.tmp` 草稿、未进入 WPF 工程。两端几何算法**尚未对齐**，交点/变速反折场景的视觉等价性未验证。
+- **PlayableArea（可击打区域）实现状态**：Avalonia 走的是重构后的「新」算法（TGrid 采样 + 四边形裁剪，见 `src/.../Graphics/Drawing/Editors/DrawPlayableAreaHelper.cs`，T-009 落地），并非 WPF 已提交原版（`FieldRangeParam` + `AdjustLaneIntersection` + EarcutNet）。WPF 侧的 `DrawPlayableAreaHelper_new` 已进入 WPF 工程并接线（`OngekiFumenEditor/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawPlayableAreaHelper_new.cs`，见 `FumenVisualEditorViewModel.Drawing.cs`）。两端几何算法**尚未对齐**，交点/变速反折场景的视觉等价性未验证。
 - 2026-09-11 性能：`PERF-RND-009 / RND-10`（PlayableArea 多重扫描）已修复（帧内缓存墙轨描述符 + 无分配子节点区间查询），新增基准 `benchmarks/.../DrawPlayableAreaProductionBenchmarks.cs`；最坏 8×256 墙由 2.40 ms / 555 KB 降至 0.35 ms / 203 KB（Release / ShortRun）。详见 `performance-gc-audit-2026-09-09.md` 的「已修复项」。
 - 2026-09-12：`PERF-RND-013 / RND-16`（预览模式下拍线使用陈旧的 `RectInDesignMode` 尺寸）已修复——渲染改用当帧 `DrawingTargetContext`，并顺带修正 `DrawTimeSigntureText` 的世界/视口 Y 空间混用；新增 `DrawTimeSignatureHelperTests` 3 项。
 - 2026-09-12：修复多线程渲染下裁判线高度抖动——`DrawingTargetContext` 新增帧快照 `CurrentTime`/`CurrentTGrid`，`OnEditorRender` 帧首只读一次播放时间，渲染期全部时间消费者（裁判线、player location、hit effect、拍线、playable area 采样、beam、projectile）改用 `IFumenEditorDrawingContext.FrameTime`/`FrameTGrid`；随之删除失效的 `GetViewportTGrid()`/`GetViewportAudioTime()`。新增 `DrawingFrameSnapshotTests` 3 项。
@@ -137,9 +143,10 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 
 ### 运行时必炸或必失效
 
-1. **音频后端**：`IAudioManager` 无可用注册，涉及音频的流程必然失败（见“音频状态”）。
-2. **文档新建/打开/保存未迁移**：`FumenVisualEditorViewModel` 没有 `DoNew`/`DoOpen`/`DoSave`，`EditorProjectSetupDialogViewModel` 因此没有调用方；谱面项目的创建和加载流程整体缺失（属 P3 范围）。
-3. **主题资源键悬空**：各视图引用的 `EnvironmentWindowBackground`/`EnvironmentToolWindowText` 等资源键来自旧 Gemini 主题，Gekimini 源码中不存在定义（11 处），运行时按 Avalonia 缺资源行为回退（不保证美观，部分场景可能影响可读性）。
+1. ~~**音频后端**~~：**已解决**——`NAudioManager` 以 `[RegisterSingleton<IAudioManager>]` 注册（见“音频状态”）。
+2. ~~**文档新建/打开/保存未迁移**~~：**已解决**——`FumenVisualEditorProvider.Setup.cs`/`ProjectIO.cs` 已实现新建/打开/保存流程并接入 `EditorProjectSetupDialogViewModel`（Desktop `CanCreateNew=true`；Browser 按决策保持关闭）。
+3. ~~**主题资源键悬空**~~：**已解决**——`EnvironmentWindowBackground`/`EnvironmentToolWindowText` 已在 `UI/Themes/EditorThemeResources.axaml` 中定义。
+4. **渲染帧异常未捕获**（原 `avalonia-skia-render-changeset-review.md` 的 S2；该文档已随本轮清理删除，2026-09-29 复核问题仍在）：`DefaultSkiaRenderContext.RenderFrame` 的异常处理只有 `try/finally`（`finally` 负责 `RestoreToCount`），没有 `catch`；渲染帧内异常会沿 Avalonia 渲染线程传播。
 
 ### 功能放弃或降级（需要产品决策或后续恢复）
 
@@ -156,8 +163,8 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 
 ### 需要单独验收
 
-14. **编译绑定**：AXAML 中约 503 个普通 `{Binding}`，仅 4 处 `x:DataType`。主项目 Release 启用 `AvaloniaUseCompiledBindingsByDefault=true` 和 `IsAotCompatible=true`，在补齐 `x:DataType` 前 Release/AOT 不可用。
-15. **NuGet 漏洞**：Gekimini 的 SkiaSharp 2.88.3（NU1903 高危）与 Desktop 的 Tmds.DBus.Protocol 0.21.2 需统一升级。
+14. **编译绑定**：核心项目 62 个 AXAML 中 57 个已声明 `x:DataType`（142 处），`x:CompileBindings="False"` 已清零；编译绑定迁移基本完成，后续新增视图需保持该约定。
+15. ~~**NuGet 漏洞**~~：**已解决**——`SkiaSharp` 统一为 `3.119.4`，`Tmds.DBus.Protocol` 已移除（见“NuGet 风险”）。
 
 ## 渲染状态
 
@@ -191,19 +198,12 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 
 ## 音频状态
 
-主项目排除了整个 `Kernel/Audio/NAudioImpl` 编译目录，共涉及 19 个 C# 文件。保留的 [`NAudioManager.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Audio/NAudioImpl/NAudioManager.cs) 和 `DefaultMusicPlayer` 明确标记为未迁移，并在加载或播放时抛出异常或返回空状态。
+音频后端已完成迁移：`Kernel/Audio/NAudioImpl/` 现为编译输入（csproj 中已无对应 `Compile Remove`），[`NAudioManager.cs`](../src/OngekiFumenEditor.Avalonia/Kernel/Audio/NAudioImpl/NAudioManager.cs) 以 `[RegisterSingleton<IAudioManager>]` 注册，业务代码可正常解析 `IAudioManager`（音频文件选择、谱面项目加载、波形提取、播放/暂停/定位/变速、谱面音效）。
 
-当前业务代码仍通过 `IAudioManager` 执行：
-
-- 音频文件选择；
-- 谱面项目加载；
-- 波形提取；
-- 播放、暂停、定位和变速；
-- 谱面音效播放。
-
-但源码中没有可用的替代 `IAudioManager` 注册。因此，即使应用能启动，涉及音频的编辑流程仍会失败。
-
-[`AudioAdjustWindowViewModel.cs`](../src/OngekiFumenEditor.Avalonia/Modules/AudioAdjustWindow/ViewModels/AudioAdjustWindowViewModel.cs) 也只支持零偏移文件复制，非零偏移明确返回“未实现”。
+- 发布形态：桌面提供 `win-x64-aot`（WASAPI 主包）与 `win-x64-jit`（ASIO 伴随包）两套发布配置（见 `.github/workflows/BuildProgram.yml` 与 `src/OngekiFumenEditor.Avalonia.Desktop/Properties/PublishProfiles/`）；
+- Browser 侧通过 `NAudio.BrowserAudioWorklet`（`Avalonia/Dependencies/`）提供音频；
+- 波形偏移处理已由 `IWavAudioOffsetService` / `DefaultWavAudioOffsetService` 实现；
+- 遗留事项：NAudio 3 的 MP3 解码路径（`AudioFileReader`）与音频相关并发问题（`NAudioManager` 的 `AddSoundMixerInput`/`RemoveSoundMixerInput` 对共享字典的无锁写入）仍需单独验证。
 
 ## 显式排除的源码
 
@@ -217,19 +217,19 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 
 渲染相关排除项已经由项目注释和本报告记录为“由 Avalonia.Skia 单一路径替代”；其他排除项仍需继续补充替代关系或取消原因。
 
-## 缺失模块（按当前决策不纳入 Avalonia 编译）
+## 缺失模块（仍未迁移）
 
-以下完整模块在旧 WPF 项目中存在，但 Avalonia 应用目录中不存在：
+以下完整模块在旧 WPF 项目中存在，但在 Avalonia 应用目录中仍未迁移（`OgkiFumenListBrowser` 已于后续批次迁移完成）：
 
-此前已移除它们在 Avalonia 源码、设置重置和 JSON 源生成中的编译期引用。下表仍用于记录旧 WPF 功能覆盖差异，不代表这些模块当前应参与编译。
+此前已移除它们在 Avalonia 源码、设置重置和 JSON 源生成中的编译期引用。下表用于记录旧 WPF 功能覆盖差异。
 
-| 模块 | 缺失 C# | 缺失 XAML | 功能范围 |
-| --- | ---: | ---: | --- |
-| `OptionGeneratorTools` | 39 | 5 | ACB、封面和 Music XML 等生成工具 |
-| `EditorScriptExecutor` | 18 | 1 | 编辑器脚本执行与文档 |
-| `OgkiFumenListBrowser` | 9 | 1 | 谱面列表浏览 |
+| 模块 | 状态 | 功能范围 |
+| --- | --- | --- |
+| `OptionGeneratorTools` | **未迁移**（0 个文件） | ACB、封面和 Music XML 等生成工具 |
+| `EditorScriptExecutor` | **未迁移**（0 个文件） | 编辑器脚本执行与文档 |
+| `OgkiFumenListBrowser` | **已迁移**（14 个文件，`Modules/OgkiFumenListBrowser/`） | 谱面列表浏览 |
 
-此外，`FumenVisualEditor` 仍缺少 3 个同路径 C# 文件；`FumenConverter` 原缺失的转换包装器已补齐。
+此外，`FumenVisualEditor` 仍缺少 3 个同路径 C# 文件（`EditorObjectDataTemplateSelector.cs` 与 SVG 缓存相关的 `CachedSvgRenderDataManager.cs`、`ICacheSvgManager.cs`，随 SVG prefab 决策一并延期）；`FumenConverter` 原缺失的转换包装器已补齐。
 
 ## 测试、诊断和依赖风险
 
@@ -237,9 +237,9 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 
 当前 Avalonia 测试资产：
 
-- 测试项目数量：1（`OngekiFumenEditor.Avalonia.Tests`）；
-- 本轮新增测试文件：2（QuadTree 与 Connectable 显示对象回归）；
-- 本批次模型级回归与 SVG 禁用边界验证已完成；应用启动、主要视图加载、音频和编辑闭环仍未验收。
+- 测试项目：`OngekiFumenEditor.Avalonia.Tests`、`OngekiFumenEditor.Avalonia.Desktop.Tests`（另有 `UpdaterStub` 辅助工程）；
+- 最新读数（2026-09-19）：主测试 806/806、Desktop 148/148；CI（`.github/workflows/BuildProgram.yml`）在每次推送时运行两个测试项目；
+- headless UI/像素用例（`SkiaRenderSmokeTests`、`EditorUiRegressionTests` 等）已覆盖启动、渲染与部分编辑闭环；音频与完整编辑闭环仍需补足自动化覆盖。
 
 依赖仓库中的测试不能替代本应用的迁移测试。至少需要覆盖：
 
@@ -259,7 +259,7 @@ dotnet build .\tests\OngekiFumenEditor.Avalonia.Desktop.Tests\OngekiFumenEditor.
 
 ### NuGet 风险
 
-核心项目通过直接引用 `Avalonia.Skia 11.3.10` 解析到 `SkiaSharp 2.88.9`。但依赖项目 Gekimini 仍单独解析到 `SkiaSharp 2.88.3` 并产生 `NU1903` 高严重性漏洞警告；Desktop 项目另有 `Tmds.DBus.Protocol 0.21.2` 的 `NU1903`。后续需要在依赖项目层统一版本并重新验证 Avalonia/SkiaSharp API 兼容性。
+核心项目与 Gekimini 依赖的 `SkiaSharp` 现已统一为 `3.119.4`（见 `Directory.Packages.props`），`Tmds.DBus.Protocol` 已不在依赖图中，原 `NU1903` 两项已消除。NAudio 3 升级的浏览器 MP3 解码路径等事项仍需单独验证（见 `avalonia-dotnet-upgrade-review-2026-09-02.html`）。
 
 ## 仓库状态
 
@@ -385,21 +385,21 @@ git status --porcelain=v1 -uall -- .
 
 ### P3：打通核心编辑闭环
 
-1. 对已接入的 Avalonia.Skia 渲染路径执行桌面人工冒烟、DPI、缩放和资源释放验证。
-2. 实现并注册可用的音频后端。
-3. 验证谱面打开、渲染、编辑、撤销和保存。
+1. 对已接入的 Avalonia.Skia 渲染路径执行桌面人工冒烟、DPI、缩放和资源释放验证。（桌面/浏览器冒烟已随 2026-09-19~09-21 批次完成；DPI 与资源释放仍待逐项回归）
+2. ~~实现并注册可用的音频后端。~~（已完成，见“音频状态”）
+3. 验证谱面打开、渲染、编辑、撤销和保存。（项目新建/打开/保存流程已实现，端到端人工验收继续进行）
 4. 验证选中、拖放、滚动、缩放、键盘命令和剪贴板。
-5. 恢复 FumenVisualEditorView 编辑器快捷键宿主。
+5. ~~恢复 FumenVisualEditorView 编辑器快捷键宿主。~~（已实现：`DefaultEditorKeyBindingRouter`，并有对应键位测试用例）
 
 验收条件：能够完成“打开项目 -> 显示谱面 -> 编辑对象 -> 播放定位 -> 保存项目”的人工冒烟流程。
 
 ### P4：补齐功能和发布质量
 
-1. 迁移或明确取消 3 个缺失模块。
+1. 迁移或明确取消剩余 2 个缺失模块（`OptionGeneratorTools`、`EditorScriptExecutor`）。
 2. 补齐设置、更新、对话框、SVG、波形和音频偏移功能；处理已知问题清单中的降级项（列头排序、拖拽高亮、Toast 动画、TabControl 主题、ColorPicker 等）。
 3. 添加 Headless/UI/业务逻辑测试。
-4. 修复依赖漏洞（SkiaSharp 2.88.3、Tmds.DBus.Protocol 0.21.2）和 87 个编译警告。
-5. 验证 Release compiled bindings、裁剪和 AOT（先补 `x:DataType`）。
+4. ~~修复依赖漏洞（SkiaSharp 2.88.3、Tmds.DBus.Protocol 0.21.2）~~（已完成，见“NuGet 风险”）和 87 个编译警告。
+5. 验证 Release compiled bindings、裁剪和 AOT（`x:DataType` 已补齐；桌面 AOT 包与 Browser AOT 已在 CI 发布，继续验证）。
 6. 分别验证 Desktop 与 Browser 的平台能力边界。
 
 验收条件：功能差异清单全部关闭或有明确产品决策，Release 构建和关键自动化测试通过。

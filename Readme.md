@@ -72,6 +72,7 @@
 * 插件机制依赖于MEF框架
 * 应用VisualStudio IDE风格由UI框架提供实现:Gemini
 * ~~编辑器物件更新基于WPF的DataBinding , 渲染全依赖于WPF提供的控件组合实现~~物件由OpenGL/SKIA渲染
+* 正在进行的Avalonia跨平台重构(桌面 + 网页版)位于 `Avalonia/` 目录,构建与迁移细节见 `Avalonia/docs/`
 
 ## 感谢
 [![](https://resources.jetbrains.com/storage/products/company/brand/logos/Rider.png)](https://jb.gg/OpenSourceSupport)

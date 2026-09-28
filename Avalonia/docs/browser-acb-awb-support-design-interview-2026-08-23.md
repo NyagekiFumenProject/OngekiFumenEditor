@@ -1,7 +1,7 @@
 # Browser ACB/AWB 支持设计访谈与实施计划
 
 - **文档日期**：2026-08-23
-- **状态**：实施中；MVP 范围和产品行为已确定；文件抽象已于 2026-08-24 统一（临时句柄直接使用 `ISimpleFile`/`ISimpleDirectory`），替换操作由 CopyTo + Delete 组合实现；同日已完成导入事务与 Browser 能力开关的代码落地（见 §2.4/§2.5）
+- **状态**：已完成（2026-09-29 复核：§11 实施顺序各项均已落地——`supportsAcb` 已从代码删除、`BrowserNAudioFileReaderFactory` 已加入 `.acb`、外部 AWB 导入事务与 `AwbContentComparer`/`ExternalAwbImporter` 已实现、项目打开流程已接入 `FumenVisualEditorProvider.ProjectIO.cs`）；MVP 范围和产品行为已确定；文件抽象已于 2026-08-24 统一（临时句柄直接使用 `ISimpleFile`/`ISimpleDirectory`），替换操作由 CopyTo + Delete 组合实现；同日已完成导入事务与 Browser 能力开关的代码落地（见 §2.4/§2.5）
 - **目标平台**：Avalonia Browser / WebAssembly（标准 Browser AOT，兼顾 LLVM Browser）
 - **相关能力**：ACB、内嵌 AWB、外部 AWB、HCA 解码、OPFS/StorageProvider、项目文件夹导入
 
