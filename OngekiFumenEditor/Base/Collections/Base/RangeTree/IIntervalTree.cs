@@ -34,6 +34,12 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
         void QueryInto(TKey from, TKey to, ICollection<TValue> output);
 
         /// <summary>
+        /// Brings the index up to date with the current items. Cheap when nothing changed; callers that
+        /// are about to query the tree from several threads at once should call it once up front.
+        /// </summary>
+        void EnsureInSync();
+
+        /// <summary>
         /// Adds the specified item.
         /// </summary>
         void Add(TKey from, TKey to, TValue value);
