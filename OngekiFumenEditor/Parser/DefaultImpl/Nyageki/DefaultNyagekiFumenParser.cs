@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
@@ -26,17 +27,21 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
                 this.commandParsers[parser.CommandName.Trim()] = parser;
         }
 
-        public async Task<OngekiFumen> DeserializeAsync(Stream stream)
+        public async Task<OngekiFumen> DeserializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             using var reader = new StreamReader(stream);
 
             var fumen = new OngekiFumen();
 
+            var lineCount = 0;
             while (true)
             {
                 var line = await reader.ReadLineAsync();
                 if (line is null)
                     break;
+
+                if ((++lineCount & 0xFF) == 0)
+                    cancellationToken.ThrowIfCancellationRequested();
 
                 var seg = line.Split(':', 2);
                 var commandName = seg[0].Trim();
@@ -44,6 +49,8 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
                 if (commandParsers.TryGetValue(commandName, out var commandParser))
                     commandParser.ParseAndApply(fumen, seg);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             fumen.Setup();
             return fumen;

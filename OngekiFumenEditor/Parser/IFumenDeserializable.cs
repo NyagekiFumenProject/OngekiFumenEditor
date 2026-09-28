@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Base;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser
@@ -8,6 +9,6 @@ namespace OngekiFumenEditor.Parser
     {
         string FileFormatName { get; }
         string[] SupportFumenFileExtensions { get; }
-        Task<OngekiFumen> DeserializeAsync(Stream stream);
+        Task<OngekiFumen> DeserializeAsync(Stream stream, CancellationToken cancellationToken = default);
     }
 }

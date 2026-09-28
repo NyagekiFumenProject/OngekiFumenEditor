@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Parser.Ogkr
@@ -29,7 +30,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
             }
         }
 
-        public async Task<OngekiFumen> DeserializeAsync(Stream stream)
+        public async Task<OngekiFumen> DeserializeAsync(Stream stream, CancellationToken cancellationToken = default)
         {
             var reader = new StreamReader(stream);
             var genObjList = new List<(OngekiObjectBase obj, ICommandParser parser)>();
@@ -43,8 +44,12 @@ namespace OngekiFumenEditor.Parser.Ogkr
             await Task.Run(() =>
             {
                 string line;
+                var lineCount = 0;
                 while ((line = reader.ReadLine()) != null)
                 {
+                    if ((++lineCount & 0xFF) == 0)
+                        cancellationToken.ThrowIfCancellationRequested();
+
                     commandArg.Line = line;
 
                     var cmdName = commandArg.GetData<string>(0);
@@ -60,10 +65,14 @@ namespace OngekiFumenEditor.Parser.Ogkr
                 }
             });
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             foreach (var pair in genObjList)
             {
                 pair.parser.AfterParse(pair.obj, fumen);
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             fumen.Setup();
 
