@@ -439,11 +439,17 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             //get&register all visible objects for every drawingContext(soflanGroup)
             //帧首算一次「所有组的可见区间」并缓存：它同时服务于下面的全局枚举，
             //以及本帧随后被逐个可见子物体调用的 CheckRangeVisible()。
-            foreach (var ctx in drawingContexts.Values)
+            void MaterializeMergedVisibleTGridRanges()
             {
-                foreach (var range in ctx.VisibleTGridRanges)
-                    mergedVisibleTGridRanges.Add(range);
+                mergedVisibleTGridRanges.Clear();
+                foreach (var ctx in drawingContexts.Values)
+                {
+                    foreach (var range in ctx.VisibleTGridRanges)
+                        mergedVisibleTGridRanges.Add(range);
+                }
             }
+
+            MaterializeMergedVisibleTGridRanges();
 
             var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
             using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges, frameTGrid))
@@ -528,6 +534,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 var soflanGroupId = unusedSoflanGroups[i];
                 drawingContexts.Remove(soflanGroupId);
             }
+
+            // 未被任何可见对象使用的 soflan 组已经从 drawingContexts 摘掉：重建帧内区间缓存，
+            // 让 CheckRangeVisible 与旧实现（调用时现读 drawingContexts）看到同一集合，
+            // 否则已移除组的区间仍会让 LaneBlocker / VisibleLineVerticesQuery 多做几何提交。
+            // 本帧的对象枚举已经在上面的 using 块内完成，重建不会影响它。
+            MaterializeMergedVisibleTGridRanges();
 
             RecalculateMagaticXGridLines();
 
