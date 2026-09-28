@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (duration == 0)
                 return;
 
-            var curTGrid = target.Editor.GetCurrentTGrid();
+            var curTGrid = target.FrameTGrid;
 
             /* ^  -- leadOutTGrid
              * |  |
@@ -99,7 +99,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var curObliqueTopXGrid = obj.XGrid.TotalUnit + curBeamObj.ObliqueSourceXGridOffset.TotalUnit;
 
                 //beam not support SoflanGroup
-                var currentY = target.ConvertToViewRelativeY_DefaultSoflanGroup(target.Editor.GetViewportTGrid());
+                var currentY = target.ConvertToViewRelativeY_DefaultSoflanGroup(target.FrameViewportTGrid);
                 var obliqueTopX = (float)XGridCalculator.ConvertXGridToX(curObliqueTopXGrid, target.Editor);
                 var obliqueTopY = currentY - judgeOffset + target.CurrentDrawingTargetContext.ViewRelativeRect.Height;
 

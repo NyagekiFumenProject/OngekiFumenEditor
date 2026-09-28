@@ -54,8 +54,9 @@ public class DrawPlayerLocationHelper
         if (!enableShowPlayerLocation)
             return;
 
-        var xGrid = target.Editor.PlayerLocationRecorder.GetLocationXUnit(target.CurrentPlayTime);
-        var tGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
+        var playTime = target.FrameTime;
+        var xGrid = target.Editor.PlayerLocationRecorder.GetLocationXUnit(playTime);
+        var tGrid = target.Editor.ConvertAudioTimeToTGrid(playTime);
 
         var x = XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
         var y = target.ConvertToViewRelativeY(tGrid, target.Editor.Fumen.SoflansMap.DefaultSoflanList);

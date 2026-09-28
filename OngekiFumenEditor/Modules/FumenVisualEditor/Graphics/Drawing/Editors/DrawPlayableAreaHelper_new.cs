@@ -249,7 +249,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 ref prevContextTotalTGrid,
                 ref nextContextTotalTGrid);
 
-            var currentTGrid = context.Target.Editor.GetViewportTGrid();
+            var currentTGrid = context.Target.FrameViewportTGrid;
             if (currentTGrid is not null)
                 AddSampleOrContext(
                     currentTGrid.TotalGrid,

@@ -13,6 +13,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics
         TimeSpan CurrentPlayTime { get; }
         FumenVisualEditorViewModel Editor { get; }
 
+        /// <summary>
+        /// 本帧统一的时间快照；帧外调用时回退到实时播放时间。
+        /// 渲染相关代码应使用它，而不是 <see cref="CurrentPlayTime"/>。
+        /// </summary>
+        TimeSpan FrameTime => CurrentDrawingTargetContext is { } context ? context.CurrentTime : CurrentPlayTime;
+
+        /// <summary>
+        /// 本帧统一的当前 TGrid 快照；帧外或未填充时回退到实时值。
+        /// 渲染相关代码应使用它，而不是 editor 的实时 <c>GetCurrentTGrid()</c>。
+        /// </summary>
+        TGrid FrameTGrid => CurrentDrawingTargetContext is { CurrentTGrid: { } tGrid } ? tGrid : Editor.GetCurrentTGrid();
+
+        /// <summary>
+        /// 本帧统一的视口 TGrid 快照（预览模式下由滚动位置决定，可能领先于 <see cref="FrameTGrid"/>）；
+        /// 帧外或未填充时回退到实时值。
+        /// </summary>
+        TGrid FrameViewportTGrid => CurrentDrawingTargetContext is { ViewportTGrid: { } tGrid } ? tGrid : Editor.GetViewportTGrid();
+
         void RegisterSelectableObject(OngekiObjectBase obj, Vector2 centerPos, Vector2 size);
 
         bool CheckDrawingVisible(DrawingVisible visible);

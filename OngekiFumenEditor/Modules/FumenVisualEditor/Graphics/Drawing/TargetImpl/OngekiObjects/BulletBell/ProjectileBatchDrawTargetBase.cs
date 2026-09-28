@@ -177,7 +177,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         private void DrawPreviewMode(IFumenEditorDrawingContext target, IEnumerable<T> objs)
         {
-            var currentTGrid = target.Editor.ConvertAudioTimeToTGrid(target.CurrentPlayTime);
+            var currentTGrid = target.FrameTGrid;
             var judgeOffset = target.Editor.Setting.JudgeLineOffsetY;
             var rect = target.CurrentDrawingTargetContext.ViewRelativeRect;
             var rectMinX = rect.MinX;

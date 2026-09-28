@@ -113,7 +113,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     AddSupplementTotalGrid(totalGrid);
                 }
 
-                if (target.Editor.GetViewportTGrid() is TGrid currentViewportTGrid)
+                if (target.FrameViewportTGrid is TGrid currentViewportTGrid)
                     AddSupplementTotalGrid(currentViewportTGrid.TotalGrid);
 
                 supplementTotalGrids.Sort(Comparer<int>.Default);

@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
             else
             {
-                var currentY = target.Editor.ConvertAudioTimeToY_PreviewMode(target.CurrentPlayTime);
+                var currentY = target.Editor.ConvertAudioTimeToY_PreviewMode(target.FrameTime);
                 //显示默认的变速组
                 timelines = TGridCalculator.GetVisbleTimelines_PreviewMode(
                     fumen.SoflansMap.DefaultSoflanList,

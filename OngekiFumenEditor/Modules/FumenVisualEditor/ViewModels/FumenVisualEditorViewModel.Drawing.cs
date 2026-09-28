@@ -330,12 +330,26 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         context.PerfomenceMonitor.OnBeforeRender();
 
         //计算可以显示的TGrid范围以及像素范围
-        var tGrid = GetViewportTGrid();
+
+        // 帧首唯一一次读取播放时间：整帧（原点、裁判线、特效、拍线……）都基于同一快照，
+        // 命令生成与随后呈现共享这一帧的时间基准；帧内不再重复读取，渲染线程与 UI 线程的
+        // 时间推进因此不会被撕裂进同一帧。
+        var frameTime = CurrentPlayTime;
+        var frameTGrid = ConvertAudioTimeToTGrid(frameTime) ?? TGrid.Zero;
+        // 预览模式下视口由滚动位置决定（尾段余量允许它领先于被钳制的播放时间），
+        // 设计模式下两者相同 —— 与旧 GetViewportTGrid() / GetViewportAudioTime() 的分支一致。
+        var previewScrollMs = previewScrollPositionMs;
+        var frameViewportTime = IsPreviewMode ? TimeSpan.FromMilliseconds(previewScrollMs) : frameTime;
+        var frameViewportTGrid = IsPreviewMode ? (ConvertAudioTimeToTGrid(frameViewportTime) ?? TGrid.Zero) : frameTGrid;
+
+        var tGrid = frameViewportTGrid;
         var offsetMs = EditorGlobalSetting.Default.EditorOffsetMs;
         if (offsetMs != 0)
         {
-            var actualMs = GetViewportAudioTime() + TimeSpan.FromMilliseconds(offsetMs);
-            tGrid = TGridCalculator.ConvertAudioTimeToTGrid(actualMs, Fumen.BpmList);
+            var actualMs = frameViewportTime + TimeSpan.FromMilliseconds(offsetMs);
+            if (actualMs < TimeSpan.Zero)
+                actualMs = TimeSpan.Zero;
+            tGrid = TGridCalculator.ConvertAudioTimeToTGrid(actualMs, Fumen.BpmList) ?? TGrid.Zero;
         }
 
         #region prepare drawing contexts' for every soflan groups
@@ -386,6 +400,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 ViewRelativeRect = viewRelativeRect,
                 WorldRect = worldRect,
                 ViewRelativeOriginY = minY,
+                CurrentTime = frameTime,
+                CurrentTGrid = frameTGrid,
+                ViewportTGrid = frameViewportTGrid,
                 ViewMatrix = viewMatrix,
                 ProjectionMatrix = projectionMatrix,
                 ViewWidth = ViewWidth,
@@ -424,7 +441,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
-        using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges))
+        using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges, frameTGrid))
         {
             foreach (var displayable in visibleObjects)
             {
@@ -524,7 +541,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             //特殊处理：子弹和Bell
             var blts = Fumen.Bullets.AsEnumerable();
             var bels = Fumen.Bells.AsEnumerable();
-            var curTGrid = GetCurrentTGrid();
+            var curTGrid = frameTGrid;
             if (IsPreviewMode)
             {
                 blts = Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
@@ -761,16 +778,16 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     }
 
     /// <summary>
-    /// 收集 <paramref name="visibleRanges"/> 中所有可见对象的 displayable 展开
+    /// 收集 <paramref name="visibleRanges"/> 中所有可见对象的 displayable 展开。
+    /// <paramref name="judgeTGrid"/> 由调用方传入本帧的时间快照，避免帧内二次读取播放时间。
     /// </summary>
     private IPooledList<IDisplayableObject> EnumerateAllDisplayableObjects(OngekiFumen fumen,
-        IEnumerable<(TGrid min, TGrid max)> visibleRanges)
+        IEnumerable<(TGrid min, TGrid max)> visibleRanges, TGrid judgeTGrid)
     {
         var result = ObjectPool.GetPooledList<IDisplayableObject>();
         try
         {
             var containBeams = fumen.Beams.Any();
-            var judgeTGrid = GetCurrentTGrid();
             var isPreviewMode = IsPreviewMode;
             var editorIsPreviewMode = Editor.IsPreviewMode;
 
