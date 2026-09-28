@@ -17,10 +17,19 @@
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [Setup]}">
             <StackPanel>
-                <CheckBox
-                    Margin="10,10,10,10"
-                    Content="{markup:Translate [ProcessProriotyUpgrade]}"
-                    IsChecked="{Binding Setting.UpgradeProcessPriority}" />
+                <StackPanel Margin="10,10,10,10" Orientation="Horizontal">
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate [ProcessPriorityTier]}" />
+                    <ComboBox
+                        MinWidth="140"
+                        Margin="10,0,0,0"
+                        VerticalAlignment="Center"
+                        DisplayMemberPath="Value"
+                        ItemsSource="{Binding ProcessPriorityTierOptions}"
+                        SelectedValue="{Binding Setting.ProcessPriorityTier}"
+                        SelectedValuePath="Key" />
+                </StackPanel>
                 <CheckBox
                     Margin="10,0,10,10"
                     Content="{markup:Translate [EnableMultiInstances]}"
@@ -112,53 +121,100 @@
                         ItemsSource="{Binding AvaliableRenderManagerImplNames}"
                         SelectedValue="{Binding Setting.DefaultRenderManagerImplementName}" />
                 </StackPanel>
-                <CheckBox
-                    Margin="10,10,10,10"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.GraphicsCompatability}">
-                    <TextBlock Text="{markup:Translate [GraphicsCompatability]}" TextWrapping="Wrap" />
-                </CheckBox>
+                <!-- 通用文字渲染选项：OpenGL 与 Skia 两条文字路径消费同一批设置 -->
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        Margin="10,10,5,10"
+                        VerticalAlignment="Center"
+                        Text="{markup:Translate [EditorFontFamilyName]}" />
+                    <ComboBox
+                        MinWidth="220"
+                        VerticalAlignment="Center"
+                        ItemsSource="{Binding EditorFontFamilyNames}"
+                        SelectedValue="{Binding Setting.EditorFontFamilyName}" />
+                </StackPanel>
                 <CheckBox
                     Margin="10,0,10,10"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.OutputGraphicsLog}">
-                    <TextBlock Text="{markup:Translate [OutputGraphicsLog]}" TextWrapping="Wrap" />
+                    IsChecked="{Binding Setting.DisableStringRendererAntialiasing}">
+                    <TextBlock Text="{markup:Translate [DisableStringRendererAntialiasing]}" TextWrapping="Wrap" />
                 </CheckBox>
-                <CheckBox
-                    Margin="30,0,10,10"
-                    VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.GraphicsLogSynchronous}"
-                    IsEnabled="{Binding Setting.OutputGraphicsLog}">
-                    <TextBlock Text="{markup:Translate [GraphicsLogSynchronous]}" TextWrapping="Wrap" />
-                </CheckBox>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock
-                        Margin="10,10,5,10"
-                        VerticalAlignment="Center"
-                        Text="{markup:Translate [SkiaRenderBackend]}" />
-                    <ComboBox
-                        VerticalAlignment="Center"
-                        ItemsSource="{Binding AvaliableSkiaBackends}"
-                        SelectedValue="{Binding Setting.SkiaRenderBackend}" />
-                </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock
-                        Margin="10,10,5,10"
-                        VerticalAlignment="Center"
-                        Text="{markup:Translate [D3DRenderQueueFrameCount]}" />
-                    <ComboBox
-                        Margin="5,0,5,0"
-                        VerticalAlignment="Center"
-                        ItemsSource="{Binding D3DRenderQueueFrameCountOptions}"
-                        SelectedValue="{Binding D3DRenderQueueFrameCount}" />
-                    <TextBlock
-                        Margin="10,10,5,10"
-                        VerticalAlignment="Center"
-                        Foreground="DarkSlateGray"
-                        Text="{markup:Translate [D3DRenderQueueFrameCountHint]}" />
-                </StackPanel>
+                <!-- OpenGL 实现专属：仅 DefaultOpenGLRenderManagerImpl 消费 -->
+                <GroupBox
+                    Margin="10,5,10,0"
+                    Header="OpenGL"
+                    Visibility="{Binding IsOpenGLBackend, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                    <StackPanel Margin="0,5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                Margin="10,10,5,10"
+                                VerticalAlignment="Center"
+                                Text="{markup:Translate [MsaaSampleCount]}" />
+                            <ComboBox
+                                MinWidth="140"
+                                VerticalAlignment="Center"
+                                ItemsSource="{Binding MsaaSampleCountOptions}"
+                                SelectedValue="{Binding Setting.MsaaSampleCount}" />
+                        </StackPanel>
+                        <CheckBox
+                            Margin="10,0,10,10"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding Setting.GraphicsCompatability}">
+                            <TextBlock Text="{markup:Translate [GraphicsCompatability]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <CheckBox
+                            Margin="10,0,10,10"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding Setting.OutputGraphicsLog}">
+                            <TextBlock Text="{markup:Translate [OutputGraphicsLog]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                        <CheckBox
+                            Margin="30,0,10,10"
+                            VerticalContentAlignment="Center"
+                            IsChecked="{Binding Setting.GraphicsLogSynchronous}"
+                            IsEnabled="{Binding Setting.OutputGraphicsLog}">
+                            <TextBlock Text="{markup:Translate [GraphicsLogSynchronous]}" TextWrapping="Wrap" />
+                        </CheckBox>
+                    </StackPanel>
+                </GroupBox>
+                <!-- Skia 实现专属：后端选择，以及仅 DirectX12 后端有效的渲染队列深度 -->
+                <GroupBox
+                    Margin="10,10,10,0"
+                    Header="Skia"
+                    Visibility="{Binding IsSkiaBackend, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                    <StackPanel Margin="0,5">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock
+                                Margin="10,10,5,10"
+                                VerticalAlignment="Center"
+                                Text="{markup:Translate [SkiaRenderBackend]}" />
+                            <ComboBox
+                                VerticalAlignment="Center"
+                                ItemsSource="{Binding AvaliableSkiaBackends}"
+                                SelectedValue="{Binding Setting.SkiaRenderBackend}" />
+                        </StackPanel>
+                        <StackPanel
+                            Orientation="Horizontal"
+                            Visibility="{Binding IsSkiaDirectX12Backend, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=True}">
+                            <TextBlock
+                                Margin="10,10,5,10"
+                                VerticalAlignment="Center"
+                                Text="{markup:Translate [D3DRenderQueueFrameCount]}" />
+                            <ComboBox
+                                Margin="5,0,5,0"
+                                VerticalAlignment="Center"
+                                ItemsSource="{Binding D3DRenderQueueFrameCountOptions}"
+                                SelectedValue="{Binding D3DRenderQueueFrameCount}" />
+                            <TextBlock
+                                Margin="10,10,5,10"
+                                VerticalAlignment="Center"
+                                Foreground="DarkSlateGray"
+                                Text="{markup:Translate [D3DRenderQueueFrameCountHint]}" />
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
                 <Button
-                    Margin="10,0,0,0"
+                    Margin="10,10,0,0"
                     Padding="10,5"
                     HorizontalAlignment="Left"
                     cal:Message.Attach="OpenRenderPerfomenceMeasurePanel()"

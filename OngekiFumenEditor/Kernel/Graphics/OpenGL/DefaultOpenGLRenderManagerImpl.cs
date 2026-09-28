@@ -188,6 +188,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             Log.LogDebug($"GLWpfControlSettings.GraphicsContextFlags: {setting.ContextFlags}");
             Log.LogDebug($"GLWpfControlSettings.GraphicsProfile: {setting.Profile}");
 
+            setting.Samples = Math.Clamp(Properties.ProgramSetting.Default.MsaaSampleCount, 0, 8);
+            Log.LogDebug($"GLWpfControlSettings.Samples: {setting.Samples}");
+
             glView.Start(setting);
 
             sharedContext = sharedContext ?? glView.Context;

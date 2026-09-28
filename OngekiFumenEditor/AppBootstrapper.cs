@@ -287,17 +287,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             return;
         }
 
-        if (ProgramSetting.Default.UpgradeProcessPriority)
-        {
-            var curProc = Process.GetCurrentProcess();
-            //提升
-            var before = curProc.PriorityClass;
-            var after = ProcessPriorityClass.High;
-            curProc.PriorityClass = after;
-            Log.LogDebug($"Upgrade process priority: {before} -> {after}");
-
-            curProc.PriorityBoostEnabled = true;
-        }
+        ApplyProcessPriorityTier();
 
         //overwrite ViewLocator
         var locateForModel = ViewLocator.LocateForModel;
@@ -376,6 +366,48 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         //var isf = fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x).FirstOrDefault(x => x.Id == 2375);
         //var queryPath = fumen.IndividualSoflanAreaMap.DebugFindDataQueryPath(isf);
         //var soflanGroup = fumen.IndividualSoflanAreaMap.QuerySoflanGroup(new(-12, 0), new(10, 1440));
+    }
+
+    /// <summary>
+    /// 按 <see cref="ProgramSetting.ProcessPriorityTier"/> 应用进程优先级：0=Normal(不修改)/1=BelowNormal/2=AboveNormal/3=High。
+    /// 非 Windows 平台跳过；异常只记日志，不影响启动。
+    /// </summary>
+    private static void ApplyProcessPriorityTier()
+    {
+        if (!OperatingSystem.IsWindows())
+            return;
+
+        var tier = ProgramSetting.Default.ProcessPriorityTier;
+
+        ProcessPriorityClass priorityClass;
+        switch (tier)
+        {
+            case 1:
+                priorityClass = ProcessPriorityClass.BelowNormal;
+                break;
+            case 2:
+                priorityClass = ProcessPriorityClass.AboveNormal;
+                break;
+            case 3:
+                priorityClass = ProcessPriorityClass.High;
+                break;
+            default:
+                return;
+        }
+
+        try
+        {
+            var curProc = Process.GetCurrentProcess();
+            //提升
+            var before = curProc.PriorityClass;
+            curProc.PriorityClass = priorityClass;
+            curProc.PriorityBoostEnabled = true;
+            Log.LogDebug($"Upgrade process priority: {before} -> {priorityClass}");
+        }
+        catch (Exception ex)
+        {
+            Log.LogWarn($"Failed to apply process priority tier {tier}: {ex.Message}");
+        }
     }
 
     private void MainWindow_Closed(object sender, EventArgs e)

@@ -24,7 +24,24 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
         private static IEnumerable<IFontHandle> defaultSupportFonts;
         public static IEnumerable<IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
         public IEnumerable<IFontHandle> SupportFonts => DefaultSupportFonts;
-        public static IFontHandle DefaultFont { get; } = GetSupportFonts().FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
+        public static IFontHandle DefaultFont { get; } = ResolveDefaultFont();
+
+        /// <summary>
+        /// 解析默认字体：<see cref="ProgramSetting.EditorFontFamilyName"/> 非空时按家族名匹配系统字体表，
+        /// 未命中则把配置名直接交给 <c>SKTypeface.FromFamilyName</c>（由绘制侧再退回 <c>SKTypeface.Default</c>）；
+        /// 为空时保持既有 "consola" 匹配行为（系统字体家族名通常为 "Consolas"，故结果为 null → <c>SKTypeface.Default</c>）。
+        /// </summary>
+        private static IFontHandle ResolveDefaultFont()
+        {
+            var configured = ProgramSetting.Default.EditorFontFamilyName;
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                return DefaultSupportFonts.FirstOrDefault(x => string.Equals(x.FamilyName, configured, StringComparison.OrdinalIgnoreCase))
+                    ?? new FontHandle { FamilyName = configured };
+            }
+
+            return DefaultSupportFonts.FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
+        }
 
         public DefaultSkiaStringDrawing(DefaultSkiaDrawingManagerImpl manager) : base(manager)
         {
@@ -67,7 +84,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
                    typefaceName,
                    isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
                    SKFontStyleWidth.Normal,
-                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright);
+                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright) ?? SKTypeface.Default;
 
             font.Typeface = typeface;
             font.Size = fontSize;
@@ -108,7 +125,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
                    typefaceName,
                    isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
                    SKFontStyleWidth.Normal,
-                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright);
+                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright) ?? SKTypeface.Default;
 
             font.Typeface = typeface;
             font.Size = fontSize;

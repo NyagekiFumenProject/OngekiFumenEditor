@@ -37,6 +37,59 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
         public IEnumerable<int> D3DRenderQueueFrameCountOptions { get; } = Enumerable.Range(2, 4);
 
+        /// <summary>编辑器字体家族候选：首项为空字符串表示使用平台默认字体。</summary>
+        public IEnumerable<string> EditorFontFamilyNames { get; } = GetEditorFontFamilyNames();
+
+        /// <summary>MSAA 采样数候选。0 表示关闭（保持默认行为）。</summary>
+        public IEnumerable<int> MsaaSampleCountOptions { get; } = new[] { 0, 2, 4, 8 };
+
+        /// <summary>进程优先级档位候选，Value 与 <see cref="ProgramSetting.ProcessPriorityTier"/> 取值对应。</summary>
+        public IEnumerable<KeyValuePair<int, string>> ProcessPriorityTierOptions { get; } = new[]
+        {
+            new KeyValuePair<int, string>(0, "Normal"),
+            new KeyValuePair<int, string>(1, "BelowNormal"),
+            new KeyValuePair<int, string>(2, "AboveNormal"),
+            new KeyValuePair<int, string>(3, "High"),
+        };
+
+        /// <summary>OpenGL 实现专属选项（MSAA/兼容性/GL 调试日志）是否可见。</summary>
+        public bool IsOpenGLBackend => string.Equals(Setting.DefaultRenderManagerImplementName, OpenGLRenderManagerImplName, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>Skia 实现专属选项（Skia 后端选择/渲染队列深度）是否可见。</summary>
+        public bool IsSkiaBackend => string.Equals(Setting.DefaultRenderManagerImplementName, SkiaRenderManagerImplName, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>D3D 渲染队列深度仅对 Skia + DirectX12 后端生效（该后端由 D3D9On12 呈现实现消费）。</summary>
+        public bool IsSkiaDirectX12Backend => IsSkiaBackend && string.Equals(Setting.SkiaRenderBackend, nameof(RenderBackendType.DirectX12), StringComparison.OrdinalIgnoreCase);
+
+        private const string OpenGLRenderManagerImplName = "OpenGL";
+        private const string SkiaRenderManagerImplName = "Skia";
+
+        private static IEnumerable<string> GetEditorFontFamilyNames()
+        {
+            var names = new List<string> { string.Empty };
+
+            try
+            {
+                names.AddRange(SixLabors.Fonts.SystemFonts.Families
+                    .Select(x => x.Name)
+                    .Where(x => !string.IsNullOrWhiteSpace(x)));
+            }
+            catch (Exception ex)
+            {
+                Log.LogWarn($"Failed to enumerate system font families: {ex.Message}");
+            }
+
+            var current = ProgramSetting.Default.EditorFontFamilyName;
+            if (!string.IsNullOrWhiteSpace(current) && !names.Contains(current, StringComparer.OrdinalIgnoreCase))
+                names.Add(current);
+
+            return names
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(x => x.Length == 0 ? 0 : 1)
+                .ThenBy(x => x, StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+        }
+
         public int D3DRenderQueueFrameCount
         {
             get => Math.Clamp(Setting.D3DRenderQueueFrameCount, 2, 5);
@@ -91,6 +144,14 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
             Log.LogDebug($"logs setting property changed : {e.PropertyName}");
             if (e.PropertyName == nameof(ProgramSetting.D3DRenderQueueFrameCount))
                 NotifyOfPropertyChange(() => D3DRenderQueueFrameCount);
+            else if (e.PropertyName == nameof(ProgramSetting.DefaultRenderManagerImplementName))
+            {
+                NotifyOfPropertyChange(() => IsOpenGLBackend);
+                NotifyOfPropertyChange(() => IsSkiaBackend);
+                NotifyOfPropertyChange(() => IsSkiaDirectX12Backend);
+            }
+            else if (e.PropertyName == nameof(ProgramSetting.SkiaRenderBackend))
+                NotifyOfPropertyChange(() => IsSkiaDirectX12Backend);
         }
 
         public string SettingsPageName => Resources.TabProgram;

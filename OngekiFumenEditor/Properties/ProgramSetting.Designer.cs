@@ -61,13 +61,13 @@ namespace OngekiFumenEditor.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool UpgradeProcessPriority {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ProcessPriorityTier {
             get {
-                return ((bool)(this["UpgradeProcessPriority"]));
+                return ((int)(this["ProcessPriorityTier"]));
             }
             set {
-                this["UpgradeProcessPriority"] = value;
+                this["ProcessPriorityTier"] = value;
             }
         }
 
@@ -236,6 +236,30 @@ namespace OngekiFumenEditor.Properties {
             }
             set {
                 this["DisableStringRendererAntialiasing"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string EditorFontFamilyName {
+            get {
+                return ((string)(this["EditorFontFamilyName"]));
+            }
+            set {
+                this["EditorFontFamilyName"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int MsaaSampleCount {
+            get {
+                return ((int)(this["MsaaSampleCount"]));
+            }
+            set {
+                this["MsaaSampleCount"] = value;
             }
         }
 

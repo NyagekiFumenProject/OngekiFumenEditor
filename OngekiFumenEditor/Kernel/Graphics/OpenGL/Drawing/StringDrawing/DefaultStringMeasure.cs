@@ -39,7 +39,54 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         private readonly SkiaGlyphAtlas glyphAtlas = new();
 
         public static IEnumerable<IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
-        public static IFontHandle DefaultFont { get; } = DefaultSupportFonts.FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
+
+        private static readonly object defaultFontSync = new();
+        private static IFontHandle cachedDefaultFont;
+
+        static DefaultStringMeasure()
+        {
+            ProgramSetting.Default.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(ProgramSetting.EditorFontFamilyName))
+                    InvalidateDefaultFontCache();
+            };
+        }
+
+        /// <summary>
+        /// 默认字体：随 <see cref="ProgramSetting.EditorFontFamilyName"/> 变化即时重解析（编辑器逐帧读取，无需重启）。
+        /// </summary>
+        public static IFontHandle DefaultFont
+        {
+            get
+            {
+                lock (defaultFontSync)
+                    return cachedDefaultFont ??= ResolveDefaultFont();
+            }
+        }
+
+        private static void InvalidateDefaultFontCache()
+        {
+            lock (defaultFontSync)
+                cachedDefaultFont = null;
+        }
+
+        /// <summary>
+        /// 解析默认字体：优先使用 <see cref="ProgramSetting.EditorFontFamilyName"/> 指定的家族名（按文件名去扩展名，大小写不敏感），
+        /// 匹配不到则回退既有 <c>consola</c> 匹配，再取不到则退到第一个可用字体（不抛异常）。
+        /// </summary>
+        private static IFontHandle ResolveDefaultFont()
+        {
+            var configured = ProgramSetting.Default.EditorFontFamilyName;
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                var matched = DefaultSupportFonts.FirstOrDefault(x => string.Equals(x.FamilyName, configured, StringComparison.OrdinalIgnoreCase));
+                if (matched != null)
+                    return matched;
+            }
+
+            return DefaultSupportFonts.FirstOrDefault(x => x.FamilyName.ToLower() == "consola")
+                ?? DefaultSupportFonts.FirstOrDefault();
+        }
 
         public IEnumerable<IFontHandle> SupportFonts => DefaultSupportFonts;
 
@@ -176,11 +223,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
         private static IReadOnlyList<IFontHandle> GetSupportFonts()
         {
-            return Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.Fonts)).Select(x => new FontHandle
+            try
             {
-                FamilyName = Path.GetFileNameWithoutExtension(x),
-                FilePath = x
-            }).Where(x => Path.GetExtension(x.FilePath).Equals(".ttf", StringComparison.OrdinalIgnoreCase)).ToArray();
+                var fontDir = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+                if (string.IsNullOrEmpty(fontDir) || !Directory.Exists(fontDir))
+                    return Array.Empty<IFontHandle>();
+
+                return Directory.GetFiles(fontDir).Select(x => new FontHandle
+                {
+                    FamilyName = Path.GetFileNameWithoutExtension(x),
+                    FilePath = x
+                }).Where(x => Path.GetExtension(x.FilePath).Equals(".ttf", StringComparison.OrdinalIgnoreCase)).ToArray();
+            }
+            catch (Exception ex)
+            {
+                OngekiFumenEditor.Utils.Log.LogWarn($"Failed to enumerate system fonts: {ex.Message}");
+                return Array.Empty<IFontHandle>();
+            }
         }
 
         private static IFontHandle TryGetSubFont(IFontHandle handle, string sub)
