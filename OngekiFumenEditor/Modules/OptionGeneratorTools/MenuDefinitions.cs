@@ -5,7 +5,7 @@ using System.ComponentModel.Composition;
 
 namespace OngekiFumenEditor.Modules.OptionGeneratorTools
 {
-    public static class MenuDefintions
+    public static class MenuDefinitions
     {
         [Export]
         public static MenuItemDefinition ToolsOptionsMenuGroupMenuItem = new TextMenuItemDefinition(
