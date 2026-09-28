@@ -18,6 +18,7 @@
 | 同步方式 / 合入提交 | `b26b79118f6c664ab6d113fdf5ccac9a3fba71ab` — "Merge remote-tracking branch 'origin/master' into avalonia12"（第二父即 `8b2940785`） |
 | 分叉基线（初始移植来源） | `a00e90ab4980079875df3532fcbdc7d5a8a16373` — "fix crash"，初始移植提交 `6d452ce16` 的父提交（2026-01-06） |
 | 上一次对比分析报告 | `Avalonia/docs/wpf-master-to-avalonia-migration-review-2026-09-19.html`（报告内三元组：本地 master `a00e90ab4` / origin/master `8b2940785` / HEAD `1b63794eb`） |
+| 最近一次反向分析报告（Avalonia → WPF 回移候选） | `Avalonia/docs/avalonia-to-wpf-editor-render-backport-review-2026-09-29.md`（2026-09-29；分类计数 **A 可直接回移 12 / B 需适配 3 / C 不适用 9 / D Avalonia 侧未落地 4**） |
 | 更早的对照报告 | `Avalonia/docs/wpf-master-origin-master-comparison-2026-09-03.html`（合并基点 `a00e90ab4980`，264 提交） |
 | 待同步 | 同步点之后 WPF 树有 84 个路径的差异，其中 16 个提交只改 WPF 树、Avalonia 未跟进（见 §3） |
 
@@ -96,3 +97,4 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 | 2026-09-19 | 对比分析 | `a00e90ab4980`..`8b2940785` | `Avalonia/docs/wpf-master-to-avalonia-migration-review-2026-09-19.html` | 265 提交，逐项核对是否已迁到 Avalonia |
 | 2026-09-19 | 同步（合并） | `8b2940785` | `b26b79118` | WPF `origin/master` 并入 `avalonia12`；当前同步点 |
 | 2026-09-29 | 建立本文件 | `8b2940785` | — | 记录同步点、分叉基线与 84 路径待同步清单 |
+| 2026-09-29 | 反向差异分析（Avalonia → WPF 回移候选） | `8b2940785` | `Avalonia/docs/avalonia-to-wpf-editor-render-backport-review-2026-09-29.md` | 逐提交核对 Avalonia 侧编辑器渲染改动与 WPF 现状：A 可直接回移 12、B 需适配 3、C 不适用/已等价 9、D Avalonia 侧未落地 4；推荐顺序与可复用基准已列出 |
