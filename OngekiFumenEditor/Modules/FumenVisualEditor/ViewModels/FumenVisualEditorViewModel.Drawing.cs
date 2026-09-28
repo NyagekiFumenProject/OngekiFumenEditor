@@ -43,7 +43,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
 {
-    private static Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
+    private Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
 
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
 
@@ -77,7 +77,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private DrawXGridHelper xGridHelper;
     private int cacheMagaticXGridLinesHash;
 
-    private IEnumerable<IFumenEditorDrawingTarget> drawingTargets;
+    private IEnumerable<IFumenEditorDrawingTarget> drawingTargets = [];
     public IEnumerable<IFumenEditorDrawingTarget> CurrentDrawingTargets => drawingTargets;
 
     private TaskCompletionSource renderInitializationTaskSource = new();
@@ -238,6 +238,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         LoadRenderOrderVisible();
         ResortRenderOrder();
 
+        DisposeDrawingHelpers();
         timeSignatureHelper = new DrawTimeSignatureHelper();
         timeSignatureHelper.Initalize(renderImpl);
 
@@ -1097,15 +1098,47 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private void DisposeRenderLoop()
     {
         var context = RenderContext;
-        if (context is null)
-            return;
+        if (context is not null)
+        {
+            context.OnRender -= Render;
+            context.StopRendering();
+            context.Name = default;
+            context.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
 
-        context.OnRender -= Render;
-        context.StopRendering();
-        context.Name = default;
-        context.PerfomenceMonitor = DummyPerformenceMonitor.Instance;
+            renderImpl?.RemoveRenderContext(context);
+            RenderContext = null;
+        }
 
-        renderImpl?.RemoveRenderContext(context);
-        RenderContext = null;
+        DisposeDrawingHelpers();
+
+        // 绘制目标是 DI 单例（其纹理复用/释放的所有权问题另行处理），这里只释放本编辑器持有的
+        // 引用与映射；每次渲染循环重建的助手必须随编辑器关闭释放，否则会继续持有原生纹理与全局设置订阅。
+        drawingTargets = [];
+        drawTargetOrder = [];
+        drawTargetMap.Clear();
+        drawMap.Clear();
+        drawingContexts.Clear();
+        mergedVisibleTGridRanges.Clear();
+        cachedMagneticXGridLines.Clear();
+        CurrentDrawingTargetContext = default;
+        renderInitializationTaskSource.TrySetResult();
+    }
+
+    /// <summary>
+    /// 释放每次 <see cref="PrepareRenderLoop"/> 重建的绘制助手（它们持有原生纹理与全局设置订阅）。
+    /// </summary>
+    private void DisposeDrawingHelpers()
+    {
+        playableAreaHelper?.Dispose();
+        playableAreaHelper = null;
+        playerLocationHelper?.Dispose();
+        playerLocationHelper = null;
+        hitObjectEffectHelper?.Dispose();
+        hitObjectEffectHelper = null;
+
+        timeSignatureHelper = null;
+        xGridHelper = null;
+        judgeLineHelper = null;
+        selectingRangeHelper = null;
     }
 }

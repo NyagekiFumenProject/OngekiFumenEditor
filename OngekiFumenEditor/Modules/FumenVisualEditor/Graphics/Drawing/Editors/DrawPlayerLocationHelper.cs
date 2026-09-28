@@ -11,7 +11,7 @@ using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
 
-public class DrawPlayerLocationHelper
+public class DrawPlayerLocationHelper : IDisposable
 {
     private (Vector2 size, Vector2 position, float rotation, Vector4 color)[] arr = { default };
     private IImage texture;
@@ -20,6 +20,7 @@ public class DrawPlayerLocationHelper
 
     public void Initalize(IRenderManagerImpl impl)
     {
+        Reset();
         arr[0].rotation = 0f;
 
         texture = ResourceUtils.OpenReadTextureFromFile(impl, @".\Resources\editor\playerLoc.png");
@@ -65,5 +66,17 @@ public class DrawPlayerLocationHelper
         arr[0].size = size;
 
         builder.DrawTexture(texture, arr);
+    }
+
+    public void Dispose()
+    {
+        Reset();
+    }
+
+    private void Reset()
+    {
+        Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
+        texture?.Dispose();
+        texture = null;
     }
 }

@@ -13,12 +13,13 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 {
-    public class DrawHitObjectEffectHelper
+    public class DrawHitObjectEffectHelper : IDisposable
     {
         private bool showHitEffect;
 
         public void Initalize(IRenderManagerImpl impl)
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
             showHitEffect = Properties.EditorGlobalSetting.Default.ShowHitObjectEffectInPreviewMode;
 
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
@@ -130,6 +131,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 }
             }
             builder.DrawCircles(circles);
+        }
+
+        public void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
         }
     }
 }

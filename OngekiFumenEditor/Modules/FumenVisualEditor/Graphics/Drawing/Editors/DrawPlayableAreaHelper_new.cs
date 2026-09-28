@@ -151,8 +151,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// </summary>
         public void Initalize(IRenderManagerImpl impl)
         {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
             UpdateProps();
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
+        }
+
+        public void Dispose()
+        {
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
         }
 
         /// <summary>
