@@ -36,6 +36,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
         private readonly DrawCommandListContextSlots drawCommandListContextSlots = new();
         private readonly object drawCommandListGate = new();
 
+        private readonly object offscreenGate = new();
+        private readonly OpenGLOffscreenRenderQueue offscreenRenderQueue = new();
+        private readonly HashSet<DefaultOpenGLRenderContext> activeRenderContexts = new();
+
         // Import the necessary Win32 functions
         [DllImport("opengl32.dll")]
         private static extern nint wglGetCurrentDC();
@@ -314,6 +318,105 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                         perfomenceMonitor.OnAfterPresent();
                     }
                 });
+            }
+        }
+
+        /// <inheritdoc />
+        public IOffscreenRenderContext CreateOffscreenToImage(OffscreenRenderOptions options)
+        {
+            if (options is null)
+                throw new ArgumentNullException(nameof(options));
+
+            options.Validate();
+
+            lock (offscreenGate)
+            {
+                if (offscreenRenderQueue.IsTerminated)
+                    throw new ObjectDisposedException(nameof(DefaultOpenGLRenderManagerImpl), "离屏渲染队列已关闭。");
+
+                if (activeRenderContexts.Count == 0)
+                    throw new InvalidOperationException("创建 OpenGL 离屏上下文要求至少存在一个已开始渲染（StartRendering）的 GL 控件。");
+            }
+
+            return new OpenGLOffscreenRenderContext(this, offscreenRenderQueue, options);
+        }
+
+        /// <inheritdoc />
+        public IOffscreenRenderContext CreateOffscreenToImage(int width, int height)
+        {
+            return CreateOffscreenToImage(new OffscreenRenderOptions
+            {
+                Width = width,
+                Height = height,
+            });
+        }
+
+        /// <inheritdoc />
+        public Task Term()
+        {
+            // 同步完成：取消排队请求、（若有 current 上下文）执行延迟删除；绝不等待渲染 tick（退出路径上等 tick 会死锁）。
+            offscreenRenderQueue.Terminate();
+            Log.LogInfo("[离屏] OpenGL 离屏渲染队列已关闭。");
+
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
+        /// 在 GL 控件渲染回调（上下文 current）内排空离屏渲染队列。
+        /// 每个 tick 都必须调用，包括被 FPS 闸门丢弃的 tick。
+        /// </summary>
+        internal void PumpOffscreenRenders()
+        {
+            offscreenRenderQueue.Pump(this);
+        }
+
+        /// <summary>登记一个待删除的 GL 纹理（延迟删除：下次 drain 或退出时执行）。</summary>
+        internal void EnqueueTextureDeletion(int textureId)
+        {
+            if (textureId != 0)
+                offscreenRenderQueue.EnqueueDeletion(new OpenGLPendingDeletion(textureId, 0));
+        }
+
+        /// <summary>登记一个待删除的 GL 帧缓冲。</summary>
+        internal void EnqueueFramebufferDeletion(int framebufferId)
+        {
+            if (framebufferId != 0)
+                offscreenRenderQueue.EnqueueDeletion(new OpenGLPendingDeletion(0, framebufferId));
+        }
+
+        internal void NotifyRenderContextStarted(DefaultOpenGLRenderContext context)
+        {
+            lock (offscreenGate)
+                activeRenderContexts.Add(context);
+        }
+
+        internal void NotifyRenderContextStopped(DefaultOpenGLRenderContext context)
+        {
+            bool noActiveContext;
+
+            lock (offscreenGate)
+            {
+                activeRenderContexts.Remove(context);
+                noActiveContext = activeRenderContexts.Count == 0;
+            }
+
+            if (noActiveContext)
+            {
+                // 最后一个渲染中的 GL 控件停止后不再产生 tick，挂起中的排队请求必须以异常结束，避免永久等待。
+                offscreenRenderQueue.CancelQueued(null, new OperationCanceledException("没有处于渲染中的 GL 控件，排队中的离屏渲染请求被取消。"));
+            }
+        }
+
+        /// <summary>当前线程是否存在 current 的 GL 上下文（用于判断能否安全执行 GL 调用）。</summary>
+        internal static bool HasCurrentGlContext()
+        {
+            try
+            {
+                return wglGetCurrentDC() != nint.Zero;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

@@ -26,5 +26,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public float ViewHeight { get; set; }
         public float RenderScaleX { get; set; } = 1;
         public float RenderScaleY { get; set; } = 1;
+
+        /// <summary>
+        /// 为 true 时，<see cref="IDrawing.GetOverrideViewProjectMatrixOrDefault(DrawingTargetContext)"/> 会在视图投影矩阵之后追加一次
+        /// Y 轴翻转（NDC y → -y）。离屏渲染用它把「GL 纹理行序（t=0 在底部）」对齐到 Bitmap/Skia 图像行序，避免结果贴回时上下颠倒。
+        /// </summary>
+        public bool FlipY { get; set; }
     }
 }

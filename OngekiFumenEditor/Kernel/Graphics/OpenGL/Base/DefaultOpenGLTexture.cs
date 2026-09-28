@@ -69,9 +69,29 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
             }
         }
 
+        [NonSerialized]
+        private readonly Action<int> releaseTexture;
+
         public DefaultOpenGLTexture(string name = "Texture")
         {
             Name = name;
+        }
+
+        /// <summary>
+        /// 离屏渲染专用构造：接管一个已经创建好的 GL 纹理名。
+        /// <see cref="Dispose"/> 不直接调用 <c>GL.DeleteTexture</c>，而是通过 <paramref name="releaseTexture"/> 释放
+        /// （离屏纹理的删除必须回到有 current 上下文的时机执行，调用方通常传入延迟删除队列的入队委托）。
+        /// </summary>
+        /// <param name="textureId">已存在的 GL 纹理名。</param>
+        /// <param name="width">纹理宽度（设备像素）。</param>
+        /// <param name="height">纹理高度（设备像素）。</param>
+        /// <param name="releaseTexture">纹理释放委托；为 null 时退回直接删除。</param>
+        /// <param name="name">纹理名称（调试用）。</param>
+        internal DefaultOpenGLTexture(int textureId, int width, int height, Action<int> releaseTexture, string name = "OffscreenTexture") : this(name)
+        {
+            _id = textureId;
+            _textureSize = new Vector2(width, height);
+            this.releaseTexture = releaseTexture;
         }
 
         public DefaultOpenGLTexture(Bitmap bmp, string name = "Texture") : this(name)
@@ -105,9 +125,17 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Base
         {
             if (_id is int id)
             {
-                GL.DeleteTexture(id);
-                OpenGLTextureBindingCache.InvalidateTexture(id);
                 _id = null;
+
+                if (releaseTexture is not null)
+                {
+                    releaseTexture(id);
+                }
+                else
+                {
+                    GL.DeleteTexture(id);
+                    OpenGLTextureBindingCache.InvalidateTexture(id);
+                }
             }
         }
     }

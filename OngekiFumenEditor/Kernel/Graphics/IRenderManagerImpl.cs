@@ -72,5 +72,22 @@ namespace OngekiFumenEditor.Kernel.Graphics
         /// Presents the front slot associated with the specified render context.
         /// </summary>
         void PresentDrawCommandList(IRenderContext context);
+
+        /// <summary>
+        /// 创建离屏渲染目标（固定尺寸/格式、不参与控件绘制周期）。返回的上下文由调用方负责 Dispose。
+        /// OpenGL 后端要求存在处于渲染中的活动 GL 控件，否则抛 <see cref="InvalidOperationException"/>。
+        /// </summary>
+        IOffscreenRenderContext CreateOffscreenToImage(OffscreenRenderOptions options);
+
+        /// <summary>创建离屏渲染目标（平台默认像素格式 + sRGB + Premul 的便捷重载）。</summary>
+        IOffscreenRenderContext CreateOffscreenToImage(int width, int height);
+
+        /// <summary>
+        /// 关闭本后端持有的后台资源（Skia 的离屏渲染通道线程、OpenGL 的排队请求与延迟删除队列）。
+        /// <b>同步完成保证</b>：实现必须同步执行完全部清理；返回的 Task 完成时（同步实现即返回前），
+        /// 所有未完成的 <see cref="IOffscreenRenderContext.RenderToImageAsync"/> 任务都必须已结束（结果/异常/取消皆可）。
+        /// 由 AppBootstrapper.OnExit 在第一个 await 之前调用。
+        /// </summary>
+        Task Term();
     }
 }

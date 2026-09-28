@@ -69,6 +69,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
             prevRenderTimestamp = 0;
             glView.Render += GlView_Render;
+            manager.NotifyRenderContextStarted(this);
         }
 
         public void StopRendering()
@@ -78,16 +79,25 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             isStart = false;
 
             glView.Render -= GlView_Render;
+            manager.NotifyRenderContextStopped(this);
         }
 
         private void GlView_Render(TimeSpan ts)
         {
-            if (!TryUpdateRenderTime(out var actualTs))
-                return;
+            try
+            {
+                if (!TryUpdateRenderTime(out var actualTs))
+                    return;
 
-            OnRender?.Invoke(this, actualTs);
+                OnRender?.Invoke(this, actualTs);
 
-            SwapAndPresentDrawCommandList();
+                SwapAndPresentDrawCommandList();
+            }
+            finally
+            {
+                // 离屏队列必须在每个 tick 排空——包括被 FPS 闸门丢弃的 tick，否则离屏渲染会被限帧吞掉。
+                manager.PumpOffscreenRenders();
+            }
         }
 
         private void SwapAndPresentDrawCommandList()

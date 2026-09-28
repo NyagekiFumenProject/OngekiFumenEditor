@@ -39,6 +39,15 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         public static void Present(DefaultOpenGLRenderManagerImpl manager, IRenderContext renderContext, DrawCommandList drawCommandList)
         {
+            Present(manager, renderContext, drawCommandList, false);
+        }
+
+        /// <summary>
+        /// 重放一个命令列表。<paramref name="flipY"/> 为 true 时，绘制使用的视图投影矩阵会追加一次 Y 轴翻转：
+        /// 离屏渲染用它把「GL 纹理行序（t=0 在底部）」对齐到 Bitmap/Skia 图像行序，避免结果贴回时上下颠倒。
+        /// </summary>
+        internal static void Present(DefaultOpenGLRenderManagerImpl manager, IRenderContext renderContext, DrawCommandList drawCommandList, bool flipY)
+        {
             ArgumentNullException.ThrowIfNull(manager);
             ArgumentNullException.ThrowIfNull(renderContext);
             ArgumentNullException.ThrowIfNull(drawCommandList);
@@ -46,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             lock (replayGate)
             {
                 EnsureInitialized(manager);
-                Reset(renderContext, drawCommandList.FrameState);
+                Reset(renderContext, drawCommandList.FrameState, flipY);
                 Present(drawCommandList.Commands);
             }
         }
@@ -92,7 +101,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             }
         }
 
-        private static void Reset(IRenderContext renderContext, DrawCommandListFrameState frameState)
+        private static void Reset(IRenderContext renderContext, DrawCommandListFrameState frameState, bool flipY)
         {
             currentModelMatrix = frameState.ModelMatrix;
             currentViewMatrix = frameState.ViewMatrix;
@@ -102,7 +111,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
             viewMatrixStack.Clear();
             projectionMatrixStack.Clear();
 
-            drawingContext.Reset(renderContext, CreateTargetContext(frameState));
+            drawingContext.Reset(renderContext, CreateTargetContext(frameState, flipY));
 
             var renderViewWidth = (int)(frameState.ViewWidth * frameState.RenderScaleX);
             var renderViewHeight = (int)(frameState.ViewHeight * frameState.RenderScaleY);
@@ -136,7 +145,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
 
         private static IPerfomenceMonitor PerfomenceMonitor => drawingContext.RenderContext?.PerfomenceMonitor ?? DummyPerformenceMonitor.Instance;
 
-        private static DrawingTargetContext CreateTargetContext(DrawCommandListFrameState frameState)
+        private static DrawingTargetContext CreateTargetContext(DrawCommandListFrameState frameState, bool flipY)
         {
             return new DrawingTargetContext
             {
@@ -146,7 +155,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL
                 RenderScaleX = frameState.RenderScaleX,
                 RenderScaleY = frameState.RenderScaleY,
                 ViewMatrix = frameState.ViewMatrix,
-                ProjectionMatrix = frameState.ProjectionMatrix
+                ProjectionMatrix = frameState.ProjectionMatrix,
+                FlipY = flipY
             };
         }
 
