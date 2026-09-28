@@ -1,8 +1,7 @@
 using FontStashSharp;
-using FontStashSharp.Rasterizers.FreeType;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Properties;
-using OngekiFumenEditor.Utils;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,24 +10,30 @@ using System.Numerics;
 
 namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 {
-    internal sealed class DefaultStringMeasure : IStringMeasure
+    /// <summary>
+    /// GL 侧字体表 / 样式解析 / 度量缓存，以及 Skia 字形图集的持有者。
+    /// <para>
+    /// 替换历史实现（FontStashSharp + FreeType，按 <c>字号 × FontResolutionFactor</c> 光栅化再双线性缩回）：
+    /// 那条链路会让 hinting 在缩放时被摊平，且 1.5.1 的度量按 <c>字号 × factor²</c> 查询、与显示尺寸不一致，
+    /// 结果是文字发虚且清晰度随定位相位波动。现在统一为「按最终像素尺寸带 hinting 光栅化」。
+    /// </para>
+    /// </summary>
+    internal sealed class DefaultStringMeasure : IStringMeasure, IDisposable
     {
         private const int MaxMeasureTextCacheCount = 4096;
 
-        private readonly Dictionary<IFontHandle, FontSystem> cacheFonts = new();
         private readonly Dictionary<(IFontHandle handle, FontStyle style), ResolvedTextStyle> cacheResolvedTextStyles = new();
         private readonly Dictionary<MeasureTextCacheKey, Vector2> cacheMeasureTextSizes = new();
         private readonly Queue<MeasureTextCacheKey> cacheMeasureTextSizeOrder = new();
+
+        private readonly SkiaGlyphAtlas glyphAtlas = new();
 
         public static IEnumerable<IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
         public static IFontHandle DefaultFont { get; } = DefaultSupportFonts.FirstOrDefault(x => x.FamilyName.ToLower() == "consola");
 
         public IEnumerable<IFontHandle> SupportFonts => DefaultSupportFonts;
 
-        static DefaultStringMeasure()
-        {
-            FontSystemDefaults.FontLoader = new FreeTypeLoader();
-        }
+        internal SkiaGlyphAtlas GlyphAtlas => glyphAtlas;
 
         public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
@@ -36,48 +41,48 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             handle ??= DefaultFont;
 
             var resolvedStyle = ResolveTextStyle(handle, style);
-            var font = GetFontSystem(resolvedStyle.FontHandle).GetFont(fontSize);
-            return MeasureString(font, text, resolvedStyle.FontHandle, fontSize, scale, resolvedStyle.FontStyle);
+
+            var key = new MeasureTextCacheKey(text, resolvedStyle.FontHandle, fontSize, scale, resolvedStyle.FontStyle);
+            if (cacheMeasureTextSizes.TryGetValue(key, out var size))
+                return size;
+
+            var filePath = GetFontFilePath(resolvedStyle.FontHandle);
+            using var font = CreateFont(filePath, Math.Max(1, fontSize));
+            font.MeasureText(text, out var bounds);
+
+            size = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
+            cacheMeasureTextSizes[key] = size;
+            cacheMeasureTextSizeOrder.Enqueue(key);
+
+            while (cacheMeasureTextSizes.Count > MaxMeasureTextCacheCount && cacheMeasureTextSizeOrder.TryDequeue(out var oldKey))
+                cacheMeasureTextSizes.Remove(oldKey);
+
+            return size;
         }
 
-        internal FontSystem GetFontSystem(IFontHandle fontHandle)
+        /// <summary>按指定像素尺寸创建用于光栅化/度量的 Skia 字体。</summary>
+        internal SKFont CreateFont(string filePath, int pixelSize)
         {
-            if (!cacheFonts.TryGetValue(fontHandle, out var fontSystem))
+            return new SKFont(glyphAtlas.GetTypeface(filePath), pixelSize)
             {
-                var settings = new FontSystemSettings
-                {
-                    FontResolutionFactor = 2,
-                    KernelWidth = 1,
-                    KernelHeight = 1,
-                };
-                fontSystem = new FontSystem(settings);
+                Hinting = SKFontHinting.Full,
+                Edging = ProgramSetting.Default.DisableStringRendererAntialiasing ? SKFontEdging.Alias : SKFontEdging.Antialias,
+                Subpixel = false,
+            };
+        }
 
-                if (ProgramSetting.Default.DisableStringRendererAntialiasing)
-                {
-                    var baseGlyphRenderer = settings.GlyphRenderer;
-                    settings.GlyphRenderer = (i, o, opt) =>
-                    {
-                        baseGlyphRenderer(i, o, opt);
-                        OnDisableAntialiasingGlyphRenderer(i, o, opt);
-                    };
-                }
-
-                var handle = fontHandle as FontHandle;
-                fontSystem.AddFont(File.ReadAllBytes(handle.FilePath));
-                cacheFonts[fontHandle] = fontSystem;
-
-                Log.LogDebug($"Created new FontSystem: {handle.FamilyName}, FilePath: {handle.FilePath}");
-            }
-
-            return fontSystem;
+        internal static string GetFontFilePath(IFontHandle handle)
+        {
+            return (handle as FontHandle)?.FilePath
+                ?? throw new ArgumentException($"字体句柄缺少文件路径：{handle?.FamilyName}", nameof(handle));
         }
 
         internal void RebuildFontSystem()
         {
-            foreach (var fontSystem in cacheFonts.Values)
-                fontSystem.Dispose();
-            cacheFonts.Clear();
-            ClearTextCaches();
+            cacheResolvedTextStyles.Clear();
+            cacheMeasureTextSizes.Clear();
+            cacheMeasureTextSizeOrder.Clear();
+            glyphAtlas.Dispose();
         }
 
         internal ResolvedTextStyle ResolveTextStyle(IFontHandle handle, FontStyle style)
@@ -109,22 +114,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             return resolvedStyle;
         }
 
-        internal Vector2 MeasureString(DynamicSpriteFont font, string text, IFontHandle handle, int fontSize, Vector2 scale, TextStyle fontStyle)
-        {
-            var key = new MeasureTextCacheKey(text, handle, fontSize, scale, fontStyle);
-            if (cacheMeasureTextSizes.TryGetValue(key, out var size))
-                return size;
-
-            size = font.MeasureString(text, scale);
-            cacheMeasureTextSizes[key] = size;
-            cacheMeasureTextSizeOrder.Enqueue(key);
-
-            while (cacheMeasureTextSizes.Count > MaxMeasureTextCacheCount && cacheMeasureTextSizeOrder.TryDequeue(out var oldKey))
-                cacheMeasureTextSizes.Remove(oldKey);
-
-            return size;
-        }
-
         private static IReadOnlyList<IFontHandle> GetSupportFonts()
         {
             return Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.Fonts)).Select(x => new FontHandle
@@ -132,26 +121,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 FamilyName = Path.GetFileNameWithoutExtension(x),
                 FilePath = x
             }).Where(x => Path.GetExtension(x.FilePath).Equals(".ttf", StringComparison.OrdinalIgnoreCase)).ToArray();
-        }
-
-        private static void OnDisableAntialiasingGlyphRenderer(byte[] input, byte[] output, GlyphRenderOptions options)
-        {
-            var size = options.Size.X * options.Size.Y;
-
-            for (var i = 0; i < size; i++)
-            {
-                var c = input[i];
-                var ci = i * 4;
-
-                if (c == 0)
-                {
-                    output[ci] = output[ci + 1] = output[ci + 2] = output[ci + 3] = 0;
-                }
-                else
-                {
-                    output[ci] = output[ci + 1] = output[ci + 2] = output[ci + 3] = 255;
-                }
-            }
         }
 
         private static IFontHandle TryGetSubFont(IFontHandle handle, string sub)
@@ -167,14 +136,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
         internal readonly struct ResolvedTextStyle
         {
+            public IFontHandle FontHandle { get; }
+            public TextStyle FontStyle { get; }
+
             public ResolvedTextStyle(IFontHandle fontHandle, TextStyle fontStyle)
             {
                 FontHandle = fontHandle;
                 FontStyle = fontStyle;
             }
-
-            public IFontHandle FontHandle { get; }
-            public TextStyle FontStyle { get; }
         }
 
         private sealed class FontHandle : IFontHandle
@@ -185,43 +154,33 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
         private readonly struct MeasureTextCacheKey : IEquatable<MeasureTextCacheKey>
         {
-            public MeasureTextCacheKey(string text, IFontHandle fontHandle, int fontSize, Vector2 scale, TextStyle fontStyle)
+            private readonly string text;
+            private readonly IFontHandle handle;
+            private readonly int fontSize;
+            private readonly Vector2 scale;
+            private readonly TextStyle style;
+
+            public MeasureTextCacheKey(string text, IFontHandle handle, int fontSize, Vector2 scale, TextStyle style)
             {
-                Text = text;
-                FontHandle = fontHandle;
-                FontSize = fontSize;
-                Scale = scale;
-                FontStyle = fontStyle;
+                this.text = text;
+                this.handle = handle;
+                this.fontSize = fontSize;
+                this.scale = scale;
+                this.style = style;
             }
 
-            private string Text { get; }
-            private IFontHandle FontHandle { get; }
-            private int FontSize { get; }
-            private Vector2 Scale { get; }
-            private TextStyle FontStyle { get; }
+            public bool Equals(MeasureTextCacheKey other) =>
+                text == other.text && Equals(handle, other.handle) && fontSize == other.fontSize &&
+                scale == other.scale && style == other.style;
 
-            public bool Equals(MeasureTextCacheKey other)
-            {
-                return string.Equals(Text, other.Text, StringComparison.Ordinal)
-                    && ReferenceEquals(FontHandle, other.FontHandle)
-                    && FontSize == other.FontSize
-                    && Scale.Equals(other.Scale)
-                    && FontStyle == other.FontStyle;
-            }
+            public override bool Equals(object obj) => obj is MeasureTextCacheKey other && Equals(other);
 
-            public override bool Equals(object obj)
-            {
-                return obj is MeasureTextCacheKey other && Equals(other);
-            }
-
-            public override int GetHashCode()
-            {
-                return HashCode.Combine(Text, FontHandle, FontSize, Scale, FontStyle);
-            }
+            public override int GetHashCode() => HashCode.Combine(text, handle, fontSize, scale, style);
         }
 
-        private void ClearTextCaches()
+        public void Dispose()
         {
+            glyphAtlas.Dispose();
             cacheResolvedTextStyles.Clear();
             cacheMeasureTextSizes.Clear();
             cacheMeasureTextSizeOrder.Clear();
