@@ -172,6 +172,9 @@ namespace OngekiFumenEditor.Kernel.Mcp
                         result.FailedCount = failed.Length;
                         result.ErrorCode = "ACTION_FAILED";
                         result.ErrorMessage = string.Join("; ", failed.Select(x => $"{x.Operation}#{x.ObjectId}: {x.ErrorMessage}"));
+
+                        // 整批回滚后净效果等于“没有应用”，不要对外声称 applied=true。
+                        result.Applied = false;
                         TryRollback(composite, result);
                     }
                 }
