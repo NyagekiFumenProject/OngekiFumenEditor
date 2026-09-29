@@ -52,7 +52,7 @@
 * `McpToolAuthorizationService` registers clients, tracks remembered approvals, optionally rejects anonymous use, and can request a backup before script execution.
 * `McpClientAuthorizationManager` keys remembered approvals by `clientId`, then `requestedBy`, then a shared anonymous identity.
 * Interactive confirmation is the default for mutation tools.
-* Program-level behavior is shaped by `ProgramSetting`, especially MCP enablement, listen port, and anonymous-client policy.
+* Program-level behavior is shaped by `ProgramSetting`: MCP enablement, listen port, anonymous-client policy, and `AllowAllMcpOperationsByDefault` (default off) - when enabled every tool call is approved without a dialog and the anonymous-client rejection is skipped, with `[MCP AUTH] ... "source":"setting"` in the log.
 
 ## Script Host Lane
 
