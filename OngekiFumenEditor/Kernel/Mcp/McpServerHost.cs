@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using OngekiFumenEditor.Kernel.Mcp.Tools.Editor;
+using OngekiFumenEditor.Kernel.Mcp.Tools.Script;
 using OngekiFumenEditor.Kernel.RuntimeAutomation;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -21,17 +23,17 @@ namespace OngekiFumenEditor.Kernel.Mcp
         private const int MinPort = 1;
         private const int MaxPort = 65535;
 
-        private readonly EditorTools editorTools;
-        private readonly ScriptTools scriptTools;
+        private readonly EditorTool editorTools;
+        private readonly ScriptTool scriptTools;
         private readonly SkillResources skillResources;
-        private readonly EditorMutationTools editorMutationTools;
-        private readonly EditorDocumentTools editorDocumentTools;
+        private readonly EditorMutationTool editorMutationTools;
+        private readonly EditorDocumentTool editorDocumentTools;
         private readonly SemaphoreSlim lifecycleLock = new SemaphoreSlim(1, 1);
         private WebApplication webApplication;
         private string runningEndpoint;
 
         [ImportingConstructor]
-        public McpServerHost(EditorTools editorTools, ScriptTools scriptTools, SkillResources skillResources, EditorMutationTools editorMutationTools, EditorDocumentTools editorDocumentTools)
+        public McpServerHost(EditorTool editorTools, ScriptTool scriptTools, SkillResources skillResources, EditorMutationTool editorMutationTools, EditorDocumentTool editorDocumentTools)
         {
             this.editorTools = editorTools;
             this.scriptTools = scriptTools;
@@ -220,10 +222,10 @@ namespace OngekiFumenEditor.Kernel.Mcp
                     options.ServerInstructions = skillResources.BuildServerInstructions();
                 })
                 .WithHttpTransport()
-                .WithTools<EditorTools>(editorTools)
-                .WithTools<ScriptTools>(scriptTools)
-                .WithTools<EditorMutationTools>(editorMutationTools)
-                .WithTools<EditorDocumentTools>(editorDocumentTools)
+                .WithTools<EditorTool>(editorTools)
+                .WithTools<ScriptTool>(scriptTools)
+                .WithTools<EditorMutationTool>(editorMutationTools)
+                .WithTools<EditorDocumentTool>(editorDocumentTools)
                 .WithResources(skillResources.BuildDirectResources())
                 .WithResources<SkillResources>(skillResources);
 

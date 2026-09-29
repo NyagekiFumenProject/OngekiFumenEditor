@@ -14,13 +14,13 @@
 
 ## Codebase Facts
 
-- 当前 MCP tool 位于 `OngekiFumenEditor/Kernel/Mcp/`。
-- `McpServerHost` 显式注册 tool：`.WithTools<EditorTools>(editorTools)`、`.WithTools<ScriptTools>(scriptTools)`。新增 tool 类需要注入并注册到 host。
-- 当前 `EditorTools` 只提供只读编辑器发现和摘要：
+- 当前 MCP tool 位于 `OngekiFumenEditor/Kernel/Mcp/`（工具实现按命令拆分在 `Kernel/Mcp/Tools/{Editor,Script}/` 下的一族 partial 类里；host 仍在 `Kernel/Mcp/`）。
+- `McpServerHost` 显式注册 tool：`.WithTools<EditorTool>(editorTools)`、`.WithTools<ScriptTool>(scriptTools)`。新增 tool 类需要注入并注册到 host。
+- 当前 `EditorTool` 只提供只读编辑器发现和摘要：
   - `editor.get_current`
   - `editor.list_opened`
   - `editor.get_current_summary`
-- 当前可变更编辑器状态的 MCP 入口主要是 `ScriptTools`，通过 runtime script 间接执行。
+- 当前可变更编辑器状态的 MCP 入口主要是 `ScriptTool`，通过 runtime script 间接执行。
 - runtime script host 已处理：
   - `expectedEditorId` 防止目标编辑器切换
   - 用户授权和确认

@@ -24,7 +24,7 @@ Map repo-relative paths directly onto GitHub:
 Example mappings:
 
 * `OngekiFumenEditor/AppBootstrapper.cs`
-* `OngekiFumenEditor/Kernel/Mcp/EditorTools.cs`
+* `OngekiFumenEditor/Kernel/Mcp/Tools/Editor/EditorTool.cs`
 * `OngekiFumenEditor/Kernel/RuntimeAutomation/RuntimeAutomationScriptHost.cs`
 * `OngekiFumenEditor/Modules/EditorScriptExecutor/Scripts/ScriptArgs.cs`
 
