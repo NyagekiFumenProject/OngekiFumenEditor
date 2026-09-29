@@ -192,8 +192,66 @@ dotnet run -c Release --project .\OngekiFumenEditor.Benchmark -- --filter "*Grid
 4. **运行时复测**（下一步，需重启应用）：按 `docs/render-performance-profile-2026-09-29.md` §9.1 重跑 75 s trace，预期 `<>c__DisplayClass9_0` 退出分配类型榜首、`dotnet.gc.heap.total_allocated` 从 ~107 MB/s 降到 ~40 MB/s 量级、`gc.collections[gen0]` 从 7 次/s 降到 ~3 次/s。
 5. **回滚**：本阶段只新增 `Utils/CommonPropertyChangedBase.cs` 并改动 `Base/GridBase.cs`（含基类替换、setter 变更检测、`NormalizeSelf` 单次通知）；把 `GridBase` 的基类改回 `PropertyChangedBase` 并把两个 setter/`NormalizeSelf` 恢复为「属性写入」形态即可完全回滚。
 
-## 7. 后续（阶段 2 及以后）
+## 8. 其它高频通知点排查（2026-09-29 追加）
+
+问：除了网格，还有哪些属性变更事件触发频率高、应该改用同一套 args 复用分发？用既有 75 s trace + 源码盘点回答。
+
+### 8.1 数据：这个负载里通知分配 100% 来自网格
+
+给分析器加了「按分配类型过滤」后（`--alloc-type DisplayClass9_0`，闭包类型只由 Caliburn 通知产生，可当通知计数器），75 s 窗口内 **46,971 ticks 全部落在网格族**：
+
+| 站点 | ticks | 占比 | 归谁 |
+| --- | --- | --- | --- |
+| `GridBase.NormalizeSelf()` | 20,228 | 43.1% | `TGrid/XGrid` 写入 ✅ 已覆盖 |
+| `TGrid.op_Addition`（构造新 TGrid） | 10,886 | 23.2% | ✅ 已覆盖 |
+| `ConnectableChildObjectBase.CalulateXGrid` | 6,526 | 13.9% | ✅ 已覆盖 |
+| `Caliburn…NotifyOfPropertyChange(string)`（caller: NormalizeSelf） | 3,747 | 8.0% | ✅ 已覆盖 |
+| `DrawPlayableAreaHelper_new.QueryBoundaryXGridUnit` | 3,631 | 7.7% | ✅ 已覆盖 |
+| `ConvertToLimitParam` | 925 | 2.0% | ✅ 已覆盖 |
+| `BuildAreaSample` | 912 | 1.9% | ✅ 已覆盖 |
+| `ConnectableStartObject.CalulateXGrid` | 61 | 0.13% | ✅ 已覆盖 |
+| `AddScreenDistanceSamples` | 55 | 0.12% | ✅ 已覆盖 |
+
+**没有第 10 个站点**；trace 里也查不到任何 `System.Linq.Expressions.*` 分配，说明物件 setter 的表达式重载在这个负载里根本没被调用（物件网格不会逐帧重赋值）。结论：稳态渲染下除网格外没有高频通知点。
+
+### 8.2 结构性约束：不是所有类都能换基类
+
+| 类别 | 例子 | 能否换 `CommonPropertyChangedBase` |
+| --- | --- | --- |
+| 直接派生 `PropertyChangedBase` | `OngekiObjectBase`、`OngekiFumen`、`FumenMetaInfo`、`RangeValue`、`SoundVolumeProxy`、`WaveformDrawingOptionBase`、`DefaultFumenSoundPlayer`、`DefaultMusicPlayer`、`NAudioManager`、设置页 VM、`KeyBindingDefinition`…… | ✅ 一行换基类 |
+| Caliburn 的 `Screen` 家族 | `FumenVisualEditorViewModel : PersistedDocument`、`AudioPlayerToolViewerViewModel : Tool`、`RenderPerfomenceMeasurePanelViewModel : WindowBase` | ❌ 单继承，中间隔着 `Screen`。需要在该类里**本地覆写** `NotifyOfPropertyChange(string)`，用 `CommonPropertyChangedBase.ArgsOf(propertyName)` 取共享 args，再在自己的类里 `OnPropertyChanged(args)`（`OnPropertyChanged` 是 `protected`，只能由派生类自身调用）——仅在它变成热点时才值得做 |
+
+### 8.3 表达式重载是最贵的通知形式（实测）
+
+`NotifyOfPropertyChange(() => X)`（全仓库 **217 处**）会在**调用点**构造表达式树，因此代价与订阅者无关：
+
+| 形式 | 每次成本（实测） | 说明 |
+| --- | --- | --- |
+| `NotifyOfPropertyChange(() => X)` | **368–464 B** | 表达式树 + `GetMemberInfo()` 反射 + 通知本身；换成 `nameof` 前这笔开销无法通过换基类消除 |
+| `NotifyOfPropertyChange(nameof(X))`（Caliburn） | 120 B | 闭包 + 委托 + args |
+| `NotifyOfPropertyChange(nameof(X))`（本基类） | **0 B** | 复用 args、热路径无闭包 |
+| 对比：`Set(ref x, v)`（285 处） | 120 B → 0 B | 换基类后即 0（`Set` 内部走 `NotifyOfPropertyChange(string)`）|
+
+### 8.4 本次追加的迁移与验证
+
+- `OngekiObjectBase` → `CommonPropertyChangedBase`（一行，覆盖全部物件：`Bullet`/`Bell`/`Hold`/`Tap`/`Soflan`/`LaneStart`……）。
+- 实测（真实物件 `OngekiFumenEditor.Base.OngekiObjects.Tap`，独立进程探针）：
+  - `obj.NotifyOfPropertyChange(nameof(Tag))`：**0 B/op**（换基类前为 120 B）；
+  - `obj.NotifyOfPropertyChange(() => Tag)`：368 B/op（表达式树仍在调用点，换基类只省下其中约 120 B）；
+  - `obj.TGrid = new TGrid(...)`（含转发订阅）：472 B/op，其中转发订阅 152 B 属阶段 2 目标。
+- 未做：317 处表达式重载调用点（217 表达式 + 100 其它）暂不批量改写——当前无热点证据，改写属于纯 churn；等某个物件通知路径真的进入逐帧/逐物件写入时，再按「`nameof(...)` + （可选）静态 args 字段」改写该处即可。
+
+### 8.5 观察名单（若将来变热，按此顺序处理）
+
+1. `FumenVisualEditorViewModel`（含 partial）与 `FumenVisualEditorViewModel.ScrollViewer`：视口/滚动/调试信息写入在拖动时逐帧发生；当前走 `Set(ref ...)`（换基类不可行 → 用 8.2 的本地覆写方案）。
+2. `AudioPlayerToolViewerViewModel`（波形拖动、播放位置、`SliderValue`）与 `DefaultFumenSoundPlayer`/`DefaultMusicPlayer`（后者可直接换基类）。
+3. `RenderPerfomenceMeasurePanelViewModel` + `RenderPerfomenceMeasureItem`（FPS/耗时面板：前者是 `WindowBase`，后者可直接换基类）。
+4. 物件侧：把 `Bullet`/`Bell`/`Hold`/`Soflan` 等 setter 里的 `NotifyOfPropertyChange(() => X)` 改成 `nameof(X)`（每处省 368 B，且消除反射），前提是这些 setter 进入逐帧路径。
+
+
+## 9. 后续（阶段 2 及以后）
 
 1. **转发链去闭包**：`Utils/PropertyChangedBaseExtensionMethod` 目前每次赋值分配闭包 + 委托（实测 152 B/次），并用 `ConcurrentDictionary<int, WeakReference<PropertyChangedEventHandler>>` 以 `RuntimeHelpers.GetHashCode` 为键做收发管理（哈希碰撞会解错 handler）。可改为：网格持 `ForwardTarget`（宿主）字段 + 单个静态委托（`ArgsOf` 透传 args），把 67,084 个常驻 `PropertyChangedEventHandler`（4.09 MiB）与每次赋值的闭包一并去掉。
-2. **其余派生类按需迁移**：`GridBase` 已接入；`OngekiObjectBase`、`OngekiFumen`、集合类等 55 个派生类可逐步换基类（API 全保留，编译期安全），低频对象收益有限，不必一次全换。
-3. **运行时复测**：见 §6.4。
+2. **其余派生类按需迁移**：`GridBase`、`OngekiObjectBase`（全部物件）已接入；`OngekiFumen`、集合类、音频/设置页等 50+ 个直接派生类可逐步跟进（API 全保留，编译期安全），`Screen` 家族按 §8.2 的本地覆写方案处理；低频类型收益有限，不必一次全换。
+3. **表达式重载清理**：217 处 `NotifyOfPropertyChange(() => X)` 按 §8.5 的名单，在对应路径变热时逐处改成 `nameof(...)`（每次省 368 B 与一次反射）。
+4. **运行时复测**：见 §6.4。
