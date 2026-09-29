@@ -549,40 +549,25 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             if (IsPreviewMode)
             {
                 //特殊处理：子弹和Bell（本块仅预览模式：只取当前时间之后的）
-                var blts = Fumen.Bullets.BinaryFindRange(frameTGrid, TGrid.MaxValue);
-                var bels = Fumen.Bells.BinaryFindRange(frameTGrid, TGrid.MaxValue);
-                bels = bels.Where(x =>
-                {
-                    _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
-                    return CheckSoflanGroupVisible(soflanGroup);
-                });
-                blts = blts.Where(x =>
-                {
-                    _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
-                    return CheckSoflanGroupVisible(soflanGroup);
-                });
-
                 foreach (var drawingTarget in GetDrawingTarget(Bullet.CommandName))
                 {
-                    //todo 优化一下
                     var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                     drawingCollectionDisposables.Add(rPool);
                     var r = drawMap[drawingTarget] = rPool;
                     var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                     drawingCollectionDisposables.Add(rrPool);
                     var rr = r[defaultDrawingTargetContext] = rrPool;
-                    rr.AddRange(blts);
+                    AddVisibleTGridRangeObjectsInto(frameTGrid, TGrid.MaxValue, Fumen.Bullets, rr);
                 }
                 foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
                 {
-                    //todo 优化一下
                     var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
                     drawingCollectionDisposables.Add(rPool);
                     var r = drawMap[drawingTarget] = rPool;
                     var rrPool = ObjectPool.GetPooledList<OngekiObjectBase>();
                     drawingCollectionDisposables.Add(rrPool);
                     var rr = r[defaultDrawingTargetContext] = rrPool;
-                    rr.AddRange(bels);
+                    AddVisibleTGridRangeObjectsInto(frameTGrid, TGrid.MaxValue, Fumen.Bells, rr);
                 }
             }
 
@@ -1002,6 +987,23 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         else
         {
             return soflanGroupWrapItem.IsDisplayInPreviewMode;
+        }
+    }
+
+    /// <summary>
+    /// 把 [minTGrid, maxTGrid] 区间内可见 soflan group 的对象按索引序写入 output。
+    /// 直写索引循环取代 BinaryFindRange(yield) + Where，去掉热路径上的逐元素迭代器/委托调用。
+    /// </summary>
+    private void AddVisibleTGridRangeObjectsInto<T>(TGrid minTGrid, TGrid maxTGrid, TGridSortList<T> source, IPooledList<OngekiObjectBase> output)
+        where T : OngekiObjectBase, ITimelineObject
+    {
+        var (minIndex, maxIndex) = source.BinaryFindRangeIndex(minTGrid, maxTGrid);
+        for (var i = minIndex; i < maxIndex; i++)
+        {
+            var obj = source[i];
+            _cacheSoflanGroupRecorder.GetCache(obj, out var soflanGroup);
+            if (CheckSoflanGroupVisible(soflanGroup))
+                output.Add(obj);
         }
     }
 
