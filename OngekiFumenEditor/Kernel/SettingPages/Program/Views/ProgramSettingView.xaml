@@ -58,6 +58,10 @@
                     Margin="10,0,10,10"
                     Content="{markup:Translate [AllowAnonymousMcpClientUsage]}"
                     IsChecked="{Binding Setting.AllowAnonymousMcpClientUsage}" />
+                <CheckBox
+                    Margin="10,0,10,10"
+                    Content="{markup:Translate [AllowAllMcpOperationsByDefault]}"
+                    IsChecked="{Binding Setting.AllowAllMcpOperationsByDefault}" />
                 <TextBlock
                     Margin="10,0,10,10"
                     Foreground="DarkSlateGray"

@@ -230,6 +230,18 @@ namespace OngekiFumenEditor.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AllowAllMcpOperationsByDefault {
+            get {
+                return ((bool)(this["AllowAllMcpOperationsByDefault"]));
+            }
+            set {
+                this["AllowAllMcpOperationsByDefault"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool DisableStringRendererAntialiasing {
             get {
                 return ((bool)(this["DisableStringRendererAntialiasing"]));

@@ -36,6 +36,26 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             clientId = Normalize(clientId);
             var registrationInfo = mcpClientAuthorizationManager.RegisterClientUsage(requestedBy, clientId);
 
+            // 开关开启时不再询问：所有客户端的所有操作一律放行（仍登记客户端、仍写 AUTH 日志）。
+            if (ProgramSetting.Default.AllowAllMcpOperationsByDefault)
+            {
+                McpOperationLogHelper.LogAuthorization(toolName, new
+                {
+                    requestedBy,
+                    clientId,
+                    identityKey = registrationInfo?.IdentityKey,
+                    approved = true,
+                    source = "setting",
+                    setting = nameof(ProgramSetting.Default.AllowAllMcpOperationsByDefault),
+                    backupFumenBeforeExecution = false,
+                });
+                return new McpToolAuthorizationResult
+                {
+                    IsAuthorized = true,
+                    BackupFumenBeforeExecution = false,
+                };
+            }
+
             if (!ProgramSetting.Default.AllowAnonymousMcpClientUsage && IsAnonymousClient(requestedBy, clientId))
             {
                 McpOperationLogHelper.LogAuthorization(toolName, new

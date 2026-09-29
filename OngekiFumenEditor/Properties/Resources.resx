@@ -2391,6 +2391,9 @@
   <data name="McpServerListenPort" xml:space="preserve">
     <value>MCP listen port</value>
   </data>
+  <data name="AllowAllMcpOperationsByDefault" xml:space="preserve">
+    <value>Allow all MCP clients to run any operation without confirmation</value>
+  </data>
   <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
     <value>Allow anonymous MCP client usage</value>
   </data>

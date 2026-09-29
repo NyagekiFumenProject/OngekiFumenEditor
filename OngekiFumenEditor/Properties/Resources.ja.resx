@@ -1702,6 +1702,9 @@
   <data name="McpServerListenPort" xml:space="preserve">
     <value>MCP リッスンポート</value>
   </data>
+  <data name="AllowAllMcpOperationsByDefault" xml:space="preserve">
+    <value>すべての MCP クライアントの全操作を既定で許可する</value>
+  </data>
   <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
     <value>匿名 MCP クライアントの利用を許可</value>
   </data>

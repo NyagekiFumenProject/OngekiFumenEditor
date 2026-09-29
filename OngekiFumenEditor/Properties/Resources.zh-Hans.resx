@@ -2364,6 +2364,9 @@
   <data name="McpServerListenPort" xml:space="preserve">
     <value>MCP 监听端口</value>
   </data>
+  <data name="AllowAllMcpOperationsByDefault" xml:space="preserve">
+    <value>默认允许全部客户端所有操作</value>
+  </data>
   <data name="AllowAnonymousMcpClientUsage" xml:space="preserve">
     <value>允许匿名 MCP 客户端使用</value>
   </data>

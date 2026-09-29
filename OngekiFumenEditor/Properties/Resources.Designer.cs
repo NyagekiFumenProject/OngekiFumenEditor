@@ -141,6 +141,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Allow all MCP clients to run any operation without confirmation.
+        /// </summary>
+        public static string AllowAllMcpOperationsByDefault {
+            get {
+                return ResourceManager.GetString("AllowAllMcpOperationsByDefault", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Allow anonymous MCP client usage.
         /// </summary>
         public static string AllowAnonymousMcpClientUsage {
