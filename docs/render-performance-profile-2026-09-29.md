@@ -379,7 +379,13 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 - 已知的一次性大缓冲来源（Scout 源码定位）：OpenGL 固定顶点缓冲（`DefaultPolygonDrawing.cs:15-17` `float[300000*6]` ≈ 7.2 MB、`DefaultInstancedLineDrawing.cs:56`、`DefaultBatchTextureDrawing.cs:49` 等）、字形图集 `byte[AtlasSize*AtlasSize*4]` = 4 MB（`SkiaGlyphAtlas.cs:234`，满了会整体重建）、整曲音频解码/峰值缓冲（`Kernel/Audio/Utils/MethodExtensions.cs:32,62`、`DefaultSamplePeak.cs:31`）、波形烘焙离屏表面（`AudioPlayerToolViewerViewModel.WaveformBlocks.cs:270-275`）。
 - 处置建议（按性价比）：
   1. 大缓冲统一走 `ArrayPool<byte>/<float>`（仓库已有 `ObjectPool` 设施）或复用纹理/顶点缓冲，避免「释放旧段 → 新段再申请」造成的洞；
-  2. 谱面/音频加载完成后执行一次 `GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce; GC.Collect();`（**仅在加载路径**，不要在渲染期），可把 300 MB 量级的碎片归还；
+  2. **已落地（2026-09-29）**：加载流程末尾新增步骤 `EditorLoadingStep.CollectingMemory`（对话框显示「回收内存…」+「6 / 6」），在首帧渲染完成后执行一次
+     `GCSettings.LargeObjectHeapCompactionMode = CompactOnce; GC.Collect();`（落点：`FumenVisualEditorViewModel.LoadInternalAsync` → `EditorLoadingSession.CollectLoadingGarbageAsync`）。
+     **仅在加载路径**，绝不要放进渲染循环。
+     效果口径修正（隔离进程小样实测：100 MB 死对象在 LOH 留下 96 MB 碎片）：
+     - **碎片会被压到 0**（96 MB → 0 MB）：之后的分配复用空洞，不再为此长堆；
+     - 但**已提交内存只返还「整段腾空」的那部分**（同一次实测 `TotalCommittedBytes` 仅 198.7 → 177.6 MB，−21 MB）。
+     本进程 LOH 是 13 个 14–51 MiB 的段、存活仅 ~100 MB，压完预计能空出多段，实际工作集下降量需重启后复测（上限为实测空闲量 ~328 MiB，验收指标见 §9.1 的计数器方法：`heap.fragmentation.size[loh]` 应 < 20 MB）；
   3. 查明那个 50.7 MiB 的 `Byte[]` 是否仍在被需要（疑似整曲解码缓冲或音频镜像）。
 
 ---
@@ -407,7 +413,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 | **P2** | `DrawPlayableAreaHelper_new` 采样循环复用 `TGrid/XGrid` 实例（或结构体化） | 分配 −1 GiB/75 s | 同上 |
 | **P2** | `OnEditorRender` 中对 Bullets 的 LINQ `Where` 改直写循环/缓存 | UI 线程时间 −4.35%（≈1.7 s/75 s） | 采样中该栈消失 |
 | **P2** | `Hold.CalculateJudgeTGrid` 的 `GridOffset` 改为 `struct` 或复用 | 分配 −424 MB/75 s | 同上 |
-| **P3** | LOH：大缓冲池化 + 加载后一次性 LOH 压缩 | 归还 200–300 MB 工作集 | `eeheap -gc` 中 LOH 段数与空闲量下降 |
+| **P3** | LOH：大缓冲池化 / **加载后一次性 LOH 压缩（已落地：加载步骤 `CollectingMemory`）** | 碎片 300 MB → ~0；工作集返还量取决于整段腾空（实测小样：96 MB 碎片 → 0，committed −21 MB），需重启后复测 | `dotnet.gc.last_collection.heap.fragmentation.size[loh]` 应 < 20 MB；`eeheap -gc` 中 LOH 段数与空闲量下降 |
 | **P3** | 排查 XML DOM（189k `XElement`）是否可在解析后释放 | 活跃堆 −17 MB | GCDump 类型表 |
 | **P3** | 确认 UI Automation 客户端是否必要（MCP/UIA 集成） | 分配 −85 MB/75 s，减少 UI 线程工作 | 采样里 `AutomationPeer*` 消失 |
 | **P3** | 排查 87 次/s 的锁竞争与每帧 `Parallel.ForEach` 调度开销（预览模式） | 减少线程池/内核态 CPU | 计数器 + `LowLevelLifoSemaphore.*` 样本下降 |
