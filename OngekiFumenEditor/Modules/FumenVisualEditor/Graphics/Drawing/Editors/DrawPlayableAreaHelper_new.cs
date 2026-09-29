@@ -34,6 +34,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private bool enablePlayFieldDrawing;
         private readonly LineVertex[] vertices = new LineVertex[2];
 
+        // 采样循环复用同一个 TGrid：私有实例、无订阅者，因此关掉通知（IsNotifying=false），
+        // 既省掉每采样一个 TGrid 的分配，也避免非 UI 线程下的通知派发分配。
+        // 数值等价于每采样 TGrid.FromTotalGrid(totalTGrid)，见 GetSampleTGrid。
+        private readonly TGrid sampleTGrid = new TGrid { IsNotifying = false };
+
         /// <summary>
         /// 谱面坐标中的一个时间采样截面。
         /// Prev 用来连接上一段，Next 用来连接下一段。
@@ -422,7 +427,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// <summary>
         /// 按屏幕距离在采样点之间补点，减少变速造成的形状误差。
         /// </summary>
-        private static void AddScreenDistanceSamples(IFumenEditorDrawingContext target, SoflanList soflanGroup, IList<int> sortedTGrids)
+        private void AddScreenDistanceSamples(IFumenEditorDrawingContext target, SoflanList soflanGroup, IList<int> sortedTGrids)
         {
             // 时间间隔短不代表屏幕距离短，变速很快时需要按屏幕距离补采样。
             var i = 0;
@@ -436,8 +441,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     continue;
                 }
 
-                var fromY = target.ConvertToViewRelativeY(TGrid.FromTotalGrid(from), soflanGroup);
-                var toY = target.ConvertToViewRelativeY(TGrid.FromTotalGrid(to), soflanGroup);
+                var fromY = target.ConvertToViewRelativeY(GetSampleTGrid(from), soflanGroup);
+                var toY = target.ConvertToViewRelativeY(GetSampleTGrid(to), soflanGroup);
                 if (!IsValueValid(fromY) || !IsValueValid(toY))
                 {
                     i++;
@@ -476,11 +481,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         }
 
         /// <summary>
+        /// 与 TGrid.FromTotalGrid 数值等价的原地写法：复用 <see cref="sampleTGrid"/>，不产生分配。
+        /// </summary>
+        private TGrid GetSampleTGrid(int totalTGrid)
+        {
+            sampleTGrid.Unit = 0;
+            sampleTGrid.Grid = totalTGrid;
+            sampleTGrid.NormalizeSelf();
+            return sampleTGrid;
+        }
+
+        /// <summary>
         /// 构造一个时间点上的左右墙轨边界采样。
         /// </summary>
-        private static PlayFieldAreaSample BuildAreaSample(FieldAreaFrameContext context, int totalTGrid)
+        private PlayFieldAreaSample BuildAreaSample(FieldAreaFrameContext context, int totalTGrid)
         {
-            var tGrid = TGrid.FromTotalGrid(totalTGrid);
+            var tGrid = GetSampleTGrid(totalTGrid);
             var left = QueryBoundaryXGridUnit(context.LeftBoundaryCandidates, LaneType.WallLeft, tGrid) ?? new(DefaultLeftXGridUnit, DefaultLeftXGridUnit);
             var right = QueryBoundaryXGridUnit(context.RightBoundaryCandidates, LaneType.WallRight, tGrid) ?? new(DefaultRightXGridUnit, DefaultRightXGridUnit);
             var isValid = IsValueValid(left.Prev) && IsValueValid(left.Next) && IsValueValid(right.Prev) && IsValueValid(right.Next);
@@ -561,7 +577,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                 return lane.GetChildObjectAt(start).TryCalulateXGridTotalUnit(tGrid, out var totalUnit) ? totalUnit : null;
             }
 
-            var x = lane.CalulateXGrid(tGrid)?.TotalUnit ?? lane.XGrid?.TotalUnit ?? double.NaN;
+            var x = lane.TryCalulateXGridTotalUnit(tGrid, out var fallbackTotalUnit) ? fallbackTotalUnit : lane.XGrid?.TotalUnit ?? double.NaN;
             return double.IsNaN(x) ? null : x;
         }
 
@@ -571,7 +587,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         private static double? CalculateBoundaryXGridUnitLegacy(LaneStartBase lane, TGrid tGrid, BoundaryEdge edge)
         {
             // 节点正好落在采样点上时，Prev 取前侧 child，Next 取后侧 child。
-            var children = lane.GetChildObjectsFromTGrid(tGrid);
+            // 这里用索引扫描复刻 GetChildObjectsFromTGrid 的无效路径分支（同一谓词、同一顺序、同一守卫），
+            // 去掉该调用每次产生的 List/数组分配；求值改用 TryCalulateXGridTotalUnit（不再构造 XGrid）。
             var isPathValid = lane.IsPathVaild();
             var childCount = 0;
             ConnectableChildObjectBase firstChild = null;
@@ -579,24 +596,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             ConnectableChildObjectBase lastExactChild = null;
             double? bestValue = null;
 
-            foreach (var child in children)
+            if (tGrid is not null && !(tGrid < lane.TGrid))
             {
-                childCount++;
-                firstChild ??= child;
+                var totalTGrid = tGrid.TotalGrid;
+                ConnectableObjectBase prev = lane;
 
-                if (child.TGrid.TotalGrid == tGrid.TotalGrid)
+                for (var i = 0; i < lane.ChildCount; i++)
                 {
-                    firstExactChild ??= child;
-                    lastExactChild = child;
-                }
+                    var child = lane.GetChildObjectAt(i);
+                    var isMatch = child.TGrid >= tGrid && prev.TGrid <= tGrid && tGrid <= child.TGrid;
+                    prev = child;
 
-                if (!isPathValid && child.CalulateXGrid(tGrid)?.TotalUnit is double childValue)
-                    bestValue = MergeBoundary(lane.LaneType, bestValue, childValue);
+                    if (!isMatch)
+                        continue;
+
+                    childCount++;
+                    firstChild ??= child;
+
+                    if (child.TGrid.TotalGrid == totalTGrid)
+                    {
+                        firstExactChild ??= child;
+                        lastExactChild = child;
+                    }
+
+                    if (!isPathValid && child.TryCalulateXGridTotalUnit(tGrid, out var childValue))
+                        bestValue = MergeBoundary(lane.LaneType, bestValue, childValue);
+                }
             }
 
             if (childCount == 0)
             {
-                var x = lane.CalulateXGrid(tGrid)?.TotalUnit ?? lane.XGrid?.TotalUnit ?? double.NaN;
+                var x = lane.TryCalulateXGridTotalUnit(tGrid, out var totalUnit) ? totalUnit : lane.XGrid?.TotalUnit ?? double.NaN;
                 return double.IsNaN(x) ? null : x;
             }
 
@@ -607,7 +637,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             }
 
             if (isPathValid)
-                return firstChild?.CalulateXGrid(tGrid)?.TotalUnit;
+                return firstChild.TryCalulateXGridTotalUnit(tGrid, out var firstChildUnit) ? firstChildUnit : null;
 
             return bestValue;
         }
@@ -635,9 +665,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
         /// <summary>
         /// 把谱面坐标采样转换成屏幕坐标采样。
         /// </summary>
-        private static PlayFieldLimitParam ConvertToLimitParam(IFumenEditorDrawingContext target, SoflanList soflanGroup, PlayFieldAreaSample sample)
+        private PlayFieldLimitParam ConvertToLimitParam(IFumenEditorDrawingContext target, SoflanList soflanGroup, PlayFieldAreaSample sample)
         {
-            var y = target.ConvertToViewRelativeY(TGrid.FromTotalGrid(sample.TotalTGrid), soflanGroup);
+            //采样点复用同一实例（与 TGrid.FromTotalGrid 等价，不分配）
+            var y = target.ConvertToViewRelativeY(GetSampleTGrid(sample.TotalTGrid), soflanGroup);
             if (!sample.IsValid || !IsValueValid(y))
                 return new(sample.TotalTGrid, 0, 0, 0, 0, 0, false);
 

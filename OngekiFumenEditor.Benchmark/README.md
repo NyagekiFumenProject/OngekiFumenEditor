@@ -13,6 +13,7 @@
 | `DisplayableEnumerationBenchmarks` | `OngekiFumen.GetAllDisplayableObjects()`、范围内枚举、`ConnectableStartObject.GetDisplayableObjects()` |
 | `GridNotificationAllocationBenchmarks` | 网格属性通知分配:Caliburn 闭包/args 逐次分配 vs `CommonPropertyChangedBase` 的 args 复用 + 变更检测(含旧实现逐行复刻对照与等价性校验) |
 | `HoldJudgeTickEnumerationBenchmarks` | 预览期 Hold 判定刻度枚举(性能报告 §8 P2 落地验证):旧「每步 GridOffset(24 B)+TGrid(56 B) 双分配」vs 新「私有累计实例原地推进 + yield 复制」,含逐步位级等价性校验 |
+| `PlayfieldAreaSamplingAllocationBenchmarks` | 可击打区域采样链路(性能报告 §8 P2 落地验证):旧「每采样 2×TGrid 物化 + 无效路径 List/XGrid」vs 新「复用 sampleTGrid + 索引扫描/TryCalulateXGridTotalUnit」,含位级等价对拍与反射直调已落地私有方法 |
 | `DrawPlayableAreaHelperNewP1BoundaryBenchmarks` | new playfield helper P1: boundary 查询重复、候选墙轨缓存、LINQ/数组分配 |
 | `DrawPlayableAreaHelperNewP1SampleCollectionBenchmarks` | new playfield helper P1: 墙轨节点采样收集的全谱扫描与索引查询 |
 | `LaneCurvePathBenchmarks` | Lane 曲线路径生成:多次 LINQ 枚举 vs 单次扫描 + PooledList(独立 DTO 模拟) |
