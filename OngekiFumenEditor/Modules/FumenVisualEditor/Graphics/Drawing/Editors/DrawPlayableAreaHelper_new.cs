@@ -558,7 +558,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
                     return child.XGrid.TotalUnit;
                 }
 
-                return lane.GetChildObjectAt(start).CalulateXGrid(tGrid)?.TotalUnit;
+                return lane.GetChildObjectAt(start).TryCalulateXGridTotalUnit(tGrid, out var totalUnit) ? totalUnit : null;
             }
 
             var x = lane.CalulateXGrid(tGrid)?.TotalUnit ?? lane.XGrid?.TotalUnit ?? double.NaN;

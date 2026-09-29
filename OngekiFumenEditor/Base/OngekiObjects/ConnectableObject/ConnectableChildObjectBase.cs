@@ -327,6 +327,22 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             return xGrid;
         }
 
+        /// <summary>
+        /// <see cref="CalulateXGrid"/> 的零分配形态：热路径只需要 XGrid 的 TotalUnit 时用它。
+        /// 数值与 <c>CalulateXGrid(tGrid)?.TotalUnit</c> 完全一致（含旧的 <c>(int)totalGrid</c> 截断语义）。
+        /// </summary>
+        public bool TryCalulateXGridTotalUnit(TGrid tGrid, out double totalUnit)
+        {
+            if (CalulateXGridTotalGrid(tGrid.TotalGrid) is not double totalGrid)
+            {
+                totalUnit = default;
+                return false;
+            }
+
+            totalUnit = (int)totalGrid / (double)XGrid.DEFAULT_RES_X;
+            return true;
+        }
+
         public bool CheckCurveVaild()
         {
             return GetConnectionPaths().All(x => x.isVaild);

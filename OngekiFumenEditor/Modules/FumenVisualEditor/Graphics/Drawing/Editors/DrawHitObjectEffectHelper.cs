@@ -118,10 +118,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
 
                 foreach (var judgeTGrid in hold.CalculateJudgeTGrid(minTGrid, maxTGrid, target.Editor.Fumen.BpmList, target.Editor.Fumen.MetaInfo.ProgJudgeBpm))
                 {
-                    var xGrid = start.CalulateXGrid(judgeTGrid);
-                    if (xGrid is null)
+                    if (!start.TryCalulateXGridTotalUnit(judgeTGrid, out var xGridUnit))
                         continue;
-                    var x = (float)XGridCalculator.ConvertXGridToX(xGrid, target.Editor);
+                    var x = (float)XGridCalculator.ConvertXGridToX(xGridUnit, target.Editor);
                     var p = new Vector2(x, y);
 
                     var tGrid = judgeTGrid;

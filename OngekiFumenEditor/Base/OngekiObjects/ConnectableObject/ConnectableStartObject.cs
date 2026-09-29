@@ -22,6 +22,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         private readonly List<ConnectableChildObjectBase> children = new List<ConnectableChildObjectBase>();
         public IEnumerable<ConnectableChildObjectBase> Children => children;
+        public int ChildCount => children.Count;
 
         public override ConnectableStartObject ReferenceStartObject => this;
 
@@ -352,7 +353,54 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public ConnectableChildObjectBase GetChildObjectFromTGrid(TGrid tGrid)
         {
-            return GetChildObjectsFromTGrid(tGrid).FirstOrDefault();
+            return TryGetChildObjectFromTGrid(tGrid, out var child) ? child : default;
+        }
+
+        /// <summary>
+        /// <see cref="GetChildObjectFromTGrid"/> 的零分配形态：与 <c>GetChildObjectsFromTGrid(tGrid).FirstOrDefault()</c> 等价
+        /// （有效路径走索引区间，无效路径逐项扫描，都不分配）。
+        /// </summary>
+        public bool TryGetChildObjectFromTGrid(TGrid tGrid, out ConnectableChildObjectBase child)
+        {
+            child = default;
+
+            if (tGrid is null || tGrid < TGrid || children.Count == 0)
+                return false;
+
+            if (IsPathVaild())
+            {
+                if (!TryGetValidPathChildRange(tGrid, out var start, out _))
+                    return false;
+
+                child = children[start];
+                return true;
+            }
+
+            ConnectableObjectBase prev = this;
+            foreach (var item in children)
+            {
+                if (item.TGrid >= tGrid && prev.TGrid <= tGrid && tGrid <= item.TGrid)
+                {
+                    child = item;
+                    return true;
+                }
+
+                prev = item;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 直接求指定 TGrid 处的 XGrid.TotalUnit（不构造 XGrid），等价于 <c>CalulateXGrid(tGrid)?.TotalUnit</c>。
+        /// </summary>
+        public bool TryCalulateXGridTotalUnit(TGrid tGrid, out double totalUnit)
+        {
+            if (TryGetChildObjectFromTGrid(tGrid, out var child))
+                return child.TryCalulateXGridTotalUnit(tGrid, out totalUnit);
+
+            totalUnit = default;
+            return false;
         }
 
         public IEnumerable<ConnectableChildObjectBase> GetChildObjectsFromTGrid(TGrid tGrid)
@@ -434,12 +482,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         public XGrid CalulateXGrid(TGrid tGrid)
         {
-            if (GetChildObjectFromTGrid(tGrid) is ConnectableChildObjectBase child)
+            if (TryGetChildObjectFromTGrid(tGrid, out var child))
                 return child.CalulateXGrid(tGrid);
             return default;
         }
 
-        public bool IsPathVaild() => children.Count == 0 || children.All(x => x.IsVaildPath);
+        public bool IsPathVaild()
+        {
+            for (var i = 0; i < children.Count; i++)
+            {
+                if (!children[i].IsVaildPath)
+                    return false;
+            }
+
+            return true;
+        }
 
         public IEnumerable<(Vector2 pos, bool isVaild)> GenAllPath(bool filterSamePointSameSeq = true)
         {

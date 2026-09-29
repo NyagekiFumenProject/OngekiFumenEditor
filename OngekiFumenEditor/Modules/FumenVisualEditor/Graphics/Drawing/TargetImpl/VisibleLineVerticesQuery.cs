@@ -76,17 +76,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                     if (diff < 0)
                     {
-                        var xGrid = start.CalulateXGrid(checkTGrid);
-                        if (xGrid is not null)
-                            PostPoint(checkTGrid, xGrid, isVailed);
+                        if (start.TryCalulateXGridTotalUnit(checkTGrid, out var xGridUnit))
+                            PostPoint2(checkTGrid.TotalUnit, xGridUnit, isVailed);
                     }
 
                     affectedSoflanPointIdx++;
                 }
             }
 
-            foreach (var childObj in start.Children)
+            var childCount = start.ChildCount;
+            for (var childIdx = 0; childIdx < childCount; childIdx++)
             {
+                var childObj = start.GetChildObjectAt(childIdx);
                 var visible = alwaysDrawing || target.CheckVisible(childObj.TGrid);
                 var curIsVaild = childObj.IsVaildPath;
                 if (prevInvaild != curIsVaild)
