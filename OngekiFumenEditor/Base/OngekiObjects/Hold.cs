@@ -65,6 +65,10 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public void SetHoldEnd(HoldEnd end)
         {
+            // å¹‚ç­‰å®ˆå«ï¼šé‡å¤æŒ‚åŒä¸€ä¸ª end ä¼šåœ¨ä¸‹é¢çš„ end.RefHold?.SetHoldEnd(null) é‡ŒæŠŠè‡ªå·±é€’å½’æ¸…ç©ºã€‚
+            if (ReferenceEquals(holdEnd, end))
+                return;
+
             if (holdEnd is not null)
                 holdEnd.PropertyChanged -= HoldEnd_PropertyChanged;
             if (end is not null)
@@ -101,7 +105,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public void CopyEntire(Hold from)
         {
-            //°üÀ¨EndÒ»Æğ¸´ÖÆÁË
+            //ï¿½ï¿½ï¿½ï¿½EndÒ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             Copy(from);
 
             if (from.HoldEnd != null)
@@ -149,7 +153,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             if (holdEndTGrid is null)
                 yield break;
 
-            //µü´úÓÃË½ÓĞÀÛ¼ÆÊµÀı£º²»¹²Ïí Hold.TGrid£¨Ô­µØÍÆ½ø²»µÃÎÛÈ¾Ô´¶ÔÏó£©£¬Ã¿´Îµ÷ÓÃÖ»·ÖÅäÕâÒ»¸ö TGrid
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë½ï¿½ï¿½ï¿½Û¼ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Hold.TGridï¿½ï¿½Ô­ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾Ô´ï¿½ï¿½ï¿½ó£©£ï¿½Ã¿ï¿½Îµï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ TGrid
             var curTGrid = new TGrid(TGrid.Unit, TGrid.Grid);
 
             while (curTGrid < holdEndTGrid)

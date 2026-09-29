@@ -6,6 +6,8 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Lane;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.RuntimeAutomation;
@@ -32,7 +34,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
             "tap", "flick", "hold", "bell", "bullet", "comment", "bpm", "meter", "clickse", "enemy", "lane", "soflan",
         };
 
-        private static readonly string[] CreatableFamilies = { "tap", "flick", "comment", "bpm", "bullet", "bell" };
+        private static readonly string[] CreatableFamilies = { "tap", "flick", "comment", "bpm", "bullet", "bell", "meter", "clickse", "enemy", "lane", "hold", "soflan" };
 
         private readonly IEditorDocumentManager editorDocumentManager;
         private readonly IMcpToolAuthorizationService mcpToolAuthorizationService;
@@ -218,18 +220,28 @@ namespace OngekiFumenEditor.Kernel.Mcp
         }
 
         [McpServerTool(Name = "editor.add_object", Title = "Add Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell. Bullets require bulletPalleteStrId; bells may omit it (or pass \"--\") for the Ongeki default bell. Inside an action scope the object is queued until editor.end_action applies it.")]
+        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan. Bullets require bulletPalleteStrId; holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); soflan requires endTGridUnit/endTGridGrid. Inside an action scope the object is queued until editor.end_action applies it.")]
         public async Task<object> AddObject(
-            [Description("Object family: tap, flick, comment, bpm, bullet or bell.")] string objectType,
+            [Description("Object family: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold or soflan.")] string objectType,
             float tGridUnit = 0,
             int tGridGrid = 0,
             float xGridUnit = 0,
             int xGridGrid = 0,
-            [Description("Applies to tap and flick.")] bool? isCritical = default,
+            [Description("Applies to tap, flick and hold.")] bool? isCritical = default,
             [Description("Flick direction: left or right.")] string direction = default,
             [Description("Comment text.")] string content = default,
             [Description("BPM value for the bpm family.")] double? bpm = default,
             [Description("Bullet pallete StrID (see editor.query_bullet_pallete). Required for bullet; optional for bell, where \"--\" means the Ongeki default bell.")] string bulletPalleteStrId = default,
+            [Description("Meter family: numerator (default 4).")] int? meterBunShi = default,
+            [Description("Meter family: denominator (default 4).")] int? meterBunbo = default,
+            [Description("Enemy family: Wave1, Wave2 or Boss (default Boss).")] string enemyWave = default,
+            [Description("Lane family: center (default), left, right, colorful, enemy, wallLeft or wallRight.")] string laneType = default,
+            [Description("Soflan family: duration (default), interpolatable or keyframe.")] string soflanType = default,
+            [Description("End position for hold (optional) and soflan (required): TGrid unit.")] float? endTGridUnit = default,
+            [Description("End position for hold (optional) and soflan (required): TGrid grid.")] int? endTGridGrid = default,
+            [Description("Soflan family: speed multiplier (default 1).")] double? speed = default,
+            [Description("Soflan family: soflan group (default 0).")] int? soflanGroup = default,
+            [Description("Soflan family: whether the speed applies in design mode (default false).")] bool? applySpeedInDesignMode = default,
             string editorId = default,
             string expectedEditorId = default,
             bool requireConfirmation = true,
@@ -239,7 +251,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
         {
             const string operationName = "editor.add_object";
             var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPalleteStrId, editorId, expectedEditorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPalleteStrId, meterBunShi, meterBunbo, enemyWave, laneType, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, editorId, expectedEditorId, requestedBy, clientId });
 
             if (!CreatableFamilies.Contains(family))
                 return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.add_object supports {string.Join(", ", CreatableFamilies)}; '{objectType}' is not supported yet.");
@@ -272,10 +284,32 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 }
             }
 
+            var spec = new ObjectCreateSpec
+            {
+                Family = family,
+                TGrid = new TGrid(tGridUnit, tGridGrid),
+                XGrid = new XGrid(xGridUnit, xGridGrid),
+                IsCritical = isCritical,
+                Direction = direction,
+                Content = content,
+                Bpm = bpm,
+                Pallete = pallete,
+                MeterBunShi = meterBunShi,
+                MeterBunbo = meterBunbo,
+                EnemyWave = enemyWave,
+                LaneType = laneType,
+                SoflanType = soflanType,
+                Speed = speed,
+                SoflanGroup = soflanGroup,
+                ApplySpeedInDesignMode = applySpeedInDesignMode,
+            };
+            if (endTGridUnit is not null || endTGridGrid is not null)
+                spec.EndTGrid = new TGrid(endTGridUnit ?? tGridUnit, endTGridGrid ?? 0);
+
             OngekiObjectBase obj;
             try
             {
-                obj = CreateObject(family, new TGrid(tGridUnit, tGridGrid), new XGrid(xGridUnit, xGridGrid), isCritical, direction, content, bpm, pallete);
+                obj = CreateObject(spec);
             }
             catch (Exception ex)
             {
@@ -284,6 +318,9 @@ namespace OngekiFumenEditor.Kernel.Mcp
 
             var outcome = new EditorActionOutcome { Operation = "add_object", ObjectType = family, ObjectId = obj.Id };
             var fumen = editor.Fumen;
+            // 尾端实例必须在建动作时捕获：撤销走 RemoveObject(hold) 会清掉 RefHold 链接，
+            // 若在执行时才读 hold.HoldEnd，重做会丢尾端、撤销会留下孤儿尾端。
+            var attachedHoldEnd = obj is Hold holdWithEnd ? holdWithEnd.HoldEnd : default;
             var action = LambdaUndoAction.Create(
                 $"Add {family} #{obj.Id}",
                 () =>
@@ -291,7 +328,11 @@ namespace OngekiFumenEditor.Kernel.Mcp
                     outcome.Executed = true;
                     try
                     {
+                        if (attachedHoldEnd is not null && obj is Hold holdToLink && !ReferenceEquals(holdToLink.HoldEnd, attachedHoldEnd))
+                            holdToLink.SetHoldEnd(attachedHoldEnd);
                         fumen.AddObject(obj);
+                        if (attachedHoldEnd is not null)
+                            fumen.AddObject(attachedHoldEnd);
                         outcome.Success = true;
                     }
                     catch (Exception ex)
@@ -301,7 +342,12 @@ namespace OngekiFumenEditor.Kernel.Mcp
                         TrySilently(() => fumen.RemoveObject(obj));
                     }
                 },
-                () => TrySilently(() => fumen.RemoveObject(obj)));
+                () =>
+                {
+                    TrySilently(() => fumen.RemoveObject(obj));
+                    if (attachedHoldEnd is not null)
+                        TrySilently(() => fumen.RemoveObject(attachedHoldEnd));
+                });
 
             await RuntimeUiDispatcher.RunAsync(() =>
             {
@@ -383,10 +429,10 @@ namespace OngekiFumenEditor.Kernel.Mcp
         }
 
         [McpServerTool(Name = "editor.modify_object", Title = "Modify Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Modify one property of a chart object addressed by its runtime object id. Supported properties: tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete (bullet/bell only, value is a bullet pallete StrID; \"\" or \"--\" clears it for bells). Inside an action scope the change is queued until editor.end_action applies it.")]
+        [Description("Modify one property of a chart object addressed by its runtime object id. Supported properties: tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete (bullet/bell only, value is a bullet pallete StrID; \"\" or \"--\" clears it for bells), bunShi/bunbo (meter), enemyWave (enemy), endTGridUnit/endTGridGrid (hold with an end, or any soflan), speed/soflanGroup/applySpeedInDesignMode (soflan). Inside an action scope the change is queued until editor.end_action applies it.")]
         public async Task<object> ModifyObject(
             int objectId,
-            [Description("tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm or bulletPallete.")] string propertyName,
+            [Description("tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete, bunShi, bunbo, enemyWave, endTGridUnit, endTGridGrid, speed, soflanGroup or applySpeedInDesignMode.")] string propertyName,
             [Description("New value as text; parsed according to propertyName.")] string newValue,
             string editorId = default,
             string expectedEditorId = default,
@@ -546,7 +592,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
             return response;
         }
 
-        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete" };
+        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode" };
 
         // ---------------- bullet pallete (BPL) tools ----------------
 
@@ -928,6 +974,164 @@ namespace OngekiFumenEditor.Kernel.Mcp
             return response;
         }
 
+        // ---------------- hold end tools ----------------
+
+        [McpServerTool(Name = "editor.create_hold_end", Title = "Create Hold End", ReadOnly = false, Destructive = true, OpenWorld = false)]
+        [Description("Attach a hold end (HoldEnd) to a hold addressed by its runtime object id, giving the hold its length. One undoable editor action (visible in the history); inside an action scope it is queued until editor.end_action.")]
+        public async Task<object> CreateHoldEnd(
+            int holdObjectId,
+            float tGridUnit,
+            int tGridGrid = 0,
+            float xGridUnit = 0,
+            int xGridGrid = 0,
+            string editorId = default,
+            string expectedEditorId = default,
+            bool requireConfirmation = true,
+            string requestedBy = default,
+            string clientId = default,
+            CancellationToken cancellationToken = default)
+        {
+            const string operationName = "editor.create_hold_end";
+            McpOperationLogHelper.LogRequest(operationName, new { holdObjectId, tGridUnit, tGridGrid, xGridUnit, xGridGrid, editorId, expectedEditorId, requestedBy, clientId });
+
+            if (await TryAuthorizeAsync(operationName, requestedBy, clientId, $"Create the hold end of object #{holdObjectId} at T[{tGridUnit},{tGridGrid}].", requireConfirmation, cancellationToken) is { } denied)
+                return denied;
+
+            if (TryResolveEditor(editorId, expectedEditorId, out var editor, out var resolvedEditorId, out var resolveError) is false)
+                return resolveError;
+
+            var fumen = editor.Fumen;
+            if (!TryFindObject(fumen, holdObjectId, out var family, out var obj))
+                return Failure(operationName, "OBJECT_NOT_FOUND", $"No object with id {holdObjectId} was found in editor '{resolvedEditorId}'.");
+            if (obj is not Hold hold)
+                return Failure(operationName, "NOT_A_HOLD", $"Object #{holdObjectId} is a {family}, not a hold.");
+            if (hold.HoldEnd is not null)
+                return Failure(operationName, "HOLD_END_ALREADY_EXISTS", $"Hold #{holdObjectId} already has an end; adjust it with editor.modify_object (endTGridUnit/endTGridGrid) or drop it with editor.remove_hold_end.");
+
+            var endTGrid = new TGrid(tGridUnit, tGridGrid);
+            if (endTGrid <= hold.TGrid)
+                return Failure(operationName, "INVALID_ARGUMENT", $"The hold end must be after the hold start (end {endTGrid} <= start {hold.TGrid}).");
+
+            var holdEnd = new HoldEnd
+            {
+                TGrid = endTGrid,
+                XGrid = new XGrid(xGridUnit, xGridGrid),
+            };
+            var outcome = new EditorActionOutcome { Operation = "create_hold_end", ObjectType = family, ObjectId = hold.Id };
+            var action = LambdaUndoAction.Create(
+                $"Create hold end of #{hold.Id}",
+                () =>
+                {
+                    outcome.Executed = true;
+                    try
+                    {
+                        hold.SetHoldEnd(holdEnd);
+                        fumen.AddObject(holdEnd);
+                        outcome.Success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        outcome.Success = false;
+                        outcome.ErrorMessage = ex.Message;
+                        TrySilently(() => fumen.RemoveObject(holdEnd));
+                    }
+                },
+                () => TrySilently(() => fumen.RemoveObject(holdEnd)));
+
+            await RuntimeUiDispatcher.RunAsync(() =>
+            {
+                editor.UndoRedoManager.ExecuteAction(action);
+                return true;
+            }, cancellationToken);
+
+            var queued = actionScopeManager.TryTrack(resolvedEditorId, McpClientAuthorizationManager.BuildClientIdentityKey(requestedBy, clientId), outcome);
+            var response = new
+            {
+                success = queued || outcome.Success,
+                editorId = resolvedEditorId,
+                holdObjectId = hold.Id,
+                holdEndObjectId = holdEnd.Id,
+                applied = !queued,
+                queued,
+                errorMessage = queued ? default : outcome.ErrorMessage,
+            };
+            McpOperationLogHelper.LogResult(operationName, response);
+            return response;
+        }
+
+        [McpServerTool(Name = "editor.remove_hold_end", Title = "Remove Hold End", ReadOnly = false, Destructive = true, OpenWorld = false)]
+        [Description("Remove the hold end of a hold addressed by its runtime object id (the hold becomes zero-length again). One undoable editor action; inside an action scope it is queued until editor.end_action.")]
+        public async Task<object> RemoveHoldEnd(
+            int holdObjectId,
+            string editorId = default,
+            string expectedEditorId = default,
+            bool requireConfirmation = true,
+            string requestedBy = default,
+            string clientId = default,
+            CancellationToken cancellationToken = default)
+        {
+            const string operationName = "editor.remove_hold_end";
+            McpOperationLogHelper.LogRequest(operationName, new { holdObjectId, editorId, expectedEditorId, requestedBy, clientId });
+
+            if (await TryAuthorizeAsync(operationName, requestedBy, clientId, $"Remove the hold end of object #{holdObjectId}.", requireConfirmation, cancellationToken) is { } denied)
+                return denied;
+
+            if (TryResolveEditor(editorId, expectedEditorId, out var editor, out var resolvedEditorId, out var resolveError) is false)
+                return resolveError;
+
+            var fumen = editor.Fumen;
+            if (!TryFindObject(fumen, holdObjectId, out var family, out var obj))
+                return Failure(operationName, "OBJECT_NOT_FOUND", $"No object with id {holdObjectId} was found in editor '{resolvedEditorId}'.");
+            if (obj is not Hold hold)
+                return Failure(operationName, "NOT_A_HOLD", $"Object #{holdObjectId} is a {family}, not a hold.");
+            if (hold.HoldEnd is not { } holdEnd)
+                return Failure(operationName, "HOLD_END_NOT_FOUND", $"Hold #{holdObjectId} has no end to remove.");
+
+            var outcome = new EditorActionOutcome { Operation = "remove_hold_end", ObjectType = family, ObjectId = hold.Id };
+            var action = LambdaUndoAction.Create(
+                $"Remove hold end of #{hold.Id}",
+                () =>
+                {
+                    outcome.Executed = true;
+                    try
+                    {
+                        fumen.RemoveObject(holdEnd);
+                        outcome.Success = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        outcome.Success = false;
+                        outcome.ErrorMessage = ex.Message;
+                        TrySilently(() => fumen.AddObject(holdEnd));
+                    }
+                },
+                () => TrySilently(() =>
+                {
+                    hold.SetHoldEnd(holdEnd);
+                    fumen.AddObject(holdEnd);
+                }));
+
+            await RuntimeUiDispatcher.RunAsync(() =>
+            {
+                editor.UndoRedoManager.ExecuteAction(action);
+                return true;
+            }, cancellationToken);
+
+            var queued = actionScopeManager.TryTrack(resolvedEditorId, McpClientAuthorizationManager.BuildClientIdentityKey(requestedBy, clientId), outcome);
+            var response = new
+            {
+                success = queued || outcome.Success,
+                editorId = resolvedEditorId,
+                holdObjectId = hold.Id,
+                removedHoldEndObjectId = holdEnd.Id,
+                applied = !queued,
+                queued,
+                errorMessage = queued ? default : outcome.ErrorMessage,
+            };
+            McpOperationLogHelper.LogResult(operationName, response);
+            return response;
+        }
+
         // ---------------- undo / redo ----------------
 
         [McpServerTool(Name = "editor.undo", Title = "Undo", ReadOnly = false, Destructive = true, OpenWorld = false)]
@@ -1059,6 +1263,60 @@ namespace OngekiFumenEditor.Kernel.Mcp
 
         private static IBulletPalleteReferencable RequirePalleteReferencable(OngekiObjectBase obj)
             => obj as IBulletPalleteReferencable ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) does not reference a bullet pallete.");
+
+        private static MeterChange RequireMeter(OngekiObjectBase obj)
+            => obj as MeterChange ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a meter change.");
+
+        private static EnemySet RequireEnemySet(OngekiObjectBase obj)
+            => obj as EnemySet ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not an enemy set.");
+
+        private static ISoflan RequireSoflan(OngekiObjectBase obj)
+            => obj as ISoflan ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a soflan.");
+
+        private static TGrid RequireEndTGrid(OngekiObjectBase obj) => obj switch
+        {
+            Hold hold => hold.HoldEnd?.TGrid ?? throw new ArgumentException($"Hold #{hold.Id} has no end; create one with editor.create_hold_end."),
+            ISoflan soflan => soflan.EndTGrid,
+            _ => throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no end position."),
+        };
+
+        private static void WriteEndTGrid(OngekiObjectBase obj, string propertyName, string rawValue)
+        {
+            switch (obj)
+            {
+                case Hold hold:
+                    {
+                        var end = hold.HoldEnd ?? throw new ArgumentException($"Hold #{hold.Id} has no end; create one with editor.create_hold_end.");
+                        end.TGrid = propertyName == "endTGridUnit"
+                            ? new TGrid(ParseFloat(rawValue), end.TGrid.Grid)
+                            : new TGrid(end.TGrid.Unit, ParseInt(rawValue));
+                        return;
+                    }
+                case ISoflan soflan:
+                    soflan.EndTGrid = propertyName == "endTGridUnit"
+                        ? new TGrid(ParseFloat(rawValue), soflan.EndTGrid.Grid)
+                        : new TGrid(soflan.EndTGrid.Unit, ParseInt(rawValue));
+                    return;
+                default:
+                    throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no end position.");
+            }
+        }
+
+        private static int ParsePositiveInt(string rawValue, string propertyName)
+        {
+            var value = ParseInt(rawValue);
+            if (value <= 0)
+                throw new ArgumentException($"'{rawValue}' must be a positive number for {propertyName}.");
+            return value;
+        }
+
+        private static float ParseFiniteFloat(string rawValue, string propertyName)
+        {
+            var value = ParseFloat(rawValue);
+            if (float.IsNaN(value) || float.IsInfinity(value))
+                throw new ArgumentException($"'{rawValue}' must be a finite number for {propertyName}.");
+            return value;
+        }
 
         private static TEnum ParsePalleteEnum<TEnum>(string raw, string propertyName) where TEnum : struct, Enum
         {
@@ -1231,63 +1489,192 @@ namespace OngekiFumenEditor.Kernel.Mcp
             return true;
         }
 
-        private static OngekiObjectBase CreateObject(string family, TGrid tGrid, XGrid xGrid, bool? isCritical, string direction, string content, double? bpm, BulletPallete pallete = default)
+        /// <summary>editor.add_object 的入参集合：家族相关的可选参数很多，聚合成一个 spec 传递。</summary>
+        private sealed class ObjectCreateSpec
         {
-            switch (family)
+            public string Family;
+            public TGrid TGrid;
+            public XGrid XGrid;
+            public bool? IsCritical;
+            public string Direction;
+            public string Content;
+            public double? Bpm;
+            public BulletPallete Pallete;
+            public TGrid EndTGrid;
+            public int? MeterBunShi;
+            public int? MeterBunbo;
+            public string EnemyWave;
+            public string LaneType;
+            public string SoflanType;
+            public double? Speed;
+            public int? SoflanGroup;
+            public bool? ApplySpeedInDesignMode;
+        }
+
+        private static OngekiObjectBase CreateObject(ObjectCreateSpec spec)
+        {
+            switch (spec.Family)
             {
                 case "tap":
                     return new Tap
                     {
-                        TGrid = tGrid,
-                        XGrid = xGrid,
-                        IsCritical = isCritical ?? false,
+                        TGrid = spec.TGrid,
+                        XGrid = spec.XGrid,
+                        IsCritical = spec.IsCritical ?? false,
                     };
 
                 case "flick":
                     return new Flick
                     {
-                        TGrid = tGrid,
-                        XGrid = xGrid,
-                        Direction = ParseDirection(direction),
-                        IsCritical = isCritical ?? false,
+                        TGrid = spec.TGrid,
+                        XGrid = spec.XGrid,
+                        Direction = ParseDirection(spec.Direction),
+                        IsCritical = spec.IsCritical ?? false,
                     };
 
                 case "comment":
                     return new Comment
                     {
-                        TGrid = tGrid,
-                        Content = content ?? string.Empty,
+                        TGrid = spec.TGrid,
+                        Content = spec.Content ?? string.Empty,
                     };
 
                 case "bpm":
-                    if (bpm is not { } bpmValue || bpmValue <= 0)
+                    if (spec.Bpm is not { } bpmValue || bpmValue <= 0)
                         throw new ArgumentException("The bpm family requires a positive 'bpm' value.");
 
                     return new BPMChange
                     {
-                        TGrid = tGrid,
+                        TGrid = spec.TGrid,
                         BPM = bpmValue,
                     };
 
                 case "bullet":
                     return new Bullet
                     {
-                        TGrid = tGrid,
-                        XGrid = xGrid,
-                        ReferenceBulletPallete = pallete,
+                        TGrid = spec.TGrid,
+                        XGrid = spec.XGrid,
+                        ReferenceBulletPallete = spec.Pallete,
                     };
 
                 case "bell":
                     return new Bell
                     {
-                        TGrid = tGrid,
-                        XGrid = xGrid,
-                        ReferenceBulletPallete = pallete,
+                        TGrid = spec.TGrid,
+                        XGrid = spec.XGrid,
+                        ReferenceBulletPallete = spec.Pallete,
                     };
 
+                case "meter":
+                    {
+                        var meter = new MeterChange
+                        {
+                            TGrid = spec.TGrid,
+                            BunShi = spec.MeterBunShi ?? 4,
+                            Bunbo = spec.MeterBunbo ?? 4,
+                        };
+                        if (meter.BunShi <= 0 || meter.Bunbo <= 0)
+                            throw new ArgumentException("meterBunShi and meterBunbo must be positive.");
+                        return meter;
+                    }
+
+                case "clickse":
+                    return new ClickSE { TGrid = spec.TGrid };
+
+                case "enemy":
+                    return new EnemySet
+                    {
+                        TGrid = spec.TGrid,
+                        TagTblValue = ParsePalleteEnum<EnemySet.WaveChangeConst>(spec.EnemyWave ?? "Boss", "enemyWave"),
+                    };
+
+                case "lane":
+                    return CreateLane(spec);
+
+                case "hold":
+                    return CreateHold(spec);
+
+                case "soflan":
+                    return CreateSoflan(spec);
+
                 default:
-                    throw new ArgumentException($"Unsupported object family '{family}'.");
+                    throw new ArgumentException($"Unsupported object family '{spec.Family}'.");
             }
+        }
+
+        private static OngekiObjectBase CreateLane(ObjectCreateSpec spec)
+        {
+            LaneStartBase lane = (spec.LaneType ?? "center").Trim().ToLowerInvariant() switch
+            {
+                "center" => new LaneCenterStart(),
+                "left" => new LaneLeftStart(),
+                "right" => new LaneRightStart(),
+                "colorful" => new ColorfulLaneStart(),
+                "enemy" => new EnemyLaneStart(),
+                "wallleft" => new WallLeftStart(),
+                "wallright" => new WallRightStart(),
+                _ => throw new ArgumentException($"'{spec.LaneType}' is not a valid laneType; expected center, left, right, colorful, enemy, wallLeft or wallRight."),
+            };
+
+            lane.TGrid = spec.TGrid;
+            lane.XGrid = spec.XGrid;
+            return lane;
+        }
+
+        private static OngekiObjectBase CreateHold(ObjectCreateSpec spec)
+        {
+            var hold = new Hold
+            {
+                TGrid = spec.TGrid,
+                XGrid = spec.XGrid,
+                IsCritical = spec.IsCritical ?? false,
+            };
+
+            if (spec.EndTGrid is { } endTGrid)
+            {
+                if (endTGrid <= spec.TGrid)
+                    throw new ArgumentException($"A hold end must be after the hold start (end {endTGrid} <= start {spec.TGrid}).");
+
+                var holdEnd = new HoldEnd
+                {
+                    TGrid = endTGrid,
+                    XGrid = spec.XGrid,
+                };
+                hold.SetHoldEnd(holdEnd);
+            }
+
+            return hold;
+        }
+
+        private static OngekiObjectBase CreateSoflan(ObjectCreateSpec spec)
+        {
+            if (spec.EndTGrid is not { } endTGrid)
+                throw new ArgumentException("The soflan family requires endTGridUnit/endTGridGrid: a soflan always has an end.");
+
+            if (endTGrid <= spec.TGrid)
+                throw new ArgumentException($"A soflan end must be after its start (end {endTGrid} <= start {spec.TGrid}).");
+
+            var speed = (float)(spec.Speed ?? 1);
+            if (double.IsNaN(speed) || double.IsInfinity(speed))
+                throw new ArgumentException("'speed' must be a finite number.");
+
+            ISoflan soflan = (spec.SoflanType ?? "duration").Trim().ToLowerInvariant() switch
+            {
+                "duration" or "soflan" => new Soflan(),
+                "interpolatable" => new InterpolatableSoflan(),
+                "keyframe" => new KeyframeSoflan(),
+                _ => throw new ArgumentException($"'{spec.SoflanType}' is not a valid soflanType; expected duration, interpolatable or keyframe."),
+            };
+
+            soflan.TGrid = spec.TGrid;
+            soflan.EndTGrid = endTGrid;
+            soflan.Speed = speed;
+            if (spec.SoflanGroup is { } group)
+                soflan.SoflanGroup = group;
+            if (spec.ApplySpeedInDesignMode is { } apply)
+                soflan.ApplySpeedInDesignMode = apply;
+
+            return (OngekiObjectBase)soflan;
         }
 
         private static Flick.FlickDirection ParseDirection(string direction)
@@ -1322,6 +1709,22 @@ namespace OngekiFumenEditor.Kernel.Mcp
                     return RequireBpm(obj).BPM.ToString(CultureInfo.InvariantCulture);
                 case "bulletPallete":
                     return RequirePalleteReferencable(obj).ReferenceBulletPallete?.StrID ?? string.Empty;
+                case "bunShi":
+                    return RequireMeter(obj).BunShi.ToString(CultureInfo.InvariantCulture);
+                case "bunbo":
+                    return RequireMeter(obj).Bunbo.ToString(CultureInfo.InvariantCulture);
+                case "enemyWave":
+                    return RequireEnemySet(obj).TagTblValue.ToString();
+                case "endTGridUnit":
+                    return RequireEndTGrid(obj).Unit.ToString(CultureInfo.InvariantCulture);
+                case "endTGridGrid":
+                    return RequireEndTGrid(obj).Grid.ToString(CultureInfo.InvariantCulture);
+                case "speed":
+                    return RequireSoflan(obj).Speed.ToString(CultureInfo.InvariantCulture);
+                case "soflanGroup":
+                    return RequireSoflan(obj).SoflanGroup.ToString(CultureInfo.InvariantCulture);
+                case "applySpeedInDesignMode":
+                    return RequireSoflan(obj).ApplySpeedInDesignMode.ToString(CultureInfo.InvariantCulture);
                 default:
                     throw new ArgumentException($"Unsupported property '{propertyName}'.");
             }
@@ -1383,6 +1786,28 @@ namespace OngekiFumenEditor.Kernel.Mcp
                         ?? throw new ArgumentException($"No bullet pallete '{requested}' in the editor.");
                     return;
                 }
+                case "bunShi":
+                    RequireMeter(obj).BunShi = ParsePositiveInt(rawValue, propertyName);
+                    return;
+                case "bunbo":
+                    RequireMeter(obj).Bunbo = ParsePositiveInt(rawValue, propertyName);
+                    return;
+                case "enemyWave":
+                    RequireEnemySet(obj).TagTblValue = ParsePalleteEnum<EnemySet.WaveChangeConst>(rawValue, propertyName);
+                    return;
+                case "endTGridUnit":
+                case "endTGridGrid":
+                    WriteEndTGrid(obj, propertyName, rawValue);
+                    return;
+                case "speed":
+                    RequireSoflan(obj).Speed = ParseFiniteFloat(rawValue, propertyName);
+                    return;
+                case "soflanGroup":
+                    RequireSoflan(obj).SoflanGroup = ParseInt(rawValue);
+                    return;
+                case "applySpeedInDesignMode":
+                    RequireSoflan(obj).ApplySpeedInDesignMode = ParseBool(rawValue);
+                    return;
                 default:
                     throw new ArgumentException($"Unsupported property '{propertyName}'.");
             }
@@ -1497,6 +1922,27 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 xGrid = xGrid is null ? null : new { unit = xGrid.Unit, grid = xGrid.Grid, totalGrid = xGrid.TotalGrid },
                 isCritical = obj is ICriticalableObject criticalable ? criticalable.IsCritical : (bool?)null,
                 bulletPalleteStrId = obj is IBulletPalleteReferencable referencable ? referencable.ReferenceBulletPallete?.StrID : default,
+                meterBunShi = (obj as MeterChange)?.BunShi,
+                meterBunbo = (obj as MeterChange)?.Bunbo,
+                enemyWave = obj is EnemySet enemy ? enemy.TagTblValue.ToString() : default,
+                laneType = obj is LaneStartBase lane ? lane.LaneType.ToString() : default,
+                hasHoldEnd = obj is Hold holdObj ? holdObj.HoldEnd is not null : (bool?)null,
+                endTGrid = obj switch
+                {
+                    Hold h when h.HoldEnd is { } he => new { unit = he.TGrid.Unit, grid = he.TGrid.Grid, totalGrid = he.TGrid.TotalGrid },
+                    ISoflan s => new { unit = s.EndTGrid.Unit, grid = s.EndTGrid.Grid, totalGrid = s.EndTGrid.TotalGrid },
+                    _ => null,
+                },
+                soflanType = obj switch
+                {
+                    KeyframeSoflan => "keyframe",
+                    InterpolatableSoflan => "interpolatable",
+                    ISoflan => "duration",
+                    _ => default,
+                },
+                soflanSpeed = (obj as ISoflan)?.Speed,
+                soflanGroup = (obj as ISoflan)?.SoflanGroup,
+                applySpeedInDesignMode = (obj as ISoflan)?.ApplySpeedInDesignMode,
             };
         }
     }
