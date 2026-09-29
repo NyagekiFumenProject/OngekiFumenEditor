@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class OngekiObjectBase : PropertyChangedBase
+    public abstract class OngekiObjectBase : CommonPropertyChangedBase
     {
         private static int ID_GEN = 0;
 
