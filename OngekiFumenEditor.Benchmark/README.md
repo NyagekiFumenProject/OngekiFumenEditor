@@ -61,6 +61,34 @@ dotnet run -c Release --project .\OngekiFumenEditor.Benchmark -- --job dry
 
 支持的 `--job` 预设:`dry` / `short` / `medium` / `long` / `verylong` / `default`。
 
+## 已知限制
+
+### 继承 `FumenBenchmarkBase` 的用例在当前环境跑不起来（既有问题，与具体用例无关）
+
+BDN 在子进程里以 `dotnet <generated>.dll` 启动，于是 `Environment.ProcessPath` 指向
+`C:\Program Files\dotnet\dotnet.exe`，而主项目有不少路径是相对「可执行文件目录」解析的
+（`OngekiFumenEditor/Utils/AppDirectoryHelper.cs:6`）：
+
+| 位置 | 行为 |
+| --- | --- |
+| `Utils/DeadHandler/DumpFileHelper.cs:42` 创建 `.\Dumps` | bootstrap 阶段抛 `UnauthorizedAccessException`（`AppBootstrapper.Configure()`） |
+| `AppBootstrapper.cs:124` 创建 `Plugins\` | 同上 |
+
+表现：子进程以 `TargetInvocationException → UnauthorizedAccessException` 退出，结果表所有方法为 `NA`，
+并提示 `Detected error exit code from one of the benchmarks`。
+
+- **受影响**：所有继承 `FumenBenchmarkBase` 的类（`CollectionQueryBenchmarks`、`DisplayableEnumerationBenchmarks`、
+  `DrawPlayableAreaHelperNewP1*` 等——它们都要经 `BenchmarkRuntime.EnsureInitialized()` 引导 IoC）。
+- **不受影响**：自包含用例（`LaneBoundaryXGridQueryBenchmarks`、`GridNotificationAllocationBenchmarks`、
+  `LaneCurvePathBenchmarks` 等），它们不触碰引导流程。
+- **规避**：新用例写成自包含（自建数据，不调用 `BenchmarkRuntime`）。
+- **修复方向**（均属主项目改动，二选一）：
+  1. `AppDirectoryHelper.ExecutableDirectory` 优先取 `AppContext.BaseDirectory`（single-file 发布下与现在等价，
+     `dotnet app.dll` 宿主下指向 dll 所在目录，正是期望值）；
+  2. `DumpFileHelper.Init()` 与 `Plugins` 目录创建失败时降级为告警而非抛出。
+
+在修复之前，不要以「全部可跑」为前提用 `[0] 全部`。
+
 ## 基线对比
 
 每跑完一组 benchmark,程序会:
