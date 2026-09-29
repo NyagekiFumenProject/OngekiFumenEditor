@@ -13,11 +13,19 @@
 * `editor.get_current`
 * `editor.list_opened`
 * `editor.get_current_summary`
+* `editor.query_object` (pages one object family inside a TGrid range; returns runtime ids)
 * Script tools:
 * `script.compile`
 * `script.run_current_editor`
 * `script.run_editor`
 * `script.get_last_result`
+* Editor mutation tools (`Kernel/Mcp/EditorMutationTools.cs`):
+* `editor.begin_action` / `editor.end_action` open and close an undo/redo combine scope per editor. Mutations issued in between are queued and applied by `end_action`, which reports each operation's outcome, rolls the whole batch back when one of them failed, and can discard the queue with `discard=true`.
+* `editor.add_object` (tap/flick/comment/bpm) returns the new runtime object id.
+* `editor.modify_object` sets one whitelisted property (tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm).
+* `editor.remove_object` removes by runtime object id.
+* `editor.scroll_to` moves the viewport/playback position.
+* Outside an action scope these mutations apply immediately; inside one they report `applied=false, queued=true` and their real result arrives with `editor.end_action`.
 * `editor.get_current_summary` returns the most useful stable summary shape for assistants:
   editor id, display name, project path, fumen path, dirty/active flags, and lightweight object counts.
 
