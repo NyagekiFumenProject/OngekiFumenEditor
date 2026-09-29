@@ -456,40 +456,39 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             MaterializeMergedVisibleTGridRanges();
 
             var allVisibleTGridRanges = mergedVisibleTGridRanges.Merge();
-            using (var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges, frameTGrid))
+            using var visibleObjects = EnumerateAllDisplayableObjects(fumen, allVisibleTGridRanges, frameTGrid);
+
+            foreach (var displayable in visibleObjects)
             {
-                foreach (var displayable in visibleObjects)
+                if (displayable is not OngekiTimelineObjectBase obj)
+                    continue;
+                if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
                 {
-                    if (displayable is not OngekiTimelineObjectBase obj)
-                        continue;
-                    if (!map.TryGetValue(obj.IDShortName, out var soflanGroupObjectMap))
+                    var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
+                    drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
+                    soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
+                }
+
+                _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
+
+                if (!CheckSoflanGroupVisible(soflanGroup))
+                    continue;
+
+                if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
+                {
+                    if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
                     {
-                        var soflanGroupObjectMapPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiTimelineObjectBase>>();
-                        drawingCollectionDisposables.Add(soflanGroupObjectMapPool);
-                        soflanGroupObjectMap = map[obj.IDShortName] = soflanGroupObjectMapPool;
+                        var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
+                        drawingCollectionDisposables.Add(listPool);
+                        list = soflanGroupObjectMap[drawingContext] = listPool;
                     }
 
-                    _cacheSoflanGroupRecorder.GetCache(obj.Id, out var soflanGroup);
-
-                    if (!CheckSoflanGroupVisible(soflanGroup))
-                        continue;
-
-                    if (drawingContexts.TryGetValue(soflanGroup, out var drawingContext))
-                    {
-                        if (!soflanGroupObjectMap.TryGetValue(drawingContext, out var list))
-                        {
-                            var listPool = ObjectPool.GetPooledList<OngekiTimelineObjectBase>();
-                            drawingCollectionDisposables.Add(listPool);
-                            list = soflanGroupObjectMap[drawingContext] = listPool;
-                        }
-
-                        list.Add(obj);
-                        usedDrawingContexts.Add(soflanGroup);
-                    }
-                    else
-                    {
-                        Log.LogWarn($"Soflan group drawing context not found: object={obj.GetType().Name}, objectId={obj.Id}, soflanGroup={soflanGroup}");
-                    }
+                    list.Add(obj);
+                    usedDrawingContexts.Add(soflanGroup);
+                }
+                else
+                {
+                    Log.LogWarn($"Soflan group drawing context not found: object={obj.GetType().Name}, objectId={obj.Id}, soflanGroup={soflanGroup}");
                 }
             }
 
@@ -656,7 +655,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             PostDrawCommandList(builder);
 
-        //clean up
+            //clean up
         }
         finally
         {
