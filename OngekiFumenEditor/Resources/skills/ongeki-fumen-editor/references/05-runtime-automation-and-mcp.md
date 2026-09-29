@@ -3,7 +3,7 @@
 ## Architecture Split
 
 * `Kernel/Mcp/` exposes tool-shaped MCP endpoints.
-* `Kernel/RuntimeAutomation/` owns editor-context lookup, script-host execution, authorization, client tracking, and security policy.
+* `Kernel/RuntimeAutomation/` owns script-host execution, authorization, client tracking, and security policy. Editor lookups now go through `IEditorDocumentManager` (see `EditorDocumentManagerExtensions` / `EditorContextInfo.From`).
 * Keep `Kernel/Mcp` thin. Put live-editor logic and script execution rules in `Kernel/RuntimeAutomation`.
 * The main entry points today are `Kernel/Mcp/EditorTools.cs`, `Kernel/Mcp/ScriptTools.cs`, and `Kernel/Mcp/McpServerHost.cs`.
 
@@ -34,9 +34,10 @@
 
 ## Editor Context Lane
 
-* `RuntimeEditorContextProvider` converts `FumenVisualEditorViewModel` instances into `EditorContextInfo`.
-* `EditorContextInfo` carries instance-scoped editor IDs, display names, file paths, dirty/active state, and lightweight object counts.
-* Use this provider when MCP or automation needs editor facts without exposing the full view model.
+* `IEditorDocumentManager` is the single source for editor lookups: `Kernel/Mcp/EditorTools.cs` reads `CurrentActivatedEditor` and a snapshot of `GetCurrentEditors()` directly.
+* `EditorDocumentManagerExtensions` owns the shared helpers: `GetEditorSnapshot` (materialises the internal `HashSet` before enumerating it across threads) and `TryGetEditorById` (id comparison via `RuntimeAutomationEditorId`).
+* `EditorContextInfo.From(viewModel)` projects a `FumenVisualEditorViewModel` into `EditorContextInfo`, which carries instance-scoped editor IDs, display names, file paths, dirty/active state, and lightweight object counts.
+* Keep `EditorContextInfo` as the tool-facing result shape; automation that needs to mutate an editor should use the view model resolved through the document manager, not this DTO.
 
 ## Authorization Lane
 
