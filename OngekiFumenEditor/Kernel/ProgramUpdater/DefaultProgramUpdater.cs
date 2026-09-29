@@ -177,7 +177,15 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             try
             {
                 var url = $"{ApiEndPoint}/editor/getVersionInfo?requireMasterBranch={ProgramSetting.Default.UpdaterCheckMasterBranchOnly}";
-                RemoteVersionInfo = await http.GetFromJsonAsync<VersionInfo>(url);
+                var versionInfo = await http.GetFromJsonAsync<VersionInfo>(url);
+                if (versionInfo is not null)
+                {
+                    // 清单里的 time 表示 UTC（带 Z，或反序列化成 Unspecified），展示与比较前统一换算成本地时间。
+                    versionInfo.Time = versionInfo.Time.Kind == DateTimeKind.Unspecified
+                        ? DateTime.SpecifyKind(versionInfo.Time, DateTimeKind.Utc).ToLocalTime()
+                        : versionInfo.Time.ToLocalTime();
+                }
+                RemoteVersionInfo = versionInfo;
             }
             catch (Exception e)
             {

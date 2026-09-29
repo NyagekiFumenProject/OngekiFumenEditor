@@ -22,7 +22,7 @@ namespace OngekiFumenEditor.UI.Dialogs
                                 .FirstOrDefault(x => x.Key == "BuildDateTime")
                                 ?.Value;
         public string BuildConfiguration => ThisAssembly.AssemblyConfiguration;
-        public string CommitDate => ThisAssembly.GitCommitDate.AddHours(8).ToString("yyyy/M/dd H:mm:ss.fff");
+        public string CommitDate => ThisAssembly.GitCommitDate.ToLocalTime().ToString("yyyy/M/dd H:mm:ss.fff");
 
         public bool IsNotifyUpdateSuccess { get; }
         public string SourceVersion { get; }

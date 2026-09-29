@@ -105,7 +105,7 @@
                 Grid.Row="4"
                 Grid.Column="1"
                 VerticalAlignment="Center"
-                d:Content="2012/10/14 30:26:59.123"
+                d:Content="2026/9/29 22:25:00"
                 Content="{Binding NewVersionInfo.Time}"
                 FontSize="15"
                 FontWeight="Bold">
