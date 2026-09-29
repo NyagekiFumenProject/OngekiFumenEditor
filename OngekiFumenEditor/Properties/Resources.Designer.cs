@@ -7145,6 +7145,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to MCP.
+        /// </summary>
+        public static string TabMcp {
+            get {
+                return ResourceManager.GetString("TabMcp", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Program.
         /// </summary>
         public static string TabProgram {

@@ -42,31 +42,6 @@
                     Margin="10,0,10,10"
                     Content="{markup:Translate [ShowConsoleWindowInGUIMode]}"
                     IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
-                <CheckBox
-                    Margin="10,0,10,10"
-                    Content="{markup:Translate [EnableMcpServerInGUIMode]}"
-                    IsChecked="{Binding Setting.EnableMcpServerInGUIMode}" />
-                <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
-                    <TextBlock VerticalAlignment="Center" Text="{markup:Translate [McpServerListenPort]}" />
-                    <TextBox
-                        Width="100"
-                        Margin="10,0,0,0"
-                        VerticalAlignment="Center"
-                        Text="{Binding Setting.McpServerListenPort}" />
-                </StackPanel>
-                <CheckBox
-                    Margin="10,0,10,10"
-                    Content="{markup:Translate [AllowAnonymousMcpClientUsage]}"
-                    IsChecked="{Binding Setting.AllowAnonymousMcpClientUsage}" />
-                <CheckBox
-                    Margin="10,0,10,10"
-                    Content="{markup:Translate [AllowAllMcpOperationsByDefault]}"
-                    IsChecked="{Binding Setting.AllowAllMcpOperationsByDefault}" />
-                <TextBlock
-                    Margin="10,0,10,10"
-                    Foreground="DarkSlateGray"
-                    Text="{markup:Translate [McpProgramSettingsNote]}"
-                    TextWrapping="Wrap" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [CrashDumpFile]}">

@@ -1461,6 +1461,9 @@
   <data name="TabLogger" xml:space="preserve">
     <value>日志</value>
   </data>
+  <data name="TabMcp" xml:space="preserve">
+    <value>MCP</value>
+  </data>
   <data name="TabProgram" xml:space="preserve">
     <value>程序</value>
   </data>
@@ -2371,7 +2374,7 @@
     <value>允许匿名 MCP 客户端使用</value>
   </data>
   <data name="McpProgramSettingsNote" xml:space="preserve">
-    <value>MCP 菜单显示和自动启动的改动会在重启后生效。端口改动会在下次服务器启动时生效。禁用匿名 MCP 使用后，客户端必须提供 clientId 或 requestedBy。</value>
+    <value>MCP 菜单显示和自动启动的改动会在重启后生效。端口改动会在下次服务器启动时生效。禁用匿名 MCP 使用后，客户端必须提供 clientId 或 requestedBy；开启「默认允许全部客户端所有操作」则不校验此限制，也不再弹出任何确认框。</value>
   </data>
   <data name="McpMenuTitle" xml:space="preserve">
     <value>MCP</value>

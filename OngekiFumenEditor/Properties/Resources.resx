@@ -1461,6 +1461,9 @@
   <data name="TabLogger" xml:space="preserve">
     <value>Logger</value>
   </data>
+  <data name="TabMcp" xml:space="preserve">
+    <value>MCP</value>
+  </data>
   <data name="TabProgram" xml:space="preserve">
     <value>Program</value>
   </data>
@@ -2398,7 +2401,7 @@
     <value>Allow anonymous MCP client usage</value>
   </data>
   <data name="McpProgramSettingsNote" xml:space="preserve">
-    <value>MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start. When anonymous MCP usage is disabled, clients must provide clientId or requestedBy.</value>
+    <value>MCP menu visibility and auto-start changes apply after restart. Port changes apply on the next server start. When anonymous MCP usage is disabled, clients must provide clientId or requestedBy - unless "allow all MCP operations by default" is enabled, which skips that check and every confirmation dialog.</value>
   </data>
   <data name="McpMenuTitle" xml:space="preserve">
     <value>MCP</value>

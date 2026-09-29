@@ -1453,6 +1453,9 @@
   <data name="TabLogger" xml:space="preserve">
     <value>ログ</value>
   </data>
+  <data name="TabMcp" xml:space="preserve">
+    <value>MCP</value>
+  </data>
   <data name="TabProgram" xml:space="preserve">
     <value>プログラム</value>
   </data>
@@ -1709,7 +1712,7 @@
     <value>匿名 MCP クライアントの利用を許可</value>
   </data>
   <data name="McpProgramSettingsNote" xml:space="preserve">
-    <value>MCP メニュー表示と自動起動の変更は再起動後に反映されます。ポート変更は次回サーバー起動時に反映されます。匿名 MCP 利用を無効にした場合、クライアントは clientId または requestedBy を指定する必要があります。</value>
+    <value>MCP メニュー表示と自動起動の変更は再起動後に反映されます。ポート変更は次回サーバー起動時に反映されます。匿名 MCP 利用を無効にした場合、クライアントは clientId または requestedBy を指定する必要がありますが、「すべての MCP クライアントの全操作を既定で許可する」を有効にするとこの制限は適用されず、確認ダイアログも表示されません。</value>
   </data>
   <data name="McpMenuTitle" xml:space="preserve">
     <value>MCP</value>
