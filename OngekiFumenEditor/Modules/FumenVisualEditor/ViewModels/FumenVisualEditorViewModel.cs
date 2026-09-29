@@ -322,6 +322,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             session.ReportStep(EditorLoadingStep.InitializingRender);
             await WaitForEditorReadyAsync(session.CancellationToken);
+            await session.CollectLoadingGarbageAsync();
             session.Complete(EditorLoadingOutcome.Ready);
         }
 

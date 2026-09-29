@@ -1979,6 +1979,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Collecting memory....
+        /// </summary>
+        public static string EditorLoadingStepCollectingMemory {
+            get {
+                return ResourceManager.GetString("EditorLoadingStepCollectingMemory", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Initializing the editor renderer....
         /// </summary>
         public static string EditorLoadingStepInitializingRender {

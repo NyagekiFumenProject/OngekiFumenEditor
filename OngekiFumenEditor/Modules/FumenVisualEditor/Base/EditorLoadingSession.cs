@@ -2,6 +2,8 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Diagnostics;
+using System.Runtime;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
@@ -16,6 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         Parsing = 3,
         LoadingAudio = 4,
         InitializingRender = 5,
+        CollectingMemory = 6,
     }
 
     public enum EditorLoadingOutcome
@@ -31,7 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
     /// </summary>
     public sealed class EditorLoadingSession : IDisposable
     {
-        public const int StepCount = 5;
+        public const int StepCount = 6;
         /// <summary>等待渲染初始化与首帧的上限；超时只记日志，不阻塞对话框关闭。</summary>
         public static readonly TimeSpan EditorReadyTimeout = TimeSpan.FromSeconds(30);
 
@@ -65,6 +68,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         {
             Log.LogInfo($"Editor loading step: {step}");
             dialog.ReportStep(step);
+        }
+
+        /// <summary>
+        /// 加载末尾回收加载期在 LOH 留下的大对象空洞（实测碎片 ~300 MB）。CompactOnce 只对「下一次
+        /// full blocking GC」生效（后台 GC 不算），故必须紧跟一次 GC.Collect()；它是阻塞式收集，
+        /// 只能留在加载路径。先让对话框把本步骤画出来（Render 优先级有界等待，避免被渲染循环饿死），
+        /// 再开始收集。
+        /// </summary>
+        public async Task CollectLoadingGarbageAsync()
+        {
+            ReportStep(EditorLoadingStep.CollectingMemory);
+            await Dispatcher.Yield(DispatcherPriority.Render);
+
+            var sw = Stopwatch.StartNew();
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect();
+            Log.LogInfo($"Editor loading step: LOH compaction finished in {sw.ElapsedMilliseconds} ms");
         }
 
         public void Complete(EditorLoadingOutcome outcome)

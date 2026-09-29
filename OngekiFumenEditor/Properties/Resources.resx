@@ -585,6 +585,9 @@
   <data name="EditorLoadingNewProjectName" xml:space="preserve">
     <value>New project</value>
   </data>
+  <data name="EditorLoadingStepCollectingMemory" xml:space="preserve">
+    <value>Collecting memory...</value>
+  </data>
   <data name="EditorLoadingStepInitializingRender" xml:space="preserve">
     <value>Initializing the editor renderer...</value>
   </data>

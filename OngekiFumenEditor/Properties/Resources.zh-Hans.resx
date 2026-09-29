@@ -585,6 +585,9 @@
   <data name="EditorLoadingNewProjectName" xml:space="preserve">
     <value>新建工程</value>
   </data>
+  <data name="EditorLoadingStepCollectingMemory" xml:space="preserve">
+    <value>正在回收内存…</value>
+  </data>
   <data name="EditorLoadingStepInitializingRender" xml:space="preserve">
     <value>正在初始化编辑器渲染…</value>
   </data>

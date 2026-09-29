@@ -579,6 +579,9 @@
   <data name="EditorLoadingNewProjectName" xml:space="preserve">
     <value>新規プロジェクト</value>
   </data>
+  <data name="EditorLoadingStepCollectingMemory" xml:space="preserve">
+    <value>メモリを回収中…</value>
+  </data>
   <data name="EditorLoadingStepInitializingRender" xml:space="preserve">
     <value>エディタ描画を初期化中…</value>
   </data>

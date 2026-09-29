@@ -124,6 +124,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
             EditorLoadingStep.Parsing => Resources.EditorLoadingStepParsing,
             EditorLoadingStep.LoadingAudio => Resources.EditorLoadingStepLoadingAudio,
             EditorLoadingStep.InitializingRender => Resources.EditorLoadingStepInitializingRender,
+            EditorLoadingStep.CollectingMemory => Resources.EditorLoadingStepCollectingMemory,
             _ => Resources.EditorLoadingStepPreparing,
         };
     }
