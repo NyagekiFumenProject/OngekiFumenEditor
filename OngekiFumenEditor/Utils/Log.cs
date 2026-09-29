@@ -83,16 +83,24 @@ public class Log
         return sb.ToString();
     }
 
-    private void EnqueueLogRecord(string message, Severity severity, bool new_line, bool time, string prefix, string filePath, int lineNumber)
+    private void EnqueueLogRecord(LogRecord record)
     {
-        logRecordQueue.Enqueue(new LogRecord(severity, message, new_line, time, prefix, filePath, lineNumber));
+        lock (drainLock)
+        {
+            logRecordQueue.Enqueue(record);
+
+            if (isRunning)
+                return;
+
+            isRunning = true;
+        }
+
+        Task.Run(DrainLogRecordQueue);
     }
 
     private static void BeginLogRecord(string message, Severity severity, bool new_line, bool time, string prefix, string filePath, int lineNumber)
     {
-        var log = Instance;
-        log.EnqueueLogRecord(message, severity, new_line, time, prefix, filePath, lineNumber);
-        log.AwakeLogger();
+        Instance.EnqueueLogRecord(new LogRecord(severity, message, new_line, time, prefix, filePath, lineNumber));
     }
 
     [Conditional("DEBUG")]
@@ -102,23 +110,21 @@ public class Log
         BeginLogRecord(message, Severity.Debug, newLine, time, prefix, filePath, lineNumber);
     }
 
+    private readonly object drainLock = new();
     private volatile bool isRunning = false;
 
-    private void AwakeLogger()
+    // A record is only queued while the drain lock is held, and the drainer only stops once it has
+    // seen an empty queue under that same lock, so a record can never be left behind waiting for the
+    // next log write to wake the drainer up. This also makes WaitForAllLogWriteDone() a real barrier.
+    private void DrainLogRecordQueue()
     {
-        if (isRunning)
-            return;
-
-        isRunning = true;
-
-        Task.Run(() =>
+        while (true)
         {
             while (logRecordQueue.TryDequeue(out var logRecord))
             {
                 try
                 {
-                    var msg = BuildLogMessage(logRecord);
-                    Instance.Output(logRecord.Severity, msg);
+                    Output(logRecord.Severity, BuildLogMessage(logRecord));
                 }
                 catch
                 {
@@ -126,8 +132,15 @@ public class Log
                 }
             }
 
-            isRunning = false;
-        });
+            lock (drainLock)
+            {
+                if (!logRecordQueue.IsEmpty)
+                    continue;
+
+                isRunning = false;
+                return;
+            }
+        }
     }
 
     public static void LogInfo(string message, bool newLine = true, bool time = true,

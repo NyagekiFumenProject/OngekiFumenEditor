@@ -16,6 +16,7 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
     internal static class FileLogOutput
     {
         static ConcurrentQueue<string> contents = new();
+        static readonly object writeLock = new();
         static string filePath;
         static volatile bool isWriting = false;
 
@@ -40,14 +41,24 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
 
         public static void WaitForWriteDone()
         {
+            var spinWait = new SpinWait();
             while (isWriting)
-                Thread.Sleep(0);
+                spinWait.SpinOnce();
         }
 
         public static Task WriteLog(string content)
         {
-            contents.Enqueue(content);
-            return NotifyWrite();
+            lock (writeLock)
+            {
+                contents.Enqueue(content);
+
+                if (isWriting)
+                    return Task.CompletedTask;
+
+                isWriting = true;
+            }
+
+            return Task.Run(WritePendingContents);
         }
 
         public static string GetCurrentLogFile()
@@ -55,17 +66,36 @@ namespace OngekiFumenEditor.Utils.Logs.DefaultImpls
             return filePath;
         }
 
-        private static async Task NotifyWrite()
+        // Everything queued so far is written in one go: opening and closing the file once per log
+        // line costs far more than the write itself. Queuing while holding the lock keeps a line
+        // that arrives as the writer is about to stop from waiting for the next log line.
+        private static void WritePendingContents()
         {
-            if (isWriting)
-                return;
-            isWriting = true;
-            await Task.Run(() =>
+            while (true)
             {
-                while (filePath != null && contents.TryDequeue(out var msg))
-                    File.AppendAllText(filePath, msg);
-                isWriting = false;
-            });
+                try
+                {
+                    var pending = new StringBuilder();
+                    while (contents.TryDequeue(out var msg))
+                        pending.Append(msg);
+
+                    if (filePath != null && pending.Length > 0)
+                        File.AppendAllText(filePath, pending.ToString());
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"Write log file failed : {e.Message}");
+                }
+
+                lock (writeLock)
+                {
+                    if (!contents.IsEmpty)
+                        continue;
+
+                    isWriting = false;
+                    return;
+                }
+            }
         }
     }
 
