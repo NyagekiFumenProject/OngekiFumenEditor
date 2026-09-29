@@ -10,6 +10,7 @@
 | --- | --- |
 | `CollectionQueryBenchmarks` | 集合范围查询:`BinaryFindRange` / `GetVisibleStartObjects` / Soflan 区间查询 |
 | `LaneBoundaryXGridQueryBenchmarks` | 渲染期边界求值分配:旧 `CalulateXGrid`(List+XGrid) vs 新索引区间+TotalUnit 数值返回,含逐点等价性校验 |
+| `BulletBellQueryBenchmarks` | 预览模式子弹/Bell 分桶查询(性能报告 §8 P2 落地验证):旧 `BinaryFindRange(yield)` + `Where` 逐 target 重枚举 vs 已落地的索引区间 + 直写循环;另测「帧内列表复用」「group 可见性缓存」两种未采纳形态,含逐元素等价性校验 |
 | `DisplayableEnumerationBenchmarks` | `OngekiFumen.GetAllDisplayableObjects()`、范围内枚举、`ConnectableStartObject.GetDisplayableObjects()` |
 | `GridNotificationAllocationBenchmarks` | 网格属性通知分配:Caliburn 闭包/args 逐次分配 vs `CommonPropertyChangedBase` 的 args 复用 + 变更检测(含旧实现逐行复刻对照与等价性校验) |
 | `HoldJudgeTickEnumerationBenchmarks` | 预览期 Hold 判定刻度枚举(性能报告 §8 P2 落地验证):旧「每步 GridOffset(24 B)+TGrid(56 B) 双分配」vs 新「私有累计实例原地推进 + yield 复制」,含逐步位级等价性校验 |
