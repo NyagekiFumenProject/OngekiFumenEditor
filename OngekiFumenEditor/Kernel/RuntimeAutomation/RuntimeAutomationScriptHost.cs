@@ -23,7 +23,6 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal sealed class RuntimeAutomationScriptHost : IRuntimeAutomationScriptHost
     {
-        private readonly IRuntimeEditorContextProvider editorContextProvider;
         private readonly IScriptSecurityPolicy scriptSecurityPolicy;
         private readonly IEditorScriptExecutor editorScriptExecutor;
         private readonly IEditorDocumentManager editorDocumentManager;
@@ -38,13 +37,11 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
         [ImportingConstructor]
         public RuntimeAutomationScriptHost(
-            IRuntimeEditorContextProvider editorContextProvider,
             IScriptSecurityPolicy scriptSecurityPolicy,
             IEditorScriptExecutor editorScriptExecutor,
             IEditorDocumentManager editorDocumentManager,
             IMcpToolAuthorizationService mcpToolAuthorizationService)
         {
-            this.editorContextProvider = editorContextProvider;
             this.scriptSecurityPolicy = scriptSecurityPolicy;
             this.editorScriptExecutor = editorScriptExecutor;
             this.editorDocumentManager = editorDocumentManager;
@@ -70,7 +67,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             if (editor is null)
                 return CacheResult(CreateRunFailure("NO_ACTIVE_EDITOR", "No active editor is available."));
 
-            var editorId = editorContextProvider.GetCurrentEditor()?.EditorId ?? RuntimeAutomationEditorId.Generate(editor);
+            var editorId = RuntimeAutomationEditorId.Generate(editor);
             if (!string.IsNullOrWhiteSpace(request?.ExpectedEditorId) && !string.Equals(request.ExpectedEditorId, editorId, StringComparison.Ordinal))
                 return CacheResult(CreateRunFailure("EDITOR_CHANGED", $"The active editor changed. Expected '{request.ExpectedEditorId}', actual '{editorId}'.", editorId, GetTransactionName(request)));
 
@@ -87,8 +84,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             if (!string.IsNullOrWhiteSpace(request?.ExpectedEditorId) && !string.Equals(request.ExpectedEditorId, editorId, StringComparison.Ordinal))
                 return CacheResult(CreateRunFailure("EDITOR_CHANGED", $"The requested editor id '{editorId}' does not match expected '{request.ExpectedEditorId}'.", editorId, GetTransactionName(request)));
 
-            var editor = editorDocumentManager.GetCurrentEditors().FirstOrDefault(x => RuntimeAutomationEditorId.Generate(x) == editorId);
-            if (editor is null)
+            if (!editorDocumentManager.TryGetEditorById(editorId, out var editor))
                 return CacheResult(CreateRunFailure("EDITOR_NOT_FOUND", $"Editor '{editorId}' was not found.", editorId, GetTransactionName(request)));
 
             return await RunOnEditorCoreAsync(editor, editorId, request, false, cancellationToken);

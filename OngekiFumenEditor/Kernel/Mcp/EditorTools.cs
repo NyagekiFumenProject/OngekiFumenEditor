@@ -1,8 +1,10 @@
 using OngekiFumenEditor.Kernel.RuntimeAutomation;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using ModelContextProtocol.Server;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,13 +14,13 @@ namespace OngekiFumenEditor.Kernel.Mcp
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal sealed class EditorTools
     {
-        private readonly IRuntimeEditorContextProvider editorContextProvider;
+        private readonly IEditorDocumentManager editorDocumentManager;
         private readonly IMcpToolAuthorizationService mcpToolAuthorizationService;
 
         [ImportingConstructor]
-        public EditorTools(IRuntimeEditorContextProvider editorContextProvider, IMcpToolAuthorizationService mcpToolAuthorizationService)
+        public EditorTools(IEditorDocumentManager editorDocumentManager, IMcpToolAuthorizationService mcpToolAuthorizationService)
         {
-            this.editorContextProvider = editorContextProvider;
+            this.editorDocumentManager = editorDocumentManager;
             this.mcpToolAuthorizationService = mcpToolAuthorizationService;
         }
 
@@ -46,7 +48,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 return deniedResult;
             }
 
-            var result = editorContextProvider.GetCurrentEditor();
+            var result = EditorContextInfo.From(editorDocumentManager.CurrentActivatedEditor);
             McpOperationLogHelper.LogResult(operationName, result);
             return result;
         }
@@ -75,7 +77,10 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 return deniedResult;
             }
 
-            var result = editorContextProvider.GetOpenedEditors();
+            var result = editorDocumentManager.GetEditorSnapshot()
+                .Select(EditorContextInfo.From)
+                .Where(x => x is not null)
+                .ToArray();
             McpOperationLogHelper.LogResult(operationName, result);
             return result;
         }
@@ -104,7 +109,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 return deniedResult;
             }
 
-            var current = editorContextProvider.GetCurrentEditor();
+            var current = EditorContextInfo.From(editorDocumentManager.CurrentActivatedEditor);
             if (current is null)
             {
                 var noActiveEditorResult = new
