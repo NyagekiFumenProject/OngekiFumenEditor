@@ -135,7 +135,7 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             return string.IsNullOrWhiteSpace(clientId) ? default : clientId.Trim();
         }
 
-        private static string BuildClientIdentityKey(string requestedBy, string clientId)
+        internal static string BuildClientIdentityKey(string requestedBy, string clientId)
         {
             if (!string.IsNullOrWhiteSpace(clientId))
                 return $"clientId:{clientId}";
