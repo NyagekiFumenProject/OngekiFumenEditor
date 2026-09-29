@@ -145,12 +145,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 return (int)standardBeatLen;
             }
 
-            var holdStartTGrid = TGrid;
             var holdEndTGrid = HoldEnd?.TGrid;
             if (holdEndTGrid is null)
                 yield break;
 
-            var curTGrid = holdStartTGrid;
+            //迭代用私有累计实例：不共享 Hold.TGrid（原地推进不得污染源对象），每次调用只分配这一个 TGrid
+            var curTGrid = new TGrid(TGrid.Unit, TGrid.Grid);
 
             while (curTGrid < holdEndTGrid)
             {
@@ -161,23 +161,23 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 if (bpm.TGrid <= minTGrid && minTGrid <= nextTGrid)
                 {
                     var tickGrid = CalcHoldTickStepSize(bpm.BPM);
-                    curTGrid = curTGrid + new GridOffset(0, tickGrid);
+                    curTGrid.AddOffset(new GridOffset(0, tickGrid));
 
                     //skip to minTGrid
                     while (curTGrid < minTGrid)
                     {
                         tickGrid = CalcHoldTickStepSize(bpm.BPM);
-                        curTGrid = curTGrid + new GridOffset(0, tickGrid);
+                        curTGrid.AddOffset(new GridOffset(0, tickGrid));
                     }
 
                     //enumerate until hold end or maxTGrid
                     while (curTGrid < holdEndTGrid && curTGrid < maxTGrid)
                     {
-                        yield return curTGrid;
+                        yield return curTGrid.CopyNew();
 
                         bpm = bpmList.GetBpm(curTGrid);
                         tickGrid = CalcHoldTickStepSize(bpm.BPM);
-                        curTGrid = curTGrid + new GridOffset(0, tickGrid);
+                        curTGrid.AddOffset(new GridOffset(0, tickGrid));
                     }
 
                     //finally check if need to yield hold end
@@ -191,9 +191,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 {
                     //not in range yet, skip curTGrid to relative pos of next bpm
                     var tickGrid = CalcHoldTickStepSize(bpm.BPM);
-                    var nextBpmCurTGrid = curTGrid + new GridOffset(0, tickGrid * ((nextTGrid.TotalGrid - curTGrid.TotalGrid) / tickGrid + 1));
-
-                    curTGrid = nextBpmCurTGrid;
+                    curTGrid.AddOffset(new GridOffset(0, tickGrid * ((nextTGrid.TotalGrid - curTGrid.TotalGrid) / tickGrid + 1)));
                 }
             }
         }

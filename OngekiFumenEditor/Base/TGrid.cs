@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace OngekiFumenEditor.Base
 {
     public class TGrid : GridBase
@@ -59,8 +61,28 @@ namespace OngekiFumenEditor.Base
 
         public static TGrid operator +(TGrid l, GridOffset r)
         {
-            var unit = l.Unit + r.Unit;
-            var grid = r.Grid + l.Grid;
+            GetAdvancedValues(l, r, out var unit, out var grid);
+
+            return new TGrid(unit, grid);
+        }
+
+        /// <summary>
+        /// 与 <c>tGrid + offset</c> 数值等价的原地推进，不分配新实例。
+        /// 仅用于「迭代累计」这类私有实例；调用方必须保证该实例没有被外部共享。
+        /// </summary>
+        public void AddOffset(GridOffset r)
+        {
+            GetAdvancedValues(this, r, out var unit, out var grid);
+
+            Unit = unit;
+            Grid = grid;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void GetAdvancedValues(TGrid l, GridOffset r, out float unit, out int grid)
+        {
+            unit = l.Unit + r.Unit;
+            grid = r.Grid + l.Grid;
 
             while (grid < 0)
             {
@@ -70,8 +92,6 @@ namespace OngekiFumenEditor.Base
 
             unit += grid / l.ResT;
             grid = (int)(grid % l.ResT);
-
-            return new TGrid(unit, grid);
         }
 
         public static TGrid operator -(TGrid l, GridOffset r)
