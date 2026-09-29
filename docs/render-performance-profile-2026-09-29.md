@@ -405,6 +405,13 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 
 ## 8. 优化建议（按投入产出排序）
 
+> **实施进度（2026-09-29）**：
+> - ✅ P1-①「`GridBase` 属性通知零分配」→ 单笔通知 120 B → 0 B（`docs/common-propertychanged-base-design.md`），另已把 `OngekiObjectBase`（全部物件）接入；
+> - ✅ P1-②「边界求值零分配」→ 新增 `TryGetChildObjectFromTGrid`/`TryCalulateXGridTotalUnit` 并切换 3 处热路径，benchmark per 边界点：边界求值 56 B → 0 B、子物件定位 64 B → 0 B；
+> - ✅ P3「加载末尾 LOH 压缩」→ 加载流程新增步骤 `CollectingMemory`，碎片 → ~0（工作集返还量待真机复测）；
+> - ⏳ P0（WASAPI 忙轮询，约 1 个核）与其余 P2/P3 项待做；
+> - ⏳ 所有已落地项的**真机 trace 复测**（重启应用后按 §9.1）与视觉回归仍待执行。
+
 | 优先级 | 措施 | 预期收益 | 验证方式 |
 |---|---|---|---|
 | **P0** | 修复 WASAPI latency=0（`NAudioManager.cs:115`）：传非 0 latency，或改用事件同步正确实现/升级 NAudio | 释放 ≈ 1 个物理核（进程 CPU −45%） | 复测该线程 CPU 应 ≈0；进程 CPU 降到 ~1 核 |
@@ -456,6 +463,10 @@ PerfToolkit analyze render.nettrace --pid <PID> --top 30 --threads <热点TID列
 | `threads-t0.txt` / `threads-t1.txt` | 追踪窗口前后的逐线程 CPU 快照 |
 | `sample-cpu.ps1` / `sample-threads.ps1` | 采集脚本（进程/线程 CPU、内存、状态快照） |
 | `toolkit/` | 本次使用的 TraceEvent 分析器源码（一次性工具，未纳入仓库） |
+| `bench-boundary.txt` | `LaneBoundaryXGridQueryBenchmarks` 输出（边界求值/子物件定位，56 B/64 B → 0 B） |
+| `bench-phase1-short.txt` | `GridNotificationAllocationBenchmarks` 输出（通知 120 B → 0 B） |
+| `notify-sites.md` | 按分配类型过滤的通知站点明细（`--alloc-type DisplayClass9_0`） |
+| `allocprobe/` | 隔离进程探针（物件通知、表达式重载、对话框步骤联动、LOH 压缩效果的一次性验证） |
 
 > 复现提示：`heap.dmp` 体积较大，如无后续深入分析需求可删除；其余文件合计 < 100 MB。
 
