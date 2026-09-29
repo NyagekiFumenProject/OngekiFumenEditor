@@ -263,7 +263,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         UpdateActualRenderInterval();
 
-        renderInitializationTaskSource.SetResult();
+        // 同一个 TCS 也会在 DisposeRenderLoop()（编辑器关闭/渲染循环拆除）里完成，
+        // 两次 SetResult 会抛 InvalidOperationException，故这里必须幂等。
+        renderInitializationTaskSource.TrySetResult();
     }
 
     private void OnEditorLoop(IRenderContext context, TimeSpan ts)
