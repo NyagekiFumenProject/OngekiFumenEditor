@@ -1,11 +1,16 @@
 using Caliburn.Micro;
+using OngekiFumenEditor.Utils;
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Base
 {
-    public abstract class GridBase : PropertyChangedBase, IComparable<GridBase>, ISerializable, IComparable
+    public abstract class GridBase : CommonPropertyChangedBase, IComparable<GridBase>, ISerializable, IComparable
     {
+        private static readonly PropertyChangedEventArgs GridNotifyArgs = ArgsOf(nameof(Grid));
+        private static readonly PropertyChangedEventArgs UnitNotifyArgs = ArgsOf(nameof(Unit));
+
         private int grid = 0;
         private float unit = 0;
 
@@ -41,9 +46,12 @@ namespace OngekiFumenEditor.Base
             get => grid;
             set
             {
+                if (grid == value)
+                    return;
+
                 grid = value;
                 RecalculateTotalValues();
-                NotifyOfPropertyChange(nameof(Grid));
+                NotifyOfPropertyChange(GridNotifyArgs);
             }
         }
 
@@ -52,27 +60,42 @@ namespace OngekiFumenEditor.Base
             get => unit;
             set
             {
+                if (unit == value)
+                    return;
+
                 unit = value;
                 RecalculateTotalValues();
-                NotifyOfPropertyChange(nameof(Unit));
+                NotifyOfPropertyChange(UnitNotifyArgs);
             }
         }
 
         public void NormalizeSelf()
         {
-            var addUnit = Grid / GridRadix;
-            Unit += addUnit;
-            Grid = (int)(Grid % GridRadix);
+            var oldUnit = unit;
+            var oldGrid = grid;
 
-            var diff = Unit - (int)Unit;
-            Unit = (int)Unit;
-            Grid += (int)(diff * GridRadix);
+            var newUnit = oldUnit + oldGrid / GridRadix;
+            var newGrid = (int)(oldGrid % GridRadix);
 
-            if (Grid < 0)
+            var diff = newUnit - (int)newUnit;
+            newUnit = (int)newUnit;
+            newGrid += (int)(diff * GridRadix);
+
+            if (newGrid < 0)
             {
-                Grid += (int)GridRadix;
-                Unit--;
+                newGrid += (int)GridRadix;
+                newUnit--;
             }
+
+            if (newUnit == oldUnit && newGrid == oldGrid)
+                return;
+
+            unit = newUnit;
+            grid = newGrid;
+            RecalculateTotalValues();
+
+            NotifyOfPropertyChange(UnitNotifyArgs);
+            NotifyOfPropertyChange(GridNotifyArgs);
         }
 
         public int Compare(GridBase x, GridBase y)
