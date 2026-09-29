@@ -9,6 +9,7 @@
 | 类 | 覆盖范围 |
 | --- | --- |
 | `CollectionQueryBenchmarks` | 集合范围查询:`BinaryFindRange` / `GetVisibleStartObjects` / Soflan 区间查询 |
+| `LaneBoundaryXGridQueryBenchmarks` | 渲染期边界求值分配:旧 `CalulateXGrid`(List+XGrid) vs 新索引区间+TotalUnit 数值返回,含逐点等价性校验 |
 | `DisplayableEnumerationBenchmarks` | `OngekiFumen.GetAllDisplayableObjects()`、范围内枚举、`ConnectableStartObject.GetDisplayableObjects()` |
 | `GridNotificationAllocationBenchmarks` | 网格属性通知分配:Caliburn 闭包/args 逐次分配 vs `CommonPropertyChangedBase` 的 args 复用 + 变更检测(含旧实现逐行复刻对照与等价性校验) |
 | `DrawPlayableAreaHelperNewP1BoundaryBenchmarks` | new playfield helper P1: boundary 查询重复、候选墙轨缓存、LINQ/数组分配 |
