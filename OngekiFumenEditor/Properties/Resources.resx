@@ -1914,8 +1914,41 @@
   <data name="HasNewVersion" xml:space="preserve">
     <value>Update available!</value>
   </data>
-  <data name="ProgramReadyToUpdate" xml:space="preserve">
-    <value>Close the application and update?</value>
+  <data name="UpdaterProgressTitle" xml:space="preserve">
+    <value>Starting Update</value>
+  </data>
+  <data name="UpdaterTargetFormat" xml:space="preserve">
+    <value>Updating {0} → {1}</value>
+  </data>
+  <data name="UpdaterStepDownloading" xml:space="preserve">
+    <value>Downloading the update package...</value>
+  </data>
+  <data name="UpdaterStepDownloadingFormat" xml:space="preserve">
+    <value>Downloading the update package... {0}</value>
+  </data>
+  <data name="UpdaterStepExtracting" xml:space="preserve">
+    <value>Extracting and preparing the update files...</value>
+  </data>
+  <data name="UpdaterStepCancelling" xml:space="preserve">
+    <value>Cancelling...</value>
+  </data>
+  <data name="UpdaterStepReady" xml:space="preserve">
+    <value>The update package is ready. The application will close and start updating; any unsaved data will be lost.</value>
+  </data>
+  <data name="UpdaterStepFailedFormat" xml:space="preserve">
+    <value>Failed to prepare the update: {0}</value>
+  </data>
+  <data name="UpdaterCancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="UpdaterConfirmStart" xml:space="preserve">
+    <value>Close and Update</value>
+  </data>
+  <data name="UpdaterClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="UpdaterRetry" xml:space="preserve">
+    <value>Retry</value>
   </data>
   <data name="EnableUpdateCheck" xml:space="preserve">
     <value>Enable automatic update checks</value>

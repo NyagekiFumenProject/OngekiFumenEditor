@@ -1908,8 +1908,41 @@
   <data name="HasNewVersion" xml:space="preserve">
     <value>有新版本！</value>
   </data>
-  <data name="ProgramReadyToUpdate" xml:space="preserve">
-    <value>程序更新文件准备完成, 是否关闭程序, 开始更新?</value>
+  <data name="UpdaterProgressTitle" xml:space="preserve">
+    <value>开始更新</value>
+  </data>
+  <data name="UpdaterTargetFormat" xml:space="preserve">
+    <value>正在更新：{0} → {1}</value>
+  </data>
+  <data name="UpdaterStepDownloading" xml:space="preserve">
+    <value>正在下载更新包...</value>
+  </data>
+  <data name="UpdaterStepDownloadingFormat" xml:space="preserve">
+    <value>正在下载更新包... {0}</value>
+  </data>
+  <data name="UpdaterStepExtracting" xml:space="preserve">
+    <value>正在解压并准备更新文件...</value>
+  </data>
+  <data name="UpdaterStepCancelling" xml:space="preserve">
+    <value>正在取消...</value>
+  </data>
+  <data name="UpdaterStepReady" xml:space="preserve">
+    <value>更新包已准备完成, 程序将关闭并开始更新, 未保存的数据会丢失。</value>
+  </data>
+  <data name="UpdaterStepFailedFormat" xml:space="preserve">
+    <value>更新准备失败: {0}</value>
+  </data>
+  <data name="UpdaterCancel" xml:space="preserve">
+    <value>取消</value>
+  </data>
+  <data name="UpdaterConfirmStart" xml:space="preserve">
+    <value>关闭程序，开始更新</value>
+  </data>
+  <data name="UpdaterClose" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="UpdaterRetry" xml:space="preserve">
+    <value>重新下载</value>
   </data>
   <data name="EnableUpdateCheck" xml:space="preserve">
     <value>允许程序检查是否有更新</value>

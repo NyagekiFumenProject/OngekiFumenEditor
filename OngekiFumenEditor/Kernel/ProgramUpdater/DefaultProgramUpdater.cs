@@ -78,6 +78,9 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
         private bool isModified = false;
         private Button updatableButton;
 
+        private string preparedUpdaterFilePath;
+        private string preparedSourceFolder;
+
         private void ModifyFrameworkMenuView()
         {
             if (isModified)
@@ -194,7 +197,7 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             }
         }
 
-        public async Task StartUpdate()
+        public async Task PrepareUpdateAsync(IProgress<UpdatePrepareProgress> progress, CancellationToken cancellationToken)
         {
             if (RemoteVersionInfo is null)
                 throw new Exception("Can't start update because RemoteVersionInfo is empty.");
@@ -202,24 +205,125 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
             var isMaster = "master".Equals(RemoteVersionInfo.Branch, StringComparison.InvariantCultureIgnoreCase);
             var url = $"{ApiEndPoint}/editor/get?requireMasterBranch={isMaster}";
 
-            var zipStream = new MemoryStream();
+            var zipFilePath = Path.Combine(TempFileHelper.GetTempFolderPath("updater", "zip"), "editor.zip");
+            try
             {
                 Log.LogInfo($"begin download editor zip file: {url}");
-                using var ns = await http.GetStreamAsync(url);
-                await ns.CopyToAsync(zipStream);
-                zipStream.Seek(0, SeekOrigin.Begin);
+                using (var response = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                {
+                    response.EnsureSuccessStatusCode();
+                    var contentLength = response.Content.Headers.ContentLength ?? -1;
+
+                    using var ns = await response.Content.ReadAsStreamAsync(cancellationToken);
+                    using var fs = File.Create(zipFilePath);
+
+                    var buffer = new byte[81920];
+                    long received = 0;
+                    var stopwatch = Stopwatch.StartNew();
+                    var lastReportAt = TimeSpan.Zero;
+                    long lastReportBytes = 0;
+                    double speed = 0;
+
+                    void ReportDownload()
+                    {
+                        var now = stopwatch.Elapsed;
+                        var seconds = (now - lastReportAt).TotalSeconds;
+                        if (seconds > 0)
+                        {
+                            var instant = (received - lastReportBytes) / seconds;
+                            // 指数平滑，避免速度数字剧烈跳动。
+                            speed = speed <= 0 ? instant : speed * 0.6 + instant * 0.4;
+                        }
+                        lastReportAt = now;
+                        lastReportBytes = received;
+                        progress?.Report(new UpdatePrepareProgress(UpdatePrepareStep.Downloading, contentLength > 0 ? (double)received / contentLength : -1, speed));
+                    }
+
+                    while (true)
+                    {
+                        var read = await ns.ReadAsync(buffer, cancellationToken);
+                        if (read <= 0)
+                            break;
+
+                        await fs.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+                        received += read;
+
+                        // 每 250ms 上报一次：既能平滑显示速度，也不会把 UI 线程刷爆。
+                        if ((stopwatch.Elapsed - lastReportAt).TotalMilliseconds >= 250)
+                            ReportDownload();
+                    }
+
+                    ReportDownload();
+                }
+
+                var tempZipFolder = TempFileHelper.GetTempFolderPath("updater", $"{RemoteVersionInfo.Branch}_{RemoteVersionInfo.Version}");
+                var sourceFolder = TempFileHelper.GetTempFolderPath("updater", $"{RemoteVersionInfo.Branch}_{RemoteVersionInfo.Version}");
+                Log.LogInfo($"tempZipFolder = {tempZipFolder}");
+
+                using (var zipFile = new ZipArchive(File.OpenRead(zipFilePath), ZipArchiveMode.Read))
+                {
+                    var entries = zipFile.Entries;
+                    var runFolder = Path.GetFullPath(tempZipFolder);
+                    var payloadFolder = Path.GetFullPath(sourceFolder);
+                    var stepTotal = entries.Count * 2;
+                    var stepDone = 0;
+
+                    void ExtractAll(string targetFolder)
+                    {
+                        Directory.CreateDirectory(targetFolder);
+                        foreach (var entry in entries)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                            var destinationPath = Path.GetFullPath(Path.Combine(targetFolder, entry.FullName));
+                            if (!destinationPath.StartsWith(targetFolder + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                                throw new IOException($"Zip entry escapes the target directory: {entry.FullName}");
+
+                            if (string.IsNullOrEmpty(entry.Name))
+                                Directory.CreateDirectory(destinationPath);
+                            else
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+                                entry.ExtractToFile(destinationPath, overwrite: true);
+                            }
+
+                            progress?.Report(new UpdatePrepareProgress(UpdatePrepareStep.Extracting, (double)++stepDone / stepTotal));
+                        }
+                    }
+
+                    // 解压两份：一份供更新器进程自身运行，一份作为待复制到安装目录的负载，避免更新器覆盖自己正在运行的文件。
+                    await Task.Run(() =>
+                    {
+                        ExtractAll(runFolder);
+                        ExtractAll(payloadFolder);
+                    }, cancellationToken);
+                }
+
+                var updaterFilePath = Path.Combine(tempZipFolder, "OngekiFumenEditor.CommandLine.exe");
+                if (!File.Exists(updaterFilePath))
+                    throw new Exception($"Downloaded wrong file, updater file is not found: {updaterFilePath}");
+
+                preparedUpdaterFilePath = updaterFilePath;
+                preparedSourceFolder = sourceFolder;
+                Log.LogInfo($"update package is ready: updater={updaterFilePath}, source={sourceFolder}");
             }
+            finally
+            {
+                try
+                {
+                    File.Delete(zipFilePath);
+                }
+                catch (Exception e)
+                {
+                    Log.LogWarn($"Failed to delete downloaded zip file: {zipFilePath}, {e.Message}");
+                }
+            }
+        }
 
-            var tempZipFolder = TempFileHelper.GetTempFolderPath("updater", $"{RemoteVersionInfo.Branch}_{RemoteVersionInfo.Version}");
-            var sourceFolder = TempFileHelper.GetTempFolderPath("updater", $"{RemoteVersionInfo.Branch}_{RemoteVersionInfo.Version}");
-            Log.LogInfo($"tempZipFolder = {tempZipFolder}");
-            using var zipFile = new ZipArchive(zipStream, ZipArchiveMode.Read);
-            zipFile.ExtractToDirectory(tempZipFolder);
-            zipFile.ExtractToDirectory(sourceFolder);
-
-            var updaterFilePath = Path.Combine(tempZipFolder, "OngekiFumenEditor.CommandLine.exe");
-            if (!File.Exists(updaterFilePath))
-                throw new Exception($"Downloaded wrong file, updater file is not found: {updaterFilePath}");
+        public void LaunchPreparedUpdate()
+        {
+            if (preparedUpdaterFilePath is null || preparedSourceFolder is null)
+                throw new Exception("Can't launch update because the update package has not been prepared.");
 
             var targetFolder = AppDirectoryHelper.ExecutableDirectory;
             var args = new string[]
@@ -227,20 +331,17 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 "updater",
                 "-v",
                 "--targetFolder", targetFolder,
-                "--sourceFolder", sourceFolder,
+                "--sourceFolder", preparedSourceFolder,
                 "--sourceVersion", ThisAssembly.AssemblyFileVersion,
                 "--parentProcessId", Process.GetCurrentProcess().Id.ToString()
             };
 
-            Log.LogInfo($"updaterFilePath: {updaterFilePath}");
-            Log.LogInfo($"targetFolder: {updaterFilePath}");
+            Log.LogInfo($"updaterFilePath: {preparedUpdaterFilePath}");
+            Log.LogInfo($"targetFolder: {targetFolder}");
             Log.LogInfo($"args: {string.Join(" ", args)}");
-
-            if (MessageBox.Show(Resources.ProgramReadyToUpdate, Resources.Warning, MessageBoxButton.OKCancel) != MessageBoxResult.OK)
-                return;
-
             Log.LogInfo($"user comfirmed.");
-            Process.Start(updaterFilePath, args);
+
+            Process.Start(preparedUpdaterFilePath, args);
             App.Current.Shutdown();
         }
 

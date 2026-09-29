@@ -1,0 +1,107 @@
+<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.Views.UpdateProgressDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels"
+    Title="{markup:Translate [UpdaterProgressTitle]}"
+    Width="440"
+    Background="{DynamicResource EnvironmentWindowBackground}"
+    ResizeMode="NoResize"
+    ShowMaxRestoreButton="False"
+    ShowMinButton="False"
+    SizeToContent="Height"
+    Style="{DynamicResource MainWindowStyle}"
+    WindowStartupLocation="CenterOwner"
+    d:DataContext="{d:DesignInstance Type=vm:UpdateProgressDialogViewModel}"
+    mc:Ignorable="d">
+    <mah:MetroWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </mah:MetroWindow.Resources>
+    <StackPanel Margin="20,18,20,18">
+        <!-- 正在更新的版本，用户据此确认更新目标 -->
+        <TextBlock
+            FontSize="15"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource EnvironmentToolWindowText}"
+            Text="{Binding TargetText}"
+            TextWrapping="Wrap" />
+
+        <Grid Margin="0,12,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Text="{Binding StateText}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                Grid.Column="1"
+                Margin="10,0,0,0"
+                VerticalAlignment="Bottom"
+                Foreground="{DynamicResource EnvironmentToolWindowText}"
+                Opacity="0.7"
+                Text="{Binding ProgressText}" />
+        </Grid>
+
+        <ProgressBar
+            Margin="0,10,0,0"
+            Height="8"
+            IsIndeterminate="{Binding IsProgressIndeterminate, Mode=OneWay}"
+            Maximum="1"
+            Value="{Binding ProgressValue, Mode=OneWay}" />
+
+        <Button
+            Margin="0,16,0,0"
+            Padding="14,5,14,5"
+            HorizontalAlignment="Right"
+            AutomationProperties.AutomationId="UpdaterCancelButton"
+            cal:Message.Attach="[Event Click] = [Action Cancel()]"
+            Content="{markup:Translate [UpdaterCancel]}"
+            IsEnabled="{Binding CanCancel}"
+            Visibility="{Binding IsPreparing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+        <!-- 准备完成后才出现：确定执行更新 / 取消并关闭窗口 -->
+        <StackPanel
+            Margin="0,16,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Visibility="{Binding IsReady, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Button
+                Padding="14,5,14,5"
+                AutomationProperties.AutomationId="UpdaterConfirmButton"
+                cal:Message.Attach="[Event Click] = [Action ConfirmStartUpdate()]"
+                Content="{markup:Translate [UpdaterConfirmStart]}" />
+            <Button
+                Margin="8,0,0,0"
+                Padding="14,5,14,5"
+                AutomationProperties.AutomationId="UpdaterReadyCancelButton"
+                cal:Message.Attach="[Event Click] = [Action CloseDialog()]"
+                Content="{markup:Translate [UpdaterCancel]}" />
+        </StackPanel>
+
+        <!-- 准备失败：重新下载 / 关闭 -->
+        <StackPanel
+            Margin="0,16,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Visibility="{Binding IsFailed, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Button
+                Padding="14,5,14,5"
+                AutomationProperties.AutomationId="UpdaterRetryButton"
+                cal:Message.Attach="[Event Click] = [Action Retry()]"
+                Content="{markup:Translate [UpdaterRetry]}" />
+            <Button
+                Margin="8,0,0,0"
+                Padding="14,5,14,5"
+                AutomationProperties.AutomationId="UpdaterCloseButton"
+                cal:Message.Attach="[Event Click] = [Action CloseDialog()]"
+                Content="{markup:Translate [UpdaterClose]}" />
+        </StackPanel>
+    </StackPanel>
+</mah:MetroWindow>

@@ -5579,11 +5579,110 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Close the application and update?.
+        ///   Looks up a localized string similar to Updating {0} → {1}.
         /// </summary>
-        public static string ProgramReadyToUpdate {
+        public static string UpdaterTargetFormat {
             get {
-                return ResourceManager.GetString("ProgramReadyToUpdate", resourceCulture);
+                return ResourceManager.GetString("UpdaterTargetFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Starting Update.
+        /// </summary>
+        public static string UpdaterProgressTitle {
+            get {
+                return ResourceManager.GetString("UpdaterProgressTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string UpdaterCancel {
+            get {
+                return ResourceManager.GetString("UpdaterCancel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string UpdaterClose {
+            get {
+                return ResourceManager.GetString("UpdaterClose", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Retry.
+        /// </summary>
+        public static string UpdaterRetry {
+            get {
+                return ResourceManager.GetString("UpdaterRetry", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Start Updating.
+        /// </summary>
+        public static string UpdaterConfirmStart {
+            get {
+                return ResourceManager.GetString("UpdaterConfirmStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cancelling....
+        /// </summary>
+        public static string UpdaterStepCancelling {
+            get {
+                return ResourceManager.GetString("UpdaterStepCancelling", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading the update package......
+        /// </summary>
+        public static string UpdaterStepDownloading {
+            get {
+                return ResourceManager.GetString("UpdaterStepDownloading", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Downloading the update package... {0}.
+        /// </summary>
+        public static string UpdaterStepDownloadingFormat {
+            get {
+                return ResourceManager.GetString("UpdaterStepDownloadingFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Extracting and preparing the update files....
+        /// </summary>
+        public static string UpdaterStepExtracting {
+            get {
+                return ResourceManager.GetString("UpdaterStepExtracting", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to prepare the update: {0}.
+        /// </summary>
+        public static string UpdaterStepFailedFormat {
+            get {
+                return ResourceManager.GetString("UpdaterStepFailedFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The update package is ready. The application will close and start updating; any unsaved data will be lost..
+        /// </summary>
+        public static string UpdaterStepReady {
+            get {
+                return ResourceManager.GetString("UpdaterStepReady", resourceCulture);
             }
         }
 

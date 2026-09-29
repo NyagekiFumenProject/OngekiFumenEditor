@@ -1,4 +1,5 @@
 using Caliburn.Micro;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels
 {
-    public class ShowNewVersionDialogViewModel : PropertyChangedBase
+    public class ShowNewVersionDialogViewModel : Screen
     {
         private IProgramUpdater programUpdater;
 
@@ -29,7 +30,18 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels
 
         public async void StartUpdate()
         {
-            await programUpdater.StartUpdate();
+            try
+            {
+                // 关掉本对话框，改由进度对话框负责下载/解压/确认执行。
+                await TryCloseAsync();
+                Log.LogInfo("Opening the update progress dialog.");
+                await IoC.Get<IWindowManager>().ShowDialogAsync(new UpdateProgressDialogViewModel());
+                Log.LogInfo("Update progress dialog closed.");
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Failed to open the update progress dialog: {e.Message}", e);
+            }
         }
     }
 }
