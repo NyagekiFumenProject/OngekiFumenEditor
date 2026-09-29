@@ -79,19 +79,35 @@ namespace OngekiFumenEditor.Base.Collections
             return lo;
         }
 
+        private void EnsureMaxIdCache()
+        {
+            if (cacheCurrentMaxId is not null)
+                return;
+
+            cacheCurrentMaxId = palleteMap.Count == 0
+                ? "9Z"
+                : ConvertIntToId(palleteMap.Keys.OrderBy(x => x).LastOrDefault());
+        }
+
+        /// <summary>
+        /// 预分配下一个可用的 StrID，并推进内部缓存。用于需要在模板真正入表前就拿到 id 的调用方
+        /// （例如 MCP 工具要在事务提交前把 id 返回给客户端）；被丢弃的分配会永久留空、不再复用，
+        /// 以换取绝不与后续分配撞车。
+        /// </summary>
+        public string AllocateStrID()
+        {
+            EnsureMaxIdCache();
+            var next = ConvertIntToId(ConvertIdToInt(cacheCurrentMaxId) + 1);
+            cacheCurrentMaxId = next;
+            return next;
+        }
+
         public void AddPallete(BulletPallete pallete)
         {
-            if (cacheCurrentMaxId is null)
-            {
-                if (palleteMap.Count == 0)
-                    cacheCurrentMaxId = "9Z";
-                else
-                    cacheCurrentMaxId = ConvertIntToId(palleteMap.Keys.OrderBy(x => x).LastOrDefault());
-            }
+            EnsureMaxIdCache();
 
             if (string.IsNullOrWhiteSpace(pallete.StrID))
             {
-                //����һ���µ�StrId
                 pallete.StrID = ConvertIntToId(ConvertIdToInt(cacheCurrentMaxId) + 1);
             }
 
@@ -113,7 +129,10 @@ namespace OngekiFumenEditor.Base.Collections
                 orderedPalletes.Insert(FindOrderedIndex(id), pallete);
 
                 pallete.PropertyChanged += OnPalletePropChanged;
-                cacheCurrentMaxId = Comparer<string>.Default.Compare(pallete.StrID, cacheCurrentMaxId) > 0 ? pallete.StrID : cacheCurrentMaxId;
+                // 按数值序比较缓存：字符串序会在 "AZ" 与 "B0"、或不同长度的 id 之间误判，
+                // 让缓存偏低并导致后续分配重用已存在的 id（AddPallete 会静默替换同 id 的模板）。
+                if (id > ConvertIdToInt(cacheCurrentMaxId))
+                    cacheCurrentMaxId = pallete.StrID;
 
                 CollectionChanged?.Invoke(this, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, pallete));
             }

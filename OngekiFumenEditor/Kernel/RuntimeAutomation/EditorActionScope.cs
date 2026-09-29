@@ -11,6 +11,8 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
         public string Operation { get; set; } = string.Empty;
         public string ObjectType { get; set; }
         public int ObjectId { get; set; }
+        /// <summary>非数字对象（例如子弹模板）的字符串 id；数字对象为 null。</summary>
+        public string ObjectStrId { get; set; }
         public bool Executed { get; set; }
         public bool Success { get; set; }
         public string ErrorMessage { get; set; }
