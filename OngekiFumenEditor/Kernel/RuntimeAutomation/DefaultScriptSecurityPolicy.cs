@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using System;
 using System.ComponentModel.Composition;
 using System.Collections.Generic;
@@ -61,7 +60,6 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             var syntaxTree = CSharpSyntaxTree.ParseText(scriptText, ParserOptions);
             var root = syntaxTree.GetRoot();
 
-            var allowedTargetEditorAccessSpans = new List<TextSpan>();
             var executeActionInvocations = root.DescendantNodes()
                 .OfType<InvocationExpressionSyntax>()
                 .Where(IsExecuteActionInvocation)
@@ -74,20 +72,15 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
 
             foreach (var invocation in executeActionInvocations)
             {
-                if (!TryCollectAllowedTargetEditorAccessSpans(invocation, allowedTargetEditorAccessSpans, out var issue))
+                if (!TryValidateUndoActionShape(invocation, out var issue))
                     issues.Add(issue);
             }
 
-            foreach (var access in root.DescendantNodes().OfType<MemberAccessExpressionSyntax>().Where(IsScriptArgsTargetEditorAccess))
-            {
-                if (!allowedTargetEditorAccessSpans.Any(span => Contains(span, access.Span)))
-                {
-                    issues.Add($"ScriptArgs.TargetEditor is only allowed inside UndoRedoManager.ExecuteAction redo/undo lambdas: {TrimSnippet(access.ToString())}");
-                }
-            }
+            // ScriptArgs.TargetEditor 允许出现在脚本任何位置：推荐在脚本顶部取一次存进局部变量，
+            // 再在 redo/undo 里使用它（宿主在执行脚本体与执行合并动作前都会注册该编辑器）。
         }
 
-        private static bool TryCollectAllowedTargetEditorAccessSpans(InvocationExpressionSyntax executeActionInvocation, ICollection<TextSpan> allowedSpans, out string issue)
+        private static bool TryValidateUndoActionShape(InvocationExpressionSyntax executeActionInvocation, out string issue)
         {
             issue = default;
 
@@ -97,15 +90,12 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
                 return false;
             }
 
-            if (!TryGetUndoActionParts(executeActionInvocation.ArgumentList.Arguments[0].Expression, out var redoLambda, out var undoLambda))
+            if (!TryGetUndoActionParts(executeActionInvocation.ArgumentList.Arguments[0].Expression, out _, out _))
             {
                 issue = "UndoRedoManager.ExecuteAction must use LambdaUndoAction.Create(name, redo, undo) or new LambdaUndoAction(name, redo, undo).";
                 return false;
             }
 
-            allowedSpans.Add(executeActionInvocation.Expression.Span);
-            allowedSpans.Add(redoLambda.Span);
-            allowedSpans.Add(undoLambda.Span);
             return true;
         }
 
@@ -156,12 +146,6 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             return EndsWithIdentifier(objectCreation.Type, "LambdaUndoAction");
         }
 
-        private static bool IsScriptArgsTargetEditorAccess(MemberAccessExpressionSyntax memberAccess)
-        {
-            return string.Equals(memberAccess.Name.Identifier.ValueText, "TargetEditor", StringComparison.Ordinal) &&
-                   EndsWithIdentifier(memberAccess.Expression, "ScriptArgs");
-        }
-
         private static bool EndsWithIdentifier(SyntaxNode node, string identifier)
         {
             return node switch
@@ -175,18 +159,5 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
             };
         }
 
-        private static bool Contains(TextSpan outer, TextSpan inner)
-        {
-            return inner.Start >= outer.Start && inner.End <= outer.End;
-        }
-
-        private static string TrimSnippet(string snippet)
-        {
-            if (string.IsNullOrWhiteSpace(snippet))
-                return "<empty>";
-
-            snippet = snippet.Replace("\r", " ").Replace("\n", " ").Trim();
-            return snippet.Length > 120 ? snippet[..120] + "..." : snippet;
-        }
     }
 }

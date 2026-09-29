@@ -53,7 +53,7 @@ In addition, the policy requires an undoable mutation shape:
 
 * the script must contain `UndoRedoManager.ExecuteAction(...)`
 * that call must receive exactly one inline `LambdaUndoAction.Create(name, redo, undo)` or `new LambdaUndoAction(name, redo, undo)`
-* `ScriptArgs.TargetEditor` is only allowed inside the redo and undo lambdas
+* `ScriptArgs.TargetEditor` may be used anywhere in the script; the preferred style is to capture it once near the top (`var editor = ScriptArgs.TargetEditor;`) and use that local inside the redo/undo lambdas
 
 ## Preferred Workflow
 
@@ -97,11 +97,11 @@ ScriptArgs.TargetEditor.UndoRedoManager.ExecuteAction(
         }));
 ```
 
-The example is intentionally repetitive: reacquiring `ScriptArgs.TargetEditor` inside each lambda is the simplest way to satisfy the security policy.
+Both styles are valid: reacquiring `ScriptArgs.TargetEditor` inside each lambda, or capturing it once at the top of the script. Capturing once is preferred for longer scripts, and the host registers the editor both while the script body runs and while the queued action is executed.
 
 ## Common Failure Causes
 
-* Accessing `ScriptArgs.TargetEditor` before entering the redo or undo lambda.
+* Assuming `ScriptArgs.TargetEditor` is available without a host: it is null when the script is executed outside the editor (for example run manually in an IDE), so keep the documented null check.
 * Using `#r`, `IoC.Get`, file I/O, process launch, reflection, or network APIs.
 * Building a mutation script without an explicit `UndoRedoManager.ExecuteAction(...)`.
 * Assuming editor ids are durable across sessions. They are runtime-instance identifiers only.
