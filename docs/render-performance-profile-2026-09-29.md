@@ -259,6 +259,8 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 
 > 三条都只改 `OngekiFumenEditor/Base/GridBase.cs` 一个文件，语义与消费者契约不变；**不要**去改 `Dependences/gemini` 下的 vendored Caliburn（子模块）。
 
+> **落地记录（2026-09-29）**：阶段 1 已实现——新增 `OngekiFumenEditor/Utils/CommonPropertyChangedBase.cs`（按名复用 args + 无闭包发布路径）并接入 `GridBase`（变更检测 + `NormalizeSelf` 单次通知）。benchmark 实测单笔通知分配 **120 B → 0 B**、`NormalizeSelf` 已规范化路径 480 B → 0 B、真实规范化 600 B → 0 B；设计与数据见 `docs/common-propertychanged-base-design.md`。附带的实现经验：**热路径方法体内不能含捕获型 lambda**（实测每调用 ~32 B，含 Caliburn 自身方法），派发闭包须拆到 `NoInlining` 冷方法。
+
 **B. 网格算术分配（≈ 35%）**
 
 - `TGrid.op_Addition` `new TGrid(...)`：`Base/TGrid.cs:60-89`（≈2.06 GiB / 75 s）
@@ -400,7 +402,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 | 优先级 | 措施 | 预期收益 | 验证方式 |
 |---|---|---|---|
 | **P0** | 修复 WASAPI latency=0（`NAudioManager.cs:115`）：传非 0 latency，或改用事件同步正确实现/升级 NAudio | 释放 ≈ 1 个物理核（进程 CPU −45%） | 复测该线程 CPU 应 ≈0；进程 CPU 降到 ~1 核 |
-| **P1** | 消除 `GridBase` 属性通知分配（`NormalizeSelf` 静默写 + 变更检测 + 无闭包通知实现，三处均在 `Base/GridBase.cs`；转发链本身保留） | 分配 −50% 以上，gen0 GC 7 次/s → 2–3 次/s | 复测 `GCAllocationTick`（`<>c__DisplayClass9_0` 应退出榜首）与 `gc.collections` |
+| **P1** | 消除 `GridBase` 属性通知分配（`NormalizeSelf` 静默写 + 变更检测 + 无闭包通知实现；转发链本身保留）——**已落地（阶段 1）** | 实测单笔通知 120 B → 0 B、`NormalizeSelf` 480/600 B → 0 B；预期 gen0 GC 7 次/s → 2–3 次/s（待重启后 trace 复测） | `docs/common-propertychanged-base-design.md` §5 的 benchmark 表；运行时复测见该文 §6.4 |
 | **P1** | `VisibleLineVerticesQuery`/`CalulateXGrid` 改零分配：复用已有 `TryGetValidPathChildRange`（`ConnectableStartObject.cs:387-433`），纳入 `ObjectPool` | 分配 −1.9 GiB/75 s 中的大部分 | 同上 + 该调用点 tick 归零 |
 | **P2** | `DrawPlayableAreaHelper_new` 采样循环复用 `TGrid/XGrid` 实例（或结构体化） | 分配 −1 GiB/75 s | 同上 |
 | **P2** | `OnEditorRender` 中对 Bullets 的 LINQ `Where` 改直写循环/缓存 | UI 线程时间 −4.35%（≈1.7 s/75 s） | 采样中该栈消失 |
