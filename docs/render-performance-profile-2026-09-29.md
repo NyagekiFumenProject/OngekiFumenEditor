@@ -412,6 +412,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 > - ✅ P2「Hold 判定刻度枚举零分配」→ `GridOffset` 改 `readonly record struct` + `TGrid.AddOffset` 原地推进（迭代用私有累计实例，`Hold.TGrid` 不被别名；yield 点才复制 TGrid）。benchmark `HoldJudgeTickEnumerationBenchmarks`（6 窗口 × 3 ProgJudgeBpm 位级等价对拍）：预览窗口单次枚举 **32,528 B → 456 B**（−98.6%）、**12.37 µs → 6.80 µs**；全量枚举 89,728 B → 62,840 B。**本次仅落 WPF 树**；
 > - ✅ P2「可击打区域采样链路零分配」→ `DrawPlayableAreaHelper_new` 用私有 `sampleTGrid`（IsNotifying=false）替代每采样 `TGrid.FromTotalGrid`（`BuildAreaSample`/`ConvertToLimitParam`/`AddScreenDistanceSamples` 三处）；有效路径区间查找失败时的兜底与无效路径求值改 `TryCalulateXGridTotalUnit` + `ChildCount`/`GetChildObjectAt` 索引扫描（不再 `GetChildObjectsFromTGrid`/`CalulateXGrid`）。benchmark `PlayfieldAreaSamplingAllocationBenchmarks`（位级对拍 + 反射直调已落地私有方法）：采样链 **112 B/采样 → 0 B**、相邻对 **112 B → 0 B**、无效路径 **208 B/采样 → 0 B**。另注：`total / (double)TGrid.DEFAULT_RES_T` 与 `TotalUnit` 经 300 万取样对拍**不位级等价**（3346 处差异），故未采用 `ConvertToViewRelativeY` 的 double 重载。**本次仅落 WPF 树**；
 > - ✅ P2「预览模式子弹/Bell 分桶查询去 LINQ」→ `OnEditorRender` 每帧把「当前时间之后」的子弹/Bell 按 soflan group 可见性过滤后分桶：旧实现是 `BinaryFindRange(yield).Where(...)` 惰性管道 + 每 target 重新枚举，改为 `BinaryFindRangeIndex` + 索引循环（谓词内联）直写目标桶（新私有 `AddVisibleTGridRangeObjectsInto`），并顺带清掉块内恒真内层 `if (IsPreviewMode)` 与死 `AsEnumerable()` 初始化。benchmark `BulletBellQueryBenchmarks`（真实 `TGridSortList`/`GlobalCacheSoflanGroupRecorder`(SetCache+Freeze)/`IndividualSoflanAreaListMap`/`ObjectPool`，含逐元素等价校验）：真实 target 数 T=1 下 **0.58–0.80×**（10k 可视子弹 258 → 150 µs/帧），每帧分配 **208–264 B → 0**。另测两种加强形态均未采纳：一次扫描 + 帧内池化列表复用（T=1 与已落地形态持平，T≥2 才到 0.32×）、再加 group 可见性帧内缓存（实测更慢）。**本次仅落 WPF 树，且不移植到 Avalonia（2026-09-29 决定）**；
+> - ⚠️ **回归修复（2026-09-29）「通知快速路径丢失订阅者短路 → 与渲染期 `Parallel.ForEach` 死锁」**：`CommonPropertyChangedBase` 去掉了 Caliburn 的 `PropertyChanged != null` 短路，导致**无订阅者**的跨线程通知也会同步 `Dispatcher.Invoke`；预览模式下每颗子弹在 `ProjectileBatchDrawTargetBase.DrawPreviewMode` 的 `Parallel.ForEach`（UI 线程调用并阻塞等待）里新建 `XGrid` → worker 等 UI 线程、UI 线程等 worker → 进程假死（音频线程独立仍在播放）。现场证据：主线程 `Task.InternalWait`/`Parallel.ForEach`、worker `XGrid..ctor → DispatchToUIThread → Dispatcher.Invoke`（`F:\perf-artifacts\ongeki-20260929\hang-stacks.txt`）。修复 `d34773d2`：跨线程分支改走基类实现（自带订阅者短路），UI 线程仍走零分配缓存 args 路径；
 > - ⏳ P0（WASAPI 忙轮询，约 1 个核）与其余 P2/P3 项待做；
 > - ⏳ 所有已落地项的**真机 trace 复测**（重启应用后按 §9.1）与视觉回归仍待执行。
 
@@ -426,7 +427,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 | **P3** | LOH：大缓冲池化 / **加载后一次性 LOH 压缩（已落地：加载步骤 `CollectingMemory`）** | 碎片 300 MB → ~0；工作集返还量取决于整段腾空（实测小样：96 MB 碎片 → 0，committed −21 MB），需重启后复测 | `dotnet.gc.last_collection.heap.fragmentation.size[loh]` 应 < 20 MB；`eeheap -gc` 中 LOH 段数与空闲量下降 |
 | **P3** | 排查 XML DOM（189k `XElement`）是否可在解析后释放 | 活跃堆 −17 MB | GCDump 类型表 |
 | **P3** | 确认 UI Automation 客户端是否必要（MCP/UIA 集成） | 分配 −85 MB/75 s，减少 UI 线程工作 | 采样里 `AutomationPeer*` 消失 |
-| **P3** | 排查 87 次/s 的锁竞争与每帧 `Parallel.ForEach` 调度开销（预览模式） | 减少线程池/内核态 CPU | 计数器 + `LowLevelLifoSemaphore.*` 样本下降 |
+| **P3** | 排查 87 次/s 的锁竞争与每帧 `Parallel.ForEach` 调度开销（预览模式） | 减少线程池/内核态 CPU；**另：该 `Parallel.ForEach` 由 UI 线程调用并阻塞等待，任何在其中触发的跨线程同步派发都会与之互锁**（2026-09-29 已修一例：`CommonPropertyChangedBase` 缺订阅者短路；若将来有*有订阅者*的对象在该并行体内被通知，仍会死锁） | 计数器 + `LowLevelLifoSemaphore.*` 样本下降 |
 
 ---
 
