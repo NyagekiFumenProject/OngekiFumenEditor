@@ -411,6 +411,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 > - ✅ P3「加载末尾 LOH 压缩」→ 加载流程新增步骤 `CollectingMemory`，碎片 → ~0（工作集返还量待真机复测）；
 > - ✅ P2「Hold 判定刻度枚举零分配」→ `GridOffset` 改 `readonly record struct` + `TGrid.AddOffset` 原地推进（迭代用私有累计实例，`Hold.TGrid` 不被别名；yield 点才复制 TGrid）。benchmark `HoldJudgeTickEnumerationBenchmarks`（6 窗口 × 3 ProgJudgeBpm 位级等价对拍）：预览窗口单次枚举 **32,528 B → 456 B**（−98.6%）、**12.37 µs → 6.80 µs**；全量枚举 89,728 B → 62,840 B。**本次仅落 WPF 树**；
 > - ✅ P2「可击打区域采样链路零分配」→ `DrawPlayableAreaHelper_new` 用私有 `sampleTGrid`（IsNotifying=false）替代每采样 `TGrid.FromTotalGrid`（`BuildAreaSample`/`ConvertToLimitParam`/`AddScreenDistanceSamples` 三处）；有效路径区间查找失败时的兜底与无效路径求值改 `TryCalulateXGridTotalUnit` + `ChildCount`/`GetChildObjectAt` 索引扫描（不再 `GetChildObjectsFromTGrid`/`CalulateXGrid`）。benchmark `PlayfieldAreaSamplingAllocationBenchmarks`（位级对拍 + 反射直调已落地私有方法）：采样链 **112 B/采样 → 0 B**、相邻对 **112 B → 0 B**、无效路径 **208 B/采样 → 0 B**。另注：`total / (double)TGrid.DEFAULT_RES_T` 与 `TotalUnit` 经 300 万取样对拍**不位级等价**（3346 处差异），故未采用 `ConvertToViewRelativeY` 的 double 重载。**本次仅落 WPF 树**；
+> - ✅ P2「预览模式子弹/Bell 分桶查询去 LINQ」→ `OnEditorRender` 每帧把「当前时间之后」的子弹/Bell 按 soflan group 可见性过滤后分桶：旧实现是 `BinaryFindRange(yield).Where(...)` 惰性管道 + 每 target 重新枚举，改为 `BinaryFindRangeIndex` + 索引循环（谓词内联）直写目标桶（新私有 `AddVisibleTGridRangeObjectsInto`），并顺带清掉块内恒真内层 `if (IsPreviewMode)` 与死 `AsEnumerable()` 初始化。benchmark `BulletBellQueryBenchmarks`（真实 `TGridSortList`/`GlobalCacheSoflanGroupRecorder`(SetCache+Freeze)/`IndividualSoflanAreaListMap`/`ObjectPool`，含逐元素等价校验）：真实 target 数 T=1 下 **0.58–0.80×**（10k 可视子弹 258 → 150 µs/帧），每帧分配 **208–264 B → 0**。另测两种加强形态均未采纳：一次扫描 + 帧内池化列表复用（T=1 与已落地形态持平，T≥2 才到 0.32×）、再加 group 可见性帧内缓存（实测更慢）。**本次仅落 WPF 树**；
 > - ⏳ P0（WASAPI 忙轮询，约 1 个核）与其余 P2/P3 项待做；
 > - ⏳ 所有已落地项的**真机 trace 复测**（重启应用后按 §9.1）与视觉回归仍待执行。
 
@@ -420,7 +421,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 | **P1** | 消除 `GridBase` 属性通知分配（`NormalizeSelf` 静默写 + 变更检测 + 无闭包通知实现；转发链本身保留）——**已落地（阶段 1）** | 实测单笔通知 120 B → 0 B、`NormalizeSelf` 480/600 B → 0 B；预期 gen0 GC 7 次/s → 2–3 次/s（待重启后 trace 复测） | `docs/common-propertychanged-base-design.md` §5 的 benchmark 表；运行时复测见该文 §6.4 |
 | **P1** | `VisibleLineVerticesQuery`/`CalulateXGrid` 零分配：新增 `TryGetChildObjectFromTGrid`（复用 `TryGetValidPathChildRange`/`GetChildObjectAt`）、`(Child\|Start).TryCalulateXGridTotalUnit`（返回值、不构造 XGrid），热路径 3 处（`VisibleLineVerticesQuery`、`DrawHitObjectEffectHelper`、`DrawPlayableAreaHelper_new`）已切换；`IsPathVaild()` 去 LINQ、`Children` 循环改索引 —— **已落地** | benchmark（`LaneBoundaryXGridQueryBenchmarks`，per 边界点）：边界求值 **56 B → 0 B**、子物件定位 **64 B → 0 B**（耗时 −19%~−58%）；对应 App 侧站点（1,236 MB + 660 MB / 75 s ≈ 总分配 21.8%）预期归零，待重启后 trace 复测 | benchmark `--filter *LaneBoundaryXGridQueryBenchmarks*`（含逐点等价性校验，发现并复刻了旧 `(int)totalGrid` 截断语义，故数值逐位一致） |
 | **P2** | `DrawPlayableAreaHelper_new` 采样循环复用 `TGrid/XGrid` 实例（或结构体化） —— **已落地（2026-09-29，见上方进度；仅 WPF 树）** | 原估 −1 GiB/75 s 含 P1② 已修的边界求值（683.88 MiB）；本次实得 TGrid 物化两 leaf（171.41+173.13 MiB/75 s）+ 无效路径回退（实测 208 B/采样 → 0） | benchmark `PlayfieldAreaSamplingAllocationBenchmarks`；真机 trace 复测待执行 |
-| **P2** | `OnEditorRender` 中对 Bullets 的 LINQ `Where` 改直写循环/缓存 | UI 线程时间 −4.35%（≈1.7 s/75 s） | 采样中该栈消失 |
+| **P2** | `OnEditorRender` 中对 Bullets 的 LINQ `Where` 改直写循环 —— **已落地（2026-09-29，见上方进度；仅 WPF 树）**；帧内列表复用与 group 可见性缓存两形态经实测未采纳 | 实测该块降到 **0.58–0.80×**（10k 可视子弹 258 → 150 µs/帧、1k 子弹 17.7 → 14.2 µs），每帧分配 **208–264 B → 0**；原估「UI 线程时间 −4.35%」应修正为「该块自身约 −20~40%，折算 UI 线程 ≈ −1~2%」 | benchmark `BulletBellQueryBenchmarks`（`--filter *BulletBellQueryBenchmarks*`，含逐元素等价校验）；真机 trace 复测待执行 |
 | **P2** | `Hold.CalculateJudgeTGrid` 的 `GridOffset` 改为 `struct` 或复用 —— **已落地（2026-09-29，见上方进度；仅 WPF 树）** | 分配 −424 MB/75 s（benchmark 实测预览窗口单次枚举 32,528 B → 456 B） | benchmark `HoldJudgeTickEnumerationBenchmarks`；真机 trace 复测待执行 |
 | **P3** | LOH：大缓冲池化 / **加载后一次性 LOH 压缩（已落地：加载步骤 `CollectingMemory`）** | 碎片 300 MB → ~0；工作集返还量取决于整段腾空（实测小样：96 MB 碎片 → 0，committed −21 MB），需重启后复测 | `dotnet.gc.last_collection.heap.fragmentation.size[loh]` 应 < 20 MB；`eeheap -gc` 中 LOH 段数与空闲量下降 |
 | **P3** | 排查 XML DOM（189k `XElement`）是否可在解析后释放 | 活跃堆 −17 MB | GCDump 类型表 |
@@ -468,6 +469,9 @@ PerfToolkit analyze render.nettrace --pid <PID> --top 30 --threads <热点TID列
 | `bench-boundary.txt` | `LaneBoundaryXGridQueryBenchmarks` 输出（边界求值/子物件定位，56 B/64 B → 0 B） |
 | `bench-phase1-short.txt` | `GridNotificationAllocationBenchmarks` 输出（通知 120 B → 0 B） |
 | `notify-sites.md` | 按分配类型过滤的通知站点明细（`--alloc-type DisplayClass9_0`） |
+| `bench-bulletbell-repo.txt` | `BulletBellQueryBenchmarks` 输出（out-of-process，仓库工具链，24 案例：旧 LINQ 管道 vs 已落地直写循环 vs 两种未采纳形态） |
+| `bench-bulletquery-fine.txt` | 同 benchmark 的 12 迭代复测（InProcessEmit，用于压低噪声；含 L1/L2 对照） |
+| `bullet-query-bench-2026-09-29.md` | 该优化项的评估记录（保真度说明、结果表、L1/L2 取舍理由） |
 | `allocprobe/` | 隔离进程探针（物件通知、表达式重载、对话框步骤联动、LOH 压缩效果的一次性验证） |
 
 > 复现提示：`heap.dmp` 体积较大，如无后续深入分析需求可删除；其余文件合计 < 100 MB。
