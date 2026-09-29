@@ -220,7 +220,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
         }
 
         [McpServerTool(Name = "editor.add_object", Title = "Add Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan. Bullets require bulletPalleteStrId; holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid while a keyframe soflan is a single point (tGrid*). Inside an action scope the object is queued until editor.end_action applies it.")]
+        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan. Bullets require bulletPalleteStrId; holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. Inside an action scope the object is queued until editor.end_action applies it.")]
         public async Task<object> AddObject(
             [Description("Object family: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold or soflan.")] string objectType,
             float tGridUnit = 0,
@@ -237,7 +237,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
             [Description("Enemy family: Wave1, Wave2 or Boss (default Boss).")] string enemyWave = default,
             [Description("Lane family: center (default), left, right, colorful, enemy, wallLeft or wallRight.")] string laneType = default,
             [Description("Soflan family: duration (default), interpolatable or keyframe.")] string soflanType = default,
-            [Description("End position for hold (optional) and soflan: TGrid unit. Required for duration/interpolatable soflans (a range); a keyframe soflan is a single point, so omit this (tGrid* is the point) or pass the same value as tGridUnit.")] float? endTGridUnit = default,
+            [Description("End position for hold (optional) and soflan: TGrid unit. Required for duration/interpolatable soflans; forbidden for keyframe soflans (a keyframe is a single point, use tGrid*).")] float? endTGridUnit = default,
             [Description("End position for hold (optional) and soflan: TGrid grid (same rules as endTGridUnit).")] int? endTGridGrid = default,
             [Description("Soflan family: speed multiplier (default 1).")] double? speed = default,
             [Description("Soflan family: soflan group (default 0).")] int? soflanGroup = default,
@@ -1276,6 +1276,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
         private static TGrid RequireEndTGrid(OngekiObjectBase obj) => obj switch
         {
             Hold hold => hold.HoldEnd?.TGrid ?? throw new ArgumentException($"Hold #{hold.Id} has no end; create one with editor.create_hold_end."),
+            KeyframeSoflan => throw new ArgumentException($"Object #{obj.Id} is a keyframe soflan: it is a single point and has no end."),
             ISoflan soflan => soflan.EndTGrid,
             _ => throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no end position."),
         };
@@ -1292,6 +1293,8 @@ namespace OngekiFumenEditor.Kernel.Mcp
                             : new TGrid(end.TGrid.Unit, ParseInt(rawValue));
                         return;
                     }
+                case KeyframeSoflan:
+                    throw new ArgumentException($"Object #{obj.Id} is a keyframe soflan: it is a single point and has no end.");
                 case ISoflan soflan:
                     soflan.EndTGrid = propertyName == "endTGridUnit"
                         ? new TGrid(ParseFloat(rawValue), soflan.EndTGrid.Grid)
@@ -1656,8 +1659,9 @@ namespace OngekiFumenEditor.Kernel.Mcp
             if (!isKeyframe && spec.EndTGrid is null)
                 throw new ArgumentException("The soflan family requires endTGridUnit/endTGridGrid: a duration/interpolatable soflan is a range.");
 
-            if (isKeyframe && spec.EndTGrid is { } keyframeEnd && keyframeEnd != spec.TGrid)
-                throw new ArgumentException($"A keyframe soflan is a single point: endTGrid* must equal tGrid* ({keyframeEnd} != {spec.TGrid}), or omit it.");
+            // KeyframeSoflan 是「一个点」：它没有 end（其 EndTGrid 就是 TGrid），因此禁止传 endTGrid*。
+            if (isKeyframe && spec.EndTGrid is not null)
+                throw new ArgumentException("A keyframe soflan is a single point and has no end: pass tGridUnit/tGridGrid only.");
 
             if (!isKeyframe && spec.EndTGrid is { } endTGrid && endTGrid <= spec.TGrid)
                 throw new ArgumentException($"A soflan end must be after its start (end {endTGrid} <= start {spec.TGrid}).");
@@ -1939,6 +1943,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 endTGrid = obj switch
                 {
                     Hold h when h.HoldEnd is { } he => new { unit = he.TGrid.Unit, grid = he.TGrid.Grid, totalGrid = he.TGrid.TotalGrid },
+                    KeyframeSoflan => null,
                     ISoflan s => new { unit = s.EndTGrid.Unit, grid = s.EndTGrid.Grid, totalGrid = s.EndTGrid.TotalGrid },
                     _ => null,
                 },
