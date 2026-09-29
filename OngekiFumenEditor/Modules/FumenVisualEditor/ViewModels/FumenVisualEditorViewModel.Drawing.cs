@@ -549,24 +549,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
             if (IsPreviewMode)
             {
-                /*
-                (DrawingTargetContext ctx, OngekiTimelineObjectBase obj) Convert(OngekiTimelineObjectBase obj)
-                {
-                    _cacheSoflanGroupRecorder.GetCache(obj, out var soflanGroup);
-                    var drawingContext = drawingContexts.TryGetValue(soflanGroup, out var ctx) ? ctx : drawingContexts[0];
-                    return (drawingContext, obj);
-                }
-                */
-
-                //特殊处理：子弹和Bell
-                var blts = Fumen.Bullets.AsEnumerable();
-                var bels = Fumen.Bells.AsEnumerable();
-                var curTGrid = frameTGrid;
-                if (IsPreviewMode)
-                {
-                    blts = Fumen.Bullets.BinaryFindRange(curTGrid, TGrid.MaxValue);
-                    bels = Fumen.Bells.BinaryFindRange(curTGrid, TGrid.MaxValue);
-                }
+                //特殊处理：子弹和Bell（本块仅预览模式：只取当前时间之后的）
+                var blts = Fumen.Bullets.BinaryFindRange(frameTGrid, TGrid.MaxValue);
+                var bels = Fumen.Bells.BinaryFindRange(frameTGrid, TGrid.MaxValue);
                 bels = bels.Where(x =>
                 {
                     _cacheSoflanGroupRecorder.GetCache(x, out var soflanGroup);
