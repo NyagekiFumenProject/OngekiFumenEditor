@@ -8,9 +8,8 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts
     {
         private static Dictionary<Assembly, FumenVisualEditorViewModel> editmapStore = new Dictionary<Assembly, FumenVisualEditorViewModel>();
 
-        // 脚本以 Assembly.Load(byte[], byte[]) 载入后，ScriptArgs.TargetEditor 里的 Assembly.GetCallingAssembly()
-        // 会归因到宿主程序集（getter 未被内联），于是按脚本程序集注册的项查不到。这里保留精确匹配，并回退到
-        // 最近一次注册的编辑器（脚本执行是串行的，见 RuntimeAutomationScriptHost / DefaultEditorScriptExecutor）。
+        // 精确匹配保留 per-assembly 语义；查不到时回退到最近一次注册的编辑器——脚本 lambda 可能在执行器的
+        // 注册窗口之外运行（组合动作由 RuntimeAutomationScriptHost 在 Execute 返回后才真正执行）。
         private static FumenVisualEditorViewModel lastEditor;
 
         public static FumenVisualEditorViewModel GetCurrentEditor(Assembly assembly)

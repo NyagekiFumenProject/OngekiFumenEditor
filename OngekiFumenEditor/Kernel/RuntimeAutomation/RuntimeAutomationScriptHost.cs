@@ -194,7 +194,14 @@ namespace OngekiFumenEditor.Kernel.RuntimeAutomation
                 {
                     combinedUndoAction = editor.UndoRedoManager.EndCombineAction(GetTransactionName(request));
                     if (!IsEmptyCompositeAction(combinedUndoAction))
+                    {
+                        // 组合动作在 Execute 返回后才真正执行（脚本体内只是入队），而执行器那时已 Clear 过注册；
+                        // 这里重新注册，脚本 lambda 里的 ScriptArgs.TargetEditor 才可用（本方法 finally 统一清理）。
+                        if (buildResult.Assembly is not null)
+                            ScriptArgsGlobalStore.SetCurrentEditor(buildResult.Assembly, editor);
+
                         editor.UndoRedoManager.ExecuteAction(combinedUndoAction);
+                    }
                 }
 
                 logs.Add("Script executed.");
