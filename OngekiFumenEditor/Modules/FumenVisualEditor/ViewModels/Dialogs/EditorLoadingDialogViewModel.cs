@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
     public class EditorLoadingDialogViewModel : Screen
     {
         private readonly CancellationTokenSource cancellation = new();
-        private readonly string targetName;
+        private string targetName;
 
         private string stepText = Resources.EditorLoadingStepPreparing;
         private int stepNumber = (int)EditorLoadingStep.Preparing;
@@ -30,6 +30,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
         internal bool IsFinished => finished;
         /// <summary>用户点「取消」或直接关窗时触发一次（UI 线程）。</summary>
         internal event EventHandler CancellationRequested;
+
+        /// <summary>并发加载复用同一对话框时，把提示更新到最近一次加载的目标。</summary>
+        internal void SetTarget(string name)
+        {
+            targetName = name;
+            NotifyOfPropertyChange(nameof(TargetText));
+        }
 
         /// <summary>「正在加载：xxx」，用户据此确认自己打开的是哪个谱面/工程。</summary>
         public string TargetText => string.Format(Resources.EditorLoadingTargetFormat, targetName);

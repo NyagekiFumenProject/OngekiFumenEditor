@@ -9,6 +9,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -26,7 +27,50 @@ namespace OngekiFumenEditor.Utils
         [GeneratedRegex(@"(\d+)_\d+")]
         private static partial Regex MusicIdFromFileNameRegex();
 
-        public static async Task<bool> TryOpenAsDocument(string filePath)
+        private static readonly object inFlightOpensLock = new();
+        private static readonly Dictionary<string, Task<bool>> inFlightOpens = new();
+
+        /// <summary>
+        /// 同一目标的并发打开共享同一笔在途加载：先到者真正执行，后来者 await 同一结果。
+        /// 否则第二次打开会各自 Begin 一个加载会话，随后因文档/编辑器冲突半途搁置——
+        /// 它的 Completion 永不兑现（调用方挂死），加载对话框也没人收尾。
+        /// </summary>
+        private static async Task<bool> RunSharedOpen(string key, Func<Task<bool>> open)
+        {
+            Task<bool> pending;
+            var owner = false;
+            lock (inFlightOpensLock)
+            {
+                if (inFlightOpens.TryGetValue(key, out pending))
+                {
+                    Log.LogInfo($"Join the in-flight open for '{key}'.");
+                }
+                else
+                {
+                    pending = open();
+                    inFlightOpens[key] = pending;
+                    owner = true;
+                }
+            }
+
+            try
+            {
+                return await pending;
+            }
+            finally
+            {
+                if (owner)
+                {
+                    lock (inFlightOpensLock)
+                        inFlightOpens.Remove(key);
+                }
+            }
+        }
+
+        public static Task<bool> TryOpenAsDocument(string filePath) =>
+            RunSharedOpen($"doc:{Path.GetFullPath(filePath)}", () => OpenAsDocumentCore(filePath));
+
+        private static async Task<bool> OpenAsDocumentCore(string filePath)
         {
             if (IoC.GetAll<IEditorProvider>().FirstOrDefault(x => x.Handles(filePath)) is IEditorProvider provider)
             {
@@ -44,7 +88,10 @@ namespace OngekiFumenEditor.Utils
             return false;
         }
 
-        public static async Task<bool> TryOpenOgkrFileAsDocument(string ogkrFilePath)
+        public static Task<bool> TryOpenOgkrFileAsDocument(string ogkrFilePath) =>
+            RunSharedOpen($"ogkr:{Path.GetFullPath(ogkrFilePath)}", () => OpenOgkrFileAsDocumentCore(ogkrFilePath));
+
+        private static async Task<bool> OpenOgkrFileAsDocumentCore(string ogkrFilePath)
         {
             var docName = await TryFormatOpenFileName(ogkrFilePath);
             using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, docName);
@@ -84,7 +131,17 @@ namespace OngekiFumenEditor.Utils
             }
         }
 
-        public static async Task<bool> TryOpenProject(EditorProjectDataModel proj)
+        public static Task<bool> TryOpenProject(EditorProjectDataModel proj) =>
+            RunSharedOpen(BuildProjectOpenKey(proj), () => OpenProjectCore(proj));
+
+        private static string BuildProjectOpenKey(EditorProjectDataModel proj)
+        {
+            var fumen = string.IsNullOrWhiteSpace(proj?.FumenFilePath) ? "(new)" : Path.GetFullPath(proj.FumenFilePath);
+            var audio = string.IsNullOrWhiteSpace(proj?.AudioFilePath) ? "(none)" : Path.GetFullPath(proj.AudioFilePath);
+            return $"proj:{fumen}|{audio}";
+        }
+
+        private static async Task<bool> OpenProjectCore(EditorProjectDataModel proj)
         {
             var targetName = string.IsNullOrWhiteSpace(proj?.FumenFilePath)
                 ? Resources.EditorLoadingNewProjectName

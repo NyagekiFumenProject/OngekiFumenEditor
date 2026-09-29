@@ -38,10 +38,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         /// <summary>等待渲染初始化与首帧的上限；超时只记日志，不阻塞对话框关闭。</summary>
         public static readonly TimeSpan EditorReadyTimeout = TimeSpan.FromSeconds(30);
 
+        private static readonly object sharedDialogLock = new();
+        private static EditorLoadingDialogViewModel sharedDialog;
+        private static int sharedDialogUsers;
+
         private readonly EditorLoadingDialogViewModel dialog;
+        private readonly bool ownsDialog;
         private readonly TaskCompletionSource<EditorLoadingOutcome> completion =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
         private bool disposed;
+        private bool dialogReleased;
 
         /// <param name="step">起始步骤。</param>
         /// <param name="targetName">正在加载的谱面/工程名，显示给用户确认。</param>
@@ -50,13 +56,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             var session = new EditorLoadingSession(targetName);
             Log.LogInfo($"Editor loading session started (step={step}, steps={StepCount}, target={targetName})");
             session.ReportStep(step);
-            session.ShowDialog();
+            session.ShowDialogIfOwner();
             return session;
         }
 
         private EditorLoadingSession(string targetName)
         {
-            dialog = new EditorLoadingDialogViewModel(targetName);
+            lock (sharedDialogLock)
+            {
+                // 并发加载复用同一个加载对话框：第一个会话创建并显示它，后来者只挂上去；
+                // 最后一个退栈的会话负责关闭（见 ReleaseDialog）。
+                if (sharedDialog is { IsFinished: false })
+                {
+                    dialog = sharedDialog;
+                    dialog.SetTarget(targetName);
+                    sharedDialogUsers++;
+                }
+                else
+                {
+                    dialog = new EditorLoadingDialogViewModel(targetName);
+                    sharedDialog = dialog;
+                    sharedDialogUsers = 1;
+                    ownsDialog = true;
+                }
+            }
+
             dialog.CancellationRequested += OnCancellationRequested;
         }
 
@@ -92,7 +116,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             Log.LogInfo($"Editor loading session finished: {outcome}");
             if (!completion.TrySetResult(outcome))
                 return;
-            dialog.Finish();
+            ReleaseDialog();
         }
 
         public void Dispose()
@@ -100,9 +124,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             if (disposed)
                 return;
             disposed = true;
-            dialog.CancellationRequested -= OnCancellationRequested;
             completion.TrySetResult(EditorLoadingOutcome.Failed);
-            dialog.Finish();
+            ReleaseDialog();
+        }
+
+        /// <summary>
+        /// 从共享对话框上摘掉本会话；只有最后一个退栈的会话才真正关闭对话框，
+        /// 这样并发加载不会留下别人已经不再负责的孤儿窗口。
+        /// </summary>
+        private void ReleaseDialog()
+        {
+            if (dialogReleased)
+                return;
+            dialogReleased = true;
+
+            dialog.CancellationRequested -= OnCancellationRequested;
+
+            var closeDialog = false;
+            lock (sharedDialogLock)
+            {
+                sharedDialogUsers--;
+                if (sharedDialogUsers <= 0)
+                {
+                    sharedDialogUsers = 0;
+                    closeDialog = ReferenceEquals(sharedDialog, dialog);
+                    if (closeDialog)
+                        sharedDialog = null;
+                }
+            }
+
+            if (closeDialog)
+                dialog.Finish();
         }
 
         private void OnCancellationRequested(object sender, EventArgs e)
@@ -112,8 +164,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             completion.TrySetResult(EditorLoadingOutcome.Cancelled);
         }
 
-        private void ShowDialog()
+        private void ShowDialogIfOwner()
         {
+            if (!ownsDialog)
+                return;
+
             // Caliburn 的 ShowDialogAsync 会同步进入 ShowDialog() 的嵌套消息循环，
             // 直接调用会卡住加载流程；投递到队列后加载继续跑在该嵌套循环里。
             Dispatcher.CurrentDispatcher.InvokeAsync(async () =>
