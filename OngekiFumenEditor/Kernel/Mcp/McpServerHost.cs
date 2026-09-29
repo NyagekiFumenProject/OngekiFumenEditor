@@ -25,17 +25,19 @@ namespace OngekiFumenEditor.Kernel.Mcp
         private readonly ScriptTools scriptTools;
         private readonly SkillResources skillResources;
         private readonly EditorMutationTools editorMutationTools;
+        private readonly EditorDocumentTools editorDocumentTools;
         private readonly SemaphoreSlim lifecycleLock = new SemaphoreSlim(1, 1);
         private WebApplication webApplication;
         private string runningEndpoint;
 
         [ImportingConstructor]
-        public McpServerHost(EditorTools editorTools, ScriptTools scriptTools, SkillResources skillResources, EditorMutationTools editorMutationTools)
+        public McpServerHost(EditorTools editorTools, ScriptTools scriptTools, SkillResources skillResources, EditorMutationTools editorMutationTools, EditorDocumentTools editorDocumentTools)
         {
             this.editorTools = editorTools;
             this.scriptTools = scriptTools;
             this.skillResources = skillResources;
             this.editorMutationTools = editorMutationTools;
+            this.editorDocumentTools = editorDocumentTools;
         }
 
         public bool IsRunning { get; private set; }
@@ -221,6 +223,7 @@ namespace OngekiFumenEditor.Kernel.Mcp
                 .WithTools<EditorTools>(editorTools)
                 .WithTools<ScriptTools>(scriptTools)
                 .WithTools<EditorMutationTools>(editorMutationTools)
+                .WithTools<EditorDocumentTools>(editorDocumentTools)
                 .WithResources(skillResources.BuildDirectResources())
                 .WithResources<SkillResources>(skillResources);
 
