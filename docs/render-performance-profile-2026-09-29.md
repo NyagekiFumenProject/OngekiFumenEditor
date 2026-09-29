@@ -409,7 +409,7 @@ Caveat: 预览模式下 ProjectileBatchDrawTargetBase 内部使用 Parallel.ForE
 |---|---|---|---|
 | **P0** | 修复 WASAPI latency=0（`NAudioManager.cs:115`）：传非 0 latency，或改用事件同步正确实现/升级 NAudio | 释放 ≈ 1 个物理核（进程 CPU −45%） | 复测该线程 CPU 应 ≈0；进程 CPU 降到 ~1 核 |
 | **P1** | 消除 `GridBase` 属性通知分配（`NormalizeSelf` 静默写 + 变更检测 + 无闭包通知实现；转发链本身保留）——**已落地（阶段 1）** | 实测单笔通知 120 B → 0 B、`NormalizeSelf` 480/600 B → 0 B；预期 gen0 GC 7 次/s → 2–3 次/s（待重启后 trace 复测） | `docs/common-propertychanged-base-design.md` §5 的 benchmark 表；运行时复测见该文 §6.4 |
-| **P1** | `VisibleLineVerticesQuery`/`CalulateXGrid` 改零分配：复用已有 `TryGetValidPathChildRange`（`ConnectableStartObject.cs:387-433`），纳入 `ObjectPool` | 分配 −1.9 GiB/75 s 中的大部分 | 同上 + 该调用点 tick 归零 |
+| **P1** | `VisibleLineVerticesQuery`/`CalulateXGrid` 零分配：新增 `TryGetChildObjectFromTGrid`（复用 `TryGetValidPathChildRange`/`GetChildObjectAt`）、`(Child\|Start).TryCalulateXGridTotalUnit`（返回值、不构造 XGrid），热路径 3 处（`VisibleLineVerticesQuery`、`DrawHitObjectEffectHelper`、`DrawPlayableAreaHelper_new`）已切换；`IsPathVaild()` 去 LINQ、`Children` 循环改索引 —— **已落地** | benchmark（`LaneBoundaryXGridQueryBenchmarks`，per 边界点）：边界求值 **56 B → 0 B**、子物件定位 **64 B → 0 B**（耗时 −19%~−58%）；对应 App 侧站点（1,236 MB + 660 MB / 75 s ≈ 总分配 21.8%）预期归零，待重启后 trace 复测 | benchmark `--filter *LaneBoundaryXGridQueryBenchmarks*`（含逐点等价性校验，发现并复刻了旧 `(int)totalGrid` 截断语义，故数值逐位一致） |
 | **P2** | `DrawPlayableAreaHelper_new` 采样循环复用 `TGrid/XGrid` 实例（或结构体化） | 分配 −1 GiB/75 s | 同上 |
 | **P2** | `OnEditorRender` 中对 Bullets 的 LINQ `Where` 改直写循环/缓存 | UI 线程时间 −4.35%（≈1.7 s/75 s） | 采样中该栈消失 |
 | **P2** | `Hold.CalculateJudgeTGrid` 的 `GridOffset` 改为 `struct` 或复用 | 分配 −424 MB/75 s | 同上 |
