@@ -9,7 +9,7 @@
 
 ## Current MCP Tool Surface
 
-26 tools are registered today. Every tool accepts the shared routing/auth parameters
+28 tools are registered today. Every tool accepts the shared routing/auth parameters
 `requestedBy`, `clientId` and `cancellationToken`; editor-scoped tools also accept
 `editorId` (defaults to the active editor) and `expectedEditorId` (guards against a
 mid-flight editor switch); mutating tools add `requireConfirmation` (default `true`).
@@ -22,6 +22,7 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | `editor.list_opened` | All opened editors, for picking an `editorId`. |
 | `editor.get_current_summary` | Stable lightweight summary of the active editor (`NO_ACTIVE_EDITOR` when none). |
 | `editor.query_object` | Page one object family inside a TGrid range; returns runtime ids plus the DTO below. |
+| `editor.check` | Run every built-in fumen check rule and return the results (see "Fumen Check" below). Read-only. |
 
 ### Editor document lifecycle
 
@@ -49,6 +50,12 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | `editor.scroll_to` | Move the viewport/playback to a TGrid position (design mode also moves playback). |
 | `editor.create_hold_end` | Attach a HoldEnd to a hold addressed by its runtime id (gives it length). |
 | `editor.remove_hold_end` | Drop a hold's end (the hold becomes zero-length again). |
+
+### Fumen meta info
+
+| Tool | Purpose |
+| --- | --- |
+| `editor.set_metainfo` | Set one chart meta info field (see "Fumen Meta Info" below). One undoable editor action. |
 
 ### Action scope and history
 
@@ -122,6 +129,100 @@ non-dockable family, `snapXToLane` without a lane, snap on a non-snappable prope
 snap combined with clearing the lane, snap on an unbound object, or the lane has no path
 at that TGrid).
 
+## Fumen Check (`editor.check`)
+
+Runs exactly the rules the **FumenCheckerListViewer** tool runs: it resolves every
+`IFumenCheckRule` export (`IoC.GetAll<IFumenCheckRule>()`) and calls `CheckRule(fumen, context)`
+on the UI thread. It is **read-only** — it never modifies the chart — so call it freely.
+
+Response shape:
+
+* `ruleCount` — how many rules ran; `ruleFailures[]` — rules that threw (a broken rule can never
+  fail the whole check).
+* `total` / `errorCount` / `problemCount` / `suggestCount` — counts over **all** results.
+* `results[]` — ordered by severity (`error` → `problem` → `suggest`), then by TGrid. Each entry has
+  `ruleName`, `severity` (`error` / `problem` / `suggest`), `description`, `location`, plus the
+  structured target: `objectType` + `objectId` when the rule points at an object, or
+  `tGrid{unit,grid,totalGrid}` when it points at a position. Either may be `null` — some rules
+  (e.g. the header-const one) only carry a human `location` string.
+* `matched` / `returned` / `truncated` — after the filter and limit.
+
+Parameters:
+
+* `minSeverity` is a **floor**, not an exact match: `problem` returns problems *and* errors,
+  `error` returns only errors, `suggest` (default) returns everything.
+* `limit` bounds `results` only (default 200, max 1000); the counts always cover everything.
+
+### Rule catalog
+
+`ruleCount` is **15** today. Core rules (11): `WrongLocation` (a lane-docked tap/hold is not
+actually on its lane), `MissingHoldEndObject`, `MissingRefObject`, `ObjectOverlap`,
+`ObjectTimelineNotAligned`, `ConflictRecordIdLanes`, `MissingBossEnemySet`,
+`InvalidConnectablePath`, `LaneBlockAcrossWalls`, `Soflan`, `SoflanConflict`.
+
+Ogkr rules (4): `[Ongeki] HeaderConstMismatch` (flags `MetaInfo.XRESOLUTION != 4096`,
+`TRESOLUTION != 1920`, or an empty `Creator` — handy for verifying `editor.set_metainfo`),
+`[Ongeki] ColorIdInvaild`, `[Ongeki] ColorfulLaneBrightnessInvaild`,
+`[Ongeki] NotInterpolatedCurve`.
+
+> `WallConflictCheckRule` exists in the source but carries **no `[Export]`**, so MEF never
+> registers it and it never runs. Add the export if wall-conflict detection is wanted.
+
+## Mandatory: run `editor.check` after every mutation batch
+
+**After mutating a chart, always call `editor.check` before reporting success.**
+
+Individual edits can pass every argument check yet still leave the chart inconsistent, and the
+checker is the only feedback loop that catches it. Concrete examples:
+
+* Docking a tap/hold with `referenceLaneRecordId` but *without* `snapXToLane` is accepted by
+  `editor.add_object` / `editor.modify_object`, but the object then sits at `XGrid=0` instead of on
+  the lane and trips `WrongLocation`.
+* Removing a hold end (`editor.remove_hold_end`) leaves the hold with no end → `MissingHoldEndObject`.
+* Adding or editing a soflan can trip `Soflan` / `SoflanConflict`.
+
+Recommended loop:
+
+1. Mutate — ideally inside `editor.begin_action` / `editor.end_action`, so the whole batch is a
+   single undo entry.
+2. `editor.check` with `minSeverity: "problem"`.
+3. If `total > 0`, fix the cause (or `editor.undo`) and re-run until it is clean.
+4. Only then report the work as done.
+
+## Fumen Meta Info (`editor.set_metainfo`)
+
+Sets one field of `fumen.MetaInfo` — the same values the **FumenMetaInfoBrowser** tool shows.
+It is a single undoable editor action, so it participates in `editor.undo` / `editor.redo` and in
+an action scope. Field names are matched case-insensitively; `newValue` is text parsed per field.
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `creator` | string | `MetaInfo.Creator`. |
+| `version` | string | `"1.0.0"` form, parsed by `System.Version`. |
+| `bpmFirst` | number | Also updates `BpmList.FirstBpm` so the chart's first BPM really changes. |
+| `bpmCommon` / `bpmMinimum` / `bpmMaximum` | number | Header BPM statistics only. |
+| `meterBunshi` / `meterBunbo` | integer | Also updates `MeterChanges.FirstMeter` (the meta field alone is not enough — its change notification is a dead path). |
+| `tResolution` / `xResolution` | integer | `MetaInfo.TRESOLUTION` / `XRESOLUTION`. |
+| `clickDefinition` | integer | `MetaInfo.ClickDefinition`. |
+| `tutorial` | boolean | `true` / `false` (also accepts `1` / `0`). |
+| `bulletDamage` / `hardBulletDamage` / `dangerBulletDamage` / `beamDamage` | number | |
+| `progJudgeBpm` | number | |
+
+The response echoes `oldValue` (canonical form) and `newValue`. Unknown fields fail with
+`UNSUPPORTED_METAINFO`; unparseable values fail with `INVALID_ARGUMENT`. A missing editor yields
+`NO_ACTIVE_EDITOR` / `EDITOR_NOT_FOUND`, and a chart without meta info yields `NO_METAINFO`.
+
+Verifying a write without a getter:
+
+* `creator` / `tResolution` / `xResolution` are checked by `[Ongeki] HeaderConstMismatch`, so
+  `editor.check` shows whether the value landed (and whether `editor.undo` reverted it).
+* `editor.query_object objectType='meter'` returns the first meter, so the `meterBunshi` /
+  `meterBunbo` derived sync is observable as the entry at `tGrid.totalGrid === 0`.
+* Otherwise call `editor.set_metainfo` again and read the echoed `oldValue`.
+
+> There is currently **no** `editor.get_metainfo`; the response's `oldValue` is the only way to read
+> a field back through the tool surface.
+
 ## Current MCP Resource Surface
 
 * `Kernel/Mcp/SkillResources.cs` exposes built-in repo guidance as read-only MCP resources.
@@ -193,6 +294,12 @@ That shape is not just style guidance. It matches what the runtime security vali
 * Read-only tools can return authorization-denied objects with `success = false`, `errorCode`, and `errorMessage`.
 * `editor.get_current_summary` returns `NO_ACTIVE_EDITOR` when no editor is active.
 * Mutation tools report failures through `ScriptRunResult.Success`, `ErrorCode`, `ErrorMessage`, `Diagnostics`, and `Logs`.
+* `editor.check` returns `NO_ACTIVE_EDITOR` / `EDITOR_NOT_FOUND` / `EDITOR_CHANGED` / `NO_FUMEN`, and
+  `INVALID_ARGUMENT` for a bad `minSeverity`. Per-rule failures land in `ruleFailures[]` instead of
+  failing the call.
+* `editor.set_metainfo` returns `UNSUPPORTED_METAINFO` (unknown field), `INVALID_ARGUMENT`
+  (unparseable value), `NO_METAINFO` (chart has no meta info) or the shared editor-resolution errors.
+* `editor.close` returns `EDITOR_DIRTY` for a dirty editor unless `force=true`.
 
 ## Change Guidance
 

@@ -62,6 +62,7 @@ Primary entry for the reference set:
 * For parser or model work, verify both load and save paths.
 * For editor work, verify selection, viewport, property-browser, and undo/redo side effects.
 * For MCP or runtime scripts, compile first when possible and preserve authorization, backup, and security-policy behavior.
+* For MCP chart mutations, run `editor.check` afterwards and resolve every `error`/`problem` result before reporting success — see `references/05-runtime-automation-and-mcp.md` ("Mandatory: run `editor.check` after every mutation batch").
 * For strings, settings, or resources, update `.resx`, `.settings`, generated designers, and project metadata as needed.
 
 ## Review Focus
@@ -80,6 +81,7 @@ When reviewing changes in this repo, prioritize:
 * Keep the current stack: WPF on `net10.0-windows`, Caliburn.Micro, Gemini, MEF composition, and project-specific helpers.
 * Default to `[Export]`, `[Export(typeof(...))]`, `[ImportingConstructor]`, and `[ImportMany]` instead of introducing a new DI style.
 * Use `LambdaUndoAction.Create(...)` and `UndoRedoManager.ExecuteAction(...)` for editor mutations that must be undoable.
+* After any MCP chart mutation, call `editor.check` and fix what it reports: individual edits can pass argument validation yet break chart consistency (e.g. a lane-docked tap without `snapXToLane` trips `WrongLocation`). Reading the meta info back has no dedicated tool — `editor.set_metainfo` echoes `oldValue`.
 * `FumenVisualEditorViewModel` is partial; inspect sibling partials before adding editor behavior.
 * Many features follow the same slice shape: `MenuDefinitions.cs`, `Commands/`, `Views/`, `ViewModels/`, and sometimes `Kernel/` or `Graphics/`.
 * Expect `.nyagekiProj` save/load to normalize relative paths and use temp-file copy strategies.
