@@ -54,7 +54,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 return resolveError;
 
             var fumen = editor.Fumen;
-            var pallete = fumen.BulletPalleteList[strId?.Trim()];
+            var pallete = LookupBulletPallete(fumen, strId?.Trim());
             if (pallete is null)
                 return Failure(operationName, "PALLETE_NOT_FOUND", $"No bullet pallete '{strId}' in editor '{resolvedEditorId}'.");
 
@@ -111,6 +111,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 newValue,
                 applied = !queued,
                 queued,
+                errorCode = !queued && !outcome.Success ? "INVALID_ARGUMENT" : default,
                 errorMessage = queued ? default : outcome.ErrorMessage,
             };
             McpOperationLogHelper.LogResult(operationName, response);

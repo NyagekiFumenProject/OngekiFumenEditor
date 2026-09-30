@@ -151,7 +151,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 }
                 else
                 {
-                    pallete = editor.Fumen.BulletPalleteList[requestedPalleteId];
+                    pallete = LookupBulletPallete(editor.Fumen, requestedPalleteId);
                     if (pallete is null)
                         return Failure(operationName, "PALLETE_NOT_FOUND", $"No bullet pallete '{requestedPalleteId}' in editor '{resolvedEditorId}'.");
                 }

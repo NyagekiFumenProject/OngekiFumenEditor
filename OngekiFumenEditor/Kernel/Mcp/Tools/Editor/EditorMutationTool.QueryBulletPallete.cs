@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             var fumen = editor.Fumen;
             if (!string.IsNullOrWhiteSpace(strId))
             {
-                var single = fumen.BulletPalleteList[strId.Trim()];
+                var single = LookupBulletPallete(fumen, strId.Trim());
                 if (single is null)
                     return Failure(operationName, "PALLETE_NOT_FOUND", $"No bullet pallete '{strId}' in editor '{resolvedEditorId}'.");
 

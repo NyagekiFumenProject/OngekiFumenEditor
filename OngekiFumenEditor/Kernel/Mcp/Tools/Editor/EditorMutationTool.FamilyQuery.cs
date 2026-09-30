@@ -183,6 +183,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 referenceLaneRecordId = obj is ILaneDockable dockable && dockable.ReferenceLaneStrId >= 0 ? dockable.ReferenceLaneStrId : (int?)null,
                 meterBunShi = (obj as MeterChange)?.BunShi,
                 meterBunbo = (obj as MeterChange)?.Bunbo,
+                // bpm 变化的取值：没有它就只能列出 bpm 变化而读不到 BPM。
+                bpm = obj is BPMChange bpmChange ? bpmChange.BPM : (double?)null,
                 enemyWave = obj is EnemySet enemy ? enemy.TagTblValue.ToString() : default,
                 laneType = obj is ConnectableObjectBase connectable ? connectable.LaneType.ToString() : default,
                 // 起点（lane / beam）的 RecordId 就是 parentRecordId 的取值来源；延伸段自带父起点。

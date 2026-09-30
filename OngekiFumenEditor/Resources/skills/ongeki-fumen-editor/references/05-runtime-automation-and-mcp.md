@@ -29,7 +29,7 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | Tool | Purpose |
 | --- | --- |
 | `editor.open_fast` | Fast-open a chart (`.ogkr`/`.nyageki`); resolves the audio next to it, or pass `audioPath`. |
-| `editor.open_proj` | Open a `.nyagekiProj` project; returns once the new editor reports Ready. |
+| `editor.open_proj` | Open a `.nyagekiProj` project. The tab is created immediately; its chart and audio keep loading in the background, so poll `editor.get_current_summary` until `counts` are populated before reading chart content. |
 | `editor.create_proj` | New project from an audio file, optionally seeded with a chart (`baseBpm` defaults to the chart's first BPM). |
 | `editor.close` | Close an editor tab. **Never saves**, is not undoable, and shows no dialogs. |
 

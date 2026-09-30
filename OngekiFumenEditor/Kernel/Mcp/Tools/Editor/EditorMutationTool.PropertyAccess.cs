@@ -331,7 +331,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     RequireSoflan(obj).ApplySpeedInDesignMode = ParseBool(rawValue);
                     return;
                 case "widthId":
-                    RequireBeam(obj).WidthId = WidthId.ParseFromId(ParseInt(rawValue));
+                    RequireBeam(obj).WidthId = ParseWidthId(rawValue);
                     return;
                 case "obliqueSourceXGridUnit":
                 case "obliqueSourceXGridGrid":
@@ -432,6 +432,19 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             return propertyName.EndsWith("Unit", StringComparison.Ordinal)
                 ? new XGrid(ParseFloat(rawValue), basis.Grid)
                 : new XGrid(basis.Unit, ParseInt(rawValue));
+        }
+
+        /// <summary>
+        /// 光束宽度。取值域是 <see cref="WidthIdConst"/> 的 1..5；越界直接报错而不是落到默认宽度 ——
+        /// <see cref="WidthId.ParseFromId(int)"/> 对未知 id 会静默退化成 Id_1，写错值会被当成合法设置。
+        /// </summary>
+        private static WidthId ParseWidthId(string rawValue)
+        {
+            var id = ParseInt(rawValue);
+            var found = WidthIdConst.AllWidthIds.FirstOrDefault(x => x.Id == id);
+            if (found is null)
+                throw new ArgumentException($"'{rawValue}' is not a valid widthId; valid ids are {string.Join(", ", WidthIdConst.AllWidthIds.Select(x => x.Id))}.");
+            return found;
         }
 
         /// <summary>色带 lane 的颜色：接受 <see cref="ColorIdConst.AllColors"/> 里的名字（忽略大小写）或数字 Id。</summary>

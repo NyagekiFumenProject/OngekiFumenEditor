@@ -28,8 +28,12 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts
 
         public static void Clear(Assembly assembly)
         {
+            // 只解除 per-assembly 精确映射；lastEditor 必须保留。
+            // 脚本通过 LambdaUndoAction 入队的 redo/undo lambda 会在执行器的注册窗口之外运行
+            // （组合动作在 Execute 返回后才执行，editor.undo / editor.redo 更可能在之后任意时刻触发），
+            // 此时 lambda 里重新读取的 ScriptArgs.TargetEditor 只能靠这个回退解析出编辑器；
+            // 若在这里清掉，undo/redo 会拿到 null 而抛 NullReferenceException。
             editmapStore.Remove(assembly);
-            lastEditor = default;
         }
     }
 }

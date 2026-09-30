@@ -106,6 +106,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 holdEndObjectId = holdEnd.Id,
                 applied = !queued,
                 queued,
+                errorCode = !queued && !outcome.Success ? "INVALID_ARGUMENT" : default,
                 errorMessage = queued ? default : outcome.ErrorMessage,
             };
             McpOperationLogHelper.LogResult(operationName, response);

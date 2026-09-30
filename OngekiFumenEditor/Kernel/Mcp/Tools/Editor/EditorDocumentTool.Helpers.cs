@@ -95,6 +95,13 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         private object ReportOpen(string operationName, bool opened, string fumenPath, string audioPath, string projectPath)
         {
             var editor = editorDocumentManager.CurrentActivatedEditor;
+
+            // open_proj only knows the project file; the chart and audio it points at are
+            // discovered while the editor loads. Fall back to what the editor has resolved so
+            // the response is useful whenever it is already available.
+            fumenPath = string.IsNullOrWhiteSpace(fumenPath) ? editor?.EditorProjectData?.FumenFilePath : fumenPath;
+            audioPath = string.IsNullOrWhiteSpace(audioPath) ? editor?.EditorProjectData?.AudioFilePath : audioPath;
+
             var response = new
             {
                 success = opened,

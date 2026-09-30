@@ -322,7 +322,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             if (child is IBeamObject beam)
             {
                 if (spec.WidthId is { } widthId)
-                    beam.WidthId = WidthId.ParseFromId(widthId);
+                    beam.WidthId = WidthIdConst.AllWidthIds.FirstOrDefault(x => x.Id == widthId)
+                        ?? throw new ArgumentException($"'{widthId}' is not a valid widthId; valid ids are {string.Join(", ", WidthIdConst.AllWidthIds.Select(x => x.Id))}.");
                 // 斜光束：起点/延伸段都能各自带偏移；这里只在显式给了偏移时写，避免把起点的偏移顶掉。
                 if (spec.ObliqueSourceXGrid is { } oblique)
                     beam.ObliqueSourceXGridOffset = oblique;
@@ -353,7 +354,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             };
 
             if (spec.WidthId is { } widthId)
-                beam.WidthId = WidthId.ParseFromId(widthId);
+                beam.WidthId = WidthIdConst.AllWidthIds.FirstOrDefault(x => x.Id == widthId)
+                    ?? throw new ArgumentException($"'{widthId}' is not a valid widthId; valid ids are {string.Join(", ", WidthIdConst.AllWidthIds.Select(x => x.Id))}.");
             if (spec.ObliqueSourceXGrid is { } oblique)
                 beam.ObliqueSourceXGridOffset = oblique;
 

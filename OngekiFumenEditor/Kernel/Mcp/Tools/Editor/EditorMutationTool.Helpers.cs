@@ -85,6 +85,28 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
         private static string NormalizeFamily(string objectType) => objectType?.Trim().ToLowerInvariant() ?? string.Empty;
 
+        /// <summary>
+        /// 按 StrID 精确查一个弹幕调色板。
+        /// <para>
+        /// 不能直接用 <c>fumen.BulletPalleteList[strId]</c>：它的索引器经
+        /// <see cref="BulletPalleteList.ConvertIdToInt"/> 把未知字符一律折算成 0，
+        /// 于是 "does-not-exist" 这种垃圾串可能撞上某个真实调色板的数值 id，
+        /// 静默返回一个完全不相干的调色板。这里查回来后再核对真身，对不上就当没找到。
+        /// </para>
+        /// </summary>
+        private static BulletPallete LookupBulletPallete(OngekiFumen fumen, string strId)
+        {
+            try
+            {
+                var found = fumen.BulletPalleteList[strId];
+                return found is not null && string.Equals(found.StrID, strId, StringComparison.OrdinalIgnoreCase) ? found : null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private static string NormalizePropertyName(string propertyName) => propertyName?.Trim() ?? string.Empty;
 
         private static bool IsEmptyCompositeAction(IUndoableAction action)

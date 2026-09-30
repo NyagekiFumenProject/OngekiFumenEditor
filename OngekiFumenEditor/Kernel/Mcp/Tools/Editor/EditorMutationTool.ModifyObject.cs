@@ -114,6 +114,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             }, cancellationToken);
 
             var queued = actionScopeManager.TryTrack(resolvedEditorId, McpClientAuthorizationManager.BuildClientIdentityKey(requestedBy, clientId), outcome);
+            // 属性写入失败（取值非法、越界等）必须带 errorCode 回去，否则调用方只能靠解析 errorMessage 才能分支。
+            var failed = !queued && !outcome.Success;
             var response = new
             {
                 success = queued || outcome.Success,
@@ -126,6 +128,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 snapped = snap,
                 applied = !queued,
                 queued,
+                errorCode = failed ? "INVALID_ARGUMENT" : default,
                 errorMessage = queued ? default : outcome.ErrorMessage,
             };
             McpOperationLogHelper.LogResult(operationName, response);

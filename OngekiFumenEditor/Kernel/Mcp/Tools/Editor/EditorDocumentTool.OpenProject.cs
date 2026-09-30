@@ -20,7 +20,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorDocumentTool
     {
         [McpServerTool(Name = "editor.open_proj", Title = "Open Project", ReadOnly = false, Destructive = false, OpenWorld = false)]
-        [Description("Open a .nyagekiProj project file. The editor shows its loading dialog while the project loads; the tool returns once the new editor reports Ready.")]
+        [Description("Open a .nyagekiProj project file. The editor tab is created immediately while its chart and audio keep loading in the background (the editor shows a loading dialog); poll editor.get_current_summary until counts are populated before reading chart content.")]
         public async Task<object> OpenProject(string projectPath, bool requireConfirmation = true, string requestedBy = default, string clientId = default, CancellationToken cancellationToken = default)
         {
             const string operationName = "editor.open_proj";
@@ -45,7 +45,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 return Failure(operationName, "OPEN_FAILED", ex.Message);
             }
 
-            return ReportOpen(operationName, opened, projectPath, default, default);
+            return ReportOpen(operationName, opened, default, default, projectPath);
         }
     }
 }
