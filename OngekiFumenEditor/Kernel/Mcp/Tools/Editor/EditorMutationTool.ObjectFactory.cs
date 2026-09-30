@@ -5,7 +5,10 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
@@ -49,6 +52,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             public bool? ApplySpeedInDesignMode;
             public LaneStartBase ReferenceLane;
             public bool SnapXToLane;
+            public ConnectableStartObject ParentStart;
+            public ConnectableChildObjectBase CurveTarget;
+            public int? WidthId;
+            public XGrid ObliqueSourceXGrid;
+            public ColorId? ColorId;
+            public int? Brightness;
+            public XGrid EndXGrid;
+            public string BlockDirection;
         }
 
         private static OngekiObjectBase CreateObject(ObjectCreateSpec spec)
@@ -132,6 +143,24 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 case "soflan":
                     return CreateSoflan(spec);
 
+                case "lanenext":
+                    return CreateConnectableChild(spec, static start => start.CreateChildObject(), "lanenext");
+
+                case "beam":
+                    return CreateBeam(spec);
+
+                case "beamnext":
+                    return CreateConnectableChild(spec, static start => new BeamNext(), "beamnext");
+
+                case "curvecontrol":
+                    return CreateCurvePathControl(spec);
+
+                case "isfarea":
+                    return CreateIndividualSoflanArea(spec);
+
+                case "laneblock":
+                    return CreateLaneBlockArea(spec);
+
                 default:
                     throw new ArgumentException($"Unsupported object family '{spec.Family}'.");
             }
@@ -148,11 +177,26 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 "enemy" => new EnemyLaneStart(),
                 "wallleft" => new WallLeftStart(),
                 "wallright" => new WallRightStart(),
-                _ => throw new ArgumentException($"'{spec.LaneType}' is not a valid laneType; expected center, left, right, colorful, enemy, wallLeft or wallRight."),
+                "autoplayfader" or "autoplayfaderlane" => new AutoplayFaderLaneStart(),
+                _ => throw new ArgumentException($"'{spec.LaneType}' is not a valid laneType; expected center, left, right, colorful, enemy, wallLeft, wallRight or autoplayFader."),
             };
 
             lane.TGrid = spec.TGrid;
             lane.XGrid = spec.XGrid;
+
+            // 色带 lane 的颜色/亮度是可配置的，且 add 时不指定就永远是默认的 Akari / 亮度 3。
+            if (lane is IColorfulLane colorful)
+            {
+                if (spec.ColorId is { } colorId)
+                    colorful.ColorId = colorId;
+                if (spec.Brightness is { } brightness)
+                    colorful.Brightness = brightness;
+            }
+            else if (spec.ColorId is not null || spec.Brightness is not null)
+            {
+                throw new ArgumentException($"colorId/brightness only apply to laneType 'colorful'; a '{lane.LaneType}' lane has no colour.");
+            }
+
             return lane;
         }
 
@@ -251,6 +295,135 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 soflan.ApplySpeedInDesignMode = apply;
 
             return (OngekiObjectBase)soflan;
+        }
+
+        /// <summary>
+        /// lane / beam 的延伸段（lanenext / beamnext）工厂。延伸段必须挂在已有起点上：
+        /// 起点由 <c>parentRecordId</c> 解析而来，子类由起点自己的 <c>CreateChildObject()</c> 决定，
+        /// 这样 colorful / enemy / wall / autoplayfader 等变体都能自动落到正确的子类型。
+        /// </summary>
+        private static OngekiObjectBase CreateConnectableChild(ObjectCreateSpec spec, Func<ConnectableStartObject, ConnectableChildObjectBase> childFactory, string familyName)
+        {
+            var start = spec.ParentStart
+                ?? throw new ArgumentException($"The {familyName} family requires parentRecordId: the RecordId of the owning start object.");
+
+            var child = childFactory(start);
+
+            if (spec.EndTGrid is { } forbiddenEnd)
+                throw new ArgumentException($"A {familyName} segment is a single point: pass tGridUnit/tGridGrid only (got endTGrid {forbiddenEnd}).");
+
+            child.TGrid = spec.TGrid;
+            child.XGrid = spec.XGrid;
+
+            // 子物件靠 ReferenceStartObject / RecordId 归属起点；ConnectableObjectList.Add 也按 RecordId 找父。
+            child.SetReferenceStartObject(start);
+            child.RecordId = start.RecordId;
+
+            if (child is IBeamObject beam)
+            {
+                if (spec.WidthId is { } widthId)
+                    beam.WidthId = WidthId.ParseFromId(widthId);
+                // 斜光束：起点/延伸段都能各自带偏移；这里只在显式给了偏移时写，避免把起点的偏移顶掉。
+                if (spec.ObliqueSourceXGrid is { } oblique)
+                    beam.ObliqueSourceXGridOffset = oblique;
+            }
+
+            // 色带 lane 的延伸段同样带颜色/亮度（ColorfulLaneNext 实现 IColorfulLane）。
+            if (child is IColorfulLane colorful)
+            {
+                if (spec.ColorId is { } colorId)
+                    colorful.ColorId = colorId;
+                if (spec.Brightness is { } brightness)
+                    colorful.Brightness = brightness;
+            }
+            else if (spec.ColorId is not null || spec.Brightness is not null)
+            {
+                throw new ArgumentException($"colorId/brightness only apply to a colorful lane; a {familyName} segment on a {start.LaneType} lane has no colour.");
+            }
+
+            return child;
+        }
+
+        private static OngekiObjectBase CreateBeam(ObjectCreateSpec spec)
+        {
+            var beam = new BeamStart
+            {
+                TGrid = spec.TGrid,
+                XGrid = spec.XGrid,
+            };
+
+            if (spec.WidthId is { } widthId)
+                beam.WidthId = WidthId.ParseFromId(widthId);
+            if (spec.ObliqueSourceXGrid is { } oblique)
+                beam.ObliqueSourceXGridOffset = oblique;
+
+            return beam;
+        }
+
+        private static OngekiObjectBase CreateCurvePathControl(ObjectCreateSpec spec)
+        {
+            var target = spec.CurveTarget
+                ?? throw new ArgumentException("The curvecontrol family requires referenceObjectId: the object id of the lane segment the control point bends.");
+
+            return new LaneCurvePathControlObject
+            {
+                TGrid = spec.TGrid,
+                XGrid = spec.XGrid,
+            };
+        }
+
+        private static OngekiObjectBase CreateIndividualSoflanArea(ObjectCreateSpec spec)
+        {
+            if (spec.EndTGrid is null)
+                throw new ArgumentException("The isfarea family requires endTGridUnit/endTGridGrid: an individual soflan area is a range.");
+
+            if (spec.EndTGrid <= spec.TGrid)
+                throw new ArgumentException($"An individual soflan area end must be after its start (end {spec.EndTGrid} <= start {spec.TGrid}).");
+
+            var area = new IndividualSoflanArea
+            {
+                TGrid = spec.TGrid,
+                XGrid = spec.XGrid,
+                SoflanGroup = spec.SoflanGroup ?? 0,
+            };
+
+            // 区域是「起止矩形」：终点 TGrid 决定纵向长度，终点 XGrid 决定横向宽度（AreaWidth 是派生的）。
+            area.EndIndicator.TGrid = spec.EndTGrid;
+            area.EndIndicator.XGrid = spec.EndXGrid ?? spec.XGrid;
+
+            return area;
+        }
+
+        private static OngekiObjectBase CreateLaneBlockArea(ObjectCreateSpec spec)
+        {
+            if (spec.EndTGrid is null)
+                throw new ArgumentException("The laneblock family requires endTGridUnit/endTGridGrid: a lane block is a range.");
+
+            if (spec.EndTGrid <= spec.TGrid)
+                throw new ArgumentException($"A lane block end must be after its start (end {spec.EndTGrid} <= start {spec.TGrid}).");
+
+            var block = new LaneBlockArea
+            {
+                TGrid = spec.TGrid,
+                Direction = ParseLaneBlockDirection(spec.BlockDirection),
+            };
+            block.EndIndicator.TGrid = spec.EndTGrid;
+
+            return block;
+        }
+
+        private static LaneBlockArea.BlockDirection ParseLaneBlockDirection(string raw)
+        {
+            var text = (raw ?? string.Empty).Trim();
+            if (text.Length == 0)
+                return LaneBlockArea.BlockDirection.Left;
+
+            return text.ToLowerInvariant() switch
+            {
+                "left" => LaneBlockArea.BlockDirection.Left,
+                "right" => LaneBlockArea.BlockDirection.Right,
+                _ => throw new ArgumentException($"'{raw}' is not a valid blockDirection; expected left or right."),
+            };
         }
     }
 }

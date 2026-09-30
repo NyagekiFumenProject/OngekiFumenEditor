@@ -29,12 +29,15 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     [PartCreationPolicy(CreationPolicy.Shared)]
     internal sealed partial class EditorMutationTool
     {
+        // lane / beam 是「可连接物件」：集合里只枚举起点（LaneStartBase / BeamStart），
+        // 延伸段与曲线控制点分别由 lanenext / beamnext / curvecontrol 三个族单独暴露。
         private static readonly string[] QuerableFamilies =
         {
             "tap", "flick", "hold", "bell", "bullet", "comment", "bpm", "meter", "clickse", "enemy", "lane", "soflan",
+            "lanenext", "beam", "beamnext", "curvecontrol", "isfarea", "laneblock",
         };
 
-        private static readonly string[] CreatableFamilies = { "tap", "flick", "comment", "bpm", "bullet", "bell", "meter", "clickse", "enemy", "lane", "hold", "soflan" };
+        private static readonly string[] CreatableFamilies = { "tap", "flick", "comment", "bpm", "bullet", "bell", "meter", "clickse", "enemy", "lane", "hold", "soflan", "lanenext", "beam", "beamnext", "curvecontrol", "isfarea", "laneblock" };
 
         private readonly IEditorDocumentManager editorDocumentManager;
         private readonly IMcpToolAuthorizationService mcpToolAuthorizationService;
@@ -48,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             this.actionScopeManager = actionScopeManager;
         }
 
-        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode", ReferenceLaneRecordIdProperty };
+        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode", ReferenceLaneRecordIdProperty, "widthId", "obliqueSourceXGridUnit", "obliqueSourceXGridGrid", "colorId", "brightness", "endXGridUnit", "endXGridGrid", "blockDirection" };
 
         // ---------------- bullet pallete (BPL) tools ----------------
 

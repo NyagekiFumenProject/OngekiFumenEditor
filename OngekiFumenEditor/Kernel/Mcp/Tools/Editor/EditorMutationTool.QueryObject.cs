@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         [McpServerTool(Name = "editor.query_object", Title = "Query Objects", ReadOnly = true, Destructive = false, OpenWorld = false)]
         [Description("Query chart objects of one family inside a TGrid range, ordered by TGrid then id. Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
         public async Task<object> QueryObject(
-            [Description("Object family: tap, flick, hold, bell, bullet, comment, bpm, meter, clickse, enemy, lane or soflan.")] string objectType,
+            [Description("Object family: tap, flick, hold, bell, bullet, comment, bpm, meter, clickse, enemy, lane (lane starts), lanenext (lane segments), curvecontrol (lane curve control points), beam, beamnext, isfarea, laneblock or soflan.")] string objectType,
             [Description("Inclusive lower bound in the TGrid totalGrid scale; omit for no bound.")] int? minTotalGrid = default,
             [Description("Inclusive upper bound in the TGrid totalGrid scale; omit for no bound.")] int? maxTotalGrid = default,
             int limit = 200,

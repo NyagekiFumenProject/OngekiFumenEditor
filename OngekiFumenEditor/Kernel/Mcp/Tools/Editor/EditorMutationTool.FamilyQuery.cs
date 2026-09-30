@@ -5,7 +5,10 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
+using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
@@ -125,12 +128,35 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return fumen.Holds.Where(x => InRange(x, min, max));
                 case "lane":
                     return fumen.Lanes.Where(x => InRange(x, min, max));
+                case "lanenext":
+                    // Lanes 集合只枚举起点；延伸段在各自起点的 Children 里。
+                    return Ordered(fumen.Lanes.SelectMany(x => x.Children).Where(x => InRange(x, min, max)));
+                case "beam":
+                    return fumen.Beams.Where(x => InRange(x, min, max));
+                case "beamnext":
+                    return Ordered(fumen.Beams.SelectMany(x => x.Children).Where(x => InRange(x, min, max)));
+                case "curvecontrol":
+                    return Ordered(fumen.Lanes
+                        .SelectMany(x => x.Children)
+                        .SelectMany(x => x.PathControls)
+                        .Where(x => InRange(x, min, max)));
+                case "isfarea":
+                    return Ordered(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x).Where(x => InRange(x, min, max)));
+                case "laneblock":
+                    return fumen.LaneBlocks.Where(x => InRange(x, min, max));
                 case "soflan":
                     return fumen.SoflansMap.Values.SelectMany(x => x).OfType<OngekiObjectBase>().Where(x => InRange(x, min, max));
                 default:
                     return default;
             }
         }
+
+        /// <summary>
+        /// 子物件是从各个起点聚合出来的，整体未必按 TGrid 有序；查询分页依赖稳定顺序，
+        /// 所以这几族统一按 (TGrid, Id) 排一次。起点族保持原有顺序不动，避免改变既有行为。
+        /// </summary>
+        private static IEnumerable<OngekiObjectBase> Ordered(IEnumerable<OngekiObjectBase> source)
+            => source.OrderBy(x => ((ITimelineObject)x).TGrid.TotalGrid).ThenBy(x => x.Id);
 
         private static IEnumerable<OngekiObjectBase> RangeOf<T>(IBinaryFindRangeEnumable<T, TGrid> list, TGrid min, TGrid max)
             where T : OngekiObjectBase, ITimelineObject
@@ -143,6 +169,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         {
             var tGrid = (obj as ITimelineObject)?.TGrid;
             var xGrid = (obj as OngekiMovableObjectBase)?.XGrid;
+            var beam = obj as IBeamObject;
 
             return new
             {
@@ -157,15 +184,44 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 meterBunShi = (obj as MeterChange)?.BunShi,
                 meterBunbo = (obj as MeterChange)?.Bunbo,
                 enemyWave = obj is EnemySet enemy ? enemy.TagTblValue.ToString() : default,
-                laneType = obj is LaneStartBase lane ? lane.LaneType.ToString() : default,
-                // lane 的 RecordId 就是 referenceLaneRecordId 的取值来源（§58）。
-                recordId = obj is LaneStartBase laneStart ? laneStart.RecordId : (int?)null,
+                laneType = obj is ConnectableObjectBase connectable ? connectable.LaneType.ToString() : default,
+                // 起点（lane / beam）的 RecordId 就是 parentRecordId 的取值来源；延伸段自带父起点。
+                recordId = obj is ConnectableStartObject startObj ? startObj.RecordId : (int?)null,
+                parentRecordId = obj is ConnectableChildObjectBase childObj ? childObj.ReferenceStartObject?.RecordId : (int?)null,
                 hasHoldEnd = obj is Hold holdObj ? holdObj.HoldEnd is not null : (bool?)null,
+                // 光束：宽度档位与斜光束源偏移（斜光束的 IDShortName 是 OBS）。
+                widthId = beam?.WidthId.Id,
+                obliqueSourceXGrid = (beam?.ObliqueSourceXGridOffset) is { } oblique
+                    ? (object)new { unit = oblique.Unit, grid = oblique.Grid, totalGrid = oblique.TotalGrid }
+                    : null,
+                isObliqueBeam = obj switch
+                {
+                    BeamStart beamStart => beamStart.IsObliqueBeam,
+                    BeamNext beamNext => beamNext.IsObliqueBeam,
+                    _ => (bool?)null,
+                },
+                // 色带 lane 的颜色与亮度。
+                colorId = obj is IColorfulLane colorful ? colorful.ColorId.Id : (int?)null,
+                colorName = obj is IColorfulLane colorfulNamed ? colorfulNamed.ColorId.Name : default,
+                brightness = obj is ColorfulLaneStart colorfulStart ? colorfulStart.Brightness : (int?)null,
+                // 曲线控制点：Index 是它在所属延伸段上的顺序，parentObjectId 指向该延伸段。
+                segmentIndex = obj is LaneCurvePathControlObject control ? control.Index : (int?)null,
+                parentObjectId = obj is LaneCurvePathControlObject controlOwner ? controlOwner.RefCurveObject?.Id : (int?)null,
+                // lane block：Left / Right。
+                blockDirection = obj is LaneBlockArea block ? block.Direction.ToString() : default,
+                areaWidth = obj is IndividualSoflanArea area ? area.AreaWidth : (float?)null,
                 endTGrid = obj switch
                 {
                     Hold h when h.HoldEnd is { } he => new { unit = he.TGrid.Unit, grid = he.TGrid.Grid, totalGrid = he.TGrid.TotalGrid },
                     KeyframeSoflan => null,
                     ISoflan s => new { unit = s.EndTGrid.Unit, grid = s.EndTGrid.Grid, totalGrid = s.EndTGrid.TotalGrid },
+                    IndividualSoflanArea a => new { unit = a.EndIndicator.TGrid.Unit, grid = a.EndIndicator.TGrid.Grid, totalGrid = a.EndIndicator.TGrid.TotalGrid },
+                    LaneBlockArea b => new { unit = b.EndIndicator.TGrid.Unit, grid = b.EndIndicator.TGrid.Grid, totalGrid = b.EndIndicator.TGrid.TotalGrid },
+                    _ => null,
+                },
+                endXGrid = obj switch
+                {
+                    IndividualSoflanArea a => new { unit = a.EndIndicator.XGrid.Unit, grid = a.EndIndicator.XGrid.Grid, totalGrid = a.EndIndicator.XGrid.TotalGrid },
                     _ => null,
                 },
                 soflanType = obj switch
@@ -176,7 +232,12 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     _ => default,
                 },
                 soflanSpeed = (obj as ISoflan)?.Speed,
-                soflanGroup = (obj as ISoflan)?.SoflanGroup,
+                soflanGroup = obj switch
+                {
+                    ISoflan soflan => soflan.SoflanGroup,
+                    IndividualSoflanArea areaOwner => areaOwner.SoflanGroup,
+                    _ => (int?)null,
+                },
                 applySpeedInDesignMode = (obj as ISoflan)?.ApplySpeedInDesignMode,
             };
         }

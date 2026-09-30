@@ -45,6 +45,10 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
             var outcome = new EditorActionOutcome { Operation = "remove_object", ObjectType = family, ObjectId = objectId };
             var fumen = editor.Fumen;
+            // 曲线控制点的还原同样不能走 fumen.AddObject；而且必须在真正移除之前捕获 owner，
+            // 因为 RemoveControlObject 会把 RefCurveObject 清空。
+            var restoreObject = BuildAddObject(fumen, obj);
+            var removeObject = BuildRemoveObject(fumen, obj);
             var action = LambdaUndoAction.Create(
                 $"Remove {family} #{objectId}",
                 () =>
@@ -52,17 +56,17 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     outcome.Executed = true;
                     try
                     {
-                        fumen.RemoveObject(obj);
+                        removeObject();
                         outcome.Success = true;
                     }
                     catch (Exception ex)
                     {
                         outcome.Success = false;
                         outcome.ErrorMessage = ex.Message;
-                        TrySilently(() => fumen.AddObject(obj));
+                        TrySilently(restoreObject);
                     }
                 },
-                () => TrySilently(() => fumen.AddObject(obj)));
+                () => TrySilently(restoreObject));
 
             await RuntimeUiDispatcher.RunAsync(() =>
             {

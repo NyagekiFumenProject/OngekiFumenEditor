@@ -6,6 +6,8 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Base.OngekiObjects.Beam;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
@@ -44,27 +46,36 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             Hold hold => hold.HoldEnd?.TGrid ?? throw new ArgumentException($"Hold #{hold.Id} has no end; create one with editor.create_hold_end."),
             KeyframeSoflan => throw new ArgumentException($"Object #{obj.Id} is a keyframe soflan: it is a single point and has no end."),
             ISoflan soflan => soflan.EndTGrid,
+            IndividualSoflanArea area => area.EndIndicator.TGrid,
+            LaneBlockArea block => block.EndIndicator.TGrid,
             _ => throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no end position."),
         };
 
         private static void WriteEndTGrid(OngekiObjectBase obj, string propertyName, string rawValue)
         {
+            static TGrid Combine(string propertyName, string rawValue, TGrid current)
+                => propertyName == "endTGridUnit"
+                    ? new TGrid(ParseFloat(rawValue), current.Grid)
+                    : new TGrid(current.Unit, ParseInt(rawValue));
+
             switch (obj)
             {
                 case Hold hold:
                     {
                         var end = hold.HoldEnd ?? throw new ArgumentException($"Hold #{hold.Id} has no end; create one with editor.create_hold_end.");
-                        end.TGrid = propertyName == "endTGridUnit"
-                            ? new TGrid(ParseFloat(rawValue), end.TGrid.Grid)
-                            : new TGrid(end.TGrid.Unit, ParseInt(rawValue));
+                        end.TGrid = Combine(propertyName, rawValue, end.TGrid);
                         return;
                     }
                 case KeyframeSoflan:
                     throw new ArgumentException($"Object #{obj.Id} is a keyframe soflan: it is a single point and has no end.");
                 case ISoflan soflan:
-                    soflan.EndTGrid = propertyName == "endTGridUnit"
-                        ? new TGrid(ParseFloat(rawValue), soflan.EndTGrid.Grid)
-                        : new TGrid(soflan.EndTGrid.Unit, ParseInt(rawValue));
+                    soflan.EndTGrid = Combine(propertyName, rawValue, soflan.EndTGrid);
+                    return;
+                case IndividualSoflanArea area:
+                    area.EndIndicator.TGrid = Combine(propertyName, rawValue, area.EndIndicator.TGrid);
+                    return;
+                case LaneBlockArea block:
+                    block.EndIndicator.TGrid = Combine(propertyName, rawValue, block.EndIndicator.TGrid);
                     return;
                 default:
                     throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no end position.");
@@ -197,9 +208,30 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 case "speed":
                     return RequireSoflan(obj).Speed.ToString(CultureInfo.InvariantCulture);
                 case "soflanGroup":
-                    return RequireSoflan(obj).SoflanGroup.ToString(CultureInfo.InvariantCulture);
+                    return obj switch
+                    {
+                        ISoflan soflan => soflan.SoflanGroup.ToString(CultureInfo.InvariantCulture),
+                        IndividualSoflanArea area => area.SoflanGroup.ToString(CultureInfo.InvariantCulture),
+                        _ => throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no soflanGroup."),
+                    };
                 case "applySpeedInDesignMode":
                     return RequireSoflan(obj).ApplySpeedInDesignMode.ToString(CultureInfo.InvariantCulture);
+                case "widthId":
+                    return RequireBeam(obj).WidthId.Id.ToString(CultureInfo.InvariantCulture);
+                case "obliqueSourceXGridUnit":
+                    return RequireBeam(obj).ObliqueSourceXGridOffset?.Unit.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+                case "obliqueSourceXGridGrid":
+                    return RequireBeam(obj).ObliqueSourceXGridOffset?.Grid.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+                case "colorId":
+                    return RequireColorful(obj).ColorId.Id.ToString(CultureInfo.InvariantCulture);
+                case "brightness":
+                    return RequireColorful(obj).Brightness.ToString(CultureInfo.InvariantCulture);
+                case "endXGridUnit":
+                    return RequireSoflanArea(obj).EndIndicator.XGrid.Unit.ToString(CultureInfo.InvariantCulture);
+                case "endXGridGrid":
+                    return RequireSoflanArea(obj).EndIndicator.XGrid.Grid.ToString(CultureInfo.InvariantCulture);
+                case "blockDirection":
+                    return RequireLaneBlock(obj).Direction.ToString();
                 case ReferenceLaneRecordIdProperty:
                     return (obj as ILaneDockable)?.ReferenceLaneStrId is int laneId && laneId >= 0
                         ? laneId.ToString(CultureInfo.InvariantCulture)
@@ -217,12 +249,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 {
                     var timeline = RequireTimeline(obj);
                     timeline.TGrid = new TGrid(ParseFloat(rawValue), timeline.TGrid.Grid);
+                    ReorderConnectableChild(obj);
                     return;
                 }
                 case "tGridGrid":
                 {
                     var timeline = RequireTimeline(obj);
                     timeline.TGrid = new TGrid(timeline.TGrid.Unit, ParseInt(rawValue));
+                    ReorderConnectableChild(obj);
                     return;
                 }
                 case "xGridUnit":
@@ -282,10 +316,45 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     RequireSoflan(obj).Speed = ParseFiniteFloat(rawValue, propertyName);
                     return;
                 case "soflanGroup":
+                    if (obj is IndividualSoflanArea soflanArea)
+                    {
+                        // IndividualSoflanAreaMap 是按 SoflanGroup 分桶的字典 + 区间树，
+                        // 改组必须重新入桶，否则对象会留在旧组的列表里、新组查不到。
+                        fumen.IndividualSoflanAreaMap.Remove(soflanArea);
+                        soflanArea.SoflanGroup = ParseInt(rawValue);
+                        fumen.IndividualSoflanAreaMap.Add(soflanArea);
+                        return;
+                    }
                     RequireSoflan(obj).SoflanGroup = ParseInt(rawValue);
                     return;
                 case "applySpeedInDesignMode":
                     RequireSoflan(obj).ApplySpeedInDesignMode = ParseBool(rawValue);
+                    return;
+                case "widthId":
+                    RequireBeam(obj).WidthId = WidthId.ParseFromId(ParseInt(rawValue));
+                    return;
+                case "obliqueSourceXGridUnit":
+                case "obliqueSourceXGridGrid":
+                    {
+                        var beam = RequireBeam(obj);
+                        beam.ObliqueSourceXGridOffset = WriteXGridComponent(beam.ObliqueSourceXGridOffset, propertyName, rawValue);
+                        return;
+                    }
+                case "colorId":
+                    RequireColorful(obj).ColorId = ParseColorId(rawValue);
+                    return;
+                case "brightness":
+                    RequireColorful(obj).Brightness = ParseInt(rawValue);
+                    return;
+                case "endXGridUnit":
+                case "endXGridGrid":
+                    {
+                        var area = RequireSoflanArea(obj);
+                        area.EndIndicator.XGrid = WriteXGridComponent(area.EndIndicator.XGrid, propertyName, rawValue);
+                        return;
+                    }
+                case "blockDirection":
+                    RequireLaneBlock(obj).Direction = ParseLaneBlockDirection(rawValue);
                     return;
                 case ReferenceLaneRecordIdProperty:
                 {
@@ -338,5 +407,53 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
         private static BPMChange RequireBpm(OngekiObjectBase obj)
             => obj as BPMChange ?? throw new ArgumentException($"Object #{obj.Id} is not a bpm change.");
+
+        private static IBeamObject RequireBeam(OngekiObjectBase obj)
+            => obj as IBeamObject ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a beam.");
+
+        private static IColorfulLane RequireColorful(OngekiObjectBase obj)
+            => obj as IColorfulLane ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a colorful lane.");
+
+        private static IndividualSoflanArea RequireSoflanArea(OngekiObjectBase obj)
+            => obj as IndividualSoflanArea ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not an individual soflan area.");
+
+        private static LaneBlockArea RequireLaneBlock(OngekiObjectBase obj)
+            => obj as LaneBlockArea ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a lane block area.");
+
+        /// <summary>
+        /// 写 XGrid 的单个分量。空串表示「清空」（目前只有光束的斜光束源偏移允许为空）。
+        /// </summary>
+        private static XGrid WriteXGridComponent(XGrid current, string propertyName, string rawValue)
+        {
+            if (string.IsNullOrWhiteSpace(rawValue))
+                return default;
+
+            var basis = current ?? new XGrid(0, 0);
+            return propertyName.EndsWith("Unit", StringComparison.Ordinal)
+                ? new XGrid(ParseFloat(rawValue), basis.Grid)
+                : new XGrid(basis.Unit, ParseInt(rawValue));
+        }
+
+        /// <summary>色带 lane 的颜色：接受 <see cref="ColorIdConst.AllColors"/> 里的名字（忽略大小写）或数字 Id。</summary>
+        private static ColorId ParseColorId(string rawValue)
+        {
+            var text = (rawValue ?? string.Empty).Trim();
+            if (text.Length == 0)
+                throw new ArgumentException("colorId requires a colour name or numeric id.");
+
+            if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id))
+            {
+                var byId = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == id);
+                if (byId.Name is not null)
+                    return byId;
+                throw new ArgumentException($"'{rawValue}' is not a valid colorId; valid ids are {string.Join(", ", ColorIdConst.AllColors.Select(x => x.Id))}.");
+            }
+
+            var byName = ColorIdConst.AllColors.FirstOrDefault(x => string.Equals(x.Name, text, StringComparison.OrdinalIgnoreCase));
+            if (byName.Name is not null)
+                return byName;
+
+            throw new ArgumentException($"'{rawValue}' is not a valid colorId; valid names are {string.Join(", ", ColorIdConst.AllColors.Select(x => x.Name))}.");
+        }
     }
 }
