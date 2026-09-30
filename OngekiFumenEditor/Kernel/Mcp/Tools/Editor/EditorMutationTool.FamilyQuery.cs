@@ -144,10 +144,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 xGrid = xGrid is null ? null : new { unit = xGrid.Unit, grid = xGrid.Grid, totalGrid = xGrid.TotalGrid },
                 isCritical = obj is ICriticalableObject criticalable ? criticalable.IsCritical : (bool?)null,
                 bulletPalleteStrId = obj is IBulletPalleteReferencable referencable ? referencable.ReferenceBulletPallete?.StrID : default,
+                // §58：lane 引用在 MCP 里统一报告为 referenceLaneRecordId，滞空时为 null。
+                referenceLaneRecordId = obj is ILaneDockable dockable && dockable.ReferenceLaneStrId >= 0 ? dockable.ReferenceLaneStrId : (int?)null,
                 meterBunShi = (obj as MeterChange)?.BunShi,
                 meterBunbo = (obj as MeterChange)?.Bunbo,
                 enemyWave = obj is EnemySet enemy ? enemy.TagTblValue.ToString() : default,
                 laneType = obj is LaneStartBase lane ? lane.LaneType.ToString() : default,
+                // lane 的 RecordId 就是 referenceLaneRecordId 的取值来源（§58）。
+                recordId = obj is LaneStartBase laneStart ? laneStart.RecordId : (int?)null,
                 hasHoldEnd = obj is Hold holdObj ? holdObj.HoldEnd is not null : (bool?)null,
                 endTGrid = obj switch
                 {

@@ -47,6 +47,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             public double? Speed;
             public int? SoflanGroup;
             public bool? ApplySpeedInDesignMode;
+            public LaneStartBase ReferenceLane;
+            public bool SnapXToLane;
         }
 
         private static OngekiObjectBase CreateObject(ObjectCreateSpec spec)
@@ -54,12 +56,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             switch (spec.Family)
             {
                 case "tap":
-                    return new Tap
-                    {
-                        TGrid = spec.TGrid,
-                        XGrid = spec.XGrid,
-                        IsCritical = spec.IsCritical ?? false,
-                    };
+                    return CreateTap(spec);
 
                 case "flick":
                     return new Flick
@@ -168,20 +165,51 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 IsCritical = spec.IsCritical ?? false,
             };
 
-            if (spec.EndTGrid is { } endTGrid)
-            {
-                if (endTGrid <= spec.TGrid)
-                    throw new ArgumentException($"A hold end must be after the hold start (end {endTGrid} <= start {spec.TGrid}).");
+            if (spec.EndTGrid is { } endTGrid && endTGrid <= spec.TGrid)
+                throw new ArgumentException($"A hold end must be after the hold start (end {endTGrid} <= start {spec.TGrid}).");
 
+            // §58/§62：先绑 lane，再（可选）把起点吸附到 lane。吸附必须在 lane 算不出 XGrid 时直接失败。
+            if (spec.ReferenceLane is { } referenceLane)
+            {
+                hold.ReferenceLaneStart = referenceLane;
+                if (spec.SnapXToLane)
+                    hold.XGrid = RequireLaneXGrid(referenceLane, hold.TGrid, hold);
+            }
+
+            if (spec.EndTGrid is { } holdEndTGrid)
+            {
                 var holdEnd = new HoldEnd
                 {
-                    TGrid = endTGrid,
-                    XGrid = spec.XGrid,
+                    TGrid = holdEndTGrid,
+                    XGrid = hold.XGrid,
                 };
+                // SetHoldEnd 内部会 RedockXGrid()：终点是「lane 能算就跟 lane，算不出就静默保留」，
+                // 所以下面还要显式再算一次，把「算不出」升级成校验失败。
                 hold.SetHoldEnd(holdEnd);
+                if (spec.SnapXToLane && spec.ReferenceLane is { } laneForEnd)
+                    holdEnd.XGrid = RequireLaneXGrid(laneForEnd, holdEnd.TGrid, holdEnd);
             }
 
             return hold;
+        }
+
+        private static OngekiObjectBase CreateTap(ObjectCreateSpec spec)
+        {
+            var tap = new Tap
+            {
+                TGrid = spec.TGrid,
+                XGrid = spec.XGrid,
+                IsCritical = spec.IsCritical ?? false,
+            };
+
+            if (spec.ReferenceLane is { } referenceLane)
+            {
+                tap.ReferenceLaneStart = referenceLane;
+                if (spec.SnapXToLane)
+                    tap.XGrid = RequireLaneXGrid(referenceLane, tap.TGrid, tap);
+            }
+
+            return tap;
         }
 
         private static OngekiObjectBase CreateSoflan(ObjectCreateSpec spec)

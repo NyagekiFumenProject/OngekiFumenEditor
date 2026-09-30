@@ -48,7 +48,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             this.actionScopeManager = actionScopeManager;
         }
 
-        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode" };
+        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode", ReferenceLaneRecordIdProperty };
 
         // ---------------- bullet pallete (BPL) tools ----------------
 

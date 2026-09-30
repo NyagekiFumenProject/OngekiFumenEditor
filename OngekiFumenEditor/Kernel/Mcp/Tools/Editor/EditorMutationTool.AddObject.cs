@@ -28,7 +28,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.add_object", Title = "Add Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan. Bullets require bulletPalleteStrId; holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. Inside an action scope the object is queued until editor.end_action applies it.")]
+        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan. Bullets require bulletPalleteStrId; holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. tap and hold optionally dock to a lane via referenceLaneRecordId (+ snapXToLane to put the object exactly on that lane). Inside an action scope the object is queued until editor.end_action applies it.")]
         public async Task<object> AddObject(
             [Description("Object family: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold or soflan.")] string objectType,
             float tGridUnit = 0,
@@ -50,6 +50,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             [Description("Soflan family: speed multiplier (default 1).")] double? speed = default,
             [Description("Soflan family: soflan group (default 0).")] int? soflanGroup = default,
             [Description("Soflan family: whether the speed applies in design mode (default false).")] bool? applySpeedInDesignMode = default,
+            [Description("tap/hold only: RecordId of the lane to dock to (see editor.query_object objectType='lane'). Omit, or pass a negative value, to leave the object floating.")] int? referenceLaneRecordId = default,
+            [Description("tap/hold only: after docking, overwrite XGrid (and, for holds with an end, the HoldEnd XGrid) with the position the lane computes at that TGrid. Requires referenceLaneRecordId; fails when the lane has no path at that TGrid. Default false.")] bool? snapXToLane = default,
             string editorId = default,
             string expectedEditorId = default,
             bool requireConfirmation = true,
@@ -59,16 +61,31 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         {
             const string operationName = "editor.add_object";
             var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPalleteStrId, meterBunShi, meterBunbo, enemyWave, laneType, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, editorId, expectedEditorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPalleteStrId, meterBunShi, meterBunbo, enemyWave, laneType, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, editorId, expectedEditorId, requestedBy, clientId });
 
             if (!CreatableFamilies.Contains(family))
                 return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.add_object supports {string.Join(", ", CreatableFamilies)}; '{objectType}' is not supported yet.");
+
+            // §58：负数（UI 的 -1 哨兵）与不传同义 —— 不绑定 lane。
+            var laneRecordId = referenceLaneRecordId is { } requestedLaneRecordId && requestedLaneRecordId >= 0 ? requestedLaneRecordId : (int?)null;
+            if ((laneRecordId is not null || snapXToLane is not null) && family is not ("tap" or "hold"))
+                return Failure(operationName, "INVALID_ARGUMENT", $"referenceLaneRecordId and snapXToLane only apply to tap and hold; '{family}' cannot dock to a lane.");
+            if (snapXToLane == true && laneRecordId is null)
+                return Failure(operationName, "INVALID_ARGUMENT", $"snapXToLane requires a non-negative referenceLaneRecordId: there is no lane to snap to.");
 
             if (await TryAuthorizeAsync(operationName, requestedBy, clientId, $"Add a {family} object at T[{tGridUnit},{tGridGrid}].", requireConfirmation, cancellationToken) is { } denied)
                 return denied;
 
             if (TryResolveEditor(editorId, expectedEditorId, out var editor, out var resolvedEditorId, out var resolveError) is false)
                 return resolveError;
+
+            LaneStartBase referenceLane = default;
+            if (laneRecordId is { } laneToResolve)
+            {
+                referenceLane = editor.Fumen.Lanes.FirstOrDefault(x => x.RecordId == laneToResolve);
+                if (referenceLane is null)
+                    return Failure(operationName, "LANE_NOT_FOUND", $"No lane with RecordId {laneToResolve} in editor '{resolvedEditorId}'. List lanes with editor.query_object objectType='lane'.");
+            }
 
             BulletPallete pallete = default;
             if (family is "bullet" or "bell")
@@ -110,6 +127,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 Speed = speed,
                 SoflanGroup = soflanGroup,
                 ApplySpeedInDesignMode = applySpeedInDesignMode,
+                ReferenceLane = referenceLane,
+                SnapXToLane = snapXToLane == true,
             };
             if (endTGridUnit is not null || endTGridGrid is not null)
                 spec.EndTGrid = new TGrid(endTGridUnit ?? tGridUnit, endTGridGrid ?? 0);

@@ -200,6 +200,10 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return RequireSoflan(obj).SoflanGroup.ToString(CultureInfo.InvariantCulture);
                 case "applySpeedInDesignMode":
                     return RequireSoflan(obj).ApplySpeedInDesignMode.ToString(CultureInfo.InvariantCulture);
+                case ReferenceLaneRecordIdProperty:
+                    return (obj as ILaneDockable)?.ReferenceLaneStrId is int laneId && laneId >= 0
+                        ? laneId.ToString(CultureInfo.InvariantCulture)
+                        : string.Empty;
                 default:
                     throw new ArgumentException($"Unsupported property '{propertyName}'.");
             }
@@ -283,6 +287,15 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 case "applySpeedInDesignMode":
                     RequireSoflan(obj).ApplySpeedInDesignMode = ParseBool(rawValue);
                     return;
+                case ReferenceLaneRecordIdProperty:
+                {
+                    // §58：数字绑定；空串 / null / 负数（UI 的 -1 哨兵）滞空。
+                    var dockable = RequireLaneDockable(obj);
+                    dockable.ReferenceLaneStart = TryParseLaneRecordId(rawValue, out var recordId)
+                        ? ResolveLaneByRecordId(fumen, recordId)
+                        : default;
+                    return;
+                }
                 default:
                     throw new ArgumentException($"Unsupported property '{propertyName}'.");
             }
