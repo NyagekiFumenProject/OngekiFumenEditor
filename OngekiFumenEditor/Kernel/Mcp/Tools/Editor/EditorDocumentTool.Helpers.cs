@@ -5,6 +5,7 @@ using OngekiFumenEditor.Kernel.RuntimeAutomation;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Utils;
 using System;
@@ -106,6 +107,39 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             };
             McpOperationLogHelper.LogResult(operationName, response);
             return response;
+        }
+
+        private bool TryResolveEditor(string editorId, string expectedEditorId, out FumenVisualEditorViewModel editor, out string resolvedEditorId, out object errorResult)
+        {
+            editor = string.IsNullOrWhiteSpace(editorId)
+                ? editorDocumentManager.CurrentActivatedEditor
+                : (editorDocumentManager.TryGetEditorById(editorId, out var found) ? found : null);
+            resolvedEditorId = RuntimeAutomationEditorId.Generate(editor);
+
+            if (editor is null)
+            {
+                errorResult = new
+                {
+                    success = false,
+                    errorCode = string.IsNullOrWhiteSpace(editorId) ? "NO_ACTIVE_EDITOR" : "EDITOR_NOT_FOUND",
+                    errorMessage = string.IsNullOrWhiteSpace(editorId) ? "No active editor is available." : $"Editor '{editorId}' was not found.",
+                };
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(expectedEditorId) && !string.Equals(expectedEditorId, resolvedEditorId, StringComparison.Ordinal))
+            {
+                errorResult = new
+                {
+                    success = false,
+                    errorCode = "EDITOR_CHANGED",
+                    errorMessage = $"Expected editor '{expectedEditorId}' but resolved '{resolvedEditorId}'.",
+                };
+                return false;
+            }
+
+            errorResult = null;
+            return true;
         }
 
         private static object Failure(string operationName, string errorCode, string errorMessage)

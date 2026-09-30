@@ -388,8 +388,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
+        private int skipClosePromptOnce;
+
+        /// <summary>
+        /// 自动化（MCP）专用：让**下一次**关闭询问直接放行。关闭流程里 Caliburn 的 CloseStrategy
+        /// 会先问一次 <see cref="CanCloseAsync"/>，而它默认会弹「是否保存」模态框；自动化调用没有
+        /// 人来点这个框，所以由调用方先声明「dirty 策略已由我决定」，把弹框跳过。
+        /// 一次性消费：关不掉（例如被别处拦下）之后，用户手动关窗仍会正常询问。
+        /// </summary>
+        public void RequestCloseWithoutPrompt() => Interlocked.Exchange(ref skipClosePromptOnce, 1);
+
         public override async Task<bool> CanCloseAsync(CancellationToken cancellationToken)
         {
+            // 被 RequestCloseWithoutPrompt() 放行的那一次：不弹框，也不改 dirty 状态。
+            if (Interlocked.Exchange(ref skipClosePromptOnce, 0) == 1)
+                return true;
+
             if (!IsDirty)
                 return true;
 
