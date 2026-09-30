@@ -5,29 +5,122 @@
 * `Kernel/Mcp/` exposes tool-shaped MCP endpoints.
 * `Kernel/RuntimeAutomation/` owns script-host execution, authorization, client tracking, and security policy. Editor lookups now go through `IEditorDocumentManager` (see `EditorDocumentManagerExtensions` / `EditorContextInfo.From`).
 * Keep `Kernel/Mcp` thin. Put live-editor logic and script execution rules in `Kernel/RuntimeAutomation`.
-* The main entry points today are `Kernel/Mcp/Tools/Editor/EditorTool.cs`, `Kernel/Mcp/Tools/Script/ScriptTool.cs`, and `Kernel/Mcp/McpServerHost.cs`.
+* The main entry points today are `Kernel/Mcp/Tools/Editor/EditorTool.cs` (read-only discovery), `Kernel/Mcp/Tools/Editor/EditorMutationTool*.cs` (object/pallete/history mutation), `Kernel/Mcp/Tools/Editor/EditorDocumentTool*.cs` (open/create/close), `Kernel/Mcp/Tools/Script/ScriptTool.cs`, and `Kernel/Mcp/McpServerHost.cs`.
 
 ## Current MCP Tool Surface
 
-* Read-only editor tools:
-* `editor.get_current`
-* `editor.list_opened`
-* `editor.get_current_summary`
-* `editor.query_object` (pages one object family inside a TGrid range; returns runtime ids)
-* Script tools:
-* `script.compile`
-* `script.run_current_editor`
-* `script.run_editor`
-* `script.get_last_result`
-* Editor mutation tools (`Kernel/Mcp/Tools/Editor/EditorMutationTool.cs`):
-* `editor.begin_action` / `editor.end_action` open and close an undo/redo combine scope per editor. Mutations issued in between are queued and applied by `end_action`, which reports each operation's outcome, rolls the whole batch back when one of them failed, and can discard the queue with `discard=true`.
-* `editor.add_object` (tap/flick/comment/bpm) returns the new runtime object id.
-* `editor.modify_object` sets one whitelisted property (tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm).
-* `editor.remove_object` removes by runtime object id.
-* `editor.scroll_to` moves the viewport/playback position.
-* Outside an action scope these mutations apply immediately; inside one they report `applied=false, queued=true` and their real result arrives with `editor.end_action`.
-* `editor.get_current_summary` returns the most useful stable summary shape for assistants:
-  editor id, display name, project path, fumen path, dirty/active flags, and lightweight object counts.
+26 tools are registered today. Every tool accepts the shared routing/auth parameters
+`requestedBy`, `clientId` and `cancellationToken`; editor-scoped tools also accept
+`editorId` (defaults to the active editor) and `expectedEditorId` (guards against a
+mid-flight editor switch); mutating tools add `requireConfirmation` (default `true`).
+
+### Editor discovery and read-only
+
+| Tool | Purpose |
+| --- | --- |
+| `editor.get_current` | The active editor: id, display name, paths, dirty/active flags, object counts. |
+| `editor.list_opened` | All opened editors, for picking an `editorId`. |
+| `editor.get_current_summary` | Stable lightweight summary of the active editor (`NO_ACTIVE_EDITOR` when none). |
+| `editor.query_object` | Page one object family inside a TGrid range; returns runtime ids plus the DTO below. |
+
+### Editor document lifecycle
+
+| Tool | Purpose |
+| --- | --- |
+| `editor.open_fast` | Fast-open a chart (`.ogkr`/`.nyageki`); resolves the audio next to it, or pass `audioPath`. |
+| `editor.open_proj` | Open a `.nyagekiProj` project; returns once the new editor reports Ready. |
+| `editor.create_proj` | New project from an audio file, optionally seeded with a chart (`baseBpm` defaults to the chart's first BPM). |
+| `editor.close` | Close an editor tab. **Never saves**, is not undoable, and shows no dialogs. |
+
+`editor.close` details:
+
+* Omit `editorId` to close the active editor.
+* A dirty editor is refused with `EDITOR_DIRTY` so the caller can save or `editor.undo` first; pass `force=true` to discard the unsaved changes and close anyway.
+* The response reports `closed`, `wasDirty`, `discardedUnsavedChanges`, `remainingEditorCount`, `remainingEditorIds` and `activeEditorId`.
+* Internally it raises a one-shot bypass flag on the view model (`RequestCloseWithoutPrompt`) so the Caliburn `CanCloseAsync` save prompt is skipped exactly once, then awaits `TryCloseAsync`. Other errors: `NO_ACTIVE_EDITOR`, `EDITOR_NOT_FOUND`, `EDITOR_CHANGED`, `CLOSE_FAILED`.
+
+### Object mutation
+
+| Tool | Purpose |
+| --- | --- |
+| `editor.add_object` | Add one object (see the family cheat-sheet); returns the runtime object id. |
+| `editor.modify_object` | Set one whitelisted property of an object (see the property cheat-sheet). |
+| `editor.remove_object` | Remove an object by runtime id. |
+| `editor.scroll_to` | Move the viewport/playback to a TGrid position (design mode also moves playback). |
+| `editor.create_hold_end` | Attach a HoldEnd to a hold addressed by its runtime id (gives it length). |
+| `editor.remove_hold_end` | Drop a hold's end (the hold becomes zero-length again). |
+
+### Action scope and history
+
+| Tool | Purpose |
+| --- | --- |
+| `editor.begin_action` | Open an undo/redo combine scope per editor. |
+| `editor.end_action` | Apply the queued batch as one undo entry, or drop it with `discard=true`. |
+| `editor.undo` / `editor.redo` | Step the history; report the entry name and updated counts. |
+
+* Outside an action scope mutations apply immediately; inside one they report `applied=false, queued=true` and their real outcome (per operation, with whole-batch rollback on any failure) arrives with `editor.end_action`.
+* `editor.end_action` also accepts `name` for the combined history entry.
+
+### Bullet palletes
+
+| Tool | Purpose |
+| --- | --- |
+| `editor.create_bullet_pallete` | Create a BPL and return its StrID (allocated up-front, so it survives a discarded scope as an unused id). |
+| `editor.modify_bullet_pallete` | Edit editorName/shooter/target/size/type/speed/placeOffset/randomOffsetRange. |
+| `editor.remove_bullet_pallete` | Remove a BPL; refused with `PALLETE_IN_USE` while any bullet/bell still references it. |
+| `editor.query_bullet_pallete` | Detail one StrID, or page all palletes (`editorNameContains` filter). |
+
+### Script
+
+| Tool | Purpose |
+| --- | --- |
+| `script.compile` | Compile a script without running it. |
+| `script.run_current_editor` / `script.run_editor` | Run against the active / a named editor (default `requireConfirmation=true`, `wrapUndoTransaction=true`). |
+| `script.get_last_result` | Fetch the last script result. |
+
+## Object Family, Property And Value Cheat-Sheet
+
+`editor.add_object` and `editor.query_object` accept the same twelve families
+(`CreatableFamilies` in `EditorMutationTool.cs`):
+`tap`, `flick`, `comment`, `bpm`, `bullet`, `bell`, `meter`, `clickse`, `enemy`, `lane`, `hold`, `soflan`.
+
+Family-specific add arguments:
+
+* `bullet` / `bell` — `bulletPalleteStrId` (required for bullet; optional for bell, where `--` means the Ongeki default bell).
+* `meter` — `meterBunShi` / `meterBunbo` (default 4/4).
+* `enemy` — `enemyWave` (`Wave1` / `Wave2` / `Boss`, default `Boss`).
+* `lane` — `laneType` (`center` default, plus `left`, `right`, `colorful`, `enemy`, `wallLeft`, `wallRight`).
+* `hold` — optional `endTGridUnit` / `endTGridGrid`, or attach the end later with `editor.create_hold_end`.
+* `soflan` — `soflanType` (`duration` default, or `interpolatable`, `keyframe`) plus `speed`, `soflanGroup`, `applySpeedInDesignMode`. `duration`/`interpolatable` require `endTGridUnit`/`endTGridGrid`; `keyframe` is a single point and forbids them.
+
+`editor.modify_object` whitelist (`SupportedModifyProperties`):
+`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `bpm`, `bulletPallete`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`.
+
+* `bulletPallete` — bullet/bell only; value is a pallete StrID (`""` or `--` clears a bell's pallete).
+* `bunShi`/`bunbo` — meter; `enemyWave` — enemy; `endTGrid*` — hold with an end, or any soflan; `speed`/`soflanGroup`/`applySpeedInDesignMode` — soflan.
+* `referenceLaneRecordId` — tap/hold only (see Lane Docking below); `""` or a negative value clears the binding.
+
+`editor.query_object` DTO fields (per object): `id`, `type`, `tGrid{unit,grid,totalGrid}`,
+`xGrid{unit,grid,totalGrid}`, `isCritical`, `bulletPalleteStrId`, `referenceLaneRecordId`
+(null when floating), `meterBunShi`, `meterBunbo`, `enemyWave`, `laneType`, `recordId`
+(lane only — this is the value you pass back as `referenceLaneRecordId`), `hasHoldEnd`,
+`endTGrid{unit,grid,totalGrid}`, `soflanType`, `soflanSpeed`, `soflanGroup`, `applySpeedInDesignMode`.
+TGrid/XGrid totals are reported in the editor's internal scale.
+
+## Lane Docking (tap / hold)
+
+Only `tap` and `hold` implement `ILaneDockable`. A lane's `RecordId` is its stable
+identity (not its runtime id); resolve it against `fumen.Lanes`.
+
+* **Bind** — `editor.add_object` with `referenceLaneRecordId`, or `editor.modify_object` with property `referenceLaneRecordId` and the RecordId as `newValue`. An omitted, negative, `""` or `"null"` value leaves the object floating.
+* **Snap** — add `snapXToLane: true` to re-derive the XGrid from the lane at the object's TGrid: a tap gets its `XGrid`; a hold gets both `XGrid` and its `HoldEnd.XGrid`. Snapping is strict — when the lane has no path at that TGrid the call fails (`INVALID_ARGUMENT`) rather than silently keeping the old XGrid.
+* Snapping also works while moving: `editor.modify_object` accepts `snapXToLane` together with `referenceLaneRecordId`, `tGridUnit` or `tGridGrid`.
+* On undo both the property and every snapped XGrid are rolled back together (captured via `DockableXGridSnapshot`).
+
+Failure codes: `LANE_NOT_FOUND` (unknown RecordId), `INVALID_ARGUMENT` (lane args on a
+non-dockable family, `snapXToLane` without a lane, snap on a non-snappable property,
+snap combined with clearing the lane, snap on an unbound object, or the lane has no path
+at that TGrid).
 
 ## Current MCP Resource Surface
 
