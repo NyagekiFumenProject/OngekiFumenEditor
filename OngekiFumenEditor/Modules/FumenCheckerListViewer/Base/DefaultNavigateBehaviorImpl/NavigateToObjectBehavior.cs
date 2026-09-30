@@ -4,17 +4,18 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateB
 {
     public class NavigateToObjectBehavior : INavigateBehavior
     {
-        private readonly OngekiTimelineObjectBase ongekiObject;
-
         public NavigateToObjectBehavior(OngekiTimelineObjectBase ongekiObject)
         {
-            this.ongekiObject = ongekiObject;
+            OngekiObject = ongekiObject;
         }
+
+        /// <summary>该检查结果指向的谱面对象；MCP 的 editor.check 用它回报 objectId / tGrid。</summary>
+        public OngekiTimelineObjectBase OngekiObject { get; }
 
         public void Navigate(IFumenCheckContext editor)
         {
-            editor?.ScrollTo(ongekiObject);
-            editor?.NotifyObjectClicked(ongekiObject);
+            editor?.ScrollTo(OngekiObject);
+            editor?.NotifyObjectClicked(OngekiObject);
         }
     }
 }

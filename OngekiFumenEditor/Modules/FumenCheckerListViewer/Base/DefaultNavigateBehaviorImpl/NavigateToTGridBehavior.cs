@@ -4,16 +4,17 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultNavigateB
 {
     public class NavigateToTGridBehavior : INavigateBehavior
     {
-        private readonly TGrid tGrid;
-
         public NavigateToTGridBehavior(TGrid tGrid)
         {
-            this.tGrid = tGrid;
+            TargetTGrid = tGrid;
         }
+
+        /// <summary>该检查结果指向的谱面位置；MCP 的 editor.check 用它回报 tGrid。</summary>
+        public TGrid TargetTGrid { get; }
 
         public void Navigate(IFumenCheckContext editor)
         {
-            editor?.ScrollTo(tGrid);
+            editor?.ScrollTo(TargetTGrid);
         }
     }
 }
