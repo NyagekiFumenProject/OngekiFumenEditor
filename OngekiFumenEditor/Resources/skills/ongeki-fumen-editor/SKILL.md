@@ -82,6 +82,7 @@ When reviewing changes in this repo, prioritize:
 * Default to `[Export]`, `[Export(typeof(...))]`, `[ImportingConstructor]`, and `[ImportMany]` instead of introducing a new DI style.
 * Use `LambdaUndoAction.Create(...)` and `UndoRedoManager.ExecuteAction(...)` for editor mutations that must be undoable.
 * After any MCP chart mutation, call `editor.check` and fix what it reports: individual edits can pass argument validation yet break chart consistency (e.g. a lane-docked tap without `snapXToLane` trips `WrongLocation`). Reading the meta info back has no dedicated tool — `editor.set_metainfo` echoes `oldValue`.
+* Lanes and beams are **start-plus-segment chains**, not flat objects: `fumen.Lanes` / `fumen.Beams` enumerate only the starts, segments live in `start.Children`, and curve control points hang off individual segments. Keep the families straight when touching them (`lane` / `lanenext` / `curvecontrol`, `beam` / `beamnext`), and note that `OngekiFumen.AddObject` deliberately does **not** handle `LaneCurvePathControlObject` (only `RemoveObject` does) — a curve control point must be attached through its owning segment.
 * `FumenVisualEditorViewModel` is partial; inspect sibling partials before adding editor behavior.
 * Many features follow the same slice shape: `MenuDefinitions.cs`, `Commands/`, `Views/`, `ViewModels/`, and sometimes `Kernel/` or `Graphics/`.
 * Expect `.nyagekiProj` save/load to normalize relative paths and use temp-file copy strategies.

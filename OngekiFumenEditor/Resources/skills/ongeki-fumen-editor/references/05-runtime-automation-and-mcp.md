@@ -87,32 +87,75 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 
 ## Object Family, Property And Value Cheat-Sheet
 
-`editor.add_object` and `editor.query_object` accept the same twelve families
+`editor.add_object` and `editor.query_object` accept the same eighteen families
 (`CreatableFamilies` in `EditorMutationTool.cs`):
-`tap`, `flick`, `comment`, `bpm`, `bullet`, `bell`, `meter`, `clickse`, `enemy`, `lane`, `hold`, `soflan`.
+
+`tap`, `flick`, `comment`, `bpm`, `bullet`, `bell`, `meter`, `clickse`, `enemy`, `lane`, `hold`, `soflan`,
+`lanenext`, `beam`, `beamnext`, `curvecontrol`, `isfarea`, `laneblock`.
+
+The last six reach the "connectable" structures (lane/beam are a start plus a chain of
+segments, and each segment can carry curve control points) that the flat families cannot:
+
+* **`lane`** enumerates lane **starts** (`LaneStartBase`) only. Its `recordId` is the dock target for tap/hold.
+* **`lanenext`** enumerates lane **segments** (the `LaneNext` chain). A freshly added `lane` is a
+  zero-length point — extend it by adding `lanenext` segments. Requires `parentRecordId`
+  (the owning start's `recordId`).
+* **`curvecontrol`** attaches a `LaneCurvePathControlObject` to a segment. Requires
+  `referenceObjectId` (the segment's `id` from `objectType='lanenext'`).
+* **`beam`** enumerates `BeamStart`; **`beamnext`** its segments (also requires `parentRecordId`).
+* **`isfarea`** — `IndividualSoflanArea`, a rectangular range.
+* **`laneblock`** — `LaneBlockArea`, a range that occludes one side of the lanes.
 
 Family-specific add arguments:
 
 * `bullet` / `bell` — `bulletPalleteStrId` (required for bullet; optional for bell, where `--` means the Ongeki default bell).
 * `meter` — `meterBunShi` / `meterBunbo` (default 4/4).
 * `enemy` — `enemyWave` (`Wave1` / `Wave2` / `Boss`, default `Boss`).
-* `lane` — `laneType` (`center` default, plus `left`, `right`, `colorful`, `enemy`, `wallLeft`, `wallRight`).
+* `lane` — `laneType` (`center` default, plus `left`, `right`, `colorful`, `enemy`, `wallLeft`, `wallRight`, `autoplayFader`). A `colorful` lane also takes `colorId` (a `ColorIdConst` name such as `Akari`, `Yuzu`, `Rio`, … — or its numeric id) and `brightness`; without them it is created in the default Akari colour at brightness 3.
 * `hold` — optional `endTGridUnit` / `endTGridGrid`, or attach the end later with `editor.create_hold_end`.
 * `soflan` — `soflanType` (`duration` default, or `interpolatable`, `keyframe`) plus `speed`, `soflanGroup`, `applySpeedInDesignMode`. `duration`/`interpolatable` require `endTGridUnit`/`endTGridGrid`; `keyframe` is a single point and forbids them.
+* `lanenext` / `beamnext` — `parentRecordId` (required) plus the segment's own `tGrid*`/`xGrid*`. A segment is a **single point**, so `endTGrid*` is forbidden. The concrete subtype follows the owning start (`colorful` start → `ColorfulLaneNext`, and so on), so the same call extends every lane/beam flavour; on a colorful lane `colorId`/`brightness` are accepted too.
+* `beam` — `widthId` (1–5, default 1) and optionally `obliqueSourceXGridUnit`/`obliqueSourceXGridGrid` to make it an oblique beam (its short name becomes `OBS`).
+* `curvecontrol` — `referenceObjectId` (required) plus the control point's `tGrid*`/`xGrid*`. It is inserted by `index` order automatically.
+* `isfarea` / `laneblock` — `endTGridUnit`/`endTGridGrid` required; `isfarea` also takes `endXGridUnit`/`endXGridGrid` (its width) and `soflanGroup`, `laneblock` takes `blockDirection` (`left` default, or `right`).
 
 `editor.modify_object` whitelist (`SupportedModifyProperties`):
-`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `bpm`, `bulletPallete`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`.
+`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `bpm`, `bulletPallete`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`, `widthId`, `obliqueSourceXGridUnit`, `obliqueSourceXGridGrid`, `colorId`, `brightness`, `endXGridUnit`, `endXGridGrid`, `blockDirection`.
 
 * `bulletPallete` — bullet/bell only; value is a pallete StrID (`""` or `--` clears a bell's pallete).
-* `bunShi`/`bunbo` — meter; `enemyWave` — enemy; `endTGrid*` — hold with an end, or any soflan; `speed`/`soflanGroup`/`applySpeedInDesignMode` — soflan.
+* `bunShi`/`bunbo` — meter; `enemyWave` — enemy.
+* `endTGrid*` — hold with an end, soflan, `isfarea` or `laneblock`; `speed`/`applySpeedInDesignMode` — soflan only; `soflanGroup` — soflan or `isfarea`.
+* `widthId` / `obliqueSourceXGridUnit` / `obliqueSourceXGridGrid` — beam (`""` clears the oblique source); `colorId` / `brightness` — colorful lane; `endXGrid*` — `isfarea`; `blockDirection` — `laneblock`.
 * `referenceLaneRecordId` — tap/hold only (see Lane Docking below); `""` or a negative value clears the binding.
+* Moving a segment's `tGrid*` re-sorts it inside its start automatically, so the chain order stays valid.
 
 `editor.query_object` DTO fields (per object): `id`, `type`, `tGrid{unit,grid,totalGrid}`,
 `xGrid{unit,grid,totalGrid}`, `isCritical`, `bulletPalleteStrId`, `referenceLaneRecordId`
-(null when floating), `meterBunShi`, `meterBunbo`, `enemyWave`, `laneType`, `recordId`
-(lane only — this is the value you pass back as `referenceLaneRecordId`), `hasHoldEnd`,
-`endTGrid{unit,grid,totalGrid}`, `soflanType`, `soflanSpeed`, `soflanGroup`, `applySpeedInDesignMode`.
+(null when floating), `meterBunShi`, `meterBunbo`, `enemyWave`, `laneType`,
+`recordId` (start objects only — this is the value you pass back as `referenceLaneRecordId`
+or `parentRecordId`), `parentRecordId` (segments and curve control points),
+`hasHoldEnd`, `endTGrid{unit,grid,totalGrid}`, `endXGrid` (`isfarea`), `widthId`,
+`obliqueSourceXGrid`, `isObliqueBeam`, `colorId`, `colorName`, `brightness`,
+`segmentIndex` and `parentObjectId` (curve control points), `blockDirection` (`laneblock`),
+`areaWidth` (`isfarea`), `soflanType`, `soflanSpeed`, `soflanGroup`, `applySpeedInDesignMode`.
 TGrid/XGrid totals are reported in the editor's internal scale.
+
+## Lane And Beam Structure (start / segment / curve control)
+
+Lanes and beams are not flat objects. A start (`LaneStartBase` / `BeamStart`) owns an
+ordered chain of segments (`LaneNextBase` / `BeamNext`), and every segment may carry
+`LaneCurvePathControlObject` points that bend it into a Bezier curve.
+
+* `objectType='lane'` / `'beam'` list **starts** only. A start's `recordId` is its stable
+  identity — the dock target for tap/hold, and the `parentRecordId` for segments.
+* A start added through `editor.add_object` is a **zero-length point**: extend it by
+  adding segments (`objectType='lanenext'` / `'beamnext'` with `parentRecordId`). A lane
+  with no segment covers nothing, so `snapXToLane` against it will fail.
+* Segments come back from `objectType='lanenext'` / `'beamnext'`; their `id` is what
+  `objectType='curvecontrol'` takes as `referenceObjectId`.
+* Removing a start removes its whole chain; removing a segment only shortens the chain.
+* The segment subtype always follows the owning start, so one `lanenext` call extends
+  center / left / right / colorful / enemy / wall / autoPlayFader lanes alike.
 
 ## Lane Docking (tap / hold)
 
