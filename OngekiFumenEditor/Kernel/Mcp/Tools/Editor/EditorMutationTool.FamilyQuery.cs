@@ -112,7 +112,15 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 case "bpm":
                     return RangeOf(fumen.BpmList, min, max);
                 case "meter":
-                    return RangeOf(fumen.MeterChanges, min, max);
+                    // MeterChanges.BinaryFindRange 只查 changedMeterList，**不含 FirstMeter**；
+                    // 但「列出全部节拍」显然不该漏掉 T=0 的首个节拍（枚举器与 Count 都把它算在内），这里补上。
+                    return fumen.MeterChanges.BinaryFindRange(min, max)
+                        .Cast<OngekiObjectBase>()
+                        .Concat(InRange(fumen.MeterChanges.FirstMeter, min, max)
+                            ? new OngekiObjectBase[] { fumen.MeterChanges.FirstMeter }
+                            : Enumerable.Empty<OngekiObjectBase>())
+                        .Distinct()
+                        .OrderBy(x => ((MeterChange)x).TGrid.TotalGrid);
                 case "hold":
                     return fumen.Holds.Where(x => InRange(x, min, max));
                 case "lane":
