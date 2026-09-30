@@ -2088,7 +2088,7 @@ Answer:
 
 ### 62. `SnapXToLane` semantics for Tap/Hold
 
-Status: open
+Status: decided
 
 Problem:
 
@@ -2109,3 +2109,9 @@ Recommended answer:
 Question:
 
 `SnapXToLane=true` 时是否同时把 Tap/Hold 起点和 HoldEnd 终点的 `XGrid` 吸附到目标 lane，并在无法计算时校验失败？
+
+Answer:
+
+同意。`SnapXToLane` 是 add/set 中针对 `tap` / `hold` 的 optional boolean，默认 `false`。当 `ReferenceLaneRecordId` 为非 null 且 `SnapXToLane = true` 时，用目标 lane 在 `Tap.TGrid`（或 `Hold.TGrid`）的 `CalulateXGrid` 更新起点 `XGrid`；对带 `HoldEnd` 的 `Hold`，同时用目标 lane 在 `HoldEnd.TGrid` 的 `CalulateXGrid` 更新 `HoldEnd.XGrid`。若 `ReferenceLaneRecordId = null` 却请求 `SnapXToLane = true`，校验失败（避免“滞空但 snap”的矛盾请求）；若 lane 在目标 `TGrid` 无法计算 `XGrid`，同样校验失败，不静默保留旧 `XGrid`。
+
+实现落点：`EditorMutationTool.AddObject.cs` 与 `EditorMutationTool.ModifyObject.cs` 共用 `EditorMutationTool.LaneDocking.cs` 的吸附/回滚逻辑（`SnapDockableXGridToBoundLane` + `DockableXGridSnapshot`，undo 时属性与所有被吸附的 `XGrid` 一并回滚）；未绑定/非 tap-hold/无 lane 路径分别返回 `INVALID_ARGUMENT`，未知 `RecordId` 返回 `LANE_NOT_FOUND`。
