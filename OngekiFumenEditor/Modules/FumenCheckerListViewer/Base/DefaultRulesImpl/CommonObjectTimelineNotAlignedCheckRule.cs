@@ -28,6 +28,12 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
         public IEnumerable<ICheckResult> CheckRule(OngekiFumen fumen, IFumenCheckContext fumenHostViewModel)
         {
             const string ruleName = "ObjectTimelineNotAligned";
+
+            // BPM ≤ 0 时拍段列表的时间轴换算会算出 NaN，TimeSpan 会直接抛异常（见 BpmOutOfRange 规则）。
+            // 这种谱面的节奏基准已经不成立，直接跳过本规则，避免一条规则把整批检查结果打崩。
+            if (fumen.BpmList.Any(x => x.BPM < 0.0001))
+                yield break;
+
             var beats = fumen.MeterChanges.GetCachedAllTimeSignatureUniformPositionList(fumen.BpmList);
             var currentIndex = 0;
             var currentStartTGrid = default(TGrid);

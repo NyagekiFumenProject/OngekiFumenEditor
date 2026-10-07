@@ -35,8 +35,8 @@ export default {
     ctx.hasKeys('check response shape', payload,
       ['success', 'editorId', 'ruleCount', 'minSeverity', 'total', 'errorCount', 'problemCount', 'suggestCount', 'matched', 'returned', 'truncated', 'results', 'ruleFailures']);
 
-    // WallConflictCheckRule ships without [Export] and is therefore a dead rule: 15, not 16.
-    ctx.equal('the host runs the expected number of check rules', payload.ruleCount, 15);
+    // WallConflictCheckRule ships without [Export] and is therefore a dead rule: 22, not 23.
+    ctx.equal('the host runs the expected number of check rules', payload.ruleCount, 22);
     ctx.isArray('every rule that ran reports back', payload.ruleFailures, {});
     ctx.equal('no rule blew up', payload.ruleFailures.length, 0);
     ctx.equal('total equals the number of matched results when nothing is truncated', payload.total >= payload.matched, true);

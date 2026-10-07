@@ -49,6 +49,11 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             };
             bpl.RandomOffsetRange = dataIntArr.ElementAtOrDefault(8);
 
+            // 游戏侧 BulletPalleteList 是 Dictionary<string, BulletPallete>：同 strID 的第二条会抛
+            // ArgumentException（读谱崩溃）。编辑器这里会静默用新模板替换旧模板，所以只能在此记缺陷。
+            if (fumen.BulletPalleteList.Any(x => string.Equals(x.StrID, bpl.StrID, StringComparison.Ordinal)))
+                ReportBulletPalleteIdDuplicate(fumen, args, bpl.StrID);
+
             return bpl;
         }
     }

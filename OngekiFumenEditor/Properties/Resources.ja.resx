@@ -1012,8 +1012,26 @@
   <data name="MenuMirrorSelectionLaneColors" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
-  <data name="MissingBossEnemySet" xml:space="preserve">
-    <value>ボスのエネミーセットオブジェクトがありません。BOSSWAVEを判断するために配置することを推奨します。</value>
+  <data name="BpmOutOfRange" xml:space="preserve">
+    <value>BPM記録 {0} の値 {1} が0以下（または 0.0001 未満）です。ゲーム側はこの区間の時間換算を飛ばすため、以降のノートの時刻が不正になります。</value>
+  </data>
+  <data name="BulletPalleteDuplicateId" xml:space="preserve">
+    <value>弾種ID「{0}」が重複しています。ゲーム側は辞書に登録するため重複キーで例外が発生し、譜面の読み込みに失敗します。</value>
+  </data>
+  <data name="HoldProgressJudgeLoop" xml:space="preserve">
+    <value>ホールド {0}：BPM {1} と PROGJUDGE_BPM {2} の組み合わせで判定点の間隔が0になり、読み込み時に無限ループ（フリーズ）します。</value>
+  </data>
+  <data name="MissingEnemySetWave" xml:space="preserve">
+    <value>EnemySet に {0} がありません。ゲーム側は全てのEnemySetを破棄し、既定のウェーブ構成に切り替えます。</value>
+  </data>
+  <data name="OrphanLaneRecord" xml:space="preserve">
+    <value>レーン延伸記録 {0}(recordId={1}) に対応する起点記録がありません。ゲーム側では不完全なレーンとして登録され、そのidを参照するノートで例外が発生します。</value>
+  </data>
+  <data name="RecordColumnTooFew" xml:space="preserve">
+    <value>記録 {0} の列数が不足しています（必要 {1}、実際 {2}）。ゲーム側は列番号で読み取るため、欠けた列で例外が発生します。</value>
+  </data>
+  <data name="SoflanPatternMissingForArea" xml:space="preserve">
+    <value>個別ソフランエリア(グループ {0})内にホールド {1} がありますが、そのグループを使うソフランがありません。ゲーム側の読み込み時に例外が発生します。</value>
   </data>
   <data name="MissingEndObject" xml:space="preserve">
     <value>HOLD(Oid:{0})オブジェクトに終点が設定されていません</value>

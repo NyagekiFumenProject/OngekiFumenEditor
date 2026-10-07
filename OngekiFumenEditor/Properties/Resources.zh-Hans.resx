@@ -1020,8 +1020,26 @@
   <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
     <value>镜像击打轨道颜色</value>
   </data>
-  <data name="MissingBossEnemySet" xml:space="preserve">
-    <value>缺少Boss的EnemySet物件,建议放置一个来钦定boss出现的时机</value>
+  <data name="BpmOutOfRange" xml:space="preserve">
+    <value>BPM 记录 {0} 的取值 {1} ≤ 0（或小于 0.0001）：游戏会跳过该段时间轴换算，后续物件的时刻全部无效。</value>
+  </data>
+  <data name="BulletPalleteDuplicateId" xml:space="preserve">
+    <value>弹种ID「{0}」重复定义：游戏把弹种读进字典，重复键会抛异常导致读谱崩溃（编辑器只保留最后一个模板）。</value>
+  </data>
+  <data name="HoldProgressJudgeLoop" xml:space="preserve">
+    <value>长条 {0}：BPM {1} 与 PROGJUDGE_BPM {2} 的组合会让游戏判定点步长归零，读谱时长条判定点生成死循环（游戏卡死）。</value>
+  </data>
+  <data name="MissingEnemySetWave" xml:space="preserve">
+    <value>EnemySet 缺少 {0}：游戏会丢弃整组 EnemySet 并改用默认波次布局，作者编写的波次全部失效。</value>
+  </data>
+  <data name="OrphanLaneRecord" xml:space="preserve">
+    <value>轨道延伸段记录 {0}(recordId={1}) 找不到对应的起点记录：游戏会为它注册一条残缺轨道，引用该 id 的音符/长条会异常崩溃。</value>
+  </data>
+  <data name="RecordColumnTooFew" xml:space="preserve">
+    <value>记录 {0} 列数不足（需要 {1} 列，实际 {2} 列）：游戏按列索引读取这些字段，缺列会越界崩溃。</value>
+  </data>
+  <data name="SoflanPatternMissingForArea" xml:space="preserve">
+    <value>局部Soflan区域(组 {0})内有长条 {1}，但没有任何soflan使用该组：游戏读谱时查soflan表会因缺键抛异常崩溃。</value>
   </data>
   <data name="MissingEndObject" xml:space="preserve">
     <value>Hold(Oid:{0})物件缺少HoldEnd中止物件</value>

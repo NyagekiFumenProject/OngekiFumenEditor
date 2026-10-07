@@ -4625,11 +4625,65 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Missing EnemySet(Boss) object. It is recommended to place one to designate the timing of the boss&apos;s appearance.
+        ///   Looks up a localized string similar to BPM record {0} has value {1} (at or below zero, or under 0.0001): the game skips the time conversion for that section, leaving later notes with invalid times.
         /// </summary>
-        public static string MissingBossEnemySet {
+        public static string BpmOutOfRange {
             get {
-                return ResourceManager.GetString("MissingBossEnemySet", resourceCulture);
+                return ResourceManager.GetString("BpmOutOfRange", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate bullet pallete id &apos;{0}&apos;: the game loads palletes into a dictionary and throws on the duplicate key, so the chart fails to load.
+        /// </summary>
+        public static string BulletPalleteDuplicateId {
+            get {
+                return ResourceManager.GetString("BulletPalleteDuplicateId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hold {0} with BPM {1} against PROGJUDGE_BPM {2}: the game&apos;s judge point step becomes zero while loading the chart, which freezes the game in an infinite loop.
+        /// </summary>
+        public static string HoldProgressJudgeLoop {
+            get {
+                return ResourceManager.GetString("HoldProgressJudgeLoop", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to EnemySet is missing {0}: the game discards every EnemySet and falls back to the default wave layout.
+        /// </summary>
+        public static string MissingEnemySetWave {
+            get {
+                return ResourceManager.GetString("MissingEnemySetWave", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane segment record {0} (recordId={1}) has no matching start record: the game registers a broken lane for it, and notes or holds referencing that id may crash.
+        /// </summary>
+        public static string OrphanLaneRecord {
+            get {
+                return ResourceManager.GetString("OrphanLaneRecord", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Record {0} has too few columns (needs {1}, has {2}): the game reads those fields by column index and crashes on the missing ones.
+        /// </summary>
+        public static string RecordColumnTooFew {
+            get {
+                return ResourceManager.GetString("RecordColumnTooFew", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.
+        /// </summary>
+        public static string SoflanPatternMissingForArea {
+            get {
+                return ResourceManager.GetString("SoflanPatternMissingForArea", resourceCulture);
             }
         }
 

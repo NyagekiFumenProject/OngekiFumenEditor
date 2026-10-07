@@ -1020,8 +1020,26 @@
   <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
     <value>Mirror lane _colors</value>
   </data>
-  <data name="MissingBossEnemySet" xml:space="preserve">
-    <value>Missing EnemySet(Boss) object. It is recommended to place one to designate the timing of the boss's appearance</value>
+  <data name="BpmOutOfRange" xml:space="preserve">
+    <value>BPM record {0} has value {1} (at or below zero, or under 0.0001): the game skips the time conversion for that section, leaving later notes with invalid times.</value>
+  </data>
+  <data name="BulletPalleteDuplicateId" xml:space="preserve">
+    <value>Duplicate bullet pallete id '{0}': the game loads palletes into a dictionary and throws on the duplicate key, so the chart fails to load.</value>
+  </data>
+  <data name="HoldProgressJudgeLoop" xml:space="preserve">
+    <value>Hold {0} with BPM {1} against PROGJUDGE_BPM {2}: the game's judge point step becomes zero while loading the chart, which freezes the game in an infinite loop.</value>
+  </data>
+  <data name="MissingEnemySetWave" xml:space="preserve">
+    <value>EnemySet is missing {0}: the game discards every EnemySet and falls back to the default wave layout.</value>
+  </data>
+  <data name="OrphanLaneRecord" xml:space="preserve">
+    <value>Lane segment record {0} (recordId={1}) has no matching start record: the game registers a broken lane for it, and notes or holds referencing that id may crash.</value>
+  </data>
+  <data name="RecordColumnTooFew" xml:space="preserve">
+    <value>Record {0} has too few columns (needs {1}, has {2}): the game reads those fields by column index and crashes on the missing ones.</value>
+  </data>
+  <data name="SoflanPatternMissingForArea" xml:space="preserve">
+    <value>Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.</value>
   </data>
   <data name="MissingEndObject" xml:space="preserve">
     <value>Hold (Oid:{0}) object is missing the HoldEnd object</value>

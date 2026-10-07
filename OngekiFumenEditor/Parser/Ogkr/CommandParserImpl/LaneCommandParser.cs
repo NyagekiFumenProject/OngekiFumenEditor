@@ -12,19 +12,40 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
     public abstract class LaneCommandParserBase : CommandParserBase
     {
-        public void CommonParse(ConnectableObjectBase connectObject, CommandArgs args, OngekiFumen fumen)
+        /// <summary>
+        /// 解析 Start/子段的 TGrid 与 XGrid；色带轨道另有 color/brightness 两列（第 5/6 列）。
+        /// 返回 false 表示该记录连位置列都不够，调用方应跳过它；返回 true 时即使色带列缺失，
+        /// 对象其余字段仍可用（color/brightness 保持默认值），缺陷已写进 fumen.ParseIssues。
+        /// </summary>
+        public bool CommonParse(ConnectableObjectBase connectObject, CommandArgs args, OngekiFumen fumen)
         {
             var dataArr = args.GetDataArray<float>();
+            var requiredColumns = connectObject is IColorfulLane ? 7 : 5;
+
+            if (dataArr.Length < 5)
+            {
+                ReportColumnTooFew(fumen, args, requiredColumns, dataArr.Length);
+                return false;
+            }
 
             connectObject.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);
             connectObject.XGrid = new XGrid(dataArr[4]);
 
             if (connectObject is IColorfulLane colorfulLane)
             {
-                var colorId = (int)dataArr[5];
-                colorfulLane.ColorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId);
-                colorfulLane.Brightness = (int)dataArr[6];
+                if (dataArr.Length < 7)
+                {
+                    ReportColumnTooFew(fumen, args, requiredColumns, dataArr.Length);
+                }
+                else
+                {
+                    var colorId = (int)dataArr[5];
+                    colorfulLane.ColorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Id == colorId);
+                    colorfulLane.Brightness = (int)dataArr[6];
+                }
             }
+
+            return true;
         }
     }
 
@@ -39,8 +60,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
                 IsTransparent = args.GetData<int>(7) > 0,
             };
 
-            CommonParse(laneObject, args, fumen);
-            return laneObject;
+            return CommonParse(laneObject, args, fumen) ? laneObject : default;
         }
     }
 
@@ -52,11 +72,14 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             if (fumen.Lanes.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
             {
                 CoreLog.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
+                ReportMissingLaneStart(fumen, args, beamRecordId);
                 return default;
             }
 
             var laneObject = new T();
-            CommonParse(laneObject, args, fumen);
+            if (!CommonParse(laneObject, args, fumen))
+                return null;
+
             beamStart.AddChildObject(laneObject);
             return null;
         }

@@ -232,10 +232,19 @@ Parameters:
 
 ### Rule catalog
 
-`ruleCount` is **15** today. Core rules (11): `WrongLocation` (a lane-docked tap/hold is not
+`ruleCount` is **22** today. Core rules (18): `WrongLocation` (a lane-docked tap/hold is not
 actually on its lane), `MissingHoldEndObject`, `MissingRefObject`, `ObjectOverlap`,
-`ObjectTimelineNotAligned`, `ConflictRecordIdLanes`, `MissingBossEnemySet`,
-`InvalidConnectablePath`, `LaneBlockAcrossWalls`, `Soflan`, `SoflanConflict`.
+`ObjectTimelineNotAligned`, `ConflictRecordIdLanes`, `MissingEnemySetWave` (EnemySets exist but
+WAVE1 or BOSS is missing — the game then discards every EnemySet and falls back to its default
+wave layout), `InvalidConnectablePath`, `LaneBlockAcrossWalls`, `Soflan`, `SoflanConflict`,
+plus seven rules ported from the game's own reader/runtime behaviour (all `error`):
+`BulletPalleteDuplicateId` (two BPL records share an id — the game's pallete dictionary throws),
+`SoflanPatternMissingForArea` (an ISF area names a soflan group that has no soflan while a hold
+sits inside it), `OrphanLaneRecord` (a lane Next/End record has no start record),
+`ColorfulLaneRecordColumns` and `BeamRecordColumns` (too few columns for fields the game reads by
+column index), `HoldProgressJudgeLoop` (`PROGJUDGE_BPM` versus the segment BPM would make the
+game's hold judge-point loop spin forever) and `BpmOutOfRange` (a BPM at or below zero breaks the
+game's time axis).
 
 Ogkr rules (4): `[Ongeki] HeaderConstMismatch` (flags `MetaInfo.XRESOLUTION != 4096`,
 `TRESOLUTION != 1920`, or an empty `Creator` — handy for verifying `editor.set_metainfo`),

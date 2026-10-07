@@ -51,6 +51,23 @@ namespace OngekiFumenEditor.Base
         public TGridSortList<Tap> Taps { get; } = new();
         public HoldList Holds { get; } = new();
 
+        private readonly List<FumenParseIssue> parseIssues = new();
+
+        /// <summary>
+        /// 本次加载过程中解析器发现的记录级缺陷（游戏侧会出错、但编辑器仍能加载下来的记录）。
+        /// 只由 Parser 层写入，检查规则只读；重新加载谱面会重建该列表。
+        /// </summary>
+        public IReadOnlyList<FumenParseIssue> ParseIssues => parseIssues;
+
+        /// <summary>记录一条解析期缺陷，见 <see cref="FumenParseIssueKind"/>。</summary>
+        public void ReportParseIssue(FumenParseIssue issue)
+        {
+            if (issue is null)
+                return;
+
+            parseIssues.Add(issue);
+        }
+
         public OngekiFumen()
         {
             Setup();
