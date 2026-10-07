@@ -22,8 +22,8 @@ namespace OngekiFumenEditor.FumenCheckerTests;
 /// </summary>
 internal static class Program
 {
-    /// <summary>装配的规则数量：15 条既有 + 7 条新增（WallConflictCheckRule 至今没有 [Export]，不计入）。</summary>
-    private const int ExpectedRuleCount = 22;
+    /// <summary>装配的规则数量：15 条既有 + 8 条新增（WallConflictCheckRule 至今没有 [Export]，不计入）。</summary>
+    private const int ExpectedRuleCount = 23;
 
     [STAThread]
     private static int Main(string[] args)

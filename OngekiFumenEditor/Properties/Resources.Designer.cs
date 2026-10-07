@@ -4625,6 +4625,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The default soflan group&apos;s last speed change is not a positive speed ({0}x at {1}): a multiplier at or below zero stalls or reverses the game&apos;s time mapping.
+        /// </summary>
+        public static string DefaultSoflanLastSpeedNonPositive {
+            get {
+                return ResourceManager.GetString("DefaultSoflanLastSpeedNonPositive", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to BPM record {0} has value {1} (at or below zero, or under 0.0001): the game skips the time conversion for that section, leaving later notes with invalid times.
         /// </summary>
         public static string BpmOutOfRange {

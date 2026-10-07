@@ -1020,6 +1020,9 @@
   <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
     <value>镜像击打轨道颜色</value>
   </data>
+  <data name="DefaultSoflanLastSpeedNonPositive" xml:space="preserve">
+    <value>默认变速组的最后一条变速不是正速（{0}x @ {1}）：倍率 ≤ 0 会让游戏的时间轴映射停滞或倒退。</value>
+  </data>
   <data name="BpmOutOfRange" xml:space="preserve">
     <value>BPM 记录 {0} 的取值 {1} ≤ 0（或小于 0.0001）：游戏会跳过该段时间轴换算，后续物件的时刻全部无效。</value>
   </data>

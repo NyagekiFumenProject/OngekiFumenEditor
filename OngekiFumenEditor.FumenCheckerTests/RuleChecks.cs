@@ -6,7 +6,7 @@ namespace OngekiFumenEditor.FumenCheckerTests;
 /// </summary>
 internal static class RuleChecks
 {
-    /// <summary>本次新增的 8 条「游戏侧会崩溃」规则名（样例谱面 sweep 用它判定误报）。</summary>
+    /// <summary>本次新增的 9 条规则名（8 条「游戏侧会崩溃」+ 1 条「默认变速组最后变速非正速」警告；样例谱面 sweep 用它判定误报）。</summary>
     public static readonly string[] NewRuleNames =
     {
         "BulletPalleteDuplicateId",
@@ -17,18 +17,25 @@ internal static class RuleChecks
         "HoldProgressJudgeLoop",
         "BpmOutOfRange",
         "MissingEnemySetWave",
+        "DefaultSoflanLastSpeedNonPositive",
     };
+
+    /// <summary>本次新增规则的严重度：除「默认变速组最后变速非正速」是警告档（problem）外，其余都从游戏崩溃路径移植（error）。</summary>
+    public static string NewRuleSeverity(string ruleName) => ruleName == "DefaultSoflanLastSpeedNonPositive" ? "Problem" : "Error";
 
     /// <summary>
     /// 样例谱面里已知的、经人工核对为真实的命中（不是误报），sweep 断言只放行这些组合。
     /// 三张谱面都只写了半个波次序列：20997_03 只有 WAVE1、23807_03 与 24003_04 只有 BOSS，
     /// 按游戏代码会丢弃整组 EnemySet 并改用默认波次布局。
+    /// 22863_04 通篇用 0x 停止做节奏 gimmick，默认变速组的最后一条变速（T[65,960]，120 格）
+    /// 也是 0x 且之后没有恢复正速的记录（其后仍有音符，最大到 unit 91）→ 命中为真。
     /// </summary>
     public static readonly (string Chart, string RuleName)[] KnownSampleFindings =
     {
         ("20997_03.ogkr", "MissingEnemySetWave"),
         ("23807_03.ogkr", "MissingEnemySetWave"),
         ("24003_04.ogkr", "MissingEnemySetWave"),
+        ("22863_04.ogkr", "DefaultSoflanLastSpeedNonPositive"),
     };
 
     private const string BplA0 = "BPL\tA0\tUPS\t0\tFIX\t1.000000\tN\tCIR\t0";
@@ -198,7 +205,33 @@ internal static class RuleChecks
             Forbidden = new[] { "MissingEnemySetWave" },
         };
 
-        // ---------------- 全部缺陷同时出现：8 条规则各命中一次 ----------------
+        // ---------------- 默认变速组最后一条变速非正速（警告档） ----------------
+        yield return new CheckCase
+        {
+            Name = "default-soflan-last-speed-non-positive",
+            Chart = new ChartBuilder()
+                .Add("SFL\t1\t960\t240\t0.000000\t0")
+                .Build(),
+            Expected = new[] { new Expectation("DefaultSoflanLastSpeedNonPositive", 1, "Problem") },
+        };
+        yield return new CheckCase
+        {
+            Name = "default-soflan-last-speed-positive",
+            Chart = new ChartBuilder()
+                .Add("SFL\t1\t960\t240\t0.500000\t0")
+                .Build(),
+            Forbidden = new[] { "DefaultSoflanLastSpeedNonPositive" },
+        };
+        yield return new CheckCase
+        {
+            Name = "default-soflan-last-speed-non-positive-other-group",
+            Chart = new ChartBuilder()
+                .Add("SFL\t1\t960\t240\t0.000000\t5")
+                .Build(),
+            Forbidden = new[] { "DefaultSoflanLastSpeedNonPositive" },
+        };
+
+        // ---------------- 全部缺陷同时出现：9 条规则各命中一次 ----------------
         yield return new CheckCase
         {
             Name = "kitchen-sink",
@@ -211,9 +244,10 @@ internal static class RuleChecks
                     "LLN\t9\t1\t0\t-24",
                     "BPM\t1\t0\t0.000",
                     "CLS\t2\t0\t0\t-12",
-                    "OBS\t3\t0\t0\t-12\t1")
+                    "OBS\t3\t0\t0\t-12\t1",
+                    "SFL\t1\t960\t240\t0.000000\t0")
                 .Build(),
-            Expected = NewRuleNames.Select(x => new Expectation(x, 1)).ToArray(),
+            Expected = NewRuleNames.Select(x => new Expectation(x, 1, NewRuleSeverity(x))).ToArray(),
         };
     }
 

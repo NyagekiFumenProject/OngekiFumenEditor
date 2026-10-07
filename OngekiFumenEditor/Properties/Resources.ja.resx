@@ -1012,6 +1012,9 @@
   <data name="MenuMirrorSelectionLaneColors" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
+  <data name="DefaultSoflanLastSpeedNonPositive" xml:space="preserve">
+    <value>既定ソフラングループの最後の速度変化が正の速度ではありません（{0}x @ {1}）。0 以下の倍率はゲーム側の時間軸変換を停止・逆行させます。</value>
+  </data>
   <data name="BpmOutOfRange" xml:space="preserve">
     <value>BPM記録 {0} の値 {1} が0以下（または 0.0001 未満）です。ゲーム側はこの区間の時間換算を飛ばすため、以降のノートの時刻が不正になります。</value>
   </data>

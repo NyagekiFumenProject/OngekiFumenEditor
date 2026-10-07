@@ -1020,6 +1020,9 @@
   <data name="MenuMirrorSelectionLaneColors" xml:space="preserve">
     <value>Mirror lane _colors</value>
   </data>
+  <data name="DefaultSoflanLastSpeedNonPositive" xml:space="preserve">
+    <value>The default soflan group's last speed change is not a positive speed ({0}x at {1}): a multiplier at or below zero stalls or reverses the game's time mapping.</value>
+  </data>
   <data name="BpmOutOfRange" xml:space="preserve">
     <value>BPM record {0} has value {1} (at or below zero, or under 0.0001): the game skips the time conversion for that section, leaving later notes with invalid times.</value>
   </data>

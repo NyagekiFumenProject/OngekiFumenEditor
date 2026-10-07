@@ -232,11 +232,13 @@ Parameters:
 
 ### Rule catalog
 
-`ruleCount` is **22** today. Core rules (18): `WrongLocation` (a lane-docked tap/hold is not
+`ruleCount` is **23** today. Core rules (19): `WrongLocation` (a lane-docked tap/hold is not
 actually on its lane), `MissingHoldEndObject`, `MissingRefObject`, `ObjectOverlap`,
 `ObjectTimelineNotAligned`, `ConflictRecordIdLanes`, `MissingEnemySetWave` (EnemySets exist but
 WAVE1 or BOSS is missing — the game then discards every EnemySet and falls back to its default
 wave layout), `InvalidConnectablePath`, `LaneBlockAcrossWalls`, `Soflan`, `SoflanConflict`,
+`DefaultSoflanLastSpeedNonPositive` (the default soflan group's last speed change is not a
+positive speed, so the game's time mapping stalls or runs backwards — `problem`),
 plus seven rules ported from the game's own reader/runtime behaviour (all `error`):
 `BulletPalleteDuplicateId` (two BPL records share an id — the game's pallete dictionary throws),
 `SoflanPatternMissingForArea` (an ISF area names a soflan group that has no soflan while a hold
@@ -265,7 +267,8 @@ checker is the only feedback loop that catches it. Concrete examples:
   `editor.add_object` / `editor.modify_object`, but the object then sits at `XGrid=0` instead of on
   the lane and trips `WrongLocation`.
 * Removing a hold end (`editor.remove_hold_end`) leaves the hold with no end → `MissingHoldEndObject`.
-* Adding or editing a soflan can trip `Soflan` / `SoflanConflict`.
+* Adding or editing a soflan can trip `Soflan` / `SoflanConflict`; leaving the default group's
+  last speed change at or below 0 also trips `DefaultSoflanLastSpeedNonPositive`.
 
 Recommended loop:
 
