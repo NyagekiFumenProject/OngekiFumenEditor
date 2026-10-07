@@ -280,5 +280,37 @@ export default {
     const leftover = (await api.family(editorId, 'tap', { minTotalGrid: horizontalTGrid, maxTotalGrid: horizontalTGrid }))
       .filter((tap) => tap.xGrid && [20, 21, 24].includes(Number(tap.xGrid.unit)));
     ctx.equal('the section leaves no taps behind', leftover.length, 0);
+
+    // ---------------- ObjectTimelineNotAligned: lattice test, not "1/n only" ----------------
+    // The rule used to accept only 1/n and (n-1)/n fractions of a beat, computed in doubles — which
+    // also rejected exact triplets once the beat index grew (1/3 -> 3.0000000000000426). It now
+    // accepts any offset whose gcd with the beat length reaches 10 grids (4/4) or 1/48 of the beat.
+    // These taps live in the seeded chart's first segment (MET_DEF 4/4, start T[0,0], before the
+    // chart's first MET change), so the offset inside a beat is exactly the grid value.
+    ctx.section('ObjectTimelineNotAligned accepts regular grid points, still flags off-grid ones');
+
+    const tripleTap = await api.must(await api.addObject({
+      editorId, objectType: 'tap', ...splitTotalGrid(80), xGridUnit: 0, xGridGrid: 0,
+    }), 'add a 1/6-beat (triplet) tap');
+    const threeEighthsTap = await api.must(await api.addObject({
+      editorId, objectType: 'tap', ...splitTotalGrid(180), xGridUnit: 0, xGridGrid: 0,
+    }), 'add a 3/8-beat tap');
+    const offGridTap = await api.must(await api.addObject({
+      editorId, objectType: 'tap', ...splitTotalGrid(5), xGridUnit: 0, xGridGrid: 0,
+    }), 'add a 5-grid tap');
+
+    const notAligned = (await api.must(await api.check({ editorId, limit: 1000 }), 'run check'))
+      .results.filter((result) => result.ruleName === 'ObjectTimelineNotAligned');
+    const isNotAligned = (objectId) => notAligned.some((result) => Number(result.objectId) === objectId);
+
+    ctx.equal('a 1/6-beat (triplet) position is not reported', isNotAligned(tripleTap.objectId), false);
+    ctx.equal('a 3/8-beat position is not reported', isNotAligned(threeEighthsTap.objectId), false);
+    ctx.equal('a 5-grid drag is still reported', isNotAligned(offGridTap.objectId), true);
+
+    for (let undone = 0; undone < 3; undone++)
+      await api.undo({ editorId });
+    const alignLeftover = (await api.family(editorId, 'tap', { minTotalGrid: 0, maxTotalGrid: 479 }))
+      .filter((tap) => [5, 80, 180].includes(Number(tap.tGrid?.grid)));
+    ctx.equal('the lattice section leaves no taps behind', alignLeftover.length, 0);
   },
 };
