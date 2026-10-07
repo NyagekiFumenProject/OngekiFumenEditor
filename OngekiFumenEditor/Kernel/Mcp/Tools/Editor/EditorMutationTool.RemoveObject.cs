@@ -67,6 +67,16 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                         outcome.ErrorMessage = ex.Message;
                         TrySilently(restoreObject);
                     }
+
+                    if (outcome.Success)
+                        TrySilently(() =>
+                        {
+                            // §27：被删对象立即取消选中并刷新属性浏览器，避免浏览器停留在已删除对象上；
+                            // 与 UI 的 RemoveObjects 同语义 —— undo 把它带回来时也是未选中状态。
+                            if (obj is ISelectableObject selectable)
+                                selectable.IsSelected = false;
+                            RefreshPropertyBrowser(editor);
+                        });
                 },
                 () => TrySilently(restoreObject));
 

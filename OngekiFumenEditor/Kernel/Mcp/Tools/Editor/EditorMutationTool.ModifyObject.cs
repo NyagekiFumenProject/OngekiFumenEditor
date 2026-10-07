@@ -110,6 +110,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                         outcome.ErrorMessage = ex.Message;
                         TrySilently(() => RollbackModify(obj, property, oldValue, fumen, xGridSnapshot));
                     }
+
+                    if (outcome.Success)
+                        TrySilently(() =>
+                        {
+                            // §27：被改动的是当前选中对象时刷新属性浏览器，让它显示新值。
+                            if (obj is ISelectableObject { IsSelected: true })
+                                RefreshPropertyBrowser(editor);
+                        });
                 },
                 () => TrySilently(() => RollbackModify(obj, property, oldValue, fumen, xGridSnapshot)));
 

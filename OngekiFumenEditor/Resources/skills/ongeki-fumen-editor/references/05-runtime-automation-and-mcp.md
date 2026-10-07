@@ -53,8 +53,11 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 
 `editor.add_object` / `editor.remove_object` / `editor.modify_object` mark the editor dirty (`isDirty`,
 reported by `editor.get_current` and `editor.get_current_summary`) when their action applies — a queued
-mutation only when `editor.end_action` applies it, and a rejected write never does. A dirty editor must
-be undone or saved before `editor.close` accepts it without `force=true`.
+mutation only when `editor.end_action` applies it, and a rejected write never does. Removing an object
+also clears its selection, and both remove and modify refresh the property browser when the target
+editor is active (a removed object disappears from the browser; a modified selected object shows the
+new values; undo brings a deleted object back unselected). A dirty editor must be undone or saved
+before `editor.close` accepts it without `force=true`.
 
 ### Fumen meta info
 

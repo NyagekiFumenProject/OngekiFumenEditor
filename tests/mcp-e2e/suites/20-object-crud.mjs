@@ -40,6 +40,35 @@ if (bullet is null)
     return null;
 return new { speed = bullet.Speed, placeOffset = bullet.PlaceOffset, randomOffsetRange = bullet.RandomOffsetRange, shooter = bullet.ShooterValue.ToString(), target = bullet.TargetValue.ToString(), size = bullet.SizeValue.ToString(), type = bullet.TypeValue.ToString(), damageType = bullet.BulletDamageTypeValue.ToString(), hasPallete = bullet.ReferenceBulletPallete != null };`;
 
+// Selection probes for the delete / property-browser contract: select exactly one tap by id, or
+// snapshot the current selection. The security policy requires the ExecuteAction shape, so each
+// probe leaves one "MCP Script" entry — harmless as long as no assertion depends on the exact
+// undo depth around it (the delete check below undoes before taking its snapshot).
+const SELECT_IMPORTS = `using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using System.Linq;`;
+
+const selectTapScript = (id) => `${SELECT_IMPORTS}
+
+var editor = ScriptArgs.TargetEditor;
+var target = editor.Fumen.Taps.FirstOrDefault(x => x.Id == ${id});
+editor.UndoRedoManager.ExecuteAction(
+    LambdaUndoAction.Create("MCP e2e read-only probe", () => { }, () => { }));
+editor.ClearSelection();
+if (target is not null)
+    target.IsSelected = true;
+var selected = editor.SelectObjects.OfType<OngekiObjectBase>().Select(x => x.Id).ToArray();
+return new { selected = selected.Length, ids = selected };`;
+
+const selectionSnapshotScript = `${SELECT_IMPORTS}
+
+var editor = ScriptArgs.TargetEditor;
+editor.UndoRedoManager.ExecuteAction(
+    LambdaUndoAction.Create("MCP e2e read-only probe", () => { }, () => { }));
+var selected = editor.SelectObjects.OfType<OngekiObjectBase>().Select(x => x.Id).ToArray();
+return new { selected = selected.Length, ids = selected };`;
+
 export default {
   name: '20-object-crud',
   description: 'add_object / modify_object / remove_object + undo/redo',
@@ -487,8 +516,37 @@ export default {
     ctx.equal('applying the scope marks the editor dirty', await probeDirty(scopeProbeId), true);
     ctx.ok('scope probe is closed again', await api.close({ editorId: scopeProbeId, force: true }));
 
+    // ---------------- selection stays consistent across delete / modify ----------------
+    ctx.section('remove_object clears the selection; modify_object keeps it');
+
+    const selectionVictim = await api.addObject({ editorId, objectType: 'tap', ...T(33), xGridUnit: 0, xGridGrid: 0 });
+    ctx.ok('a tap for the selection contract is created', selectionVictim);
+    const selectionVictimId = selectionVictim.payload?.objectId;
+
+    const selectProbe = await api.runScript({ editorId, scriptText: selectTapScript(selectionVictimId) });
+    ctx.equal('the probe selected exactly the victim', selectProbe.payload.result?.selected, 1);
+    ctx.equal('the selection is visible through query_object',
+      (await api.queryObject({ editorId, objectType: 'tap', selectedOnly: true, limit: 2000 })).payload.count, 1);
+
+    // Delete it and undo: the flag must have been cleared at delete time, so the object comes back
+    // unselected (the §27 contract; a surviving flag would make it reappear selected).
+    ctx.ok('the selected tap is removed', await api.removeObject({ editorId, objectId: selectionVictimId }));
+    const removalUndo = await api.undo({ editorId });
+    ctx.check('the removal is undoable', /Remove tap/i.test(removalUndo.payload?.undone ?? ''), `undone=${removalUndo.payload?.undone}`);
+    ctx.check('the tap is back after undo', !!(await findById('tap', selectionVictimId)));
+
+    const afterUndoSelection = await api.runScript({ editorId, scriptText: selectionSnapshotScript });
+    ctx.equal('undo brings the object back unselected', afterUndoSelection.payload.result?.selected, 0);
+
+    // a modify on a selected object must keep it selected (the browser refresh must not disturb the selection)
+    await api.runScript({ editorId, scriptText: selectTapScript(selectionVictimId) });
+    ctx.ok('a selected object can still be modified',
+      await api.modifyObject({ editorId, objectId: selectionVictimId, propertyName: 'tGridUnit', newValue: '7.5' }));
+    const afterModifySelection = await api.runScript({ editorId, scriptText: selectionSnapshotScript });
+    ctx.equal('modify_object keeps the selection', afterModifySelection.payload.result?.ids?.[0], selectionVictimId);
+
     // leave the chart as we found it: undo the leftover fixtures
-    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, taggedTapId, taggedCommentId, ...created.values()].filter((id) => Number.isInteger(id));
+    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, taggedTapId, taggedCommentId, selectionVictimId, ...created.values()].filter((id) => Number.isInteger(id));
     for (const id of leftovers) {
       await api.removeObject({ editorId, objectId: id });
     }

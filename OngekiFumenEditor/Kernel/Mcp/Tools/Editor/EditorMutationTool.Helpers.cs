@@ -11,6 +11,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.RuntimeAutomation;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -135,6 +136,20 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             {
                 // 单条动作的补偿失败不再向上冒泡：结果由 EditorActionOutcome 汇报，end_action 汇总时统一回滚。
             }
+        }
+
+        /// <summary>
+        /// §27：写操作后把属性浏览器刷到一致状态（删除的对象从选中集消失、被改动的选中对象显示新值）。
+        /// 只在该 editor 是当前激活编辑器时刷新 —— 属性浏览器展示的就是活动编辑器的选中集，
+        /// 与 UI 的 <c>RemoveObjects</c> 守卫（<c>if (IsActive)</c>）一致。
+        /// </summary>
+        private static void RefreshPropertyBrowser(FumenVisualEditorViewModel editor)
+        {
+            if (editor is null || !editor.IsActive)
+                return;
+
+            // 全限定 IoC：本文件不引入 Caliburn.Micro，避免它的 Action 与 System.Action 撞名。
+            TrySilently(() => Caliburn.Micro.IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(editor));
         }
 
         private static bool TryParseCursor(string cursor, out int? totalGrid, out int objectId)
