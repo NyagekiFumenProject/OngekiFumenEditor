@@ -51,6 +51,11 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | `editor.create_hold_end` | Attach a HoldEnd to a hold addressed by its runtime id (gives it length). |
 | `editor.remove_hold_end` | Drop a hold's end (the hold becomes zero-length again). |
 
+`editor.add_object` / `editor.remove_object` / `editor.modify_object` mark the editor dirty (`isDirty`,
+reported by `editor.get_current` and `editor.get_current_summary`) when their action applies — a queued
+mutation only when `editor.end_action` applies it, and a rejected write never does. A dirty editor must
+be undone or saved before `editor.close` accepts it without `force=true`.
+
 ### Fumen meta info
 
 | Tool | Purpose |

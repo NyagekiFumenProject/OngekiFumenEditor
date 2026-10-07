@@ -75,9 +75,9 @@ Behaviours the suites pin down — the details that are easy to get wrong:
   resolvable outside the executor's registration window (suite 80 is the regression guard).
 * **`editor.scroll_to` clamps to the loaded audio duration** and never touches history; two
   scroll targets derived from the chart's length can therefore collapse onto the same position.
-* **Only a property change marks a chart dirty** (`OngekiFumen.ObjectModifiedChanged`), so
-  `add_object` alone leaves `isDirty` false while `modify_object` on the same object flips it.
-  `editor.close` refuses a dirty editor with `EDITOR_DIRTY` unless `force: true`.
+* **Every write marks the chart dirty**: `add_object` / `remove_object` / `modify_object` set `isDirty`
+  explicitly when their action applies (a queued mutation only when `end_action` applies it, and a
+  rejected write never does). `editor.close` refuses a dirty editor with `EDITOR_DIRTY` unless `force: true`.
 * **`editor.open_proj` returns before its chart and audio finish loading** — poll
   `editor.get_current_summary` until `counts` are populated (suite 90 does exactly this).
 

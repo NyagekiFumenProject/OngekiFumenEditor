@@ -101,6 +101,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                         if (snap)
                             SnapDockableXGridToBoundLane(obj);
                         outcome.Success = true;
+                        // §27：所有成功写操作显式标脏；queued 场景下这里在 end_action 应用时才执行。
+                        editor.IsDirty = true;
                     }
                     catch (Exception ex)
                     {

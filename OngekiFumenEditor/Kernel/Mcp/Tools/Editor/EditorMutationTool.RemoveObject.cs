@@ -58,6 +58,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     {
                         removeObject();
                         outcome.Success = true;
+                        // §27：写操作显式标脏（remove 不触发被删对象的属性变更通知）。
+                        editor.IsDirty = true;
                     }
                     catch (Exception ex)
                     {

@@ -281,6 +281,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                         if (attachedHoldEnd is not null)
                             fumen.AddObject(attachedHoldEnd);
                         outcome.Success = true;
+                        // §27：写操作显式标脏 —— add 不走属性变更通知链，不显式置位时 isDirty 会一直保持 false。
+                        editor.IsDirty = true;
                     }
                     catch (Exception ex)
                     {

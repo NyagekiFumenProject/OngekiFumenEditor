@@ -9,6 +9,7 @@
 
 import { verifyUndoRedo } from '../lib/history.mjs';
 import { splitTotalGrid, totalGridResolution } from '../lib/env.mjs';
+import { waitFor } from '../lib/harness.mjs';
 
 // Read-only probes for custom projectile parameters. The security policy requires every script
 // to carry the mutation shape, so each probe registers a no-op action and only reads the chart —
@@ -46,6 +47,7 @@ export default {
   async run(ctx) {
     const api = ctx.api;
     const editorId = ctx.editorId;
+    const env = ctx.env;
     ctx.cover('editor.add_object', 'editor.modify_object', 'editor.remove_object');
 
     const findById = async (family, objectId) =>
@@ -411,6 +413,79 @@ export default {
       reverted: async () => !!(await findById('tap', victimId)),
       undoName: /Remove tap|Delete tap/i,
     });
+
+    // ---------------- write tools mark the document dirty ----------------
+    ctx.section('add_object / remove_object / modify_object mark the editor dirty');
+
+    // Each probe opens a fresh editor so "dirty" can only come from the operation under test;
+    // closing with force discards the probe chart and leaves the seed editor alone.
+    const probeEditor = async (probeId) =>
+      (await api.listOpened()).payload.find((e) => e.editorId === probeId);
+    const probeDirty = async (probeId) => (await probeEditor(probeId))?.isDirty;
+    const anyCount = (probe) =>
+      probe.tapCount + probe.laneCount + probe.holdCount + probe.bellCount +
+      probe.bulletCount + probe.bpmChangeCount + probe.soflanCount;
+
+    // open_fast / open_proj create the tab before their chart finishes loading, so wait for the
+    // counters instead of sampling once — querying or mutating too early would hit an empty chart.
+    // `project: true` opens the project fixture (a copy of the seeded chart, which has taps to
+    // remove and modify); otherwise second.ogkr is used and only its load completion is confirmed.
+    const openProbeEditor = async (label, { project = false } = {}) => {
+      const opened = project
+        ? await api.openProject({ projectPath: env.projectPath })
+        : await api.openFast({ fumenPath: env.secondChart, audioPath: env.audioPath });
+      ctx.ok(`${label}: a fresh editor opens`, opened);
+      const probeId = opened.payload?.editorId;
+      const ready = await waitFor(async () => {
+        const probe = await probeEditor(probeId);
+        return probe && (project ? probe.tapCount > 0 : anyCount(probe) > 0) ? probe : null;
+      });
+      ctx.check(`${label}: the probe chart finished loading`, ready.ok,
+        ready.ok ? `taps=${ready.last.tapCount} after ${ready.waitedMs}ms` : 'timed out waiting for the chart to load');
+      ctx.equal(`${label}: the fresh editor starts clean`, await probeDirty(probeId), false);
+      return probeId;
+    };
+
+    const addProbeId = await openProbeEditor('add probe');
+    ctx.fails('add probe: a rejected add is refused',
+      await api.addObject({ editorId: addProbeId, objectType: 'nope', ...T(31) }), 'UNSUPPORTED_OBJECT_TYPE');
+    ctx.equal('add probe: a rejected write leaves the editor clean', await probeDirty(addProbeId), false);
+    ctx.ok('add probe: a regular add succeeds',
+      await api.addObject({ editorId: addProbeId, objectType: 'tap', ...T(31), xGridUnit: 0, xGridGrid: 0 }));
+    ctx.equal('add_object marks the editor dirty', await probeDirty(addProbeId), true);
+    ctx.ok('add probe is closed again', await api.close({ editorId: addProbeId, force: true }));
+
+    const removeProbeId = await openProbeEditor('remove probe', { project: true });
+    const removeVictim = (await api.family(removeProbeId, 'tap'))[0];
+    if (removeVictim) {
+      ctx.ok('remove probe: the victim tap is removed',
+        await api.removeObject({ editorId: removeProbeId, objectId: removeVictim.id }));
+      ctx.equal('remove_object marks the editor dirty', await probeDirty(removeProbeId), true);
+    } else {
+      ctx.check('remove probe: the fresh chart has a tap to remove', false, 'the project fixture should contain a tap');
+    }
+    ctx.ok('remove probe is closed again', await api.close({ editorId: removeProbeId, force: true }));
+
+    const modifyProbeId = await openProbeEditor('modify probe', { project: true });
+    const modifyVictim = (await api.family(modifyProbeId, 'tap'))[0];
+    if (modifyVictim) {
+      ctx.ok('modify probe: the tap is modified',
+        await api.modifyObject({ editorId: modifyProbeId, objectId: modifyVictim.id, propertyName: 'tGridUnit', newValue: '1.5' }));
+      ctx.equal('modify_object marks the editor dirty', await probeDirty(modifyProbeId), true);
+    } else {
+      ctx.check('modify probe: the fresh chart has a tap to modify', false, 'the project fixture should contain a tap');
+    }
+    ctx.ok('modify probe is closed again', await api.close({ editorId: modifyProbeId, force: true }));
+
+    // a queued mutation dirties only when the action scope actually applies it
+    const scopeProbeId = await openProbeEditor('scope probe');
+    ctx.ok('scope probe: a scope opens', await api.beginAction({ editorId: scopeProbeId }));
+    ctx.ok('scope probe: the add is queued',
+      await api.addObject({ editorId: scopeProbeId, objectType: 'tap', ...T(32), xGridUnit: 0, xGridGrid: 0 }));
+    ctx.equal('a queued add does not dirty the editor before it is applied', await probeDirty(scopeProbeId), false);
+    ctx.ok('scope probe: the scope applies', await api.endAction({ editorId: scopeProbeId, name: 'e2e dirty scope' }));
+    ctx.equal('applying the scope marks the editor dirty', await probeDirty(scopeProbeId), true);
+    ctx.ok('scope probe is closed again', await api.close({ editorId: scopeProbeId, force: true }));
 
     // leave the chart as we found it: undo the leftover fixtures
     const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, taggedTapId, taggedCommentId, ...created.values()].filter((id) => Number.isInteger(id));
