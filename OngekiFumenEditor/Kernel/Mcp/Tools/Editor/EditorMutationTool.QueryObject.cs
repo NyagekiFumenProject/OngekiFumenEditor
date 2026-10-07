@@ -28,9 +28,10 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.query_object", Title = "Query Objects", ReadOnly = true, Destructive = false, OpenWorld = false)]
-        [Description("Query chart objects of one family inside a TGrid range, ordered by TGrid (objects sharing a TGrid keep the chart's internal order, which is stable across calls but not sorted by id). selectedOnly=true narrows the result to the objects currently selected in the editor. Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; paging assumes the filter and the selection stay unchanged between pages. Totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
+        [Description("Query chart objects of one family — or several via objectTypes — inside a TGrid range. Single-family pages are ordered by TGrid (objects sharing a TGrid keep the chart's internal order, which is stable across calls but not sorted by id); multi-family pages merge every requested family and are ordered by TGrid then object id. selectedOnly=true narrows the result to the objects currently selected in the editor. Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; paging assumes the filters and the selection stay unchanged between pages. Totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
         public async Task<object> QueryObject(
-            [Description("Object family: tap, flick, hold, bell, bullet, comment, bpm, meter, clickse, enemy, lane (lane starts), lanenext (lane segments), curvecontrol (lane curve control points), beam, beamnext, isfarea, laneblock or soflan.")] string objectType,
+            [Description("Object family (single form): tap, flick, hold, bell, bullet, comment, bpm, meter, clickse, enemy, lane (lane starts), lanenext (lane segments), curvecontrol (lane curve control points), beam, beamnext, isfarea, laneblock or soflan. Provide this or objectTypes; giving both merges them without duplicates.")] string objectType = default,
+            [Description("Object families (multi form): any combination of the family names above. Multi-family pages are ordered by TGrid then object id.")] string[] objectTypes = default,
             [Description("Inclusive lower bound in the TGrid totalGrid scale; omit for no bound.")] int? minTotalGrid = default,
             [Description("Inclusive upper bound in the TGrid totalGrid scale; omit for no bound.")] int? maxTotalGrid = default,
             [Description("When true, only objects currently selected in the editor are returned. Default false (no selection filter).")] bool? selectedOnly = default,
@@ -42,13 +43,23 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             CancellationToken cancellationToken = default)
         {
             const string operationName = "editor.query_object";
-            var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, minTotalGrid, maxTotalGrid, selectedOnly, limit, cursor, editorId, requestedBy, clientId });
+            var requestedFamilies = new List<string>();
+            if (!string.IsNullOrWhiteSpace(objectType))
+                requestedFamilies.Add(NormalizeFamily(objectType));
+            if (objectTypes is not null)
+                requestedFamilies.AddRange(objectTypes.Where(x => !string.IsNullOrWhiteSpace(x)).Select(NormalizeFamily));
+            McpOperationLogHelper.LogRequest(operationName, new { objectType, objectTypes, minTotalGrid, maxTotalGrid, selectedOnly, limit, cursor, editorId, requestedBy, clientId });
 
-            if (!QuerableFamilies.Contains(family))
-                return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.query_object supports {string.Join(", ", QuerableFamilies)}; '{objectType}' is not supported.");
+            if (requestedFamilies.Count == 0)
+                return Failure(operationName, "INVALID_ARGUMENT", "editor.query_object needs objectType or objectTypes: pass at least one family to query.");
 
-            if (await TryAuthorizeAsync(operationName, requestedBy, clientId, $"Query {family} objects.", true, cancellationToken) is { } denied)
+            var unknownFamily = requestedFamilies.FirstOrDefault(x => !QuerableFamilies.Contains(x));
+            if (unknownFamily is not null)
+                return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.query_object supports {string.Join(", ", QuerableFamilies)}; '{unknownFamily}' is not supported.");
+
+            var families = requestedFamilies.Distinct().ToArray();
+
+            if (await TryAuthorizeAsync(operationName, requestedBy, clientId, $"Query {string.Join(", ", families)} objects.", true, cancellationToken) is { } denied)
                 return denied;
 
             if (TryResolveEditor(editorId, default, out var editor, out var resolvedEditorId, out var resolveError) is false)
@@ -69,11 +80,25 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 var lastTotalGrid = 0;
                 var lastObjectId = 0;
 
-                var source = EnumerateFamily(editor.Fumen, family, min, max);
-                if (selectedOnly == true)
-                    source = source.Where(x => x is ISelectableObject { IsSelected: true });
+                IEnumerable<(string family, OngekiObjectBase obj)> source;
+                if (families.Length == 1)
+                {
+                    var single = families[0];
+                    source = EnumerateFamily(editor.Fumen, single, min, max).Select(x => (single, x));
+                }
+                else
+                {
+                    // 多族结果跨族合并，必须给出全序：按 (TGrid, Id) 排序（单族保持各族原有顺序，避免改变既有分页契约）。
+                    source = families
+                        .SelectMany(f => EnumerateFamily(editor.Fumen, f, min, max).Select(x => (family: f, obj: x)))
+                        .OrderBy(x => x.obj is ITimelineObject timeline ? timeline.TGrid.TotalGrid : 0)
+                        .ThenBy(x => x.obj.Id);
+                }
 
-                foreach (var obj in source)
+                if (selectedOnly == true)
+                    source = source.Where(x => x.obj is ISelectableObject { IsSelected: true });
+
+                foreach (var (itemFamily, obj) in source)
                 {
                     if (!seenCursor)
                     {
@@ -90,7 +115,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
                     lastTotalGrid = (obj as ITimelineObject)?.TGrid.TotalGrid ?? 0;
                     lastObjectId = obj.Id;
-                    objects.Add(ToObjectDto(family, obj));
+                    objects.Add(ToObjectDto(itemFamily, obj));
                 }
 
                 return new { objects, truncated, lastTotalGrid, lastObjectId };
@@ -102,14 +127,15 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             {
                 success = true,
                 editorId = resolvedEditorId,
-                objectType = family,
+                objectType = families.Length == 1 ? families[0] : default,
+                objectTypes = families,
                 selectedOnly = selectedOnly == true,
                 count = page.objects.Count,
                 truncated = page.truncated,
                 nextCursor,
                 objects = page.objects,
             };
-            McpOperationLogHelper.LogResult(operationName, new { success = true, family, count = response.count, truncated = response.truncated, nextCursor });
+            McpOperationLogHelper.LogResult(operationName, new { success = true, families, count = response.count, truncated = response.truncated, nextCursor });
             return response;
         }
     }

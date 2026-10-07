@@ -27,8 +27,8 @@ export class McpApi {
 
   listOpened() { return this.#client.call('editor.list_opened'); }
 
-  queryObject({ editorId, objectType, minTotalGrid, maxTotalGrid, selectedOnly, limit = 4000, cursor } = {}) {
-    return this.#client.call('editor.query_object', { editorId, objectType, minTotalGrid, maxTotalGrid, selectedOnly, limit, cursor });
+  queryObject({ editorId, objectType, objectTypes, minTotalGrid, maxTotalGrid, selectedOnly, limit = 4000, cursor } = {}) {
+    return this.#client.call('editor.query_object', { editorId, objectType, objectTypes, minTotalGrid, maxTotalGrid, selectedOnly, limit, cursor });
   }
 
   // ---------------- document lifecycle ----------------

@@ -43,7 +43,7 @@ export default {
       'editor.modify_object': ['newValue', 'objectId', 'propertyName'],
       'editor.open_fast': ['fumenPath'],
       'editor.open_proj': ['projectPath'],
-      'editor.query_object': ['objectType'],
+      'editor.query_object': [],
       'editor.remove_bullet_pallete': ['strId'],
       'editor.remove_hold_end': ['holdObjectId'],
       'editor.remove_object': ['objectId'],

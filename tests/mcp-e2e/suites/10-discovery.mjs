@@ -213,5 +213,68 @@ export default {
     ctx.equal('the clear probe reports no selection', clearedProbe.payload.result?.selected, 0);
     ctx.equal('after clearing, selectedOnly returns nothing',
       (await api.queryObject({ editorId, objectType: 'tap', selectedOnly: true, limit: 2000 })).payload.count, 0);
+
+    // ---------------- editor.query_object — multiple families ----------------
+    ctx.section('editor.query_object — multiple families');
+
+    const holds = (await api.family(editorId, 'hold')).length;
+    const bells = (await api.family(editorId, 'bell')).length;
+
+    const twoFamilies = await api.queryObject({ editorId, objectTypes: ['hold', 'bell'], limit: 2000 });
+    ctx.ok('query_object accepts objectTypes', twoFamilies);
+    const twoFamilyObjects = twoFamilies.payload.objects ?? [];
+    ctx.equal('the multi-family query merges both families', twoFamilies.payload.count, holds + bells);
+    ctx.check('every item carries one of the requested families',
+      twoFamilyObjects.every((o) => o.type === 'hold' || o.type === 'bell'),
+      `types=${[...new Set(twoFamilyObjects.map((o) => o.type))]}`);
+    ctx.check('both families are represented',
+      twoFamilyObjects.some((o) => o.type === 'hold') && twoFamilyObjects.some((o) => o.type === 'bell'));
+    ctx.check('the response echoes the resolved family list',
+      JSON.stringify(twoFamilies.payload.objectTypes) === JSON.stringify(['hold', 'bell']),
+      `objectTypes=${JSON.stringify(twoFamilies.payload.objectTypes)}`);
+    ctx.equal('a multi-family response omits the singular family echo', twoFamilies.payload.objectType, undefined);
+
+    // multi-family pages are ordered by (TGrid, id)
+    let mergedOrdered = true;
+    for (let i = 1; i < twoFamilyObjects.length; i++) {
+      const prev = twoFamilyObjects[i - 1];
+      const cur = twoFamilyObjects[i];
+      if (prev.tGrid.totalGrid > cur.tGrid.totalGrid ||
+          (prev.tGrid.totalGrid === cur.tGrid.totalGrid && prev.id > cur.id)) { mergedOrdered = false; break; }
+    }
+    ctx.check('multi-family results are ordered by TGrid then id', mergedOrdered, `count=${twoFamilyObjects.length}`);
+
+    // paging a merged query reproduces the single-shot page exactly
+    const mergedWalk = [];
+    let mergedCursor;
+    let mergedPages = 0;
+    do {
+      const page = await api.queryObject({ editorId, objectTypes: ['hold', 'bell'], limit: 7, cursor: mergedCursor });
+      if (page.payload?.success !== true) { ctx.check('multi-family paging stays successful', false, `code=${page.payload?.errorCode}`); break; }
+      mergedWalk.push(...page.payload.objects);
+      mergedCursor = page.payload.nextCursor;
+      mergedPages++;
+    } while (mergedCursor && mergedPages < 200);
+    ctx.equal('multi-family paging visits every object exactly once', mergedWalk.length, twoFamilyObjects.length);
+    ctx.equal('multi-family paging matches the single-shot order',
+      mergedWalk.map((o) => o.id).join(','), twoFamilyObjects.map((o) => o.id).join(','));
+    ctx.check('multi-family paging needed more than one round trip', mergedPages > 1, `pages=${mergedPages}`);
+
+    // a single-element objectTypes behaves like the single objectType form
+    const viaArray = await api.queryObject({ editorId, objectTypes: ['tap'], limit: 2000 });
+    ctx.equal('a one-element objectTypes equals the single-family form',
+      viaArray.payload.objects.map((o) => o.id).join(','), allTapObjects.map((o) => o.id).join(','));
+    ctx.equal('a one-element objectTypes echoes the singular family', viaArray.payload.objectType, 'tap');
+
+    // providing both forms merges them without duplicates
+    const combined = await api.queryObject({ editorId, objectType: 'hold', objectTypes: ['hold', 'bell'], limit: 2000 });
+    ctx.equal('objectType + objectTypes merge without duplicates', combined.payload.count, holds + bells);
+
+    ctx.fails('an unknown family inside objectTypes is rejected',
+      await api.queryObject({ editorId, objectTypes: ['hold', 'not_a_family'] }), 'UNSUPPORTED_OBJECT_TYPE');
+    ctx.fails('querying without any family is rejected',
+      await api.queryObject({ editorId }), 'INVALID_ARGUMENT');
+    ctx.fails('an empty objectTypes list is rejected',
+      await api.queryObject({ editorId, objectTypes: [] }), 'INVALID_ARGUMENT');
   },
 };
