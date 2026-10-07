@@ -195,13 +195,16 @@ identity (not its runtime id); resolve it against `fumen.Lanes`.
 
 * **Bind** — `editor.add_object` with `referenceLaneRecordId`, or `editor.modify_object` with property `referenceLaneRecordId` and the RecordId as `newValue`. An omitted, negative, `""` or `"null"` value leaves the object floating.
 * **Snap** — add `snapXToLane: true` to re-derive the XGrid from the lane at the object's TGrid: a tap gets its `XGrid`; a hold gets both `XGrid` and its `HoldEnd.XGrid`. Snapping is strict — when the lane has no path at that TGrid the call fails (`INVALID_ARGUMENT`) rather than silently keeping the old XGrid.
+* **Nearest** — `editor.add_object` and `editor.modify_object` take a `dockMode` parameter: `"explicit"` (default; everything above) or `"nearest"`, which picks the dockable lane (center/left/right/wallLeft/wallRight) whose XGrid at the object's TGrid is closest to the object's — same distance = lower `RecordId` — and binds + snaps to it in one step. `modify_object` resolves the lane **after** the write, so a `tGridUnit`/`xGridUnit` change in the same call steers the pick; its response echoes `dockMode: "nearest"` and `snapped: true`.
 * Snapping also works while moving: `editor.modify_object` accepts `snapXToLane` together with `referenceLaneRecordId`, `tGridUnit` or `tGridGrid`.
-* On undo both the property and every snapped XGrid are rolled back together (captured via `DockableXGridSnapshot`).
+* On undo the property, the snapped XGrids and the previous lane binding are rolled back together (captured via `LaneDockingSnapshot`).
 
 Failure codes: `LANE_NOT_FOUND` (unknown RecordId), `INVALID_ARGUMENT` (lane args on a
 non-dockable family, `snapXToLane` without a lane, snap on a non-snappable property,
-snap combined with clearing the lane, snap on an unbound object, or the lane has no path
-at that TGrid).
+snap combined with clearing the lane, snap on an unbound object, the lane has no path
+at that TGrid, `dockMode` values other than `explicit`/`nearest`, `dockMode="nearest"`
+on a family that cannot dock, `"nearest"` combined with `referenceLaneRecordId` or
+`snapXToLane`, or no dockable lane covering the position).
 
 ## Fumen Check (`editor.check`)
 

@@ -13,6 +13,7 @@
 
 import { verifyUndoRedo } from '../lib/history.mjs';
 import { splitTotalGrid, totalGridResolution } from '../lib/env.mjs';
+import { waitFor } from '../lib/harness.mjs';
 
 export default {
   name: '30-connectable',
@@ -98,7 +99,123 @@ export default {
       reshuffled[0].tGrid.totalGrid <= reshuffled[1].tGrid.totalGrid,
       `${reshuffled[0].tGrid.totalGrid} <= ${reshuffled[1].tGrid.totalGrid}`);
 
-    // ---------------- curve control points ----------------
+    // ---------------- dockMode = nearest ----------------
+    ctx.section('dockMode=nearest picks and snaps to the closest lane');
+
+    // The seed chart already has lanes everywhere, which would make "nearest" ambiguous; the
+    // second fixture has none, so only the lanes created below can be candidates.
+    const dockOpen = await api.openFast({ fumenPath: ctx.env.secondChart, audioPath: ctx.env.audioPath });
+    const dockEditorId = dockOpen.payload?.editorId;
+    const dockReady = await waitFor(async () => {
+      const probe = (await api.listOpened()).payload.find((e) => e.editorId === dockEditorId);
+      const count = probe ? probe.laneCount + probe.tapCount + probe.bellCount + probe.bpmChangeCount + probe.soflanCount : 0;
+      return count > 0 ? probe : null;
+    });
+    ctx.check('the lane-free dock probe finished loading', dockReady.ok,
+      dockReady.ok ? `after ${dockReady.waitedMs}ms` : 'timed out waiting for the chart to load');
+
+    const dAdd = (objectType, args = {}) => api.addObject({ editorId: dockEditorId, objectType, ...args });
+    const dModify = (objectId, propertyName, newValue, extra = {}) => api.modifyObject({ editorId: dockEditorId, objectId, propertyName, newValue, ...extra });
+    const dFind = async (family, id) => (await api.family(dockEditorId, family)).find((o) => o.id === id);
+    const dT = (n) => splitTotalGrid(base + (100 + n) * totalGridResolution);
+
+    // two lanes, 10 XGrid units apart, each with a constant path across [dT(0), dT(2)]
+    const nearLeft = await dAdd('lane', { ...dT(0), xGridUnit: 10, xGridGrid: 0, laneType: 'center' });
+    const nearLeftRecord = (await dFind('lane', nearLeft.payload?.objectId))?.recordId;
+    await dAdd('lanenext', { ...dT(1), xGridUnit: 10, xGridGrid: 0, parentRecordId: nearLeftRecord });
+    await dAdd('lanenext', { ...dT(2), xGridUnit: 10, xGridGrid: 0, parentRecordId: nearLeftRecord });
+
+    const nearRight = await dAdd('lane', { ...dT(0), xGridUnit: 20, xGridGrid: 0, laneType: 'left' });
+    const nearRightRecord = (await dFind('lane', nearRight.payload?.objectId))?.recordId;
+    await dAdd('lanenext', { ...dT(1), xGridUnit: 20, xGridGrid: 0, parentRecordId: nearRightRecord });
+    await dAdd('lanenext', { ...dT(2), xGridUnit: 20, xGridGrid: 0, parentRecordId: nearRightRecord });
+    ctx.check('two lanes with a path across the dock range are ready',
+      Number.isInteger(nearLeftRecord) && Number.isInteger(nearRightRecord),
+      `left=${nearLeftRecord} right=${nearRightRecord}`);
+
+    const snapAt = dT(1);
+    const dockedLeft = await dAdd('tap', { ...snapAt, xGridUnit: 11, xGridGrid: 0, dockMode: 'nearest' });
+    const dockedLeftDto = await dFind('tap', dockedLeft.payload?.objectId);
+    ctx.equal('the nearest lane wins for a tap next to it', dockedLeftDto?.referenceLaneRecordId, nearLeftRecord);
+    ctx.check('the nearest tap was snapped onto that lane',
+      dockedLeftDto?.xGrid?.unit === 10 && dockedLeftDto?.xGrid?.grid === 0,
+      `xGrid=${JSON.stringify(dockedLeftDto?.xGrid)}`);
+
+    const dockedRight = await dAdd('tap', { ...snapAt, xGridUnit: 18, xGridGrid: 0, dockMode: 'nearest' });
+    const dockedRightDto = await dFind('tap', dockedRight.payload?.objectId);
+    ctx.equal('a tap closer to the other lane docks there', dockedRightDto?.referenceLaneRecordId, nearRightRecord);
+    ctx.check('that tap was snapped onto the second lane',
+      dockedRightDto?.xGrid?.unit === 20 && dockedRightDto?.xGrid?.grid === 0,
+      `xGrid=${JSON.stringify(dockedRightDto?.xGrid)}`);
+
+    const tied = await dAdd('tap', { ...snapAt, xGridUnit: 15, xGridGrid: 0, dockMode: 'nearest' });
+    const tiedDto = await dFind('tap', tied.payload?.objectId);
+    ctx.equal('an exact tie falls back to the lower RecordId', tiedDto?.referenceLaneRecordId, Math.min(nearLeftRecord, nearRightRecord));
+
+    const explicit = await dAdd('tap', { ...snapAt, xGridUnit: 0, xGridGrid: 0, referenceLaneRecordId: nearRightRecord, snapXToLane: true, dockMode: 'explicit' });
+    ctx.ok("dockMode='explicit' keeps the explicit binding path", explicit);
+    ctx.equal('the explicit mode still honors referenceLaneRecordId',
+      (await dFind('tap', explicit.payload?.objectId))?.referenceLaneRecordId, nearRightRecord);
+
+    ctx.fails('an unknown dockMode value is rejected',
+      await dAdd('tap', { ...snapAt, xGridUnit: 10, xGridGrid: 0, dockMode: 'closest' }), 'INVALID_ARGUMENT');
+    ctx.fails('dockMode=nearest is refused on a family that cannot dock',
+      await dAdd('bpm', { ...snapAt, bpm: 180, dockMode: 'nearest' }), 'INVALID_ARGUMENT');
+    ctx.fails('dockMode=nearest cannot be combined with referenceLaneRecordId',
+      await dAdd('tap', { ...snapAt, xGridUnit: 10, xGridGrid: 0, dockMode: 'nearest', referenceLaneRecordId: nearLeftRecord }), 'INVALID_ARGUMENT');
+    ctx.fails('dockMode=nearest cannot be combined with snapXToLane',
+      await dAdd('tap', { ...snapAt, xGridUnit: 10, xGridGrid: 0, dockMode: 'nearest', referenceLaneRecordId: nearLeftRecord, snapXToLane: true }), 'INVALID_ARGUMENT');
+    ctx.fails('dockMode=nearest fails when no lane covers the position',
+      await dAdd('tap', { ...dT(50), xGridUnit: 10, xGridGrid: 0, dockMode: 'nearest' }), 'INVALID_ARGUMENT');
+
+    // modify re-docks after the write: the written position steers the pick, and undo restores binding + XGrid
+    const redock = await dAdd('tap', { ...snapAt, xGridUnit: 10, xGridGrid: 0, referenceLaneRecordId: nearLeftRecord, snapXToLane: true });
+    const redockId = redock.payload?.objectId;
+    const redockResponse = await dModify(redockId, 'xGridUnit', '19', { dockMode: 'nearest' });
+    ctx.equal('modify_object(dockMode=nearest) echoes the mode', redockResponse.payload?.dockMode, 'nearest');
+    ctx.equal('modify_object(dockMode=nearest) reports the implicit snap', redockResponse.payload?.snapped, true);
+    const redockedDto = await dFind('tap', redockId);
+    ctx.equal('the re-dock picked the lane closest to the written position', redockedDto?.referenceLaneRecordId, nearRightRecord);
+    ctx.check('the re-dock snapped the tap onto the new lane',
+      redockedDto?.xGrid?.unit === 20 && redockedDto?.xGrid?.grid === 0,
+      `xGrid=${JSON.stringify(redockedDto?.xGrid)}`);
+
+    ctx.ok('the re-dock is undoable', await api.undo({ editorId: dockEditorId }));
+    const restoredDto = await dFind('tap', redockId);
+    ctx.equal('undo restores the previous lane binding', restoredDto?.referenceLaneRecordId, nearLeftRecord);
+    ctx.check('undo restores the previous XGrid',
+      restoredDto?.xGrid?.unit === 10 && restoredDto?.xGrid?.grid === 0,
+      `xGrid=${JSON.stringify(restoredDto?.xGrid)}`);
+
+    const floating = await dAdd('tap', { ...snapAt, xGridUnit: 12, xGridGrid: 0 });
+    const floated = await dModify(floating.payload?.objectId, 'tag', 'floating', { dockMode: 'nearest' });
+    ctx.ok('a floating tap can be docked with dockMode=nearest', floated);
+    ctx.equal('the floating tap now carries a lane binding',
+      (await dFind('tap', floating.payload?.objectId))?.referenceLaneRecordId, nearLeftRecord);
+    ctx.ok('the automatic dock is undoable', await api.undo({ editorId: dockEditorId }));
+    const undockedDto = await dFind('tap', floating.payload?.objectId);
+    ctx.check('undo removes the automatic binding again',
+      undockedDto !== undefined && undockedDto.referenceLaneRecordId === undefined,
+      `dto=${JSON.stringify(undockedDto)}`);
+    ctx.check('undo also restores the floating position',
+      undockedDto?.xGrid?.unit === 12 && undockedDto?.xGrid?.grid === 0,
+      `xGrid=${JSON.stringify(undockedDto?.xGrid)}`);
+
+    ctx.fails('modify_object rejects an unknown dockMode',
+      await dModify(redockId, 'tag', 'x', { dockMode: 'nearest-ish' }), 'INVALID_ARGUMENT');
+    ctx.fails('modify_object(dockMode=nearest) cannot write referenceLaneRecordId',
+      await dModify(redockId, 'referenceLaneRecordId', String(nearLeftRecord), { dockMode: 'nearest' }), 'INVALID_ARGUMENT');
+    ctx.fails('modify_object(dockMode=nearest) cannot be combined with snapXToLane',
+      await dModify(redockId, 'tGridUnit', String(snapAt.tGridUnit), { dockMode: 'nearest', snapXToLane: true }), 'INVALID_ARGUMENT');
+    const notDockable = await dAdd('comment', { ...snapAt, content: 'not dockable' });
+    ctx.fails('modify_object(dockMode=nearest) is refused on a non-dockable object',
+      await dModify(notDockable.payload?.objectId, 'content', 'still floating', { dockMode: 'nearest' }), 'INVALID_ARGUMENT');
+    ctx.fails('modify_object(dockMode=nearest) fails when no lane covers the position',
+      await dModify(redockId, 'tGridUnit', String(dT(50).tGridUnit), { dockMode: 'nearest' }), 'INVALID_ARGUMENT');
+
+    ctx.ok('the dock probe editor is closed again', await api.close({ editorId: dockEditorId, force: true }));
+
+    // ---------------- curvecontrol ----------------
     ctx.section('curvecontrol');
 
     ctx.fails('curvecontrol without referenceObjectId is rejected',

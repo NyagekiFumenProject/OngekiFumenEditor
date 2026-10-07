@@ -62,7 +62,7 @@ export default {
     const addProps = Object.keys(byName.get('editor.add_object')?.inputSchema?.properties ?? {});
     const addMustHave = [
       'objectType', 'tGridUnit', 'tGridGrid', 'xGridUnit', 'xGridGrid', 'laneType', 'soflanType',
-      'endTGridUnit', 'endTGridGrid', 'bulletPalleteStrId', 'referenceLaneRecordId', 'snapXToLane',
+      'endTGridUnit', 'endTGridGrid', 'bulletPalleteStrId', 'referenceLaneRecordId', 'snapXToLane', 'dockMode',
       'parentRecordId', 'referenceObjectId', 'widthId', 'obliqueSourceXGridUnit', 'obliqueSourceXGridGrid',
       'colorId', 'brightness', 'endXGridUnit', 'endXGridGrid', 'blockDirection', 'editorId', 'expectedEditorId',
       'shooter', 'target', 'size', 'type', 'bulletDamageType', 'placeOffset', 'randomOffsetRange', 'tag', 'isTransparent',
@@ -72,7 +72,7 @@ export default {
       `missing: ${addMustHave.filter((p) => !addProps.includes(p)).join(', ')}`);
 
     const modProps = Object.keys(byName.get('editor.modify_object')?.inputSchema?.properties ?? {});
-    const modMustHave = ['objectId', 'propertyName', 'newValue', 'snapXToLane', 'editorId', 'expectedEditorId'];
+    const modMustHave = ['objectId', 'propertyName', 'newValue', 'snapXToLane', 'dockMode', 'editorId', 'expectedEditorId'];
     ctx.check('modify_object still exposes the full parameter surface',
       modMustHave.every((p) => modProps.includes(p)),
       `missing: ${modMustHave.filter((p) => !modProps.includes(p)).join(', ')}`);
@@ -87,7 +87,7 @@ export default {
     const doc = await ctx.client.readResource('skill://ongeki-fumen-editor/references/05-runtime-automation-and-mcp.md');
     const text = doc.contents?.[0]?.text ?? '';
     ctx.check('the served MCP reference page is non-trivial', text.length > 5000, `length=${text.length}`);
-    for (const probe of ['editor.check', 'editor.set_metainfo', 'editor.get_metainfo', 'lanenext', 'curvecontrol', 'isfarea', 'laneblock', 'colorId', 'snapXToLane']) {
+    for (const probe of ['editor.check', 'editor.set_metainfo', 'editor.get_metainfo', 'lanenext', 'curvecontrol', 'isfarea', 'laneblock', 'colorId', 'snapXToLane', 'dockMode']) {
       ctx.check(`served doc mentions '${probe}'`, text.includes(probe));
     }
   },

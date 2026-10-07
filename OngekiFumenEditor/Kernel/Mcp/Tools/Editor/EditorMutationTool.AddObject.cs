@@ -62,6 +62,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             [Description("Soflan family: whether the speed applies in design mode (default false).")] bool? applySpeedInDesignMode = default,
             [Description("tap/hold only: RecordId of the lane to dock to (see editor.query_object objectType='lane'). Omit, or pass a negative value, to leave the object floating.")] int? referenceLaneRecordId = default,
             [Description("tap/hold only: after docking, overwrite XGrid (and, for holds with an end, the HoldEnd XGrid) with the position the lane computes at that TGrid. Requires referenceLaneRecordId; fails when the lane has no path at that TGrid. Default false.")] bool? snapXToLane = default,
+            [Description("tap/hold only: placement mode. 'explicit' (default) honors referenceLaneRecordId/snapXToLane; 'nearest' docks to the closest dockable lane that has a path at this TGrid (same distance = lower RecordId) and snaps XGrid onto it, so it must not be combined with referenceLaneRecordId or snapXToLane. Fails when no dockable lane covers the position.")] string dockMode = default,
             [Description("lanenext / beamnext only: RecordId of the owning lane or beam start (from editor.query_object objectType='lane' or 'beam'). Required: an extension segment must hang off an existing start.")] int? parentRecordId = default,
             [Description("curvecontrol only: object id of the lane segment to bend (from editor.query_object objectType='lanenext'). Required.")] int? referenceObjectId = default,
             [Description("beam / beamnext only: beam width id, 1 to 5 (default 1).")] int? widthId = default,
@@ -81,7 +82,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         {
             const string operationName = "editor.add_object";
             var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, tag, bpm, bulletPalleteStrId, shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, meterBunShi, meterBunbo, enemyWave, laneType, isTransparent, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, parentRecordId, referenceObjectId, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection, editorId, expectedEditorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, tag, bpm, bulletPalleteStrId, shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, meterBunShi, meterBunbo, enemyWave, laneType, isTransparent, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, dockMode, parentRecordId, referenceObjectId, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection, editorId, expectedEditorId, requestedBy, clientId });
 
             if (!CreatableFamilies.Contains(family))
                 return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.add_object supports {string.Join(", ", CreatableFamilies)}; '{objectType}' is not supported yet.");
@@ -92,6 +93,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 return Failure(operationName, "INVALID_ARGUMENT", $"referenceLaneRecordId and snapXToLane only apply to tap and hold; '{family}' cannot dock to a lane.");
             if (snapXToLane == true && laneRecordId is null)
                 return Failure(operationName, "INVALID_ARGUMENT", $"snapXToLane requires a non-negative referenceLaneRecordId: there is no lane to snap to.");
+
+            if (!TryNormalizeDockMode(dockMode, out var dock, out var dockModeError))
+                return Failure(operationName, "INVALID_ARGUMENT", dockModeError);
+            var dockNearest = dock == DockModeNearest;
+            if (dockNearest && family is not ("tap" or "hold"))
+                return Failure(operationName, "INVALID_ARGUMENT", $"dockMode=nearest only applies to tap and hold; '{family}' cannot dock to a lane.");
+            if (dockNearest && (referenceLaneRecordId is not null || snapXToLane is not null))
+                return Failure(operationName, "INVALID_ARGUMENT", $"dockMode=nearest picks the lane itself; it cannot be combined with referenceLaneRecordId or snapXToLane.");
 
             if (parentRecordId is not null && family is not ("lanenext" or "beamnext"))
                 return Failure(operationName, "INVALID_ARGUMENT", $"parentRecordId only applies to lanenext and beamnext; '{family}' has no owning start.");
@@ -142,7 +151,19 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 return resolveError;
 
             LaneStartBase referenceLane = default;
-            if (laneRecordId is { } laneToResolve)
+            if (dockNearest)
+            {
+                // §17：nearest 在构建前就选好 lane，之后完全复用显式绑定 + 吸附的既有创建路径。
+                try
+                {
+                    referenceLane = PickNearestDockableLane(editor.Fumen, new TGrid(tGridUnit, tGridGrid), new XGrid(xGridUnit, xGridGrid));
+                }
+                catch (Exception ex)
+                {
+                    return Failure(operationName, "INVALID_ARGUMENT", ex.Message);
+                }
+            }
+            else if (laneRecordId is { } laneToResolve)
             {
                 referenceLane = editor.Fumen.Lanes.FirstOrDefault(x => x.RecordId == laneToResolve);
                 if (referenceLane is null)
@@ -222,7 +243,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     SoflanGroup = soflanGroup,
                     ApplySpeedInDesignMode = applySpeedInDesignMode,
                     ReferenceLane = referenceLane,
-                    SnapXToLane = snapXToLane == true,
+                    SnapXToLane = snapXToLane == true || dockNearest,
                     ParentStart = parentStart,
                     CurveTarget = curveTarget,
                     WidthId = widthId,

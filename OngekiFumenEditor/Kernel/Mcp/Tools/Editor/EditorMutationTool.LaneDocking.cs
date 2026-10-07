@@ -23,6 +23,69 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             => fumen.Lanes.FirstOrDefault(x => x.RecordId == recordId)
                 ?? throw new ArgumentException($"No lane with RecordId {recordId} in the editor.");
 
+        private const string DockModeExplicit = "explicit";
+        private const string DockModeNearest = "nearest";
+
+        /// <summary>
+        /// §17：<c>dockMode</c> 取值归一化。省略 / 空串 = <c>explicit</c>（维持显式绑定语义），
+        /// 大小写不敏感地接受 explicit / nearest，其它取值直接失败。
+        /// </summary>
+        private static bool TryNormalizeDockMode(string rawValue, out string mode, out string error)
+        {
+            mode = DockModeExplicit;
+            error = default;
+
+            var text = (rawValue ?? string.Empty).Trim();
+            if (text.Length == 0)
+                return true;
+
+            if (string.Equals(text, DockModeExplicit, StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (string.Equals(text, DockModeNearest, StringComparison.OrdinalIgnoreCase))
+            {
+                mode = DockModeNearest;
+                return true;
+            }
+
+            error = $"'dockMode' must be '{DockModeExplicit}' (honor referenceLaneRecordId / snapXToLane) or '{DockModeNearest}' (dock to the closest lane with a path here); '{rawValue}' is not supported.";
+            return false;
+        }
+
+        /// <summary>
+        /// §17：<c>dockMode=nearest</c> 的选道规则 —— 取该 TGrid 处算得出 XGrid 的最近可停靠 lane
+        /// （|laneXGrid - xGrid| 升序，同距按 RecordId 升序）。没有任何候选就直接失败，绝不静默滞空。
+        /// </summary>
+        private static LaneStartBase PickNearestDockableLane(OngekiFumen fumen, TGrid tGrid, XGrid xGrid)
+        {
+            var pick = fumen.Lanes
+                .GetVisibleStartObjects(tGrid, tGrid)
+                .Where(x => x.IsDockableLane)
+                .Select(x => (Lane: x, LaneXGrid: x.CalulateXGrid(tGrid)))
+                .Where(x => x.LaneXGrid is not null)
+                .OrderBy(x => Math.Abs(x.LaneXGrid.TotalGrid - xGrid.TotalGrid))
+                .ThenBy(x => x.Lane.RecordId)
+                .FirstOrDefault();
+
+            return pick.Lane
+                ?? throw new ArgumentException($"No dockable lane (center/left/right/wallLeft/wallRight) has a path at T[{tGrid.Unit},{tGrid.Grid}]; dockMode=nearest needs at least one candidate there.");
+        }
+
+        /// <summary>按 dockMode=nearest 重新绑定 lane 并吸附 XGrid；hold 连终点一起吸附。</summary>
+        private static void DockDockableToNearestLane(OngekiFumen fumen, OngekiObjectBase obj)
+        {
+            var dockable = RequireLaneDockable(obj);
+            var (tGrid, xGrid) = obj switch
+            {
+                Tap tap => (tap.TGrid, tap.XGrid),
+                Hold hold => (hold.TGrid, hold.XGrid),
+                _ => throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) cannot dock to a lane; only tap and hold do."),
+            };
+
+            dockable.ReferenceLaneStart = PickNearestDockableLane(fumen, tGrid, xGrid);
+            SnapDockableXGridToBoundLane(obj);
+        }
+
         /// <summary>
         /// 解析 MCP 的 lane 引用取值。返回 false 表示“滞空”（空串 / "null" / 负数），此时 out 值无意义。
         /// 只有既不是数字也不是滞空写法时才抛错。
@@ -77,18 +140,19 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         }
 
         /// <summary>
-        /// 吸附改动的 XGrid 并不属于被修改的那个属性本身，所以 undo / 回滚时必须单独把这几处位置也还原，
-        /// 否则撤销 lane 绑定之后对象会停在吸附后的位置上。
+        /// 停靠 / 吸附改动的是 lane 绑定和 XGrid，并不属于被修改的那个属性本身，所以 undo / 回滚时必须
+        /// 单独把这些也还原，否则撤销 lane 绑定或 dockMode=nearest 之后对象会停在新的绑定或位置上。
         /// </summary>
-        private sealed class DockableXGridSnapshot
+        private sealed class LaneDockingSnapshot
         {
             private XGrid startXGrid;
             private XGrid holdEndXGrid;
+            private LaneStartBase laneStart;
 
-            public static DockableXGridSnapshot Capture(OngekiObjectBase obj) => obj switch
+            public static LaneDockingSnapshot Capture(OngekiObjectBase obj) => obj switch
             {
-                Tap tap => new DockableXGridSnapshot { startXGrid = tap.XGrid },
-                Hold hold => new DockableXGridSnapshot { startXGrid = hold.XGrid, holdEndXGrid = hold.HoldEnd?.XGrid },
+                Tap tap => new LaneDockingSnapshot { startXGrid = tap.XGrid, laneStart = tap.ReferenceLaneStart },
+                Hold hold => new LaneDockingSnapshot { startXGrid = hold.XGrid, holdEndXGrid = hold.HoldEnd?.XGrid, laneStart = hold.ReferenceLaneStart },
                 _ => default,
             };
 
@@ -97,12 +161,16 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 switch (obj)
                 {
                     case Tap tap when startXGrid is not null:
+                        tap.ReferenceLaneStart = laneStart;
                         tap.XGrid = startXGrid;
                         return;
 
                     case Hold hold:
                         if (startXGrid is not null)
+                        {
+                            hold.ReferenceLaneStart = laneStart;
                             hold.XGrid = startXGrid;
+                        }
                         if (hold.HoldEnd is { } holdEnd && holdEndXGrid is not null)
                             holdEnd.XGrid = holdEndXGrid;
                         return;

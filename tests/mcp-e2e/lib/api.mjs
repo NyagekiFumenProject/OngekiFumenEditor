@@ -59,8 +59,8 @@ export class McpApi {
     return this.#client.call('editor.add_object', { editorId, expectedEditorId, objectType, ...rest });
   }
 
-  modifyObject({ editorId, objectId, propertyName, newValue, snapXToLane } = {}) {
-    return this.#client.call('editor.modify_object', { editorId, objectId, propertyName, newValue, snapXToLane });
+  modifyObject({ editorId, objectId, propertyName, newValue, snapXToLane, dockMode } = {}) {
+    return this.#client.call('editor.modify_object', { editorId, objectId, propertyName, newValue, snapXToLane, dockMode });
   }
 
   removeObject({ editorId, objectId } = {}) {
