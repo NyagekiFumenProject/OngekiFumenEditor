@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             this.actionScopeManager = actionScopeManager;
         }
 
-        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "bpm", "bulletPallete", "shooter", "target", "size", "type", "bulletDamageType", "placeOffset", "randomOffsetRange", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode", ReferenceLaneRecordIdProperty, "widthId", "obliqueSourceXGridUnit", "obliqueSourceXGridGrid", "colorId", "brightness", "endXGridUnit", "endXGridGrid", "blockDirection" };
+        private static readonly string[] SupportedModifyProperties = { "tGridUnit", "tGridGrid", "xGridUnit", "xGridGrid", "isCritical", "direction", "content", "tag", "bpm", "bulletPallete", "shooter", "target", "size", "type", "bulletDamageType", "placeOffset", "randomOffsetRange", "bunShi", "bunbo", "enemyWave", "endTGridUnit", "endTGridGrid", "speed", "soflanGroup", "applySpeedInDesignMode", ReferenceLaneRecordIdProperty, "widthId", "obliqueSourceXGridUnit", "obliqueSourceXGridGrid", "colorId", "brightness", "endXGridUnit", "endXGridGrid", "blockDirection" };
 
         /// <summary>
         /// §42：bullet/bell 的 custom projectile 参数。palette 非空时这些属性在属性浏览器里只读，

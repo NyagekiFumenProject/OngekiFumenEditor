@@ -191,6 +191,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return RequireFlick(obj).Direction.ToString();
                 case "content":
                     return RequireComment(obj).Content ?? string.Empty;
+                case "tag":
+                    return obj.Tag ?? string.Empty;
                 case "bpm":
                     return RequireBpm(obj).BPM.ToString(CultureInfo.InvariantCulture);
                 case "bulletPallete":
@@ -300,6 +302,9 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return;
                 case "content":
                     RequireComment(obj).Content = rawValue ?? string.Empty;
+                    return;
+                case "tag":
+                    obj.Tag = rawValue ?? string.Empty;
                     return;
                 case "bpm":
                     RequireBpm(obj).BPM = ParseDouble(rawValue);

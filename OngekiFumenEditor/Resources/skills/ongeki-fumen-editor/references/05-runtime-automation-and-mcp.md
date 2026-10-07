@@ -109,6 +109,7 @@ segments, and each segment can carry curve control points) that the flat familie
 
 Family-specific add arguments:
 
+* every family — optional `tag` (free text; `editor.modify_object` property `tag` reads it back or rewrites it, `""` clears it).
 * `bullet` / `bell` — take a pallete (`bulletPalleteStrId`, from `editor.query_bullet_pallete`;
   `--` means the Ongeki default bell and is bell-only) **or** explicit custom projectile
   parameters: `shooter` / `target` (enum names), `placeOffset`, `randomOffsetRange` and `speed`
@@ -127,11 +128,12 @@ Family-specific add arguments:
 * `isfarea` / `laneblock` — `endTGridUnit`/`endTGridGrid` required; `isfarea` also takes `endXGridUnit`/`endXGridGrid` (its width) and `soflanGroup`, `laneblock` takes `blockDirection` (`left` default, or `right`).
 
 `editor.modify_object` whitelist (`SupportedModifyProperties`):
-`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `bpm`, `bulletPallete`, `shooter`, `target`, `size`, `type`, `bulletDamageType`, `placeOffset`, `randomOffsetRange`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`, `widthId`, `obliqueSourceXGridUnit`, `obliqueSourceXGridGrid`, `colorId`, `brightness`, `endXGridUnit`, `endXGridGrid`, `blockDirection`.
+`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `tag`, `bpm`, `bulletPallete`, `shooter`, `target`, `size`, `type`, `bulletDamageType`, `placeOffset`, `randomOffsetRange`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`, `widthId`, `obliqueSourceXGridUnit`, `obliqueSourceXGridGrid`, `colorId`, `brightness`, `endXGridUnit`, `endXGridGrid`, `blockDirection`.
 
 * `bulletPallete` — bullet/bell only; value is a pallete StrID. `""` clears it (a bullet then drops back to custom parameters); `"--"` selects the Ongeki default bell and is bell-only.
 * `shooter`/`target`/`placeOffset`/`randomOffsetRange` — bullet/bell custom projectile parameters; `size`/`type`/`bulletDamageType` are bullet-only and a bell rejects them. Custom parameters are writable only while the object has no pallete: clear `bulletPallete` first or the call fails with `INVALID_ARGUMENT`. `speed` follows the same rule in custom mode.
 * `bunShi`/`bunbo` — meter; `enemyWave` — enemy.
+* `tag` — every object; free text, `""` clears it.
 * `endTGrid*` — hold with an end, soflan, `isfarea` or `laneblock`; `speed` (soflan speed, or bullet/bell custom projectile speed)/`applySpeedInDesignMode`; `soflanGroup` — soflan or `isfarea`.
 * `widthId` / `obliqueSourceXGridUnit` / `obliqueSourceXGridGrid` — beam (`""` clears the oblique source); `colorId` / `brightness` — colorful lane; `endXGrid*` — `isfarea`; `blockDirection` — `laneblock`.
 * `referenceLaneRecordId` — tap/hold only (see Lane Docking below); `""` or a negative value clears the binding.

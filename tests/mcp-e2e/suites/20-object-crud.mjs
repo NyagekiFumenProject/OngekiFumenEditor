@@ -326,6 +326,36 @@ export default {
     ctx.ok('the pallete can be cleared again', unbound);
     ctx.equal('clearing echoes the pallete StrID it had', unbound.payload?.oldValue, palleteStrId);
 
+    // ---------------- tag ----------------
+    ctx.section('editor.add_object / modify_object — tag');
+
+    const taggedTap = await api.addObject({ editorId, objectType: 'tap', ...T(29), xGridUnit: 0, xGridGrid: 0, tag: 'mcp-tag' });
+    ctx.ok('add_object accepts a tag', taggedTap);
+    const taggedTapId = taggedTap.payload?.objectId;
+
+    const tagEcho = await api.modifyObject({ editorId, objectId: taggedTapId, propertyName: 'tag', newValue: 'mcp-tag-2' });
+    ctx.ok('modify_object writes tag', tagEcho);
+    ctx.equal('the add-time tag reads back through the modify echo', tagEcho.payload?.oldValue, 'mcp-tag');
+    ctx.equal('the tag write reports the new value', tagEcho.payload?.newValue, 'mcp-tag-2');
+
+    // undo / redo round-trip, observed through the next write's echo
+    await api.undo({ editorId });
+    await api.redo({ editorId });
+    const tagEcho2 = await api.modifyObject({ editorId, objectId: taggedTapId, propertyName: 'tag', newValue: 'mcp-tag-3' });
+    ctx.equal('undo/redo round-trips the tag value', tagEcho2.payload?.oldValue, 'mcp-tag-2');
+    await api.undo({ editorId });
+
+    const tagCleared = await api.modifyObject({ editorId, objectId: taggedTapId, propertyName: 'tag', newValue: '' });
+    ctx.equal('an empty tag clears it', tagCleared.payload?.newValue, '');
+    ctx.equal('clearing echoes the value it replaced', tagCleared.payload?.oldValue, 'mcp-tag-2');
+
+    // tag is universal: a comment carries one too
+    const taggedComment = await api.addObject({ editorId, objectType: 'comment', ...T(30), content: 'tagged comment', tag: 'comment-tag' });
+    ctx.ok('add_object(comment) accepts a tag', taggedComment);
+    const taggedCommentId = taggedComment.payload?.objectId;
+    const commentTagEcho = await api.modifyObject({ editorId, objectId: taggedCommentId, propertyName: 'tag', newValue: 'comment-tag-2' });
+    ctx.equal('the comment tag reads back through the modify echo', commentTagEcho.payload?.oldValue, 'comment-tag');
+
     // ---------------- remove ----------------
     ctx.section('editor.remove_object');
 
@@ -383,7 +413,7 @@ export default {
     });
 
     // leave the chart as we found it: undo the leftover fixtures
-    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, ...created.values()].filter((id) => Number.isInteger(id));
+    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, taggedTapId, taggedCommentId, ...created.values()].filter((id) => Number.isInteger(id));
     for (const id of leftovers) {
       await api.removeObject({ editorId, objectId: id });
     }
