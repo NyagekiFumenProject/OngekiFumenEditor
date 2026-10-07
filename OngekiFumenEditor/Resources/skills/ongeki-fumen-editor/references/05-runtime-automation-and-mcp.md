@@ -21,7 +21,7 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | `editor.get_current` | The active editor: id, display name, paths, dirty/active flags, object counts. |
 | `editor.list_opened` | All opened editors, for picking an `editorId`. |
 | `editor.get_current_summary` | Stable lightweight summary of the active editor (`NO_ACTIVE_EDITOR` when none). |
-| `editor.query_object` | Page one object family inside a TGrid range; returns runtime ids plus the DTO below. |
+| `editor.query_object` | Page one object family inside a TGrid range; `selectedOnly` narrows the result to the current editor selection. Returns runtime ids plus the DTO below. |
 | `editor.check` | Run every built-in fumen check rule and return the results (see "Fumen Check" below). Read-only. |
 
 ### Editor document lifecycle
@@ -148,7 +148,9 @@ or `parentRecordId`), `parentRecordId` (segments and curve control points),
 `obliqueSourceXGrid`, `isObliqueBeam`, `colorId`, `colorName`, `brightness`,
 `segmentIndex` and `parentObjectId` (curve control points), `blockDirection` (`laneblock`),
 `areaWidth` (`isfarea`), `soflanType`, `soflanSpeed`, `soflanGroup`, `applySpeedInDesignMode`.
-TGrid/XGrid totals are reported in the editor's internal scale.
+TGrid/XGrid totals are reported in the editor's internal scale. Filters: `minTotalGrid`/`maxTotalGrid`
+(inclusive), `selectedOnly` (only objects currently selected in the editor) and cursor paging via
+`nextCursor`; paging assumes the filters and the selection stay unchanged between pages.
 
 ## Lane And Beam Structure (start / segment / curve control)
 

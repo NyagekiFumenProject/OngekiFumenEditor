@@ -28,11 +28,12 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.query_object", Title = "Query Objects", ReadOnly = true, Destructive = false, OpenWorld = false)]
-        [Description("Query chart objects of one family inside a TGrid range, ordered by TGrid (objects sharing a TGrid keep the chart's internal order, which is stable across calls but not sorted by id). Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
+        [Description("Query chart objects of one family inside a TGrid range, ordered by TGrid (objects sharing a TGrid keep the chart's internal order, which is stable across calls but not sorted by id). selectedOnly=true narrows the result to the objects currently selected in the editor. Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; paging assumes the filter and the selection stay unchanged between pages. Totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
         public async Task<object> QueryObject(
             [Description("Object family: tap, flick, hold, bell, bullet, comment, bpm, meter, clickse, enemy, lane (lane starts), lanenext (lane segments), curvecontrol (lane curve control points), beam, beamnext, isfarea, laneblock or soflan.")] string objectType,
             [Description("Inclusive lower bound in the TGrid totalGrid scale; omit for no bound.")] int? minTotalGrid = default,
             [Description("Inclusive upper bound in the TGrid totalGrid scale; omit for no bound.")] int? maxTotalGrid = default,
+            [Description("When true, only objects currently selected in the editor are returned. Default false (no selection filter).")] bool? selectedOnly = default,
             int limit = 200,
             [Description("Opaque cursor returned by a previous call.")] string cursor = default,
             string editorId = default,
@@ -42,7 +43,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         {
             const string operationName = "editor.query_object";
             var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, minTotalGrid, maxTotalGrid, limit, cursor, editorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { family, minTotalGrid, maxTotalGrid, selectedOnly, limit, cursor, editorId, requestedBy, clientId });
 
             if (!QuerableFamilies.Contains(family))
                 return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.query_object supports {string.Join(", ", QuerableFamilies)}; '{objectType}' is not supported.");
@@ -68,7 +69,11 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 var lastTotalGrid = 0;
                 var lastObjectId = 0;
 
-                foreach (var obj in EnumerateFamily(editor.Fumen, family, min, max))
+                var source = EnumerateFamily(editor.Fumen, family, min, max);
+                if (selectedOnly == true)
+                    source = source.Where(x => x is ISelectableObject { IsSelected: true });
+
+                foreach (var obj in source)
                 {
                     if (!seenCursor)
                     {
@@ -98,6 +103,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 success = true,
                 editorId = resolvedEditorId,
                 objectType = family,
+                selectedOnly = selectedOnly == true,
                 count = page.objects.Count,
                 truncated = page.truncated,
                 nextCursor,

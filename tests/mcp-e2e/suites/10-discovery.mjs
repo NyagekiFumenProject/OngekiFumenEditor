@@ -5,6 +5,36 @@
 // suite pins their exact response shapes (two of them return bare values, not the usual
 // `{success:...}` envelope) plus query_object's paging and filtering contract.
 
+// Selection probes for query_object's selectedOnly filter. The security policy requires every
+// script to carry the mutation shape, so each probe registers a no-op action — that leaves one
+// "MCP Script" history entry, which is harmless here (this suite makes no history assertions).
+const READ_IMPORTS = `using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using System.Linq;`;
+
+const selectTapsScript = (count) => `${READ_IMPORTS}
+
+var editor = ScriptArgs.TargetEditor;
+var picks = editor.Fumen.Taps.OrderBy(x => x.Id).Take(${count}).ToArray();
+editor.UndoRedoManager.ExecuteAction(
+    LambdaUndoAction.Create("MCP e2e read-only probe", () => { }, () => { }));
+editor.ClearSelection();
+// AddToSelection() has click semantics (NotifyObjectClicked toggles a lone selection off again),
+// so a multi-selection is built the way range selection does it: set the flags directly.
+foreach (var pick in picks)
+    pick.IsSelected = true;
+var selected = editor.SelectObjects.OfType<OngekiObjectBase>().Select(x => x.Id).OrderBy(x => x).ToArray();
+return new { selected = selected.Length, ids = selected };`;
+
+const clearSelectionScript = `${READ_IMPORTS}
+
+var editor = ScriptArgs.TargetEditor;
+editor.UndoRedoManager.ExecuteAction(
+    LambdaUndoAction.Create("MCP e2e read-only probe", () => { }, () => { }));
+editor.ClearSelection();
+return new { selected = editor.SelectObjects.Count() };`;
+
 export default {
   name: '10-discovery',
   description: 'get_current / list_opened / get_current_summary / query_object',
@@ -136,5 +166,52 @@ export default {
     const bounded = await api.queryObject({ editorId, objectType: 'tap', minTotalGrid: middle, maxTotalGrid: middle , limit: 2000 });
     const outside = bounded.payload.objects.filter((o) => o.tGrid.totalGrid !== middle);
     ctx.equal('maxTotalGrid is honoured (inclusive bounds)', outside.length, 0);
+
+    // ---------------- editor.query_object — selectedOnly ----------------
+    ctx.section('editor.query_object — selectedOnly');
+
+    const selection = await api.runScript({ editorId, scriptText: selectTapsScript(10) });
+    ctx.ok('the selection probe runs', selection);
+    const selectedIds = (selection.payload.result?.ids ?? []).map(Number);
+    ctx.equal('the probe selected ten taps', selectedIds.length, 10);
+
+    const selectedPage = await api.queryObject({ editorId, objectType: 'tap', selectedOnly: true, limit: 2000 });
+    ctx.ok('query_object accepts selectedOnly', selectedPage);
+    ctx.equal('selectedOnly echoes the filter', selectedPage.payload.selectedOnly, true);
+    ctx.equal('selectedOnly returns exactly the selected taps', selectedPage.payload.count, selectedIds.length);
+    ctx.check('selectedOnly returns the selected ids',
+      JSON.stringify(selectedPage.payload.objects.map((o) => o.id).sort((a, b) => a - b)) === JSON.stringify(selectedIds),
+      `returned=${selectedPage.payload.objects.map((o) => o.id).join(',')} selected=${selectedIds.join(',')}`);
+
+    const unfiltered = await api.queryObject({ editorId, objectType: 'tap', limit: 2000 });
+    ctx.equal('the unfiltered query is unchanged', unfiltered.payload.count, allTapObjects.length);
+    ctx.equal('the unfiltered query reports the filter as off', unfiltered.payload.selectedOnly, false);
+
+    // paging under the filter must reproduce the single-shot page exactly
+    const selectedWalk = [];
+    let selectedCursor;
+    let selectedPages = 0;
+    do {
+      const page = await api.queryObject({ editorId, objectType: 'tap', selectedOnly: true, limit: 3, cursor: selectedCursor });
+      if (page.payload?.success !== true) { ctx.check('selectedOnly paging stays successful', false, `code=${page.payload?.errorCode}`); break; }
+      selectedWalk.push(...page.payload.objects);
+      selectedCursor = page.payload.nextCursor;
+      selectedPages++;
+    } while (selectedCursor && selectedPages < 50);
+    ctx.equal('selectedOnly paging visits each selected tap exactly once', selectedWalk.length, selectedIds.length);
+    ctx.check('selectedOnly paging needed more than one round trip', selectedPages > 1, `pages=${selectedPages}`);
+    ctx.equal('selectedOnly paging matches the single-shot order',
+      selectedWalk.map((o) => o.id).join(','), selectedPage.payload.objects.map((o) => o.id).join(','));
+
+    // a family with nothing selected returns an empty page, not an error
+    const holdsSelected = await api.queryObject({ editorId, objectType: 'hold', selectedOnly: true, limit: 2000 });
+    ctx.ok('selectedOnly on a family with no selection succeeds', holdsSelected);
+    ctx.equal('selectedOnly returns nothing when nothing is selected', holdsSelected.payload.count, 0);
+
+    // clearing the selection again (and closing the fixture editor) leaves no trace
+    const clearedProbe = await api.runScript({ editorId, scriptText: clearSelectionScript });
+    ctx.equal('the clear probe reports no selection', clearedProbe.payload.result?.selected, 0);
+    ctx.equal('after clearing, selectedOnly returns nothing',
+      (await api.queryObject({ editorId, objectType: 'tap', selectedOnly: true, limit: 2000 })).payload.count, 0);
   },
 };
