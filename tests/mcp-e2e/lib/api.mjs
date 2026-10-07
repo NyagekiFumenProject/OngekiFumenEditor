@@ -31,6 +31,10 @@ export class McpApi {
     return this.#client.call('editor.query_object', { editorId, objectType, objectTypes, minTotalGrid, maxTotalGrid, selectedOnly, includeAuxiliary, limit, cursor });
   }
 
+  getObject({ editorId, objectId, expectedEditorId } = {}) {
+    return this.#client.call('editor.get_object', { editorId, objectId, expectedEditorId });
+  }
+
   // ---------------- document lifecycle ----------------
 
   createProject({ audioPath, fumenPath, baseBpm, audioDurationMs, requireConfirmation } = {}) {

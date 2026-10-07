@@ -14,7 +14,7 @@ export default {
     const { tools } = await ctx.client.listTools();
     const names = tools.map((t) => t.name).sort();
 
-    ctx.equal('tools/list returns exactly 29 tools', tools.length, 29);
+    ctx.equal('tools/list returns exactly 30 tools', tools.length, 30);
     ctx.check('the advertised tool set matches the expected set',
       JSON.stringify(names) === JSON.stringify([...EXPECTED_TOOLS].sort()),
       `missing=[${EXPECTED_TOOLS.filter((n) => !names.includes(n))}] extra=[${names.filter((n) => !EXPECTED_TOOLS.includes(n))}]`);

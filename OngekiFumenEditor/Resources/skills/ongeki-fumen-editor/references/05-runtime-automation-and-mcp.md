@@ -9,7 +9,7 @@
 
 ## Current MCP Tool Surface
 
-29 tools are registered today. Every tool accepts the shared routing/auth parameters
+30 tools are registered today. Every tool accepts the shared routing/auth parameters
 `requestedBy`, `clientId` and `cancellationToken`; editor-scoped tools also accept
 `editorId` (defaults to the active editor) and `expectedEditorId` (guards against a
 mid-flight editor switch); mutating tools add `requireConfirmation` (default `true`).
@@ -22,6 +22,7 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | `editor.list_opened` | All opened editors, for picking an `editorId`. |
 | `editor.get_current_summary` | Stable lightweight summary of the active editor (`NO_ACTIVE_EDITOR` when none). |
 | `editor.query_object` | Page one family (`objectType`) or several (`objectTypes`) inside a TGrid range; `selectedOnly` narrows the result to the current editor selection. Returns runtime ids plus the DTO below. |
+| `editor.get_object` | Full read of one object by id: the DTO below plus every property `editor.modify_object` can address on it, each with its canonical value and a `writable` flag. Read-only. |
 | `editor.check` | Run every built-in fumen check rule and return the results (see "Fumen Check" below). Read-only. |
 
 ### Editor document lifecycle
@@ -163,6 +164,12 @@ TGrid/XGrid totals are reported in the editor's internal scale. Families: `objec
 true; `false` drops auxiliary display objects such as the curve control points) and cursor paging via
 `nextCursor`; paging assumes the filters and the selection stay unchanged between pages. Single-family
 pages keep each family's internal tie order; multi-family pages are ordered by TGrid then object id.
+`editor.get_object objectId=<id>` returns this DTO for one object together with its properties array:
+one `{ name, value, writable }` row per `editor.modify_object` property that applies to the object
+(inapplicable ones are omitted, just as modify rejects them with `UNSUPPORTED_PROPERTY`), values in
+the same canonical strings writes echo, and `writable` mirroring modify's per-property eligibility —
+custom projectile parameters read `writable: false` while a pallete is set. Whether a concrete value
+parses can only be discovered by actually writing it.
 
 ## Lane And Beam Structure (start / segment / curve control)
 

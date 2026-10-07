@@ -357,6 +357,71 @@ export default {
     ctx.ok('the pallete can be cleared again', unbound);
     ctx.equal('clearing echoes the pallete StrID it had', unbound.payload?.oldValue, palleteStrId);
 
+    // ---------------- editor.get_object ----------------
+    ctx.section('editor.get_object — full property read');
+    ctx.cover('editor.get_object');
+
+    const readBack = await api.addObject({ editorId, objectType: 'tap', ...T(34), xGridUnit: 1, xGridGrid: 2, tag: 'readback' });
+    ctx.ok('a tap for the read-back is created', readBack);
+    const readBackId = readBack.payload?.objectId;
+    const propertyRow = (payload, name) => (payload?.properties ?? []).find((p) => p.name === name);
+
+    const read = await api.getObject({ editorId, objectId: readBackId });
+    ctx.hasKeys('get_object response shape', read.payload, ['success', 'editorId', 'objectType', 'objectId', 'object', 'properties']);
+    ctx.equal('get_object echoes the family', read.payload.objectType, 'tap');
+    ctx.equal('get_object echoes the object id', read.payload.objectId, readBackId);
+    ctx.equal('the embedded DTO reports the object id', read.payload.object?.id, readBackId);
+    ctx.equal('the property read reports the tag', propertyRow(read.payload, 'tag')?.value, 'readback');
+    ctx.equal('the property read reports the TGrid unit', Number(propertyRow(read.payload, 'tGridUnit')?.value), T(34).tGridUnit);
+    ctx.equal('the property read reports the XGrid unit', Number(propertyRow(read.payload, 'xGridUnit')?.value), 1);
+    ctx.equal('the property read reports the XGrid grid', Number(propertyRow(read.payload, 'xGridGrid')?.value), 2);
+    ctx.equal('bool properties use canonical formatting', propertyRow(read.payload, 'isCritical')?.value, 'False');
+    ctx.equal('writable properties report writable=true', propertyRow(read.payload, 'tag')?.writable, true);
+    ctx.check('every property name is unique',
+      new Set(read.payload.properties.map((p) => p.name)).size === read.payload.properties.length);
+    ctx.check('inapplicable properties are omitted',
+      propertyRow(read.payload, 'bulletPallete') === undefined && propertyRow(read.payload, 'direction') === undefined);
+
+    const viaQuery = await findById('tap', readBackId);
+    ctx.check('the embedded DTO matches query_object',
+      JSON.stringify(read.payload.object) === JSON.stringify(viaQuery),
+      `get_object=${JSON.stringify(read.payload.object)} query_object=${JSON.stringify(viaQuery)}`);
+
+    // get_object is the read half of modify_object: writes are observable and reads never disturb history
+    await api.modifyObject({ editorId, objectId: readBackId, propertyName: 'tag', newValue: 'readback-2' });
+    ctx.equal('get_object reflects the write',
+      propertyRow((await api.getObject({ editorId, objectId: readBackId })).payload, 'tag')?.value, 'readback-2');
+    const writeUndone = await api.undo({ editorId });
+    ctx.check('the write is undoable after a read',
+      typeof writeUndone.payload?.undone === 'string', `undone=${writeUndone.payload?.undone}`);
+    ctx.equal('get_object reflects the undo',
+      propertyRow((await api.getObject({ editorId, objectId: readBackId })).payload, 'tag')?.value, 'readback');
+
+    // projectile eligibility: custom parameters are readable but only writable while no pallete is bound
+    const readBell = await api.addObject({ editorId, objectType: 'bell', ...T(35), xGridUnit: 0, xGridGrid: 0, shooter: 'Enemy', target: 'Player', speed: 2 });
+    const readBellId = readBell.payload?.objectId;
+    const bellGet = await api.getObject({ editorId, objectId: readBellId });
+    ctx.equal('the projectile read reports the custom shooter', propertyRow(bellGet.payload, 'shooter')?.value, 'Enemy');
+    ctx.equal('custom parameters report writable=true while unbound', propertyRow(bellGet.payload, 'speed')?.writable, true);
+    ctx.check('a bell omits properties it does not have',
+      ['size', 'type', 'bulletDamageType'].every((name) => propertyRow(bellGet.payload, name) === undefined));
+
+    const readPaletted = await api.addObject({ editorId, objectType: 'bullet', ...T(36), xGridUnit: 0, xGridGrid: 0, bulletPalleteStrId: palleteStrId });
+    const readPalettedId = readPaletted.payload?.objectId;
+    const palettedRead = await api.getObject({ editorId, objectId: readPalettedId });
+    ctx.equal('the paletted bullet reports its pallete', propertyRow(palettedRead.payload, 'bulletPallete')?.value, palleteStrId);
+    ctx.check('custom parameters stay readable while a pallete is set',
+      propertyRow(palettedRead.payload, 'speed')?.value !== undefined);
+    ctx.equal('custom parameters report writable=false while a pallete is set', propertyRow(palettedRead.payload, 'speed')?.writable, false);
+    ctx.equal('the pallete reference itself stays writable', propertyRow(palettedRead.payload, 'bulletPallete')?.writable, true);
+
+    ctx.fails('get_object rejects an unknown object id',
+      await api.getObject({ editorId, objectId: 2147483000 }), 'OBJECT_NOT_FOUND');
+    ctx.fails('get_object rejects a missing editor',
+      await api.getObject({ editorId: 'editor-missing', objectId: readBackId }), 'EDITOR_NOT_FOUND');
+    ctx.fails('get_object rejects a stale expectedEditorId',
+      await api.getObject({ editorId, expectedEditorId: 'editor-somebody-else', objectId: readBackId }), 'EDITOR_CHANGED');
+
     // ---------------- tag ----------------
     ctx.section('editor.add_object / modify_object — tag');
 
@@ -546,7 +611,7 @@ export default {
     ctx.equal('modify_object keeps the selection', afterModifySelection.payload.result?.ids?.[0], selectionVictimId);
 
     // leave the chart as we found it: undo the leftover fixtures
-    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, taggedTapId, taggedCommentId, selectionVictimId, ...created.values()].filter((id) => Number.isInteger(id));
+    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, taggedTapId, taggedCommentId, selectionVictimId, readBackId, readBellId, readPalettedId, ...created.values()].filter((id) => Number.isInteger(id));
     for (const id of leftovers) {
       await api.removeObject({ editorId, objectId: id });
     }
