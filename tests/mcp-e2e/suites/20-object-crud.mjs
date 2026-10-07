@@ -10,6 +10,35 @@
 import { verifyUndoRedo } from '../lib/history.mjs';
 import { splitTotalGrid, totalGridResolution } from '../lib/env.mjs';
 
+// Read-only probes for custom projectile parameters. The security policy requires every script
+// to carry the mutation shape, so each probe registers a no-op action and only reads the chart —
+// but that action still leaves the run's own "MCP Script" history entry behind. Probes therefore
+// must not run between a mutation and its undo (the undo would consume the probe's entry).
+const READ_IMPORTS = `using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.EditorScriptExecutor.Scripts;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using System.Linq;`;
+
+const readBellScript = (id) => `${READ_IMPORTS}
+
+var editor = ScriptArgs.TargetEditor;
+var bell = editor.Fumen.Bells.FirstOrDefault(x => x.Id == ${id});
+editor.UndoRedoManager.ExecuteAction(
+    LambdaUndoAction.Create("MCP e2e read-only probe", () => { }, () => { }));
+if (bell is null)
+    return null;
+return new { speed = bell.Speed, placeOffset = bell.PlaceOffset, randomOffsetRange = bell.RandomOffsetRange, shooter = bell.ShooterValue.ToString(), target = bell.TargetValue.ToString(), hasPallete = bell.ReferenceBulletPallete != null };`;
+
+const readBulletScript = (id) => `${READ_IMPORTS}
+
+var editor = ScriptArgs.TargetEditor;
+var bullet = editor.Fumen.Bullets.FirstOrDefault(x => x.Id == ${id});
+editor.UndoRedoManager.ExecuteAction(
+    LambdaUndoAction.Create("MCP e2e read-only probe", () => { }, () => { }));
+if (bullet is null)
+    return null;
+return new { speed = bullet.Speed, placeOffset = bullet.PlaceOffset, randomOffsetRange = bullet.RandomOffsetRange, shooter = bullet.ShooterValue.ToString(), target = bullet.TargetValue.ToString(), size = bullet.SizeValue.ToString(), type = bullet.TypeValue.ToString(), damageType = bullet.BulletDamageTypeValue.ToString(), hasPallete = bullet.ReferenceBulletPallete != null };`;
+
 export default {
   name: '20-object-crud',
   description: 'add_object / modify_object / remove_object + undo/redo',
@@ -99,6 +128,82 @@ export default {
     // optimistic concurrency
     ctx.fails('add_object rejects a stale expectedEditorId',
       await api.addObject({ editorId, expectedEditorId: 'editor-somebody-else', objectType: 'tap', ...T(2) }), 'EDITOR_CHANGED');
+
+    // ---------------- custom projectile parameters ----------------
+    ctx.section('editor.add_object — custom projectile parameters');
+
+    const bellCustom = await api.addObject({
+      editorId, objectType: 'bell', ...T(21), xGridUnit: 0, xGridGrid: 0,
+      shooter: 'Enemy', target: 'Player', speed: 2.5, placeOffset: 8, randomOffsetRange: 4,
+    });
+    ctx.ok('add_object(bell) accepts custom projectile parameters', bellCustom);
+    const bellCustomId = bellCustom.payload?.objectId;
+    const bellRead = await api.runScript({ editorId, scriptText: readBellScript(bellCustomId) });
+    ctx.ok('the custom bell can be read back through a script', bellRead);
+    ctx.equal('the custom bell stores the requested shooter', bellRead.payload.result?.shooter, 'Enemy');
+    ctx.equal('the custom bell stores the requested target', bellRead.payload.result?.target, 'Player');
+    ctx.equal('the custom bell stores the requested speed', bellRead.payload.result?.speed, 2.5);
+    ctx.equal('the custom bell stores the requested placeOffset', bellRead.payload.result?.placeOffset, 8);
+    ctx.equal('the custom bell stores the requested randomOffsetRange', bellRead.payload.result?.randomOffsetRange, 4);
+    ctx.equal('the custom bell has no pallete', bellRead.payload.result?.hasPallete, false);
+
+    const bulletCustom = await api.addObject({
+      editorId, objectType: 'bullet', ...T(22), xGridUnit: 0, xGridGrid: 0,
+      shooter: 'Center', target: 'FixField', size: 'Large', type: 'Needle', bulletDamageType: 'Danger',
+      speed: 1.5, placeOffset: 2, randomOffsetRange: 6,
+    });
+    ctx.ok('add_object(bullet) works without a pallete when custom parameters are explicit', bulletCustom);
+    const bulletCustomId = bulletCustom.payload?.objectId;
+    const bulletRead = await api.runScript({ editorId, scriptText: readBulletScript(bulletCustomId) });
+    ctx.ok('the custom bullet can be read back through a script', bulletRead);
+    ctx.equal('the custom bullet stores the requested shooter', bulletRead.payload.result?.shooter, 'Center');
+    ctx.equal('the custom bullet stores the requested target', bulletRead.payload.result?.target, 'FixField');
+    ctx.equal('the custom bullet stores the requested size', bulletRead.payload.result?.size, 'Large');
+    ctx.equal('the custom bullet stores the requested type', bulletRead.payload.result?.type, 'Needle');
+    ctx.equal('the custom bullet stores the requested damage type', bulletRead.payload.result?.damageType, 'Danger');
+    ctx.equal('the custom bullet stores the requested speed', bulletRead.payload.result?.speed, 1.5);
+    ctx.equal('the custom bullet has no pallete', bulletRead.payload.result?.hasPallete, false);
+
+    ctx.fails('a pallete and custom parameters cannot be combined',
+      await api.addObject({ editorId, objectType: 'bell', ...T(23), xGridUnit: 0, xGridGrid: 0, bulletPalleteStrId: palleteStrId, shooter: 'Enemy' }),
+      'INVALID_ARGUMENT');
+    ctx.fails('a bullet with a pallete rejects custom parameters too',
+      await api.addObject({ editorId, objectType: 'bullet', ...T(23), xGridUnit: 0, xGridGrid: 0, bulletPalleteStrId: palleteStrId, speed: 2 }),
+      'INVALID_ARGUMENT');
+    ctx.fails('custom projectile parameters on a tap are rejected',
+      await api.addObject({ editorId, objectType: 'tap', ...T(23), shooter: 'Enemy' }), 'INVALID_ARGUMENT');
+    ctx.fails('a bell rejects size (it has no effect on bells)',
+      await api.addObject({ editorId, objectType: 'bell', ...T(23), xGridUnit: 0, xGridGrid: 0, size: 'Large' }), 'INVALID_ARGUMENT');
+    ctx.fails('a bell rejects type (a bell is always a Circle)',
+      await api.addObject({ editorId, objectType: 'bell', ...T(23), xGridUnit: 0, xGridGrid: 0, type: 'Needle' }), 'INVALID_ARGUMENT');
+    ctx.fails('a bell rejects bulletDamageType',
+      await api.addObject({ editorId, objectType: 'bell', ...T(23), xGridUnit: 0, xGridGrid: 0, bulletDamageType: 'Danger' }), 'INVALID_ARGUMENT');
+    ctx.fails('an unknown shooter enum value is rejected',
+      await api.addObject({ editorId, objectType: 'bell', ...T(23), xGridUnit: 0, xGridGrid: 0, shooter: 'Nowhere' }), 'INVALID_ARGUMENT');
+    ctx.fails("'speed' on a tap is rejected (it is a soflan / projectile parameter)",
+      await api.addObject({ editorId, objectType: 'tap', ...T(23), speed: 2 }), 'INVALID_ARGUMENT');
+
+    // custom parameters survive the undo/redo cycle like any other content. The cycle itself
+    // observes the object through query_object (see the probe note at the top): after the
+    // cycle's final undo, one redo must bring the whole object, fields included, back.
+    let customBellCycleId = null;
+    await verifyUndoRedo(ctx, {
+      label: 'add_object(bell custom)',
+      mutate: async () => {
+        const response = await api.addObject({ editorId, objectType: 'bell', ...T(25), xGridUnit: 0, xGridGrid: 0, shooter: 'TargetHead', speed: 3 });
+        customBellCycleId = response.payload?.objectId;
+        return response;
+      },
+      applied: async () => !!(await findById('bell', customBellCycleId)),
+      reverted: async () => (await findById('bell', customBellCycleId)) === undefined,
+      undoName: /Add bell/i,
+      redoName: /Add bell/i,
+    });
+
+    const revived = await api.redo({ editorId });
+    ctx.ok('the custom bell is redoable after the cycle', revived);
+    const revivedRead = await api.runScript({ editorId, scriptText: readBellScript(customBellCycleId) });
+    ctx.equal('the redo restores the custom projectile fields', revivedRead.payload?.result?.speed, 3);
 
     // ---------------- modify ----------------
     ctx.section('editor.modify_object');
@@ -191,7 +296,7 @@ export default {
     });
 
     // leave the chart as we found it: undo the leftover fixtures
-    const leftovers = [addId, modifyId, victimId, ...created.values()].filter((id) => Number.isInteger(id));
+    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, ...created.values()].filter((id) => Number.isInteger(id));
     for (const id of leftovers) {
       await api.removeObject({ editorId, objectId: id });
     }

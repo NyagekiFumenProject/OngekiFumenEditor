@@ -109,7 +109,13 @@ segments, and each segment can carry curve control points) that the flat familie
 
 Family-specific add arguments:
 
-* `bullet` / `bell` — `bulletPalleteStrId` (required for bullet; optional for bell, where `--` means the Ongeki default bell).
+* `bullet` / `bell` — take a pallete (`bulletPalleteStrId`, from `editor.query_bullet_pallete`;
+  `--` means the Ongeki default bell and is bell-only) **or** explicit custom projectile
+  parameters: `shooter` / `target` (enum names), `placeOffset`, `randomOffsetRange` and `speed`
+  for both, plus `size` / `type` / `bulletDamageType` for bullets only. The two modes are
+  mutually exclusive (passing both fails with `INVALID_ARGUMENT`); a bullet with no pallete needs
+  at least one custom parameter, or the call fails with `MISSING_BULLET_PALLETE`. Bells reject
+  `size` / `type` / `bulletDamageType`.
 * `meter` — `meterBunShi` / `meterBunbo` (default 4/4).
 * `enemy` — `enemyWave` (`Wave1` / `Wave2` / `Boss`, default `Boss`).
 * `lane` — `laneType` (`center` default, plus `left`, `right`, `colorful`, `enemy`, `wallLeft`, `wallRight`, `autoplayFader`). A `colorful` lane also takes `colorId` (a `ColorIdConst` name such as `Akari`, `Yuzu`, `Rio`, … — or its numeric id) and `brightness`; without them it is created in the default Akari colour at brightness 3.

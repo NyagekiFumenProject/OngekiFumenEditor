@@ -41,6 +41,13 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             public string Content;
             public double? Bpm;
             public BulletPallete Pallete;
+            public string Shooter;
+            public string Target;
+            public string Size;
+            public string Type;
+            public string BulletDamageType;
+            public int? PlaceOffset;
+            public int? RandomOffsetRange;
             public TGrid EndTGrid;
             public int? MeterBunShi;
             public int? MeterBunbo;
@@ -96,20 +103,28 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     };
 
                 case "bullet":
-                    return new Bullet
                     {
-                        TGrid = spec.TGrid,
-                        XGrid = spec.XGrid,
-                        ReferenceBulletPallete = spec.Pallete,
-                    };
+                        var bullet = new Bullet
+                        {
+                            TGrid = spec.TGrid,
+                            XGrid = spec.XGrid,
+                            ReferenceBulletPallete = spec.Pallete,
+                        };
+                        ApplyProjectileCustomFields(bullet, spec, "bullet");
+                        return bullet;
+                    }
 
                 case "bell":
-                    return new Bell
                     {
-                        TGrid = spec.TGrid,
-                        XGrid = spec.XGrid,
-                        ReferenceBulletPallete = spec.Pallete,
-                    };
+                        var bell = new Bell
+                        {
+                            TGrid = spec.TGrid,
+                            XGrid = spec.XGrid,
+                            ReferenceBulletPallete = spec.Pallete,
+                        };
+                        ApplyProjectileCustomFields(bell, spec, "bell");
+                        return bell;
+                    }
 
                 case "meter":
                     {
@@ -164,6 +179,64 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 default:
                     throw new ArgumentException($"Unsupported object family '{spec.Family}'.");
             }
+        }
+
+        /// <summary>
+        /// §36/§41/§42：bullet/bell 的 custom projectile 参数只在没有 palette 时生效 ——
+        /// 有 palette 时这些值由 palette 派生（属性浏览器里也是只读的）。AddObject 的校验已经拒绝
+        /// 「palette + custom 参数」的组合，这里对 palette 模式直接跳过，避免覆盖派生值的语义歧义。
+        /// </summary>
+        private static void ApplyProjectileCustomFields(IBulletPalleteReferencable projectile, ObjectCreateSpec spec, string familyName)
+        {
+            if (spec.Pallete is not null)
+                return;
+
+            switch (projectile)
+            {
+                case Bell bell:
+                    if (spec.Shooter is not null)
+                        bell.ShooterValue = ParsePalleteEnum<Shooter>(spec.Shooter, "shooter");
+                    if (spec.Target is not null)
+                        bell.TargetValue = ParsePalleteEnum<Target>(spec.Target, "target");
+                    if (spec.Speed is { } bellSpeed)
+                        bell.Speed = ToFiniteFloat(bellSpeed, "speed");
+                    if (spec.PlaceOffset is { } bellPlaceOffset)
+                        bell.PlaceOffset = bellPlaceOffset;
+                    if (spec.RandomOffsetRange is { } bellRandomOffsetRange)
+                        bell.RandomOffsetRange = bellRandomOffsetRange;
+                    return;
+
+                case Bullet bullet:
+                    if (spec.Shooter is not null)
+                        bullet.ShooterValue = ParsePalleteEnum<Shooter>(spec.Shooter, "shooter");
+                    if (spec.Target is not null)
+                        bullet.TargetValue = ParsePalleteEnum<Target>(spec.Target, "target");
+                    if (spec.Speed is { } bulletSpeed)
+                        bullet.Speed = ToFiniteFloat(bulletSpeed, "speed");
+                    if (spec.PlaceOffset is { } bulletPlaceOffset)
+                        bullet.PlaceOffset = bulletPlaceOffset;
+                    if (spec.RandomOffsetRange is { } bulletRandomOffsetRange)
+                        bullet.RandomOffsetRange = bulletRandomOffsetRange;
+                    if (spec.Size is not null)
+                        bullet.SizeValue = ParsePalleteEnum<BulletSize>(spec.Size, "size");
+                    if (spec.Type is not null)
+                        bullet.TypeValue = ParsePalleteEnum<BulletType>(spec.Type, "type");
+                    if (spec.BulletDamageType is not null)
+                        bullet.BulletDamageTypeValue = ParsePalleteEnum<BulletDamageType>(spec.BulletDamageType, "bulletDamageType");
+                    return;
+
+                default:
+                    throw new ArgumentException($"A {familyName} has no custom projectile parameters.");
+            }
+        }
+
+        /// <summary>double → float 保留 soflan 侧同样的有限性校验，避免 NaN/Infinity 写进谱面对象。</summary>
+        private static float ToFiniteFloat(double value, string propertyName)
+        {
+            var result = (float)value;
+            if (float.IsNaN(result) || float.IsInfinity(result))
+                throw new ArgumentException($"'{value}' is not a finite number for {propertyName}.");
+            return result;
         }
 
         private static OngekiObjectBase CreateLane(ObjectCreateSpec spec)

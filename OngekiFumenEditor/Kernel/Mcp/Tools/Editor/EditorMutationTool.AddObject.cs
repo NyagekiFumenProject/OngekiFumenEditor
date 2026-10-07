@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.add_object", Title = "Add Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan, lanenext, beam, beamnext, curvecontrol, isfarea, laneblock. Bullets require bulletPalleteStrId; holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. tap and hold optionally dock to a lane via referenceLaneRecordId (+ snapXToLane to put the object exactly on that lane). lanenext/beamnext extend an existing lane/beam start: they need parentRecordId (the start's recordId) and must NOT take endTGrid*. curvecontrol bends a lane segment and needs referenceObjectId (the segment's object id from objectType='lanenext'). isfarea and laneblock are ranges and require endTGridUnit/endTGridGrid. Inside an action scope the object is queued until editor.end_action applies it.")]
+        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan, lanenext, beam, beamnext, curvecontrol, isfarea, laneblock. Bullets and bells take a bullet pallete (bulletPalleteStrId) or explicit custom projectile parameters (shooter/target/size/type/bulletDamageType/placeOffset/randomOffsetRange/speed), never both — a bullet needs one of the two. Holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. tap and hold optionally dock to a lane via referenceLaneRecordId (+ snapXToLane to put the object exactly on that lane). lanenext/beamnext extend an existing lane/beam start: they need parentRecordId (the start's recordId) and must NOT take endTGrid*. curvecontrol bends a lane segment and needs referenceObjectId (the segment's object id from objectType='lanenext'). isfarea and laneblock are ranges and require endTGridUnit/endTGridGrid. Inside an action scope the object is queued until editor.end_action applies it.")]
         public async Task<object> AddObject(
             [Description("Object family: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan, lanenext, beam, beamnext, curvecontrol, isfarea or laneblock.")] string objectType,
             float tGridUnit = 0,
@@ -41,6 +41,13 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             [Description("Comment text.")] string content = default,
             [Description("BPM value for the bpm family.")] double? bpm = default,
             [Description("Bullet pallete StrID (see editor.query_bullet_pallete). Required for bullet; optional for bell, where \"--\" means the Ongeki default bell.")] string bulletPalleteStrId = default,
+            [Description("bullet/bell only, custom projectile mode: Shooter enum name (TargetHead, Enemy, Center). Forbidden together with bulletPalleteStrId.")] string shooter = default,
+            [Description("bullet/bell only, custom projectile mode: Target enum name (Player, FixField). Forbidden together with bulletPalleteStrId.")] string target = default,
+            [Description("bullet only, custom projectile mode: BulletSize enum name (Normal, Large). Bells have no effective size and reject it. Forbidden together with bulletPalleteStrId.")] string size = default,
+            [Description("bullet only, custom projectile mode: BulletType enum name (Circle, Needle, Square). A bell is always a Circle. Forbidden together with bulletPalleteStrId.")] string type = default,
+            [Description("bullet only, custom projectile mode: BulletDamageType enum name (Normal, Hard, Danger). Forbidden together with bulletPalleteStrId.")] string bulletDamageType = default,
+            [Description("bullet/bell only, custom projectile mode: PlaceOffset in TGrid units. Forbidden together with bulletPalleteStrId.")] int? placeOffset = default,
+            [Description("bullet/bell only, custom projectile mode: RandomOffsetRange. Forbidden together with bulletPalleteStrId.")] int? randomOffsetRange = default,
             [Description("Meter family: numerator (default 4).")] int? meterBunShi = default,
             [Description("Meter family: denominator (default 4).")] int? meterBunbo = default,
             [Description("Enemy family: Wave1, Wave2 or Boss (default Boss).")] string enemyWave = default,
@@ -48,7 +55,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             [Description("Soflan family: duration (default), interpolatable or keyframe.")] string soflanType = default,
             [Description("End position for hold (optional) and for the range families soflan, isfarea and laneblock: TGrid unit. Required for duration/interpolatable soflans, isfarea and laneblock; forbidden for keyframe soflans and for the single-point families lanenext/beamnext/curvecontrol.")] float? endTGridUnit = default,
             [Description("End position: TGrid grid (same rules as endTGridUnit).")] int? endTGridGrid = default,
-            [Description("Soflan family: speed multiplier (default 1).")] double? speed = default,
+            [Description("Soflan family: speed multiplier (default 1). bullet/bell, custom projectile mode: projectile speed (default 1).")] double? speed = default,
             [Description("Soflan family / isfarea: soflan group (default 0).")] int? soflanGroup = default,
             [Description("Soflan family: whether the speed applies in design mode (default false).")] bool? applySpeedInDesignMode = default,
             [Description("tap/hold only: RecordId of the lane to dock to (see editor.query_object objectType='lane'). Omit, or pass a negative value, to leave the object floating.")] int? referenceLaneRecordId = default,
@@ -72,7 +79,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         {
             const string operationName = "editor.add_object";
             var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPalleteStrId, meterBunShi, meterBunbo, enemyWave, laneType, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, parentRecordId, referenceObjectId, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection, editorId, expectedEditorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPalleteStrId, shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, meterBunShi, meterBunbo, enemyWave, laneType, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, parentRecordId, referenceObjectId, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection, editorId, expectedEditorId, requestedBy, clientId });
 
             if (!CreatableFamilies.Contains(family))
                 return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.add_object supports {string.Join(", ", CreatableFamilies)}; '{objectType}' is not supported yet.");
@@ -103,6 +110,26 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 return Failure(operationName, "INVALID_ARGUMENT", $"endXGridUnit/endXGridGrid only apply to isfarea; '{family}' has no second X position.");
             if (blockDirection is not null && family != "laneblock")
                 return Failure(operationName, "INVALID_ARGUMENT", $"blockDirection only applies to laneblock; '{family}' is not a lane block.");
+
+            // §36/§41：custom projectile 参数只属于 bullet / bell；palette 与 custom 参数互斥（见下方 pallete 解析）。
+            var hasCustomProjectileArgs =
+                shooter is not null || target is not null || size is not null || type is not null ||
+                bulletDamageType is not null || placeOffset is not null || randomOffsetRange is not null;
+            if (hasCustomProjectileArgs && family is not ("bullet" or "bell"))
+                return Failure(operationName, "INVALID_ARGUMENT", $"shooter/target/size/type/bulletDamageType/placeOffset/randomOffsetRange only apply to bullet and bell; '{family}' has no projectile parameters.");
+            if (speed is not null && family is not ("soflan" or "bullet" or "bell"))
+                return Failure(operationName, "INVALID_ARGUMENT", $"'speed' only applies to soflan (speed multiplier) and bullet/bell (projectile speed); '{family}' has no speed.");
+
+            if (family == "bell")
+            {
+                // Bell 的 SizeValue/TypeValue 在属性浏览器里分别是隐藏和只读派生值；静默接受等于骗调用方。
+                if (size is not null)
+                    return Failure(operationName, "INVALID_ARGUMENT", "'size' cannot be set on a bell: SizeValue has no effect on bells.");
+                if (type is not null)
+                    return Failure(operationName, "INVALID_ARGUMENT", "'type' cannot be set on a bell: a bell is always a Circle.");
+                if (bulletDamageType is not null)
+                    return Failure(operationName, "INVALID_ARGUMENT", "'bulletDamageType' only applies to bullets.");
+            }
 
             if (await TryAuthorizeAsync(operationName, requestedBy, clientId, $"Add a {family} object at T[{tGridUnit},{tGridGrid}].", requireConfirmation, cancellationToken) is { } denied)
                 return denied;
@@ -141,8 +168,9 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 var requestedPalleteId = bulletPalleteStrId?.Trim();
                 if (string.IsNullOrEmpty(requestedPalleteId))
                 {
-                    if (family == "bullet")
-                        return Failure(operationName, "MISSING_BULLET_PALLETE", "editor.add_object requires bulletPalleteStrId when objectType is 'bullet'.");
+                    // §41: 无 palette 的 bullet 必须显式给至少一个 custom 参数，否则等价于「全默认 custom」而调用方可能只是想漏传 palette。
+                    if (family == "bullet" && !hasCustomProjectileArgs && speed is null)
+                        return Failure(operationName, "MISSING_BULLET_PALLETE", "editor.add_object requires bulletPalleteStrId or at least one custom projectile parameter for objectType 'bullet' (shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, speed).");
                 }
                 else if (requestedPalleteId == Bell.OngekiDefaultBellPaletteName)
                 {
@@ -154,6 +182,10 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     pallete = LookupBulletPallete(editor.Fumen, requestedPalleteId);
                     if (pallete is null)
                         return Failure(operationName, "PALLETE_NOT_FOUND", $"No bullet pallete '{requestedPalleteId}' in editor '{resolvedEditorId}'.");
+
+                    // §37: palette 已提供这些值，再传 custom 参数会被覆盖 —— 直接拒绝而不是静默忽略。
+                    if (hasCustomProjectileArgs || speed is not null)
+                        return Failure(operationName, "INVALID_ARGUMENT", $"bulletPalleteStrId and custom projectile parameters cannot be combined for '{family}': the pallete supplies those values. Drop either the pallete or the custom parameters.");
                 }
             }
 
@@ -170,6 +202,13 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     Content = content,
                     Bpm = bpm,
                     Pallete = pallete,
+                    Shooter = shooter,
+                    Target = target,
+                    Size = size,
+                    Type = type,
+                    BulletDamageType = bulletDamageType,
+                    PlaceOffset = placeOffset,
+                    RandomOffsetRange = randomOffsetRange,
                     MeterBunShi = meterBunShi,
                     MeterBunbo = meterBunbo,
                     EnemyWave = enemyWave,
