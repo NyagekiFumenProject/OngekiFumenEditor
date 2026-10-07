@@ -65,7 +65,7 @@ export default {
       'endTGridUnit', 'endTGridGrid', 'bulletPalleteStrId', 'referenceLaneRecordId', 'snapXToLane',
       'parentRecordId', 'referenceObjectId', 'widthId', 'obliqueSourceXGridUnit', 'obliqueSourceXGridGrid',
       'colorId', 'brightness', 'endXGridUnit', 'endXGridGrid', 'blockDirection', 'editorId', 'expectedEditorId',
-      'shooter', 'target', 'size', 'type', 'bulletDamageType', 'placeOffset', 'randomOffsetRange', 'tag',
+      'shooter', 'target', 'size', 'type', 'bulletDamageType', 'placeOffset', 'randomOffsetRange', 'tag', 'isTransparent',
     ];
     ctx.check('add_object still exposes the full parameter surface',
       addMustHave.every((p) => addProps.includes(p)),

@@ -65,6 +65,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             public XGrid ObliqueSourceXGrid;
             public ColorId? ColorId;
             public int? Brightness;
+            public bool? IsTransparent;
             public XGrid EndXGrid;
             public string BlockDirection;
         }
@@ -256,6 +257,9 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
             lane.TGrid = spec.TGrid;
             lane.XGrid = spec.XGrid;
+
+            if (spec.IsTransparent is { } isTransparent)
+                lane.IsTransparent = isTransparent;
 
             // 色带 lane 的颜色/亮度是可配置的，且 add 时不指定就永远是默认的 Akari / 亮度 3。
             if (lane is IColorfulLane colorful)

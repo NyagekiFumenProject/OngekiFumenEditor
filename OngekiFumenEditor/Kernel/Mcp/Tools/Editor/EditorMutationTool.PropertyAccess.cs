@@ -249,6 +249,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return RequireColorful(obj).ColorId.Id.ToString(CultureInfo.InvariantCulture);
                 case "brightness":
                     return RequireColorful(obj).Brightness.ToString(CultureInfo.InvariantCulture);
+                case "isTransparent":
+                    return RequireLaneStart(obj).IsTransparent.ToString(CultureInfo.InvariantCulture);
                 case "endXGridUnit":
                     return RequireSoflanArea(obj).EndIndicator.XGrid.Unit.ToString(CultureInfo.InvariantCulture);
                 case "endXGridGrid":
@@ -394,6 +396,9 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return;
                 case "brightness":
                     RequireColorful(obj).Brightness = ParseInt(rawValue);
+                    return;
+                case "isTransparent":
+                    RequireLaneStart(obj).IsTransparent = ParseBool(rawValue);
                     return;
                 case "endXGridUnit":
                 case "endXGridGrid":
@@ -564,6 +569,9 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
         private static IColorfulLane RequireColorful(OngekiObjectBase obj)
             => obj as IColorfulLane ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a colorful lane.");
+
+        private static LaneStartBase RequireLaneStart(OngekiObjectBase obj)
+            => obj as LaneStartBase ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a lane start.");
 
         private static IndividualSoflanArea RequireSoflanArea(OngekiObjectBase obj)
             => obj as IndividualSoflanArea ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not an individual soflan area.");

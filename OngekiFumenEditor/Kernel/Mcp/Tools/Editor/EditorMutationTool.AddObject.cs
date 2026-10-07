@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.add_object", Title = "Add Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan, lanenext, beam, beamnext, curvecontrol, isfarea, laneblock. Every family also takes an optional free-text 'tag'. Bullets and bells take a bullet pallete (bulletPalleteStrId) or explicit custom projectile parameters (shooter/target/size/type/bulletDamageType/placeOffset/randomOffsetRange/speed), never both — a bullet needs one of the two. Holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. tap and hold optionally dock to a lane via referenceLaneRecordId (+ snapXToLane to put the object exactly on that lane). lanenext/beamnext extend an existing lane/beam start: they need parentRecordId (the start's recordId) and must NOT take endTGrid*. curvecontrol bends a lane segment and needs referenceObjectId (the segment's object id from objectType='lanenext'). isfarea and laneblock are ranges and require endTGridUnit/endTGridGrid. Inside an action scope the object is queued until editor.end_action applies it.")]
+        [Description("Add a chart object and return its runtime object id. Supported objectType values: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan, lanenext, beam, beamnext, curvecontrol, isfarea, laneblock. Every family also takes an optional free-text 'tag'; lane starts take an optional 'isTransparent'. Bullets and bells take a bullet pallete (bulletPalleteStrId) or explicit custom projectile parameters (shooter/target/size/type/bulletDamageType/placeOffset/randomOffsetRange/speed), never both — a bullet needs one of the two. Holds take an optional endTGridUnit/endTGridGrid (add the end later with editor.create_hold_end); duration/interpolatable soflans require endTGridUnit/endTGridGrid, while a keyframe soflan is a single point and must not take them. tap and hold optionally dock to a lane via referenceLaneRecordId (+ snapXToLane to put the object exactly on that lane). lanenext/beamnext extend an existing lane/beam start: they need parentRecordId (the start's recordId) and must NOT take endTGrid*. curvecontrol bends a lane segment and needs referenceObjectId (the segment's object id from objectType='lanenext'). isfarea and laneblock are ranges and require endTGridUnit/endTGridGrid. Inside an action scope the object is queued until editor.end_action applies it.")]
         public async Task<object> AddObject(
             [Description("Object family: tap, flick, comment, bpm, bullet, bell, meter, clickse, enemy, lane, hold, soflan, lanenext, beam, beamnext, curvecontrol, isfarea or laneblock.")] string objectType,
             float tGridUnit = 0,
@@ -53,6 +53,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             [Description("Meter family: denominator (default 4).")] int? meterBunbo = default,
             [Description("Enemy family: Wave1, Wave2 or Boss (default Boss).")] string enemyWave = default,
             [Description("Lane family: center (default), left, right, colorful, enemy, wallLeft, wallRight or autoplayFader.")] string laneType = default,
+            [Description("lane only: whether the lane start is transparent (default false).")] bool? isTransparent = default,
             [Description("Soflan family: duration (default), interpolatable or keyframe.")] string soflanType = default,
             [Description("End position for hold (optional) and for the range families soflan, isfarea and laneblock: TGrid unit. Required for duration/interpolatable soflans, isfarea and laneblock; forbidden for keyframe soflans and for the single-point families lanenext/beamnext/curvecontrol.")] float? endTGridUnit = default,
             [Description("End position: TGrid grid (same rules as endTGridUnit).")] int? endTGridGrid = default,
@@ -80,7 +81,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         {
             const string operationName = "editor.add_object";
             var family = NormalizeFamily(objectType);
-            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, tag, bpm, bulletPalleteStrId, shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, meterBunShi, meterBunbo, enemyWave, laneType, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, parentRecordId, referenceObjectId, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection, editorId, expectedEditorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { family, tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, tag, bpm, bulletPalleteStrId, shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, meterBunShi, meterBunbo, enemyWave, laneType, isTransparent, soflanType, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, referenceLaneRecordId, snapXToLane, parentRecordId, referenceObjectId, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection, editorId, expectedEditorId, requestedBy, clientId });
 
             if (!CreatableFamilies.Contains(family))
                 return Failure(operationName, "UNSUPPORTED_OBJECT_TYPE", $"editor.add_object supports {string.Join(", ", CreatableFamilies)}; '{objectType}' is not supported yet.");
@@ -107,6 +108,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 return Failure(operationName, "INVALID_ARGUMENT", $"widthId and obliqueSourceXGridUnit/obliqueSourceXGridGrid only apply to beam and beamnext; '{family}' has no beam width.");
             if ((colorId is not null || brightness is not null) && family is not ("lane" or "lanenext"))
                 return Failure(operationName, "INVALID_ARGUMENT", $"colorId and brightness only apply to lane and lanenext; '{family}' is not a lane.");
+            if (isTransparent is not null && family != "lane")
+                return Failure(operationName, "INVALID_ARGUMENT", $"isTransparent only applies to lane; '{family}' is not a lane start.");
             if ((endXGridUnit is not null || endXGridGrid is not null) && family != "isfarea")
                 return Failure(operationName, "INVALID_ARGUMENT", $"endXGridUnit/endXGridGrid only apply to isfarea; '{family}' has no second X position.");
             if (blockDirection is not null && family != "laneblock")
@@ -228,6 +231,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                         : new XGrid(obliqueSourceXGridUnit ?? 0, obliqueSourceXGridGrid ?? 0),
                     ColorId = colorId is null ? null : ParseColorId(colorId),
                     Brightness = brightness,
+                    IsTransparent = isTransparent,
                     EndXGrid = endXGridUnit is null && endXGridGrid is null
                         ? null
                         : new XGrid(endXGridUnit ?? xGridUnit, endXGridGrid ?? xGridGrid),

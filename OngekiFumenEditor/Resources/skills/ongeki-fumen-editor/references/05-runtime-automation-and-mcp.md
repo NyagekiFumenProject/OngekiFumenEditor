@@ -119,7 +119,7 @@ Family-specific add arguments:
   `size` / `type` / `bulletDamageType`.
 * `meter` — `meterBunShi` / `meterBunbo` (default 4/4).
 * `enemy` — `enemyWave` (`Wave1` / `Wave2` / `Boss`, default `Boss`).
-* `lane` — `laneType` (`center` default, plus `left`, `right`, `colorful`, `enemy`, `wallLeft`, `wallRight`, `autoplayFader`). A `colorful` lane also takes `colorId` (a `ColorIdConst` name such as `Akari`, `Yuzu`, `Rio`, … — or its numeric id) and `brightness`; without them it is created in the default Akari colour at brightness 3.
+* `lane` — `laneType` (`center` default, plus `left`, `right`, `colorful`, `enemy`, `wallLeft`, `wallRight`, `autoplayFader`). A `colorful` lane also takes `colorId` (a `ColorIdConst` name such as `Akari`, `Yuzu`, `Rio`, … — or its numeric id) and `brightness`; without them it is created in the default Akari colour at brightness 3. Every lane start also takes `isTransparent` (default false).
 * `hold` — optional `endTGridUnit` / `endTGridGrid`, or attach the end later with `editor.create_hold_end`.
 * `soflan` — `soflanType` (`duration` default, or `interpolatable`, `keyframe`) plus `speed`, `soflanGroup`, `applySpeedInDesignMode`. `duration`/`interpolatable` require `endTGridUnit`/`endTGridGrid`; `keyframe` is a single point and forbids them.
 * `lanenext` / `beamnext` — `parentRecordId` (required) plus the segment's own `tGrid*`/`xGrid*`. A segment is a **single point**, so `endTGrid*` is forbidden. The concrete subtype follows the owning start (`colorful` start → `ColorfulLaneNext`, and so on), so the same call extends every lane/beam flavour; on a colorful lane `colorId`/`brightness` are accepted too.
@@ -128,14 +128,14 @@ Family-specific add arguments:
 * `isfarea` / `laneblock` — `endTGridUnit`/`endTGridGrid` required; `isfarea` also takes `endXGridUnit`/`endXGridGrid` (its width) and `soflanGroup`, `laneblock` takes `blockDirection` (`left` default, or `right`).
 
 `editor.modify_object` whitelist (`SupportedModifyProperties`):
-`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `tag`, `bpm`, `bulletPallete`, `shooter`, `target`, `size`, `type`, `bulletDamageType`, `placeOffset`, `randomOffsetRange`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`, `widthId`, `obliqueSourceXGridUnit`, `obliqueSourceXGridGrid`, `colorId`, `brightness`, `endXGridUnit`, `endXGridGrid`, `blockDirection`.
+`tGridUnit`, `tGridGrid`, `xGridUnit`, `xGridGrid`, `isCritical`, `direction`, `content`, `tag`, `bpm`, `bulletPallete`, `shooter`, `target`, `size`, `type`, `bulletDamageType`, `placeOffset`, `randomOffsetRange`, `bunShi`, `bunbo`, `enemyWave`, `endTGridUnit`, `endTGridGrid`, `speed`, `soflanGroup`, `applySpeedInDesignMode`, `referenceLaneRecordId`, `widthId`, `obliqueSourceXGridUnit`, `obliqueSourceXGridGrid`, `colorId`, `brightness`, `isTransparent`, `endXGridUnit`, `endXGridGrid`, `blockDirection`.
 
 * `bulletPallete` — bullet/bell only; value is a pallete StrID. `""` clears it (a bullet then drops back to custom parameters); `"--"` selects the Ongeki default bell and is bell-only.
 * `shooter`/`target`/`placeOffset`/`randomOffsetRange` — bullet/bell custom projectile parameters; `size`/`type`/`bulletDamageType` are bullet-only and a bell rejects them. Custom parameters are writable only while the object has no pallete: clear `bulletPallete` first or the call fails with `INVALID_ARGUMENT`. `speed` follows the same rule in custom mode.
 * `bunShi`/`bunbo` — meter; `enemyWave` — enemy.
 * `tag` — every object; free text, `""` clears it.
 * `endTGrid*` — hold with an end, soflan, `isfarea` or `laneblock`; `speed` (soflan speed, or bullet/bell custom projectile speed)/`applySpeedInDesignMode`; `soflanGroup` — soflan or `isfarea`.
-* `widthId` / `obliqueSourceXGridUnit` / `obliqueSourceXGridGrid` — beam (`""` clears the oblique source); `colorId` / `brightness` — colorful lane; `endXGrid*` — `isfarea`; `blockDirection` — `laneblock`.
+* `widthId` / `obliqueSourceXGridUnit` / `obliqueSourceXGridGrid` — beam (`""` clears the oblique source); `colorId` / `brightness` — colorful lane; `isTransparent` — lane starts (`true`/`false`); `endXGrid*` — `isfarea`; `blockDirection` — `laneblock`.
 * `referenceLaneRecordId` — tap/hold only (see Lane Docking below); `""` or a negative value clears the binding.
 * Moving a segment's `tGrid*` re-sorts it inside its start automatically, so the chain order stays valid.
 

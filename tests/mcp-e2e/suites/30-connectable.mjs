@@ -273,6 +273,37 @@ export default {
     const faderAlias = await add('lane', { ...T(8), xGridUnit: 0, xGridGrid: 0, laneType: 'autoplayfaderlane' });
     ctx.ok('the autoplayfaderlane alias is accepted too', faderAlias);
 
+    // ---------------- lane transparency ----------------
+    ctx.section('lane isTransparent');
+
+    const faded = await add('lane', { ...T(10), xGridUnit: 0, xGridGrid: 0, laneType: 'center', isTransparent: true });
+    ctx.ok('add_object(lane) accepts isTransparent', faded);
+    const fadedId = faded.payload.objectId;
+
+    const transparencyOff = await modify(fadedId, 'isTransparent', 'false');
+    ctx.ok('modify_object writes isTransparent', transparencyOff);
+    ctx.equal('the add-time isTransparent reads back through the modify echo', transparencyOff.payload?.oldValue, 'True');
+    ctx.equal('the write reports the new value', transparencyOff.payload?.newValue, 'false');
+
+    await modify(fadedId, 'isTransparent', 'true');
+    await api.undo({ editorId });
+    await api.redo({ editorId });
+    const transparencyEcho2 = await modify(fadedId, 'isTransparent', 'false');
+    ctx.equal('undo/redo round-trips isTransparent', transparencyEcho2.payload?.oldValue, 'True');
+    await api.undo({ editorId });
+
+    ctx.equal('a lane without the flag defaults to opaque',
+      (await modify(plain.payload.objectId, 'isTransparent', 'false')).payload?.oldValue, 'False');
+
+    ctx.fails('isTransparent is refused on a tap',
+      await add('tap', { ...T(10), xGridUnit: 0, xGridGrid: 0, isTransparent: true }), 'INVALID_ARGUMENT');
+    ctx.fails('isTransparent is refused on a beam',
+      await add('beam', { ...T(10), xGridUnit: 0, xGridGrid: 0, isTransparent: true }), 'INVALID_ARGUMENT');
+    ctx.fails('modify refuses isTransparent on a lanenext segment',
+      await modify(segment1.payload.objectId, 'isTransparent', 'true'), 'UNSUPPORTED_PROPERTY');
+    ctx.fails('an unparsable isTransparent is rejected',
+      await modify(fadedId, 'isTransparent', 'maybe'), 'INVALID_ARGUMENT');
+
     // ---------------- cross-family misuse ----------------
     ctx.section('cross-family properties are refused, not ignored');
 
@@ -376,7 +407,7 @@ export default {
     ctx.section('cleanup');
     for (const objectId of [laneId, snappingLane.payload.objectId, beamId, plain.payload.objectId,
       colorfulId, fader.payload.objectId, faderAlias.payload.objectId, docked.payload.objectId,
-      area.payload.objectId, block.payload.objectId,
+      area.payload.objectId, block.payload.objectId, fadedId,
       segment1.payload.objectId, segment2.payload.objectId]) {
       if (Number.isInteger(objectId)) await remove(objectId);
     }
