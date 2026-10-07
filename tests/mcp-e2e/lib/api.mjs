@@ -113,6 +113,10 @@ export class McpApi {
     return this.#client.call('editor.set_metainfo', { editorId, metainfoName, newValue });
   }
 
+  getMetainfo({ editorId, metainfoName } = {}) {
+    return this.#client.call('editor.get_metainfo', { editorId, metainfoName });
+  }
+
   check({ editorId, minSeverity, limit } = {}) {
     return this.#client.call('editor.check', { editorId, minSeverity, limit });
   }

@@ -192,5 +192,46 @@ export default {
     ctx.check('editor.check is stable across repeated calls',
       stable.payload.results.filter((r) => String(r.ruleName).includes(RULE)).length === baselineMismatches,
       `count=${stable.payload.results.filter((r) => String(r.ruleName).includes(RULE)).length}`);
+
+    // ---------------- get_metainfo read-back ----------------
+    ctx.section('editor.get_metainfo');
+    ctx.cover('editor.get_metainfo');
+
+    ctx.fails('get_metainfo rejects an unknown field',
+      await api.getMetainfo({ editorId, metainfoName: 'favouriteColour' }), 'UNSUPPORTED_METAINFO');
+
+    // read-back for a write: set_metainfo reports oldValue, get_metainfo must report the new value
+    await api.setMetainfo({ editorId, metainfoName: 'creator', newValue: 'MCP-GET-E2E' });
+    const single = await api.getMetainfo({ editorId, metainfoName: 'creator' });
+    ctx.ok('get_metainfo reads a single field', single);
+    ctx.hasKeys('get_metainfo single-field response shape', single.payload, ['success', 'editorId', 'metainfoName', 'valueType', 'value']);
+    ctx.equal('the single-field read echoes the field name', single.payload.metainfoName, 'creator');
+    ctx.equal('the single-field read reports the value type', single.payload.valueType, 'string');
+    ctx.equal('the single-field read returns what set_metainfo wrote', single.payload.value, 'MCP-GET-E2E');
+
+    const all = await api.getMetainfo({ editorId });
+    ctx.ok('get_metainfo reads every field when the name is omitted', all);
+    ctx.hasKeys('get_metainfo all-fields response shape', all.payload, ['success', 'editorId', 'fields']);
+    ctx.isArray('get_metainfo returns one entry per supported field', all.payload.fields, { length: 17 });
+    ctx.check('every field entry carries name/valueType/value',
+      all.payload.fields.every((f) => typeof f.name === 'string' && typeof f.valueType === 'string' && typeof f.value === 'string'));
+    const byName = new Map(all.payload.fields.map((f) => [f.name, f]));
+    ctx.equal('the all-fields read sees the creator write', byName.get('creator')?.value, 'MCP-GET-E2E');
+
+    // cross-check one field against a different tool: bpmFirst is the chart's first BPM entry
+    const firstBpm = (await api.family(editorId, 'bpm'))[0];
+    ctx.equal('the reported bpmFirst matches the chart\'s first BPM entry', Number(byName.get('bpmFirst')?.value), firstBpm?.bpm);
+
+    // read-only proof: a read between an undo and its redo must consume neither stack
+    const undoAfterSet = await api.undo({ editorId });
+    ctx.ok('the creator write is undoable', undoAfterSet);
+    const readAfterUndo = await api.getMetainfo({ editorId, metainfoName: 'creator' });
+    ctx.equal('the read reflects the undo', readAfterUndo.payload?.value, 'MCP-E2E');
+    const redoAfterRead = await api.redo({ editorId });
+    ctx.check('a read does not consume the redo stack',
+      typeof redoAfterRead.payload?.redone === 'string' && /creator/i.test(redoAfterRead.payload.redone),
+      `redone=${redoAfterRead.payload?.redone}`);
+    ctx.equal('the read returns the redone value', (await api.getMetainfo({ editorId, metainfoName: 'creator' })).payload?.value, 'MCP-GET-E2E');
+    await api.undo({ editorId });
   },
 };

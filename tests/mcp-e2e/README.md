@@ -9,7 +9,7 @@ documentation.
 
 ## Why this exists
 
-The tool surface is large (28 tools) and most of it is only reachable at runtime — the MCP
+The tool surface is large (29 tools) and most of it is only reachable at runtime — the MCP
 host starts inside the editor process, not in a test host. Anything that asserts on tool
 names, parameters or history semantics has to talk to a live instance, so the suite lives
 here instead of in a unit-test project.

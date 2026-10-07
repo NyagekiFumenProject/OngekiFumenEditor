@@ -14,7 +14,7 @@ export default {
     const { tools } = await ctx.client.listTools();
     const names = tools.map((t) => t.name).sort();
 
-    ctx.equal('tools/list returns exactly 28 tools', tools.length, 28);
+    ctx.equal('tools/list returns exactly 29 tools', tools.length, 29);
     ctx.check('the advertised tool set matches the expected set',
       JSON.stringify(names) === JSON.stringify([...EXPECTED_TOOLS].sort()),
       `missing=[${EXPECTED_TOOLS.filter((n) => !names.includes(n))}] extra=[${names.filter((n) => !EXPECTED_TOOLS.includes(n))}]`);
@@ -86,7 +86,7 @@ export default {
     const doc = await ctx.client.readResource('skill://ongeki-fumen-editor/references/05-runtime-automation-and-mcp.md');
     const text = doc.contents?.[0]?.text ?? '';
     ctx.check('the served MCP reference page is non-trivial', text.length > 5000, `length=${text.length}`);
-    for (const probe of ['editor.check', 'editor.set_metainfo', 'lanenext', 'curvecontrol', 'isfarea', 'laneblock', 'colorId', 'snapXToLane']) {
+    for (const probe of ['editor.check', 'editor.set_metainfo', 'editor.get_metainfo', 'lanenext', 'curvecontrol', 'isfarea', 'laneblock', 'colorId', 'snapXToLane']) {
       ctx.check(`served doc mentions '${probe}'`, text.includes(probe));
     }
   },

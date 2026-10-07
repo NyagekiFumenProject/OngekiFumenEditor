@@ -9,7 +9,7 @@
 
 ## Current MCP Tool Surface
 
-28 tools are registered today. Every tool accepts the shared routing/auth parameters
+29 tools are registered today. Every tool accepts the shared routing/auth parameters
 `requestedBy`, `clientId` and `cancellationToken`; editor-scoped tools also accept
 `editorId` (defaults to the active editor) and `expectedEditorId` (guards against a
 mid-flight editor switch); mutating tools add `requireConfirmation` (default `true`).
@@ -56,6 +56,7 @@ mid-flight editor switch); mutating tools add `requireConfirmation` (default `tr
 | Tool | Purpose |
 | --- | --- |
 | `editor.set_metainfo` | Set one chart meta info field (see "Fumen Meta Info" below). One undoable editor action. |
+| `editor.get_metainfo` | Read one chart meta info field, or every field when the name is omitted. Read-only. |
 
 ### Action scope and history
 
@@ -232,7 +233,7 @@ Recommended loop:
 3. If `total > 0`, fix the cause (or `editor.undo`) and re-run until it is clean.
 4. Only then report the work as done.
 
-## Fumen Meta Info (`editor.set_metainfo`)
+## Fumen Meta Info (`editor.set_metainfo`, `editor.get_metainfo`)
 
 Sets one field of `fumen.MetaInfo` — the same values the **FumenMetaInfoBrowser** tool shows.
 It is a single undoable editor action, so it participates in `editor.undo` / `editor.redo` and in
@@ -255,16 +256,19 @@ The response echoes `oldValue` (canonical form) and `newValue`. Unknown fields f
 `UNSUPPORTED_METAINFO`; unparseable values fail with `INVALID_ARGUMENT`. A missing editor yields
 `NO_ACTIVE_EDITOR` / `EDITOR_NOT_FOUND`, and a chart without meta info yields `NO_METAINFO`.
 
-Verifying a write without a getter:
+`editor.get_metainfo` reads the same fields back: pass `metainfoName` for one field
+(`{ metainfoName, valueType, value }`), or omit it to get `fields[]`, one entry per supported
+field. Values are the same canonical strings `set_metainfo` echoes. It is read-only — it never
+adds a history entry or marks the chart dirty — and shares set's failure codes
+(`UNSUPPORTED_METAINFO` for unknown fields, `NO_METAINFO` when the chart has none).
 
-* `creator` / `tResolution` / `xResolution` are checked by `[Ongeki] HeaderConstMismatch`, so
+Verifying a write:
+
+* `editor.get_metainfo` reads the value back directly (see above).
+* `creator` / `tResolution` / `xResolution` are also checked by `[Ongeki] HeaderConstMismatch`, so
   `editor.check` shows whether the value landed (and whether `editor.undo` reverted it).
 * `editor.query_object objectType='meter'` returns the first meter, so the `meterBunshi` /
   `meterBunbo` derived sync is observable as the entry at `tGrid.totalGrid === 0`.
-* Otherwise call `editor.set_metainfo` again and read the echoed `oldValue`.
-
-> There is currently **no** `editor.get_metainfo`; the response's `oldValue` is the only way to read
-> a field back through the tool surface.
 
 ## Current MCP Resource Surface
 
