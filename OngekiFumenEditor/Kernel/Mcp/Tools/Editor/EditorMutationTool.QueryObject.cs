@@ -28,13 +28,14 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.query_object", Title = "Query Objects", ReadOnly = true, Destructive = false, OpenWorld = false)]
-        [Description("Query chart objects of one family — or several via objectTypes — inside a TGrid range. Single-family pages are ordered by TGrid (objects sharing a TGrid keep the chart's internal order, which is stable across calls but not sorted by id); multi-family pages merge every requested family and are ordered by TGrid then object id. selectedOnly=true narrows the result to the objects currently selected in the editor. Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; paging assumes the filters and the selection stay unchanged between pages. Totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
+        [Description("Query chart objects of one family — or several via objectTypes — inside a TGrid range. Single-family pages are ordered by TGrid (objects sharing a TGrid keep the chart's internal order, which is stable across calls but not sorted by id); multi-family pages merge every requested family and are ordered by TGrid then object id. selectedOnly=true narrows the result to the objects currently selected in the editor; includeAuxiliary=false drops auxiliary display objects (lane curve control points). Returns runtime object ids usable with editor.modify_object/editor.remove_object. Pass nextCursor back as cursor to page; paging assumes the filters and the selection stay unchanged between pages. Totals are reported in the editor's internal TGrid scale (see tGrid.totalGrid).")]
         public async Task<object> QueryObject(
             [Description("Object family (single form): tap, flick, hold, bell, bullet, comment, bpm, meter, clickse, enemy, lane (lane starts), lanenext (lane segments), curvecontrol (lane curve control points), beam, beamnext, isfarea, laneblock or soflan. Provide this or objectTypes; giving both merges them without duplicates.")] string objectType = default,
             [Description("Object families (multi form): any combination of the family names above. Multi-family pages are ordered by TGrid then object id.")] string[] objectTypes = default,
             [Description("Inclusive lower bound in the TGrid totalGrid scale; omit for no bound.")] int? minTotalGrid = default,
             [Description("Inclusive upper bound in the TGrid totalGrid scale; omit for no bound.")] int? maxTotalGrid = default,
             [Description("When true, only objects currently selected in the editor are returned. Default false (no selection filter).")] bool? selectedOnly = default,
+            [Description("When false, auxiliary display objects (currently the lane curve control points) are omitted from the result. Default true (they are included).")] bool? includeAuxiliary = default,
             int limit = 200,
             [Description("Opaque cursor returned by a previous call.")] string cursor = default,
             string editorId = default,
@@ -48,7 +49,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 requestedFamilies.Add(NormalizeFamily(objectType));
             if (objectTypes is not null)
                 requestedFamilies.AddRange(objectTypes.Where(x => !string.IsNullOrWhiteSpace(x)).Select(NormalizeFamily));
-            McpOperationLogHelper.LogRequest(operationName, new { objectType, objectTypes, minTotalGrid, maxTotalGrid, selectedOnly, limit, cursor, editorId, requestedBy, clientId });
+            McpOperationLogHelper.LogRequest(operationName, new { objectType, objectTypes, minTotalGrid, maxTotalGrid, selectedOnly, includeAuxiliary, limit, cursor, editorId, requestedBy, clientId });
 
             if (requestedFamilies.Count == 0)
                 return Failure(operationName, "INVALID_ARGUMENT", "editor.query_object needs objectType or objectTypes: pass at least one family to query.");
@@ -97,6 +98,8 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
                 if (selectedOnly == true)
                     source = source.Where(x => x.obj is ISelectableObject { IsSelected: true });
+                if (includeAuxiliary == false)
+                    source = source.Where(x => !IsAuxiliaryObject(x.obj));
 
                 foreach (var (itemFamily, obj) in source)
                 {
@@ -130,6 +133,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 objectType = families.Length == 1 ? families[0] : default,
                 objectTypes = families,
                 selectedOnly = selectedOnly == true,
+                includeAuxiliary = includeAuxiliary != false,
                 count = page.objects.Count,
                 truncated = page.truncated,
                 nextCursor,

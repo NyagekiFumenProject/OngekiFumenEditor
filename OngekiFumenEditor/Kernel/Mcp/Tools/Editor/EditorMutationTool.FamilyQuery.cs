@@ -165,11 +165,18 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
         private static bool InRange(OngekiObjectBase obj, TGrid min, TGrid max)
             => obj is ITimelineObject timeline && min <= timeline.TGrid && timeline.TGrid <= max;
 
+        /// <summary>§30：辅助对象（displayable helper）——目前只有曲线控制点。</summary>
+        private static bool IsAuxiliaryObject(OngekiObjectBase obj)
+            => obj is LaneCurvePathControlObject;
+
         private static object ToObjectDto(string family, OngekiObjectBase obj)
         {
             var tGrid = (obj as ITimelineObject)?.TGrid;
             var xGrid = (obj as OngekiMovableObjectBase)?.XGrid;
             var beam = obj as IBeamObject;
+            // §30：辅助对象目前只有曲线控制点；owner 是它在链上的宿主延伸段。
+            var curveControl = obj as LaneCurvePathControlObject;
+            var curveOwner = curveControl?.RefCurveObject;
 
             return new
             {
@@ -206,9 +213,16 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 colorId = obj is IColorfulLane colorful ? colorful.ColorId.Id : (int?)null,
                 colorName = obj is IColorfulLane colorfulNamed ? colorfulNamed.ColorId.Name : default,
                 brightness = obj is ColorfulLaneStart colorfulStart ? colorfulStart.Brightness : (int?)null,
-                // 曲线控制点：Index 是它在所属延伸段上的顺序，parentObjectId 指向该延伸段。
-                segmentIndex = obj is LaneCurvePathControlObject control ? control.Index : (int?)null,
-                parentObjectId = obj is LaneCurvePathControlObject controlOwner ? controlOwner.RefCurveObject?.Id : (int?)null,
+                // 曲线控制点：Index 是它在所属延伸段上的顺序；owner* 指向该延伸段，isAuxiliary 标记辅助对象。
+                isAuxiliary = IsAuxiliaryObject(obj),
+                segmentIndex = curveControl?.Index,
+                ownerObjectId = curveOwner?.Id,
+                ownerObjectType = curveOwner switch
+                {
+                    BeamNext => "beamnext",
+                    not null => "lanenext",
+                    _ => default(string),
+                },
                 // lane block：Left / Right。
                 blockDirection = obj is LaneBlockArea block ? block.Direction.ToString() : default,
                 areaWidth = obj is IndividualSoflanArea area ? area.AreaWidth : (float?)null,

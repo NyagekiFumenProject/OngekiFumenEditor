@@ -146,11 +146,13 @@ Family-specific add arguments:
 or `parentRecordId`), `parentRecordId` (segments and curve control points),
 `hasHoldEnd`, `endTGrid{unit,grid,totalGrid}`, `endXGrid` (`isfarea`), `widthId`,
 `obliqueSourceXGrid`, `isObliqueBeam`, `colorId`, `colorName`, `brightness`,
-`segmentIndex` and `parentObjectId` (curve control points), `blockDirection` (`laneblock`),
+`segmentIndex`, `isAuxiliary` and `ownerObjectId`/`ownerObjectType` (curve control points; the owner
+is the lane segment the point bends — `lanenext`, or `beamnext` if one ever hangs off a beam), `blockDirection` (`laneblock`),
 `areaWidth` (`isfarea`), `soflanType`, `soflanSpeed`, `soflanGroup`, `applySpeedInDesignMode`.
 TGrid/XGrid totals are reported in the editor's internal scale. Families: `objectType` (single) or
 `objectTypes` (array); giving both merges them without duplicates. Filters: `minTotalGrid`/`maxTotalGrid`
-(inclusive), `selectedOnly` (only objects currently selected in the editor) and cursor paging via
+(inclusive), `selectedOnly` (only objects currently selected in the editor), `includeAuxiliary` (default
+true; `false` drops auxiliary display objects such as the curve control points) and cursor paging via
 `nextCursor`; paging assumes the filters and the selection stay unchanged between pages. Single-family
 pages keep each family's internal tie order; multi-family pages are ordered by TGrid then object id.
 

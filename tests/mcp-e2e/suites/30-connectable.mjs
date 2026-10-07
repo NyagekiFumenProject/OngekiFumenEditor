@@ -111,11 +111,36 @@ export default {
     ctx.ok('adding a curve control point to a segment succeeds', control);
     const controlId = control.payload.objectId;
     const controlDto = await find('curvecontrol', controlId);
-    ctx.hasKeys('curvecontrol DTO exposes parentObjectId', controlDto, ['parentObjectId']);
-    ctx.equal('the control point reports its owning segment', controlDto.parentObjectId, segmentId);
+    ctx.hasKeys('curvecontrol DTO exposes the auxiliary owner fields', controlDto, ['isAuxiliary', 'ownerObjectId', 'ownerObjectType']);
+    ctx.equal('the control point is marked auxiliary', controlDto.isAuxiliary, true);
+    ctx.equal('the control point reports its owning segment', controlDto.ownerObjectId, segmentId);
+    ctx.equal('the owner type is the lane segment family', controlDto.ownerObjectType, 'lanenext');
 
-    const controls = (await api.family(editorId, 'curvecontrol')).filter((c) => c.parentObjectId === segmentId);
+    const controls = (await api.family(editorId, 'curvecontrol')).filter((c) => c.ownerObjectId === segmentId);
     ctx.equal('the segment now carries one control point', controls.length, 1);
+
+    // auxiliary objects can be hidden from queries, and ordinary objects never carry owner fields
+    const withAuxiliary = await api.queryObject({ editorId, objectTypes: ['curvecontrol', 'tap'], limit: 2000 });
+    ctx.ok('a multi-family query including auxiliaries runs', withAuxiliary);
+    ctx.equal('includeAuxiliary defaults to true', withAuxiliary.payload.includeAuxiliary, true);
+    const auxiliaryCount = withAuxiliary.payload.objects.filter((o) => o.isAuxiliary).length;
+    ctx.check('the query sees the curve control auxiliaries', auxiliaryCount > 0, `count=${auxiliaryCount}`);
+
+    const withoutAuxiliary = await api.queryObject({ editorId, objectTypes: ['curvecontrol', 'tap'], includeAuxiliary: false, limit: 2000 });
+    ctx.ok('includeAuxiliary=false is accepted', withoutAuxiliary);
+    ctx.equal('includeAuxiliary=false echoes the filter', withoutAuxiliary.payload.includeAuxiliary, false);
+    ctx.equal('includeAuxiliary=false drops exactly the auxiliaries',
+      withoutAuxiliary.payload.count, withAuxiliary.payload.count - auxiliaryCount);
+    ctx.check('the filtered page contains no auxiliary items',
+      withoutAuxiliary.payload.objects.every((o) => o.isAuxiliary === false));
+
+    const hiddenControls = await api.queryObject({ editorId, objectType: 'curvecontrol', includeAuxiliary: false, limit: 2000 });
+    ctx.equal('an explicit auxiliary family can be hidden too', hiddenControls.payload.count, 0);
+
+    const tapSample = withAuxiliary.payload.objects.find((o) => o.type === 'tap');
+    ctx.equal('ordinary objects are not auxiliary', tapSample?.isAuxiliary, false);
+    ctx.equal('ordinary objects have no owner id', tapSample?.ownerObjectId, undefined);
+    ctx.equal('ordinary objects have no owner type', tapSample?.ownerObjectType, undefined);
 
     const controlX = await modify(controlId, 'xGridGrid', '240');
     ctx.ok('a curve control point can be moved', controlX);
