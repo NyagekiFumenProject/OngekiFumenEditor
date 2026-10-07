@@ -28,10 +28,10 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
     internal sealed partial class EditorMutationTool
     {
         [McpServerTool(Name = "editor.modify_object", Title = "Modify Object", ReadOnly = false, Destructive = true, OpenWorld = false)]
-        [Description("Modify one property of a chart object addressed by its runtime object id. Supported properties: tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete (bullet/bell only, value is a bullet pallete StrID; \"\" or \"--\" clears it for bells), bunShi/bunbo (meter), enemyWave (enemy), endTGridUnit/endTGridGrid (hold with an end, soflan, isfarea or laneblock), speed/soflanGroup/applySpeedInDesignMode (soflan; soflanGroup also applies to isfarea), widthId (beam, 1-5), obliqueSourceXGridUnit/obliqueSourceXGridGrid (beam; \"\" clears the oblique source), colorId/brightness (colorful lane), endXGridUnit/endXGridGrid (isfarea), blockDirection (laneblock, left/right), referenceLaneRecordId (tap/hold only, value is a lane RecordId; \"\" or -1 clears the lane binding and leaves the object floating). Inside an action scope the change is queued until editor.end_action applies it.")]
+        [Description("Modify one property of a chart object addressed by its runtime object id. Supported properties: tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete (bullet/bell only, value is a bullet pallete StrID; \"\" clears it — a bullet then falls back to custom parameters — while \"--\" selects the Ongeki default bell and is bell-only), shooter/target/placeOffset/randomOffsetRange/speed (bullet/bell custom projectile parameters, writable only while no pallete is set), size/type/bulletDamageType (bullet-only custom projectile parameters), bunShi/bunbo (meter), enemyWave (enemy), endTGridUnit/endTGridGrid (hold with an end, soflan, isfarea or laneblock), speed/soflanGroup/applySpeedInDesignMode (soflan; soflanGroup also applies to isfarea), widthId (beam, 1-5), obliqueSourceXGridUnit/obliqueSourceXGridGrid (beam; \"\" clears the oblique source), colorId/brightness (colorful lane), endXGridUnit/endXGridGrid (isfarea), blockDirection (laneblock, left/right), referenceLaneRecordId (tap/hold only, value is a lane RecordId; \"\" or -1 clears the lane binding and leaves the object floating). Inside an action scope the change is queued until editor.end_action applies it.")]
         public async Task<object> ModifyObject(
             int objectId,
-            [Description("tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete, bunShi, bunbo, enemyWave, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection or referenceLaneRecordId.")] string propertyName,
+            [Description("tGridUnit, tGridGrid, xGridUnit, xGridGrid, isCritical, direction, content, bpm, bulletPallete, shooter, target, size, type, bulletDamageType, placeOffset, randomOffsetRange, bunShi, bunbo, enemyWave, endTGridUnit, endTGridGrid, speed, soflanGroup, applySpeedInDesignMode, widthId, obliqueSourceXGridUnit, obliqueSourceXGridGrid, colorId, brightness, endXGridUnit, endXGridGrid, blockDirection or referenceLaneRecordId.")] string propertyName,
             [Description("New value as text; parsed according to propertyName.")] string newValue,
             [Description("tap/hold only: after the write, snap XGrid (and the HoldEnd XGrid, when present) back onto the docked lane. Only valid with referenceLaneRecordId, tGridUnit or tGridGrid, and only when the object is bound to a lane. Default false (never snaps).")] bool? snapXToLane = default,
             string editorId = default,
@@ -65,6 +65,10 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
 
             if (!TryFindObject(editor.Fumen, objectId, out var family, out var obj))
                 return Failure(operationName, "OBJECT_NOT_FOUND", $"No object with id {objectId} was found in editor '{resolvedEditorId}'.");
+
+            // §42：palette 已提供这些值；custom 参数在 palette 非空时按属性浏览器规则只读，必须先清掉 bulletPallete。
+            if (ProjectileCustomProperties.Contains(property) && obj is IBulletPalleteReferencable { ReferenceBulletPallete: not null })
+                return Failure(operationName, "INVALID_ARGUMENT", $"Object #{objectId} has a bullet pallete; custom projectile parameters are read-only while it is set. Clear 'bulletPallete' first.");
 
             if (snap && obj is not ILaneDockable)
                 return Failure(operationName, "UNSUPPORTED_PROPERTY", $"Object #{objectId} ({family}) cannot dock to a lane; snapXToLane only applies to tap and hold.");

@@ -239,6 +239,93 @@ export default {
     ctx.fails('modify_object rejects blockDirection on a tap object',
       await api.modifyObject({ editorId, objectId: moveTarget, propertyName: 'blockDirection', newValue: 'left' }), 'UNSUPPORTED_PROPERTY');
 
+    // ---------------- modify: custom projectile parameters ----------------
+    ctx.section('editor.modify_object — custom projectile parameters');
+
+    const modBullet = await api.addObject({
+      editorId, objectType: 'bullet', ...T(27), xGridUnit: 0, xGridGrid: 0,
+      shooter: 'Center', target: 'FixField', size: 'Normal', type: 'Circle', bulletDamageType: 'Normal',
+      speed: 1, placeOffset: 0, randomOffsetRange: 0,
+    });
+    ctx.ok('a custom bullet for the modify cases is created', modBullet);
+    const modBulletId = modBullet.payload?.objectId;
+
+    const palettedBullet = await api.addObject({ editorId, objectType: 'bullet', ...T(28), xGridUnit: 0, xGridGrid: 0, bulletPalleteStrId: palleteStrId });
+    ctx.ok('a palleted bullet for the read-only case is created', palettedBullet);
+    const palettedBulletId = palettedBullet.payload?.objectId;
+
+    ctx.fails('custom projectile parameters are read-only while a pallete is set',
+      await api.modifyObject({ editorId, objectId: palettedBulletId, propertyName: 'speed', newValue: '5' }), 'INVALID_ARGUMENT');
+
+    const cleared = await api.modifyObject({ editorId, objectId: palettedBulletId, propertyName: 'bulletPallete', newValue: '' });
+    ctx.ok('clearing a bullet pallete drops it to custom mode', cleared);
+    ctx.equal('the clear echoes the pallete StrID it had', cleared.payload?.oldValue, palleteStrId);
+
+    const afterClear = await api.modifyObject({ editorId, objectId: palettedBulletId, propertyName: 'speed', newValue: '5' });
+    ctx.ok('custom parameters become writable once the pallete is cleared', afterClear);
+    ctx.equal('the write echoes the default speed it replaced', afterClear.payload?.oldValue, '1');
+
+    // every custom field is writable; each write echoes what the previous one left behind
+    const writeChain = [
+      ['shooter', 'Enemy', 'Center'],
+      ['target', 'Player', 'FixField'],
+      ['size', 'Large', 'Normal'],
+      ['type', 'Needle', 'Circle'],
+      ['bulletDamageType', 'Danger', 'Normal'],
+      ['speed', '2.5', '1'],
+      ['placeOffset', '7', '0'],
+      ['randomOffsetRange', '3', '0'],
+    ];
+    for (const [property, value, expectedOld] of writeChain) {
+      const response = await api.modifyObject({ editorId, objectId: modBulletId, propertyName: property, newValue: value });
+      ctx.ok(`modify_object writes custom '${property}'`, response);
+      ctx.equal(`custom '${property}' echoes the previous value`, response.payload?.oldValue, expectedOld);
+    }
+
+    const customRead = await api.runScript({ editorId, scriptText: readBulletScript(modBulletId) });
+    ctx.equal('the custom reads back shooter', customRead.payload.result?.shooter, 'Enemy');
+    ctx.equal('the custom reads back target', customRead.payload.result?.target, 'Player');
+    ctx.equal('the custom reads back size', customRead.payload.result?.size, 'Large');
+    ctx.equal('the custom reads back type', customRead.payload.result?.type, 'Needle');
+    ctx.equal('the custom reads back damage type', customRead.payload.result?.damageType, 'Danger');
+    ctx.equal('the custom reads back speed', customRead.payload.result?.speed, 2.5);
+    ctx.equal('the custom reads back placeOffset', customRead.payload.result?.placeOffset, 7);
+    ctx.equal('the custom reads back randomOffsetRange', customRead.payload.result?.randomOffsetRange, 3);
+
+    // undo / redo of a custom write; the next write's echo proves what the history step restored
+    await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'speed', newValue: '9' });
+    const undoCustom = await api.undo({ editorId });
+    ctx.check('the custom write is undoable', /speed/i.test(undoCustom.payload?.undone ?? ''), `undone=${undoCustom.payload?.undone}`);
+    const redoCustom = await api.redo({ editorId });
+    ctx.check('the custom write is redoable', /speed/i.test(redoCustom.payload?.redone ?? ''), `redone=${redoCustom.payload?.redone}`);
+    const afterRedo = await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'speed', newValue: '8' });
+    ctx.equal('the redo re-applied the custom value', afterRedo.payload?.oldValue, '9');
+    await api.undo({ editorId });
+
+    // family / value limits mirror add_object
+    ctx.fails('a bell rejects size in modify too',
+      await api.modifyObject({ editorId, objectId: bellCustomId, propertyName: 'size', newValue: 'Large' }), 'UNSUPPORTED_PROPERTY');
+    ctx.fails('a bell rejects type in modify too',
+      await api.modifyObject({ editorId, objectId: bellCustomId, propertyName: 'type', newValue: 'Needle' }), 'UNSUPPORTED_PROPERTY');
+    ctx.fails('a bell rejects bulletDamageType in modify too',
+      await api.modifyObject({ editorId, objectId: bellCustomId, propertyName: 'bulletDamageType', newValue: 'Danger' }), 'UNSUPPORTED_PROPERTY');
+    ctx.fails('a tap rejects shooter',
+      await api.modifyObject({ editorId, objectId: moveTarget, propertyName: 'shooter', newValue: 'Enemy' }), 'UNSUPPORTED_PROPERTY');
+    ctx.fails('an unknown shooter value is rejected',
+      await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'shooter', newValue: 'Nowhere' }), 'INVALID_ARGUMENT');
+    ctx.fails('an unknown pallete StrID is rejected on modify',
+      await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'bulletPallete', newValue: 'no-such-pallete' }), 'INVALID_ARGUMENT');
+
+    // a custom bullet can be bound back to a pallete, which flips its custom parameters back to read-only
+    const bound = await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'bulletPallete', newValue: palleteStrId });
+    ctx.ok('a custom bullet can be bound back to a pallete', bound);
+    ctx.equal('binding echoes the empty pallete it had', bound.payload?.oldValue, '');
+    ctx.fails('custom parameters are read-only again after rebinding',
+      await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'speed', newValue: '1' }), 'INVALID_ARGUMENT');
+    const unbound = await api.modifyObject({ editorId, objectId: modBulletId, propertyName: 'bulletPallete', newValue: '' });
+    ctx.ok('the pallete can be cleared again', unbound);
+    ctx.equal('clearing echoes the pallete StrID it had', unbound.payload?.oldValue, palleteStrId);
+
     // ---------------- remove ----------------
     ctx.section('editor.remove_object');
 
@@ -296,7 +383,7 @@ export default {
     });
 
     // leave the chart as we found it: undo the leftover fixtures
-    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, ...created.values()].filter((id) => Number.isInteger(id));
+    const leftovers = [addId, modifyId, victimId, bellCustomId, bulletCustomId, customBellCycleId, modBulletId, palettedBulletId, ...created.values()].filter((id) => Number.isInteger(id));
     for (const id of leftovers) {
       await api.removeObject({ editorId, objectId: id });
     }

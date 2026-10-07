@@ -195,6 +195,19 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     return RequireBpm(obj).BPM.ToString(CultureInfo.InvariantCulture);
                 case "bulletPallete":
                     return RequirePalleteReferencable(obj).ReferenceBulletPallete?.StrID ?? string.Empty;
+                case "shooter":
+                case "target":
+                case "size":
+                case "type":
+                case "placeOffset":
+                case "randomOffsetRange":
+                    RequireProjectilePropertyApplicable(obj, propertyName);
+                    return ReadProjectileProperty(RequireProjectile(obj), propertyName);
+                case "bulletDamageType":
+                    RequireProjectilePropertyApplicable(obj, propertyName);
+                    return obj is Bullet bulletWithDamageType
+                        ? bulletWithDamageType.BulletDamageTypeValue.ToString()
+                        : throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) is not a bullet.");
                 case "bunShi":
                     return RequireMeter(obj).BunShi.ToString(CultureInfo.InvariantCulture);
                 case "bunbo":
@@ -206,7 +219,15 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 case "endTGridGrid":
                     return RequireEndTGrid(obj).Grid.ToString(CultureInfo.InvariantCulture);
                 case "speed":
-                    return RequireSoflan(obj).Speed.ToString(CultureInfo.InvariantCulture);
+                    switch (obj)
+                    {
+                        case ISoflan soflan:
+                            return soflan.Speed.ToString(CultureInfo.InvariantCulture);
+                        case IProjectile projectile:
+                            return projectile.Speed.ToString(CultureInfo.InvariantCulture);
+                        default:
+                            throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no speed.");
+                    }
                 case "soflanGroup":
                     return obj switch
                     {
@@ -287,15 +308,24 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 {
                     var referencable = RequirePalleteReferencable(obj);
                     var requested = rawValue?.Trim();
-                    if (string.IsNullOrEmpty(requested) || requested == Bell.OngekiDefaultBellPaletteName)
+                    if (string.IsNullOrEmpty(requested))
                     {
-                        if (obj is not Bell)
-                            throw new ArgumentException("A bullet must reference a bullet pallete; only bells can fall back to the Ongeki default bell.");
+                        // §42：清空即回到 custom 模式。bullet 从 add_object 支持自定义参数起也允许滞空，
+                        // 否则 bullet 一旦绑过 palette 就再也回不到 custom。
                         referencable.ReferenceBulletPallete = default;
                         return;
                     }
 
-                    referencable.ReferenceBulletPallete = fumen.BulletPalleteList[requested]
+                    if (requested == Bell.OngekiDefaultBellPaletteName)
+                    {
+                        if (obj is not Bell)
+                            throw new ArgumentException($"'{Bell.OngekiDefaultBellPaletteName}' marks the Ongeki default bell and cannot be used for a bullet; clear the pallete with an empty value to switch a bullet to custom parameters.");
+                        referencable.ReferenceBulletPallete = default;
+                        return;
+                    }
+
+                    // 与 add 侧一致：精确查找，避免 BulletPalleteList 索引器把未知字符串折算成数字 id 撞上别的调色板。
+                    referencable.ReferenceBulletPallete = LookupBulletPallete(fumen, requested)
                         ?? throw new ArgumentException($"No bullet pallete '{requested}' in the editor.");
                     return;
                 }
@@ -313,7 +343,21 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                     WriteEndTGrid(obj, propertyName, rawValue);
                     return;
                 case "speed":
-                    RequireSoflan(obj).Speed = ParseFiniteFloat(rawValue, propertyName);
+                    if (obj is ISoflan soflan)
+                    {
+                        soflan.Speed = ParseFiniteFloat(rawValue, propertyName);
+                        return;
+                    }
+                    WriteProjectileProperty(obj, propertyName, rawValue);
+                    return;
+                case "shooter":
+                case "target":
+                case "size":
+                case "type":
+                case "placeOffset":
+                case "randomOffsetRange":
+                case "bulletDamageType":
+                    WriteProjectileProperty(obj, propertyName, rawValue);
                     return;
                 case "soflanGroup":
                     if (obj is IndividualSoflanArea soflanArea)
@@ -368,6 +412,108 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 default:
                     throw new ArgumentException($"Unsupported property '{propertyName}'.");
             }
+        }
+
+        private static IProjectile RequireProjectile(OngekiObjectBase obj)
+            => obj as IProjectile ?? throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no projectile parameters.");
+
+        /// <summary>
+        /// Bell 的 SizeValue 无效果、TypeValue 恒为 Circle，BulletDamageTypeValue 只属于 Bullet ——
+        /// 与 add 侧同一套家族限制，保证两侧报错一致。
+        /// </summary>
+        private static void RequireProjectilePropertyApplicable(OngekiObjectBase obj, string propertyName)
+        {
+            if (obj is not Bell)
+                return;
+
+            switch (propertyName)
+            {
+                case "size":
+                    throw new ArgumentException("'size' has no effect on bells.");
+                case "type":
+                    throw new ArgumentException("'type' cannot be set on a bell: a bell is always a Circle.");
+                case "bulletDamageType":
+                    throw new ArgumentException("'bulletDamageType' only applies to bullets.");
+            }
+        }
+
+        private static string ReadProjectileProperty(IProjectile projectile, string propertyName)
+        {
+            return propertyName switch
+            {
+                "shooter" => projectile.ShooterValue.ToString(),
+                "target" => projectile.TargetValue.ToString(),
+                "size" => projectile.SizeValue.ToString(),
+                "type" => projectile.TypeValue.ToString(),
+                "placeOffset" => projectile.PlaceOffset.ToString(CultureInfo.InvariantCulture),
+                "randomOffsetRange" => projectile.RandomOffsetRange.ToString(CultureInfo.InvariantCulture),
+                "speed" => projectile.Speed.ToString(CultureInfo.InvariantCulture),
+                _ => throw new ArgumentException($"Unsupported projectile property '{propertyName}'."),
+            };
+        }
+
+        /// <summary>
+        /// 写 custom projectile 参数。「palette 非空时只读」的请求级校验在 modify_object 的入口完成；
+        /// 这里不重复拦截 —— undo/redo 的回放可能在对象已经重新绑上 palette 的时刻恢复旧本地值，
+        /// 该值对 palette 不可见，但清掉 palette 后就该看到它。
+        /// </summary>
+        private static void WriteProjectileProperty(OngekiObjectBase obj, string propertyName, string rawValue)
+        {
+            switch (obj)
+            {
+                case Bell bell:
+                    switch (propertyName)
+                    {
+                        case "shooter":
+                            bell.ShooterValue = ParsePalleteEnum<Shooter>(rawValue, propertyName);
+                            return;
+                        case "target":
+                            bell.TargetValue = ParsePalleteEnum<Target>(rawValue, propertyName);
+                            return;
+                        case "speed":
+                            bell.Speed = ParseFiniteFloat(rawValue, propertyName);
+                            return;
+                        case "placeOffset":
+                            bell.PlaceOffset = ParseInt(rawValue);
+                            return;
+                        case "randomOffsetRange":
+                            bell.RandomOffsetRange = ParseInt(rawValue);
+                            return;
+                    }
+                    break;
+
+                case Bullet bullet:
+                    switch (propertyName)
+                    {
+                        case "shooter":
+                            bullet.ShooterValue = ParsePalleteEnum<Shooter>(rawValue, propertyName);
+                            return;
+                        case "target":
+                            bullet.TargetValue = ParsePalleteEnum<Target>(rawValue, propertyName);
+                            return;
+                        case "speed":
+                            bullet.Speed = ParseFiniteFloat(rawValue, propertyName);
+                            return;
+                        case "placeOffset":
+                            bullet.PlaceOffset = ParseInt(rawValue);
+                            return;
+                        case "randomOffsetRange":
+                            bullet.RandomOffsetRange = ParseInt(rawValue);
+                            return;
+                        case "size":
+                            bullet.SizeValue = ParsePalleteEnum<BulletSize>(rawValue, propertyName);
+                            return;
+                        case "type":
+                            bullet.TypeValue = ParsePalleteEnum<BulletType>(rawValue, propertyName);
+                            return;
+                        case "bulletDamageType":
+                            bullet.BulletDamageTypeValue = ParsePalleteEnum<BulletDamageType>(rawValue, propertyName);
+                            return;
+                    }
+                    break;
+            }
+
+            throw new ArgumentException($"Object #{obj.Id} ({obj.GetType().Name}) has no writable projectile property '{propertyName}'.");
         }
 
         private static float ParseFloat(string rawValue)
