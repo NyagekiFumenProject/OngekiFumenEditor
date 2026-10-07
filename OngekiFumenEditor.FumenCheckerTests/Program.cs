@@ -15,6 +15,10 @@ namespace OngekiFumenEditor.FumenCheckerTests;
 ///
 /// usage: dotnet run --project OngekiFumenEditor.FumenCheckerTests -c Release
 /// 退出码 1 表示有检查失败。
+///
+/// 本工程是测试类工程，**不要加进 `OngekiFumenEditor.sln`**（该解决方案只装生产工程，
+/// 测试按 csproj 单独调用；同 Avalonia 侧的约定）。可选参数：
+/// `--verbose` 逐规则打印进度，`--parse-only &lt;path&gt;` 只解析一张谱面用于诊断。
 /// </summary>
 internal static class Program
 {

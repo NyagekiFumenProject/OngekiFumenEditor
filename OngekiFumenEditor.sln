@@ -32,8 +32,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Benchmark
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor.OutputPaneCheck", "OngekiFumenEditor.OutputPaneCheck\OngekiFumenEditor.OutputPaneCheck.csproj", "{B4E1B2A5-1D9C-4C4E-9C3B-2E5C1A7D6F10}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OngekiFumenEditor.FumenCheckerTests", "OngekiFumenEditor.FumenCheckerTests\OngekiFumenEditor.FumenCheckerTests.csproj", "{EA96EDAB-319A-4D51-8114-95D12B08E104}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildTools", "BuildTools", "{B3B3AB16-01DF-4A57-9C47-4FC39964DD05}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecommendedScriptVerifier", "Tools\RecommendedScriptVerifier\RecommendedScriptVerifier.csproj", "{07D64AE7-64D0-4582-A0F3-10F424608B6E}"
@@ -92,10 +90,6 @@ Global
 		{B4E1B2A5-1D9C-4C4E-9C3B-2E5C1A7D6F10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4E1B2A5-1D9C-4C4E-9C3B-2E5C1A7D6F10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4E1B2A5-1D9C-4C4E-9C3B-2E5C1A7D6F10}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EA96EDAB-319A-4D51-8114-95D12B08E104}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EA96EDAB-319A-4D51-8114-95D12B08E104}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EA96EDAB-319A-4D51-8114-95D12B08E104}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EA96EDAB-319A-4D51-8114-95D12B08E104}.Release|Any CPU.Build.0 = Release|Any CPU
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
