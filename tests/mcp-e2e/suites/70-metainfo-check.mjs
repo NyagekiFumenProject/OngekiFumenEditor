@@ -7,6 +7,7 @@
 // its undo) really landed.
 
 import { verifyUndoRedo } from '../lib/history.mjs';
+import { splitTotalGrid, totalGridResolution } from '../lib/env.mjs';
 
 const RULE = 'HeaderConstMismatch';
 
@@ -233,5 +234,51 @@ export default {
       `redone=${redoAfterRead.payload?.redone}`);
     ctx.equal('the read returns the redone value', (await api.getMetainfo({ editorId, metainfoName: 'creator' })).payload?.value, 'MCP-GET-E2E');
     await api.undo({ editorId });
+
+    // ---------------- horizontal lane segments accept an X interval ----------------
+    // A horizontal segment — every point shares one TGrid and only X moves; the WLS/WLE pair of a
+    // wall that exists for a single instant is the real-world shape — covers an X *interval* at
+    // that moment, so an object docked anywhere inside it sits on the lane. WrongLocation used to
+    // compare against the single X the interpolation picks for a zero-length segment (the start
+    // key), which reported a tap resting on the end key as misplaced.
+    ctx.section('WrongLocation accepts objects sitting on a horizontal lane segment');
+
+    const horizontalTGrid = 61 * totalGridResolution;
+    const atHorizontal = splitTotalGrid(horizontalTGrid);
+
+    const wall = await api.must(await api.addObject({
+      editorId, objectType: 'lane', laneType: 'wallRight',
+      ...atHorizontal, xGridUnit: 22, xGridGrid: 0,
+    }), 'create the wall lane');
+    const wallRecordId = (await api.family(editorId, 'lane')).find((lane) => lane.id === wall.objectId)?.recordId;
+    ctx.check('the new wall lane reports its RecordId', Number.isInteger(wallRecordId), `recordId=${wallRecordId}`);
+
+    await api.must(await api.addObject({
+      editorId, objectType: 'lanenext', parentRecordId: wallRecordId,
+      ...atHorizontal, xGridUnit: 20, xGridGrid: 0,
+    }), 'add a zero-length segment (same TGrid as the start, different X)');
+
+    const dockedTap = async (xGridUnit) => api.must(await api.addObject({
+      editorId, objectType: 'tap', referenceLaneRecordId: wallRecordId,
+      ...atHorizontal, xGridUnit, xGridGrid: 0,
+    }), `dock a tap at x=${xGridUnit}`);
+
+    const endKeyTap = await dockedTap(20);   // the segment's end key
+    const insideTap = await dockedTap(21);   // inside the segment's X interval
+    const outsideTap = await dockedTap(24);  // beyond the interval (and its 1 unit tolerance)
+
+    const wrongLocations = (await api.must(await api.check({ editorId, limit: 1000 }), 'run check'))
+      .results.filter((result) => result.ruleName === 'WrongLocation');
+    const isWrongLocation = (objectId) => wrongLocations.some((result) => Number(result.objectId) === objectId);
+
+    ctx.equal('a tap on the segment end key is not reported', isWrongLocation(endKeyTap.objectId), false);
+    ctx.equal('a tap inside the segment X interval is not reported', isWrongLocation(insideTap.objectId), false);
+    ctx.equal('a tap outside the segment X interval is still reported', isWrongLocation(outsideTap.objectId), true);
+
+    for (let undone = 0; undone < 5; undone++)
+      await api.undo({ editorId });
+    const leftover = (await api.family(editorId, 'tap', { minTotalGrid: horizontalTGrid, maxTotalGrid: horizontalTGrid }))
+      .filter((tap) => tap.xGrid && [20, 21, 24].includes(Number(tap.xGrid.unit)));
+    ctx.equal('the section leaves no taps behind', leftover.length, 0);
   },
 };
