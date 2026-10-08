@@ -18,6 +18,68 @@ namespace OngekiFumenEditor.Base.Collections
             nameof(ConnectableStartObject.MaxTGrid)
         );
 
+        private readonly Dictionary<int, START_TYPE> startObjectByRecordId = new();
+
+        public bool TryGetStartObject(int recordId, out START_TYPE start)
+        {
+            return startObjectByRecordId.TryGetValue(recordId, out start);
+        }
+
+        private void IndexStartObject(START_TYPE startObject)
+        {
+            if (!startObjectByRecordId.ContainsKey(startObject.RecordId))
+                startObjectByRecordId.Add(startObject.RecordId, startObject);
+        }
+
+        private void RemoveRecordIdIndexFor(START_TYPE startObject)
+        {
+            var staleKey = 0;
+            var found = false;
+            foreach (var pair in startObjectByRecordId)
+            {
+                if (ReferenceEquals(pair.Value, startObject))
+                {
+                    staleKey = pair.Key;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+                return;
+
+            startObjectByRecordId.Remove(staleKey);
+
+            ReindexRecordId(staleKey);
+        }
+
+        private void ReindexRecordId(int recordId)
+        {
+            START_TYPE candidate = null;
+            foreach (var startObject in startObjects)
+            {
+                if (startObject.RecordId == recordId)
+                {
+                    candidate = startObject;
+                    break;
+                }
+            }
+
+            if (candidate is null)
+                startObjectByRecordId.Remove(recordId);
+            else
+                startObjectByRecordId[recordId] = candidate;
+        }
+
+        private void OnStartPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not START_TYPE startObject)
+                return;
+
+            RemoveRecordIdIndexFor(startObject);
+            ReindexRecordId(startObject.RecordId);
+        }
+
         public int Count => startObjects.Count;
 
         public IEnumerator<START_TYPE> GetEnumerator() => startObjects.GetEnumerator();
@@ -36,6 +98,8 @@ namespace OngekiFumenEditor.Base.Collections
                     startObject.RecordId = GetNewRecordId();
 
                 startObjects.Add(startObject);
+                IndexStartObject(startObject);
+                startObject.PropertyChanged += OnStartPropertyChanged;
                 return;
             }
 
@@ -51,6 +115,8 @@ namespace OngekiFumenEditor.Base.Collections
             if (obj is START_TYPE startObj)
             {
                 startObjects.Remove(startObj);
+                RemoveRecordIdIndexFor(startObj);
+                startObj.PropertyChanged -= OnStartPropertyChanged;
                 return;
             }
 
