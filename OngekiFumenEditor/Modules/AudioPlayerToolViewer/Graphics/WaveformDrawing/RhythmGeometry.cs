@@ -16,26 +16,40 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         /// <summary>
         /// 构造节奏强度曲线。时间轴按像素列降采样：每列只保留该列时间跨度内所有帧的最大值，
         /// 因此顶点数只与视图宽度有关，与歌曲长度、缩放级别无关。
+        /// <paramref name="tone"/> 的强调/γ 映射在降采样之前、按原生帧率施加（核宽与缩放无关）。
         /// </summary>
         public static void BuildCurve(List<LineVertex> points, RhythmEnvelope envelope, TimeSpan fromTime, TimeSpan toTime,
-            float width, float height, float heightWeight, Vector4 color)
+            float width, float height, float heightWeight, Vector4 color, RhythmCurveTone tone)
         {
             var columnCount = Math.Max(1, (int)MathF.Ceiling(width));
+            var durationMs = (toTime - fromTime).TotalMilliseconds;
+            var frameRate = envelope.FrameRateHz;
+            var firstFrame = Math.Max(0, (int)(fromTime.TotalSeconds * frameRate));
+            var lastFrame = Math.Min(envelope.FrameCount - 1, (int)(toTime.TotalSeconds * frameRate) + 1);
+            var frameCount = Math.Max(0, lastFrame - firstFrame + 1);
+            if (frameCount <= 0)
+                return;
+
             var columns = ArrayPool<float>.Shared.Rent(columnCount);
+            var source = ArrayPool<float>.Shared.Rent(frameCount);
+            var mapped = ArrayPool<float>.Shared.Rent(frameCount);
+            var scratch = ArrayPool<float>.Shared.Rent(frameCount);
             try
             {
                 Array.Clear(columns, 0, columnCount);
 
-                var durationMs = (toTime - fromTime).TotalMilliseconds;
-                var frameRate = envelope.FrameRateHz;
-                var firstFrame = Math.Max(0, (int)(fromTime.TotalSeconds * frameRate));
-                var lastFrame = Math.Min(envelope.FrameCount - 1, (int)(toTime.TotalSeconds * frameRate) + 1);
+                var values = source.AsSpan(0, frameCount);
+                var mappedValues = mapped.AsSpan(0, frameCount);
+                var scratchValues = scratch.AsSpan(0, frameCount);
+                envelope.Total.AsSpan(firstFrame, frameCount).CopyTo(values);
+                tone.Apply(values, mappedValues, scratchValues, frameRate);
 
-                for (var frame = firstFrame; frame <= lastFrame; frame++)
+                for (var i = 0; i < frameCount; i++)
                 {
+                    var frame = firstFrame + i;
                     var x = WaveformGeometry.ProjectX(envelope.GetFrameTime(frame), fromTime, durationMs, width);
                     var column = Math.Clamp((int)(x + width / 2), 0, columnCount - 1);
-                    var value = envelope.Total[frame];
+                    var value = mappedValues[i];
                     if (value > columns[column])
                         columns[column] = value;
                 }
@@ -52,6 +66,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             finally
             {
                 ArrayPool<float>.Shared.Return(columns);
+                ArrayPool<float>.Shared.Return(source);
+                ArrayPool<float>.Shared.Return(mapped);
+                ArrayPool<float>.Shared.Return(scratch);
             }
         }
     }

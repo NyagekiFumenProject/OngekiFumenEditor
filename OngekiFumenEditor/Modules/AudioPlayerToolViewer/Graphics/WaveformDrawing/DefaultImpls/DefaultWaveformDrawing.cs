@@ -111,12 +111,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             //（顶点数已按像素列降采样，只与视图宽度有关，与歌曲长度、缩放级别无关）。
             if (option.ShowRhythmCurve && target.RhythmCurve is { } rhythmCurve && rhythmCurve.FrameCount > 0)
             {
+                var tone = new RhythmCurveTone(
+                    waveformSettings.RhythmCurveGamma,
+                    waveformSettings.RhythmCurveEmphasis);
+
                 builder.PushModelMatrix(Matrix4x4.CreateScale(1, target.WaveformVecticalScale, 1f));
                 cachedLineDrawList.Clear();
                 try
                 {
                     RhythmGeometry.BuildCurve(cachedLineDrawList, rhythmCurve, fromTime, toTime, width, height,
-                        RhythmCurveHeightWeight, waveformSettings.WaveformRhythmCurveColor.ToVector4());
+                        RhythmCurveHeightWeight, waveformSettings.WaveformRhythmCurveColor.ToVector4(), tone);
                     if (cachedLineDrawList.Count > 0)
                         builder.DrawSimpleLines(cachedLineDrawList, RhythmCurveLineWidth);
                 }

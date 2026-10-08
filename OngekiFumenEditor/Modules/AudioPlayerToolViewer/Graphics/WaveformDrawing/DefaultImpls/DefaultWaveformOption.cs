@@ -60,6 +60,35 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
 
 
+
+        private float rhythmCurveGamma = DefaultWaveformSettings.Default.RhythmCurveGamma;
+        [ObjectPropertyBrowserShow]
+        [LocalizableObjectPropertyBrowserAlias(nameof(RhythmCurveGamma))]
+        public float RhythmCurveGamma
+        {
+            get => rhythmCurveGamma;
+            set
+            {
+                var clamped = System.Math.Clamp(value, RhythmCurveTone.MinGamma, RhythmCurveTone.MaxGamma);
+                if (Set(ref rhythmCurveGamma, clamped))
+                    DefaultWaveformSettings.Default.RhythmCurveGamma = clamped;
+            }
+        }
+
+        private float rhythmCurveEmphasis = DefaultWaveformSettings.Default.RhythmCurveEmphasis;
+        [ObjectPropertyBrowserShow]
+        [LocalizableObjectPropertyBrowserAlias(nameof(RhythmCurveEmphasis))]
+        public float RhythmCurveEmphasis
+        {
+            get => rhythmCurveEmphasis;
+            set
+            {
+                var clamped = System.Math.Clamp(value, 0f, RhythmCurveTone.MaxEmphasis);
+                if (Set(ref rhythmCurveEmphasis, clamped))
+                    DefaultWaveformSettings.Default.RhythmCurveEmphasis = clamped;
+            }
+        }
+
         public DefaultWaveformOption()
         {
             SyncFromSettings();
@@ -71,6 +100,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             ShowObjectPlaceLine = DefaultWaveformSettings.Default.ShowObjectPlaceLine;
             ShowTimingLine = DefaultWaveformSettings.Default.ShowTimingLine;
             ShowRhythmCurve = DefaultWaveformSettings.Default.ShowRhythmCurve;
+            RhythmCurveGamma = DefaultWaveformSettings.Default.RhythmCurveGamma;
+            RhythmCurveEmphasis = DefaultWaveformSettings.Default.RhythmCurveEmphasis;
         }
 
         public override void Reload()

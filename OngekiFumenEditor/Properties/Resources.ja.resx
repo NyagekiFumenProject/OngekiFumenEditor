@@ -1393,6 +1393,12 @@
   <data name="ShowDebugInfo" xml:space="preserve">
     <value>デバッグ情報を表示</value>
   </data>
+  <data name="RhythmCurveGamma" xml:space="preserve">
+    <value>リズムカーブのコントラスト (γ)</value>
+  </data>
+  <data name="RhythmCurveEmphasis" xml:space="preserve">
+    <value>リズムカーブの強調 (λ)</value>
+  </data>
   <data name="ShowRhythmCurve" xml:space="preserve">
     <value>リズムカーブを表示</value>
   </data>

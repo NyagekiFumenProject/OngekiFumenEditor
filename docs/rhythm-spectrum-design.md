@@ -49,6 +49,9 @@ AudioPlayerToolViewer 原来只有一条振幅包络（`DefaultSamplePeak` → �
    尺度下限为全曲 P95 的 25%（低于该比例即视为无内容），结果截断到 0–1。
 5. **合成**：三频段按低 1.0 / 中 1.0 / 高 0.6 加权平均，得到 0–1 的总曲线。
 
+分析侧到此结束；面板再对这条曲线做一次**显示侧色调映射**（`RhythmCurveTone`，见 §5），
+映射参数属于观感设置，改它不需要重跑分析。
+
 参数集中在 `DefaultRhythmAnalyzer` 顶部常量区，均已加注释。
 
 ## 4. 数据模型
@@ -68,16 +71,25 @@ IRhythmAnalyzer.Analyze(SampleData, CancellationToken) -> RhythmEnvelope
 
 - **画法**：总曲线按像素列取最大值降采样，关于中轴镜像，随 `WaveformVecticalScale` 竖直缩放；
   顶点数只与视图宽度有关（2×宽度），与歌曲长度、缩放级别无关。
+- **显示侧色调映射**（`RhythmCurveTone`，在像素列降采样**之前**、按 200fps 原生分辨率施加，
+  所以核宽与缩放级别无关）：
+  1. 局部均值强调 `v' = clamp(v + λ·(v − blurσ(v)), 0, 1)`：σ 固定 100ms（与节拍包宽同量级），
+     核用两次盒式滑动均值近似（三角核），不是 O(n·k) 的卷积；曲线本来就平坦时 `v − blurσ(v) ≈ 0`，
+     因此**不会凭空造峰**；峰顶被 clamp 在 1，效果体现在把谷压下去、把峰的肩部变陡。
+  2. γ 压缩 `v'' = v'^γ`：峰顶保持 1，中低段整体压低。
+  两个参数都在面板的特殊选项里可调：`RhythmCurveGamma`（γ，默认 1.5，范围 1–3）、
+  `RhythmCurveEmphasis`（λ，默认 0.7，范围 0–2；置 0 即关闭强调）。
 - **默认开启**，可在面板的特殊选项里勾掉（`ShowRhythmCurve`），颜色在音频设置页改（`WaveformRhythmCurveColor`，默认 90, 230, 160）。
 - 与离屏图块无关，逐帧实时绘制，因此改颜色/开关立即生效；波形本体的分块预渲染路径不受影响。
 - 分析耗时（Release，整曲一次）：274.9s 歌曲 1.2s、242.0s 歌曲 1.1s、216.6s 歌曲 0.9s。
 
 ## 6. 设置与本地化
 
-- 特殊选项（`DefaultWaveformOption`，对象检查器里可勾）：`ShowRhythmCurve`（默认开）；
+- 特殊选项（`DefaultWaveformOption`，对象检查器里可勾）：`ShowRhythmCurve`（默认开）、
+  `RhythmCurveGamma`（默认 1.5）、`RhythmCurveEmphasis`（默认 0.7）；
   同类的 `ShowWaveform` / `ShowObjectPlaceLine` / `ShowTimingLine` 一并改为可本地化别名。
 - 颜色（`DefaultWaveformSettings`，音频设置页自动列出所有 `Waveform*` 颜色项）：`WaveformRhythmCurveColor`。
-- 资源键（en / zh-Hans / ja）：`ShowWaveform`、`ShowRhythmCurve`。
+- 资源键（en / zh-Hans / ja）：`ShowWaveform`、`ShowRhythmCurve`、`RhythmCurveGamma`、`RhythmCurveEmphasis`。
 
 ## 7. 验证
 
@@ -86,7 +98,7 @@ dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release
 dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release -- --audio <file> [--out <png>] [--expect-bpm <bpm>] [--start <s>] [--window <s>]
 ```
 
-默认跑 14 项用例（全部通过）。断言的是「曲线像不像鼓点轨」，不是某帧的具体数值：
+默认跑 21 项用例（全部通过）。断言的是「曲线像不像鼓点轨」，不是某帧的具体数值：
 
 | 用例 | 结论 |
 | --- | --- |
@@ -96,26 +108,33 @@ dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release -- --audio
 | 整段静音 | 曲线全零 |
 | 16bit 数据 | 分析返回 null |
 | 几何构造 | 顶点数 = 2×列数、上下对称、x 单调、尖峰满幅、不超界、窗口外的尖峰不参与绘制 |
+| 色调映射 | 恒等参数不改数值；平坦曲线经默认映射后 max−min = 0.0000（不造假峰）；0.25 基线 + 满幅峰的合成曲线：基线 0.250→0.115、峰顶保持 1.000、峰谷比 4.00→8.67 |
+| 色调映射（作用在真实分析曲线上） | 150BPM 鼓组曲线基线（p50）0.061→0.006、峰顶保持 1.000、p90/mean 2.85→3.35 |
 
 真实歌曲（`--audio` 模式，Release）：
 
-| 曲目 | 时长 | 分析耗时 | mean | p90 | p90/mean | 占比 ≥0.5 |
+| 曲目 | 时长 | 分析耗时 | mean | p90 | p90/mean | 默认映射后 p90/mean |
 | --- | --- | --- | --- | --- | --- | --- |
-| music0997 | 274.9s | 1.2s | 0.281 | 0.511 | 1.82 | 10.9% |
-| Kano - Dreamin Chuchu | 242.0s | 1.1s | 0.244 | 0.474 | 1.94 | 8.3% |
-| 一二三,初音ミク - あんたにあっかんべ | 216.6s | 0.9s | 0.263 | 0.503 | 1.92 | 10.2% |
+| music0997 | 274.9s | 1.1s | 0.281 | 0.511 | 1.82 | 2.47（mean 0.179，max 仍 1.000） |
+| Kano - Dreamin Chuchu | 242.0s | 1.1s | 0.244 | 0.474 | 1.94 | 2.64（mean 0.151） |
+| 一二三,初音ミク - あんたにあっかんべ | 216.6s | 0.9s | 0.263 | 0.503 | 1.92 | 2.65（mean 0.166） |
 
-（p90/mean ≈ 1.8–1.9、约一成帧高于 0.5：曲线是「稀疏尖峰 + 低基线」，而不是一片平台。
+（映射前 p90/mean ≈ 1.8–1.9、约一成帧高于 0.5：曲线是「稀疏尖峰 + 低基线」而不是平台；
+默认映射（γ=1.5、λ=0.7）把基线均值再压低约 37%、峰顶保持满幅，p90/mean 升到 2.5–2.7。
+`--out` 导出的对照图走的就是同一套默认映射。
 `--out` 可导出对照图：白/绿镜像曲线 + 可选 `--expect-bpm` 参考虚线，用于肉眼核对峰值是否落在拍上。）
 
 实机（Debug 构建，真实窗口，后台启动并最小化）：打开 265s 歌曲的工程，
-日志出现 `[Rhythm] 分析完成 3647ms, 曲线帧数=33033`（Debug + 加载期竞争 CPU），
-整个会话 0 条 ERROR，面板渲染控件正常加载。
+日志出现 `[Rhythm] 分析完成 3581ms, 曲线帧数=33033`（Debug + 加载期竞争 CPU），
+整个会话 0 条 ERROR，面板渲染控件正常加载（色调映射上线后同样为零错误）。
 
 ## 8. 已知限制
 
 - **曲线是相对变化量**：它不表示绝对能量，安静段与响亮段在数值上被拉平（这是为了看得见节奏），
-  因此不能用它判断音量大小。
+  因此不能用它判断音量大小。默认的 γ 压缩会进一步压低中低段，γ 越大曲线越"只有峰没有身"，
+  需要看清中低段的细节时把 γ 调回 1。
+- **强调项会放大噪声**：λ 越大，撞在一起的镲片之间越容易出现小抖动（平坦段落不受影响）；
+  嫌吵就把 `RhythmCurveEmphasis` 调回 0。
 - **不提供节拍/速度信息**：不再有 BPM 网格与读数，需要速度时只能靠谱面 BPM 与耳朵。
 - **高频内容权重较低**：合奏里轻的反拍踩镲在总曲线上只是小包（单频段归一化下才与底鼓等量齐观），
   这是「重音结构优先」的取舍。

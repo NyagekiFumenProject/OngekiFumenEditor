@@ -146,6 +146,30 @@ namespace OngekiFumenEditor.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
+        public float RhythmCurveGamma {
+            get {
+                return ((float)(this["RhythmCurveGamma"]));
+            }
+            set {
+                this["RhythmCurveGamma"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.7")]
+        public float RhythmCurveEmphasis {
+            get {
+                return ((float)(this["RhythmCurveEmphasis"]));
+            }
+            set {
+                this["RhythmCurveEmphasis"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("90, 230, 160")]
         public global::System.Drawing.Color WaveformRhythmCurveColor {
             get {

@@ -29,7 +29,7 @@ internal static class SpectrumImageWriter
 
         var points = new List<LineVertex>();
 
-        RhythmGeometry.BuildCurve(points, envelope, fromTime, toTime, ImageWidth, ImageHeight, 0.9f, CurveColor);
+        RhythmGeometry.BuildCurve(points, envelope, fromTime, toTime, ImageWidth, ImageHeight, 0.9f, CurveColor, RhythmCurveTone.Default);
         Draw(canvas, points, 1.4f);
 
         if (referenceBpm is { } bpm and > 0)

@@ -77,6 +77,83 @@ internal static class Program
         Check(analyzer.Analyze(wrongFormat) is null, "16bit 数据: 返回 null", "ok");
 
         CheckGeometry();
+        CheckToneMapping(analyzer);
+    }
+
+    /// <summary>
+    /// 显示侧色调映射（强调 + γ）：恒等、平坦不造假峰、峰谷对比确实被拉开，
+    /// 以及真实合成曲线走一遍默认参数后的 p90/mean 变化（这就是「峰谷更明显」的量化口径）。
+    /// </summary>
+    private static void CheckToneMapping(DefaultRhythmAnalyzer analyzer)
+    {
+        var frameInterval = TimeSpan.FromSeconds(1.0 / 200);
+        var frameCount = 4000;
+
+        // 1) 恒等参数不改变任何数值
+        var source = new float[frameCount];
+        for (var i = 0; i < frameCount; i++)
+            source[i] = 0.2f + 0.6f * (i % 37) / 37f;
+        var mapped = new float[frameCount];
+        var scratch = new float[frameCount];
+        RhythmCurveTone.Identity.Apply(source, mapped, scratch, 200);
+        Check(source.Zip(mapped).All(p => MathF.Abs(p.First - p.Second) < 1e-6f), "tone: 恒等参数不改变数值", "");
+
+        // 2) 平坦曲线保持平坦：强调项不会凭空造峰（v - blur(v) == 0）
+        var flat = new float[frameCount];
+        Array.Fill(flat, 0.42f);
+        RhythmCurveTone.Default.Apply(flat, mapped, scratch, 200);
+        Check(mapped.Max() - mapped.Min() < 1e-3f, "tone: 平坦曲线保持平坦（不造假峰）",
+            $"max-min={mapped.Max() - mapped.Min():F4}");
+
+        // 3) 峰谷对比：0.25 基线 + 每 40 帧一个峰
+        var spiky = new float[frameCount];
+        for (var i = 0; i < frameCount; i++)
+            spiky[i] = i % 40 == 0 ? 1f : 0.25f;
+        RhythmCurveTone.Default.Apply(spiky, mapped, scratch, 200);
+        var peakValue = Enumerable.Range(0, frameCount / 40).Min(k => mapped[k * 40]);
+        var baselineBefore = spiky.Where((_, i) => i % 40 != 0).Average();
+        var baselineAfter = mapped.Where((_, i) => i % 40 != 0).Average();
+        var peakBefore = spiky.Where((_, i) => i % 40 == 0).Average();
+        var peakAfter = mapped.Where((_, i) => i % 40 == 0).Average();
+        var contrastBefore = baselineBefore > 0 ? peakBefore / baselineBefore : 0;
+        var contrastAfter = baselineAfter > 0 ? peakAfter / baselineAfter : 0;
+        Check(baselineAfter <= baselineBefore * 0.7f, "tone: 基线被压低",
+            $"{baselineBefore:F3} -> {baselineAfter:F3}");
+        Check(peakValue >= 0.9f, "tone: 峰顶仍保持满幅", $"min peak={peakValue:F3}");
+        Check(contrastAfter >= contrastBefore * 1.8f, "tone: 峰谷比明显拉开",
+            $"{contrastBefore:F2} -> {contrastAfter:F2}");
+
+        // 4) 端到端：真实合成曲线（150BPM 鼓组）走默认映射后的 p90/mean
+        var drums = SyntheticClickTrack.CreateDrumPattern(150, 30);
+        var envelope = analyzer.Analyze(drums.ToSampleData());
+        if (envelope is null)
+        {
+            Check(false, "tone: 端到端对比", "分析返回 null");
+            return;
+        }
+
+        var raw = new float[envelope.FrameCount];
+        Array.Copy(envelope.Total, raw, raw.Length);
+        var toned = new float[envelope.FrameCount];
+        var toneScratch = new float[envelope.FrameCount];
+        RhythmCurveTone.Default.Apply(raw, toned, toneScratch, envelope.FrameRateHz);
+
+        // 面板上的观感 = 峰高 / 基线：基线（p50）必须明显下降，峰顶必须保持
+        var rawSorted = raw.OrderBy(x => x).ToArray();
+        var tonedSorted = toned.OrderBy(x => x).ToArray();
+        var rawMedian = rawSorted[rawSorted.Length / 2];
+        var tonedMedian = tonedSorted[tonedSorted.Length / 2];
+        Check(tonedMedian <= rawMedian * 0.7f, "tone: 鼓组曲线基线（p50）被压低",
+            $"{rawMedian:F3} -> {tonedMedian:F3}");
+        Check(tonedSorted[^1] >= 0.95f, "tone: 鼓组曲线峰顶保持", $"max={tonedSorted[^1]:F3}");
+        Console.WriteLine($"      tone: 鼓组 p90/mean {Stats(raw).P90 / Stats(raw).Mean:F2} -> {Stats(toned).P90 / Stats(toned).Mean:F2}, " +
+            $"占比≥0.5 {(raw.Count(x => x >= 0.5f) / (double)raw.Length):P1} -> {(toned.Count(x => x >= 0.5f) / (double)toned.Length):P1}");
+    }
+
+    private static (double Mean, double P90) Stats(float[] values)
+    {
+        var sorted = values.OrderBy(x => x).ToArray();
+        return (sorted.Average(), sorted[(int)(sorted.Length * 0.9)]);
     }
 
     private static RhythmEnvelope Measure(IRhythmAnalyzer analyzer, SyntheticTrack track)
@@ -190,7 +267,7 @@ internal static class Program
         var envelope = new RhythmEnvelope(frameInterval, total);
 
         var points = new List<LineVertex>();
-        RhythmGeometry.BuildCurve(points, envelope, TimeSpan.Zero, TimeSpan.FromSeconds(30), 100, 200, 0.8f, Vector4.One);
+        RhythmGeometry.BuildCurve(points, envelope, TimeSpan.Zero, TimeSpan.FromSeconds(30), 100, 200, 0.8f, Vector4.One, RhythmCurveTone.Identity);
         Check(points.Count == 200, "geometry: 曲线顶点数 = 2×列数", $"actual={points.Count}");
 
         var monotonic = true;
@@ -221,7 +298,7 @@ internal static class Program
 
         // 只看 5 秒窗口时，窗口之外的尖峰不能出现
         points.Clear();
-        RhythmGeometry.BuildCurve(points, envelope, TimeSpan.Zero, TimeSpan.FromSeconds(5), 100, 200, 0.8f, Vector4.One);
+        RhythmGeometry.BuildCurve(points, envelope, TimeSpan.Zero, TimeSpan.FromSeconds(5), 100, 200, 0.8f, Vector4.One, RhythmCurveTone.Identity);
         Check(points.Count == 200 && points.All(x => MathF.Abs(x.Point.Y) < 1e-4f),
             "geometry: 窗口外的尖峰不参与绘制", $"vertices={points.Count}");
     }
@@ -261,6 +338,15 @@ internal static class Program
         Console.WriteLine($"curve: {stopwatch.ElapsedMilliseconds}ms, frames={envelope.FrameCount} ({envelope.FrameRateHz:F0}fps), " +
             $"mean={mean:F3} p90={p90:F3} max={envelope.Total.Max():F3} 占比≥0.5 {above:P1} " +
             $"p90/mean={(mean > 0 ? p90 / mean : 0):F2}");
+
+        // 面板画的是映射之后的曲线，这里把同一套默认参数也跑一遍，便于用数字对照
+        var toned = new float[envelope.FrameCount];
+        var toneScratch = new float[envelope.FrameCount];
+        RhythmCurveTone.Default.Apply(envelope.Total, toned, toneScratch, envelope.FrameRateHz);
+        var tonedStats = Stats(toned);
+        Console.WriteLine($"curve(默认映射 γ={RhythmCurveTone.DefaultGamma} λ={RhythmCurveTone.DefaultEmphasis}): " +
+            $"mean={tonedStats.Mean:F3} p90={tonedStats.P90:F3} max={toned.Max():F3} " +
+            $"p90/mean={(tonedStats.Mean > 0 ? tonedStats.P90 / tonedStats.Mean : 0):F2}");
 
         if (options.OutputPath is { } outputPath)
         {
