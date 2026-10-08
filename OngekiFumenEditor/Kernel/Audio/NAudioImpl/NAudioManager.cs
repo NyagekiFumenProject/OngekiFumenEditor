@@ -293,12 +293,11 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
         {
-            using var audioFileReader = new AudioFileReader(filePath);
             Log.LogInfo($"Load sound file: {filePath}");
 
-            var provider = await AudioCompatibilizer.CheckCompatible(audioFileReader, targetSampleRate);
+            using var processedProvider = await AudioCompatibilizer.OpenSampleProvider(filePath, targetSampleRate);
 
-            return new NAudioSoundPlayer(new CachedSound(provider), this);
+            return new NAudioSoundPlayer(new CachedSound(processedProvider), this);
         }
 
         public void Dispose()

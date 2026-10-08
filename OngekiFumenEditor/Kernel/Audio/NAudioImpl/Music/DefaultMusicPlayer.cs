@@ -91,9 +91,8 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
             try
             {
                 Log.LogInfo($"Load audio file: {audio_file}");
-                var rawStream = new AudioFileReader(audio_file);
-                duration = rawStream.TotalTime;
-                var processedProvider = await AudioCompatibilizer.CheckCompatible(rawStream, targetSampleRate, cancellationToken);
+                using var processedProvider = await AudioCompatibilizer.OpenSampleProvider(audio_file, targetSampleRate, cancellationToken);
+                duration = processedProvider.Duration;
 
                 cancellationToken.ThrowIfCancellationRequested();
 
