@@ -1393,11 +1393,17 @@
   <data name="ShowDebugInfo" xml:space="preserve">
     <value>デバッグ情報を表示</value>
   </data>
+  <data name="ShowRhythmCurve" xml:space="preserve">
+    <value>リズムカーブを表示</value>
+  </data>
   <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>オブジェクト配置位置を表示</value>
   </data>
   <data name="ShowTimingLine" xml:space="preserve">
     <value>リズムラインを表示</value>
+  </data>
+  <data name="ShowWaveform" xml:space="preserve">
+    <value>波形を表示</value>
   </data>
   <data name="SmallJacketSize" xml:space="preserve">
     <value>サムネイル画像サイズ（デフォルト：220×220）</value>

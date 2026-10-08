@@ -29,5 +29,11 @@
     <Setting Name="WaveformHoldLineColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">191, 255, 255, 0</Value>
     </Setting>
+    <Setting Name="ShowRhythmCurve" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="WaveformRhythmCurveColor" Type="System.Drawing.Color" Scope="User">
+      <Value Profile="(Default)">90, 230, 160</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

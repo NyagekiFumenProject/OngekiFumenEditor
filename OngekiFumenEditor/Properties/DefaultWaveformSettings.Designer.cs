@@ -130,5 +130,35 @@ namespace OngekiFumenEditor.Properties {
                 this["WaveformHoldLineColor"] = value;
             }
         }
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowRhythmCurve {
+            get {
+                return ((bool)(this["ShowRhythmCurve"]));
+            }
+            set {
+                this["ShowRhythmCurve"] = value;
+            }
+        }
+
+
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("90, 230, 160")]
+        public global::System.Drawing.Color WaveformRhythmCurveColor {
+            get {
+                return ((global::System.Drawing.Color)(this["WaveformRhythmCurveColor"]));
+            }
+            set {
+                this["WaveformRhythmCurveColor"] = value;
+            }
+        }
+
+
+
+
+
     }
 }

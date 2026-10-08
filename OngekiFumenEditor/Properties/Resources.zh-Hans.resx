@@ -1401,11 +1401,17 @@
   <data name="ShowDebugInfo" xml:space="preserve">
     <value>显示调试信息</value>
   </data>
+  <data name="ShowRhythmCurve" xml:space="preserve">
+    <value>显示节奏曲线</value>
+  </data>
   <data name="ShowObjectPlaceLine" xml:space="preserve">
     <value>显示物品放置的位置</value>
   </data>
   <data name="ShowTimingLine" xml:space="preserve">
     <value>显示节奏线</value>
+  </data>
+  <data name="ShowWaveform" xml:space="preserve">
+    <value>显示波形</value>
   </data>
   <data name="SmallJacketSize" xml:space="preserve">
     <value>小图尺寸(通常220x220):</value>

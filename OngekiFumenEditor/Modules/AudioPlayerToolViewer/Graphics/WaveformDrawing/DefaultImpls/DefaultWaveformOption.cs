@@ -8,7 +8,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
     {
         private bool showTimingLine;
         [ObjectPropertyBrowserShow]
-        [ObjectPropertyBrowserAlias(nameof(ShowTimingLine))]
+        [LocalizableObjectPropertyBrowserAlias(nameof(ShowTimingLine))]
         public bool ShowTimingLine
         {
             get => showTimingLine;
@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
         private bool showObjectPlaceLine;
         [ObjectPropertyBrowserShow]
-        [ObjectPropertyBrowserAlias(nameof(ShowObjectPlaceLine))]
+        [LocalizableObjectPropertyBrowserAlias(nameof(ShowObjectPlaceLine))]
         public bool ShowObjectPlaceLine
         {
             get => showObjectPlaceLine;
@@ -34,7 +34,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
         private bool showWaveform;
         [ObjectPropertyBrowserShow]
-        [ObjectPropertyBrowserAlias(nameof(ShowWaveform))]
+        [LocalizableObjectPropertyBrowserAlias(nameof(ShowWaveform))]
         public bool ShowWaveform
         {
             get => showWaveform;
@@ -44,6 +44,21 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 DefaultWaveformSettings.Default.ShowWaveform = value;
             }
         }
+
+        private bool showRhythmCurve;
+        [ObjectPropertyBrowserShow]
+        [LocalizableObjectPropertyBrowserAlias(nameof(ShowRhythmCurve))]
+        public bool ShowRhythmCurve
+        {
+            get => showRhythmCurve;
+            set
+            {
+                Set(ref showRhythmCurve, value);
+                DefaultWaveformSettings.Default.ShowRhythmCurve = value;
+            }
+        }
+
+
 
         public DefaultWaveformOption()
         {
@@ -55,6 +70,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             ShowWaveform = DefaultWaveformSettings.Default.ShowWaveform;
             ShowObjectPlaceLine = DefaultWaveformSettings.Default.ShowObjectPlaceLine;
             ShowTimingLine = DefaultWaveformSettings.Default.ShowTimingLine;
+            ShowRhythmCurve = DefaultWaveformSettings.Default.ShowRhythmCurve;
         }
 
         public override void Reload()

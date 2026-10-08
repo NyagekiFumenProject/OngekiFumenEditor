@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <LangVersion>preview</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>OngekiFumenEditor.RhythmAnalysisCheck</RootNamespace>
+        <AssemblyName>OngekiFumenEditor.RhythmAnalysisCheck</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!-- 跑真实分析器与真实几何构造：合成节拍用例证明算法，真实歌曲用例可导出对照图。 -->
+        <ProjectReference Include="..\OngekiFumenEditor\OngekiFumenEditor.csproj" AdditionalProperties="DisableFody=true" />
+    </ItemGroup>
+</Project>

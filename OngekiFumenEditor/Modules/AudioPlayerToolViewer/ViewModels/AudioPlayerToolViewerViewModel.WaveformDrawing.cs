@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using FontStashSharp.RichText;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Kernel.Audio.Rhythm;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics;
@@ -27,15 +28,20 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private float renderScaleX = 1;
         private float renderScaleY = 1;
         private ISamplePeak samplePeak;
+        private IRhythmAnalyzer rhythmAnalyzer;
         private CancellationTokenSource loadWaveformTask;
         private CancellationTokenSource resampleTaskCancelTokenSource;
         private TaskCompletionSource initTask = new TaskCompletionSource();
 
         private PeakPointCollection rawPeakData;
         private PeakPointCollection usingPeakData;
+        private RhythmEnvelope rhythmCurve;
 
         public TimeSpan CurrentTime { get; private set; }
         public TimeSpan AudioTotalDuration => AudioPlayer?.Duration ?? default;
+
+        /// <summary>整首歌的节奏强度曲线，供绘制层读取；尚未分析完成时为 null。</summary>
+        public RhythmEnvelope RhythmCurve => rhythmCurve;
 
         private IWaveformDrawing waveformDrawing;
         public IWaveformDrawing WaveformDrawing
@@ -198,6 +204,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             AttachWaveformSettingsEvents();
 
             samplePeak = IoC.Get<ISamplePeak>();
+            rhythmAnalyzer = IoC.Get<IRhythmAnalyzer>();
             WaveformDrawing = IoC.Get<IWaveformDrawing>();
             WaveformDrawing.Initialize(impl);
             initTask.SetResult();
@@ -226,6 +233,20 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             var sampleData = await player.GetSamplesAsync();
             rawPeakData = sampleData is not null ? samplePeak.GetPeakValues(sampleData) : null;
             ResamplePeak();
+
+            // 节奏分析要对整首歌做一次 STFT，成本和波峰同量级，所以同样放在这条后台任务里做；
+            // 换歌/关闭面板时通过取消令牌放弃，结果不会发布出来。
+            if (sampleData is not null && rhythmAnalyzer is not null)
+            {
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+                var curve = rhythmAnalyzer.Analyze(sampleData, cancelToken);
+                stopwatch.Stop();
+                if (cancelToken.IsCancellationRequested)
+                    return;
+
+                rhythmCurve = curve;
+                Log.LogInfo($"[Rhythm] 分析完成 {stopwatch.ElapsedMilliseconds}ms, 曲线帧数={curve?.FrameCount.ToString() ?? "null"}");
+            }
         }
 
         private async void ResamplePeak()
@@ -255,6 +276,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             loadWaveformTask = null;
             rawPeakData = null;
             usingPeakData = null;
+            rhythmCurve = null;
             InvalidateWaveformBlocks();
         }
 

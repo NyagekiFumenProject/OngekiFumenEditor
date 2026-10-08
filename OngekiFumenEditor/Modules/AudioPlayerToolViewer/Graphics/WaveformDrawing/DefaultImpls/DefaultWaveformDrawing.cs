@@ -45,6 +45,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         private const int CursorLineWidth = 2;
         private const int MaxWaveformLineWidth = 24;
 
+        // 节奏曲线样式：属于可视化的固定几何比例，不跟随波形线宽设置。
+        private const float RhythmCurveHeightWeight = 0.55f;   // 曲线高度（相对半高）
+        private const int RhythmCurveLineWidth = 2;
+
         private static readonly List<LineVertex> cachedLineDrawList = new();
         private static readonly List<(float, string)> cachedPostDrawList = new();
         private static readonly List<CircleInstance> cachedCircleDrawList = new();
@@ -71,7 +75,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             var beatLineColor = waveformSettings.WaveformBeatLineColor.ToVector4();
             var objectPlaceLineColor = waveformSettings.WaveformObjectPlaceLineColor.ToVector4();
             var holdLineColor = waveformSettings.WaveformHoldLineColor.ToVector4();
-
             var bodyLineWidth = Math.Clamp(viewerSettings.WaveformBodyLineWidth, 1, MaxWaveformLineWidth);
             var holdLineWidth = Math.Clamp(viewerSettings.WaveformHoldLineWidth, 1, MaxWaveformLineWidth);
             var markerLineWidth = Math.Clamp(viewerSettings.WaveformMarkerLineWidth, 1, MaxWaveformLineWidth);
@@ -96,6 +99,26 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     WaveformGeometry.Build(cachedLineDrawList, peakData, fromTime, toTime, width, height, waveformColor, WaveformGeometry.DefaultEdgeMarkerColor);
                     if (cachedLineDrawList.Count > 0)
                         builder.DrawSimpleLines(cachedLineDrawList, bodyLineWidth);
+                }
+                finally
+                {
+                    cachedLineDrawList.Clear();
+                    builder.PopModelMatrix();
+                }
+            }
+
+            //绘制节奏曲线：数据来自整首歌的一次性频谱分析，与离屏图块无关，所以这里逐帧实时绘制
+            //（顶点数已按像素列降采样，只与视图宽度有关，与歌曲长度、缩放级别无关）。
+            if (option.ShowRhythmCurve && target.RhythmCurve is { } rhythmCurve && rhythmCurve.FrameCount > 0)
+            {
+                builder.PushModelMatrix(Matrix4x4.CreateScale(1, target.WaveformVecticalScale, 1f));
+                cachedLineDrawList.Clear();
+                try
+                {
+                    RhythmGeometry.BuildCurve(cachedLineDrawList, rhythmCurve, fromTime, toTime, width, height,
+                        RhythmCurveHeightWeight, waveformSettings.WaveformRhythmCurveColor.ToVector4());
+                    if (cachedLineDrawList.Count > 0)
+                        builder.DrawSimpleLines(cachedLineDrawList, RhythmCurveLineWidth);
                 }
                 finally
                 {

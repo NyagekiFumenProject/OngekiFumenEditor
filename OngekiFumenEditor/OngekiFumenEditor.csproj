@@ -56,6 +56,11 @@
         </AssemblyAttribute>
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- 节奏分析校验工程直接驱动内部实现（分析器与几何构造），不为测试把生产 API 公开化 -->
+        <InternalsVisibleTo Include="OngekiFumenEditor.RhythmAnalysisCheck" />
+    </ItemGroup>
+
     <!--处理pdb-->
     <PropertyGroup Condition="'$(Configuration)'=='Debug'">
         <DebugType>full</DebugType>

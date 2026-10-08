@@ -1,3 +1,4 @@
+using OngekiFumenEditor.Kernel.Audio.Rhythm;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using System;
@@ -17,6 +18,11 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics
         float DurationMsPerPixel { get; }
         float CurrentTimeXOffset { get; }
         float WaveformVecticalScale { get; }
+
+        /// <summary>
+        /// 已加载歌曲的节奏强度曲线；尚未分析完成、分析失败或音频不可用时为 null。
+        /// </summary>
+        RhythmEnvelope RhythmCurve { get; }
 
         FumenVisualEditorViewModel EditorViewModel { get; }
     }
