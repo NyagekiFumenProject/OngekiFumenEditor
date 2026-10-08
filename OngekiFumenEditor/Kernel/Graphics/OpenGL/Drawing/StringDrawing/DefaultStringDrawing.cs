@@ -42,6 +42,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize)
         {
             text ??= string.Empty;
+            if (scale.X == 0 || scale.Y == 0)
+            {
+                measureTextSize = Vector2.Zero;
+                return;
+            }
             handle ??= DefaultStringMeasure.DefaultFont;
 
             var resolvedStyle = stringMeasure.ResolveTextStyle(handle, style);
@@ -53,10 +58,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             var fontId = stringMeasure.GlyphAtlas.GetFontId(filePath);
 
             var textBox = stringMeasure.GetTextBounds(text, fontId, pixelSize, disableAntialiasing);
-            var boxWidth = textBox.X;
-            var boxHeight = textBox.Y;
+            var boxWidth = textBox.Width;
+            var boxHeight = textBox.Height;
 
-            measureTextSize = new Vector2(boxWidth * Math.Abs(scale.X), boxHeight * Math.Abs(scale.Y));
+            // 拉伸比：字形按纵向缩放光栅化，横向差值转成四边形宽度比（缩放一致时恒为 1）。
+            var stretchX = scale.X / Math.Abs(scale.Y);
+            var scaleY = Math.Sign(scale.Y);
+            measureTextSize = new Vector2(boxWidth * Math.Abs(stretchX), boxHeight);
 
             if (text.Length == 0 || boxWidth <= 0 || boxHeight <= 0)
                 return;
@@ -70,12 +78,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             OpenBatch(mvp, target);
 
             // 与 Skia 后端相同的原点换算：origin 以文本盒为单位，0.5 表示居中。
-            var offsetX = origin.X * boxWidth;
-            var offsetY = boxHeight - origin.Y * boxHeight;
-
-            // 拉伸比：字形按纵向缩放光栅化，横向差值转成四边形宽度比（缩放一致时恒为 1）。
-            var stretchX = Math.Abs(scale.Y) < float.Epsilon ? 1f : scale.X / Math.Abs(scale.Y);
-            var scaleY = Math.Sign(scale.Y) == 0 ? 1f : Math.Sign(scale.Y);
+            var offsetX = textBox.Left + origin.X * boxWidth;
+            var offsetY = -textBox.Top - origin.Y * boxHeight;
 
             var cos = rotate == 0 ? 1f : MathF.Cos(rotate);
             var sin = rotate == 0 ? 0f : MathF.Sin(rotate);
@@ -90,7 +94,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             void PushLocal(Vector2 topLeft, float width, float height, Vector4 uv)
             {
                 var localX = topLeft.X + penX;
-                var localY = topLeft.Y + baselineY;
+                var localY = (topLeft.Y + baselineY) * scaleY;
                 if (snapToPixels)
                 {
                     localX = MathF.Round(localX);
@@ -102,8 +106,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
                 var tl = pos + Rotate(new Vector2(localX, localY));
                 var tr = pos + Rotate(new Vector2(localX + width, localY));
-                var br = pos + Rotate(new Vector2(localX + width, localY - height));
-                var bl = pos + Rotate(new Vector2(localX, localY - height));
+                var br = pos + Rotate(new Vector2(localX + width, localY - height * scaleY));
+                var bl = pos + Rotate(new Vector2(localX, localY - height * scaleY));
 
                 renderer.PushQuad(tl, tr, br, bl, uv, color);
             }
@@ -145,7 +149,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                     ? -(metrics.UnderlinePosition ?? thickness)
                     : metrics.XHeight / 2;
 
-                PushLocal(new Vector2(0, lineY), boxWidth * stretchX, thickness, solidUv);
+                PushLocal(new Vector2(textBox.Left * stretchX, lineY), boxWidth * stretchX, thickness, solidUv);
             }
         }
 

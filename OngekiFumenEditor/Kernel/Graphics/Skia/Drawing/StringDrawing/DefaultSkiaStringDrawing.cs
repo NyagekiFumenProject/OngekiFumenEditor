@@ -93,6 +93,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
         public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
             text ??= string.Empty;
+            if (scale.X == 0 || scale.Y == 0)
+                return Vector2.Zero;
             var aliased = ProgramSetting.Default.DisableStringRendererAntialiasing;
             fontFallback.MeasureText(GetTypeface(handle, style), text, fontSize, aliased,
                 aliased ? aliasedPaint : antialiasedPaint, out var bounds, true);
@@ -102,6 +104,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
         public void Draw(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IDrawingContext target, IFontHandle handle, out Vector2? measureTextSize)
         {
             text = text ?? string.Empty;
+
+            if (scale.X == 0 || scale.Y == 0)
+            {
+                measureTextSize = Vector2.Zero;
+                return;
+            }
 
             if (!OnBegin(target))
             {
@@ -122,7 +130,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             measureTextSize = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
             //adjust pos thought origin and size
 
-            var offsetPos = new SKPoint(origin.X * bounds.Width, bounds.Height - origin.Y * bounds.Height);
+            var offsetPos = new SKPoint(bounds.Left + origin.X * bounds.Width, -bounds.Top - origin.Y * bounds.Height);
 
             canvas.Scale(1, -1);
             canvas.Translate(pos.X, -pos.Y);
@@ -151,13 +159,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
                 if (isUnderline)
                 {
                     var underlineY = adjustPos.Y + metrics.UnderlinePosition ?? 0;
-                    canvas.DrawLine(adjustPos.X, underlineY, adjustPos.X + bounds.Width, underlineY, linePaint);
+                    canvas.DrawLine(adjustPos.X + bounds.Left, underlineY, adjustPos.X + bounds.Right, underlineY, linePaint);
                     target.RenderContext.PerfomenceMonitor.CountDrawCall();
                 }
                 else
                 {
                     float strikeY = adjustPos.Y - metrics.XHeight / 2;
-                    canvas.DrawLine(adjustPos.X, strikeY, adjustPos.X + bounds.Width, strikeY, linePaint);
+                    canvas.DrawLine(adjustPos.X + bounds.Left, strikeY, adjustPos.X + bounds.Right, strikeY, linePaint);
                     target.RenderContext.PerfomenceMonitor.CountDrawCall();
                 }
             }

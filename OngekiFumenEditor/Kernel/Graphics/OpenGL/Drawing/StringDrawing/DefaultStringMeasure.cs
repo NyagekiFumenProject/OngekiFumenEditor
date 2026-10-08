@@ -26,7 +26,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         private readonly Dictionary<MeasureTextCacheKey, Vector2> cacheMeasureTextSizes = new();
         private readonly Queue<MeasureTextCacheKey> cacheMeasureTextSizeOrder = new();
         private readonly SkiaFontFallback fontFallback = new();
-        private readonly Dictionary<TextSizeCacheKey, Vector2> cacheTextSizes = new();
+        private readonly Dictionary<TextSizeCacheKey, SKRect> cacheTextSizes = new();
         private readonly Queue<TextSizeCacheKey> cacheTextSizeOrder = new();
 
         /// <summary>测量用画笔（沿用旧行为：只带抗锯齿开关，与字形设置一致）。</summary>
@@ -92,19 +92,24 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
             text ??= string.Empty;
+            if (scale.X == 0 || scale.Y == 0)
+                return Vector2.Zero;
             handle ??= DefaultFont;
 
             var resolvedStyle = ResolveTextStyle(handle, style);
+            var disableAntialiasing = ProgramSetting.Default.DisableStringRendererAntialiasing;
 
-            var key = new MeasureTextCacheKey(text, resolvedStyle.FontHandle, fontSize, scale, resolvedStyle.FontStyle);
+            var key = new MeasureTextCacheKey(text, resolvedStyle.FontHandle, fontSize, scale, resolvedStyle.FontStyle, disableAntialiasing);
             if (cacheMeasureTextSizes.TryGetValue(key, out var size))
                 return size;
 
             var filePath = GetFontFilePath(resolvedStyle.FontHandle);
-            var bounds = GetTextBounds(text, glyphAtlas.GetFontId(filePath), Math.Max(1, fontSize),
-                ProgramSetting.Default.DisableStringRendererAntialiasing);
+            var pixelSize = Math.Max(1, (int)Math.Round(fontSize * Math.Abs(scale.Y)));
+            var bounds = GetTextBounds(text, glyphAtlas.GetFontId(filePath), pixelSize, disableAntialiasing);
+            var stretchX = scale.X / Math.Abs(scale.Y);
 
-            size = new Vector2(bounds.X * Math.Abs(scale.X), bounds.Y * Math.Abs(scale.Y));
+            // 纵向缩放已计入光栅化字号，测量必须与绘制使用同一个像素尺寸。
+            size = new Vector2(bounds.Width * Math.Abs(stretchX), bounds.Height);
             cacheMeasureTextSizes[key] = size;
             cacheMeasureTextSizeOrder.Enqueue(key);
 
@@ -128,9 +133,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         internal SKPaint GetMeasurePaint(bool disableAntialiasing) => disableAntialiasing ? measurePaintAliased : measurePaint;
 
         /// <summary>
-        /// 文本盒尺寸（像素）。绘制路径每帧都会对同一串文字重新求布，而结果只与 (文字, 字体, 像素尺寸, 抗锯齿) 有关。
+        /// 文本盒尺寸及其相对基线的位置（像素）。绘制路径每帧都会对同一串文字重新求布，而结果只与 (文字, 字体, 像素尺寸, 抗锯齿) 有关。
         /// </summary>
-        internal Vector2 GetTextBounds(string text, int fontId, int pixelSize, bool disableAntialiasing)
+        internal SKRect GetTextBounds(string text, int fontId, int pixelSize, bool disableAntialiasing)
         {
             text ??= string.Empty;
 
@@ -140,15 +145,13 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
 
             fontFallback.MeasureText(glyphAtlas.GetTypeface(fontId), text, pixelSize, disableAntialiasing,
                 GetMeasurePaint(disableAntialiasing), out var bounds);
-            var size = new Vector2(bounds.Width, bounds.Height);
-
-            cacheTextSizes[key] = size;
+            cacheTextSizes[key] = bounds;
             cacheTextSizeOrder.Enqueue(key);
 
             while (cacheTextSizes.Count > MaxMeasureTextCacheCount && cacheTextSizeOrder.TryDequeue(out var oldKey))
                 cacheTextSizes.Remove(oldKey);
 
-            return size;
+            return bounds;
         }
 
 
@@ -255,23 +258,25 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             private readonly int fontSize;
             private readonly Vector2 scale;
             private readonly TextStyle style;
+            private readonly bool disableAntialiasing;
 
-            public MeasureTextCacheKey(string text, IFontHandle handle, int fontSize, Vector2 scale, TextStyle style)
+            public MeasureTextCacheKey(string text, IFontHandle handle, int fontSize, Vector2 scale, TextStyle style, bool disableAntialiasing)
             {
                 this.text = text;
                 this.handle = handle;
                 this.fontSize = fontSize;
                 this.scale = scale;
                 this.style = style;
+                this.disableAntialiasing = disableAntialiasing;
             }
 
             public bool Equals(MeasureTextCacheKey other) =>
                 text == other.text && Equals(handle, other.handle) && fontSize == other.fontSize &&
-                scale == other.scale && style == other.style;
+                scale == other.scale && style == other.style && disableAntialiasing == other.disableAntialiasing;
 
             public override bool Equals(object obj) => obj is MeasureTextCacheKey other && Equals(other);
 
-            public override int GetHashCode() => HashCode.Combine(text, handle, fontSize, scale, style);
+            public override int GetHashCode() => HashCode.Combine(text, handle, fontSize, scale, style, disableAntialiasing);
         }
 
 

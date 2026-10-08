@@ -175,15 +175,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 var text = " " + formatObj(obj) + " ";
                 var fontColor = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
                 var size = builder.MeasureString(text, Vector2.One, 16, FontStyle.Normal, default);
+                var textPos = new Vector2(x, y + 12);
                 builder.DrawString(
                     text,
-                    new Vector2(x, y + 12),
+                    textPos,
                     Vector2.One, 16, 0,
                     fontColor,
                     new(0, 0.5f),
                     FontStyle.Normal,
                     default);
-                var borderPos = new Vector2(x + size.X / 2, y + size.Y / 2 + 1);
+                // 文字的 origin.Y 为 0.5，边框和点击区域应共用同一垂直中心。
+                var borderPos = textPos + new Vector2(size.X / 2, 0);
 
                 target.RegisterSelectableObject(obj, borderPos, size);
                 if (obj.IsSelected)

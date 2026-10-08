@@ -97,6 +97,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.Text
             {
                 var font = GetFont(run.Typeface, size, aliased, subpixel);
                 var advance = font.MeasureText(run.Text, out var runBounds, paint);
+                // 排版盒保留空格的推进宽度和字体行高，同时容纳越出行盒的字形。
+                // 仅使用墨迹范围会丢掉首尾留白，且让基线随字符串内容变化。
+                font.GetFontMetrics(out var metrics);
+                var layoutBounds = new SKRect(0, metrics.Ascent, advance, metrics.Descent);
+                runBounds = runBounds.IsEmpty ? layoutBounds : SKRect.Union(layoutBounds, runBounds);
                 if (!runBounds.IsEmpty)
                 {
                     runBounds.Offset(penX, 0);
