@@ -39,6 +39,16 @@ namespace OngekiFumenEditor.Base.Collections.Base
                 return;
             }
 
+            // 升序写入的快速路径：新键严格大于末尾键时，二分查找必然返回 Count（即追加），
+            // 直接 items.Add 省掉二分与 List.Insert 的 O(n) 搬移。
+            // 必须用严格比较：相等键时 List.BinarySearch 返回哪个匹配是未定义的（可能落在同键组中间），
+            // 走原路径才能与旧行为保持逐位一致。
+            if (items.Count == 0 || comparer.Compare(items[items.Count - 1], obj) < 0)
+            {
+                items.Add(obj);
+                return;
+            }
+
             var index = items.BinarySearch(obj, comparer);
             if (index < 0)
                 index = ~index;
