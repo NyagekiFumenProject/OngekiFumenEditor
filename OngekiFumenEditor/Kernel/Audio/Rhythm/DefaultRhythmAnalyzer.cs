@@ -10,10 +10,10 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
     /// <list type="number">
     /// <item>短时傅里叶（1024 点 Hann，5ms 一跳，帧以窗口中心对齐时间轴）；</item>
     /// <item>对数压缩：把宽动态范围压到可比较的尺度，弱拍才不会被强拍吞掉；</item>
-    /// <item>逐 bin 背景抑制：每个频点维护一条「最近 150ms 对数幅度均值」的参考值，只有相对它的抬升才计入，
-    ///       于是持续音/长音被抵消、鼓点被留下（有限窗口让过去的事件滑过即被遗忘，指数平均会一直记得长尾）；</item>
-    /// <item>分频段汇总成三条起音强度曲线（低/中/高），再做局部自适应归一化——每 3 秒的局部峰值拉到 1，
-    ///       但尺度下限不低于全曲 P95 的一定比例，静音段不会被噪声抬满；</item>
+    /// <item>把 15ms 前的频谱沿频率轴取邻近 ±1 bin 的最大值，再保留当前幅度超过它至少 0.03 的抬升；
+    ///       抑制持续音、泄漏和小幅颤音，同时避免长尾参考与宽平滑把密集击打合并；</item>
+    /// <item>分频段汇总起音强度，以 σ=7.5ms 的高斯核平滑，再按每 3 秒的局部峰值归一化；
+    ///       尺度下限取 0.1 与全曲原始通量 P95 的 25% 中较大者，避免放大微小残差；</item>
     /// <item>三条曲线按固定权重合成一条 0–1 的总曲线，交给绘制层。</item>
     /// </list>
     /// </summary>
@@ -30,10 +30,13 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
         private static readonly float[] BandWeights = { 1.0f, 1.0f, 0.6f };
 
         private const float LogCompressGain = 300f;         // ln(1 + g*x)：典型音乐幅度压到 O(1)
-        private const double BackgroundWindowSeconds = 0.15;  // 每 bin 背景窗口长度（滑过即遗忘）
-        private const double SmoothSeconds = 0.05;          // 归一化前的平滑
+        private const int ReferenceLagFrames = 3;          // 15ms 前的频谱参考
+        private const float MinimumLogRise = 0.03f;        // 对数幅度域的残差下限
+        private const double SmoothSigmaSeconds = 0.0075;  // 窄高斯平滑，保留密集峰之间的谷
+        private const float MinimumScale = 0.1f;           // 局部尺度的绝对下限
         private const double LocalScaleSeconds = 3.0;       // 局部归一化窗口
         private const double GlobalScaleFloorRatio = 0.25;  // 局部尺度不低于全局 P95 的比例
+        private static readonly float[] SmoothingKernel = BuildGaussianKernel(SmoothSigmaSeconds);
 
         public RhythmEnvelope Analyze(SampleData data, CancellationToken cancellationToken = default)
         {
@@ -74,9 +77,10 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
             var total = new float[frameCount];
             for (var band = 0; band < BandCount; band++)
             {
-                var smoothed = MovingAverage(flux[band], Math.Max(1, (int)(SmoothSeconds * FramesPerSecond)));
+                var smoothed = GaussianSmooth(flux[band], SmoothingKernel);
                 var localScale = SlidingMax(smoothed, Math.Max(1, (int)(LocalScaleSeconds * FramesPerSecond)));
-                var scaleFloor = (float)(Percentile(flux[band], 0.95) * GlobalScaleFloorRatio);
+                var scaleFloor = MathF.Max(MinimumScale,
+                    (float)(Percentile(flux[band], 0.95) * GlobalScaleFloorRatio));
                 var weight = BandWeights[band] / weightSum;
 
                 for (var i = 0; i < frameCount; i++)
@@ -118,10 +122,9 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
         }
 
         /// <summary>
-        /// 逐帧做 STFT，计算每个 bin 相对自身近期背景的对数幅度抬升，并按频段汇总成谱通量。
-        /// 背景取「最近一个有限窗口内对数幅度的均值」：有限窗口让过去的事件在窗口滑过之后彻底被遗忘，
-        /// 军鼓这类宽带长尾不会把紧跟其后的踩镲压掉（指数平均会一直记得）。参考值在「用掉之后」才把当前帧计入，
-        /// 当前帧的抬升因此不会被自己污染；首帧只初始化背景、不计通量，避免开头必然出现一次虚假的强抬升。
+        /// 对当前频谱与 15ms 前的频率邻域最大值作正差分，再按频段求平均。
+        /// 环形缓冲保存已取频率最大值的参考谱；前三帧用首帧作参考，首帧本身不计通量。
+        /// 频率最大值在全部非 DC bin 上计算，可以跨过频段边界。
         /// </summary>
         private static void ComputeBandFlux(ReadOnlySpan<float> interleaved, int sampleCount, int channels, int hop,
             int frameCount, int[][] bandBins, float[][] flux, CancellationToken cancellationToken)
@@ -139,13 +142,10 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
 
             var re = new float[FftSize];
             var im = new float[FftSize];
-            var rise = new float[FftSize / 2 + 1];
 
             var binCount = FftSize / 2 + 1;
-            var historyLength = Math.Max(1, (int)(BackgroundWindowSeconds * FramesPerSecond));
-            var levels = new float[binCount];                   // 本帧各 bin 的对数幅度
-            var history = new float[binCount * historyLength];  // 每 bin 的背景环形缓冲
-            var historySum = new float[binCount];               // 每 bin 背景窗口内求和
+            var levels = new float[binCount];
+            var referenceHistory = new float[binCount * ReferenceLagFrames];
             var historyCursor = 0;
 
             var magnitudeScale = 2.0f / (FftSize * windowGain);   // 单边幅度归一：满幅正弦 ≈ 1
@@ -169,43 +169,33 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
                 for (var k = 1; k < binCount; k++)
                     levels[k] = LogLevel(re[k], im[k], magnitudeScale);
 
-                if (frame == 0)
+                if (frame > 0)
                 {
-                    // 用首帧填满背景窗口：既避免开头的虚假强起音，也省掉每 bin 的窗口计数分支
-                    for (var k = 1; k < binCount; k++)
-                    {
-                        var first = levels[k];
-                        historySum[k] = first * historyLength;
-                        var baseIndex = k * historyLength;
-                        for (var slot = 0; slot < historyLength; slot++)
-                            history[baseIndex + slot] = first;
-                    }
-                }
-                else
-                {
-                    for (var k = 1; k < binCount; k++)
-                    {
-                        var level = levels[k];
-                        var delta = level - historySum[k] / historyLength;
-                        rise[k] = delta > 0 ? delta : 0;
-
-                        var slotIndex = k * historyLength + historyCursor;
-                        historySum[k] += level - history[slotIndex];
-                        history[slotIndex] = level;
-                    }
-
+                    var referenceOffset = frame < ReferenceLagFrames ? 0 : historyCursor * binCount;
                     for (var band = 0; band < bandBins.Length; band++)
                     {
                         var bins = bandBins[band];
-                        var sum = 0f;
+                        double sum = 0;
                         foreach (var k in bins)
-                            sum += rise[k];
-                        flux[band][frame] = sum / bins.Length;
+                            sum += Math.Max(0d, (double)levels[k]
+                                - referenceHistory[referenceOffset + k] - MinimumLogRise);
+                        flux[band][frame] = (float)(sum / bins.Length);
                     }
                 }
 
-                historyCursor = historyCursor + 1 >= historyLength ? 0 : historyCursor + 1;
+                // 比较完成后才写当前帧，不能污染正在使用的滞后参考。
+                BuildFrequencyReference(levels, referenceHistory, historyCursor * binCount);
+                if (++historyCursor == ReferenceLagFrames)
+                    historyCursor = 0;
             }
+        }
+
+        private static void BuildFrequencyReference(float[] levels, float[] history, int offset)
+        {
+            history[offset + 1] = MathF.Max(levels[1], levels[2]);
+            for (var k = 2; k < levels.Length - 1; k++)
+                history[offset + k] = MathF.Max(levels[k - 1], MathF.Max(levels[k], levels[k + 1]));
+            history[offset + levels.Length - 1] = MathF.Max(levels[^2], levels[^1]);
         }
 
         /// <summary>ln(1 + g·|X|)：小信号近似线性、大信号对数压缩，两种动态都能看清节奏。</summary>
@@ -223,29 +213,32 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
             return sum / channels;
         }
 
-        /// <summary>以第 i 个样本为中心的滑动平均（前缀和实现，O(n)）。</summary>
-        private static float[] MovingAverage(float[] values, int window)
+        private static float[] BuildGaussianKernel(double sigmaSeconds)
         {
-            var length = values.Length;
-            var result = new float[length];
-            if (window <= 1)
+            var sigmaFrames = sigmaSeconds * FramesPerSecond;
+            var radius = Math.Max(1, (int)Math.Ceiling(3 * sigmaFrames));
+            var kernel = new float[2 * radius + 1];
+            var sum = 0f;
+            for (var i = -radius; i <= radius; i++)
             {
-                Array.Copy(values, result, length);
-                return result;
+                kernel[i + radius] = (float)Math.Exp(-i * i / (2 * sigmaFrames * sigmaFrames));
+                sum += kernel[i + radius];
             }
+            for (var i = 0; i < kernel.Length; i++)
+                kernel[i] /= sum;
+            return kernel;
+        }
 
-            var half = window / 2;
-            var prefix = new double[length + 1];
-            for (var i = 0; i < length; i++)
-                prefix[i + 1] = prefix[i] + values[i];
-
-            for (var i = 0; i < length; i++)
+        /// <summary>居中高斯平滑；边界按最近样本填充，与曲线的时间轴保持对齐。</summary>
+        private static float[] GaussianSmooth(float[] values, float[] kernel)
+        {
+            var result = new float[values.Length];
+            var radius = kernel.Length / 2;
+            for (var i = 0; i < values.Length; i++)
             {
-                var from = Math.Max(0, i - half);
-                var to = Math.Min(length, i + half + 1);
-                result[i] = (float)((prefix[to] - prefix[from]) / (to - from));
+                for (var k = 0; k < kernel.Length; k++)
+                    result[i] += values[Math.Clamp(i + k - radius, 0, values.Length - 1)] * kernel[k];
             }
-
             return result;
         }
 

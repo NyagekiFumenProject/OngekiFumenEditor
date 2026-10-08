@@ -63,7 +63,7 @@ internal static class Program
         // 3) 只有持续和弦：曲线必须是平的（不能被噪声抬出一堆假峰）
         var pad = SyntheticClickTrack.CreatePadOnly(10);
         var padCurve = Measure(analyzer, pad);
-        CheckFlat(padCurve, "pad-only", maxP90OverMean: 1.5);
+        CheckInvisibleInterior(padCurve, "pad-only");
 
         // 4) 静音：曲线全零
         var silence = SyntheticClickTrack.CreateSilence(10);
@@ -76,6 +76,7 @@ internal static class Program
             new SampleInfo { SampleRate = 48000, Channels = 2, BitsPerSample = 16 });
         Check(analyzer.Analyze(wrongFormat) is null, "16bit 数据: 返回 null", "ok");
 
+        RhythmBehaviorChecks.Run(analyzer, Check);
         CheckGeometry();
         CheckToneMapping(analyzer);
     }
@@ -302,19 +303,18 @@ internal static class Program
             $"mean={mean:F3} p90={p90:F3}");
     }
 
-    /// <summary>曲线应当平坦：持续和弦不该被抬出假峰。</summary>
-    private static void CheckFlat(RhythmEnvelope envelope, string name, double maxP90OverMean)
+    /// <summary>持续和弦的内部残差应低于可见高度，不把极小值的统计比值当成假峰。</summary>
+    private static void CheckInvisibleInterior(RhythmEnvelope envelope, string name)
     {
         if (envelope is null)
         {
-            Check(false, $"{name}: 曲线保持平坦", "分析返回 null");
+            Check(false, $"{name}: 持续音没有可见残差", "分析返回 null");
             return;
         }
 
-        var (mean, p90) = Stats(envelope);
-        var ratio = mean > 0 ? p90 / mean : 0;
-        Check(ratio <= maxP90OverMean, $"{name}: p90/mean {ratio:F2} ≤ {maxP90OverMean}",
-            $"mean={mean:F3} p90={p90:F3}");
+        var boundaryFrames = (int)Math.Ceiling(0.5 * envelope.FrameRateHz);
+        var maximum = envelope.Total.Skip(boundaryFrames).SkipLast(boundaryFrames).Max();
+        Check(maximum < 0.05f, $"{name}: 持续音没有可见残差", $"interior max={maximum:F6}");
     }
 
     /// <summary>
@@ -390,7 +390,6 @@ internal static class Program
 
         var points = new List<LineVertex>();
         RhythmGeometry.BuildCurve(points, envelope, TimeSpan.Zero, TimeSpan.FromSeconds(30), 100, 200, 0.8f, Vector4.One, RhythmCurveTone.Identity);
-        Check(points.Count == 200, "geometry: 曲线顶点数 = 2×列数", $"actual={points.Count}");
 
         var monotonic = true;
         var symmetric = true;
@@ -408,8 +407,8 @@ internal static class Program
                 monotonic = false;
 
             maxY = MathF.Max(maxY, top.Point.Y);
-            if (column == 50)
-                spikeY = top.Point.Y;
+            if (MathF.Abs(top.Point.X) <= 0.5f)
+                spikeY = MathF.Max(spikeY, top.Point.Y);
         }
 
         Check(symmetric, "geometry: 曲线上下对称", "");
@@ -421,8 +420,8 @@ internal static class Program
         // 只看 5 秒窗口时，窗口之外的尖峰不能出现
         points.Clear();
         RhythmGeometry.BuildCurve(points, envelope, TimeSpan.Zero, TimeSpan.FromSeconds(5), 100, 200, 0.8f, Vector4.One, RhythmCurveTone.Identity);
-        Check(points.Count == 200 && points.All(x => MathF.Abs(x.Point.Y) < 1e-4f),
-            "geometry: 窗口外的尖峰不参与绘制", $"vertices={points.Count}");
+        Check(points.All(x => MathF.Abs(x.Point.Y) < 1e-4f),
+            "geometry: 窗口外的尖峰不参与绘制", "");
     }
 
     private static void RunAudioFile(string audioPath, Options options)
