@@ -16,21 +16,30 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <valueconverters:IntToSolidBrush x:Key="IntToSolidBrush" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <valueconverters:IntToSolidBrush x:Key="IntToSolidBrush" />
+        </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [AutoSave]}">
             <StackPanel Margin="10">
-                <CheckBox Content="{markup:Translate [EnableAutoSave]}" IsChecked="{Binding Setting.IsEnableAutoSave}" />
+                <CheckBox Content="{markup:Translate [EnableAutoSave]}" IsChecked="{Binding Setting.IsEnableAutoSave}" ToolTip="{markup:Translate [SettingsToolTipEditorEnableAutoSave]}" />
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableAutoSave}"
-                    Orientation="Horizontal">
+                    Orientation="Horizontal"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorAutoSaveInterval]}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTipService.ShowDuration="60000">
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [AutoSaveInterval]}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
-                        Text="{Binding Setting.AutoSaveTimeInterval}">
+                        Text="{Binding Setting.AutoSaveTimeInterval}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorAutoSaveInterval]}">
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [TimesPerMin]}" />
                 </StackPanel>
@@ -38,24 +47,29 @@
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [UndoRedo]}">
             <StackPanel Margin="10">
-                <CheckBox VerticalContentAlignment="Center" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}">
+                <CheckBox VerticalContentAlignment="Center" IsChecked="{Binding Setting.RecoveryCurrentTimeAfterExecuteAction}" ToolTip="{markup:Translate [SettingsToolTipEditorRecoveryUndoPosition]}">
                     <TextBlock Text="{markup:Translate [RememberUndoPlace]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}">
+                    IsChecked="{Binding Setting.IsEnableUndoActionSavingLimit}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorEnableUndoLimit]}">
                     <TextBlock Text="{markup:Translate [LimitUndoCount]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <StackPanel
                     Margin="0,10,0,0"
                     IsEnabled="{Binding Setting.IsEnableUndoActionSavingLimit}"
-                    Orientation="Horizontal">
+                    Orientation="Horizontal"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorUndoLimit]}"
+                    ToolTipService.ShowOnDisabled="True"
+                    ToolTipService.ShowDuration="60000">
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SaveMaxCount_Part1]}" />
                     <TextBox
                         Width="50"
                         Margin="5,0,5,0"
-                        Text="{Binding Setting.UndoActionSavingLimit}">
+                        Text="{Binding Setting.UndoActionSavingLimit}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorUndoLimit]}">
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SaveMaxCount_Part2]}" />
                 </StackPanel>
@@ -75,7 +89,8 @@
                         Width="50"
                         Margin="5,0,5,0"
                         VerticalAlignment="Center"
-                        Text="{Binding Setting.MouseWheelLength}">
+                        Text="{Binding Setting.MouseWheelLength}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorMouseWheelLength]}">
                     </TextBox>
                     <TextBlock
                         Grid.Column="2"
@@ -86,22 +101,26 @@
                 <CheckBox
                     Margin="0,10,0,0"
                     Content="{markup:Translate [EnableHorizonScroll]}"
-                    IsChecked="{Binding Setting.EnableXOffset}" />
+                    IsChecked="{Binding Setting.EnableXOffset}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorEnableHorizontalScroll]}" />
                 <CheckBox
                     Margin="0,10,0,0"
                     Content="{markup:Translate [EnableHorizonScrollBarDisplay]}"
                     IsChecked="{Binding Setting.ShowXOffsetScrollBar}"
-                    IsEnabled="{Binding Setting.EnableXOffset}" />
+                    IsEnabled="{Binding Setting.EnableXOffset}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorShowHorizontalScrollBar]}" />
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.EnablePlaceObjectBeyondAudioDuration}">
+                    IsChecked="{Binding Setting.EnablePlaceObjectBeyondAudioDuration}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorPlaceBeyondAudio]}">
                     <TextBlock Text="{markup:Translate [EnablePlaceObjectBeyondAudioDuration]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding Setting.ReturnStartTimeAfterPause}">
+                    IsChecked="{Binding Setting.ReturnStartTimeAfterPause}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorReturnAfterPause]}">
                     <TextBlock Text="{markup:Translate [ReturnStartTimeAfterPause]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
@@ -110,7 +129,8 @@
                         Width="50"
                         Margin="5,0,5,0"
                         VerticalAlignment="Center"
-                        Text="{Binding Setting.EditorOffsetMs}">
+                        Text="{Binding Setting.EditorOffsetMs}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorOffsetMs]}">
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Millisecond]}" />
                 </StackPanel>
@@ -118,7 +138,8 @@
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
                     Content="{markup:Translate [InjectDefaultClickSE]}"
-                    IsChecked="{Binding Setting.InjectDefaultClickSE}" />
+                    IsChecked="{Binding Setting.InjectDefaultClickSE}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorInjectDefaultClickSE]}" />
             </StackPanel>
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Render]}">
@@ -131,7 +152,8 @@
                         Margin="5,0"
                         KeyDown="HoldBodyWidthTextBox_KeyDown"
                         LostKeyboardFocus="HoldBodyWidthTextBox_LostKeyboardFocus"
-                        Text="{Binding HoldBodyWidthText, UpdateSourceTrigger=PropertyChanged}" />
+                        Text="{Binding HoldBodyWidthText, UpdateSourceTrigger=PropertyChanged}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorHoldBodyWidth]}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–50)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -139,7 +161,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.TextureSizeScale}" />
+                        Text="{Binding Setting.TextureSizeScale}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorTextureSizeScale]}" />
                     <TextBlock VerticalAlignment="Center" Text="× (0.25–3)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -147,7 +170,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.HoldBodyOpacity}" />
+                        Text="{Binding Setting.HoldBodyOpacity}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorHoldBodyOpacity]}" />
                     <TextBlock VerticalAlignment="Center" Text="(0–1)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -155,7 +179,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.LaneLineWidth}" />
+                        Text="{Binding Setting.LaneLineWidth}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorLaneLineWidth]}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -163,7 +188,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.WallLaneLineWidth}" />
+                        Text="{Binding Setting.WallLaneLineWidth}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorWallLaneLineWidth]}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -171,7 +197,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.AutoPlayFaderLineWidth}" />
+                        Text="{Binding Setting.AutoPlayFaderLineWidth}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorAutoPlayFaderLineWidth]}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -179,7 +206,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.DefaultCurvePrecision}" />
+                        Text="{Binding Setting.DefaultCurvePrecision}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorDefaultCurvePrecision]}" />
                     <TextBlock VerticalAlignment="Center" Text="(≥0.01)" />
                 </StackPanel>
                 <StackPanel Margin="10,5,5,5" Orientation="Horizontal">
@@ -187,7 +215,8 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.LimitFPS}" />
+                        Text="{Binding Setting.LimitFPS}"
+                        ToolTip="{markup:Translate [SettingsToolTipEditorLimitFPS]}" />
                     <TextBlock x:Name="noLimitText" Text="{markup:Translate [NoLimit]}">
                         <Behaviors:Interaction.Triggers>
                             <Behaviors:DataTrigger
@@ -226,7 +255,8 @@
                                 <TextBox
                                     Width="50"
                                     Margin="5,0,2,0"
-                                    Text="{Binding Setting.ParallelCountLimit}">
+                                    Text="{Binding Setting.ParallelCountLimit}"
+                                    ToolTip="{markup:Translate [SettingsToolTipEditorParallelCountLimit]}">
                                 </TextBox>
                                 <TextBlock Text="{markup:Translate [BellBulletCountOverLimit_Sep]}">
                                 </TextBlock>
@@ -247,13 +277,21 @@
                                 BorderBrush="{Binding Setting.PlayFieldBackgroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
                                 BorderThickness="1"
                                 CornerRadius="7"
-                                Cursor="Hand">
+                                Cursor="Hand"
+                                ToolTip="{markup:Translate [SettingsToolTipEditorPlayFieldBackgroundColor]}"
+                                ToolTipService.ShowOnDisabled="True"
+                                ToolTipService.ShowDuration="60000">
                             </Border>
                         </StackPanel>
-                        <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}">
+                        <CheckBox IsChecked="{Binding Setting.EnablePlayFieldDrawing}" ToolTip="{markup:Translate [SettingsToolTipEditorEnablePlayFieldDrawing]}">
                             <TextBlock Text="{markup:Translate [EnablePlayFieldDrawing]}" />
                         </CheckBox>
-                        <StackPanel Margin="0,5,0,5" IsEnabled="{Binding Setting.EnablePlayFieldDrawing}">
+                        <StackPanel
+                            Margin="0,5,0,5"
+                            IsEnabled="{Binding Setting.EnablePlayFieldDrawing}"
+                            ToolTip="{markup:Translate [SettingsToolTipEditorPlayFieldOptions]}"
+                            ToolTipService.ShowOnDisabled="True"
+                            ToolTipService.ShowDuration="60000">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock VerticalAlignment="Center" Text="{markup:Translate [PlayFieldForegroundColor]}" />
                                 <Border
@@ -265,17 +303,20 @@
                                     BorderBrush="{Binding Setting.PlayFieldForegroundColor, Converter={StaticResource IntToSolidBrush}, ConverterParameter=True}"
                                     BorderThickness="1"
                                     CornerRadius="7"
-                                    Cursor="Hand">
+                                    Cursor="Hand"
+                                    ToolTip="{markup:Translate [SettingsToolTipEditorPlayFieldForegroundColor]}"
+                                    ToolTipService.ShowOnDisabled="True"
+                                    ToolTipService.ShowDuration="60000">
                                 </Border>
                             </StackPanel>
-                            <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.HideWallLaneWhenEnablePlayField}">
+                            <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.HideWallLaneWhenEnablePlayField}" ToolTip="{markup:Translate [SettingsToolTipEditorHideWallLane]}">
                                 <TextBlock Text="{markup:Translate [HideWallLaneWhenEnablePlayField]}" />
                             </CheckBox>
                         </StackPanel>
-                        <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}">
+                        <CheckBox IsChecked="{Binding Setting.EnableShowPlayerLocation}" ToolTip="{markup:Translate [SettingsToolTipEditorShowPlayerLocation]}">
                             <TextBlock Text="{markup:Translate [EnableShowPlayerLocation]}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
-                        <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.ShowHitObjectEffectInPreviewMode}">
+                        <CheckBox Margin="0,5,0,0" IsChecked="{Binding Setting.ShowHitObjectEffectInPreviewMode}" ToolTip="{markup:Translate [SettingsToolTipEditorShowHitEffects]}">
                             <TextBlock Text="{markup:Translate [ShowHitObjectEffectInPreviewMode]}" TextWrapping="WrapWithOverflow" />
                         </CheckBox>
                     </StackPanel>
@@ -288,7 +329,8 @@
                     Padding="10,5,10,5"
                     HorizontalAlignment="Left"
                     cal:Message.Attach="ClearRecentOpen()"
-                    Content="{markup:Translate [CleanRecentFilesRecords]}" />
+                    Content="{markup:Translate [CleanRecentFilesRecords]}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorClearRecentFiles]}" />
             </StackPanel>
         </GroupBox>
     </StackPanel>

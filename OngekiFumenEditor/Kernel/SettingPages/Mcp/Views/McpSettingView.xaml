@@ -13,26 +13,37 @@
     d:DesignHeight="400"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [TabMcp]}">
             <StackPanel>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipMcpEnableServer]}"
                     Margin="10,10,10,10"
                     Content="{markup:Translate [EnableMcpServerInGUIMode]}"
                     IsChecked="{Binding Setting.EnableMcpServerInGUIMode}" />
                 <StackPanel Margin="10,0,10,10" Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [McpServerListenPort]}" />
                     <TextBox
+                        ToolTip="{markup:Translate [SettingsToolTipMcpListenPort]}"
                         Width="100"
                         Margin="10,0,0,0"
                         VerticalAlignment="Center"
                         Text="{Binding Setting.McpServerListenPort}" />
                 </StackPanel>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipMcpAllowAnonymous]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [AllowAnonymousMcpClientUsage]}"
                     IsChecked="{Binding Setting.AllowAnonymousMcpClientUsage}" />
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipMcpAllowAllOperations]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [AllowAllMcpOperationsByDefault]}"
                     IsChecked="{Binding Setting.AllowAllMcpOperationsByDefault}" />

@@ -13,6 +13,13 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [Logger]}">
             <Grid Margin="10">
@@ -26,12 +33,14 @@
                     Grid.Column="1"
                     Margin="10,0,10,0"
                     VerticalAlignment="Center"
+                    ToolTip="{markup:Translate [SettingsToolTipLogsFolderPath]}"
                     Text="{Binding Setting.LogFileDirPath}">
                 </TextBox>
                 <Button
                     Grid.Column="2"
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnLogsFolderPathButtonClick()"
+                    ToolTip="{markup:Translate [SettingsToolTipLogsBrowseFolder]}"
                     Content="{markup:Translate [Browser]}">
                 </Button>
             </Grid>

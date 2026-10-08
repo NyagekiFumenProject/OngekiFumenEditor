@@ -60,6 +60,7 @@
 * 程序更新检测/下载安装
 * 更好的CLI支持
 * 自定义快捷键按键绑定
+* 选项界面详细提示：悬停开关、输入框、下拉框或颜色选项可查看用途、勾选／取消效果、参数单位与适用条件；禁用的选项也可查看，支持中英日文和长文本自动换行。
 * 实现分组变速功能
 * ~~提供更好的变速工具/界面~~
 * 实现[MCP Server](https://github.com/NyagekiFumenProject/OngekiFumenEditor/wiki/Tutorial_16(zh-CN)),支持AI辅助写谱

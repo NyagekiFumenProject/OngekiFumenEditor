@@ -14,6 +14,13 @@
     d:DesignHeight="800"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [Setup]}">
             <StackPanel>
@@ -22,6 +29,7 @@
                         VerticalAlignment="Center"
                         Text="{markup:Translate [ProcessPriorityTier]}" />
                     <ComboBox
+                        ToolTip="{markup:Translate [SettingsToolTipProgramProcessPriority]}"
                         MinWidth="140"
                         Margin="10,0,0,0"
                         VerticalAlignment="Center"
@@ -31,14 +39,17 @@
                         SelectedValuePath="Key" />
                 </StackPanel>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramMultiInstances]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [EnableMultiInstances]}"
                     IsChecked="{Binding Setting.EnableMultiInstances}" />
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramDisableSplash]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [DisableShowSplashScreenAfterBoot]}"
                     IsChecked="{Binding Setting.DisableShowSplashScreenAfterBoot}" />
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramConsole]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [ShowConsoleWindowInGUIMode]}"
                     IsChecked="{Binding Setting.ShowConsoleWindowInGUIMode}" />
@@ -54,12 +65,14 @@
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [CrashDumpFileOutput]}" />
                     <TextBox
+                        ToolTip="{markup:Translate [SettingsToolTipProgramDumpDirectory]}"
                         Grid.Column="1"
                         Margin="10,0,10,0"
                         VerticalAlignment="Center"
                         Text="{Binding Setting.DumpFileDirPath}">
                     </TextBox>
                     <Button
+                        ToolTip="{markup:Translate [SettingsToolTipProgramBrowseDumpDirectory]}"
                         Grid.Column="2"
                         Padding="20,2,20,2"
                         cal:Message.Attach="OnDumpFolderPathButtonClick()"
@@ -68,18 +81,21 @@
                     </Button>
                 </Grid>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramFullDump]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [EnableDumpFullMemory]}"
                     IsChecked="{Binding Setting.IsFullDump}">
 
                 </CheckBox>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramCrashNotification]}"
                     Margin="10,0,10,10"
                     Content="{markup:Translate [EnableNotifyUserByDialog]}"
                     IsChecked="{Binding Setting.IsNotifyUserCrash}">
                 </CheckBox>
 
                 <Button
+                    ToolTip="{markup:Translate [SettingsToolTipProgramTestDump]}"
                     Margin="10,0,10,10"
                     Padding="20,2,20,2"
                     HorizontalAlignment="Left"
@@ -96,6 +112,7 @@
                         VerticalAlignment="Center"
                         Text="{markup:Translate [SelectRenderManagerImpl]}" />
                     <ComboBox
+                        ToolTip="{markup:Translate [SettingsToolTipProgramRenderManager]}"
                         VerticalAlignment="Center"
                         ItemsSource="{Binding AvaliableRenderManagerImplNames}"
                         SelectedValue="{Binding Setting.DefaultRenderManagerImplementName}" />
@@ -107,12 +124,14 @@
                         VerticalAlignment="Center"
                         Text="{markup:Translate [EditorFontFamilyName]}" />
                     <ComboBox
+                        ToolTip="{markup:Translate [SettingsToolTipProgramFontFamily]}"
                         MinWidth="220"
                         VerticalAlignment="Center"
                         ItemsSource="{Binding EditorFontFamilyNames}"
                         SelectedValue="{Binding Setting.EditorFontFamilyName}" />
                 </StackPanel>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramDisableTextAntialiasing]}"
                     Margin="10,0,10,10"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.DisableStringRendererAntialiasing}">
@@ -130,24 +149,28 @@
                                 VerticalAlignment="Center"
                                 Text="{markup:Translate [MsaaSampleCount]}" />
                             <ComboBox
+                                ToolTip="{markup:Translate [SettingsToolTipProgramMsaa]}"
                                 MinWidth="140"
                                 VerticalAlignment="Center"
                                 ItemsSource="{Binding MsaaSampleCountOptions}"
                                 SelectedValue="{Binding Setting.MsaaSampleCount}" />
                         </StackPanel>
                         <CheckBox
+                            ToolTip="{markup:Translate [SettingsToolTipProgramGraphicsCompatibility]}"
                             Margin="10,0,10,10"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding Setting.GraphicsCompatability}">
                             <TextBlock Text="{markup:Translate [GraphicsCompatability]}" TextWrapping="Wrap" />
                         </CheckBox>
                         <CheckBox
+                            ToolTip="{markup:Translate [SettingsToolTipProgramGraphicsLog]}"
                             Margin="10,0,10,10"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding Setting.OutputGraphicsLog}">
                             <TextBlock Text="{markup:Translate [OutputGraphicsLog]}" TextWrapping="Wrap" />
                         </CheckBox>
                         <CheckBox
+                            ToolTip="{markup:Translate [SettingsToolTipProgramGraphicsLogSynchronous]}"
                             Margin="30,0,10,10"
                             VerticalContentAlignment="Center"
                             IsChecked="{Binding Setting.GraphicsLogSynchronous}"
@@ -168,6 +191,7 @@
                                 VerticalAlignment="Center"
                                 Text="{markup:Translate [SkiaRenderBackend]}" />
                             <ComboBox
+                                ToolTip="{markup:Translate [SettingsToolTipProgramSkiaBackend]}"
                                 VerticalAlignment="Center"
                                 ItemsSource="{Binding AvaliableSkiaBackends}"
                                 SelectedValue="{Binding Setting.SkiaRenderBackend}" />
@@ -180,6 +204,7 @@
                                 VerticalAlignment="Center"
                                 Text="{markup:Translate [D3DRenderQueueFrameCount]}" />
                             <ComboBox
+                                ToolTip="{markup:Translate [SettingsToolTipProgramRenderQueueFrames]}"
                                 Margin="5,0,5,0"
                                 VerticalAlignment="Center"
                                 ItemsSource="{Binding D3DRenderQueueFrameCountOptions}"
@@ -193,6 +218,7 @@
                     </StackPanel>
                 </GroupBox>
                 <Button
+                    ToolTip="{markup:Translate [SettingsToolTipProgramPerformancePanel]}"
                     Margin="10,10,0,0"
                     Padding="10,5"
                     HorizontalAlignment="Left"
@@ -203,27 +229,29 @@
         <GroupBox Margin="5" Header="{markup:Translate [FileAssociationRequestAdmin]}">
             <StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <CheckBox IsChecked="{Binding EnableAssociateNyagekiProj}">
+                    <CheckBox ToolTip="{markup:Translate [SettingsToolTipProgramAssociateProject]}" IsChecked="{Binding EnableAssociateNyagekiProj}">
                         <TextBlock Text=".nyagekiProj" TextWrapping="Wrap" />
                     </CheckBox>
-                    <CheckBox Margin="10,0" IsChecked="{Binding EnableAssociateNyageki}">
+                    <CheckBox Margin="10,0" ToolTip="{markup:Translate [SettingsToolTipProgramAssociateNyageki]}" IsChecked="{Binding EnableAssociateNyageki}">
                         <TextBlock Text=".nyageki" TextWrapping="Wrap" />
                     </CheckBox>
-                    <CheckBox IsChecked="{Binding EnableAssociateOgkr}">
+                    <CheckBox ToolTip="{markup:Translate [SettingsToolTipProgramAssociateOgkr]}" IsChecked="{Binding EnableAssociateOgkr}">
                         <TextBlock Text=".ogkr" TextWrapping="Wrap" />
                     </CheckBox>
-                    <CheckBox Margin="10,0,0,0" IsChecked="{Binding EnableAssociateNyagekiScript}">
+                    <CheckBox Margin="10,0,0,0" ToolTip="{markup:Translate [SettingsToolTipProgramAssociateScript]}" IsChecked="{Binding EnableAssociateNyagekiScript}">
                         <TextBlock Text=".nyagekiScript" TextWrapping="Wrap" />
                     </CheckBox>
                 </StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Button
+                        ToolTip="{markup:Translate [SettingsToolTipProgramRegisterAssociations]}"
                         Padding="10,5"
                         HorizontalAlignment="Left"
                         cal:Message.Attach="RegisterNyagekiAssociations()"
                         Content="{markup:Translate [FileAssociationRegister]}"
                         IsEnabled="{Binding EnableAssociate}" />
                     <Button
+                        ToolTip="{markup:Translate [SettingsToolTipProgramUnregisterAssociations]}"
                         Margin="10,0,0,0"
                         Padding="10,5"
                         HorizontalAlignment="Left"
@@ -236,12 +264,14 @@
         <GroupBox Margin="5" Header="{markup:Translate [ProgramUpdates]}">
             <StackPanel>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramUpdateCheckEnabled]}"
                     Margin="10,10,10,10"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.EnableUpdateCheck}">
                     <TextBlock Text="{markup:Translate [EnableUpdateCheck]}" TextWrapping="Wrap" />
                 </CheckBox>
                 <CheckBox
+                    ToolTip="{markup:Translate [SettingsToolTipProgramUpdateMasterOnly]}"
                     Margin="30,0,10,5"
                     VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.UpdaterCheckMasterBranchOnly}"
@@ -250,6 +280,7 @@
                 </CheckBox>
                 <StackPanel Orientation="Horizontal">
                     <Button
+                        ToolTip="{markup:Translate [SettingsToolTipProgramCheckUpdates]}"
                         Margin="5,5,5,5"
                         Padding="10,5"
                         HorizontalAlignment="Left"
@@ -257,6 +288,9 @@
                         cal:Message.Attach="CheckUpdate($executioncontext)"
                         Content="{markup:Translate [CheckUpdates]}" />
                     <TextBlock
+                        ToolTip="{markup:Translate [SettingsToolTipProgramUpdateDetails]}"
+                        ToolTipService.ShowOnDisabled="True"
+                        ToolTipService.ShowDuration="60000"
                         Margin="5,0"
                         VerticalAlignment="Center"
                         cal:Message.Attach="[Event MouseLeftButtonDown]=[OpenShowNewVersionDialog($executioncontext)]"
@@ -279,6 +313,7 @@
             <StackPanel>
                 <StackPanel Margin="5" Orientation="Horizontal">
                     <Button
+                        ToolTip="{markup:Translate [SettingsToolTipProgramResetSettings]}"
                         Padding="10,5"
                         HorizontalAlignment="Left"
                         cal:Message.Attach="ResetAllSettings()"

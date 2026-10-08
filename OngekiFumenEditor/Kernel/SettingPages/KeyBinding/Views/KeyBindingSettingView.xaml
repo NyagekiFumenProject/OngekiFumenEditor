@@ -15,7 +15,12 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <valueconverters:ShowKeybindExpressionValueConverter x:Key="ShowKeybindExpressionValueConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <valueconverters:ShowKeybindExpressionValueConverter x:Key="ShowKeybindExpressionValueConverter" />
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -33,6 +38,7 @@
                     Width="200"
                     Margin="10,0"
                     Padding="0,4"
+                    ToolTip="{markup:Translate [SettingsToolTipKeyBindingFilterKeywords]}"
                     Text="{Binding FilterKeywords}" />
 
             </StackPanel>
@@ -40,6 +46,7 @@
                 <CheckBox
                     VerticalAlignment="Center"
                     Content="{markup:Translate [ShowNotAssignKeybindingOnly]}"
+                    ToolTip="{markup:Translate [SettingsToolTipKeyBindingShowNotAssignOnly]}"
                     IsChecked="{Binding IsShowNotAssignOnly}" />
             </StackPanel>
             <Grid Margin="0,0,0,10">
@@ -47,6 +54,7 @@
                     Padding="10,4"
                     HorizontalAlignment="Left"
                     cal:Message.Attach="UpdateDisplayList()"
+                    ToolTip="{markup:Translate [SettingsToolTipKeyBindingApplyFilter]}"
                     Content="{markup:Translate [ApplyFilter]}" />
                 <Button
                     Margin="0,0"
@@ -54,6 +62,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     cal:Message.Attach="ResetAllDefinitions()"
+                    ToolTip="{markup:Translate [SettingsToolTipKeyBindingResetDefinitions]}"
                     Content="{markup:Translate [ResetAllKeybindings]}" />
             </Grid>
             <Border Height="1" Background="Gray" />
@@ -92,6 +101,7 @@
                             Margin="30,3,3,3"
                             Padding="10,5"
                             cal:Message.Attach="ChangeKeybind($executionContext)"
+                            ToolTip="{markup:Translate [SettingsToolTipKeyBindingChange]}"
                             Content="{markup:Translate [Change]}" />
                     </Grid>
                 </DataTemplate>

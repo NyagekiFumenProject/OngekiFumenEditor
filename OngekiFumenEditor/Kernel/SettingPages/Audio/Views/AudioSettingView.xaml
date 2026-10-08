@@ -16,7 +16,12 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:ResourceKeyToTextConverter x:Key="ResourceKeyToTextConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:ResourceKeyToTextConverter x:Key="ResourceKeyToTextConverter" />
+        </ResourceDictionary>
     </UserControl.Resources>
     <StackPanel>
         <GroupBox Margin="5" Header="{markup:Translate [Output]}">
@@ -26,6 +31,7 @@
                     <ComboBox
                         Width="100"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioOutputType]}"
                         ItemsSource="{Binding AudioOutputTypeValues}"
                         SelectedIndex="{Binding Setting.AudioOutputType}" />
                 </StackPanel>
@@ -34,6 +40,7 @@
                     <TextBox
                         Width="75"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioSampleRate]}"
                         Text="{Binding Setting.AudioSampleRate}" />
                 </StackPanel>
             </StackPanel>
@@ -43,6 +50,7 @@
                 <CheckBox
                     VerticalContentAlignment="Center"
                     Content="{markup:Translate [EnableVarspeed]}"
+                    ToolTip="{markup:Translate [SettingsToolTipAudioEnableVarspeed]}"
                     IsChecked="{Binding Setting.EnableVarspeed}" />
                 <StackPanel
                     Margin="20,10,0,0"
@@ -53,6 +61,7 @@
                         Width="50"
                         Margin="5,0"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioVarspeedReadDurationMs]}"
                         Text="{Binding Setting.VarspeedReadDurationMs}">
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Millisecond]}" />
@@ -72,18 +81,21 @@
                         Grid.Column="1"
                         Margin="10,0,10,0"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioSoundFolderPath]}"
                         Text="{Binding Setting.SoundFolderPath}">
                     </TextBox>
                     <Button
                         Grid.Column="2"
                         Padding="20,2,20,2"
                         cal:Message.Attach="OnSoundFolderPathButtonClick()"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioBrowseSounds]}"
                         Content="{markup:Translate [Browser]}" />
                 </Grid>
 
                 <CheckBox
                     Margin="0,10,0,0"
                     Content="Allow one sound to be played multiple times at the same time. (require restart program)"
+                    ToolTip="{markup:Translate [SettingsToolTipAudioEnableSoundMultiPlay]}"
                     IsChecked="{Binding Setting.EnableSoundMultiPlay}" />
                 <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [SoundOffsetMs]}" />
@@ -91,6 +103,7 @@
                         Width="50"
                         Margin="5,0,5,0"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioSoundOffsetMs]}"
                         Text="{Binding Setting.SoundOffsetMs}">
                     </TextBox>
                     <TextBlock VerticalAlignment="Center" Text="{markup:Translate [Millisecond]}" />
@@ -99,11 +112,11 @@
         </GroupBox>
         <GroupBox Margin="5" Header="{markup:Translate [Visualizer]}">
             <StackPanel Margin="10">
-                <CheckBox Content="{markup:Translate [EnableVisualizerDisplay]}" IsChecked="{Binding PlayerSetting.EnableWaveformDisplay}" />
+                <CheckBox Content="{markup:Translate [EnableVisualizerDisplay]}" IsChecked="{Binding PlayerSetting.EnableWaveformDisplay}" ToolTip="{markup:Translate [SettingsToolTipAudioEnableWaveformDisplay]}" />
                 <ItemsControl Margin="0,10,0,0" ItemsSource="{Binding WaveformColorsProperties}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid Margin="5">
+                            <Grid Margin="5" ToolTip="{markup:Translate [SettingsToolTipAudioWaveformColor]}">
                                 <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
                                     <TextBlock VerticalAlignment="Center" Text="{Binding Name, Converter={StaticResource ResourceKeyToTextConverter}}" />
                                     <Border
@@ -118,6 +131,7 @@
                                     HorizontalAlignment="Right"
                                     Padding="10,2"
                                     cal:Message.Attach="OnSelectWaveformColor($executionContext)"
+                                    ToolTip="{markup:Translate [SettingsToolTipAudioWaveformColor]}"
                                     Content="{markup:Translate [Change]}" />
                             </Grid>
                         </DataTemplate>
@@ -129,6 +143,7 @@
                         Width="50"
                         Margin="5,0"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioWaveformBodyLineWidth]}"
                         Text="{Binding PlayerSetting.WaveformBodyLineWidth}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
                 </StackPanel>
@@ -138,6 +153,7 @@
                         Width="50"
                         Margin="5,0"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioWaveformHoldLineWidth]}"
                         Text="{Binding PlayerSetting.WaveformHoldLineWidth}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
                 </StackPanel>
@@ -147,12 +163,14 @@
                         Width="50"
                         Margin="5,0"
                         VerticalAlignment="Center"
+                        ToolTip="{markup:Translate [SettingsToolTipAudioWaveformMarkerLineWidth]}"
                         Text="{Binding PlayerSetting.WaveformMarkerLineWidth}" />
                     <TextBlock VerticalAlignment="Center" Text="px (1–24)" />
                 </StackPanel>
                 <CheckBox
                     Margin="0,10,0,0"
                     Content="{markup:Translate [EnableWaveformBlockPrerender]}"
+                    ToolTip="{markup:Translate [SettingsToolTipAudioEnableWaveformBlockPrerender]}"
                     IsChecked="{Binding PlayerSetting.EnableWaveformBlockPrerender}" />
             </StackPanel>
         </GroupBox>

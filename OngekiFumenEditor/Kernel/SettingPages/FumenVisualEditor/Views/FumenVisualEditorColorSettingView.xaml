@@ -14,6 +14,13 @@
                                      Type=vm:FumenVisualEditorColorSettingViewModel}"
     d:DesignWidth="800"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <ItemsControl
         ItemsSource="{Binding ColorsProperties}"
         ScrollViewer.CanContentScroll="True"
@@ -31,13 +38,17 @@
                             Width="25"
                             Margin="5,0"
                             Background="{Binding Brush}"
-                            CornerRadius="7" />
-                        <Label VerticalAlignment="Center" Content="{Binding ColorString}" />
+                            CornerRadius="7"
+                            ToolTip="{markup:Translate [SettingsToolTipColorValue]}"
+                            ToolTipService.ShowOnDisabled="True"
+                            ToolTipService.ShowDuration="60000" />
+                        <Label VerticalAlignment="Center" Content="{Binding ColorString}" ToolTip="{markup:Translate [SettingsToolTipColorValue]}" />
                         <Button
                             Margin="5,0"
                             Padding="10,2"
                             cal:Message.Attach="OnSelectColor($executionContext)"
-                            Content="{markup:Translate [Change]}" />
+                            Content="{markup:Translate [Change]}"
+                            ToolTip="{markup:Translate [SettingsToolTipColorChange]}" />
                     </StackPanel>
                 </Grid>
             </DataTemplate>

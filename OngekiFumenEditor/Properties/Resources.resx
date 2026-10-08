@@ -2850,4 +2850,274 @@
   <data name="EnableWaveformBlockPrerender" xml:space="preserve">
     <value>Pre-render waveform blocks</value>
   </data>
+  <data name="SettingsToolTipAudioOutputType" xml:space="preserve">
+    <value>Selects the audio output API: WaveOut, WASAPI shared mode, or ASIO. ASIO requires an installed compatible driver. This affects music and sound-effect output; restart the program after changing it.</value>
+  </data>
+  <data name="SettingsToolTipAudioSampleRate" xml:space="preserve">
+    <value>Sets the music and sound-effect mixing sample rate in Hz, such as 44100 or 48000. Use a positive rate supported by your output device. -1 asks to use the default device rate at startup; declining uses 48000 Hz. Changes require a restart.</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableVarspeed" xml:space="preserve">
+    <value>Checked: enables SoundTouch music-speed adjustment without changing pitch. Unchecked: music plays at normal speed and speed adjustment is unavailable. Sound effects do not use this speed processor. Changes require a restart.</value>
+  </data>
+  <data name="SettingsToolTipAudioVarspeedReadDurationMs" xml:space="preserve">
+    <value>Sets the amount of audio read into the speed processor per block, in milliseconds; only applies when variable-speed playback is enabled. Use a positive value. Larger values allocate larger buffers and increase the playback-time delay compensation. Changes require a restart.</value>
+  </data>
+  <data name="SettingsToolTipAudioSoundFolderPath" xml:space="preserve">
+    <value>Directory containing chart sound effects, such as tap.wav, bell.wav and holdtick.wav. Relative paths are resolved from the editor executable directory. Missing files cannot be played. Restart the program to reload sound files after changing the directory.</value>
+  </data>
+  <data name="SettingsToolTipAudioBrowseSounds" xml:space="preserve">
+    <value>Opens a folder chooser and saves the selected sound-effect directory. Select the folder containing the sound files, not an individual WAV file. Restart the program to reload the sounds.</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableSoundMultiPlay" xml:space="preserve">
+    <value>Checked: repeated instances of the same sound effect can overlap. Unchecked: triggering the same sound again stops its previous playback before starting the new instance. Different sound effects can still overlap. Changes require a restart.</value>
+  </data>
+  <data name="SettingsToolTipAudioSoundOffsetMs" xml:space="preserve">
+    <value>Adjusts chart sound-effect and metronome timing relative to music, in milliseconds. Positive values trigger them earlier; negative values trigger them later; 0 adds no offset. This does not move chart objects or change music playback.</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableWaveformDisplay" xml:space="preserve">
+    <value>Checked: allows the audio-player panel to display its waveform visualization when that panel also has waveform display enabled. Unchecked: hides the visualization globally. Music and sound-effect playback are unaffected.</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformColor" xml:space="preserve">
+    <value>Changes the display color of the waveform element named in this row, such as its background, waveform, cursor, beat lines, object markers or Hold lines. Click Change to open the color picker. This affects visualization only, not audio or chart data.</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformBodyLineWidth" xml:space="preserve">
+    <value>Sets the waveform outline width in pixels. The effective range is 1–24 px; values outside it are clamped when drawing. Larger values make the waveform thicker. This affects display only and applies without restarting.</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformHoldLineWidth" xml:space="preserve">
+    <value>Sets the width of horizontal Hold-duration lines in the waveform panel, in pixels. The effective range is 1–24 px, clamped when drawing. Larger values make Hold spans thicker; chart Hold duration is unchanged. Applies without restarting.</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformMarkerLineWidth" xml:space="preserve">
+    <value>Sets the width of beat lines and object timing markers in the waveform panel, in pixels. The effective range is 1–24 px, clamped when drawing. Larger values make these markers thicker; their timing is unchanged. The playback cursor has a separate fixed width. Applies without restarting.</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableWaveformBlockPrerender" xml:space="preserve">
+    <value>Checked: pre-renders waveform blocks offscreen and reuses their cached images to reduce repeated drawing. Unchecked: draws the waveform directly every frame instead. Color and line-width changes invalidate cached blocks. This does not change audio; no restart is needed.</value>
+  </data>
+  <data name="SettingsToolTipLogsFolderPath" xml:space="preserve">
+    <value>Directory used for program log files, including diagnostics and errors. Relative paths are resolved from the editor executable directory. Changing the path does not move existing logs; restart the program to create logs in the new directory.</value>
+  </data>
+  <data name="SettingsToolTipLogsBrowseFolder" xml:space="preserve">
+    <value>Opens a folder chooser and saves the selected log directory. Existing log files stay in their original location; restart the program to use the new directory.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingFilterKeywords" xml:space="preserve">
+    <value>Filters shortcuts by action name, main key, modifiers or configuration key using a case-insensitive substring match. An empty value adds no keyword filter. Click Apply Filter to update the list; this does not change any shortcut.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingShowNotAssignOnly" xml:space="preserve">
+    <value>Checked: after applying the filter, lists only actions with no main key assigned. Unchecked: also includes assigned shortcuts. Can be combined with the keyword filter; click Apply Filter to refresh. This changes the list only.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingApplyFilter" xml:space="preserve">
+    <value>Refreshes the shortcut list using the current keyword and unassigned-only conditions. Does not change or save key assignments.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingResetDefinitions" xml:space="preserve">
+    <value>After confirmation, restores default keys and modifiers for the shortcuts currently shown in this list. If a filter is active, hidden shortcuts are not reset. Save the settings to persist the changes.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingChange" xml:space="preserve">
+    <value>Opens shortcut assignment for this action. Press the desired key, optionally with Ctrl, Shift, Alt or Win, then confirm. Confirming a conflict can remove the previous action’s assignment. Save the settings to persist the changes.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingCapture" xml:space="preserve">
+    <value>Shows the shortcut being assigned. Press the desired main key, optionally with Ctrl, Shift, Alt or Win. Clear stages an unassigned shortcut; Reset stages this action’s default shortcut. Neither takes effect until you confirm.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingConfirm" xml:space="preserve">
+    <value>Applies the shortcut shown above and closes this dialog. If it conflicts with another action, confirmation is requested; accepting removes that action’s assignment. Save the options window to persist the change.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingClear" xml:space="preserve">
+    <value>Clears the staged main key and modifiers, leaving this action unassigned. Click Confirm to apply; closing without confirming keeps the previous assignment.</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingReset" xml:space="preserve">
+    <value>Loads this action’s default main key and modifiers into the assignment preview. Click Confirm to apply; other actions are unaffected unless you confirm a key conflict.</value>
+  </data>
+  <data name="SettingsToolTipProgramProcessPriority" xml:space="preserve">
+    <value>Windows process scheduling priority, applied at GUI startup: Normal (0) leaves the current priority unchanged; BelowNormal (1), AboveNormal (2), and High (3) set the corresponding priority. Higher priority competes more strongly with other applications; it is not a frame-rate limit. Restart the editor to apply a change.</value>
+  </data>
+  <data name="SettingsToolTipProgramMultiInstances" xml:space="preserve">
+    <value>Checked: allow separate editor processes instead of forwarding new launch arguments to the existing instance. Unchecked: new launches forward their arguments to the existing instance and then exit (the --wait option waits for it instead). Read once when IPC initializes; restart the editor after changing this option.</value>
+  </data>
+  <data name="SettingsToolTipProgramDisableSplash" xml:space="preserve">
+    <value>Checked: suppress the welcome/start screen after GUI startup. Unchecked: show it only when no document is open after startup arguments have been processed. This does not close an already visible screen; the change applies on the next editor startup.</value>
+  </data>
+  <data name="SettingsToolTipProgramConsole" xml:space="preserve">
+    <value>Checked: show the console window when starting the GUI version. Unchecked: hide it. Applied at startup, so restart the editor after changing it. Debug builds always show the console regardless of this setting.</value>
+  </data>
+  <data name="SettingsToolTipProgramDumpDirectory" xml:space="preserve">
+    <value>Directory for timestamp-named crash dump (.dmp) files. Absolute paths are used directly; relative paths are resolved against the editor executable's directory. An empty path means that directory. The folder is created when needed and must be writable. The path is read when writing a dump; no restart is required.</value>
+  </data>
+  <data name="SettingsToolTipProgramBrowseDumpDirectory" xml:space="preserve">
+    <value>Open a folder picker for the crash dump output directory, initially at the resolved current path. Confirming an existing folder updates and saves the setting immediately; cancelling leaves it unchanged. The picker can also create a new folder.</value>
+  </data>
+  <data name="SettingsToolTipProgramFullDump" xml:space="preserve">
+    <value>Checked: request a dump containing full process memory (MiniDumpWithFullMemory). Unchecked: request a normal minidump (MiniDumpNormal). Full dumps can be much larger and contain sensitive data held in memory; review them before sharing. Read for each dump, so no restart is required.</value>
+  </data>
+  <data name="SettingsToolTipProgramCrashNotification" xml:space="preserve">
+    <value>Checked/unchecked saves the crash-notification flag as enabled/disabled. However, the current WPF crash handler does not read this flag: release builds still show the crash dialog, and debug builds rethrow the exception. Disabling this option currently does not suppress that dialog.</value>
+  </data>
+  <data name="SettingsToolTipProgramTestDump" xml:space="preserve">
+    <value>Danger: deliberately schedule an exception in a background task to exercise exception handling. This is not a harmless preview and may end the editor session; save your work first. A dump is not guaranteed: it depends on exception handling and the availability of native exception information.</value>
+  </data>
+  <data name="SettingsToolTipProgramRenderManager" xml:space="preserve">
+    <value>Select the graphics implementation used by editor render controls: OpenGL or Skia. OpenGL-only options do not configure Skia, even if Skia's own backend is OpenGL. The active implementation is cached after first use; changing this selection does not replace it in the current session. Restart the editor to switch implementations.</value>
+  </data>
+  <data name="SettingsToolTipProgramFontFamily" xml:space="preserve">
+    <value>Default font family for text drawn inside the editor canvas, not the application's UI font. The blank item uses the renderer's default-font fallback; unavailable families also fall back. OpenGL refreshes its default font when the setting changes. Skia caches its default font at first use, so restart to apply a change to an already-used Skia renderer. Text with an explicit font is unaffected.</value>
+  </data>
+  <data name="SettingsToolTipProgramDisableTextAntialiasing" xml:space="preserve">
+    <value>Checked: draw canvas text without glyph antialiasing, giving harder edges. Unchecked: enable text antialiasing for smoother edges. Applies to text paths in both OpenGL and Skia, not to all shapes or the WPF interface. The drawing code reads it during rendering; no restart is required.</value>
+  </data>
+  <data name="SettingsToolTipProgramMsaa" xml:space="preserve">
+    <value>Multisample antialiasing sample count for the OpenGL implementation only: 0 disables MSAA; available enabled values are 2, 4, and 8 samples. The renderer clamps the configured count to 0–8. It is read when an OpenGL control is initialized and does not reconfigure existing controls. Restart to apply it consistently. This is separate from text antialiasing and does not configure Skia.</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsCompatibility" xml:space="preserve">
+    <value>Checked: initialize the OpenGL implementation with OpenGL 3.3 and a compatibility profile. Unchecked: request OpenGL 4.5 with a core profile. This changes the requested graphics context, not the Skia backend; use it when investigating OpenGL compatibility problems. Existing contexts are not recreated, so restart the editor after changing it.</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsLog" xml:space="preserve">
+    <value>Checked: request an OpenGL debug context and send OpenGL debug callback messages to the application's debug log. Unchecked: do not enable that callback output. OpenGL implementation only; logging may add overhead. Read during context and renderer initialization, so restart to apply. The synchronous-log option is available only while this is checked.</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsLogSynchronous" xml:space="preserve">
+    <value>Requires OpenGL graphics logging. Checked: enable DebugOutputSynchronous so debug callbacks run synchronously with the OpenGL call that generated them. Unchecked: leave callbacks unsynchronized. Synchronous output can add rendering overhead but helps associate a message with its originating call. Read at OpenGL initialization; restart to apply. It does not change ordinary application logging or Skia.</value>
+  </data>
+  <data name="SettingsToolTipProgramSkiaBackend" xml:space="preserve">
+    <value>Only used when the graphics implementation is Skia. CPU uses software rendering; OpenGL, DirectX, and DirectX12 create their corresponding Skia render controls (DirectX12 is presented through D3D9On12). The choice is read whenever a new Skia control is created; existing controls keep their backend. Restart to switch all controls. The queue-frame setting applies only to DirectX12.</value>
+  </data>
+  <data name="SettingsToolTipProgramRenderQueueFrames" xml:space="preserve">
+    <value>Number of back-buffer surfaces in the Skia DirectX12/D3D9On12 rendering queue, measured in frames. This page allows 2–5: 2 is double buffering and 3 is triple buffering; the rendering implementation itself clamps to 1–5. More frames allocate more render-target surfaces. The buffer-count change is detected on a subsequent render and rebuilds the buffers, without a restart. Other Skia backends and the OpenGL implementation ignore it.</value>
+  </data>
+  <data name="SettingsToolTipProgramPerformancePanel" xml:space="preserve">
+    <value>Open the rendering-performance measurement panel to inspect rendering measurements. This opens a separate window; it does not change the selected graphics implementation or other rendering settings.</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateProject" xml:space="preserve">
+    <value>Checked: include .nyagekiProj project files when registering file associations. Unchecked: omit them from that registration. Merely changing this checkbox does not modify Windows associations; click Register to apply. Unregister removes the application's entire registration regardless of these selections.</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateNyageki" xml:space="preserve">
+    <value>Checked: include .nyageki chart files when registering file associations. Unchecked: omit them from that registration. Merely changing this checkbox does not modify Windows associations; click Register to apply. Unregister removes the application's entire registration regardless of these selections.</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateOgkr" xml:space="preserve">
+    <value>Checked: include .ogkr chart files when registering file associations. Unchecked: omit them from that registration. Merely changing this checkbox does not modify Windows associations; click Register to apply. Unregister removes the application's entire registration regardless of these selections.</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateScript" xml:space="preserve">
+    <value>Checked: include .nyagekiScript script files when registering file associations. Unchecked: omit them from that registration. Merely changing this checkbox does not modify Windows associations; click Register to apply. Unregister removes the application's entire registration regardless of these selections.</value>
+  </data>
+  <data name="SettingsToolTipProgramRegisterAssociations" xml:space="preserve">
+    <value>Register the checked file types with Windows so their open command launches this editor executable with the file path as an argument. Select at least one type. Administrator permission is required if Windows rejects the registry operation. Available only while this application's association registration is absent; changing the checkboxes alone does not register anything.</value>
+  </data>
+  <data name="SettingsToolTipProgramUnregisterAssociations" xml:space="preserve">
+    <value>Remove the entire OngekiFumenEditor file-association registration from Windows, not just the currently checked extensions. Available only when the application is registered. Administrator permission is required if Windows rejects the removal. Does not delete chart, project, or script files.</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateCheckEnabled" xml:space="preserve">
+    <value>Checked: allow online version checks at startup and from Check Updates. Unchecked: both checks return without contacting the version service and clear the remote-version information when invoked. It does not automatically download or install an update. Read on each check; no restart is required.</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateMasterOnly" xml:space="preserve">
+    <value>Requires update checking to be enabled. Checked: request only master-branch versions from the version service. Unchecked: do not restrict that request to master, allowing other branches to be considered by the service. Used on the next version check; changing it alone does not start a check or install anything. No restart is required.</value>
+  </data>
+  <data name="SettingsToolTipProgramCheckUpdates" xml:space="preserve">
+    <value>Query the online version service using the update-check and branch settings. The button is disabled while its request is running. If update checking is off, this action makes no network request and clears remote-version information. Checking does not download or install an update; use the new-version link to open its details.</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateDetails" xml:space="preserve">
+    <value>Click to open the new-version dialog for the detected version and branch. The link is shown only when a new version is available. Opening this dialog does not itself install the update; review the details and choose the update action there.</value>
+  </data>
+  <data name="SettingsToolTipProgramResetSettings" xml:space="preserve">
+    <value>After confirmation, reset and immediately save the defaults for audio-player-viewer, audio, global editor, logging, option-generator, and program settings (including MCP settings). This is broader than the current page, but does not reset every possible settings store. Cancel to keep the settings. It does not restart the editor; settings read only at startup or initialization still need a restart to take effect.</value>
+  </data>
+  <data name="SettingsToolTipMcpEnableServer" xml:space="preserve">
+    <value>Checked: automatically start the local MCP HTTP server after GUI startup and include the MCP menu. Unchecked: do not auto-start it and exclude that menu. This switch is read at startup/menu composition; it does not start or stop a running server immediately, so restart to apply. MCP exposes editor automation; only connect clients you trust.</value>
+  </data>
+  <data name="SettingsToolTipMcpListenPort" xml:space="preserve">
+    <value>Requested TCP port for http://127.0.0.1:&lt;port&gt;/mcp (loopback only). Valid integers are 1–65535; 0 or an out-of-range value falls back to 39281, not automatic port 0. If the port is already occupied, startup probes successive ports, wrapping from 65535 to 1; the actual endpoint can therefore differ from this setting. Read when the server starts; it does not move an already-running listener. Restart the server/editor to apply and check the actual server URL.</value>
+  </data>
+  <data name="SettingsToolTipMcpAllowAnonymous" xml:space="preserve">
+    <value>Checked: clients with neither clientId nor requestedBy may proceed to the usual authorization flow; this alone does not approve execution. Unchecked: reject such anonymous tool calls with MCP_CLIENT_ID_REQUIRED. A supplied identity is a client label, not credential authentication. IMPORTANT: Allow all operations by default takes precedence and bypasses this rejection even when unchecked. Read per authorization request; no restart is required.</value>
+  </data>
+  <data name="SettingsToolTipMcpAllowAllOperations" xml:space="preserve">
+    <value>Security-sensitive. Checked: approve every operation handled by MCP tool authorization for every client without confirmation, including anonymous clients; this bypasses the anonymous restriction and returns no pre-execution chart backup. Client registration and authorization logging still occur. Unchecked: apply the anonymous policy, honor remembered client approvals, and otherwise require confirmation (or reject calls that cannot prompt). Read per authorization request; no restart is required. Enable only for clients you fully trust.</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableAutoSave" xml:space="preserve">
+    <value>Checked: periodically saves the currently active editor to its existing file path. Unchecked: stops automatic saving; manual saving is unchanged. New documents without a path are skipped. Auto-save overwrites the current file rather than creating a separate backup.</value>
+  </data>
+  <data name="SettingsToolTipEditorAutoSaveInterval" xml:space="preserve">
+    <value>Time between automatic saves, in minutes, not saves per minute. Applies only while auto-save is enabled. Use a positive value: smaller values save more often and perform more disk writes; larger values leave a longer unsaved interval.</value>
+  </data>
+  <data name="SettingsToolTipEditorRecoveryUndoPosition" xml:space="preserve">
+    <value>Checked: requests remembering an action’s time position so undo can return to it when it is outside the design-mode viewport. Unchecked: requests keeping the current view position. Current limitation: the undo wrapper is not recorded by the WPF implementation, so this option currently does not restore the position.</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableUndoLimit" xml:space="preserve">
+    <value>Checked: caps the retained action history at the configured count and discards the oldest excess entries. Unchecked: removes the count cap, but does not recover entries already discarded. This controls undo/redo history, not chart object count.</value>
+  </data>
+  <data name="SettingsToolTipEditorUndoLimit" xml:space="preserve">
+    <value>Maximum number of retained history entries when the limit is enabled. Enter a nonnegative integer; 0 retains no action history. Lowering the limit can immediately discard older entries, which cannot then be undone. Combined operations count as one history entry.</value>
+  </data>
+  <data name="SettingsToolTipEditorMouseWheelLength" xml:space="preserve">
+    <value>Distance per mouse-wheel step: pixels in free-scrolling design mode, milliseconds in preview mode. Larger positive values move farther; 0 adds no movement. Design-mode beat-aligned scrolling uses beat steps instead and ignores this parameter.</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableHorizontalScroll" xml:space="preserve">
+    <value>Checked: enables the editor’s horizontal view offset. Unchecked: displays the view with zero horizontal offset, without changing chart X coordinates. The stored offset is retained, and the horizontal-scrollbar option is available only while this is enabled.</value>
+  </data>
+  <data name="SettingsToolTipEditorShowHorizontalScrollBar" xml:space="preserve">
+    <value>Requires horizontal scrolling. Checked: shows the horizontal scrollbar for adjusting the view offset. Unchecked: hides the bar without disabling the horizontal offset itself. Does not change chart coordinates.</value>
+  </data>
+  <data name="SettingsToolTipEditorPlaceBeyondAudio" xml:space="preserve">
+    <value>Checked: allows placement operations that use the editor’s duration check outside the audio’s time range, including before time zero. Unchecked: rejects those placements with a notification. Existing objects are not removed and the audio duration is not extended.</value>
+  </data>
+  <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
+    <value>Checked: pausing/stopping from the audio-player panel returns the editor view to the position where that playback started. Unchecked: keeps the view at its pause position. This adjusts the view position, not the chart’s object timing.</value>
+  </data>
+  <data name="SettingsToolTipEditorOffsetMs" xml:space="preserve">
+    <value>Offsets the editor drawing viewport relative to its current time, in milliseconds. Positive values show a later chart position, negative values an earlier position (clamped at time zero); 0 adds no offset. Does not change music playback, sound-effect timing or saved object times.</value>
+  </data>
+  <data name="SettingsToolTipEditorInjectDefaultClickSE" xml:space="preserve">
+    <value>Checked: when no CLK exists at or before the end of the first measure, adds playback-only click sounds at the interior beats of that measure. Unchecked: plays only chart-defined CLK sounds. Re-evaluated when playback is prepared; no CLK objects are inserted into the chart file.</value>
+  </data>
+  <data name="SettingsToolTipEditorHoldBodyWidth" xml:space="preserve">
+    <value>Width of Hold body lines in the editor canvas, in pixels; integer range 1–50. Larger values draw thicker Hold bodies. Committed on focus loss, Enter or saving; invalid text restores the current value. Applies to the canvas, not SVG export.</value>
+  </data>
+  <data name="SettingsToolTipEditorTextureSizeScale" xml:space="preserve">
+    <value>Display-size multiplier for object and node textures that support this setting. 1 keeps their base size; smaller values shrink them and larger values enlarge them. Drawing clamps the effective multiplier to 0.25–3. Does not move objects or scale chart coordinates.</value>
+  </data>
+  <data name="SettingsToolTipEditorHoldBodyOpacity" xml:space="preserve">
+    <value>Opacity of Hold body lines, from 0 to 1. 0 makes the body transparent, 1 opaque; larger values make it more visible. Drawing clamps values to this range. Hold heads, duration and chart data are unchanged.</value>
+  </data>
+  <data name="SettingsToolTipEditorLaneLineWidth" xml:space="preserve">
+    <value>Width of ordinary lane/connection lines in the editor canvas, in pixels. Drawing clamps values to 1–24; larger values draw thicker lines. Wall lanes and autoplay-fader lanes have separate width settings. Does not alter lane coordinates.</value>
+  </data>
+  <data name="SettingsToolTipEditorWallLaneLineWidth" xml:space="preserve">
+    <value>Width of left and right wall-lane lines, in pixels. Drawing clamps values to 1–24; larger values draw thicker walls. If wall-lane display is hidden in preview, changing the width does not make it visible. Does not change playable-area boundaries.</value>
+  </data>
+  <data name="SettingsToolTipEditorAutoPlayFaderLineWidth" xml:space="preserve">
+    <value>Width of autoplay-fader lane lines, in pixels. Drawing clamps values to 1–24; larger values make these guides thicker. This changes visualization only, not the lane path or automatic player movement.</value>
+  </data>
+  <data name="SettingsToolTipEditorDefaultCurvePrecision" xml:space="preserve">
+    <value>Default Bézier sampling step for newly created connection objects. New objects use at least 0.01. Smaller values sample more densely for smoother curves but more computation; larger values use fewer segments. Existing objects retain their own precision.</value>
+  </data>
+  <data name="SettingsToolTipEditorLimitFPS" xml:space="preserve">
+    <value>Maximum editor-canvas rendering rate, in frames per second. A positive integer caps rendering; 0 or a negative value removes the application’s cap. A lower cap reduces redraw frequency and can save resources, but makes motion less smooth. This is not an audio-speed setting.</value>
+  </data>
+  <data name="SettingsToolTipEditorParallelCountLimit" xml:space="preserve">
+    <value>Preview-mode threshold for parallel Bell/Bullet position calculations, measured per drawing batch. Counts at or above this value use parallel processing; lower counts use serial processing. A smaller threshold starts parallel work sooner, with scheduling overhead. This is neither a maximum object count nor a thread count. Read at renderer initialization; restart to apply consistently.</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldBackgroundColor" xml:space="preserve">
+    <value>Click the color swatch to choose the preview background outside the playable-area fill. Used only in preview mode with playable-area drawing enabled; otherwise the editor uses its fixed dark background. Does not change exported chart data.</value>
+  </data>
+  <data name="SettingsToolTipEditorEnablePlayFieldDrawing" xml:space="preserve">
+    <value>Checked: fills the playable area between wall boundaries in preview mode and uses the configured background/foreground colors. Unchecked: skips this fill and uses the fixed dark background. Design mode is unaffected. Wall-line hiding is a separate retained setting.</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldOptions" xml:space="preserve">
+    <value>Playable-area foreground and wall-line controls are editable only while playable-area drawing is enabled. Turning the area option off does not clear their stored values. The wall-hide flag can still hide preview wall lines until it is explicitly unchecked.</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldForegroundColor" xml:space="preserve">
+    <value>Click the color swatch to set the playable-area fill color and alpha. Requires playable-area drawing and affects preview mode only; lower alpha makes the fill more transparent. Does not alter the wall boundaries or chart data.</value>
+  </data>
+  <data name="SettingsToolTipEditorHideWallLane" xml:space="preserve">
+    <value>Checked: skips drawing wall-lane lines in preview mode. Unchecked: draws them normally. Does not remove wall objects or change area boundaries. This control is editable only when playable-area drawing is on; switching area drawing off does not automatically uncheck it.</value>
+  </data>
+  <data name="SettingsToolTipEditorShowPlayerLocation" xml:space="preserve">
+    <value>Checked: displays the simulated player marker in preview and allows dragging it to record player positions used by player-targeted projectiles. Unchecked: hides the marker and disables that drag interaction. Changing this switch clears the temporary player-position record; chart objects are unchanged.</value>
+  </data>
+  <data name="SettingsToolTipEditorShowHitEffects" xml:space="preserve">
+    <value>Checked: draws simulated hit flashes/rings for objects reaching their hit time in preview. Unchecked: omits these visual effects. Design mode, chart data and sound-effect playback are unchanged.</value>
+  </data>
+  <data name="SettingsToolTipEditorClearRecentFiles" xml:space="preserve">
+    <value>Immediately clears and saves all recently opened file records, including chart, project and script entries. No confirmation is shown. This does not delete files or close currently open documents.</value>
+  </data>
+  <data name="SettingsToolTipColorValue" xml:space="preserve">
+    <value>Shows the current display color of the lane/object element named in this row. The text is its color value and the swatch is a preview. These colors affect editor visualization only, not object types, coordinates or exported chart data. Use Change to choose a color.</value>
+  </data>
+  <data name="SettingsToolTipColorChange" xml:space="preserve">
+    <value>Opens the color picker for the element named in this row. Changing it updates its editor display color, not its lane/object type. Save the options to persist the chosen color.</value>
+  </data>
 </root>

@@ -2817,4 +2817,274 @@
   <data name="EnableWaveformBlockPrerender" xml:space="preserve">
     <value>波形分块预渲染</value>
   </data>
+  <data name="SettingsToolTipAudioOutputType" xml:space="preserve">
+    <value>选择音乐和音效使用的音频输出接口：WaveOut、WASAPI 共享模式或 ASIO。ASIO 需要已安装兼容驱动。更改后需重启程序。</value>
+  </data>
+  <data name="SettingsToolTipAudioSampleRate" xml:space="preserve">
+    <value>设置音乐和音效混音的采样率，单位 Hz，例如 44100 或 48000。应填写输出设备支持的正整数。-1 表示启动时询问是否采用默认设备采样率；拒绝时使用 48000 Hz。更改后需重启程序。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableVarspeed" xml:space="preserve">
+    <value>勾选：启用 SoundTouch 音乐变速，可调整播放速度而保持音高。取消勾选：音乐按正常速度播放，不能调整速度。音效不经过此变速处理。更改后需重启程序。</value>
+  </data>
+  <data name="SettingsToolTipAudioVarspeedReadDurationMs" xml:space="preserve">
+    <value>设置变速处理每批读取的音频时长，单位毫秒，仅启用音乐变速时有效。请填写正数。数值越大，分配的缓冲区越大，播放时间的延迟补偿也越大。更改后需重启程序。</value>
+  </data>
+  <data name="SettingsToolTipAudioSoundFolderPath" xml:space="preserve">
+    <value>指定谱面音效目录，其中应包含 tap.wav、bell.wav、holdtick.wav 等音效文件。相对路径以编辑器可执行文件所在目录为基准。缺失的音效无法播放；更改目录后需重启程序重新加载。</value>
+  </data>
+  <data name="SettingsToolTipAudioBrowseSounds" xml:space="preserve">
+    <value>打开文件夹选择器，并保存选中的音效目录。请选择包含音效文件的文件夹，而不是单个 WAV 文件；重启程序后重新加载音效。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableSoundMultiPlay" xml:space="preserve">
+    <value>勾选：同一种音效可同时叠加播放。取消勾选：再次触发同一种音效时，先停止此前仍在播放的那一次，再播放新的一次；不同音效仍可同时播放。更改后需重启程序。</value>
+  </data>
+  <data name="SettingsToolTipAudioSoundOffsetMs" xml:space="preserve">
+    <value>校正谱面音效和节拍器相对于音乐的触发时间，单位毫秒。正数使触发提前，负数使触发延后，0 表示不偏移。不移动谱面物件，也不改变音乐本身的播放位置。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableWaveformDisplay" xml:space="preserve">
+    <value>勾选：允许音频播放器面板显示波形可视化，面板自身的波形显示开关也需打开。取消勾选：全局隐藏该可视化。两种状态都不影响音乐和音效播放。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformColor" xml:space="preserve">
+    <value>设置当前行名称对应的波形元素颜色，例如背景、波形、游标、节拍线、物件标记或 Hold 线。点击“修改”打开颜色选择器。仅影响可视化显示，不改变音频和谱面数据。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformBodyLineWidth" xml:space="preserve">
+    <value>设置波形轮廓的线宽，单位像素。实际范围为 1–24 px，超出范围会在绘制时限制到边界。数值越大，波形线条越粗。仅影响显示，无需重启。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformHoldLineWidth" xml:space="preserve">
+    <value>设置波形面板中表示 Hold 持续区间的横线宽度，单位像素。实际范围为 1–24 px，绘制时会限制到该范围。数值越大，Hold 区间线越粗；不会改变谱面 Hold 时长。无需重启。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformMarkerLineWidth" xml:space="preserve">
+    <value>设置波形面板中的节拍线和物件时间标记线宽，单位像素。实际范围为 1–24 px，绘制时会限制到该范围。数值越大，标记线越粗；标记时间不变。播放游标使用独立的固定线宽。无需重启。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableWaveformBlockPrerender" xml:space="preserve">
+    <value>勾选：将波形分块离屏预渲染并缓存图像，减少逐帧重复绘制。取消勾选：每帧直接实时绘制波形，不使用分块图像。颜色和线宽变化会使缓存作废。仅影响绘制方式，不改变音频；无需重启。</value>
+  </data>
+  <data name="SettingsToolTipLogsFolderPath" xml:space="preserve">
+    <value>指定程序诊断和错误等日志文件的输出目录。相对路径以编辑器可执行文件所在目录为基准。更改路径不会搬移已有日志；重启程序后在新目录创建日志。</value>
+  </data>
+  <data name="SettingsToolTipLogsBrowseFolder" xml:space="preserve">
+    <value>打开文件夹选择器并保存选中的日志目录。已有日志保留在原位置；重启程序后使用新目录。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingFilterKeywords" xml:space="preserve">
+    <value>按操作名称、主键、修饰键或配置键进行不区分大小写的包含匹配。留空表示不按关键词筛选。输入后点击“应用筛选”更新列表；不会修改快捷键。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingShowNotAssignOnly" xml:space="preserve">
+    <value>勾选：应用筛选后只列出尚未分配主键的操作。取消勾选：已分配快捷键的操作也可列出。可与关键词筛选一起使用，点击“应用筛选”刷新。只改变列表显示。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingApplyFilter" xml:space="preserve">
+    <value>使用当前关键词和“只显示未分配”条件刷新快捷键列表。不修改或保存快捷键分配。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingResetDefinitions" xml:space="preserve">
+    <value>确认后，将当前列表中的快捷键主键和修饰键恢复为默认值。存在筛选时，只重置列表中显示的项目，隐藏的项目不会重置。保存选项后持久化这些更改。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingChange" xml:space="preserve">
+    <value>打开当前操作的快捷键分配窗口。按下所需主键，可配合 Ctrl、Shift、Alt 或 Win，然后确认。若确认占用已有组合键，会解除原操作的分配。保存选项后持久化更改。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingCapture" xml:space="preserve">
+    <value>显示正在分配的组合键。按下所需主键，可配合 Ctrl、Shift、Alt 或 Win。“清空”准备取消分配，“重置”准备恢复当前操作的默认快捷键；两者都需点击“确认”才会应用。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingConfirm" xml:space="preserve">
+    <value>应用上方显示的快捷键并关闭此窗口。若与其他操作冲突，会再次询问；同意后解除原操作的快捷键分配。还需保存选项窗口才能持久化更改。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingClear" xml:space="preserve">
+    <value>清空待分配的主键和修饰键，使当前操作没有快捷键。点击“确认”才会应用；不确认直接关闭窗口会保留原分配。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingReset" xml:space="preserve">
+    <value>将当前操作的默认主键和修饰键填入待分配预览。点击“确认”才会应用；除非确认处理组合键冲突，否则不会更改其他操作。</value>
+  </data>
+  <data name="SettingsToolTipProgramProcessPriority" xml:space="preserve">
+    <value>Windows 进程调度优先级，在图形界面启动时应用：Normal（0）保持当前优先级不变；BelowNormal（1）、AboveNormal（2）、High（3）设置对应档位。较高优先级会更积极地争用其他程序的 CPU 时间，并非帧率限制。修改后重启编辑器生效。</value>
+  </data>
+  <data name="SettingsToolTipProgramMultiInstances" xml:space="preserve">
+    <value>勾选：允许启动独立的编辑器进程，不把新启动参数转交已有实例。取消勾选：再次启动时将参数交给已有实例，然后退出（使用 --wait 参数时则等待已有实例结束）。此设置在进程间通信初始化时读取一次，修改后需重启编辑器。</value>
+  </data>
+  <data name="SettingsToolTipProgramDisableSplash" xml:space="preserve">
+    <value>勾选：图形界面启动后不显示欢迎／开屏窗口。取消勾选：处理启动参数后，仅在没有打开文档时显示开屏窗口。不会关闭已经显示的窗口，修改将在下次启动编辑器时应用。</value>
+  </data>
+  <data name="SettingsToolTipProgramConsole" xml:space="preserve">
+    <value>勾选：启动图形界面版本时显示控制台窗口。取消勾选：隐藏控制台。此设置在启动时应用，修改后需重启编辑器。Debug 构建无论此设置为何都会显示控制台。</value>
+  </data>
+  <data name="SettingsToolTipProgramDumpDirectory" xml:space="preserve">
+    <value>保存以时间命名的崩溃转储（.dmp）文件的目录。绝对路径直接使用；相对路径以编辑器可执行文件所在目录为基准；空路径表示该目录。写入时会按需创建目录，因此位置必须可写。每次写入转储时读取此路径，无需重启。</value>
+  </data>
+  <data name="SettingsToolTipProgramBrowseDumpDirectory" xml:space="preserve">
+    <value>打开崩溃转储输出目录选择器，初始位置为当前设置解析后的路径。确认一个存在的目录后立即更新并保存设置；取消不改变路径。选择器也允许新建文件夹。</value>
+  </data>
+  <data name="SettingsToolTipProgramFullDump" xml:space="preserve">
+    <value>勾选：请求包含完整进程内存的转储（MiniDumpWithFullMemory）。取消勾选：请求普通小型转储（MiniDumpNormal）。完整转储可能显著增大文件，并包含内存中的敏感数据，分享前请检查。每次生成转储时读取，无需重启。</value>
+  </data>
+  <data name="SettingsToolTipProgramCrashNotification" xml:space="preserve">
+    <value>勾选／取消勾选分别将崩溃通知标志保存为开启／关闭。但当前 WPF 崩溃处理程序未读取此标志：Release 构建仍会显示崩溃对话框，Debug 构建会重新抛出异常。因此目前取消勾选并不会隐藏该对话框。</value>
+  </data>
+  <data name="SettingsToolTipProgramTestDump" xml:space="preserve">
+    <value>危险操作：故意在后台任务中抛出异常，用于触发异常处理。这不是无害的预览，可能结束当前编辑器会话，请先保存工作。不保证生成转储，实际结果取决于异常处理是否触发以及能否取得原生异常信息。</value>
+  </data>
+  <data name="SettingsToolTipProgramRenderManager" xml:space="preserve">
+    <value>选择编辑器渲染控件使用的图形实现：OpenGL 或 Skia。OpenGL 专属设置不用于 Skia，即使 Skia 自身的后端选择了 OpenGL。当前实现首次使用后会缓存，本次会话中更改选择不会替换它；切换实现需重启编辑器。</value>
+  </data>
+  <data name="SettingsToolTipProgramFontFamily" xml:space="preserve">
+    <value>编辑器画布中文字的默认字体家族，不是程序界面的字体。空白项使用渲染器的默认字体回退逻辑；不可用的字体也会回退。OpenGL 会在设置变化时刷新默认字体；Skia 在首次使用时缓存默认字体，因此已使用过 Skia 时需重启才能应用更改。明确指定字体的文字不受影响。</value>
+  </data>
+  <data name="SettingsToolTipProgramDisableTextAntialiasing" xml:space="preserve">
+    <value>勾选：画布文字不使用字形抗锯齿，边缘更硬。取消勾选：启用文字抗锯齿，平滑文字边缘。OpenGL 和 Skia 的文字渲染路径均适用，但不控制所有图形或 WPF 界面的抗锯齿。绘制时读取此设置，无需重启。</value>
+  </data>
+  <data name="SettingsToolTipProgramMsaa" xml:space="preserve">
+    <value>仅 OpenGL 实现使用的多重采样抗锯齿采样数：0 表示关闭 MSAA，可选开启值为 2、4、8 个样本。渲染器将配置值限制在 0–8。此设置在 OpenGL 控件初始化时读取，不会重新配置已有控件；重启可使所有控件一致生效。它与文字抗锯齿独立，也不配置 Skia。</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsCompatibility" xml:space="preserve">
+    <value>勾选：OpenGL 实现使用 OpenGL 3.3 和兼容配置初始化。取消勾选：请求 OpenGL 4.5 核心配置。此项改变请求的图形上下文，不影响 Skia 后端，可用于排查 OpenGL 兼容性问题。已有上下文不会重新创建，修改后请重启编辑器。</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsLog" xml:space="preserve">
+    <value>勾选：请求 OpenGL 调试上下文，并把 OpenGL 调试回调消息写入程序调试日志。取消勾选：不启用此回调输出。仅适用于 OpenGL 实现，记录日志可能增加开销。上下文和渲染器初始化时读取，修改后需重启。只有勾选此项时，才可设置同步日志选项。</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsLogSynchronous" xml:space="preserve">
+    <value>依赖 OpenGL 图形日志开启。勾选：启用 DebugOutputSynchronous，使调试回调与产生消息的 OpenGL 调用同步执行。取消勾选：不启用同步回调。同步输出可能增加渲染开销，但有助于把消息对应到原始调用。在 OpenGL 初始化时读取，修改后需重启。不改变普通程序日志或 Skia。</value>
+  </data>
+  <data name="SettingsToolTipProgramSkiaBackend" xml:space="preserve">
+    <value>仅在图形实现选择 Skia 时使用。CPU 使用软件渲染；OpenGL、DirectX、DirectX12 创建对应的 Skia 渲染控件（DirectX12 通过 D3D9On12 呈现）。每次新建 Skia 控件时读取，已有控件保留原后端；重启可切换所有控件。渲染队列帧数设置只用于 DirectX12。</value>
+  </data>
+  <data name="SettingsToolTipProgramRenderQueueFrames" xml:space="preserve">
+    <value>Skia DirectX12／D3D9On12 渲染队列中的后缓冲表面数量，单位为帧。本页可选 2–5：2 为双重缓冲，3 为三重缓冲；渲染实现本身将值限制在 1–5。帧数越多，分配的渲染目标表面越多。后续渲染时会检测数量变化并重建缓冲，无需重启。其他 Skia 后端及 OpenGL 实现不使用此项。</value>
+  </data>
+  <data name="SettingsToolTipProgramPerformancePanel" xml:space="preserve">
+    <value>打开渲染性能测量面板，查看渲染测量数据。此操作打开独立窗口，不修改所选图形实现或其他渲染设置。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateProject" xml:space="preserve">
+    <value>勾选：注册文件关联时包含 .nyagekiProj 工程文件。取消勾选：本次注册不包含此类型。仅改变勾选状态不会修改 Windows 文件关联，需要点击注册才会应用。注销会移除本程序的整个关联注册，不受这些勾选项限制。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateNyageki" xml:space="preserve">
+    <value>勾选：注册文件关联时包含 .nyageki 谱面文件。取消勾选：本次注册不包含此类型。仅改变勾选状态不会修改 Windows 文件关联，需要点击注册才会应用。注销会移除本程序的整个关联注册，不受这些勾选项限制。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateOgkr" xml:space="preserve">
+    <value>勾选：注册文件关联时包含 .ogkr 谱面文件。取消勾选：本次注册不包含此类型。仅改变勾选状态不会修改 Windows 文件关联，需要点击注册才会应用。注销会移除本程序的整个关联注册，不受这些勾选项限制。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateScript" xml:space="preserve">
+    <value>勾选：注册文件关联时包含 .nyagekiScript 脚本文件。取消勾选：本次注册不包含此类型。仅改变勾选状态不会修改 Windows 文件关联，需要点击注册才会应用。注销会移除本程序的整个关联注册，不受这些勾选项限制。</value>
+  </data>
+  <data name="SettingsToolTipProgramRegisterAssociations" xml:space="preserve">
+    <value>向 Windows 注册勾选的文件类型，使其打开命令以文件路径为参数启动当前编辑器可执行文件。至少需选择一种类型；若 Windows 拒绝注册操作，需要管理员权限。只有当前不存在本程序的关联注册时此按钮才可用，单独改变勾选项不会执行注册。</value>
+  </data>
+  <data name="SettingsToolTipProgramUnregisterAssociations" xml:space="preserve">
+    <value>从 Windows 移除 OngekiFumenEditor 的整个文件关联注册，而非仅移除当前勾选的扩展名。只有本程序已注册关联时可用；若 Windows 拒绝移除操作，需要管理员权限。不会删除谱面、工程或脚本文件。</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateCheckEnabled" xml:space="preserve">
+    <value>勾选：允许启动时及点击“检查更新”时在线查询版本。取消勾选：这两种检查被调用时均不连接版本服务，并清除远程版本信息。不会自动下载或安装更新。每次检查时读取，无需重启。</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateMasterOnly" xml:space="preserve">
+    <value>依赖更新检查开启。勾选：向版本服务请求仅 master 分支的版本。取消勾选：请求不限制为 master，允许服务考虑其他分支。下次检查版本时使用；仅改变此项不会立即检查或安装任何内容。无需重启。</value>
+  </data>
+  <data name="SettingsToolTipProgramCheckUpdates" xml:space="preserve">
+    <value>按更新检查开关和分支设置查询在线版本服务，请求进行期间按钮禁用。若更新检查已关闭，此操作不发送网络请求，并清除远程版本信息。检查本身不会下载或安装更新，可点击新版本链接打开详情。</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateDetails" xml:space="preserve">
+    <value>点击打开已检测到的版本及分支的新版本对话框。只有发现新版本时才显示此链接。打开对话框本身不会安装更新，可先查看详情，再在其中选择更新操作。</value>
+  </data>
+  <data name="SettingsToolTipProgramResetSettings" xml:space="preserve">
+    <value>确认后将音频播放器面板、音频、编辑器全局、日志、选项生成工具及程序设置（含 MCP）恢复为默认值，并立即保存。影响范围不限于当前页面，但并不重置所有可能的设置存储。取消确认可保留设置。此操作不自动重启编辑器；仅在启动或初始化时读取的设置仍需重启生效。</value>
+  </data>
+  <data name="SettingsToolTipMcpEnableServer" xml:space="preserve">
+    <value>勾选：图形界面启动后自动启动本地 MCP HTTP 服务，并加入 MCP 菜单。取消勾选：不自动启动服务，并排除此菜单。此开关在启动／菜单组装时读取，不会立即启动或停止正在运行的服务，需重启生效。MCP 提供编辑器自动化能力，请仅连接可信客户端。</value>
+  </data>
+  <data name="SettingsToolTipMcpListenPort" xml:space="preserve">
+    <value>http://127.0.0.1:&lt;端口&gt;/mcp 请求使用的 TCP 端口，仅监听回环地址。有效整数为 1–65535；0 或超出范围的值回退到 39281，不代表自动分配端口 0。若端口被占用，启动时依次探测后续端口，从 65535 回绕到 1，因此实际地址可能与设置不同。服务启动时读取，不会迁移已运行的监听端口；重启服务／编辑器后生效，并请查看实际服务 URL。</value>
+  </data>
+  <data name="SettingsToolTipMcpAllowAnonymous" xml:space="preserve">
+    <value>勾选：既未提供 clientId 也未提供 requestedBy 的客户端可以进入常规授权流程，此项本身不批准执行。取消勾选：此类匿名工具调用以 MCP_CLIENT_ID_REQUIRED 拒绝。提供的身份是客户端标识，不是凭证认证。注意：“默认允许全部客户端所有操作”优先，开启它会绕过匿名拒绝，即使此项取消勾选也一样。每次授权请求时读取，无需重启。</value>
+  </data>
+  <data name="SettingsToolTipMcpAllowAllOperations" xml:space="preserve">
+    <value>安全敏感设置。勾选：对所有客户端无确认放行经过 MCP 工具授权的每项操作，包括匿名客户端；它绕过匿名限制，并不要求执行前谱面备份。仍会登记客户端并记录授权日志。取消勾选：执行匿名策略、使用已记住的客户端批准，否则要求确认（无法弹窗的调用则拒绝）。每次授权请求时读取，无需重启。只应对完全可信的客户端开启。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableAutoSave" xml:space="preserve">
+    <value>勾选：按设定间隔，将当前活动编辑器的文档保存到已有文件路径。取消勾选：停止自动保存，不影响手动保存。尚未指定路径的新文档会跳过。自动保存会写入当前文件，并非另存备份。</value>
+  </data>
+  <data name="SettingsToolTipEditorAutoSaveInterval" xml:space="preserve">
+    <value>两次自动保存之间的时间间隔，单位分钟，不是每分钟保存次数。仅在启用自动保存时有效。请填写正数；数值越小保存越频繁，磁盘写入也越频繁；数值越大，未保存的时间跨度越长。</value>
+  </data>
+  <data name="SettingsToolTipEditorRecoveryUndoPosition" xml:space="preserve">
+    <value>勾选：用于请求记录操作的时间位置，并在设计模式撤销时、该位置不可见的情况下返回那里。取消勾选：保留当前视图位置。当前限制：WPF 实现未将位置恢复动作加入撤销记录，因此此开关目前不会恢复位置。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableUndoLimit" xml:space="preserve">
+    <value>勾选：按下方数量限制保留的操作历史，超过上限时丢弃最旧记录。取消勾选：不设数量上限，但不会恢复此前已经丢弃的记录。此项控制撤销／重做历史，不限制谱面物件数量。</value>
+  </data>
+  <data name="SettingsToolTipEditorUndoLimit" xml:space="preserve">
+    <value>启用数量限制时保留的操作历史条数。应填写非负整数；0 表示不保留操作历史。降低上限可能立即丢弃旧记录，被丢弃的操作将无法撤销。合并操作按一条历史记录计算。</value>
+  </data>
+  <data name="SettingsToolTipEditorMouseWheelLength" xml:space="preserve">
+    <value>鼠标滚轮每步滚动距离：设计模式自由滚动时单位为像素，预览模式单位为毫秒。正数越大，每步移动越远；0 不产生位移。设计模式启用判定线拍吸附时按拍滚动，不使用此参数。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableHorizontalScroll" xml:space="preserve">
+    <value>勾选：启用编辑器视图的横向偏移。取消勾选：以零横向偏移显示，不修改谱面 X 坐标。已保存的横向偏移值仍保留，只有开启此项时才能设置横向滚动条显示。</value>
+  </data>
+  <data name="SettingsToolTipEditorShowHorizontalScrollBar" xml:space="preserve">
+    <value>依赖横向滚动开启。勾选：显示用于调整视图横向偏移的滚动条。取消勾选：隐藏该滚动条，但不关闭横向偏移本身。不修改谱面坐标。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlaceBeyondAudio" xml:space="preserve">
+    <value>勾选：允许通过编辑器时长检查的放置操作超出音频范围，包括零时刻之前。取消勾选：拒绝这些越界放置并提示。不会删除已有物件，也不会延长音频本身。</value>
+  </data>
+  <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
+    <value>勾选：通过音频播放器面板暂停／停止时，将编辑器视图返回本次播放开始的位置。取消勾选：视图停留在暂停的位置。只调整视图位置，不改变谱面物件时间。</value>
+  </data>
+  <data name="SettingsToolTipEditorOffsetMs" xml:space="preserve">
+    <value>校正编辑器绘制视口相对于当前时间的偏移，单位毫秒。正数显示更晚的谱面位置，负数显示更早的位置（最早限制到零时刻），0 表示不偏移。不改变音乐播放、音效触发时间或已保存的物件时间。</value>
+  </data>
+  <data name="SettingsToolTipEditorInjectDefaultClickSE" xml:space="preserve">
+    <value>勾选：当首小节结束位置及之前没有 CLK 时，在首小节内部各拍补播放用的默认打点音。取消勾选：只播放谱面中已有的 CLK。下次准备播放时重新判断，不会向谱面文件插入 CLK 物件。</value>
+  </data>
+  <data name="SettingsToolTipEditorHoldBodyWidth" xml:space="preserve">
+    <value>设置编辑器画布中 Hold 主体线宽，单位像素，整数范围 1–50。数值越大，Hold 主体越粗。失焦、按 Enter 或保存选项时提交；无效文本恢复为当前值。只作用于编辑器画布，不影响 SVG 导出。</value>
+  </data>
+  <data name="SettingsToolTipEditorTextureSizeScale" xml:space="preserve">
+    <value>支持此设置的物件及节点贴图的显示尺寸倍率。1 保持基础尺寸，小于 1 缩小，大于 1 放大；绘制时将实际倍率限制在 0.25–3。不会移动物件或缩放谱面坐标。</value>
+  </data>
+  <data name="SettingsToolTipEditorHoldBodyOpacity" xml:space="preserve">
+    <value>Hold 主体线条的不透明度，范围 0–1。0 表示主体透明，1 表示不透明；数值越大越明显。绘制时会限制到该范围。不改变 Hold 头部、持续时长或谱面数据。</value>
+  </data>
+  <data name="SettingsToolTipEditorLaneLineWidth" xml:space="preserve">
+    <value>编辑器画布中普通轨道／连接线的宽度，单位像素。绘制时限制为 1–24，数值越大线条越粗。墙轨和自动演奏轨道使用各自的独立线宽设置。不改变轨道坐标。</value>
+  </data>
+  <data name="SettingsToolTipEditorWallLaneLineWidth" xml:space="preserve">
+    <value>左右墙轨线宽，单位像素。绘制时限制为 1–24，数值越大墙轨越粗。若预览中已隐藏墙轨，更改线宽不会让它重新出现。不改变可击打区域边界坐标。</value>
+  </data>
+  <data name="SettingsToolTipEditorAutoPlayFaderLineWidth" xml:space="preserve">
+    <value>自动演奏轨道引导线的宽度，单位像素。绘制时限制为 1–24，数值越大引导线越粗。仅改变显示，不改变轨道路径或自动演奏时玩家的移动。</value>
+  </data>
+  <data name="SettingsToolTipEditorDefaultCurvePrecision" xml:space="preserve">
+    <value>新建连接物件使用的默认贝塞尔曲线采样步长；新物件实际使用的值至少为 0.01。数值越小采样越密、曲线越细腻但计算越多；越大则分段越少。已有物件保留各自的曲线精度。</value>
+  </data>
+  <data name="SettingsToolTipEditorLimitFPS" xml:space="preserve">
+    <value>编辑器画布的最高渲染帧率，单位帧／秒。正整数用于限制帧率，0 或负数表示不设程序内上限。较低上限减少重绘次数、可能降低资源消耗，但运动显示会较不流畅。不控制音频播放速度。</value>
+  </data>
+  <data name="SettingsToolTipEditorParallelCountLimit" xml:space="preserve">
+    <value>预览模式下 Bell／Bullet 位置计算启用并行处理的数量阈值，按每个绘制批次计数。数量达到或超过此值时并行，少于此值时串行。阈值越小越早启用并行，也会增加调度开销。不是物件数量上限或线程数。渲染器初始化时读取，重启可使所有渲染器一致生效。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldBackgroundColor" xml:space="preserve">
+    <value>点击色块选择预览中可击打区域填充以外的背景色。仅在预览模式且开启可击打区域绘制时使用；其他情况下编辑器使用固定深色背景。不改变导出的谱面数据。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnablePlayFieldDrawing" xml:space="preserve">
+    <value>勾选：预览模式填充墙边界之间的可击打区域，并使用设定的背景色和前景色。取消勾选：不绘制该填充，背景恢复为固定深色。设计模式不受影响；墙轨隐藏是另一个独立保留的设置。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldOptions" xml:space="preserve">
+    <value>只有开启可击打区域绘制时，才能编辑下方的区域前景色和墙轨隐藏选项。关闭区域绘制不会清除这些值；墙轨隐藏标志仍可能隐藏预览墙线，直到明确取消其勾选。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldForegroundColor" xml:space="preserve">
+    <value>点击色块设置可击打区域的填充颜色和透明度。依赖区域绘制开启，仅影响预览模式；降低 alpha 会让填充更透明。不修改墙边界或谱面数据。</value>
+  </data>
+  <data name="SettingsToolTipEditorHideWallLane" xml:space="preserve">
+    <value>勾选：预览模式不绘制墙轨线。取消勾选：正常绘制墙轨。不删除墙轨物件，也不改变区域边界。只有开启区域绘制时才能编辑此项；关闭区域绘制不会自动取消该勾选。</value>
+  </data>
+  <data name="SettingsToolTipEditorShowPlayerLocation" xml:space="preserve">
+    <value>勾选：预览中显示模拟玩家标记，可拖动标记记录供玩家目标型抛射物使用的位置。取消勾选：隐藏标记并禁用该拖动交互。切换此开关会清空临时玩家位置记录，但不修改谱面物件。</value>
+  </data>
+  <data name="SettingsToolTipEditorShowHitEffects" xml:space="preserve">
+    <value>勾选：预览中为到达判定时间的物件显示模拟命中闪光／圆环效果。取消勾选：不显示这些视觉效果。不影响设计模式、谱面数据或音效播放。</value>
+  </data>
+  <data name="SettingsToolTipEditorClearRecentFiles" xml:space="preserve">
+    <value>立即清空并保存所有最近打开记录，包括谱面、工程和脚本记录，不会再次确认。不删除实际文件，也不关闭已经打开的文档。</value>
+  </data>
+  <data name="SettingsToolTipColorValue" xml:space="preserve">
+    <value>显示当前行名称对应的轨道／物件元素的颜色。文字为颜色值，色块为预览。仅影响编辑器可视化，不修改物件类型、坐标或导出的谱面数据；点击“修改”选择颜色。</value>
+  </data>
+  <data name="SettingsToolTipColorChange" xml:space="preserve">
+    <value>打开当前行对应元素的颜色选择器。更改的是编辑器显示颜色，不会改变轨道／物件类型。保存选项后持久化所选颜色。</value>
+  </data>
 </root>

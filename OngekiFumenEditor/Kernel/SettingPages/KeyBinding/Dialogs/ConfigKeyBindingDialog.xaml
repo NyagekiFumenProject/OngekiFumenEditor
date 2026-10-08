@@ -16,6 +16,13 @@
     Style="{DynamicResource MainWindowStyle}"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Gemini;component/Themes/SettingsToolTips.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Window.DataContext>
         <Binding RelativeSource="{RelativeSource Self}">
         </Binding>
@@ -36,6 +43,8 @@
             HorizontalAlignment="Center"
             FontSize="25"
             FontWeight="Bold"
+            ToolTip="{markup:Translate [SettingsToolTipKeyBindingCapture]}"
+            ToolTipService.ShowDuration="60000"
             Text="{Binding CurrentExpression}">
         </TextBlock>
         <TextBlock
@@ -62,6 +71,7 @@
                 Padding="10,5,10,5"
                 Click="Button_Click_1"
                 Content="{markup:Translate [Comfirm]}"
+                ToolTip="{markup:Translate [SettingsToolTipKeyBindingConfirm]}"
                 FontSize="16">
             </Button>
 
@@ -71,6 +81,7 @@
                 Padding="10,5,10,5"
                 Click="Button_Click"
                 Content="{markup:Translate [Clear]}"
+                ToolTip="{markup:Translate [SettingsToolTipKeyBindingClear]}"
                 FontSize="16">
             </Button>
 
@@ -80,6 +91,7 @@
                 Padding="10,5,10,5"
                 Click="Button_Click_2"
                 Content="{markup:Translate [Reset]}"
+                ToolTip="{markup:Translate [SettingsToolTipKeyBindingReset]}"
                 FontSize="16">
             </Button>
         </Grid>

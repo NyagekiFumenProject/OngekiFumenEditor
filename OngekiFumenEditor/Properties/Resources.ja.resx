@@ -2122,4 +2122,274 @@
   <data name="EnableWaveformBlockPrerender" xml:space="preserve">
     <value>波形ブロックの事前レンダリング</value>
   </data>
+  <data name="SettingsToolTipAudioOutputType" xml:space="preserve">
+    <value>音楽と効果音の出力方式を WaveOut、WASAPI 共有モード、ASIO から選びます。ASIO には対応ドライバーが必要です。変更後はプログラムを再起動してください。</value>
+  </data>
+  <data name="SettingsToolTipAudioSampleRate" xml:space="preserve">
+    <value>音楽と効果音のミキシング周波数を Hz で指定します（例：44100、48000）。出力機器が対応する正の整数を使ってください。-1 は起動時に既定機器の周波数を使うか確認し、拒否すると 48000 Hz を使います。変更後は再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableVarspeed" xml:space="preserve">
+    <value>オン：SoundTouch で音程を保ちながら音楽の再生速度を変更できます。オフ：通常速度で再生し、速度変更は使えません。効果音にはこの処理を適用しません。変更後は再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioVarspeedReadDurationMs" xml:space="preserve">
+    <value>変速処理で一度に読み込む音声の長さをミリ秒で指定します。音楽の変速を有効にした場合のみ使います。正の値を指定してください。大きいほどバッファーと再生時刻の遅延補正が増えます。変更後は再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioSoundFolderPath" xml:space="preserve">
+    <value>tap.wav、bell.wav、holdtick.wav などの譜面効果音を置くフォルダーです。相対パスは実行ファイルのフォルダーを基準にします。欠けた効果音は再生できません。変更後は再起動して音声を読み直してください。</value>
+  </data>
+  <data name="SettingsToolTipAudioBrowseSounds" xml:space="preserve">
+    <value>フォルダー選択画面を開き、選択した効果音フォルダーを保存します。個別の WAV ではなく、音声ファイルを含むフォルダーを選んでください。効果音の再読み込みには再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableSoundMultiPlay" xml:space="preserve">
+    <value>オン：同じ効果音を重ねて再生できます。オフ：同じ効果音を再び鳴らすと、前の再生を止めてから新しい再生を始めます。異なる効果音は同時に再生できます。変更後は再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioSoundOffsetMs" xml:space="preserve">
+    <value>譜面効果音とメトロノームのタイミングを音楽に対してミリ秒で補正します。正の値は早め、負の値は遅らせ、0 は補正しません。譜面オブジェクトや音楽の再生位置は変更しません。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableWaveformDisplay" xml:space="preserve">
+    <value>オン：音声プレーヤーの波形可視化を許可します。パネル側の波形表示もオンにする必要があります。オフ：この可視化を全体で非表示にします。音楽や効果音の再生には影響しません。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformColor" xml:space="preserve">
+    <value>この行の名前に対応する波形要素（背景、波形、カーソル、ビート線、オブジェクト印、Hold 線など）の表示色を変更します。「変更」で色選択画面を開きます。音声や譜面データは変更しません。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformBodyLineWidth" xml:space="preserve">
+    <value>波形本体の線幅をピクセルで指定します。有効範囲は 1～24 px で、範囲外の値は描画時に制限します。大きいほど線が太くなります。表示のみの設定で、再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformHoldLineWidth" xml:space="preserve">
+    <value>波形パネルで Hold の継続区間を示す横線の幅をピクセルで指定します。有効範囲は 1～24 px で、描画時に制限します。大きいほど太くなりますが、譜面の Hold 長は変わりません。再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioWaveformMarkerLineWidth" xml:space="preserve">
+    <value>波形パネルのビート線とオブジェクト時刻の印の幅をピクセルで指定します。有効範囲は 1～24 px で、描画時に制限します。大きいほど太くなりますが、時刻は変わりません。再生カーソルは別の固定幅です。再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipAudioEnableWaveformBlockPrerender" xml:space="preserve">
+    <value>オン：波形を区間ごとにオフスクリーン描画して画像を再利用し、繰り返しの描画を減らします。オフ：区間画像を使わず毎フレーム直接描画します。色や線幅の変更でキャッシュを無効化します。音声は変わらず、再起動も不要です。</value>
+  </data>
+  <data name="SettingsToolTipLogsFolderPath" xml:space="preserve">
+    <value>診断情報やエラーなどのプログラムログを保存するフォルダーです。相対パスは実行ファイルのフォルダーを基準にします。既存ログは移動しません。変更後は再起動すると新しい場所にログを作成します。</value>
+  </data>
+  <data name="SettingsToolTipLogsBrowseFolder" xml:space="preserve">
+    <value>フォルダー選択画面を開き、選択したログ保存先を保存します。既存ログは元の場所に残ります。新しい保存先を使うには再起動してください。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingFilterKeywords" xml:space="preserve">
+    <value>操作名、主キー、修飾キー、設定キーを、大文字・小文字を区別しない部分一致で絞り込みます。空欄ならキーワードで絞り込みません。「フィルター適用」で一覧を更新します。キー割り当ては変更しません。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingShowNotAssignOnly" xml:space="preserve">
+    <value>オン：フィルター適用後、主キーが未割り当ての操作だけを表示します。オフ：割り当て済みの操作も表示対象にします。キーワード条件と併用でき、「フィルター適用」で更新します。一覧表示だけの設定です。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingApplyFilter" xml:space="preserve">
+    <value>現在のキーワードと未割り当てのみの条件で一覧を更新します。キーの割り当てや保存は行いません。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingResetDefinitions" xml:space="preserve">
+    <value>確認後、現在の一覧に表示された操作の主キーと修飾キーを既定値に戻します。絞り込み中は非表示の操作を変更しません。変更を保存するには設定を保存してください。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingChange" xml:space="preserve">
+    <value>この操作のキー割り当て画面を開きます。必要なら Ctrl、Shift、Alt、Win と組み合わせてキーを押し、確定します。競合を承認すると元の操作の割り当てを解除します。設定を保存すると変更を保持します。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingCapture" xml:space="preserve">
+    <value>割り当て中のキーを表示します。必要なら Ctrl、Shift、Alt、Win と組み合わせて主キーを押してください。「クリア」は未割り当て、「リセット」はこの操作の既定キーを選びます。「確定」するまでは適用しません。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingConfirm" xml:space="preserve">
+    <value>上に表示したキーを適用して画面を閉じます。他の操作と競合する場合は確認し、承認すると元の操作の割り当てを解除します。変更の保持には設定画面での保存も必要です。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingClear" xml:space="preserve">
+    <value>割り当て予定の主キーと修飾キーを消し、この操作を未割り当てにします。「確定」で適用し、確定せず閉じれば元の割り当てを保ちます。</value>
+  </data>
+  <data name="SettingsToolTipKeyBindingReset" xml:space="preserve">
+    <value>この操作の既定の主キーと修飾キーを割り当て候補に戻します。「確定」で適用します。キー競合を承認する場合を除き、他の操作は変更しません。</value>
+  </data>
+  <data name="SettingsToolTipProgramProcessPriority" xml:space="preserve">
+    <value>Windows のプロセス優先度を GUI 起動時に適用します。Normal（0）は現在の優先度を変更せず、BelowNormal（1）、AboveNormal（2）、High（3）は対応する優先度を設定します。高い優先度は他のアプリより CPU 時間を取得しやすくしますが、フレームレート制限ではありません。変更後はエディタを再起動してください。</value>
+  </data>
+  <data name="SettingsToolTipProgramMultiInstances" xml:space="preserve">
+    <value>オン：新しい起動引数を既存インスタンスへ転送せず、独立したエディタプロセスを起動できます。オフ：新規起動は引数を既存インスタンスへ転送して終了します（--wait 指定時は既存インスタンスの終了を待ちます）。IPC 初期化時に一度だけ読み取るため、変更後は再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramDisableSplash" xml:space="preserve">
+    <value>オン：GUI 起動後のウェルカム画面を表示しません。オフ：起動引数を処理した後、開いているドキュメントがない場合だけ表示します。既に表示された画面は閉じません。次回のエディタ起動時に適用されます。</value>
+  </data>
+  <data name="SettingsToolTipProgramConsole" xml:space="preserve">
+    <value>オン：GUI 版の起動時にコンソールウィンドウを表示します。オフ：非表示にします。起動時に適用するため、変更後は再起動してください。Debug ビルドでは、この設定に関係なくコンソールを表示します。</value>
+  </data>
+  <data name="SettingsToolTipProgramDumpDirectory" xml:space="preserve">
+    <value>日時を名前にしたクラッシュダンプ（.dmp）の保存先です。絶対パスはそのまま、相対パスはエディタ実行ファイルのフォルダを基準に使用します。空欄はそのフォルダを意味します。必要に応じて作成するため、書き込み可能な場所を指定してください。ダンプ出力時に読み取るので再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramBrowseDumpDirectory" xml:space="preserve">
+    <value>クラッシュダンプ保存先のフォルダ選択を開きます。初期位置は現在の設定を解決したパスです。存在するフォルダを確定すると設定をすぐ更新・保存し、キャンセルすると変更しません。新しいフォルダも作成できます。</value>
+  </data>
+  <data name="SettingsToolTipProgramFullDump" xml:space="preserve">
+    <value>オン：プロセスの全メモリを含むダンプ（MiniDumpWithFullMemory）を要求します。オフ：通常のミニダンプ（MiniDumpNormal）を要求します。全メモリダンプは大きくなり、メモリ内の機密情報を含む可能性があります。共有前に確認してください。ダンプごとに読み取るので再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramCrashNotification" xml:space="preserve">
+    <value>オン／オフはクラッシュ通知フラグを有効／無効として保存します。ただし、現在の WPF クラッシュ処理はこのフラグを参照しません。Release ビルドはクラッシュダイアログを表示し、Debug ビルドは例外を再スローします。現在はオフにしてもダイアログを抑止できません。</value>
+  </data>
+  <data name="SettingsToolTipProgramTestDump" xml:space="preserve">
+    <value>危険な操作です。例外処理を確認するため、バックグラウンドタスクで意図的に例外を発生させます。安全なプレビューではなく、エディタのセッションが終了する可能性があります。先に保存してください。ダンプの生成は例外処理の発動とネイティブ例外情報の取得状況に依存し、保証されません。</value>
+  </data>
+  <data name="SettingsToolTipProgramRenderManager" xml:space="preserve">
+    <value>エディタ描画コントロールの実装（OpenGL または Skia）を選択します。Skia のバックエンドが OpenGL でも、OpenGL 実装専用の設定は Skia には適用されません。使用中の実装は初回使用時にキャッシュされ、このセッション中は置き換わりません。切り替えには再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramFontFamily" xml:space="preserve">
+    <value>エディタのキャンバス内に描画する文字の既定フォントファミリです。アプリの UI フォントではありません。空の項目は描画実装の既定フォントへのフォールバックを使用し、利用できないフォントもフォールバックします。OpenGL は変更時に既定フォントを更新します。Skia は初回使用時にキャッシュするため、使用済みの Skia に変更を反映するには再起動してください。明示的にフォントを指定した文字には影響しません。</value>
+  </data>
+  <data name="SettingsToolTipProgramDisableTextAntialiasing" xml:space="preserve">
+    <value>オン：キャンバスの文字のアンチエイリアスを無効にし、輪郭を硬く描画します。オフ：文字のアンチエイリアスを有効にして輪郭を滑らかにします。OpenGL と Skia の文字描画に適用されますが、すべての図形や WPF UI の設定ではありません。描画中に読み取るので再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramMsaa" xml:space="preserve">
+    <value>OpenGL 実装専用のマルチサンプルアンチエイリアス数です。0 は MSAA 無効、選択可能な有効値は 2・4・8 サンプルです。描画側は設定値を 0～8 に制限します。OpenGL コントロール初期化時に読み取り、既存のコントロールは再設定しません。全体に反映するには再起動してください。文字のアンチエイリアスとは別で、Skia には適用されません。</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsCompatibility" xml:space="preserve">
+    <value>オン：OpenGL 実装を OpenGL 3.3 の互換プロファイルで初期化します。オフ：OpenGL 4.5 のコアプロファイルを要求します。要求する描画コンテキストを変更する設定で、Skia のバックエンドには影響しません。OpenGL の互換性問題の調査に使用できます。既存コンテキストは再作成しないため、変更後は再起動してください。</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsLog" xml:space="preserve">
+    <value>オン：OpenGL のデバッグコンテキストを要求し、デバッグコールバックのメッセージをアプリのデバッグログへ出力します。オフ：そのコールバック出力を有効にしません。OpenGL 実装専用で、ログには追加の負荷がかかる場合があります。コンテキストと描画実装の初期化時に読み取るため再起動が必要です。同期ログ設定は、この項目がオンのときだけ操作できます。</value>
+  </data>
+  <data name="SettingsToolTipProgramGraphicsLogSynchronous" xml:space="preserve">
+    <value>OpenGL 描画ログが有効な場合に使用します。オン：DebugOutputSynchronous を有効にし、メッセージを生成した OpenGL 呼び出しと同期してコールバックを実行します。オフ：同期コールバックを有効にしません。同期出力は描画負荷を増やす場合がありますが、発生元の呼び出しとの対応を確認しやすくします。OpenGL 初期化時に読み取るため再起動が必要です。通常のアプリログや Skia は変更しません。</value>
+  </data>
+  <data name="SettingsToolTipProgramSkiaBackend" xml:space="preserve">
+    <value>描画実装が Skia の場合だけ使用します。CPU はソフトウェア描画、OpenGL・DirectX・DirectX12 は対応する Skia 描画コントロールを作成します（DirectX12 の表示には D3D9On12 を使用）。新しい Skia コントロールの作成時に読み取り、既存のコントロールは元のバックエンドを保持します。すべてを切り替えるには再起動してください。キューのフレーム数設定は DirectX12 専用です。</value>
+  </data>
+  <data name="SettingsToolTipProgramRenderQueueFrames" xml:space="preserve">
+    <value>Skia DirectX12／D3D9On12 の描画キューに用意するバックバッファサーフェス数です。単位はフレーム。この画面では 2～5 を選択でき、2 はダブルバッファ、3 はトリプルバッファです。描画実装自体は 1～5 に制限します。数を増やすと描画ターゲットの確保数も増えます。後続の描画時に変更を検出してバッファを再作成するため、再起動は不要です。他の Skia バックエンドや OpenGL 実装では使用しません。</value>
+  </data>
+  <data name="SettingsToolTipProgramPerformancePanel" xml:space="preserve">
+    <value>描画性能測定パネルを開いて、描画の測定値を確認します。別ウィンドウを開く操作で、選択した描画実装や他の描画設定は変更しません。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateProject" xml:space="preserve">
+    <value>オン：関連付けの登録に .nyagekiProj プロジェクトファイルを含めます。オフ：今回の登録には含めません。チェックの変更だけでは Windows の関連付けは変わらず、登録ボタンで適用します。登録解除はこれらの選択に関係なく、アプリ全体の登録を削除します。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateNyageki" xml:space="preserve">
+    <value>オン：関連付けの登録に .nyageki 譜面ファイルを含めます。オフ：今回の登録には含めません。チェックの変更だけでは Windows の関連付けは変わらず、登録ボタンで適用します。登録解除はこれらの選択に関係なく、アプリ全体の登録を削除します。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateOgkr" xml:space="preserve">
+    <value>オン：関連付けの登録に .ogkr 譜面ファイルを含めます。オフ：今回の登録には含めません。チェックの変更だけでは Windows の関連付けは変わらず、登録ボタンで適用します。登録解除はこれらの選択に関係なく、アプリ全体の登録を削除します。</value>
+  </data>
+  <data name="SettingsToolTipProgramAssociateScript" xml:space="preserve">
+    <value>オン：関連付けの登録に .nyagekiScript スクリプトファイルを含めます。オフ：今回の登録には含めません。チェックの変更だけでは Windows の関連付けは変わらず、登録ボタンで適用します。登録解除はこれらの選択に関係なく、アプリ全体の登録を削除します。</value>
+  </data>
+  <data name="SettingsToolTipProgramRegisterAssociations" xml:space="preserve">
+    <value>選択したファイル形式を Windows に登録し、開くコマンドがファイルパスを引数として現在のエディタ実行ファイルを起動するようにします。少なくとも一つ選択してください。Windows が登録操作を拒否する場合は管理者権限が必要です。アプリの関連付け登録がない場合だけ操作できます。チェックを変更するだけでは登録されません。</value>
+  </data>
+  <data name="SettingsToolTipProgramUnregisterAssociations" xml:space="preserve">
+    <value>Windows から OngekiFumenEditor のファイル関連付け登録全体を削除します。現在チェックした拡張子だけを削除する操作ではありません。登録済みの場合だけ使用できます。Windows が削除を拒否する場合は管理者権限が必要です。譜面・プロジェクト・スクリプトのファイルは削除しません。</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateCheckEnabled" xml:space="preserve">
+    <value>オン：起動時と「更新を確認」操作でオンラインのバージョン確認を許可します。オフ：どちらの確認もバージョンサービスへ接続せず、呼び出された時点で取得済みのリモートバージョン情報を消去します。自動ダウンロードやインストールは行いません。確認ごとに読み取るので再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateMasterOnly" xml:space="preserve">
+    <value>更新確認が有効な場合に使用します。オン：バージョンサービスに master ブランチ限定で問い合わせます。オフ：master 限定にせず、サービスが他のブランチも対象にできます。次回のバージョン確認で使用します。変更だけでは確認やインストールを開始しません。再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipProgramCheckUpdates" xml:space="preserve">
+    <value>更新確認とブランチの設定に従ってオンラインのバージョンサービスへ問い合わせます。実行中はボタンを無効にします。更新確認がオフの場合はネットワーク通信をせず、リモートバージョン情報を消去します。確認だけではダウンロードやインストールを行いません。新バージョンのリンクから詳細を開けます。</value>
+  </data>
+  <data name="SettingsToolTipProgramUpdateDetails" xml:space="preserve">
+    <value>クリックして、検出したバージョンとブランチの新バージョンダイアログを開きます。新しいバージョンがある場合だけ表示されます。ダイアログを開くだけでは更新をインストールしません。詳細を確認し、ダイアログ内で更新操作を選択してください。</value>
+  </data>
+  <data name="SettingsToolTipProgramResetSettings" xml:space="preserve">
+    <value>確認後、音声プレイヤービュー・音声・エディタ全体・ログ・オプション生成ツール・プログラム設定（MCP を含む）を既定値へ戻し、すぐ保存します。現在のページより広い範囲に影響しますが、すべての設定ストアを対象にはしません。確認をキャンセルすると保持します。自動再起動は行わないため、起動・初期化時だけ読む設定は再起動が必要です。</value>
+  </data>
+  <data name="SettingsToolTipMcpEnableServer" xml:space="preserve">
+    <value>オン：GUI 起動後にローカル MCP HTTP サーバーを自動起動し、MCP メニューを表示します。オフ：自動起動せず、メニューも除外します。起動時・メニュー構成時に読み取る設定で、実行中のサーバーを即座に開始・停止しません。適用には再起動が必要です。MCP はエディタの自動操作を提供するため、信頼するクライアントだけを接続してください。</value>
+  </data>
+  <data name="SettingsToolTipMcpListenPort" xml:space="preserve">
+    <value>http://127.0.0.1:&lt;ポート&gt;/mcp で要求する TCP ポートです（ループバックのみ）。有効な整数は 1～65535。0 や範囲外の値は 39281 に置き換えられ、ポート 0 の自動割り当てではありません。使用中なら次のポートを順に試し、65535 の次は 1 に戻るため、実際の接続先は設定値と異なる場合があります。サーバー起動時に読み取り、実行中の待受先は移動しません。サーバー／エディタを再起動して適用し、実際の URL を確認してください。</value>
+  </data>
+  <data name="SettingsToolTipMcpAllowAnonymous" xml:space="preserve">
+    <value>オン：clientId と requestedBy のどちらもないクライアントを通常の承認処理へ進めます。この設定だけでは実行を許可しません。オフ：そのような匿名ツール呼び出しを MCP_CLIENT_ID_REQUIRED で拒否します。指定した識別情報はクライアントのラベルであり、認証資格情報ではありません。重要：「すべての操作を既定で許可」が優先され、有効な場合はこの項目がオフでも匿名拒否を迂回します。承認要求ごとに読み取るので再起動は不要です。</value>
+  </data>
+  <data name="SettingsToolTipMcpAllowAllOperations" xml:space="preserve">
+    <value>セキュリティに関わる設定です。オン：匿名を含むすべてのクライアントについて、MCP ツール承認を通る全操作を確認なしで許可します。匿名制限を迂回し、実行前の譜面バックアップも要求しません。クライアント登録と承認ログは継続します。オフ：匿名ポリシーと記憶済みのクライアント承認を適用し、それ以外は確認を要求します（確認を表示できない呼び出しは拒否）。承認要求ごとに読み取るので再起動は不要です。完全に信頼するクライアントの場合だけ有効にしてください。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableAutoSave" xml:space="preserve">
+    <value>オン：現在アクティブなエディタの文書を既存の保存先へ定期保存します。オフ：自動保存を止め、手動保存は変更しません。保存先がない新規文書は対象外です。別のバックアップではなく現在のファイルに保存します。</value>
+  </data>
+  <data name="SettingsToolTipEditorAutoSaveInterval" xml:space="preserve">
+    <value>自動保存の間隔を分で指定します。毎分の保存回数ではありません。自動保存が有効な場合だけ使います。正の値を指定してください。小さいほど保存とディスク書き込みが頻繁になり、大きいほど未保存の時間が長くなります。</value>
+  </data>
+  <data name="SettingsToolTipEditorRecoveryUndoPosition" xml:space="preserve">
+    <value>オン：操作時の時刻を記憶し、デザインモードで取り消す際にその位置が画面外なら戻ることを要求します。オフ：現在の表示位置を保ちます。現在の WPF 実装は位置復元処理を履歴に登録しないため、この設定による位置復元は機能しません。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableUndoLimit" xml:space="preserve">
+    <value>オン：設定した件数まで操作履歴を保持し、超過分の古い履歴を破棄します。オフ：件数制限を外しますが、破棄済みの履歴は戻りません。譜面オブジェクト数ではなく、取り消し・やり直しの履歴を制限します。</value>
+  </data>
+  <data name="SettingsToolTipEditorUndoLimit" xml:space="preserve">
+    <value>件数制限が有効なときに保持する操作履歴の最大数です。0 以上の整数を指定し、0 は履歴を保持しません。上限を下げると古い履歴が直ちに失われ、取り消せなくなる場合があります。結合操作は履歴 1 件として数えます。</value>
+  </data>
+  <data name="SettingsToolTipEditorMouseWheelLength" xml:space="preserve">
+    <value>ホイール 1 段の移動量です。デザインモードの自由スクロールではピクセル、プレビューモードではミリ秒で指定します。正の値が大きいほど移動し、0 は移動しません。デザインモードの拍スナップ中は拍単位で移動し、この値を使いません。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnableHorizontalScroll" xml:space="preserve">
+    <value>オン：エディタ表示の横方向オフセットを有効にします。オフ：オフセット 0 で表示し、譜面の X 座標は変更しません。保存したオフセット値は保持します。横スクロールバー設定はこの項目がオンのときだけ操作できます。</value>
+  </data>
+  <data name="SettingsToolTipEditorShowHorizontalScrollBar" xml:space="preserve">
+    <value>横スクロールが有効な場合に使用します。オン：表示オフセット調整用の横スクロールバーを表示します。オフ：バーを隠すだけで、オフセット自体は無効にしません。譜面座標は変更しません。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlaceBeyondAudio" xml:space="preserve">
+    <value>オン：音声範囲チェックを使う配置操作で、音声の範囲外や時刻 0 より前にも配置できます。オフ：そのような配置を通知して拒否します。既存オブジェクトは削除せず、音声の長さも変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
+    <value>オン：音声プレーヤーパネルで一時停止・停止すると、エディタ表示を今回の再生開始位置へ戻します。オフ：停止位置の表示を保ちます。表示位置だけを変更し、譜面オブジェクトの時刻は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorOffsetMs" xml:space="preserve">
+    <value>描画する表示位置を現在時刻に対してミリ秒で補正します。正の値は後の位置、負の値は前の位置を表示し、最も早い位置は時刻 0 です。0 は補正しません。音楽再生、効果音、保存済みオブジェクト時刻は変更しません。</value>
+  </data>
+  <data name="SettingsToolTipEditorInjectDefaultClickSE" xml:space="preserve">
+    <value>オン：最初の小節末までに CLK がない場合、その小節内の拍に再生専用のクリック音を補います。オフ：譜面に定義した CLK のみ再生します。再生準備時に判定し、譜面ファイルへ CLK オブジェクトは追加しません。</value>
+  </data>
+  <data name="SettingsToolTipEditorHoldBodyWidth" xml:space="preserve">
+    <value>エディタの Hold 本体線幅をピクセルで指定します。整数 1～50 で、大きいほど太くなります。フォーカス移動、Enter、設定保存で確定し、不正な文字列は現在値に戻します。キャンバス用で、SVG 出力には影響しません。</value>
+  </data>
+  <data name="SettingsToolTipEditorTextureSizeScale" xml:space="preserve">
+    <value>この設定に対応するオブジェクトや節点の画像サイズ倍率です。1 は基準サイズ、小さい値は縮小、大きい値は拡大します。描画時の倍率は 0.25～3 に制限します。オブジェクトの位置や譜面座標は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorHoldBodyOpacity" xml:space="preserve">
+    <value>Hold 本体線の不透明度を 0～1 で指定します。0 は透明、1 は不透明で、大きいほど目立ちます。描画時にこの範囲へ制限します。Hold の頭、継続時間、譜面データは変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorLaneLineWidth" xml:space="preserve">
+    <value>エディタの通常レーン・接続線の幅をピクセルで指定します。描画時は 1～24 に制限し、大きいほど太くします。壁レーンと自動演奏レーンは別の線幅設定です。レーン座標は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorWallLaneLineWidth" xml:space="preserve">
+    <value>左右の壁レーン線幅をピクセルで指定します。描画時は 1～24 に制限し、大きいほど太くします。プレビューで壁レーンを非表示にしている場合、幅の変更だけでは表示されません。プレイ領域の境界座標は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorAutoPlayFaderLineWidth" xml:space="preserve">
+    <value>自動演奏レーンのガイド線幅をピクセルで指定します。描画時は 1～24 に制限し、大きいほど太くします。表示だけの変更で、レーン経路や自動演奏時のプレイヤー移動は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorDefaultCurvePrecision" xml:space="preserve">
+    <value>新しい接続オブジェクトに使うベジェ曲線の既定サンプリング間隔です。新規オブジェクトでは最低 0.01 を使います。小さいほど滑らかになりますが計算量が増え、大きいほど線分が減ります。既存オブジェクトの精度は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorLimitFPS" xml:space="preserve">
+    <value>エディタ描画の最大フレームレートを毎秒フレーム数で指定します。正の整数は上限、0 や負の値はアプリの上限なしです。低い上限は描画回数と負荷を減らせますが、動きが滑らかでなくなります。音声速度の設定ではありません。</value>
+  </data>
+  <data name="SettingsToolTipEditorParallelCountLimit" xml:space="preserve">
+    <value>プレビューの Bell・Bullet 位置計算を並列化する描画バッチごとの件数しきい値です。この数以上なら並列、未満なら順次処理します。小さいほど早く並列化しますが、スケジューリング負荷も伴います。最大オブジェクト数やスレッド数ではありません。描画実装の初期化時に読み取るため、全体に反映するには再起動してください。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldBackgroundColor" xml:space="preserve">
+    <value>色見本をクリックして、プレイ領域の塗り以外のプレビュー背景色を選びます。プレビューモードで領域描画が有効な場合だけ使い、それ以外は固定の暗い背景です。譜面の出力データは変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorEnablePlayFieldDrawing" xml:space="preserve">
+    <value>オン：プレビューで壁の境界間のプレイ領域を塗り、設定した背景色と前景色を使います。オフ：塗りを省略し、固定の暗い背景を使います。デザインモードには影響しません。壁線の非表示は別に保持される設定です。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldOptions" xml:space="preserve">
+    <value>領域描画が有効な間だけ、領域の前景色と壁線非表示を操作できます。領域描画を無効にしても値は消えません。壁線非表示の設定は、明示的にオフにするまでプレビューの壁線を隠す場合があります。</value>
+  </data>
+  <data name="SettingsToolTipEditorPlayFieldForegroundColor" xml:space="preserve">
+    <value>色見本をクリックしてプレイ領域の塗り色と alpha を選びます。領域描画が有効なプレビューだけに適用し、alpha が低いほど透明になります。壁の境界や譜面データは変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorHideWallLane" xml:space="preserve">
+    <value>オン：プレビューで壁レーン線を描画しません。オフ：通常どおり描画します。壁オブジェクトや領域境界は変えません。領域描画がオンのときだけ操作でき、領域描画をオフにしても自動では解除しません。</value>
+  </data>
+  <data name="SettingsToolTipEditorShowPlayerLocation" xml:space="preserve">
+    <value>オン：プレビューに仮想プレイヤーの印を表示し、ドラッグしてプレイヤー狙いの弾に使う位置を記録できます。オフ：印を隠し、ドラッグ操作を無効にします。この設定を切り替えると一時的な位置記録を消しますが、譜面オブジェクトは変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorShowHitEffects" xml:space="preserve">
+    <value>オン：プレビューで判定時刻に達したオブジェクトの仮想ヒット光・リングを描画します。オフ：その視覚効果を省略します。デザインモード、譜面データ、効果音再生は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorClearRecentFiles" xml:space="preserve">
+    <value>最近開いた譜面・プロジェクト・スクリプトなどの履歴を直ちに消して保存します。確認は表示しません。実際のファイルは削除せず、開いている文書も閉じません。</value>
+  </data>
+  <data name="SettingsToolTipColorValue" xml:space="preserve">
+    <value>この行に対応するレーン・オブジェクト要素の表示色です。文字は色の値、色見本はプレビューです。エディタ表示だけに影響し、種類・座標・譜面出力データは変えません。「変更」で色を選べます。</value>
+  </data>
+  <data name="SettingsToolTipColorChange" xml:space="preserve">
+    <value>この行の要素の色選択画面を開きます。変更するのはエディタの表示色で、レーンやオブジェクトの種類は変えません。設定を保存して色を保持してください。</value>
+  </data>
 </root>
