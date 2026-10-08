@@ -68,7 +68,8 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
                 flux[band] = new float[frameCount];
 
             ComputeBandFlux(interleaved, sampleCount, info.Channels, hop, frameCount, bandBins, flux, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
+            if (cancellationToken.IsCancellationRequested)
+                return null;
 
             var weightSum = 0f;
             foreach (var weight in BandWeights)
@@ -152,8 +153,8 @@ namespace OngekiFumenEditor.Kernel.Audio.Rhythm
 
             for (var frame = 0; frame < frameCount; frame++)
             {
-                if ((frame & 255) == 0)
-                    cancellationToken.ThrowIfCancellationRequested();
+                if ((frame & 255) == 0 && cancellationToken.IsCancellationRequested)
+                    return;
 
                 var start = frame * hop - FftSize / 2;
                 for (var i = 0; i < FftSize; i++)
