@@ -1,9 +1,24 @@
+using OngekiFumenEditor.Base.Attributes;
+using System.Drawing;
+
 namespace OngekiFumenEditor.Base.EditorObjects
 {
     public class Comment : OngekiTimelineObjectBase
     {
         public static string CommandName => "[CMT]";
         public override string IDShortName => CommandName;
+
+        public static readonly Color DefaultColor = Color.LightYellow;
+
+        private Color color = DefaultColor;
+
+        [LocalizableObjectPropertyBrowserAlias("CommentColor")]
+        [ObjectPropertyBrowserTipText("CommentColorTip")]
+        public Color Color
+        {
+            get => color;
+            set => Set(ref color, value);
+        }
 
         private string content = string.Empty;
 
@@ -23,6 +38,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
                 return;
 
             Content = from.Content;
+            Color = from.Color;
         }
     }
 }

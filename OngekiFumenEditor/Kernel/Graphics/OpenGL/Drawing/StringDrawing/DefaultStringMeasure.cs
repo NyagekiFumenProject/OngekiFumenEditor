@@ -22,13 +22,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
     {
         private const int MaxMeasureTextCacheCount = 4096;
 
-        /// <summary>字体实例缓存上限。缩放连续变化会产生大量像素尺寸，超过上限整体丢弃重建。</summary>
-        private const int MaxCachedFontCount = 256;
-
         private readonly Dictionary<(IFontHandle handle, FontStyle style), ResolvedTextStyle> cacheResolvedTextStyles = new();
         private readonly Dictionary<MeasureTextCacheKey, Vector2> cacheMeasureTextSizes = new();
         private readonly Queue<MeasureTextCacheKey> cacheMeasureTextSizeOrder = new();
-        private readonly Dictionary<FontCacheKey, SKFont> cacheFonts = new();
+        private readonly SkiaFontFallback fontFallback = new();
         private readonly Dictionary<TextSizeCacheKey, Vector2> cacheTextSizes = new();
         private readonly Queue<TextSizeCacheKey> cacheTextSizeOrder = new();
 
@@ -104,11 +101,10 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 return size;
 
             var filePath = GetFontFilePath(resolvedStyle.FontHandle);
-            var font = GetFont(glyphAtlas.GetFontId(filePath), Math.Max(1, fontSize),
+            var bounds = GetTextBounds(text, glyphAtlas.GetFontId(filePath), Math.Max(1, fontSize),
                 ProgramSetting.Default.DisableStringRendererAntialiasing);
-            font.MeasureText(text, out var bounds);
 
-            size = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
+            size = new Vector2(bounds.X * Math.Abs(scale.X), bounds.Y * Math.Abs(scale.Y));
             cacheMeasureTextSizes[key] = size;
             cacheMeasureTextSizeOrder.Enqueue(key);
 
@@ -122,24 +118,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         /// 取「按最终像素尺寸创建、带 hinting」的字体实例。每次绘制都新建原生 <see cref="SKFont"/>（并随即 Dispose）
         /// 是文字热路径上最大的一块固定开销，因此按 (字体, 像素尺寸, 抗锯齿) 复用。
         /// </summary>
-        internal SKFont GetFont(int fontId, int pixelSize, bool disableAntialiasing)
-        {
-            var key = new FontCacheKey(fontId, pixelSize, disableAntialiasing);
-            if (cacheFonts.TryGetValue(key, out var cached))
-                return cached;
+        internal SKFont GetFont(int fontId, int pixelSize, bool disableAntialiasing) =>
+            fontFallback.GetFont(glyphAtlas.GetTypeface(fontId), pixelSize, disableAntialiasing);
 
-            if (cacheFonts.Count >= MaxCachedFontCount)
-                ClearFontCache();
-
-            var font = new SKFont(glyphAtlas.GetTypeface(fontId), pixelSize)
-            {
-                Hinting = SKFontHinting.Full,
-                Edging = disableAntialiasing ? SKFontEdging.Alias : SKFontEdging.Antialias,
-                Subpixel = false,
-            };
-            cacheFonts[key] = font;
-            return font;
-        }
+        internal SkiaFontFallback.FontRun[] GetFontRuns(string text, int fontId) =>
+            fontFallback.GetRuns(glyphAtlas.GetTypeface(fontId), text);
 
         /// <summary>测量用画笔；返回的实例只读，调用方不得修改。</summary>
         internal SKPaint GetMeasurePaint(bool disableAntialiasing) => disableAntialiasing ? measurePaintAliased : measurePaint;
@@ -155,8 +138,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             if (cacheTextSizes.TryGetValue(key, out var cached))
                 return cached;
 
-            var font = GetFont(fontId, pixelSize, disableAntialiasing);
-            font.MeasureText(text, out var bounds, GetMeasurePaint(disableAntialiasing));
+            fontFallback.MeasureText(glyphAtlas.GetTypeface(fontId), text, pixelSize, disableAntialiasing,
+                GetMeasurePaint(disableAntialiasing), out var bounds);
             var size = new Vector2(bounds.Width, bounds.Height);
 
             cacheTextSizes[key] = size;
@@ -168,12 +151,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             return size;
         }
 
-        private void ClearFontCache()
-        {
-            foreach (var font in cacheFonts.Values)
-                font.Dispose();
-            cacheFonts.Clear();
-        }
 
         internal static string GetFontFilePath(IFontHandle handle)
         {
@@ -188,7 +165,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             cacheMeasureTextSizeOrder.Clear();
             cacheTextSizes.Clear();
             cacheTextSizeOrder.Clear();
-            ClearFontCache();
+            fontFallback.Clear();
             glyphAtlas.Dispose();
         }
 
@@ -297,26 +274,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             public override int GetHashCode() => HashCode.Combine(text, handle, fontSize, scale, style);
         }
 
-        private readonly struct FontCacheKey : IEquatable<FontCacheKey>
-        {
-            private readonly int fontId;
-            private readonly int pixelSize;
-            private readonly bool disableAntialiasing;
-
-            public FontCacheKey(int fontId, int pixelSize, bool disableAntialiasing)
-            {
-                this.fontId = fontId;
-                this.pixelSize = pixelSize;
-                this.disableAntialiasing = disableAntialiasing;
-            }
-
-            public bool Equals(FontCacheKey other) =>
-                fontId == other.fontId && pixelSize == other.pixelSize && disableAntialiasing == other.disableAntialiasing;
-
-            public override bool Equals(object obj) => obj is FontCacheKey other && Equals(other);
-
-            public override int GetHashCode() => HashCode.Combine(fontId, pixelSize, disableAntialiasing);
-        }
 
         private readonly struct TextSizeCacheKey : IEquatable<TextSizeCacheKey>
         {
@@ -350,7 +307,7 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             cacheMeasureTextSizeOrder.Clear();
             cacheTextSizes.Clear();
             cacheTextSizeOrder.Clear();
-            ClearFontCache();
+            fontFallback.Dispose();
             measurePaint.Dispose();
             measurePaintAliased.Dispose();
         }

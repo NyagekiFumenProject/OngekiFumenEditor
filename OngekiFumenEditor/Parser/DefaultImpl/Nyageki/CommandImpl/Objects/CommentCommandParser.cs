@@ -2,6 +2,8 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
+using System.Drawing;
+using System.Globalization;
 
 namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 {
@@ -12,15 +14,16 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
 
         public void ParseAndApply(OngekiFumen fumen, string[] seg)
         {
-            //$"Comment\t:\t{comment.Content}\t:\tT[{comment.TGrid.Unit},{comment.TGrid.Grid}]"
-            var bpm = new Comment();
+            var comment = new Comment();
             var data = seg[1].Split(":");
 
             var s = data[0];
-            bpm.Content = string.IsNullOrWhiteSpace(s) ? string.Empty : Base64.Decode(s);
-            bpm.TGrid = data[1].ParseToTGrid();
+            comment.Content = string.IsNullOrWhiteSpace(s) ? string.Empty : Base64.Decode(s);
+            comment.TGrid = data[1].ParseToTGrid();
+            if (data.Length > 2)
+                comment.Color = Color.FromArgb(int.Parse(data[2].Trim(), NumberStyles.HexNumber, CultureInfo.InvariantCulture));
 
-            fumen.AddObject(bpm);
+            fumen.AddObject(comment);
         }
     }
 }

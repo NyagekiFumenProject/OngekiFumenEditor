@@ -51,7 +51,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             // 关键：按「最终像素尺寸」光栅化（字号 × 纵向缩放），hinting 才真正生效。
             var pixelSize = Math.Max(1, (int)Math.Round(fontSize * Math.Abs(scale.Y)));
             var fontId = stringMeasure.GlyphAtlas.GetFontId(filePath);
-            var font = stringMeasure.GetFont(fontId, pixelSize, disableAntialiasing);
 
             var textBox = stringMeasure.GetTextBounds(text, fontId, pixelSize, disableAntialiasing);
             var boxWidth = textBox.X;
@@ -109,32 +108,33 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 renderer.PushQuad(tl, tr, br, bl, uv, color);
             }
 
-            for (var i = 0; i < text.Length; i++)
+            foreach (var run in stringMeasure.GetFontRuns(text, fontId))
             {
-                var codepoint = char.ConvertToUtf32(text, i);
-                if (char.IsHighSurrogate(text[i]))
-                    i++;
-
-                var glyph = atlas.GetGlyph(fontId, codepoint, pixelSize, disableAntialiasing);
-
-                // 取字形时可能刚好触发图集重建（那时 BeforeReset 已经把旧批次提交掉），这里重新开批继续收集。
-                OpenBatch(mvp, target);
-
-                PushLocal(new Vector2(glyph.OffsetX * stretchX, glyph.Top), glyph.Width * stretchX, glyph.Height,
-                    new Vector4(glyph.U0, glyph.V0, glyph.U1, glyph.V1));
-
-                penX += glyph.Advance * stretchX;
-
-                if (renderer.IsFull)
+                var runFontId = atlas.GetFontId(run.Typeface);
+                foreach (var rune in run.Text.EnumerateRunes())
                 {
-                    Flush();
+                    var glyph = atlas.GetGlyph(runFontId, rune.Value, pixelSize, disableAntialiasing);
+
+                    // 取字形时可能刚好触发图集重建，这里重新开批继续收集。
                     OpenBatch(mvp, target);
+
+                    PushLocal(new Vector2(glyph.OffsetX * stretchX, glyph.Top), glyph.Width * stretchX, glyph.Height,
+                        new Vector4(glyph.U0, glyph.V0, glyph.U1, glyph.V1));
+
+                    penX += glyph.Advance * stretchX;
+
+                    if (renderer.IsFull)
+                    {
+                        Flush();
+                        OpenBatch(mvp, target);
+                    }
                 }
             }
 
             // 下划线/删除线：用图集里的 1x1 实心条目画成细矩形。
             if (resolvedStyle.FontStyle != TextStyle.None)
             {
+                var font = stringMeasure.GetFont(fontId, pixelSize, disableAntialiasing);
                 font.GetFontMetrics(out var metrics);
                 var solid = atlas.GetSolid(fontId);
                 var solidUv = new Vector4(solid.U0, solid.V0, solid.U1, solid.V1);

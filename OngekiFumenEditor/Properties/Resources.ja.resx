@@ -2392,4 +2392,10 @@
   <data name="SettingsToolTipColorChange" xml:space="preserve">
     <value>この行の要素の色選択画面を開きます。変更するのはエディタの表示色で、レーンやオブジェクトの種類は変えません。設定を保存して色を保持してください。</value>
   </data>
+  <data name="CommentColor" xml:space="preserve">
+    <value>コメントの色</value>
+  </data>
+  <data name="CommentColorTip" xml:space="preserve">
+    <value>コメントの文字とタイムラインのマーカーに使う色です。既定は明るい薄黄色（#FFFFFFE0）です。</value>
+  </data>
 </root>

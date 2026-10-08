@@ -2247,6 +2247,12 @@
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
   </data>
+  <data name="CommentColor" xml:space="preserve">
+    <value>注释颜色</value>
+  </data>
+  <data name="CommentColorTip" xml:space="preserve">
+    <value>用于注释文字和时间线标记的颜色，默认为明亮浅黄色（#FFFFFFE0）。</value>
+  </data>
   <data name="EnemyLane" xml:space="preserve">
     <value>Enemy Lane</value>
   </data>

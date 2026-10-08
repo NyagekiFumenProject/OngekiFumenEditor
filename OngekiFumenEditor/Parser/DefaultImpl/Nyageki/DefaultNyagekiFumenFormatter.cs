@@ -9,6 +9,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -62,7 +63,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki
         private void ProcessComments(OngekiFumen fumen, StreamWriter sb)
         {
             foreach (var comment in fumen.Comments.OrderBy(x => x.TGrid))
-                sb.WriteLine($"Comment\t:\t{Base64.Encode(comment.Content)}\t:\tT[{comment.TGrid.Unit},{comment.TGrid.Grid}]");
+                sb.WriteLine($"Comment\t:\t{Base64.Encode(comment.Content)}\t:\tT[{comment.TGrid.Unit},{comment.TGrid.Grid}]\t:\t{comment.Color.ToArgb().ToString("X8", CultureInfo.InvariantCulture)}");
             sb.WriteLine();
         }
 

@@ -13,6 +13,7 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -90,7 +91,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
             sb.AppendLine("[COMMENT]");
 
             foreach (var o in fumen.Comments.OrderBy(x => x.TGrid))
-                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{Base64.Encode(o.Content)}");
+                sb.AppendLine($"{o.IDShortName}\t{o.TGrid.Serialize()}\t{Base64.Encode(o.Content)}\t{o.Color.ToArgb().ToString("X8", CultureInfo.InvariantCulture)}");
             sb.AppendLine();
         }
 

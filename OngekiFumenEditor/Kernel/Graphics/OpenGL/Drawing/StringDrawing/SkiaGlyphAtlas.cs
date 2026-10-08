@@ -89,6 +89,8 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
         private readonly Dictionary<AtlasKey, AtlasEntry> entries = new();
         private readonly Dictionary<string, int> fontIdMap = new(StringComparer.OrdinalIgnoreCase);
         private readonly List<SKTypeface> typefaces = new();
+        private readonly Dictionary<IntPtr, int> typefaceIdMap = new();
+        private readonly HashSet<SKTypeface> ownedTypefaces = new();
         private readonly object syncRoot = new();
 
         private DefaultOpenGLTexture texture;
@@ -115,9 +117,23 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
                 var typeface = SKTypeface.FromFile(fontFilePath)
                     ?? throw new InvalidOperationException($"无法加载字体文件：{fontFilePath}");
 
+                id = GetFontId(typeface);
+                ownedTypefaces.Add(typeface);
+                fontIdMap[fontFilePath] = id;
+                return id;
+            }
+        }
+
+        // 回退字体由 SkiaFontFallback 持有；图集只借用，不重复释放。
+        internal int GetFontId(SKTypeface typeface)
+        {
+            lock (syncRoot)
+            {
+                if (typefaceIdMap.TryGetValue(typeface.Handle, out var id))
+                    return id;
                 id = typefaces.Count;
                 typefaces.Add(typeface);
-                fontIdMap[fontFilePath] = id;
+                typefaceIdMap[typeface.Handle] = id;
                 return id;
             }
         }
@@ -299,9 +315,11 @@ namespace OngekiFumenEditor.Kernel.Graphics.OpenGL.Drawing.StringDrawing
             texture = null;
             pixelBuffer = null;
 
-            foreach (var typeface in typefaces)
+            foreach (var typeface in ownedTypefaces)
                 typeface.Dispose();
             typefaces.Clear();
+            ownedTypefaces.Clear();
+            typefaceIdMap.Clear();
             fontIdMap.Clear();
             entries.Clear();
         }

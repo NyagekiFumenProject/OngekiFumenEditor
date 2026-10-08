@@ -36,7 +36,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         {
             {"MET", FSColor.LightGreen },
             {"SFL", FSColor.LightCyan },
-            {"[CMT]", FSColor.Crimson },
             {"[INTP_SFL]", FSColor.LightSeaGreen },
             {"[KEY_SFL]", FSColor.Cornsilk },
             {"[INTP_SFL_End]", FSColor.LightSeaGreen },
@@ -53,8 +52,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         // docs/Performance_Issues.md #2 Benchmark 复核结论)。
         private static readonly IComparer<RegisterDrawingInfo> colorComparer =
             Comparer<RegisterDrawingInfo>.Create((a, b) =>
-                colors[a.TimelineObject.IDShortName].PackedValue
-                    .CompareTo(colors[b.TimelineObject.IDShortName].PackedValue));
+                GetColor(a.TimelineObject).PackedValue
+                    .CompareTo(GetColor(b.TimelineObject).PackedValue));
+
+        private static FSColor GetColor(OngekiTimelineObjectBase obj) => obj is Comment comment
+            ? new FSColor(comment.Color.R, comment.Color.G, comment.Color.B, comment.Color.A)
+            : colors[obj.IDShortName];
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<OngekiTimelineObjectBase> objs)
         {
@@ -92,7 +95,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     var per = 1.0f * target.CurrentDrawingTargetContext.ViewRelativeRect.Width / actualItems.Count;
                     for (var i = 0; i < actualItems.Count; i++)
                     {
-                        var c = colors[actualItems[i].TimelineObject.IDShortName];
+                        var c = GetColor(actualItems[i].TimelineObject);
                         var color = new Vector4(c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f);
                         lineVertices.Add(new(new(per * i, y), color, VertexDash.Solider));
                         lineVertices.Add(new(new(per * (i + 1), y), color, VertexDash.Solider));
@@ -151,7 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             for (var idx = 0; idx < sortedItems.Count; idx++)
             {
                 var obj = sortedItems[idx].TimelineObject;
-                var c = colors[obj.IDShortName];
+                var c = GetColor(obj);
 
                 if (idx != 0)
                 {

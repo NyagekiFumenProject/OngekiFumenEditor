@@ -2256,6 +2256,12 @@
   <data name="Comment" xml:space="preserve">
     <value>Comment</value>
   </data>
+  <data name="CommentColor" xml:space="preserve">
+    <value>Comment color</value>
+  </data>
+  <data name="CommentColorTip" xml:space="preserve">
+    <value>Color of the comment text and its timeline marker. The default is light yellow (#FFFFFFE0).</value>
+  </data>
   <data name="EnemyLane" xml:space="preserve">
     <value>Enemy Lane</value>
   </data>

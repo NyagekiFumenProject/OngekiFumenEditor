@@ -21,6 +21,12 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             public string FilePath { get; set; }
         }
 
+        private readonly SkiaFontFallback fontFallback = new();
+        private readonly Dictionary<(string family, bool bold, bool italic), SKTypeface> typefaces = new();
+        private readonly SKPaint antialiasedPaint = new() { IsAntialias = true };
+        private readonly SKPaint aliasedPaint = new() { IsAntialias = false };
+        private readonly SKPaint linePaint = new();
+
         private static IEnumerable<IFontHandle> defaultSupportFonts;
         public static IEnumerable<IFontHandle> DefaultSupportFonts { get; } = GetSupportFonts();
         public IEnumerable<IFontHandle> SupportFonts => DefaultSupportFonts;
@@ -67,32 +73,29 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             .ToArray();
         }
 
+        private SKTypeface GetTypeface(IFontHandle handle, FontStyle style)
+        {
+            var family = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
+            var bold = style.HasFlag(FontStyle.Bold);
+            var italic = style.HasFlag(FontStyle.Italic);
+            var key = (family, bold, italic);
+            if (typefaces.TryGetValue(key, out var typeface))
+                return typeface;
+
+            typeface = SKTypeface.FromFamilyName(family,
+                bold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
+                SKFontStyleWidth.Normal,
+                italic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright) ?? SKTypeface.Default;
+            typefaces[key] = typeface;
+            return typeface;
+        }
+
         public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle)
         {
             text ??= string.Empty;
-
-            using var paint = new SKPaint();
-            paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;
-
-            using var font = new SKFont();
-
-            var isBold = style.HasFlag(FontStyle.Bold);
-            var isItalic = style.HasFlag(FontStyle.Italic);
-            var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
-
-            using var typeface = SKTypeface.FromFamilyName(
-                   typefaceName,
-                   isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
-                   SKFontStyleWidth.Normal,
-                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright) ?? SKTypeface.Default;
-
-            font.Typeface = typeface;
-            font.Size = fontSize;
-            font.Edging = paint.IsAntialias ? SKFontEdging.SubpixelAntialias : SKFontEdging.Alias;
-            font.Hinting = SKFontHinting.Full;
-            font.Subpixel = true;
-
-            font.MeasureText(text, out var bounds, paint);
+            var aliased = ProgramSetting.Default.DisableStringRendererAntialiasing;
+            fontFallback.MeasureText(GetTypeface(handle, style), text, fontSize, aliased,
+                aliased ? aliasedPaint : antialiasedPaint, out var bounds, true);
             return new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
         }
 
@@ -108,32 +111,14 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
 
             var canvas = Canvas;
 
-            using var paint = new SKPaint();
-            paint.IsAntialias = !ProgramSetting.Default.DisableStringRendererAntialiasing;
+            var aliased = ProgramSetting.Default.DisableStringRendererAntialiasing;
+            var paint = aliased ? aliasedPaint : antialiasedPaint;
             paint.ColorF = new(color.X, color.Y, color.Z, color.W);
-
-            using var font = new SKFont();
-
-            var isBold = style.HasFlag(FontStyle.Bold);
-            var isItalic = style.HasFlag(FontStyle.Italic);
             var isUnderline = style.HasFlag(FontStyle.Underline);
             var isStrike = style.HasFlag(FontStyle.Strike);
 
-            var typefaceName = (handle ?? DefaultFont)?.FamilyName ?? SKTypeface.Default.FamilyName;
-
-            using var typeface = SKTypeface.FromFamilyName(
-                   typefaceName,
-                   isBold ? SKFontStyleWeight.Bold : SKFontStyleWeight.Normal,
-                   SKFontStyleWidth.Normal,
-                    isItalic ? SKFontStyleSlant.Oblique : SKFontStyleSlant.Upright) ?? SKTypeface.Default;
-
-            font.Typeface = typeface;
-            font.Size = fontSize;
-            font.Edging = paint.IsAntialias ? SKFontEdging.SubpixelAntialias : SKFontEdging.Alias;
-            font.Hinting = SKFontHinting.Full;
-            font.Subpixel = true;
-
-            font.MeasureText(text, out var bounds, paint);
+            var typeface = GetTypeface(handle, style);
+            fontFallback.MeasureText(typeface, text, fontSize, aliased, paint, out var bounds, true);
             measureTextSize = new Vector2(bounds.Width * Math.Abs(scale.X), bounds.Height * Math.Abs(scale.Y));
             //adjust pos thought origin and size
 
@@ -146,14 +131,20 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             canvas.Scale(scale.X, scale.Y);
 
             var adjustPos = new SKPoint(-offsetPos.X, offsetPos.Y);
-            canvas.DrawText(text, adjustPos, font, paint);
-            target.RenderContext.PerfomenceMonitor.CountDrawCall();
+            var penX = adjustPos.X;
+            foreach (var run in fontFallback.GetRuns(typeface, text))
+            {
+                var font = fontFallback.GetFont(run.Typeface, fontSize, aliased, true);
+                canvas.DrawText(run.Text, penX, adjustPos.Y, font, paint);
+                penX += font.MeasureText(run.Text, paint);
+                target.RenderContext.PerfomenceMonitor.CountDrawCall();
+            }
 
             if (isUnderline || isStrike)
             {
-                using var linePaint = new SKPaint();
                 linePaint.IsAntialias = paint.IsAntialias;
                 linePaint.Color = new SKColor((byte)(color.X * 255), (byte)(color.Y * 255), (byte)(color.Z * 255), (byte)(color.W * 255));
+                var font = fontFallback.GetFont(typeface, fontSize, aliased, true);
                 font.GetFontMetrics(out var metrics);
                 linePaint.StrokeWidth = metrics.UnderlineThickness ?? 2;
 
@@ -171,13 +162,19 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
                 }
             }
 
-            typeface?.Dispose();
             OnEnd();
         }
 
         public void Dispose()
         {
-
+            fontFallback.Dispose();
+            foreach (var typeface in typefaces.Values)
+                if (!ReferenceEquals(typeface, SKTypeface.Default))
+                    typeface.Dispose();
+            typefaces.Clear();
+            antialiasedPaint.Dispose();
+            aliasedPaint.Dispose();
+            linePaint.Dispose();
         }
     }
 }
