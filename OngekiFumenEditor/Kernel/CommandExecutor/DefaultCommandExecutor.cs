@@ -107,8 +107,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                 //calculate duration
                 if (File.Exists(opt.AudioFilePath))
                 {
-                    var audioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(opt.AudioFilePath);
-                    opt.Duration = audioPlayer.Duration;
+                    opt.Duration = await IoC.Get<IAudioManager>().GetAudioDurationAsync(opt.AudioFilePath);
                 }
                 else
                 {

@@ -300,6 +300,63 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             return new NAudioSoundPlayer(new CachedSound(processedProvider), this);
         }
 
+        public async Task<TimeSpan> GetAudioDurationAsync(string filePath, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (string.IsNullOrWhiteSpace(filePath))
+                return default;
+
+            if (await TryReadDurationFromHeaderAsync(filePath, cancellationToken) is { } headerDuration)
+                return headerDuration;
+
+            // 兜底：与旧行为一致（整曲解码），任何格式都不会退化
+            using var audio = await LoadAudioAsync(filePath, cancellationToken);
+            return audio?.Duration ?? default;
+        }
+
+        /// <summary>
+        /// 从文件头/帧索引取时长，不做整曲解码。取不到（未知格式、坏文件）返回 null，由调用方回退。
+        /// </summary>
+        private static async Task<TimeSpan?> TryReadDurationFromHeaderAsync(string filePath, CancellationToken cancellationToken)
+        {
+            try
+            {
+                if (filePath.EndsWith(".acb", StringComparison.OrdinalIgnoreCase))
+                {
+                    // acb 先转 wav（结果有落盘缓存），再读 wav 头
+                    filePath = await AcbConverter.ConvertAcbFileToWavFile(filePath);
+                    if (string.IsNullOrEmpty(filePath))
+                        return null;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (filePath.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                {
+                    using var reader = new WaveFileReader(filePath);
+                    return reader.TotalTime;
+                }
+
+                if (filePath.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase))
+                {
+                    using var reader = new Mp3FileReader(filePath);
+                    return reader.TotalTime;
+                }
+
+                return null;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                Log.LogWarn($"Can't read audio duration from header ({filePath}), fallback to full decode : {e.Message}");
+                return null;
+            }
+        }
+
         public void Dispose()
         {
             Log.LogDebug("call DefaultAudioManager.Dispose()");

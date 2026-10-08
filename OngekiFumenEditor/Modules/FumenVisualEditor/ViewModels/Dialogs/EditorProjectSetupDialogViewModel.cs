@@ -28,9 +28,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
             if (dialog.ShowDialog() == true)
             {
                 EditorProjectData.AudioFilePath = dialog.FileName;
-                using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(EditorProjectData.AudioFilePath);
-                var durationMs = audio.Duration;
-                EditorProjectData.AudioDuration = durationMs;
+                EditorProjectData.AudioDuration = await IoC.Get<IAudioManager>().GetAudioDurationAsync(EditorProjectData.AudioFilePath);
             }
         }
 

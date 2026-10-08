@@ -35,8 +35,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
                 proj.BaseBPM = baseBpm ?? fumen.MetaInfo.BpmDefinition.First;
             }
 
-            using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioPath);
-            proj.AudioDuration = audio.Duration;
+            proj.AudioDuration = await IoC.Get<IAudioManager>().GetAudioDurationAsync(audioPath);
             return proj;
         }
 
@@ -53,8 +52,7 @@ namespace OngekiFumenEditor.Kernel.Mcp.Tools.Editor
             }
             else
             {
-                using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioPath);
-                proj.AudioDuration = audio.Duration;
+                proj.AudioDuration = await IoC.Get<IAudioManager>().GetAudioDurationAsync(audioPath);
             }
 
             if (string.IsNullOrWhiteSpace(fumenPath))

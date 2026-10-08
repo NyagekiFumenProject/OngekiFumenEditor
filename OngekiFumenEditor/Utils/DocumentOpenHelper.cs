@@ -180,7 +180,7 @@ namespace OngekiFumenEditor.Utils
                 session.CancellationToken.ThrowIfCancellationRequested();
                 if (!File.Exists(audioFile))
                     return null;
-                audioDuration = await CalcAudioDuration(audioFile, session.CancellationToken);
+                audioDuration = await IoC.Get<IAudioManager>().GetAudioDurationAsync(audioFile, session.CancellationToken);
             }
 
             session.ReportStep(EditorLoadingStep.Parsing);
@@ -276,14 +276,7 @@ namespace OngekiFumenEditor.Utils
             if (!File.Exists(audioFile))
                 return default;
 
-            return (audioFile, await CalcAudioDuration(audioFile));
-        }
-
-        private static async Task<TimeSpan> CalcAudioDuration(string audioFilePath, CancellationToken cancellationToken = default)
-        {
-            using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(audioFilePath, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            return audio.Duration;
+            return (audioFile, await IoC.Get<IAudioManager>().GetAudioDurationAsync(audioFile));
         }
     }
 }

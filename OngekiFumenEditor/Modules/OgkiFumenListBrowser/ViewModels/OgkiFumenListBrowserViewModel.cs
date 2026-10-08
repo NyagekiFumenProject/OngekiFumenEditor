@@ -306,13 +306,12 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
                 newProj.Fumen = fumen;
                 newProj.AudioFilePath = diff.RefSet.AudioFilePath;
 
-                using var audio = await IoC.Get<IAudioManager>().LoadAudioAsync(diff.RefSet.AudioFilePath, session.CancellationToken);
-                if (audio is null)
+                if (string.IsNullOrWhiteSpace(diff.RefSet.AudioFilePath))
                 {
                     MessageBox.Show(Resources.CantOpenByAudioFileNotFound.Format(diff.RefSet.Title));
                     return;
                 }
-                newProj.AudioDuration = audio.Duration;
+                newProj.AudioDuration = await IoC.Get<IAudioManager>().GetAudioDurationAsync(diff.RefSet.AudioFilePath, session.CancellationToken);
 
                 var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
                 var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
