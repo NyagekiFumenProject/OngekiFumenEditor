@@ -7793,15 +7793,6 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Auto save all modified documents.
-        /// </summary>
-        public static string AutoSaveAllDirtyDocuments {
-            get {
-                return ResourceManager.GetString("AutoSaveAllDirtyDocuments", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Texture size scale.
         /// </summary>
         public static string TextureSizeScale {

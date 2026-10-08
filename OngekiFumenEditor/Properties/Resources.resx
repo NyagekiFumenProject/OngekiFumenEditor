@@ -2790,9 +2790,6 @@
   <data name="DisableStringRendererAntialiasing" xml:space="preserve">
     <value>Disable text antialiasing</value>
   </data>
-  <data name="AutoSaveAllDirtyDocuments" xml:space="preserve">
-    <value>Auto save all modified documents</value>
-  </data>
   <data name="TextureSizeScale" xml:space="preserve">
     <value>Texture size scale</value>
   </data>

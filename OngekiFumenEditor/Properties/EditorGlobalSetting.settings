@@ -131,9 +131,6 @@
     <Setting Name="HoldBodyWidth" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">13</Value>
     </Setting>
-    <Setting Name="AutoSaveAllDirtyDocuments" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="TextureSizeScale" Type="System.Double" Scope="User">
       <Value Profile="(Default)">1</Value>
     </Setting>

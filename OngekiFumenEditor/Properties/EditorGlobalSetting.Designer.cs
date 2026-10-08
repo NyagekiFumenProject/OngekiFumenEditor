@@ -541,18 +541,6 @@ namespace OngekiFumenEditor.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool AutoSaveAllDirtyDocuments {
-            get {
-                return ((bool)(this["AutoSaveAllDirtyDocuments"]));
-            }
-            set {
-                this["AutoSaveAllDirtyDocuments"] = value;
-            }
-        }
-
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
         public double TextureSizeScale {
             get {

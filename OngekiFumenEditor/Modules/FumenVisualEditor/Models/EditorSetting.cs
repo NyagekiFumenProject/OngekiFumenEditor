@@ -325,8 +325,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 //以下设置由各自的绘制/工具目标直接读取 EditorGlobalSetting.Default，本身不需要在 EditorSetting 上做包装，
                 //这里补空 case 只是让 default 分支的 LogWarn 不再被无关设置变更刷屏。
-                case nameof(Properties.EditorGlobalSetting.AutoSaveAllDirtyDocuments):
-                    break;
                 case nameof(Properties.EditorGlobalSetting.TextureSizeScale):
                     break;
                 case nameof(Properties.EditorGlobalSetting.HoldBodyOpacity):
