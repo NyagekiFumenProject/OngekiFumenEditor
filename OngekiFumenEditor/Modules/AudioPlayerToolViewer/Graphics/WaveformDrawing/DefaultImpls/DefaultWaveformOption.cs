@@ -58,34 +58,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             }
         }
 
-
-
-
-        private float rhythmCurveGamma = DefaultWaveformSettings.Default.RhythmCurveGamma;
+        private RhythmCurveIntensity rhythmCurveIntensity = (RhythmCurveIntensity)DefaultWaveformSettings.Default.RhythmCurveIntensity;
         [ObjectPropertyBrowserShow]
-        [LocalizableObjectPropertyBrowserAlias(nameof(RhythmCurveGamma))]
-        public float RhythmCurveGamma
+        [LocalizableObjectPropertyBrowserAlias(nameof(RhythmCurveIntensity))]
+        public RhythmCurveIntensity RhythmCurveIntensity
         {
-            get => rhythmCurveGamma;
+            get => rhythmCurveIntensity;
             set
             {
-                var clamped = System.Math.Clamp(value, RhythmCurveTone.MinGamma, RhythmCurveTone.MaxGamma);
-                if (Set(ref rhythmCurveGamma, clamped))
-                    DefaultWaveformSettings.Default.RhythmCurveGamma = clamped;
-            }
-        }
-
-        private float rhythmCurveEmphasis = DefaultWaveformSettings.Default.RhythmCurveEmphasis;
-        [ObjectPropertyBrowserShow]
-        [LocalizableObjectPropertyBrowserAlias(nameof(RhythmCurveEmphasis))]
-        public float RhythmCurveEmphasis
-        {
-            get => rhythmCurveEmphasis;
-            set
-            {
-                var clamped = System.Math.Clamp(value, 0f, RhythmCurveTone.MaxEmphasis);
-                if (Set(ref rhythmCurveEmphasis, clamped))
-                    DefaultWaveformSettings.Default.RhythmCurveEmphasis = clamped;
+                var normalized = System.Enum.IsDefined(value) ? value : RhythmCurveIntensity.Enhanced;
+                if (Set(ref rhythmCurveIntensity, normalized))
+                    DefaultWaveformSettings.Default.RhythmCurveIntensity = (int)normalized;
             }
         }
 
@@ -100,8 +83,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
             ShowObjectPlaceLine = DefaultWaveformSettings.Default.ShowObjectPlaceLine;
             ShowTimingLine = DefaultWaveformSettings.Default.ShowTimingLine;
             ShowRhythmCurve = DefaultWaveformSettings.Default.ShowRhythmCurve;
-            RhythmCurveGamma = DefaultWaveformSettings.Default.RhythmCurveGamma;
-            RhythmCurveEmphasis = DefaultWaveformSettings.Default.RhythmCurveEmphasis;
+            RhythmCurveIntensity = System.Enum.IsDefined((RhythmCurveIntensity)DefaultWaveformSettings.Default.RhythmCurveIntensity)
+                ? (RhythmCurveIntensity)DefaultWaveformSettings.Default.RhythmCurveIntensity
+                : RhythmCurveIntensity.Enhanced;
         }
 
         public override void Reload()

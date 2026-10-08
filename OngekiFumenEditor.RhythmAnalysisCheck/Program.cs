@@ -98,30 +98,47 @@ internal static class Program
         RhythmCurveTone.Identity.Apply(source, mapped, scratch, 200);
         Check(source.Zip(mapped).All(p => MathF.Abs(p.First - p.Second) < 1e-6f), "tone: 恒等参数不改变数值", "");
 
-        // 2) 平坦曲线保持平坦：强调项不会凭空造峰（v - blur(v) == 0）
+        // 2) 「默认」档（= 色调映射上线前的观感）必须是恒等映射
+        var legacy = new float[frameCount];
+        RhythmCurveTone.FromIntensity(RhythmCurveIntensity.Default).Apply(source, legacy, scratch, 200);
+        Check(source.Zip(legacy).All(p => MathF.Abs(p.First - p.Second) < 1e-6f), "tone: 默认档 = 原样输出", "");
+
+        // 3) 平坦曲线保持平坦：强调项不会凭空造峰（v - blur(v) == 0）
         var flat = new float[frameCount];
         Array.Fill(flat, 0.42f);
-        RhythmCurveTone.Default.Apply(flat, mapped, scratch, 200);
-        Check(mapped.Max() - mapped.Min() < 1e-3f, "tone: 平坦曲线保持平坦（不造假峰）",
-            $"max-min={mapped.Max() - mapped.Min():F4}");
+        foreach (var intensity in new[] { RhythmCurveIntensity.Enhanced, RhythmCurveIntensity.Strong })
+        {
+            RhythmCurveTone.FromIntensity(intensity).Apply(flat, mapped, scratch, 200);
+            Check(mapped.Max() - mapped.Min() < 1e-3f, $"tone: {intensity} 平坦曲线保持平坦（不造假峰）",
+                $"max-min={mapped.Max() - mapped.Min():F4}");
+        }
 
-        // 3) 峰谷对比：0.25 基线 + 每 40 帧一个峰
+        // 4) 峰谷对比：0.25 基线 + 每 40 帧一个峰；档位越高对比越大、峰顶始终满幅
         var spiky = new float[frameCount];
         for (var i = 0; i < frameCount; i++)
             spiky[i] = i % 40 == 0 ? 1f : 0.25f;
-        RhythmCurveTone.Default.Apply(spiky, mapped, scratch, 200);
-        var peakValue = Enumerable.Range(0, frameCount / 40).Min(k => mapped[k * 40]);
         var baselineBefore = spiky.Where((_, i) => i % 40 != 0).Average();
-        var baselineAfter = mapped.Where((_, i) => i % 40 != 0).Average();
         var peakBefore = spiky.Where((_, i) => i % 40 == 0).Average();
-        var peakAfter = mapped.Where((_, i) => i % 40 == 0).Average();
         var contrastBefore = baselineBefore > 0 ? peakBefore / baselineBefore : 0;
-        var contrastAfter = baselineAfter > 0 ? peakAfter / baselineAfter : 0;
-        Check(baselineAfter <= baselineBefore * 0.7f, "tone: 基线被压低",
-            $"{baselineBefore:F3} -> {baselineAfter:F3}");
-        Check(peakValue >= 0.9f, "tone: 峰顶仍保持满幅", $"min peak={peakValue:F3}");
-        Check(contrastAfter >= contrastBefore * 1.8f, "tone: 峰谷比明显拉开",
-            $"{contrastBefore:F2} -> {contrastAfter:F2}");
+        var previousContrast = contrastBefore;
+
+        foreach (var intensity in new[] { RhythmCurveIntensity.Enhanced, RhythmCurveIntensity.Strong })
+        {
+            RhythmCurveTone.FromIntensity(intensity).Apply(spiky, mapped, scratch, 200);
+            var peakValue = Enumerable.Range(0, frameCount / 40).Min(k => mapped[k * 40]);
+            var baselineAfter = mapped.Where((_, i) => i % 40 != 0).Average();
+            var peakAfter = mapped.Where((_, i) => i % 40 == 0).Average();
+            var contrastAfter = baselineAfter > 0 ? peakAfter / baselineAfter : 0;
+
+            Check(baselineAfter <= baselineBefore * 0.7f, $"tone: {intensity} 基线被压低",
+                $"{baselineBefore:F3} -> {baselineAfter:F3}");
+            Check(peakValue >= 0.9f, $"tone: {intensity} 峰顶仍保持满幅", $"min peak={peakValue:F3}");
+            Check(contrastAfter >= contrastBefore * 1.8f, $"tone: {intensity} 峰谷比明显拉开",
+                $"{contrastBefore:F2} -> {contrastAfter:F2}");
+            Check(contrastAfter >= previousContrast, $"tone: {intensity} 不弱于更低档位",
+                $"{previousContrast:F2} -> {contrastAfter:F2}");
+            previousContrast = contrastAfter;
+        }
 
         // 4) 端到端：真实合成曲线（150BPM 鼓组）走默认映射后的 p90/mean
         var drums = SyntheticClickTrack.CreateDrumPattern(150, 30);
@@ -136,7 +153,7 @@ internal static class Program
         Array.Copy(envelope.Total, raw, raw.Length);
         var toned = new float[envelope.FrameCount];
         var toneScratch = new float[envelope.FrameCount];
-        RhythmCurveTone.Default.Apply(raw, toned, toneScratch, envelope.FrameRateHz);
+        RhythmCurveTone.FromIntensity(RhythmCurveIntensity.Enhanced).Apply(raw, toned, toneScratch, envelope.FrameRateHz);
 
         // 面板上的观感 = 峰高 / 基线：基线（p50）必须明显下降，峰顶必须保持
         var rawSorted = raw.OrderBy(x => x).ToArray();
@@ -342,9 +359,9 @@ internal static class Program
         // 面板画的是映射之后的曲线，这里把同一套默认参数也跑一遍，便于用数字对照
         var toned = new float[envelope.FrameCount];
         var toneScratch = new float[envelope.FrameCount];
-        RhythmCurveTone.Default.Apply(envelope.Total, toned, toneScratch, envelope.FrameRateHz);
+        RhythmCurveTone.FromIntensity(RhythmCurveIntensity.Enhanced).Apply(envelope.Total, toned, toneScratch, envelope.FrameRateHz);
         var tonedStats = Stats(toned);
-        Console.WriteLine($"curve(默认映射 γ={RhythmCurveTone.DefaultGamma} λ={RhythmCurveTone.DefaultEmphasis}): " +
+        Console.WriteLine($"curve(默认档 Enhanced: γ={RhythmCurveTone.EnhancedGamma} λ={RhythmCurveTone.EnhancedEmphasis}): " +
             $"mean={tonedStats.Mean:F3} p90={tonedStats.P90:F3} max={toned.Max():F3} " +
             $"p90/mean={(tonedStats.Mean > 0 ? tonedStats.P90 / tonedStats.Mean : 0):F2}");
 

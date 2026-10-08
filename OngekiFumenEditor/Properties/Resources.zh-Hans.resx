@@ -1401,11 +1401,8 @@
   <data name="ShowDebugInfo" xml:space="preserve">
     <value>显示调试信息</value>
   </data>
-  <data name="RhythmCurveGamma" xml:space="preserve">
-    <value>节奏曲线对比度 (γ)</value>
-  </data>
-  <data name="RhythmCurveEmphasis" xml:space="preserve">
-    <value>节奏曲线强调 (λ)</value>
+  <data name="RhythmCurveIntensity" xml:space="preserve">
+    <value>节奏曲线强度</value>
   </data>
   <data name="ShowRhythmCurve" xml:space="preserve">
     <value>显示节奏曲线</value>

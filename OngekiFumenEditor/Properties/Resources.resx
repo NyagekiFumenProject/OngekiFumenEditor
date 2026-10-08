@@ -1401,11 +1401,8 @@
   <data name="ShowDebugInfo" xml:space="preserve">
     <value>Show debug info</value>
   </data>
-  <data name="RhythmCurveGamma" xml:space="preserve">
-    <value>Rhythm curve contrast (gamma)</value>
-  </data>
-  <data name="RhythmCurveEmphasis" xml:space="preserve">
-    <value>Rhythm curve emphasis (lambda)</value>
+  <data name="RhythmCurveIntensity" xml:space="preserve">
+    <value>Rhythm curve intensity</value>
   </data>
   <data name="ShowRhythmCurve" xml:space="preserve">
     <value>Display rhythm curve</value>

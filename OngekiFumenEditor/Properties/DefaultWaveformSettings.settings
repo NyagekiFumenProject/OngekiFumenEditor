@@ -32,11 +32,8 @@
     <Setting Name="ShowRhythmCurve" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="RhythmCurveGamma" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">1.5</Value>
-    </Setting>
-    <Setting Name="RhythmCurveEmphasis" Type="System.Single" Scope="User">
-      <Value Profile="(Default)">0.7</Value>
+    <Setting Name="RhythmCurveIntensity" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="WaveformRhythmCurveColor" Type="System.Drawing.Color" Scope="User">
       <Value Profile="(Default)">90, 230, 160</Value>

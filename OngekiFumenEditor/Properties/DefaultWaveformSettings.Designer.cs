@@ -144,27 +144,17 @@ namespace OngekiFumenEditor.Properties {
 
 
 
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
-        public float RhythmCurveGamma {
-            get {
-                return ((float)(this["RhythmCurveGamma"]));
-            }
-            set {
-                this["RhythmCurveGamma"] = value;
-            }
-        }
+
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0.7")]
-        public float RhythmCurveEmphasis {
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int RhythmCurveIntensity {
             get {
-                return ((float)(this["RhythmCurveEmphasis"]));
+                return ((int)(this["RhythmCurveIntensity"]));
             }
             set {
-                this["RhythmCurveEmphasis"] = value;
+                this["RhythmCurveIntensity"] = value;
             }
         }
 

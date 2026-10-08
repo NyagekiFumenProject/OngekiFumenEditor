@@ -21,14 +21,21 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         /// <summary>强调核的时间宽度（秒）：与节拍包宽（约 100–300ms）同量级。</summary>
         public const float EmphasisScaleSeconds = 0.1f;
 
-        public const float DefaultGamma = 1.5f;
-        public const float DefaultEmphasis = 0.7f;
-
-        /// <summary>默认：γ=1.5 压基线 + λ=0.7 轻度强调。</summary>
-        public static RhythmCurveTone Default { get; } = new(DefaultGamma, DefaultEmphasis);
+        public const float EnhancedGamma = 1.5f;
+        public const float EnhancedEmphasis = 0.7f;
+        public const float StrongGamma = 2.0f;
+        public const float StrongEmphasis = 1.3f;
 
         /// <summary>不做任何映射（几何/单元用途）。</summary>
         public static RhythmCurveTone Identity { get; } = new(1f, 0f);
+
+        /// <summary>把面板上的强度档位换算成实际的 (γ, λ)。</summary>
+        public static RhythmCurveTone FromIntensity(RhythmCurveIntensity intensity) => intensity switch
+        {
+            RhythmCurveIntensity.Enhanced => new(EnhancedGamma, EnhancedEmphasis),
+            RhythmCurveIntensity.Strong => new(StrongGamma, StrongEmphasis),
+            _ => Identity,
+        };
 
         /// <summary>
         /// 把 <paramref name="source"/> 映射到 <paramref name="destination"/>（两者必须不同，长度相同）。
