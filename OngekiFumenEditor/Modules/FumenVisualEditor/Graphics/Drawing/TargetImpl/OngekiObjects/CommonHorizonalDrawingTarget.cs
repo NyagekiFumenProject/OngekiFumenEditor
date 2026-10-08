@@ -149,17 +149,45 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 _ => string.Empty
             };
 
-            var x = 0f;
+            var slash = "/";
+            var slashSize = builder.MeasureString(slash, Vector2.One, 16, FontStyle.Normal, default);
+            var rightWidth = 0f;
+            var rightItemCount = 0;
+
+            // Lane blockers are drawn against one of the two walls. Keep their
+            // labels on the matching side so the label follows the rendered wall.
+            for (var idx = 0; idx < sortedItems.Count; idx++)
+            {
+                var obj = sortedItems[idx].TimelineObject;
+                if (!IsRightLaneBlock(obj))
+                    continue;
+
+                if (rightItemCount++ != 0)
+                    rightWidth += slashSize.X;
+
+                rightWidth += builder.MeasureString(
+                    " " + formatObj(obj) + " ",
+                    Vector2.One,
+                    16,
+                    FontStyle.Normal,
+                    default).X;
+            }
+
+            var leftX = 0f;
+            var rightX = target.CurrentDrawingTargetContext.ViewRelativeRect.ButtomRight.X - rightWidth;
+            var hasLeftItem = false;
+            var hasRightItem = false;
+
             // sortedItems 已经按 color.PackedValue 排好序;不再 Select+OrderBy。
             for (var idx = 0; idx < sortedItems.Count; idx++)
             {
                 var obj = sortedItems[idx].TimelineObject;
                 var c = GetColor(obj);
+                var isRightItem = IsRightLaneBlock(obj);
+                var x = isRightItem ? rightX : leftX;
 
-                if (idx != 0)
+                if (isRightItem ? hasRightItem : hasLeftItem)
                 {
-                    var slash = "/";
-                    var slashSize = builder.MeasureString(slash, Vector2.One, 16, FontStyle.Normal, default);
                     builder.DrawString(
                         slash,
                         new Vector2(x, y + 12),
@@ -206,7 +234,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     }, 1);
                 }
                 x += size.X;
+
+                if (isRightItem)
+                {
+                    rightX = x;
+                    hasRightItem = true;
+                }
+                else
+                {
+                    leftX = x;
+                    hasLeftItem = true;
+                }
             }
         }
+
+        private static bool IsRightLaneBlock(OngekiTimelineObjectBase obj) => obj switch
+        {
+            LaneBlockArea o => o.Direction == LaneBlockArea.BlockDirection.Right,
+            LaneBlockArea.LaneBlockAreaEndIndicator o => o.RefLaneBlockArea?.Direction == LaneBlockArea.BlockDirection.Right,
+            _ => false
+        };
     }
 }
