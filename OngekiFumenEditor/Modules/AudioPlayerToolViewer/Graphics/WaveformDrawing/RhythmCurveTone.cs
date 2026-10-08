@@ -29,6 +29,17 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
         /// <summary>不做任何映射（几何/单元用途）。</summary>
         public static RhythmCurveTone Identity { get; } = new(1f, 0f);
 
+        /// <summary>
+        /// 模糊核的帧半径：三角核 = 两次半窗 h 的盒式滤波，有效半径 2h（h 与 <see cref="Apply"/> 内部一致）。
+        /// 调用方据此把读取范围向两侧外扩，模糊核才不会把「窗口边缘」当成「信号边缘」。
+        /// </summary>
+        public int GetBlurRadiusFrames(double frameRateHz) => GetHalfWindowFrames(frameRateHz) * 2;
+
+        private int GetHalfWindowFrames(double frameRateHz)
+            => Emphasis > 0 && frameRateHz > 0
+                ? Math.Max(1, (int)Math.Round(EmphasisScaleSeconds * frameRateHz / 2))
+                : 0;
+
         /// <summary>把面板上的强度档位换算成实际的 (γ, λ)。</summary>
         public static RhythmCurveTone FromIntensity(RhythmCurveIntensity intensity) => intensity switch
         {
@@ -49,10 +60,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
 
             var gamma = Math.Clamp(Gamma, MinGamma, MaxGamma);
             var emphasis = Math.Clamp(Emphasis, 0, MaxEmphasis);
+            var halfWindow = GetHalfWindowFrames(frameRateHz);
 
-            if (emphasis > 0 && frameRateHz > 0)
+            if (emphasis > 0 && halfWindow > 0)
             {
-                var halfWindow = Math.Max(1, (int)Math.Round(EmphasisScaleSeconds * frameRateHz / 2));
                 BoxBlur(source, scratch, halfWindow);
                 BoxBlur(scratch, destination, halfWindow);          // 两次盒式 → 三角核（高斯近似）
 

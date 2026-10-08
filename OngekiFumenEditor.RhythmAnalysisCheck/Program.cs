@@ -140,7 +140,12 @@ internal static class Program
             previousContrast = contrastAfter;
         }
 
-        // 4) 端到端：真实合成曲线（150BPM 鼓组）走默认映射后的 p90/mean
+        // 4) 窗口边界无关性：同一段时间在窄窗口与宽窗口里画出来必须一样高
+        CheckToneWindowIndependence(analyzer);
+        // 4b) 末尾一致性：把「歌曲末尾之后是静音」显式补进曲线，末尾若干列必须不变
+        CheckToneSongEndConsistency(analyzer);
+
+        // 5) 端到端：真实合成曲线（150BPM 鼓组）走默认映射后的 p90/mean
         var drums = SyntheticClickTrack.CreateDrumPattern(150, 30);
         var envelope = analyzer.Analyze(drums.ToSampleData());
         if (envelope is null)
@@ -165,6 +170,106 @@ internal static class Program
         Check(tonedSorted[^1] >= 0.95f, "tone: 鼓组曲线峰顶保持", $"max={tonedSorted[^1]:F3}");
         Console.WriteLine($"      tone: 鼓组 p90/mean {Stats(raw).P90 / Stats(raw).Mean:F2} -> {Stats(toned).P90 / Stats(toned).Mean:F2}, " +
             $"占比≥0.5 {(raw.Count(x => x >= 0.5f) / (double)raw.Length):P1} -> {(toned.Count(x => x >= 0.5f) / (double)toned.Length):P1}");
+    }
+
+    /// <summary>
+    /// 窗口边界无关性：色调映射依赖邻域，但**不能用「窗口边缘」冒充「信号边缘」**。
+    /// 同一段时间（10ms/列，列与列严格对齐）在窄窗口 [5,10) 与宽窗口 [4,11) 里画出来必须同高；
+    /// 若实现拿窗口边界值去填充模糊核，右端若干列就会变形，而且平移一下曲线就会突然变。
+    /// </summary>
+    private static void CheckToneWindowIndependence(DefaultRhythmAnalyzer analyzer)
+    {
+        var drums = SyntheticClickTrack.CreateDrumPattern(150, 30);
+        var envelope = analyzer.Analyze(drums.ToSampleData());
+        if (envelope is null)
+        {
+            Check(false, "tone: 窗口边界无关性", "分析返回 null");
+            return;
+        }
+
+        var tone = RhythmCurveTone.FromIntensity(RhythmCurveIntensity.Enhanced);
+        var (maxDiff, worstColumn) = MeasureWindowEdgeDiff(envelope, tone, 5.0);
+        Check(maxDiff < 1e-3f, "tone: 窗口边界不影响曲线", $"max diff={maxDiff:F4} @column {worstColumn}");
+    }
+
+    /// <summary>
+    /// 度量「窗口边缘伪影」：同一段时间（10ms/列、列严格对齐）在窄窗口 [t0, t0+5) 与
+    /// 宽窗口 [t0-1, t0+6) 里画出来的最大高度差（像素）。理想为 0。
+    /// </summary>
+    private static (float MaxDiff, int WorstColumn) MeasureWindowEdgeDiff(RhythmEnvelope envelope, RhythmCurveTone tone, double fromSeconds)
+    {
+        var narrow = new List<LineVertex>();
+        var wide = new List<LineVertex>();
+        var from = TimeSpan.FromSeconds(fromSeconds);
+        RhythmGeometry.BuildCurve(narrow, envelope, from, from + TimeSpan.FromSeconds(5), 500, 200, 0.8f, Vector4.One, tone);
+        RhythmGeometry.BuildCurve(wide, envelope, from - TimeSpan.FromSeconds(1), from + TimeSpan.FromSeconds(6), 700, 200, 0.8f, Vector4.One, tone);
+
+        var maxDiff = 0f;
+        var worstColumn = -1;
+        for (var column = 1; column < 499; column++)
+        {
+            var diff = MathF.Abs(narrow[column * 2].Point.Y - wide[(100 + column) * 2].Point.Y);
+            if (diff > maxDiff)
+            {
+                maxDiff = diff;
+                worstColumn = column;
+            }
+        }
+
+        if (Environment.GetEnvironmentVariable("RHYTHM_DUMP") == "1")
+        {
+            for (var column = 494; column < 500; column++)
+            {
+                var n = narrow[column * 2].Point.Y;
+                var w = wide[(100 + column) * 2].Point.Y;
+                Console.WriteLine($"      edge col {column}: narrow={n:F3} wide={w:F3} diff={MathF.Abs(n - w):F3}");
+            }
+        }
+
+        return (maxDiff, worstColumn);
+    }
+
+    /// <summary>
+    /// 末尾一致性：曲线数据到最后一帧就结束了，之后是静音。
+    /// 用「把 0.5s 静音显式接到末尾」的加长曲线复算，末尾若干列必须和原曲线一致——
+    /// 否则实现是拿最后一帧的值无限重复当延续，尾部会被压平（移动端看着就是「末尾突然变了」）。
+    /// </summary>
+    private static void CheckToneSongEndConsistency(DefaultRhythmAnalyzer analyzer)
+    {
+        var drums = SyntheticClickTrack.CreateDrumPattern(150, 30);
+        var envelope = analyzer.Analyze(drums.ToSampleData());
+        if (envelope is null)
+        {
+            Check(false, "tone: 末尾一致性", "分析返回 null");
+            return;
+        }
+
+        // 末尾补 0.5s 静音
+        var tailFrames = (int)(0.5 * envelope.FrameRateHz);
+        var extendedTotal = new float[envelope.FrameCount + tailFrames];
+        Array.Copy(envelope.Total, extendedTotal, envelope.Total.Length);
+        var extended = new RhythmEnvelope(envelope.FrameInterval, extendedTotal);
+
+        var tone = RhythmCurveTone.FromIntensity(RhythmCurveIntensity.Enhanced);
+        var original = new List<LineVertex>();
+        var withTail = new List<LineVertex>();
+        // 同一时间窗、同一 10ms/列，列与列严格对齐
+        RhythmGeometry.BuildCurve(original, envelope, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30), 500, 200, 0.8f, Vector4.One, tone);
+        RhythmGeometry.BuildCurve(withTail, extended, TimeSpan.FromSeconds(25), TimeSpan.FromSeconds(30), 500, 200, 0.8f, Vector4.One, tone);
+
+        var maxDiff = 0f;
+        var worstColumn = -1;
+        for (var column = 0; column < 500; column++)
+        {
+            var diff = MathF.Abs(original[column * 2].Point.Y - withTail[column * 2].Point.Y);
+            if (diff > maxDiff)
+            {
+                maxDiff = diff;
+                worstColumn = column;
+            }
+        }
+
+        Check(maxDiff < 1e-3f, "tone: 末尾与补静音后一致", $"max diff={maxDiff:F4} @column {worstColumn}");
     }
 
     private static (double Mean, double P90) Stats(float[] values)
@@ -364,6 +469,14 @@ internal static class Program
         Console.WriteLine($"curve(默认档 Enhanced: γ={RhythmCurveTone.EnhancedGamma} λ={RhythmCurveTone.EnhancedEmphasis}): " +
             $"mean={tonedStats.Mean:F3} p90={tonedStats.P90:F3} max={toned.Max():F3} " +
             $"p90/mean={(tonedStats.Mean > 0 ? tonedStats.P90 / tonedStats.Mean : 0):F2}");
+
+        // 窗口边缘伪影：同一段时间在窄/宽窗口里画出来的最大高度差（px），理想为 0
+        var mid = duration.TotalSeconds * 0.5;
+        foreach (var level in new[] { RhythmCurveIntensity.Default, RhythmCurveIntensity.Enhanced, RhythmCurveIntensity.Strong })
+        {
+            var (edgeDiff, edgeColumn) = MeasureWindowEdgeDiff(envelope, RhythmCurveTone.FromIntensity(level), mid);
+            Console.WriteLine($"window-edge diff ({level}): {edgeDiff:F3}px @column {edgeColumn}");
+        }
 
         if (options.OutputPath is { } outputPath)
         {

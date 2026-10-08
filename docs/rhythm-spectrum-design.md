@@ -72,7 +72,10 @@ IRhythmAnalyzer.Analyze(SampleData, CancellationToken) -> RhythmEnvelope
 - **画法**：总曲线按像素列取最大值降采样，关于中轴镜像，随 `WaveformVecticalScale` 竖直缩放；
   顶点数只与视图宽度有关（2×宽度），与歌曲长度、缩放级别无关。
 - **显示侧色调映射**（`RhythmCurveTone`，在像素列降采样**之前**、按 200fps 原生分辨率施加，
-  所以核宽与缩放级别无关）：
+  所以核宽与缩放级别无关）。**邻域取法**：读取范围向两侧外扩模糊核半径（σ·帧率 ≈ 20 帧），
+  落在曲线数据内的部分取真实值，只有超出曲线首尾的部分补 0 —— 既不能拿窗口边缘当信号边缘
+  （否则曲线在可视窗口左右两端各有一小段伪影，且随平移移动），也不能拿边界值无限重复
+  （否则歌曲末尾的尾音会被压平）：
   1. 局部均值强调 `v' = clamp(v + λ·(v − blurσ(v)), 0, 1)`：σ 固定 100ms（与节拍包宽同量级），
      核用两次盒式滑动均值近似（三角核），不是 O(n·k) 的卷积；曲线本来就平坦时 `v − blurσ(v) ≈ 0`，
      因此**不会凭空造峰**；峰顶被 clamp 在 1，效果体现在把谷压下去、把峰的肩部变陡。
@@ -106,7 +109,7 @@ dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release
 dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release -- --audio <file> [--out <png>] [--expect-bpm <bpm>] [--start <s>] [--window <s>]
 ```
 
-默认跑 28 项用例（全部通过）。断言的是「曲线像不像鼓点轨」，不是某帧的具体数值：
+默认跑 30 项用例（全部通过）。断言的是「曲线像不像鼓点轨」，不是某帧的具体数值：
 
 | 用例 | 结论 |
 | --- | --- |
@@ -118,6 +121,7 @@ dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release -- --audio
 | 几何构造 | 顶点数 = 2×列数、上下对称、x 单调、尖峰满幅、不超界、窗口外的尖峰不参与绘制 |
 | 色调映射 | 恒等参数不改数值；`Default` 档 = 原样输出；`Enhanced`/`Strong` 两档下平坦曲线 max−min = 0.0000（不造假峰）；0.25 基线 + 满幅峰：基线 0.250→0.115（Enhanced）/ 0.051（Strong），峰顶始终 1.000，峰谷比 4.00→8.67→19.52（档位单调） |
 | 色调映射（作用在真实分析曲线上） | 150BPM 鼓组曲线基线（p50）0.061→0.006、峰顶保持 1.000、p90/mean 2.85→3.35 |
+| 色调映射的边界无关性 | 同一段时间在窄窗口 [t, t+5) 与宽窗口 [t−1, t+6)（10ms/列、列严格对齐）里画出来，最大高度差 **0.0000px**；把 0.5s 静音显式接到曲线末尾后，末尾各列同样 **0.0000px** 不变 |
 
 真实歌曲（`--audio` 模式，Release）：
 
@@ -127,7 +131,10 @@ dotnet run --project OngekiFumenEditor.RhythmAnalysisCheck -c Release -- --audio
 | Kano - Dreamin Chuchu | 242.0s | 1.1s | 0.244 | 0.474 | 1.94 | 2.64（mean 0.151） |
 | 一二三,初音ミク - あんたにあっかんべ | 216.6s | 0.9s | 0.263 | 0.503 | 1.92 | 2.65（mean 0.166） |
 
-（映射前 p90/mean ≈ 1.8–1.9、约一成帧高于 0.5：曲线是「稀疏尖峰 + 低基线」而不是平台；
+（窗口边缘伪影（`--audio` 模式会打印）：修好前后在 music0997 上是 1.44px（Enhanced）/ 2.81px（Strong）、
+修好后三首歌三档全部 **0.000px**。
+
+映射前 p90/mean ≈ 1.8–1.9、约一成帧高于 0.5：曲线是「稀疏尖峰 + 低基线」而不是平台；
 默认档 `Enhanced`（γ=1.5、λ=0.7）把基线均值再压低约 37%、峰顶保持满幅，p90/mean 升到 2.5–2.7。
 `--out` 导出的对照图走的就是同一套默认映射。
 `--out` 可导出对照图：白/绿镜像曲线 + 可选 `--expect-bpm` 参考虚线，用于肉眼核对峰值是否落在拍上。）

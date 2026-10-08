@@ -31,17 +31,34 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                 return;
 
             var columns = ArrayPool<float>.Shared.Rent(columnCount);
-            var source = ArrayPool<float>.Shared.Rent(frameCount);
-            var mapped = ArrayPool<float>.Shared.Rent(frameCount);
-            var scratch = ArrayPool<float>.Shared.Rent(frameCount);
+            // 强调项依赖邻域：读取范围向两侧外扩模糊核半径，落在曲线数据内的部分取真实值，
+            // 只有超出曲线首尾的部分补 0（歌曲之外的真实延续是静音，而不是把边界值无限重复）。
+            var margin = tone.GetBlurRadiusFrames(frameRate);
+            var bufferCount = frameCount + margin * 2;
+            var desiredFirst = firstFrame - margin;
+            var source = ArrayPool<float>.Shared.Rent(bufferCount);
+            var mapped = ArrayPool<float>.Shared.Rent(bufferCount);
+            var scratch = ArrayPool<float>.Shared.Rent(bufferCount);
             try
             {
                 Array.Clear(columns, 0, columnCount);
+                if (margin > 0)
+                {
+                    Array.Clear(source, 0, bufferCount);
+                    var readFirst = Math.Max(0, desiredFirst);
+                    var readLast = Math.Min(envelope.FrameCount, desiredFirst + bufferCount);
+                    if (readLast > readFirst)
+                        envelope.Total.AsSpan(readFirst, readLast - readFirst)
+                            .CopyTo(source.AsSpan(readFirst - desiredFirst, readLast - readFirst));
+                }
+                else
+                {
+                    envelope.Total.AsSpan(firstFrame, frameCount).CopyTo(source.AsSpan(0, frameCount));
+                }
 
-                var values = source.AsSpan(0, frameCount);
-                var mappedValues = mapped.AsSpan(0, frameCount);
-                var scratchValues = scratch.AsSpan(0, frameCount);
-                envelope.Total.AsSpan(firstFrame, frameCount).CopyTo(values);
+                var values = source.AsSpan(0, bufferCount);
+                var mappedValues = mapped.AsSpan(0, bufferCount);
+                var scratchValues = scratch.AsSpan(0, bufferCount);
                 tone.Apply(values, mappedValues, scratchValues, frameRate);
 
                 for (var i = 0; i < frameCount; i++)
@@ -49,7 +66,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.Graphics.WaveformDrawi
                     var frame = firstFrame + i;
                     var x = WaveformGeometry.ProjectX(envelope.GetFrameTime(frame), fromTime, durationMs, width);
                     var column = Math.Clamp((int)(x + width / 2), 0, columnCount - 1);
-                    var value = mappedValues[i];
+                    var value = mappedValues[margin + i];
                     if (value > columns[column])
                         columns[column] = value;
                 }
