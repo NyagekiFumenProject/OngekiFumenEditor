@@ -65,16 +65,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
                     .OrderBy(x => x.Item2)
                     .FirstOrDefault();
 
+                if (afterLane is not LaneStartBase afterLaneStart || afterXGrid is null)
+                    continue;
+
                 redoAction += () =>
                 {
-                    obj.ReferenceLaneStart = afterLane as LaneStartBase;
-                    //obj.XGrid = afterXGrid;
+                    obj.ReferenceLaneStart = afterLaneStart;
+                    obj.XGrid = afterXGrid;
                 };
 
                 undoAction += () =>
                 {
                     obj.ReferenceLaneStart = beforeLane;
-                    //obj.XGrid = beforeXGrid;
+                    obj.XGrid = beforeXGrid;
                 };
             }
 

@@ -176,7 +176,6 @@ namespace OngekiFumenEditor.Utils.Ogkr
             foreach (var obj in affactObjects)
             {
                 var tGrid = obj.TGrid;
-                var beforeXGrid = obj.XGrid;
                 var beforeLane = obj.ReferenceLaneStart;
 
                 (var afterLane, var afterXGrid) =
@@ -188,7 +187,11 @@ namespace OngekiFumenEditor.Utils.Ogkr
                     .OrderBy(x => x.Item2)
                     .FirstOrDefault();
 
-                obj.ReferenceLaneStart = afterLane as LaneStartBase;
+                if (afterLane is LaneStartBase afterLaneStart && afterXGrid is not null)
+                {
+                    obj.ReferenceLaneStart = afterLaneStart;
+                    obj.XGrid = afterXGrid;
+                }
             }
         }
 
