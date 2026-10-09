@@ -16,7 +16,7 @@ namespace OngekiFumenEditor.UI.ValueConverters
             if (values.Length < 2)
                 throw new ArgumentException("LocalizeConverter requires >=2 values");
 
-            var strArr = values.Select(x => x.ToString()).ToArray();
+            var strArr = values.Select(x => x?.ToString() ?? string.Empty).ToArray();
 
             return strArr[0].Format(strArr[1..]);
         }
