@@ -332,11 +332,28 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             window.Closed += MainWindow_Closed;
             if (!string.IsNullOrWhiteSpace(ProgramSetting.Default.WindowSizePositionLastTime))
             {
-                var arr = ProgramSetting.Default.WindowSizePositionLastTime.Split(",").Select(x => double.Parse(x.Trim())).ToArray();
-                window.Left = arr[0];
-                window.Top = arr[1];
-                window.Width = arr[2];
-                window.Height = arr[3];
+                var values = ProgramSetting.Default.WindowSizePositionLastTime
+                    .Split(',', StringSplitOptions.TrimEntries);
+                if (values.Length == 4
+                    && values.All(x => double.TryParse(x, NumberStyles.Float, CultureInfo.InvariantCulture, out _)))
+                {
+                    var arr = values.Select(x => double.Parse(x, NumberStyles.Float, CultureInfo.InvariantCulture)).ToArray();
+                    if (arr.All(double.IsFinite) && arr[2] > 0 && arr[3] > 0)
+                    {
+                        window.Left = arr[0];
+                        window.Top = arr[1];
+                        window.Width = arr[2];
+                        window.Height = arr[3];
+                    }
+                    else
+                    {
+                        Log.LogWarn($"Ignore invalid window geometry values: {ProgramSetting.Default.WindowSizePositionLastTime}");
+                    }
+                }
+                else
+                {
+                    Log.LogWarn($"Ignore malformed window geometry setting: {ProgramSetting.Default.WindowSizePositionLastTime}");
+                }
             }
         }
 
@@ -417,14 +434,18 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         if (sender is not Window mainWindow)
             return;
 
-        ProgramSetting.Default.WindowSizePositionLastTime = string.Join(", ", new[] {
-            mainWindow.Left,
-            mainWindow.Top,
-            mainWindow.Width,
-            mainWindow.Height
-        });
-        ProgramSetting.Default.Save();
-        Log.LogInfo($"WindowSizePositionLastTime = {ProgramSetting.Default.WindowSizePositionLastTime}");
+        var geometry = new[] { mainWindow.Left, mainWindow.Top, mainWindow.Width, mainWindow.Height };
+        if (geometry.All(double.IsFinite) && geometry[2] > 0 && geometry[3] > 0)
+        {
+            ProgramSetting.Default.WindowSizePositionLastTime = string.Join(", ", geometry.Select(x =>
+                x.ToString("R", CultureInfo.InvariantCulture)));
+            ProgramSetting.Default.Save();
+            Log.LogInfo($"WindowSizePositionLastTime = {ProgramSetting.Default.WindowSizePositionLastTime}");
+        }
+        else
+        {
+            Log.LogWarn($"Skip saving invalid window geometry: {string.Join(", ", geometry)}");
+        }
 
         App.Current.Shutdown();
     }
