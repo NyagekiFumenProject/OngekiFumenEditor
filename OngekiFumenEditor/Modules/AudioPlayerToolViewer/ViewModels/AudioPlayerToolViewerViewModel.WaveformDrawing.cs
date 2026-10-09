@@ -31,7 +31,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private IRhythmAnalyzer rhythmAnalyzer;
         private CancellationTokenSource loadWaveformTask;
         private CancellationTokenSource resampleTaskCancelTokenSource;
-        private TaskCompletionSource initTask = new TaskCompletionSource();
+        private Task waveformTask = Task.CompletedTask;
+        private Task resampleTask = Task.CompletedTask;
+        private int waveformGeneration;
+        private FrameworkElement waveformRenderControl;
+        private bool renderControlEventsAttached;
+        private TaskCompletionSource initTask = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         private PeakPointCollection rawPeakData;
         private PeakPointCollection usingPeakData;
@@ -110,7 +115,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             set
             {
                 Set(ref resampleSize, value);
-                ResamplePeak();
+                StartResamplePeak();
                 Properties.AudioPlayerToolViewerSetting.Default.ResampleSize = value;
                 Properties.AudioPlayerToolViewerSetting.Default.Save();
             }
@@ -194,12 +199,48 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             RenderContext.LimitFPS = LimitFPS <= 0 ? -1 : LimitFPS;
         }
 
-        public async void PrepareRenderLoop(FrameworkElement renderControl, IRenderManagerImpl impl)
+        private async Task PrepareRenderLoopAsync(FrameworkElement renderControl, IRenderManagerImpl impl)
+        {
+            try
+            {
+                await PrepareRenderLoopCoreAsync(renderControl, impl);
+            }
+            catch (OperationCanceledException)
+            {
+                DisposeWaveformRenderLoop();
+                initTask.TrySetCanceled();
+                throw;
+            }
+            catch (Exception e)
+            {
+                DisposeWaveformRenderLoop();
+                initTask.TrySetException(e);
+                throw;
+            }
+        }
+
+        private async Task PrepareRenderLoopCoreAsync(FrameworkElement renderControl, IRenderManagerImpl impl)
         {
             Log.LogDebug($"ready.");
 
-            await impl.WaitForInitializationIsDone();
-            RenderContext = await impl.GetOrCreateRenderContext(renderControl);
+            var cancellationToken = LifetimeCancellation;
+            await impl.WaitForInitializationIsDone(cancellationToken);
+            var context = await impl.GetOrCreateRenderContext(renderControl, cancellationToken);
+            if (IsDisposed || cancellationToken.IsCancellationRequested)
+            {
+                context.StopRendering();
+                impl.RemoveRenderContext(context);
+                return;
+            }
+            RenderContext = context;
+
+            if (IsDisposed || cancellationToken.IsCancellationRequested)
+            {
+                RenderContext = null;
+                context.StopRendering();
+                impl.RemoveRenderContext(context);
+                return;
+            }
 
             AttachWaveformSettingsEvents();
 
@@ -207,7 +248,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             rhythmAnalyzer = IoC.Get<IRhythmAnalyzer>();
             WaveformDrawing = IoC.Get<IWaveformDrawing>();
             WaveformDrawing.Initialize(impl);
-            initTask.SetResult();
+            initTask.TrySetResult();
 
             viewWidth = (float)renderControl.ActualWidth;
             viewHeight = (float)renderControl.ActualHeight;
@@ -219,20 +260,27 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private void PrepareWaveform(IAudioPlayer player)
         {
             CleanWaveform();
+            if (IsDisposed)
+                return;
+
             loadWaveformTask = new CancellationTokenSource();
             var cancelToken = loadWaveformTask.Token;
+            var generation = Volatile.Read(ref waveformGeneration);
 
-            Task.Run(() => OnPrepareWaveform(player, cancelToken), cancelToken);
+            waveformTask = Task.Run(() => OnPrepareWaveformAsync(player, generation, cancelToken), cancelToken);
+            _ = ObserveOperationAsync(waveformTask, "waveform preparation");
         }
 
-        private async void OnPrepareWaveform(IAudioPlayer player, CancellationToken cancelToken)
+        private async Task OnPrepareWaveformAsync(IAudioPlayer player, int generation, CancellationToken cancelToken)
         {
-            await initTask.Task;
-            if (cancelToken.IsCancellationRequested || player is null || samplePeak is null)
+            await initTask.Task.WaitAsync(cancelToken).ConfigureAwait(false);
+            if (!IsWaveformCurrent(player, generation, cancelToken) || samplePeak is null)
                 return;
             var sampleData = await player.GetSamplesAsync();
+            if (!IsWaveformCurrent(player, generation, cancelToken))
+                return;
             rawPeakData = sampleData is not null ? samplePeak.GetPeakValues(sampleData) : null;
-            ResamplePeak();
+            await ResamplePeakAsync(generation, cancelToken).ConfigureAwait(false);
 
             // 节奏分析要对整首歌做一次 STFT，成本和波峰同量级，所以同样放在这条后台任务里做；
             // 换歌/关闭面板时通过取消令牌放弃，结果不会发布出来。
@@ -241,7 +289,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var stopwatch = System.Diagnostics.Stopwatch.StartNew();
                 var curve = rhythmAnalyzer.Analyze(sampleData, cancelToken);
                 stopwatch.Stop();
-                if (cancelToken.IsCancellationRequested)
+                if (!IsWaveformCurrent(player, generation, cancelToken))
                     return;
 
                 rhythmCurve = curve;
@@ -249,21 +297,37 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
-        private async void ResamplePeak()
+        private bool IsWaveformCurrent(IAudioPlayer player, int generation, CancellationToken cancellationToken)
+            => !IsDisposed && !cancellationToken.IsCancellationRequested && generation == Volatile.Read(ref waveformGeneration) && ReferenceEquals(player, AudioPlayer);
+
+        private void StartResamplePeak()
+        {
+            var generation = Volatile.Read(ref waveformGeneration);
+            resampleTask = ResamplePeakAsync(generation, LifetimeCancellation);
+            _ = ObserveOperationAsync(resampleTask, "waveform resampling");
+        }
+
+        private async Task ResamplePeakAsync(int generation, CancellationToken parentToken)
         {
             resampleTaskCancelTokenSource?.Cancel();
             var tokenSource = new CancellationTokenSource();
             resampleTaskCancelTokenSource = tokenSource;
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(parentToken, tokenSource.Token);
+            var cancellationToken = linkedTokenSource.Token;
 
             if (ResampleSize == 0)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (generation != Volatile.Read(ref waveformGeneration) || IsDisposed)
+                    return;
                 usingPeakData = rawPeakData;
                 InvalidateWaveformBlocks();
             }
             else
             {
-                var newPeakData = rawPeakData is null ? default : await rawPeakData?.GenerateSimplfiedAsync(ResampleSize, tokenSource.Token);
-                if (tokenSource.IsCancellationRequested)
+                var sourcePeakData = rawPeakData;
+                var newPeakData = sourcePeakData is null ? default : await sourcePeakData.GenerateSimplfiedAsync(ResampleSize, cancellationToken).ConfigureAwait(false);
+                if (cancellationToken.IsCancellationRequested || generation != Volatile.Read(ref waveformGeneration) || IsDisposed)
                     return;
                 usingPeakData = newPeakData;
                 InvalidateWaveformBlocks();
@@ -274,6 +338,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             loadWaveformTask?.Cancel();
             loadWaveformTask = null;
+            resampleTaskCancelTokenSource?.Cancel();
+            resampleTaskCancelTokenSource = null;
+            Interlocked.Increment(ref waveformGeneration);
             rawPeakData = null;
             usingPeakData = null;
             rhythmCurve = null;
@@ -382,8 +449,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
         }
 
-        public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
+        public void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
         {
+            _ = ObserveOperationAsync(OnRenderControlHostLoadedAsync(executionContext), "render control initialization");
+        }
+
+        private async Task OnRenderControlHostLoadedAsync(ActionExecutionContext executionContext)
+        {
+            if (IsDisposed)
+                return;
+
             if (executionContext.Source is not ContentControl contentControl)
                 throw new InvalidOperationException($"Waveform render control host source must be ContentControl, actual={executionContext.Source?.GetType().FullName}");
             //check render control is created and shown.
@@ -392,21 +467,31 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             renderImpl = IoC.Get<IRenderManager>().GetCurrentRenderManagerImpl();
             var renderControl = renderImpl.CreateRenderControl();
-            await renderImpl.InitializeRenderControl(renderControl);
+            await renderImpl.InitializeRenderControl(renderControl, LifetimeCancellation);
+            if (IsDisposed || LifetimeCancellation.IsCancellationRequested)
+            {
+                renderImpl = null;
+                return;
+            }
 
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is created");
 
             renderControl.Loaded += RenderControl_Loaded;
             renderControl.Unloaded += RenderControl_UnLoaded;
             renderControl.SizeChanged += RenderControl_SizeChanged;
+            waveformRenderControl = renderControl;
+            renderControlEventsAttached = true;
 
             contentControl.Content = renderControl;
 
-            PrepareRenderLoop(renderControl, renderImpl);
+            await PrepareRenderLoopAsync(renderControl, renderImpl);
         }
 
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            if (IsDisposed)
+                return;
+
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"renderControl new size: {e.NewSize} , renderControl.RenderSize = {renderControl.RenderSize}");
 
@@ -432,6 +517,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void RenderControl_UnLoaded(object sender, RoutedEventArgs e)
         {
+            if (IsDisposed)
+                return;
+
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is unloaded");
 
@@ -447,14 +535,59 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             context.StopRendering();
         }
 
-        private async void RenderControl_Loaded(object sender, RoutedEventArgs e)
+        private void DisposeWaveformRenderLoop()
         {
+            waveformRenderActive = false;
+
+            var renderControl = waveformRenderControl;
+            if (renderControl is not null && renderControlEventsAttached)
+            {
+                renderControl.Loaded -= RenderControl_Loaded;
+                renderControl.Unloaded -= RenderControl_UnLoaded;
+                renderControl.SizeChanged -= RenderControl_SizeChanged;
+            }
+
+            waveformRenderControl = null;
+            renderControlEventsAttached = false;
+
+            var context = RenderContext;
+            RenderContext = null;
+            if (context is not null)
+            {
+                context.OnRender -= Render;
+                context.Name = default;
+                context.StopRendering();
+                renderImpl?.RemoveRenderContext(context);
+            }
+
+            initTask.TrySetCanceled();
+        }
+
+        private void RenderControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            _ = ObserveOperationAsync(RenderControlLoadedAsync(sender), "render control reload");
+        }
+
+        private async Task RenderControlLoadedAsync(object sender)
+        {
+            if (IsDisposed)
+                return;
+
             var renderControl = sender as FrameworkElement;
             Log.LogDebug($"RenderControl({renderControl.GetHashCode()}) is loaded");
 
             waveformRenderActive = true;
 
-            RenderContext = await renderImpl.GetOrCreateRenderContext(renderControl);
+            var context = await renderImpl.GetOrCreateRenderContext(renderControl, LifetimeCancellation);
+            if (IsDisposed || LifetimeCancellation.IsCancellationRequested)
+            {
+                context.OnRender -= Render;
+                context.StopRendering();
+                renderImpl.RemoveRenderContext(context);
+                return;
+            }
+
+            RenderContext = context;
             RenderContext.Name = "AudioPlayerToolViewerViewModel.WaveRender";
             UpdateActualRenderInterval();
             RenderContext.OnRender += Render;

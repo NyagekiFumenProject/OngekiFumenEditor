@@ -11,11 +11,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
-    public class DefaultEditorUndoManager : PropertyChangedBase, IUndoRedoManager
+    public class DefaultEditorUndoManager : PropertyChangedBase, IUndoRedoManager, IDisposable
     {
         public IObservableCollection<IUndoableAction> ActionStack { get; } = new BindableCollection<IUndoableAction>();
 
@@ -51,6 +52,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
         private Stack<List<IUndoableAction>> _combineStack = new();
         private readonly FumenVisualEditorViewModel editor;
         private bool isRecoveryCurrentTime;
+        private int isDisposed;
 
         public int RedoActionCount => ActionStack.Count - UndoActionCount;
 
@@ -286,6 +288,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
         {
             ActionStack.Clear();
             UndoActionCount = 0;
+        }
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref isDisposed, 1) != 0)
+                return;
+
+            Properties.EditorGlobalSetting.Default.PropertyChanged -= OnSettingPropertyChanged;
+            _combineStack.Clear();
+            Clear();
+            BatchBegin = null;
+            BatchEnd = null;
         }
     }
 }

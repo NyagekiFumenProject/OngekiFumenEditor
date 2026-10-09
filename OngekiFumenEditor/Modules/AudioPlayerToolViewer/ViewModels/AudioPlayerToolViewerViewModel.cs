@@ -12,6 +12,7 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -26,6 +27,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private float sliderDraggingValue = 0;
         private bool isSliderDragging = false;
+        private readonly IEditorDocumentManager editorDocumentManager;
+        private readonly CancellationTokenSource lifetimeCancellation = new();
+        private int disposed;
+
+        internal bool IsDisposed => Volatile.Read(ref disposed) != 0;
+        internal CancellationToken LifetimeCancellation => lifetimeCancellation.Token;
         public float SliderValue
         {
             get
@@ -64,6 +71,12 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             get => audioPlayer;
             private set
             {
+                if (IsDisposed)
+                {
+                    value?.OnPlaybackFinished -= OnPlaybackFinished;
+                    return;
+                }
+
                 if (audioPlayer is not null)
                     audioPlayer.OnPlaybackFinished -= OnPlaybackFinished;
                 Set(ref audioPlayer, value);
@@ -77,16 +90,26 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void OnPlaybackFinished()
         {
-            Dispatcher.CurrentDispatcher.Invoke(() =>
+            if (IsDisposed)
+                return;
+
+            var dispatcher = Application.Current?.Dispatcher;
+            if (dispatcher is null || dispatcher.HasShutdownStarted)
+                return;
+
+            dispatcher.BeginInvoke(new System.Action(() =>
             {
+                if (IsDisposed)
+                    return;
+
                 Log.LogInfo($"OnPlaybackFinished()~~");
                 OnStopButtonClicked();
-                if (AudioPlayer is not null)
+                if (AudioPlayer is not null && Editor is not null)
                 {
                     var audioTime = AudioPlayer.Duration - TimeSpan.FromSeconds(1);
                     Editor.ScrollTo(audioTime);
                 }
-            });
+            }));
         }
 
         private IFumenSoundPlayer fumenSoundPlayer = default;
@@ -153,8 +176,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         {
             DisplayName = Resources.AudioPlayerToolViewer;
             FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
-            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
-            Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
+            editorDocumentManager = IoC.Get<IEditorDocumentManager>();
+            editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
+            Editor = editorDocumentManager.CurrentActivatedEditor;
 
             UpdateActualRenderInterval();
             CompositionTarget.Rendering += CompositionTarget_Rendering;
@@ -162,6 +186,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
         {
+            if (IsDisposed)
+                return;
+
             Editor = @new;
             this.RegisterOrUnregisterPropertyChangeEvent(old, @new, OnEditorPropertyChanged);
         }
@@ -183,6 +210,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
         {
+            if (IsDisposed)
+                return;
+
             if (AudioPlayer is null)
                 return;
             if (!AudioPlayer.IsPlaying)
@@ -218,8 +248,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             Log.LogDebug($"Begin drag, from : {SliderValue}");
         }
 
-        public async void RequestPlayOrPause()
+        public void RequestPlayOrPause()
         {
+            _ = ObserveOperationAsync(RequestPlayOrPauseAsync(), "play/pause");
+        }
+
+        private async Task RequestPlayOrPauseAsync()
+        {
+            if (IsDisposed)
+                return;
+
             if (AudioPlayer is null)
             {
                 Log.LogWarn($"音频未加载!");
@@ -236,11 +274,19 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
             else
             {
-                await FumenSoundPlayer.Prepare(Editor, AudioPlayer);
-                var tgrid = Editor.GetCurrentTGrid();
-                var seekTo = Editor.ConvertTGridToAudioTime(tgrid);
+                var player = AudioPlayer;
+                var editor = Editor;
+                if (player is null || editor is null || FumenSoundPlayer is null)
+                    return;
+
+                await FumenSoundPlayer.Prepare(editor, player);
+                if (IsDisposed || !ReferenceEquals(player, AudioPlayer) || !ReferenceEquals(editor, Editor))
+                    return;
+
+                var tgrid = editor.GetCurrentTGrid();
+                var seekTo = editor.ConvertTGridToAudioTime(tgrid);
                 Log.LogDebug($"seek to {tgrid}({seekTo})");
-                AudioPlayer.Seek(seekTo, false);
+                player.Seek(seekTo, false);
                 FumenSoundPlayer.Seek(seekTo, false);
                 playStartTime = seekTo;
             }
@@ -263,8 +309,16 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             NotifyOfPropertyChange(() => SoundControls);
         }
 
-        public async void OnReloadSoundFiles()
+        public void OnReloadSoundFiles()
         {
+            _ = ObserveOperationAsync(ReloadSoundFilesAsync(), "reload sound files");
+        }
+
+        private async Task ReloadSoundFilesAsync()
+        {
+            if (IsDisposed)
+                return;
+
             if (AudioPlayer is null || FumenSoundPlayer is null)
             {
                 MessageBox.Show(Resources.WaitForAudioAndFumenLoaded);
@@ -277,17 +331,52 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 return;
             }
 
-            var result = await FumenSoundPlayer.ReloadSoundFiles();
+            var soundPlayer = FumenSoundPlayer;
+            var result = await soundPlayer.ReloadSoundFiles();
 
-            if (result)
+            if (!IsDisposed && result)
             {
                 MessageBox.Show(Resources.SoundLoaded);
             }
         }
 
+        private async Task ObserveOperationAsync(Task operation, string operationName)
+        {
+            try
+            {
+                await operation;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (Exception e)
+            {
+                Log.LogError($"Audio player tool {operationName} failed.", e);
+            }
+        }
+
         public void Dispose()
         {
+            if (Interlocked.Exchange(ref disposed, 1) != 0)
+                return;
+
+            lifetimeCancellation.Cancel();
             CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            editorDocumentManager.OnActivateEditorChanged -= OnActivateEditorChanged;
+            this.RegisterOrUnregisterPropertyChangeEvent(editor, null, OnEditorPropertyChanged);
+
+            if (audioPlayer is not null)
+            {
+                audioPlayer.OnPlaybackFinished -= OnPlaybackFinished;
+                audioPlayer = null;
+            }
+
+            editor = null;
+
+            var soundPlayer = FumenSoundPlayer;
+            soundPlayer?.Stop();
+            if (soundPlayer is not null)
+                _ = ObserveOperationAsync(soundPlayer.Clean(), "clean sound");
             DisposeWaveformBlocks();
         }
     }

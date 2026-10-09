@@ -93,6 +93,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             waveformRenderActive = false;
             waveformBlocksDisposed = true;
 
+            DisposeWaveformRenderLoop();
+
             DetachWaveformSettingsEvents();
 
             if (waveformDrawing?.Options is { } options)

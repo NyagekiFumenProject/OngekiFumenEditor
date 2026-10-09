@@ -1,6 +1,7 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Utils;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
@@ -12,14 +13,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             Properties.EditorGlobalSetting.Default.PropertyChanged += Default_PropertyChanged;
         }
 
+        private int isDisposed;
+
         private async void RequestSave()
         {
-            if (isRequestSave)
+            if (Volatile.Read(ref isDisposed) != 0 || isRequestSave)
                 return;
             isRequestSave = true;
-            await Task.Delay(2000);
-            Properties.EditorGlobalSetting.Default.Save();
-            isRequestSave = false;
+            try
+            {
+                await Task.Delay(2000);
+                if (Volatile.Read(ref isDisposed) == 0)
+                    Properties.EditorGlobalSetting.Default.Save();
+            }
+            catch (Exception e)
+            {
+                Log.LogError("Failed to save editor settings.", e);
+            }
+            finally
+            {
+                isRequestSave = false;
+            }
         }
 
         private double judgeLineOffsetY = Properties.EditorGlobalSetting.Default.JudgeLineOffsetY;
@@ -267,6 +281,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 
         private void Default_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
+            if (Volatile.Read(ref isDisposed) != 0)
+                return;
+
             switch (e.PropertyName)
             {
                 case nameof(Properties.EditorGlobalSetting.JudgeLineOffsetY):
@@ -349,7 +366,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
 
         public void Dispose()
         {
+            if (Interlocked.Exchange(ref isDisposed, 1) != 0)
+                return;
+
             Properties.EditorGlobalSetting.Default.PropertyChanged -= Default_PropertyChanged;
+
+            if (isRequestSave)
+            {
+                try
+                {
+                    Properties.EditorGlobalSetting.Default.Save();
+                }
+                catch (Exception e)
+                {
+                    Log.LogError("Failed to flush editor settings during disposal.", e);
+                }
+            }
         }
     }
 }

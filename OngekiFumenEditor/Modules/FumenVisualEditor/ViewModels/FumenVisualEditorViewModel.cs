@@ -33,9 +33,11 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 {
     [Export(typeof(FumenVisualEditorViewModel))]
-    public partial class FumenVisualEditorViewModel : PersistedDocument
+    public partial class FumenVisualEditorViewModel : PersistedDocument, IDisposable
     {
         private IEditorDocumentManager EditorManager => IoC.Get<IEditorDocumentManager>();
+        private int isDisposed;
+        private int isDestroyNotified;
 
         private EditorProjectDataModel editorProjectData = new EditorProjectDataModel();
         public EditorProjectDataModel EditorProjectData
@@ -46,6 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             set
             {
+                var previousProjectData = editorProjectData;
                 var prevFumen = editorProjectData?.Fumen;
                 Set(ref editorProjectData, value);
                 RecalculateTotalDurationHeight();
@@ -68,6 +71,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
 
                 setupFumen(editorProjectData?.Fumen, prevFumen);
+
+                if (previousProjectData is not null && !ReferenceEquals(previousProjectData, value))
+                    previousProjectData.EditorSetting.Dispose();
 
                 if (EditorManager.CurrentActivatedEditor == this)
                     IoC.Get<WindowTitleHelper>().UpdateWindowTitleByEditor(this);
@@ -93,6 +99,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (Volatile.Read(ref isDisposed) != 0)
+                return;
+
             switch (e.PropertyName)
             {
                 case nameof(EditorGlobalSetting.VerticalDisplayScale):
@@ -133,6 +142,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnFumenObjectModifiedChanged(OngekiObjectBase sender, PropertyChangedEventArgs e)
         {
+            if (Volatile.Read(ref isDisposed) != 0)
+                return;
+
             switch (e.PropertyName)
             {
                 case nameof(ISelectableObject.IsSelected):
@@ -448,12 +460,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
-            await base.OnDeactivateAsync(close, cancellationToken);
-            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-            EditorManager.NotifyDeactivate(this);
-            AudioPlayer?.Pause();
-            if (close)
-                DisposeRenderLoop();
+            try
+            {
+                await base.OnDeactivateAsync(close, cancellationToken);
+                await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
+                EditorManager.NotifyDeactivate(this);
+                if (!close)
+                    AudioPlayer?.Pause();
+            }
+            finally
+            {
+                if (close)
+                {
+                    Dispose();
+                    if (Interlocked.Exchange(ref isDestroyNotified, 1) == 0)
+                        EditorManager.NotifyDestory(this);
+                }
+            }
         }
 
         protected override async Task OnInitializedAsync(CancellationToken cancellationToken)
@@ -462,16 +485,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             EditorManager.NotifyCreate(this);
         }
 
-        public override async Task TryCloseAsync(bool? dialogResult = null)
+        public void Dispose()
         {
-            await base.TryCloseAsync(dialogResult);
+            if (Interlocked.Exchange(ref isDisposed, 1) != 0)
+                return;
+
+            var fumen = editorProjectData?.Fumen;
+            if (fumen is not null)
+            {
+                fumen.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;
+                fumen.MeterChanges.OnChangedEvent -= OnTimeSignatureListChanged;
+                fumen.ObjectModifiedChanged -= OnFumenObjectModifiedChanged;
+            }
+
+            EditorGlobalSetting.Default.PropertyChanged -= OnSettingPropertyChanged;
+            editorProjectData?.EditorSetting.Dispose();
+            Setting.Dispose();
+
+            if (UndoRedoManager is IDisposable undoManager)
+                undoManager.Dispose();
+            else
+                UndoRedoManager.Clear();
 
             AudioPlayer?.Pause();
             AudioPlayer?.Dispose();
             AudioPlayer = null;
-
-            if (dialogResult != false)
-                EditorManager.NotifyDestory(this);
+            DisposeRenderLoop();
+            LoadingFinished = null;
         }
 
         #endregion
