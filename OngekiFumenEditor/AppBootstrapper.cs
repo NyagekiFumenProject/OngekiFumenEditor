@@ -747,6 +747,17 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     protected override async void OnExit(object sender, EventArgs e)
     {
+        try
+        {
+            // The tool is a shared shell item rather than a document conductor child, so
+            // its Dispose path is not reached automatically when the main window exits.
+            IoC.Get<IAudioPlayerToolViewer>()?.Dispose();
+        }
+        catch (Exception ex)
+        {
+            Log.LogError($"Dispose audio player tool viewer failed: {ex.Message}", ex);
+        }
+
         // Must run first and finish synchronously: code after the first await in OnExit never runs before the process
         // exits, so render backends close their background resources here (Skia lane, OpenGL queue and delayed deletions).
         foreach (var renderManagerImpl in IoC.GetAll<IRenderManagerImpl>())
