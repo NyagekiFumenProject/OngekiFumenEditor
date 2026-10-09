@@ -16,9 +16,16 @@ namespace OngekiFumenEditor.Utils
             var tempFolder = Path.Combine(Path.GetTempPath(), TempFolder, subTempFolderName);
             Directory.CreateDirectory(tempFolder);
 
+            // A deterministic name is also used as a lookup key (for example, the
+            // persistent image cache).  Once that file exists, returning the same
+            // path is the intended behavior; checking for existence here would
+            // otherwise spin forever.
+            if (!random)
+                return Path.Combine(tempFolder, prefix + extension);
+
             while (true)
             {
-                var actualPrefix = random ? prefix + "." + RandomHepler.RandomString(RandomStringLength) : prefix;
+                var actualPrefix = prefix + "." + RandomHepler.RandomString(RandomStringLength);
                 var fullTempFileName = Path.Combine(tempFolder, actualPrefix + extension);
                 if (!File.Exists(fullTempFileName))
                     return fullTempFileName;
@@ -27,11 +34,19 @@ namespace OngekiFumenEditor.Utils
 
         public static string GetTempFolderPath(string subTempFolderName = "misc", string prefix = "tempFolder", bool random = true)
         {
+            var baseFolder = Path.Combine(Path.GetTempPath(), TempFolder, subTempFolderName);
+            if (!random)
+            {
+                var deterministicFolder = Path.Combine(baseFolder, prefix);
+                Directory.CreateDirectory(deterministicFolder);
+                return deterministicFolder;
+            }
+
             while (true)
             {
-                var actualPrefix = random ? prefix + "_" + RandomHepler.RandomString(RandomStringLength) : prefix;
-                var tempFolder = Path.Combine(Path.GetTempPath(), TempFolder, subTempFolderName, actualPrefix);
-                if (!File.Exists(tempFolder))
+                var actualPrefix = prefix + "_" + RandomHepler.RandomString(RandomStringLength);
+                var tempFolder = Path.Combine(baseFolder, actualPrefix);
+                if (!Directory.Exists(tempFolder) && !File.Exists(tempFolder))
                 {
                     Directory.CreateDirectory(tempFolder);
                     return tempFolder;

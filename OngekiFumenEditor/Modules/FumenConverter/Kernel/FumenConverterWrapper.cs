@@ -20,14 +20,15 @@ public static class FumenConverterWrapper
         OngekiFumen fumen;
 
         if (inMemoryFumen is null) {
+            if (string.IsNullOrWhiteSpace(option.InputFumenFilePath))
+                return new(false, Resources.NoFumenInput);
+
             if (parserManager.GetDeserializer(option.InputFumenFilePath) is not IFumenDeserializable deserializable) {
                 return new(false, Resources.FumenFileDeserializeNotSupport);
             }
 
-            if (string.IsNullOrWhiteSpace(option.InputFumenFilePath))
-                return new(false, Resources.NoFumenInput);
-
-            fumen = await deserializable.DeserializeAsync(File.OpenRead(option.InputFumenFilePath));
+            using var input = File.OpenRead(option.InputFumenFilePath);
+            fumen = await deserializable.DeserializeAsync(input);
         }
         else {
             fumen = inMemoryFumen;
@@ -52,8 +53,7 @@ public static class FumenConverterWrapper
         var converter = IoC.Get<IFumenConverter>();
         try {
             var output = await converter.ConvertFumenAsync(fumen, option.OutputFumenFilePath);
-            await using var outfile = File.OpenWrite(option.OutputFumenFilePath);
-            await outfile.WriteAsync(output);
+            await File.WriteAllBytesAsync(option.OutputFumenFilePath, output);
         }
         catch (FumenConvertException e) {
             return new(false, e.Message);

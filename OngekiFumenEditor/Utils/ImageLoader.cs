@@ -28,7 +28,8 @@ namespace OngekiFumenEditor.Utils
 
         public Task<byte[]> LoadImage(string url, CancellationToken cancellationToken)
         {
-            var taskCompleteSource = new TaskCompletionSource<byte[]>();
+            var taskCompleteSource = new TaskCompletionSource<byte[]>(
+                TaskCreationOptions.RunContinuationsAsynchronously);
             tasks.Push(new LoadTask(taskCompleteSource, url));
             PrcessQueue();
             return taskCompleteSource.Task;
@@ -52,14 +53,25 @@ namespace OngekiFumenEditor.Utils
 
                 if (tasks.TryPop(out var task))
                 {
-                    Task.Run(async () =>
+                    _ = Task.Run(async () =>
                     {
-                        var url = task.url;
-                        var taskSource = task.TaskSource;
-
-                        await ProcessTask(url, taskSource);
-                        Interlocked.Decrement(ref currentTaskRunningCount);
-                    }).NoWait();
+                        try
+                        {
+                            await ProcessTask(task.url, task.TaskSource);
+                        }
+                        catch (Exception e)
+                        {
+                            // Every queued request must reach a terminal state.  A
+                            // decode/cache exception must not leave UI converters
+                            // awaiting the TaskCompletionSource forever.
+                            Log.LogError($"process image {task.url} failed", e);
+                            task.TaskSource.TrySetResult(null);
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref currentTaskRunningCount);
+                        }
+                    });
                 }
                 else
                 {
@@ -162,7 +174,7 @@ namespace OngekiFumenEditor.Utils
 
             var r = await GetRaw();
 
-            if (r.Length >= abMagic.Length)
+            if (r is not null && r.Length >= abMagic.Length)
             {
                 var isABFile = true;
                 for (var i = 0; i < abMagic.Length; i++)
