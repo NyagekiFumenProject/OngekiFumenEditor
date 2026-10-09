@@ -119,55 +119,90 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     {
         base.BindServices(batch);
 
-        //setup Pluigins
+        // Optional plugins must never make the core composition fail.  In
+        // particular, Directory.CreateDirectory/EnumerateDirectories can throw
+        // before a plugin catalog is even created (read-only or malformed installs).
         var exeDir = AppDirectoryHelper.ExecutableDirectory;
         var pluginsDirPath = Path.Combine(exeDir, "Plugins");
-        Directory.CreateDirectory(pluginsDirPath);
-        var pluginsDirPaths = Directory.EnumerateDirectories(pluginsDirPath);
-
-        foreach (var path in pluginsDirPaths)
+        try
         {
-            Debug.WriteLine("----------------");
-            Debug.WriteLine($"加载插件子目录:{path}");
-            try
+            Directory.CreateDirectory(pluginsDirPath);
+            foreach (var path in Directory.EnumerateDirectories(pluginsDirPath))
             {
-                var directoryCatalog = new DirectoryCatalog(path);
-                foreach (var partDef in directoryCatalog.Parts)
+                Debug.WriteLine("----------------");
+                Debug.WriteLine($"加载插件子目录:{path}");
+                try
                 {
-                    var part = partDef.CreatePart();
-                    batch.AddPart(part);
-                    var imports = part.ToString();
-                    var exports = string.Join(", ", part.ExportDefinitions.Select(x => x.ContractName));
-                    Debug.WriteLine($"Export ({imports}) => ({exports})");
+                    var directoryCatalog = new DirectoryCatalog(path);
+                    foreach (var partDef in directoryCatalog.Parts)
+                    {
+                        var part = partDef.CreatePart();
+                        batch.AddPart(part);
+                        var imports = part.ToString();
+                        var exports = string.Join(", ", part.ExportDefinitions.Select(x => x.ContractName));
+                        Debug.WriteLine($"Export ({imports}) => ({exports})");
+                    }
                 }
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine($"加载插件子目录出错:{e.Message}");
-            }
-
-            var pluginsName = Path.GetFileName(path);
-            if (pluginsName.StartsWith("OngekiFumenEditorPlugins."))
-            {
-                var pluginDllAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                    .Where(x => x.GetName().Name == pluginsName).FirstOrDefault();
-                if (pluginDllAssembly != null)
+                catch (Exception e)
                 {
-                    AssemblySource.AddRange(new[] { pluginDllAssembly });
-                    Debug.WriteLine($"Add plugin assembly {pluginDllAssembly.GetName().Name}.dll into AssemblySource");
+                    LogOptionalStartupFailure($"加载插件子目录出错: {path}", e);
                 }
-            }
 
-            Debug.WriteLine("----------------");
+                try
+                {
+                    var pluginsName = Path.GetFileName(path);
+                    if (pluginsName.StartsWith("OngekiFumenEditorPlugins.", StringComparison.Ordinal))
+                    {
+                        var pluginDllAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                            .FirstOrDefault(x => x.GetName().Name == pluginsName);
+                        if (pluginDllAssembly != null)
+                        {
+                            AssemblySource.AddRange(new[] { pluginDllAssembly });
+                            Debug.WriteLine($"Add plugin assembly {pluginDllAssembly.GetName().Name}.dll into AssemblySource");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogOptionalStartupFailure($"注册插件程序集出错: {path}", e);
+                }
+
+                Debug.WriteLine("----------------");
+            }
+        }
+        catch (Exception e)
+        {
+            LogOptionalStartupFailure($"跳过插件扫描: {pluginsDirPath}", e);
+        }
+    }
+
+    private static void LogOptionalStartupFailure(string message, Exception exception)
+    {
+        Debug.WriteLine($"{message}: {exception}");
+        try
+        {
+            Log.LogWarn($"{message}: {exception.Message}");
+        }
+        catch
+        {
+            // Composition may not have finished yet; Debug output is the fallback.
         }
     }
 
     protected override void Configure()
     {
-        FileLogOutput.Init();
-        DumpFileHelper.Init();
-        CoreLog.SetResolver(() => coreLogTarget);
-        base.Configure();
+        try
+        {
+            FileLogOutput.Init();
+            DumpFileHelper.Init();
+            CoreLog.SetResolver(() => coreLogTarget);
+            base.Configure();
+        }
+        catch (Exception exception)
+        {
+            HandleStartupFailure(exception, "Configure");
+            throw;
+        }
         if (Interlocked.Exchange(ref processExitHandlerInstalled, 1) == 0)
             AppDomain.CurrentDomain.ProcessExit += (_, _) => FlushLogsForProcessExit();
         var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
@@ -218,6 +253,30 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             $"User CurrentCulture: {CultureInfo.CurrentCulture}, CurrentUICulture: {CultureInfo.CurrentUICulture}, DefaultThreadCurrentCulture: {CultureInfo.DefaultThreadCurrentCulture}, DefaultThreadCurrentUICulture: {CultureInfo.DefaultThreadCurrentUICulture}");
     }
 
+    private static void HandleStartupFailure(Exception exception, string phase)
+    {
+        var dumpFile = string.Empty;
+        try
+        {
+            // The dump must be attempted before any best-effort log flush or UI work.
+            dumpFile = DumpFileHelper.WriteMiniDump(IntPtr.Zero) ?? string.Empty;
+        }
+        catch (Exception dumpException)
+        {
+            Debug.WriteLine($"Write startup dump failed: {dumpException}");
+        }
+
+        try
+        {
+            FileLogOutput.WriteLog($"Startup failed during {phase}: {exception}\nDump file: {dumpFile}").GetAwaiter().GetResult();
+            FileLogOutput.WaitForWriteDone();
+        }
+        catch (Exception logException)
+        {
+            Debug.WriteLine($"Write startup failure log failed: {logException}");
+        }
+    }
+
     private bool CheckIfAdminPermission()
     {
         using var identity = WindowsIdentity.GetCurrent();
@@ -243,20 +302,19 @@ public class AppBootstrapper : Gemini.AppBootstrapper
     public async void OnStartupForCMD(object sender, StartupEventArgs e)
     {
         IsGUIMode = false;
-        Log.Instance.RemoveOutput<ConsoleLogOutput>();
-        SetAppReady();
-
-        await IoC.Get<ISchedulerManager>().Init();
-
-        var executor = IoC.Get<ICommandExecutor>();
-
         try
         {
+            InitExceptionCatcher();
+            Log.Instance.RemoveOutput<ConsoleLogOutput>();
+            SetAppReady();
+            await IoC.Get<ISchedulerManager>().Init();
+
+            var executor = IoC.Get<ICommandExecutor>();
             Application.Current.Shutdown(await executor.Execute(e.Args));
         }
         catch (Exception ex)
         {
-            Log.LogError($"Unhandled exception processing arguments:\n{ex.Message}");
+            HandleStartupFailure(ex, "command-line startup");
             Application.Current.Shutdown(1);
         }
     }
