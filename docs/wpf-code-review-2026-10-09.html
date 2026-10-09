@@ -11,7 +11,7 @@ body { margin:0 auto; max-width:1200px; padding:2rem; background:var(--bg); colo
 h1,h2,h3 { line-height:1.25; } h1 { margin-top:0; } h2 { border-bottom:1px solid var(--line); padding-bottom:.4rem; margin-top:2rem; }
 .meta { color:var(--muted); } .notice { background:var(--panel); border-left:4px solid #4285f4; padding:.8rem 1rem; }
 table { border-collapse:collapse; width:100%; margin:1rem 0; } th,td { border:1px solid var(--line); padding:.55rem .65rem; vertical-align:top; text-align:left; } th { background:var(--panel); }
-.sev { font-weight:700; white-space:nowrap; } .critical { color:var(--critical); } .high { color:var(--high); } .medium { color:var(--medium); } .low { color:var(--low); }
+.sev { font-weight:700; white-space:nowrap; } .status-done { display:inline-block; background:#188038; color:#fff; font-size:.78em; padding:.18rem .48rem; border-radius:999px; font-weight:700; white-space:nowrap; margin-right:.4rem; vertical-align:middle; } .critical { color:var(--critical); } .high { color:var(--high); } .medium { color:var(--medium); } .low { color:var(--low); }
 code { background:var(--panel); padding:.1rem .3rem; border-radius:3px; } a { color:#4285f4; }
 .finding { border:1px solid var(--line); border-radius:6px; padding:1rem; margin:1rem 0; } .finding h3 { margin-top:0; }
 ul { margin-top:.35rem; }
@@ -46,7 +46,7 @@ ul { margin-top:.35rem; }
 <h2>发现项</h2>
 <div id="findings">
 <article class="finding" id="finding-001">
-<h3><span class="sev medium">F-001 · Medium</span>　ShowXOffsetScrollBar 写入了错误的设置项</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-001 · Medium</span>　ShowXOffsetScrollBar 写入了错误的设置项</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs#L187-L196"><code>OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs:187-196</code></a></p>
 <p><strong>触发条件：</strong> 用户在编辑器设置中切换“显示 X 偏移滚动条”。<code>ShowXOffsetScrollBar</code> 的 setter 第 193 行把值写入了 <code>EditorGlobalSetting.Default.ForceXGridMagneticDock</code>，而不是 <code>ShowXOffsetScrollBar</code>。</p>
 <p><strong>后果：</strong> X 偏移滚动条选项无法正确持久化；每次切换还会覆盖“强制 X 网格吸附”的设置。当前会话内 backing field 可能暂时显示用户选择，但重启后从配置重新加载时会恢复旧值，同时网格吸附行为可能被意外改变。</p>
@@ -54,7 +54,7 @@ ul { margin-top:.35rem; }
 <p><strong>处理状态：</strong>已修复，提交 <code>eb77fd39</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；等价 Avalonia 回归测试 1 passed、0 failed。</p></article>
 
 <article class="finding" id="finding-002">
-<h3><span class="sev high">F-002 · High</span>　图像加载失败会让等待者永久挂起</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-002 · High</span>　图像加载失败会让等待者永久挂起</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L37-L70"><code>Utils/ImageLoader.cs:37-70</code></a>、<a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L140-L166"><code>:140-166</code></a></p>
 <p><strong>触发条件：</strong> 图片文件不存在、网络请求失败、缓存损坏，<code>Load()</code> 返回 null；<code>ProcessTask</code> 随后无条件访问 <code>r.Length</code>。后台 <code>Task.Run</code> 的异常没有传给 <code>TaskCompletionSource</code>，也没有 finally 清理并发计数。</p>
 <p><strong>后果：</strong> 图片绑定等待的 Task 永不完成，界面可能永久显示加载中；队列任务异常也无法被调用方观察。</p>
@@ -62,7 +62,7 @@ ul { margin-top:.35rem; }
 <p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-003">
-<h3><span class="sev high">F-003 · High</span>　确定性临时缓存路径在命中后忙等死循环</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-003 · High</span>　确定性临时缓存路径在命中后忙等死循环</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/TempFileHelper.cs#L14-L24"><code>Utils/TempFileHelper.cs:14-24</code></a>、<a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L109-L123"><code>ImageLoader.cs:109-123</code></a></p>
 <p><strong>触发条件：</strong> <code>ImageLoader.GetCacheFile</code> 以 <code>random:false</code> 请求固定文件名。文件第一次写入后，<code>GetTempFilePath</code> 仍循环等待“文件不存在”，但没有任何删除或改名路径。</p>
 <p><strong>后果：</strong> 同一网络图片第二次加载会占满一个线程并永久卡在生成缓存路径，调用方同时因 F-002 无法完成。</p>
@@ -70,7 +70,7 @@ ul { margin-top:.35rem; }
 <p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-004">
-<h3><span class="sev high">F-004 · High</span>　转换器在检查空输入前解引用路径</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-004 · High</span>　转换器在检查空输入前解引用路径</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenConverter/Kernel/FumenConverterWrapper.cs#L16-L30"><code>FumenConverterWrapper.cs:16-30</code></a>、<a href="../OngekiFumenEditor/Parser/DefaultImpl/Nyageki/DefaultFumenParser.cs#L16-L22"><code>DefaultFumenParser.cs:16-22</code></a></p>
 <p><strong>触发条件：</strong> 转换对话框未选择输入文件，<code>option.InputFumenFilePath</code> 为空；代码先调用 <code>GetDeserializer</code>，解析器内部直接对 null 调用 <code>EndsWith</code>。</p>
 <p><strong>后果：</strong> 用户应得到“未选择输入文件”的结果，却收到 NullReferenceException；命令行或异步 UI 调用还可能把异常升级为未处理异常。</p>
@@ -78,7 +78,7 @@ ul { margin-top:.35rem; }
 <p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-005">
-<h3><span class="sev high">F-005 · High</span>　转换输出不会截断旧文件尾部</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-005 · High</span>　转换输出不会截断旧文件尾部</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenConverter/Kernel/FumenConverterWrapper.cs#L52-L57"><code>FumenConverterWrapper.cs:52-57</code></a></p>
 <p><strong>触发条件：</strong> 输出文件已存在且本次转换结果比旧文件短。<code>File.OpenWrite</code> 使用 <code>OpenOrCreate</code>，从位置 0 覆盖但不截断文件。</p>
 <p><strong>后果：</strong> 旧尾部字节保留，生成的谱面或二进制文件可能包含不可见残留，解析失败或内容异常。</p>
@@ -110,7 +110,7 @@ ul { margin-top:.35rem; }
 </article>
 
 <article class="finding" id="finding-009">
-<h3><span class="sev medium">F-009 · Medium</span>　损坏的最近文件配置会阻止启动</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-009 · Medium</span>　损坏的最近文件配置会阻止启动</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/RecentFiles/DefaultImp/DefaultEditorRecentFilesManager.cs#L40-L52"><code>DefaultEditorRecentFilesManager.cs:40-52</code></a></p>
 <p><strong>触发条件：</strong> 最近文件 Base64 被截断、JSON 被手动修改，或 JSON 反序列化返回 null。</p>
 <p><strong>后果：</strong> 构造 recent-files manager 时异常直接冒出，编辑器可能在启动早期退出；<code>list.Take</code> 对 null 还会产生 NullReferenceException。</p>
@@ -118,7 +118,7 @@ ul { margin-top:.35rem; }
 <p><strong>处理状态：</strong>已修复，提交 <code>fe6aef0a</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；git diff --check 通过。</p></article>
 
 <article class="finding" id="finding-010">
-<h3><span class="sev high">F-010 · High</span>　窗口位置配置受区域设置影响并可能直接阻断启动</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-010 · High</span>　窗口位置配置受区域设置影响并可能直接阻断启动</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L333-L339"><code>AppBootstrapper.cs:333-339</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L420-L427"><code>:420-427</code></a></p>
 <p><strong>触发条件：</strong> 关闭窗口时用当前文化格式化 double 并用逗号拼接；在逗号小数文化下保存的值再次按逗号 Split 会被拆成更多字段。配置被截断或手工修改时也没有长度和格式校验。</p>
 <p><strong>后果：</strong> 下次启动可能在 UI 初始化阶段抛 FormatException/IndexOutOfRangeException，或把位置和尺寸错位解析。</p>
@@ -238,7 +238,7 @@ ul { margin-top:.35rem; }
 </article>
 
 <article class="finding" id="finding-025">
-<h3><span class="sev medium">F-025 · Medium</span>　Music.xml 读取流未释放</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-025 · Medium</span>　Music.xml 读取流未释放</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/DocumentOpenHelper.cs#L201-L235"><code>Utils/DocumentOpenHelper.cs:201-235</code></a></p>
 <p><strong>触发条件：</strong> <code>XDocument.LoadAsync(File.OpenRead(...))</code> 直接把流交给 XML 加载，没有 using。</p>
 <p><strong>后果：</strong> 每次快速打开/读取 Music.xml 都可能在 Windows 保留文件句柄，阻止文件替换删除，长时间运行还会耗尽句柄。</p>
