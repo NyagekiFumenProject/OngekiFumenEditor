@@ -693,19 +693,19 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 写入稳定 factory 名并通过注册表解析；旧文件缺省使用默认，未知名称记录 ParseIssue，并为不同插值器做 round-trip 校验。</p>
 </article>
 <article class="finding" id="finding-088">
-<h3><span class="sev high">F-088 · High</span> PROGJUDGE_BPM 未校验会污染长条判定计算</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-088 · High</span> PROGJUDGE_BPM 未校验会污染长条判定计算</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/MetaInfo/ProgJudgeBpmCommandParsers.cs#L7-L15"><code>ProgJudgeBpmCommandParsers.cs:7-15</code></a>、<a href="../OngekiFumenEditor/Parser/DefaultImpl/Nyageki/CommandImpl/Headers/HeaderCommand.cs#L104-L110"><code>HeaderCommand.cs:104-110</code></a>、<a href="../OngekiFumenEditor/Base/OngekiObjects/Hold.cs#L130-L160"><code>Hold.cs:130-160</code></a></p>
 <p><strong>触发条件：</strong> OGKR/Nyageki 可以把 0、负数、NaN 或解析失败的默认 0 直接写入 <code>MetaInfo.ProgJudgeBpm</code>，没有范围校验。</p>
 <p><strong>后果：</strong> Hold 判定步长计算用该值做除法、Log 和位移，可能得到错误步长、溢出或异常长的判定循环；坏元数据会影响整张谱面的判定和统计。</p>
 <p><strong>推荐方案：</strong> 在 parser 边界要求有限且大于 0 的 BPM，非法值记录 ParseIssue 并回退到明确默认值（例如 240）；计算函数也应对异常输入做防御。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>061226db</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；OGKR/Nyageki 解析和 UI 入口会将非法 PROGJUDGE_BPM 记录为 ParseIssue 并回退到安全默认值，Hold 判定步长始终保持可推进。</p></article>
 <article class="finding" id="finding-089">
-<h3><span class="sev high">F-089 · High</span> 谱面标准化计算出的新 XGrid 没有写回对象</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-089 · High</span> 谱面标准化计算出的新 XGrid 没有写回对象</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/Ogkr/StandardizeFormat.cs#L153-L193"><code>Utils/Ogkr/StandardizeFormat.cs:153-193</code></a></p>
 <p><strong>触发条件：</strong> InterpolateAllLanes 为受影响对象计算了 <code>afterLane</code> 和 <code>afterXGrid</code>，循环末只赋值 <code>obj.ReferenceLaneStart</code>，没有将新坐标写回 <code>obj.XGrid</code>。</p>
 <p><strong>后果：</strong> 对弯曲或被替换车道上的 Tap/Hold/HoldEnd 执行标准化后，对象仍保留旧横向坐标；导出或再次渲染时出现视觉、判定位置错位。</p>
 <p><strong>推荐方案：</strong> 在 afterXGrid 非 null 时同步更新 obj.XGrid，并保留无法匹配对象的诊断；加入标准化前后车道和坐标一致性测试。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>dc1b8f6b</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；标准化和交互式插值在找到新车道时同步写回 XGrid，撤销操作恢复原坐标，未匹配对象保留原状态。</p></article>
 <article class="finding" id="finding-090">
 <h3><span class="sev high">F-090 · High</span> Music.xml 导入再生成会篡改作者和 MusicSource 元数据</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/OptionGeneratorTools/Kernel/MusicXmlSerialization.cs#L72-L88"><code>MusicXmlSerialization.cs:72-88</code></a>、<a href="../OngekiFumenEditor/Modules/OptionGeneratorTools/Kernel/MusicXmlSerialization.cs#L155-L167"><code>:155-167</code></a></p>
