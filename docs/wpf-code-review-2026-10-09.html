@@ -23,7 +23,7 @@ ul { margin-top:.35rem; }
 <div class="notice">
   本报告记录静态代码审查发现的可复现程序缺陷。发现按严重度编号，审查过程中持续追加；仅记录有明确触发路径、后果和可执行修复方向的问题，不把纯风格意见列为 bug。
 </div>
-<p><strong>审查结果：</strong>共确认 87 项问题，其中 Critical 5 项、High 56 项、Medium 25 项、Low 1 项。优先处理谱面往返数据损坏、IPC/更新器误杀与卡死、日志和转储可靠性、音频并发以及图形资源生命周期问题。</p>
+<p><strong>审查结果：</strong>共确认 90 项问题，其中 Critical 5 项、High 59 项、Medium 25 项、Low 1 项。优先处理谱面往返数据损坏、IPC/更新器误杀与卡死、日志和转储可靠性、音频并发以及图形资源生命周期问题。</p>
 <h2>审查范围与方法</h2>
 <ul>
 <li>启动、退出、异常处理、日志和崩溃转储。</li>
@@ -691,6 +691,27 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 属性面板可以选择非默认 CurveInterpolaterFactory，但 SVG formatter 没有写 factory 名称，parser 也不会恢复该属性。</p>
 <p><strong>后果：</strong> 保存重开或格式转换后插值器静默回到默认 XGridLimited，后续重新生成的 SVG 路径几何改变，用户看不到元数据丢失。</p>
 <p><strong>推荐方案：</strong> 写入稳定 factory 名并通过注册表解析；旧文件缺省使用默认，未知名称记录 ParseIssue，并为不同插值器做 round-trip 校验。</p>
+</article>
+<article class="finding" id="finding-088">
+<h3><span class="sev high">F-088 · High</span> PROGJUDGE_BPM 未校验会污染长条判定计算</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/MetaInfo/ProgJudgeBpmCommandParsers.cs#L7-L15"><code>ProgJudgeBpmCommandParsers.cs:7-15</code></a>、<a href="../OngekiFumenEditor/Parser/DefaultImpl/Nyageki/CommandImpl/Headers/HeaderCommand.cs#L104-L110"><code>HeaderCommand.cs:104-110</code></a>、<a href="../OngekiFumenEditor/Base/OngekiObjects/Hold.cs#L130-L160"><code>Hold.cs:130-160</code></a></p>
+<p><strong>触发条件：</strong> OGKR/Nyageki 可以把 0、负数、NaN 或解析失败的默认 0 直接写入 <code>MetaInfo.ProgJudgeBpm</code>，没有范围校验。</p>
+<p><strong>后果：</strong> Hold 判定步长计算用该值做除法、Log 和位移，可能得到错误步长、溢出或异常长的判定循环；坏元数据会影响整张谱面的判定和统计。</p>
+<p><strong>推荐方案：</strong> 在 parser 边界要求有限且大于 0 的 BPM，非法值记录 ParseIssue 并回退到明确默认值（例如 240）；计算函数也应对异常输入做防御。</p>
+</article>
+<article class="finding" id="finding-089">
+<h3><span class="sev high">F-089 · High</span> 谱面标准化计算出的新 XGrid 没有写回对象</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/Ogkr/StandardizeFormat.cs#L153-L193"><code>Utils/Ogkr/StandardizeFormat.cs:153-193</code></a></p>
+<p><strong>触发条件：</strong> InterpolateAllLanes 为受影响对象计算了 <code>afterLane</code> 和 <code>afterXGrid</code>，循环末只赋值 <code>obj.ReferenceLaneStart</code>，没有将新坐标写回 <code>obj.XGrid</code>。</p>
+<p><strong>后果：</strong> 对弯曲或被替换车道上的 Tap/Hold/HoldEnd 执行标准化后，对象仍保留旧横向坐标；导出或再次渲染时出现视觉、判定位置错位。</p>
+<p><strong>推荐方案：</strong> 在 afterXGrid 非 null 时同步更新 obj.XGrid，并保留无法匹配对象的诊断；加入标准化前后车道和坐标一致性测试。</p>
+</article>
+<article class="finding" id="finding-090">
+<h3><span class="sev high">F-090 · High</span> Music.xml 导入再生成会篡改作者和 MusicSource 元数据</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/OptionGeneratorTools/Kernel/MusicXmlSerialization.cs#L72-L88"><code>MusicXmlSerialization.cs:72-88</code></a>、<a href="../OngekiFumenEditor/Modules/OptionGeneratorTools/Kernel/MusicXmlSerialization.cs#L155-L167"><code>:155-167</code></a></p>
+<p><strong>触发条件：</strong> 生成时把 ArtistName.id 和 MusicSourceName.id 固定为 MusicId、source 文本固定为 Title；导入时只保存 ArtistName.str，丢弃原有 ID 和 source 字段。</p>
+<p><strong>后果：</strong> 对现有 Music.xml 执行 Parse→Generate，即使用户没有修改作者，也会改写游戏用于查表的 ID。重新安装/导入后可能显示错误作者或找不到对应 MusicSource。</p>
+<p><strong>推荐方案：</strong> 在生成模型中保留 artist/source 的原始 id 与文本并原样序列化；只有用户明确选择“重新绑定”时才使用 MusicId，且在 UI 中显示将要改变的元数据。</p>
 </article>
 </div>
 
