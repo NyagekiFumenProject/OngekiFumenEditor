@@ -222,20 +222,20 @@ ul { margin-top:.35rem; }
 <p><strong>处理状态：</strong>已修复，提交 <code>d2577553</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；音乐播放器生命周期方法已移除 async void，并完成资源竞态静态检查。</p></article>
 
 <article class="finding" id="finding-023">
-<h3><span class="sev high">F-023 · High</span>　波形后台任务的取消异常和旧结果发布未受控</h3>
-<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.WaveformDrawing.cs#L219-L249"><code>WaveformDrawing.cs:219-249</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/PeakPointCollection.cs#L20-L30"><code>PeakPointCollection.cs:20-30</code></a></p>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-023 · High</span>　波形后台任务的取消异常和旧结果发布未受控</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.WaveformDrawing.cs#L260-L320"><code>WaveformDrawing.cs:260-320</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/PeakPointCollection.cs#L20-L30"><code>PeakPointCollection.cs:20-30</code></a></p>
 <p><strong>触发条件：</strong> <code>Task.Run</code> 调用 async void；切歌或修改采样尺寸时取消旧 token，但 <code>GetSamplesAsync</code> 返回后没有再次确认当前 player/generation，<code>ResamplePeak</code> 取消异常也没有调用方捕获。</p>
 <p><strong>后果：</strong> <code>TaskCanceledException</code> 可进入全局异常处理；旧音频的波形或节奏曲线可能覆盖新音频，界面出现串曲数据。</p>
 <p><strong>推荐解决方案：</strong> 全链路改为 Task，统一 catch <code>OperationCanceledException</code>；每次加载分配 generation，只有 token 未取消且 player 仍是当前实例时才发布结果。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>81e209cc</code>。波形加载、重采样和节奏分析改为可观察 Task，加入取消令牌、generation、当前播放器校验和统一取消异常处理。</p><p><strong>验证结果：</strong>WPF Debug 构建 0 errors（仅既有 80 个 warning）；git diff --check 通过。</p></article>
 
 <article class="finding" id="finding-024">
-<h3><span class="sev medium">F-024 · Medium</span>　关闭编辑器/工具后全局事件仍持有旧对象</h3>
-<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs#L188-L196"><code>FumenVisualEditorViewModel.cs:188-196</code></a>、<a href="../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs#L465-L475"><code>:465-475</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L152-L161"><code>AudioPlayerToolViewerViewModel.cs:152-161</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L288-L292"><code>:288-292</code></a></p>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-024 · Medium</span>　关闭编辑器/工具后全局事件仍持有旧对象</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs#L207-L214"><code>FumenVisualEditorViewModel.cs:207-214</code></a>、<a href="../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs#L461-L518"><code>:461-518</code></a>、<a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorUndoManager.cs#L293-L305"><code>DefaultEditorUndoManager.cs:293-305</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L176-L184"><code>AudioPlayerToolViewerViewModel.cs:176-184</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L358-L377"><code>:358-377</code></a></p>
 <p><strong>触发条件：</strong> 编辑器和音频工具订阅全局设置/文档管理器事件，但关闭和 Dispose 只释放部分渲染资源，没有解除这些订阅或取消所有异步波形任务。</p>
 <p><strong>后果：</strong> 单例事件源长期持有已关闭 ViewModel；反复开关文档/工具会累积回调、内存和 CPU，回调还可能访问已经释放的渲染状态。</p>
 <p><strong>推荐解决方案：</strong> 实现完整 Dispose，解除 EditorSetting、UndoManager、文档管理器和 RenderContext 事件，停止渲染、取消 CTS，并确保关闭路径最终调用它。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>81e209cc</code>。编辑器关闭时幂等解除谱面、全局设置和 UndoManager 订阅，停止渲染并释放音频；音频工具 Dispose 时解除文档管理器、编辑器、播放器、波形设置和渲染控件事件，取消波形任务并移除 RenderContext。</p><p><strong>验证结果：</strong>WPF Debug 构建 0 errors（仅既有 80 个 warning）；git diff --check 通过。</p></article>
 
 <article class="finding" id="finding-025">
 <h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-025 · Medium</span>　Music.xml 读取流未释放</h3>
