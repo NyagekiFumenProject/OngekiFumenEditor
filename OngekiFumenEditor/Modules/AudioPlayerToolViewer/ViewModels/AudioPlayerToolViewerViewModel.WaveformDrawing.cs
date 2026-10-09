@@ -36,6 +36,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private int waveformGeneration;
         private FrameworkElement waveformRenderControl;
         private bool renderControlEventsAttached;
+        private bool waveformSettingsEventsAttached;
         private TaskCompletionSource initTask = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
         private PeakPointCollection rawPeakData;
@@ -59,7 +60,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
                 Set(ref waveformDrawing, value);
 
-                if (waveformDrawing?.Options is { } newOptions)
+                if (waveformSettingsEventsAttached && waveformDrawing?.Options is { } newOptions)
                     newOptions.PropertyChanged += OnWaveformDrawingOptionPropertyChanged;
             }
         }
@@ -98,14 +99,26 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void AttachWaveformSettingsEvents()
         {
+            if (waveformSettingsEventsAttached)
+                return;
+
             Properties.DefaultWaveformSettings.Default.PropertyChanged += OnWaveformSettingsPropertyChanged;
             Properties.AudioPlayerToolViewerSetting.Default.PropertyChanged += OnWaveformSettingsPropertyChanged;
+            if (waveformDrawing?.Options is { } options)
+                options.PropertyChanged += OnWaveformDrawingOptionPropertyChanged;
+            waveformSettingsEventsAttached = true;
         }
 
         private void DetachWaveformSettingsEvents()
         {
+            if (!waveformSettingsEventsAttached)
+                return;
+
             Properties.DefaultWaveformSettings.Default.PropertyChanged -= OnWaveformSettingsPropertyChanged;
             Properties.AudioPlayerToolViewerSetting.Default.PropertyChanged -= OnWaveformSettingsPropertyChanged;
+            if (waveformDrawing?.Options is { } options)
+                options.PropertyChanged -= OnWaveformDrawingOptionPropertyChanged;
+            waveformSettingsEventsAttached = false;
         }
 
         private int resampleSize = Properties.AudioPlayerToolViewerSetting.Default.ResampleSize;
@@ -347,6 +360,55 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             InvalidateWaveformBlocks();
         }
 
+        /// <summary>
+        /// 暂时隐藏工具时停止波形工作，但保留可复用的渲染控件和上下文；工具重新显示时由
+        /// <see cref="ResumeWaveformRuntime"/> 恢复，避免共享 Tool 实例被永久 Dispose 后无法重开。
+        /// </summary>
+        private void SuspendWaveformRuntime()
+        {
+            waveformRenderActive = false;
+
+            var context = RenderContext;
+            if (context is not null)
+            {
+                context.OnRender -= Render;
+                context.StopRendering();
+            }
+
+            loadWaveformTask?.Cancel();
+            loadWaveformTask = null;
+            resampleTaskCancelTokenSource?.Cancel();
+            resampleTaskCancelTokenSource = null;
+            Interlocked.Increment(ref waveformGeneration);
+            rawPeakData = null;
+            usingPeakData = null;
+            rhythmCurve = null;
+            InvalidateWaveformBlocks();
+
+            var inFlight = blockRenderOffscreenContext;
+            blockRenderOffscreenContext = null;
+            inFlight?.Dispose();
+
+            DetachWaveformSettingsEvents();
+        }
+
+        /// <summary>重新显示共享音频工具时恢复波形设置、渲染和当前音频的后台准备。</summary>
+        private void ResumeWaveformRuntime()
+        {
+            if (IsDisposed || !IsVisible)
+                return;
+
+            if (RenderContext is not null)
+            {
+                AttachWaveformSettingsEvents();
+
+                RenderContext.OnRender -= Render;
+                RenderContext.OnRender += Render;
+                RenderContext.StartRendering();
+                waveformRenderActive = true;
+            }
+        }
+
         public void OnWaveformOptionReset()
         {
             WaveformDrawing?.Options?.Reset();
@@ -538,6 +600,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private void DisposeWaveformRenderLoop()
         {
             waveformRenderActive = false;
+            DetachWaveformSettingsEvents();
 
             var renderControl = waveformRenderControl;
             if (renderControl is not null && renderControlEventsAttached)
@@ -570,7 +633,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private async Task RenderControlLoadedAsync(object sender)
         {
-            if (IsDisposed)
+            if (IsDisposed || !IsVisible)
                 return;
 
             var renderControl = sender as FrameworkElement;
@@ -590,6 +653,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             RenderContext = context;
             RenderContext.Name = "AudioPlayerToolViewerViewModel.WaveRender";
             UpdateActualRenderInterval();
+            RenderContext.OnRender -= Render;
             RenderContext.OnRender += Render;
             RenderContext.StartRendering();
         }

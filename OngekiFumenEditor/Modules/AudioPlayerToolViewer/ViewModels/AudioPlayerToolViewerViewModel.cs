@@ -30,6 +30,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private readonly IEditorDocumentManager editorDocumentManager;
         private readonly CancellationTokenSource lifetimeCancellation = new();
         private int disposed;
+        private bool runtimeEventsAttached;
 
         internal bool IsDisposed => Volatile.Read(ref disposed) != 0;
         internal CancellationToken LifetimeCancellation => lifetimeCancellation.Token;
@@ -60,7 +61,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             set
             {
                 Set(ref editor, value);
-                FumenSoundPlayer?.Clean();
+                if (FumenSoundPlayer is not null)
+                    _ = ObserveOperationAsync(FumenSoundPlayer.Clean(), "clean editor sound");
                 AudioPlayer = Editor?.AudioPlayer;
             }
         }
@@ -83,7 +85,10 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 if (audioPlayer is not null)
                     audioPlayer.OnPlaybackFinished += OnPlaybackFinished;
 
-                PrepareWaveform(AudioPlayer);
+                if (AudioPlayer is null)
+                    CleanWaveform();
+                else
+                    PrepareWaveform(AudioPlayer);
                 NotifyOfPropertyChange(() => IsAudioButtonEnabled);
             }
         }
@@ -177,11 +182,77 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             DisplayName = Resources.AudioPlayerToolViewer;
             FumenSoundPlayer = IoC.Get<IFumenSoundPlayer>();
             editorDocumentManager = IoC.Get<IEditorDocumentManager>();
-            editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
+            PropertyChanged += OnToolPropertyChanged;
+            AttachRuntimeEvents();
             Editor = editorDocumentManager.CurrentActivatedEditor;
+            this.RegisterOrUnregisterPropertyChangeEvent(null, editor, OnEditorPropertyChanged);
 
             UpdateActualRenderInterval();
+        }
+
+        private void OnToolPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(IsVisible) || IsDisposed)
+                return;
+
+            if (IsVisible)
+                ResumeRuntime();
+            else
+            {
+                SuspendRuntime();
+            }
+        }
+
+        private void AttachRuntimeEvents()
+        {
+            if (IsDisposed || runtimeEventsAttached)
+                return;
+
+            runtimeEventsAttached = true;
+            editorDocumentManager.OnActivateEditorChanged += OnActivateEditorChanged;
             CompositionTarget.Rendering += CompositionTarget_Rendering;
+        }
+
+        private void DetachRuntimeEvents()
+        {
+            if (!runtimeEventsAttached && editor is null && audioPlayer is null)
+                return;
+
+            editorDocumentManager.OnActivateEditorChanged -= OnActivateEditorChanged;
+            CompositionTarget.Rendering -= CompositionTarget_Rendering;
+            this.RegisterOrUnregisterPropertyChangeEvent(editor, null, OnEditorPropertyChanged);
+
+            if (audioPlayer is not null)
+            {
+                audioPlayer.OnPlaybackFinished -= OnPlaybackFinished;
+                audioPlayer = null;
+            }
+
+            editor = null;
+            runtimeEventsAttached = false;
+        }
+
+        private void SuspendRuntime()
+        {
+            if (IsDisposed)
+                return;
+
+            DetachRuntimeEvents();
+            FumenSoundPlayer?.Stop();
+            if (FumenSoundPlayer is not null)
+                _ = ObserveOperationAsync(FumenSoundPlayer.Clean(), "clean hidden sound");
+            SuspendWaveformRuntime();
+        }
+
+        private void ResumeRuntime()
+        {
+            if (IsDisposed)
+                return;
+
+            AttachRuntimeEvents();
+            Editor = editorDocumentManager.CurrentActivatedEditor;
+            this.RegisterOrUnregisterPropertyChangeEvent(null, editor, OnEditorPropertyChanged);
+            ResumeWaveformRuntime();
         }
 
         private void OnActivateEditorChanged(FumenVisualEditorViewModel @new, FumenVisualEditorViewModel old)
@@ -195,6 +266,9 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
+            if (IsDisposed || !runtimeEventsAttached)
+                return;
+
             switch (e.PropertyName)
             {
                 case nameof(FumenVisualEditorViewModel.EditorProjectData):
@@ -361,15 +435,8 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 return;
 
             lifetimeCancellation.Cancel();
-            CompositionTarget.Rendering -= CompositionTarget_Rendering;
-            editorDocumentManager.OnActivateEditorChanged -= OnActivateEditorChanged;
-            this.RegisterOrUnregisterPropertyChangeEvent(editor, null, OnEditorPropertyChanged);
-
-            if (audioPlayer is not null)
-            {
-                audioPlayer.OnPlaybackFinished -= OnPlaybackFinished;
-                audioPlayer = null;
-            }
+            PropertyChanged -= OnToolPropertyChanged;
+            DetachRuntimeEvents();
 
             editor = null;
 

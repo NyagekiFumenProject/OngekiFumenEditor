@@ -460,6 +460,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
+            var deactivationSucceeded = false;
             try
             {
                 await base.OnDeactivateAsync(close, cancellationToken);
@@ -467,13 +468,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 EditorManager.NotifyDeactivate(this);
                 if (!close)
                     AudioPlayer?.Pause();
+                deactivationSucceeded = true;
             }
             finally
             {
                 if (close)
                 {
                     Dispose();
-                    if (Interlocked.Exchange(ref isDestroyNotified, 1) == 0)
+                    if (deactivationSucceeded && Interlocked.Exchange(ref isDestroyNotified, 1) == 0)
                         EditorManager.NotifyDestory(this);
                 }
             }

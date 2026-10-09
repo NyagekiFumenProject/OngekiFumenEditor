@@ -97,9 +97,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
             DetachWaveformSettingsEvents();
 
-            if (waveformDrawing?.Options is { } options)
-                options.PropertyChanged -= OnWaveformDrawingOptionPropertyChanged;
-
             InvalidateWaveformBlocks();
             FlushPendingBlockDisposal();
 
@@ -260,6 +257,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
         private async Task RenderWaveformBlockAsync(int index, float spanMs, PeakPointCollection peakData)
         {
             var generation = waveformBlockGeneration;
+            IOffscreenRenderContext offscreen = null;
 
             try
             {
@@ -269,7 +267,7 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
                 var deviceWidth = Math.Max(1, (int)MathF.Ceiling(logicalWidth * renderScaleX));
                 var deviceHeight = Math.Max(1, (int)MathF.Ceiling(viewHeight * renderScaleY));
 
-                using var offscreen = renderImpl.CreateOffscreenToImage(new OffscreenRenderOptions
+                offscreen = renderImpl.CreateOffscreenToImage(new OffscreenRenderOptions
                 {
                     Width = deviceWidth,
                     Height = deviceHeight,
@@ -320,8 +318,13 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
             }
             finally
             {
-                blockRenderOffscreenContext = null;
-                blockRenderInFlight = false;
+                if (ReferenceEquals(blockRenderOffscreenContext, offscreen))
+                {
+                    blockRenderOffscreenContext = null;
+                    blockRenderInFlight = false;
+                }
+
+                offscreen?.Dispose();
             }
         }
 
