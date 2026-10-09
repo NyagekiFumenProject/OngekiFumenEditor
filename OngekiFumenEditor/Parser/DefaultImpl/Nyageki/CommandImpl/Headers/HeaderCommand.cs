@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 using System.ComponentModel.Composition;
 
@@ -107,7 +108,18 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Headers
 
         protected override void ApplyHeaderValue(OngekiFumen fumen, string headerValue)
         {
-            fumen.MetaInfo.ProgJudgeBpm = float.Parse(headerValue);
+            if (!HoldTickStepCalculator.TryParseProgJudgeBpm(headerValue, out var value))
+            {
+                fumen.ReportParseIssue(new FumenParseIssue
+                {
+                    Kind = FumenParseIssueKind.InvalidProgJudgeBpm,
+                    Tag = CommandName,
+                    Line = $"{CommandName}: {headerValue}",
+                    Detail = headerValue ?? string.Empty,
+                });
+            }
+
+            fumen.MetaInfo.ProgJudgeBpm = value;
         }
     }
 

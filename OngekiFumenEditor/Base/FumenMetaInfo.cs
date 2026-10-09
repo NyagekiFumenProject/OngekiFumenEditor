@@ -1,4 +1,5 @@
 using Caliburn.Micro;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.ComponentModel;
@@ -60,7 +61,12 @@ namespace OngekiFumenEditor.Base
         public double HardBulletDamage { get; set; } = 2;
         public double DangerBulletDamage { get; set; } = 4;
         public double BeamDamage { get; set; } = 2;
-        public float ProgJudgeBpm { get; set; } = 240;
+        private float progJudgeBpm = HoldTickStepCalculator.DefaultProgJudgeBpm;
+        public float ProgJudgeBpm
+        {
+            get => progJudgeBpm;
+            set => Set(ref progJudgeBpm, HoldTickStepCalculator.CoerceProgJudgeBpm(value));
+        }
     }
 }
 

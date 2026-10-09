@@ -130,24 +130,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public IEnumerable<TGrid> CalculateJudgeTGrid(TGrid minTGrid, TGrid maxTGrid, BpmList bpmList, float progressJudgeBpm)
         {
             int CalcHoldTickStepSize(double bpm)
-            {
-                var standardBeatLen = TGrid.DEFAULT_RES_T / 4;
-
-                if (bpm < progressJudgeBpm)
-                {
-                    var ratio = progressJudgeBpm / bpm;
-                    var power = (int)Math.Ceiling(Math.Log(ratio, 2));
-                    standardBeatLen >>= power;
-                }
-                else
-                {
-                    var ratio = bpm / progressJudgeBpm;
-                    var power = (int)Math.Floor(Math.Log(ratio, 2));
-                    standardBeatLen <<= power;
-                }
-
-                return (int)standardBeatLen;
-            }
+                => HoldTickStepCalculator.Calculate(bpm, progressJudgeBpm, HoldTickStepCalculator.DefaultStandardBeatLen);
 
             var holdEndTGrid = HoldEnd?.TGrid;
             if (holdEndTGrid is null)

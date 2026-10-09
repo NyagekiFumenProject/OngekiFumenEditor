@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using System;
 
 namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
@@ -253,11 +254,11 @@ namespace OngekiFumenEditor.Modules.FumenMetaInfoBrowser.ViewModels
         {
             get
             {
-                return FumenMetaInfo?.ProgJudgeBpm ?? 240;
+                return FumenMetaInfo?.ProgJudgeBpm ?? HoldTickStepCalculator.DefaultProgJudgeBpm;
             }
             set
             {
-                FumenMetaInfo.ProgJudgeBpm = value;
+                FumenMetaInfo.ProgJudgeBpm = HoldTickStepCalculator.CoerceProgJudgeBpm(value);
                 NotifyOfPropertyChange(() => ProgJudgeBpm);
             }
         }

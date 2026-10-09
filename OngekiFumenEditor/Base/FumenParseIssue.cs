@@ -24,6 +24,11 @@ namespace OngekiFumenEditor.Base
         /// 编辑器侧则会把缺读到的字段静默写成默认值（回写会丢列）。
         /// </summary>
         RecordColumnTooFew,
+
+        /// <summary>
+        /// PROGJUDGE_BPM 无效（非有限数、低于允许下限或解析失败）；编辑器已回退到默认判定 BPM。
+        /// </summary>
+        InvalidProgJudgeBpm,
     }
 
     /// <summary>
