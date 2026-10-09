@@ -148,9 +148,16 @@ namespace OngekiFumenEditor.Kernel.ProgramUpdater
                 VerticalAlignment = VerticalAlignment.Center,
             };
             updatableButton.SetResourceReference(Button.BackgroundProperty, "MenuDefaultBackground");
-            updatableButton.Click += (e, ee) =>
+            updatableButton.Click += async (e, ee) =>
             {
-                IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel()).Wait();
+                try
+                {
+                    await IoC.Get<IWindowManager>().ShowWindowAsync(new ShowNewVersionDialogViewModel());
+                }
+                catch (Exception exception)
+                {
+                    Log.LogError($"Failed to open the update dialog: {exception.Message}", exception);
+                }
             };
 
             Grid.SetColumn(updatableButton, 1);

@@ -513,7 +513,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         e.Handled = false;
     }
 
-    private bool exceptionHandling;
+    private int exceptionHandling;
     private AbortableThread ipcThread;
     private static int processExitHandlerInstalled;
 
@@ -541,32 +541,91 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     private void InitExceptionCatcher()
     {
-        var recHandle = new HashSet<IntPtr>();
-
-        async void ProcessException(object sender, Exception exception, string trigSource)
+#if !DEBUG
+        async Task FinishExceptionHandlingAsync(Exception exception, string exceptionDetails, string innerMessage, string dumpFile)
         {
-            if (exceptionHandling)
-                return;
-            exceptionHandling = true;
+            try
+            {
+                try
+                {
+                    foreach (var visual in Application.Current.Windows.OfType<Window>())
+                        visual.Hide();
+                    IoC.Get<IAudioPlayerToolViewer>()?.AudioPlayer?.Pause();
+                }
+                catch
+                {
+                }
 
+                await FileLogOutput.WriteLog(exceptionDetails);
+                await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
+                var resuceFolders = await FumenRescue.Rescue();
+                await FileLogOutput.WriteLog("FumenRescue.Rescue() End\n");
+
+                var logFile = FileLogOutput.GetCurrentLogFile();
+
+                var apartmentState = Thread.CurrentThread.GetApartmentState();
+                await FileLogOutput.WriteLog($"current apartmentState: {apartmentState}\n");
+                if (apartmentState == ApartmentState.STA)
+                {
+                    var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
+                    exceptionWindow.ShowDialog();
+                }
+                else
+                {
+                    Application.Current.Invoke(() =>
+                    {
+                        var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
+                        return exceptionWindow.ShowDialog();
+                    });
+                }
+            }
+            catch (Exception exceptionHandlerException)
+            {
+                Debug.WriteLine($"Unhandled exception handler failed : {exceptionHandlerException}");
+            }
+            finally
+            {
+                try
+                {
+                    await Log.WaitForAllLogWriteDone();
+                    FileLogOutput.WaitForWriteDone();
+                }
+                catch (Exception flushException)
+                {
+                    Debug.WriteLine($"Flush logs after unhandled exception failed : {flushException}");
+                }
+
+                Environment.Exit(-1);
+            }
+        }
+#endif
+
+        void ProcessException(object sender, Exception exception, string trigSource)
+        {
+            if (Interlocked.CompareExchange(ref exceptionHandling, 1, 0) != 0)
+                return;
+
+            exception ??= new InvalidOperationException("Unhandled exception did not provide an Exception instance.");
+
+            // AppDomain.UnhandledException is synchronous and the CLR may terminate the
+            // process as soon as the callback returns. Write the dump before any await, UI
+            // work, or log I/O so those operations cannot prevent the crash artifact.
+            var exceptionHandle = Marshal.GetExceptionPointers();
+            var dumpFile = string.Empty;
 #if !DEBUG
             try
             {
+                // Managed exceptions have no native EXCEPTION_POINTERS. DumpFileHelper
+                // handles IntPtr.Zero by writing a dump without exception context.
+                dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle) ?? string.Empty;
+            }
+            catch (Exception dumpException)
+            {
+                Debug.WriteLine($"Can't write crash dump: {dumpException}");
+            }
 #endif
-            await FileLogOutput.WriteLog($"trigged by {trigSource}");
-
-            try
-            {
-                foreach (var visual in Application.Current.Windows.OfType<Window>())
-                    visual.Hide();
-                IoC.Get<IAudioPlayerToolViewer>()?.AudioPlayer?.Pause();
-            }
-            catch
-            {
-            }
 
             var innerMessage = exception.Message;
-
             var sb = new StringBuilder();
 
             void exceptionDump(Exception e, int level = 0)
@@ -588,78 +647,33 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             sb.AppendLine(
                 $"Program notice a (unhandled) exception from object: {sender}({sender?.GetType().FullName})");
             exceptionDump(exception);
+            sb.AppendLine($"Dump file: {dumpFile}");
             sb.AppendLine("----------------------------");
-            await FileLogOutput.WriteLog(sb.ToString());
-#if !DEBUG
-            var exceptionHandle = Marshal.GetExceptionPointers();
-            var dumpFile = string.Empty;
-            if (exceptionHandle == IntPtr.Zero || !recHandle.Contains(exceptionHandle))
+
+            try
             {
-                try
-                {
-                    // Managed exceptions have no native EXCEPTION_POINTERS. DumpFileHelper
-                    // handles IntPtr.Zero by writing a dump without exception context.
-                    dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
-                    if (exceptionHandle != IntPtr.Zero)
-                        recHandle.Add(exceptionHandle);
-                }
-                catch (Exception dumpException)
-                {
-                    Log.LogError("Can't write crash dump.", dumpException);
-                }
+                // Best-effort minimal log after the dump. A broken log sink must not undo the
+                // dump that was already produced.
+                FileLogOutput.WriteLog($"trigged by {trigSource}\nDump file: {dumpFile}").GetAwaiter().GetResult();
+            }
+            catch (Exception logException)
+            {
+                Debug.WriteLine($"Write minimal crash log failed: {logException}");
             }
 
-            await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
-            var resuceFolders = await FumenRescue.Rescue();
-            await FileLogOutput.WriteLog("FumenRescue.Rescue() End\n");
-
-            var logFile = FileLogOutput.GetCurrentLogFile();
-
-            var apartmentState = Thread.CurrentThread.GetApartmentState();
-            await FileLogOutput.WriteLog($"current apartmentState: {apartmentState}\n");
-            if (apartmentState == ApartmentState.STA)
-            {
-                var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
-                exceptionWindow.ShowDialog();
-            }
-            else
-            {
-                var result = Application.Current.Invoke(() =>
-                {
-                    var exceptionWindow = new ExceptionTermWindow(innerMessage, resuceFolders, logFile, dumpFile);
-                    return exceptionWindow.ShowDialog();
-                });
-            }
-#else
+#if DEBUG
             throw exception;
-#endif
-#if !DEBUG
-            }
-            catch (Exception exceptionHandlerException)
-            {
-                Debug.WriteLine($"Unhandled exception handler failed : {exceptionHandlerException}");
-            }
-            finally
-            {
-                try
-                {
-                    await Log.WaitForAllLogWriteDone();
-                    FileLogOutput.WaitForWriteDone();
-                }
-                catch (Exception flushException)
-                {
-                    Debug.WriteLine($"Flush logs after unhandled exception failed : {flushException}");
-                }
-
-                exceptionHandling = true;
-                Environment.Exit(-1);
-            }
+#else
+            _ = FinishExceptionHandlingAsync(exception, sb.ToString(), innerMessage, dumpFile);
 #endif
         }
 
-        AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
+        AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
         {
-            ProcessException(sender, e.ExceptionObject as Exception, "AppDomain.CurrentDomain.UnhandledException");
+            var exception = e.ExceptionObject as Exception
+                ?? new InvalidOperationException(
+                    $"Unhandled exception object was {e.ExceptionObject?.GetType().FullName ?? "null"}.");
+            ProcessException(sender, exception, "AppDomain.CurrentDomain.UnhandledException");
         };
         Application.Current.DispatcherUnhandledException += (sender, e) =>
         {
