@@ -100,14 +100,19 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
             {
                 var musicXml = MusicXmlSerialization.Serialize(option, enumManager);
 
-                using var fs = File.Open(saveFilePath, FileMode.Create);
-                using var writer = XmlWriter.Create(fs, new XmlWriterSettings()
+                await using var ms = new MemoryStream();
+                using (var writer = XmlWriter.Create(ms, new XmlWriterSettings()
                 {
                     Async = true,
                     Encoding = System.Text.Encoding.UTF8,
                     Indent = true
-                });
-                await musicXml.SaveAsync(writer, default);
+                }))
+                {
+                    await musicXml.SaveAsync(writer, default);
+                    await writer.FlushAsync();
+                }
+
+                await FileHelper.WriteAllBytesAtomicAsync(saveFilePath, ms.ToArray());
 
                 return true;
             }
@@ -127,9 +132,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
                 return;
             }
 
-            //generate useless empty ogkr files for other disable fumen diff
+            // Generate the empty chart referenced by each disabled difficulty.
             using var emptyOgkrFs = ResourceUtils.OpenReadFromLocalAssemblyEmbbedResources("empty_ogkr_template.ogkr");
+            using var emptyOgkrMs = new MemoryStream();
+            await emptyOgkrFs.CopyToAsync(emptyOgkrMs);
+            var emptyOgkrData = emptyOgkrMs.ToArray();
             var idStr = MusicXmlOption.MusicId.ToString().PadLeft(4, '0');
+            var saveDirectory = Path.GetDirectoryName(Path.GetFullPath(saveFilePath));
             foreach (var pair in MusicXmlOption.FumenDatas)
             {
                 var fumenData = pair.Value;
@@ -139,16 +148,9 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ViewModels
                     continue;
 
                 var fileName = $"{idStr}_0{(int)fumenDiff}.ogkr";
-                var filePath = Path.Combine(Path.GetDirectoryName(saveFilePath), fileName);
-                if (File.Exists(filePath))
-                {
-                    Log.LogDebug($"Skip generate empty ogkr file for disabled diff since file already exists: {filePath}");
-                    continue;
-                }
+                var filePath = Path.Combine(saveDirectory, fileName);
 
-                emptyOgkrFs.Seek(0, SeekOrigin.Begin);
-                using var fs = File.Create(filePath);
-                await emptyOgkrFs.CopyToAsync(fs);
+                await FileHelper.WriteAllBytesAtomicAsync(filePath, emptyOgkrData);
 
                 Log.LogDebug($"Generate empty ogkr file for disabled diff: {filePath}");
             }

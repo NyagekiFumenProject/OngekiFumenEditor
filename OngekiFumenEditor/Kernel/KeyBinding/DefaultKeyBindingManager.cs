@@ -49,45 +49,63 @@ namespace OngekiFumenEditor.Kernel.KeyBinding
         public void SaveConfig()
         {
             var json = JsonSerializer.Serialize(new Config() { KeyBindings = definitionMap.ToDictionary(x => x.Key, x => KeyBindingDefinition.FormatToExpression(x.Value.Key, x.Value.Modifiers)) }, serializerOptions);
-            File.WriteAllText(jsonConfigFilePath, json);
+            FileHelper.WriteAllTextAtomic(jsonConfigFilePath, json);
 
             Log.LogInfo($"Saved.");
         }
 
         public void LoadConfig()
         {
-            if (File.Exists(jsonConfigFilePath))
+            if (!TryLoadConfig(jsonConfigFilePath))
             {
-                try
+                var backupPath = FileHelper.GetBackupFilePath(jsonConfigFilePath);
+                if (File.Exists(backupPath))
                 {
-                    var json = File.ReadAllText(jsonConfigFilePath);
-                    var strMap = JsonSerializer.Deserialize<Config>(json).KeyBindings;
-
-                    foreach (var item in strMap)
-                    {
-                        var name = item.Key;
-                        var expr = item.Value;
-
-                        if (!KeyBindingDefinition.TryParseExpression(expr, out var k, out var m))
-                        {
-                            Log.LogError($"Can't parse {name} keybinding expr: {expr}");
-                            continue;
-                        }
-
-                        if (definitionMap.TryGetValue(name, out var definition))
-                        {
-                            definition.Key = k;
-                            definition.Modifiers = m;
-                        }
-                    }
-                }
-                catch (Exception e)
-                {
-                    Log.LogInfo($"Load failed: {e.Message}");
+                    Log.LogWarn($"Load keybinding config failed; trying backup: {backupPath}");
+                    TryLoadConfig(backupPath);
                 }
             }
 
             Log.LogInfo($"Loaded.");
+        }
+
+        private bool TryLoadConfig(string path)
+        {
+            if (!File.Exists(path))
+                return false;
+
+            try
+            {
+                var json = File.ReadAllText(path);
+                var config = JsonSerializer.Deserialize<Config>(json);
+                if (config?.KeyBindings is null)
+                    return false;
+
+                foreach (var item in config.KeyBindings)
+                {
+                    var name = item.Key;
+                    var expr = item.Value;
+
+                    if (!KeyBindingDefinition.TryParseExpression(expr, out var k, out var m))
+                    {
+                        Log.LogError($"Can't parse {name} keybinding expr: {expr}");
+                        continue;
+                    }
+
+                    if (definitionMap.TryGetValue(name, out var definition))
+                    {
+                        definition.Key = k;
+                        definition.Modifiers = m;
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.LogInfo($"Load failed ({path}): {e.Message}");
+                return false;
+            }
         }
 
         public bool CheckKeyBinding(KeyBindingDefinition defination, KeyEventArgs e)

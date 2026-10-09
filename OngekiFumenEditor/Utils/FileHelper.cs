@@ -1,5 +1,8 @@
+using System;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Utils
 {
@@ -43,6 +46,90 @@ namespace OngekiFumenEditor.Utils
             }
 
             return true;
+        }
+
+        public static string GetBackupFilePath(string filePath)
+            => Path.GetFullPath(filePath) + ".bak";
+
+        public static void WriteAllBytesAtomic(string filePath, byte[] data)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+
+            var fullPath = Path.GetFullPath(filePath);
+            var directory = Path.GetDirectoryName(fullPath)
+                ?? throw new IOException($"Unable to determine destination directory: {fullPath}");
+            Directory.CreateDirectory(directory);
+
+            var tempPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, FileOptions.WriteThrough))
+                {
+                    stream.Write(data, 0, data.Length);
+                    stream.Flush(true);
+                }
+
+                ReplaceWithBackup(tempPath, fullPath);
+            }
+            finally
+            {
+                TryDelete(tempPath);
+            }
+        }
+
+        public static async Task WriteAllBytesAtomicAsync(string filePath, byte[] data)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+
+            var fullPath = Path.GetFullPath(filePath);
+            var directory = Path.GetDirectoryName(fullPath)
+                ?? throw new IOException($"Unable to determine destination directory: {fullPath}");
+            Directory.CreateDirectory(directory);
+
+            var tempPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                await using (var stream = new FileStream(tempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.WriteThrough))
+                {
+                    await stream.WriteAsync(data.AsMemory());
+                    await stream.FlushAsync();
+                    stream.Flush(true);
+                }
+
+                ReplaceWithBackup(tempPath, fullPath);
+            }
+            finally
+            {
+                TryDelete(tempPath);
+            }
+        }
+
+        public static Task WriteAllTextAtomicAsync(string filePath, string content, Encoding encoding = null)
+            => WriteAllBytesAtomicAsync(filePath, (encoding ?? new UTF8Encoding(false)).GetBytes(content ?? string.Empty));
+
+        public static void WriteAllTextAtomic(string filePath, string content, Encoding encoding = null)
+            => WriteAllBytesAtomic(filePath, (encoding ?? new UTF8Encoding(false)).GetBytes(content ?? string.Empty));
+
+        private static void ReplaceWithBackup(string tempPath, string destinationPath)
+        {
+            var backupPath = GetBackupFilePath(destinationPath);
+            if (File.Exists(destinationPath))
+                File.Replace(tempPath, destinationPath, backupPath, ignoreMetadataErrors: true);
+            else
+                File.Move(tempPath, destinationPath);
+        }
+
+        private static void TryDelete(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+            catch
+            {
+                // Keep the original file intact when cleanup itself fails.
+            }
         }
     }
 }

@@ -163,7 +163,16 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
         protected override async Task DoLoad(string filePath)
         {
             embeddedRecommendedScriptResourceName = default;
-            ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
+            try
+            {
+                ScriptDocument.Text = await File.ReadAllTextAsync(filePath);
+            }
+            catch (Exception e) when (File.Exists(FileHelper.GetBackupFilePath(filePath)))
+            {
+                var backupPath = FileHelper.GetBackupFilePath(filePath);
+                Log.LogWarn($"Load script failed; recovering backup: {backupPath} ({e.Message})");
+                ScriptDocument.Text = await File.ReadAllTextAsync(backupPath);
+            }
             Init();
             DisplayName = default;
             IoC.Get<IEditorRecentFilesManager>().PostRecord(new(filePath, DisplayName, RecentOpenType.NormalDocumentOpen));
@@ -198,7 +207,7 @@ namespace OngekiFumenEditor.Modules.EditorScriptExecutor.Documents.ViewModels
                     await DoSaveAs(this);
                     return;
                 }
-                await File.WriteAllTextAsync(filePath, ScriptDocument.Text);
+                await FileHelper.WriteAllTextAtomicAsync(filePath, ScriptDocument.Text);
                 IsDirty = false;
                 DisplayName = default;
                 embeddedRecommendedScriptResourceName = default;

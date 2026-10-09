@@ -1,6 +1,8 @@
 using System;
 using System.Buffers;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using DereTore.Exchange.Archive.ACB;
 using DereTore.Exchange.Audio.HCA;
@@ -83,7 +85,30 @@ public static class AcbConverter
         lock (locker)
         {
             var tempFolder = TempFileHelper.GetTempFolderPath(prefix: "decodeAcbFiles", random: false);
-            tempAwbFilePath = Path.Combine(tempFolder, Path.GetFileNameWithoutExtension(filePath) + ".wav");
+            // The old basename-only key made two different ACB files named, for
+            // example, "music.acb" share one decoded WAV.  Include the canonical
+            // source path and basic file identity in the cache key so a cache hit
+            // always belongs to this version of this input file.
+            var fullPath = Path.GetFullPath(filePath);
+            long fileLength = 0;
+            long lastWriteTicks = 0;
+            try
+            {
+                var fileInfo = new FileInfo(fullPath);
+                if (fileInfo.Exists)
+                {
+                    fileLength = fileInfo.Length;
+                    lastWriteTicks = fileInfo.LastWriteTimeUtc.Ticks;
+                }
+            }
+            catch
+            {
+                // AcbFile.FromFile below reports the actual input error.
+            }
+
+            var cacheIdentity = $"{fullPath}\0{fileLength}\0{lastWriteTicks}";
+            var cacheKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(cacheIdentity)));
+            tempAwbFilePath = Path.Combine(tempFolder, $"{Path.GetFileNameWithoutExtension(filePath)}.{cacheKey}.wav");
             Log.LogInfo($"Extract .acb to .wav and load the later , acb file path : {tempAwbFilePath}");
 
             if (File.Exists(tempAwbFilePath))
