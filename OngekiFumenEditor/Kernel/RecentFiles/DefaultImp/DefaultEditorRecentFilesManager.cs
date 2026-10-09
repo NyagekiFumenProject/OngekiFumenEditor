@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -43,12 +44,38 @@ namespace OngekiFumenEditor.Kernel.RecentFiles.DefaultImp
             {
                 recentRecordInfos.Clear();
 
-                var base64Str = Properties.EditorGlobalSetting.Default.RecentOpenedListStr;
-                if (!string.IsNullOrWhiteSpace(base64Str))
+                try
                 {
-                    var jsonStr = Base64.Decode(Properties.EditorGlobalSetting.Default.RecentOpenedListStr);
-                    var list = JsonSerializer.Deserialize<List<RecentRecordInfo>>(jsonStr);
-                    recentRecordInfos.AddRange(list.Take(MaxRecordCount));
+                    var base64Str = Properties.EditorGlobalSetting.Default.RecentOpenedListStr;
+                    if (!string.IsNullOrWhiteSpace(base64Str))
+                    {
+                        var jsonStr = Base64.Decode(base64Str);
+                        var list = JsonSerializer.Deserialize<List<RecentRecordInfo>>(jsonStr);
+                        if (list is null)
+                            throw new JsonException("Recent file records JSON must contain an array.");
+
+                        recentRecordInfos.AddRange(list
+                            .Where(x => x is not null && !string.IsNullOrWhiteSpace(x.FileName))
+                            .Take(MaxRecordCount));
+                    }
+                }
+                catch (Exception exception)
+                {
+                    // Recent files are optional state. A truncated/invalid value must not
+                    // prevent the editor from starting, and clearing it avoids repeating the
+                    // same failure on every subsequent launch.
+                    recentRecordInfos.Clear();
+                    Debug.WriteLine($"Load recent file records failed: {exception}");
+
+                    try
+                    {
+                        Properties.EditorGlobalSetting.Default.RecentOpenedListStr = string.Empty;
+                        Properties.EditorGlobalSetting.Default.Save();
+                    }
+                    catch (Exception resetException)
+                    {
+                        Debug.WriteLine($"Reset invalid recent file records failed: {resetException}");
+                    }
                 }
             }
         }
