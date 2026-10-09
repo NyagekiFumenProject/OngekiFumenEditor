@@ -19,6 +19,9 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
     {
         private FinishedListenerProvider finishProvider;
 
+        private readonly object lifecycleSync = new();
+        private long lifecycleVersion;
+
         private TimeSpan baseOffset = TimeSpan.FromMilliseconds(0);
         private Stopwatch sw = new();
         private TimeSpan pauseTime;
@@ -31,7 +34,14 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 
         public event IAudioPlayer.OnPlaybackFinishedFunc OnPlaybackFinished;
 
-        public TimeSpan Duration => duration;
+        public TimeSpan Duration
+        {
+            get
+            {
+                lock (lifecycleSync)
+                    return duration;
+            }
+        }
 
         public TimeSpan CurrentTime { get => GetTime(); }
 
@@ -75,18 +85,35 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
             this.manager = manager;
         }
 
-        private void Provider_OnReturnEmptySamples()
+        private void Provider_OnReturnEmptySamples(FinishedListenerProvider source)
         {
-            finishProvider.StopListen();
-            OnPlaybackFinished?.Invoke();
+            IAudioPlayer.OnPlaybackFinishedFunc callback;
+            lock (lifecycleSync)
+            {
+                // A mixer read can finish after the provider has been removed. Ignore
+                // callbacks from that stale provider instead of touching a newly loaded
+                // reader (or a disposed one).
+                if (!ReferenceEquals(source, finishProvider) || !IsAvaliable)
+                    return;
+
+                source.StopListen();
+                callback = OnPlaybackFinished;
+            }
+
+            callback?.Invoke();
         }
 
         public async Task Load(string audio_file, int targetSampleRate, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            //release resource before loading new one.
+            // Release the previous resource before loading a new one. Dispose invalidates
+            // an in-flight load, so a concurrent close/reload cannot publish stale state.
             Dispose();
+
+            long loadVersion;
+            lock (lifecycleSync)
+                loadVersion = ++lifecycleVersion;
 
             try
             {
@@ -96,17 +123,29 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                samples = processedProvider.ToWaveProvider().ToArray();
+                var loadedSamples = processedProvider.ToWaveProvider().ToArray();
+                var loadedReader = new BufferWaveStream(loadedSamples, processedProvider.WaveFormat);
+                loadedReader.Seek(0, SeekOrigin.Begin);
+                var loadedFinishProvider = new FinishedListenerProvider(loadedReader);
+                loadedFinishProvider.StartListen();
 
-                audioFileReader = new BufferWaveStream(samples, processedProvider.WaveFormat);
-                audioFileReader.Seek(0, SeekOrigin.Begin);
+                lock (lifecycleSync)
+                {
+                    if (loadVersion != lifecycleVersion)
+                    {
+                        loadedReader.Dispose();
+                        return;
+                    }
 
-                finishProvider = new(audioFileReader);
-                finishProvider.StartListen();
-                finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+                    samples = loadedSamples;
+                    audioFileReader = loadedReader;
+                    finishProvider = loadedFinishProvider;
+                    finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
+                    duration = processedProvider.Duration;
+                    IsAvaliable = true;
+                }
 
                 NotifyOfPropertyChange(() => Duration);
-                IsAvaliable = true;
             }
             catch (OperationCanceledException)
             {
@@ -122,74 +161,128 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 
         public void Seek(TimeSpan seekTime, bool pause)
         {
-            seekTime = MathUtils.Max(TimeSpan.FromMilliseconds(0), MathUtils.Min(seekTime, Duration));
+            lock (lifecycleSync)
+            {
+                if (!IsAvaliable || audioFileReader is null || finishProvider is null)
+                    return;
 
-            audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds), SeekOrigin.Begin);
-            //more accurate
-            baseOffset = audioFileReader.CurrentTime;
-
-            finishProvider.StartListen();
+                seekTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(seekTime, duration));
+                audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds), SeekOrigin.Begin);
+                // More accurate.
+                baseOffset = audioFileReader.CurrentTime;
+                pauseTime = baseOffset;
+                finishProvider.StartListen();
+            }
 
             if (!pause)
                 Play();
             UpdatePropsManually();
         }
 
-        public async void Play()
+        public void Play()
         {
-            IsPlaying = true;
-            sw.Restart();
-            musicMixer.AddMixerInput(finishProvider);
+            lock (lifecycleSync)
+            {
+                if (!IsAvaliable || IsPlaying || finishProvider is null)
+                    return;
+
+                IsPlaying = true;
+                sw.Restart();
+                musicMixer.AddMixerInput(finishProvider);
+            }
+
             UpdatePropsManually();
             manager.Reposition();
-
-            await IoC.Get<ISchedulerManager>().AddScheduler(this);
+            _ = IoC.Get<ISchedulerManager>().AddScheduler(this);
         }
 
         private TimeSpan GetTime()
         {
-            if (!IsPlaying)
-                return pauseTime;
-            var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
-            var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs / 2);
-            var actualTime = MathUtils.Max(TimeSpan.Zero, adjustedTime);
-            return actualTime;
+            lock (lifecycleSync)
+            {
+                if (!IsPlaying)
+                    return pauseTime;
+                var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
+                var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs / 2);
+                return MathUtils.Max(TimeSpan.Zero, adjustedTime);
+            }
         }
 
-        public async void Stop()
+        public void Stop()
         {
-            IsPlaying = false;
-            musicMixer.RemoveMixerInput(finishProvider);
-            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
-            Seek(TimeSpan.FromMilliseconds(0), true);
+            lock (lifecycleSync)
+            {
+                if (!IsAvaliable || audioFileReader is null || finishProvider is null)
+                    return;
+
+                IsPlaying = false;
+                sw.Stop();
+                musicMixer.RemoveMixerInput(finishProvider);
+                audioFileReader.Seek(0, SeekOrigin.Begin);
+                baseOffset = audioFileReader.CurrentTime;
+                pauseTime = baseOffset;
+                finishProvider.StartListen();
+            }
+
+            _ = IoC.Get<ISchedulerManager>().RemoveScheduler(this);
             UpdatePropsManually();
         }
 
-        public async void Pause()
+        public void Pause()
         {
-            pauseTime = GetTime();
-            IsPlaying = false;
-            musicMixer.RemoveMixerInput(finishProvider);
+            lock (lifecycleSync)
+            {
+                if (!IsAvaliable || !IsPlaying || finishProvider is null)
+                    return;
+
+                pauseTime = GetTime();
+                baseOffset = pauseTime;
+                IsPlaying = false;
+                sw.Stop();
+                musicMixer.RemoveMixerInput(finishProvider);
+            }
+
             UpdatePropsManually();
-            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
+            _ = IoC.Get<ISchedulerManager>().RemoveScheduler(this);
         }
 
         private void CleanCurrentOut()
         {
-            musicMixer.RemoveMixerInput(finishProvider);
+            if (finishProvider is not null)
+                musicMixer.RemoveMixerInput(finishProvider);
             UpdatePropsManually();
         }
 
-        public async void Dispose()
+        public void Dispose()
         {
-            CleanCurrentOut();
+            BufferWaveStream readerToDispose;
+            FinishedListenerProvider providerToRemove;
+            lock (lifecycleSync)
+            {
+                lifecycleVersion++;
+                providerToRemove = finishProvider;
+                readerToDispose = audioFileReader;
 
-            audioFileReader?.Dispose();
-            audioFileReader = null;
-            IsAvaliable = false;
-            IsPlaying = false;
+                if (providerToRemove is not null)
+                {
+                    providerToRemove.StopListen();
+                    providerToRemove.OnReturnEmptySamples -= Provider_OnReturnEmptySamples;
+                    musicMixer.RemoveMixerInput(providerToRemove);
+                }
 
-            await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
+                finishProvider = null;
+                audioFileReader = null;
+                samples = null;
+                duration = TimeSpan.Zero;
+                pauseTime = TimeSpan.Zero;
+                baseOffset = TimeSpan.Zero;
+                sw.Stop();
+                IsAvaliable = false;
+                IsPlaying = false;
+            }
+
+            readerToDispose?.Dispose();
+            _ = IoC.Get<ISchedulerManager>().RemoveScheduler(this);
         }
 
         public void OnSchedulerTerm()
@@ -219,13 +312,15 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 
         public Task<SampleData> GetSamplesAsync()
         {
-            if (!IsAvaliable)
-                return Task.FromResult<SampleData>(default);
+            lock (lifecycleSync)
+            {
+                if (!IsAvaliable || samples is null || audioFileReader is null)
+                    return Task.FromResult<SampleData>(default);
 
-            var subBuffer = samples.AsMemory();
-            var sampleData = new SampleData(subBuffer, ConvertToSampleInfo(audioFileReader.WaveFormat));
-
-            return Task.FromResult(sampleData);
+                var subBuffer = samples.AsMemory();
+                var sampleData = new SampleData(subBuffer, ConvertToSampleInfo(audioFileReader.WaveFormat));
+                return Task.FromResult(sampleData);
+            }
         }
 
         public static SampleInfo ConvertToSampleInfo(WaveFormat waveFormat)

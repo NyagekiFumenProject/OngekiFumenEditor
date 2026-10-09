@@ -87,6 +87,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles
             public Color AuxiliaryLineColor { get; set; }
         }
 
-        public Dictionary<string, StoreBulletPalleteEditorData> StoreBulletPalleteEditorDatas { get; set; } = new();
+        private Dictionary<string, StoreBulletPalleteEditorData> storeBulletPalleteEditorDatas = new();
+        public Dictionary<string, StoreBulletPalleteEditorData> StoreBulletPalleteEditorDatas
+        {
+            get => storeBulletPalleteEditorDatas;
+            // Older project files can explicitly contain null. Keep the in-memory
+            // model usable so loading such a file cannot fail during palette apply.
+            set => storeBulletPalleteEditorDatas = value ?? new();
+        }
     }
 }

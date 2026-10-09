@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
         public WaveFormat WaveFormat => provider.WaveFormat;
         private bool enableEventFire;
 
-        public event Action OnReturnEmptySamples;
+        public event Action<FinishedListenerProvider> OnReturnEmptySamples;
 
         public FinishedListenerProvider(ISampleProvider provider)
         {
@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
         {
             var read = Provider.Read(buffer, offset, count);
             if (read < count && enableEventFire)
-                OnReturnEmptySamples?.Invoke();
+                OnReturnEmptySamples?.Invoke(this);
 
             if (read < count)
                 Array.Clear(buffer, offset + read, count - read);

@@ -24,7 +24,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         public static async Task<EditorProjectDataModel> TryLoadFromFileAsync(string filePath, CancellationToken cancellationToken = default)
         {
             Log.LogDebug($"filePath = {filePath}");
-            var projectData = await projFileManager.Load(filePath);
+            var projectData = await projFileManager.Load(filePath, cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
 
             projectData.FumenFilePath = projectData.FumenFilePath ?? GetDefaultFumenFilePathForAutoGenerate(filePath);

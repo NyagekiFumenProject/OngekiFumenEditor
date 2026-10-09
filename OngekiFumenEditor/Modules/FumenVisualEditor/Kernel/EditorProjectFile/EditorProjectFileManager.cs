@@ -4,6 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile.Seria
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile
@@ -31,10 +32,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile
             return Task.FromResult(new EditorProjectDataModel());
         }
 
-        public async Task<EditorProjectDataModel> Load(string filePath)
+        public async Task<EditorProjectDataModel> Load(string filePath, CancellationToken cancellationToken = default)
         {
-            var buffer = await File.ReadAllBytesAsync(filePath);
+            cancellationToken.ThrowIfCancellationRequested();
+            var buffer = await File.ReadAllBytesAsync(filePath, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             var editorProj = await manager.Load<EditorProjectDataModel>(buffer);
+            cancellationToken.ThrowIfCancellationRequested();
 
             return editorProj;
         }
