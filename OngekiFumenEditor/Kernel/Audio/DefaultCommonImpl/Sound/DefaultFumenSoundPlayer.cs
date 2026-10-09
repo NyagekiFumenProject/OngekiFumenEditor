@@ -77,8 +77,30 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
         private async Task InitSoundsAsync()
         {
-            var source = new TaskCompletionSource<bool>();
+            var source = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
             loadTask = source.Task;
+            try
+            {
+                await InitSoundsCoreAsync(source);
+            }
+            catch (OperationCanceledException)
+            {
+                source.TrySetCanceled();
+            }
+            catch (Exception e)
+            {
+                Log.LogError("Initialize fumen sound players failed.", e);
+                source.TrySetException(e);
+            }
+            finally
+            {
+                // Every exit path must complete the task observed by Prepare/ReloadSoundFiles.
+                source.TrySetResult(false);
+            }
+        }
+
+        private async Task InitSoundsCoreAsync(TaskCompletionSource<bool> source)
+        {
             var audioManager = IoC.Get<IAudioManager>();
 
             var soundFolderPath = AudioSetting.Default.SoundFolderPath;
@@ -87,7 +109,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var msg = Resources.ErrorSoundFolderNotFound;
                 MessageBox.Show(msg);
                 Log.LogError(msg);
-                source.SetResult(false);
+                source.TrySetResult(false);
                 return;
             }
             else
@@ -154,11 +176,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             {
                 if (!DesignerProperties.GetIsInDesignMode(new DependencyObject()))
                     MessageBox.Show(Resources.WarnSomeSoundsNotLoad);
-                source.SetResult(false);
+                source.TrySetResult(false);
                 return;
             }
 
-            source.SetResult(true);
+            source.TrySetResult(true);
         }
 
         public async Task Prepare(FumenVisualEditorViewModel editor, IAudioPlayer player)

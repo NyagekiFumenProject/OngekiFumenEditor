@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Parser;
 
@@ -15,7 +17,10 @@ public interface IFumenParserManager
 
     async Task Serialize(OngekiFumen fumen, string saveFilePath)
     {
-        await File.WriteAllBytesAsync(saveFilePath, await GetSerializer(saveFilePath).SerializeAsync(fumen));
+        var serializer = GetSerializer(saveFilePath)
+            ?? throw new NotSupportedException($"No serializer is registered for '{saveFilePath}'.");
+        var buffer = await serializer.SerializeAsync(fumen);
+        await FileHelper.WriteAllBytesAtomicAsync(saveFilePath, buffer);
     }
 
     async Task<OngekiFumen> Deserialize(string loadFilePath)
