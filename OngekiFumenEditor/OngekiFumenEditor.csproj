@@ -228,9 +228,6 @@
         <ProjectReference Include="..\Dependences\gemini\Dependences\Caliburn.Micro\src\Caliburn.Micro.Core\Caliburn.Micro.Core.csproj">
             <PrivateAssets>all</PrivateAssets>
         </ProjectReference>
-        <ProjectReference Include="..\Dependences\earcut.net\src\Earcut.csproj">
-            <PrivateAssets>all</PrivateAssets>
-        </ProjectReference>
         <ProjectReference Include="..\Dependences\MigratableSerializer\MigratableSerializer\MigratableSerializer.csproj">
             <PrivateAssets>all</PrivateAssets>
         </ProjectReference>

@@ -7,8 +7,8 @@
 ## 当前共识
 
 - 新实现目标文件暂定为 `OngekiFumenEditor/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawPlayableAreaHelper_new.cs`。
-- 旧实现 `DrawPlayableAreaHelper.cs` 先保留，用于对照、截图回归和逐步切换。
-- 当前 helper 是编辑器侧 2D polygon 填充算法，直接从 `WallLeft` / `WallRight` 墙轨生成左右边界点列，再用 Earcut 三角化。
+- 旧实现 `DrawPlayableAreaHelper.cs` 曾在切换阶段保留，用于对照、截图回归和逐步切换；主路径确认使用新实现后已删除。
+- 旧 helper 曾是编辑器侧 2D polygon 填充算法，直接从 `WallLeft` / `WallRight` 墙轨生成左右边界点列，再用 Earcut 三角化。
 - MU3 运行时算法是 `FieldObject.AreaData -> JointField.LimitParam` 的截面序列算法，核心语义是 `placeBef/placeAft`、`prev.Aft -> next.Bef` 插值、可见范围采样和 Soflan 后的 Z 轴显示。
 
 ## 实现记录
@@ -19,7 +19,7 @@
 - 新 helper 第一版在预览模式始终尝试绘制 Playfield，设计模式只绘制音频结束线。
 - 新 helper 第一版使用默认 Soflan 组、`WallLeft` / `WallRight`、实时局部采样、相邻截面双三角形绘制。
 - 新 helper 第一版不读取 `EditorGlobalSetting`，填充色使用配置默认值语义的不透明黑色。
-- 旧 `DrawPlayableAreaHelper.cs` 保留在代码库中作为源码对照，但不再被主渲染路径实例化。
+- 旧 `DrawPlayableAreaHelper.cs` 已删除，主渲染路径继续使用 `DrawPlayableAreaHelper_new`。
 
 ## 待确认决策
 
@@ -339,7 +339,7 @@
 
 实现要求：
 
-- 保留旧 `DrawPlayableAreaHelper.cs` 文件作为源码对照，但编辑器主渲染路径直接实例化并调用 `DrawPlayableAreaHelper_new`。
+- 编辑器主渲染路径直接实例化并调用 `DrawPlayableAreaHelper_new`；旧 helper 在切换完成后删除。
 - 修改引用点集中在 `FumenVisualEditorViewModel.Drawing.cs`：
   - helper 字段类型。
   - `PrepareRenderLoop(...)` 或等价初始化处的 `new`。
@@ -468,8 +468,7 @@
   `OngekiFumenEditor/Modules/FumenVisualEditor/Graphics/Drawing/Editors/DrawPlayableAreaHelper_new.cs`。
 - 新类名：
   `DrawPlayableAreaHelper_new`。
-- 暂不重命名旧 `DrawPlayableAreaHelper`。
-- 后续算法稳定并决定正式替换时，再考虑重命名或删除旧实现。
+- 旧 `DrawPlayableAreaHelper` 已删除，不再需要重命名或保留兼容实现。
 
 原因：
 
@@ -674,7 +673,7 @@
 
 ## 实现约束草案
 
-- 保持旧 helper 不删除，作为源码对照；编辑器主渲染路径直接改用新 helper。
+- 旧 helper 已删除；编辑器主渲染路径直接使用新 helper。
 - 新 helper 应避免继续依赖“左右边界交叉后交换尾段”的多边形修补作为核心正确性来源。
 - 新 helper 的几何中间模型应显式表达场地截面，而不是只表达屏幕空间左右点列。
 - 局部 AreaData 构建不得只使用严格视口内对象；必须考虑视口边界外的最近前置和后置边界状态。

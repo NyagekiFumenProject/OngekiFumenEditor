@@ -44,7 +44,7 @@ jobs:
     # Avalonia/Dependencies require separate repository access (AcbGeneratorFuck is private),
     # so a recursive checkout would fail; they are intentionally not initialized.
     - name: Init build submodules
-      run: git submodule update --init --recursive Dependences/gemini Dependences/SvgToXaml Dependences/MigratableSerializer Dependences/earcut.net
+      run: git submodule update --init --recursive Dependences/gemini Dependences/SvgToXaml Dependences/MigratableSerializer
     - name: Setup .NET11
       uses: actions/setup-dotnet@v4.3.1
       with:
