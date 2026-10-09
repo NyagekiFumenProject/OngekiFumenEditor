@@ -2398,4 +2398,112 @@
   <data name="CommentColorTip" xml:space="preserve">
     <value>コメントの文字とタイムラインのマーカーに使う色です。既定は明るい薄黄色（#FFFFFFE0）です。</value>
   </data>
+  <data name="FumenStatistics" xml:space="preserve">
+    <value>譜面統計</value>
+  </data>
+  <data name="FumenStatisticsToolTip" xml:space="preserve">
+    <value>現在の譜面のオブジェクト数と OGKR T_* コマンドの値を表示</value>
+  </data>
+  <data name="FumenStatisticsObjects" xml:space="preserve">
+    <value>オブジェクト数</value>
+  </data>
+  <data name="FumenStatisticsObjectTotal" xml:space="preserve">
+    <value>オブジェクト総数</value>
+  </data>
+  <data name="FumenStatisticsObjectType" xml:space="preserve">
+    <value>オブジェクト種別</value>
+  </data>
+  <data name="FumenStatisticsCount" xml:space="preserve">
+    <value>数</value>
+  </data>
+  <data name="FumenStatisticsCommands" xml:space="preserve">
+    <value>T_* コマンド</value>
+  </data>
+  <data name="FumenStatisticsCommand" xml:space="preserve">
+    <value>コマンド</value>
+  </data>
+  <data name="FumenStatisticsDescription" xml:space="preserve">
+    <value>集計ルール</value>
+  </data>
+  <data name="FumenStatisticsClose" xml:space="preserve">
+    <value>閉じる</value>
+  </data>
+  <data name="FumenStatisticsObjectsNote" xml:space="preserve">
+    <value>初期 BPM、拍子、既定の Soflan を含みます。Tap / Hold には Critical も含まれます。Hold、Soflan、各領域はそれぞれ 1 個と数え、終了マーカーは別に数えません。レーン・ビームのノードと曲線制御点は個別に集計します。</value>
+  </data>
+  <data name="FumenStatisticsCommandsNote" xml:space="preserve">
+    <value>現在の譜面から OGKR 出力と同じルールで計算します。T_TAP / T_SIDE は Hold の始点を含み、T_HOLD / T_SHOLD は BPM と PROGJUDGE_BPM に基づく継続判定数（終点判定を含む）です。T_TOTAL に Bell は含まれません。</value>
+  </data>
+  <data name="FumenStatisticsTap" xml:space="preserve">
+    <value>Tap（壁以外）</value>
+  </data>
+  <data name="FumenStatisticsSideTap" xml:space="preserve">
+    <value>Tap（壁）</value>
+  </data>
+  <data name="FumenStatisticsHold" xml:space="preserve">
+    <value>Hold（壁以外）</value>
+  </data>
+  <data name="FumenStatisticsSideHold" xml:space="preserve">
+    <value>Hold（壁）</value>
+  </data>
+  <data name="FumenStatisticsLaneStarts" xml:space="preserve">
+    <value>レーン始点（壁を含む）</value>
+  </data>
+  <data name="FumenStatisticsLaneChildren" xml:space="preserve">
+    <value>レーン中間・終点ノード（壁を含む）</value>
+  </data>
+  <data name="FumenStatisticsBeamStarts" xml:space="preserve">
+    <value>ビーム始点</value>
+  </data>
+  <data name="FumenStatisticsBeamChildren" xml:space="preserve">
+    <value>ビーム中間・終点ノード</value>
+  </data>
+  <data name="FumenStatisticsCurveControls" xml:space="preserve">
+    <value>曲線制御点</value>
+  </data>
+  <data name="FumenStatisticsMeters" xml:space="preserve">
+    <value>拍子</value>
+  </data>
+  <data name="FumenStatisticsSoflanAreas" xml:space="preserve">
+    <value>個別 Soflan 領域</value>
+  </data>
+  <data name="FumenStatisticsLaneBlocks" xml:space="preserve">
+    <value>レーン遮断領域</value>
+  </data>
+  <data name="FumenStatisticsComments" xml:space="preserve">
+    <value>コメント</value>
+  </data>
+  <data name="FumenStatisticsSvgPrefabs" xml:space="preserve">
+    <value>SVG プレハブ</value>
+  </data>
+  <data name="FumenStatisticsBulletPalletes" xml:space="preserve">
+    <value>弾パレット</value>
+  </data>
+  <data name="FumenStatisticsTotalDescription" xml:space="preserve">
+    <value>T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK</value>
+  </data>
+  <data name="FumenStatisticsTapDescription" xml:space="preserve">
+    <value>壁以外の Tap と Hold 始点</value>
+  </data>
+  <data name="FumenStatisticsHoldDescription" xml:space="preserve">
+    <value>壁以外の Hold 継続判定数（終点を含む）</value>
+  </data>
+  <data name="FumenStatisticsSideDescription" xml:space="preserve">
+    <value>壁 Tap と壁 Hold 始点</value>
+  </data>
+  <data name="FumenStatisticsSideHoldDescription" xml:space="preserve">
+    <value>壁 Hold 継続判定数（終点を含む）</value>
+  </data>
+  <data name="FumenStatisticsFlickDescription" xml:space="preserve">
+    <value>Flick オブジェクト数</value>
+  </data>
+  <data name="FumenStatisticsBellDescription" xml:space="preserve">
+    <value>Bell オブジェクト数（T_TOTAL 対象外）</value>
+  </data>
+  <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
+    <value>T_* コマンドの値を計算できません：{0}</value>
+  </data>
+  <data name="FumenStatisticsInvalidHoldTiming" xml:space="preserve">
+    <value>Hold の判定パラメーターが無効です。BPM と PROGJUDGE_BPM は有限の正数で、TRESOLUTION から得られる判定間隔は 0 より大きく、オーバーフローしない必要があります。</value>
+  </data>
 </root>

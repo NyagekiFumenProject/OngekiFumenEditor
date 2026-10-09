@@ -1,0 +1,125 @@
+<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Modules.FumenVisualEditor.Views.Dialogs.FumenStatisticsDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs"
+    Title="{markup:Translate [FumenStatistics]}"
+    Width="760"
+    Height="660"
+    MinWidth="600"
+    MinHeight="440"
+    Background="{DynamicResource EnvironmentWindowBackground}"
+    Foreground="{DynamicResource EnvironmentToolWindowText}"
+    ShowMinButton="False"
+    Style="{DynamicResource MainWindowStyle}"
+    WindowStartupLocation="CenterOwner"
+    d:DataContext="{d:DesignInstance Type=vm:FumenStatisticsDialogViewModel}"
+    mc:Ignorable="d">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            Margin="0,0,0,12"
+            FontSize="16"
+            FontWeight="SemiBold"
+            Text="{Binding FumenName}"
+            TextTrimming="CharacterEllipsis"
+            ToolTip="{Binding FumenName}" />
+
+        <TabControl Grid.Row="1">
+            <TabItem Header="{markup:Translate [FumenStatisticsObjects]}">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Margin="0,0,0,10" Orientation="Horizontal">
+                        <TextBlock FontWeight="SemiBold" Text="{markup:Translate [FumenStatisticsObjectTotal]}" />
+                        <TextBlock Margin="12,0,0,0" FontWeight="SemiBold" Text="{Binding TotalObjectCount, Mode=OneWay}" />
+                    </StackPanel>
+                    <DataGrid
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        CanUserReorderColumns="False"
+                        HeadersVisibility="Column"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding ObjectCounts}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="*" Binding="{Binding Name}" Header="{markup:Translate [FumenStatisticsObjectType]}" />
+                            <DataGridTextColumn Width="120" Binding="{Binding Count}" Header="{markup:Translate [FumenStatisticsCount]}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="0,10,0,0"
+                        Text="{markup:Translate [FumenStatisticsObjectsNote]}"
+                        TextWrapping="Wrap" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="{markup:Translate [FumenStatisticsCommands]}">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Margin="0,0,0,10"
+                        Text="{markup:Translate [FumenStatisticsCommandsNote]}"
+                        TextWrapping="Wrap" />
+                    <DataGrid
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        CanUserReorderColumns="False"
+                        CanUserSortColumns="False"
+                        HeadersVisibility="Column"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding CommandCounts}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Width="110" Binding="{Binding Name}" Header="{markup:Translate [FumenStatisticsCommand]}" />
+                            <DataGridTextColumn Width="80" Binding="{Binding Count}" Header="{markup:Translate [FumenStatisticsCount]}" />
+                            <DataGridTextColumn Width="*" Binding="{Binding Description}" Header="{markup:Translate [FumenStatisticsDescription]}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Margin" Value="4,2" />
+                                        <Setter Property="TextWrapping" Value="Wrap" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="0,10,0,0"
+                        Text="{Binding CalculationError}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding HasCalculationError, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <Button
+            Grid.Row="2"
+            Margin="0,12,0,0"
+            Padding="20,5"
+            HorizontalAlignment="Right"
+            cal:Message.Attach="[Event Click] = [Action Close()]"
+            Content="{markup:Translate [FumenStatisticsClose]}"
+            IsCancel="True"
+            IsDefault="True" />
+    </Grid>
+</mah:MetroWindow>

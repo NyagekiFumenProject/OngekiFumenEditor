@@ -7980,5 +7980,329 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("DisableStringRendererAntialiasing", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Chart Statistics.
+        /// </summary>
+        public static string FumenStatistics {
+            get {
+                return ResourceManager.GetString("FumenStatistics", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Show object counts and OGKR T_* values for the active chart.
+        /// </summary>
+        public static string FumenStatisticsToolTip {
+            get {
+                return ResourceManager.GetString("FumenStatisticsToolTip", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Object Counts.
+        /// </summary>
+        public static string FumenStatisticsObjects {
+            get {
+                return ResourceManager.GetString("FumenStatisticsObjects", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Total objects.
+        /// </summary>
+        public static string FumenStatisticsObjectTotal {
+            get {
+                return ResourceManager.GetString("FumenStatisticsObjectTotal", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Object type.
+        /// </summary>
+        public static string FumenStatisticsObjectType {
+            get {
+                return ResourceManager.GetString("FumenStatisticsObjectType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Count.
+        /// </summary>
+        public static string FumenStatisticsCount {
+            get {
+                return ResourceManager.GetString("FumenStatisticsCount", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to T_* Commands.
+        /// </summary>
+        public static string FumenStatisticsCommands {
+            get {
+                return ResourceManager.GetString("FumenStatisticsCommands", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Command.
+        /// </summary>
+        public static string FumenStatisticsCommand {
+            get {
+                return ResourceManager.GetString("FumenStatisticsCommand", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Counting rule.
+        /// </summary>
+        public static string FumenStatisticsDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string FumenStatisticsClose {
+            get {
+                return ResourceManager.GetString("FumenStatisticsClose", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Includes the initial BPM, meter and default Soflan. Tap and Hold counts include Critical objects. Each Hold, Soflan and area counts once; their end markers are not counted separately. Lane/beam nodes and curve control points are listed separately..
+        /// </summary>
+        public static string FumenStatisticsObjectsNote {
+            get {
+                return ResourceManager.GetString("FumenStatisticsObjectsNote", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Calculated from the current chart using the same rules as OGKR export. T_TAP / T_SIDE include Hold heads; T_HOLD / T_SHOLD count sustained judgements, including the end judgement, using BPM and PROGJUDGE_BPM. Bells are excluded from T_TOTAL..
+        /// </summary>
+        public static string FumenStatisticsCommandsNote {
+            get {
+                return ResourceManager.GetString("FumenStatisticsCommandsNote", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Tap (non-wall).
+        /// </summary>
+        public static string FumenStatisticsTap {
+            get {
+                return ResourceManager.GetString("FumenStatisticsTap", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Tap (wall).
+        /// </summary>
+        public static string FumenStatisticsSideTap {
+            get {
+                return ResourceManager.GetString("FumenStatisticsSideTap", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hold (non-wall).
+        /// </summary>
+        public static string FumenStatisticsHold {
+            get {
+                return ResourceManager.GetString("FumenStatisticsHold", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hold (wall).
+        /// </summary>
+        public static string FumenStatisticsSideHold {
+            get {
+                return ResourceManager.GetString("FumenStatisticsSideHold", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane starts (including walls).
+        /// </summary>
+        public static string FumenStatisticsLaneStarts {
+            get {
+                return ResourceManager.GetString("FumenStatisticsLaneStarts", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane middle/end nodes (including walls).
+        /// </summary>
+        public static string FumenStatisticsLaneChildren {
+            get {
+                return ResourceManager.GetString("FumenStatisticsLaneChildren", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Beam starts.
+        /// </summary>
+        public static string FumenStatisticsBeamStarts {
+            get {
+                return ResourceManager.GetString("FumenStatisticsBeamStarts", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Beam middle/end nodes.
+        /// </summary>
+        public static string FumenStatisticsBeamChildren {
+            get {
+                return ResourceManager.GetString("FumenStatisticsBeamChildren", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Curve control points.
+        /// </summary>
+        public static string FumenStatisticsCurveControls {
+            get {
+                return ResourceManager.GetString("FumenStatisticsCurveControls", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Meter.
+        /// </summary>
+        public static string FumenStatisticsMeters {
+            get {
+                return ResourceManager.GetString("FumenStatisticsMeters", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Individual Soflan areas.
+        /// </summary>
+        public static string FumenStatisticsSoflanAreas {
+            get {
+                return ResourceManager.GetString("FumenStatisticsSoflanAreas", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane blockers.
+        /// </summary>
+        public static string FumenStatisticsLaneBlocks {
+            get {
+                return ResourceManager.GetString("FumenStatisticsLaneBlocks", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Comments.
+        /// </summary>
+        public static string FumenStatisticsComments {
+            get {
+                return ResourceManager.GetString("FumenStatisticsComments", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to SVG prefabs.
+        /// </summary>
+        public static string FumenStatisticsSvgPrefabs {
+            get {
+                return ResourceManager.GetString("FumenStatisticsSvgPrefabs", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bullet palettes.
+        /// </summary>
+        public static string FumenStatisticsBulletPalletes {
+            get {
+                return ResourceManager.GetString("FumenStatisticsBulletPalletes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK.
+        /// </summary>
+        public static string FumenStatisticsTotalDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsTotalDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Non-wall Taps and non-wall Hold heads.
+        /// </summary>
+        public static string FumenStatisticsTapDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsTapDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Non-wall Hold sustained judgements (including ends).
+        /// </summary>
+        public static string FumenStatisticsHoldDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsHoldDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Wall Taps and wall Hold heads.
+        /// </summary>
+        public static string FumenStatisticsSideDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsSideDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Wall Hold sustained judgements (including ends).
+        /// </summary>
+        public static string FumenStatisticsSideHoldDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsSideHoldDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Flick objects.
+        /// </summary>
+        public static string FumenStatisticsFlickDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsFlickDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bell objects (excluded from T_TOTAL).
+        /// </summary>
+        public static string FumenStatisticsBellDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsBellDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to calculate T_* values: {0}.
+        /// </summary>
+        public static string FumenStatisticsCalculationFailed {
+            get {
+                return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hold timing is invalid: BPM and PROGJUDGE_BPM must be finite positive values, and TRESOLUTION must produce a positive judgement step without overflow..
+        /// </summary>
+        public static string FumenStatisticsInvalidHoldTiming {
+            get {
+                return ResourceManager.GetString("FumenStatisticsInvalidHoldTiming", resourceCulture);
+            }
+        }
     }
 }

@@ -3126,4 +3126,112 @@
   <data name="SettingsToolTipColorChange" xml:space="preserve">
     <value>Opens the color picker for the element named in this row. Changing it updates its editor display color, not its lane/object type. Save the options to persist the chosen color.</value>
   </data>
+  <data name="FumenStatistics" xml:space="preserve">
+    <value>Chart Statistics</value>
+  </data>
+  <data name="FumenStatisticsToolTip" xml:space="preserve">
+    <value>Show object counts and OGKR T_* values for the active chart</value>
+  </data>
+  <data name="FumenStatisticsObjects" xml:space="preserve">
+    <value>Object Counts</value>
+  </data>
+  <data name="FumenStatisticsObjectTotal" xml:space="preserve">
+    <value>Total objects</value>
+  </data>
+  <data name="FumenStatisticsObjectType" xml:space="preserve">
+    <value>Object type</value>
+  </data>
+  <data name="FumenStatisticsCount" xml:space="preserve">
+    <value>Count</value>
+  </data>
+  <data name="FumenStatisticsCommands" xml:space="preserve">
+    <value>T_* Commands</value>
+  </data>
+  <data name="FumenStatisticsCommand" xml:space="preserve">
+    <value>Command</value>
+  </data>
+  <data name="FumenStatisticsDescription" xml:space="preserve">
+    <value>Counting rule</value>
+  </data>
+  <data name="FumenStatisticsClose" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="FumenStatisticsObjectsNote" xml:space="preserve">
+    <value>Includes the initial BPM, meter and default Soflan. Tap and Hold counts include Critical objects. Each Hold, Soflan and area counts once; their end markers are not counted separately. Lane/beam nodes and curve control points are listed separately.</value>
+  </data>
+  <data name="FumenStatisticsCommandsNote" xml:space="preserve">
+    <value>Calculated from the current chart using the same rules as OGKR export. T_TAP / T_SIDE include Hold heads; T_HOLD / T_SHOLD count sustained judgements, including the end judgement, using BPM and PROGJUDGE_BPM. Bells are excluded from T_TOTAL.</value>
+  </data>
+  <data name="FumenStatisticsTap" xml:space="preserve">
+    <value>Tap (non-wall)</value>
+  </data>
+  <data name="FumenStatisticsSideTap" xml:space="preserve">
+    <value>Tap (wall)</value>
+  </data>
+  <data name="FumenStatisticsHold" xml:space="preserve">
+    <value>Hold (non-wall)</value>
+  </data>
+  <data name="FumenStatisticsSideHold" xml:space="preserve">
+    <value>Hold (wall)</value>
+  </data>
+  <data name="FumenStatisticsLaneStarts" xml:space="preserve">
+    <value>Lane starts (including walls)</value>
+  </data>
+  <data name="FumenStatisticsLaneChildren" xml:space="preserve">
+    <value>Lane middle/end nodes (including walls)</value>
+  </data>
+  <data name="FumenStatisticsBeamStarts" xml:space="preserve">
+    <value>Beam starts</value>
+  </data>
+  <data name="FumenStatisticsBeamChildren" xml:space="preserve">
+    <value>Beam middle/end nodes</value>
+  </data>
+  <data name="FumenStatisticsCurveControls" xml:space="preserve">
+    <value>Curve control points</value>
+  </data>
+  <data name="FumenStatisticsMeters" xml:space="preserve">
+    <value>Meter</value>
+  </data>
+  <data name="FumenStatisticsSoflanAreas" xml:space="preserve">
+    <value>Individual Soflan areas</value>
+  </data>
+  <data name="FumenStatisticsLaneBlocks" xml:space="preserve">
+    <value>Lane blockers</value>
+  </data>
+  <data name="FumenStatisticsComments" xml:space="preserve">
+    <value>Comments</value>
+  </data>
+  <data name="FumenStatisticsSvgPrefabs" xml:space="preserve">
+    <value>SVG prefabs</value>
+  </data>
+  <data name="FumenStatisticsBulletPalletes" xml:space="preserve">
+    <value>Bullet palettes</value>
+  </data>
+  <data name="FumenStatisticsTotalDescription" xml:space="preserve">
+    <value>T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK</value>
+  </data>
+  <data name="FumenStatisticsTapDescription" xml:space="preserve">
+    <value>Non-wall Taps and non-wall Hold heads</value>
+  </data>
+  <data name="FumenStatisticsHoldDescription" xml:space="preserve">
+    <value>Non-wall Hold sustained judgements (including ends)</value>
+  </data>
+  <data name="FumenStatisticsSideDescription" xml:space="preserve">
+    <value>Wall Taps and wall Hold heads</value>
+  </data>
+  <data name="FumenStatisticsSideHoldDescription" xml:space="preserve">
+    <value>Wall Hold sustained judgements (including ends)</value>
+  </data>
+  <data name="FumenStatisticsFlickDescription" xml:space="preserve">
+    <value>Flick objects</value>
+  </data>
+  <data name="FumenStatisticsBellDescription" xml:space="preserve">
+    <value>Bell objects (excluded from T_TOTAL)</value>
+  </data>
+  <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
+    <value>Unable to calculate T_* values: {0}</value>
+  </data>
+  <data name="FumenStatisticsInvalidHoldTiming" xml:space="preserve">
+    <value>Hold timing is invalid: BPM and PROGJUDGE_BPM must be finite positive values, and TRESOLUTION must produce a positive judgement step without overflow.</value>
+  </data>
 </root>

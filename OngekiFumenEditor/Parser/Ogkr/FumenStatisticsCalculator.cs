@@ -1,5 +1,7 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Properties;
+using System;
 using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr
@@ -64,11 +66,16 @@ namespace OngekiFumenEditor.Parser.Ogkr
                 var progressJudgeBPM = fumen.MetaInfo.ProgJudgeBpm;
                 var standardBeatLen = timeResolution_ >> 2; //ȡ1/4��Ƭ����
 
+                if (!double.IsFinite(bpm) || bpm <= 0 || !float.IsFinite(progressJudgeBPM) || progressJudgeBPM <= 0 || standardBeatLen <= 0)
+                    throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);
+
                 if (bpm < progressJudgeBPM)
                 {
                     while (bpm < progressJudgeBPM)
                     {
                         standardBeatLen >>= 1;
+                        if (standardBeatLen == 0)
+                            throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);
                         bpm *= 2f;
                     }
                 }
@@ -76,6 +83,8 @@ namespace OngekiFumenEditor.Parser.Ogkr
                 {
                     for (progressJudgeBPM *= 2f; progressJudgeBPM <= bpm; progressJudgeBPM *= 2f)
                     {
+                        if (standardBeatLen > int.MaxValue / 2)
+                            throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);
                         standardBeatLen <<= 1;
                     }
                 }

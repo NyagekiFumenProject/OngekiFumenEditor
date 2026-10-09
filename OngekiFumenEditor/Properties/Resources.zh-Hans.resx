@@ -3093,4 +3093,112 @@
   <data name="SettingsToolTipColorChange" xml:space="preserve">
     <value>打开当前行对应元素的颜色选择器。更改的是编辑器显示颜色，不会改变轨道／物件类型。保存选项后持久化所选颜色。</value>
   </data>
+  <data name="FumenStatistics" xml:space="preserve">
+    <value>谱面统计</value>
+  </data>
+  <data name="FumenStatisticsToolTip" xml:space="preserve">
+    <value>统计当前谱面的物件数量及 OGKR T_* 命令数值</value>
+  </data>
+  <data name="FumenStatisticsObjects" xml:space="preserve">
+    <value>物件数量</value>
+  </data>
+  <data name="FumenStatisticsObjectTotal" xml:space="preserve">
+    <value>谱面物件总数</value>
+  </data>
+  <data name="FumenStatisticsObjectType" xml:space="preserve">
+    <value>物件类型</value>
+  </data>
+  <data name="FumenStatisticsCount" xml:space="preserve">
+    <value>数量</value>
+  </data>
+  <data name="FumenStatisticsCommands" xml:space="preserve">
+    <value>T_* 命令</value>
+  </data>
+  <data name="FumenStatisticsCommand" xml:space="preserve">
+    <value>命令</value>
+  </data>
+  <data name="FumenStatisticsDescription" xml:space="preserve">
+    <value>统计规则</value>
+  </data>
+  <data name="FumenStatisticsClose" xml:space="preserve">
+    <value>关闭</value>
+  </data>
+  <data name="FumenStatisticsObjectsNote" xml:space="preserve">
+    <value>包含起始 BPM、拍号和默认 Soflan。Tap / Hold 数量包含 Critical 物件。每个 Hold、Soflan 和区域计 1 个，结束标记不另计；轨道、激光节点及曲线控制点分别列出。</value>
+  </data>
+  <data name="FumenStatisticsCommandsNote" xml:space="preserve">
+    <value>根据当前谱面计算，与 OGKR 导出使用相同规则。T_TAP / T_SIDE 包含对应 Hold 头部；T_HOLD / T_SHOLD 根据 BPM 和 PROGJUDGE_BPM 统计持续判定（含结束判定）。T_TOTAL 不包含 Bell。</value>
+  </data>
+  <data name="FumenStatisticsTap" xml:space="preserve">
+    <value>Tap（普通）</value>
+  </data>
+  <data name="FumenStatisticsSideTap" xml:space="preserve">
+    <value>Tap（侧键）</value>
+  </data>
+  <data name="FumenStatisticsHold" xml:space="preserve">
+    <value>Hold（普通）</value>
+  </data>
+  <data name="FumenStatisticsSideHold" xml:space="preserve">
+    <value>Hold（侧键）</value>
+  </data>
+  <data name="FumenStatisticsLaneStarts" xml:space="preserve">
+    <value>轨道起点（含墙轨）</value>
+  </data>
+  <data name="FumenStatisticsLaneChildren" xml:space="preserve">
+    <value>轨道中间／结束节点（含墙轨）</value>
+  </data>
+  <data name="FumenStatisticsBeamStarts" xml:space="preserve">
+    <value>激光起点</value>
+  </data>
+  <data name="FumenStatisticsBeamChildren" xml:space="preserve">
+    <value>激光中间／结束节点</value>
+  </data>
+  <data name="FumenStatisticsCurveControls" xml:space="preserve">
+    <value>曲线控制点</value>
+  </data>
+  <data name="FumenStatisticsMeters" xml:space="preserve">
+    <value>拍号</value>
+  </data>
+  <data name="FumenStatisticsSoflanAreas" xml:space="preserve">
+    <value>独立 Soflan 区域</value>
+  </data>
+  <data name="FumenStatisticsLaneBlocks" xml:space="preserve">
+    <value>轨道遮挡区域</value>
+  </data>
+  <data name="FumenStatisticsComments" xml:space="preserve">
+    <value>注释</value>
+  </data>
+  <data name="FumenStatisticsSvgPrefabs" xml:space="preserve">
+    <value>SVG 预制件</value>
+  </data>
+  <data name="FumenStatisticsBulletPalletes" xml:space="preserve">
+    <value>子弹调色板</value>
+  </data>
+  <data name="FumenStatisticsTotalDescription" xml:space="preserve">
+    <value>T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK</value>
+  </data>
+  <data name="FumenStatisticsTapDescription" xml:space="preserve">
+    <value>普通 Tap + 普通 Hold 头部</value>
+  </data>
+  <data name="FumenStatisticsHoldDescription" xml:space="preserve">
+    <value>普通 Hold 持续判定数（含结束判定）</value>
+  </data>
+  <data name="FumenStatisticsSideDescription" xml:space="preserve">
+    <value>侧键 Tap + 侧键 Hold 头部</value>
+  </data>
+  <data name="FumenStatisticsSideHoldDescription" xml:space="preserve">
+    <value>侧键 Hold 持续判定数（含结束判定）</value>
+  </data>
+  <data name="FumenStatisticsFlickDescription" xml:space="preserve">
+    <value>Flick 物件数量</value>
+  </data>
+  <data name="FumenStatisticsBellDescription" xml:space="preserve">
+    <value>Bell 物件数量（不计入 T_TOTAL）</value>
+  </data>
+  <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
+    <value>无法计算 T_* 命令数值：{0}</value>
+  </data>
+  <data name="FumenStatisticsInvalidHoldTiming" xml:space="preserve">
+    <value>Hold 判定参数无效：BPM 和 PROGJUDGE_BPM 必须为有限正数，TRESOLUTION 必须能生成大于 0 且不溢出的判定步长。</value>
+  </data>
 </root>
