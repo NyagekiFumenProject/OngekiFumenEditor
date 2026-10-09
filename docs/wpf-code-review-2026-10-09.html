@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WPF 项目代码审查（已完成）</title>
+<style>
+:root { color-scheme: light dark; --bg:#fff; --fg:#202124; --muted:#5f6368; --line:#dadce0; --panel:#f8f9fa; --critical:#b00020; --high:#c62828; --medium:#b26a00; --low:#456a00; }
+@media (prefers-color-scheme:dark) { :root { --bg:#202124; --fg:#e8eaed; --muted:#bdc1c6; --line:#5f6368; --panel:#292a2d; } }
+body { margin:0 auto; max-width:1200px; padding:2rem; background:var(--bg); color:var(--fg); font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif; }
+h1,h2,h3 { line-height:1.25; } h1 { margin-top:0; } h2 { border-bottom:1px solid var(--line); padding-bottom:.4rem; margin-top:2rem; }
+.meta { color:var(--muted); } .notice { background:var(--panel); border-left:4px solid #4285f4; padding:.8rem 1rem; }
+table { border-collapse:collapse; width:100%; margin:1rem 0; } th,td { border:1px solid var(--line); padding:.55rem .65rem; vertical-align:top; text-align:left; } th { background:var(--panel); }
+.sev { font-weight:700; white-space:nowrap; } .critical { color:var(--critical); } .high { color:var(--high); } .medium { color:var(--medium); } .low { color:var(--low); }
+code { background:var(--panel); padding:.1rem .3rem; border-radius:3px; } a { color:#4285f4; }
+.finding { border:1px solid var(--line); border-radius:6px; padding:1rem; margin:1rem 0; } .finding h3 { margin-top:0; }
+ul { margin-top:.35rem; }
+</style>
+</head>
+<body>
+<h1>WPF 项目代码审查</h1>
+<p class="meta">报告文件：<code>docs/wpf-code-review-2026-10-09.html</code>　|　审查对象：<code>OngekiFumenEditor/</code>　|　状态：<strong id="status">已完成</strong></p>
+<div class="notice">
+  本报告记录静态代码审查发现的可复现程序缺陷。发现按严重度编号，审查过程中持续追加；仅记录有明确触发路径、后果和可执行修复方向的问题，不把纯风格意见列为 bug。
+</div>
+<p><strong>审查结果：</strong>共确认 38 项问题，其中 Critical 4 项、High 22 项、Medium 12 项。优先处理 IPC 死锁/异常转储、工程救援与双文件保存、更新器回滚、图形初始化等待和音频异步生命周期问题。</p>
+<h2>审查范围与方法</h2>
+<ul>
+<li>启动、退出、异常处理、日志和崩溃转储。</li>
+<li>文件/数据 I/O、谱面解析与保存、设置、缓存和资源生命周期。</li>
+<li>WPF UI、Dispatcher、async/await、线程、音频、渲染、事件和并发。</li>
+<li>通过源码路径、调用链和已有构建结果交叉核对；必要时补充最小化复现或构建验证。</li>
+</ul>
+
+<h2>严重度定义</h2>
+<table>
+<thead><tr><th>级别</th><th>含义</th></tr></thead>
+<tbody>
+<tr><td class="sev critical">Critical</td><td>可导致数据损坏/丢失、进程无法启动或大范围崩溃，且触发条件现实。</td></tr>
+<tr><td class="sev high">High</td><td>常见操作下导致崩溃、功能不可用或关键结果错误。</td></tr>
+<tr><td class="sev medium">Medium</td><td>特定输入、环境或时序下出现明显错误、丢失或不一致。</td></tr>
+<tr><td class="sev low">Low</td><td>影响有限但可确认的错误，或需要较苛刻条件才能触发。</td></tr>
+</tbody>
+</table>
+
+<h2>发现项</h2>
+<div id="findings">
+<article class="finding" id="finding-001">
+<h3><span class="sev medium">F-001 · Medium</span>　ShowXOffsetScrollBar 写入了错误的设置项</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs#L187-L196"><code>OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs:187-196</code></a></p>
+<p><strong>触发条件：</strong> 用户在编辑器设置中切换“显示 X 偏移滚动条”。<code>ShowXOffsetScrollBar</code> 的 setter 第 193 行把值写入了 <code>EditorGlobalSetting.Default.ForceXGridMagneticDock</code>，而不是 <code>ShowXOffsetScrollBar</code>。</p>
+<p><strong>后果：</strong> X 偏移滚动条选项无法正确持久化；每次切换还会覆盖“强制 X 网格吸附”的设置。当前会话内 backing field 可能暂时显示用户选择，但重启后从配置重新加载时会恢复旧值，同时网格吸附行为可能被意外改变。</p>
+<p><strong>推荐解决方案：</strong> 将赋值改为 <code>showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar = value;</code>，并增加设置 setter 回归测试：分别切换两个选项，保存并重新加载设置，验证两个属性互不影响。</p>
+</article>
+
+<article class="finding" id="finding-002">
+<h3><span class="sev high">F-002 · High</span>　图像加载失败会让等待者永久挂起</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L37-L70"><code>Utils/ImageLoader.cs:37-70</code></a>、<a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L140-L166"><code>:140-166</code></a></p>
+<p><strong>触发条件：</strong> 图片文件不存在、网络请求失败、缓存损坏，<code>Load()</code> 返回 null；<code>ProcessTask</code> 随后无条件访问 <code>r.Length</code>。后台 <code>Task.Run</code> 的异常没有传给 <code>TaskCompletionSource</code>，也没有 finally 清理并发计数。</p>
+<p><strong>后果：</strong> 图片绑定等待的 Task 永不完成，界面可能永久显示加载中；队列任务异常也无法被调用方观察。</p>
+<p><strong>推荐解决方案：</strong> 将消费者改成可等待的 <code>Task</code>，在统一 try/catch/finally 中处理 null、缓存异常和取消，使用 <code>TrySetResult/TrySetException/TrySetCanceled</code>，始终递减运行计数并删除损坏缓存。</p>
+</article>
+
+<article class="finding" id="finding-003">
+<h3><span class="sev high">F-003 · High</span>　确定性临时缓存路径在命中后忙等死循环</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/TempFileHelper.cs#L14-L24"><code>Utils/TempFileHelper.cs:14-24</code></a>、<a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L109-L123"><code>ImageLoader.cs:109-123</code></a></p>
+<p><strong>触发条件：</strong> <code>ImageLoader.GetCacheFile</code> 以 <code>random:false</code> 请求固定文件名。文件第一次写入后，<code>GetTempFilePath</code> 仍循环等待“文件不存在”，但没有任何删除或改名路径。</p>
+<p><strong>后果：</strong> 同一网络图片第二次加载会占满一个线程并永久卡在生成缓存路径，调用方同时因 F-002 无法完成。</p>
+<p><strong>推荐解决方案：</strong> <code>random:false</code> 直接返回确定性路径；随机模式才检查冲突。缓存读写还应使用临时文件和原子替换，避免半写文件成为永久缓存。</p>
+</article>
+
+<article class="finding" id="finding-004">
+<h3><span class="sev high">F-004 · High</span>　转换器在检查空输入前解引用路径</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenConverter/Kernel/FumenConverterWrapper.cs#L16-L30"><code>FumenConverterWrapper.cs:16-30</code></a>、<a href="../OngekiFumenEditor/Parser/DefaultImpl/Nyageki/DefaultFumenParser.cs#L16-L22"><code>DefaultFumenParser.cs:16-22</code></a></p>
+<p><strong>触发条件：</strong> 转换对话框未选择输入文件，<code>option.InputFumenFilePath</code> 为空；代码先调用 <code>GetDeserializer</code>，解析器内部直接对 null 调用 <code>EndsWith</code>。</p>
+<p><strong>后果：</strong> 用户应得到“未选择输入文件”的结果，却收到 NullReferenceException；命令行或异步 UI 调用还可能把异常升级为未处理异常。</p>
+<p><strong>推荐解决方案：</strong> 先用 <code>IsNullOrWhiteSpace</code> 验证输入，再调用 parser manager；manager 的 serializer/deserializer API 也应对空路径返回 null 而不是解引用。</p>
+</article>
+
+<article class="finding" id="finding-005">
+<h3><span class="sev high">F-005 · High</span>　转换输出不会截断旧文件尾部</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenConverter/Kernel/FumenConverterWrapper.cs#L52-L57"><code>FumenConverterWrapper.cs:52-57</code></a></p>
+<p><strong>触发条件：</strong> 输出文件已存在且本次转换结果比旧文件短。<code>File.OpenWrite</code> 使用 <code>OpenOrCreate</code>，从位置 0 覆盖但不截断文件。</p>
+<p><strong>后果：</strong> 旧尾部字节保留，生成的谱面或二进制文件可能包含不可见残留，解析失败或内容异常。</p>
+<p><strong>推荐解决方案：</strong> 使用 <code>FileMode.Create</code> 或 <code>File.WriteAllBytesAsync</code>；更稳妥是同目录临时文件写完并 Flush 后原子替换目标。</p>
+</article>
+
+<article class="finding" id="finding-006">
+<h3><span class="sev high">F-006 · High</span>　旧项目缺少音频路径时无法进入手动选音频流程</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs#L24-L45"><code>EditorProjectDataUtils.cs:24-45</code></a></p>
+<p><strong>触发条件：</strong> 旧版本或手工编辑的工程 JSON 中 <code>AudioFilePath</code> 为 null、空字符串或空白。代码只为 <code>FumenFilePath</code> 提供默认值，随后直接把 AudioFilePath 传给 <code>Path.Combine</code>。</p>
+<p><strong>后果：</strong> 工程在打开阶段抛异常，用户无法进入编辑器再手动选择音频；空字符串的 FumenFilePath 也不会触发默认谱面路径。</p>
+<p><strong>推荐解决方案：</strong> 对两个字段统一使用 <code>IsNullOrWhiteSpace</code>；谱面路径为空时生成工程同名 <code>.ogkr</code>，音频路径为空时保留为空并交给 UI 的音频选择流程处理。</p>
+</article>
+
+<article class="finding" id="finding-007">
+<h3><span class="sev critical">F-007 · Critical</span>　工程文件与谱面文件的双写不是原子操作</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs#L142-L183"><code>EditorProjectDataUtils.cs:142-183</code></a></p>
+<p><strong>触发条件：</strong> 保存工程时先覆盖项目文件，再覆盖谱面文件；任一步骤中断、磁盘满、进程崩溃或断电。</p>
+<p><strong>后果：</strong> 项目文件可能已经指向新内容，而谱面仍是旧内容、半写内容或不存在，形成不可恢复的项目/谱面不一致。临时文件也没有 finally 清理。</p>
+<p><strong>推荐解决方案：</strong> 两个临时文件分别写入并 <code>Flush(true)</code>，验证可重新加载后，用备份/事务清单协调替换；至少先替换谱面和项目的临时副本，失败时保留旧文件并清理临时文件。</p>
+</article>
+
+<article class="finding" id="finding-008">
+<h3><span class="sev critical">F-008 · Critical</span>　崩溃救援工程引用错误路径，未保存谱面无法恢复</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/DeadHandler/FumenRescue.cs#L38-L80"><code>Utils/DeadHandler/FumenRescue.cs:38-80</code></a></p>
+<p><strong>触发条件：</strong> 崩溃救援先按原 <code>EditorProjectData</code> 保存项目，再另存谱面。第 67-68 行在原谱面名非空时才随机改名；原路径为空时文件名为空，且项目中的 <code>FumenFilePath</code> 从未改为救援目录内的文件名。</p>
+<p><strong>后果：</strong> 救援项目仍指向原路径，打开救援目录时找不到刚写出的谱面；新建/未保存文档还会把目录路径当输出路径而保存失败，崩溃时丢失未保存谱面。</p>
+<p><strong>推荐解决方案：</strong> 先生成确定的救援谱面文件名（空路径使用文档名或随机名），克隆项目数据并改为相对救援路径，再分别写临时文件、重新加载验证后原子落盘。</p>
+</article>
+
+<article class="finding" id="finding-009">
+<h3><span class="sev medium">F-009 · Medium</span>　损坏的最近文件配置会阻止启动</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/RecentFiles/DefaultImp/DefaultEditorRecentFilesManager.cs#L40-L52"><code>DefaultEditorRecentFilesManager.cs:40-52</code></a></p>
+<p><strong>触发条件：</strong> 最近文件 Base64 被截断、JSON 被手动修改，或 JSON 反序列化返回 null。</p>
+<p><strong>后果：</strong> 构造 recent-files manager 时异常直接冒出，编辑器可能在启动早期退出；<code>list.Take</code> 对 null 还会产生 NullReferenceException。</p>
+<p><strong>推荐解决方案：</strong> 分别捕获 Base64/JSON 异常，把坏数据移到备份并回写空列表；反序列化结果使用空列表兜底，不让最近文件阻断主程序启动。</p>
+</article>
+
+<article class="finding" id="finding-010">
+<h3><span class="sev high">F-010 · High</span>　窗口位置配置受区域设置影响并可能直接阻断启动</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L333-L339"><code>AppBootstrapper.cs:333-339</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L420-L427"><code>:420-427</code></a></p>
+<p><strong>触发条件：</strong> 关闭窗口时用当前文化格式化 double 并用逗号拼接；在逗号小数文化下保存的值再次按逗号 Split 会被拆成更多字段。配置被截断或手工修改时也没有长度和格式校验。</p>
+<p><strong>后果：</strong> 下次启动可能在 UI 初始化阶段抛 FormatException/IndexOutOfRangeException，或把位置和尺寸错位解析。</p>
+<p><strong>推荐解决方案：</strong> 使用 JSON/四个独立设置项，数字统一 InvariantCulture；读取使用 TryParse、数量检查和屏幕边界校验，失败时忽略配置并恢复默认。</p>
+</article>
+
+<article class="finding" id="finding-011">
+<h3><span class="sev critical">F-011 · Critical</span>　IPC 写入忙时未释放 Mutex，会造成双向死锁</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/IPCHelper.cs#L114-L136"><code>Utils/IPCHelper.cs:114-136</code></a></p>
+<p><strong>触发条件：</strong> 共享内存的消息槽仍有数据时，<code>WriteLine</code> 在已取得 Mutex 后直接 <code>continue</code>，没有 <code>ReleaseMutex</code>。</p>
+<p><strong>后果：</strong> 发送端永久持有命名 Mutex 并等待槽清空；接收端读取完成后再次等待同一 Mutex，第二实例/宿主通信和退出都可能永久卡死。</p>
+<p><strong>推荐解决方案：</strong> 将读取、写入和释放放进 try/finally；发现槽忙时先释放锁再等待，并使用信号量/事件而不是持锁 Sleep。</p>
+</article>
+
+<article class="finding" id="finding-012">
+<h3><span class="sev high">F-012 · High</span>　IPC PID 存在 TOCTOU 和跨安装误路由</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/IPCHelper.cs#L41-L70"><code>IPCHelper.cs:41-70</code></a>、<a href="../OngekiFumenEditor/Utils/IPCHelper.cs#L148-L162"><code>:148-162</code></a></p>
+<p><strong>触发条件：</strong> 从 MMF 读出 PID 后目标进程恰好退出，或 PID 已被系统复用；源码 Debug、Release、桌面部署同时运行时还共享固定的 MMF/Mutex/Event 名称。</p>
+<p><strong>后果：</strong> <code>Process.GetProcessById</code> 可直接抛异常；更危险的是命令可能被发送给另一套安装，或被更新器按名称误杀。</p>
+<p><strong>推荐解决方案：</strong> 用命名 Mutex 原子选主，校验进程路径、启动时间和安装实例 ID；对象名称包含规范化安装标识和用户 SID。处理进程退出/复用的 TOCTOU，失效时清理并重试。</p>
+</article>
+
+<article class="finding" id="finding-013">
+<h3><span class="sev medium">F-013 · Medium</span>　IPC 消息长度截断但发布了原始长度</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/IPCHelper.cs#L129-L135"><code>IPCHelper.cs:129-135</code></a></p>
+<p><strong>触发条件：</strong> 序列化后的命令超过 MMF 可用容量。写入数据按容量截断，但长度字段仍写入 <code>buffer.Length</code>。</p>
+<p><strong>后果：</strong> 接收端按超出实际数据的长度读取，可能越界、抛异常或破坏后续 IPC 状态；命令内容也已损坏。</p>
+<p><strong>推荐解决方案：</strong> 发布实际写入长度并拒绝超长消息；更好是分片传输或改用命名管道，并在读写两端做最大长度校验。</p>
+</article>
+
+<article class="finding" id="finding-014">
+<h3><span class="sev high">F-014 · High</span>　IPC 线程退出时可能与 UI 互相等待</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L434-L460"><code>AppBootstrapper.cs:434-460</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L673-L676"><code>:673-676</code></a></p>
+<p><strong>触发条件：</strong> IPC 线程收到命令后同步调用 <code>Dispatcher.Invoke</code>，同时 UI 线程进入退出流程并调用 <code>ipcThread.Abort()</code>，而 Abort 默认等待线程结束。</p>
+<p><strong>后果：</strong> IPC 线程等待 UI 执行命令，UI 线程等待 IPC 线程退出，形成关闭死锁。</p>
+<p><strong>推荐解决方案：</strong> 使用 <code>Dispatcher.InvokeAsync</code> 并在 IPC 线程不阻塞等待；退出时先取消并设置有界等待，超时后记录并继续关闭。</p>
+</article>
+
+<article class="finding" id="finding-015">
+<h3><span class="sev critical">F-015 · Critical</span>　AppDomain 未处理异常回调可能在转储前终止进程</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L525-L571"><code>AppBootstrapper.cs:525-571</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L639-L646"><code>:639-646</code></a></p>
+<p><strong>触发条件：</strong> <code>AppDomain.UnhandledException</code> 事件通过 async void 调用 <code>ProcessException</code> 后立即返回；CLR 随后进入终止流程，而处理器还可能停在第一次 await。</p>
+<p><strong>后果：</strong> <code>DumpFileHelper.WriteMiniDump</code>、FumenRescue 和异常报告窗口可能根本没有执行。若首个文件日志写入失败，也会直接跳过转储。</p>
+<p><strong>推荐解决方案：</strong> 对 AppDomain/native 异常使用同步最小路径：先写 dmp，再做有界日志刷写；每条日志独立捕获异常，不能让日志 I/O 阻断转储。异常处理入口还应以 Interlocked 闸门防并发重入。</p>
+</article>
+
+<article class="finding" id="finding-016">
+<h3><span class="sev high">F-016 · High</span>　OnExit 的异步清理不受 WPF 等待，异常还会跳过后续步骤</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L655-L687"><code>AppBootstrapper.cs:655-687</code></a>、<a href="../OngekiFumenEditor/Kernel/Scheduler/SchedulerManager.cs#L180-L208"><code>SchedulerManager.cs:180-208</code></a></p>
+<p><strong>触发条件：</strong> <code>OnExit</code> 是 async void，首个未完成 await 后 WPF 不会等待；音频 Dispose、Scheduler.Term 或某个 <code>OnSchedulerTerm</code> 抛异常时，后续日志和 <code>base.OnExit</code> 不再执行。</p>
+<p><strong>后果：</strong> 正常退出可能留下调度线程、音频资源和未写入日志；CLI/更新器也可能卡在清理任务。</p>
+<p><strong>推荐解决方案：</strong> 把退出协调移到同步可等待入口，或每一步使用有界同步等待；每个清理步骤独立 try/finally，Scheduler 逐项捕获异常，最终无论如何都执行日志刷写和 base.OnExit。</p>
+</article>
+
+<article class="finding" id="finding-017">
+<h3><span class="sev high">F-017 · High</span>　更新器会按进程名杀掉其它安装和实例</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/ProgramUpdater/DefaultProgramUpdater.cs#L420-L433"><code>DefaultProgramUpdater.cs:420-433</code></a></p>
+<p><strong>触发条件：</strong> 更新器枚举所有名为 <code>OngekiFumenEditor</code> 的进程，只排除自己的 PID，不校验可执行文件路径。</p>
+<p><strong>后果：</strong> 源码、Release、桌面部署或其他用户实例可能被强制终止，未保存文档和日志丢失。</p>
+<p><strong>推荐解决方案：</strong> 只处理目标安装目录内、且启动时间/实例 token 匹配的进程；优先通过 IPC 请求正常退出，禁止按进程名全局 Kill。</p>
+</article>
+
+<article class="finding" id="finding-018">
+<h3><span class="sev high">F-018 · High</span>　更新失败回滚无法覆盖已经复制的新文件</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/ProgramUpdater/DefaultProgramUpdater.cs#L376-L398"><code>DefaultProgramUpdater.cs:376-398</code></a></p>
+<p><strong>触发条件：</strong> 更新复制阶段中途失败，目标文件已经存在新版本；回滚使用不带 overwrite 的 <code>File.Move(backup, target)</code>。</p>
+<p><strong>后果：</strong> 回滚移动因目标存在而失败，安装目录留下新旧文件混合状态，程序可能无法启动或加载错误程序集。</p>
+<p><strong>推荐解决方案：</strong> 使用全新 staging 目录并原子切换；若保留现有方案，回滚前安全删除/替换目标并逐项校验恢复结果，失败时阻止启动并保留可恢复备份。</p>
+</article>
+
+<article class="finding" id="finding-019">
+<h3><span class="sev high">F-019 · High</span>　Skia/OpenGL 初始化异常会让等待者永久等待</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Graphics/Skia/DefaultSkiaDrawingManagerImpl.cs#L44-L94"><code>DefaultSkiaDrawingManagerImpl.cs:44-94</code></a>、<a href="../OngekiFumenEditor/Kernel/Graphics/OpenGL/DefaultOpenGLRenderManagerImpl.cs#L198-L210"><code>DefaultOpenGLRenderManagerImpl.cs:198-210</code></a></p>
+<p><strong>触发条件：</strong> 初始化通过 <code>Dispatcher.CurrentDispatcher.InvokeAsync(...)</code> fire-and-forget；项目的 <code>NoWait</code> 扩展为空实现。<code>Initialize</code> 抛异常时，初始化 TCS 不会 SetException；取消令牌也没有传给等待任务。</p>
+<p><strong>后果：</strong> 编辑器等待渲染初始化直到外层超时或永久挂起，真实图形错误被隐藏，异常还可能以未观察任务形式出现。</p>
+<p><strong>推荐解决方案：</strong> 使用应用 UI Dispatcher 并 await 初始化任务；在 catch/finally 中 TrySetException/TrySetCanceled，WaitForInitialization 必须真正响应 CancellationToken。应删除空的 NoWait 实现或至少统一观察异常。</p>
+</article>
+
+<article class="finding" id="finding-020">
+<h3><span class="sev high">F-020 · High</span>　自动保存在线程池直接访问 UI 编辑器对象</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/DefaultImpl/DefaultEditorDocumentManager.cs#L90-L103"><code>DefaultEditorDocumentManager.cs:90-103</code></a></p>
+<p><strong>触发条件：</strong> SchedulerManager 使用 <code>TaskScheduler.Default</code> 运行自动保存；代码中的 <code>Dispatcher.CurrentDispatcher</code> 只是取得当前线程的 Dispatcher，并没有切回 WPF UI 线程。</p>
+<p><strong>后果：</strong> 保存期间可能与用户编辑并发读写 Observable/模型集合，出现枚举修改、半更新快照或保存内容不完整。</p>
+<p><strong>推荐解决方案：</strong> 将保存快照或整个保存操作派发到应用 UI Dispatcher；为每个编辑器加保存互斥和取消旧保存机制，并让保存接受 scheduler cancellationToken。</p>
+</article>
+
+<article class="finding" id="finding-021">
+<h3><span class="sev high">F-021 · High</span>　播放结束回调使用了错误的 Dispatcher</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L78-L89"><code>AudioPlayerToolViewerViewModel.cs:78-89</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/Music/DefaultMusicPlayer.cs#L78-L82"><code>DefaultMusicPlayer.cs:78-82</code></a></p>
+<p><strong>触发条件：</strong> NAudio 线程触发 <code>OnPlaybackFinished</code>，回调中使用 <code>Dispatcher.CurrentDispatcher</code>。该属性取得的是音频线程自己的 Dispatcher，不是应用 UI Dispatcher。</p>
+<p><strong>后果：</strong> <code>OnStopButtonClicked</code>、编辑器滚动和属性通知可能在线程错误上执行，触发跨线程异常；若文档同时关闭，回调还可能访问已失效 Editor。</p>
+<p><strong>推荐解决方案：</strong> 保存并使用应用 UI Dispatcher，使用 BeginInvoke/InvokeAsync；派发前校验当前 editor/player 身份，关闭后取消回调。</p>
+</article>
+
+<article class="finding" id="finding-022">
+<h3><span class="sev high">F-022 · High</span>　音频 Stop/Dispose 的 async void 竞态会在释放后访问 reader</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/Music/DefaultMusicPlayer.cs#L159-L193"><code>DefaultMusicPlayer.cs:159-193</code></a></p>
+<p><strong>触发条件：</strong> <code>Stop</code> 移除 scheduler 后 await；期间另一条关闭/换曲路径进入 <code>Dispose</code> 并把 <code>audioFileReader</code> 置 null，Stop 恢复后仍调用 <code>Seek</code>。Play/Pause/Dispose 都是 async void，调用方无法等待或串行化。</p>
+<p><strong>后果：</strong> 快速切歌、关闭窗口或退出时会产生 NullReferenceException/未观察异常，且 NAudio 资源可能在 scheduler 仍使用时被释放。</p>
+<p><strong>推荐解决方案：</strong> 改为可等待的 Task/ValueTask，使用生命周期锁或取消令牌串行化 Play/Stop/Pause/Dispose；Dispose 必须幂等，先停止 scheduler 和 mixer，再释放 reader。</p>
+</article>
+
+<article class="finding" id="finding-023">
+<h3><span class="sev high">F-023 · High</span>　波形后台任务的取消异常和旧结果发布未受控</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.WaveformDrawing.cs#L219-L249"><code>WaveformDrawing.cs:219-249</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/PeakPointCollection.cs#L20-L30"><code>PeakPointCollection.cs:20-30</code></a></p>
+<p><strong>触发条件：</strong> <code>Task.Run</code> 调用 async void；切歌或修改采样尺寸时取消旧 token，但 <code>GetSamplesAsync</code> 返回后没有再次确认当前 player/generation，<code>ResamplePeak</code> 取消异常也没有调用方捕获。</p>
+<p><strong>后果：</strong> <code>TaskCanceledException</code> 可进入全局异常处理；旧音频的波形或节奏曲线可能覆盖新音频，界面出现串曲数据。</p>
+<p><strong>推荐解决方案：</strong> 全链路改为 Task，统一 catch <code>OperationCanceledException</code>；每次加载分配 generation，只有 token 未取消且 player 仍是当前实例时才发布结果。</p>
+</article>
+
+<article class="finding" id="finding-024">
+<h3><span class="sev medium">F-024 · Medium</span>　关闭编辑器/工具后全局事件仍持有旧对象</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs#L188-L196"><code>FumenVisualEditorViewModel.cs:188-196</code></a>、<a href="../OngekiFumenEditor/Modules/FumenVisualEditor/ViewModels/FumenVisualEditorViewModel.cs#L465-L475"><code>:465-475</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L152-L161"><code>AudioPlayerToolViewerViewModel.cs:152-161</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L288-L292"><code>:288-292</code></a></p>
+<p><strong>触发条件：</strong> 编辑器和音频工具订阅全局设置/文档管理器事件，但关闭和 Dispose 只释放部分渲染资源，没有解除这些订阅或取消所有异步波形任务。</p>
+<p><strong>后果：</strong> 单例事件源长期持有已关闭 ViewModel；反复开关文档/工具会累积回调、内存和 CPU，回调还可能访问已经释放的渲染状态。</p>
+<p><strong>推荐解决方案：</strong> 实现完整 Dispose，解除 EditorSetting、UndoManager、文档管理器和 RenderContext 事件，停止渲染、取消 CTS，并确保关闭路径最终调用它。</p>
+</article>
+
+<article class="finding" id="finding-025">
+<h3><span class="sev medium">F-025 · Medium</span>　Music.xml 读取流未释放</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/DocumentOpenHelper.cs#L201-L235"><code>Utils/DocumentOpenHelper.cs:201-235</code></a></p>
+<p><strong>触发条件：</strong> <code>XDocument.LoadAsync(File.OpenRead(...))</code> 直接把流交给 XML 加载，没有 using。</p>
+<p><strong>后果：</strong> 每次快速打开/读取 Music.xml 都可能在 Windows 保留文件句柄，阻止文件替换删除，长时间运行还会耗尽句柄。</p>
+<p><strong>推荐解决方案：</strong> 使用 using 声明包住 FileStream，或调用带路径的 XML API；在异常和取消路径也确保释放。</p>
+</article>
+
+<article class="finding" id="finding-026">
+<h3><span class="sev medium">F-026 · Medium</span>　配置直接覆盖写，崩溃可留下截断 JSON</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/Settings/OverlayJsonSettingsProvider.cs#L43-L75"><code>OverlayJsonSettingsProvider.cs:43-75</code></a></p>
+<p><strong>触发条件：</strong> 保存配置使用 <code>File.WriteAllText</code> 直接覆盖正式文件，进程崩溃、断电或磁盘写满发生在写入中途。</p>
+<p><strong>后果：</strong> <code>config.json</code> 可能变成半个 JSON；下次加载若根节点/分组类型异常，<code>GetPropertyValues</code> 还可能对 null 直接调用 <code>TryGetPropertyValue</code>，造成启动或设置页崩溃。</p>
+<p><strong>推荐解决方案：</strong> 同目录临时文件写入并 Flush 后 File.Replace，保留 .bak；加载损坏配置时恢复备份或空对象，并对节点类型做校验。</p>
+</article>
+
+<article class="finding" id="finding-027">
+<h3><span class="sev medium">F-027 · Medium</span>　IsPathWritable 的检查方式会误报可写</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/FileHelper.cs#L34-L46"><code>Utils/FileHelper.cs:34-46</code></a></p>
+<p><strong>触发条件：</strong> 现有文件只用 <code>FileAccess.Read</code> 打开测试，目录/新文件则直接认为可写；ACL、只读属性或安装目录权限禁止写入时仍可能返回 true。</p>
+<p><strong>后果：</strong> 保存流程通过预检查后才在真正 File.Copy 时失败，用户得到延迟且不准确的错误；自动保存还可能反复失败。</p>
+<p><strong>推荐解决方案：</strong> 检查目标目录并以 FileAccess.Write/Append 做最小写入测试，处理只读属性和 ACL；不要把“能读”命名为“可写”。</p>
+</article>
+
+<article class="finding" id="finding-028">
+<h3><span class="sev high">F-028 · High</span>　同一秒内 dmp 文件名会互相覆盖</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/DeadHandler/DumpFileHelper.cs#L55-L61"><code>DumpFileHelper.cs:55-61</code></a></p>
+<p><strong>触发条件：</strong> 文件名只使用当前文化的 <code>DateTime.Now.ToString()</code>，精度到秒；多个托管异常或异常处理重入发生在同一秒。</p>
+<p><strong>后果：</strong> 后一次 <code>FileMode.Create</code> 覆盖先前 dmp，用户丢失第一个崩溃现场；路径还受当前区域设置影响。</p>
+<p><strong>推荐解决方案：</strong> 使用 UTC/InvariantCulture 的毫秒或 ticks 加 Guid，并以 CreateNew 原子占用文件名；异常处理闸门应同时避免重复写 dump。</p>
+</article>
+
+<article class="finding" id="finding-029">
+<h3><span class="sev medium">F-029 · Medium</span>　保存和标准化产生的临时文件长期不清理</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs#L86-L131"><code>EditorProjectDataUtils.cs:86-131</code></a>、<a href="../OngekiFumenEditor/Utils/TempFileHelper.cs#L10-L25"><code>TempFileHelper.cs:10-25</code></a>、<a href="../OngekiFumenEditor/Utils/Ogkr/StandardizeFormat.cs#L24-L32"><code>StandardizeFormat.cs:24-32</code></a></p>
+<p><strong>触发条件：</strong> 保存/转换成功或异常后只复制临时文件，不在 finally 删除；标准化还会先由 <code>GetTempFileName</code> 创建一个额外临时文件。</p>
+<p><strong>后果：</strong> 频繁 Ctrl+S、自动保存和转换会在临时目录积累项目/谱面副本，最终占满临时盘并拖慢扫描。</p>
+<p><strong>推荐解决方案：</strong> 使用 try/finally 删除临时文件；需要恢复时使用明确命名、带保留期限的备份清理策略，不要把所有临时副本永久保留。</p>
+</article>
+
+<article class="finding" id="finding-030">
+<h3><span class="sev high">F-030 · High</span>　ACB 音频缓存会跨文件误复用</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/AcbConverter.cs#L84-L96"><code>Kernel/Audio/AcbConverter.cs:84-96</code></a></p>
+<p><strong>触发条件：</strong> 缓存路径只使用 ACB 的文件名，不含完整路径、文件大小、修改时间或内容哈希；不同目录有同名 ACB，或源文件更新。</p>
+<p><strong>后果：</strong> 编辑器可能播放另一目录的旧 WAV，用户看到/听到的内容与当前工程不一致且不易察觉。</p>
+<p><strong>推荐解决方案：</strong> 以规范化绝对路径和文件元数据/内容哈希生成缓存 key，并在命中时校验元数据，不匹配就重新解码。</p>
+</article>
+
+<article class="finding" id="finding-031">
+<h3><span class="sev high">F-031 · High</span>　日志等待屏障存在入队竞态</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/Log.cs#L171-L183"><code>Utils/Log.cs:171-183</code></a>、<a href="../OngekiFumenEditor/Utils/Log.cs#L77-L99"><code>:77-99</code></a></p>
+<p><strong>触发条件：</strong> <code>WaitForAllLogWriteDone</code> 无锁读取 <code>isRunning</code>；它读到 false 后，另一个线程才在 <code>drainLock</code> 中入队并启动 drainer。</p>
+<p><strong>后果：</strong> 关闭/异常刷写可能在这条记录进入 file sink 前返回，导致仍有少量日志遗漏。</p>
+<p><strong>推荐解决方案：</strong> 用同一把锁检查队列和运行状态，并返回可等待的 completion TCS；关闭时设置停止标记，拒绝或同步接收新的日志，直到屏障完成。</p>
+</article>
+
+<article class="finding" id="finding-032">
+<h3><span class="sev high">F-032 · High</span>　参数处理丢弃异步任务</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/ArgProcesser/DefaultArgProcessManager.cs#L34-L69"><code>DefaultArgProcessManager.cs:34-69</code></a></p>
+<p><strong>触发条件：</strong> <code>ProcessArgs</code> 声明为 async Task，但内部通过 <code>Dispatcher.Invoke(async ...)</code> 和 <code>NoWait</code> 丢弃返回 Task。</p>
+<p><strong>后果：</strong> 打开文件/等待资源的异常无法回传，IPC 调用方会误以为处理完成；连续打开或退出时可能出现竞态和未观察异常。</p>
+<p><strong>推荐解决方案：</strong> 使用 <code>Dispatcher.InvokeAsync</code> 并 await/Unwrap 内部 Task，确保命令顺序、异常和取消由调用方掌握。</p>
+</article>
+
+<article class="finding" id="finding-033">
+<h3><span class="sev high">F-033 · High</span>　更新检查窗口在 UI 线程同步 Wait 可能死锁</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/ProgramUpdater/DefaultProgramUpdater.cs#L150-L154"><code>DefaultProgramUpdater.cs:150-154</code></a></p>
+<p><strong>触发条件：</strong> UI 点击处理器调用 <code>ShowWindowAsync(...).Wait()</code>，而窗口创建通常需要 UI Dispatcher 继续泵消息。</p>
+<p><strong>后果：</strong> 更新对话框可能永远打不开，UI 线程被阻塞，后续关闭和日志刷写也无法执行。</p>
+<p><strong>推荐解决方案：</strong> 将点击处理器改为 async Task/async void 事件并 await <code>ShowWindowAsync</code>；捕获显示异常并恢复按钮状态。</p>
+</article>
+
+<article class="finding" id="finding-034">
+<h3><span class="sev medium">F-034 · Medium</span>　脚本保存和快捷键配置也会被半写覆盖</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/EditorScriptExecutor/Documents/ViewModels/EditorScriptDocumentViewModel.cs#L191-L205"><code>EditorScriptDocumentViewModel.cs:191-205</code></a>、<a href="../OngekiFumenEditor/Kernel/KeyBinding/DefaultKeyBindingManager.cs#L49-L54"><code>DefaultKeyBindingManager.cs:49-54</code></a></p>
+<p><strong>触发条件：</strong> 两处都直接对正式文件调用 <code>WriteAllTextAsync</code>/<code>WriteAllText</code>。</p>
+<p><strong>后果：</strong> 崩溃、断电或磁盘满会留下空文件/截断 JSON，用户脚本或快捷键配置丢失。</p>
+<p><strong>推荐解决方案：</strong> 同目录临时文件写入并 Flush 后原子 Replace，保留 .bak；加载坏文件时自动恢复备份并提示用户。</p>
+</article>
+
+<article class="finding" id="finding-035">
+<h3><span class="sev medium">F-035 · Medium</span>　设置延迟保存在退出或异常时会丢值</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorSetting.cs#L15-L23"><code>EditorSetting.cs:15-23</code></a></p>
+<p><strong>触发条件：</strong> setter 只启动 2 秒后的 async void 保存；用户在延迟结束前退出或进程异常，保存任务没有被等待。</p>
+<p><strong>后果：</strong> UI 中已经修改的编辑器设置只存在内存，重启后恢复旧值；Save 抛异常还会让 <code>isRequestSave</code> 永久保持 true，后续设置不再保存。</p>
+<p><strong>推荐解决方案：</strong> 用可取消/可等待的 debounce 任务，在 OnExit 强制 Flush；Save 放在 try/finally 中恢复状态并记录错误。</p>
+</article>
+
+<article class="finding" id="finding-036">
+<h3><span class="sev high">F-036 · High</span>　命令行/更新器也会启动 GUI 更新检查并拖住退出</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L243-L260"><code>AppBootstrapper.cs:243-260</code></a>、<a href="../OngekiFumenEditor/Kernel/ProgramUpdater/DefaultProgramUpdater.cs#L500-L515"><code>DefaultProgramUpdater.cs:500-515</code></a></p>
+<p><strong>触发条件：</strong> CLI 启动 Scheduler 后，更新器调度任务仍按默认设置执行 HTTP 检查，并忽略 scheduler cancellationToken。</p>
+<p><strong>后果：</strong> 命令行任务或更新器退出时可能等待网络默认超时，无法按预期快速结束。</p>
+<p><strong>推荐解决方案：</strong> CLI/Updater 模式禁用 GUI-only scheduler；更新检查接受取消令牌并设置明确超时，Scheduler.Term 对未结束任务有界等待。</p>
+</article>
+
+<article class="finding" id="finding-037">
+<h3><span class="sev medium">F-037 · Medium</span>　异常转储回调可能因写盘问题自身失败</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/DeadHandler/DumpFileHelper.cs#L122-L126"><code>DumpFileHelper.cs:122-126</code></a></p>
+<p><strong>触发条件：</strong> native 未处理异常过滤器直接调用 <code>WriteMiniDump</code>，没有 catch；路径无权限、磁盘满或日志刷写死锁时异常会从过滤器继续抛出。</p>
+<p><strong>后果：</strong> 本应生成的 dmp 可能完全没有，进程也可能停在异常过滤流程。</p>
+<p><strong>推荐解决方案：</strong> native 回调使用最小同步写 dmp 路径，所有日志操作限时并 catch；写盘失败只能写 Debug/事件日志，不能阻断过滤器返回。</p>
+</article>
+
+<article class="finding" id="finding-038">
+<h3><span class="sev medium">F-038 · Medium</span>　渲染事件未完整解除会持续泄漏资源</h3>
+<p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Graphics/Skia/RenderControls/SkiaRenderControlBase.cs#L27-L37"><code>SkiaRenderControlBase.cs:27-37</code></a>、<a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L288-L292"><code>AudioPlayerToolViewerViewModel.cs:288-292</code></a></p>
+<p><strong>触发条件：</strong> 控件从视觉树卸载但 Visibility 仍为 Visible，或工具窗口关闭时只移除 CompositionTarget.Rendering，没有解除 RenderContext/Loaded/Unloaded 订阅。</p>
+<p><strong>后果：</strong> 静态渲染事件继续持有控件和 ViewModel，重复打开工具/编辑器会增加每帧回调、GPU/CPU 使用和原生资源占用。</p>
+<p><strong>推荐解决方案：</strong> 使用 Loaded/Unloaded 成对管理静态事件，Dispose 时停止渲染并移除 RenderContext；D3D/Skia 资源释放必须与控件生命周期绑定。</p>
+</article>
+</div>
+
+<ul>
+<li>强制终止进程、<code>FailFast</code>、系统崩溃和断电不能由进程内清理代码保证日志或数据落盘。</li>
+<li>已有构建警告只有在能关联到实际错误行为时才会列入发现项。</li>
+</ul>
+
+<h2>验证记录</h2>
+<ul id="verification"><li>三路只读审查完成：启动/退出/更新器、文件/数据 I/O、UI/线程/音频/渲染。</li><li>当前提交未修改生产代码；本报告只记录问题和推荐方案。</li><li>建议按 Critical → High → Medium 顺序建立修复批次，并为每项补充回归用例。</li></ul>
+
+</body>
+</html>
