@@ -18,6 +18,7 @@ public class SelectionArea : PropertyChangedBase
     public SelectionAreaKind SelectionAreaKind;
 
     private FumenVisualEditorViewModel editor;
+    private readonly Dictionary<OngekiObjectBase, Rect> horizonalBounds = new();
 
     private Func<OngekiObjectBase, bool>? filterFunc;
     public Func<OngekiObjectBase, bool>? FilterFunc
@@ -61,7 +62,25 @@ public class SelectionArea : PropertyChangedBase
     public bool IsActive
     {
         get => isActive;
-        set => Set(ref isActive, value);
+        set
+        {
+            if (!Set(ref isActive, value))
+                return;
+
+            horizonalBounds.Clear();
+            if (value)
+            {
+                foreach (var hit in editor.GetHits())
+                    CacheSelectableObjectBounds(hit.Key, hit.Value);
+            }
+        }
+    }
+
+    internal void CacheSelectableObjectBounds(OngekiObjectBase obj, Rect bounds)
+    {
+        // 自动滚动会清空每帧的命中区域；保留本次框选见过的 Horizonal 标签，供移出视口后继续判断。
+        if (IsActive && obj is ITimelineObject && obj is not IHorizonPositionObject)
+            horizonalBounds[obj] = bounds;
     }
 
     public SelectionArea(FumenVisualEditorViewModel editor)
@@ -92,15 +111,24 @@ public class SelectionArea : PropertyChangedBase
 
         bool Check(OngekiObjectBase obj)
         {
-            if (obj is ITimelineObject timelineObject)
+            if (obj is ITimelineObject && obj is not IHorizonPositionObject)
             {
-                if (timelineObject.TGrid > maxTGrid || timelineObject.TGrid < minTGrid)
+                // Horizonal 物件没有 XGrid，按实际标签中心做二维框选，避免只凭时间范围选中。
+                if (!editor.TryGetSelectableObjectBounds(obj, out var bounds) &&
+                    !horizonalBounds.TryGetValue(obj, out bounds))
+                    return false;
+
+                if (!Rect.Contains(new Point(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2)))
                     return false;
             }
-
-            if (obj is IHorizonPositionObject horizonPositionObject)
+            else
             {
-                if (horizonPositionObject.XGrid > maxXGrid || horizonPositionObject.XGrid < minXGrid)
+                if (obj is ITimelineObject timelineObject &&
+                    (timelineObject.TGrid > maxTGrid || timelineObject.TGrid < minTGrid))
+                    return false;
+
+                if (obj is IHorizonPositionObject horizonPositionObject &&
+                    (horizonPositionObject.XGrid > maxXGrid || horizonPositionObject.XGrid < minXGrid))
                     return false;
             }
 

@@ -151,6 +151,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public ImmutableDictionary<OngekiObjectBase, Rect> GetHits() => hits.ToImmutableDictionary();
 
+        internal bool TryGetSelectableObjectBounds(OngekiObjectBase obj, out Rect bounds)
+            => hits.TryGetValue(obj, out bounds);
+
         public async Task OpenRenderPerfomenceMeasurePanel()
         {
             await IoC.Get<IWindowManager>().ShowWindowAsync(IoC.Get<IRenderPerfomenceMeasurePanel>());
@@ -1712,6 +1715,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 ? centerPos.Y + drawingTargetContext.ViewRelativeOriginY
                 : centerPos.Y;
             hits[obj] = new Rect(centerPos.X - size.X / 2, centerY - size.Y / 2, size.X, size.Y);
+            SelectionArea.CacheSelectableObjectBounds(obj, hits[obj]);
         }
 
         public void ScrollPage(int page)
