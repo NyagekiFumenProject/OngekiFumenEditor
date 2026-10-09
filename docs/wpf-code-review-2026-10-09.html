@@ -51,7 +51,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 用户在编辑器设置中切换“显示 X 偏移滚动条”。<code>ShowXOffsetScrollBar</code> 的 setter 第 193 行把值写入了 <code>EditorGlobalSetting.Default.ForceXGridMagneticDock</code>，而不是 <code>ShowXOffsetScrollBar</code>。</p>
 <p><strong>后果：</strong> X 偏移滚动条选项无法正确持久化；每次切换还会覆盖“强制 X 网格吸附”的设置。当前会话内 backing field 可能暂时显示用户选择，但重启后从配置重新加载时会恢复旧值，同时网格吸附行为可能被意外改变。</p>
 <p><strong>推荐解决方案：</strong> 将赋值改为 <code>showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar = value;</code>，并增加设置 setter 回归测试：分别切换两个选项，保存并重新加载设置，验证两个属性互不影响。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>eb77fd39</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；等价 Avalonia 回归测试 1 passed、0 failed。</p></article>
 
 <article class="finding" id="finding-002">
 <h3><span class="sev high">F-002 · High</span>　图像加载失败会让等待者永久挂起</h3>
@@ -59,7 +59,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 图片文件不存在、网络请求失败、缓存损坏，<code>Load()</code> 返回 null；<code>ProcessTask</code> 随后无条件访问 <code>r.Length</code>。后台 <code>Task.Run</code> 的异常没有传给 <code>TaskCompletionSource</code>，也没有 finally 清理并发计数。</p>
 <p><strong>后果：</strong> 图片绑定等待的 Task 永不完成，界面可能永久显示加载中；队列任务异常也无法被调用方观察。</p>
 <p><strong>推荐解决方案：</strong> 将消费者改成可等待的 <code>Task</code>，在统一 try/catch/finally 中处理 null、缓存异常和取消，使用 <code>TrySetResult/TrySetException/TrySetCanceled</code>，始终递减运行计数并删除损坏缓存。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-003">
 <h3><span class="sev high">F-003 · High</span>　确定性临时缓存路径在命中后忙等死循环</h3>
@@ -67,7 +67,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> <code>ImageLoader.GetCacheFile</code> 以 <code>random:false</code> 请求固定文件名。文件第一次写入后，<code>GetTempFilePath</code> 仍循环等待“文件不存在”，但没有任何删除或改名路径。</p>
 <p><strong>后果：</strong> 同一网络图片第二次加载会占满一个线程并永久卡在生成缓存路径，调用方同时因 F-002 无法完成。</p>
 <p><strong>推荐解决方案：</strong> <code>random:false</code> 直接返回确定性路径；随机模式才检查冲突。缓存读写还应使用临时文件和原子替换，避免半写文件成为永久缓存。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-004">
 <h3><span class="sev high">F-004 · High</span>　转换器在检查空输入前解引用路径</h3>
@@ -75,7 +75,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 转换对话框未选择输入文件，<code>option.InputFumenFilePath</code> 为空；代码先调用 <code>GetDeserializer</code>，解析器内部直接对 null 调用 <code>EndsWith</code>。</p>
 <p><strong>后果：</strong> 用户应得到“未选择输入文件”的结果，却收到 NullReferenceException；命令行或异步 UI 调用还可能把异常升级为未处理异常。</p>
 <p><strong>推荐解决方案：</strong> 先用 <code>IsNullOrWhiteSpace</code> 验证输入，再调用 parser manager；manager 的 serializer/deserializer API 也应对空路径返回 null 而不是解引用。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-005">
 <h3><span class="sev high">F-005 · High</span>　转换输出不会截断旧文件尾部</h3>
@@ -83,7 +83,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 输出文件已存在且本次转换结果比旧文件短。<code>File.OpenWrite</code> 使用 <code>OpenOrCreate</code>，从位置 0 覆盖但不截断文件。</p>
 <p><strong>后果：</strong> 旧尾部字节保留，生成的谱面或二进制文件可能包含不可见残留，解析失败或内容异常。</p>
 <p><strong>推荐解决方案：</strong> 使用 <code>FileMode.Create</code> 或 <code>File.WriteAllBytesAsync</code>；更稳妥是同目录临时文件写完并 Flush 后原子替换目标。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；输入流、空输入、失败任务和旧输出覆盖路径已完成编译验证。</p></article>
 
 <article class="finding" id="finding-006">
 <h3><span class="sev high">F-006 · High</span>　旧项目缺少音频路径时无法进入手动选音频流程</h3>
@@ -115,7 +115,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 最近文件 Base64 被截断、JSON 被手动修改，或 JSON 反序列化返回 null。</p>
 <p><strong>后果：</strong> 构造 recent-files manager 时异常直接冒出，编辑器可能在启动早期退出；<code>list.Take</code> 对 null 还会产生 NullReferenceException。</p>
 <p><strong>推荐解决方案：</strong> 分别捕获 Base64/JSON 异常，把坏数据移到备份并回写空列表；反序列化结果使用空列表兜底，不让最近文件阻断主程序启动。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>fe6aef0a</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；git diff --check 通过。</p></article>
 
 <article class="finding" id="finding-010">
 <h3><span class="sev high">F-010 · High</span>　窗口位置配置受区域设置影响并可能直接阻断启动</h3>
@@ -123,7 +123,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> 关闭窗口时用当前文化格式化 double 并用逗号拼接；在逗号小数文化下保存的值再次按逗号 Split 会被拆成更多字段。配置被截断或手工修改时也没有长度和格式校验。</p>
 <p><strong>后果：</strong> 下次启动可能在 UI 初始化阶段抛 FormatException/IndexOutOfRangeException，或把位置和尺寸错位解析。</p>
 <p><strong>推荐解决方案：</strong> 使用 JSON/四个独立设置项，数字统一 InvariantCulture；读取使用 TryParse、数量检查和屏幕边界校验，失败时忽略配置并恢复默认。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>61bc4d0f</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；git diff --check 通过。</p></article>
 
 <article class="finding" id="finding-011">
 <h3><span class="sev critical">F-011 · Critical</span>　IPC 写入忙时未释放 Mutex，会造成双向死锁</h3>
@@ -243,7 +243,7 @@ ul { margin-top:.35rem; }
 <p><strong>触发条件：</strong> <code>XDocument.LoadAsync(File.OpenRead(...))</code> 直接把流交给 XML 加载，没有 using。</p>
 <p><strong>后果：</strong> 每次快速打开/读取 Music.xml 都可能在 Windows 保留文件句柄，阻止文件替换删除，长时间运行还会耗尽句柄。</p>
 <p><strong>推荐解决方案：</strong> 使用 using 声明包住 FileStream，或调用带路径的 XML API；在异常和取消路径也确保释放。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>b467ac89</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；git diff --check 通过。</p></article>
 
 <article class="finding" id="finding-026">
 <h3><span class="sev medium">F-026 · Medium</span>　配置直接覆盖写，崩溃可留下截断 JSON</h3>
