@@ -158,12 +158,12 @@ ul { margin-top:.35rem; }
 </article>
 
 <article class="finding" id="finding-015">
-<h3><span class="sev critical">F-015 · Critical</span>　AppDomain 未处理异常回调可能在转储前终止进程</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev critical">F-015 · Critical</span>　AppDomain 未处理异常回调可能在转储前终止进程</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L525-L571"><code>AppBootstrapper.cs:525-571</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L639-L646"><code>:639-646</code></a></p>
 <p><strong>触发条件：</strong> <code>AppDomain.UnhandledException</code> 事件通过 async void 调用 <code>ProcessException</code> 后立即返回；CLR 随后进入终止流程，而处理器还可能停在第一次 await。</p>
 <p><strong>后果：</strong> <code>DumpFileHelper.WriteMiniDump</code>、FumenRescue 和异常报告窗口可能根本没有执行。若首个文件日志写入失败，也会直接跳过转储。</p>
 <p><strong>推荐解决方案：</strong> 对 AppDomain/native 异常使用同步最小路径：先写 dmp，再做有界日志刷写；每条日志独立捕获异常，不能让日志 I/O 阻断转储。异常处理入口还应以 Interlocked 闸门防并发重入。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>a76221de</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；AppDomain 异常入口改为同步转储优先，已通过静态检查。</p></article>
 
 <article class="finding" id="finding-016">
 <h3><span class="sev high">F-016 · High</span>　OnExit 的异步清理不受 WPF 等待，异常还会跳过后续步骤</h3>
@@ -214,12 +214,12 @@ ul { margin-top:.35rem; }
 </article>
 
 <article class="finding" id="finding-022">
-<h3><span class="sev high">F-022 · High</span>　音频 Stop/Dispose 的 async void 竞态会在释放后访问 reader</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-022 · High</span>　音频 Stop/Dispose 的 async void 竞态会在释放后访问 reader</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/Music/DefaultMusicPlayer.cs#L159-L193"><code>DefaultMusicPlayer.cs:159-193</code></a></p>
 <p><strong>触发条件：</strong> <code>Stop</code> 移除 scheduler 后 await；期间另一条关闭/换曲路径进入 <code>Dispose</code> 并把 <code>audioFileReader</code> 置 null，Stop 恢复后仍调用 <code>Seek</code>。Play/Pause/Dispose 都是 async void，调用方无法等待或串行化。</p>
 <p><strong>后果：</strong> 快速切歌、关闭窗口或退出时会产生 NullReferenceException/未观察异常，且 NAudio 资源可能在 scheduler 仍使用时被释放。</p>
 <p><strong>推荐解决方案：</strong> 改为可等待的 Task/ValueTask，使用生命周期锁或取消令牌串行化 Play/Stop/Pause/Dispose；Dispose 必须幂等，先停止 scheduler 和 mixer，再释放 reader。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>d2577553</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；音乐播放器生命周期方法已移除 async void，并完成资源竞态静态检查。</p></article>
 
 <article class="finding" id="finding-023">
 <h3><span class="sev high">F-023 · High</span>　波形后台任务的取消异常和旧结果发布未受控</h3>
@@ -278,12 +278,12 @@ ul { margin-top:.35rem; }
 </article>
 
 <article class="finding" id="finding-030">
-<h3><span class="sev high">F-030 · High</span>　ACB 音频缓存会跨文件误复用</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-030 · High</span>　ACB 音频缓存会跨文件误复用</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/AcbConverter.cs#L84-L96"><code>Kernel/Audio/AcbConverter.cs:84-96</code></a></p>
 <p><strong>触发条件：</strong> 缓存路径只使用 ACB 的文件名，不含完整路径、文件大小、修改时间或内容哈希；不同目录有同名 ACB，或源文件更新。</p>
 <p><strong>后果：</strong> 编辑器可能播放另一目录的旧 WAV，用户看到/听到的内容与当前工程不一致且不易察觉。</p>
 <p><strong>推荐解决方案：</strong> 以规范化绝对路径和文件元数据/内容哈希生成缓存 key，并在命中时校验元数据，不匹配就重新解码。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>ea6d11f4</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；缓存 key 已包含规范化路径、文件长度和 UTC 修改时间。</p></article>
 
 <article class="finding" id="finding-031">
 <h3><span class="sev high">F-031 · High</span>　日志等待屏障存在入队竞态</h3>
@@ -302,20 +302,20 @@ ul { margin-top:.35rem; }
 </article>
 
 <article class="finding" id="finding-033">
-<h3><span class="sev high">F-033 · High</span>　更新检查窗口在 UI 线程同步 Wait 可能死锁</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-033 · High</span>　更新检查窗口在 UI 线程同步 Wait 可能死锁</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/ProgramUpdater/DefaultProgramUpdater.cs#L150-L154"><code>DefaultProgramUpdater.cs:150-154</code></a></p>
 <p><strong>触发条件：</strong> UI 点击处理器调用 <code>ShowWindowAsync(...).Wait()</code>，而窗口创建通常需要 UI Dispatcher 继续泵消息。</p>
 <p><strong>后果：</strong> 更新对话框可能永远打不开，UI 线程被阻塞，后续关闭和日志刷写也无法执行。</p>
 <p><strong>推荐解决方案：</strong> 将点击处理器改为 async Task/async void 事件并 await <code>ShowWindowAsync</code>；捕获显示异常并恢复按钮状态。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>a76221de</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；更新器按钮路径已移除同步 Wait，并通过静态检查。</p></article>
 
 <article class="finding" id="finding-034">
-<h3><span class="sev medium">F-034 · Medium</span>　脚本保存和快捷键配置也会被半写覆盖</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-034 · Medium</span>　脚本保存和快捷键配置也会被半写覆盖</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/EditorScriptExecutor/Documents/ViewModels/EditorScriptDocumentViewModel.cs#L191-L205"><code>EditorScriptDocumentViewModel.cs:191-205</code></a>、<a href="../OngekiFumenEditor/Kernel/KeyBinding/DefaultKeyBindingManager.cs#L49-L54"><code>DefaultKeyBindingManager.cs:49-54</code></a></p>
 <p><strong>触发条件：</strong> 两处都直接对正式文件调用 <code>WriteAllTextAsync</code>/<code>WriteAllText</code>。</p>
 <p><strong>后果：</strong> 崩溃、断电或磁盘满会留下空文件/截断 JSON，用户脚本或快捷键配置丢失。</p>
 <p><strong>推荐解决方案：</strong> 同目录临时文件写入并 Flush 后原子 Replace，保留 .bak；加载坏文件时自动恢复备份并提示用户。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>ea6d11f4</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；脚本与快捷键配置保存增加原子写入和 .bak 回退。</p></article>
 
 <article class="finding" id="finding-035">
 <h3><span class="sev medium">F-035 · Medium</span>　设置延迟保存在退出或异常时会丢值</h3>
@@ -385,26 +385,26 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 读取与写入使用同一节点名，并加入包含 true/false 两种值的 XML round-trip 测试；解析失败要记录字段错误而不是保留无法区分的默认状态。</p>
 </article>
 <article class="finding" id="finding-044">
-<h3><span class="sev high">F-044 · High</span> Music.xml 和禁用难度谱面文件直接覆盖正式文件</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-044 · High</span> Music.xml 和禁用难度谱面文件直接覆盖正式文件</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/OptionGeneratorTools/ViewModels/MusicXmlWindowViewModel.cs#L96-L110"><code>MusicXmlWindowViewModel.cs:96-110</code></a>、<a href="../OngekiFumenEditor/Modules/OptionGeneratorTools/ViewModels/MusicXmlWindowViewModel.cs#L130-L151"><code>:130-151</code></a></p>
 <p><strong>触发条件：</strong> 生成器对目标 XML 使用 <code>FileMode.Create</code>，对禁用难度的空 OGKR 使用 <code>File.Create</code>；写入期间崩溃、断电或磁盘已满都会中断其中一个文件。</p>
 <p><strong>后果：</strong> 目录可能留下截断的 Music.xml 或 0 字节谱面。更严重的是序列化没有根据 <code>FumenData.Enable</code> 清空原有 path，用户取消难度后 XML 仍引用旧谱面，生成的空文件可能根本没有被使用。</p>
 <p><strong>推荐方案：</strong> 先在 staging 目录写完全部 XML/OGKR，逐个重新加载校验并 <code>Flush(true)</code>，再使用同目录临时文件原子替换；<code>Enable=false</code> 时统一引用生成的空谱面或写空路径。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>ea6d11f4</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；Music.xml 与禁用难度谱面均使用同目录临时文件和原子替换。</p></article>
 <article class="finding" id="finding-045">
-<h3><span class="sev high">F-045 · High</span> 旧项目的空字典会在打开时触发空引用</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-045 · High</span> 旧项目的空字典会在打开时触发空引用</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Models/EditorProjectFiles/EditorProjectDataModel_V0_5_2.cs#L84-L90"><code>EditorProjectDataModel_V0_5_2.cs:84-90</code></a>、<a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Base/EditorProjectDataUtils.cs#L54-L77"><code>EditorProjectDataUtils.cs:54-77</code></a></p>
 <p><strong>触发条件：</strong> 旧版本 JSON 明确写出 <code>StoreBulletPalleteEditorDatas: null</code> 时，JSON 反序列化会覆盖默认初始化的字典。</p>
 <p><strong>后果：</strong> 加载完成后 <code>ApplyBulletPalleteListEditorData</code> 直接调用 <code>TryGetValue</code>，项目无法打开；用户无法进入编辑器把该文件另存为修复。</p>
 <p><strong>推荐方案：</strong> 迁移和加载边界统一把 null 集合归一化为空字典，并在保存前做完整性校验；不要依赖属性初始化覆盖输入 JSON 的显式 null。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>d2577553</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；旧模型的 null 字典已归一化为空字典。</p></article>
 <article class="finding" id="finding-046">
-<h3><span class="sev medium">F-046 · Medium</span> 项目文件读取没有传递取消令牌</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-046 · Medium</span> 项目文件读取没有传递取消令牌</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenVisualEditor/Kernel/EditorProjectFile/EditorProjectFileManager.cs#L30-L38"><code>EditorProjectFileManager.cs:30-38</code></a></p>
 <p><strong>触发条件：</strong> 上层打开项目时传入了取消令牌，但 <code>EditorProjectFileManager.Load</code> 的 <code>File.ReadAllBytesAsync(filePath)</code> 没有接收该令牌，只能在完整读取后才检查取消。</p>
 <p><strong>后果：</strong> 关闭文档、切换文件或异常退出时，大型项目仍继续占用磁盘和内存，旧任务可能在用户已切换目标后继续进入反序列化。</p>
 <p><strong>推荐方案：</strong> 让 Load 接受并传递 <code>CancellationToken</code>，在反序列化前后都检查；取消后释放缓冲并让调用方区分取消与格式错误。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>d2577553</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；项目文件读取和反序列化阶段均检查 CancellationToken。</p></article>
 <article class="finding" id="finding-047">
 <h3><span class="sev high">F-047 · High</span> 游戏列表浏览器信任 XML 路径，可越出所选根目录</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/OgkiFumenListBrowser/Models/OngekiFumenSet.cs#L45-L56"><code>OngekiFumenSet.cs:45-56</code></a>、<a href="../OngekiFumenEditor/Modules/OgkiFumenListBrowser/ViewModels/OgkiFumenListBrowserViewModel.cs#L252-L255"><code>OgkiFumenListBrowserViewModel.cs:252-255</code></a></p>
