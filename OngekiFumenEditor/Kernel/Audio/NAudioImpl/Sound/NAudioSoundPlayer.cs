@@ -9,7 +9,8 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 
         private NAudioManager soundManager = default;
         private CachedSound cacheSound = default;
-        private Dictionary<int, ILoopHandle> loopMap = new Dictionary<int, ILoopHandle>();
+        private readonly object loopLocker = new();
+        private readonly Dictionary<int, ILoopHandle> loopMap = new();
 
         public NAudioSoundPlayer(CachedSound cache, NAudioManager manager)
         {
@@ -17,7 +18,20 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
             cacheSound = cache;
         }
 
-        public float Volume { get; set; } = 1;
+        private float volume = 1;
+        public float Volume
+        {
+            get => volume;
+            set
+            {
+                lock (loopLocker)
+                {
+                    volume = value;
+                    foreach (var handle in loopMap.Values)
+                        handle.Volume = value;
+                }
+            }
+        }
 
         public void Dispose()
         {
@@ -31,27 +45,33 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Sound
 
         public void PlayLoop(int loopId, TimeSpan init)
         {
-            if (!loopMap.ContainsKey(loopId))
+            lock (loopLocker)
             {
-                var handle = soundManager.PlayLoopSound(cacheSound, Volume, init);
-                loopMap[loopId] = handle;
-            }
-            else
-            {
-                OngekiFumenEditor.Utils.Log.LogWarn($"Play loop sound ignored because loop id already exists: loopId={loopId}");
+                if (!loopMap.ContainsKey(loopId))
+                {
+                    var handle = soundManager.PlayLoopSound(cacheSound, volume, init);
+                    loopMap[loopId] = handle;
+                }
+                else
+                {
+                    OngekiFumenEditor.Utils.Log.LogWarn($"Play loop sound ignored because loop id already exists: loopId={loopId}");
+                }
             }
         }
 
         public void StopLoop(int loopId)
         {
-            if (loopMap.TryGetValue(loopId, out var handle))
+            lock (loopLocker)
             {
-                soundManager.StopLoopSound(handle);
-                loopMap.Remove(loopId);
-            }
-            else
-            {
-                OngekiFumenEditor.Utils.Log.LogWarn($"Stop loop sound ignored because loop id does not exist: loopId={loopId}");
+                if (loopMap.TryGetValue(loopId, out var handle))
+                {
+                    soundManager.StopLoopSound(handle);
+                    loopMap.Remove(loopId);
+                }
+                else
+                {
+                    OngekiFumenEditor.Utils.Log.LogWarn($"Stop loop sound ignored because loop id does not exist: loopId={loopId}");
+                }
             }
         }
     }

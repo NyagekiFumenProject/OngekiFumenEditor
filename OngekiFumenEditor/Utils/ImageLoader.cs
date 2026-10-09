@@ -88,7 +88,7 @@ namespace OngekiFumenEditor.Utils
 
             var isNetworkLoad = path.StartsWith("http", StringComparison.InvariantCultureIgnoreCase);
 
-            var data = await LoadFromInMemory(path);
+            var data = await LoadFromInMemory(hash);
             if (data != null)
             {
                 taskSource.SetResult(data);

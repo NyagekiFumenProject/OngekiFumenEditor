@@ -276,7 +276,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
             if (string.IsNullOrWhiteSpace(filePath))
                 return null;
 
-            if (filePath.EndsWith(".acb"))
+            if (filePath.EndsWith(".acb", StringComparison.OrdinalIgnoreCase))
             {
                 filePath = await AcbConverter.ConvertAcbFileToWavFile(filePath);
                 if (filePath is null)

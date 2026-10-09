@@ -1,4 +1,7 @@
 namespace OngekiFumenEditor.Kernel.Audio
 {
-    public interface ILoopHandle { }
+    public interface ILoopHandle
+    {
+        float Volume { get; set; }
+    }
 }
