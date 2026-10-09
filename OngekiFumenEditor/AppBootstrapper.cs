@@ -543,10 +543,20 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 #if !DEBUG
             var exceptionHandle = Marshal.GetExceptionPointers();
             var dumpFile = string.Empty;
-            if (exceptionHandle != IntPtr.Zero && !recHandle.Contains(exceptionHandle))
+            if (exceptionHandle == IntPtr.Zero || !recHandle.Contains(exceptionHandle))
             {
-                dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
-                recHandle.Add(exceptionHandle);
+                try
+                {
+                    // Managed exceptions have no native EXCEPTION_POINTERS. DumpFileHelper
+                    // handles IntPtr.Zero by writing a dump without exception context.
+                    dumpFile = DumpFileHelper.WriteMiniDump(exceptionHandle);
+                    if (exceptionHandle != IntPtr.Zero)
+                        recHandle.Add(exceptionHandle);
+                }
+                catch (Exception dumpException)
+                {
+                    Log.LogError("Can't write crash dump.", dumpException);
+                }
             }
             await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
             var resuceFolders = await FumenRescue.Rescue();
