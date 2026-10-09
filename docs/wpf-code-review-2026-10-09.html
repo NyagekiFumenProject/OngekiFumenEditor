@@ -525,19 +525,19 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 生成带版本的 manifest，按白名单删除目标中过期的程序集/资源并保留用户数据；更稳妥的是 staging 后目录原子切换，回滚时先删除新增文件再恢复备份。</p>
 </article>
 <article class="finding" id="finding-064">
-<h3><span class="sev high">F-064 · High</span> 可选目录和插件扫描发生在异常处理器安装前</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-064 · High</span> 可选目录和插件扫描发生在异常处理器安装前</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L123-L126"><code>AppBootstrapper.cs:123-126</code></a>、<a href="../OngekiFumenEditor/Utils/DeadHandler/DumpFileHelper.cs#L45-L49"><code>DumpFileHelper.cs:45-49</code></a>、<a href="../Dependences/gemini/src/Gemini/AppBootstrapper.cs#L98-L120"><code>Gemini/AppBootstrapper.cs:98-120</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L267-L278"><code>AppBootstrapper.cs:267-278</code></a></p>
 <p><strong>触发条件：</strong> Configure 期间创建 Plugins、Dump 目录和扫描 DLL；这些操作在 GUI 的 InitExceptionCatcher 之前。只读安装目录、路径是文件、插件依赖缺失或 ReflectionTypeLoadException 都可能从外层抛出。</p>
 <p><strong>后果：</strong> 程序在自有日志、救援和 dmp 处理器注册前直接退出，用户只能看到无诊断的启动失败；一个坏插件也能阻断整个主程序。</p>
 <p><strong>推荐方案：</strong> 启动最早阶段同步建立可写 fallback 并捕获异常；每个插件目录/DLL 独立 catch 并记录 loader exceptions，跳过坏插件，不让可选资源决定主程序能否启动。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>f3c5d6db</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；插件目录/程序集扫描已采用隔离失败策略，并通过静态检查。</p></article>
 <article class="finding" id="finding-065">
-<h3><span class="sev high">F-065 · High</span> 非 Exception 的 UnhandledExceptionObject 会让异常处理器自身崩溃</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-065 · High</span> 非 Exception 的 UnhandledExceptionObject 会让异常处理器自身崩溃</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L544-L555"><code>AppBootstrapper.cs:544-555</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L636-L639"><code>:636-639</code></a></p>
 <p><strong>触发条件：</strong> <code>AppDomain.UnhandledException</code> 允许 ExceptionObject 是任意 object，代码使用 <code>as Exception</code> 后直接传入；ProcessException 第一段无条件访问 <code>exception.Message</code>。</p>
 <p><strong>后果：</strong> 原始未处理异常被异常处理器自己的 NullReference 覆盖，日志、FumenRescue 和 dmp 均可能跳过，正是崩溃现场最需要的路径失效。</p>
 <p><strong>推荐方案：</strong> 对 null/非 Exception 使用安全格式化并包装为 Exception，ProcessException 首行做 null-safe；保证转储和日志流程不依赖原对象运行时类型。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>a76221de</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；非 Exception 的异常对象包装路径已通过静态检查。</p></article>
 <article class="finding" id="finding-066">
 <h3><span class="sev high">F-066 · High</span> Gemini IoC 构造服务失败时无限重试</h3>
 <p><strong>位置：</strong> <a href="../Dependences/gemini/src/Gemini/AppBootstrapper.cs#L204-L224"><code>Gemini/AppBootstrapper.cs:204-224</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/NAudioManager.cs#L96-L123"><code>NAudioManager.cs:96-123</code></a></p>
@@ -560,19 +560,19 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 对空源在构造/首读阶段返回明确的不可播放结果，读取前检查 buffer 长度；把坏音频从 cache 排除并显示具体文件名。</p>
 </article>
 <article class="finding" id="finding-069">
-<h3><span class="sev low">F-069 · Low</span> ImageLoader 的内存缓存永远命不中</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev low">F-069 · Low</span> ImageLoader 的内存缓存永远命不中</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Utils/ImageLoader.cs#L47-L95"><code>Utils/ImageLoader.cs:47-95</code></a></p>
 <p><strong>触发条件：</strong> ProcessTask 读取内存缓存时使用原始 URL <code>path</code>，保存时却使用 MD5 后的 <code>hash</code> 作为 key。</p>
 <p><strong>后果：</strong> 同一网络图片即使刚刚成功加载，也无法从内存缓存命中，每次都重新检查磁盘/网络；高频图片列表会增加延迟和网络请求。</p>
 <p><strong>推荐方案：</strong> 统一使用规范化 URL 的 hash 作为读写 key，并在 URL 变化时清理旧弱引用；缓存命中和失效应有可观测日志。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>eb6ac36c</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；内存缓存读写已统一使用 URL hash。</p></article>
 <article class="finding" id="finding-070">
-<h3><span class="sev medium">F-070 · Medium</span> 音频加载对大写 .ACB 扩展名不兼容</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-070 · Medium</span> 音频加载对大写 .ACB 扩展名不兼容</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/NAudioManager.cs#L270-L315"><code>NAudioManager.cs:270-315</code></a></p>
 <p><strong>触发条件：</strong> <code>LoadAudioAsync</code> 使用大小写敏感的 <code>EndsWith(".acb")</code>，而同文件的时长读取路径使用 OrdinalIgnoreCase。</p>
 <p><strong>后果：</strong> 游戏包中的 <code>.ACB</code> 被当作普通音频交给解码器，打开失败或无法自动读取时长；同一文件在不同调用路径表现不一致。</p>
 <p><strong>推荐方案：</strong> 统一用 <code>Path.GetExtension</code> 和 <code>StringComparison.OrdinalIgnoreCase</code> 判断扩展名，并为大小写变体加入加载回归用例。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>eb6ac36c</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；.acb 扩展名判断已通过大小写变体静态检查。</p></article>
 <article class="finding" id="finding-071">
 <h3><span class="sev high">F-071 · High</span> ISF 区域宽度序列化后被截断</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Parser/Ogkr/DefaultOngekiFumenFormatter.cs#L280-L281"><code>DefaultOngekiFumenFormatter.cs:280-281</code></a>、<a href="../OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/IndividualSoflanAreaCommandParser.cs#L19-L29"><code>IndividualSoflanAreaCommandParser.cs:19-29</code></a></p>
@@ -581,19 +581,19 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 保留 float/double 并使用 <code>/ 2f</code> 计算；对非整数和奇数宽度做 round-trip 测试，解析失败时返回结构化错误。</p>
 </article>
 <article class="finding" id="finding-072">
-<h3><span class="sev medium">F-072 · Medium</span> 调整音效音量不会更新已在播放的循环句柄</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-072 · Medium</span> 调整音效音量不会更新已在播放的循环句柄</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/Sound/NAudioSoundPlayer.cs#L20-L37"><code>NAudioSoundPlayer.cs:20-37</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs#L602-L623"><code>DefaultFumenSoundPlayer.cs:602-623</code></a></p>
 <p><strong>触发条件：</strong> <code>Volume</code> 是自动属性，PlayLoop 创建句柄时只复制一次音量；用户随后通过 SetVolume 修改播放器属性，不会同步 <code>loopMap</code> 中的现有句柄。</p>
 <p><strong>后果：</strong> 正在播放的 BeamLoop/其他持续音效保持旧音量，直到停止并重新播放；设置页面显示的值与听感不一致。</p>
 <p><strong>推荐方案：</strong> 将 Volume 改为 setter，遍历现有 loop handle 同步值，或把可变音量能力放进 ILoopHandle；同时覆盖播放中调节和重载场景。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>eb6ac36c</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；现有循环句柄会在音量变化时同步更新。</p></article>
 <article class="finding" id="finding-073">
-<h3><span class="sev high">F-073 · High</span> CLI 调度器初始化没有异常兜底</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-073 · High</span> CLI 调度器初始化没有异常兜底</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/AppBootstrapper.cs#L243-L261"><code>AppBootstrapper.cs:243-261</code></a>、<a href="../OngekiFumenEditor/AppBootstrapper.cs#L264-L278"><code>:264-278</code></a></p>
 <p><strong>触发条件：</strong> <code>OnStartupForCMD</code> 是 async void，InitExceptionCatcher 只在 GUI 入口安装；Scheduler.Init 和 IoC 获取又位于 CLI 的 try 外。</p>
 <p><strong>后果：</strong> 音频设备、插件或 IO 初始化异常会走 WPF 默认未处理路径，CLI 没有自有日志、救援或 dmp，也可能没有稳定的非零退出码。</p>
 <p><strong>推荐方案：</strong> 在最早的共享入口安装同步兜底，把 IoC 获取和 Scheduler.Init 纳入 try/finally；失败时写 fallback 日志、刷写并返回明确错误码。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>f3c5d6db</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；CLI 调度器/命令执行已纳入异常兜底并通过静态检查。</p></article>
 <article class="finding" id="finding-074">
 <h3><span class="sev high">F-074 · High</span> 换曲时 async void Dispose 会误删新音频资源</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/Music/DefaultMusicPlayer.cs#L80-L101"><code>DefaultMusicPlayer.cs:80-101</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/NAudioImpl/Music/DefaultMusicPlayer.cs#L177-L193"><code>:177-193</code></a></p>
@@ -630,12 +630,12 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 每个命令先验证列数和类型，失败记录行号后跳过或返回结构化 FumenParseIssue；主循环按行隔离异常，并在 UI 中区分部分加载和文件不可恢复。</p>
 </article>
 <article class="finding" id="finding-079">
-<h3><span class="sev high">F-079 · High</span> 音效初始化异常会让 Prepare 永久等待</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-079 · High</span> 音效初始化异常会让 Prepare 永久等待</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs#L70-L157"><code>DefaultFumenSoundPlayer.cs:70-157</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs#L159-L180"><code>:159-180</code></a></p>
 <p><strong>触发条件：</strong> 构造函数 fire-and-forget 调用 InitSoundsAsync；其中 IoC.Get、Task.WhenAll、ApplySavedSoundVolumes 或 MessageBox 任意一步抛异常时，<code>TaskCompletionSource</code> 没有 TrySetResult/Exception。</p>
 <p><strong>后果：</strong> <code>loadTask</code> 永久处于 Pending，Prepare 永久 await，播放按钮和关闭流程都可能卡住；真正的加载异常也没有交给调用方。</p>
 <p><strong>推荐方案：</strong> 在统一 try/catch/finally 中完成 TCS，区分取消、部分失败和致命失败；构造阶段保存初始化 Task，让调用方可以 await 并显示具体错误。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>2da3d8ce</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；音效初始化 TCS 的异常、取消、缺目录和成功路径均能结束。</p></article>
 <article class="finding" id="finding-080">
 <h3><span class="sev high">F-080 · High</span> 播放按钮在 Prepare 期间可并发启动多条音频状态机</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/AudioPlayerToolViewer/ViewModels/AudioPlayerToolViewerViewModel.cs#L221-L246"><code>AudioPlayerToolViewerViewModel.cs:221-246</code></a>、<a href="../OngekiFumenEditor/Kernel/Audio/DefaultCommonImpl/Sound/DefaultFumenSoundPlayer.cs#L159-L181"><code>DefaultFumenSoundPlayer.cs:159-181</code></a></p>
@@ -658,12 +658,12 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 兼容路径绑定对象后使用传统 TexParameter/BufferData/VertexAttribPointer，或先探测扩展并明确降级；不要在 3.3 配置下无条件调用 4.5 API。</p>
 </article>
 <article class="finding" id="finding-083">
-<h3><span class="sev high">F-083 · High</span> 公共谱面 Serialize API 会先截断正式 OGKR</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev high">F-083 · High</span> 公共谱面 Serialize API 会先截断正式 OGKR</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Parser/IFumenParserManager.cs#L14-L25"><code>Parser/IFumenParserManager.cs:14-25</code></a></p>
 <p><strong>触发条件：</strong> 默认 Serialize 直接调用 <code>File.WriteAllBytesAsync(saveFilePath, ...)</code>；进程崩溃、磁盘已满或取消发生在写入中间时，目标文件已经被截断。</p>
 <p><strong>后果：</strong> 用户原有谱面可能变成 0 字节或半写文本，后续解析失败且没有备份；这条公共 API 也会影响未来绕过项目保存工具的调用方。</p>
 <p><strong>推荐方案：</strong> 同目录临时文件写完并 Flush(true)，重新加载校验后使用 File.Replace/Move 原子替换；失败保留原文件并清理临时文件。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>2da3d8ce</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；公共 Serialize API 已使用 Flush(true) 后原子替换并保留 .bak。</p></article>
 <article class="finding" id="finding-084">
 <h3><span class="sev high">F-084 · High</span> 新版或第三方 bullet 枚举值会让整谱无法打开</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/BulletCommandParser.cs#L18-L34"><code>BulletCommandParser.cs:18-34</code></a>、<a href="../OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/BulletPalleteCommandParser.cs#L20-L34"><code>BulletPalleteCommandParser.cs:20-34</code></a></p>
@@ -672,12 +672,12 @@ ul { margin-top:.35rem; }
 <p><strong>推荐方案：</strong> 使用 TryParse 和明确的 fallback/ParseIssue，尽可能保留原始 token；主解析循环按行隔离异常，未知值应显示警告而不是让整个文件失败。</p>
 </article>
 <article class="finding" id="finding-085">
-<h3><span class="sev medium">F-085 · Medium</span> FumenConverter 批量转换会泄漏输入文件句柄</h3>
+<h3><span class="status-done" aria-label="已处理">✓ 已处理</span> <span class="sev medium">F-085 · Medium</span> FumenConverter 批量转换会泄漏输入文件句柄</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Modules/FumenConverter/Kernel/FumenConverterWrapper.cs#L25-L35"><code>FumenConverterWrapper.cs:25-35</code></a></p>
 <p><strong>触发条件：</strong> <code>File.OpenRead(option.InputFumenFilePath)</code> 直接传给 DeserializeAsync，没有 using/await using；默认 parser 不拥有调用方的 stream。</p>
 <p><strong>后果：</strong> 批量转换多文件时句柄要等 GC 才释放，Windows 上源文件会被锁住并最终耗尽句柄；取消和异常路径尤其容易留下锁。</p>
 <p><strong>推荐方案：</strong> 调用方使用 await using 明确管理输入流，约定 parser 不重复处置；转换结束、取消和异常都必须走 finally。</p>
-</article>
+<p><strong>处理状态：</strong>已修复，提交 <code>21454548</code>。</p><p><strong>验证结果：</strong>最终 WPF Debug 构建 0 errors（仅既有 warning）；转换器输入流的 using 覆盖正常、异常和取消路径。</p></article>
 <article class="finding" id="finding-086">
 <h3><span class="sev high">F-086 · High</span> SVG 丢失后任何保存都会被绝对路径异常阻断</h3>
 <p><strong>位置：</strong> <a href="../OngekiFumenEditor/Parser/Ogkr/DefaultOngekiFumenFormatter.cs#L101-L114"><code>DefaultOngekiFumenFormatter.cs:101-114</code></a>、<a href="../OngekiFumenEditor/Parser/Ogkr/CommandParserImpl/Editor/SvgPrefabCommand.cs#L53-L61"><code>SvgPrefabCommand.cs:53-61</code></a></p>
