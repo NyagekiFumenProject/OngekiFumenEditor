@@ -208,7 +208,8 @@ namespace OngekiFumenEditor.Utils
             //从Music.xml读取musicId
             if (File.Exists(musicXmlFilePath))
             {
-                var musicXml = await XDocument.LoadAsync(File.OpenRead(musicXmlFilePath), LoadOptions.None, default);
+                await using var musicXmlStream = File.OpenRead(musicXmlFilePath);
+                var musicXml = await XDocument.LoadAsync(musicXmlStream, LoadOptions.None, default);
                 var element = musicXml.XPathSelectElement(@"//Name[1]/str[1]");
                 if (element?.Value is string name)
                     result = name;
@@ -226,7 +227,8 @@ namespace OngekiFumenEditor.Utils
             if (File.Exists(musicXmlFilePath))
             {
                 //从Music.xml读取musicId
-                var musicXml = await XDocument.LoadAsync(File.OpenRead(musicXmlFilePath), LoadOptions.None, default);
+                await using var musicXmlStream = File.OpenRead(musicXmlFilePath);
+                var musicXml = await XDocument.LoadAsync(musicXmlStream, LoadOptions.None, default);
                 var element = musicXml.XPathSelectElement(@"//MusicSourceName[1]/id[1]");
                 if (element != null)
                 {
