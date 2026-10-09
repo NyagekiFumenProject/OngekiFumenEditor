@@ -105,7 +105,17 @@ namespace OngekiFumenEditor.Utils.DeadHandler
                     Marshal.FreeHGlobal(exceptionParam);
             }
 
-            FileLogOutput.WaitForWriteDone();
+            try
+            {
+                // The dump result is logged through Log's queue. Waiting only on the
+                // file sink could return before that record reaches the sink.
+                Log.WaitForAllLogWriteDone().GetAwaiter().GetResult();
+            }
+            catch (Exception logException)
+            {
+                Debug.WriteLine($"Flush dump log failed : {logException}");
+                FileLogOutput.WaitForWriteDone();
+            }
             return filePath;
         }
 

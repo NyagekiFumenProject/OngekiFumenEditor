@@ -175,5 +175,9 @@ public class Log
         {
             await Task.Delay(10);
         }
+
+        // Log's queue only guarantees that records reached each output. The file sink
+        // writes on its own batch worker, so wait for that worker as well.
+        FileLogOutput.WaitForWriteDone();
     }
 }

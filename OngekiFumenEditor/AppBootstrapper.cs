@@ -168,6 +168,8 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         DumpFileHelper.Init();
         CoreLog.SetResolver(() => coreLogTarget);
         base.Configure();
+        if (Interlocked.Exchange(ref processExitHandlerInstalled, 1) == 0)
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => FlushLogsForProcessExit();
         var defaultCreateTrigger = Caliburn.Micro.Parser.CreateTrigger;
 
         Caliburn.Micro.Parser.CreateTrigger = (target, triggerText) =>
@@ -492,6 +494,29 @@ public class AppBootstrapper : Gemini.AppBootstrapper
 
     private bool exceptionHandling;
     private AbortableThread ipcThread;
+    private static int processExitHandlerInstalled;
+
+    private static void FlushLogsForProcessExit()
+    {
+        try
+        {
+            // ProcessExit is synchronous. Drain Log's queue first, then the file sink's
+            // independent batch writer, so an async OnExit continuation cannot leave records behind.
+            Log.WaitForAllLogWriteDone().GetAwaiter().GetResult();
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"Flush logs during process exit failed : {exception}");
+            try
+            {
+                FileLogOutput.WaitForWriteDone();
+            }
+            catch (Exception fileException)
+            {
+                Debug.WriteLine($"Flush file logs during process exit failed : {fileException}");
+            }
+        }
+    }
 
     private void InitExceptionCatcher()
     {
@@ -503,6 +528,10 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                 return;
             exceptionHandling = true;
 
+#if !DEBUG
+            try
+            {
+#endif
             await FileLogOutput.WriteLog($"trigged by {trigSource}");
 
             try
@@ -558,6 +587,7 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                     Log.LogError("Can't write crash dump.", dumpException);
                 }
             }
+
             await FileLogOutput.WriteLog("FumenRescue.Rescue() Begin\n");
             var resuceFolders = await FumenRescue.Rescue();
             await FileLogOutput.WriteLog("FumenRescue.Rescue() End\n");
@@ -579,11 +609,30 @@ public class AppBootstrapper : Gemini.AppBootstrapper
                     return exceptionWindow.ShowDialog();
                 });
             }
-
-            exceptionHandling = true;
-            Environment.Exit(-1);
 #else
             throw exception;
+#endif
+#if !DEBUG
+            }
+            catch (Exception exceptionHandlerException)
+            {
+                Debug.WriteLine($"Unhandled exception handler failed : {exceptionHandlerException}");
+            }
+            finally
+            {
+                try
+                {
+                    await Log.WaitForAllLogWriteDone();
+                    FileLogOutput.WaitForWriteDone();
+                }
+                catch (Exception flushException)
+                {
+                    Debug.WriteLine($"Flush logs after unhandled exception failed : {flushException}");
+                }
+
+                exceptionHandling = true;
+                Environment.Exit(-1);
+            }
 #endif
         }
 
@@ -626,7 +675,15 @@ public class AppBootstrapper : Gemini.AppBootstrapper
         IoC.Get<IAudioManager>().Dispose();
         await IoC.Get<ISchedulerManager>().Term();
         await Log.WaitForAllLogWriteDone();
-        await FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
+        try
+        {
+            await FileLogOutput.WriteLog("\n----------CLOSE FILE LOG OUTPUT----------");
+            FileLogOutput.WaitForWriteDone();
+        }
+        catch (Exception exception)
+        {
+            Debug.WriteLine($"Write close file log marker failed : {exception}");
+        }
         base.OnExit(sender, e);
     }
 
