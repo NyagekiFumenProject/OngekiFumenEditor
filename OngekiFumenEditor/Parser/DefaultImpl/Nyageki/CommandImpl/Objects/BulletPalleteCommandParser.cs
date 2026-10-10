@@ -27,7 +27,7 @@ namespace OngekiFumenEditor.Parser.DefaultImpl.Nyageki.CommandImpl.Objects
             bpl.Speed = float.Parse(map["Speed"]);
             bpl.PlaceOffset = int.Parse(map["PlaceOffset"]);
 
-            //¼æÈİÀÏÆÌÃæ
+            //å…¼å®¹è€é“ºé¢
             if (map.TryGetValue("RandomOffsetRange", out var r))
                 bpl.RandomOffsetRange = int.Parse(r);
 

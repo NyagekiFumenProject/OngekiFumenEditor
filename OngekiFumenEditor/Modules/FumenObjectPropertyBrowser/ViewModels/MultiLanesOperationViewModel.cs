@@ -21,7 +21,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
         private readonly List<ILaneDockable> RedockedObjects = new();
 
         /**
-         �ϲ�ǰ:
+         合并前:
             frontStart  frontChild
             o-----------o
 
@@ -30,7 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                         o--------o---------o
                         laterStart
 
-        �ϲ���:
+        合并后:
             frontStart  frontChild
             o-----------o
                         |

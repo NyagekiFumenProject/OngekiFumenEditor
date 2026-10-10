@@ -64,7 +64,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
             {
                 var bpm = fumen.BpmList.GetBpm(time).BPM;
                 var progressJudgeBPM = fumen.MetaInfo.ProgJudgeBpm;
-                var standardBeatLen = timeResolution_ >> 2; //ȡ1/4��Ƭ����
+                var standardBeatLen = timeResolution_ >> 2; //取1/4切片长度
 
                 if (!double.IsFinite(bpm) || bpm <= 0 || !float.IsFinite(progressJudgeBPM) || progressJudgeBPM <= 0 || standardBeatLen <= 0)
                     throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);

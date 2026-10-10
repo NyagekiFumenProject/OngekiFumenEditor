@@ -781,7 +781,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     apGroup.Children.Add(gen);
                     var newOffsetX = offsetX + width;
 
-                    //������
+                    //画个线
                     var svgLine = new SvgLine();
                     svgLine.AddCustomClass("eventLine");
                     svgLine.StartX = new SvgUnit(SvgUnitType.Pixel, offsetX);
@@ -791,7 +791,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     svgLine.Stroke = new SvgColourServer(color);
                     apGroup.Children.Add(svgLine);
 
-                    //����offsetX
+                    //更新offsetX
                     offsetX = newOffsetX;
                 }
 
@@ -966,7 +966,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
 
                     if (!obj.IsCurvePath)
                     {
-                        //ֱ�ߣ��Ż�
+                        //直线，优化
                         PostPointByTGrid(obj, minTGrid, maxTGrid, list);
                     }
                     else
@@ -1162,7 +1162,7 @@ namespace OngekiFumenEditor.Modules.PreviewSvgGenerator.Kernel
                     }
                     else
                     {
-                        //Ĭ��24��
+                        //默认24咯
                         result.Add(new(defaultX, fromY));
                         result.Add(new(defaultX, toY));
                     }

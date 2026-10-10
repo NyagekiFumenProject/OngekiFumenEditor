@@ -40,13 +40,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropAc
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.SplitLane, () =>
             {
-                //�������Ҫ�����ֳ����ĺ�����������
+                //计算出需要被划分出来的后边子物件集合
                 splitOutChildren.AddRange(startObject.Children.Where(x => x.TGrid > dragTGrid));
                 affactedObjects.AddRange(editor.Fumen.Taps.AsEnumerable<ILaneDockable>()
                     .Concat(editor.Fumen.Holds)
                     .Where(x => x.ReferenceLaneStart == startObject));
 
-                //�����ֵ������ɾ������
+                //被划分的子物件删除出来
                 foreach (var item in splitOutChildren)
                 {
                     startObject.RemoveChildObject(item);

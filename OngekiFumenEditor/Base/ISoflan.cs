@@ -15,6 +15,6 @@ namespace OngekiFumenEditor.Base
 
         float SpeedInEditor { get; }
 
-        TGrid EndTGrid { get; set; } // ���ǵ�SoflanList�ļ����ʹ��
+        TGrid EndTGrid { get; set; } // 考虑到SoflanList的间隔树使用
     }
 }

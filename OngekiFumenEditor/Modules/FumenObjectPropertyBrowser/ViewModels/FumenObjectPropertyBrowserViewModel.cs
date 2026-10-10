@@ -41,7 +41,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
             if (SelectedObjects.Count == 0)
                 return;
 
-            //»ñÈ¡ËùÓÐÒÑÑ¡Îï¼þ¶¼¹²ÓÐµÄÊôÐÔ
+            //èŽ·å–æ‰€æœ‰å·²é€‰ç‰©ä»¶éƒ½å…±æœ‰çš„å±žæ€§
             var genericProperties = SelectedObjects
                 .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x =>
@@ -108,7 +108,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
             OnObjectChanged();
             referenceEditor?.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.SelectObjects));
-            //todo ½âñî
+            //todo è§£è€¦
             NotifyOfPropertyChange(nameof(SelectedObjects));
             UpdateDisplayName();
         }

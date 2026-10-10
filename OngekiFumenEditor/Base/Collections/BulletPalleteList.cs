@@ -115,10 +115,10 @@ namespace OngekiFumenEditor.Base.Collections
             if (palleteMap.TryGetValue(ConvertIdToInt(pallete.StrID), out var old))
             {
                 if (old == pallete)
-                    addable = false; //�ظ���ӣ��Ǿͺ�����
+                    addable = false; //重复添加，那就忽略了
                 else
                 {
-                    RemovePallete(old); //���ھɵģ��Ǿ���ɾ�˾ɵ�������µ�
+                    RemovePallete(old); //存在旧的，那就先删了旧的再添加新的
                 }
             }
 

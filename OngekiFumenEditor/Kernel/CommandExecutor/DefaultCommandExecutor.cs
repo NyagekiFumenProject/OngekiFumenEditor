@@ -111,7 +111,7 @@ namespace OngekiFumenEditor.Kernel.CommandExecutor
                 }
                 else
                 {
-                    //Ö»ÄÜÍ¨¹ıÆ×ÃæÀ´¼ÆËã
+                    //åªèƒ½é€šè¿‡è°±é¢æ¥è®¡ç®—
                     var maxTGrid = fumen.GetAllDisplayableObjects().OfType<ITimelineObject>().Max(x => x.TGrid);
                     maxTGrid += new GridOffset(5, 0);
                     var duration = TGridCalculator.ConvertTGridToAudioTime(maxTGrid, fumen.BpmList);

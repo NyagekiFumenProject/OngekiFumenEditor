@@ -30,11 +30,11 @@ namespace OngekiFumenEditor.Base.EditorObjects
         }
 
         /// <summary>
-        /// 是否在制谱器设计模式绘制
+        /// 鏄惁鍦ㄥ埗璋卞櫒璁捐妯″紡缁樺埗
         /// </summary>
         public abstract bool IsDisplayInDesignMode { get; set; }
         /// <summary>
-        /// 是否在制谱器预览模式绘制
+        /// 鏄惁鍦ㄥ埗璋卞櫒棰勮妯″紡缁樺埗
         /// </summary>
         public abstract bool IsDisplayInPreviewMode { get; set; }
     }

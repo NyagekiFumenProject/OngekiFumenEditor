@@ -121,13 +121,13 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser
         }
 
         /// <summary>
-        /// ¿ÉÄÜ·µ»ØDependencyProperty.UnsetValue±íÊ¾²»Í¬µÄÖµ
+        /// å¯èƒ½è¿”å›DependencyProperty.UnsetValueè¡¨ç¤ºä¸åŒçš„å€¼
         /// </summary>
         public object ProxyValue
         {
             get
             {
-                //Èç¹ûËùÓĞÖµ¶¼ÊÇÒ»ÑùµÄ£¬ÄÇ¾Í·µ»ØÕıÈ·µÄÖµ£¬·ñÔò¾Í·µ»Ødefault
+                //å¦‚æœæ‰€æœ‰å€¼éƒ½æ˜¯ä¸€æ ·çš„ï¼Œé‚£å°±è¿”å›æ­£ç¡®çš„å€¼ï¼Œå¦åˆ™å°±è¿”å›default
                 var itor = wrappers.GetEnumerator();
                 if (!itor.MoveNext())
                     return DependencyProperty.UnsetValue;

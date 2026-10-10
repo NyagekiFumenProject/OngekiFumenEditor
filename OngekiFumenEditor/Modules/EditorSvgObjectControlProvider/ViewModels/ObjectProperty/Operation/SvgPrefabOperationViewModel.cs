@@ -113,7 +113,7 @@ namespace OngekiFumenEditor.Modules.EditorSvgObjectControlProvider.ViewModels.Ob
                 var subGenStarts = startObj.InterpolateCurve(SvgPrefab.CurveInterpolaterFactory).ToArray();
                 if (targetObject is IColorfulLane lane)
                 {
-                    //Ⱦɫ
+                    //染色
                     var colorId = ColorIdConst.AllColors.FirstOrDefault(x => x.Color == laneColor?.Color);
                     var brightness = (int)SvgPrefab.ColorfulLaneBrightness.CurrentValue;
                     subGenStarts

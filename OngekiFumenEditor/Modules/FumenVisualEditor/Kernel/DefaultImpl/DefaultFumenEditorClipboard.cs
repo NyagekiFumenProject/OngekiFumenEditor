@@ -51,7 +51,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
             prevScale = sourceEditor.Setting.VerticalDisplayScale;
 
-            //Çå¿ÕÒ»ÏÂ
+            //æ¸…ç©ºä¸€ä¸‹
             currentCopiedSources.Clear();
             this.sourceEditor = default;
 
@@ -70,21 +70,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
             foreach (var obj in objects.Where(x => x switch
             {
-                //²»ÔÊĞí±»¸´ÖÆ
+                //ä¸å…è®¸è¢«å¤åˆ¶
                 ConnectableObjectBase and not (ConnectableStartObject) => false,
                 LaneCurvePathControlObject => false,
                 LaneBlockArea.LaneBlockAreaEndIndicator => false,
                 Soflan.SoflanEndIndicator => false,
-                //ÔÊĞí±»¸´ÖÆ
+                //å…è®¸è¢«å¤åˆ¶
                 _ => true,
             }))
             {
-                //ÕâÀï»¹ÊÇµÃÔÙ´ÎÏêÏ¸¹ıÂË:
-                // * HoldÍ·¿ÉÒÔÖ±½Ó±»¸´ÖÆ
-                // * ¹ìµÀÈç¹ûÊÇÕû¸ö¹ìµÀ½Úµã¶¼±»Ñ¡ÖĞ£¬ÄÇÃ´ËüÒ²¿ÉÒÔ±»¸´ÖÆ£¬·ñÔò¾Í²»×¼
+                //è¿™é‡Œè¿˜æ˜¯å¾—å†æ¬¡è¯¦ç»†è¿‡æ»¤:
+                // * Holdå¤´å¯ä»¥ç›´æ¥è¢«å¤åˆ¶
+                // * è½¨é“å¦‚æœæ˜¯æ•´ä¸ªè½¨é“èŠ‚ç‚¹éƒ½è¢«é€‰ä¸­ï¼Œé‚£ä¹ˆå®ƒä¹Ÿå¯ä»¥è¢«å¤åˆ¶ï¼Œå¦åˆ™å°±ä¸å‡†
                 if (obj is ConnectableStartObject start && obj is not Hold)
                 {
-                    //¼ì²éstart¹ìµÀ½ÚµãÊÇ·ñÈ«±»Ñ¡ÖĞÁË
+                    //æ£€æŸ¥startè½¨é“èŠ‚ç‚¹æ˜¯å¦å…¨è¢«é€‰ä¸­äº†
                     if (!start.Children.OfType<ConnectableObjectBase>().Append(start).All(x => x.IsSelected))
                         continue;
                 }
@@ -98,20 +98,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                 switch (copied)
                 {
-                    //ÌØÊâ´¦ÀíConnectableStart:Á¬ChildºÍControlÒ»Æğ¸´ÖÆÁË,Ë³±ãÉ¾³ıRecordId(Ìí¼ÓÊ±ĞèÒªÖØĞÂ·ÖÅä¶øÒÑ)
+                    //ç‰¹æ®Šå¤„ç†ConnectableStart:è¿Childå’ŒControlä¸€èµ·å¤åˆ¶äº†,é¡ºä¾¿åˆ é™¤RecordId(æ·»åŠ æ—¶éœ€è¦é‡æ–°åˆ†é…è€Œå·²)
                     case ConnectableStartObject _start:
                         _start.CopyEntireConnectableObject((ConnectableStartObject)source);
                         _start.RecordId = -1;
                         break;
-                    //ÌØÊâ´¦ÀíLBK:Á¬EndÎï¼şÒ»Æğ¸´ÖÆÁË
+                    //ç‰¹æ®Šå¤„ç†LBK:è¿Endç‰©ä»¶ä¸€èµ·å¤åˆ¶äº†
                     case LaneBlockArea _lbk:
                         _lbk.CopyEntire((LaneBlockArea)source);
                         break;
-                    //ÌØÊâ´¦ÀíSFL:Á¬EndÎï¼şÒ»Æğ¸´ÖÆÁË
+                    //ç‰¹æ®Šå¤„ç†SFL:è¿Endç‰©ä»¶ä¸€èµ·å¤åˆ¶äº†
                     case Soflan _sfl:
                         _sfl.CopyEntire((Soflan)source);
                         break;
-                    //ÌØÊâ´¦ÀíHold: Á¬HoldEndÎï¼şÒ»Æğ¸´ÖÆÁË
+                    //ç‰¹æ®Šå¤„ç†Hold: è¿HoldEndç‰©ä»¶ä¸€èµ·å¤åˆ¶äº†
                     case Hold hold:
                         var sourceHold = (Hold)source;
                         hold.CopyEntire(sourceHold);
@@ -125,7 +125,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         break;
                 }
 
-                //×¢²á,²¢¼ÇÂ¼µ±Ç°Î»ÖÃ
+                //æ³¨å†Œ,å¹¶è®°å½•å½“å‰ä½ç½®
                 currentCopiedSources[copied] = canvasPos;
             }
 
@@ -147,12 +147,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 return;
             if (sourceEditor is null)
             {
-                Log.LogWarn($"ÎŞ·¨Õ³ÌùÒòÎªsourceEditorÎª¿Õ");
+                Log.LogWarn($"æ— æ³•ç²˜è´´å› ä¸ºsourceEditorä¸ºç©º");
                 return;
             }
             if (currentCopiedSources.Count is 0)
             {
-                Log.LogWarn($"ÎŞ·¨Õ³ÌùÒòÎª¸´ÖÆÁĞ±íÎª¿Õ");
+                Log.LogWarn($"æ— æ³•ç²˜è´´å› ä¸ºå¤åˆ¶åˆ—è¡¨ä¸ºç©º");
                 return;
             }
             var curScale = targetEditor.Setting.VerticalDisplayScale;
@@ -173,17 +173,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 return fixedY;
             }
 
-            //¼ÆËã³ö¾µÏñÖĞĞÄÎ»ÖÃ
+            //è®¡ç®—å‡ºé•œåƒä¸­å¿ƒä½ç½®
             var mirrorYOpt = CalculateYMirror(currentCopiedSources.Keys, pasteOption);
             var mirrorXOpt = CalculateXMirror(targetEditor, currentCopiedSources.Keys, pasteOption);
 
-            //»ñÈ¡Ô´ÖĞĞÄµã
+            //è·å–æºä¸­å¿ƒç‚¹
             var sourceCenterPos = CalculateRangeCenter(currentCopiedSources.Keys);
             var fixedY = adjustY(sourceCenterPos.Y);
             var fixedCenterPos = new Point(sourceCenterPos.X, fixedY);
-            //»ñÈ¡Ä¿±êÖĞĞÄµã
+            //è·å–ç›®æ ‡ä¸­å¿ƒç‚¹
             var targetPoint = placePoint ?? fixedCenterPos;
-            //¼ÆËã³öÆ«ÒÆÁ¿
+            //è®¡ç®—å‡ºåç§»é‡
             var offset = (Point)(targetPoint - fixedCenterPos);
 
             if (pasteOption == PasteOption.XGridZeroMirror)
@@ -226,20 +226,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                 switch (copied)
                 {
-                    //ÌØÊâ´¦ÀíConnectableStart:Á¬ChildºÍControlÒ»Æğ¸´ÖÆÁË,Ë³±ãÉ¾³ıRecordId(Ìí¼ÓÊ±ĞèÒªÖØĞÂ·ÖÅä¶øÒÑ)
+                    //ç‰¹æ®Šå¤„ç†ConnectableStart:è¿Childå’ŒControlä¸€èµ·å¤åˆ¶äº†,é¡ºä¾¿åˆ é™¤RecordId(æ·»åŠ æ—¶éœ€è¦é‡æ–°åˆ†é…è€Œå·²)
                     case ConnectableStartObject _start:
                         _start.CopyEntireConnectableObject((ConnectableStartObject)source);
                         redo += () => _start.RecordId = -1;
                         break;
-                    //ÌØÊâ´¦ÀíLBK:Á¬EndÎï¼şÒ»Æğ¸´ÖÆÁË
+                    //ç‰¹æ®Šå¤„ç†LBK:è¿Endç‰©ä»¶ä¸€èµ·å¤åˆ¶äº†
                     case LaneBlockArea _lbk:
                         _lbk.CopyEntire((LaneBlockArea)source);
                         break;
-                    //ÌØÊâ´¦ÀíSFL:Á¬EndÎï¼şÒ»Æğ¸´ÖÆÁË
+                    //ç‰¹æ®Šå¤„ç†SFL:è¿Endç‰©ä»¶ä¸€èµ·å¤åˆ¶äº†
                     case Soflan _sfl:
                         _sfl.CopyEntire((Soflan)source);
                         break;
-                    //ÌØÊâ´¦ÀíHold:Çå³ıId
+                    //ç‰¹æ®Šå¤„ç†Hold:æ¸…é™¤Id
                     case Hold hold:
                         hold.CopyEntire((Hold)source);
                         hold.ReferenceLaneStart = default;
@@ -258,7 +258,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         break;
                 }
 
-                //Õ³Ìù´¦ÀíÎï¼şµÄÊ±¼äÖáÎ»ÖÃ
+                //ç²˜è´´å¤„ç†ç‰©ä»¶çš„æ—¶é—´è½´ä½ç½®
                 TGrid newTGrid = default;
                 if (copied is ITimelineObject timelineObject)
                 {
@@ -297,7 +297,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                             {
                                 Soflan _sfl => _sfl.EndIndicator,
                                 LaneBlockArea _lbk => _lbk.EndIndicator,
-                                _ => throw new Exception("Õâ¶¼ÄÜÕ¨ÕæµÄÅ£Æ¤")
+                                _ => throw new Exception("è¿™éƒ½èƒ½ç‚¸çœŸçš„ç‰›çš®")
                             };
                             var oldEndIndicatorTGrid = endIndicator.TGrid.CopyNew();
                             var endIndicatorY = sourceEditor.ConvertTGridToY_DesignMode(oldEndIndicatorTGrid);
@@ -355,9 +355,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     }
                 }
 
-                //Õ³Ìù´¦ÀíÎï¼şµÄË®Æ½ÖáÎ»ÖÃ
+                //ç²˜è´´å¤„ç†ç‰©ä»¶çš„æ°´å¹³è½´ä½ç½®
                 XGrid newXGrid = default;
-                var offsetedX = 0d; //ºóÃæ»áÓÃµ½,Òò´ËÌá³öÀ´
+                var offsetedX = 0d; //åé¢ä¼šç”¨åˆ°,å› æ­¤æå‡ºæ¥
                 if (copied is IHorizonPositionObject horizonPositionObject)
                 {
                     var xGrid = horizonPositionObject.XGrid.CopyNew();
@@ -426,10 +426,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     }
                 }
 
-                //Õ³ÌùÌØÊâ´¦Àí×Óµ¯Ä£°å(ÌØ±ğÊÇ¿ç±à¼­Æ÷Õ³ÌùÊ±)
+                //ç²˜è´´ç‰¹æ®Šå¤„ç†å­å¼¹æ¨¡æ¿(ç‰¹åˆ«æ˜¯è·¨ç¼–è¾‘å™¨ç²˜è´´æ—¶)
                 if (copied is IBulletPalleteReferencable bullet && bullet.ReferenceBulletPallete is BulletPallete pallete)
                 {
-                    //Èç¹ûIsAppendÎªfalse,ÄÇ¾ÍÖ±½Ó¸ÄÒıÓÃÖ±½Ó³ÉÕâ¸ö¡£·ñÔò¾ÍĞÂ½¨Ò»¸ö
+                    //å¦‚æœIsAppendä¸ºfalse,é‚£å°±ç›´æ¥æ”¹å¼•ç”¨ç›´æ¥æˆè¿™ä¸ªã€‚å¦åˆ™å°±æ–°å»ºä¸€ä¸ª
                     var isAppend = false;
                     BulletPallete existPallete = default;
                     if (targetEditor.Fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == pallete.StrID) is BulletPallete e)
@@ -476,7 +476,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     };
                 }
 
-                //Õ³ÌùÌØÊâ´¦ÀíTap/Hold(ÌØ±ğÊÇ¿ç±à¼­Æ÷Õ³ÌùÊ±)
+                //ç²˜è´´ç‰¹æ®Šå¤„ç†Tap/Hold(ç‰¹åˆ«æ˜¯è·¨ç¼–è¾‘å™¨ç²˜è´´æ—¶)
                 if (copied is ILaneDockable dockable)
                 {
                     var before = dockable.ReferenceLaneStart;
@@ -487,7 +487,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         var beforeStart = isSameEditorCopy ? ((source as ILaneDockable)?.ReferenceLaneStart) : default;
 
                         var pickLane = default(LaneStartBase);
-                        //»ñÈ¡¸½½üÄÜ¸½×ÅµÄ¹ìµÀ
+                        //è·å–é™„è¿‘èƒ½é™„ç€çš„è½¨é“
                         var dockableLanes = targetEditor.Fumen.Lanes
                             .GetVisibleStartObjects(newTGrid, newTGrid)
                             .Where(x => x.IsDockableLane)
@@ -505,25 +505,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                             .Select(x => x.x)
                             .ToArray();
 
-                        //ÓÅÏÈÔ­¹ìµÀ
+                        //ä¼˜å…ˆåŸè½¨é“
                         if (beforeStart != null && dockableLanes.Any(x => x == beforeStart))
                         {
                             pickLane = beforeStart;
                         }
-                        //ÓÅÏÈÍ¬ÀàĞÍ¹ìµÀ
+                        //ä¼˜å…ˆåŒç±»å‹è½¨é“
                         else if (beforeStart?.LaneType is LaneType perferLaneType && dockableLanes.FirstOrDefault(x => x.LaneType == perferLaneType) is LaneStartBase sameTypeLane)
                         {
                             pickLane = sameTypeLane;
                         }
-                        //ÓÅÏÈ¾àÀë×î½ü¹ìµÀ
+                        //ä¼˜å…ˆè·ç¦»æœ€è¿‘è½¨é“
                         else
                             pickLane = dockableLanes.FirstOrDefault();
 
-                        //Èç¹ûÊÇHold,holdEndÒ²Òª·Åµ½¶ÔÓ¦µÄÎ»ÖÃÉÏ
+                        //å¦‚æœæ˜¯Hold,holdEndä¹Ÿè¦æ”¾åˆ°å¯¹åº”çš„ä½ç½®ä¸Š
                         if (dockable is Hold hold && hold.HoldEnd is HoldEnd holdEnd)
                             holdEnd.TGrid = newTGrid + endTGridOffset;
 
-                        //ÇÕ¶¨
+                        //é’¦å®š
                         dockable.ReferenceLaneStart = pickLane;
                     };
 
@@ -615,7 +615,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
         {
             var mesureObjects = objects;
 
-            //Èç¹ûÊÇ´¿¹ìµÀ¸´ÖÆ£¬ÄÇÃ´¸øËùÓĞ¹ìµÀ¶¼¼ÆËã,Èç¹û²»ÊÇ£¬¾Í¹ıÂËµôËùÓĞ¹ìµÀ
+            //å¦‚æœæ˜¯çº¯è½¨é“å¤åˆ¶ï¼Œé‚£ä¹ˆç»™æ‰€æœ‰è½¨é“éƒ½è®¡ç®—,å¦‚æœä¸æ˜¯ï¼Œå°±è¿‡æ»¤æ‰æ‰€æœ‰è½¨é“
             if (!mesureObjects.All(x => x is ConnectableObjectBase))
                 mesureObjects = mesureObjects.Where(x => x is not ConnectableObjectBase);
             else

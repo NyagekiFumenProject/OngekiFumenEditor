@@ -403,7 +403,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             if (offsetMs != 0)
                 currentTime = currentTime + TimeSpan.FromMilliseconds(offsetMs);
 
-            //���������Ч
+            //播放物件音效
             while (itor is not null)
             {
                 var nextBeatTime = itor.Value.Time.TotalMilliseconds;
@@ -418,12 +418,12 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //���Ž�����
+            //播放节拍器
             while (meterActionsItor is not null)
             {
                 var nextActionItor = meterActionsItor.Next;
 
-                //��鵱ǰ�Ƿ���Ч
+                //检查当前是否有效
                 if (meterActionsItor.Value.isSkip)
                 {
                     meterActionsItor = nextActionItor;
@@ -434,7 +434,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 var nextBeatTime = meterActionsItor.Value.Time +
                     meterActionsItor.Value.BeatInterval * currentMeterHitCount;
 
-                //����Ƿ񳬹���һ��
+                //检查是否超过下一个
                 if (nextActionItor != null)
                 {
                     if (nextBeatTime > nextActionItor.Value.Time)
@@ -445,7 +445,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     }
                 }
 
-                //û�����ͼ����
+                //没超过就检查了
                 var ct = currentTime.TotalMilliseconds - nextBeatTime.TotalMilliseconds;
                 if (ct >= 0)
                 {
@@ -459,13 +459,13 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                     break;
             }
 
-            //���ѭ����Ч
+            //检查循环音效
             lock (locker)
             {
                 var queryDurationEvents = durationEvents.Query(currentTime);
                 foreach (var durationEvent in queryDurationEvents)
                 {
-                    //����Ƿ����ڲ�����
+                    //检查是否正在播放了
                     if (!currentPlayingDurationEvents.Contains(durationEvent))
                     {
                         if (SoundControl.HasFlag(durationEvent.Sounds) && cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))
@@ -477,7 +477,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                         }
                     }
                 }
-                //����Ƿ��Ѿ��������
+                //检查是否已经播放完成
                 foreach (var durationEvent in currentPlayingDurationEvents.Where(x => currentTime < x.Time || currentTime > x.EndTime).ToArray())
                 {
                     if (cacheSounds.TryGetValue(durationEvent.Sounds, out var soundPlayer))

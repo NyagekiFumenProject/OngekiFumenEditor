@@ -105,7 +105,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public void CopyEntire(Hold from)
         {
-            //����Endһ������
+            //包括End一起复制了
             Copy(from);
 
             if (from.HoldEnd != null)
@@ -136,7 +136,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             if (holdEndTGrid is null)
                 yield break;
 
-            //������˽���ۼ�ʵ���������� Hold.TGrid��ԭ���ƽ�������ȾԴ���󣩣�ÿ�ε���ֻ������һ�� TGrid
+            //这里需要累计实际计算的值，不能修改 Hold.TGrid（原始的平滑对象，渲染源对象），每次迭代只需要返回一个 TGrid
             var curTGrid = new TGrid(TGrid.Unit, TGrid.Grid);
 
             while (curTGrid < holdEndTGrid)

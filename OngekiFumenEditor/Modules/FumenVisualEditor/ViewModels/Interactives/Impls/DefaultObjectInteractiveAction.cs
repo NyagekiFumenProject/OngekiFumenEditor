@@ -31,7 +31,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             if (dragInfoMap.TryGetValue(obj, out var info))
                 dragInfoMap.Remove(obj);
             else
-                return;//��Ӧ���ߵ���
+                return;//不应该走到这
 
             var dragStartCanvasPoint = info.CanvasPoint;
             var x = obj is IHorizonPositionObject horizonPositionObject ? XGridCalculator.ConvertXGridToX(horizonPositionObject.XGrid, editor) : 0;
@@ -46,7 +46,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                     OnMoveCanvas(obj, newPos, editor);
                 }, () =>
                 {
-                    //��ֱ��move�ˣ�ֱ������λ�þ���
+                    //不直接move了，直接设置位置就行
                     if (obj is IHorizonPositionObject horizonPositionObject)
                         horizonPositionObject.XGrid = info.XGrid;
                     if (obj is ITimelineObject timelineObject)
@@ -61,7 +61,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         public override void OnDragMove(OngekiObjectBase obj, Point pos, FumenVisualEditorViewModel editor)
         {
             if (!dragInfoMap.TryGetValue(obj, out var info))
-                return;//��Ӧ���ߵ���
+                return;//不应该走到这
 
             var dragStartCanvasPoint = info.CanvasPoint;
             var dragStartPoint = info.Point;
@@ -71,7 +71,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 dragStartCanvasPoint.Y + (pos.Y - dragStartPoint.Y)
                 );
 
-            //��������һ��
+            //这里限制一下
             //movePoint.X = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.X));
             movePoint.Y = Math.Max(0, Math.Min(editor.TotalDurationHeight, movePoint.Y));
 

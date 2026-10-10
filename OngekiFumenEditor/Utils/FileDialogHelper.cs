@@ -10,7 +10,7 @@ namespace OngekiFumenEditor.Utils
 {
     public static class FileDialogHelper
     {
-        // (".nagekiProj","Nageki�����ļ�")[]
+        // (".nagekiProj","Nageki谱面文件")[]
         public static string BuildExtensionFilter(IEnumerable<(string ext, string desc)> extParams) => string.Join("|", extParams.Select(x => $"{x.desc} ({x.ext})|*{x.ext}"));
         public static string BuildExtensionFilter(params (string ext, string desc)[] extParams) => BuildExtensionFilter(extParams.AsEnumerable());
 
