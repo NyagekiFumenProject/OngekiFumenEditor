@@ -38,7 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {
-            return x;
+            return base.CheckAndAdjustX(obj, x, editor);
         }
     }
 }

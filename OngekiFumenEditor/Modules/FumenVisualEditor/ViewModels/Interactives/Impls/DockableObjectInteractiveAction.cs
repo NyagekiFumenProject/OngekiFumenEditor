@@ -93,8 +93,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {
+            if (((ILaneDockable)obj).ReferenceLaneStart is ConnectableStartObject startObject &&
+                obj is ITimelineObject timelineObject &&
+                TryGetHorizontalSegmentXRange(startObject, timelineObject.TGrid, x, editor, out var minX, out var maxX))
+            {
+                // A zero-duration lane segment covers an X range. Apply the normal XGrid
+                // adjustment first, then keep the result inside that range.
+                var adjustedX = base.CheckAndAdjustX(obj, x, editor);
+                if (adjustedX is not double value)
+                    return adjustedX;
+
+                return Math.Max(minX, Math.Min(maxX, value));
+            }
+
             if (((ILaneDockable)obj).ReferenceLaneStart is ConnectableStartObject)
                 return x;
+
             return base.CheckAndAdjustX(obj, x, editor);
         }
 
@@ -140,6 +154,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             out double dockingX)
         {
             dockingX = default;
+            if (!TryGetHorizontalSegmentXRange(startObject, tGrid, draggedX, editor, out var minX, out var maxX))
+                return false;
+
+            dockingX = Math.Max(minX, Math.Min(maxX, draggedX));
+            return true;
+        }
+
+        /// <summary>
+        /// Finds the horizontal zero-duration segment nearest to the dragged position and returns its X range.
+        /// </summary>
+        protected static bool TryGetHorizontalSegmentXRange(
+            ConnectableStartObject startObject,
+            TGrid tGrid,
+            double draggedX,
+            FumenVisualEditorViewModel editor,
+            out double minX,
+            out double maxX)
+        {
+            minX = default;
+            maxX = default;
             var totalTGrid = tGrid.TotalGrid;
             var hasCandidate = false;
             var closestDistance = double.MaxValue;
@@ -169,19 +203,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 if (!isHorizontal)
                     continue;
 
-                var minX = XGridCalculator.ConvertXGridToX(minXTotalGrid / XGrid.DEFAULT_RES_X, editor);
-                var maxX = XGridCalculator.ConvertXGridToX(maxXTotalGrid / XGrid.DEFAULT_RES_X, editor);
-                if (minX > maxX)
-                    (minX, maxX) = (maxX, minX);
+                var candidateMinX = XGridCalculator.ConvertXGridToX(minXTotalGrid / XGrid.DEFAULT_RES_X, editor);
+                var candidateMaxX = XGridCalculator.ConvertXGridToX(maxXTotalGrid / XGrid.DEFAULT_RES_X, editor);
+                if (candidateMinX > candidateMaxX)
+                    (candidateMinX, candidateMaxX) = (candidateMaxX, candidateMinX);
 
-                var candidateX = Math.Max(minX, Math.Min(maxX, draggedX));
+                var candidateX = Math.Max(candidateMinX, Math.Min(candidateMaxX, draggedX));
                 var distance = Math.Abs(candidateX - draggedX);
                 if (hasCandidate && distance >= closestDistance)
                     continue;
 
                 hasCandidate = true;
                 closestDistance = distance;
-                dockingX = candidateX;
+                minX = candidateMinX;
+                maxX = candidateMaxX;
             }
 
             return hasCandidate;
