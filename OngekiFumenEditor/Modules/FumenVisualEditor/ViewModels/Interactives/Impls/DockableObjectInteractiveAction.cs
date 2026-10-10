@@ -34,9 +34,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                         _ => default
                     })
                     .FilterNull()
-                    .Select(startObject => (CalculateConnectableObjectCurrentRelativeX(startObject, tGrid, editor), startObject))
-                    .Where(x => x.Item1 != null)
-                    .Select(x => (Math.Abs(x.Item1.Value - relativePoint.X), x.Item1.Value, x.startObject))
+                    .Select(startObject => (position: CalculateConnectableObjectCurrentRelativeX(startObject, tGrid, editor), startObject))
+                    .Where(x => x.position != null)
+                    .Select(candidate =>
+                    {
+                        var dockX = candidate.position.Value;
+                        if (TryGetHorizontalSegmentDockingX(candidate.startObject, tGrid, relativePoint.X, editor, out var horizontalX))
+                            dockX = horizontalX;
+
+                        return (Math.Abs(dockX - relativePoint.X), Value: dockX, candidate.startObject);
+                    })
                     .GroupBy(x => x.Item1)
                     .OrderBy(x => x.Key)
                     .FirstOrDefault();
@@ -66,10 +73,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
                 if (closestLaneObject?.startObject is not null)
                 {
-                    //����Ѿ����ŵ�����Ļ����ǾͿ�������϶�����һ�����Ϲ�����������������������Լ�����ģ�
-                    //��ô��ǿ�Ƹ��������ˮƽλ�óɶ�Ӧ�����
-                    if (closestLaneObject?.Item1 < magneticDockDistance || //�����϶�����һ������
-                        closestLaneObject?.startObject == dockable.ReferenceLaneStart) //û�ϵ���һ������(������Ҫ����ˮƽλ��)
+                    //如果已经附着到轨道的话，那就考虑如果拖动到另一条线上过近，或者最近的线依旧是自己附属的，
+                    //那么就强制更新物件的水平位置成对应轨道的
+                    if (closestLaneObject?.Item1 < magneticDockDistance || //可能拖动到另一条线上
+                        closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
                     {
                         relativePoint.X = closestLaneObject?.Value ?? default;
                         dockable.ReferenceLaneStart = closestLaneObject?.startObject;
@@ -79,7 +86,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 }
             }
 
-            //���ForceTapHoldMagneticDockToLane=true,����Ҫ�����ն�λ��
+            //如果ForceTapHoldMagneticDockToLane=true,则不需要这里钦定位置
             if (enableMoveTo)
                 base.OnMoveCanvas(obj, relativePoint, editor);
         }
@@ -117,6 +124,67 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 return default;
 
             return XGridCalculator.ConvertXGridToX(xGrid, editor);
+        }
+
+        /// <summary>
+        /// Returns the position on a horizontal lane segment that is closest to the dragged object.
+        /// A zero-duration segment spans an X interval at one TGrid, while the regular interpolation
+        /// API can only return its first key. Keeping the dragged X inside that interval lets a
+        /// docked Tap or Hold move between the segment's endpoints.
+        /// </summary>
+        protected static bool TryGetHorizontalSegmentDockingX(
+            ConnectableStartObject startObject,
+            TGrid tGrid,
+            double draggedX,
+            FumenVisualEditorViewModel editor,
+            out double dockingX)
+        {
+            dockingX = default;
+            var totalTGrid = tGrid.TotalGrid;
+            var hasCandidate = false;
+            var closestDistance = double.MaxValue;
+
+            foreach (var child in startObject.Children)
+            {
+                if (child.PrevObject is not OngekiMovableObjectBase previousObject ||
+                    previousObject.TGrid.TotalGrid != totalTGrid ||
+                    child.TGrid.TotalGrid != totalTGrid)
+                    continue;
+
+                var minXTotalGrid = (double)previousObject.XGrid.TotalGrid;
+                var maxXTotalGrid = (double)child.XGrid.TotalGrid;
+                var isHorizontal = true;
+                foreach (var control in child.PathControls)
+                {
+                    if (control.TGrid.TotalGrid != totalTGrid)
+                    {
+                        isHorizontal = false;
+                        break;
+                    }
+
+                    minXTotalGrid = Math.Min(minXTotalGrid, control.XGrid.TotalGrid);
+                    maxXTotalGrid = Math.Max(maxXTotalGrid, control.XGrid.TotalGrid);
+                }
+
+                if (!isHorizontal)
+                    continue;
+
+                var minX = XGridCalculator.ConvertXGridToX(minXTotalGrid / XGrid.DEFAULT_RES_X, editor);
+                var maxX = XGridCalculator.ConvertXGridToX(maxXTotalGrid / XGrid.DEFAULT_RES_X, editor);
+                if (minX > maxX)
+                    (minX, maxX) = (maxX, minX);
+
+                var candidateX = Math.Max(minX, Math.Min(maxX, draggedX));
+                var distance = Math.Abs(candidateX - draggedX);
+                if (hasCandidate && distance >= closestDistance)
+                    continue;
+
+                hasCandidate = true;
+                closestDistance = distance;
+                dockingX = candidateX;
+            }
+
+            return hasCandidate;
         }
     }
 }

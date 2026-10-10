@@ -26,6 +26,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 if (((obj as HoldEnd)?.RefHold)?.ReferenceLaneStart is LaneStartBase start)
                 {
                     var x = CalculateConnectableObjectCurrentRelativeX(start, tGrid, editor) ?? relativePoint.X;
+                    if (TryGetHorizontalSegmentDockingX(start, tGrid, relativePoint.X, editor, out var horizontalX))
+                        x = horizontalX;
                     relativePoint.X = x;
                     //Log.LogDebug($"auto lock to lane x: {x}");
                 }
