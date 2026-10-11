@@ -11,6 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
     public class EditorLoadingDialogViewModel : Screen
     {
         private readonly CancellationTokenSource cancellation = new();
+        private readonly TaskCompletionSource<bool> viewShown = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private string targetName;
 
         private string stepText = Resources.EditorLoadingStepPreparing;
@@ -28,6 +29,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 
         internal CancellationToken CancellationToken => cancellation.Token;
         internal bool IsFinished => finished;
+        /// <summary>
+        /// 对话框窗口真正显示后才完成；加载流程在继续到可能再弹模态窗口的步骤（如音频选择框）前
+        /// 必须等它，否则文件对话框会先进入自己的模态循环，把加载对话框的循环嵌套进去——
+        /// 文件对话框窗口永远不显示、整条加载流程死锁。窗口始终没能显示（显示失败或提前结束）时同样完成，
+        /// 保证等待方不会挂死。
+        /// </summary>
+        internal Task ViewShownTask => viewShown.Task;
+        /// <summary>窗口显示失败时放行等待方；之后不会再显示这个对话框。</summary>
+        internal void ReleaseViewShownWaiters() => viewShown.TrySetResult(true);
         /// <summary>用户点「取消」或直接关窗时触发一次（UI 线程）。</summary>
         internal event EventHandler CancellationRequested;
 
@@ -60,6 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
         {
             base.OnViewLoaded(view);
             viewLoaded = true;
+            viewShown.TrySetResult(true);
         }
 
         public override Task<bool> CanCloseAsync(CancellationToken cancellationToken = default)
@@ -85,6 +96,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
                 return;
             finished = true;
             closeApproved = true;
+            // 对话框再也不会显示出来（加载在显示前就结束/失败）：放行等在 ViewShownTask 上的加载流程。
+            viewShown.TrySetResult(true);
 
             if (!viewLoaded)
             {

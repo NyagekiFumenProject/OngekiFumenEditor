@@ -237,7 +237,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     return Resources.EditorLoadingNewProjectName;
                 }
 
-                using var session = EditorLoadingSession.Begin(EditorLoadingStep.Parsing, ResolveTargetName(projectData));
+                using var session = await EditorLoadingSession.BeginAsync(EditorLoadingStep.Parsing, ResolveTargetName(projectData));
                 try
                 {
                     if (File.Exists(projectData.FumenFilePath))
@@ -274,7 +274,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task DoLoad(string filePath)
         {
-            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, Path.GetFileName(filePath));
+            using var session = await EditorLoadingSession.BeginAsync(EditorLoadingStep.Preparing, Path.GetFileName(filePath));
             try
             {
                 using var _ = StatusBarHelper.BeginStatus("Editor project file loading : " + filePath);

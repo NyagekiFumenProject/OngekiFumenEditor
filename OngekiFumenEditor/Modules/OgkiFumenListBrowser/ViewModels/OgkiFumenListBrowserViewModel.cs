@@ -294,7 +294,7 @@ namespace OngekiFumenEditor.Modules.OgkiFumenListBrowser.ViewModels
         {
             IsBusy = true;
             var docName = $"[{Resources.FastOpen}] {diff.RefSet.Title}";
-            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, docName);
+            using var session = await EditorLoadingSession.BeginAsync(EditorLoadingStep.Preparing, docName);
             try
             {
                 session.ReportStep(EditorLoadingStep.Parsing);

@@ -29,8 +29,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
     }
 
     /// <summary>
-    /// 一次「谱面加载到编辑器」的全过程：创建时弹出模态加载对话框，流程按步骤上报，
-    /// 结束/失败/取消时关闭对话框；取消通过 <see cref="CancellationToken"/> 协作式中止。
+    /// 一次「谱面加载到编辑器」的全过程：<see cref="BeginAsync"/> 创建并显示模态加载对话框后才返回，
+    /// 流程按步骤上报，结束/失败/取消时关闭对话框；取消通过 <see cref="CancellationToken"/> 协作式中止。
     /// </summary>
     public sealed class EditorLoadingSession : IDisposable
     {
@@ -49,14 +49,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         private bool disposed;
         private bool dialogReleased;
 
+        /// <summary>
+        /// 开始一次加载：创建（或复用）加载对话框、把它排队显示，等它真正显示出来后才返回，
+        /// 这样调用方后续步骤（可能再弹音频选择框等模态窗口）一定跑在加载对话框的嵌套消息循环里。
+        /// 顺序反了就会变成：文件对话框先进入自己的模态循环，队列里的对话框显示操作只能在该循环内执行，
+        /// 于是文件对话框窗口永远不显示、加载流程死锁（只能取消/杀进程）。
+        /// </summary>
         /// <param name="step">起始步骤。</param>
         /// <param name="targetName">正在加载的谱面/工程名，显示给用户确认。</param>
-        public static EditorLoadingSession Begin(EditorLoadingStep step, string targetName)
+        public static async Task<EditorLoadingSession> BeginAsync(EditorLoadingStep step, string targetName)
         {
             var session = new EditorLoadingSession(targetName);
             Log.LogInfo($"Editor loading session started (step={step}, steps={StepCount}, target={targetName})");
             session.ReportStep(step);
             session.ShowDialogIfOwner();
+            // 非 owner（复用已在显示的对话框）或对话框已显示时立即完成，不产生额外等待。
+            await session.dialog.ViewShownTask;
             return session;
         }
 
@@ -170,7 +178,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 return;
 
             // Caliburn 的 ShowDialogAsync 会同步进入 ShowDialog() 的嵌套消息循环，
-            // 直接调用会卡住加载流程；投递到队列后加载继续跑在该嵌套循环里。
+            // 直接调用会卡住加载流程；投递到队列后加载继续跑在该嵌套循环里
+            //（BeginAsync 等 ViewShownTask 完成后才把 session 交还给调用方）。
             Dispatcher.CurrentDispatcher.InvokeAsync(async () =>
             {
                 if (dialog.IsFinished)
@@ -182,6 +191,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 catch (Exception e)
                 {
                     Log.LogError($"Failed to show the editor loading dialog: {e.Message}", e);
+                    dialog.ReleaseViewShownWaiters();
                 }
             });
         }

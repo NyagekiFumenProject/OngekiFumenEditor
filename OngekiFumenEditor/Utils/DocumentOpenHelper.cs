@@ -94,7 +94,7 @@ namespace OngekiFumenEditor.Utils
         private static async Task<bool> OpenOgkrFileAsDocumentCore(string ogkrFilePath)
         {
             var docName = await TryFormatOpenFileName(ogkrFilePath);
-            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, docName);
+            using var session = await EditorLoadingSession.BeginAsync(EditorLoadingStep.Preparing, docName);
             try
             {
                 var newProj = await TryCreateEditorProjectDataModel(ogkrFilePath, session);
@@ -146,7 +146,7 @@ namespace OngekiFumenEditor.Utils
             var targetName = string.IsNullOrWhiteSpace(proj?.FumenFilePath)
                 ? Resources.EditorLoadingNewProjectName
                 : Path.GetFileName(proj.FumenFilePath);
-            using var session = EditorLoadingSession.Begin(EditorLoadingStep.Preparing, targetName);
+            using var session = await EditorLoadingSession.BeginAsync(EditorLoadingStep.Preparing, targetName);
             var fumenProvider = IoC.Get<IFumenVisualEditorProvider>();
             var editor = IoC.Get<IFumenVisualEditorProvider>().Create();
             var viewAware = (IViewAware)editor;
