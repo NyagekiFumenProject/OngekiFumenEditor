@@ -2,8 +2,10 @@ using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Parser.Ogkr;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,7 +13,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
 {
     public class FumenStatisticsDialogViewModel : Screen
     {
-        public sealed record StatisticsRow(string Name, int Count, string Description = "");
+        public sealed record StatisticsRow(string Name, int Count, string Description = "", string ValueText = null)
+        {
+            /// <summary>显示用值：默认取 <see cref="Count"/>；附加指标（如百分比）由 <see cref="ValueText"/> 覆盖。</summary>
+            public string CountText => ValueText ?? Count.ToString(CultureInfo.InvariantCulture);
+        }
 
         public string FumenName { get; }
         public IReadOnlyList<StatisticsRow> ObjectCounts { get; }
@@ -68,6 +74,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Dialogs
                     new("T_SHOLD", statistics.SideHoldObjects, Resources.FumenStatisticsSideHoldDescription),
                     new("T_FLICK", statistics.FlickObjects, Resources.FumenStatisticsFlickDescription),
                     new("T_BELL", statistics.BellObjects, Resources.FumenStatisticsBellDescription),
+                    new(Resources.FumenStatisticsPlatinumScore, statistics.PlatinumScoreMax, Resources.FumenStatisticsPlatinumScoreDescription),
+                    new(Resources.FumenStatisticsHoldTickShare, statistics.HoldTickObjects,
+                        Resources.FumenStatisticsHoldTickShareDescription.Format(statistics.HoldTickObjects, statistics.TotalObjects),
+                        (statistics.HoldTickShare * 100).ToString("F1", CultureInfo.InvariantCulture) + "%"),
                 };
             }
             catch (Exception e) when (e is InvalidOperationException or OverflowException or ArgumentException)

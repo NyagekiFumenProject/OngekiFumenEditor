@@ -2725,6 +2725,12 @@
   <data name="FumenStatisticsBulletPalletes" xml:space="preserve">
     <value>弾パレット</value>
   </data>
+  <data name="FumenStatisticsPlatinumScore" xml:space="preserve">
+    <value>プラチナスコア</value>
+  </data>
+  <data name="FumenStatisticsPlatinumScoreDescription" xml:space="preserve">
+    <value>プラチナスコア満点：判定単位ごとに最大 2 点のため、総計は T_TOTAL × 2。</value>
+  </data>
   <data name="FumenStatisticsTotalDescription" xml:space="preserve">
     <value>T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK</value>
   </data>
@@ -2733,6 +2739,12 @@
   </data>
   <data name="FumenStatisticsHoldDescription" xml:space="preserve">
     <value>壁以外の Hold 継続判定数（終点を含む）</value>
+  </data>
+  <data name="FumenStatisticsHoldTickShare" xml:space="preserve">
+    <value>HoldTick 割合</value>
+  </data>
+  <data name="FumenStatisticsHoldTickShareDescription" xml:space="preserve">
+    <value>Hold の継続判定（T_HOLD + T_SHOLD = {0}、終点を含み始点を含まない）が全 {1} 判定単位に占める割合。</value>
   </data>
   <data name="FumenStatisticsSideDescription" xml:space="preserve">
     <value>壁 Tap と壁 Hold 始点</value>
@@ -2748,8 +2760,5 @@
   </data>
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>T_* コマンドの値を計算できません：{0}</value>
-  </data>
-  <data name="FumenStatisticsInvalidHoldTiming" xml:space="preserve">
-    <value>Hold の判定パラメーターが無効です。BPM と PROGJUDGE_BPM は有限の正数で、TRESOLUTION から得られる判定間隔は 0 より大きく、オーバーフローしない必要があります。</value>
   </data>
 </root>

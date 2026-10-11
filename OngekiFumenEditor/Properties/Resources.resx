@@ -3453,6 +3453,12 @@
   <data name="FumenStatisticsBulletPalletes" xml:space="preserve">
     <value>Bullet palettes</value>
   </data>
+  <data name="FumenStatisticsPlatinumScore" xml:space="preserve">
+    <value>Platinum score</value>
+  </data>
+  <data name="FumenStatisticsPlatinumScoreDescription" xml:space="preserve">
+    <value>Max platinum score: every judged unit is worth up to 2 points, so the total equals T_TOTAL x 2.</value>
+  </data>
   <data name="FumenStatisticsTotalDescription" xml:space="preserve">
     <value>T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK</value>
   </data>
@@ -3461,6 +3467,12 @@
   </data>
   <data name="FumenStatisticsHoldDescription" xml:space="preserve">
     <value>Non-wall Hold sustained judgements (including ends)</value>
+  </data>
+  <data name="FumenStatisticsHoldTickShare" xml:space="preserve">
+    <value>HoldTick share</value>
+  </data>
+  <data name="FumenStatisticsHoldTickShareDescription" xml:space="preserve">
+    <value>Sustained hold judgements (T_HOLD + T_SHOLD = {0}, end judgement included, hold heads excluded) out of {1} judged units.</value>
   </data>
   <data name="FumenStatisticsSideDescription" xml:space="preserve">
     <value>Wall Taps and wall Hold heads</value>
@@ -3476,8 +3488,5 @@
   </data>
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>Unable to calculate T_* values: {0}</value>
-  </data>
-  <data name="FumenStatisticsInvalidHoldTiming" xml:space="preserve">
-    <value>Hold timing is invalid: BPM and PROGJUDGE_BPM must be finite positive values, and TRESOLUTION must produce a positive judgement step without overflow.</value>
   </data>
 </root>

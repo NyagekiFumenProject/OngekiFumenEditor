@@ -3420,6 +3420,12 @@
   <data name="FumenStatisticsBulletPalletes" xml:space="preserve">
     <value>子弹调色板</value>
   </data>
+  <data name="FumenStatisticsPlatinumScore" xml:space="preserve">
+    <value>白金分数</value>
+  </data>
+  <data name="FumenStatisticsPlatinumScoreDescription" xml:space="preserve">
+    <value>白金分数满分：每个判定单元最多 2 分，总计 = T_TOTAL × 2。</value>
+  </data>
   <data name="FumenStatisticsTotalDescription" xml:space="preserve">
     <value>T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK</value>
   </data>
@@ -3428,6 +3434,12 @@
   </data>
   <data name="FumenStatisticsHoldDescription" xml:space="preserve">
     <value>普通 Hold 持续判定数（含结束判定）</value>
+  </data>
+  <data name="FumenStatisticsHoldTickShare" xml:space="preserve">
+    <value>HoldTick 占比</value>
+  </data>
+  <data name="FumenStatisticsHoldTickShareDescription" xml:space="preserve">
+    <value>Hold 持续判定点（T_HOLD + T_SHOLD = {0}，含终点、不含起点）占全部 {1} 个判定单元的比例。</value>
   </data>
   <data name="FumenStatisticsSideDescription" xml:space="preserve">
     <value>侧键 Tap + 侧键 Hold 头部</value>
@@ -3443,8 +3455,5 @@
   </data>
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>无法计算 T_* 命令数值：{0}</value>
-  </data>
-  <data name="FumenStatisticsInvalidHoldTiming" xml:space="preserve">
-    <value>Hold 判定参数无效：BPM 和 PROGJUDGE_BPM 必须为有限正数，TRESOLUTION 必须能生成大于 0 且不溢出的判定步长。</value>
   </data>
 </root>

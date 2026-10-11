@@ -8954,6 +8954,24 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Platinum score.
+        /// </summary>
+        public static string FumenStatisticsPlatinumScore {
+            get {
+                return ResourceManager.GetString("FumenStatisticsPlatinumScore", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Max platinum score: every judged unit is worth up to 2 points, so the total equals T_TOTAL x 2..
+        /// </summary>
+        public static string FumenStatisticsPlatinumScoreDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsPlatinumScoreDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK.
         /// </summary>
         public static string FumenStatisticsTotalDescription {
@@ -8977,6 +8995,24 @@ namespace OngekiFumenEditor.Properties {
         public static string FumenStatisticsHoldDescription {
             get {
                 return ResourceManager.GetString("FumenStatisticsHoldDescription", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to HoldTick share.
+        /// </summary>
+        public static string FumenStatisticsHoldTickShare {
+            get {
+                return ResourceManager.GetString("FumenStatisticsHoldTickShare", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sustained hold judgements (T_HOLD + T_SHOLD = {0}, end judgement included, hold heads excluded) out of {1} judged units..
+        /// </summary>
+        public static string FumenStatisticsHoldTickShareDescription {
+            get {
+                return ResourceManager.GetString("FumenStatisticsHoldTickShareDescription", resourceCulture);
             }
         }
 
@@ -9022,15 +9058,6 @@ namespace OngekiFumenEditor.Properties {
         public static string FumenStatisticsCalculationFailed {
             get {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Hold timing is invalid: BPM and PROGJUDGE_BPM must be finite positive values, and TRESOLUTION must produce a positive judgement step without overflow..
-        /// </summary>
-        public static string FumenStatisticsInvalidHoldTiming {
-            get {
-                return ResourceManager.GetString("FumenStatisticsInvalidHoldTiming", resourceCulture);
             }
         }
     }

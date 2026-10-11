@@ -1,7 +1,5 @@
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Properties;
-using System;
 using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr
@@ -26,6 +24,16 @@ namespace OngekiFumenEditor.Parser.Ogkr
                 result.HoldObjects +
                 result.TapObjects +
                 result.SideHoldObjects;
+
+            // 白金分数上限：每个判定单元最多 2 分（游戏 Counters.addPlatinumScore 每次 +2，
+            // 上限 _tsjNoteTotal / volumeJudgeTechMax * 2；注 volumeNotesTech 全 1 -> TotalObjects × 2）。
+            result.PlatinumScoreMax = result.TotalObjects * 2;
+
+            // HoldTick 贡献：持续判定点（judgeList 点数，含终点、不含起点），每个判定单元权重相同。
+            result.HoldTickObjects = result.HoldObjects + result.SideHoldObjects;
+            result.HoldTickShare = result.TotalObjects > 0
+                ? (double)result.HoldTickObjects / result.TotalObjects
+                : 0;
             /*
             var msg = $"T_TOTAL {result.TotalObjects}{Environment.NewLine}";
             msg += $"T_TAP {result.TapObjects}{Environment.NewLine}";
@@ -58,44 +66,16 @@ namespace OngekiFumenEditor.Parser.Ogkr
 
         private static int CalculateHold(Hold x, OngekiFumen fumen)
         {
-            var timeResolution_ = fumen.MetaInfo.TRESOLUTION;
-
-            int CalcHoldTickStepSize(TGrid time)
-            {
-                var bpm = fumen.BpmList.GetBpm(time).BPM;
-                var progressJudgeBPM = fumen.MetaInfo.ProgJudgeBpm;
-                var standardBeatLen = timeResolution_ >> 2; //取1/4切片长度
-
-                if (!double.IsFinite(bpm) || bpm <= 0 || !float.IsFinite(progressJudgeBPM) || progressJudgeBPM <= 0 || standardBeatLen <= 0)
-                    throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);
-
-                if (bpm < progressJudgeBPM)
-                {
-                    while (bpm < progressJudgeBPM)
-                    {
-                        standardBeatLen >>= 1;
-                        if (standardBeatLen == 0)
-                            throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);
-                        bpm *= 2f;
-                    }
-                }
-                else
-                {
-                    for (progressJudgeBPM *= 2f; progressJudgeBPM <= bpm; progressJudgeBPM *= 2f)
-                    {
-                        if (standardBeatLen > int.MaxValue / 2)
-                            throw new InvalidOperationException(Resources.FumenStatisticsInvalidHoldTiming);
-                        standardBeatLen <<= 1;
-                    }
-                }
-                return standardBeatLen;
-            }
+            // 与游戏判定点（MU3 Reader/HoldObj.CreateJudgePoint）保持一致：
+            // 步长统一走 HoldTickStepCalculator（含 BPM 3.75 下限与 float32 语义，基准为本编辑器网格的 1/4 切片），
+            // 起点单独计为 Tap、这里不计入；终点判定固定计入一次。
+            var progressJudgeBpm = fumen.MetaInfo.ProgJudgeBpm;
 
             var holdStartTGrid = x.TGrid;
             var holdEndTGrid = x.HoldEnd?.TGrid;
 
             var count = 0;
-            var tickGrid = CalcHoldTickStepSize(holdStartTGrid);
+            var tickGrid = HoldTickStepCalculator.Calculate(fumen.BpmList.GetBpm(holdStartTGrid).BPM, progressJudgeBpm, HoldTickStepCalculator.DefaultStandardBeatLen);
             var curTGrid = holdStartTGrid + new GridOffset(0, tickGrid);
 
             if (holdEndTGrid is not null)
@@ -103,7 +83,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
                 while (curTGrid < holdEndTGrid)
                 {
                     count++;
-                    tickGrid = CalcHoldTickStepSize(curTGrid);
+                    tickGrid = HoldTickStepCalculator.Calculate(fumen.BpmList.GetBpm(curTGrid).BPM, progressJudgeBpm, HoldTickStepCalculator.DefaultStandardBeatLen);
                     curTGrid = curTGrid + new GridOffset(0, tickGrid);
                 }
             }

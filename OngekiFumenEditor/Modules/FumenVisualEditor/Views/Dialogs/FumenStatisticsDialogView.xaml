@@ -91,7 +91,7 @@
                         ItemsSource="{Binding CommandCounts}">
                         <DataGrid.Columns>
                             <DataGridTextColumn Width="110" Binding="{Binding Name}" Header="{markup:Translate [FumenStatisticsCommand]}" />
-                            <DataGridTextColumn Width="80" Binding="{Binding Count}" Header="{markup:Translate [FumenStatisticsCount]}" />
+                            <DataGridTextColumn Width="80" Binding="{Binding CountText}" Header="{markup:Translate [FumenStatisticsCount]}" />
                             <DataGridTextColumn Width="*" Binding="{Binding Description}" Header="{markup:Translate [FumenStatisticsDescription]}">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
