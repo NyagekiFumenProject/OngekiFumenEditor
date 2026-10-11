@@ -26,6 +26,7 @@
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
                 Text="Drag new BeamNext"
+                ToolTip="{markup:Translate [BeamNextDragTipText]}"
                 TextWrapping="Wrap" />
         </Border>
         <Border
@@ -38,7 +39,8 @@
             <TextBlock
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
-                Text="Drag new BeamEnd" />
+                Text="Drag new BeamEnd"
+                ToolTip="{markup:Translate [BeamEndDragTipText]}" />
         </Border>
     </StackPanel>
 </UserControl>

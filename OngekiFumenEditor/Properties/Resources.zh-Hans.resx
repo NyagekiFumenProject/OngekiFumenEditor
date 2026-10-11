@@ -168,6 +168,42 @@
   <data name="Artist" xml:space="preserve">
     <value>艺术家:</value>
   </data>
+  <data name="AudioAdjustBrowseInputTipText" xml:space="preserve">
+    <value>选择用于读取时间信息的谱面文件。</value>
+  </data>
+  <data name="AudioAdjustBrowseOutputTipText" xml:space="preserve">
+    <value>选择调整后谱面的保存路径。</value>
+  </data>
+  <data name="AudioAdjustBySecondTipText" xml:space="preserve">
+    <value>按秒指定延迟偏移量。</value>
+  </data>
+  <data name="AudioAdjustByTGridTipText" xml:space="preserve">
+    <value>按 TGrid 网格指定延迟偏移位置。</value>
+  </data>
+  <data name="AudioAdjustInputFromEditorTipText" xml:space="preserve">
+    <value>以当前编辑器打开的谱面为基准。</value>
+  </data>
+  <data name="AudioAdjustInputFromFileTipText" xml:space="preserve">
+    <value>以指定的谱面文件为基准读取时间信息。</value>
+  </data>
+  <data name="AudioAdjustProcessTipText" xml:space="preserve">
+    <value>按所选选项计算延迟并生成调整后的谱面文件。</value>
+  </data>
+  <data name="AudioAdjustRecalculateAllObjectsTipText" xml:space="preserve">
+    <value>勾选：计算延迟后，对所有物件的 TGrid 一并重算。&#xA;取消勾选：只调整音频偏移，不重算物件时间。</value>
+  </data>
+  <data name="AudioAdjustSecondsTipText" xml:space="preserve">
+    <value>延迟偏移的秒数（可为小数）。</value>
+  </data>
+  <data name="AudioAdjustTGridBpmTipText" xml:space="preserve">
+    <value>用于把 TGrid 偏移换算为时间的 BPM。</value>
+  </data>
+  <data name="AudioAdjustTGridGridTipText" xml:space="preserve">
+    <value>偏移位置的 TGrid 网格部分。</value>
+  </data>
+  <data name="AudioAdjustTGridUnitTipText" xml:space="preserve">
+    <value>偏移位置的 TGrid 单位部分。</value>
+  </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>音频时长:</value>
   </data>
@@ -218,6 +254,12 @@
   </data>
   <data name="BatchSwitchFlickDirection" xml:space="preserve">
     <value>批量改变Flick物件方向</value>
+  </data>
+  <data name="BeamEndDragTipText" xml:space="preserve">
+    <value>从此条拖入编辑器，创建光束终点（BeamEnd）。</value>
+  </data>
+  <data name="BeamNextDragTipText" xml:space="preserve">
+    <value>从此条拖入编辑器，创建光束延伸段（BeamNext）。</value>
   </data>
   <data name="BeatSplit" xml:space="preserve">
     <value>节奏线细分倍率:</value>
@@ -359,6 +401,9 @@
   </data>
   <data name="CombineLanes" xml:space="preserve">
     <value>合并轨道</value>
+  </data>
+  <data name="CombineLanesTipText" xml:space="preserve">
+    <value>把当前选中的多条轨道合并为一条（保留路径与形状）。</value>
   </data>
   <data name="Comfirm" xml:space="preserve">
     <value>确认</value>
@@ -555,8 +600,14 @@
   <data name="DragToCreateWallEnd" xml:space="preserve">
     <value>拖动生成WallEnd物件</value>
   </data>
+  <data name="DragToCreateWallEndTipText" xml:space="preserve">
+    <value>从此条拖入编辑器，创建墙轨终点。</value>
+  </data>
   <data name="DragToCreateWallNext" xml:space="preserve">
     <value>拖动生成WallNext物件</value>
+  </data>
+  <data name="DragToCreateWallNextTipText" xml:space="preserve">
+    <value>从此条拖入编辑器，创建墙轨延伸段。</value>
   </data>
   <data name="DragToSplit" xml:space="preserve">
     <value>拖动分割</value>
@@ -846,6 +897,9 @@
   <data name="GenerateLaneObjects" xml:space="preserve">
     <value>原地生成轨道物件</value>
   </data>
+  <data name="GenerateLaneObjectsTipText" xml:space="preserve">
+    <value>按该 SVG 预制物件的路径，在原地生成对应的轨道物件。</value>
+  </data>
   <data name="GenerateMusicXmlFile" xml:space="preserve">
     <value>生成Music.xml文件</value>
   </data>
@@ -1082,6 +1136,9 @@
   </data>
   <data name="SettingsToolTipEditorXOffset" xml:space="preserve">
     <value>视图的水平偏移量。&#xA;只平移显示位置，不修改谱面中的坐标。</value>
+  </data>
+  <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
+    <value>显示当前所选组的变速点明细列表（该开关暂不可用）。</value>
   </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>局部Soflan区域(组 {0})内有长条 {1}，但没有任何soflan使用该组：游戏读谱时查soflan表会因缺键抛异常崩溃。</value>
@@ -1463,6 +1520,18 @@
   </data>
   <data name="SoflanConflict" xml:space="preserve">
     <value>发现Soflan作用时效冲突:{0}和{1}</value>
+  </data>
+  <data name="SoflanPointColumnBpmTipText" xml:space="preserve">
+    <value>该时刻生效的 BPM（来自 BPM 变更点）。</value>
+  </data>
+  <data name="SoflanPointColumnSpeedTipText" xml:space="preserve">
+    <value>该变速点的速度倍率。</value>
+  </data>
+  <data name="SoflanPointColumnTGridTipText" xml:space="preserve">
+    <value>变速点所在的谱面时间（TGrid）。</value>
+  </data>
+  <data name="SoflanPointColumnYTipText" xml:space="preserve">
+    <value>变速点在编辑器中的纵向显示位置。</value>
   </data>
   <data name="SortOrder" xml:space="preserve">
     <value>列表排序:</value>
@@ -2309,6 +2378,24 @@
   </data>
   <data name="ChangeColor" xml:space="preserve">
     <value>更改颜色</value>
+  </data>
+  <data name="SoflanGroupColumnDesignTipText" xml:space="preserve">
+    <value>勾选：该组（及其中的变速点）在设计模式下显示。</value>
+  </data>
+  <data name="SoflanGroupColumnNameTipText" xml:space="preserve">
+    <value>变速组名称；组层级以缩进显示，箭头按钮可折叠/展开。</value>
+  </data>
+  <data name="SoflanGroupColumnPreviewTipText" xml:space="preserve">
+    <value>勾选：该组在预览模式（游玩演示）中显示并生效。</value>
+  </data>
+  <data name="SoflanGroupColumnSoflansTipText" xml:space="preserve">
+    <value>选中后，右侧列表显示该组包含的变速点明细。</value>
+  </data>
+  <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
+    <value>输入新变速组的名称，随后点击右侧按钮创建。</value>
+  </data>
+  <data name="SoflanGroupCreateTipText" xml:space="preserve">
+    <value>用左侧输入框中的名称创建一个新的变速组。</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>变速分组查看器</value>

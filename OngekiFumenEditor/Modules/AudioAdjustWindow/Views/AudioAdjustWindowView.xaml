@@ -28,7 +28,8 @@
                     Margin="0,5,0,5"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding IsUseInputFile, Mode=TwoWay}">
+                    IsChecked="{Binding IsUseInputFile, Mode=TwoWay}"
+                    ToolTip="{markup:Translate [AudioAdjustInputFromFileTipText]}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,10,0"
@@ -48,6 +49,7 @@
                             Padding="20,2,20,2"
                             cal:Message.Attach="OnOpenSelectInputFileDialog()"
                             Content="{markup:Translate [Browser]}"
+                            ToolTip="{markup:Translate [AudioAdjustBrowseInputTipText]}"
                             Foreground="{StaticResource EnvironmentToolWindowText}">
                         </Button>
                     </StackPanel>
@@ -61,7 +63,8 @@
                     Margin="0,5,0,5"
                     VerticalAlignment="Center"
                     VerticalContentAlignment="Center"
-                    IsChecked="{Binding IsCurrentEditorAsInputFumen, Mode=TwoWay}">
+                    IsChecked="{Binding IsCurrentEditorAsInputFumen, Mode=TwoWay}"
+                    ToolTip="{markup:Translate [AudioAdjustInputFromEditorTipText]}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock
                             Margin="0,0,10,0"
@@ -77,21 +80,23 @@
                     Margin="20,0,10,0"
                     VerticalAlignment="Center"
                     Content="{markup:Translate [AllObjectApplyNewDelayAfterCalculated]}"
-                    IsChecked="{Binding IsRecalculateObjects}">
+                    IsChecked="{Binding IsRecalculateObjects}"
+                    ToolTip="{markup:Translate [AudioAdjustRecalculateAllObjectsTipText]}">
                 </CheckBox>
             </StackPanel>
         </GroupBox>
 
         <GroupBox Margin="5" Header="{markup:Translate [OffsetOption]}">
             <StackPanel>
-                <RadioButton VerticalContentAlignment="Center" GroupName="2857">
+                <RadioButton VerticalContentAlignment="Center" GroupName="2857" ToolTip="{markup:Translate [AudioAdjustBySecondTipText]}">
                     <StackPanel Orientation="Horizontal">
                         <Label Content="{markup:Translate [ApplyOffsetBySecond]}">
                         </Label>
                         <TextBox
                             Width="100"
                             VerticalAlignment="Center"
-                            Text="{Binding Seconds}">
+                            Text="{Binding Seconds}"
+                            ToolTip="{markup:Translate [AudioAdjustSecondsTipText]}">
                         </TextBox>
                         <Label Content="{markup:Translate [Second]}">
                         </Label>
@@ -100,7 +105,8 @@
                 <RadioButton
                     VerticalContentAlignment="Center"
                     GroupName="2857"
-                    IsChecked="{Binding IsUseGridOffset, Mode=OneWayToSource}">
+                    IsChecked="{Binding IsUseGridOffset, Mode=OneWayToSource}"
+                    ToolTip="{markup:Translate [AudioAdjustByTGridTipText]}">
                     <StackPanel Orientation="Horizontal">
                         <Label Content="{markup:Translate [ApplyOffsetByTGrid]}">
                         </Label>
@@ -108,18 +114,21 @@
                         <TextBox
                             Width="50"
                             VerticalAlignment="Center"
-                            Text="{Binding Unit}" />
+                            Text="{Binding Unit}"
+                            ToolTip="{markup:Translate [AudioAdjustTGridUnitTipText]}" />
                         <Label>Grid:</Label>
                         <TextBox
                             Width="50"
                             VerticalAlignment="Center"
-                            Text="{Binding Grid}" />
+                            Text="{Binding Grid}"
+                            ToolTip="{markup:Translate [AudioAdjustTGridGridTipText]}" />
                         <Label>Bpm:</Label>
                         <TextBox
                             Width="75"
                             VerticalAlignment="Center"
                             IsEnabled="{Binding IsUseInputFile}"
-                            Text="{Binding Bpm}" />
+                            Text="{Binding Bpm}"
+                            ToolTip="{markup:Translate [AudioAdjustTGridBpmTipText]}" />
                     </StackPanel>
                 </RadioButton>
             </StackPanel>
@@ -146,6 +155,7 @@
                     Padding="20,2,20,2"
                     cal:Message.Attach="OnOpenSelectOutputFileDialog()"
                     Content="{markup:Translate [Browser]}"
+                    ToolTip="{markup:Translate [AudioAdjustBrowseOutputTipText]}"
                     Foreground="{StaticResource EnvironmentToolWindowText}">
                 </Button>
             </StackPanel>
@@ -156,6 +166,7 @@
             Padding="0,10,0,10"
             cal:Message.Attach="OnExecuteConverter()"
             Content="{markup:Translate [Process]}"
+            ToolTip="{markup:Translate [AudioAdjustProcessTipText]}"
             Foreground="{StaticResource EnvironmentToolWindowText}">
         </Button>
     </StackPanel>

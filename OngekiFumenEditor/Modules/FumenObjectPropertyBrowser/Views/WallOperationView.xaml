@@ -24,6 +24,7 @@
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
                 Text="{markup:Translate [DragToCreateWallNext]}"
+                ToolTip="{markup:Translate [DragToCreateWallNextTipText]}"
                 TextWrapping="Wrap" />
         </Border>
         <Border
@@ -37,6 +38,7 @@
                 Margin="5"
                 Foreground="{DynamicResource EnvironmentToolWindowText}"
                 Text="{markup:Translate [DragToCreateWallEnd]}"
+                ToolTip="{markup:Translate [DragToCreateWallEndTipText]}"
                 TextWrapping="Wrap" />
         </Border>
     </StackPanel>

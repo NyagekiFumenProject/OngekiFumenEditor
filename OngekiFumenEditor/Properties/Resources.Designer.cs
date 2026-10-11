@@ -285,6 +285,114 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Choose the chart file used as the timing reference..
+        /// </summary>
+        public static string AudioAdjustBrowseInputTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustBrowseInputTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Choose where to save the adjusted chart..
+        /// </summary>
+        public static string AudioAdjustBrowseOutputTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustBrowseOutputTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the delay offset in seconds..
+        /// </summary>
+        public static string AudioAdjustBySecondTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustBySecondTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Specify the delay offset by TGrid position..
+        /// </summary>
+        public static string AudioAdjustByTGridTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustByTGridTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Use the chart currently open in the editor as the reference..
+        /// </summary>
+        public static string AudioAdjustInputFromEditorTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustInputFromEditorTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Use the specified chart file as the timing reference..
+        /// </summary>
+        public static string AudioAdjustInputFromFileTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustInputFromFileTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Compute the delay with the selected options and write the adjusted chart..
+        /// </summary>
+        public static string AudioAdjustProcessTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustProcessTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Checked: after the delay is computed, every object's TGrid is recalculated as well..
+        /// </summary>
+        public static string AudioAdjustRecalculateAllObjectsTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustRecalculateAllObjectsTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delay offset in seconds (decimals allowed)..
+        /// </summary>
+        public static string AudioAdjustSecondsTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustSecondsTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to BPM used to convert the TGrid offset into time..
+        /// </summary>
+        public static string AudioAdjustTGridBpmTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustTGridBpmTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Grid part of the TGrid offset..
+        /// </summary>
+        public static string AudioAdjustTGridGridTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustTGridGridTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unit part of the TGrid offset..
+        /// </summary>
+        public static string AudioAdjustTGridUnitTipText {
+            get {
+                return ResourceManager.GetString("AudioAdjustTGridUnitTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Audio duration:.
         /// </summary>
         public static string AudioDuration {
@@ -526,6 +634,24 @@ namespace OngekiFumenEditor.Properties {
         public static string Beam {
             get {
                 return ResourceManager.GetString("Beam", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Drag from here into the editor to create a beam end (BeamEnd)..
+        /// </summary>
+        public static string BeamEndDragTipText {
+            get {
+                return ResourceManager.GetString("BeamEndDragTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Drag from here into the editor to create a beam segment (BeamNext)..
+        /// </summary>
+        public static string BeamNextDragTipText {
+            get {
+                return ResourceManager.GetString("BeamNextDragTipText", resourceCulture);
             }
         }
 
@@ -1147,6 +1273,15 @@ namespace OngekiFumenEditor.Properties {
         public static string CombineLanes {
             get {
                 return ResourceManager.GetString("CombineLanes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Combine the selected lanes into a single lane, keeping their paths..
+        /// </summary>
+        public static string CombineLanesTipText {
+            get {
+                return ResourceManager.GetString("CombineLanesTipText", resourceCulture);
             }
         }
 
@@ -1889,11 +2024,29 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Drag from here into the editor to create a wall end..
+        /// </summary>
+        public static string DragToCreateWallEndTipText {
+            get {
+                return ResourceManager.GetString("DragToCreateWallEndTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Drag to add a new WallNext object.
         /// </summary>
         public static string DragToCreateWallNext {
             get {
                 return ResourceManager.GetString("DragToCreateWallNext", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Drag from here into the editor to create a wall segment..
+        /// </summary>
+        public static string DragToCreateWallNextTipText {
+            get {
+                return ResourceManager.GetString("DragToCreateWallNextTipText", resourceCulture);
             }
         }
 
@@ -3226,6 +3379,15 @@ namespace OngekiFumenEditor.Properties {
         public static string GenerateLaneObjects {
             get {
                 return ResourceManager.GetString("GenerateLaneObjects", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Generate lane objects from this SVG prefab's path, in place..
+        /// </summary>
+        public static string GenerateLaneObjectsTipText {
+            get {
+                return ResourceManager.GetString("GenerateLaneObjectsTipText", resourceCulture);
             }
         }
 
@@ -5152,6 +5314,15 @@ namespace OngekiFumenEditor.Properties {
         public static string RecordColumnTooFew {
             get {
                 return ResourceManager.GetString("RecordColumnTooFew", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Shows the soflan detail list of the selected group (not available yet)..
+        /// </summary>
+        public static string SoflanGroupShowPointListTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupShowPointListTipText", resourceCulture);
             }
         }
 
@@ -7532,11 +7703,101 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Checked: the group (and its soflans) is visible in design mode..
+        /// </summary>
+        public static string SoflanGroupColumnDesignTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupColumnDesignTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Soflan group name; hierarchy is shown by indentation, the arrow collapses or expands it..
+        /// </summary>
+        public static string SoflanGroupColumnNameTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupColumnNameTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Checked: the group is shown and applied in preview mode..
+        /// </summary>
+        public static string SoflanGroupColumnPreviewTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupColumnPreviewTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Selecting it shows the group's soflans in the list on the right..
+        /// </summary>
+        public static string SoflanGroupColumnSoflansTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupColumnSoflansTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type a name for the new soflan group, then click the button to create it..
+        /// </summary>
+        public static string SoflanGroupCreateNameTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupCreateNameTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Create a new soflan group with the name typed on the left..
+        /// </summary>
+        public static string SoflanGroupCreateTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupCreateTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Soflan Groups.
         /// </summary>
         public static string SoflanGroupListViewer {
             get {
                 return ResourceManager.GetString("SoflanGroupListViewer", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to BPM in effect at that moment (from BPM changes)..
+        /// </summary>
+        public static string SoflanPointColumnBpmTipText {
+            get {
+                return ResourceManager.GetString("SoflanPointColumnBpmTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Speed multiplier of the soflan point..
+        /// </summary>
+        public static string SoflanPointColumnSpeedTipText {
+            get {
+                return ResourceManager.GetString("SoflanPointColumnSpeedTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Chart time (TGrid) of the soflan point..
+        /// </summary>
+        public static string SoflanPointColumnTGridTipText {
+            get {
+                return ResourceManager.GetString("SoflanPointColumnTGridTipText", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Vertical display position of the soflan point in the editor..
+        /// </summary>
+        public static string SoflanPointColumnYTipText {
+            get {
+                return ResourceManager.GetString("SoflanPointColumnYTipText", resourceCulture);
             }
         }
 

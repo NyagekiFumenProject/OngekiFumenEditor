@@ -57,8 +57,9 @@
                 <TextBox
                     Width="100"
                     Margin="10,0,10,0"
-                    Text="{Binding CreateNewGroupName}" />
-                <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="{markup:Translate [NewItemGroup]}" />
+                    Text="{Binding CreateNewGroupName}"
+                    ToolTip="{markup:Translate [SoflanGroupCreateNameTipText]}" />
+                <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="{markup:Translate [NewItemGroup]}" ToolTip="{markup:Translate [SoflanGroupCreateTipText]}" />
             </ToolBar>
         </StackPanel>
 
@@ -79,7 +80,10 @@
                             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn Width="220" Header="Name">
+                    <GridViewColumn Width="220">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Name" ToolTip="{markup:Translate [SoflanGroupColumnNameTipText]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
@@ -204,7 +208,10 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Design">
+                    <GridViewColumn>
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Design" ToolTip="{markup:Translate [SoflanGroupColumnDesignTipText]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -214,7 +221,10 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Preview">
+                    <GridViewColumn>
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Preview" ToolTip="{markup:Translate [SoflanGroupColumnPreviewTipText]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <CheckBox
@@ -224,7 +234,10 @@
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Header="Soflans">
+                    <GridViewColumn>
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Soflans" ToolTip="{markup:Translate [SoflanGroupColumnSoflansTipText]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <RadioButton
@@ -268,7 +281,8 @@
                 Margin="10,0"
                 HorizontalAlignment="Right"
                 VerticalAlignment="Center"
-                IsEnabled="False">
+                IsEnabled="False"
+                ToolTip="{markup:Translate [SoflanGroupShowPointListTipText]}">
                 <TextBlock Text="{markup:Translate [EditorShowSoflanPointList]}" />
             </CheckBox>
         </Grid>
@@ -293,22 +307,26 @@
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
 
-                    <GridViewColumn
-                        Width="150"
-                        DisplayMemberBinding="{Binding Y}"
-                        Header="Y" />
-                    <GridViewColumn
-                        Width="90"
-                        DisplayMemberBinding="{Binding TGrid}"
-                        Header="TGrid" />
-                    <GridViewColumn
-                        Width="90"
-                        DisplayMemberBinding="{Binding Bpm.BPM}"
-                        Header="Bpm" />
-                    <GridViewColumn
-                        Width="150"
-                        DisplayMemberBinding="{Binding Speed}"
-                        Header="Speed" />
+                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding Y}">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Y" ToolTip="{markup:Translate [SoflanPointColumnYTipText]}" />
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="90" DisplayMemberBinding="{Binding TGrid}">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="TGrid" ToolTip="{markup:Translate [SoflanPointColumnTGridTipText]}" />
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="90" DisplayMemberBinding="{Binding Bpm.BPM}">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Bpm" ToolTip="{markup:Translate [SoflanPointColumnBpmTipText]}" />
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding Speed}">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="Speed" ToolTip="{markup:Translate [SoflanPointColumnSpeedTipText]}" />
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
                 </GridView>
             </ListView.View>
         </ListView>

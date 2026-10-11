@@ -168,6 +168,42 @@
   <data name="Artist" xml:space="preserve">
     <value>Artist:</value>
   </data>
+  <data name="AudioAdjustBrowseInputTipText" xml:space="preserve">
+    <value>Choose the chart file used as the timing reference.</value>
+  </data>
+  <data name="AudioAdjustBrowseOutputTipText" xml:space="preserve">
+    <value>Choose where to save the adjusted chart.</value>
+  </data>
+  <data name="AudioAdjustBySecondTipText" xml:space="preserve">
+    <value>Specify the delay offset in seconds.</value>
+  </data>
+  <data name="AudioAdjustByTGridTipText" xml:space="preserve">
+    <value>Specify the delay offset by TGrid position.</value>
+  </data>
+  <data name="AudioAdjustInputFromEditorTipText" xml:space="preserve">
+    <value>Use the chart currently open in the editor as the reference.</value>
+  </data>
+  <data name="AudioAdjustInputFromFileTipText" xml:space="preserve">
+    <value>Use the specified chart file as the timing reference.</value>
+  </data>
+  <data name="AudioAdjustProcessTipText" xml:space="preserve">
+    <value>Compute the delay with the selected options and write the adjusted chart.</value>
+  </data>
+  <data name="AudioAdjustRecalculateAllObjectsTipText" xml:space="preserve">
+    <value>Checked: after the delay is computed, every object's TGrid is recalculated as well.&#xA;Unchecked: only the audio offset is adjusted; object times stay as they are.</value>
+  </data>
+  <data name="AudioAdjustSecondsTipText" xml:space="preserve">
+    <value>Delay offset in seconds (decimals allowed).</value>
+  </data>
+  <data name="AudioAdjustTGridBpmTipText" xml:space="preserve">
+    <value>BPM used to convert the TGrid offset into time.</value>
+  </data>
+  <data name="AudioAdjustTGridGridTipText" xml:space="preserve">
+    <value>Grid part of the TGrid offset.</value>
+  </data>
+  <data name="AudioAdjustTGridUnitTipText" xml:space="preserve">
+    <value>Unit part of the TGrid offset.</value>
+  </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>Audio duration:</value>
   </data>
@@ -218,6 +254,12 @@
   </data>
   <data name="BatchSwitchFlickDirection" xml:space="preserve">
     <value>Batch switch flick direction</value>
+  </data>
+  <data name="BeamEndDragTipText" xml:space="preserve">
+    <value>Drag from here into the editor to create a beam end (BeamEnd).</value>
+  </data>
+  <data name="BeamNextDragTipText" xml:space="preserve">
+    <value>Drag from here into the editor to create a beam segment (BeamNext).</value>
   </data>
   <data name="BeatSplit" xml:space="preserve">
     <value>Subdivisions per beat</value>
@@ -359,6 +401,9 @@
   </data>
   <data name="CombineLanes" xml:space="preserve">
     <value>Combine lanes</value>
+  </data>
+  <data name="CombineLanesTipText" xml:space="preserve">
+    <value>Combine the selected lanes into a single lane, keeping their paths.</value>
   </data>
   <data name="Comfirm" xml:space="preserve">
     <value>Confirm</value>
@@ -555,8 +600,14 @@
   <data name="DragToCreateWallEnd" xml:space="preserve">
     <value>Drag to add a new WallEnd object</value>
   </data>
+  <data name="DragToCreateWallEndTipText" xml:space="preserve">
+    <value>Drag from here into the editor to create a wall end.</value>
+  </data>
   <data name="DragToCreateWallNext" xml:space="preserve">
     <value>Drag to add a new WallNext object</value>
+  </data>
+  <data name="DragToCreateWallNextTipText" xml:space="preserve">
+    <value>Drag from here into the editor to create a wall segment.</value>
   </data>
   <data name="DragToSplit" xml:space="preserve">
     <value>Split lane</value>
@@ -846,6 +897,9 @@
   <data name="GenerateLaneObjects" xml:space="preserve">
     <value>Generate lane objects</value>
   </data>
+  <data name="GenerateLaneObjectsTipText" xml:space="preserve">
+    <value>Generate lane objects from this SVG prefab's path, in place.</value>
+  </data>
   <data name="GenerateMusicXmlFile" xml:space="preserve">
     <value>Generate Music.xml file</value>
   </data>
@@ -1082,6 +1136,9 @@
   </data>
   <data name="SettingsToolTipEditorXOffset" xml:space="preserve">
     <value>Horizontal view offset.&#xA;Only pans the display; chart coordinates are not modified.</value>
+  </data>
+  <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
+    <value>Shows the soflan detail list of the selected group (not available yet).</value>
   </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.</value>
@@ -1463,6 +1520,18 @@
   </data>
   <data name="SoflanConflict" xml:space="preserve">
     <value>Detected conflicting Soflan duration: {0} and {1}</value>
+  </data>
+  <data name="SoflanPointColumnBpmTipText" xml:space="preserve">
+    <value>BPM in effect at that moment (from BPM changes).</value>
+  </data>
+  <data name="SoflanPointColumnSpeedTipText" xml:space="preserve">
+    <value>Speed multiplier of the soflan point.</value>
+  </data>
+  <data name="SoflanPointColumnTGridTipText" xml:space="preserve">
+    <value>Chart time (TGrid) of the soflan point.</value>
+  </data>
+  <data name="SoflanPointColumnYTipText" xml:space="preserve">
+    <value>Vertical display position of the soflan point in the editor.</value>
   </data>
   <data name="SortOrder" xml:space="preserve">
     <value>Sort Order:</value>
@@ -2315,6 +2384,24 @@
   </data>
   <data name="ChangeColor" xml:space="preserve">
     <value>Change color</value>
+  </data>
+  <data name="SoflanGroupColumnDesignTipText" xml:space="preserve">
+    <value>Checked: the group (and its soflans) is visible in design mode.</value>
+  </data>
+  <data name="SoflanGroupColumnNameTipText" xml:space="preserve">
+    <value>Soflan group name; hierarchy is shown by indentation, the arrow collapses or expands it.</value>
+  </data>
+  <data name="SoflanGroupColumnPreviewTipText" xml:space="preserve">
+    <value>Checked: the group is shown and applied in preview mode.</value>
+  </data>
+  <data name="SoflanGroupColumnSoflansTipText" xml:space="preserve">
+    <value>Selecting it shows the group's soflans in the list on the right.</value>
+  </data>
+  <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
+    <value>Type a name for the new soflan group, then click the button to create it.</value>
+  </data>
+  <data name="SoflanGroupCreateTipText" xml:space="preserve">
+    <value>Create a new soflan group with the name typed on the left.</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>Soflan Groups</value>

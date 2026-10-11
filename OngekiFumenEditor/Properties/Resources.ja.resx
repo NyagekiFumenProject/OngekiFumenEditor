@@ -168,6 +168,42 @@
   <data name="Artist" xml:space="preserve">
     <value>アーティスト：</value>
   </data>
+  <data name="AudioAdjustBrowseInputTipText" xml:space="preserve">
+    <value>時間情報の基準にする譜面ファイルを選択します。</value>
+  </data>
+  <data name="AudioAdjustBrowseOutputTipText" xml:space="preserve">
+    <value>調整後の譜面の保存先を選択します。</value>
+  </data>
+  <data name="AudioAdjustBySecondTipText" xml:space="preserve">
+    <value>遅延のオフセットを秒で指定します。</value>
+  </data>
+  <data name="AudioAdjustByTGridTipText" xml:space="preserve">
+    <value>遅延オフセットを TGrid の位置で指定します。</value>
+  </data>
+  <data name="AudioAdjustInputFromEditorTipText" xml:space="preserve">
+    <value>現在エディタで開いている譜面を基準にします。</value>
+  </data>
+  <data name="AudioAdjustInputFromFileTipText" xml:space="preserve">
+    <value>指定した譜面ファイルを時間情報の基準にします。</value>
+  </data>
+  <data name="AudioAdjustProcessTipText" xml:space="preserve">
+    <value>選択した内容で遅延を計算し、調整後の譜面を出力します。</value>
+  </data>
+  <data name="AudioAdjustRecalculateAllObjectsTipText" xml:space="preserve">
+    <value>オン：遅延の計算後、すべてのオブジェクトの TGrid も再計算します。&#xA;オフ：音声オフセットのみを調整し、オブジェクトの時刻は変更しません。</value>
+  </data>
+  <data name="AudioAdjustSecondsTipText" xml:space="preserve">
+    <value>遅延オフセットの秒数（小数可）。</value>
+  </data>
+  <data name="AudioAdjustTGridBpmTipText" xml:space="preserve">
+    <value>TGrid オフセットを時間へ換算する BPM。</value>
+  </data>
+  <data name="AudioAdjustTGridGridTipText" xml:space="preserve">
+    <value>オフセット位置の TGrid グリッド部分。</value>
+  </data>
+  <data name="AudioAdjustTGridUnitTipText" xml:space="preserve">
+    <value>オフセット位置の TGrid 単位部分。</value>
+  </data>
   <data name="AudioDuration" xml:space="preserve">
     <value>音源再生時間：</value>
   </data>
@@ -218,6 +254,12 @@
   </data>
   <data name="BatchSwitchFlickDirection" xml:space="preserve">
     <value>Flickの向きを一括変更する</value>
+  </data>
+  <data name="BeamEndDragTipText" xml:space="preserve">
+    <value>ここからエディタへドラッグしてビーム終端（BeamEnd）を作成します。</value>
+  </data>
+  <data name="BeamNextDragTipText" xml:space="preserve">
+    <value>ここからエディタへドラッグしてビーム延伸（BeamNext）を作成します。</value>
   </data>
   <data name="BeatSplit" xml:space="preserve">
     <value>拍の分割数：</value>
@@ -356,6 +398,9 @@
   </data>
   <data name="CombineLanes" xml:space="preserve">
     <value>レーンを結合</value>
+  </data>
+  <data name="CombineLanesTipText" xml:space="preserve">
+    <value>選択中の複数レーンを 1 本に結合します（経路は保持）。</value>
   </data>
   <data name="Comfirm" xml:space="preserve">
     <value>確認</value>
@@ -549,8 +594,14 @@
   <data name="DragToCreateWallEnd" xml:space="preserve">
     <value>ドラッグしてSIDE終点を追加</value>
   </data>
+  <data name="DragToCreateWallEndTipText" xml:space="preserve">
+    <value>ここからエディタへドラッグして壁レーンの終端を作成します。</value>
+  </data>
   <data name="DragToCreateWallNext" xml:space="preserve">
     <value>ドラッグしてSIDE中間点を追加</value>
+  </data>
+  <data name="DragToCreateWallNextTipText" xml:space="preserve">
+    <value>ここからエディタへドラッグして壁レーンの延伸を作成します。</value>
   </data>
   <data name="DragToSplit" xml:space="preserve">
     <value>ドラッグしてレーンを分岐</value>
@@ -840,6 +891,9 @@
   <data name="GenerateLaneObjects" xml:space="preserve">
     <value>レーンオブジェクトを生成</value>
   </data>
+  <data name="GenerateLaneObjectsTipText" xml:space="preserve">
+    <value>この SVG プリファブの経路から、その場に対応するレーンオブジェクトを生成します。</value>
+  </data>
   <data name="GenerateMusicXmlFile" xml:space="preserve">
     <value>Music.xmlを生成</value>
   </data>
@@ -1074,6 +1128,27 @@
   </data>
   <data name="SettingsToolTipEditorXOffset" xml:space="preserve">
     <value>ビューの水平オフセット。&#xA;表示位置を移動するだけで、譜面の座標は変更しません。</value>
+  </data>
+  <data name="SoflanGroupColumnDesignTipText" xml:space="preserve">
+    <value>オン：このグループ（とそのソフラン）をデザインモードで表示します。</value>
+  </data>
+  <data name="SoflanGroupColumnNameTipText" xml:space="preserve">
+    <value>ソフラングループの名前。階層はインデントで表示され、矢印で折りたたみできます。</value>
+  </data>
+  <data name="SoflanGroupColumnPreviewTipText" xml:space="preserve">
+    <value>オン：このグループをプレビューモードで表示・適用します。</value>
+  </data>
+  <data name="SoflanGroupColumnSoflansTipText" xml:space="preserve">
+    <value>選択すると、このグループのソフランが右のリストに表示されます。</value>
+  </data>
+  <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
+    <value>新しいソフラングループの名前を入力し、右のボタンで作成します。</value>
+  </data>
+  <data name="SoflanGroupCreateTipText" xml:space="preserve">
+    <value>左の入力欄の名前で新しいソフラングループを作成します。</value>
+  </data>
+  <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
+    <value>選択中グループのソフラン詳細リストを表示します（現在は使用できません）。</value>
   </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>個別ソフランエリア(グループ {0})内にホールド {1} がありますが、そのグループを使うソフランがありません。ゲーム側の読み込み時に例外が発生します。</value>
@@ -1455,6 +1530,18 @@
   </data>
   <data name="SoflanConflict" xml:space="preserve">
     <value>ソフラン位置が重複しています：{0}，{1}</value>
+  </data>
+  <data name="SoflanPointColumnBpmTipText" xml:space="preserve">
+    <value>その時刻に有効な BPM（BPM 変更点より）。</value>
+  </data>
+  <data name="SoflanPointColumnSpeedTipText" xml:space="preserve">
+    <value>ソフランポイントの速度倍率。</value>
+  </data>
+  <data name="SoflanPointColumnTGridTipText" xml:space="preserve">
+    <value>ソフランポイントの譜面時刻（TGrid）。</value>
+  </data>
+  <data name="SoflanPointColumnYTipText" xml:space="preserve">
+    <value>エディタ上でのソフランポイントの縦位置。</value>
   </data>
   <data name="SortOrder" xml:space="preserve">
     <value>並び順：</value>
