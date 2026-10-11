@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Duration Soflan", "Soflan")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Duration Soflan", "Soflan", description: "ToolboxItemDurationSoflan")]
     public class SoflanToolboxGenerator : ToolboxGenerator<Soflan>
     {
 

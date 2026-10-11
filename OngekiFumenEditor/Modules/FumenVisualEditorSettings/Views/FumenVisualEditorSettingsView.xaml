@@ -27,46 +27,53 @@
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.DisableTGridMagneticDock}">
+                IsChecked="{Binding Setting.DisableTGridMagneticDock}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorDisableTGridMagneticDock]}">
                 <TextBlock Text="{markup:Translate [DisableTGridMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.ForceXGridMagneticDock}">
+                IsChecked="{Binding Setting.ForceXGridMagneticDock}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorForceXGridMagneticDock]}">
                 <TextBlock Text="{markup:Translate [ForceXGridMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.DisableXGridMagneticDock}">
+                IsChecked="{Binding Setting.DisableXGridMagneticDock}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorDisableXGridMagneticDock]}">
                 <TextBlock Text="{markup:Translate [DisableXGridMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.ForceTapHoldMagneticDockToLane}">
+                IsChecked="{Binding Setting.ForceTapHoldMagneticDockToLane}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorForceTapHoldMagneticDockToLane]}">
                 <TextBlock Text="{markup:Translate [ForceTapHoldMagneticDockToLane]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.ForceMagneticDock}">
+                IsChecked="{Binding Setting.ForceMagneticDock}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorForceMagneticDock]}">
                 <TextBlock Text="{markup:Translate [ForceMagneticDock]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.JudgeLineAlignBeat}">
+                IsChecked="{Binding Setting.JudgeLineAlignBeat}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorJudgeLineAlignBeat]}">
                 <TextBlock Text="{markup:Translate [JudgeLineAlignBeat]}" TextWrapping="Wrap" />
             </CheckBox>
             <CheckBox
                 Margin="0,2,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.AdjustPastedObjects}">
+                IsChecked="{Binding Setting.AdjustPastedObjects}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorAdjustPastedObjects]}">
                 <TextBlock Text="{markup:Translate [AdjustPastedObjects]}" TextWrapping="Wrap" />
             </CheckBox>
-            <Grid Margin="0,2,0,2">
+            <Grid Margin="0,2,0,2" ToolTip="{markup:Translate [SettingsToolTipEditorXGridUnitSpace]}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -98,7 +105,8 @@
                     DisplayName="{markup:Translate [BeatSplit]}"
                     MaxValue="16"
                     MinValue="0"
-                    Step="1">
+                    Step="1"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorBeatSplit]}">
                 </controls:RangeValue>
                 <controls:RangeValue
                     Padding="0,10,0,10"
@@ -107,14 +115,16 @@
                     IsEnabled="{Binding Setting.EnableXOffset}"
                     MaxValue="200"
                     MinValue="0"
-                    Step="1" />
+                    Step="1"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorXGridDisplayMaxUnit]}" />
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.JudgeLineOffsetY, Mode=TwoWay}"
                     DisplayName="{markup:Translate [JudgeLineOffsetY]}"
                     MaxValue="500"
                     MinValue="0"
-                    Step="1">
+                    Step="1"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorJudgeLineOffsetY]}">
                 </controls:RangeValue>
                 <controls:RangeValue
                     Padding="0,10,0,10"
@@ -122,17 +132,20 @@
                     DisplayName="{markup:Translate [XOffset]}"
                     MaxValue="600"
                     MinValue="-600"
-                    Step="1" />
+                    Step="1"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorXOffset]}">
+                </controls:RangeValue>
                 <controls:RangeValue
                     Padding="0,10,0,10"
                     CurrentValue="{Binding Setting.VerticalDisplayScale, Mode=TwoWay}"
                     DisplayName="{markup:Translate [VerticalDisplayScale]}"
                     MaxValue="3"
                     MinValue="0.1"
-                    Step="0.1">
+                    Step="0.1"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorVerticalDisplayScale]}">
                 </controls:RangeValue>
             </StackPanel>
-            <Grid Margin="0,2,0,2">
+            <Grid Margin="0,2,0,2" ToolTip="{markup:Translate [SettingsToolTipEditorDisplayTimeFormat]}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                     <ColumnDefinition />
@@ -158,7 +171,8 @@
             <CheckBox
                 Margin="0,10,0,2"
                 VerticalContentAlignment="Center"
-                IsChecked="{Binding Setting.LoopPlayTiming}">
+                IsChecked="{Binding Setting.LoopPlayTiming}"
+                ToolTip="{markup:Translate [SettingsToolTipEditorLoopPlayTiming]}">
                 <TextBlock Text="{markup:Translate [EnableLoopPlayTiming]}" TextWrapping="Wrap" />
             </CheckBox>
         </StackPanel>

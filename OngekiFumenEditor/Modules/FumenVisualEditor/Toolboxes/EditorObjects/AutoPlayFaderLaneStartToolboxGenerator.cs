@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.EditorObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "AutoPlayFaderLane", "Misc")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "AutoPlayFaderLane", "Misc", description: "ToolboxItemAutoPlayFaderLane")]
     public class AutoPlayFaderLaneStartToolboxGenerator : ToolboxGenerator<AutoplayFaderLaneStart>
     {
 

@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "BPM Change", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "BPM Change", "Ongeki Objects", description: "ToolboxItemBPMChange")]
     public class BPMChangeToolboxGenerator : ToolboxGenerator<BPMChange>
     {
 

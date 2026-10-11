@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Click SE", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Click SE", "Ongeki Objects", description: "ToolboxItemClickSE")]
     public class ClickSEToolboxGenerator : ToolboxGenerator<ClickSE>
     {
 

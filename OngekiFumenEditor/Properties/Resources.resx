@@ -1038,6 +1038,51 @@
   <data name="RecordColumnTooFew" xml:space="preserve">
     <value>Record {0} has too few columns (needs {1}, has {2}): the game reads those fields by column index and crashes on the missing ones.</value>
   </data>
+  <data name="SettingsToolTipEditorAdjustPastedObjects" xml:space="preserve">
+    <value>Controls whether pasted objects snap to beat/grid positions.&#xA;Checked: pasted objects snap to the nearest beat and grid lines.&#xA;Unchecked: they keep the time and horizontal position they had when copied.</value>
+  </data>
+  <data name="SettingsToolTipEditorBeatSplit" xml:space="preserve">
+    <value>Density of subdivision beat lines between judge lines.&#xA;Larger values show more helper lines per measure.</value>
+  </data>
+  <data name="SettingsToolTipEditorDisableTGridMagneticDock" xml:space="preserve">
+    <value>Controls whether the timeline snaps to beat lines while dragging objects.&#xA;Checked: the timeline never snaps, so objects can be placed at any moment.&#xA;Unchecked: the timeline snaps to the nearest beat line.</value>
+  </data>
+  <data name="SettingsToolTipEditorDisableXGridMagneticDock" xml:space="preserve">
+    <value>Controls whether the horizontal XGrid axis snaps to grid lines.&#xA;Checked: horizontal positions follow the pointer exactly, with no snapping.&#xA;Unchecked: snapping applies near a grid line.</value>
+  </data>
+  <data name="SettingsToolTipEditorDisplayTimeFormat" xml:space="preserve">
+    <value>Display format of times on the timeline and status bar.&#xA;Switch between time, measure/beat and other representations.</value>
+  </data>
+  <data name="SettingsToolTipEditorForceMagneticDock" xml:space="preserve">
+    <value>Forces snapping on both the timeline and the horizontal XGrid axis.&#xA;Checked: every drag or placement snaps to the nearest beat and grid lines.&#xA;Unchecked: the normal snapping distance applies.</value>
+  </data>
+  <data name="SettingsToolTipEditorForceTapHoldMagneticDockToLane" xml:space="preserve">
+    <value>Controls how Tap/Hold objects dock horizontally while being dragged.&#xA;Checked: they always dock to the nearest lane and take the exact lane position.&#xA;Unchecked: they dock only when dragged close to a lane; otherwise the position is free.</value>
+  </data>
+  <data name="SettingsToolTipEditorForceXGridMagneticDock" xml:space="preserve">
+    <value>Controls the snapping strength of the horizontal XGrid axis.&#xA;Checked: horizontal positions always snap to the nearest grid line.&#xA;Unchecked: snapping applies only near a grid line.</value>
+  </data>
+  <data name="SettingsToolTipEditorJudgeLineAlignBeat" xml:space="preserve">
+    <value>Controls how the mouse wheel scrolls the chart.&#xA;Checked: scrolling aligns to beats, keeping the judge line on beat lines.&#xA;Unchecked: scrolling moves by a fixed distance.</value>
+  </data>
+  <data name="SettingsToolTipEditorJudgeLineOffsetY" xml:space="preserve">
+    <value>Vertical offset of the judge line in the view.&#xA;It affects the viewport and scroll reference point; display only.</value>
+  </data>
+  <data name="SettingsToolTipEditorLoopPlayTiming" xml:space="preserve">
+    <value>Metronome playback in design mode.&#xA;Checked: playing the chart also outputs beat clicks to help stay on time.&#xA;Unchecked: only music and sound effects are played.</value>
+  </data>
+  <data name="SettingsToolTipEditorVerticalDisplayScale" xml:space="preserve">
+    <value>Display scale of the chart's vertical (time) axis.&#xA;Larger values give the same time span more screen height.</value>
+  </data>
+  <data name="SettingsToolTipEditorXGridDisplayMaxUnit" xml:space="preserve">
+    <value>Maximum XGrid unit range shown horizontally.&#xA;Larger values widen the view and shrink the displayed size of each unit.</value>
+  </data>
+  <data name="SettingsToolTipEditorXGridUnitSpace" xml:space="preserve">
+    <value>Spacing between unit grid helper lines on the horizontal axis.&#xA;Larger values spread the lines apart and coarsen drag snapping.</value>
+  </data>
+  <data name="SettingsToolTipEditorXOffset" xml:space="preserve">
+    <value>Horizontal view offset.&#xA;Only pans the display; chart coordinates are not modified.</value>
+  </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.</value>
   </data>
@@ -1512,6 +1557,48 @@
   <data name="TimesPerMin" xml:space="preserve">
     <value>min/times</value>
   </data>
+  <data name="TipColumnAction" xml:space="preserve">
+    <value>Per-row actions: drag into the chart to create objects, or clone this palette.</value>
+  </data>
+  <data name="TipColumnBulletSize" xml:space="preserve">
+    <value>Bullet (barrage) size.</value>
+  </data>
+  <data name="TipColumnBulletSpeed" xml:space="preserve">
+    <value>Bullet speed multiplier; larger values fly faster.</value>
+  </data>
+  <data name="TipColumnBulletType" xml:space="preserve">
+    <value>Bullet shape / barrage type.</value>
+  </data>
+  <data name="TipColumnName" xml:space="preserve">
+    <value>Display name of the bullet palette; used in the editor only.</value>
+  </data>
+  <data name="TipColumnRandomOffsetRange" xml:space="preserve">
+    <value>Random position offset applied when firing.</value>
+  </data>
+  <data name="TipColumnShootOffset" xml:space="preserve">
+    <value>Offset of the fire position relative to the source.</value>
+  </data>
+  <data name="TipColumnShootSource" xml:space="preserve">
+    <value>Fire source: where the bullet starts from (e.g. judge line, target).</value>
+  </data>
+  <data name="TipColumnShootTarget" xml:space="preserve">
+    <value>Fire target: what the bullet aims at.</value>
+  </data>
+  <data name="TipColumnStrId" xml:space="preserve">
+    <value>Unique string id of the bullet palette (e.g. A0); bullets reference it.</value>
+  </data>
+  <data name="TipDeleteSelectedPalletes" xml:space="preserve">
+    <value>Delete the bullet palettes selected in the list.</value>
+  </data>
+  <data name="TipFilterBox" xml:space="preserve">
+    <value>Filter the list by name.</value>
+  </data>
+  <data name="TipFilterButton" xml:space="preserve">
+    <value>Refresh the filtered list with the typed keywords.</value>
+  </data>
+  <data name="TipNewBulletPallete" xml:space="preserve">
+    <value>Create a new bullet-palette (BPL) record.</value>
+  </data>
   <data name="Title" xml:space="preserve">
     <value>Title:</value>
   </data>
@@ -1526,6 +1613,78 @@
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>For _selected objects...</value>
+  </data>
+  <data name="ToolboxItemAutoPlayFaderLane" xml:space="preserve">
+    <value>Autoplay fader lane (editor-only): records the player's horizontal path during autoplay.</value>
+  </data>
+  <data name="ToolboxItemBPMChange" xml:space="preserve">
+    <value>BPM change: changes the chart's BPM (tempo) at this moment.</value>
+  </data>
+  <data name="ToolboxItemBeamStart" xml:space="preserve">
+    <value>Beam start: fires a laser beam toward its target from this moment.</value>
+  </data>
+  <data name="ToolboxItemBell" xml:space="preserve">
+    <value>Bell: a collectible object that players tap to pick up.</value>
+  </data>
+  <data name="ToolboxItemBullet" xml:space="preserve">
+    <value>Bullet: a projectile fired with a palette (BPL) configuration; players dodge it.</value>
+  </data>
+  <data name="ToolboxItemClickSE" xml:space="preserve">
+    <value>Click SE: a click sound played when this moment is reached.</value>
+  </data>
+  <data name="ToolboxItemComment" xml:space="preserve">
+    <value>Comment: an editor-only note; it does not affect gameplay.</value>
+  </data>
+  <data name="ToolboxItemDurationSoflan" xml:space="preserve">
+    <value>Duration soflan: holds a constant speed multiplier over a range.</value>
+  </data>
+  <data name="ToolboxItemEnemyLaneStart" xml:space="preserve">
+    <value>Enemy lane start: a lane that enemies move along.</value>
+  </data>
+  <data name="ToolboxItemEnemySet" xml:space="preserve">
+    <value>Enemy set: spawns an enemy (with its barrage) at this moment.</value>
+  </data>
+  <data name="ToolboxItemFlick" xml:space="preserve">
+    <value>Flick: an object players must swipe left or right.</value>
+  </data>
+  <data name="ToolboxItemHoldStart" xml:space="preserve">
+    <value>Hold start: begins a hold; pair it with a hold end.</value>
+  </data>
+  <data name="ToolboxItemIndividualSoflanArea" xml:space="preserve">
+    <value>Individual soflan area: applies a per-group speed change inside this range.</value>
+  </data>
+  <data name="ToolboxItemInterpolatableSoflan" xml:space="preserve">
+    <value>Interpolatable soflan: interpolates the speed multiplier across a range.</value>
+  </data>
+  <data name="ToolboxItemKeyframeSoflan" xml:space="preserve">
+    <value>Keyframe soflan: switches the speed multiplier instantly at one moment.</value>
+  </data>
+  <data name="ToolboxItemLaneBlock" xml:space="preserve">
+    <value>Lane block: marks part of a lane as blocked (per direction) inside this range.</value>
+  </data>
+  <data name="ToolboxItemLaneCenterStart" xml:space="preserve">
+    <value>Lane center (green) start: creates a center lane.</value>
+  </data>
+  <data name="ToolboxItemLaneColorfulStart" xml:space="preserve">
+    <value>Lane colorful start: a lane with configurable color and brightness.</value>
+  </data>
+  <data name="ToolboxItemLaneLeftStart" xml:space="preserve">
+    <value>Lane left (red) start: creates a left lane.</value>
+  </data>
+  <data name="ToolboxItemLaneRightStart" xml:space="preserve">
+    <value>Lane right (blue) start: creates a right lane.</value>
+  </data>
+  <data name="ToolboxItemMeterChange" xml:space="preserve">
+    <value>Meter change: switches the time signature at this moment.</value>
+  </data>
+  <data name="ToolboxItemTap" xml:space="preserve">
+    <value>Tap: the basic object that players tap to hit.</value>
+  </data>
+  <data name="ToolboxItemWallLeftStart" xml:space="preserve">
+    <value>Wall left start: the left wall bounding the playable area.</value>
+  </data>
+  <data name="ToolboxItemWallRightStart" xml:space="preserve">
+    <value>Wall right start: the right wall bounding the playable area.</value>
   </data>
   <data name="Tutorial" xml:space="preserve">
     <value>Getting Started Tutorial</value>

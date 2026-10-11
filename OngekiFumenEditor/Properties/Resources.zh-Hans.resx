@@ -1038,6 +1038,51 @@
   <data name="RecordColumnTooFew" xml:space="preserve">
     <value>记录 {0} 列数不足（需要 {1} 列，实际 {2} 列）：游戏按列索引读取这些字段，缺列会越界崩溃。</value>
   </data>
+  <data name="SettingsToolTipEditorAdjustPastedObjects" xml:space="preserve">
+    <value>控制粘贴物件落点是否重新吸附。&#xA;勾选：粘贴后将物件自动吸附到最近的节拍与网格位置。&#xA;取消勾选：保持复制时的原始时间与水平位置。</value>
+  </data>
+  <data name="SettingsToolTipEditorBeatSplit" xml:space="preserve">
+    <value>判定线之间叠加的细分节奏线密度。&#xA;值越大，每小节内显示的辅助线越多。</value>
+  </data>
+  <data name="SettingsToolTipEditorDisableTGridMagneticDock" xml:space="preserve">
+    <value>控制拖动物件时时间轴是否自动吸附节拍线。&#xA;勾选：时间轴不自动吸附，可在任意时刻精确放置。&#xA;取消勾选：时间轴自动吸附到最近的节拍线。</value>
+  </data>
+  <data name="SettingsToolTipEditorDisableXGridMagneticDock" xml:space="preserve">
+    <value>控制水平位置轴（XGrid）是否自动吸附网格线。&#xA;勾选：水平位置完全跟随鼠标，不做任何吸附。&#xA;取消勾选：接近网格线时自动吸附。</value>
+  </data>
+  <data name="SettingsToolTipEditorDisplayTimeFormat" xml:space="preserve">
+    <value>时间轴与状态栏中时刻的显示格式。&#xA;可切换为时间、小节拍等不同表示方式。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceMagneticDock" xml:space="preserve">
+    <value>时间轴与水平位置轴同时强制吸附。&#xA;勾选：拖动或放置一律吸附到最近的节拍线与网格线（等效于同时开启两项强制吸附）。&#xA;取消勾选：使用常规吸附距离。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceTapHoldMagneticDockToLane" xml:space="preserve">
+    <value>控制拖动 Tap/Hold 时的横向停靠方式。&#xA;勾选：始终停靠到最近的轨道并使用轨道上的精确位置，不能自由摆放。&#xA;取消勾选：只有接近轨道时才停靠，其余位置按自由拖动处理。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceXGridMagneticDock" xml:space="preserve">
+    <value>控制水平位置轴（XGrid）的吸附强度。&#xA;勾选：无论如何拖动，水平位置都吸附到最近的网格线。&#xA;取消勾选：只有接近网格线时才吸附。</value>
+  </data>
+  <data name="SettingsToolTipEditorJudgeLineAlignBeat" xml:space="preserve">
+    <value>控制鼠标滚轮滚动谱面的方式。&#xA;勾选：按节拍对齐滚动，判定线停留在节奏线上。&#xA;取消勾选：按固定距离平滑滚动。</value>
+  </data>
+  <data name="SettingsToolTipEditorJudgeLineOffsetY" xml:space="preserve">
+    <value>判定线在视图垂直方向上的偏移位置。&#xA;影响视野与滚动对齐的参考点；只影响显示。</value>
+  </data>
+  <data name="SettingsToolTipEditorLoopPlayTiming" xml:space="preserve">
+    <value>编辑模式下是否播放节拍器。&#xA;勾选：播放时输出节拍点击声，便于对拍。&#xA;取消勾选：只播放音乐与音效。</value>
+  </data>
+  <data name="SettingsToolTipEditorVerticalDisplayScale" xml:space="preserve">
+    <value>谱面纵向（时间轴方向）的显示比例。&#xA;值越大，同一时间段在屏幕上占用越高。</value>
+  </data>
+  <data name="SettingsToolTipEditorXGridDisplayMaxUnit" xml:space="preserve">
+    <value>视图水平方向显示的最大 XGrid 单位范围。&#xA;值越大视野越宽，每个单位显示得越窄。</value>
+  </data>
+  <data name="SettingsToolTipEditorXGridUnitSpace" xml:space="preserve">
+    <value>水平方向单位网格辅助线之间的间距。&#xA;值越大辅助线越疏，拖动吸附的分辨率也随之变粗。</value>
+  </data>
+  <data name="SettingsToolTipEditorXOffset" xml:space="preserve">
+    <value>视图的水平偏移量。&#xA;只平移显示位置，不修改谱面中的坐标。</value>
+  </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>局部Soflan区域(组 {0})内有长条 {1}，但没有任何soflan使用该组：游戏读谱时查soflan表会因缺键抛异常崩溃。</value>
   </data>
@@ -1512,6 +1557,48 @@
   <data name="TimesPerMin" xml:space="preserve">
     <value>分钟/次</value>
   </data>
+  <data name="TipColumnAction" xml:space="preserve">
+    <value>每行可用的操作：拖入谱面创建对应物件，或克隆该子弹类型。</value>
+  </data>
+  <data name="TipColumnBulletSize" xml:space="preserve">
+    <value>弹幕大小。</value>
+  </data>
+  <data name="TipColumnBulletSpeed" xml:space="preserve">
+    <value>子弹速度倍率，值越大飞行越快。</value>
+  </data>
+  <data name="TipColumnBulletType" xml:space="preserve">
+    <value>子弹形状／弹幕类型。</value>
+  </data>
+  <data name="TipColumnName" xml:space="preserve">
+    <value>子弹类型的显示名称，仅供编辑器内辨识。</value>
+  </data>
+  <data name="TipColumnRandomOffsetRange" xml:space="preserve">
+    <value>发射时的随机位置偏移范围。</value>
+  </data>
+  <data name="TipColumnShootOffset" xml:space="preserve">
+    <value>发射位置相对发射来源的偏移量。</value>
+  </data>
+  <data name="TipColumnShootSource" xml:space="preserve">
+    <value>发射来源：子弹从哪个位置射出（如判定点、目标等）。</value>
+  </data>
+  <data name="TipColumnShootTarget" xml:space="preserve">
+    <value>发射目标：子弹瞄准的对象类型。</value>
+  </data>
+  <data name="TipColumnStrId" xml:space="preserve">
+    <value>子弹类型的唯一字符串 ID（如 A0），子弹通过它引用该类型。</value>
+  </data>
+  <data name="TipDeleteSelectedPalletes" xml:space="preserve">
+    <value>删除列表中选中的子弹类型。</value>
+  </data>
+  <data name="TipFilterBox" xml:space="preserve">
+    <value>按名字过滤列表内容。</value>
+  </data>
+  <data name="TipFilterButton" xml:space="preserve">
+    <value>按输入的关键词刷新过滤结果。</value>
+  </data>
+  <data name="TipNewBulletPallete" xml:space="preserve">
+    <value>新建一个子弹类型（BPL 记录）。</value>
+  </data>
   <data name="Title" xml:space="preserve">
     <value>标题:</value>
   </data>
@@ -1526,6 +1613,78 @@
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>对选取物件...</value>
+  </data>
+  <data name="ToolboxItemAutoPlayFaderLane" xml:space="preserve">
+    <value>自动播放渐变轨（编辑器专用）：记录自动播放时的玩家横向轨迹。</value>
+  </data>
+  <data name="ToolboxItemBPMChange" xml:space="preserve">
+    <value>变速点：在此刻改变谱面的 BPM（节拍速度）。</value>
+  </data>
+  <data name="ToolboxItemBeamStart" xml:space="preserve">
+    <value>光束起点：从该时刻向目标发射激光柱，玩家需及时躲避。</value>
+  </data>
+  <data name="ToolboxItemBell" xml:space="preserve">
+    <value>铃铛：玩家点击拾取的目标物件（BEL）。</value>
+  </data>
+  <data name="ToolboxItemBullet" xml:space="preserve">
+    <value>弹幕：按弹幕类型（BPL）配置发射的子弹，玩家需躲避。</value>
+  </data>
+  <data name="ToolboxItemClickSE" xml:space="preserve">
+    <value>打点音：到达该时刻时播放的点击音效（CLK）。</value>
+  </data>
+  <data name="ToolboxItemComment" xml:space="preserve">
+    <value>注释：编辑器专用的备注物件，不参与游戏内容。</value>
+  </data>
+  <data name="ToolboxItemDurationSoflan" xml:space="preserve">
+    <value>持续变速：在区间内保持固定速度倍率。</value>
+  </data>
+  <data name="ToolboxItemEnemyLaneStart" xml:space="preserve">
+    <value>敌人轨道起点：供敌人移动与定位的轨道（ENS）。</value>
+  </data>
+  <data name="ToolboxItemEnemySet" xml:space="preserve">
+    <value>敌人设置：在该时刻生成敌人，随附弹幕演出。</value>
+  </data>
+  <data name="ToolboxItemFlick" xml:space="preserve">
+    <value>滑动：玩家需向左或向右滑动操作的物件（FLK）。</value>
+  </data>
+  <data name="ToolboxItemHoldStart" xml:space="preserve">
+    <value>长按起点：与长按终点组成长按物件（HLD）。</value>
+  </data>
+  <data name="ToolboxItemIndividualSoflanArea" xml:space="preserve">
+    <value>独立变速区：在区间内对指定组应用独立于全局的变速（ISF）。</value>
+  </data>
+  <data name="ToolboxItemInterpolatableSoflan" xml:space="preserve">
+    <value>插值变速：在区间内从起始倍率线性过渡到目标倍率。</value>
+  </data>
+  <data name="ToolboxItemKeyframeSoflan" xml:space="preserve">
+    <value>关键帧变速：在单个时刻瞬间切换速度倍率。</value>
+  </data>
+  <data name="ToolboxItemLaneBlock" xml:space="preserve">
+    <value>轨道封锁：在区间内以指定方向封锁轨道的演出物件（LBK）。</value>
+  </data>
+  <data name="ToolboxItemLaneCenterStart" xml:space="preserve">
+    <value>中间（绿）轨道起点：创建一条中间轨道。</value>
+  </data>
+  <data name="ToolboxItemLaneColorfulStart" xml:space="preserve">
+    <value>彩色轨道起点：颜色与亮度可自定义的轨道（色带）。</value>
+  </data>
+  <data name="ToolboxItemLaneLeftStart" xml:space="preserve">
+    <value>左侧（红）轨道起点：创建一条左侧轨道。</value>
+  </data>
+  <data name="ToolboxItemLaneRightStart" xml:space="preserve">
+    <value>右侧（蓝）轨道起点：创建一条右侧轨道。</value>
+  </data>
+  <data name="ToolboxItemMeterChange" xml:space="preserve">
+    <value>拍号变化：在此刻切换拍号（如 4/4 变为 3/4）。</value>
+  </data>
+  <data name="ToolboxItemTap" xml:space="preserve">
+    <value>点击：玩家点击判定的基本物件（TAP）。</value>
+  </data>
+  <data name="ToolboxItemWallLeftStart" xml:space="preserve">
+    <value>左墙轨起点：构成可击打区域左边界的墙轨。</value>
+  </data>
+  <data name="ToolboxItemWallRightStart" xml:space="preserve">
+    <value>右墙轨起点：构成可击打区域右边界的墙轨。</value>
   </data>
   <data name="Tutorial" xml:space="preserve">
     <value>入门教程</value>

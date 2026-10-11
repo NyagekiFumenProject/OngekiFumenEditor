@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Individual Soflan Area", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Individual Soflan Area", "Ongeki Objects", description: "ToolboxItemIndividualSoflanArea")]
     public class IndividualSoflanAreaToolboxGenerator : ToolboxGenerator<IndividualSoflanArea>
     {
 

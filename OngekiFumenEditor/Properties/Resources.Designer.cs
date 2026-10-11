@@ -3599,6 +3599,483 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Controls whether pasted objects snap to beat/grid positions..
+        /// </summary>
+        public static string SettingsToolTipEditorAdjustPastedObjects {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorAdjustPastedObjects", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Density of subdivision beat lines between judge lines..
+        /// </summary>
+        public static string SettingsToolTipEditorBeatSplit {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorBeatSplit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Controls whether the timeline snaps to beat lines while dragging objects..
+        /// </summary>
+        public static string SettingsToolTipEditorDisableTGridMagneticDock {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorDisableTGridMagneticDock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Controls whether the horizontal XGrid axis snaps to grid lines..
+        /// </summary>
+        public static string SettingsToolTipEditorDisableXGridMagneticDock {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorDisableXGridMagneticDock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Display format of times on the timeline and status bar..
+        /// </summary>
+        public static string SettingsToolTipEditorDisplayTimeFormat {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorDisplayTimeFormat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Forces snapping on both the timeline and the horizontal XGrid axis..
+        /// </summary>
+        public static string SettingsToolTipEditorForceMagneticDock {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorForceMagneticDock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Controls how Tap/Hold objects dock horizontally while being dragged..
+        /// </summary>
+        public static string SettingsToolTipEditorForceTapHoldMagneticDockToLane {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorForceTapHoldMagneticDockToLane", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Controls the snapping strength of the horizontal XGrid axis..
+        /// </summary>
+        public static string SettingsToolTipEditorForceXGridMagneticDock {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorForceXGridMagneticDock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Controls how the mouse wheel scrolls the chart..
+        /// </summary>
+        public static string SettingsToolTipEditorJudgeLineAlignBeat {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorJudgeLineAlignBeat", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Vertical offset of the judge line in the view..
+        /// </summary>
+        public static string SettingsToolTipEditorJudgeLineOffsetY {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorJudgeLineOffsetY", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Metronome playback in design mode..
+        /// </summary>
+        public static string SettingsToolTipEditorLoopPlayTiming {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorLoopPlayTiming", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Display scale of the chart's vertical (time) axis..
+        /// </summary>
+        public static string SettingsToolTipEditorVerticalDisplayScale {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorVerticalDisplayScale", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum XGrid unit range shown horizontally..
+        /// </summary>
+        public static string SettingsToolTipEditorXGridDisplayMaxUnit {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorXGridDisplayMaxUnit", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Spacing between unit grid helper lines on the horizontal axis..
+        /// </summary>
+        public static string SettingsToolTipEditorXGridUnitSpace {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorXGridUnitSpace", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Horizontal view offset..
+        /// </summary>
+        public static string SettingsToolTipEditorXOffset {
+            get {
+                return ResourceManager.GetString("SettingsToolTipEditorXOffset", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Per-row actions: drag into the chart to create objects, or clone this palette..
+        /// </summary>
+        public static string TipColumnAction {
+            get {
+                return ResourceManager.GetString("TipColumnAction", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bullet (barrage) size..
+        /// </summary>
+        public static string TipColumnBulletSize {
+            get {
+                return ResourceManager.GetString("TipColumnBulletSize", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bullet speed multiplier; larger values fly faster..
+        /// </summary>
+        public static string TipColumnBulletSpeed {
+            get {
+                return ResourceManager.GetString("TipColumnBulletSpeed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bullet shape / barrage type..
+        /// </summary>
+        public static string TipColumnBulletType {
+            get {
+                return ResourceManager.GetString("TipColumnBulletType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Display name of the bullet palette; used in the editor only..
+        /// </summary>
+        public static string TipColumnName {
+            get {
+                return ResourceManager.GetString("TipColumnName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Random position offset applied when firing..
+        /// </summary>
+        public static string TipColumnRandomOffsetRange {
+            get {
+                return ResourceManager.GetString("TipColumnRandomOffsetRange", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Offset of the fire position relative to the source..
+        /// </summary>
+        public static string TipColumnShootOffset {
+            get {
+                return ResourceManager.GetString("TipColumnShootOffset", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Fire source: where the bullet starts from (e.g. judge line, target)..
+        /// </summary>
+        public static string TipColumnShootSource {
+            get {
+                return ResourceManager.GetString("TipColumnShootSource", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Fire target: what the bullet aims at..
+        /// </summary>
+        public static string TipColumnShootTarget {
+            get {
+                return ResourceManager.GetString("TipColumnShootTarget", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unique string id of the bullet palette (e.g. A0); bullets reference it..
+        /// </summary>
+        public static string TipColumnStrId {
+            get {
+                return ResourceManager.GetString("TipColumnStrId", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Delete the bullet palettes selected in the list..
+        /// </summary>
+        public static string TipDeleteSelectedPalletes {
+            get {
+                return ResourceManager.GetString("TipDeleteSelectedPalletes", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Filter the list by name..
+        /// </summary>
+        public static string TipFilterBox {
+            get {
+                return ResourceManager.GetString("TipFilterBox", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh the filtered list with the typed keywords..
+        /// </summary>
+        public static string TipFilterButton {
+            get {
+                return ResourceManager.GetString("TipFilterButton", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Create a new bullet-palette (BPL) record..
+        /// </summary>
+        public static string TipNewBulletPallete {
+            get {
+                return ResourceManager.GetString("TipNewBulletPallete", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Autoplay fader lane (editor-only): records the player's horizontal path during autoplay..
+        /// </summary>
+        public static string ToolboxItemAutoPlayFaderLane {
+            get {
+                return ResourceManager.GetString("ToolboxItemAutoPlayFaderLane", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to BPM change: changes the chart's BPM (tempo) at this moment..
+        /// </summary>
+        public static string ToolboxItemBPMChange {
+            get {
+                return ResourceManager.GetString("ToolboxItemBPMChange", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Beam start: fires a laser beam toward its target from this moment..
+        /// </summary>
+        public static string ToolboxItemBeamStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemBeamStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bell: a collectible object that players tap to pick up..
+        /// </summary>
+        public static string ToolboxItemBell {
+            get {
+                return ResourceManager.GetString("ToolboxItemBell", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Bullet: a projectile fired with a palette (BPL) configuration; players dodge it..
+        /// </summary>
+        public static string ToolboxItemBullet {
+            get {
+                return ResourceManager.GetString("ToolboxItemBullet", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Click SE: a click sound played when this moment is reached..
+        /// </summary>
+        public static string ToolboxItemClickSE {
+            get {
+                return ResourceManager.GetString("ToolboxItemClickSE", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Comment: an editor-only note; it does not affect gameplay..
+        /// </summary>
+        public static string ToolboxItemComment {
+            get {
+                return ResourceManager.GetString("ToolboxItemComment", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Duration soflan: holds a constant speed multiplier over a range..
+        /// </summary>
+        public static string ToolboxItemDurationSoflan {
+            get {
+                return ResourceManager.GetString("ToolboxItemDurationSoflan", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enemy lane start: a lane that enemies move along..
+        /// </summary>
+        public static string ToolboxItemEnemyLaneStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemEnemyLaneStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Enemy set: spawns an enemy (with its barrage) at this moment..
+        /// </summary>
+        public static string ToolboxItemEnemySet {
+            get {
+                return ResourceManager.GetString("ToolboxItemEnemySet", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Flick: an object players must swipe left or right..
+        /// </summary>
+        public static string ToolboxItemFlick {
+            get {
+                return ResourceManager.GetString("ToolboxItemFlick", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Hold start: begins a hold; pair it with a hold end..
+        /// </summary>
+        public static string ToolboxItemHoldStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemHoldStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Individual soflan area: applies a per-group speed change inside this range..
+        /// </summary>
+        public static string ToolboxItemIndividualSoflanArea {
+            get {
+                return ResourceManager.GetString("ToolboxItemIndividualSoflanArea", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Interpolatable soflan: interpolates the speed multiplier across a range..
+        /// </summary>
+        public static string ToolboxItemInterpolatableSoflan {
+            get {
+                return ResourceManager.GetString("ToolboxItemInterpolatableSoflan", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Keyframe soflan: switches the speed multiplier instantly at one moment..
+        /// </summary>
+        public static string ToolboxItemKeyframeSoflan {
+            get {
+                return ResourceManager.GetString("ToolboxItemKeyframeSoflan", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane block: marks part of a lane as blocked (per direction) inside this range..
+        /// </summary>
+        public static string ToolboxItemLaneBlock {
+            get {
+                return ResourceManager.GetString("ToolboxItemLaneBlock", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane center (green) start: creates a center lane..
+        /// </summary>
+        public static string ToolboxItemLaneCenterStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemLaneCenterStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane colorful start: a lane with configurable color and brightness..
+        /// </summary>
+        public static string ToolboxItemLaneColorfulStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemLaneColorfulStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane left (red) start: creates a left lane..
+        /// </summary>
+        public static string ToolboxItemLaneLeftStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemLaneLeftStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Lane right (blue) start: creates a right lane..
+        /// </summary>
+        public static string ToolboxItemLaneRightStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemLaneRightStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Meter change: switches the time signature at this moment..
+        /// </summary>
+        public static string ToolboxItemMeterChange {
+            get {
+                return ResourceManager.GetString("ToolboxItemMeterChange", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Tap: the basic object that players tap to hit..
+        /// </summary>
+        public static string ToolboxItemTap {
+            get {
+                return ResourceManager.GetString("ToolboxItemTap", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Wall left start: the left wall bounding the playable area..
+        /// </summary>
+        public static string ToolboxItemWallLeftStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemWallLeftStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Wall right start: the right wall bounding the playable area..
+        /// </summary>
+        public static string ToolboxItemWallRightStart {
+            get {
+                return ResourceManager.GetString("ToolboxItemWallRightStart", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Batch: Clipboard.
         /// </summary>
         public static string kbd_batch_ModeClipboard {

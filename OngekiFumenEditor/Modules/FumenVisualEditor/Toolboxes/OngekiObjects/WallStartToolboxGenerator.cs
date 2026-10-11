@@ -10,13 +10,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Left Start", "Ongeki Lanes")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Left Start", "Ongeki Lanes", description: "ToolboxItemWallLeftStart")]
     public class WallLeftStartToolboxGenerator : WallStartToolboxGenerator<WallLeftStart>
     {
 
     }
 
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Right Start", "Ongeki Lanes")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Wall Right Start", "Ongeki Lanes", description: "ToolboxItemWallRightStart")]
     public class WallRightStartToolboxGenerator : WallStartToolboxGenerator<WallRightStart>
     {
 

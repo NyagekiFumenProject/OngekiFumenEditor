@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Block", "Lane Control")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Lane Block", "Lane Control", description: "ToolboxItemLaneBlock")]
     public class LaneBlockAreaToolboxGenerator : ToolboxGenerator<LaneBlockArea>
     {
 

@@ -4,7 +4,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Toolboxes.OngekiObjects
 {
-    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Beam Start", "Ongeki Objects")]
+    [ToolboxItem(typeof(FumenVisualEditorViewModel), "Beam Start", "Ongeki Objects", description: "ToolboxItemBeamStart")]
     public class BeamStartToolboxGenerator : ToolboxGenerator<BeamStart>
     {
 

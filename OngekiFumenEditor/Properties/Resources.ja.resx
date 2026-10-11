@@ -1030,6 +1030,51 @@
   <data name="RecordColumnTooFew" xml:space="preserve">
     <value>記録 {0} の列数が不足しています（必要 {1}、実際 {2}）。ゲーム側は列番号で読み取るため、欠けた列で例外が発生します。</value>
   </data>
+  <data name="SettingsToolTipEditorAdjustPastedObjects" xml:space="preserve">
+    <value>貼り付けたオブジェクトを再スナップするかを設定します。&#xA;オン：貼り付け後に拍・グリッド位置へ自動スナップします。&#xA;オフ：コピー時の時刻と水平位置を保ちます。</value>
+  </data>
+  <data name="SettingsToolTipEditorBeatSplit" xml:space="preserve">
+    <value>判定線の間に表示する細分リズム線の密度。&#xA;値が大きいほど 1 小節内の補助線が増えます。</value>
+  </data>
+  <data name="SettingsToolTipEditorDisableTGridMagneticDock" xml:space="preserve">
+    <value>オブジェクトのドラッグ時に時間軸を拍線へスナップするかを設定します。&#xA;オン：時間軸は自動スナップせず、任意の時刻に正確に配置できます。&#xA;オフ：時間軸は最も近い拍線へスナップします。</value>
+  </data>
+  <data name="SettingsToolTipEditorDisableXGridMagneticDock" xml:space="preserve">
+    <value>水平位置軸（XGrid）をグリッド線へスナップするかを設定します。&#xA;オン：水平位置はマウスに完全に追従し、スナップしません。&#xA;オフ：グリッド線に近いとき自動でスナップします。</value>
+  </data>
+  <data name="SettingsToolTipEditorDisplayTimeFormat" xml:space="preserve">
+    <value>タイムラインとステータスバーでの時刻表示形式。&#xA;時間や小節・拍などに切り替えられます。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceMagneticDock" xml:space="preserve">
+    <value>時間軸と水平位置軸の両方を強制スナップします。&#xA;オン：ドラッグ・配置は常に最も近い拍線とグリッド線へスナップします。&#xA;オフ：通常のスナップ距離を使います。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceTapHoldMagneticDockToLane" xml:space="preserve">
+    <value>Tap/Hold のドラッグ時の横位置のドッキング方法を設定します。&#xA;オン：常に最も近いレーンへドッキングし、レーン上の正確な位置を使います。&#xA;オフ：レーンに近いときだけドッキングし、それ以外は自由に配置できます。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceXGridMagneticDock" xml:space="preserve">
+    <value>水平位置軸（XGrid）のスナップの強さを設定します。&#xA;オン：ドラッグ位置は常に最も近いグリッド線へスナップします。&#xA;オフ：グリッド線に近いときだけスナップします。</value>
+  </data>
+  <data name="SettingsToolTipEditorJudgeLineAlignBeat" xml:space="preserve">
+    <value>マウスホイールでのスクロール方法を設定します。&#xA;オン：拍に合わせてスクロールし、判定線は拍線に留まります。&#xA;オフ：一定距離で滑らかにスクロールします。</value>
+  </data>
+  <data name="SettingsToolTipEditorJudgeLineOffsetY" xml:space="preserve">
+    <value>判定線のビュー内での縦方向オフセット。&#xA;視野とスクロール基準点に影響します。表示のみです。</value>
+  </data>
+  <data name="SettingsToolTipEditorLoopPlayTiming" xml:space="preserve">
+    <value>編集モードでのメトロノーム再生を設定します。&#xA;オン：再生時にクリック音を出し、拍の確認に使えます。&#xA;オフ：音楽と効果音のみ再生します。</value>
+  </data>
+  <data name="SettingsToolTipEditorVerticalDisplayScale" xml:space="preserve">
+    <value>譜面の縦方向（時間軸方向）の表示倍率。&#xA;値が大きいほど、同じ時間幅が画面上で高くなります。</value>
+  </data>
+  <data name="SettingsToolTipEditorXGridDisplayMaxUnit" xml:space="preserve">
+    <value>水平方向に表示する XGrid 単位の最大範囲。&#xA;値が大きいほど視野が広がり、1 単位の表示は狭くなります。</value>
+  </data>
+  <data name="SettingsToolTipEditorXGridUnitSpace" xml:space="preserve">
+    <value>水平方向の単位グリッド補助線の間隔。&#xA;値が大きいほど線の間隔が広がり、ドラッグ時のスナップも粗くなります。</value>
+  </data>
+  <data name="SettingsToolTipEditorXOffset" xml:space="preserve">
+    <value>ビューの水平オフセット。&#xA;表示位置を移動するだけで、譜面の座標は変更しません。</value>
+  </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>個別ソフランエリア(グループ {0})内にホールド {1} がありますが、そのグループを使うソフランがありません。ゲーム側の読み込み時に例外が発生します。</value>
   </data>
@@ -1504,6 +1549,48 @@
   <data name="TimesPerMin" xml:space="preserve">
     <value>回/分</value>
   </data>
+  <data name="TipColumnAction" xml:space="preserve">
+    <value>行ごとの操作：譜面へドラッグして作成、またはこのタイプを複製します。</value>
+  </data>
+  <data name="TipColumnBulletSize" xml:space="preserve">
+    <value>弾幕の大きさ。</value>
+  </data>
+  <data name="TipColumnBulletSpeed" xml:space="preserve">
+    <value>弾の速度倍率。値が大きいほど速く飛びます。</value>
+  </data>
+  <data name="TipColumnBulletType" xml:space="preserve">
+    <value>弾の形状・弾幕タイプ。</value>
+  </data>
+  <data name="TipColumnName" xml:space="preserve">
+    <value>弾幕タイプの表示名。エディタ内での識別用です。</value>
+  </data>
+  <data name="TipColumnRandomOffsetRange" xml:space="preserve">
+    <value>発射時のランダムな位置オフセット範囲。</value>
+  </data>
+  <data name="TipColumnShootOffset" xml:space="preserve">
+    <value>発射位置の発射元に対するオフセット。</value>
+  </data>
+  <data name="TipColumnShootSource" xml:space="preserve">
+    <value>発射元：弾がどこから発射されるか。</value>
+  </data>
+  <data name="TipColumnShootTarget" xml:space="preserve">
+    <value>発射ターゲット：弾が狙う対象。</value>
+  </data>
+  <data name="TipColumnStrId" xml:space="preserve">
+    <value>弾幕タイプの一意な文字列 ID（例 A0）。弾はこれを参照します。</value>
+  </data>
+  <data name="TipDeleteSelectedPalletes" xml:space="preserve">
+    <value>リストで選択した弾幕タイプを削除します。</value>
+  </data>
+  <data name="TipFilterBox" xml:space="preserve">
+    <value>名前でリストを絞り込みます。</value>
+  </data>
+  <data name="TipFilterButton" xml:space="preserve">
+    <value>入力したキーワードで絞り込み結果を更新します。</value>
+  </data>
+  <data name="TipNewBulletPallete" xml:space="preserve">
+    <value>新しい弾幕タイプ（BPL レコード）を作成します。</value>
+  </data>
   <data name="Title" xml:space="preserve">
     <value>タイトル：</value>
   </data>
@@ -1518,6 +1605,78 @@
   </data>
   <data name="ToSelectedObjects" xml:space="preserve">
     <value>選択されたオブジェクト…</value>
+  </data>
+  <data name="ToolboxItemAutoPlayFaderLane" xml:space="preserve">
+    <value>オートプレイフェーダーレーン（エディタ専用）：オートプレイ時のプレイヤー軌跡を記録します。</value>
+  </data>
+  <data name="ToolboxItemBPMChange" xml:space="preserve">
+    <value>BPM 変更：この時点で譜面の BPM（テンポ）を変更します。</value>
+  </data>
+  <data name="ToolboxItemBeamStart" xml:space="preserve">
+    <value>ビーム開始：この時刻からターゲットへレーザーを照射します。</value>
+  </data>
+  <data name="ToolboxItemBell" xml:space="preserve">
+    <value>ベル：プレイヤーがタップして取得するオブジェクト。</value>
+  </data>
+  <data name="ToolboxItemBullet" xml:space="preserve">
+    <value>弾：弾幕タイプ（BPL）の設定で発射される弾。プレイヤーは避けます。</value>
+  </data>
+  <data name="ToolboxItemClickSE" xml:space="preserve">
+    <value>クリック SE：この時刻に達すると再生されるクリック音。</value>
+  </data>
+  <data name="ToolboxItemComment" xml:space="preserve">
+    <value>コメント：エディタ専用のメモ。ゲーム内容には影響しません。</value>
+  </data>
+  <data name="ToolboxItemDurationSoflan" xml:space="preserve">
+    <value>持続ソフラン：範囲内で一定の速度倍率を保ちます。</value>
+  </data>
+  <data name="ToolboxItemEnemyLaneStart" xml:space="preserve">
+    <value>敵レーン開始：敵が移動するためのレーン。</value>
+  </data>
+  <data name="ToolboxItemEnemySet" xml:space="preserve">
+    <value>敵セット：この時刻に敵を出現させます。</value>
+  </data>
+  <data name="ToolboxItemFlick" xml:space="preserve">
+    <value>フリック：左右にスワイプして操作するオブジェクト。</value>
+  </data>
+  <data name="ToolboxItemHoldStart" xml:space="preserve">
+    <value>ホールド開始：ホールド終点と組み合わせて長押しオブジェクトを作ります。</value>
+  </data>
+  <data name="ToolboxItemIndividualSoflanArea" xml:space="preserve">
+    <value>個別ソフラン領域：範囲内で指定グループに独立した速度変化を適用します。</value>
+  </data>
+  <data name="ToolboxItemInterpolatableSoflan" xml:space="preserve">
+    <value>補間ソフラン：範囲内で速度倍率を線形に変化させます。</value>
+  </data>
+  <data name="ToolboxItemKeyframeSoflan" xml:space="preserve">
+    <value>キーフレームソフラン：単一時点で速度倍率を即座に切り替えます。</value>
+  </data>
+  <data name="ToolboxItemLaneBlock" xml:space="preserve">
+    <value>レーンブロック：範囲内で指定方向のレーンをブロックする演出。</value>
+  </data>
+  <data name="ToolboxItemLaneCenterStart" xml:space="preserve">
+    <value>レーン中央（緑）開始：中央レーンを作成します。</value>
+  </data>
+  <data name="ToolboxItemLaneColorfulStart" xml:space="preserve">
+    <value>カラー（彩帯）レーン開始：色と明るさを設定できるレーン。</value>
+  </data>
+  <data name="ToolboxItemLaneLeftStart" xml:space="preserve">
+    <value>レーン左（赤）開始：左レーンを作成します。</value>
+  </data>
+  <data name="ToolboxItemLaneRightStart" xml:space="preserve">
+    <value>レーン右（青）開始：右レーンを作成します。</value>
+  </data>
+  <data name="ToolboxItemMeterChange" xml:space="preserve">
+    <value>拍子変更：この時点で拍子を切り替えます。</value>
+  </data>
+  <data name="ToolboxItemTap" xml:space="preserve">
+    <value>タップ：プレイヤーがタップする基本オブジェクト。</value>
+  </data>
+  <data name="ToolboxItemWallLeftStart" xml:space="preserve">
+    <value>左壁レーン開始：プレイ領域の左境界となる壁レーン。</value>
+  </data>
+  <data name="ToolboxItemWallRightStart" xml:space="preserve">
+    <value>右壁レーン開始：プレイ領域の右境界となる壁レーン。</value>
   </data>
   <data name="Tutorial" xml:space="preserve">
     <value>チュートリアル</value>

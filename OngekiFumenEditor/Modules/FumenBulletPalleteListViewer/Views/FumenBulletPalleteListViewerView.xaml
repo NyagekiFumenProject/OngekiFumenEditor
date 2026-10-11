@@ -30,23 +30,27 @@
                 Margin="0,0,5,0"
                 cal:Message.Attach="[Event Click] = [Action OnCreateNew()];"
                 Content="{markup:Translate [NewBulletPallete]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                IsEnabled="{Binding IsEnable, Mode=OneWay}"
+                ToolTip="{markup:Translate [TipNewBulletPallete]}">
             </Button>
             <Button
                 cal:Message.Attach="[Event Click] = [Action OnDeleteSelecting($view)];"
                 Content="{markup:Translate [DeleteSelectedPalletes]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                IsEnabled="{Binding IsEnable, Mode=OneWay}"
+                ToolTip="{markup:Translate [TipDeleteSelectedPalletes]}">
             </Button>
 
             <TextBox
                 Width="150"
                 Margin="20,0,10,0"
-                Text="{Binding Filter}" />
+                Text="{Binding Filter}"
+                ToolTip="{markup:Translate [TipFilterBox]}" />
 
             <Button
                 cal:Message.Attach="[Event Click] = [Action OnRefreshFilter()];"
                 Content="{markup:Translate [Filter]}"
-                IsEnabled="{Binding IsEnable, Mode=OneWay}">
+                IsEnabled="{Binding IsEnable, Mode=OneWay}"
+                ToolTip="{markup:Translate [TipFilterButton]}">
             </Button>
         </StackPanel>
         <ListView
@@ -76,11 +80,15 @@
                             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn
-                        Width="60"
-                        DisplayMemberBinding="{Binding StrID}"
-                        Header="{markup:Translate [BulletPaletteId]}" />
-                    <GridViewColumn Width="120" Header="{markup:Translate [Name]}">
+                    <GridViewColumn Width="60" DisplayMemberBinding="{Binding StrID}">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [BulletPaletteId]}" ToolTip="{markup:Translate [TipColumnStrId]}" />
+                        </GridViewColumn.Header>
+                    </GridViewColumn>
+                    <GridViewColumn Width="120">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [Name]}" ToolTip="{markup:Translate [TipColumnName]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding EditorName}">
@@ -89,7 +97,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [ShootSource]}">
+                    <GridViewColumn Width="100">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [ShootSource]}" ToolTip="{markup:Translate [TipColumnShootSource]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding ShooterValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding ShooterValue}" />
@@ -97,7 +108,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="80" Header="{markup:Translate [ShootOffset]}">
+                    <GridViewColumn Width="80">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [ShootOffset]}" ToolTip="{markup:Translate [TipColumnShootOffset]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding PlaceOffset}">
@@ -106,7 +120,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [ShootTarget]}">
+                    <GridViewColumn Width="100">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [ShootTarget]}" ToolTip="{markup:Translate [TipColumnShootTarget]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TargetValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TargetValue}" />
@@ -114,7 +131,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="60" Header="{markup:Translate [BulletSpeed]}">
+                    <GridViewColumn Width="60">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [BulletSpeed]}" ToolTip="{markup:Translate [TipColumnBulletSpeed]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding Speed}">
@@ -123,7 +143,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="100" Header="{markup:Translate [BulletSize]}">
+                    <GridViewColumn Width="100">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [BulletSize]}" ToolTip="{markup:Translate [TipColumnBulletSize]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding SizeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding SizeValue}" />
@@ -131,7 +154,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="75" Header="{markup:Translate [BulletType]}">
+                    <GridViewColumn Width="75">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [BulletType]}" ToolTip="{markup:Translate [TipColumnBulletType]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox ItemsSource="{Binding TypeValue, Mode=OneTime, Converter={StaticResource EnumValuesGenerator}}" SelectedValue="{Binding TypeValue}" />
@@ -139,7 +165,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
 
-                    <GridViewColumn Width="75" Header="{markup:Translate [RandomOffsetRange]}">
+                    <GridViewColumn Width="75">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [RandomOffsetRange]}" ToolTip="{markup:Translate [TipColumnRandomOffsetRange]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBox Text="{Binding RandomOffsetRange}" />
@@ -160,7 +189,10 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>-->
 
-                    <GridViewColumn Width="240" Header="{markup:Translate [Action]}">
+                    <GridViewColumn Width="240">
+                        <GridViewColumn.Header>
+                            <TextBlock Text="{markup:Translate [Action]}" ToolTip="{markup:Translate [TipColumnAction]}" />
+                        </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
