@@ -198,6 +198,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private bool forceXGridIntegerUnit = Properties.EditorGlobalSetting.Default.ForceXGridIntegerUnit;
+        /// <summary>
+        /// 开启后，拖动物件时水平位置轴限制为整数单位（X[整数,0]）；吸附在轨道上的物件拖动时保持精确贴合轨道。
+        /// </summary>
+        public bool ForceXGridIntegerUnit
+        {
+            get => forceXGridIntegerUnit;
+            set
+            {
+                forceXGridIntegerUnit = Properties.EditorGlobalSetting.Default.ForceXGridIntegerUnit = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => ForceXGridIntegerUnit);
+            }
+        }
+
         private bool showXOffsetScrollBar = Properties.EditorGlobalSetting.Default.ShowXOffsetScrollBar;
         public bool ShowXOffsetScrollBar
         {
@@ -312,6 +327,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.ForceXGridMagneticDock):
                     forceXGridMagneticDock = Properties.EditorGlobalSetting.Default.ForceXGridMagneticDock;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ForceXGridIntegerUnit):
+                    forceXGridIntegerUnit = Properties.EditorGlobalSetting.Default.ForceXGridIntegerUnit;
                     break;
                 case nameof(Properties.EditorGlobalSetting.VerticalDisplayScale):
                     verticalDisplayScale = Properties.EditorGlobalSetting.Default.VerticalDisplayScale;

@@ -26,6 +26,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             public LaneStartBase RefLane { get; set; }
         }
 
+        /// <summary>
+        /// 本帧该物件的水平位置是否由所吸附的轨道接管（吸附物件贴合轨道）。
+        /// 由 DockableObjectInteractiveAction / HoldEndObjectInteractiveAction 在改写坐标时置 true；
+        /// true 时 ForceXGridIntegerUnit 不做整数单位取整。
+        /// </summary>
+        protected virtual bool IsXGridSnappedToLaneThisMove => false;
+
         public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
             if (dragInfoMap.TryGetValue(obj, out var info))
@@ -133,6 +140,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 if (rx is double drx)
                 {
                     var xGrid = XGridCalculator.ConvertXToXGrid(drx, editor);
+                    if (editor.Setting.ForceXGridIntegerUnit && !IsXGridSnappedToLaneThisMove)
+                        xGrid = XGridCalculator.RoundToIntegerUnit(xGrid);
                     posObj.XGrid = xGrid;
                 }
 

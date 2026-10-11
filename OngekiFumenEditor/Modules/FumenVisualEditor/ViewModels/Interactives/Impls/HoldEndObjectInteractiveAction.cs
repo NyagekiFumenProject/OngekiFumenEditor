@@ -10,6 +10,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 {
     public class HoldEndObjectInteractiveAction : DockableObjectInteractiveAction
     {
+        private bool isHoldEndSnappedToLaneThisMove;
+
+        protected override bool IsXGridSnappedToLaneThisMove
+            => base.IsXGridSnappedToLaneThisMove || isHoldEndSnappedToLaneThisMove;
+
         public override IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = null)
         {
             var forceMagneticToLane = editor?.Setting.ForceTapHoldMagneticDockToLane ?? false;
@@ -20,16 +25,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)
         {
+            isHoldEndSnappedToLaneThisMove = false;
+
             var ry = CheckAndAdjustY((ITimelineObject)obj, relativePoint.Y, editor);
             if (ry is double y && editor.ConvertYToTGrid_DesignMode(y) is TGrid tGrid)
             {
                 if (((obj as HoldEnd)?.RefHold)?.ReferenceLaneStart is LaneStartBase start)
                 {
-                    var x = CalculateConnectableObjectCurrentRelativeX(start, tGrid, editor) ?? relativePoint.X;
+                    var laneX = CalculateConnectableObjectCurrentRelativeX(start, tGrid, editor);
                     if (TryGetHorizontalSegmentDockingX(start, tGrid, relativePoint.X, editor, out var horizontalX))
-                        x = horizontalX;
-                    relativePoint.X = x;
-                    //Log.LogDebug($"auto lock to lane x: {x}");
+                    {
+                        relativePoint.X = horizontalX;
+                        isHoldEndSnappedToLaneThisMove = true;
+                    }
+                    else if (laneX is double lx)
+                    {
+                        relativePoint.X = lx;
+                        isHoldEndSnappedToLaneThisMove = true;
+                    }
                 }
             }
 

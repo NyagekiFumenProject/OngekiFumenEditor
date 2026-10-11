@@ -759,6 +759,9 @@
   <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
     <value>強制的にTAP/HOLDノーツをレーンにスナップ</value>
   </data>
+  <data name="ForceXGridIntegerUnit" xml:space="preserve">
+    <value>水平位置を整数単位に強制</value>
+  </data>
   <data name="ForceXGridMagneticDock" xml:space="preserve">
     <value>強制的にXGridをスナップ</value>
   </data>
@@ -2325,6 +2328,9 @@
   </data>
   <data name="SettingsToolTipEditorPlaceBeyondAudio" xml:space="preserve">
     <value>オン：音声範囲チェックを使う配置操作で、音声の範囲外や時刻 0 より前にも配置できます。オフ：そのような配置を通知して拒否します。既存オブジェクトは削除せず、音声の長さも変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceXGridIntegerUnit" xml:space="preserve">
+    <value>オン：オブジェクトのドラッグ（および配置）時に水平位置を最も近い整数 XGrid 単位に丸め、譜面には X[k,0] のみが保存されます。オフ：水平位置はポインターの正確な値に従います。レーンにドッキング済みのオブジェクトはドラッグ中もレーン上の正確な位置を保ち、この設定の影響を受けません。時間軸のスナップにも影響しません。</value>
   </data>
   <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
     <value>オン：音声プレーヤーパネルで一時停止・停止すると、エディタ表示を今回の再生開始位置へ戻します。オフ：停止位置の表示を保ちます。表示位置だけを変更し、譜面オブジェクトの時刻は変えません。</value>

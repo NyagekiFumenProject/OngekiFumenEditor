@@ -2618,6 +2618,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Force horizontal positions to whole units.
+        /// </summary>
+        public static string ForceXGridIntegerUnit {
+            get {
+                return ResourceManager.GetString("ForceXGridIntegerUnit", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Snap to nearest XGrid unit.
         /// </summary>
         public static string ForceXGridMagneticDock {

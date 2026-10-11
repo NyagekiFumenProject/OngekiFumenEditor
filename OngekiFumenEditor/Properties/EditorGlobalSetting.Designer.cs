@@ -181,6 +181,18 @@ namespace OngekiFumenEditor.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ForceXGridIntegerUnit {
+            get {
+                return ((bool)(this["ForceXGridIntegerUnit"]));
+            }
+            set {
+                this["ForceXGridIntegerUnit"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool ForceXGridMagneticDock {
             get {

@@ -40,6 +40,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
             return Math.Abs(xUnit - nearXUnit) < 0.00001 ? (int)nearXUnit : (float)xUnit;
         }
 
+        /// <summary>
+        /// 将 XGrid 四舍五入到最近的整数 unit（半值远离零），Grid 置 0。
+        /// 与 ConvertXToXGridTotalUnit 内 nearXUnit 的舍入方向一致。
+        /// </summary>
+        public static XGrid RoundToIntegerUnit(XGrid xGrid)
+        {
+            var totalUnit = xGrid.TotalUnit;
+            var nearestUnit = totalUnit > 0 ? Math.Floor(totalUnit + 0.5) : Math.Ceiling(totalUnit - 0.5);
+            return new XGrid((float)nearestUnit, 0);
+        }
+
         #endregion
 
         #region XGrid -> X

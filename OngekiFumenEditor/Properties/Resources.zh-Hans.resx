@@ -765,6 +765,9 @@
   <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
     <value>强制Tap或Hold物件停靠到轨道上</value>
   </data>
+  <data name="ForceXGridIntegerUnit" xml:space="preserve">
+    <value>强制水平位置轴为整数单位</value>
+  </data>
   <data name="ForceXGridMagneticDock" xml:space="preserve">
     <value>强制水平位置轴自动停靠</value>
   </data>
@@ -3026,6 +3029,9 @@
   </data>
   <data name="SettingsToolTipEditorPlaceBeyondAudio" xml:space="preserve">
     <value>勾选：允许通过编辑器时长检查的放置操作超出音频范围，包括零时刻之前。取消勾选：拒绝这些越界放置并提示。不会删除已有物件，也不会延长音频本身。</value>
+  </data>
+  <data name="SettingsToolTipEditorForceXGridIntegerUnit" xml:space="preserve">
+    <value>勾选：拖动（或放置）物件时，水平位置轴取整到最近的整数单位，谱面只会写入 X[k,0]。取消勾选：水平位置跟随指针的精确值。拖动已停靠到轨道的物件时仍保持精确贴合轨道，不受此开关影响；时间轴吸附也不受影响。</value>
   </data>
   <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
     <value>勾选：通过音频播放器面板暂停／停止时，将编辑器视图返回本次播放开始的位置。取消勾选：视图停留在暂停的位置。只调整视图位置，不改变谱面物件时间。</value>

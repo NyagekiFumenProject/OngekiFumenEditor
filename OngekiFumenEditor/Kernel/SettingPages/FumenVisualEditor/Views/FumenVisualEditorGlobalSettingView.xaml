@@ -119,6 +119,13 @@
                 <CheckBox
                     Margin="0,10,0,0"
                     VerticalContentAlignment="Center"
+                    IsChecked="{Binding Setting.ForceXGridIntegerUnit}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorForceXGridIntegerUnit]}">
+                    <TextBlock Text="{markup:Translate [ForceXGridIntegerUnit]}" TextWrapping="Wrap" />
+                </CheckBox>
+                <CheckBox
+                    Margin="0,10,0,0"
+                    VerticalContentAlignment="Center"
                     IsChecked="{Binding Setting.ReturnStartTimeAfterPause}"
                     ToolTip="{markup:Translate [SettingsToolTipEditorReturnAfterPause]}">
                     <TextBlock Text="{markup:Translate [ReturnStartTimeAfterPause]}" TextWrapping="Wrap" />

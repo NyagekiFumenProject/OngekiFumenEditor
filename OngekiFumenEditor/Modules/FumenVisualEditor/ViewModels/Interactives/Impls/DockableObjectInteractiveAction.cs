@@ -11,6 +11,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 {
     public class DockableObjectInteractiveAction : DefaultObjectInteractiveAction
     {
+        private bool isXGridSnappedToLaneThisMove;
+
+        protected override bool IsXGridSnappedToLaneThisMove => isXGridSnappedToLaneThisMove;
+
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
             return editor.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();
@@ -18,6 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)
         {
+            isXGridSnappedToLaneThisMove = false;
+
             var forceMagneticToLane = editor.Setting.ForceTapHoldMagneticDockToLane;
             var forceMagnetic = editor.Setting.ForceMagneticDock;
             var enableMoveTo = !forceMagneticToLane;
@@ -79,6 +85,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                         closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
                     {
                         relativePoint.X = closestLaneObject?.Value ?? default;
+                        isXGridSnappedToLaneThisMove = true;
                         dockable.ReferenceLaneStart = closestLaneObject?.startObject;
                         //Log.LogDebug($"auto dock to lane : {closestLaneObject.startObject}");
                         enableMoveTo = true;

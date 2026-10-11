@@ -765,6 +765,9 @@
   <data name="ForceTapHoldMagneticDockToLane" xml:space="preserve">
     <value>Force Tap/Hold objects to snap onto the lane</value>
   </data>
+  <data name="ForceXGridIntegerUnit" xml:space="preserve">
+    <value>Force horizontal positions to whole units</value>
+  </data>
   <data name="ForceXGridMagneticDock" xml:space="preserve">
     <value>Snap to nearest XGrid unit</value>
   </data>
@@ -3059,6 +3062,9 @@
   </data>
   <data name="SettingsToolTipEditorPlaceBeyondAudio" xml:space="preserve">
     <value>Checked: allows placement operations that use the editor’s duration check outside the audio’s time range, including before time zero. Unchecked: rejects those placements with a notification. Existing objects are not removed and the audio duration is not extended.</value>
+  </data>
+  <data name="SettingsToolTipEditorForceXGridIntegerUnit" xml:space="preserve">
+    <value>Checked: dragging (and placing) an object snaps its horizontal position to the nearest whole XGrid unit, so the chart stores X[k,0]. Unchecked: the horizontal position follows the pointer exactly at full resolution. Objects docked to a lane keep the exact lane position while being dragged; time-axis snapping is not affected.</value>
   </data>
   <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
     <value>Checked: pausing/stopping from the audio-player panel returns the editor view to the position where that playback started. Unchecked: keeps the view at its pause position. This adjusts the view position, not the chart’s object timing.</value>
