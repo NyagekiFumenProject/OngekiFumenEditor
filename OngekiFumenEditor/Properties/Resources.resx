@@ -606,9 +606,6 @@
   <data name="EditorLoadingTargetFormat" xml:space="preserve">
     <value>Loading: {0}</value>
   </data>
-  <data name="EditorLock" xml:space="preserve">
-    <value>Editor locked</value>
-  </data>
   <data name="EditorModeSwitch" xml:space="preserve">
     <value>Editor Mode</value>
   </data>
@@ -626,9 +623,6 @@
   </data>
   <data name="EditorTarget" xml:space="preserve">
     <value>Editor target</value>
-  </data>
-  <data name="EditorUnlock" xml:space="preserve">
-    <value>Editor unlock</value>
   </data>
   <data name="EditScriptByVisualStudio" xml:space="preserve">
     <value>Use Visual Studio to edit the script.</value>

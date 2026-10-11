@@ -47,20 +47,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
     {
         #region Visibilities
 
-        private bool isLocked = default;
-        public bool IsLocked
-        {
-            get => isLocked;
-            set
-            {
-                Set(ref isLocked, value);
-                NotifyOfPropertyChange(() => EditorObjectVisibility);
-                NotifyOfPropertyChange(() => EditorLockedVisibility);
-                NotifyOfPropertyChange(() => IsDesignMode);
-                NotifyOfPropertyChange(() => IsPreviewMode);
-            }
-        }
-
         private bool isUserRequestHideEditorObject = default;
         private bool IsUserRequestHideEditorObject
         {
@@ -74,12 +60,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
         }
 
-        public Visibility EditorLockedVisibility =>
-            IsLocked
-                ? Visibility.Hidden : Visibility.Visible;
-
         public Visibility EditorObjectVisibility =>
-            IsLocked || // 编辑器被锁住
             IsUserRequestHideEditorObject // 用户要求隐藏(比如按下Q)
                 ? Visibility.Hidden : Visibility.Visible;
 
@@ -176,6 +157,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_SelectAll(ActionExecutionContext e)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             IsPreventMutualExclusionSelecting = true;
 
             Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
@@ -186,6 +173,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_ReverseSelect(ActionExecutionContext e)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             IsPreventMutualExclusionSelecting = true;
 
             Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = !x.IsSelected);
@@ -201,6 +194,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_SelectEntireLane(ActionExecutionContext e)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             foreach (var connectable in SelectObjects.OfType<ConnectableObjectBase>().Select(c => c.ReferenceStartObject).Distinct())
             {
                 connectable.IsSelected = true;
@@ -214,6 +213,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_SelectAttachedCurves(ActionExecutionContext e)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             foreach (var connectable in SelectObjects.OfType<ConnectableChildObjectBase>())
             {
                 foreach (var curve in connectable.PathControls)
@@ -264,9 +269,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public async void PasteCopiesObjects(PasteOption mirrorOption, Point? placePoint = default)
         {
-            if (IsLocked)
-                return;
-
             if (!IsDesignMode)
             {
                 Toast.ShowMessage(Resources.EditorMustBeDesignMode);
@@ -278,6 +280,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_MirrorSelectionXGridZero(ActionExecutionContext ctx)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
             {
@@ -290,6 +298,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void MenuItemAction_MirrorSelectionXGrid(ActionExecutionContext ctx)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             var selection = SelectObjects.OfType<OngekiMovableObjectBase>().ToList();
             if (selection.Count == 0)
             {
@@ -559,6 +573,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_ChangeDockableLaneType(ActionExecutionContext e)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             if (!(
                 SelectObjects.IsOnlyOne(out var r) &&
                 r is ConnectableObjectBase connectable &&
@@ -637,6 +657,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void KeyboardAction_FastPlaceNewObject<T>(Point position) where T : OngekiObjectBase, new()
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             var tap = new T();
             var isFirst = true;
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("Add {0}".Format(typeof(T).Name), () =>
@@ -657,6 +683,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastPlaceDockableObject(LaneType targetType)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             if ((!SelectObjects.AtCount(1)) || SelectObjects.FirstOrDefault() is not ILaneDockable dockable)
             {
                 ToastNotify(Resources.MustSelectOneTapOrHold);
@@ -748,8 +780,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void DeleteSelection(IEnumerable<OngekiObjectBase> selection = null)
         {
-            if (IsLocked)
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
                 return;
+            }
 
             //获取要删除的物件
             var selects = selection?.ToArray() ?? SelectObjects.OfType<OngekiObjectBase>().ToArray();
@@ -817,8 +852,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_SelectAllObjects(ActionExecutionContext e)
         {
-            if (IsLocked)
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
                 return;
+            }
 
             Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ForEach(x => x.IsSelected = true);
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
@@ -826,8 +864,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
-            if (IsLocked)
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
                 return;
+            }
 
             //鍙栨秷閫夋嫨
             SelectObjects.ForEach(x => x.IsSelected = false);
@@ -835,6 +876,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastSetObjectIsCritical(ActionExecutionContext e)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             var propertyBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
 
             var position = Mouse.GetPosition(e.View as FrameworkElement);
@@ -884,6 +931,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_FastSwitchFlickDirection(ActionExecutionContext _)
         {
+            if (!IsDesignMode)
+            {
+                ToastNotify(Resources.EditorMustBeDesignMode);
+                return;
+            }
+
             var selectedFlicks = SelectObjects.OfType<Flick>().ToList();
 
             if (selectedFlicks.Count == 0)
@@ -1118,18 +1171,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
             OnMouseUp(e);
-            /*
-            if (IsLocked)
-                return;
-
-            //Log.LogInfo("OnMouseLeave");
-            if (!(IsMouseDown && (e.View as FrameworkElement)?.Parent is IInputElement parent))
-                return;
-            IsMouseDown = false;
-            IsDragging = false;
-            var pos = (e.EventArgs as MouseEventArgs).GetPosition(parent);
-            SelectObjects.ForEach(x => x.OnDragEnd(pos));
-            //e.Handled = true;*/
         }
 
         public void OnMouseUp(ActionExecutionContext e)
@@ -1141,9 +1182,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             Log.LogInfo("Visual mouseup");
-
-            if (IsLocked)
-                return;
 
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
@@ -1243,9 +1281,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (IsDesignMode)
             {
-                if (IsLocked)
-                    return;
-
                 if (arg.ChangedButton == MouseButton.Left)
                 {
                     position.Y = Math.Max(0, RectInDesignMode.MaxY - position.Y);
@@ -1382,9 +1417,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //show current cursor position in statusbar
             UpdateCurrentCursorPosition(pos);
-
-            if (IsLocked)
-                return;
 
             if (IsDesignMode)
             {
@@ -1663,12 +1695,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_DragEnter(ActionExecutionContext e)
         {
-            if (IsLocked)
-            {
-                Log.LogWarn($"discard user actions because editor was locked.");
-                return;
-            }
-
             var arg = e.EventArgs as DragEventArgs;
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 arg.Effects = DragDropEffects.None;
@@ -1676,11 +1702,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_Drop(ActionExecutionContext e)
         {
-            if (IsLocked)
-            {
-                Log.LogWarn($"discard user actions because editor was locked.");
-                return;
-            }
             if (!IsDesignMode)
             {
                 Toast.ShowMessage(Resources.EditorMustBeDesignMode);
@@ -1791,9 +1812,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseWheel(ActionExecutionContext e)
         {
-            if (IsLocked)
-                return;
-
             var arg = e.EventArgs as MouseWheelEventArgs;
             arg.Handled = true;
 
@@ -1882,34 +1900,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }
         }
-
-        #region Lock/Unlock User Interaction
-
-        /// <summary>
-        /// 锁住编辑器所有交互操作，用户无法对此编辑器做任何的操作
-        /// </summary>
-        public void LockAllUserInteraction()
-        {
-            if (IsLocked)
-                return;
-            IsLocked = true;
-            SelectObjects.ToArray().ForEach(x => x.IsSelected = false);
-            IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-            ToastNotify(Resources.EditorLock);
-        }
-
-        /// <summary>
-        /// 解除对编辑器用户操作的封锁
-        /// </summary>
-        public void UnlockAllUserInteraction()
-        {
-            if (!IsLocked)
-                return;
-            IsLocked = false;
-            ToastNotify(Resources.EditorUnlock);
-        }
-
-        #endregion
 
         public void ToastNotify(string message)
         {

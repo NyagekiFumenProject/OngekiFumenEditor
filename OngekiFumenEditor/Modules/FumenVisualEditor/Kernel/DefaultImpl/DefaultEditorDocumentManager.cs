@@ -97,9 +97,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
             var editor = CurrentActivatedEditor;
             Log.LogInfo($"begin auto save current document: {editor.FileName}");
-            //editor.LockAllUserInteraction();
             await editor.Save(editor.FilePath);
-            //editor.UnlockAllUserInteraction();
             Log.LogInfo($"auto save done.");
         }
 

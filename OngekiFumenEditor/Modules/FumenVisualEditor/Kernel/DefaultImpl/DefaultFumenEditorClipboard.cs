@@ -34,8 +34,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         public async Task CopyObjects(FumenVisualEditorViewModel sourceEditor, IEnumerable<ISelectableObject> objects)
         {
-            if (sourceEditor.IsLocked)
-                return;
             if (sourceEditor.Fumen is null)
                 return;
             if (!sourceEditor.IsDesignMode)
@@ -143,8 +141,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         public async Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteOption pasteOption, Point? placePoint = null)
         {
-            if (targetEditor.IsLocked)
-                return;
             if (sourceEditor is null)
             {
                 Log.LogWarn($"无法粘贴因为sourceEditor为空");

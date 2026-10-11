@@ -31,6 +31,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
         public override Task Run(Command command)
         {
             if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor) {
+                if (!editor.IsDesignMode && !editor.IsBatchMode)
+                {
+                    editor.ToastNotify(Resources.EditorMustBeDesignMode);
+                    return TaskUtility.Completed;
+                }
+
                 var behaviors = Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView());
 
                 if (editor.IsBatchMode) {

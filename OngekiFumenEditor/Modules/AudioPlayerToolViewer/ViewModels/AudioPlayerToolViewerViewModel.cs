@@ -305,7 +305,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
         public void OnStopButtonClicked()
         {
-            //Editor.UnlockAllUserInteraction();
             FumenSoundPlayer?.Stop();
             AudioPlayer?.Stop();
             if (EditorGlobalSetting.Default.ReturnStartTimeAfterPause)

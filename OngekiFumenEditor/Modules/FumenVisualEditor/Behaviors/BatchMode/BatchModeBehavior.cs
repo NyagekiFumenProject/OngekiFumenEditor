@@ -149,6 +149,9 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
         if (AssociatedObject.DataContext is not FumenVisualEditorViewModel editor)
             return;
 
+        if (!editor.IsDesignMode)
+            return;
+
         if (args.ChangedButton == MouseButton.Left) {
             if (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt)) {
                 // Holding alt forces Normal Mode click behavior.
@@ -193,6 +196,9 @@ public class BatchModeBehavior : Behavior<FumenVisualEditorView>
     {
         var editor = IoC.Get<IEditorDocumentManager>()?.CurrentActivatedEditor;
         if (editor is null)
+            return;
+
+        if (!editor.IsDesignMode)
             return;
 
         if (args.ChangedButton == MouseButton.Left) {

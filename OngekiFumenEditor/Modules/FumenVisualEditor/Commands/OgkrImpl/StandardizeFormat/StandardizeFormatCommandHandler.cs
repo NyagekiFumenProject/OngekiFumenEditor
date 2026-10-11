@@ -33,12 +33,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Standard
             if (saveFileDialog.ShowDialog() != true)
                 return;
 
-            editor.LockAllUserInteraction();
-
             var newFilePath = saveFileDialog.FileName;
 
             var taskResult = await Utils.Ogkr.StandardizeFormat.Process(editor.Fumen);
-            editor.UnlockAllUserInteraction();
 
             if (!taskResult.IsSuccess)
             {

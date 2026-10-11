@@ -24,11 +24,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
                 return TaskUtility.Completed;
             if (MessageBox.Show(Resources.ComfirmInterpolateMessage, Resources.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return TaskUtility.Completed;
-            editor.LockAllUserInteraction();
-
             Process(editor, false);
 
-            editor.UnlockAllUserInteraction();
             return TaskUtility.Completed;
         }
     }
@@ -47,11 +44,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.OgkrImpl.Interpol
                 return TaskUtility.Completed;
             if (MessageBox.Show(Resources.ComfirmInterpolateMessage, Resources.Suggest, MessageBoxButton.YesNo) != MessageBoxResult.Yes)
                 return TaskUtility.Completed;
-            editor.LockAllUserInteraction();
-
             Process(editor, true);
 
-            editor.UnlockAllUserInteraction();
             return TaskUtility.Completed;
         }
     }

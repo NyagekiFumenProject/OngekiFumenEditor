@@ -606,9 +606,6 @@
   <data name="EditorLoadingTargetFormat" xml:space="preserve">
     <value>正在加载：{0}</value>
   </data>
-  <data name="EditorLock" xml:space="preserve">
-    <value>编辑器已锁住</value>
-  </data>
   <data name="EditorModeSwitch" xml:space="preserve">
     <value>编辑器预览模式</value>
   </data>
@@ -626,9 +623,6 @@
   </data>
   <data name="EditorTarget" xml:space="preserve">
     <value>编辑器目标</value>
-  </data>
-  <data name="EditorUnlock" xml:space="preserve">
-    <value>编辑器已解锁</value>
   </data>
   <data name="EditScriptByVisualStudio" xml:space="preserve">
     <value>使用VS编辑脚本</value>

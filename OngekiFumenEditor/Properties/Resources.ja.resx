@@ -600,9 +600,6 @@
   <data name="EditorLoadingTargetFormat" xml:space="preserve">
     <value>読み込み中：{0}</value>
   </data>
-  <data name="EditorLock" xml:space="preserve">
-    <value>エディタはロックされています</value>
-  </data>
   <data name="EditorModeSwitch" xml:space="preserve">
     <value>エディタモードを切り替え</value>
   </data>
@@ -620,9 +617,6 @@
   </data>
   <data name="EditorTarget" xml:space="preserve">
     <value>エディタの対象</value>
-  </data>
-  <data name="EditorUnlock" xml:space="preserve">
-    <value>エディタのロック解除</value>
   </data>
   <data name="EditScriptByVisualStudio" xml:space="preserve">
     <value>Visual Studioでスクリプトを編集</value>

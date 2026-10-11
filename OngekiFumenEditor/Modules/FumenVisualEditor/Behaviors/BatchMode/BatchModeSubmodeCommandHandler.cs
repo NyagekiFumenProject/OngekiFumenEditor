@@ -8,6 +8,7 @@ using Caliburn.Micro;
 using Gemini.Framework.Commands;
 using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Behaviors.BatchMode;
@@ -40,7 +41,16 @@ public abstract class BatchModeSubmodeCommandHandler<TCommandDefinition> : Comma
 
     public override Task Run(Command command)
     {
-        Editor.CurrentActivatedEditor.BatchModeBehavior.CurrentSubmode = Submode;
+        if (Editor.CurrentActivatedEditor is not { } editor)
+            return Task.CompletedTask;
+
+        if (!editor.IsDesignMode)
+        {
+            editor.ToastNotify(Resources.EditorMustBeDesignMode);
+            return Task.CompletedTask;
+        }
+
+        editor.BatchModeBehavior.CurrentSubmode = Submode;
         return Task.CompletedTask;
     }
 }

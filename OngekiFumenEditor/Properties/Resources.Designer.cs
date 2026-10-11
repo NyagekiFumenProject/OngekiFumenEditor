@@ -2051,15 +2051,6 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Editor locked.
-        /// </summary>
-        public static string EditorLock {
-            get {
-                return ResourceManager.GetString("EditorLock", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to Editor Mode.
         /// </summary>
         public static string EditorModeSwitch {
@@ -2128,15 +2119,6 @@ namespace OngekiFumenEditor.Properties {
         public static string EditorTarget {
             get {
                 return ResourceManager.GetString("EditorTarget", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Editor unlock.
-        /// </summary>
-        public static string EditorUnlock {
-            get {
-                return ResourceManager.GetString("EditorUnlock", resourceCulture);
             }
         }
 
