@@ -31,7 +31,8 @@ namespace OngekiFumenEditor.Base
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecalculateTotalValues()
         {
-            TotalGrid = (int)(Unit * GridRadix + Grid);
+            // 提升乘加精度，避免较大 Unit 丢失末尾的单个 Grid。
+            TotalGrid = (int)((double)Unit * GridRadix + Grid);
             TotalUnit = Unit + Grid * 1.0 / GridRadix;
         }
 

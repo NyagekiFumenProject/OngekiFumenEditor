@@ -117,6 +117,8 @@
                     </MenuItem>
                 </MenuItem>
                 <Separator />
+                <MenuItem Header="{markup:Translate [ShowBulletHitRanges]}" IsCheckable="True" IsChecked="{Binding ShowBulletHitRanges}" ToolTip="{markup:Translate [TipBulletHitRanges]}" />
+                <MenuItem Header="{markup:Translate [ShowBeamHitRanges]}" IsCheckable="True" IsChecked="{Binding ShowBeamHitRanges}" ToolTip="{markup:Translate [TipBeamHitRanges]}" />
                 <MenuItem
                     Header="{markup:Translate [ShowDebugInfo]}"
                     IsCheckable="True"
@@ -127,6 +129,15 @@
             </ContextMenu>
         </Grid.ContextMenu>
 
+        <Canvas Panel.ZIndex="20" IsHitTestVisible="False" ClipToBounds="True" Visibility="{Binding QuickPlacementVisibility}">
+            <Image Canvas.Left="{Binding QuickPlacementX}" Canvas.Top="{Binding QuickPlacementY}"
+                   Source="{Binding QuickPlacementImage}" Width="{Binding QuickPlacementImageWidth}" Height="{Binding QuickPlacementImageHeight}"
+                   Opacity="0.55" Visibility="{Binding QuickPlacementImageVisibility}" />
+            <TextBlock Canvas.Left="{Binding QuickPlacementX}" Canvas.Top="{Binding QuickPlacementY}"
+                       Text="{Binding QuickPlacementGlyph}" Visibility="{Binding QuickPlacementGlyphVisibility}"
+                       FontSize="28" Foreground="#A0FFFFFF" />
+        </Canvas>
+        <ToggleButton Panel.ZIndex="21" Margin="8" HorizontalAlignment="Right" VerticalAlignment="Top" Content="{Binding IndividualSoflanPlacementText}" IsChecked="{Binding IsIndividualSoflanPlacementActive, Mode=OneWay}" cal:Message.Attach="[Event Click] = [Action ToggleIndividualSoflanPlacement()]" ToolTip="{markup:Translate [TipIsaPlacement]}" />
         <ContentControl x:Name="renderControlHost" cal:Message.Attach="[Event Loaded]=[Action OnRenderControlHostLoaded($executionContext)];" />
 
         <!--<opentkcontrol:GLWpfControl

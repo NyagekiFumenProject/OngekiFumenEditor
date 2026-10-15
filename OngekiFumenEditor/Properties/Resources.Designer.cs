@@ -9060,5 +9060,35 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
             }
         }
+        public static string ContinuousProjectilePlacement => ResourceManager.GetString("ContinuousProjectilePlacement", resourceCulture);
+        public static string UndoQuickProjectilePlacement => ResourceManager.GetString("UndoQuickProjectilePlacement", resourceCulture);
+        public static string UndoChangeBulletDamage => ResourceManager.GetString("UndoChangeBulletDamage", resourceCulture);
+        public static string kbd_editor_QuickBulletDamageUp => ResourceManager.GetString("kbd_editor_QuickBulletDamageUp", resourceCulture);
+        public static string kbd_editor_QuickBulletDamageDown => ResourceManager.GetString("kbd_editor_QuickBulletDamageDown", resourceCulture);
+        public static string ShowBulletHitRanges => ResourceManager.GetString("ShowBulletHitRanges", resourceCulture);
+        public static string TipBulletHitRanges => ResourceManager.GetString("TipBulletHitRanges", resourceCulture);
+        public static string ShowBeamHitRanges => ResourceManager.GetString("ShowBeamHitRanges", resourceCulture);
+        public static string TipBeamHitRanges => ResourceManager.GetString("TipBeamHitRanges", resourceCulture);
+        public static string RelativeBulletHitRangeHint => ResourceManager.GetString("RelativeBulletHitRangeHint", resourceCulture);
+        public static string TipIsaPlacement => ResourceManager.GetString("TipIsaPlacement", resourceCulture);
+        public static string IsaPlacement => ResourceManager.GetString("IsaPlacement", resourceCulture);
+        public static string IsaPlacementFirstPoint => ResourceManager.GetString("IsaPlacementFirstPoint", resourceCulture);
+        public static string IsaPlacementSecondPoint => ResourceManager.GetString("IsaPlacementSecondPoint", resourceCulture);
+        public static string IsaPlacementDesignModeRequired => ResourceManager.GetString("IsaPlacementDesignModeRequired", resourceCulture);
+        public static string IsaPlacementGroupRequired => ResourceManager.GetString("IsaPlacementGroupRequired", resourceCulture);
+        public static string IsaPlacementGroupMissing => ResourceManager.GetString("IsaPlacementGroupMissing", resourceCulture);
+        public static string IsaPlacementUndo => ResourceManager.GetString("IsaPlacementUndo", resourceCulture);
+        public static string SoflanGroupInvalidDelete => ResourceManager.GetString("SoflanGroupInvalidDelete", resourceCulture);
+        public static string SoflanGroupReplacementRequired => ResourceManager.GetString("SoflanGroupReplacementRequired", resourceCulture);
+        public static string SoflanGroupDelete => ResourceManager.GetString("SoflanGroupDelete", resourceCulture);
+        public static string SoflanGroupCreateUndo => ResourceManager.GetString("SoflanGroupCreateUndo", resourceCulture);
+        public static string SoflanGroupDefaultCannotDelete => ResourceManager.GetString("SoflanGroupDefaultCannotDelete", resourceCulture);
+        public static string SoflanGroupDeleteReferenced => ResourceManager.GetString("SoflanGroupDeleteReferenced", resourceCulture);
+        public static string SoflanGroupReferenceCount => ResourceManager.GetString("SoflanGroupReferenceCount", resourceCulture);
+        public static string SoflanGroupReplaceAndDelete => ResourceManager.GetString("SoflanGroupReplaceAndDelete", resourceCulture);
+        public static string SoflanGroupDeleteAllReferences => ResourceManager.GetString("SoflanGroupDeleteAllReferences", resourceCulture);
+        public static string SoflanGroupSelectorTip => ResourceManager.GetString("SoflanGroupSelectorTip", resourceCulture);
+        public static string SoflanGroupDefaultName => ResourceManager.GetString("SoflanGroupDefaultName", resourceCulture);
+        public static string PasteInvalidGridPosition => ResourceManager.GetString("PasteInvalidGridPosition", resourceCulture);
     }
 }

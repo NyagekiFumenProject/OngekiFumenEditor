@@ -11,7 +11,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices, bool preservePathBreaks = false)
         {
             if (start is null)
                 return;
@@ -123,6 +123,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 prevObj = childObj;
                 prevVisible = visible;
+            }
+
+            // 判定带依赖每个顶点的有效性标记，不能使用只比较坐标的线段简化。
+            if (preservePathBreaks)
+            {
+                foreach (var vertex in tempVertices)
+                    outVertices.Add(vertex);
+                return;
             }
 
             //optimze vertices

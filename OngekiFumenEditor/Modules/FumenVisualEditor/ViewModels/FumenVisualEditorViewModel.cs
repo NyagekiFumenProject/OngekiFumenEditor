@@ -493,6 +493,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             var fumen = editorProjectData?.Fumen;
+            soflanGroupCacheInvalidation.Dispose();
             if (fumen is not null)
             {
                 fumen.BpmList.OnChangedEvent -= OnTimeSignatureListChanged;

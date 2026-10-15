@@ -200,7 +200,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             }
         }
 
-        public void InsertBefore(SoflanGroupDisplayItemListViewBase item, SoflanGroupWrapItem insertBefore)
+        public void InsertBefore(SoflanGroupDisplayItemListViewBase item, SoflanGroupDisplayItemListViewBase insertBefore)
         {
             var index = -1;
             for (var i = 0; i < Children.Count; i++)

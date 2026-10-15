@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2392,10 +2392,10 @@
     <value>选中后，右侧列表显示该组包含的变速点明细。</value>
   </data>
   <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
-    <value>输入新变速组的名称，随后点击右侧按钮创建。</value>
+    <value>名称可为空，默认使用编号。</value>
   </data>
   <data name="SoflanGroupCreateTipText" xml:space="preserve">
-    <value>用左侧输入框中的名称创建一个新的变速组。</value>
+    <value>新建有效变速组。</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>变速分组查看器</value>
@@ -3456,4 +3456,34 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>无法计算 T_* 命令数值：{0}</value>
   </data>
+  <data name="ContinuousProjectilePlacement" xml:space="preserve"><value>连续放置</value></data>
+  <data name="UndoQuickProjectilePlacement" xml:space="preserve"><value>连续放置子弹或铃铛</value></data>
+  <data name="UndoChangeBulletDamage" xml:space="preserve"><value>批量修改子弹伤害</value></data>
+  <data name="kbd_editor_QuickBulletDamageUp" xml:space="preserve"><value>增加选中子弹伤害</value></data>
+  <data name="kbd_editor_QuickBulletDamageDown" xml:space="preserve"><value>减少选中子弹伤害</value></data>
+  <data name="ShowBulletHitRanges" xml:space="preserve"><value>子弹判定范围</value></data>
+  <data name="TipBulletHitRanges" xml:space="preserve"><value>编辑模式显示落点判定宽度；虚线表示自机狙击的相对位置。</value></data>
+  <data name="ShowBeamHitRanges" xml:space="preserve"><value>激光判定范围</value></data>
+  <data name="TipBeamHitRanges" xml:space="preserve"><value>编辑模式沿激光轨迹显示横向判定宽度。</value></data>
+  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>虚线：自机狙击相对偏移，实际落点随自机</value></data>
+  <data name="TipIsaPlacement" xml:space="preserve"><value>选择变速组后，点击谱面两个对角点创建 ISA 区域；再次点击或拖放物件取消。</value></data>
+  <data name="IsaPlacement" xml:space="preserve"><value>ISA 两点放置</value></data>
+  <data name="IsaPlacementFirstPoint" xml:space="preserve"><value>ISA：请选择第一个对角点（再次点击取消）</value></data>
+  <data name="IsaPlacementSecondPoint" xml:space="preserve"><value>ISA：请选择第二个对角点（再次点击取消）</value></data>
+  <data name="IsaPlacementDesignModeRequired" xml:space="preserve"><value>请在普通设计模式中放置 ISA 区域。</value></data>
+  <data name="IsaPlacementGroupRequired" xml:space="preserve"><value>请先创建或选择本谱面已有的变速组，再放置 ISA 区域。</value></data>
+  <data name="IsaPlacementGroupMissing" xml:space="preserve"><value>所选变速组已不存在，请重新选择变速组。</value></data>
+  <data name="IsaPlacementUndo" xml:space="preserve"><value>创建 ISA 区域</value></data>
+  <data name="SoflanGroupInvalidDelete" xml:space="preserve"><value>默认组或无效组不能删除。</value></data>
+  <data name="SoflanGroupReplacementRequired" xml:space="preserve"><value>请选择有效的替代组。</value></data>
+  <data name="SoflanGroupDelete" xml:space="preserve"><value>删除变速组</value></data>
+  <data name="SoflanGroupCreateUndo" xml:space="preserve"><value>创建变速组</value></data>
+  <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>默认组（0）不能删除。</value></data>
+  <data name="SoflanGroupDeleteReferenced" xml:space="preserve"><value>删除被引用的变速组</value></data>
+  <data name="SoflanGroupReferenceCount" xml:space="preserve"><value>该组被 {0} 个物件引用，请选择处理方式。</value></data>
+  <data name="SoflanGroupReplaceAndDelete" xml:space="preserve"><value>转移到指定替代组后删除</value></data>
+  <data name="SoflanGroupDeleteAllReferences" xml:space="preserve"><value>删除全部引用物件及该组</value></data>
+  <data name="SoflanGroupSelectorTip" xml:space="preserve"><value>请先在变速组列表创建组，再从已有组中选择。</value></data>
+  <data name="SoflanGroupDefaultName" xml:space="preserve"><value>默认组（0）</value></data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>粘贴位置超出坐标范围，或包含早于谱面起点的时间。</value></data>
 </root>

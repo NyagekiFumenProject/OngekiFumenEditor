@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -1142,10 +1142,10 @@
     <value>選択すると、このグループのソフランが右のリストに表示されます。</value>
   </data>
   <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
-    <value>新しいソフラングループの名前を入力し、右のボタンで作成します。</value>
+    <value>名前は空欄にできます。既定ではグループ番号を使用します。</value>
   </data>
   <data name="SoflanGroupCreateTipText" xml:space="preserve">
-    <value>左の入力欄の名前で新しいソフラングループを作成します。</value>
+    <value>有効な変速グループを作成します。</value>
   </data>
   <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
     <value>選択中グループのソフラン詳細リストを表示します（現在は使用できません）。</value>
@@ -2761,4 +2761,34 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>T_* コマンドの値を計算できません：{0}</value>
   </data>
+  <data name="ContinuousProjectilePlacement" xml:space="preserve"><value>連続配置</value></data>
+  <data name="UndoQuickProjectilePlacement" xml:space="preserve"><value>弾またはベルを配置</value></data>
+  <data name="UndoChangeBulletDamage" xml:space="preserve"><value>選択した弾のダメージを変更</value></data>
+  <data name="kbd_editor_QuickBulletDamageUp" xml:space="preserve"><value>選択した弾のダメージを増加</value></data>
+  <data name="kbd_editor_QuickBulletDamageDown" xml:space="preserve"><value>選択した弾のダメージを減少</value></data>
+  <data name="ShowBulletHitRanges" xml:space="preserve"><value>弾の判定範囲</value></data>
+  <data name="TipBulletHitRanges" xml:space="preserve"><value>編集モードで判定幅を表示します。破線は自機に対する相対位置です。</value></data>
+  <data name="ShowBeamHitRanges" xml:space="preserve"><value>ビームの判定範囲</value></data>
+  <data name="TipBeamHitRanges" xml:space="preserve"><value>編集モードでビーム軌道の横方向の判定幅を表示します。</value></data>
+  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>破線：自機に対する相対位置。実際の落下地点は自機に追従</value></data>
+  <data name="TipIsaPlacement" xml:space="preserve"><value>変速グループを選択して対角の2点をクリックするとISAを作成します。再クリックまたは物件のドラッグで取消。</value></data>
+  <data name="IsaPlacement" xml:space="preserve"><value>ISAを2点で配置</value></data>
+  <data name="IsaPlacementFirstPoint" xml:space="preserve"><value>ISA：最初の対角点を選択（再クリックで取消）</value></data>
+  <data name="IsaPlacementSecondPoint" xml:space="preserve"><value>ISA：2番目の対角点を選択（再クリックで取消）</value></data>
+  <data name="IsaPlacementDesignModeRequired" xml:space="preserve"><value>通常の編集モードでISA領域を配置してください。</value></data>
+  <data name="IsaPlacementGroupRequired" xml:space="preserve"><value>ISAを配置する前に変速グループを作成または選択してください。</value></data>
+  <data name="IsaPlacementGroupMissing" xml:space="preserve"><value>選択した変速グループは存在しません。再選択してください。</value></data>
+  <data name="IsaPlacementUndo" xml:space="preserve"><value>ISA領域を作成</value></data>
+  <data name="SoflanGroupInvalidDelete" xml:space="preserve"><value>既定または無効なグループは削除できません。</value></data>
+  <data name="SoflanGroupReplacementRequired" xml:space="preserve"><value>有効な移行先グループを選択してください。</value></data>
+  <data name="SoflanGroupDelete" xml:space="preserve"><value>変速グループを削除</value></data>
+  <data name="SoflanGroupCreateUndo" xml:space="preserve"><value>変速グループを作成</value></data>
+  <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>既定グループ（0）は削除できません。</value></data>
+  <data name="SoflanGroupDeleteReferenced" xml:space="preserve"><value>参照されている変速グループを削除</value></data>
+  <data name="SoflanGroupReferenceCount" xml:space="preserve"><value>このグループは{0}個の物件に参照されています。処理方法を選択してください。</value></data>
+  <data name="SoflanGroupReplaceAndDelete" xml:space="preserve"><value>指定グループへ移行して削除</value></data>
+  <data name="SoflanGroupDeleteAllReferences" xml:space="preserve"><value>参照物件とグループをすべて削除</value></data>
+  <data name="SoflanGroupSelectorTip" xml:space="preserve"><value>変速グループ一覧でグループを作成してから選択してください。</value></data>
+  <data name="SoflanGroupDefaultName" xml:space="preserve"><value>既定グループ（0）</value></data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>貼り付け位置が座標範囲外か、譜面の開始より前の時刻を含んでいます。</value></data>
 </root>
