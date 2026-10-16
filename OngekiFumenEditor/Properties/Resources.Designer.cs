@@ -9060,5 +9060,24 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
             }
         }
+        public static string IsaPlacement => ResourceManager.GetString("IsaPlacement", resourceCulture);
+        public static string IsaPlacementDesignModeRequired => ResourceManager.GetString("IsaPlacementDesignModeRequired", resourceCulture);
+        public static string IsaPlacementFirstPoint => ResourceManager.GetString("IsaPlacementFirstPoint", resourceCulture);
+        public static string IsaPlacementGroupMissing => ResourceManager.GetString("IsaPlacementGroupMissing", resourceCulture);
+        public static string IsaPlacementGroupRequired => ResourceManager.GetString("IsaPlacementGroupRequired", resourceCulture);
+        public static string IsaPlacementSecondPoint => ResourceManager.GetString("IsaPlacementSecondPoint", resourceCulture);
+        public static string IsaPlacementUndo => ResourceManager.GetString("IsaPlacementUndo", resourceCulture);
+        public static string SoflanGroupCreateUndo => ResourceManager.GetString("SoflanGroupCreateUndo", resourceCulture);
+        public static string SoflanGroupDefaultCannotDelete => ResourceManager.GetString("SoflanGroupDefaultCannotDelete", resourceCulture);
+        public static string SoflanGroupDefaultName => ResourceManager.GetString("SoflanGroupDefaultName", resourceCulture);
+        public static string SoflanGroupDelete => ResourceManager.GetString("SoflanGroupDelete", resourceCulture);
+        public static string SoflanGroupDeleteAllReferences => ResourceManager.GetString("SoflanGroupDeleteAllReferences", resourceCulture);
+        public static string SoflanGroupDeleteReferenced => ResourceManager.GetString("SoflanGroupDeleteReferenced", resourceCulture);
+        public static string SoflanGroupInvalidDelete => ResourceManager.GetString("SoflanGroupInvalidDelete", resourceCulture);
+        public static string SoflanGroupReferenceCount => ResourceManager.GetString("SoflanGroupReferenceCount", resourceCulture);
+        public static string SoflanGroupReplaceAndDelete => ResourceManager.GetString("SoflanGroupReplaceAndDelete", resourceCulture);
+        public static string SoflanGroupReplacementRequired => ResourceManager.GetString("SoflanGroupReplacementRequired", resourceCulture);
+        public static string SoflanGroupSelectorTip => ResourceManager.GetString("SoflanGroupSelectorTip", resourceCulture);
+        public static string TipIsaPlacement => ResourceManager.GetString("TipIsaPlacement", resourceCulture);
     }
 }

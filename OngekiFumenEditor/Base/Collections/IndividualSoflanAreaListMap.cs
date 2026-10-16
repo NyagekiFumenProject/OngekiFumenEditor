@@ -134,6 +134,32 @@ namespace OngekiFumenEditor.Base.Collections
             return item;
         }
 
+        public int GetNextSoflanGroupId(IEnumerable<int> additionalReserved = null)
+        {
+            // 保留缓存编号，避免撤销历史中的对象指向后来创建的其他组。
+            var reserved = cachedSoflanGroupWrapItemMap.Keys.Concat(additionalReserved ?? Enumerable.Empty<int>()).ToHashSet();
+            var id = 1;
+            while (reserved.Contains(id)) id++;
+            return id;
+        }
+
+        // 缓存中可能保留已删除的组，选择器只使用仍挂在树中的组。
+        public IEnumerable<SoflanGroupWrapItem> GetSoflanGroups()
+        {
+            IEnumerable<SoflanGroupWrapItem> Visit(SoflanGroupWrapItemGroup group)
+            {
+                foreach (var child in group.Children)
+                {
+                    if (child is SoflanGroupWrapItem item)
+                        yield return item;
+                    else if (child is SoflanGroupWrapItemGroup subGroup)
+                        foreach (var subItem in Visit(subGroup))
+                            yield return subItem;
+                }
+            }
+            return Visit(SoflanGroupWrapItemGroupRoot).OrderBy(x => x.SoflanGroupId);
+        }
+
         IEnumerator IEnumerable.GetEnumerator() => isfMap.GetEnumerator();
 
         public bool ContainsKey(int key)

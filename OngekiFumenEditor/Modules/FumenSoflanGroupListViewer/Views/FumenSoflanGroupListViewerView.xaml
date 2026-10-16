@@ -60,6 +60,7 @@
                     Text="{Binding CreateNewGroupName}"
                     ToolTip="{markup:Translate [SoflanGroupCreateNameTipText]}" />
                 <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="{markup:Translate [NewItemGroup]}" ToolTip="{markup:Translate [SoflanGroupCreateTipText]}" />
+                <Button cal:Message.Attach="[Event Click] = [Action DeleteSelectedGroup()]" Content="{markup:Translate [SoflanGroupDelete]}" />
             </ToolBar>
         </StackPanel>
 

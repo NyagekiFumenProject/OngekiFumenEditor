@@ -17,6 +17,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
@@ -59,6 +60,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private DrawJudgeLineHelper judgeLineHelper;
     private DrawPlayableAreaHelper_new playableAreaHelper;
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
+    private readonly SoflanGroupCacheInvalidation soflanGroupCacheInvalidation = new();
     private DrawHitObjectEffectHelper hitObjectEffectHelper;
     private DrawPlayerLocationHelper playerLocationHelper;
     private Vector4 playFieldBackgroundColor;
@@ -328,11 +330,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         builder.SetCurrentProjectionMatrix(projectionMatrix);
 
         var fumen = Fumen;
+        soflanGroupCacheInvalidation.Attach(fumen);
         if (fumen is null)
         {
             PostDrawCommandList(builder);
             goto End;
         }
+
+        soflanGroupCacheInvalidation.RefreshIfNeeded(RebuildObjectSoflanGroupRecord);
 
         context.PerfomenceMonitor.OnBeforeRender();
 
@@ -615,9 +620,17 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                         builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
                         builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
 
-                        drawingTarget.Begin(this, builder);
-                        //all object collection has been sorted within GetDisplayableObjects()
                         var drawingObjects = soflanGroupDrawing.Value;
+                        IDrawCommandListBuilder objectBuilder = builder;
+                        if (IsDesignMode && drawingObjects.Count > 0)
+                        {
+                            _cacheSoflanGroupRecorder.GetCache(drawingObjects[0], out var soflanGroup);
+                            if (soflanGroup != 0)
+                                objectBuilder = new SoflanGroupTintBuilder(builder,
+                                    IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(soflanGroup));
+                        }
+                        drawingTarget.Begin(this, objectBuilder);
+                        //all object collection has been sorted within GetDisplayableObjects()
                         for (var i = 0; i < drawingObjects.Count; i++)
                         {
                             var obj = drawingObjects[i];

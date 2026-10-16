@@ -11,6 +11,8 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
     {
         public static UIElement GenerateUI(IObjectPropertyAccessProxy wrapper)
         {
+            if (wrapper.PropertyInfo.Name == "SoflanGroup" && wrapper.PropertyInfo.PropertyType == typeof(int))
+                return SoflanGroupSelector.Create(wrapper);
             var typeGenerators = IoC.GetAll<ITypeUIGenerator>();
             var generator = typeGenerators
                 .Where(x =>

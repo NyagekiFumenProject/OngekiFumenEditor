@@ -32,6 +32,7 @@ namespace OngekiFumenEditor.Base
         }
 
         public event Action<OngekiObjectBase, PropertyChangedEventArgs> ObjectModifiedChanged;
+        public event System.Action ObjectCollectionChanged;
 
         public BulletPalleteList BulletPalleteList { get; } = new();
         public BpmList BpmList { get; } = new();
@@ -260,6 +261,7 @@ namespace OngekiFumenEditor.Base
                 start.ConnectableObjectsPropertyChanged += OnOngekiObjectModify;
             else
                 obj.PropertyChanged += OnOngekiObjectModify;
+            ObjectCollectionChanged?.Invoke();
         }
 
         public void RemoveObject(OngekiObjectBase obj)
@@ -366,6 +368,7 @@ namespace OngekiFumenEditor.Base
                 start.ConnectableObjectsPropertyChanged -= OnOngekiObjectModify;
             else
                 obj.PropertyChanged -= OnOngekiObjectModify;
+            ObjectCollectionChanged?.Invoke();
         }
 
         private void OnOngekiObjectModify(object sender, PropertyChangedEventArgs e)
@@ -443,4 +446,3 @@ namespace OngekiFumenEditor.Base
         }
     }
 }
-

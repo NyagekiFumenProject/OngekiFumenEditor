@@ -55,7 +55,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                 }))
                 .SelectMany(x => x)
                 .GroupBy(x => (x.PropertyType, x.Name))
-                .Where(x => x.Count() == SelectedObjects.Count)
+                .Where(x => x.Count() == SelectedObjects.Count || x.Key.Name == "SoflanGroup")
                 .Select(x => x.First())
                 //.IntersectManyBy(x => (x.PropertyType, x.Name))
                 .Select(x => (x.PropertyType, x.Name, x))

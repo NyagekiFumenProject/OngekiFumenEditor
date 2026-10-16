@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2398,10 +2398,10 @@
     <value>Selecting it shows the group's soflans in the list on the right.</value>
   </data>
   <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
-    <value>Type a name for the new soflan group, then click the button to create it.</value>
+    <value>The name may be empty; the group number will be used by default.</value>
   </data>
   <data name="SoflanGroupCreateTipText" xml:space="preserve">
-    <value>Create a new soflan group with the name typed on the left.</value>
+    <value>Create a valid soflan group.</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>Soflan Groups</value>
@@ -3489,4 +3489,23 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>Unable to calculate T_* values: {0}</value>
   </data>
+  <data name="IsaPlacement" xml:space="preserve"><value>Place ISA with two points</value></data>
+  <data name="IsaPlacementDesignModeRequired" xml:space="preserve"><value>Place ISA areas in normal design mode.</value></data>
+  <data name="IsaPlacementFirstPoint" xml:space="preserve"><value>ISA: choose the first corner (click again to cancel)</value></data>
+  <data name="IsaPlacementGroupMissing" xml:space="preserve"><value>The selected soflan group no longer exists. Select another group.</value></data>
+  <data name="IsaPlacementGroupRequired" xml:space="preserve"><value>Create or select an existing soflan group before placing an ISA.</value></data>
+  <data name="IsaPlacementSecondPoint" xml:space="preserve"><value>ISA: choose the second corner (click again to cancel)</value></data>
+  <data name="IsaPlacementUndo" xml:space="preserve"><value>Create ISA area</value></data>
+  <data name="SoflanGroupCreateUndo" xml:space="preserve"><value>Create soflan group</value></data>
+  <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>The default group (0) cannot be deleted.</value></data>
+  <data name="SoflanGroupDefaultName" xml:space="preserve"><value>Default group (0)</value></data>
+  <data name="SoflanGroupDelete" xml:space="preserve"><value>Delete soflan group</value></data>
+  <data name="SoflanGroupDeleteAllReferences" xml:space="preserve"><value>Delete all referencing objects and the group</value></data>
+  <data name="SoflanGroupDeleteReferenced" xml:space="preserve"><value>Delete referenced soflan group</value></data>
+  <data name="SoflanGroupInvalidDelete" xml:space="preserve"><value>The default or an invalid group cannot be deleted.</value></data>
+  <data name="SoflanGroupReferenceCount" xml:space="preserve"><value>This group is referenced by {0} objects. Choose how to proceed.</value></data>
+  <data name="SoflanGroupReplaceAndDelete" xml:space="preserve"><value>Move references to another group, then delete</value></data>
+  <data name="SoflanGroupReplacementRequired" xml:space="preserve"><value>Choose a valid replacement group.</value></data>
+  <data name="SoflanGroupSelectorTip" xml:space="preserve"><value>Create a group in the soflan group list, then select it from existing groups.</value></data>
+  <data name="TipIsaPlacement" xml:space="preserve"><value>Choose a soflan group, then click two corners to create an ISA. Click again or drag an object to cancel.</value></data>
 </root>
