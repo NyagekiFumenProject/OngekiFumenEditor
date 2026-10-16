@@ -117,6 +117,8 @@
                     </MenuItem>
                 </MenuItem>
                 <Separator />
+                <MenuItem Header="{markup:Translate [ShowBulletHitRanges]}" IsCheckable="True" IsChecked="{Binding ShowBulletHitRanges}" ToolTip="{markup:Translate [TipBulletHitRanges]}" />
+                <MenuItem Header="{markup:Translate [ShowBeamHitRanges]}" IsCheckable="True" IsChecked="{Binding ShowBeamHitRanges}" ToolTip="{markup:Translate [TipBeamHitRanges]}" />
                 <MenuItem
                     Header="{markup:Translate [ShowDebugInfo]}"
                     IsCheckable="True"

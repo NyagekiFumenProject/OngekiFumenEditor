@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2761,4 +2761,9 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>T_* コマンドの値を計算できません：{0}</value>
   </data>
+  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>破線：自機に対する相対位置。実際の落下地点は自機に追従</value></data>
+  <data name="ShowBeamHitRanges" xml:space="preserve"><value>ビームの判定範囲</value></data>
+  <data name="ShowBulletHitRanges" xml:space="preserve"><value>弾の判定範囲</value></data>
+  <data name="TipBeamHitRanges" xml:space="preserve"><value>編集モードでビーム軌道の横方向の判定幅を表示します。</value></data>
+  <data name="TipBulletHitRanges" xml:space="preserve"><value>編集モードで判定幅を表示します。破線は自機に対する相対位置です。</value></data>
 </root>
