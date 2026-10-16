@@ -24,6 +24,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             isXGridSnappedToLaneThisMove = false;
 
+            // 已附轨物件保持原轨引用，时间吸附遵循通用开关；轨道区间外不夹时间或跨轨。
+            if (obj is ILaneDockable attached && attached.ReferenceLaneStart is LaneStartBase originalLane)
+            {
+                var basic = new DefaultObjectInteractiveAction();
+                if (basic.CheckAndAdjustY(attached, relativePoint.Y, editor) is double attachedY &&
+                    editor.ConvertYToTGrid_DesignMode(attachedY) is TGrid attachedT)
+                {
+                    var targetX = XGridCalculator.ConvertXToXGrid(relativePoint.X, editor);
+                    var attachedX = CalculateOriginalLaneX(originalLane, attachedT, targetX);
+                    if (attachedX == null) return;
+                    if (attached.TGrid.TotalGrid != attachedT.TotalGrid) attached.TGrid = attachedT;
+                    if (attached.XGrid.TotalGrid != attachedX.TotalGrid) attached.XGrid = attachedX;
+                }
+                return;
+            }
+
             var forceMagneticToLane = editor.Setting.ForceTapHoldMagneticDockToLane;
             var forceMagnetic = editor.Setting.ForceMagneticDock;
             var enableMoveTo = !forceMagneticToLane;
@@ -96,6 +112,73 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             //如果ForceTapHoldMagneticDockToLane=true,则不需要这里钦定位置
             if (enableMoveTo)
                 base.OnMoveCanvas(obj, relativePoint, editor);
+        }
+
+        // 同时刻水平段覆盖一段 X 区间，保留目标横坐标在最近区间内的位置。
+        internal static XGrid CalculateOriginalLaneX(LaneStartBase lane, TGrid time, XGrid target)
+            => CreateOriginalLaneProjector(lane)(time, target);
+
+        // 每个动作按轨道建一次索引；有效性仅检查一次，同 T 插值结果复用。
+        internal static Func<TGrid, XGrid, XGrid> CreateOriginalLaneProjector(LaneStartBase lane)
+        {
+            var children = lane.Children.ToArray();
+            var valid = lane.IsPathVaild();
+            var horizontalRanges = new Dictionary<int, List<(int min, int max)>>();
+            foreach (var child in children)
+            {
+                if (child.PrevObject is not OngekiMovableObjectBase previous || previous.TGrid.TotalGrid != child.TGrid.TotalGrid) continue;
+                var t = child.TGrid.TotalGrid;
+                var min = Math.Min(previous.XGrid.TotalGrid, child.XGrid.TotalGrid);
+                var max = Math.Max(previous.XGrid.TotalGrid, child.XGrid.TotalGrid);
+                var horizontal = true;
+                foreach (var control in child.PathControls)
+                {
+                    if (control.TGrid.TotalGrid != t) { horizontal = false; break; }
+                    min = Math.Min(min, control.XGrid.TotalGrid);
+                    max = Math.Max(max, control.XGrid.TotalGrid);
+                }
+                if (!horizontal) continue;
+                if (child.PathControls.Count > 0)
+                {
+                    var path = child.GetConnectionPaths().Select(p => p.pos.X).ToArray();
+                    if (path.Length > 0) { min = (int)Math.Ceiling(path.Min()); max = (int)Math.Floor(path.Max()); }
+                }
+                if (!horizontalRanges.TryGetValue(t, out var ranges)) horizontalRanges[t] = ranges = new();
+                ranges.Add((min, max));
+            }
+            var interpolated = new Dictionary<int, XGrid>();
+            return (time, target) =>
+            {
+                if (horizontalRanges.TryGetValue(time.TotalGrid, out var ranges))
+                {
+                    int closest = target.TotalGrid;
+                    long distance = long.MaxValue;
+                    foreach (var range in ranges)
+                    {
+                        var x = Math.Max(range.min, Math.Min(range.max, target.TotalGrid));
+                        var delta = Math.Abs((long)x - target.TotalGrid);
+                        if (delta >= distance) continue;
+                        distance = delta; closest = x;
+                    }
+                    return XGrid.FromTotalGrid(closest);
+                }
+                if (interpolated.TryGetValue(time.TotalGrid, out var cached)) return cached;
+                XGrid result = null;
+                if (!valid) result = lane.CalulateXGrid(time);
+                else if (time >= lane.TGrid && children.Length > 0)
+                {
+                    var lo = 0; var hi = children.Length;
+                    while (lo < hi)
+                    {
+                        var mid = lo + (hi - lo) / 2;
+                        if (children[mid].TGrid < time) lo = mid + 1;
+                        else hi = mid;
+                    }
+                    if (lo < children.Length) result = children[lo].CalulateXGrid(time);
+                }
+                interpolated[time.TotalGrid] = result;
+                return result;
+            };
         }
 
         public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
