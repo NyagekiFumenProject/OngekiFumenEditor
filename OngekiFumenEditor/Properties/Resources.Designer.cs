@@ -9060,5 +9060,10 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
             }
         }
+        public static string ContinuousProjectilePlacement => ResourceManager.GetString("ContinuousProjectilePlacement", resourceCulture);
+        public static string UndoChangeBulletDamage => ResourceManager.GetString("UndoChangeBulletDamage", resourceCulture);
+        public static string UndoQuickProjectilePlacement => ResourceManager.GetString("UndoQuickProjectilePlacement", resourceCulture);
+        public static string kbd_editor_QuickBulletDamageDown => ResourceManager.GetString("kbd_editor_QuickBulletDamageDown", resourceCulture);
+        public static string kbd_editor_QuickBulletDamageUp => ResourceManager.GetString("kbd_editor_QuickBulletDamageUp", resourceCulture);
     }
 }

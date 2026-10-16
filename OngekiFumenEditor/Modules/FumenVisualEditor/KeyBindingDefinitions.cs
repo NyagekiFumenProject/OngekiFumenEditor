@@ -12,6 +12,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
 {
     public static class KeyBindingDefinitions
     {
+        [Export] public static KeyBindingDefinition KBD_QuickBulletDamageUp = new("kbd_editor_QuickBulletDamageUp", Key.Up);
+        [Export] public static KeyBindingDefinition KBD_QuickBulletDamageDown = new("kbd_editor_QuickBulletDamageDown", Key.Down);
         [Export]
         public static KeyBindingDefinition KBD_ChangeDockableLaneType = new KeyBindingDefinition(
             "kbd_editor_ChangeDockableLaneType",

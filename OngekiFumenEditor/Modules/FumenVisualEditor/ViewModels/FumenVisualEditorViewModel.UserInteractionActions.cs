@@ -53,6 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => isUserRequestHideEditorObject;
             set
             {
+                CancelPlacementTools();
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
                 NotifyOfPropertyChange(() => IsDesignMode);
@@ -864,6 +865,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
+            CancelPlacementTools();
             if (!IsDesignMode)
             {
                 ToastNotify(Resources.EditorMustBeDesignMode);
@@ -1165,11 +1167,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
+        // 模式切换、工具箱拖放和文档失焦共用同一取消入口。
+        public void CancelPlacementTools()
+        {
+            if (IsQuickPlacementActive) CancelQuickPlacement();
+        }
+
         #region Drag Actions
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
+            quickPlacingDrag = false;
+            CurrentCursorPosition = null;
+            placementViewportPoint = null;
+            NotifyOfPropertyChange(() => QuickPlacementVisibility);
             OnMouseUp(e);
         }
 
@@ -1180,6 +1192,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 return;
             }
+
+            if (arg.ChangedButton == MouseButton.Right && consumeQuickRightMouseUp)
+            {
+                consumeQuickRightMouseUp = false;
+                arg.Handled = true;
+                return;
+            }
+            if (arg.ChangedButton == MouseButton.Left && consumeQuickMouseUp)
+            {
+                consumeQuickMouseUp = false;
+                var pointer = arg.GetPosition(e.Source);
+                if (quickPlacingDrag && IsQuickPlacementActive && IsDesignMode && !IsBatchMode)
+                    PlaceQuickObject(new Point(pointer.X, RectInDesignMode.MaxY - pointer.Y));
+                quickPlacingDrag = false;
+                arg.Handled = true;
+                return;
+            }
+            if (!IsDesignMode || IsBatchMode) CancelPlacementTools();
 
             Log.LogInfo("Visual mouseup");
 
@@ -1272,12 +1302,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 return;
             }
+            // 上次释放若发生在视口之外，不得影响下一次普通右键。
+            consumeQuickRightMouseUp = false;
             Log.LogInfo("Visual mousedown");
 
             prevRightButtonState = arg.RightButton;
 
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
+            if (!IsDesignMode || IsBatchMode) CancelPlacementTools();
+            if (arg.ChangedButton == MouseButton.Left)
+            {
+                // 上一次释放可能发生在画布外，新的按下开启独立的点击序列。
+                consumeQuickMouseUp = false;
+            }
+            if (IsDesignMode && !IsBatchMode && IsQuickPlacementActive)
+            {
+                if (arg.ChangedButton == MouseButton.Right)
+                {
+                    CancelQuickPlacement();
+                    consumeQuickRightMouseUp = true;
+                    arg.Handled = true;
+                    return;
+                }
+                if (arg.ChangedButton == MouseButton.Left)
+                {
+                    placementViewportPoint = position;
+                    CurrentCursorPosition = new Point(position.X, RectInDesignMode.MaxY - position.Y);
+                    quickPlacingDrag = true;
+                    consumeQuickMouseUp = true;
+                    UpdateQuickPlacementPreview();
+                    view?.Focus();
+                    arg.Handled = true;
+                    return;
+                }
+            }
 
             if (IsDesignMode)
             {
@@ -1416,7 +1475,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public async void OnMouseMove(Point pos)
         {
             //show current cursor position in statusbar
+            placementViewportPoint = pos;
             UpdateCurrentCursorPosition(pos);
+            if (!IsDesignMode || IsBatchMode) CancelPlacementTools();
+            UpdateQuickPlacementPreview();
 
             if (IsDesignMode)
             {
@@ -1437,6 +1499,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
+
+                if (IsQuickPlacementActive) return;
 
                 if (SelectionArea.IsActive)
                 {
@@ -1570,6 +1634,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
+            CancelPlacementTools();
             if (!CurrentCursorPosition.HasValue)
             {
                 return;
@@ -1698,6 +1763,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as DragEventArgs;
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 arg.Effects = DragDropEffects.None;
+            else
+                CancelPlacementTools();
         }
 
         public void Grid_Drop(ActionExecutionContext e)
@@ -1711,6 +1778,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as DragEventArgs;
             if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
+                CancelPlacementTools();
                 var mousePosition = arg.GetPosition(e.View as FrameworkElement);
                 mousePosition.Y = RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY;
 
@@ -1755,6 +1823,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var change = new GridOffset((float)changeGrid.TotalUnit * page, 0);
 
             ScrollTo(GetViewportTGrid() + new GridOffset(change.Unit, change.Grid));
+            UpdateQuickPlacementPreview();
         }
 
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
@@ -1823,6 +1892,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 OnWheelVerticalScale(arg);
             else
                 OnWheelScrollViewer(arg);
+            UpdateQuickPlacementPreview();
         }
 
         /*
