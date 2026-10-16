@@ -9060,5 +9060,10 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
             }
         }
+        public static string RelativeBulletHitRangeHint => ResourceManager.GetString("RelativeBulletHitRangeHint", resourceCulture);
+        public static string ShowBeamHitRanges => ResourceManager.GetString("ShowBeamHitRanges", resourceCulture);
+        public static string ShowBulletHitRanges => ResourceManager.GetString("ShowBulletHitRanges", resourceCulture);
+        public static string TipBeamHitRanges => ResourceManager.GetString("TipBeamHitRanges", resourceCulture);
+        public static string TipBulletHitRanges => ResourceManager.GetString("TipBulletHitRanges", resourceCulture);
     }
 }
