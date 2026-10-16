@@ -53,6 +53,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => isUserRequestHideEditorObject;
             set
             {
+                CancelPlacementTools();
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
                 NotifyOfPropertyChange(() => IsDesignMode);
@@ -864,6 +865,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
+            CancelPlacementTools();
             if (!IsDesignMode)
             {
                 ToastNotify(Resources.EditorMustBeDesignMode);
@@ -1165,11 +1167,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
+        // 模式切换、工具箱拖放和文档失焦共用同一取消入口。
+        public void CancelPlacementTools()
+        {
+            if (IsIndividualSoflanPlacementActive) CancelIndividualSoflanPlacement();
+        }
+
         #region Drag Actions
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
+            CurrentCursorPosition = null;
             OnMouseUp(e);
         }
 
@@ -1180,6 +1189,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 return;
             }
+
+            if (arg.ChangedButton == MouseButton.Left && consumeIndividualSoflanMouseUp)
+            {
+                consumeIndividualSoflanMouseUp = false;
+                arg.Handled = true;
+                return;
+            }
+            if (!IsDesignMode || IsBatchMode) CancelPlacementTools();
 
             Log.LogInfo("Visual mouseup");
 
@@ -1272,18 +1289,37 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 return;
             }
+            // 上次释放若发生在视口之外，不得影响下一次普通右键。
             Log.LogInfo("Visual mousedown");
 
             prevRightButtonState = arg.RightButton;
 
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
+            if (!IsDesignMode || IsBatchMode) CancelPlacementTools();
+            if (arg.ChangedButton == MouseButton.Left)
+            {
+                // 上一次释放可能发生在画布外，新的按下开启独立的点击序列。
+                consumeIndividualSoflanMouseUp = false;
+            }
+            if (IsDesignMode && arg.ChangedButton == MouseButton.Right && IsIndividualSoflanPlacementActive)
+            {
+                CancelIndividualSoflanPlacement();
+                arg.Handled = true;
+                return;
+            }
 
             if (IsDesignMode)
             {
                 if (arg.ChangedButton == MouseButton.Left)
                 {
                     position.Y = Math.Max(0, RectInDesignMode.MaxY - position.Y);
+                    if (!IsBatchMode && TryPlaceIndividualSoflanPoint(position))
+                    {
+                        view?.Focus();
+                        arg.Handled = true;
+                        return;
+                    }
 
                     isSelectRangeDragging = false;
 
@@ -1417,6 +1453,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //show current cursor position in statusbar
             UpdateCurrentCursorPosition(pos);
+            if (!IsDesignMode || IsBatchMode) CancelPlacementTools();
 
             if (IsDesignMode)
             {
@@ -1437,6 +1474,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                     //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
+
+                if (IsIndividualSoflanPlacementActive) return;
 
                 if (SelectionArea.IsActive)
                 {
@@ -1570,6 +1609,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
+            CancelPlacementTools();
             if (!CurrentCursorPosition.HasValue)
             {
                 return;
@@ -1698,6 +1738,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as DragEventArgs;
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 arg.Effects = DragDropEffects.None;
+            else
+                CancelPlacementTools();
         }
 
         public void Grid_Drop(ActionExecutionContext e)
@@ -1711,11 +1753,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as DragEventArgs;
             if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
+                CancelPlacementTools();
                 var mousePosition = arg.GetPosition(e.View as FrameworkElement);
                 mousePosition.Y = RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY;
 
                 switch (arg.Data.GetData(ToolboxDragDrop.DataFormat))
                 {
+                    case ToolboxItem toolboxItem when toolboxItem.ItemType == typeof(Toolboxes.OngekiObjects.IndividualSoflanAreaToolboxGenerator):
+                        ToggleIndividualSoflanPlacement();
+                        return;
                     case ToolboxItem toolboxItem:
                         new DefaultToolBoxDropAction(toolboxItem).Drop(this, mousePosition);
                         break;

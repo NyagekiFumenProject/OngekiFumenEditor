@@ -1,3 +1,4 @@
+using OngekiFumenEditor.Properties;
 using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
@@ -14,10 +15,10 @@ namespace OngekiFumenEditor.Base.EditorObjects
         public SoflanGroupWrapItem(int soflanGroupId)
         {
             SoflanGroupId = soflanGroupId;
-            displayName = $"SoflanGroup #{SoflanGroupId}";
+            displayName = SoflanGroupId.ToString();
 
             if (soflanGroupId == 0)
-                displayName = "Default " + displayName;
+                displayName = Resources.SoflanGroupDefaultName;
         }
 
         private string displayName;
@@ -26,6 +27,10 @@ namespace OngekiFumenEditor.Base.EditorObjects
             get => displayName;
             set { } //ignore
         }
+
+        public string SelectionDisplayName => SoflanGroupId == 0 || string.IsNullOrWhiteSpace(Parent?.DisplayName) ||
+            Parent.DisplayName == "default" || Parent.DisplayName == "root" || Parent.DisplayName == SoflanGroupId.ToString()
+            ? DisplayName : $"{Parent.DisplayName}（{SoflanGroupId}）";
 
         private bool isSelected = false;
         public bool IsSelected
