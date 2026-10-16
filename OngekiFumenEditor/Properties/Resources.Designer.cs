@@ -9060,5 +9060,6 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
             }
         }
+        public static string PasteInvalidGridPosition => ResourceManager.GetString("PasteInvalidGridPosition", resourceCulture);
     }
 }

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2761,4 +2761,5 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>T_* コマンドの値を計算できません：{0}</value>
   </data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>貼り付け位置が座標範囲外か、譜面の開始より前の時刻を含んでいます。</value></data>
 </root>
