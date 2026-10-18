@@ -7,7 +7,11 @@ internal static class Program
     {
         try
         {
+            OngekiFumenEditor.Properties.EditorGlobalSetting.Default.SettingsSaving += (_, e) => e.Cancel = true;
             var count = GridClipboardChecks.Run();
+            var switchFailures = new System.Collections.Generic.List<string>();
+            LaneSwitchChecks.Run((condition, name) => { if (!condition) switchFailures.Add(name); count++; });
+            if (switchFailures.Count > 0) throw new InvalidOperationException(string.Join(Environment.NewLine, switchFailures));
             var cacheFailures = new System.Collections.Generic.List<string>();
             StartCurveCacheChecks.Run((condition, name) => { if (!condition) cacheFailures.Add(name); count++; });
             if (cacheFailures.Count > 0) throw new InvalidOperationException(string.Join(Environment.NewLine, cacheFailures));

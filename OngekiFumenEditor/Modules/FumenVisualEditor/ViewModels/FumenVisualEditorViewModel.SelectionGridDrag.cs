@@ -32,6 +32,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             internal readonly long AnchorT;
             internal readonly long AnchorX;
             internal Point GrabOffset;
+            private readonly bool allowLaneSwitch;
+            private LaneSwitchResolver laneSwitchResolver;
 
             internal SelectionGridDrag(IEnumerable<OngekiTimelineObjectBase> selected, IEnumerable<OngekiTimelineObjectBase> related)
             {
@@ -42,6 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     OngekiFumenEditor.Base.EditorObjects.LaneCurve.LaneCurvePathControlObject control => control.RefCurveObject?.ReferenceStartObject,
                     _ => null
                 }).Where(x => x != null).ToHashSet();
+                allowLaneSwitch = changedLanes.Count == 0;
                 Before = related.Concat(targets).Distinct().Select(o => new Position
                 {
                     Object = o, T = o.TGrid.TotalGrid,
@@ -76,7 +79,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     XGrid targetX = p.X.HasValue ? XGrid.FromTotalGrid((int)x) : null;
                     if (p.Selected && editor != null)
                     {
-                        if (!editor.Setting.DisableTGridMagneticDock && action.CheckAndAdjustY(p.Object, editor.ConvertTGridToY_DesignMode(targetT), editor) is double snappedY)
+                        if (!(dt == 0 && p.Object is Tap or Hold or HoldEnd) && !editor.Setting.DisableTGridMagneticDock && action.CheckAndAdjustY(p.Object, editor.ConvertTGridToY_DesignMode(targetT), editor) is double snappedY)
                             targetT = editor.ConvertYToTGrid_DesignMode(snappedY);
                         if (targetT == null || targetT.TotalGrid < 0) return false;
                         if (targetX != null && !editor.Setting.DisableXGridMagneticDock)
@@ -93,6 +96,45 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     desired[i] = new Position { Object = p.Object, T = targetT.TotalGrid, X = targetX?.TotalGrid, Lane = p.Lane, Selected = p.Selected, LaneAffected = p.LaneAffected };
                 }
                 var byObject = desired.ToDictionary(p => p.Object);
+                // 同选头尾以头部的实际时间位移为准，避免分别吸附改变 Hold 时长。
+                foreach (var head in desired.Where(p => p.Selected && p.Object is Hold))
+                {
+                    var hold = (Hold)head.Object;
+                    if (hold.HoldEnd != null && byObject.TryGetValue(hold.HoldEnd, out var tail) && tail.Selected)
+                    {
+                        var end = (long)head.T + positionsByObject[hold.HoldEnd].T - positionsByObject[hold].T;
+                        if (end < head.T || end > int.MaxValue) return false;
+                        tail.T = (int)end;
+                    }
+                }
+                if (editor != null && allowLaneSwitch)
+                {
+                    foreach (var p in desired.Where(p => p.Selected && p.Object is Tap or Hold && p.Lane != null))
+                    {
+                        var currentLane = ((ILaneDockable)p.Object).ReferenceLaneStart;
+                        var hold = p.Object as Hold;
+                        Position tail = null;
+                        if (hold?.HoldEnd != null) byObject.TryGetValue(hold.HoldEnd, out tail);
+                        var end = hold?.HoldEnd == null ? null : TGrid.FromTotalGrid(tail?.T ?? hold.HoldEnd.TGrid.TotalGrid);
+                        if (end != null && end.TotalGrid < p.T) return false;
+                        laneSwitchResolver ??= new LaneSwitchResolver(editor);
+                        var rawX = XGrid.FromTotalGrid((int)((long)positionsByObject[p.Object].X.Value + dx));
+                        p.Lane = dx != 0 || !ReferenceEquals(currentLane, p.Lane)
+                            ? laneSwitchResolver.Resolve(currentLane, TGrid.FromTotalGrid(p.T), rawX, end) : currentLane;
+                        // 在写入模型前先投影，避免每帧先写鼠标 X 再贴轨造成重复通知。
+                        var headX = laneSwitchResolver.Project(p.Lane, TGrid.FromTotalGrid(p.T), rawX);
+                        if (headX == null) return false;
+                        p.X = headX.TotalGrid;
+                        if (tail != null)
+                        {
+                            tail.Lane = p.Lane;
+                            tail.LaneAffected = true;
+                            var tailX = laneSwitchResolver.Project(p.Lane, TGrid.FromTotalGrid(tail.T), XGrid.FromTotalGrid(tail.X.Value));
+                            if (tailX == null) return false;
+                            tail.X = tailX.TotalGrid;
+                        }
+                    }
+                }
                 // 全部关键节点选中的整线使用实际起点的吸附增量，保留几何形状。
                 foreach (var lane in desired.Where(p => p.Object is ConnectableStartObject).Select(p => (ConnectableStartObject)p.Object))
                 {
@@ -180,7 +222,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     if (end != null && Time(end) < p.T) return false;
                 }
                 var previousPositions = snapToLane ? CaptureCurrent() : null;
-                if (!ApplyWithSnapping(desired, 0, 0, snapToLane))
+                if (!ApplyWithSnapping(desired, 0, 0, snapToLane, allowLaneSwitch ? laneSwitchResolver : null))
                 {
                     Apply(previousPositions);
                     return false;
@@ -190,7 +232,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             internal static void Apply(Position[] positions, long dt = 0, long dx = 0) => ApplyWithSnapping(positions, dt, dx, false);
 
-            private static bool ApplyWithSnapping(Position[] positions, long dt, long dx, bool snapHoldEndsToLane)
+            private static bool ApplyWithSnapping(Position[] positions, long dt, long dx, bool snapHoldEndsToLane, LaneSwitchResolver resolver = null)
             {
                 // 父物件先写入，尾节点随后恢复，避免持续物件 setter 钳制尾节点。
                 foreach (var p in positions.OrderBy(p => p.Object is HoldEnd or Soflan.SoflanEndIndicator or LaneBlockArea.LaneBlockAreaEndIndicator or IndividualSoflanArea.IndividualSoflanAreaEndIndicator ? 1 : 0))
@@ -213,6 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var projectors = new Dictionary<LaneStartBase, Func<TGrid, XGrid, XGrid>>();
                     XGrid Project(LaneStartBase lane, TGrid time, XGrid x)
                     {
+                        if (resolver != null) return resolver.Project(lane, time, x);
                         if (!projectors.TryGetValue(lane, out var project))
                             projectors[lane] = project = Interactives.Impls.DockableObjectInteractiveAction.CreateOriginalLaneProjector(lane);
                         return project(time, x);

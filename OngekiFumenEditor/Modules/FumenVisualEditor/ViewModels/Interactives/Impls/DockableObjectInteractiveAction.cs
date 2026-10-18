@@ -1,3 +1,6 @@
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -15,6 +18,66 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         protected override bool IsXGridSnappedToLaneThisMove => isXGridSnappedToLaneThisMove;
 
+        private sealed class NoteState
+        {
+            internal ILaneDockable Note;
+            internal TGrid Time;
+            internal XGrid X;
+            internal LaneStartBase Lane;
+            internal HoldEnd Tail;
+            internal TGrid TailTime;
+            internal XGrid TailX;
+            internal NoteState(ILaneDockable note)
+            {
+                Note = note; Time = note.TGrid.CopyNew(); X = note.XGrid.CopyNew(); Lane = note.ReferenceLaneStart;
+                Tail = (note as Hold)?.HoldEnd;
+                TailTime = Tail?.TGrid.CopyNew(); TailX = Tail?.XGrid.CopyNew();
+            }
+            internal void Apply()
+            {
+                Note.TGrid = Time.CopyNew();
+                if (Tail != null) Tail.TGrid = TailTime.CopyNew();
+                if (!ReferenceEquals(Note.ReferenceLaneStart, Lane)) Note.ReferenceLaneStart = Lane;
+                Note.XGrid = X.CopyNew();
+                if (Tail != null) Tail.XGrid = TailX.CopyNew();
+            }
+            internal bool SameAs(NoteState other) => ReferenceEquals(Lane, other.Lane) && Time == other.Time && X == other.X && TailTime == other.TailTime && TailX == other.TailX;
+        }
+        private sealed class NoteDrag
+        {
+            internal NoteState Before;
+            internal Point Mouse;
+            internal Point Canvas;
+            internal LaneSwitchResolver Resolver;
+        }
+        private readonly Dictionary<OngekiObjectBase, NoteDrag> noteDrags = new();
+
+        public override void OnDragStart(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (obj is not Tap && obj is not Hold) { base.OnDragStart(obj, point, editor); return; }
+            var note = (ILaneDockable)obj;
+            noteDrags[obj] = new NoteDrag { Before = new NoteState(note), Mouse = point,
+                Canvas = new Point(XGridCalculator.ConvertXGridToX(note.XGrid, editor), editor.ConvertTGridToY_DesignMode(note.TGrid)),
+                Resolver = new LaneSwitchResolver(editor) };
+        }
+        public override void OnDragMove(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (!noteDrags.TryGetValue(obj, out var drag)) { base.OnDragMove(obj, point, editor); return; }
+            OnMoveCanvas(obj, new Point(drag.Canvas.X + point.X - drag.Mouse.X, Math.Max(0, Math.Min(editor.TotalDurationHeight, drag.Canvas.Y + point.Y - drag.Mouse.Y))), editor);
+        }
+        public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (!noteDrags.TryGetValue(obj, out var drag)) { base.OnDragEnd(obj, point, editor); return; }
+            try
+            {
+                OnDragMove(obj, point, editor);
+                var after = new NoteState((ILaneDockable)obj);
+                if (!drag.Before.SameAs(after))
+                    editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects, after.Apply, drag.Before.Apply));
+            }
+            finally { noteDrags.Remove(obj); }
+        }
+
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
             return editor.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();
@@ -24,19 +87,31 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             isXGridSnappedToLaneThisMove = false;
 
-            // 已附轨物件保持原轨引用，时间吸附遵循通用开关；轨道区间外不夹时间或跨轨。
+            // Tap/Hold 头靠近有效目标轨才换线；纯横移保留原时间。
             if (obj is ILaneDockable attached && attached.ReferenceLaneStart is LaneStartBase originalLane)
             {
+                noteDrags.TryGetValue(obj, out var drag);
+                var originalY = drag?.Canvas.Y ?? editor.ConvertTGridToY_DesignMode(attached.TGrid);
+                var pureHorizontal = Math.Abs(relativePoint.Y - originalY) < .0001;
                 var basic = new DefaultObjectInteractiveAction();
-                if (basic.CheckAndAdjustY(attached, relativePoint.Y, editor) is double attachedY &&
-                    editor.ConvertYToTGrid_DesignMode(attachedY) is TGrid attachedT)
-                {
-                    var targetX = XGridCalculator.ConvertXToXGrid(relativePoint.X, editor);
-                    var attachedX = CalculateOriginalLaneX(originalLane, attachedT, targetX);
-                    if (attachedX == null) return;
-                    if (attached.TGrid.TotalGrid != attachedT.TotalGrid) attached.TGrid = attachedT;
-                    if (attached.XGrid.TotalGrid != attachedX.TotalGrid) attached.XGrid = attachedX;
-                }
+                var attachedT = pureHorizontal ? (drag?.Before.Time ?? attached.TGrid).CopyNew() :
+                    basic.CheckAndAdjustY(attached, relativePoint.Y, editor) is double attachedY ? editor.ConvertYToTGrid_DesignMode(attachedY) : null;
+                if (attachedT == null) return;
+                var targetX = XGridCalculator.ConvertXToXGrid(relativePoint.X, editor);
+                var resolver = drag?.Resolver ?? new LaneSwitchResolver(editor);
+                var lane = originalLane;
+                var originalX = drag?.Canvas.X ?? XGridCalculator.ConvertXGridToX(attached.XGrid, editor);
+                var tail = (obj as Hold)?.HoldEnd;
+                if (tail != null && attachedT > tail.TGrid) return;
+                if (obj is Tap or Hold && Math.Abs(relativePoint.X - originalX) > .0001)
+                    lane = resolver.Resolve(originalLane, attachedT, targetX, tail?.TGrid);
+                var attachedX = resolver.Project(lane, attachedT, targetX);
+                var tailX = tail != null ? resolver.Project(lane, tail.TGrid, tail.XGrid) : null;
+                if (attachedX == null || tail != null && tailX == null) return;
+                if (attached.TGrid.TotalGrid != attachedT.TotalGrid) attached.TGrid = attachedT;
+                if (!ReferenceEquals(attached.ReferenceLaneStart, lane)) attached.ReferenceLaneStart = lane;
+                if (attached.XGrid.TotalGrid != attachedX.TotalGrid) attached.XGrid = attachedX;
+                if (tail != null && tail.XGrid.TotalGrid != tailX.TotalGrid) tail.XGrid = tailX;
                 return;
             }
 
