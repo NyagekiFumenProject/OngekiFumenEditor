@@ -1,9 +1,11 @@
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
+using Gemini.Modules.UndoRedo;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -167,9 +169,29 @@ namespace OngekiFumenEditor.Modules.TGridCalculatorToolViewer.ViewModels
             Editor.ScrollTo(new TGrid(Unit, Grid));
         }
 
+        /// <summary>
+        /// 构造"把指定 TGrid 赋给物件"的可撤销动作；物件当前 TGrid 为空时返回 null。
+        /// </summary>
+        public static IUndoableAction CreateApplyTGridAction(ITimelineObject timelineObject, TGrid newTGrid)
+        {
+            if (timelineObject?.TGrid is not TGrid oldTGrid)
+                return default;
+
+            return LambdaUndoAction.Create(
+                Resources.GiveTGridToSelectedObject,
+                () => timelineObject.TGrid = newTGrid.CopyNew(),
+                () => timelineObject.TGrid = oldTGrid);
+        }
+
         public void OnRequestApplyTGridToObject()
         {
-            TimelineObject.TGrid = new TGrid(Unit, Grid);
+            if (Editor is null || TimelineObject is null)
+                return;
+
+            if (CreateApplyTGridAction(TimelineObject, new TGrid(Unit, Grid)) is not IUndoableAction action)
+                return;
+
+            Editor.UndoRedoManager.ExecuteAction(action);
         }
     }
 }
