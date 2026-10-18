@@ -249,10 +249,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
 
         private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            ConnectableObjectsPropertyChanged?.Invoke(sender, e);
             switch (e.PropertyName)
             {
                 case nameof(TGrid):
+                // 属性面板直接修改坐标分量时，通知名是 Unit 或 Grid。
+                case nameof(GridBase.Unit):
+                case nameof(GridBase.Grid):
                     if (sender is ConnectableChildObjectBase child)
                     {
                         child.NotifyRefreshPaths();
@@ -262,13 +264,17 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     {
                         NextObject?.NotifyRefreshPaths();
                     }
-                    NotifyRefreshMinMaxTGrid();
+                    NotifyRefreshMinMaxTGrid(e.PropertyName != nameof(TGrid));
                     break;
                 case nameof(XGrid):
                     if (sender is ConnectableChildObjectBase child2)
                     {
                         child2.NotifyRefreshPaths();
                         child2.NextObject?.NotifyRefreshPaths();
+                    }
+                    else
+                    {
+                        NextObject?.NotifyRefreshPaths();
                     }
                     break;
                 case nameof(ConnectableChildObjectBase.CurvePrecision):
@@ -279,14 +285,21 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 default:
                     break;
             }
+            // 先使相邻路径缓存失效，保证绘制和贴轨监听者取得最新曲线。
+            ConnectableObjectsPropertyChanged?.Invoke(sender, e);
         }
 
-        private void NotifyRefreshMinMaxTGrid()
+        private void NotifyRefreshMinMaxTGrid(bool notifyOnlyIfRangeChanged = false)
         {
+            var previousMin = cachedMinTGrid;
+            var previousMax = cachedMaxTGrid;
             cachedMaxTGrid = default;
             cachedMinTGrid = default;
-            NotifyOfPropertyChange(() => MinTGrid);
-            NotifyOfPropertyChange(() => MaxTGrid);
+            // Unit/Grid 通知未区分 X 与 T；范围未变时不重建时间索引。
+            if (!notifyOnlyIfRangeChanged || previousMin is null || previousMin != MinTGrid)
+                NotifyOfPropertyChange(() => MinTGrid);
+            if (!notifyOnlyIfRangeChanged || previousMax is null || previousMax != MaxTGrid)
+                NotifyOfPropertyChange(() => MaxTGrid);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()

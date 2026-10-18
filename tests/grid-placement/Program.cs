@@ -8,6 +8,9 @@ internal static class Program
         try
         {
             var count = GridClipboardChecks.Run();
+            var cacheFailures = new System.Collections.Generic.List<string>();
+            StartCurveCacheChecks.Run((condition, name) => { if (!condition) cacheFailures.Add(name); count++; });
+            if (cacheFailures.Count > 0) throw new InvalidOperationException(string.Join(Environment.NewLine, cacheFailures));
             GridInteractionChecks.Run((condition, name) => { if (!condition) throw new InvalidOperationException(name); count++; });
             ClipboardInteractionChecks.Run((condition, name) => { if (!condition) throw new InvalidOperationException(name); count++; });
             SelectionGridDragChecks.Run((condition, name) =>
