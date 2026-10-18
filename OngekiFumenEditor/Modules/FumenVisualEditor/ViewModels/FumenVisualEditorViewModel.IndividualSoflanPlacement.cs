@@ -40,17 +40,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 CancelIndividualSoflanPlacement();
                 return;
             }
+
             if (!IsDesignMode || IsBatchMode)
             {
                 ToastNotify(Resources.IsaPlacementDesignModeRequired);
                 return;
             }
+
             var selectedGroup = IoC.Get<IFumenSoflanGroupListViewer>().CurrentSelectedSoflanGroupWrapItem;
             if (selectedGroup is null || !Fumen.IndividualSoflanAreaMap.GetSoflanGroups().Any(x => x.SoflanGroupId == selectedGroup.SoflanGroupId))
             {
                 ToastNotify(Resources.IsaPlacementGroupRequired);
                 return;
             }
+
             individualSoflanPlacementGroup = selectedGroup.SoflanGroupId;
             individualSoflanPlacement.Toggle();
             SelectionArea.IsActive = false;
@@ -72,6 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 ToastNotify(Resources.IsaPlacementGroupMissing);
                 return true;
             }
+
             // 沿用普通物件的时间及 X 吸附规则；两个角点分别吸附。
             var probe = new IndividualSoflanArea();
             var interaction = new DefaultObjectInteractiveAction();
@@ -93,9 +97,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 area.EndIndicator.TGrid = (first.T <= point.T ? point.T : first.T).CopyNew();
                 area.EndIndicator.XGrid = (first.X <= point.X ? point.X : first.X).CopyNew();
                 UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.IsaPlacementUndo,
-                    () => { Fumen.AddObject(area); ClearSelection(); area.IsSelected = true; IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this); },
-                    () => { Fumen.RemoveObject(area); IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this); }));
+                    () =>
+                    {
+                        Fumen.AddObject(area);
+                        ClearSelection();
+                        area.IsSelected = true;
+                        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+                    },
+                    () =>
+                    {
+                        Fumen.RemoveObject(area);
+                        IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
+                    }));
             }
+
             NotifyIndividualSoflanPlacement();
             return true;
         }

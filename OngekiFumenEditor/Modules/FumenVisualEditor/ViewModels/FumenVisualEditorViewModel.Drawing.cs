@@ -324,8 +324,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         builder.SetCleanColor(GetCleanColor());
         builder.SetViewport(ViewWidth, ViewHeight, RenderScaleX, RenderScaleY);
 
-        var projectionMatrix =
-            Matrix4x4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
+        var projectionMatrix = Matrix4x4.CreateOrthographic(ViewWidth, ViewHeight, -1, 1);
         builder.SetCurrentViewMatrix(Matrix4x4.Identity);
         builder.SetCurrentProjectionMatrix(projectionMatrix);
 
@@ -340,9 +339,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         soflanGroupCacheInvalidation.RefreshIfNeeded(RebuildObjectSoflanGroupRecord);
 
         context.PerfomenceMonitor.OnBeforeRender();
-
         //计算可以显示的TGrid范围以及像素范围
-
         // 帧首唯一一次读取播放时间：整帧（原点、裁判线、特效、拍线……）都基于同一快照，
         // 命令生成与随后呈现共享这一帧的时间基准；帧内不再重复读取，渲染线程与 UI 线程的
         // 时间推进因此不会被撕裂进同一帧。
@@ -365,11 +362,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
 
         #region prepare drawing contexts' for every soflan groups
-
         IEnumerable<KeyValuePair<int, SoflanList>> soflanMap = Fumen.SoflansMap;
         //if (IsDesignMode)
         //    soflanMap = [new KeyValuePair<int, SoflanList>(0, Fumen.SoflansMap.DefaultSoflanList)];
-
         foreach (KeyValuePair<int, SoflanList> pair in soflanMap)
         {
             var curY = ConvertToY(tGrid.TotalUnit, pair.Value);
@@ -381,8 +376,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             if (IsPreviewMode)
             {
                 //Preview Mode
-                using var ranges =
-                    pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
+                using var ranges = pair.Value.GetVisibleRanges_PreviewMode(curY, ViewHeight, Setting.JudgeLineOffsetY, Fumen.BpmList,
                         Setting.VerticalDisplayScale);
                 foreach (var x in ranges)
                 {
@@ -430,9 +424,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         if (IsDesignMode)
             RectInDesignMode = defaultDrawingTargetContext.WorldRect;
-
         #endregion
-
         // objType -> soflanGroup -> obj[]
         var drawingCollectionDisposables = ObjectPool.GetPooledList<IDisposable>();
 
@@ -445,7 +437,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         {
             //always draw default soflan group
             usedDrawingContexts.Add(0);
-
             //Prepare objects we will draw them.
             //get&register all visible objects for every drawingContext(soflanGroup)
             //帧首算一次「所有组的可见区间」并缓存：它同时服务于下面的全局枚举，
@@ -566,6 +557,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                     var rr = r[defaultDrawingTargetContext] = rrPool;
                     AddVisibleTGridRangeObjectsInto(frameTGrid, TGrid.MaxValue, Fumen.Bullets, rr);
                 }
+
                 foreach (var drawingTarget in GetDrawingTarget(Bell.CommandName))
                 {
                     var rPool = ObjectPool.GetPooledDictionary<DrawingTargetContext, IPooledList<OngekiObjectBase>>();
@@ -579,7 +571,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             }
 
             #region Rendering
-
             CurrentDrawingTargetContext = defaultDrawingTargetContext;
             builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
             builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
@@ -629,6 +620,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                                 objectBuilder = new SoflanGroupTintBuilder(builder,
                                     IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(soflanGroup));
                         }
+
                         drawingTarget.Begin(this, objectBuilder);
                         //all object collection has been sorted within GetDisplayableObjects()
                         for (var i = 0; i < drawingObjects.Count; i++)
@@ -636,6 +628,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                             var obj = drawingObjects[i];
                             drawingTarget.Post(obj);
                         }
+
                         drawingTarget.End();
                     }
                 }
@@ -654,7 +647,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             selectingRangeHelper.Draw(this, builder);
 
             PostDrawCommandList(builder);
-
             //clean up
         }
         finally
@@ -664,6 +656,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                 var disposable = drawingCollectionDisposables[i];
                 disposable.Dispose();
             }
+
             unusedSoflanGroups.Dispose();
             usedDrawingContexts.Dispose();
             map.Dispose();
@@ -673,8 +666,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             // 成功路径与异常路径都经过本块；try 之前的两个 goto End 早退点不经此处，但那时 drawMap 本就为空。
             drawMap.Clear();
         }
+
         context.PerfomenceMonitor.OnAfterRender();
-        #endregion
+            #endregion
     End:
         builder?.Dispose();
         // 这里**不再** drawMap.Clear()：本帧对 drawMap 的写入全部发生在 try 内，而到达本标签只有两条路径 ——

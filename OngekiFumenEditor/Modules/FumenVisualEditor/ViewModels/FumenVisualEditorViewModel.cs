@@ -491,7 +491,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Interlocked.Exchange(ref isDisposed, 1) != 0)
                 return;
-
             var fumen = editorProjectData?.Fumen;
             soflanGroupCacheInvalidation.Dispose();
             if (fumen is not null)
@@ -504,12 +503,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             EditorGlobalSetting.Default.PropertyChanged -= OnSettingPropertyChanged;
             editorProjectData?.EditorSetting.Dispose();
             Setting.Dispose();
-
             if (UndoRedoManager is IDisposable undoManager)
                 undoManager.Dispose();
             else
                 UndoRedoManager.Clear();
-
             AudioPlayer?.Pause();
             AudioPlayer?.Dispose();
             AudioPlayer = null;

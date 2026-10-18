@@ -228,7 +228,7 @@ namespace OngekiFumenEditor.Base
             }
             else if (obj is HoldEnd holdEnd)
             {
-                if (holdEnd.RefHold is null && Holds.FirstOrDefault(x => x.Id == holdEnd.CacheRecoveryHoldObjectID) is Hold h)
+                if (holdEnd.RefHold is null && Holds.FirstOrDefault(x => x.Id == holdEnd.CacheRecoveryHoldObjectID)is Hold h)
                     h.SetHoldEnd(holdEnd);
             }
             else if (obj is Comment comment)
@@ -247,7 +247,7 @@ namespace OngekiFumenEditor.Base
             {
                 LaneStartBase or LaneNextBase => obj,
                 _ => null
-            } is ConnectableObjectBase lane)
+            }is ConnectableObjectBase lane)
             {
                 Lanes.Add(lane);
                 ConnectableObjectDockingHelper.RelocateDockableObjects(this, lane);
@@ -348,14 +348,12 @@ namespace OngekiFumenEditor.Base
             {
                 LaneStartBase or LaneNextBase => obj,
                 _ => null
-            } is ConnectableObjectBase lane)
+            }is ConnectableObjectBase lane)
             {
                 var refStart = lane.ReferenceStartObject;
                 var prev = (lane as ConnectableChildObjectBase)?.PrevObject;
                 var next = lane.NextObject;
-
                 Lanes.Remove(lane);
-
                 ConnectableObjectDockingHelper.RelocateDockableObjects(this, prev, refStart);
                 ConnectableObjectDockingHelper.RelocateDockableObjects(this, next, refStart);
             }

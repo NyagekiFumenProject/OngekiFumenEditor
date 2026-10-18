@@ -127,7 +127,15 @@
             </ContextMenu>
         </Grid.ContextMenu>
 
-        <ToggleButton Panel.ZIndex="21" Margin="8" HorizontalAlignment="Right" VerticalAlignment="Top" Content="{Binding IndividualSoflanPlacementText}" IsChecked="{Binding IsIndividualSoflanPlacementActive, Mode=OneWay}" cal:Message.Attach="[Event Click] = [Action ToggleIndividualSoflanPlacement()]" ToolTip="{markup:Translate [TipIsaPlacement]}" />
+        <ToggleButton
+            Panel.ZIndex="21"
+            Margin="8"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            Content="{Binding IndividualSoflanPlacementText}"
+            IsChecked="{Binding IsIndividualSoflanPlacementActive, Mode=OneWay}"
+            cal:Message.Attach="[Event Click] = [Action ToggleIndividualSoflanPlacement()]"
+            ToolTip="{markup:Translate [TipIsaPlacement]}" />
         <ContentControl x:Name="renderControlHost" cal:Message.Attach="[Event Loaded]=[Action OnRenderControlHostLoaded($executionContext)];" />
 
         <!--<opentkcontrol:GLWpfControl

@@ -13,7 +13,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
         public void Attach(OngekiFumen value)
         {
-            if (ReferenceEquals(fumen, value)) return;
+            if (ReferenceEquals(fumen, value))
+                return;
             Dispose();
             fumen = value;
             if (fumen != null)
@@ -21,6 +22,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 fumen.ObjectModifiedChanged += OnModified;
                 fumen.ObjectCollectionChanged += Invalidate;
             }
+
             Invalidate();
         }
 
@@ -34,9 +36,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
         public void RefreshIfNeeded(Action rebuild)
         {
-            if (Interlocked.Exchange(ref dirty, 0) == 0) return;
-            try { rebuild(); }
-            catch { Invalidate(); throw; }
+            if (Interlocked.Exchange(ref dirty, 0) == 0)
+                return;
+            try
+            {
+                rebuild();
+            }
+            catch
+            {
+                Invalidate();
+                throw;
+            }
         }
 
         public void Dispose()

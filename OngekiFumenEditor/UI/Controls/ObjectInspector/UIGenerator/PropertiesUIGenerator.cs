@@ -22,23 +22,23 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator
 
 
             return generator.Select(x =>
+            {
+                try
                 {
-                    try
+                    var element = x.Generate(wrapper);
+                    wrapper.PropertyChanged += (s, e) =>
                     {
-                        var element = x.Generate(wrapper);
-                        wrapper.PropertyChanged += (s, e) =>
-                        {
-                            //if (e.PropertyName == nameof(IObjectPropertyAccessProxy.ProxyValue))
-                            element.IsEnabled = !wrapper.IsReadOnly;
-                        };
+                        //if (e.PropertyName == nameof(IObjectPropertyAccessProxy.ProxyValue))
                         element.IsEnabled = !wrapper.IsReadOnly;
-                        return element;
-                    }
-                    catch
-                    {
-                        return default;
-                    }
-                }).OfType<UIElement>().FirstOrDefault();
+                    };
+                    element.IsEnabled = !wrapper.IsReadOnly;
+                    return element;
+                }
+                catch
+                {
+                    return default;
+                }
+            }).OfType<UIElement>().FirstOrDefault();
         }
     }
 }

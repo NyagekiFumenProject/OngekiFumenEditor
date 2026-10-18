@@ -120,24 +120,40 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             // 保留缓存编号，避免撤销历史中的对象指向后来创建的其他组。
             var id = map.GetNextSoflanGroupId(fumen.SoflansMap.Keys.Concat(map.Keys));
             var item = map.TryGetOrCreateSoflanGroupWrapItem(id, out _);
-            var group = new SoflanGroupWrapItemGroup { DisplayName =
-                string.IsNullOrWhiteSpace(CreateNewGroupName) ? id.ToString() : CreateNewGroupName.Trim() };
+            var group = new SoflanGroupWrapItemGroup
+            {
+                DisplayName = string.IsNullOrWhiteSpace(CreateNewGroupName) ? id.ToString() : CreateNewGroupName.Trim()
+            };
             Editor.UndoRedoManager.ExecuteAction(
                 OngekiFumenEditor.Modules.FumenVisualEditor.Base.LambdaUndoAction.Create(Resources.SoflanGroupCreateUndo,
-                () => { group.Add(item); map.SoflanGroupWrapItemGroupRoot.Add(group); RebuildItemGroupRoot(); CurrentSelectedSoflanGroupWrapItem = item; item.IsSelected = true; },
-                () => { group.Remove(item); map.SoflanGroupWrapItemGroupRoot.Remove(group); RebuildItemGroupRoot(); }));
+                    () =>
+                    {
+                        group.Add(item);
+                        map.SoflanGroupWrapItemGroupRoot.Add(group);
+                        RebuildItemGroupRoot();
+                        CurrentSelectedSoflanGroupWrapItem = item;
+                        item.IsSelected = true;
+                    },
+                    () =>
+                    {
+                        group.Remove(item);
+                        map.SoflanGroupWrapItemGroupRoot.Remove(group);
+                        RebuildItemGroupRoot();
+                    }));
             CreateNewGroupName = string.Empty;
         }
 
         public void DeleteSelectedGroup()
         {
             var item = CurrentSelectedSoflanGroupWrapItem;
-            if (Editor?.Fumen is not OngekiFumen fumen || item is null) return;
+            if (Editor?.Fumen is not OngekiFumen fumen || item is null)
+                return;
             if (item.SoflanGroupId == 0)
             {
                 MessageBox.Show(Resources.SoflanGroupDefaultCannotDelete, Resources.SoflanGroupDelete);
                 return;
             }
+
             var references = fumen.SoflansMap.Values.SelectMany(x => x).OfType<OngekiObjectBase>()
                 .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x))
                 .Where(x => (int)x.GetType().GetProperty("SoflanGroup").GetValue(x) == item.SoflanGroupId)
@@ -148,16 +164,18 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             {
                 var dialog = new OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Views.DeleteSoflanGroupDialog(
                     fumen.IndividualSoflanAreaMap.GetSoflanGroups().Where(x => x != item), references.Length);
-                if (dialog.ShowDialog() != true) return;
+                if (dialog.ShowDialog() != true)
+                    return;
                 replacement = dialog.Replacement;
                 deleteObjects = dialog.DeleteReferences;
             }
+
             Editor.UndoRedoManager.ExecuteAction(SoflanGroupOperations.CreateDeleteAction(
                 fumen, item, replacement, deleteObjects, () =>
-                {
-                    RebuildItemGroupRoot();
-                    IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
-                }));
+            {
+                RebuildItemGroupRoot();
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
+            }));
         }
 
         private SoflanGroupWrapItem currentSelectedSoflanGroupWrapItem;
@@ -264,6 +282,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
                 if (item.IsDisplaySoflanDesignMode)
                     CurrentSoflansDisplaySoflanGroupWrapItem = item;
             }
+
             CurrentSelectedSoflanGroupWrapItem ??= fumen.IndividualSoflanAreaMap.GetSoflanGroups().FirstOrDefault(x => x.SoflanGroupId == 0);
             CurrentSoflansDisplaySoflanGroupWrapItem ??= CurrentSelectedSoflanGroupWrapItem;
         }

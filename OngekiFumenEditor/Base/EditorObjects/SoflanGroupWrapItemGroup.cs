@@ -214,7 +214,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
 
             if (index < 0)
                 throw new Exception("Children not contains insertBefore");
-
             children.Insert(index, item);
         }
     }

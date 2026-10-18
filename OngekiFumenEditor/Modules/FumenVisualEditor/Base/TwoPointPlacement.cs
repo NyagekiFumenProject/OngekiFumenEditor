@@ -5,6 +5,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
     {
         public bool IsActive { get; private set; }
         public bool HasFirstPoint { get; private set; }
+
         private T firstPoint;
 
         public void Toggle()
@@ -32,6 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 HasFirstPoint = true;
                 return false;
             }
+
             first = firstPoint;
             Cancel();
             return true;

@@ -15,7 +15,8 @@ internal static class Program
     private static int checks;
     private static void Check(bool condition, string name)
     {
-        if (!condition) throw new InvalidOperationException(name);
+        if (!condition)
+            throw new InvalidOperationException(name);
         checks++;
     }
 
@@ -61,17 +62,29 @@ internal static class Program
         var fumen = new OngekiFumen();
         fumen.Setup();
         var map = fumen.IndividualSoflanAreaMap;
-        var parent = new SoflanGroupWrapItemGroup { DisplayName = "测试组" };
+        var parent = new SoflanGroupWrapItemGroup
+        {
+            DisplayName = "测试组"
+        };
         map.SoflanGroupWrapItemGroupRoot.Add(parent);
         var item = map.TryGetOrCreateSoflanGroupWrapItem(1, out _);
         parent.Add(item);
-        var subgroup = new SoflanGroupWrapItemGroup { DisplayName = "子组" };
+        var subgroup = new SoflanGroupWrapItemGroup
+        {
+            DisplayName = "子组"
+        };
         parent.Add(subgroup);
         var replacement = map.GetSoflanGroups().Single(x => x.SoflanGroupId == 0);
         Check(item.SelectionDisplayName.Contains("1"), "选择器显示有效组编号");
         Check(map.GetNextSoflanGroupId(new[] { 2 }) == 3, "新组避开缓存及物件保留编号");
-        var area = new IndividualSoflanArea { SoflanGroup = 1 };
-        var soflan = new Soflan { SoflanGroup = 1 };
+        var area = new IndividualSoflanArea
+        {
+            SoflanGroup = 1
+        };
+        var soflan = new Soflan
+        {
+            SoflanGroup = 1
+        };
         fumen.AddObject(area);
         fumen.AddObject(soflan);
         var transfer = SoflanGroupOperations.CreateDeleteAction(fumen, item, replacement, false);
@@ -88,8 +101,15 @@ internal static class Program
         remove.Undo();
         Check(map.Values.SelectMany(x => x).Contains(area) && fumen.SoflansMap.Values.SelectMany(x => x).Contains(soflan), "撤销恢复全部引用");
         var rejected = false;
-        try { SoflanGroupOperations.CreateDeleteAction(fumen, item, null, false); }
-        catch (InvalidOperationException) { rejected = true; }
+        try
+        {
+            SoflanGroupOperations.CreateDeleteAction(fumen, item, null, false);
+        }
+        catch (InvalidOperationException)
+        {
+            rejected = true;
+        }
+
         Check(rejected, "有引用时拒绝无替代组的删除");
     }
 
@@ -156,9 +176,11 @@ internal static class Program
 public class NoOpBuilder : DispatchProxy
 {
     public Vector4 LastColor { get; private set; }
+
     protected override object Invoke(MethodInfo method, object[] args)
     {
-        if (method.Name == nameof(IDrawCommandListBuilder.DrawCircle)) LastColor = (Vector4)args[1];
+        if (method.Name == nameof(IDrawCommandListBuilder.DrawCircle))
+            LastColor = (Vector4)args[1];
         return method.ReturnType != typeof(void) && method.ReturnType.IsValueType
             ? Activator.CreateInstance(method.ReturnType) : null;
     }

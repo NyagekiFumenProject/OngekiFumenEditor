@@ -16,7 +16,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
         {
             SoflanGroupId = soflanGroupId;
             displayName = SoflanGroupId.ToString();
-
             if (soflanGroupId == 0)
                 displayName = Resources.SoflanGroupDefaultName;
         }
@@ -28,9 +27,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             set { } //ignore
         }
 
-        public string SelectionDisplayName => SoflanGroupId == 0 || string.IsNullOrWhiteSpace(Parent?.DisplayName) ||
-            Parent.DisplayName == "default" || Parent.DisplayName == "root" || Parent.DisplayName == SoflanGroupId.ToString()
-            ? DisplayName : $"{Parent.DisplayName}（{SoflanGroupId}）";
+        public string SelectionDisplayName => SoflanGroupId == 0 || string.IsNullOrWhiteSpace(Parent?.DisplayName) || Parent.DisplayName == "default" || Parent.DisplayName == "root" || Parent.DisplayName == SoflanGroupId.ToString() ? DisplayName : $"{Parent.DisplayName}（{SoflanGroupId}）";
 
         private bool isSelected = false;
         public bool IsSelected

@@ -17,7 +17,11 @@ namespace OngekiFumenEditor.Base.Collections
     public class IndividualSoflanAreaListMap : PropertyChangedBase, IReadOnlyDictionary<int, IndividualSoflanAreaList>
     {
         private IntervalTreeWrapper<TGrid, IndividualSoflanArea> cacheTree = new(
-            x => new() { Min = x.TGrid, Max = x.EndIndicator.TGrid },
+            x => new()
+            {
+                Min = x.TGrid,
+                Max = x.EndIndicator.TGrid
+            },
             true,
             nameof(IndividualSoflanArea.TGrid),
             nameof(IndividualSoflanArea.EndIndicator.TGrid)
@@ -139,7 +143,8 @@ namespace OngekiFumenEditor.Base.Collections
             // 保留缓存编号，避免撤销历史中的对象指向后来创建的其他组。
             var reserved = cachedSoflanGroupWrapItemMap.Keys.Concat(additionalReserved ?? Enumerable.Empty<int>()).ToHashSet();
             var id = 1;
-            while (reserved.Contains(id)) id++;
+            while (reserved.Contains(id))
+                id++;
             return id;
         }
 
@@ -157,6 +162,7 @@ namespace OngekiFumenEditor.Base.Collections
                             yield return subItem;
                 }
             }
+
             return Visit(SoflanGroupWrapItemGroupRoot).OrderBy(x => x.SoflanGroupId);
         }
 

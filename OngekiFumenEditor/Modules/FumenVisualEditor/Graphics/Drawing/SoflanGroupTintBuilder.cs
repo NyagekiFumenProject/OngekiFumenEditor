@@ -60,6 +60,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public DrawCommandList GetDrawCommandList() => inner.GetDrawCommandList();
         public void Clear() => inner.Clear();
         // 装饰器不拥有帧级 builder，其生命周期仍由调用者管理。
-        public void Dispose() { }
+        public void Dispose()
+        {
+        }
     }
 }
