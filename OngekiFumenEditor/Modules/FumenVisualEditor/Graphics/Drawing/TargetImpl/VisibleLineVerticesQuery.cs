@@ -18,9 +18,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
-
             //var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
-
             using var tempVertices = ObjectPool.GetPooledList<LineVertex>();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,6 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 tempVertices.Add(vert);
             }
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed) => PostPoint2(tGrid.TotalUnit, xGrid.TotalUnit, isVailed);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]

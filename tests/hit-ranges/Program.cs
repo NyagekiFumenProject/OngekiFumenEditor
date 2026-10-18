@@ -5,7 +5,11 @@ using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
-internal static class Program { static void Main() {
+
+internal static class Program
+{
+    static void Main()
+    {
         Assert(HitRangeGeometry.BulletHalfWidth(BulletType.Circle) == 2, "圆弹判定半宽应为2。");
         Assert(HitRangeGeometry.BulletHalfWidth(BulletType.Needle) == 1 && HitRangeGeometry.BulletHalfWidth(BulletType.Square) == 1, "针弹和方弹判定半宽应为1。");
         var band = new List<PolygonVertex>();
@@ -26,4 +30,11 @@ internal static class Program { static void Main() {
         HitRangeGeometry.AddVisibleBands(band, path, 3, -5, 5, Vector4.One);
         Assert(band.Count == 0, "无效路径标记必须保持断段。");
         Console.WriteLine("判定范围几何回归通过。");
- } static void Assert(bool condition,string message) { if(!condition) throw new InvalidOperationException(message); } }
+    }
+
+    static void Assert(bool condition, string message)
+    {
+        if (!condition)
+            throw new InvalidOperationException(message);
+    }
+}
