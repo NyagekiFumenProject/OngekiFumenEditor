@@ -40,7 +40,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 quickPlacementFumen.BulletPalleteList.CollectionChanged -= OnQuickPlacementPalettesChanged;
             quickPlacementFumen = null;
             quickPlacementFactory = null;
-            if (quickPlacementPreviewObject is IBulletPalleteReferencable projectile) projectile.ReferenceBulletPallete = null;
+            if (quickPlacementPreviewObject is IBulletPalleteReferencable projectile)
+                projectile.ReferenceBulletPallete = null;
             quickPlacementPreviewObject = null;
             quickPlacingDrag = false;
             NotifyOfPropertyChange(() => QuickPlacementVisibility);
@@ -49,8 +50,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void BeginPaletteQuickPlacement(BulletPallete palette, bool bell)
         {
-            if (!IsDesignMode || IsBatchMode || Fumen == null || !Fumen.BulletPalleteList.Contains(palette)) return;
-            BeginQuickPlacement(bell ? () => new Bell { ReferenceBulletPallete = palette } : () => new Bullet { ReferenceBulletPallete = palette }, bell ? "◇" : "●");
+            if (!IsDesignMode || IsBatchMode || Fumen == null || !Fumen.BulletPalleteList.Contains(palette))
+                return;
+            BeginQuickPlacement(bell ? () => new Bell
+            {
+                ReferenceBulletPallete = palette
+            } : () => new Bullet
+            {
+                ReferenceBulletPallete = palette
+            }, bell ? "◇" : "●");
             quickPlacementFumen = Fumen;
             quickPlacementFumen.BulletPalleteList.CollectionChanged += OnQuickPlacementPalettesChanged;
         }
@@ -70,6 +78,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 CancelQuickPlacement();
                 return false;
             }
+
             return true;
         }
 
@@ -108,6 +117,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 NotifyOfPropertyChange(() => QuickPlacementX);
                 NotifyOfPropertyChange(() => QuickPlacementY);
             }
+
             NotifyOfPropertyChange(() => QuickPlacementVisibility);
         }
 
@@ -126,18 +136,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var height = 40d;
             if (obj is Bullet bullet)
             {
-                var shape = bullet.TypeValue switch { BulletType.Needle => "Needle", BulletType.Square => "Square", _ => "Circle" };
+                var shape = bullet.TypeValue switch
+                {
+                    BulletType.Needle => "Needle",
+                    BulletType.Square => "Square",
+                    _ => "Circle"
+                };
                 // 新放置子弹的默认伤害为普通，复用正式绘制器的对应颜色资源。
                 resource = "bullet" + shape + "Normal.png";
-                if (bullet.TypeValue != BulletType.Circle) { width = 30; height = 80; }
-                if (bullet.SizeValue == BulletSize.Large) { width *= 1.4; height *= 1.4; }
+                if (bullet.TypeValue != BulletType.Circle)
+                {
+                    width = 30;
+                    height = 80;
+                }
+
+                if (bullet.SizeValue == BulletSize.Large)
+                {
+                    width *= 1.4;
+                    height *= 1.4;
+                }
             }
             else if (obj is Bell bell)
             {
                 resource = "bell.png";
-                if (bell.SizeValue == BulletSize.Large) { width *= 1.4; height *= 1.4; }
+                if (bell.SizeValue == BulletSize.Large)
+                {
+                    width *= 1.4;
+                    height *= 1.4;
+                }
             }
-            else { width = 28; height = 36; }
+            else
+            {
+                width = 28;
+                height = 36;
+            }
+
             var image = resource == null ? null : System.IO.Path.Combine(AppContext.BaseDirectory, "Resources", "editor", resource);
             if (QuickPlacementImage != image)
             {
@@ -146,14 +179,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 NotifyOfPropertyChange(() => QuickPlacementImageVisibility);
                 NotifyOfPropertyChange(() => QuickPlacementGlyphVisibility);
             }
-            if (QuickPlacementImageWidth != width) { QuickPlacementImageWidth = width; NotifyOfPropertyChange(() => QuickPlacementImageWidth); }
-            if (QuickPlacementImageHeight != height) { QuickPlacementImageHeight = height; NotifyOfPropertyChange(() => QuickPlacementImageHeight); }
+
+            if (QuickPlacementImageWidth != width)
+            {
+                QuickPlacementImageWidth = width;
+                NotifyOfPropertyChange(() => QuickPlacementImageWidth);
+            }
+
+            if (QuickPlacementImageHeight != height)
+            {
+                QuickPlacementImageHeight = height;
+                NotifyOfPropertyChange(() => QuickPlacementImageHeight);
+            }
         }
 
         private void PlaceQuickObject(Point position)
         {
             if (!ValidateQuickPlacementPalette() || !IsDesignMode || IsBatchMode ||
-                !CheckAndNotifyIfPlaceBeyondDuration(position) || !TryGetQuickPlacementGrid(position, out var x, out var t)) return;
+                !CheckAndNotifyIfPlaceBeyondDuration(position) || !TryGetQuickPlacementGrid(position, out var x, out var t))
+                return;
             var obj = quickPlacementFactory();
             obj.XGrid = x.CopyNew();
             obj.TGrid = t.CopyNew();
@@ -166,35 +210,46 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         internal static bool IsQuickPlacementTextInput(object target)
             => target is System.Windows.Controls.Primitives.TextBoxBase
                 or System.Windows.Controls.PasswordBox or System.Windows.Controls.ComboBox;
-
         // 使用配置中的定义匹配，Preview 阶段消费事件以阻止旧绑定重复执行。
         public bool HandleQuickPlacementKey(KeyEventArgs e)
         {
             RefreshPlacementCursor();
-            if (IsQuickPlacementTextInput(Keyboard.FocusedElement) || !IsDesignMode || IsBatchMode) return false;
+            if (IsQuickPlacementTextInput(Keyboard.FocusedElement) || !IsDesignMode || IsBatchMode)
+                return false;
             var manager = IoC.Get<IKeyBindingManager>();
             bool Match(KeyBindingDefinition definition) => manager.CheckKeyBinding(definition, e);
             if (Match(KeyBindingDefinitions.KBD_CancelSelectingObjects) && IsQuickPlacementActive)
             {
-                CancelQuickPlacement(); return true;
-            }
-            if (Match(KeyBindingDefinitions.KBD_QuickBulletDamageUp) || Match(KeyBindingDefinitions.KBD_QuickBulletDamageDown))
-            {
-                if (!SelectObjects.OfType<Bullet>().Any()) return false;
-                if (!e.IsRepeat) ChangeSelectedBulletDamage(Match(KeyBindingDefinitions.KBD_QuickBulletDamageUp) ? 1 : -1);
+                CancelQuickPlacement();
                 return true;
             }
+
+            if (Match(KeyBindingDefinitions.KBD_QuickBulletDamageUp) || Match(KeyBindingDefinitions.KBD_QuickBulletDamageDown))
+            {
+                if (!SelectObjects.OfType<Bullet>().Any())
+                    return false;
+                if (!e.IsRepeat)
+                    ChangeSelectedBulletDamage(Match(KeyBindingDefinitions.KBD_QuickBulletDamageUp) ? 1 : -1);
+                return true;
+            }
+
             return false;
         }
 
         private void ChangeSelectedBulletDamage(int direction)
         {
             var values = SelectObjects.OfType<Bullet>().Select(b => (Bullet: b, Old: b.BulletDamageTypeValue)).ToArray();
-            if (values.Length == 0) return;
+            if (values.Length == 0)
+                return;
             UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(OngekiFumenEditor.Properties.Resources.UndoChangeBulletDamage, () =>
             {
-                foreach (var pair in values) pair.Bullet.BulletDamageTypeValue = (BulletDamageType)(((int)pair.Old + direction + 3) % 3);
-            }, () => { foreach (var pair in values) pair.Bullet.BulletDamageTypeValue = pair.Old; }));
+                foreach (var pair in values)
+                    pair.Bullet.BulletDamageTypeValue = (BulletDamageType)(((int)pair.Old + direction + 3) % 3);
+            }, () =>
+            {
+                foreach (var pair in values)
+                    pair.Bullet.BulletDamageTypeValue = pair.Old;
+            }));
         }
     }
 }

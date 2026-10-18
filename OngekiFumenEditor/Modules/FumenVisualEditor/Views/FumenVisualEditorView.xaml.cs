@@ -29,10 +29,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnPlacementViewLoaded(object sender, RoutedEventArgs e)
         {
-            if (placementViewLoaded) return;
+            if (placementViewLoaded)
+                return;
             placementViewLoaded = true;
             placementWindow = Window.GetWindow(this);
-            if (placementWindow != null) placementWindow.Deactivated += OnPlacementWindowDeactivated;
+            if (placementWindow != null)
+                placementWindow.Deactivated += OnPlacementWindowDeactivated;
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnPlacementEditorChanged;
             // 在窗口中首次收到工具箱拖放就取消，避免留下尚未完成的第一个点。
             placementWindow?.AddHandler(DragDrop.PreviewDragEnterEvent,
@@ -41,11 +43,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnPlacementViewUnloaded(object sender, RoutedEventArgs e)
         {
-            if (!placementViewLoaded) return;
+            if (!placementViewLoaded)
+                return;
             placementViewLoaded = false;
             placementWindow?.RemoveHandler(DragDrop.PreviewDragEnterEvent,
                 new DragEventHandler(OnToolboxDragStarted));
-            if (placementWindow != null) placementWindow.Deactivated -= OnPlacementWindowDeactivated;
+            if (placementWindow != null)
+                placementWindow.Deactivated -= OnPlacementWindowDeactivated;
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged -= OnPlacementEditorChanged;
             placementWindow = null;
             (DataContext as FumenVisualEditorViewModel)?.CancelPlacementTools();
@@ -53,7 +57,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 
         private void OnPlacementEditorChanged(FumenVisualEditorViewModel next, FumenVisualEditorViewModel old)
         {
-            if (old == DataContext) old?.CancelPlacementTools();
+            if (old == DataContext)
+                old?.CancelPlacementTools();
         }
 
         private void OnPlacementWindowDeactivated(object sender, System.EventArgs e)
@@ -64,8 +69,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         private void OnQuickPlacementKeyDown(object sender, KeyEventArgs e)
         {
             // 文本编辑控件完整保留文字输入、方向键、Tab 和 Ctrl 快捷键。
-            if (Keyboard.FocusedElement is TextBoxBase or PasswordBox or ComboBox) return;
-            if ((DataContext as FumenVisualEditorViewModel)?.HandleQuickPlacementKey(e) == true) e.Handled = true;
+            if (Keyboard.FocusedElement is TextBoxBase or PasswordBox or ComboBox)
+                return;
+            if ((DataContext as FumenVisualEditorViewModel)?.HandleQuickPlacementKey(e) == true)
+                e.Handled = true;
         }
 
         private void OnToolboxDragStarted(object sender, DragEventArgs e)

@@ -128,3 +128,8 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：子弹管理器连续放置、伤害快捷键及右键取消。
 - Avalonia：本次未移植。
 - 不改变现有同步点。
+
+## 2026-10-18：PR 排版整理
+
+- 按官方 `.editorconfig` 及相邻 WPF 代码整理缩进、初始化器和回调换行，功能不变。
+- Avalonia 代码本次未处理，不改变同步点。

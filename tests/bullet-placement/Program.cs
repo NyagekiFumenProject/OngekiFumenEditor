@@ -20,7 +20,12 @@ internal static class Program
         // 不创建窗口、不启动编辑器，仅检验取消状态与输入保护。
         var type = typeof(FumenVisualEditorViewModel);
         var input = type.GetMethod("IsQuickPlacementTextInput", BindingFlags.Static | BindingFlags.NonPublic)!;
-        foreach (var control in new object[] { new TextBox(), new PasswordBox(), new ComboBox() })
+        foreach (var control in new object[]
+        {
+            new TextBox(),
+            new PasswordBox(),
+            new ComboBox()
+        })
             Assert((bool)input.Invoke(null, new[] { control })!, "文本输入控件必须保留方向键。");
         Assert(!(bool)input.Invoke(null, new object[] { new object() })!, "非输入对象不应被误判。");
 
@@ -30,7 +35,10 @@ internal static class Program
             foreach (var field in inherited.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
                 field.SetValue(editor, field.GetValue(initializedViewAware));
         var palette = new BulletPallete();
-        var preview = new Bullet { ReferenceBulletPallete = palette };
+        var preview = new Bullet
+        {
+            ReferenceBulletPallete = palette
+        };
         void Field(string name, object value) => type.GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(editor, value);
         Field("quickPlacementPreviewObject", preview);
         Field("quickPlacementFactory", (Func<OngekiMovableObjectBase>)(() => new Bullet()));
@@ -47,7 +55,10 @@ internal static class Program
         Field("editorProjectData", new EditorProjectDataModel());
         var fumen = editor.Fumen;
         fumen.AddObject(palette);
-        preview = new Bullet { ReferenceBulletPallete = palette };
+        preview = new Bullet
+        {
+            ReferenceBulletPallete = palette
+        };
         Field("quickPlacementPreviewObject", preview);
         Field("quickPlacementFactory", (Func<OngekiMovableObjectBase>)(() => new Bullet()));
         Field("quickPlacementFumen", fumen);
@@ -57,24 +68,40 @@ internal static class Program
         fumen.RemoveObject(palette);
         Assert(!editor.IsQuickPlacementActive && preview.ReferenceBulletPallete == null,
             "删除或撤回新建调色板必须立即取消放置并解除预览引用。");
-        Field("quickPlacementPreviewObject", new Bullet { ReferenceBulletPallete = palette });
+        Field("quickPlacementPreviewObject", new Bullet
+        {
+            ReferenceBulletPallete = palette
+        });
         Field("quickPlacementFactory", (Func<OngekiMovableObjectBase>)(() => throw new InvalidOperationException("不得执行悬空工厂")));
         type.GetMethod("PlaceQuickObject", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(editor, new object[] { new System.Windows.Point() });
         Assert(!editor.IsQuickPlacementActive, "放置时必须再次拒绝不存在的调色板。");
         typeof(OngekiFumenEditor.Utils.Log).GetField("cacheInstance", BindingFlags.Static | BindingFlags.NonPublic)!.SetValue(null, new OngekiFumenEditor.Utils.Log(Array.Empty<OngekiFumenEditor.Utils.Logs.ILogOutput>()));
         var rightFlag = type.GetField("consumeQuickRightMouseUp", BindingFlags.Instance | BindingFlags.NonPublic)!;
         rightFlag.SetValue(editor, true);
-        var rightRelease = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 1, System.Windows.Input.MouseButton.Right) { RoutedEvent = System.Windows.Input.Mouse.PreviewMouseUpEvent };
-        editor.OnMouseUp(new Caliburn.Micro.ActionExecutionContext { EventArgs = rightRelease });
+        var rightRelease = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 1, System.Windows.Input.MouseButton.Right)
+        {
+            RoutedEvent = System.Windows.Input.Mouse.PreviewMouseUpEvent
+        };
+        editor.OnMouseUp(new Caliburn.Micro.ActionExecutionContext
+        {
+            EventArgs = rightRelease
+        });
         Assert(rightRelease.Handled && !(bool)rightFlag.GetValue(editor)!, "取消后的右键释放必须单次消费并清状态。");
-        var ordinaryRelease = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 2, System.Windows.Input.MouseButton.Right) { RoutedEvent = System.Windows.Input.Mouse.PreviewMouseUpEvent };
-        editor.OnMouseUp(new Caliburn.Micro.ActionExecutionContext { EventArgs = ordinaryRelease });
+        var ordinaryRelease = new System.Windows.Input.MouseButtonEventArgs(System.Windows.Input.Mouse.PrimaryDevice, 2, System.Windows.Input.MouseButton.Right)
+        {
+            RoutedEvent = System.Windows.Input.Mouse.PreviewMouseUpEvent
+        };
+        editor.OnMouseUp(new Caliburn.Micro.ActionExecutionContext
+        {
+            EventArgs = ordinaryRelease
+        });
         Assert(!ordinaryRelease.Handled, "普通右键释放不应被吞。");
         Console.WriteLine("子弹放置无窗口回归通过。");
     }
 
     static void Assert(bool condition, string message)
     {
-        if (!condition) throw new InvalidOperationException(message);
+        if (!condition)
+            throw new InvalidOperationException(message);
     }
 }

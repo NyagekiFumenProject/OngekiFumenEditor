@@ -30,7 +30,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
 
         public override Task Run(Command command)
         {
-            if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor) {
+            if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor)
+            {
                 if (!editor.IsDesignMode && !editor.IsBatchMode)
                 {
                     editor.ToastNotify(Resources.EditorMustBeDesignMode);
@@ -40,12 +41,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
                 editor.CancelPlacementTools();
                 var behaviors = Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView());
 
-                if (editor.IsBatchMode) {
+                if (editor.IsBatchMode)
+                {
                     behaviors.Remove(editor.BatchModeBehavior);
                 }
-                else {
+                else
+                {
                     behaviors.Add(editor.BatchModeBehavior);
                 }
+
                 editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.IsBatchMode));
                 editor.ToastNotify($"{Resources.BatchModeToggle}{(editor.IsBatchMode ? Resources.Enable : Resources.Disable)}");
             }

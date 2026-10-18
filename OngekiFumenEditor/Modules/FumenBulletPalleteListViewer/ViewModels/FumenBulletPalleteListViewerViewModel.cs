@@ -74,13 +74,21 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
             {
                 return editor;
             }
+
             set
             {
-                if (ReferenceEquals(editor, value)) return;
-                if (editor != null) { editor.CancelQuickPlacement(); editor.QuickPlacementCancelled -= ClearPaletteQuickPlacement; }
+                if (ReferenceEquals(editor, value))
+                    return;
+                if (editor != null)
+                {
+                    editor.CancelQuickPlacement();
+                    editor.QuickPlacementCancelled -= ClearPaletteQuickPlacement;
+                }
+
                 this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropertyChanged);
                 Set(ref editor, value);
-                if (editor != null) editor.QuickPlacementCancelled += ClearPaletteQuickPlacement;
+                if (editor != null)
+                    editor.QuickPlacementCancelled += ClearPaletteQuickPlacement;
                 NotifyOfPropertyChange(() => IsEnable);
 
                 if (Editor?.Fumen is not null)
@@ -129,21 +137,28 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
         {
             if (context.Source is CheckBox check)
             {
-                if (!quickChecks.Any(w => w.TryGetTarget(out var old) && old == check)) quickChecks.Add(new(check));
+                if (!quickChecks.Any(w => w.TryGetTarget(out var old) && old == check))
+                    quickChecks.Add(new(check));
                 SyncPaletteQuickChecks();
             }
         }
 
         public void OnQuickPlacementCheckClick(ActionExecutionContext context)
         {
-            if (context.Source is not CheckBox check || check.DataContext is not BulletPallete palette) return;
+            if (context.Source is not CheckBox check || check.DataContext is not BulletPallete palette)
+                return;
             var enabled = check.IsChecked == true;
             Editor?.CancelQuickPlacement();
             if (enabled && Editor != null)
             {
                 Editor.BeginPaletteQuickPlacement(palette, check.Tag as string == "Bell");
-                if (Editor.IsQuickPlacementActive) { quickPalette = palette; quickBell = check.Tag as string == "Bell"; }
+                if (Editor.IsQuickPlacementActive)
+                {
+                    quickPalette = palette;
+                    quickBell = check.Tag as string == "Bell";
+                }
             }
+
             SyncPaletteQuickChecks();
         }
 
@@ -168,7 +183,8 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
                 return;
             }
 
-            if (SelectedItems.Contains(quickPalette)) Editor.CancelQuickPlacement();
+            if (SelectedItems.Contains(quickPalette))
+                Editor.CancelQuickPlacement();
             foreach (var item in SelectedItems.ToArray())
                 Editor.Fumen.RemoveObject(item);
             DataView?.Refresh();

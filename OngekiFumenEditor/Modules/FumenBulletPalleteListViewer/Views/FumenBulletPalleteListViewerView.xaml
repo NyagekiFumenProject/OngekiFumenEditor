@@ -85,10 +85,15 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <CheckBox Content="Bullet" Tag="Bullet" Margin="0,0,8,0"
-                                              cal:Message.Attach="[Event Loaded] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event DataContextChanged] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event Click] = [Action OnQuickPlacementCheckClick($executionContext)];" />
-                                    <CheckBox Content="Bell" Tag="Bell"
-                                              cal:Message.Attach="[Event Loaded] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event DataContextChanged] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event Click] = [Action OnQuickPlacementCheckClick($executionContext)];" />
+                                    <CheckBox
+                                        Content="Bullet"
+                                        Tag="Bullet"
+                                        Margin="0,0,8,0"
+                                        cal:Message.Attach="[Event Loaded] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event DataContextChanged] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event Click] = [Action OnQuickPlacementCheckClick($executionContext)];" />
+                                    <CheckBox
+                                        Content="Bell"
+                                        Tag="Bell"
+                                        cal:Message.Attach="[Event Loaded] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event DataContextChanged] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event Click] = [Action OnQuickPlacementCheckClick($executionContext)];" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
