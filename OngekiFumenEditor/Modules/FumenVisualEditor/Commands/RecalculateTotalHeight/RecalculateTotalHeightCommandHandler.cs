@@ -1,6 +1,7 @@
 using Gemini.Framework.Commands;
 using Gemini.Framework.Threading;
 using OngekiFumenEditor.Kernel.Audio;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
@@ -32,8 +33,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.RecalculateTotalH
         {
             if (editorDocumentManager.CurrentActivatedEditor is FumenVisualEditorViewModel editor && editor.AudioPlayer is IAudioPlayer audio && editor.EditorProjectData is EditorProjectDataModel proj)
             {
-                proj.AudioDuration = audio.Duration;
-                editor.RecalculateTotalDurationHeight();
+                var newDuration = audio.Duration;
+                var oldDuration = proj.AudioDuration;
+
+                editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.RecalculateTotalHeight,
+                    () =>
+                    {
+                        proj.AudioDuration = newDuration;
+                        editor.RecalculateTotalDurationHeight();
+                    },
+                    () =>
+                    {
+                        proj.AudioDuration = oldDuration;
+                        editor.RecalculateTotalDurationHeight();
+                    }));
 
                 editor.ToastNotify(Resources.RecaculatedSuccess);
             }
