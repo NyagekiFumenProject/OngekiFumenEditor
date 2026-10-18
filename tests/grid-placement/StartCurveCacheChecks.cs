@@ -19,11 +19,29 @@ public static class StartCurveCacheChecks
     const BindingFlags F = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     static (LaneLeftStart lane, LaneLeftNext first, LaneLeftNext last) MakeLane()
     {
-        var lane = new LaneLeftStart { TGrid = new TGrid(), XGrid = new XGrid(), CurveInterpolaterFactory = OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory.DefaultCurveInterpolaterFactory.Default };
-        var first = new LaneLeftNext { TGrid = TGrid.FromTotalGrid(1920), XGrid = XGrid.FromTotalGrid(4096) };
-        var last = new LaneLeftNext { TGrid = TGrid.FromTotalGrid(3840), XGrid = new XGrid() };
-        lane.AddChildObject(first); lane.AddChildObject(last);
-        first.AddControlObject(new LaneCurvePathControlObject { TGrid = TGrid.FromTotalGrid(960), XGrid = XGrid.FromTotalGrid(3072) });
+        var lane = new LaneLeftStart
+        {
+            TGrid = new TGrid(),
+            XGrid = new XGrid(),
+            CurveInterpolaterFactory = OngekiFumenEditor.Kernel.CurveInterpolater.DefaultImpl.Factory.DefaultCurveInterpolaterFactory.Default
+        };
+        var first = new LaneLeftNext
+        {
+            TGrid = TGrid.FromTotalGrid(1920),
+            XGrid = XGrid.FromTotalGrid(4096)
+        };
+        var last = new LaneLeftNext
+        {
+            TGrid = TGrid.FromTotalGrid(3840),
+            XGrid = new XGrid()
+        };
+        lane.AddChildObject(first);
+        lane.AddChildObject(last);
+        first.AddControlObject(new LaneCurvePathControlObject
+        {
+            TGrid = TGrid.FromTotalGrid(960),
+            XGrid = XGrid.FromTotalGrid(3072)
+        });
         return (lane, first, last);
     }
 
@@ -31,65 +49,122 @@ public static class StartCurveCacheChecks
     {
         CheckTimeIndex(check);
         // 先缓存，再单独横移，避免纵向变动掩盖缓存遗漏。
-        foreach (var component in new[] { "对象", "Unit", "Grid" })
+        foreach (var component in new[]
+        {
+            "对象",
+            "Unit",
+            "Grid"
+        })
         {
             var (lane, first, last) = MakeLane();
             _ = first.GetConnectionPaths();
             var unaffected = last.GetConnectionPaths();
-            if (component == "对象") lane.XGrid = XGrid.FromTotalGrid(1024);
-            else if (component == "Unit") lane.XGrid.Unit = 1;
-            else lane.XGrid.Grid = 1024;
+            if (component == "对象")
+                lane.XGrid = XGrid.FromTotalGrid(1024);
+            else if (component == "Unit")
+                lane.XGrid.Unit = 1;
+            else
+                lane.XGrid.Grid = 1024;
             check(first.GetConnectionPaths()[0].pos.X == lane.XGrid.TotalGrid, $"Start 横移（{component}）刷新曲线起点");
-            var fresh = MakeLane(); fresh.lane.XGrid = lane.XGrid.CopyNew();
+            var fresh = MakeLane();
+            fresh.lane.XGrid = lane.XGrid.CopyNew();
             check(lane.CalulateXGrid(TGrid.FromTotalGrid(480)) == fresh.lane.CalulateXGrid(TGrid.FromTotalGrid(480)), $"Start 横移（{component}）内部插值与新曲线一致");
             check(ReferenceEquals(unaffected, last.GetConnectionPaths()), $"Start 横移（{component}）复用无关曲线段");
             check(ReferenceEquals(first.GetConnectionPaths(), first.GetConnectionPaths()), $"Start 横移（{component}）重复查询复用缓存");
         }
-        foreach (var target in new[] { "Start", "中间点" })
-        foreach (var axis in new[] { "XGrid", "TGrid" })
+
+        foreach (var target in new[]
         {
-            var (lane, first, last) = MakeLane();
-            var node = target == "Start" ? (ConnectableObjectBase)lane : first;
-            _ = first.GetConnectionPaths(); _ = last.GetConnectionPaths();
-            var freshDuringNotification = false;
-            lane.ConnectableObjectsPropertyChanged += (sender, e) => {
-                if (!ReferenceEquals(sender, node) || e.PropertyName != axis) return;
-                var path = first.GetConnectionPaths();
-                freshDuringNotification = path[0].pos == new Vector2(lane.XGrid.TotalGrid, lane.TGrid.TotalGrid)
+            "Start",
+            "中间点"
+        })
+            foreach (var axis in new[]
+            {
+                "XGrid",
+                "TGrid"
+            })
+            {
+                var (lane, first, last) = MakeLane();
+                var node = target == "Start" ? (ConnectableObjectBase)lane : first;
+                _ = first.GetConnectionPaths();
+                _ = last.GetConnectionPaths();
+                var freshDuringNotification = false;
+                lane.ConnectableObjectsPropertyChanged += (sender, e) =>
+                {
+                    if (!ReferenceEquals(sender, node) || e.PropertyName != axis)
+                        return;
+                    var path = first.GetConnectionPaths();
+                    freshDuringNotification = path[0].pos == new Vector2(lane.XGrid.TotalGrid, lane.TGrid.TotalGrid)
                     && path[path.Count - 1].pos == new Vector2(first.XGrid.TotalGrid, first.TGrid.TotalGrid);
-            };
-            if (axis == "XGrid") node.XGrid = XGrid.FromTotalGrid(1024);
-            else node.TGrid = TGrid.FromTotalGrid(target == "Start" ? 240 : 2160);
-            check(freshDuringNotification, $"{target} {axis} 通知监听者时路径已更新");
-        }
-        foreach (var useSelection in new[] { false, true })
+                };
+                if (axis == "XGrid")
+                    node.XGrid = XGrid.FromTotalGrid(1024);
+                else
+                    node.TGrid = TGrid.FromTotalGrid(target == "Start" ? 240 : 2160);
+                check(freshDuringNotification, $"{target} {axis} 通知监听者时路径已更新");
+            }
+
+        foreach (var useSelection in new[]
+        {
+            false,
+            true
+        })
         {
             var vmType = typeof(FumenVisualEditorViewModel);
             var editor = (FumenVisualEditorViewModel)RuntimeHelpers.GetUninitializedObject(vmType);
             editor.IsNotifying = true;
-            var project = new EditorProjectDataModel { AudioDuration = TimeSpan.FromSeconds(10) };
+            var project = new EditorProjectDataModel
+            {
+                AudioDuration = TimeSpan.FromSeconds(10)
+            };
             vmType.GetField("editorProjectData", F).SetValue(editor, project);
-            vmType.GetField("<Setting>k__BackingField", F).SetValue(editor, new EditorSetting { DisableTGridMagneticDock = true, DisableXGridMagneticDock = true, ForceXGridIntegerUnit = false });
+            vmType.GetField("<Setting>k__BackingField", F).SetValue(editor, new EditorSetting
+            {
+                DisableTGridMagneticDock = true,
+                DisableXGridMagneticDock = true,
+                ForceXGridIntegerUnit = false
+            });
             vmType.GetProperty("ViewWidth", F).SetValue(editor, 1200f);
             vmType.GetProperty("RectInDesignMode", F).SetValue(editor, new VisibleRect(new Vector2(1200, 0), new Vector2(0, 1000)));
             project.Fumen.BpmList.FirstBpm = 120;
             var (lane, first, last) = MakeLane();
-            var tap = new Tap { TGrid = TGrid.FromTotalGrid(240), ReferenceLaneStart = lane };
-            var hold = new Hold { TGrid = TGrid.FromTotalGrid(480), ReferenceLaneStart = lane };
-            hold.SetHoldEnd(new HoldEnd { TGrid = TGrid.FromTotalGrid(1440) });
-            project.Fumen.AddObject(lane); project.Fumen.AddObject(tap); project.Fumen.AddObject(hold);
+            var tap = new Tap
+            {
+                TGrid = TGrid.FromTotalGrid(240),
+                ReferenceLaneStart = lane
+            };
+            var hold = new Hold
+            {
+                TGrid = TGrid.FromTotalGrid(480),
+                ReferenceLaneStart = lane
+            };
+            hold.SetHoldEnd(new HoldEnd
+            {
+                TGrid = TGrid.FromTotalGrid(1440)
+            });
+            project.Fumen.AddObject(lane);
+            project.Fumen.AddObject(tap);
+            project.Fumen.AddObject(hold);
             ConnectableObjectDockingHelper.RelocateDockableObjects(project.Fumen, lane);
-            var notes = new OngekiMovableObjectBase[] { tap, hold, hold.HoldEnd };
+            var notes = new OngekiMovableObjectBase[]
+            {
+                tap,
+                hold,
+                hold.HoldEnd
+            };
             var oldX = notes.Select(n => n.XGrid.TotalGrid).ToArray();
             var otherCache = last.GetConnectionPaths();
-            var fresh = MakeLane(); fresh.lane.XGrid = XGrid.FromTotalGrid(1024);
+            var fresh = MakeLane();
+            fresh.lane.XGrid = XGrid.FromTotalGrid(1024);
             var label = useSelection ? "选择拖动入口" : "单节点拖动入口";
-            object drag = null; Type dragType = null;
+            object drag = null;
+            Type dragType = null;
             if (useSelection)
             {
                 lane.IsSelected = true;
                 vmType.GetMethod("BeginSelectionGridDrag", F).Invoke(editor, new object[] { new Point(600, 0) });
-                drag = vmType.GetField("selectionGridDrag", F).GetValue(editor); dragType = drag.GetType();
+                drag = vmType.GetField("selectionGridDrag", F).GetValue(editor);
+                dragType = drag.GetType();
                 var grab = (Point)dragType.GetField("GrabOffset", F).GetValue(drag);
                 vmType.GetMethod("MoveSelectionGridDrag", F).Invoke(editor, new object[] { new Point(grab.X + XGridCalculator.ConvertXGridToX(fresh.lane.XGrid, editor), grab.Y + editor.ConvertTGridToY_DesignMode(lane.TGrid)) });
             }
@@ -98,6 +173,7 @@ public static class StartCurveCacheChecks
                 var actionType = vmType.Assembly.GetType("OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls.ConnectableObjectInteractiveAction");
                 actionType.GetMethod("OnMoveCanvas").Invoke(Activator.CreateInstance(actionType, true), new object[] { lane, new Point(XGridCalculator.ConvertXGridToX(fresh.lane.XGrid, editor), editor.ConvertTGridToY_DesignMode(lane.TGrid)), editor });
             }
+
             check(lane.XGrid.TotalGrid == 1024 && lane.TGrid.TotalGrid == 0, $"{label}确实只横移 Start");
             for (var i = 0; i < notes.Length; i++)
                 check(notes[i].XGrid.TotalGrid != oldX[i] && notes[i].XGrid == fresh.lane.CalulateXGrid(notes[i].TGrid), $"{label} {notes[i].GetType().Name} 随新曲线贴轨");
@@ -116,16 +192,35 @@ public static class StartCurveCacheChecks
             }
         }
     }
+
     static void CheckTimeIndex(Action<bool, string> check)
     {
         var fumen = new OngekiFumen();
-        var lane = new LaneLeftStart { TGrid = new TGrid(1), XGrid = new XGrid() };
-        lane.AddChildObject(new LaneLeftNext { TGrid = new TGrid(3), XGrid = new XGrid(2) });
+        var lane = new LaneLeftStart
+        {
+            TGrid = new TGrid(1),
+            XGrid = new XGrid()
+        };
+        lane.AddChildObject(new LaneLeftNext
+        {
+            TGrid = new TGrid(3),
+            XGrid = new XGrid(2)
+        });
         fumen.AddObject(lane);
-        _ = lane.MinTGrid; _ = lane.MaxTGrid;
+        _ = lane.MinTGrid;
+        _ = lane.MaxTGrid;
         var notifications = 0;
-        lane.PropertyChanged += (_, e) => { if(e.PropertyName is "MinTGrid" or "MaxTGrid") notifications++; };
-        for(var i = 1; i <= 200; i++) { lane.XGrid.Unit = i; lane.XGrid.Grid = i; }
+        lane.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is "MinTGrid" or "MaxTGrid")
+                notifications++;
+        };
+        for (var i = 1; i <= 200; i++)
+        {
+            lane.XGrid.Unit = i;
+            lane.XGrid.Grid = i;
+        }
+
         check(notifications == 0, "400 次纯 X 分量更新不重建时间索引");
         check(fumen.Lanes.GetVisibleStartObjects(new TGrid(1), new TGrid(1)).Contains(lane), "X 分量更新保留区间查询");
         var xNotifications = notifications;

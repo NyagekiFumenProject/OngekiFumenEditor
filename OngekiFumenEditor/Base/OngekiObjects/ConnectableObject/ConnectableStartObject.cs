@@ -264,6 +264,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     {
                         NextObject?.NotifyRefreshPaths();
                     }
+
                     NotifyRefreshMinMaxTGrid(e.PropertyName != nameof(TGrid));
                     break;
                 case nameof(XGrid):
@@ -276,6 +277,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                     {
                         NextObject?.NotifyRefreshPaths();
                     }
+
                     break;
                 case nameof(ConnectableChildObjectBase.CurvePrecision):
                     //曲线精度变化只会影响该子物件自己生成的路径，重新生成即可。
@@ -285,6 +287,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                 default:
                     break;
             }
+
             // 先使相邻路径缓存失效，保证绘制和贴轨监听者取得最新曲线。
             ConnectableObjectsPropertyChanged?.Invoke(sender, e);
         }

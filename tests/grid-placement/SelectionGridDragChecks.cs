@@ -20,6 +20,7 @@ public static class SelectionGridDragChecks
         public long AnchorT => (long)DragType.GetField("AnchorT", Members).GetValue(instance);
         public long AnchorX => (long)DragType.GetField("AnchorX", Members).GetValue(instance);
         public object Before => DragType.GetField("Before", Members).GetValue(instance);
+
         public bool TryMove(long dt, long dx) => (bool)DragType.GetMethod("TryMove", Members).Invoke(instance, new object[] { dt, dx });
         public object CaptureCurrent() => DragType.GetMethod("CaptureCurrent", Members).Invoke(instance, null);
         public static void Apply(object positions) => DragType.GetMethod("Apply", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { positions, 0L, 0L });
@@ -27,14 +28,34 @@ public static class SelectionGridDragChecks
 
     public static void Run(Action<bool, string> check)
     {
-        Tap Point(int t, int x) => new Tap { TGrid = TGrid.FromTotalGrid(t), XGrid = XGrid.FromTotalGrid(x) };
+        Tap Point(int t, int x) => new Tap
+        {
+            TGrid = TGrid.FromTotalGrid(t),
+            XGrid = XGrid.FromTotalGrid(x)
+        };
         // 实际谱面在1920处由120 BPM/4拍变为240 BPM/3/8拍；BPM与拍号均非移动对象。
-        var timingBpms = new BpmList { FirstBpm = 120 };
-        timingBpms.Add(new BPMChange { TGrid = TGrid.FromTotalGrid(1920), BPM = 240 });
+        var timingBpms = new BpmList
+        {
+            FirstBpm = 120
+        };
+        timingBpms.Add(new BPMChange
+        {
+            TGrid = TGrid.FromTotalGrid(1920),
+            BPM = 240
+        });
         var timingMeters = new MeterChangeList();
-        timingMeters.Add(new MeterChange { TGrid = TGrid.FromTotalGrid(1920), BunShi = 3, Bunbo = 8 });
+        timingMeters.Add(new MeterChange
+        {
+            TGrid = TGrid.FromTotalGrid(1920),
+            BunShi = 3,
+            Bunbo = 8
+        });
         var timingSoflans = new SoflanList();
-        foreach (var expectedTick in new[] { 960, 2640 })
+        foreach (var expectedTick in new[]
+        {
+            960,
+            2640
+        })
         {
             var expected = TGrid.FromTotalGrid(expectedTick);
             var lineY = TGridCalculator.ConvertTGridToY_DesignMode(expected, timingSoflans, timingBpms, 1);
@@ -67,8 +88,15 @@ public static class SelectionGridDragChecks
         SelectionGridDrag.Apply(after);
         check(a.TGrid.TotalGrid == 9100 && a.XGrid.TotalGrid == -200300, "重做恢复真实Grid");
 
-        var hold = new Hold { TGrid = TGrid.FromTotalGrid(100) };
-        hold.SetHoldEnd(new HoldEnd { TGrid = TGrid.FromTotalGrid(500), XGrid = XGrid.FromTotalGrid(900) });
+        var hold = new Hold
+        {
+            TGrid = TGrid.FromTotalGrid(100)
+        };
+        hold.SetHoldEnd(new HoldEnd
+        {
+            TGrid = TGrid.FromTotalGrid(500),
+            XGrid = XGrid.FromTotalGrid(900)
+        });
         var other = Point(200, 100);
         var headOnly = new SelectionGridDrag(new OngekiTimelineObjectBase[] { hold, other }, new OngekiTimelineObjectBase[] { hold, hold.HoldEnd, other });
         check(headOnly.TryMove(200, 30) && hold.HoldEnd.TGrid.TotalGrid == 500 && hold.HoldEnd.XGrid.TotalGrid == 900, "未选Hold尾不跟随");
@@ -76,13 +104,20 @@ public static class SelectionGridDragChecks
         var both = new SelectionGridDrag(new OngekiTimelineObjectBase[] { hold, hold.HoldEnd }, new OngekiTimelineObjectBase[] { hold, hold.HoldEnd });
         check(both.TryMove(700, 20) && hold.TGrid.TotalGrid == 1000 && hold.HoldEnd.TGrid.TotalGrid == 1200, "Hold头尾同选各移动一次");
 
-        var soflan = new Soflan { TGrid = TGrid.FromTotalGrid(100) };
+        var soflan = new Soflan
+        {
+            TGrid = TGrid.FromTotalGrid(100)
+        };
         soflan.EndTGrid = TGrid.FromTotalGrid(500);
         var duration = new SelectionGridDrag(new OngekiTimelineObjectBase[] { soflan, soflan.EndIndicator }, new OngekiTimelineObjectBase[] { soflan, soflan.EndIndicator });
         check(duration.TryMove(800, 0) && soflan.EndTGrid.TotalGrid == 1300, "持续头尾移动不受setter钳制影响");
         SelectionGridDrag.Apply(duration.Before);
         check(soflan.TGrid.TotalGrid == 100 && soflan.EndTGrid.TotalGrid == 500, "持续范围撤销恢复");
-        var area = new IndividualSoflanArea { TGrid = TGrid.FromTotalGrid(100), XGrid = XGrid.FromTotalGrid(20) };
+        var area = new IndividualSoflanArea
+        {
+            TGrid = TGrid.FromTotalGrid(100),
+            XGrid = XGrid.FromTotalGrid(20)
+        };
         area.EndIndicator.TGrid = TGrid.FromTotalGrid(500);
         area.EndIndicator.XGrid = XGrid.FromTotalGrid(70);
         var areaOther = Point(1000, 300);
@@ -98,7 +133,11 @@ public static class SelectionGridDragChecks
         check(areaBoth.TryMove(700, 25) && area.TGrid.TotalGrid == 800 && area.EndIndicator.TGrid.TotalGrid == 1200 && areaOther.TGrid.TotalGrid == 1700, "ISA两端同选按父先尾后移动且各一次");
         SelectionGridDrag.Apply(areaBoth.Before);
         check(area.TGrid.TotalGrid == 100 && area.EndIndicator.TGrid.TotalGrid == 500 && area.EndIndicator.XGrid.TotalGrid == 70, "ISA反序快照撤销恢复原头尾Grid");
-        var start = new LaneLeftStart { TGrid = TGrid.FromTotalGrid(50), XGrid = XGrid.FromTotalGrid(40) };
+        var start = new LaneLeftStart
+        {
+            TGrid = TGrid.FromTotalGrid(50),
+            XGrid = XGrid.FromTotalGrid(40)
+        };
         var laneSelection = new SelectionGridDrag(new OngekiTimelineObjectBase[] { start, other }, new OngekiTimelineObjectBase[] { start, other });
         check(laneSelection.TryMove(10, 20) && start.TGrid.TotalGrid == 60 && start.XGrid.TotalGrid == 60, "轨道起点只应用一次偏移");
         hold.ReferenceLaneStart = start;

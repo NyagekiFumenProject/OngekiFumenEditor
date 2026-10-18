@@ -29,8 +29,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         public Task CopyObjects(FumenVisualEditorViewModel sourceEditor, IEnumerable<ISelectableObject> objects)
         {
-            if (sourceEditor.Fumen is null) return Task.CompletedTask;
-            if (!sourceEditor.IsDesignMode) { sourceEditor.ToastNotify(Resources.EditorMustBeDesignMode); return Task.CompletedTask; }
+            if (sourceEditor.Fumen is null)
+                return Task.CompletedTask;
+            if (!sourceEditor.IsDesignMode)
+            {
+                sourceEditor.ToastNotify(Resources.EditorMustBeDesignMode);
+                return Task.CompletedTask;
+            }
+
             currentCopiedSources.Clear();
             var sources = new List<OngekiObjectBase>();
             foreach (var obj in objects.OfType<OngekiObjectBase>().Distinct())
@@ -38,10 +44,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 if (obj is ConnectableObjectBase and not ConnectableStartObject ||
                     obj is LaneCurvePathControlObject || obj is HoldEnd ||
                     obj is LaneBlockArea.LaneBlockAreaEndIndicator || obj is Soflan.SoflanEndIndicator ||
-                    obj is IndividualSoflanArea.IndividualSoflanAreaEndIndicator) continue;
-                if (obj is ConnectableStartObject start && !start.Children.Append<ConnectableObjectBase>(start).All(x => x.IsSelected)) continue;
+                    obj is IndividualSoflanArea.IndividualSoflanAreaEndIndicator)
+                    continue;
+                if (obj is ConnectableStartObject start && !start.Children.Append<ConnectableObjectBase>(start).All(x => x.IsSelected))
+                    continue;
                 sources.Add(obj);
             }
+
             currentCopiedSources.AddRange(GridClipboardGeometry.CloneSet(sources));
             sourceEditor.ToastNotify(currentCopiedSources.Count == 0 ? Resources.ClearCopyList :
                 currentCopiedSources.Count == 1 ? Resources.CopiedObjectsBrushAllowed.Format(1) : Resources.CopiedObjects.Format(currentCopiedSources.Count));
@@ -50,12 +59,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
         public Task PasteObjects(FumenVisualEditorViewModel targetEditor, PasteOption pasteOption, Point? placePoint = null)
         {
-            if (targetEditor.Fumen is null || !ContainPastableObjects) return Task.CompletedTask;
-            if (!targetEditor.IsDesignMode) { targetEditor.ToastNotify(Resources.EditorMustBeDesignMode); return Task.CompletedTask; }
+            if (targetEditor.Fumen is null || !ContainPastableObjects)
+                return Task.CompletedTask;
+            if (!targetEditor.IsDesignMode)
+            {
+                targetEditor.ToastNotify(Resources.EditorMustBeDesignMode);
+                return Task.CompletedTask;
+            }
+
             var copies = GridClipboardGeometry.CloneSet(currentCopiedSources);
-            if (copies.Length == 0) return Task.CompletedTask;
+            if (copies.Length == 0)
+                return Task.CompletedTask;
             var anchor = GridClipboardGeometry.ReferencePoint(copies);
-            var targetX = anchor.x; var targetT = anchor.t;
+            var targetX = anchor.x;
+            var targetT = anchor.t;
             if (pasteOption != PasteOption.Direct && placePoint is Point target)
             {
                 // 参考点只决定 Grid 平移；每个新物件在平移后独立吸附。
@@ -64,20 +81,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     return Task.CompletedTask;
                 targetX = XGridCalculator.ConvertXToXGrid(target.X, targetEditor);
                 targetT = targetEditor.ConvertYToTGrid_DesignMode(target.Y);
-                if (targetX is null || targetT is null) return Task.CompletedTask;
+                if (targetX is null || targetT is null)
+                    return Task.CompletedTask;
             }
+
             if (!GridClipboardGeometry.Place(copies, targetX, targetT, pasteOption) ||
                 (targetEditor.Setting.AdjustPastedObjects && !GridClipboardGeometry.AdjustToGrid(copies, targetEditor)))
             {
                 targetEditor.ToastNotify(OngekiFumenEditor.Properties.Resources.PasteInvalidGridPosition);
                 return Task.CompletedTask;
             }
+
             // 附轨与坐标先在未加入谱面的克隆上完整预检，失败时不产生任何局部粘贴。
             Task RejectMissingLane()
             {
                 targetEditor.ToastNotify(Resources.CantPlaceObjectsByNoSuiteLanes.Format("Tap / Hold"));
                 return Task.CompletedTask;
             }
+
             var availableLanes = targetEditor.Fumen.Lanes.Concat(copies.OfType<LaneStartBase>()).Where(x => x.IsDockableLane).ToArray();
             var projectors = new Dictionary<LaneStartBase, Func<TGrid, XGrid, XGrid>>();
             XGrid Project(LaneStartBase lane, TGrid time, XGrid x)
@@ -86,6 +107,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     projectors[lane] = project = DockableObjectInteractiveAction.CreateOriginalLaneProjector(lane);
                 return project(time, x);
             }
+
             foreach (var copied in copies)
                 if (copied is Tap or Hold && copied is ILaneDockable attached)
                 {
@@ -95,27 +117,35 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                             .Where(x => x.position != null)
                             .Select(x => (x.lane, distance: Math.Abs(XGridCalculator.ConvertXGridToX(x.position, targetEditor) - XGridCalculator.ConvertXGridToX(attached.XGrid, targetEditor))))
                             .Where(x => x.distance <= 8).OrderBy(x => x.distance).Select(x => x.lane).FirstOrDefault();
-                    if (lane == null) return RejectMissingLane();
+                    if (lane == null)
+                        return RejectMissingLane();
                     var coordinates = GridClipboardGeometry.Enumerate(copied).Select(node => (node,
                         t: (node as ITimelineObject)?.TGrid?.CopyNew(), x: (node as IHorizonPositionObject)?.XGrid?.CopyNew())).ToArray();
                     attached.ReferenceLaneStart = lane;
                     foreach (var point in coordinates)
                     {
-                        if (point.t != null) ((ITimelineObject)point.node).TGrid = point.t;
-                        if (point.x != null) ((IHorizonPositionObject)point.node).XGrid = point.x;
+                        if (point.t != null)
+                            ((ITimelineObject)point.node).TGrid = point.t;
+                        if (point.x != null)
+                            ((IHorizonPositionObject)point.node).XGrid = point.x;
                     }
+
                     foreach (var node in GridClipboardGeometry.Enumerate(copied).OfType<ILaneDockable>())
                     {
                         var laneX = Project(lane, node.TGrid, node.XGrid);
-                        if (laneX == null) return RejectMissingLane();
+                        if (laneX == null)
+                            return RejectMissingLane();
                         node.XGrid = laneX;
                     }
                 }
+
             var selectedBeforePaste = targetEditor.SelectObjects.ToArray();
             void ClearSelection()
             {
-                foreach (var selected in targetEditor.SelectObjects.ToArray()) selected.IsSelected = false;
+                foreach (var selected in targetEditor.SelectObjects.ToArray())
+                    selected.IsSelected = false;
             }
+
             var redo = new System.Action(ClearSelection);
             var undo = new System.Action(ClearSelection);
             foreach (var copied in copies.OrderBy(x => x is ConnectableStartObject ? 0 : 1))
@@ -169,33 +199,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 {
                     foreach (var point in coordinates)
                     {
-                        if (point.t != null) ((ITimelineObject)point.obj).TGrid = point.t.CopyNew();
-                        if (point.x != null) ((IHorizonPositionObject)point.obj).XGrid = point.x.CopyNew();
+                        if (point.t != null)
+                            ((ITimelineObject)point.obj).TGrid = point.t.CopyNew();
+                        if (point.x != null)
+                            ((IHorizonPositionObject)point.obj).XGrid = point.x.CopyNew();
                     }
                 }
+
                 var dockable = copied as ILaneDockable;
                 var preferredLane = dockable?.ReferenceLaneStart;
                 var resolvedLane = preferredLane;
                 redo += () =>
                 {
-                    if (copied is ConnectableStartObject start) start.RecordId = -1;
-                    if (dockable != null) dockable.ReferenceLaneStart = resolvedLane;
+                    if (copied is ConnectableStartObject start)
+                        start.RecordId = -1;
+                    if (dockable != null)
+                        dockable.ReferenceLaneStart = resolvedLane;
                     targetEditor.Fumen.AddObject(copied);
                     // Hold 的附轨动作会修改尾点，因此先建立关联，再恢复已计算的全部坐标。
                     RestoreCoordinates();
-                    foreach (var node in GridClipboardGeometry.Enumerate(copied).OfType<ISelectableObject>()) node.IsSelected = true;
+                    foreach (var node in GridClipboardGeometry.Enumerate(copied).OfType<ISelectableObject>())
+                        node.IsSelected = true;
                 };
                 undo += () =>
                 {
                     targetEditor.RemoveObject(copied);
-                    if (dockable != null) dockable.ReferenceLaneStart = null;
+                    if (dockable != null)
+                        dockable.ReferenceLaneStart = null;
                 };
             }
+
             undo += () =>
             {
                 var remaining = targetEditor.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>().ToHashSet();
                 foreach (var selected in selectedBeforePaste)
-                    if (remaining.Contains(selected)) selected.IsSelected = true;
+                    if (remaining.Contains(selected))
+                        selected.IsSelected = true;
             };
             redo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);
             undo += () => IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(targetEditor);

@@ -22,7 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 
         internal XGrid Project(LaneStartBase lane, TGrid time, XGrid target)
         {
-            if (lane == null) return null;
+            if (lane == null)
+                return null;
             if (!projectors.TryGetValue(lane, out var project))
                 projectors[lane] = project = DockableObjectInteractiveAction.CreateOriginalLaneProjector(lane);
             return project(time, target);
@@ -35,10 +36,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 // 复用轨道时间索引，不遍历全谱音符。同一时刻的群体拖动共享查询。
                 lanes = editor.Fumen.Lanes.GetVisibleStartObjects(time, time).OfType<LaneStartBase>()
                     .Where(l => l.IsDockableLane).Distinct().ToArray();
-                if (candidates.Count >= 256) candidates.Clear();
+                if (candidates.Count >= 256)
+                    candidates.Clear();
                 candidates[time.TotalGrid] = lanes;
                 CandidateQueryCount++;
             }
+
             var wantedX = XGridCalculator.ConvertXGridToX(target, editor);
             var best = current;
             var bestDistance = SnapDistance + .000001;
@@ -48,19 +51,28 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 bestDistance = Math.Min(bestDistance, Math.Abs(XGridCalculator.ConvertXGridToX(currentX, editor) - wantedX));
             foreach (var lane in lanes)
             {
-                if (ReferenceEquals(lane, current)) continue;
+                if (ReferenceEquals(lane, current))
+                    continue;
                 if (endTime != null)
                 {
-                    if (endTime < time || time < lane.MinTGrid || endTime > lane.MaxTGrid) continue;
-                    if (!validPaths.TryGetValue(lane, out var valid)) validPaths[lane] = valid = lane.IsPathVaild();
-                    if (!valid || Project(lane, endTime, target) == null) continue;
+                    if (endTime < time || time < lane.MinTGrid || endTime > lane.MaxTGrid)
+                        continue;
+                    if (!validPaths.TryGetValue(lane, out var valid))
+                        validPaths[lane] = valid = lane.IsPathVaild();
+                    if (!valid || Project(lane, endTime, target) == null)
+                        continue;
                 }
+
                 var x = Project(lane, time, target);
-                if (x == null) continue;
+                if (x == null)
+                    continue;
                 var distance = Math.Abs(XGridCalculator.ConvertXGridToX(x, editor) - wantedX);
-                if (distance > SnapDistance || distance >= bestDistance - .000001) continue;
-                best = lane; bestDistance = distance;
+                if (distance > SnapDistance || distance >= bestDistance - .000001)
+                    continue;
+                best = lane;
+                bestDistance = distance;
             }
+
             return best;
         }
     }

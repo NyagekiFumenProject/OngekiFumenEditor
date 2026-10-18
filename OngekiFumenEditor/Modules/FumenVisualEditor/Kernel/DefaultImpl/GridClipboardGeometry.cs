@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
+
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
     public static class GridClipboardGeometry
@@ -30,16 +31,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 if (originals[i] is ILaneDockable from && copies[i] is ILaneDockable to &&
                     from.ReferenceLaneStart != null && lanes.TryGetValue(from.ReferenceLaneStart, out var lane))
                 {
-                    var coordinates = Enumerate(copies[i]).Select(x => (node:x,
-                        t:(x as ITimelineObject)?.TGrid?.CopyNew(), x:(x as IHorizonPositionObject)?.XGrid?.CopyNew())).ToArray();
+                    var coordinates = Enumerate(copies[i]).Select(x => (node: x,
+                        t: (x as ITimelineObject)?.TGrid?.CopyNew(), x: (x as IHorizonPositionObject)?.XGrid?.CopyNew())).ToArray();
                     to.ReferenceLaneStart = lane;
                     foreach (var point in coordinates)
                     {
-                        if (point.t != null) ((ITimelineObject)point.node).TGrid = point.t;
-                        if (point.x != null) ((IHorizonPositionObject)point.node).XGrid = point.x;
+                        if (point.t != null)
+                            ((ITimelineObject)point.node).TGrid = point.t;
+                        if (point.x != null)
+                            ((IHorizonPositionObject)point.node).XGrid = point.x;
                     }
                 }
             }
+
             return copies.Where(x => x != null).ToArray();
         }
 
@@ -50,30 +54,49 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 foreach (var child in start.Children)
                 {
                     yield return child;
-                    foreach (var control in child.PathControls) yield return control;
+                    foreach (var control in child.PathControls)
+                        yield return control;
                 }
-            else if (root is Hold hold && hold.HoldEnd != null) yield return hold.HoldEnd;
-            else if (root is IndividualSoflanArea area) yield return area.EndIndicator;
-            else if (root is Soflan speed) yield return speed.EndIndicator;
-            else if (root is LaneBlockArea block) yield return block.EndIndicator;
+            else if (root is Hold hold && hold.HoldEnd != null)
+                yield return hold.HoldEnd;
+            else if (root is IndividualSoflanArea area)
+                yield return area.EndIndicator;
+            else if (root is Soflan speed)
+                yield return speed.EndIndicator;
+            else if (root is LaneBlockArea block)
+                yield return block.EndIndicator;
         }
 
         public static OngekiObjectBase Clone(OngekiObjectBase source)
         {
-            if (source == null) return null;
+            if (source == null)
+                return null;
             var sourceNodes = Enumerate(source).ToArray();
             var originalCoordinates = sourceNodes.Select(node => (
                 t: (node as ITimelineObject)?.TGrid?.CopyNew(),
                 x: (node as IHorizonPositionObject)?.XGrid?.CopyNew())).ToArray();
             var copy = source.CopyNew();
-            if (copy == null) return null;
+            if (copy == null)
+                return null;
             copy.Tag = source.Tag;
             switch (copy)
             {
-                case ConnectableStartObject start: start.CopyEntireConnectableObject((ConnectableStartObject)source); start.RecordId = -1; break;
-                case Hold hold: hold.CopyEntire((Hold)source); hold.IsCritical = ((Hold)source).IsCritical; hold.ReferenceLaneStart = ((Hold)source).ReferenceLaneStart; break;
-                case Soflan speed: speed.CopyEntire((Soflan)source); speed.SoflanGroup = ((Soflan)source).SoflanGroup; break;
-                case LaneBlockArea block: block.CopyEntire((LaneBlockArea)source); break;
+                case ConnectableStartObject start:
+                    start.CopyEntireConnectableObject((ConnectableStartObject)source);
+                    start.RecordId = -1;
+                    break;
+                case Hold hold:
+                    hold.CopyEntire((Hold)source);
+                    hold.IsCritical = ((Hold)source).IsCritical;
+                    hold.ReferenceLaneStart = ((Hold)source).ReferenceLaneStart;
+                    break;
+                case Soflan speed:
+                    speed.CopyEntire((Soflan)source);
+                    speed.SoflanGroup = ((Soflan)source).SoflanGroup;
+                    break;
+                case LaneBlockArea block:
+                    block.CopyEntire((LaneBlockArea)source);
+                    break;
                 case IndividualSoflanArea area:
                     var from = (IndividualSoflanArea)source;
                     area.SoflanGroup = from.SoflanGroup;
@@ -81,6 +104,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     area.EndIndicator.XGrid = from.EndIndicator.XGrid.CopyNew();
                     break;
             }
+
             if (copy is OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase laneCopy)
                 laneCopy.IsTransparent = ((OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase)source).IsTransparent;
             // CopyNew 的基础实现共享 Grid，必须在快照边界断开所有子物件的引用。
@@ -90,9 +114,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 var node = copiedNodes[i];
                 node.Tag = sourceNodes[i].Tag;
                 var position = originalCoordinates[i];
-                if (node is ITimelineObject t && position.t != null) t.TGrid = position.t.CopyNew();
-                if (node is IHorizonPositionObject x && position.x != null) x.XGrid = position.x.CopyNew();
+                if (node is ITimelineObject t && position.t != null)
+                    t.TGrid = position.t.CopyNew();
+                if (node is IHorizonPositionObject x && position.x != null)
+                    x.XGrid = position.x.CopyNew();
             }
+
             if (copy is IBulletPalleteReferencable bullet && bullet.ReferenceBulletPallete != null)
                 bullet.ReferenceBulletPallete = (BulletPallete)bullet.ReferenceBulletPallete.CopyNew();
             return copy;
@@ -123,25 +150,34 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     var y = editor.ConvertTGridToY_DesignMode(value.t);
                     if (action.CheckAndAdjustY((ITimelineObject)value.node, y, editor) is double snappedY)
                         value.t = editor.ConvertYToTGrid_DesignMode(snappedY);
-                    if (value.t == null || value.t.TotalGrid < 0) return false;
+                    if (value.t == null || value.t.TotalGrid < 0)
+                        return false;
                 }
+
                 if (value.x != null && !editor.Setting.DisableXGridMagneticDock)
                 {
                     var x = XGridCalculator.ConvertXGridToX(value.x, editor);
                     if (action.CheckAndAdjustX((IHorizonPositionObject)value.node, x, editor) is double snappedX)
                     {
                         var total = XGridCalculator.ConvertXToXGridTotalUnit(snappedX, editor) * XGrid.DEFAULT_RES_X;
-                        if (double.IsNaN(total) || double.IsInfinity(total) || total < int.MinValue || total > int.MaxValue) return false;
+                        if (double.IsNaN(total) || double.IsInfinity(total) || total < int.MinValue || total > int.MaxValue)
+                            return false;
                         value.x = XGridCalculator.ConvertXToXGrid(snappedX, editor);
                     }
-                    if (editor.Setting.ForceXGridIntegerUnit) value.x = XGridCalculator.RoundToIntegerUnit(value.x);
+
+                    if (editor.Setting.ForceXGridIntegerUnit)
+                        value.x = XGridCalculator.RoundToIntegerUnit(value.x);
                 }
+
                 values[i] = value;
             }
+
             foreach (var value in values)
-                if (value.t != null) ((ITimelineObject)value.node).TGrid = value.t;
+                if (value.t != null)
+                    ((ITimelineObject)value.node).TGrid = value.t;
             foreach (var value in values)
-                if (value.x != null) ((IHorizonPositionObject)value.node).XGrid = value.x;
+                if (value.x != null)
+                    ((IHorizonPositionObject)value.node).XGrid = value.x;
             return true;
         }
 
@@ -154,8 +190,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             {
                 var span = Enumerate(root).OfType<ITimelineObject>().ToArray();
                 if (root is Hold or Soflan or LaneBlockArea or IndividualSoflanArea &&
-                    span.Length == 2 && span[1].TGrid < span[0].TGrid) return false;
+                    span.Length == 2 && span[1].TGrid < span[0].TGrid)
+                    return false;
             }
+
             var anchor = ReferencePoint(rootArray);
             var maxT = nodes.OfType<ITimelineObject>().Where(x => x.TGrid != null).Select(x => x.TGrid.TotalGrid).DefaultIfEmpty(0).Max();
             var xs = nodes.OfType<IHorizonPositionObject>().Select(x => (long)x.XGrid.TotalGrid).ToArray();
@@ -167,13 +205,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 x: node is IHorizonPositionObject x ? (long?)(option == PasteOption.XGridZeroMirror ? -(long)x.XGrid.TotalGrid : option == PasteOption.SelectedRangeCenterXGridMirror ? mirrorXSum - x.XGrid.TotalGrid + dx : x.XGrid.TotalGrid + dx) : null)).ToArray();
             // 整组预检，禁止溢出或逐点钳零破坏物件间的相对坐标。
             if (pending.Any(v => v.t.HasValue && (v.t.Value < 0 || v.t.Value > int.MaxValue) ||
-                v.x.HasValue && (v.x.Value < int.MinValue || v.x.Value > int.MaxValue))) return false;
+                v.x.HasValue && (v.x.Value < int.MinValue || v.x.Value > int.MaxValue)))
+                return false;
             var values = pending.Select(v => (v.node, t: (int?)v.t, x: (int?)v.x)).ToArray();
             foreach (var value in values)
             {
-                if (value.t is int t) ((ITimelineObject)value.node).TGrid = TGrid.FromTotalGrid(t);
-                if (value.x is int x) ((IHorizonPositionObject)value.node).XGrid = XGrid.FromTotalGrid(x);
+                if (value.t is int t)
+                    ((ITimelineObject)value.node).TGrid = TGrid.FromTotalGrid(t);
+                if (value.x is int x)
+                    ((IHorizonPositionObject)value.node).XGrid = XGrid.FromTotalGrid(x);
             }
+
             if (option == PasteOption.SelectedRangeCenterTGridMirror)
             {
                 // 持续物件仍以较早端作为头，避免端点属性的最小时间约束截断镜像。
@@ -187,13 +229,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         var mirrored = points.Select(p => values.Single(v => ReferenceEquals(v.node, p))).Reverse().ToArray();
                         var controls = children.Select(child => child.PathControls.ToArray()).Reverse().ToArray();
                         foreach (var child in children)
-                            foreach (var control in child.PathControls.ToArray()) child.RemoveControlObject(control);
+                            foreach (var control in child.PathControls.ToArray())
+                                child.RemoveControlObject(control);
                         for (var i = 0; i < points.Length; i++)
                         {
                             ((ITimelineObject)points[i]).TGrid = TGrid.FromTotalGrid(mirrored[i].t.Value);
                             ((IHorizonPositionObject)points[i]).XGrid = XGrid.FromTotalGrid(mirrored[i].x.Value);
                             if (i > 0)
-                                foreach (var control in controls[i - 1].Reverse()) children[i - 1].AddControlObject(control);
+                                foreach (var control in controls[i - 1].Reverse())
+                                    children[i - 1].AddControlObject(control);
                         }
                     }
                     else if (span.Length == 2)
@@ -213,6 +257,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     }
                 }
             }
+
             return true;
         }
     }

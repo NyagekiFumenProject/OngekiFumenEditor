@@ -121,7 +121,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void ExecuteGridDragUpdate(System.Action update)
         {
             gridDragUpdateDepth++;
-            try { update(); }
+            try
+            {
+                update();
+            }
             finally
             {
                 if (--gridDragUpdateDepth == 0 && gridDragMetricsPending)
@@ -134,7 +137,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void RecalculateScrollMetrics()
         {
-            if (gridDragUpdateDepth > 0) { gridDragMetricsPending = true; return; }
+            if (gridDragUpdateDepth > 0)
+            {
+                gridDragMetricsPending = true;
+                return;
+            }
+
             var audioDuration = GetAudioDuration();
             var audioDurationMs = Math.Max(0, audioDuration.TotalMilliseconds);
 
