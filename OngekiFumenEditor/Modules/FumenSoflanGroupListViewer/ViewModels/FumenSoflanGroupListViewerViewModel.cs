@@ -1,7 +1,9 @@
 using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
+using Gemini.Modules.UndoRedo;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -128,7 +130,18 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             {
                 DisplayName = CreateNewGroupName
             };
-            DisplaySoflanGroupItemGroupRoot.Add(group);
+
+            var root = DisplaySoflanGroupItemGroupRoot;
+            if (Editor is null)
+            {
+                root.Add(group);
+            }
+            else
+            {
+                Editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.NewItemGroup,
+                    () => root.Add(group),
+                    () => group.Parent?.Remove(group)));
+            }
 
             CreateNewGroupName = string.Empty;
         }
@@ -249,26 +262,87 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 
         private void ListDragManager_ProcessDrop(object sender, ProcessDropEventArgs<SoflanGroupDisplayItemListViewBase> e)
         {
+            //only item can be moved.
+            if (e.DataItem is not SoflanGroupWrapItem item)
+                return;
+
             var placeTo = e.ItemsSource.ElementAtOrDefault(e.NewIndex);
 
-            var item = e.DataItem;
-            //only item can be moved.
-            if (item is not SoflanGroupWrapItem)
+            if (CreateMoveAction(item, placeTo) is not IUndoableAction action)
                 return;
-            var itemParent = item.Parent;
-            item.Parent?.Remove(item);
+
+            if (Editor is null)
+            {
+                action.Execute();
+                return;
+            }
+
+            Editor.UndoRedoManager.ExecuteAction(action);
+        }
+
+        /// <summary>
+        /// 根据放置目标构造分组移动的 LambdaUndoAction；目标无效（自身/位置未变化）时返回 null。
+        /// 位置语义：oldIndex / newIndex 都是"该项仍留在原父节点子列表里"时的下标。
+        /// </summary>
+        public static IUndoableAction CreateMoveAction(SoflanGroupWrapItem item, SoflanGroupDisplayItemListViewBase placeTo)
+        {
+            if (item?.Parent is not SoflanGroupWrapItemGroup oldParent)
+                return null;
+
+            var oldIndex = IndexOf(oldParent.Children, item);
+            if (oldIndex < 0)
+                return null;
+
+            SoflanGroupWrapItemGroup newParent;
+            int beforeIndex;
 
             switch (placeTo)
             {
-                case SoflanGroupWrapItem placeItem:
-                    placeItem.Parent.InsertBefore(item, placeItem);
+                case SoflanGroupWrapItem placeItem when !ReferenceEquals(placeItem, item):
+                    if (placeItem.Parent is not SoflanGroupWrapItemGroup placeParent)
+                        return null;
+
+                    newParent = placeParent;
+                    beforeIndex = IndexOf(placeParent.Children, placeItem);
+                    if (beforeIndex < 0)
+                        return null;
                     break;
                 case SoflanGroupWrapItemGroup placeGroup:
-                    placeGroup.Add(item);
+                    newParent = placeGroup;
+                    beforeIndex = placeGroup.Children.Count;
                     break;
                 default:
-                    break;
+                    return null;
             }
+
+            var sameParent = ReferenceEquals(oldParent, newParent);
+            var newIndex = beforeIndex - (sameParent && oldIndex < beforeIndex ? 1 : 0);
+            if (newIndex < 0)
+                newIndex = 0;
+
+            if (sameParent && newIndex == oldIndex)
+                return null;
+
+            return LambdaUndoAction.Create(Resources.SoflanGroupMove,
+                () => MoveTo(item, newParent, newIndex),
+                () => MoveTo(item, oldParent, oldIndex));
+        }
+
+        private static void MoveTo(SoflanGroupWrapItem item, SoflanGroupWrapItemGroup parent, int index)
+        {
+            item.Parent?.Remove(item);
+            parent.Insert(index, item);
+        }
+
+        private static int IndexOf(IReadOnlyList<SoflanGroupDisplayItemListViewBase> list, SoflanGroupDisplayItemListViewBase item)
+        {
+            for (var i = 0; i < list.Count; i++)
+            {
+                if (ReferenceEquals(list[i], item))
+                    return i;
+            }
+
+            return -1;
         }
     }
 }

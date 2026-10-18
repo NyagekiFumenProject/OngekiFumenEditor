@@ -1147,6 +1147,9 @@
   <data name="SoflanGroupCreateTipText" xml:space="preserve">
     <value>左の入力欄の名前で新しいソフラングループを作成します。</value>
   </data>
+  <data name="SoflanGroupMove" xml:space="preserve">
+    <value>ソフラングループを移動</value>
+  </data>
   <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
     <value>選択中グループのソフラン詳細リストを表示します（現在は使用できません）。</value>
   </data>

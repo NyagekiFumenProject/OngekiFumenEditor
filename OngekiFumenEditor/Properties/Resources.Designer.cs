@@ -7766,6 +7766,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Move soflan group.
+        /// </summary>
+        public static string SoflanGroupMove {
+            get {
+                return ResourceManager.GetString("SoflanGroupMove", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to BPM in effect at that moment (from BPM changes)..
         /// </summary>
         public static string SoflanPointColumnBpmTipText {

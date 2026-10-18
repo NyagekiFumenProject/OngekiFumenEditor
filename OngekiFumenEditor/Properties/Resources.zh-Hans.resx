@@ -2376,6 +2376,9 @@
   <data name="NewItemGroup" xml:space="preserve">
     <value>新建组层</value>
   </data>
+  <data name="SoflanGroupMove" xml:space="preserve">
+    <value>移动变速分组</value>
+  </data>
   <data name="ChangeColor" xml:space="preserve">
     <value>更改颜色</value>
   </data>

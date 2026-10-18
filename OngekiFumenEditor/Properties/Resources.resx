@@ -2382,6 +2382,9 @@
   <data name="NewItemGroup" xml:space="preserve">
     <value>New item group</value>
   </data>
+  <data name="SoflanGroupMove" xml:space="preserve">
+    <value>Move soflan group</value>
+  </data>
   <data name="ChangeColor" xml:space="preserve">
     <value>Change color</value>
   </data>

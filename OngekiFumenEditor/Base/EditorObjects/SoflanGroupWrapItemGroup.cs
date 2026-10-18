@@ -155,6 +155,17 @@ namespace OngekiFumenEditor.Base.EditorObjects
                 children.Add(item);
         }
 
+        public void Insert(int index, SoflanGroupDisplayItemListViewBase item)
+        {
+            if (item == null)
+                return;
+
+            if (children.Contains(item))
+                return;
+
+            children.Insert(Math.Clamp(index, 0, children.Count), item);
+        }
+
         public void Remove(SoflanGroupDisplayItemListViewBase item)
         {
             if (item == null)
@@ -198,24 +209,6 @@ namespace OngekiFumenEditor.Base.EditorObjects
                 default:
                     break;
             }
-        }
-
-        public void InsertBefore(SoflanGroupDisplayItemListViewBase item, SoflanGroupWrapItem insertBefore)
-        {
-            var index = -1;
-            for (var i = 0; i < Children.Count; i++)
-            {
-                if (Children[i] == insertBefore)
-                {
-                    index = i;
-                    break;
-                }
-            }
-
-            if (index < 0)
-                throw new Exception("Children not contains insertBefore");
-
-            children.Insert(index, item);
         }
     }
 }
