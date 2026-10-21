@@ -242,12 +242,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 //一次性读取 obj 的热点属性到本地，避免反复走 virtual getter + pallete 三元判断
                 var objSpeed = obj.Speed;
-                var safeSpeed = objSpeed > 0 ? objSpeed : .0001f;
                 var objTGrid = obj.TGrid;
                 var objXGrid = obj.XGrid;
 
-                //子弹完全经过画面所需的运动时间
-                var appearOffsetTime = height / safeSpeed;
+                //子弹完全经过画面所需的运动时间。
+                //游戏 calcNotePosZAimBullet 对 0 速让子弹停在判定线，负速保留反向轨迹；
+                //0 速用极小正速让 appearOffsetTime 足够大（precent≈1、timeY≈baseY）。
+                var appearOffsetTime = objSpeed == 0f ? height / .0001f : height / objSpeed;
 
                 var toTime = 0d;
                 var currentTime = 0d;

@@ -70,8 +70,19 @@ internal static class Program
         var randomB = ProjectileTargetGeometry.Resolve(500, Target.FixField, 1, TimeSpan.Zero, 10, 517, 23, _ => 0);
         Assert(randomA.LandingXUnit == randomB.LandingXUnit && randomA.LandingXUnit >= 494 && randomA.LandingXUnit <= 540, "随机落点须可重现且处于范围内。");
         Assert(randomA.EnvelopeMinXUnit == 494 && randomA.EnvelopeMaxXUnit == 540, "随机包络必须保留完整偏移边界。");
-        var stopped = ProjectileTargetGeometry.Resolve(500, Target.Player, 0, TimeSpan.Zero, 10, 17, 0, _ => 30);
-        Assert(stopped.LandingXUnit == 47, "零速下的玩家目标须使用安全有限帧偏移。");
+        var stopped = ProjectileTargetGeometry.Resolve(500, Target.Player, 0, TimeSpan.FromSeconds(10), 10, 17, 0, time =>
+        {
+            Assert(time == TimeSpan.FromSeconds(10), "零速玩家目标应在命中帧读取玩家位置。");
+            return 30;
+        });
+        Assert(stopped.LandingXUnit == 47, "零速下的玩家目标须使用命中帧玩家位置。");
+        var negative = ProjectileTargetGeometry.Resolve(500, Target.Player, -2f, TimeSpan.FromSeconds(10), 10, 17, 0, time =>
+        {
+            var expected = TimeSpan.FromSeconds(10) - TGridCalculator.ConvertFrameToAudioTime((40f - 7.5f) / (.47f * MathF.Min(-2f, 1f)));
+            Assert(time == expected, "负速玩家目标应按游戏公式在命中后读取玩家位置。");
+            return 30;
+        });
+        Assert(negative.LandingXUnit == 47, "负速玩家目标须保留玩家位置。");
         var slowest = ProjectileTargetGeometry.Resolve(500, Target.Player, float.Epsilon, TimeSpan.FromSeconds(10), 10, 17, 0, time =>
         {
             Assert(time == TimeSpan.Zero, "极小正速度应钳制历史查询时间，不能溢出。");

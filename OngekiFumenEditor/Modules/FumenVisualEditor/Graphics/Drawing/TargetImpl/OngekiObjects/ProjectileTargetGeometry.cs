@@ -13,13 +13,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             var targetX = xUnit;
             if (target == Target.Player)
             {
-                var safeSpeed = speed > 0 ? speed : .0001f;
-                var frameOffset = (40f - 7.5f) / (.47f * MathF.Min(safeSpeed, 1));
+                // 复刻游戏 NotesManager.calcNoteFrameAimBulletCreate：
+                // 0 速显式返回 0（命中帧取玩家位置）；负速保留 Min(1, speed) 的负号（命中后才 setup）。
+                var frameOffset = speed == 0f
+                    ? 0f
+                    : (40f - 7.5f) / (.47f * MathF.Min(speed, 1f));
                 var offsetMilliseconds = TGridCalculator.FRAME_DURATION * frameOffset;
-                // 先比较时间边界，避免极小正速度产生的无穷大进入 TimeSpan 转换。
-                var targetTime = !float.IsFinite(offsetMilliseconds) || offsetMilliseconds >= noteAudioTime.TotalMilliseconds
-                    ? TimeSpan.Zero
-                    : noteAudioTime - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
+                TimeSpan targetTime;
+                if (!float.IsFinite(offsetMilliseconds))
+                    targetTime = TimeSpan.Zero;
+                else if (offsetMilliseconds > 0 && offsetMilliseconds >= noteAudioTime.TotalMilliseconds)
+                    targetTime = TimeSpan.Zero;
+                else if (offsetMilliseconds < 0 && -offsetMilliseconds >= TimeSpan.MaxValue.TotalMilliseconds - noteAudioTime.TotalMilliseconds)
+                    targetTime = TimeSpan.MaxValue;
+                else
+                    targetTime = noteAudioTime - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
                 targetX += getPlayerLocation(targetTime);
             }
 
