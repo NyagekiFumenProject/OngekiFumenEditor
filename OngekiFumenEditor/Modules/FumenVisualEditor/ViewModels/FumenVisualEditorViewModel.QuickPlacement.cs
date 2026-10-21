@@ -3,9 +3,8 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
-using OngekiFumenEditor.Kernel.KeyBinding;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions;
 using System;
 using System.Linq;
 using System.Windows;
@@ -22,7 +21,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private bool consumeQuickMouseUp;
         private bool consumeQuickRightMouseUp;
         private Point? placementViewportPoint;
-        public event System.Action QuickPlacementCancelled;
+        public BulletPallete QuickPlacementPalette => (quickPlacementPreviewObject as IBulletPalleteReferencable)?.ReferenceBulletPallete;
+        public bool QuickPlacementIsBell => quickPlacementPreviewObject is Bell;
         public bool IsQuickPlacementActive => quickPlacementFactory != null;
         public string QuickPlacementGlyph { get; private set; }
         public string QuickPlacementImage { get; private set; }
@@ -45,7 +45,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             quickPlacementPreviewObject = null;
             quickPlacingDrag = false;
             NotifyOfPropertyChange(() => QuickPlacementVisibility);
-            QuickPlacementCancelled?.Invoke();
+            NotifyOfPropertyChange(() => QuickPlacementPalette);
+            NotifyOfPropertyChange(() => QuickPlacementIsBell);
         }
 
         public void BeginPaletteQuickPlacement(BulletPallete palette, bool bell)
@@ -91,26 +92,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             SelectionArea.IsActive = false;
             mouseDownHitObject = null;
             mouseDownNextHitObject = null;
+            NotifyOfPropertyChange(() => QuickPlacementPalette);
+            NotifyOfPropertyChange(() => QuickPlacementIsBell);
             NotifyOfPropertyChange(() => QuickPlacementGlyph);
             UpdateQuickPlacementPreview();
-        }
-
-        private bool TryGetQuickPlacementGrid(Point position, out XGrid x, out TGrid t)
-        {
-            var probe = new Bell();
-            var interaction = new DefaultObjectInteractiveAction();
-            var sx = interaction.CheckAndAdjustX(probe, position.X, this);
-            var sy = interaction.CheckAndAdjustY(probe, position.Y, this);
-            x = sx is double px ? XGridCalculator.ConvertXToXGrid(px, this) : null;
-            t = sy is double py ? ConvertYToTGrid_DesignMode(py) : null;
-            return x != null && t != null;
         }
 
         private void UpdateQuickPlacementPreview()
         {
             RefreshPlacementCursor();
-            if (IsQuickPlacementActive && CurrentCursorPosition is Point pos && TryGetQuickPlacementGrid(pos, out var x, out var t))
+            if (IsQuickPlacementActive && CurrentCursorPosition is Point pos)
             {
+                MoveObjectTo(quickPlacementPreviewObject, pos);
+                var x = quickPlacementPreviewObject.XGrid;
+                var t = quickPlacementPreviewObject.TGrid;
                 UpdateQuickPlacementAppearance();
                 QuickPlacementX = XGridCalculator.ConvertXGridToX(x, this) - QuickPlacementImageWidth / 2;
                 QuickPlacementY = RectInDesignMode.MaxY - ConvertTGridToY_DesignMode(t) - QuickPlacementImageHeight / 2;
@@ -142,8 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     BulletType.Square => "Square",
                     _ => "Circle"
                 };
-                // 新放置子弹的默认伤害为普通，复用正式绘制器的对应颜色资源。
-                resource = "bullet" + shape + "Normal.png";
+                resource = "bullet" + shape + bullet.BulletDamageTypeValue + ".png";
                 if (bullet.TypeValue != BulletType.Circle)
                 {
                     width = 30;
@@ -195,45 +189,42 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void PlaceQuickObject(Point position)
         {
-            if (!ValidateQuickPlacementPalette() || !IsDesignMode || IsBatchMode ||
-                !CheckAndNotifyIfPlaceBeyondDuration(position) || !TryGetQuickPlacementGrid(position, out var x, out var t))
+            if (!ValidateQuickPlacementPalette() || !IsDesignMode || IsBatchMode)
                 return;
-            var obj = quickPlacementFactory();
-            obj.XGrid = x.CopyNew();
-            obj.TGrid = t.CopyNew();
-            AddQuickObjectUndo(obj);
+            new OngekiObjectDropParam(() =>
+            {
+                var obj = quickPlacementFactory();
+                if (obj is Bullet bullet && quickPlacementPreviewObject is Bullet preview)
+                    bullet.BulletDamageTypeValue = preview.BulletDamageTypeValue;
+                return obj;
+            }).Drop(this, position);
         }
-
-        private void AddQuickObjectUndo(OngekiMovableObjectBase obj)
-            => UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(OngekiFumenEditor.Properties.Resources.UndoQuickProjectilePlacement, () => Fumen.AddObject(obj), () => Fumen.RemoveObject(obj)));
 
         internal static bool IsQuickPlacementTextInput(object target)
             => target is System.Windows.Controls.Primitives.TextBoxBase
                 or System.Windows.Controls.PasswordBox or System.Windows.Controls.ComboBox;
-        // 使用配置中的定义匹配，Preview 阶段消费事件以阻止旧绑定重复执行。
-        public bool HandleQuickPlacementKey(KeyEventArgs e)
+        public void KeyboardAction_QuickBulletDamageUp(ActionExecutionContext context)
+            => ChangeQuickBulletDamage(context, 1);
+
+        public void KeyboardAction_QuickBulletDamageDown(ActionExecutionContext context)
+            => ChangeQuickBulletDamage(context, -1);
+
+        private void ChangeQuickBulletDamage(ActionExecutionContext context, int direction)
         {
-            RefreshPlacementCursor();
-            if (IsQuickPlacementTextInput(Keyboard.FocusedElement) || !IsDesignMode || IsBatchMode)
-                return false;
-            var manager = IoC.Get<IKeyBindingManager>();
-            bool Match(KeyBindingDefinition definition) => manager.CheckKeyBinding(definition, e);
-            if (Match(KeyBindingDefinitions.KBD_CancelSelectingObjects) && IsQuickPlacementActive)
+            if (IsQuickPlacementTextInput(Keyboard.FocusedElement) ||
+                IsQuickPlacementTextInput((context.EventArgs as RoutedEventArgs)?.OriginalSource) || !IsDesignMode || IsBatchMode)
+                return;
+            if (context.EventArgs is KeyEventArgs key && key.IsRepeat)
+                return;
+            if (quickPlacementPreviewObject is Bullet preview)
             {
-                CancelQuickPlacement();
-                return true;
+                preview.BulletDamageTypeValue = (BulletDamageType)(((int)preview.BulletDamageTypeValue + direction + 3) % 3);
+                UpdateQuickPlacementPreview();
+                if (context.EventArgs is KeyEventArgs handledKey)
+                    handledKey.Handled = true;
             }
-
-            if (Match(KeyBindingDefinitions.KBD_QuickBulletDamageUp) || Match(KeyBindingDefinitions.KBD_QuickBulletDamageDown))
-            {
-                if (!SelectObjects.OfType<Bullet>().Any())
-                    return false;
-                if (!e.IsRepeat)
-                    ChangeSelectedBulletDamage(Match(KeyBindingDefinitions.KBD_QuickBulletDamageUp) ? 1 : -1);
-                return true;
-            }
-
-            return false;
+            else
+                ChangeSelectedBulletDamage(direction);
         }
 
         private void ChangeSelectedBulletDamage(int direction)

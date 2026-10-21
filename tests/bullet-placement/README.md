@@ -1,3 +1,9 @@
 # 独立无窗口回归
 
-先构建该功能对应的 WPF 编辑器，再运行 `dotnet run --project tests/bullet-placement/BulletPlacement.csproj -p:EditorAssemblyDirectory=<构建输出目录>`。不创建编辑器窗口，不加入解决方案。
+先构建该功能对应的 WPF 编辑器，再运行 `dotnet run --project tests/bullet-placement/BulletPlacement.csproj -p:EditorAssemblyDirectory=<本轮构建输出目录>`。不创建窗口，不加入解决方案。
+
+行为覆盖：文本输入类型保护、取消与预览引用释放、模板删除立即取消、右键释放单次消费、生产选择模板入口、临时伤害正反循环与重选恢复普通、正式定位与预览一致（含整数 X 吸附）、伤害预览资源更新及无谱面/选择副作用、已选谱面子弹伤害的真实撤销/重做、模板勾选转换、生产 Drop 连续放置/临时伤害复制/撤销重做、停用文档及模式切换取消。
+
+测试只为无窗口场景跳过编辑器的 MEF/渲染构造，复制 Caliburn 基类状态并填充必要依赖；伤害与定位调用生产入口和生产撤销管理器。测试通过反射配置独立 EditorSetting 的内存字段，不保存或修改用户设置。持续点击的真实 WPF 事件派发、焦点路由及界面勾选回收仍未覆盖；此测试不启动 GUI。
+
+新增回归：调色板动作转发上下键、没有放置会话时不修改谱面、TextBox/PasswordBox/ComboBox 的原始按键事件保护；连续五次越界放置确认工厂调用次数为零，且谱面和撤销栈不变。越界测试临时替换独立的内存设置实例并在 finally 恢复，不保存配置。

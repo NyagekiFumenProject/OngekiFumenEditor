@@ -32,6 +32,8 @@
 
     <i:Interaction.Triggers>
         <!--#region Key Bindings-->
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_QuickBulletDamageUp}" Message="KeyboardAction_QuickBulletDamageUp($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_QuickBulletDamageDown}" Message="KeyboardAction_QuickBulletDamageDown($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastSetObjectIsCritical}" Message="KeyboardAction_FastSetObjectIsCritical($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToWallLeft}" Message="KeyboardAction_FastPlaceDockableObjectToWallLeft($executionContext)" />
         <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_FastPlaceDockableObjectToWallRight}" Message="KeyboardAction_FastPlaceDockableObjectToWallRight($executionContext)" />

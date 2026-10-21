@@ -25,7 +25,6 @@ using System.Data;
 using System.Linq;
 using System.Windows;
 using System.Windows.Data;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -80,15 +79,10 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
                 if (ReferenceEquals(editor, value))
                     return;
                 if (editor != null)
-                {
                     editor.CancelQuickPlacement();
-                    editor.QuickPlacementCancelled -= ClearPaletteQuickPlacement;
-                }
 
                 this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropertyChanged);
                 Set(ref editor, value);
-                if (editor != null)
-                    editor.QuickPlacementCancelled += ClearPaletteQuickPlacement;
                 NotifyOfPropertyChange(() => IsEnable);
 
                 if (Editor?.Fumen is not null)
@@ -115,51 +109,24 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
             }
         }
 
-        private BulletPallete quickPalette;
-        private bool quickBell;
-        private readonly List<WeakReference<CheckBox>> quickChecks = new();
-
-        private void ClearPaletteQuickPlacement()
+        public void ToggleQuickPlacement(BulletPallete palette, bool bell)
         {
-            quickPalette = null;
-            SyncPaletteQuickChecks();
-        }
-
-        private void SyncPaletteQuickChecks()
-        {
-            quickChecks.RemoveAll(w => !w.TryGetTarget(out _));
-            foreach (var weak in quickChecks)
-                if (weak.TryGetTarget(out var check))
-                    check.IsChecked = check.DataContext == quickPalette && (check.Tag as string == "Bell") == quickBell;
-        }
-
-        public void OnQuickPlacementCheckLoaded(ActionExecutionContext context)
-        {
-            if (context.Source is CheckBox check)
-            {
-                if (!quickChecks.Any(w => w.TryGetTarget(out var old) && old == check))
-                    quickChecks.Add(new(check));
-                SyncPaletteQuickChecks();
-            }
-        }
-
-        public void OnQuickPlacementCheckClick(ActionExecutionContext context)
-        {
-            if (context.Source is not CheckBox check || check.DataContext is not BulletPallete palette)
-                return;
-            var enabled = check.IsChecked == true;
+            var active = Editor != null && Editor.QuickPlacementPalette == palette && Editor.QuickPlacementIsBell == bell;
             Editor?.CancelQuickPlacement();
-            if (enabled && Editor != null)
-            {
-                Editor.BeginPaletteQuickPlacement(palette, check.Tag as string == "Bell");
-                if (Editor.IsQuickPlacementActive)
-                {
-                    quickPalette = palette;
-                    quickBell = check.Tag as string == "Bell";
-                }
-            }
+            if (!active)
+                Editor?.BeginPaletteQuickPlacement(palette, bell);
+        }
 
-            SyncPaletteQuickChecks();
+        public void KeyboardAction_QuickBulletDamageUp(ActionExecutionContext context)
+        {
+            if (Editor?.IsQuickPlacementActive == true)
+                Editor.KeyboardAction_QuickBulletDamageUp(context);
+        }
+
+        public void KeyboardAction_QuickBulletDamageDown(ActionExecutionContext context)
+        {
+            if (Editor?.IsQuickPlacementActive == true)
+                Editor.KeyboardAction_QuickBulletDamageDown(context);
         }
 
         public void OnCreateNew()
@@ -183,7 +150,7 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
                 return;
             }
 
-            if (SelectedItems.Contains(quickPalette))
+            if (SelectedItems.Contains(Editor.QuickPlacementPalette))
                 Editor.CancelQuickPlacement();
             foreach (var item in SelectedItems.ToArray())
                 Editor.Fumen.RemoveObject(item);

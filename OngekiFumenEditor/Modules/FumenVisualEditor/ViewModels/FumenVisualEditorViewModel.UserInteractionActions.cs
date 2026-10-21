@@ -865,6 +865,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
+            if (IsQuickPlacementTextInput(Keyboard.FocusedElement))
+                return;
             CancelPlacementTools();
             if (!IsDesignMode)
             {

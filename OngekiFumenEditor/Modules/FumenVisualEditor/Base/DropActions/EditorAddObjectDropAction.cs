@@ -11,11 +11,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 
         public void Drop(FumenVisualEditorViewModel editor, Point mousePosition)
         {
-            var displayObject = GetDisplayObject();
-            var isFirst = true;
-
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(mousePosition))
                 return;
+
+            var displayObject = GetDisplayObject();
+            var isFirst = true;
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObject, () =>
             {

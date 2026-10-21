@@ -133,3 +133,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 - 按官方 `.editorconfig` 及相邻 WPF 代码整理缩进、初始化器和回调换行，功能不变。
 - Avalonia 代码本次未处理，不改变同步点。
+
+## 2026-10-21：PR #45 架构重写
+
+- WPF 连续子弹/Bell 放置：勾选改为绑定编辑器状态；快捷键复用 ActionMessageKeyBinding；定位和添加/撤销复用 MoveObjectTo 与 EditorAddObjectDropAction；取消进入编辑器生命周期。
+- 吸附子弹上下键循环普通、强化、危险；每次选择模板从普通开始，临时伤害不写模板；谱面已选子弹伤害继续支持撤销。
+- Avalonia 本次未移植，不改变现有同步点。
+
+- PR #45 审查修复：调色板自身以 ActionMessageKeyBinding 转发临时伤害上下键；基础添加动作先校验范围再创建对象，拒绝越界时不建立模板事件引用。Avalonia 未处理，同步点不变。

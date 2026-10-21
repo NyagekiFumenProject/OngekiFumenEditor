@@ -7,6 +7,8 @@
     xmlns:controls="clr-namespace:OngekiFumenEditor.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:kb="clr-namespace:OngekiFumenEditor.UI.KeyBinding.Input"
+    xmlns:kbDefs="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor"
     xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -17,9 +19,14 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <UserControl.Resources>
+        <valueconverters:QuickPlacementSelectionConverter x:Key="QuickPlacementSelectionConverter" />
         <valueconverters:EnumValuesGenerator x:Key="EnumValuesGenerator">
         </valueconverters:EnumValuesGenerator>
     </UserControl.Resources>
+    <i:Interaction.Triggers>
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_QuickBulletDamageUp}" Message="KeyboardAction_QuickBulletDamageUp($executionContext)" />
+        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_QuickBulletDamageDown}" Message="KeyboardAction_QuickBulletDamageDown($executionContext)" />
+    </i:Interaction.Triggers>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -85,15 +92,34 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
+                                    <i:Interaction.Triggers>
+                                        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_QuickBulletDamageUp}" Message="KeyboardAction_QuickBulletDamageUp($executionContext)" />
+                                        <kb:ActionMessageKeyBinding Definition="{x:Static kbDefs:KeyBindingDefinitions.KBD_QuickBulletDamageDown}" Message="KeyboardAction_QuickBulletDamageDown($executionContext)" />
+                                    </i:Interaction.Triggers>
                                     <CheckBox
                                         Content="Bullet"
-                                        Tag="Bullet"
                                         Margin="0,0,8,0"
-                                        cal:Message.Attach="[Event Loaded] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event DataContextChanged] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event Click] = [Action OnQuickPlacementCheckClick($executionContext)];" />
+                                        cal:Message.Attach="[Event Click] = [Action ToggleQuickPlacement($dataContext, false)];">
+                                        <CheckBox.IsChecked>
+                                            <MultiBinding Converter="{StaticResource QuickPlacementSelectionConverter}" ConverterParameter="Bullet" Mode="OneWay">
+                                                <Binding />
+                                                <Binding Path="DataContext.Editor.QuickPlacementPalette" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                <Binding Path="DataContext.Editor.QuickPlacementIsBell" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                            </MultiBinding>
+                                        </CheckBox.IsChecked>
+                                    </CheckBox>
                                     <CheckBox
                                         Content="Bell"
-                                        Tag="Bell"
-                                        cal:Message.Attach="[Event Loaded] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event DataContextChanged] = [Action OnQuickPlacementCheckLoaded($executionContext)]; [Event Click] = [Action OnQuickPlacementCheckClick($executionContext)];" />
+                                        Margin="0,0,8,0"
+                                        cal:Message.Attach="[Event Click] = [Action ToggleQuickPlacement($dataContext, true)];">
+                                        <CheckBox.IsChecked>
+                                            <MultiBinding Converter="{StaticResource QuickPlacementSelectionConverter}" ConverterParameter="Bell" Mode="OneWay">
+                                                <Binding />
+                                                <Binding Path="DataContext.Editor.QuickPlacementPalette" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                                <Binding Path="DataContext.Editor.QuickPlacementIsBell" RelativeSource="{RelativeSource AncestorType=UserControl}" />
+                                            </MultiBinding>
+                                        </CheckBox.IsChecked>
+                                    </CheckBox>
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
