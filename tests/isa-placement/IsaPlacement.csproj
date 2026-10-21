@@ -6,6 +6,7 @@
         <EditorAssemblyDirectory Condition="'$(EditorAssemblyDirectory)' == ''">$(MSBuildThisFileDirectory)../../OngekiFumenEditor/bin/Release/net10.0-windows</EditorAssemblyDirectory>
     </PropertyGroup>
     <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
         <Reference Include="$(EditorAssemblyDirectory)/*.dll" />
     </ItemGroup>
 </Project>
