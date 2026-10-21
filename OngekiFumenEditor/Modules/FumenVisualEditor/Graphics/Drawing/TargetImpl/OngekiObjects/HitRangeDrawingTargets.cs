@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Numerics;
 using OngekiFumenEditor.Base;
@@ -97,8 +98,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     }
 
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public sealed class BulletHitRangeDrawingTarget : CommonBatchDrawTargetBase<Bullet>
+    public sealed class BulletHitRangeDrawingTarget : CommonBatchDrawTargetBase<Bullet>, IDisposable
     {
+        private bool showHitRanges;
+
+        public BulletHitRangeDrawingTarget()
+        {
+            showHitRanges = EditorGlobalSetting.Default.ShowBulletHitRanges;
+            EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(EditorGlobalSetting.ShowBulletHitRanges))
+                showHitRanges = EditorGlobalSetting.Default.ShowBulletHitRanges;
+        }
+
+        public void Dispose()
+        {
+            EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+        }
+
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {
             "BLT"
@@ -112,7 +132,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Bullet> objects)
         {
-            if (!EditorGlobalSetting.Default.ShowBulletHitRanges || !target.Editor.IsDesignMode)
+            if (!showHitRanges || !target.Editor.IsDesignMode)
                 return;
             using var polygons = ObjectPool.GetPooledList<PolygonVertex>();
             using var lines = ObjectPool.GetPooledList<LineVertex>();
@@ -156,8 +176,27 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     }
 
     [Export(typeof(IFumenEditorDrawingTarget))]
-    public sealed class BeamHitRangeDrawingTarget : CommonBatchDrawTargetBase<BeamStart>
+    public sealed class BeamHitRangeDrawingTarget : CommonBatchDrawTargetBase<BeamStart>, IDisposable
     {
+        private bool showHitRanges;
+
+        public BeamHitRangeDrawingTarget()
+        {
+            showHitRanges = EditorGlobalSetting.Default.ShowBeamHitRanges;
+            EditorGlobalSetting.Default.PropertyChanged += EditorGlobalSettingPropertyChanged;
+        }
+
+        private void EditorGlobalSettingPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(EditorGlobalSetting.ShowBeamHitRanges))
+                showHitRanges = EditorGlobalSetting.Default.ShowBeamHitRanges;
+        }
+
+        public void Dispose()
+        {
+            EditorGlobalSetting.Default.PropertyChanged -= EditorGlobalSettingPropertyChanged;
+        }
+
         public override IEnumerable<string> DrawTargetID { get; } = new[]
         {
             "BMS",
@@ -172,7 +211,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<BeamStart> objects)
         {
-            if (!EditorGlobalSetting.Default.ShowBeamHitRanges || !target.Editor.IsDesignMode)
+            if (!showHitRanges || !target.Editor.IsDesignMode)
                 return;
             using var polygons = ObjectPool.GetPooledList<PolygonVertex>();
             using var path = ObjectPool.GetPooledList<LineVertex>();

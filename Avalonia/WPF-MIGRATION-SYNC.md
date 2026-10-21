@@ -157,3 +157,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`ShowBulletHitRanges`/`ShowBeamHitRanges` 从 `FumenVisualEditorViewModel` 迁移到 `EditorGlobalSetting`（默认开启，设置窗口「文档→编辑器→渲染」页提供开关并随 Apply 保存）；移除编辑器右键上下文菜单中的两个开关。
 - 测试：`tests/hit-ranges` 覆盖全局设置默认值与设置页绑定探针；构建 0 error、回归通过。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：判定范围绘制目标缓存开关（WPF）
+
+- WPF：`BulletHitRangeDrawingTarget`/`BeamHitRangeDrawingTarget` 在构造函数读取一次全局开关并订阅 `EditorGlobalSetting.Default.PropertyChanged` 更新字段，渲染只读字段；实现 `IDisposable` 取消订阅。
+- 测试：`tests/hit-ranges` 增加关闭开关后不生成绘制命令的断言。
+- Avalonia：本次未移植，不改变现有同步点。

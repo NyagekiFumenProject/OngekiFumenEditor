@@ -110,7 +110,8 @@ internal static class Program
         var expected = ProjectileTargetGeometry.Resolve(BulletPallete.RandomSeed, bullet.TargetValue, bullet.Speed,
             TGridCalculator.ConvertTGridToAudioTime(bullet.TGrid, editor.Fumen.BpmList), bullet.Id, 3, 5, _ => 0);
         using var builder = new DrawCommandListBuilder();
-        new BulletHitRangeDrawingTarget().DrawBatch(context, builder, new[] { bullet });
+        using var bulletHitRanges = new BulletHitRangeDrawingTarget();
+        bulletHitRanges.DrawBatch(context, builder, new[] { bullet });
         using (var commands = builder.GetDrawCommandList())
         {
             var polygon = commands.Commands.OfType<DrawPolygonCommand>().Single();
@@ -126,21 +127,38 @@ internal static class Program
         bullet.TGrid = new TGrid(8);
         var playerExpected = ProjectileTargetGeometry.Resolve(BulletPallete.RandomSeed, Target.Player, .5f,
             TGridCalculator.ConvertTGridToAudioTime(bullet.TGrid, editor.Fumen.BpmList), bullet.Id, 3, 5, editor.PlayerLocationRecorder.GetLocationXUnit);
-        new BulletHitRangeDrawingTarget().DrawBatch(context, builder, new[] { bullet });
+        bulletHitRanges.DrawBatch(context, builder, new[] { bullet });
         using (var commands = builder.GetDrawCommandList())
         {
             var polygon = commands.Commands.OfType<DrawPolygonCommand>().Single();
             Assert(Math.Abs(polygon.Vertices.Min(v => v.Point.X) - XGridCalculator.ConvertXGridToX(playerExpected.LandingXUnit - 2, editor)) < .001, "Player 实际命中带须包含历史玩家位置。");
         }
+        OngekiFumenEditor.Properties.EditorGlobalSetting.Default.ShowBulletHitRanges = false;
+        using (var disabledBuilder = new DrawCommandListBuilder())
+        {
+            bulletHitRanges.DrawBatch(context, disabledBuilder, new[] { bullet });
+            using var disabledCommands = disabledBuilder.GetDrawCommandList();
+            Assert(!disabledCommands.Commands.Any(), "关闭子弹判定范围后不应生成绘制命令。");
+        }
+        OngekiFumenEditor.Properties.EditorGlobalSetting.Default.ShowBulletHitRanges = true;
         var beam = new BeamStart { XGrid = new XGrid(0), TGrid = new TGrid(1), WidthId = new WidthId(999, 100, 8) };
         beam.AddChildObject(new BeamNext { XGrid = new XGrid(0), TGrid = new TGrid(2) });
-        new BeamHitRangeDrawingTarget().DrawBatch(context, builder, new[] { beam });
+        using var beamHitRanges = new BeamHitRangeDrawingTarget();
+        beamHitRanges.DrawBatch(context, builder, new[] { beam });
         using (var commands = builder.GetDrawCommandList())
         {
             var polygon = commands.Commands.OfType<DrawPolygonCommand>().Single();
             var expectedWidth = XGridCalculator.ConvertXGridToX(4d, editor) - XGridCalculator.ConvertXGridToX(-4d, editor);
             Assert(Math.Abs(polygon.Vertices.Max(v => v.Point.X) - polygon.Vertices.Min(v => v.Point.X) - expectedWidth) < .001, "Beam 绘制须取起点 WidthDraw/2（游戏 widthJudge 与 widthDraw 同值），不能取编辑器 WidthJudge。");
         }
+        OngekiFumenEditor.Properties.EditorGlobalSetting.Default.ShowBeamHitRanges = false;
+        using (var disabledBuilder = new DrawCommandListBuilder())
+        {
+            beamHitRanges.DrawBatch(context, disabledBuilder, new[] { beam });
+            using var disabledCommands = disabledBuilder.GetDrawCommandList();
+            Assert(!disabledCommands.Commands.Any(), "关闭激光判定范围后不应生成绘制命令。");
+        }
+        OngekiFumenEditor.Properties.EditorGlobalSetting.Default.ShowBeamHitRanges = true;
     }
 
     static void SetField(object obj, string name, object value) => obj.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.SetValue(obj, value);
