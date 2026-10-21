@@ -19,6 +19,7 @@ using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Composition;
 using System.Data;
@@ -35,6 +36,8 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
     {
         public FumenBulletPalleteListViewerViewModel()
         {
+            ToggleBulletPlacementCommand = new RelayCommand(parameter => ToggleProjectilePlacement(parameter, false), CanToggleProjectilePlacement);
+            ToggleBellPlacementCommand = new RelayCommand(parameter => ToggleProjectilePlacement(parameter, true), CanToggleProjectilePlacement);
             DisplayName = Resources.FumenBulletPalleteListViewer;
             IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnActivateEditorChanged;
             Editor = IoC.Get<IEditorDocumentManager>().CurrentActivatedEditor;
@@ -47,13 +50,24 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
 
         private void OnEditorPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+            if (!ReferenceEquals(sender, Editor))
+                return;
+
+            if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
             {
-                if (Editor?.Fumen is not null)
-                    DataView = CollectionViewSource.GetDefaultView(Editor.Fumen.BulletPalleteList);
-                else
-                    DataView = null;
+                DataView = Editor?.Fumen is { } fumen ? CollectionViewSource.GetDefaultView(fumen.BulletPalleteList) : null;
+                NotifyOfPropertyChange(() => IsEnable);
             }
+
+            if (string.IsNullOrEmpty(e.PropertyName) ||
+                e.PropertyName == nameof(FumenVisualEditorViewModel.RequestBatchPlaceProjectileInfo) ||
+                e.PropertyName == nameof(FumenVisualEditorViewModel.IsRequestPlaceBatchProjectilePreview))
+                NotifyPlacementRequestChanged();
+
+            if (string.IsNullOrEmpty(e.PropertyName) ||
+                e.PropertyName == nameof(FumenVisualEditorViewModel.CanRequestBatchProjectilePlacement) ||
+                e.PropertyName == nameof(FumenVisualEditorViewModel.Fumen))
+                CommandManager.InvalidateRequerySuggested();
         }
 
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
@@ -74,8 +88,20 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
             }
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(editor, value, OnEditorPropertyChanged);
+                if (ReferenceEquals(editor, value))
+                    return;
+
+                if (editor is not null)
+                {
+                    editor.PropertyChanged -= OnEditorPropertyChanged;
+                    editor.CancelBatchProjectilePlacement();
+                }
+
                 Set(ref editor, value);
+                if (editor is not null)
+                    editor.PropertyChanged += OnEditorPropertyChanged;
+
+                NotifyPlacementRequestChanged();
                 NotifyOfPropertyChange(() => IsEnable);
 
                 if (Editor?.Fumen is not null)
@@ -89,6 +115,45 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
 
         public bool IsEnable => Editor?.Fumen is not null;
 
+        public IPlaceBatchProjectileInfo RequestBatchPlaceProjectileInfo => Editor?.RequestBatchPlaceProjectileInfo;
+        public bool IsRequestPlaceBatchProjectilePreview => RequestBatchPlaceProjectileInfo is not null;
+
+        public ICommand ToggleBulletPlacementCommand { get; }
+        public ICommand ToggleBellPlacementCommand { get; }
+
+        private bool CanToggleProjectilePlacement(object parameter)
+        {
+            if (parameter is not BulletPallete pallete || Editor?.CanRequestBatchProjectilePlacement != true || Editor.Fumen is not { } fumen)
+                return false;
+
+            foreach (var existing in fumen.BulletPalleteList)
+            {
+                if (ReferenceEquals(existing, pallete))
+                    return true;
+            }
+            return false;
+        }
+
+        private void ToggleProjectilePlacement(object parameter, bool isBell)
+        {
+            if (CanToggleProjectilePlacement(parameter))
+                Editor.ToggleBatchProjectilePlacement((BulletPallete)parameter, isBell);
+
+            NotifyPlacementRequestChanged();
+        }
+
+        private void NotifyPlacementRequestChanged()
+        {
+            NotifyOfPropertyChange(() => RequestBatchPlaceProjectileInfo);
+            NotifyOfPropertyChange(() => IsRequestPlaceBatchProjectilePreview);
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        private void OnDataViewCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            CommandManager.InvalidateRequerySuggested();
+        }
+
         public ObservableCollection<BulletPallete> SelectedItems { get; } = new();
 
         private ICollectionView dataView;
@@ -97,7 +162,12 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
             get => dataView;
             set
             {
+                if (dataView is not null)
+                    dataView.CollectionChanged -= OnDataViewCollectionChanged;
                 Set(ref dataView, value);
+                if (dataView is not null)
+                    dataView.CollectionChanged += OnDataViewCollectionChanged;
+                CommandManager.InvalidateRequerySuggested();
                 OnRefreshFilter();
             }
         }
@@ -145,6 +215,7 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
                 (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
+                Editor?.CancelBatchProjectilePlacement();
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
                     var bullet = new Bullet()
@@ -171,6 +242,7 @@ namespace OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.ViewModels
                 (Math.Abs(diff.X) > SystemParameters.MinimumHorizontalDragDistance ||
                 Math.Abs(diff.Y) > SystemParameters.MinimumVerticalDragDistance))
             {
+                Editor?.CancelBatchProjectilePlacement();
                 var dragData = new DataObject(ToolboxDragDrop.DataFormat, new OngekiObjectDropParam(() =>
                 {
                     var bullet = new Bell()

@@ -3492,4 +3492,19 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>Unable to calculate T_* values: {0}</value>
   </data>
+  <data name="ContinuousProjectilePlacement" xml:space="preserve">
+    <value>Continuous placement</value>
+  </data>
+  <data name="UndoQuickProjectilePlacement" xml:space="preserve">
+    <value>Place projectile</value>
+  </data>
+  <data name="UndoChangeBulletDamage" xml:space="preserve">
+    <value>Change bullet damage</value>
+  </data>
+  <data name="kbd_editor_QuickBulletDamageUp" xml:space="preserve">
+    <value>Cycle selected bullet damage forward</value>
+  </data>
+  <data name="kbd_editor_QuickBulletDamageDown" xml:space="preserve">
+    <value>Cycle selected bullet damage backward</value>
+  </data>
 </root>

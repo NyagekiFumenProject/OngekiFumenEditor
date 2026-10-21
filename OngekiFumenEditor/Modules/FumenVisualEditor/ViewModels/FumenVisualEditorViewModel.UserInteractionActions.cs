@@ -9,6 +9,8 @@ using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Modules.AudioPlayerToolViewer;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.DropActions;
@@ -19,6 +21,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Views.UI;
 using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.UI.KeyBinding.Input;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
@@ -53,10 +56,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => isUserRequestHideEditorObject;
             set
             {
+                if (isUserRequestHideEditorObject != value)
+                    CancelBatchProjectilePlacement();
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
                 NotifyOfPropertyChange(() => IsDesignMode);
                 NotifyOfPropertyChange(() => IsPreviewMode);
+                NotifyOfPropertyChange(nameof(CanRequestBatchProjectilePlacement));
             }
         }
 
@@ -1169,6 +1175,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
+            HideBatchPlacementPreview();
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
             OnMouseUp(e);
         }
@@ -1178,6 +1185,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseButtonEventArgs;
             if (arg is null || arg.Handled)
             {
+                return;
+            }
+
+            if (TryHandleBatchProjectilePlacementMouseUp(arg.ChangedButton, arg.GetPosition(e.Source)))
+            {
+                arg.Handled = true;
                 return;
             }
 
@@ -1278,6 +1291,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
+
+            if (TryHandleBatchProjectilePlacementMouseDown(arg.ChangedButton, position))
+            {
+                view?.Focus();
+                arg.Handled = true;
+                return;
+            }
 
             if (IsDesignMode)
             {
@@ -1407,6 +1427,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
+            if (IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp)
+            {
+                currentDraggingActionId = int.MaxValue;
+                OnMouseMove(args.GetPosition(e.Source));
+                return;
+            }
+
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
             currentDraggingActionId = int.MaxValue;
@@ -1417,6 +1444,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //show current cursor position in statusbar
             UpdateCurrentCursorPosition(pos);
+            UpdateBatchPlacementPointer(pos);
+            if ((IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp) && !isMiddleMouseDown)
+                return;
 
             if (IsDesignMode)
             {
@@ -1702,6 +1732,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_Drop(ActionExecutionContext e)
         {
+            CancelBatchProjectilePlacement();
+
             if (!IsDesignMode)
             {
                 Toast.ShowMessage(Resources.EditorMustBeDesignMode);
@@ -1934,6 +1966,61 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     _ => obj.GetType().IsInstanceOfType(x)
                 };
             });
+        }
+
+        #endregion
+
+        #region Bullet Damage
+
+        public void KeyboardAction_QuickBulletDamageUp(ActionExecutionContext context)
+            => ChangeSelectedBulletDamage(context?.EventArgs as KeyEventArgs, true);
+
+        public void KeyboardAction_QuickBulletDamageDown(ActionExecutionContext context)
+            => ChangeSelectedBulletDamage(context?.EventArgs as KeyEventArgs, false);
+
+        private void ChangeSelectedBulletDamage(KeyEventArgs e, bool forward)
+        {
+            if (e is null || e.Handled || !IsDesignMode || Fumen is null || EditorManager.CurrentActivatedEditor != this)
+                return;
+
+            if (TextInputFocusHelper.IsTextInput(Keyboard.FocusedElement as DependencyObject) ||
+                TextInputFocusHelper.IsTextInput(e.OriginalSource as DependencyObject))
+                return;
+
+            List<(Bullet Bullet, BulletDamageType Before, BulletDamageType After)> changes = null;
+            foreach (var selected in SelectObjects)
+            {
+                if (selected is not Bullet bullet)
+                    continue;
+
+                var before = bullet.BulletDamageTypeValue;
+                var after = before switch
+                {
+                    BulletDamageType.Normal => forward ? BulletDamageType.Hard : BulletDamageType.Danger,
+                    BulletDamageType.Hard => forward ? BulletDamageType.Danger : BulletDamageType.Normal,
+                    BulletDamageType.Danger => forward ? BulletDamageType.Normal : BulletDamageType.Hard,
+                    _ => before
+                };
+                if (before == after)
+                    continue;
+
+                changes ??= new();
+                changes.Add((bullet, before, after));
+            }
+
+            if (changes is null)
+                return;
+
+            UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.UndoChangeBulletDamage, () =>
+            {
+                foreach (var change in changes)
+                    change.Bullet.BulletDamageTypeValue = change.After;
+            }, () =>
+            {
+                foreach (var change in changes)
+                    change.Bullet.BulletDamageTypeValue = change.Before;
+            }));
+            e.Handled = true;
         }
 
         #endregion

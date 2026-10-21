@@ -9069,5 +9069,50 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("FumenStatisticsCalculationFailed", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Continuous placement.
+        /// </summary>
+        public static string ContinuousProjectilePlacement {
+            get {
+                return ResourceManager.GetString("ContinuousProjectilePlacement", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Place projectile.
+        /// </summary>
+        public static string UndoQuickProjectilePlacement {
+            get {
+                return ResourceManager.GetString("UndoQuickProjectilePlacement", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Change bullet damage.
+        /// </summary>
+        public static string UndoChangeBulletDamage {
+            get {
+                return ResourceManager.GetString("UndoChangeBulletDamage", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cycle selected bullet damage forward.
+        /// </summary>
+        public static string kbd_editor_QuickBulletDamageUp {
+            get {
+                return ResourceManager.GetString("kbd_editor_QuickBulletDamageUp", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cycle selected bullet damage backward.
+        /// </summary>
+        public static string kbd_editor_QuickBulletDamageDown {
+            get {
+                return ResourceManager.GetString("kbd_editor_QuickBulletDamageDown", resourceCulture);
+            }
+        }
     }
 }

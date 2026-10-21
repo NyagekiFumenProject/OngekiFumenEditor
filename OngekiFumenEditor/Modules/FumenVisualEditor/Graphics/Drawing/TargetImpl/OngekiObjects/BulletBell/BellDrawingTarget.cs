@@ -61,6 +61,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override IEnumerable<string> DrawTargetID { get; } = ["BEL"];
         public override int DefaultRenderOrder => 1000;
 
+        internal void GetSprite(out IImage spriteTexture, out Vector2 size)
+        {
+            spriteTexture = texture;
+            size = sizeNormal;
+        }
+
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bell obj, Vector2 pos, float rotate, DrawBuffer buffer)
         {
             var size = /*obj.SizeValue is BulletSize.Large ? sizeLarge : */sizeNormal;

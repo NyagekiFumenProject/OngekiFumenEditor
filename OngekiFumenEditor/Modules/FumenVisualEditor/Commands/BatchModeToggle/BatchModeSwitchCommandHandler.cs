@@ -37,6 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
                     return TaskUtility.Completed;
                 }
 
+                editor.CancelBatchProjectilePlacement();
                 var behaviors = Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView());
 
                 if (editor.IsBatchMode) {
@@ -46,6 +47,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
                     behaviors.Add(editor.BatchModeBehavior);
                 }
                 editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.IsBatchMode));
+                editor.NotifyOfPropertyChange(nameof(FumenVisualEditorViewModel.CanRequestBatchProjectilePlacement));
                 editor.ToastNotify($"{Resources.BatchModeToggle}{(editor.IsBatchMode ? Resources.Enable : Resources.Disable)}");
             }
 

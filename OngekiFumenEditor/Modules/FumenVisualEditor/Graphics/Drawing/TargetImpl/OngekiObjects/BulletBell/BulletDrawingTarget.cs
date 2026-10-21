@@ -134,6 +134,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
         public override IEnumerable<string> DrawTargetID { get; } = new[] { "BLT" };
         public override int DefaultRenderOrder => 1500;
 
+        internal void GetSprite(Bullet obj, out IImage texture, out Vector2 size, out Vector2 originOffset)
+        {
+            ref readonly var info = ref spriteInfoTable[(int)obj.BulletDamageTypeValue, (int)obj.TypeValue, (int)obj.SizeValue];
+            texture = info.Texture;
+            size = info.Size;
+            originOffset = info.OriginOffset;
+        }
+
         public override void DrawVisibleObject_DesignMode(IFumenEditorDrawingContext target, Bullet obj, Vector2 pos, float rotate, DrawBuffer buffer)
         {
             ref readonly var info = ref spriteInfoTable[(int)obj.BulletDamageTypeValue, (int)obj.TypeValue, (int)obj.SizeValue];

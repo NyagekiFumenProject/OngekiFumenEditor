@@ -13,10 +13,12 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
+using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImpl.OngekiObjects.BulletBell;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
@@ -61,6 +63,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     internal GlobalCacheSoflanGroupRecorder _cacheSoflanGroupRecorder = new();
     private DrawHitObjectEffectHelper hitObjectEffectHelper;
     private DrawPlayerLocationHelper playerLocationHelper;
+    private DrawProjectilePlacementPreviewHelper projectilePlacementPreviewHelper;
     private Vector4 playFieldBackgroundColor;
 
     private DrawSelectingRangeHelper selectingRangeHelper;
@@ -260,6 +263,11 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
         hitObjectEffectHelper = new DrawHitObjectEffectHelper();
         hitObjectEffectHelper.Initalize(renderImpl);
+
+        projectilePlacementPreviewHelper = new DrawProjectilePlacementPreviewHelper(
+            IoC.Get<IFumenBulletPalleteListViewer>(),
+            drawingTargets.OfType<BulletDrawingTarget>().Single(),
+            drawingTargets.OfType<BellDrawingTarget>().Single());
 
         UpdateActualRenderInterval();
 
@@ -632,6 +640,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             builder.SetCurrentRect(CurrentDrawingTargetContext.ViewRelativeRect);
             builder.SetCurrentViewMatrix(CurrentDrawingTargetContext.ViewMatrix);
             builder.SetCurrentProjectionMatrix(CurrentDrawingTargetContext.ProjectionMatrix);
+
+            RefreshBatchProjectilePlacementPreview();
+            projectilePlacementPreviewHelper.Draw(this, builder);
 
             timeSignatureHelper.DrawTimeSigntureText(this, builder);
             xGridHelper.DrawXGridText(this, builder, CachedMagneticXGridLines);
@@ -1156,6 +1167,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         playerLocationHelper = null;
         hitObjectEffectHelper?.Dispose();
         hitObjectEffectHelper = null;
+        projectilePlacementPreviewHelper?.Dispose();
+        projectilePlacementPreviewHelper = null;
 
         timeSignatureHelper = null;
         xGridHelper = null;

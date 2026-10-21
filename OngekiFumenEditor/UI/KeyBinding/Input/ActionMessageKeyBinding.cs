@@ -77,6 +77,8 @@ namespace OngekiFumenEditor.UI.KeyBinding.Input
             }
         }
 
+        public bool AutoHandleAlt { get; set; } = true;
+
         protected override void OnAttached()
         {
             base.OnAttached();
@@ -98,7 +100,7 @@ namespace OngekiFumenEditor.UI.KeyBinding.Input
             if (Definition is KeyBindingDefinition def && IoC.Get<IKeyBindingManager>().CheckKeyBinding(def, e)) {
                 InvokeActions(e);
 
-                if (def.Modifiers.HasFlag(ModifierKeys.Alt)) {
+                if (AutoHandleAlt && def.Modifiers.HasFlag(ModifierKeys.Alt)) {
                     // Windows plays an annoying "ding" sound if Alt keys are not handled.
                     e.Handled = true;
                 }

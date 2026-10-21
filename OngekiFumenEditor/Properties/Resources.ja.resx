@@ -2764,4 +2764,19 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>T_* コマンドの値を計算できません：{0}</value>
   </data>
+  <data name="ContinuousProjectilePlacement" xml:space="preserve">
+    <value>連続配置</value>
+  </data>
+  <data name="UndoQuickProjectilePlacement" xml:space="preserve">
+    <value>弾またはベルを配置</value>
+  </data>
+  <data name="UndoChangeBulletDamage" xml:space="preserve">
+    <value>弾のダメージ種別を変更</value>
+  </data>
+  <data name="kbd_editor_QuickBulletDamageUp" xml:space="preserve">
+    <value>選択した弾のダメージ種別を順方向に切り替え</value>
+  </data>
+  <data name="kbd_editor_QuickBulletDamageDown" xml:space="preserve">
+    <value>選択した弾のダメージ種別を逆方向に切り替え</value>
+  </data>
 </root>

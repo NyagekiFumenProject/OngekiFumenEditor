@@ -23,6 +23,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
              Key.C);
 
         [Export]
+        public static KeyBindingDefinition KBD_QuickBulletDamageUp = new KeyBindingDefinition(
+            nameof(Resources.kbd_editor_QuickBulletDamageUp),
+            Key.Up);
+
+        [Export]
+        public static KeyBindingDefinition KBD_QuickBulletDamageDown = new KeyBindingDefinition(
+            nameof(Resources.kbd_editor_QuickBulletDamageDown),
+            Key.Down);
+
+        [Export]
         //KeyboardAction_FastPlaceDockableObjectToWallLeft
         public static KeyBindingDefinition KBD_FastPlaceDockableObjectToWallLeft = new KeyBindingDefinition(
             "kbd_editor_FastPlaceDockableObjectToWallLeft",
