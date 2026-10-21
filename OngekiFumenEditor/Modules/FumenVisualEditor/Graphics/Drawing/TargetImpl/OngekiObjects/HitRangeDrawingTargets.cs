@@ -11,6 +11,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
@@ -21,8 +22,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         // 本机游戏 ShellNoteCore.setShellWidth：圆弹全宽 4，针/方弹全宽 2；大小只改变外观。
         public static float BulletHalfWidth(BulletType type) => type == BulletType.Circle ? 2 : 1;
-        public static float BeamHalfWidthPixels(int width, Func<double, double> convertXGridToX)
-            => (float)Math.Abs(convertXGridToX(width / 2d) - convertXGridToX(0));
+        public static float BeamHalfWidthPixels(int width, FumenVisualEditorViewModel editor)
+            => (float)Math.Abs(XGridCalculator.ConvertXGridToX(width / 2d, editor) - XGridCalculator.ConvertXGridToX(0d, editor));
         public static Vector4 BulletColor(BulletDamageType damage) => damage switch
         {
             BulletDamageType.Hard => new Vector4(84 / 255f, 0, 169 / 255f, .48f),
@@ -137,6 +138,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             using var polygons = ObjectPool.GetPooledList<PolygonVertex>();
             using var lines = ObjectPool.GetPooledList<LineVertex>();
             var relativeExists = false;
+            var getPlayerLocation = target.Editor.PlayerLocationRecorder.GetLocationXUnit;
             foreach (var obj in objects)
             {
                 if (!target.CheckVisible(obj.TGrid))
@@ -148,7 +150,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 relativeExists |= relative;
                 var resolved = ProjectileTargetGeometry.Resolve(BulletPallete.RandomSeed, obj.TargetValue, obj.Speed,
                     TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, target.Editor.Fumen.BpmList), obj.Id,
-                    obj.XGrid.TotalUnit, obj.RandomOffsetRange, target.Editor.PlayerLocationRecorder.GetLocationXUnit);
+                    obj.XGrid.TotalUnit, obj.RandomOffsetRange, getPlayerLocation);
                 var left = (float)XGridCalculator.ConvertXGridToX(resolved.LandingXUnit - half, target.Editor);
                 var right = (float)XGridCalculator.ConvertXGridToX(resolved.LandingXUnit + half, target.Editor);
                 HitRangeGeometry.AddQuad(polygons, new(left, y - 4), new(right, y - 4), new(left, y + 4), new(right, y + 4), color);
@@ -226,7 +228,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 // 游戏 BeamNote.setup 把 widthID 1..5 映射为 widthJudge=widthDraw=2/3/4/12/20
                 // （BeamNoteCore.checkHit 用 widthJudge*0.5 判定）；编辑器 WidthIdConst.WidthJudge
                 // 是 4/6/8/16/24，与游戏不符，WidthDraw 才对应游戏判定全宽。
-                var half = HitRangeGeometry.BeamHalfWidthPixels(beam.WidthId.WidthDraw, x => XGridCalculator.ConvertXGridToX(x, target.Editor));
+                var half = HitRangeGeometry.BeamHalfWidthPixels(beam.WidthId.WidthDraw, target.Editor);
                 HitRangeGeometry.AddVisibleBands(polygons, path, half, (float)rect.MinY, (float)rect.MaxY, color);
             }
 

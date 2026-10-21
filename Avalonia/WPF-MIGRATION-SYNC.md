@@ -163,3 +163,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`BulletHitRangeDrawingTarget`/`BeamHitRangeDrawingTarget` 在构造函数读取一次全局开关并订阅 `EditorGlobalSetting.Default.PropertyChanged` 更新字段，渲染只读字段；实现 `IDisposable` 取消订阅。
 - 测试：`tests/hit-ranges` 增加关闭开关后不生成绘制命令的断言。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：判定范围与玩家位置查询分配优化（WPF）
+
+- WPF：`BulletHitRangeDrawingTarget`/`ProjectileBatchDrawTargetBase` 每帧缓存玩家位置委托，消除每个子弹/铃铛 64 B 的委托分配；`BeamHalfWidthPixels` 改为直接调用 `ConvertXGridToX`，去掉每个 Beam 的 lambda/闭包；`PlayerLocationRecorder.GetLocationXUnit` 改用 `SortableCollection` 索引器，消除 `ElementAtOrDefault` 的 80 B/op 枚举器分配。
+- 基准（Release，2,000,000 次）：`Resolve`（FixField/Player）、`GetLocationXUnit`、Beam 半宽均为 **0 B/op**；优化前分别为 64、144（含 recorder 80）、80、0 B/op（Beam 的闭包被 JIT 栈分配，但委托调用未内联，耗时约 110 ns/op）。
+- Avalonia：本次未移植，不改变现有同步点。

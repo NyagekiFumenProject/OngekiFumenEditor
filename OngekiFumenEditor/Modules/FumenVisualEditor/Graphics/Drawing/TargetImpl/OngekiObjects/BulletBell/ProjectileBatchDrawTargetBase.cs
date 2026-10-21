@@ -220,6 +220,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
 
             var randomSeed = BulletPallete.RandomSeed;
+            var getPlayerLocation = target.Editor.PlayerLocationRecorder.GetLocationXUnit;
 
             void _Draw(T obj, DrawBuffer buffer)
             {
@@ -289,7 +290,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     obj.Id,
                     objXGrid.TotalUnit,
                     obj.RandomOffsetRange,
-                    target.Editor.PlayerLocationRecorder.GetLocationXUnit);
+                    getPlayerLocation);
                 toXUnit = resolvedTarget.LandingXUnit;
 
                 #endregion
