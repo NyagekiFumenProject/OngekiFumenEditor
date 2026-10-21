@@ -71,8 +71,13 @@ jobs:
       run: |
         Get-ChildItem -Path "C:\ogkrEditorBuild" -Filter "*.pdb" -File -Recurse |
           Remove-Item -Force
+    - name: Prepare artifact branch name
+      shell: pwsh
+      run: |
+        $artifactBranch = $env:Branch -replace '[\\/:*?"<>|\r\n]', '-'
+        "ArtifactBranch=$artifactBranch" >> $env:GITHUB_ENV
     - uses: actions/upload-artifact@v4
       with:
-        name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.Branch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
+        name: OngekiFumenEditor_${{env.GitBuildVersion}}_${{env.ArtifactBranch}}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{env.Configuration}})
         path: C:\ogkrEditorBuild\
     

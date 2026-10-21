@@ -242,11 +242,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 //一次性读取 obj 的热点属性到本地，避免反复走 virtual getter + pallete 三元判断
                 var objSpeed = obj.Speed;
+                var safeSpeed = objSpeed > 0 ? objSpeed : .0001f;
                 var objTGrid = obj.TGrid;
                 var objXGrid = obj.XGrid;
 
                 //子弹完全经过画面所需的运动时间
-                var appearOffsetTime = height / objSpeed;
+                var appearOffsetTime = height / safeSpeed;
 
                 var toTime = 0d;
                 var currentTime = 0d;
@@ -279,32 +280,16 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 #region ToXUnit
 
-                switch (obj.TargetValue)
-                {
-                    case Target.Player:
-                        var frameOffset = (40f - 7.5f) / (0.47f * MathF.Min(objSpeed, 1));
-                        var targetAudioTime = TGridCalculator.ConvertTGridToAudioTime(objTGrid, fumen.BpmList) - TGridCalculator.ConvertFrameToAudioTime(frameOffset);
-                        if (targetAudioTime < TimeSpan.Zero)
-                            targetAudioTime = TimeSpan.Zero;
-
-                        toXUnit = target.Editor.PlayerLocationRecorder.GetLocationXUnit(targetAudioTime);
-                        toXUnit += objXGrid.TotalUnit;
-                        break;
-                    case Target.FixField:
-                    default:
-                        toXUnit = objXGrid.TotalUnit;
-                        break;
-                }
-
-                var rosr = obj.RandomOffsetRange;
-                if (rosr > 0)
-                {
-                    var id = obj.Id;
-                    //不使用Random类，避免随机数干扰
-                    var seed = Math.Abs((randomSeed * id + 123) * id ^ id);
-                    var actualRandomOffset = (-rosr) + (seed % (rosr - (-rosr) + 1));
-                    toXUnit += actualRandomOffset;
-                }
+                var resolvedTarget = ProjectileTargetGeometry.Resolve(
+                    randomSeed,
+                    obj.TargetValue,
+                    objSpeed,
+                    TGridCalculator.ConvertTGridToAudioTime(objTGrid, fumen.BpmList),
+                    obj.Id,
+                    objXGrid.TotalUnit,
+                    obj.RandomOffsetRange,
+                    target.Editor.PlayerLocationRecorder.GetLocationXUnit);
+                toXUnit = resolvedTarget.LandingXUnit;
 
                 #endregion
 

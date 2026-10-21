@@ -11,16 +11,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 {
     public static class VisibleLineVerticesQuery
     {
-        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices)
+        public static void QueryVisibleLineVertices(IFumenEditorDrawingContext target, ConnectableStartObject start, SoflanList soflanList, VertexDash invailedDash, Vector4 color, IList<LineVertex> outVertices, bool preservePathBreaks = false)
         {
             if (start is null)
                 return;
 
             var resT = start.TGrid.ResT;
             var resX = start.XGrid.ResX;
-
             //var soflanList = target.Editor._cacheSoflanGroupRecorder.GetCache(start);
-
             using var tempVertices = ObjectPool.GetPooledList<LineVertex>();
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -32,6 +30,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 tempVertices.Add(vert);
             }
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void PostPoint(TGrid tGrid, XGrid xGrid, bool isVailed) => PostPoint2(tGrid.TotalUnit, xGrid.TotalUnit, isVailed);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -123,6 +122,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 prevObj = childObj;
                 prevVisible = visible;
+            }
+
+            // 判定带依赖每个顶点的有效性标记，不能使用只比较坐标的线段简化。
+            if (preservePathBreaks)
+            {
+                foreach (var vertex in tempVertices)
+                    outVertices.Add(vertex);
+                return;
             }
 
             //optimze vertices
