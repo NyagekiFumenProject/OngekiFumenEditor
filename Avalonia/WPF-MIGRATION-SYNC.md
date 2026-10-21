@@ -145,3 +145,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 - WPF：弹幕落点与命中范围共用目标解析规则，包含玩家历史位置、速度安全边界及确定性随机包络；实际落点实体带状绘制，随机范围以虚线包络绘制。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：PR #44 后续修复（WPF）
+
+- WPF：Beam 判定带宽度改用 `WidthId.WidthDraw`，对齐游戏 `BeamNote.setup` 的 widthID 1..5 → 2/3/4/12/20 映射（`ed0de203`）。
+- WPF：投射物 0 速取命中帧玩家位置、负速保留反向轨迹与命中后落点，复刻游戏 `calcNoteFrameAimBulletCreate`（`a45e222f`）。
+- Avalonia：本次未移植，不改变现有同步点。
