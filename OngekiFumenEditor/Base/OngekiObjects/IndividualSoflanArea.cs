@@ -35,6 +35,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 }
             }
 
+            [OngekiFumenEditor.Base.Attributes.SoflanGroupProperty]
             public int SoflanGroup
             {
                 get => RefIndividualSoflanArea.SoflanGroup;
@@ -66,6 +67,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public float AreaWidth => (float)Math.Abs(XGrid.TotalUnit - EndIndicator.XGrid.TotalUnit);
 
         private int soflanGroup = 0;
+        [OngekiFumenEditor.Base.Attributes.SoflanGroupProperty]
         public int SoflanGroup
         {
             get => soflanGroup;

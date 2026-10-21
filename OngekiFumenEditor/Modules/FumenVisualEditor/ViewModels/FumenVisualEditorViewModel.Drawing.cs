@@ -44,6 +44,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
 public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulable, IFumenEditorDrawingContext
 {
+    private SoflanGroupTintBuilder soflanGroupTintBuilder;
+
     private Dictionary<string, IFumenEditorDrawingTarget[]> drawTargetMap = new();
 
     private readonly List<CacheDrawXLineResult> cachedMagneticXGridLines = new();
@@ -617,8 +619,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
                         {
                             _cacheSoflanGroupRecorder.GetCache(drawingObjects[0], out var soflanGroup);
                             if (soflanGroup != 0)
-                                objectBuilder = new SoflanGroupTintBuilder(builder,
-                                    IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(soflanGroup));
+                            {
+                                var tint = IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(soflanGroup);
+                                soflanGroupTintBuilder ??= new SoflanGroupTintBuilder(builder, tint);
+                                soflanGroupTintBuilder.Reset(builder, tint);
+                                objectBuilder = soflanGroupTintBuilder;
+                            }
                         }
 
                         drawingTarget.Begin(this, objectBuilder);

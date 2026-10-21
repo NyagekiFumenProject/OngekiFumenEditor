@@ -4,7 +4,6 @@ using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
@@ -12,8 +11,52 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
     /// <summary>仅为当前 ISA 物件批次混入组色，不改变透明度、几何或命中范围。</summary>
     public sealed class SoflanGroupTintBuilder : IDrawCommandListBuilder
     {
-        private readonly IDrawCommandListBuilder inner;
-        private readonly Vector4 tint;
+        private IDrawCommandListBuilder inner;
+        private Vector4 tint;
+        private readonly List<ILineDrawing.LineVertex> lines = new();
+        private readonly List<TextureInstance> textures = new();
+        private readonly List<CircleInstance> circles = new();
+        private readonly List<PolygonVertex> polygons = new();
+
+        public void Reset(IDrawCommandListBuilder builder, Vector4 color)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            inner = builder is SoflanGroupTintBuilder existing ? existing.inner : builder;
+            tint = color;
+        }
+
+        // 内层立即复制到命令池，同一绘制线程可复用暂存集合。
+        private List<ILineDrawing.LineVertex> TintLines(IEnumerable<ILineDrawing.LineVertex> source)
+        {
+            lines.Clear();
+            foreach (var x in source)
+                lines.Add(new(x.Point, TintColor(x.Color), x.Dash));
+            return lines;
+        }
+
+        private List<TextureInstance> TintTextures(IEnumerable<TextureInstance> source)
+        {
+            textures.Clear();
+            foreach (var x in source)
+                textures.Add(new(x.Size, x.Position, x.Rotation, TintColor(x.Color)));
+            return textures;
+        }
+
+        private List<CircleInstance> TintCircles(IEnumerable<CircleInstance> source)
+        {
+            circles.Clear();
+            foreach (var x in source)
+                circles.Add(new(x.Point, TintColor(x.Color), x.IsSolid, x.Radius, x.HollowLineWidth));
+            return circles;
+        }
+
+        private List<PolygonVertex> TintPolygons(IEnumerable<PolygonVertex> source)
+        {
+            polygons.Clear();
+            foreach (var x in source)
+                polygons.Add(new(x.Point, TintColor(x.Color)));
+            return polygons;
+        }
 
         public SoflanGroupTintBuilder(IDrawCommandListBuilder inner, Vector4 tint)
         {
@@ -42,15 +85,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing
         public void PopModelMatrix() => inner.PopModelMatrix();
         public void PopViewMatrix() => inner.PopViewMatrix();
         public void PopProjectionMatrix() => inner.PopProjectionMatrix();
-        public void DrawLines(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth) => inner.DrawLines(points.Select(x => x with { Color = TintColor(x.Color) }), lineWidth);
-        public void DrawSimpleLines(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth) => inner.DrawSimpleLines(points.Select(x => x with { Color = TintColor(x.Color) }), lineWidth);
-        public void DrawTexture(IImage texture, IEnumerable<TextureInstance> instances) => inner.DrawTexture(texture, instances.Select(x => x with { Color = TintColor(x.Color) }));
-        public void DrawBatchTexture(IImage texture, IEnumerable<TextureInstance> instances) => inner.DrawBatchTexture(texture, instances.Select(x => x with { Color = TintColor(x.Color) }));
+        public void DrawLines(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth) => inner.DrawLines(TintLines(points), lineWidth);
+        public void DrawSimpleLines(IEnumerable<ILineDrawing.LineVertex> points, float lineWidth) => inner.DrawSimpleLines(TintLines(points), lineWidth);
+        public void DrawTexture(IImage texture, IEnumerable<TextureInstance> instances) => inner.DrawTexture(texture, TintTextures(instances));
+        public void DrawBatchTexture(IImage texture, IEnumerable<TextureInstance> instances) => inner.DrawBatchTexture(texture, TintTextures(instances));
         // 选中高亮和文字标签保留原色，保证辨识度。
         public void DrawHighlightBatchTexture(IImage texture, IEnumerable<TextureInstance> instances) => inner.DrawHighlightBatchTexture(texture, instances);
         public void DrawCircle(Vector2 point, Vector4 color, bool isSolid, float radius, float hollowLineWidth = 0) => inner.DrawCircle(point, TintColor(color), isSolid, radius, hollowLineWidth);
-        public void DrawCircles(IEnumerable<CircleInstance> instances) => inner.DrawCircles(instances.Select(x => x with { Color = TintColor(x.Color) }));
-        public void DrawPolygon(Primitive primitive, IEnumerable<PolygonVertex> vertices) => inner.DrawPolygon(primitive, vertices.Select(x => x with { Color = TintColor(x.Color) }));
+        public void DrawCircles(IEnumerable<CircleInstance> instances) => inner.DrawCircles(TintCircles(instances));
+        public void DrawPolygon(Primitive primitive, IEnumerable<PolygonVertex> vertices) => inner.DrawPolygon(primitive, TintPolygons(vertices));
         public void DrawString(string text, Vector2 pos, Vector2 scale, int fontSize, float rotate, Vector4 color, Vector2 origin, FontStyle style, IFontHandle handle) => inner.DrawString(text, pos, scale, fontSize, rotate, color, origin, style, handle);
         public Vector2 MeasureString(string text, Vector2 scale, int fontSize, FontStyle style, IFontHandle handle) => inner.MeasureString(text, scale, fontSize, style, handle);
         public void DrawBeam(IImage texture, int width, float x, float progress, Vector4 color, float rotate, float judgeOffset) => inner.DrawBeam(texture, width, x, progress, TintColor(color), rotate, judgeOffset);

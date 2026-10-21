@@ -40,23 +40,25 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
             if (SelectedObjects.Count == 0)
                 return;
+
             //获取所有已选物件都共有的属性
             var genericProperties = SelectedObjects
                 .Select(x => x.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x =>
-            {
-                var type = x.PropertyType;
-                if (supportTypes.Contains(type))
-                    return true;
-                if (type.IsEnum)
-                    return true;
-                return false;
-            }))
+                {
+                    var type = x.PropertyType;
+                    if (supportTypes.Contains(type))
+                        return true;
+                    if (type.IsEnum)
+                        return true;
+                    return false;
+                }))
                 .SelectMany(x => x)
                 .GroupBy(x => (x.PropertyType, x.Name))
-                .Where(x => x.Count() == SelectedObjects.Count || x.Key.Name == "SoflanGroup")
-                .Select(x => x.First())//.IntersectManyBy(x => (x.PropertyType, x.Name))
-            .Select(x => (x.PropertyType, x.Name, x))
+                .Where(x => x.Count() == SelectedObjects.Count)
+                .Select(x => x.First())
+                //.IntersectManyBy(x => (x.PropertyType, x.Name))
+                .Select(x => (x.PropertyType, x.Name, x))
                 .ToArray();
 
             var wrappers = new List<IObjectPropertyAccessProxy>();
@@ -75,7 +77,6 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
                         if (refPropInfo.GetCustomAttribute<ObjectPropertyBrowserShow>() == null)
                             continue;
                     }
-
                     if (refPropInfo.GetCustomAttribute<ObjectPropertyBrowserHide>() != null)
                         continue;
                     wrapper = new UndoablePropertyInfoWrapper(new PropertyInfoWrapper(refPropInfo, SelectedObjects.FirstOrDefault()), referenceEditor);

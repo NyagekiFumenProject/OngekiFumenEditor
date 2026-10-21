@@ -75,6 +75,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         }
 
         private int soflanGroup = 0;
+        [OngekiFumenEditor.Base.Attributes.SoflanGroupProperty]
         public int SoflanGroup
         {
             get => soflanGroup;

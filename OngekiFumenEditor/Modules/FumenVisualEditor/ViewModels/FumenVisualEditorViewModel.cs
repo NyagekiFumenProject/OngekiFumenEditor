@@ -460,6 +460,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
+            CancelPlacementTools();
             var deactivationSucceeded = false;
             try
             {

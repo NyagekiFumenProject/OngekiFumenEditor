@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Windows;
+using System.Reflection;
+using OngekiFumenEditor.Base.Attributes;
 
 namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplement
 {
@@ -36,6 +38,9 @@ namespace OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator.TypeImplemen
             typeof(double?),
         };
 
-        public UIElement Generate(IObjectPropertyAccessProxy wrapper) => ViewHelper.CreateViewByViewModelType(() => new BaseValueTypeUIViewModel(wrapper));
+        public UIElement Generate(IObjectPropertyAccessProxy wrapper) =>
+            wrapper.PropertyInfo.IsDefined(typeof(SoflanGroupPropertyAttribute))
+                ? SoflanGroupSelector.Create(wrapper)
+                : ViewHelper.CreateViewByViewModelType(() => new BaseValueTypeUIViewModel(wrapper));
     }
 }

@@ -1,12 +1,7 @@
-using Caliburn.Micro;
-using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using Gemini.Modules.Toolbox;
+using System;
 using System.Windows;
 using System.Windows.Controls;
-using Gemini.Modules.Toolbox;
-using System.Windows.Input;
-using System.Windows.Controls.Primitives;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
 {
@@ -20,8 +15,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             InitializeComponent();
             Loaded += OnPlacementViewLoaded;
             Unloaded += OnPlacementViewUnloaded;
-            DataContextChanged += (_, e) => (e.OldValue as FumenVisualEditorViewModel)?.CancelPlacementTools();
+            DataContextChanged += (_, e) => InteractionInterrupted?.Invoke(this, EventArgs.Empty);
         }
+
+        public event EventHandler InteractionInterrupted;
 
         private Window placementWindow;
         private bool placementViewLoaded;
@@ -34,7 +31,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
             placementWindow = Window.GetWindow(this);
             if (placementWindow != null)
                 placementWindow.Deactivated += OnPlacementWindowDeactivated;
-            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged += OnPlacementEditorChanged;
             // 在窗口中首次收到工具箱拖放就取消，避免留下尚未完成的第一个点。
             placementWindow?.AddHandler(DragDrop.PreviewDragEnterEvent,
                 new DragEventHandler(OnToolboxDragStarted), true);
@@ -49,28 +45,20 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
                 new DragEventHandler(OnToolboxDragStarted));
             if (placementWindow != null)
                 placementWindow.Deactivated -= OnPlacementWindowDeactivated;
-            IoC.Get<IEditorDocumentManager>().OnActivateEditorChanged -= OnPlacementEditorChanged;
             placementWindow = null;
-            (DataContext as FumenVisualEditorViewModel)?.CancelPlacementTools();
+            InteractionInterrupted?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnPlacementEditorChanged(FumenVisualEditorViewModel next, FumenVisualEditorViewModel old)
+        private void OnPlacementWindowDeactivated(object sender, EventArgs e)
         {
-            if (old == DataContext)
-                old?.CancelPlacementTools();
+            InteractionInterrupted?.Invoke(this, EventArgs.Empty);
         }
-
-        private void OnPlacementWindowDeactivated(object sender, System.EventArgs e)
-        {
-            (DataContext as FumenVisualEditorViewModel)?.CancelPlacementTools();
-        }
-
 
         private void OnToolboxDragStarted(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
-                (DataContext as FumenVisualEditorViewModel)?.CancelPlacementTools();
+                InteractionInterrupted?.Invoke(this, EventArgs.Empty);
             }
         }
     }

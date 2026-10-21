@@ -79,10 +79,10 @@ namespace OngekiFumenEditor.Parser.Ogkr
         {
             sb.AppendLine("[SoflanGroupWrapItem]");
 
-            var maps = fumen.IndividualSoflanAreaMap.Keys.GroupBy(x => fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _).Parent?.DisplayName ?? "default");
+            var maps = fumen.IndividualSoflanAreaMap.GetSoflanGroups().GroupBy(x => x.Parent?.DisplayName ?? "default");
 
             foreach (var o in maps)
-                sb.AppendLine($"[SGWI]\t{o.Key}\t{string.Join("\t", o.Select(x => x.ToString()))}");
+                sb.AppendLine($"[SGWI]\t{o.Key}\t{string.Join("\t", o.Select(x => x.SoflanGroupId.ToString()))}");
             sb.AppendLine();
         }
 

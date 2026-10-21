@@ -20,7 +20,6 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.UI.ListViewDragDropManager;
-using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 
 namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 {
@@ -116,34 +115,14 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         {
             if (Editor?.Fumen is not OngekiFumen fumen)
                 return;
-            var map = fumen.IndividualSoflanAreaMap;
-            // 保留缓存编号，避免撤销历史中的对象指向后来创建的其他组。
-            var id = map.GetNextSoflanGroupId(fumen.SoflansMap.Keys.Concat(map.Keys));
-            var item = map.TryGetOrCreateSoflanGroupWrapItem(id, out _);
-            var group = new SoflanGroupWrapItemGroup
-            {
-                DisplayName = string.IsNullOrWhiteSpace(CreateNewGroupName) ? id.ToString() : CreateNewGroupName.Trim()
-            };
-            Editor.UndoRedoManager.ExecuteAction(
-                OngekiFumenEditor.Modules.FumenVisualEditor.Base.LambdaUndoAction.Create(Resources.SoflanGroupCreateUndo,
-                    () =>
-                    {
-                        group.Add(item);
-                        map.SoflanGroupWrapItemGroupRoot.Add(group);
-                        RebuildItemGroupRoot();
-                        CurrentSelectedSoflanGroupWrapItem = item;
-                        item.IsSelected = true;
-                    },
-                    () =>
-                    {
-                        group.Remove(item);
-                        map.SoflanGroupWrapItemGroupRoot.Remove(group);
-                        RebuildItemGroupRoot();
-                    }));
+            var action = SoflanGroupOperations.CreateAddAction(fumen, CreateNewGroupName, out var item, RebuildItemGroupRoot);
+            Editor.UndoRedoManager.ExecuteAction(action);
+            CurrentSelectedSoflanGroupWrapItem = item;
+            item.IsSelected = true;
             CreateNewGroupName = string.Empty;
         }
 
-        public void DeleteSelectedGroup()
+        public async System.Threading.Tasks.Task DeleteSelectedGroup()
         {
             var item = CurrentSelectedSoflanGroupWrapItem;
             if (Editor?.Fumen is not OngekiFumen fumen || item is null)
@@ -154,17 +133,14 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
                 return;
             }
 
-            var references = fumen.SoflansMap.Values.SelectMany(x => x).OfType<OngekiObjectBase>()
-                .Concat(fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x))
-                .Where(x => (int)x.GetType().GetProperty("SoflanGroup").GetValue(x) == item.SoflanGroupId)
-                .Distinct().ToArray();
+            var references = SoflanGroupOperations.GetReferences(fumen, item.SoflanGroupId);
             var replacement = default(SoflanGroupWrapItem);
             bool deleteObjects = false;
             if (references.Length > 0)
             {
-                var dialog = new OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Views.DeleteSoflanGroupDialog(
+                var dialog = new DeleteSoflanGroupDialogViewModel(
                     fumen.IndividualSoflanAreaMap.GetSoflanGroups().Where(x => x != item), references.Length);
-                if (dialog.ShowDialog() != true)
+                if (await IoC.Get<IWindowManager>().ShowDialogAsync(dialog) != true)
                     return;
                 replacement = dialog.Replacement;
                 deleteObjects = dialog.DeleteReferences;

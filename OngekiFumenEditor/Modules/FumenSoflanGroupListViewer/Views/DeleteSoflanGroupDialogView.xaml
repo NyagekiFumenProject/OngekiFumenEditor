@@ -1,0 +1,28 @@
+<UserControl
+    x:Class="OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Views.DeleteSoflanGroupDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://www.caliburnproject.org"
+    xmlns:p="clr-namespace:OngekiFumenEditor.Properties"
+    MinWidth="400">
+    <StackPanel Margin="16">
+        <TextBlock Text="{Binding ReferenceMessage}" TextWrapping="Wrap" />
+        <ComboBox
+            Margin="0,12"
+            DisplayMemberPath="SelectionDisplayName"
+            ItemsSource="{Binding Groups}"
+            SelectedItem="{Binding Replacement}" />
+        <Button
+            Margin="0,4"
+            Content="{x:Static p:Resources.SoflanGroupReplaceAndDelete}"
+            cal:Message.Attach="ReplaceAndDelete" />
+        <Button
+            Margin="0,4"
+            Content="{x:Static p:Resources.SoflanGroupDeleteAllReferences}"
+            cal:Message.Attach="DeleteAllReferences" />
+        <Button
+            Margin="0,4"
+            Content="{x:Static p:Resources.Cancel}"
+            cal:Message.Attach="Cancel" />
+    </StackPanel>
+</UserControl>

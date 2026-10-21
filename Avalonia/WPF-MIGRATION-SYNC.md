@@ -133,3 +133,7 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 - 按官方 `.editorconfig` 及相邻 WPF 代码整理缩进、初始化器和回调换行，功能不变。
 - Avalonia 代码本次未处理，不改变同步点。
+
+## 2026-10-21 WPF ISA 架构整理（#46）
+
+WPF 的组属性控件采用 ITypeUIGenerator 与 ViewModel/View；删除确认采用 Screen 与 IWindowManager；组引用处理改为强类型；空组增删可撤销、通知文档修改并复用 SGWI 持久化；组色滤镜复用装饰器及暂存集合，保持 15% 混色与原透明度。Avalonia 本次未移植；同步点仍为 `8b2940785e9b16b450e70fe248cfd16fa1d89040`。

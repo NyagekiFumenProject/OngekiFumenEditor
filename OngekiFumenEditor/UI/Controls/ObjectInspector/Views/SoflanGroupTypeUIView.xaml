@@ -1,0 +1,21 @@
+<UserControl
+    x:Class="OngekiFumenEditor.UI.Controls.ObjectInspector.Views.SoflanGroupTypeUIView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://www.caliburnproject.org">
+    <DockPanel Margin="5,0">
+        <TextBlock
+            Margin="0,0,15,0"
+            VerticalAlignment="Center"
+            Foreground="{DynamicResource EnvironmentToolWindowText}"
+            Text="{Binding PropertyInfo.DisplayPropertyName}"
+            ToolTip="{Binding PropertyInfo.DisplayPropertyTipText}" />
+        <ComboBox
+            MinWidth="100"
+            DisplayMemberPath="SelectionDisplayName"
+            ItemsSource="{Binding Groups}"
+            SelectedValue="{Binding SelectedGroup, Mode=TwoWay}"
+            SelectedValuePath="SoflanGroupId"
+            cal:Message.Attach="[Event DropDownOpened] = [Action RefreshGroups]" />
+    </DockPanel>
+</UserControl>

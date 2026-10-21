@@ -138,6 +138,13 @@ namespace OngekiFumenEditor.Base.Collections
             return item;
         }
 
+        public void RegisterSoflanGroupWrapItem(SoflanGroupWrapItem item)
+        {
+            if (cachedSoflanGroupWrapItemMap.TryGetValue(item.SoflanGroupId, out var existing) && existing != item)
+                throw new InvalidOperationException("Soflan group ID is already reserved.");
+            cachedSoflanGroupWrapItemMap[item.SoflanGroupId] = item;
+        }
+
         public int GetNextSoflanGroupId(IEnumerable<int> additionalReserved = null)
         {
             // 保留缓存编号，避免撤销历史中的对象指向后来创建的其他组。

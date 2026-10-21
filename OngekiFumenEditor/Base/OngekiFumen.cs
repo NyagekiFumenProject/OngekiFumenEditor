@@ -34,6 +34,8 @@ namespace OngekiFumenEditor.Base
         public event Action<OngekiObjectBase, PropertyChangedEventArgs> ObjectModifiedChanged;
         public event System.Action ObjectCollectionChanged;
 
+        public void NotifySoflanGroupsChanged() => ObjectModifiedChanged?.Invoke(null, new PropertyChangedEventArgs(nameof(IndividualSoflanAreaMap)));
+
         public BulletPalleteList BulletPalleteList { get; } = new();
         public BpmList BpmList { get; } = new();
         public LaneList Lanes { get; } = new();
