@@ -2,7 +2,7 @@
 
 整理日期：2026-10-20；实现记录更新：2026-10-21。
 
-本文件基于 [PR #45「子弹管理器持续放置与伤害快捷键」](https://github.com/NyagekiFumenProject/OngekiFumenEditor/pull/45)，并核对其来源 [PR #42](https://github.com/NyagekiFumenProject/OngekiFumenEditor/pull/42)。整理时两者都没有额外的评论或审阅讨论。
+本文件基于 [PR #45「子弹管理器持续放置与伤害快捷键」](https://github.com/NyagekiFumenProject/OngekiFumenEditor/pull/45)，并核对其来源 [PR #42](https://github.com/NyagekiFumenProject/OngekiFumenEditor/pull/42)。原始 PR 作者：[as2er](https://github.com/as2er)。整理时两者都没有额外的评论或审阅讨论。
 
 **核心需求只有两组：选定模板后连续放置 Bullet／Bell，以及快捷调整已选中 Bullet 的伤害类型。** 本文件保留功能与交互要求。2026-10-20 用户明确：`FumenBulletPalleteListViewerView.xaml` 的界面外观与布局按 U 节指定的 PR #45 diff 对齐；随后移除 U-3 的原事件契约约束，新增复选框交互按 MVVM 实现，不照搬原 PR 的控件事件与状态管理方式。
 
