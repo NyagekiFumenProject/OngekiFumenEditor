@@ -124,29 +124,39 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         public override void OnMoveCanvas(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
-            if (obj is ITimelineObject timeObj)
-            {
-                var ry = CheckAndAdjustY(timeObj, point.Y, editor);
-                if (ry is double dry && editor.ConvertYToTGrid_DesignMode(dry) is TGrid tGrid)
-                {
-                    timeObj.TGrid = tGrid;
-                    //Log.LogInfo($"Y: {ry} , TGrid: {timeObj.TGrid}");
-                }
-            }
+            if (obj is ITimelineObject timeObj && ResolveTGrid(timeObj, point.Y, editor) is { } tGrid)
+                timeObj.TGrid = tGrid;
 
-            if (obj is IHorizonPositionObject posObj)
-            {
-                var rx = CheckAndAdjustX(posObj, point.X, editor);
-                if (rx is double drx)
-                {
-                    var xGrid = XGridCalculator.ConvertXToXGrid(drx, editor);
-                    if (editor.Setting.ForceXGridIntegerUnit && !IsXGridSnappedToLaneThisMove)
-                        xGrid = XGridCalculator.RoundToIntegerUnit(xGrid);
-                    posObj.XGrid = xGrid;
-                }
+            if (obj is IHorizonPositionObject posObj && ResolveXGrid(posObj, point.X, editor) is { } xGrid)
+                posObj.XGrid = xGrid;
+        }
 
-                //Log.LogDebug($"x : {rx:F4} , posObj.XGrid.Unit : {posObj.XGrid.Unit} , xConvertBack : {XGridCalculator.ConvertXGridToX(posObj.XGrid, this)}");
-            }
+        public bool TryMoveCanvas(OngekiMovableObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            var tGrid = ResolveTGrid(obj, point.Y, editor);
+            var xGrid = ResolveXGrid(obj, point.X, editor);
+            if (tGrid is null || xGrid is null)
+                return false;
+
+            obj.TGrid = tGrid;
+            obj.XGrid = xGrid;
+            return true;
+        }
+
+        private TGrid ResolveTGrid(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
+            => CheckAndAdjustY(obj, y, editor) is double adjustedY
+                ? editor.ConvertYToTGrid_DesignMode(adjustedY)
+                : null;
+
+        private XGrid ResolveXGrid(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
+        {
+            if (CheckAndAdjustX(obj, x, editor) is not double adjustedX)
+                return null;
+
+            var xGrid = XGridCalculator.ConvertXToXGrid(adjustedX, editor);
+            return editor.Setting.ForceXGridIntegerUnit && !IsXGridSnappedToLaneThisMove
+                ? XGridCalculator.RoundToIntegerUnit(xGrid)
+                : xGrid;
         }
 
         public virtual double? CheckAndAdjustY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)

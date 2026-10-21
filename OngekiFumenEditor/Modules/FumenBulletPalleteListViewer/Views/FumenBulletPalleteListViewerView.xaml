@@ -19,6 +19,8 @@
     <UserControl.Resources>
         <valueconverters:EnumValuesGenerator x:Key="EnumValuesGenerator">
         </valueconverters:EnumValuesGenerator>
+        <valueconverters:ProjectilePlacementCheckedConverter x:Key="BulletPlacementCheckedConverter" IsBell="False" />
+        <valueconverters:ProjectilePlacementCheckedConverter x:Key="BellPlacementCheckedConverter" IsBell="True" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -80,6 +82,39 @@
                             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
+                    <GridViewColumn Width="110" Header="{markup:Translate [ContinuousProjectilePlacement]}">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox
+                                        Margin="0,0,8,0"
+                                        Command="{Binding DataContext.ToggleBulletPlacementCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"
+                                        Content="Bullet"
+                                        Tag="Bullet">
+                                        <CheckBox.IsChecked>
+                                            <MultiBinding Converter="{StaticResource BulletPlacementCheckedConverter}" Mode="OneWay">
+                                                <Binding />
+                                                <Binding Path="DataContext.RequestBatchPlaceProjectileInfo" RelativeSource="{RelativeSource AncestorType=ListView}" />
+                                            </MultiBinding>
+                                        </CheckBox.IsChecked>
+                                    </CheckBox>
+                                    <CheckBox
+                                        Command="{Binding DataContext.ToggleBellPlacementCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
+                                        CommandParameter="{Binding}"
+                                        Content="Bell"
+                                        Tag="Bell">
+                                        <CheckBox.IsChecked>
+                                            <MultiBinding Converter="{StaticResource BellPlacementCheckedConverter}" Mode="OneWay">
+                                                <Binding />
+                                                <Binding Path="DataContext.RequestBatchPlaceProjectileInfo" RelativeSource="{RelativeSource AncestorType=ListView}" />
+                                            </MultiBinding>
+                                        </CheckBox.IsChecked>
+                                    </CheckBox>
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
                     <GridViewColumn Width="60" DisplayMemberBinding="{Binding StrID}">
                         <GridViewColumn.Header>
                             <TextBlock Text="{markup:Translate [BulletPaletteId]}" ToolTip="{markup:Translate [TipColumnStrId]}" />

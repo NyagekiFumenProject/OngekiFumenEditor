@@ -53,10 +53,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             get => isUserRequestHideEditorObject;
             set
             {
+                if (isUserRequestHideEditorObject != value)
+                    CancelBatchProjectilePlacement();
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
                 NotifyOfPropertyChange(() => IsDesignMode);
                 NotifyOfPropertyChange(() => IsPreviewMode);
+                NotifyOfPropertyChange(nameof(CanRequestBatchProjectilePlacement));
             }
         }
 
@@ -1169,6 +1172,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void OnMouseLeave(ActionExecutionContext e)
         {
+            HideBatchPlacementPreview();
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
             OnMouseUp(e);
         }
@@ -1178,6 +1182,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as MouseButtonEventArgs;
             if (arg is null || arg.Handled)
             {
+                return;
+            }
+
+            if (TryHandleBatchProjectilePlacementMouseUp(arg.ChangedButton, arg.GetPosition(e.Source)))
+            {
+                arg.Handled = true;
                 return;
             }
 
@@ -1278,6 +1288,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
+
+            if (TryHandleBatchProjectilePlacementMouseDown(arg.ChangedButton, position))
+            {
+                view?.Focus();
+                arg.Handled = true;
+                return;
+            }
 
             if (IsDesignMode)
             {
@@ -1407,6 +1424,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
 
+            if (IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp)
+            {
+                currentDraggingActionId = int.MaxValue;
+                OnMouseMove(args.GetPosition(e.Source));
+                return;
+            }
+
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
             currentDraggingActionId = int.MaxValue;
@@ -1417,6 +1441,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             //show current cursor position in statusbar
             UpdateCurrentCursorPosition(pos);
+            UpdateBatchPlacementPointer(pos);
+            if ((IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp) && !isMiddleMouseDown)
+                return;
 
             if (IsDesignMode)
             {

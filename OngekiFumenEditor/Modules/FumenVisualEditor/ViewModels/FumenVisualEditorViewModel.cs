@@ -48,6 +48,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
             set
             {
+                if (!ReferenceEquals(editorProjectData, value))
+                    CancelBatchProjectilePlacement();
                 var previousProjectData = editorProjectData;
                 var prevFumen = editorProjectData?.Fumen;
                 Set(ref editorProjectData, value);
@@ -68,6 +70,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         cur.ObjectModifiedChanged += OnFumenObjectModifiedChanged;
                     }
                     NotifyOfPropertyChange(() => Fumen);
+                    NotifyOfPropertyChange(nameof(CanRequestBatchProjectilePlacement));
                 }
 
                 setupFumen(editorProjectData?.Fumen, prevFumen);
@@ -463,6 +466,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var deactivationSucceeded = false;
             try
             {
+                CancelBatchProjectilePlacement();
                 await base.OnDeactivateAsync(close, cancellationToken);
                 await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
                 EditorManager.NotifyDeactivate(this);
@@ -491,6 +495,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (Interlocked.Exchange(ref isDisposed, 1) != 0)
                 return;
+
+            CancelBatchProjectilePlacement();
 
             var fumen = editorProjectData?.Fumen;
             if (fumen is not null)

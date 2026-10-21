@@ -1,4 +1,5 @@
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
 using System.Windows;
@@ -16,6 +17,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base.DropActions
 
             if (!editor.CheckAndNotifyIfPlaceBeyondDuration(mousePosition))
                 return;
+
+            if (displayObject is Bullet or Bell)
+            {
+                editor.PlaceProjectileAt((OngekiMovableObjectBase)displayObject, mousePosition);
+                return;
+            }
 
             editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.AddObject, () =>
             {

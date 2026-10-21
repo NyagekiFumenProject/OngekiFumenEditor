@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../OngekiFumenEditor/OngekiFumenEditor.csproj" AdditionalProperties="DisableFody=true" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/Caliburn.Micro.Core.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/Caliburn.Micro.Platform.Core.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/Caliburn.Micro.Platform.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/Gemini.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/MahApps.Metro.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/AvalonDock.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/SkiaSharp.dll" />
+    <Reference Include="../../OngekiFumenEditor/bin/Debug/net10.0-windows/AvalonDock.Themes.VS2013.dll" />
+  </ItemGroup>
+</Project>
