@@ -3489,9 +3489,9 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>Unable to calculate T_* values: {0}</value>
   </data>
-  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>Dashed: player-relative offset; actual impact follows the player</value></data>
+  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>Player-targeted impacts use the recorded player position.</value></data>
   <data name="ShowBeamHitRanges" xml:space="preserve"><value>Beam hit ranges</value></data>
   <data name="ShowBulletHitRanges" xml:space="preserve"><value>Bullet hit ranges</value></data>
   <data name="TipBeamHitRanges" xml:space="preserve"><value>Show horizontal hit widths along beam paths in design mode.</value></data>
-  <data name="TipBulletHitRanges" xml:space="preserve"><value>Show hit widths in design mode; dashed outlines mark player-relative offsets.</value></data>
+  <data name="TipBulletHitRanges" xml:space="preserve"><value>Filled bands show this preview impact; dashed outlines show the full random range. Player targets use recorded player positions.</value></data>
 </root>

@@ -3456,9 +3456,9 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>无法计算 T_* 命令数值：{0}</value>
   </data>
-  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>虚线：自机狙击相对偏移，实际落点随自机</value></data>
+  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>自机狙击落点按已记录的玩家位置计算。</value></data>
   <data name="ShowBeamHitRanges" xml:space="preserve"><value>激光判定范围</value></data>
   <data name="ShowBulletHitRanges" xml:space="preserve"><value>子弹判定范围</value></data>
   <data name="TipBeamHitRanges" xml:space="preserve"><value>编辑模式沿激光轨迹显示横向判定宽度。</value></data>
-  <data name="TipBulletHitRanges" xml:space="preserve"><value>编辑模式显示落点判定宽度；虚线表示自机狙击的相对位置。</value></data>
+  <data name="TipBulletHitRanges" xml:space="preserve"><value>实心带表示本次预览落点；虚线表示完整随机范围。自机狙击使用已记录的玩家位置。</value></data>
 </root>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Numerics;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Beam;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles;
 using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
@@ -18,6 +19,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         // 本机游戏 ShellNoteCore.setShellWidth：圆弹全宽 4，针/方弹全宽 2；大小只改变外观。
         public static float BulletHalfWidth(BulletType type) => type == BulletType.Circle ? 2 : 1;
+        public static float BeamHalfWidthPixels(int widthJudge, Func<double, double> convertXGridToX)
+            => (float)Math.Abs(convertXGridToX(widthJudge / 2d) - convertXGridToX(0));
         public static Vector4 BulletColor(BulletDamageType damage) => damage switch
         {
             BulletDamageType.Hard => new Vector4(84 / 255f, 0, 169 / 255f, .48f),
@@ -117,18 +120,26 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             {
                 if (!target.CheckVisible(obj.TGrid))
                     continue;
-                var x = obj.XGrid.TotalUnit;
                 var half = HitRangeGeometry.BulletHalfWidth(obj.TypeValue);
-                var left = (float)XGridCalculator.ConvertXGridToX(x - half, target.Editor);
-                var right = (float)XGridCalculator.ConvertXGridToX(x + half, target.Editor);
                 var y = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(obj.TGrid);
                 var color = HitRangeGeometry.BulletColor(obj.BulletDamageTypeValue);
                 var relative = obj.TargetValue == Target.Player;
                 relativeExists |= relative;
-                if (!relative)
-                    HitRangeGeometry.AddQuad(polygons, new(left, y - 4), new(right, y - 4), new(left, y + 4), new(right, y + 4), color);
+                var resolved = ProjectileTargetGeometry.Resolve(BulletPallete.RandomSeed, obj.TargetValue, obj.Speed,
+                    TGridCalculator.ConvertTGridToAudioTime(obj.TGrid, target.Editor.Fumen.BpmList), obj.Id,
+                    obj.XGrid.TotalUnit, obj.RandomOffsetRange, target.Editor.PlayerLocationRecorder.GetLocationXUnit);
+                var left = (float)XGridCalculator.ConvertXGridToX(resolved.LandingXUnit - half, target.Editor);
+                var right = (float)XGridCalculator.ConvertXGridToX(resolved.LandingXUnit + half, target.Editor);
+                HitRangeGeometry.AddQuad(polygons, new(left, y - 4), new(right, y - 4), new(left, y + 4), new(right, y + 4), color);
                 var edge = obj.BulletDamageTypeValue == BulletDamageType.Danger ? new Vector4(.8f, .75f, .85f, .7f) : new Vector4(color.X, color.Y, color.Z, .8f);
-                HitRangeGeometry.AddOutline(lines, left, right, y, edge, relative);
+                if (obj.RandomOffsetRange > 0)
+                {
+                    var envelopeLeft = (float)XGridCalculator.ConvertXGridToX(resolved.EnvelopeMinXUnit - half, target.Editor);
+                    var envelopeRight = (float)XGridCalculator.ConvertXGridToX(resolved.EnvelopeMaxXUnit + half, target.Editor);
+                    HitRangeGeometry.AddOutline(lines, envelopeLeft, envelopeRight, y, edge, true);
+                }
+                else
+                    HitRangeGeometry.AddOutline(lines, left, right, y, edge, false);
             }
 
             if (polygons.Count > 0)
@@ -173,7 +184,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 path.Clear();
                 VisibleLineVerticesQuery.QueryVisibleLineVertices(target, beam, target.Editor.Fumen.SoflansMap.DefaultSoflanList, new VertexDash(0, 0), color, path, preservePathBreaks: true);
                 // 原游戏从起点读取 WidthId；横向判定宽度不同于激光贴图宽度。
-                var half = (float)Math.Abs(XGridCalculator.ConvertXGridToX(beam.WidthId.WidthJudge / 2d, target.Editor) - XGridCalculator.ConvertXGridToX(0d, target.Editor));
+                var half = HitRangeGeometry.BeamHalfWidthPixels(beam.WidthId.WidthJudge, x => XGridCalculator.ConvertXGridToX(x, target.Editor));
                 HitRangeGeometry.AddVisibleBands(polygons, path, half, (float)rect.MinY, (float)rect.MaxY, color);
             }
 
