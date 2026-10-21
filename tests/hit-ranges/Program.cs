@@ -121,14 +121,14 @@ internal static class Program
             var polygon = commands.Commands.OfType<DrawPolygonCommand>().Single();
             Assert(Math.Abs(polygon.Vertices.Min(v => v.Point.X) - XGridCalculator.ConvertXGridToX(playerExpected.LandingXUnit - 2, editor)) < .001, "Player 实际命中带须包含历史玩家位置。");
         }
-        var beam = new BeamStart { XGrid = new XGrid(0), TGrid = new TGrid(1), WidthId = new WidthId(999, 8, 100) };
+        var beam = new BeamStart { XGrid = new XGrid(0), TGrid = new TGrid(1), WidthId = new WidthId(999, 100, 8) };
         beam.AddChildObject(new BeamNext { XGrid = new XGrid(0), TGrid = new TGrid(2) });
         new BeamHitRangeDrawingTarget().DrawBatch(context, builder, new[] { beam });
         using (var commands = builder.GetDrawCommandList())
         {
             var polygon = commands.Commands.OfType<DrawPolygonCommand>().Single();
             var expectedWidth = XGridCalculator.ConvertXGridToX(4d, editor) - XGridCalculator.ConvertXGridToX(-4d, editor);
-            Assert(Math.Abs(polygon.Vertices.Max(v => v.Point.X) - polygon.Vertices.Min(v => v.Point.X) - expectedWidth) < .001, "Beam 绘制须取起点 WidthJudge/2，不能取贴图宽度。");
+            Assert(Math.Abs(polygon.Vertices.Max(v => v.Point.X) - polygon.Vertices.Min(v => v.Point.X) - expectedWidth) < .001, "Beam 绘制须取起点 WidthDraw/2（游戏 widthJudge 与 widthDraw 同值），不能取编辑器 WidthJudge。");
         }
     }
 

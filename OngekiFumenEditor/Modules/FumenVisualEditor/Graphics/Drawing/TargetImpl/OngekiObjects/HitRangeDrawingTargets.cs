@@ -19,8 +19,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     {
         // 本机游戏 ShellNoteCore.setShellWidth：圆弹全宽 4，针/方弹全宽 2；大小只改变外观。
         public static float BulletHalfWidth(BulletType type) => type == BulletType.Circle ? 2 : 1;
-        public static float BeamHalfWidthPixels(int widthJudge, Func<double, double> convertXGridToX)
-            => (float)Math.Abs(convertXGridToX(widthJudge / 2d) - convertXGridToX(0));
+        public static float BeamHalfWidthPixels(int width, Func<double, double> convertXGridToX)
+            => (float)Math.Abs(convertXGridToX(width / 2d) - convertXGridToX(0));
         public static Vector4 BulletColor(BulletDamageType damage) => damage switch
         {
             BulletDamageType.Hard => new Vector4(84 / 255f, 0, 169 / 255f, .48f),
@@ -183,8 +183,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     continue;
                 path.Clear();
                 VisibleLineVerticesQuery.QueryVisibleLineVertices(target, beam, target.Editor.Fumen.SoflansMap.DefaultSoflanList, new VertexDash(0, 0), color, path, preservePathBreaks: true);
-                // 原游戏从起点读取 WidthId；横向判定宽度不同于激光贴图宽度。
-                var half = HitRangeGeometry.BeamHalfWidthPixels(beam.WidthId.WidthJudge, x => XGridCalculator.ConvertXGridToX(x, target.Editor));
+                // 游戏 BeamNote.setup 把 widthID 1..5 映射为 widthJudge=widthDraw=2/3/4/12/20
+                // （BeamNoteCore.checkHit 用 widthJudge*0.5 判定）；编辑器 WidthIdConst.WidthJudge
+                // 是 4/6/8/16/24，与游戏不符，WidthDraw 才对应游戏判定全宽。
+                var half = HitRangeGeometry.BeamHalfWidthPixels(beam.WidthId.WidthDraw, x => XGridCalculator.ConvertXGridToX(x, target.Editor));
                 HitRangeGeometry.AddVisibleBands(polygons, path, half, (float)rect.MinY, (float)rect.MaxY, color);
             }
 
