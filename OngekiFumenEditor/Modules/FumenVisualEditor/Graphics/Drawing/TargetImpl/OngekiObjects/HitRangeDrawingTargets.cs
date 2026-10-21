@@ -10,6 +10,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Projectiles.Enums;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
 using static OngekiFumenEditor.Kernel.Graphics.ILineDrawing;
 
@@ -111,7 +112,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<Bullet> objects)
         {
-            if (!target.Editor.ShowBulletHitRanges || !target.Editor.IsDesignMode)
+            if (!EditorGlobalSetting.Default.ShowBulletHitRanges || !target.Editor.IsDesignMode)
                 return;
             using var polygons = ObjectPool.GetPooledList<PolygonVertex>();
             using var lines = ObjectPool.GetPooledList<LineVertex>();
@@ -171,7 +172,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<BeamStart> objects)
         {
-            if (!target.Editor.ShowBeamHitRanges || !target.Editor.IsDesignMode)
+            if (!EditorGlobalSetting.Default.ShowBeamHitRanges || !target.Editor.IsDesignMode)
                 return;
             using var polygons = ObjectPool.GetPooledList<PolygonVertex>();
             using var path = ObjectPool.GetPooledList<LineVertex>();

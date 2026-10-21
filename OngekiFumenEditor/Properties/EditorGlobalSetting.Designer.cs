@@ -634,5 +634,29 @@ namespace OngekiFumenEditor.Properties {
                 this["InjectDefaultClickSE"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowBulletHitRanges {
+            get {
+                return ((bool)(this["ShowBulletHitRanges"]));
+            }
+            set {
+                this["ShowBulletHitRanges"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowBeamHitRanges {
+            get {
+                return ((bool)(this["ShowBeamHitRanges"]));
+            }
+            set {
+                this["ShowBeamHitRanges"] = value;
+            }
+        }
     }
 }

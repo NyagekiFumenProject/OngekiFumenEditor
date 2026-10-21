@@ -102,8 +102,8 @@ internal static class Program
         SetField(editor, "<Setting>k__BackingField", new EditorSetting());
         SetField(editor, "<PlayerLocationRecorder>k__BackingField", new PlayerLocationRecorder());
         SetField(editor, "viewWidth", 800f);
-        SetField(editor, "showBulletHitRanges", true);
-        SetField(editor, "showBeamHitRanges", true);
+        OngekiFumenEditor.Properties.EditorGlobalSetting.Default.ShowBulletHitRanges = true;
+        OngekiFumenEditor.Properties.EditorGlobalSetting.Default.ShowBeamHitRanges = true;
         var context = DispatchProxy.Create<IFumenEditorDrawingContext, DrawingContextProxy>();
         ((DrawingContextProxy)(object)context).Editor = editor;
         var bullet = new Bullet { Id = 10, XGrid = new XGrid(3), TGrid = new TGrid(1), RandomOffsetRange = 5 };

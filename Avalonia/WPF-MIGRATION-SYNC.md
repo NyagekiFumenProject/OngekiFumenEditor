@@ -151,3 +151,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：Beam 判定带宽度改用 `WidthId.WidthDraw`，对齐游戏 `BeamNote.setup` 的 widthID 1..5 → 2/3/4/12/20 映射（`ed0de203`）。
 - WPF：投射物 0 速取命中帧玩家位置、负速保留反向轨迹与命中后落点，复刻游戏 `calcNoteFrameAimBulletCreate`（`a45e222f`）。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：判定范围开关迁移到全局设置（WPF）
+
+- WPF：`ShowBulletHitRanges`/`ShowBeamHitRanges` 从 `FumenVisualEditorViewModel` 迁移到 `EditorGlobalSetting`（默认开启，设置窗口「文档→编辑器→渲染」页提供开关并随 Apply 保存）；移除编辑器右键上下文菜单中的两个开关。
+- 测试：`tests/hit-ranges` 覆盖全局设置默认值与设置页绑定探针；构建 0 error、回归通过。
+- Avalonia：本次未移植，不改变现有同步点。
