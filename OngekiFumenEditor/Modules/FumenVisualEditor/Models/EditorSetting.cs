@@ -374,6 +374,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.InjectDefaultClickSE):
                     break;
+                case nameof(Properties.EditorGlobalSetting.ShowBulletHitRanges):
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ShowBeamHitRanges):
+                    break;
                 default:
                     Log.LogWarn($"unknown Properties.EditorGlobalSetting property changed : {e.PropertyName}");
                     break;

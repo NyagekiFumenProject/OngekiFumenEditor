@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <Target Name="RequireEditor" BeforeTargets="Build" Condition="'$(EditorAssemblyDirectory)' == ''">
+        <Error Text="请通过 -p:EditorAssemblyDirectory 指定已构建编辑器程序集目录。" />
+    </Target>
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <Reference Include="$(EditorAssemblyDirectory)/*.dll" />
+        <None Include="$(EditorAssemblyDirectory)/*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+</Project>

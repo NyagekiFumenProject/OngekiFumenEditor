@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -3474,4 +3474,9 @@
   <data name="kbd_editor_QuickBulletDamageDown" xml:space="preserve">
     <value>向后循环所选子弹的伤害类型</value>
   </data>
+  <data name="RelativeBulletHitRangeHint" xml:space="preserve"><value>自机狙击落点按已记录的玩家位置计算。</value></data>
+  <data name="ShowBeamHitRanges" xml:space="preserve"><value>激光判定范围</value></data>
+  <data name="ShowBulletHitRanges" xml:space="preserve"><value>子弹判定范围</value></data>
+  <data name="TipBeamHitRanges" xml:space="preserve"><value>编辑模式沿激光轨迹显示横向判定宽度。</value></data>
+  <data name="TipBulletHitRanges" xml:space="preserve"><value>实心带表示本次预览落点；虚线表示完整随机范围。自机狙击使用已记录的玩家位置。</value></data>
 </root>

@@ -251,6 +251,18 @@
                         </Behaviors:Interaction.Triggers>
                     </TextBlock>
                 </StackPanel>
+                <CheckBox
+                    Margin="10,10,5,0"
+                    VerticalContentAlignment="Center"
+                    Content="{markup:Translate [ShowBulletHitRanges]}"
+                    IsChecked="{Binding Setting.ShowBulletHitRanges}"
+                    ToolTip="{markup:Translate [TipBulletHitRanges]}" />
+                <CheckBox
+                    Margin="10,5,5,10"
+                    VerticalContentAlignment="Center"
+                    Content="{markup:Translate [ShowBeamHitRanges]}"
+                    IsChecked="{Binding Setting.ShowBeamHitRanges}"
+                    ToolTip="{markup:Translate [TipBeamHitRanges]}" />
                 <GroupBox Margin="5,0,5,5" Header="{markup:Translate [PreviewMode]}">
                     <StackPanel Margin="10">
                         <WrapPanel Orientation="Horizontal">

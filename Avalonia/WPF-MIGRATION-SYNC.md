@@ -129,3 +129,48 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 | 2026-10-21 | 功能实现与回归（WPF 侧，非同步） | `48c08772`（`WIP` 检查点）；后续解耦改动未提交 | [实施记录 §6](../docs/pr45-bullet-placement-implementation-plan.md#6-实现与验证记录2026-10-21)、[独立回归工程](../tests/bullet-placement/BulletPlacementCheck.csproj) | 完成 PR #45 子弹管理器持续放置与伤害快捷键：新增只读 `IPlaceBatchProjectileInfo`／管理器请求属性及 MVVM 互斥勾选，保留指定 diff 外观和旧创建／克隆入口；编辑器持有唯一会话，复用吸附与提交链，点击／拖动释放一次一个并保持会话；新增 `DrawProjectilePlacementPreviewHelper`，复用贴图和锚点、无谱面／命中副作用；B-1 右键取消由绘图区原有鼠标事件完成，B-2 由 `IEditorDocumentManager.OnActivateEditorChanged` 判断，B-5 由编辑器原有 `Grid_Drop` 在 Drop 时取消，未额外订阅窗口 `ContextMenuOpening`／`QueryContinueDrag`；未注册任何窗口鼠标事件，左键手势清理在原有 `OnMouseDown`／`OnMouseUp` 内完成。输入接线在 `FumenVisualEditorViewModel` 构造函数订阅 `IEditorDocumentManager.OnActivateEditorChanged` 并在 `Dispose` 解除；`FumenVisualEditorView.xaml.cs` 保持原版，不再依赖视图生命周期注册输入事件。采用方案 D-1～D-4，已回写需求 Q 节。验证：WPF Debug 构建成功；独立行为／真实 XAML 路由／Skia CPU 光栅回归 212 项通过；既有 MCP 全套 1228/1228；后台真实实例完成放置、F13 配置加载与路由、Undo／Redo 和预览截图。物理输入、浮动窗口、原生 OLE 拖拽及其他渲染后端未逐项交互验收，边界见实施记录。测试实例停止，临时配置还原。**Avalonia 功能代码本轮未处理，不改变同步点 `8b2940785`。** |
 
 | 2026-10-18 | 修复（WPF 侧，非同步） | `f47b823f`、`85799db1`、`0a7e4251`、`2e2c8a87` | 一次性验证工程 `tests/mcp-e2e/.tmp/undo-check`（未入库；40 项断言全过）+ `dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug` 0 error + 后台启动冒烟（自建实例启动到 MCP ready 无异常后停止） | 为四项此前不进 Undo/Redo 的编辑器操作补封装：① TGrid 计算器「赋给选中物件」改为 `LambdaUndoAction`（`TGridCalculatorToolViewerViewModel.CreateApplyTGridAction`）；②「重算编辑器滚动高度」改为命令内联 `LambdaUndoAction`（撤销恢复旧 `AudioDuration` 并重算）；③ 变速分组新建与拖拽移动改为 `LambdaUndoAction` / `FumenSoflanGroupListViewerViewModel.CreateMoveAction`（`SoflanGroupWrapItemGroup.Insert` 取代无调用者的 `InsertBefore`，新增三语资源 `SoflanGroupMove`；拖到空目标不再丢项）；④ 辅助菜单「调整可停靠物件水平位置」改为单个批量 `LambdaUndoAction`。**Avalonia 树尚未移植以上四项，本次不改变同步点。** |
+
+## 本次 WPF 独立改动（2026-10-16）
+
+- WPF：子弹和激光判定范围显示。
+- Avalonia：本次未移植。
+- 不改变现有同步点。
+
+## 2026-10-18：PR 排版整理
+
+- 按官方 `.editorconfig` 及相邻 WPF 代码整理缩进、初始化器和回调换行，功能不变。
+- Avalonia 代码本次未处理，不改变同步点。
+
+## 2026-10-21：PR #44 判定范围重写（WPF）
+
+- WPF：弹幕落点与命中范围共用目标解析规则，包含玩家历史位置、速度安全边界及确定性随机包络；实际落点实体带状绘制，随机范围以虚线包络绘制。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：PR #44 后续修复（WPF）
+
+- WPF：Beam 判定带宽度改用 `WidthId.WidthDraw`，对齐游戏 `BeamNote.setup` 的 widthID 1..5 → 2/3/4/12/20 映射（`ed0de203`）。
+- WPF：投射物 0 速取命中帧玩家位置、负速保留反向轨迹与命中后落点，复刻游戏 `calcNoteFrameAimBulletCreate`（`a45e222f`）。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：判定范围开关迁移到全局设置（WPF）
+
+- WPF：`ShowBulletHitRanges`/`ShowBeamHitRanges` 从 `FumenVisualEditorViewModel` 迁移到 `EditorGlobalSetting`（默认开启，设置窗口「文档→编辑器→渲染」页提供开关并随 Apply 保存）；移除编辑器右键上下文菜单中的两个开关。
+- 测试：`tests/hit-ranges` 覆盖全局设置默认值与设置页绑定探针；构建 0 error、回归通过。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：判定范围绘制目标缓存开关（WPF）
+
+- WPF：`BulletHitRangeDrawingTarget`/`BeamHitRangeDrawingTarget` 在构造函数读取一次全局开关并订阅 `EditorGlobalSetting.Default.PropertyChanged` 更新字段，渲染只读字段；实现 `IDisposable` 取消订阅。
+- 测试：`tests/hit-ranges` 增加关闭开关后不生成绘制命令的断言。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-21：判定范围与玩家位置查询分配优化（WPF）
+
+- WPF：`BulletHitRangeDrawingTarget`/`ProjectileBatchDrawTargetBase` 每帧缓存玩家位置委托，消除每个子弹/铃铛 64 B 的委托分配；`BeamHalfWidthPixels` 改为直接调用 `ConvertXGridToX`，去掉每个 Beam 的 lambda/闭包；`PlayerLocationRecorder.GetLocationXUnit` 改用 `SortableCollection` 索引器，消除 `ElementAtOrDefault` 的 80 B/op 枚举器分配。
+- 基准（Release，2,000,000 次）：`Resolve`（FixField/Player）、`GetLocationXUnit`、Beam 半宽均为 **0 B/op**；优化前分别为 64、144（含 recorder 80）、80、0 B/op（Beam 的闭包被 JIT 栈分配，但委托调用未内联，耗时约 110 ns/op）。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-22：判定范围轮廓参数命名（WPF）
+
+- WPF：`HitRangeGeometry.AddOutline` 的 `relative` 参数改为 `dashed`，调用点使用命名参数，表达实际语义（随机包络虚线 / 固定落点实线）。
+- Avalonia：本次未移植，不改变现有同步点。

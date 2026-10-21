@@ -2,7 +2,6 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Utils;
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -70,12 +69,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             if (idx == 0)
             {
                 cur = defaultRecord;
-                next = list.FirstOrDefault();
+                next = list[0];
             }
             else
             {
-                cur = list.ElementAtOrDefault(idx - 1);
-                next = list.ElementAtOrDefault(idx);
+                cur = list[idx - 1];
+                next = idx < list.Count ? list[idx] : null;
             }
 
             if (next == null)
