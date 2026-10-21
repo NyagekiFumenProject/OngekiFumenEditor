@@ -152,7 +152,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 default:
                     IsDirty = true;
-                    RecalculateScrollMetrics();
+                    if (gridDragUpdateDepth == 0 || e.PropertyName == nameof(ITimelineObject.TGrid))
+                        RecalculateScrollMetrics();
                     break;
             }
 
@@ -460,6 +461,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
+            CancelPlacementTools();
             var deactivationSucceeded = false;
             try
             {
@@ -492,6 +494,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (Interlocked.Exchange(ref isDisposed, 1) != 0)
                 return;
 
+            if (placementInputView != null)
+            {
+                placementInputView.InteractionInterrupted -= OnInteractionInterrupted;
+                placementInputView = null;
+            }
             var fumen = editorProjectData?.Fumen;
             if (fumen is not null)
             {

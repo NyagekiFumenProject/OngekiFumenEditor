@@ -122,3 +122,24 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 | 2026-10-11 | 修复（WPF 侧，非同步） | `2c8a6a3d` | 独立验证：Python 复算脚本 + 临时 WPF 验证工程（均未入库，位于 `%TEMP%`） | 修正 OGKR `T_*`（尤其 T_TOTAL/T_HOLD/T_SHOLD）的 Hold 判定公式，对齐游戏本体：① `HoldTickStepCalculator.Calculate` 改为逐位复刻游戏 `MU3.Reader.BPM.getProgressJudgeGrid()`——BPM/PROGJUDGE 以 float32 参与、BPM 先按 `Mathf.Max(bpm, 3.75f)` 抬到 3.75 以上，唯一有意偏离是结果夹在 `[1, int.MaxValue]`（游戏在极端输入下会把步长算成 0 或溢出为负，其判定点循环会失去推进性/死循环，编辑器不复刻该缺陷）；② `FumenStatisticsCalculator.CalculateHold` 删除行内重复实现、统一调用 `HoldTickStepCalculator`，基准由 `MetaInfo.TRESOLUTION >> 2` 改为 `DefaultStandardBeatLen`（=1920/4，与 `Hold.CalculateJudgeTGrid` 判定点绘制一致），闭环 Avalonia 文档记录的「两处分辨率基准不一致」；③ PROGJUDGE_BPM 合法阈值改为与游戏 Header.decode 一致（`<= 1.00001 → 240`；原实现接受 `>= 1`，会把游戏实际读作 240 的值写进文件并按其统计）；④ 删除不再使用的 `FumenStatisticsInvalidHoldTiming` 资源（en/zh-Hans/ja + Designer）。核对结论：`T_TOTAL = T_TAP + T_HOLD + T_SIDE + T_SHOLD + T_FLICK` 的分类与游戏 `NotesManager._totalNotes` 一致（Hold 起点计 Tap/SideTap、judgeList 每点计 Hold/SideHold 且恒含终点、起点单独一次、Bell 不入 total）——即 Hold 的 combo 贡献 = 起点 1 + 含终点在内的全部判定点。验证：49 张真实 ogkr 独立复算（游戏算法对照）修复前后均与文件 T_* 一致（样本无 BPM<3.75，输出不变）；40 万随机 + 2 的幂边界对照，新算法与游戏 float32 算法逐位一致（0 差异）；临时 WPF 验证工程 43/43（含 3.0 BPM 场景 T_HOLD 549 对旧公式 1280、跨 BPM 150→480 为 20、240→3.0 为 557；wall/CR/tap/flick/bell 分类与 T_TOTAL 自洽；Coerce/TryParse 阈值）；WPF Debug 构建 0 error。**Avalonia 树尚未移植**：其 `HoldTickStepCalculator.cs` 仍是 log2 闭式（无 float32/3.75 下限、阈值 1f），`FumenStatisticsCalculator.cs` 仍传 `timeResolution_ >> 2`，测试 `HoldTickStepTests.cs` 固化了旧行为（移植时需同步更新）。不改变同步点。 |
 | 2026-10-11 | 新增功能（WPF 侧，非同步） | `2c8a6a3d`（与上一行同一提交；本轮改动随该提交一并入库） | 真实 WPF 渲染探针（临时工程，未入库，位于 `%TEMP%`）：屏外窗口 + 真实 BAML/DataGrid/绑定 | 谱面统计对话框「T_* 命令」页新增两项派生指标：① **白金分数满分**（行「白金分数」/Platinum score/プラチナスコア）= `T_TOTAL × 2`，依据游戏 `Counters.addPlatinumScore`（每判定单元最多 2 分）与 `updatePlatinumScore` / `DataManager` 的 `platinumScoreMax = totalNotesNum × 2`（已核对游戏 `volumeNotesTech` 8 槽权重全为 1，故与加权口径等价）；② **HoldTick 贡献占比**（行「HoldTick 占比」）= `(T_HOLD + T_SHOLD) / T_TOTAL`，以一位小数百分比显示，描述列展开分子分母（如 `66.7%` 对应 `16 / 24`）。实现：`FumenStatisticsResult` 新增 `PlatinumScoreMax/HoldTickObjects/HoldTickShare`（由 `FumenStatisticsCalculator` 统一计算，可供脚本/导出复用）；`StatisticsRow` 新增可选 `ValueText`（仅命令页值列改绑 `CountText`，百分比等非整数指标可显示，对象页不受影响）；三语资源 en/zh-Hans/ja + Designer 各新增 4 条（`FumenStatisticsPlatinumScore[Description]`、`FumenStatisticsHoldTickShare[Description]`）。实测：因本机有运行中的 `OngekiFumenEditor.exe` 与 VS 占用原输出目录，完整构建的复制阶段不可用（编译阶段 0 错误）；改在隔离沙箱（复制现有 Debug 输出并用 `obj` 新编译主程序集覆盖）运行验收探针 **ALL PASS**——数据层（`PlatinumScoreMax=48`、`HoldTickObjects=16`、`Share=0.666667`；空谱面 0/0）、ViewModel 行（9 行、`CountText="48"` 与 `"66.7%"`、描述含 `16`/`24`）、真实窗口渲染（TabControl/命令页 DataGrid 定位成功、值列绑定路径 = `CountText`、渲染后单元格实际文本 `48` 与 `66.7%`、描述列非空）。**Avalonia 树尚未移植**（其 `FumenStatisticsResult`/`FumenStatisticsDialogViewModel`/`FumenStatisticsDialogView` 均无对应字段与行），不改变同步点。 |
 
+
+## 本次 WPF 独立改动（2026-10-16）
+
+- WPF：Grid 复制粘贴与多选拖动吸附及性能。
+- Avalonia：本次未移植。
+- 不改变现有同步点。
+
+| 2026-10-18 | Grid PR 补充修复（WPF 侧，非同步） | #43 后续提交 | 独立无窗口回归 168 项通过，旧提交新增缓存回归 19 项失败 | Start 横移、坐标 Unit/Grid 修改时刷新相邻路径，先失效再通知绘制及贴轨监听者；时间范围不变时避免多余区间索引更新。保留官方零分配查询、默认插值器及 CurvePrecision 刷新逻辑。400 次纯 X 分量更新的时间索引通知为 0。Avalonia 尚未移植，本次未改其实现，不改变同步点 `8b2940785`。 |
+
+| 2026-10-18 | Tap/Hold 邻近换线（WPF 侧，非同步） | #43 后续提交 | PR 独立回归 198 项、本地换线 30 项通过 | 8 像素内换线，Hold 由头决定轨道，单拖头保持尾时间、同拖头尾保持时长；仅拖尾不换线，纯横移不触发时间吸附，撤销恢复轨道与坐标。候选查询及投影按拖动缓存，重复位置不重复写坐标。Avalonia 本次未处理，不改变同步点。 |
+
+## 2026-10-18：PR 排版整理
+
+- 按官方 `.editorconfig` 及相邻 WPF 代码整理缩进、初始化器和回调换行，功能不变。
+- Avalonia 代码本次未处理，不改变同步点。
+
+## 2026-10-21：WPF Grid 交互边界重构
+
+WPF 的选择拖动事务改由既有 ObjectInteractiveManager 管理，单个 Tap/Hold 与群体拖动共用快照和撤销。候选吸附归入 ObjectInteractiveActionBase / DefaultObjectInteractiveAction；剪贴板只调度纯 Grid 平移与交互吸附。LaneGeometry 和 LaneSwitchResolver 不引用 VM；文档停用取消放置通过 VM 生命周期，View 仅转发窗口失焦/拖入/卸载输入事件。保留 Start 曲线缓存、索引和原快捷键绑定。
+
+Avalonia 本次未移植上述改动；同步点仍为 `8b2940785e9b16b450e70fe248cfd16fa1d89040`，不改变同步基线。

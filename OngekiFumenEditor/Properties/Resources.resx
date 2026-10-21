@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -3489,4 +3489,5 @@
   <data name="FumenStatisticsCalculationFailed" xml:space="preserve">
     <value>Unable to calculate T_* values: {0}</value>
   </data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>The paste position exceeds the grid range or includes a time before the start of the chart.</value></data>
 </root>
