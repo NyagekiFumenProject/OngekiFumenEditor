@@ -118,7 +118,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private int gridDragUpdateDepth;
         private bool gridDragMetricsPending;
 
-        private void ExecuteGridDragUpdate(System.Action update)
+        internal void ExecuteGridDragUpdate(System.Action update)
         {
             gridDragUpdateDepth++;
             try

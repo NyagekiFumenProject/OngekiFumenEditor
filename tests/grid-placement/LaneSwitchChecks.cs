@@ -24,6 +24,7 @@ public static class LaneSwitchChecks
     {
         var type = typeof(FumenVisualEditorViewModel);
         var editor = (FumenVisualEditorViewModel)RuntimeHelpers.GetUninitializedObject(type);
+        type.GetProperty("InteractiveManager").SetValue(editor, new OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.ObjectInteractiveManager());
         var screen = new Screen();
         for (var parent = typeof(Screen); parent != null; parent = parent.BaseType)
             foreach (var field in parent.GetFields(F | BindingFlags.DeclaredOnly))
@@ -98,7 +99,7 @@ public static class LaneSwitchChecks
 
     static Point Point(FumenVisualEditorViewModel e, LaneStartBase lane, int t, double extraX = 0) => new(XGridCalculator.ConvertXGridToX(lane.CalulateXGrid(TGrid.FromTotalGrid(t)), e) + extraX, e.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(t)));
     static object Drag(OngekiTimelineObjectBase[] selected, OngekiTimelineObjectBase[] related)
-        => Activator.CreateInstance(typeof(FumenVisualEditorViewModel).GetNestedType("SelectionGridDrag", BindingFlags.NonPublic), F, null, new object[] { selected, related }, null);
+        => Activator.CreateInstance(typeof(FumenVisualEditorViewModel).Assembly.GetType("OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.SelectionGridDrag"), F, null, new object[] { selected, related }, null);
     static bool Move(object drag, long t, long x, FumenVisualEditorViewModel e) => (bool)drag.GetType().GetMethod("TryMoveInEditor", F).Invoke(drag, new object[] { t, x, e });
     public static void Run(Action<bool, string> check)
     {
@@ -124,6 +125,74 @@ public static class LaneSwitchChecks
 
     static void RunCore(Action<bool, string> check)
     {
+        foreach (var initiallyDirty in new[] { false, true })
+        foreach (var externalEdit in new[] { false, true })
+        {
+            var e = Editor();
+            var lane = Lane(e, -4, -4);
+            var tap = Tap(e, lane);
+            var other = new Tap { TGrid = TGrid.FromTotalGrid(1000), XGrid = new XGrid(2) };
+            e.Fumen.AddObject(other);
+            e.IsDirty = initiallyDirty;
+            var action = e.InteractiveManager.GetInteractive(tap);
+            var from = Point(e, lane, 173);
+            action.OnDragStart(tap, from, e);
+            action.OnDragMove(tap, Point(e, lane, 960), e);
+            e.IsDirty = true;
+            if (externalEdit)
+                other.XGrid = new XGrid(3);
+            e.CancelPlacementTools();
+            check(tap.TGrid.TotalGrid == 173 && !e.InteractiveManager.IsSelectionDragging,
+                "取消恢复原位置并释放事务");
+            check(e.IsDirty == (initiallyDirty || externalEdit), "取消恢复原脏状态且保留外来编辑");
+            check(e.UndoRedoManager.UndoActionCount == 0, "取消不增加撤销动作");
+            other.XGrid = new XGrid(4);
+            e.IsDirty = true;
+            e.CancelPlacementTools();
+            check(e.IsDirty, "无事务时取消不清除外来编辑脏状态");
+        }
+
+        foreach (var useGroup in new[] { false, true })
+        {
+            var e = Editor();
+            var lane = Lane(e, 4, 4);
+            var tap = new Tap { TGrid = TGrid.FromTotalGrid(173), XGrid = new XGrid(-4) };
+            var hold = new Hold { TGrid = TGrid.FromTotalGrid(173), XGrid = new XGrid(-4) };
+            hold.SetHoldEnd(new HoldEnd { TGrid = TGrid.FromTotalGrid(823) });
+            e.Fumen.AddObject(tap);
+            e.Fumen.AddObject(hold);
+            if (useGroup)
+            {
+                var drag = Drag(new OngekiTimelineObjectBase[] { tap, hold }, new OngekiTimelineObjectBase[] { tap, hold, hold.HoldEnd });
+                check(Move(drag, 0, 8 * XGrid.DEFAULT_RES_X, e), "未附轨群体可拖至邻轨");
+                check(tap.ReferenceLaneStart == lane && hold.ReferenceLaneStart == lane, "未附轨群体自动附着目标轨");
+            }
+            else
+            {
+                foreach (var obj in new OngekiTimelineObjectBase[] { tap, hold })
+                {
+                    var action = e.InteractiveManager.GetInteractive(obj);
+                    var from = new Point(XGridCalculator.ConvertXGridToX(new XGrid(-4), e), e.ConvertTGridToY_DesignMode(obj.TGrid));
+                    action.OnDragStart(obj, from, e);
+                    action.OnDragEnd(obj, Point(e, lane, 173), e);
+                    check(((ILaneDockable)obj).ReferenceLaneStart == lane, "未附轨单拖自动附着目标轨");
+                }
+            }
+            check(hold.HoldEnd.XGrid == lane.CalulateXGrid(hold.HoldEnd.TGrid), "初次附轨后Hold尾投影至目标轨");
+        }
+        {
+            var e = Editor();
+            var shortLane = Lane(e, 4, 4, 400);
+            var hold = new Hold { TGrid = TGrid.FromTotalGrid(173), XGrid = new XGrid(-4) };
+            hold.SetHoldEnd(new HoldEnd { TGrid = TGrid.FromTotalGrid(823) });
+            e.Fumen.AddObject(hold);
+            var action = e.InteractiveManager.GetInteractive(hold);
+            action.OnDragStart(hold, new Point(XGridCalculator.ConvertXGridToX(hold.XGrid, e), e.ConvertTGridToY_DesignMode(hold.TGrid)), e);
+            action.OnDragEnd(hold, Point(e, shortLane, 173), e);
+            check(hold.ReferenceLaneStart == null && hold.HoldEnd.TGrid.TotalGrid == 823,
+                "未附轨Hold不能附着未覆盖完整头尾的目标轨");
+        }
+
         foreach (var distance in new[]
         {
             9d,
@@ -144,12 +213,14 @@ public static class LaneSwitchChecks
             var a = Lane(e, -4, -4);
             var b = Lane(e, 4, 8);
             var h = Hold(e, a);
-            var action = new DockableObjectInteractiveAction();
+            var action = e.InteractiveManager.GetInteractive(h);
             var from = Point(e, a, 173);
             var to = Point(e, b, 173);
             action.OnDragStart(h, from, e);
+            check(e.InteractiveManager.IsSelectionDragging, "单个Hold复用管理器的选择拖动事务");
             action.OnDragMove(h, to, e);
             action.OnDragEnd(h, to, e);
+            check(!e.InteractiveManager.IsSelectionDragging, "单拖结束释放管理器事务");
             check(h.ReferenceLaneStart == b && h.HoldEnd.ReferenceLaneStart == b, "只拖 Hold 头换整条所属轨");
             check(h.TGrid.TotalGrid == 173 && h.HoldEnd.TGrid.TotalGrid == 823, "只横拖头时头尾 TGrid 均不变");
             check(h.HoldEnd.XGrid == b.CalulateXGrid(h.HoldEnd.TGrid), "未选尾横向贴新轨");

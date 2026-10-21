@@ -12,7 +12,7 @@ public static class SelectionGridDragChecks
 {
     private sealed class SelectionGridDrag
     {
-        private static readonly Type DragType = typeof(FumenVisualEditorViewModel).GetNestedType("SelectionGridDrag", BindingFlags.NonPublic);
+        private static readonly Type DragType = typeof(FumenVisualEditorViewModel).Assembly.GetType("OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.SelectionGridDrag");
         private const BindingFlags Members = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
         private readonly object instance;
         public SelectionGridDrag(IEnumerable<OngekiTimelineObjectBase> selected, IEnumerable<OngekiTimelineObjectBase> related)

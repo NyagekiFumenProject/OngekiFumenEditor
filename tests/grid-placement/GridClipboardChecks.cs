@@ -61,7 +61,7 @@ public static class GridClipboardChecks
             Check(snappedTarget.TotalGrid == expectedTick, "吸附Y回转Grid仍精确落线");
             var snapA = Point(100, -100);
             var snapB = Point(1733, 300);
-            Check(GridClipboardGeometry.Place(new[] { snapA, snapB }, XGrid.Zero, snappedTarget, PasteOption.None), "实际节奏线目标可整组粘贴");
+            Check(GridClipboardGeometry.Place(new[] { snapA, snapB }, XGrid.Zero, snappedTarget, OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "实际节奏线目标可整组粘贴");
             Check(snapA.TGrid.TotalGrid == expectedTick && snapB.TGrid.TotalGrid - snapA.TGrid.TotalGrid == 1633, "参考点落线且非节奏线原始Grid差不变");
             Check(snapB.XGrid.TotalGrid - snapA.XGrid.TotalGrid == 400, "跨变更区域横向Grid差不变");
         }
@@ -86,7 +86,7 @@ public static class GridClipboardChecks
             meter,
             b
         };
-        Check(GridClipboardGeometry.Place(group, XGrid.FromTotalGrid(-200000), TGrid.FromTotalGrid(20000), PasteOption.None), "跨BPM拍号平移成功");
+        Check(GridClipboardGeometry.Place(group, XGrid.FromTotalGrid(-200000), TGrid.FromTotalGrid(20000), OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "跨BPM拍号平移成功");
         Check(b.TGrid.TotalGrid - a.TGrid.TotalGrid == 1600 && bpm.TGrid.TotalGrid - a.TGrid.TotalGrid == 400 && meter.TGrid.TotalGrid - a.TGrid.TotalGrid == 800, "跨BPM拍号保留原始时间偏移");
         Check(b.XGrid.TotalGrid - a.XGrid.TotalGrid == 400 && a.XGrid.TotalGrid < -24 * 4096, "负X跨显示边界保留横向偏移");
 
@@ -101,27 +101,27 @@ public static class GridClipboardChecks
             XGrid = XGrid.FromTotalGrid(900)
         });
         var cloned = (Hold)GridClipboardGeometry.Clone(hold);
-        Check(GridClipboardGeometry.Place(new[] { cloned }, XGrid.FromTotalGrid(250), TGrid.FromTotalGrid(500), PasteOption.None), "长Hold平移成功");
+        Check(GridClipboardGeometry.Place(new[] { cloned }, XGrid.FromTotalGrid(250), TGrid.FromTotalGrid(500), OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "长Hold平移成功");
         Check(cloned.EndTGrid.TotalGrid - cloned.TGrid.TotalGrid == 16778781, "长Hold长度保留");
         Check(cloned.HoldEnd.XGrid.TotalGrid - cloned.XGrid.TotalGrid == 1300, "长Hold尾点偏移保留");
         Check(hold.TGrid.TotalGrid == 100 && hold.EndTGrid.TotalGrid == 16778881, "克隆平移不影响原Hold");
 
         a = Point(100, 10);
         b = Point(300, 20);
-        Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(-1), PasteOption.None), "整组拒绝负时间");
+        Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(-1), OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "整组拒绝负时间");
         Check(a.TGrid.TotalGrid == 100 && b.TGrid.TotalGrid == 300 && a.XGrid.TotalGrid == 10, "负时间拒绝无部分修改");
-        Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(int.MaxValue), PasteOption.None), "整组拒绝时间溢出");
+        Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(int.MaxValue), OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "整组拒绝时间溢出");
         Check(a.TGrid.TotalGrid == 100 && b.TGrid.TotalGrid == 300, "时间溢出拒绝无部分修改");
-        Check(GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(1), PasteOption.None), "向前负偏移可成功");
+        Check(GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(1), OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "向前负偏移可成功");
         Check(a.TGrid.TotalGrid == 1 && b.TGrid.TotalGrid == 201, "向前移动保留时间间隔");
 
         a = Point(100, 0);
         b = Point(300, 1000);
-        Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.FromTotalGrid(int.MaxValue), TGrid.Zero, PasteOption.None), "整组拒绝X平移溢出");
+        Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.FromTotalGrid(int.MaxValue), TGrid.Zero, OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None), "整组拒绝X平移溢出");
         Check(a.TGrid.TotalGrid == 100 && b.XGrid.TotalGrid == 1000, "X平移溢出无部分修改");
 
         a = Point(100, int.MinValue);
-        Check(!GridClipboardGeometry.Place(new[] { a }, XGrid.Zero, TGrid.Zero, PasteOption.XGridZeroMirror), "镜像int最小X拒绝溢出");
+        Check(!GridClipboardGeometry.Place(new[] { a }, XGrid.Zero, TGrid.Zero, OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.XGridZeroMirror), "镜像int最小X拒绝溢出");
         Check(a.XGrid.TotalGrid == int.MinValue && a.TGrid.TotalGrid == 100, "X溢出拒绝无部分修改");
         foreach (var left in new[]
         {
@@ -138,7 +138,7 @@ public static class GridClipboardChecks
             };
             var oddAnchor = GridClipboardGeometry.ReferencePoint(oddPair);
             Check(GridClipboardGeometry.Place(oddPair, oddAnchor.x, oddAnchor.t,
-                PasteOption.SelectedRangeCenterXGridMirror), "奇数宽范围可原地镜像");
+                OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.SelectedRangeCenterXGridMirror), "奇数宽范围可原地镜像");
             Check(oddLeft.XGrid.TotalGrid == left + 1 && oddRight.XGrid.TotalGrid == left,
                 "奇数宽正负X镜像精确交换边界，避免圆整中心偏移");
         }

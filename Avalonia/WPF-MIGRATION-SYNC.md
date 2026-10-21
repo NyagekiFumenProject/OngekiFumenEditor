@@ -137,3 +137,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 - 按官方 `.editorconfig` 及相邻 WPF 代码整理缩进、初始化器和回调换行，功能不变。
 - Avalonia 代码本次未处理，不改变同步点。
+
+## 2026-10-21：WPF Grid 交互边界重构
+
+WPF 的选择拖动事务改由既有 ObjectInteractiveManager 管理，单个 Tap/Hold 与群体拖动共用快照和撤销。候选吸附归入 ObjectInteractiveActionBase / DefaultObjectInteractiveAction；剪贴板只调度纯 Grid 平移与交互吸附。LaneGeometry 和 LaneSwitchResolver 不引用 VM；文档停用取消放置通过 VM 生命周期，View 仅转发窗口失焦/拖入/卸载输入事件。保留 Start 曲线缓存、索引和原快捷键绑定。
+
+Avalonia 本次未移植上述改动；同步点仍为 `8b2940785e9b16b450e70fe248cfd16fa1d89040`，不改变同步基线。

@@ -1170,7 +1170,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         // 模式切换、工具箱拖放和文档失焦共用同一取消入口。
         public void CancelPlacementTools()
         {
-            if (selectionGridDrag is not null)
+            if (InteractiveManager.IsSelectionDragging)
             {
                 EndSelectionGridDrag(true);
                 isSelectRangeDragging = false;
@@ -1184,7 +1184,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
             CurrentCursorPosition = null;
-            if (selectionGridDrag is not null)
+            if (InteractiveManager.IsSelectionDragging)
             {
                 EndSelectionGridDrag();
                 isSelectRangeDragging = false;
@@ -1230,7 +1230,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         {
                             var cp = pos;
                             cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
-                            if (selectionGridDrag is not null)
+                            if (InteractiveManager.IsSelectionDragging)
                             {
                                 MoveSelectionGridDrag(cp);
                                 EndSelectionGridDrag();
@@ -1556,7 +1556,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
                         if (!r)
                             BeginSelectionGridDrag(mouseDownHitObjectPosition ?? cp);
-                        if (selectionGridDrag is not null)
+                        if (InteractiveManager.IsSelectionDragging)
                             MoveSelectionGridDrag(cp);
                         else
                             SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));

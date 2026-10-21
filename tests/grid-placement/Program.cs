@@ -9,6 +9,12 @@ internal static class Program
         {
             OngekiFumenEditor.Properties.EditorGlobalSetting.Default.SettingsSaving += (_, e) => e.Cancel = true;
             var count = GridClipboardChecks.Run();
+            ArchitectureChecks.Run((condition, name) =>
+            {
+                if (!condition)
+                    throw new InvalidOperationException(name);
+                count++;
+            });
             var switchFailures = new System.Collections.Generic.List<string>();
             LaneSwitchChecks.Run((condition, name) =>
             {

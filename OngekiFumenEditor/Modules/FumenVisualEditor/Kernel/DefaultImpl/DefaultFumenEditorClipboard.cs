@@ -85,8 +85,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     return Task.CompletedTask;
             }
 
-            if (!GridClipboardGeometry.Place(copies, targetX, targetT, pasteOption) ||
-                (targetEditor.Setting.AdjustPastedObjects && !GridClipboardGeometry.AdjustToGrid(copies, targetEditor)))
+            if (!GridClipboardGeometry.Place(copies, targetX, targetT, (GridPlacementOption)pasteOption) ||
+                (targetEditor.Setting.AdjustPastedObjects && !targetEditor.InteractiveManager.AdjustPastedObjects(copies, targetEditor)))
             {
                 targetEditor.ToastNotify(OngekiFumenEditor.Properties.Resources.PasteInvalidGridPosition);
                 return Task.CompletedTask;

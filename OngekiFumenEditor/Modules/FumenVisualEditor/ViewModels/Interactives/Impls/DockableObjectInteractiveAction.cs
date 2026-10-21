@@ -18,93 +18,39 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         protected override bool IsXGridSnappedToLaneThisMove => isXGridSnappedToLaneThisMove;
 
-        private sealed class NoteState
-        {
-            internal ILaneDockable Note;
-            internal TGrid Time;
-            internal XGrid X;
-            internal LaneStartBase Lane;
-            internal HoldEnd Tail;
-            internal TGrid TailTime;
-            internal XGrid TailX;
-            internal NoteState(ILaneDockable note)
-            {
-                Note = note;
-                Time = note.TGrid.CopyNew();
-                X = note.XGrid.CopyNew();
-                Lane = note.ReferenceLaneStart;
-                Tail = (note as Hold)?.HoldEnd;
-                TailTime = Tail?.TGrid.CopyNew();
-                TailX = Tail?.XGrid.CopyNew();
-            }
-            internal void Apply()
-            {
-                Note.TGrid = Time.CopyNew();
-                if (Tail != null)
-                    Tail.TGrid = TailTime.CopyNew();
-                if (!ReferenceEquals(Note.ReferenceLaneStart, Lane))
-                    Note.ReferenceLaneStart = Lane;
-                Note.XGrid = X.CopyNew();
-                if (Tail != null)
-                    Tail.XGrid = TailX.CopyNew();
-            }
-            internal bool SameAs(NoteState other) => ReferenceEquals(Lane, other.Lane) && Time == other.Time && X == other.X && TailTime == other.TailTime && TailX == other.TailX;
-        }
-        private sealed class NoteDrag
-        {
-            internal NoteState Before;
-            internal Point Mouse;
-            internal Point Canvas;
-            internal LaneSwitchResolver Resolver;
-        }
-        private readonly Dictionary<OngekiObjectBase, NoteDrag> noteDrags = new();
+        // 候选时间可跨越旧轨道边界；完整 Hold 覆盖与最终 X 在整组附轨预检中解析。
+        // 不能对尚未写入模型的候选坐标使用旧 ReferenceLane/TGrid 夹取。
+        protected override double? AdjustCandidateY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
+            => base.CheckAndAdjustY(obj, y, editor);
+
+        protected override double? AdjustCandidateX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
+            => base.CheckAndAdjustX(obj, x, editor);
 
         public override void OnDragStart(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
-            if (obj is not Tap && obj is not Hold)
-            {
+            if (obj is Tap or Hold or HoldEnd)
+                editor.InteractiveManager.BeginSelectionDrag(editor, point, new[] { (OngekiTimelineObjectBase)obj });
+            else
                 base.OnDragStart(obj, point, editor);
-                return;
-            }
-
-            var note = (ILaneDockable)obj;
-            noteDrags[obj] = new NoteDrag
-            {
-                Before = new NoteState(note),
-                Mouse = point,
-                Canvas = new Point(XGridCalculator.ConvertXGridToX(note.XGrid, editor), editor.ConvertTGridToY_DesignMode(note.TGrid)),
-                Resolver = new LaneSwitchResolver(editor)
-            };
         }
+
         public override void OnDragMove(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
-            if (!noteDrags.TryGetValue(obj, out var drag))
-            {
+            if (obj is Tap or Hold or HoldEnd)
+                editor.InteractiveManager.MoveSelectionDrag(editor, point);
+            else
                 base.OnDragMove(obj, point, editor);
-                return;
-            }
-
-            OnMoveCanvas(obj, new Point(drag.Canvas.X + point.X - drag.Mouse.X, Math.Max(0, Math.Min(editor.TotalDurationHeight, drag.Canvas.Y + point.Y - drag.Mouse.Y))), editor);
         }
+
         public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
-            if (!noteDrags.TryGetValue(obj, out var drag))
+            if (obj is Tap or Hold or HoldEnd)
             {
+                editor.InteractiveManager.MoveSelectionDrag(editor, point);
+                editor.InteractiveManager.EndSelectionDrag(editor);
+            }
+            else
                 base.OnDragEnd(obj, point, editor);
-                return;
-            }
-
-            try
-            {
-                OnDragMove(obj, point, editor);
-                var after = new NoteState((ILaneDockable)obj);
-                if (!drag.Before.SameAs(after))
-                    editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects, after.Apply, drag.Before.Apply));
-            }
-            finally
-            {
-                noteDrags.Remove(obj);
-            }
         }
 
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
@@ -118,18 +64,17 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             // Tap/Hold 头靠近有效目标轨才换线；纯横移保留原时间。
             if (obj is ILaneDockable attached && attached.ReferenceLaneStart is LaneStartBase originalLane)
             {
-                noteDrags.TryGetValue(obj, out var drag);
-                var originalY = drag?.Canvas.Y ?? editor.ConvertTGridToY_DesignMode(attached.TGrid);
+                var originalY = editor.ConvertTGridToY_DesignMode(attached.TGrid);
                 var pureHorizontal = Math.Abs(relativePoint.Y - originalY) < .0001;
                 var basic = new DefaultObjectInteractiveAction();
-                var attachedT = pureHorizontal ? (drag?.Before.Time ?? attached.TGrid).CopyNew() :
+                var attachedT = pureHorizontal ? attached.TGrid.CopyNew() :
                     basic.CheckAndAdjustY(attached, relativePoint.Y, editor) is double attachedY ? editor.ConvertYToTGrid_DesignMode(attachedY) : null;
                 if (attachedT == null)
                     return;
                 var targetX = XGridCalculator.ConvertXToXGrid(relativePoint.X, editor);
-                var resolver = drag?.Resolver ?? new LaneSwitchResolver(editor);
+                var resolver = editor.InteractiveManager.CreateLaneSwitchResolver(editor);
                 var lane = originalLane;
-                var originalX = drag?.Canvas.X ?? XGridCalculator.ConvertXGridToX(attached.XGrid, editor);
+                var originalX = XGridCalculator.ConvertXGridToX(attached.XGrid, editor);
                 var tail = (obj as Hold)?.HoldEnd;
                 if (tail != null && attachedT > tail.TGrid)
                     return;
@@ -227,94 +172,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             => CreateOriginalLaneProjector(lane)(time, target);
 
         // 每个动作按轨道建一次索引；有效性仅检查一次，同 T 插值结果复用。
-        internal static Func<TGrid, XGrid, XGrid> CreateOriginalLaneProjector(LaneStartBase lane)
-        {
-            var children = lane.Children.ToArray();
-            var valid = lane.IsPathVaild();
-            var horizontalRanges = new Dictionary<int, List<(int min, int max)>>();
-            foreach (var child in children)
-            {
-                if (child.PrevObject is not OngekiMovableObjectBase previous || previous.TGrid.TotalGrid != child.TGrid.TotalGrid)
-                    continue;
-                var t = child.TGrid.TotalGrid;
-                var min = Math.Min(previous.XGrid.TotalGrid, child.XGrid.TotalGrid);
-                var max = Math.Max(previous.XGrid.TotalGrid, child.XGrid.TotalGrid);
-                var horizontal = true;
-                foreach (var control in child.PathControls)
-                {
-                    if (control.TGrid.TotalGrid != t)
-                    {
-                        horizontal = false;
-                        break;
-                    }
-
-                    min = Math.Min(min, control.XGrid.TotalGrid);
-                    max = Math.Max(max, control.XGrid.TotalGrid);
-                }
-
-                if (!horizontal)
-                    continue;
-                if (child.PathControls.Count > 0)
-                {
-                    var path = child.GetConnectionPaths().Select(p => p.pos.X).ToArray();
-                    if (path.Length > 0)
-                    {
-                        min = (int)Math.Ceiling(path.Min());
-                        max = (int)Math.Floor(path.Max());
-                    }
-                }
-
-                if (!horizontalRanges.TryGetValue(t, out var ranges))
-                    horizontalRanges[t] = ranges = new();
-                ranges.Add((min, max));
-            }
-
-            var interpolated = new Dictionary<int, XGrid>();
-            return (time, target) =>
-            {
-                if (horizontalRanges.TryGetValue(time.TotalGrid, out var ranges))
-                {
-                    int closest = target.TotalGrid;
-                    long distance = long.MaxValue;
-                    foreach (var range in ranges)
-                    {
-                        var x = Math.Max(range.min, Math.Min(range.max, target.TotalGrid));
-                        var delta = Math.Abs((long)x - target.TotalGrid);
-                        if (delta >= distance)
-                            continue;
-                        distance = delta;
-                        closest = x;
-                    }
-
-                    return XGrid.FromTotalGrid(closest);
-                }
-
-                if (interpolated.TryGetValue(time.TotalGrid, out var cached))
-                    return cached;
-                XGrid result = null;
-                if (!valid)
-                    result = lane.CalulateXGrid(time);
-                else if (time >= lane.TGrid && children.Length > 0)
-                {
-                    var lo = 0;
-                    var hi = children.Length;
-                    while (lo < hi)
-                    {
-                        var mid = lo + (hi - lo) / 2;
-                        if (children[mid].TGrid < time)
-                            lo = mid + 1;
-                        else
-                            hi = mid;
-                    }
-
-                    if (lo < children.Length)
-                        result = children[lo].CalulateXGrid(time);
-                }
-
-                interpolated[time.TotalGrid] = result;
-                return result;
-            };
-        }
+        internal static Func<TGrid, XGrid, XGrid> CreateOriginalLaneProjector(LaneStartBase lane) => LaneGeometry.CreateProjector(lane);
 
         public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {
