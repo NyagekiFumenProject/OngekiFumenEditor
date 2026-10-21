@@ -169,3 +169,8 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`BulletHitRangeDrawingTarget`/`ProjectileBatchDrawTargetBase` 每帧缓存玩家位置委托，消除每个子弹/铃铛 64 B 的委托分配；`BeamHalfWidthPixels` 改为直接调用 `ConvertXGridToX`，去掉每个 Beam 的 lambda/闭包；`PlayerLocationRecorder.GetLocationXUnit` 改用 `SortableCollection` 索引器，消除 `ElementAtOrDefault` 的 80 B/op 枚举器分配。
 - 基准（Release，2,000,000 次）：`Resolve`（FixField/Player）、`GetLocationXUnit`、Beam 半宽均为 **0 B/op**；优化前分别为 64、144（含 recorder 80）、80、0 B/op（Beam 的闭包被 JIT 栈分配，但委托调用未内联，耗时约 110 ns/op）。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-22：判定范围轮廓参数命名（WPF）
+
+- WPF：`HitRangeGeometry.AddOutline` 的 `relative` 参数改为 `dashed`，调用点使用命名参数，表达实际语义（随机包络虚线 / 固定落点实线）。
+- Avalonia：本次未移植，不改变现有同步点。

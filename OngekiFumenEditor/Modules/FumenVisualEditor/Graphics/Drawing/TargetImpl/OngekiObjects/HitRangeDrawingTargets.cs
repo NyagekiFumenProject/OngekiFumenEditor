@@ -80,9 +80,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             }
         }
 
-        public static void AddOutline(IList<LineVertex> output, float left, float right, float y, Vector4 color, bool relative)
+        public static void AddOutline(IList<LineVertex> output, float left, float right, float y, Vector4 color, bool dashed)
         {
-            var dash = relative ? new VertexDash(4, 3) : VertexDash.Solider;
+            var dash = dashed ? new VertexDash(4, 3) : VertexDash.Solider;
             var a = new Vector2(left, y - 4);
             var b = new Vector2(right, y - 4);
             var c = new Vector2(right, y + 4);
@@ -159,10 +159,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 {
                     var envelopeLeft = (float)XGridCalculator.ConvertXGridToX(resolved.EnvelopeMinXUnit - half, target.Editor);
                     var envelopeRight = (float)XGridCalculator.ConvertXGridToX(resolved.EnvelopeMaxXUnit + half, target.Editor);
-                    HitRangeGeometry.AddOutline(lines, envelopeLeft, envelopeRight, y, edge, true);
+                    HitRangeGeometry.AddOutline(lines, envelopeLeft, envelopeRight, y, edge, dashed: true);
                 }
                 else
-                    HitRangeGeometry.AddOutline(lines, left, right, y, edge, false);
+                    HitRangeGeometry.AddOutline(lines, left, right, y, edge, dashed: false);
             }
 
             if (polygons.Count > 0)
