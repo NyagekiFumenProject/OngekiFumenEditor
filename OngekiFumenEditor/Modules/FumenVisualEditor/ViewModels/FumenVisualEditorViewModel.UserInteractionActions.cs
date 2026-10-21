@@ -1729,6 +1729,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_Drop(ActionExecutionContext e)
         {
+            CancelBatchProjectilePlacement();
+
             if (!IsDesignMode)
             {
                 Toast.ShowMessage(Resources.EditorMustBeDesignMode);

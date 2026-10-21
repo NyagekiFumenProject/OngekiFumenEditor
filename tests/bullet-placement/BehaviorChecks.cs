@@ -159,6 +159,7 @@ internal static class BehaviorChecks
         manager.ToggleBellPlacementCommand.Execute(a);
         using (var second = CheckSupport.CreateEditor())
         {
+            IoC.Get<IEditorDocumentManager>().NotifyActivate(second);
             check(editor.RequestBatchPlaceProjectileInfo is null && manager.RequestBatchPlaceProjectileInfo is null,
                 "switching active editor cancels old request and manager selection");
         }
@@ -366,9 +367,21 @@ internal static class BehaviorChecks
         new OngekiObjectDropParam(() => new Bell { ReferenceBulletPallete = pallete }).Drop(editor, new Point(450, 300));
         check(editor.Fumen.Bells.Count == 1 && !editor.IsRequestPlaceBatchProjectilePreview, "legacy Bell drop remains single-shot");
         editor.ToggleBatchProjectilePlacement(pallete, false);
+        editor.Grid_Drop(new ActionExecutionContext { EventArgs = DropEvent() });
+        check(!editor.IsRequestPlaceBatchProjectilePreview, "Grid_Drop cancels placement before handling another tool drop");
         editor.Dispose();
         check(!editor.IsRequestPlaceBatchProjectilePreview && !editor.CanRequestBatchProjectilePlacement, "editor disposal cancels session permanently");
     }
 
     internal static (double T, double X) Position(OngekiMovableObjectBase obj) => (obj.TGrid.TotalUnit, obj.XGrid.TotalUnit);
+
+    private static DragEventArgs DropEvent()
+    {
+        // WPF does not expose a public DragEventArgs constructor; no payload is needed to exercise cancellation.
+        var args = (DragEventArgs)Activator.CreateInstance(typeof(DragEventArgs),
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic, null,
+            new object[] { new DataObject(), DragDropKeyStates.None, DragDropEffects.None, new Grid(), new Point(0, 0) }, null)!;
+        args.RoutedEvent = DragDrop.DropEvent;
+        return args;
+    }
 }

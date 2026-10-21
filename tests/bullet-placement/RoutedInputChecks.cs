@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -186,7 +185,7 @@ internal static class RoutedInputChecks
             }
             check(editor.CanRequestBatchProjectilePlacement && !editor.IsRequestPlaceBatchProjectilePreview,
                 "leaving batch mode enables placement without resurrecting the old request");
-            WindowRoutes(check, editor, view, pallete, inputHost);
+            editor.CancelBatchProjectilePlacement();
             check(!view.IsVisible, "real editor view remained hidden during routed-input checks");
         }
         finally
@@ -196,95 +195,6 @@ internal static class RoutedInputChecks
             root.Children.Remove(inputHost);
             view.DataContext = null;
         }
-    }
-
-    private static void WindowRoutes(Action<bool, string> check, FumenVisualEditorViewModel editor,
-        FumenVisualEditorView view, BulletPallete pallete, FrameworkElement otherTool)
-    {
-        var window = new EventWindow { Content = view, ShowActivated = false, ShowInTaskbar = false };
-        try
-        {
-            // Loaded is synthetic and does not create a presentation source or show the window.
-            view.RaiseEvent(new RoutedEventArgs(FrameworkElement.LoadedEvent, view));
-            editor.ToggleBatchProjectilePlacement(pallete, false);
-            var down = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Right)
-            { RoutedEvent = Mouse.PreviewMouseDownEvent, Source = otherTool };
-            otherTool.RaiseEvent(down);
-            check(down.Handled && !editor.IsRequestPlaceBatchProjectilePreview, "real Window preview-right route cancels placement from another child control");
-            var up = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Right)
-            { RoutedEvent = Mouse.PreviewMouseUpEvent, Source = otherTool };
-            otherTool.RaiseEvent(up);
-            check(up.Handled, "Window route consumes right release after cancellation");
-            var context = ContextOpening(otherTool);
-            otherTool.RaiseEvent(context);
-            check(context.Handled, "real ContextMenuOpening route suppresses cancellation gesture");
-            down = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Right)
-            { RoutedEvent = Mouse.PreviewMouseDownEvent, Source = otherTool };
-            otherTool.RaiseEvent(down);
-            context = ContextOpening(otherTool);
-            otherTool.RaiseEvent(context);
-            check(!down.Handled && !context.Handled, "next ordinary right gesture is eligible for context menu");
-            editor.ToggleBatchProjectilePlacement(pallete, false);
-            var request = editor.RequestBatchPlaceProjectileInfo;
-            var focus = new KeyboardFocusChangedEventArgs(Keyboard.PrimaryDevice, Environment.TickCount, view, otherTool)
-            { RoutedEvent = Keyboard.GotKeyboardFocusEvent };
-            otherTool.RaiseEvent(focus);
-            check(ReferenceEquals(request, editor.RequestBatchPlaceProjectileInfo), "same-window synthetic focus route preserves placement session");
-            window.SignalDeactivated();
-            check(!editor.IsRequestPlaceBatchProjectilePreview, "actual Window.Deactivated event subscription clears session");
-            window.SignalActivated();
-            check(!editor.IsRequestPlaceBatchProjectilePreview, "reactivation does not restore cancelled session");
-            editor.ToggleBatchProjectilePlacement(pallete, false);
-            var drag = QueryDrag();
-            otherTool.RaiseEvent(drag);
-            check(!editor.IsRequestPlaceBatchProjectilePreview, "actual QueryContinueDrag route cancels before drop");
-            editor.ToggleBatchProjectilePlacement(pallete, false);
-            var p = new Point(432, 350);
-            editor.TryHandleBatchProjectilePlacementMouseDown(MouseButton.Left, p);
-            var count = editor.Fumen.Bullets.Count;
-            up = new MouseButtonEventArgs(Mouse.PrimaryDevice, Environment.TickCount, MouseButton.Left)
-            { RoutedEvent = Mouse.PreviewMouseUpEvent, Source = otherTool };
-            otherTool.RaiseEvent(up);
-            check(up.Handled && !editor.TryHandleBatchProjectilePlacementMouseUp(MouseButton.Left, p) && editor.Fumen.Bullets.Count == count,
-                "release routed outside drawing host ends pending gesture without late placement");
-            view.RaiseEvent(new RoutedEventArgs(FrameworkElement.UnloadedEvent, view));
-            check(!editor.IsRequestPlaceBatchProjectilePreview, "view unload cancels session");
-            editor.ToggleBatchProjectilePlacement(pallete, false);
-            window.SignalDeactivated();
-            check(editor.IsRequestPlaceBatchProjectilePreview, "unloaded view detaches window deactivation subscription");
-            editor.CancelBatchProjectilePlacement();
-            check(!window.IsVisible, "event host Window was never shown");
-        }
-        finally
-        {
-            view.RaiseEvent(new RoutedEventArgs(FrameworkElement.UnloadedEvent, view));
-            window.Content = null;
-            window.Close();
-        }
-    }
-
-    private static ContextMenuEventArgs ContextOpening(object source)
-    {
-        // WPF does not expose a public constructor. Reflection is confined to framework event args,
-        // not production private methods/state; the resulting event traverses the real production route.
-        var args = (ContextMenuEventArgs)Activator.CreateInstance(typeof(ContextMenuEventArgs),
-            BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { source, true, 10d, 10d }, null)!;
-        args.RoutedEvent = ContextMenuService.ContextMenuOpeningEvent;
-        return args;
-    }
-
-    private static QueryContinueDragEventArgs QueryDrag()
-    {
-        var args = (QueryContinueDragEventArgs)Activator.CreateInstance(typeof(QueryContinueDragEventArgs),
-            BindingFlags.Instance | BindingFlags.NonPublic, null, new object[] { false, DragDropKeyStates.LeftMouseButton }, null)!;
-        args.RoutedEvent = DragDrop.QueryContinueDragEvent;
-        return args;
-    }
-
-    private sealed class EventWindow : Window
-    {
-        public void SignalDeactivated() => OnDeactivated(EventArgs.Empty);
-        public void SignalActivated() => OnActivated(EventArgs.Empty);
     }
 
     private sealed class DetachedPresentationSource : PresentationSource

@@ -33,7 +33,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private bool batchPlacementPreviewVisible;
         private bool consumeBatchPlacementLeftMouseUp;
         private bool consumeBatchPlacementRightMouseUp;
-        private bool suppressBatchPlacementContextMenu;
+
+        private void OnPlacementActiveEditorChanged(FumenVisualEditorViewModel newEditor, FumenVisualEditorViewModel oldEditor)
+        {
+            if (!ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
+                CancelBatchProjectilePlacement();
+        }
 
         public IPlaceBatchProjectileInfo RequestBatchPlaceProjectileInfo => requestBatchPlaceProjectileInfo;
         public bool IsRequestPlaceBatchProjectilePreview => requestBatchPlaceProjectileInfo is not null;
@@ -214,13 +219,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         internal bool BeginBatchPlacementRightGesture()
         {
-            suppressBatchPlacementContextMenu = false;
             consumeBatchPlacementRightMouseUp = false;
             if (!IsRequestPlaceBatchProjectilePreview)
                 return false;
 
             consumeBatchPlacementRightMouseUp = true;
-            suppressBatchPlacementContextMenu = true;
             CancelBatchProjectilePlacement();
             return true;
         }
@@ -233,13 +236,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             return true;
         }
 
-        internal bool ConsumeBatchPlacementContextMenu()
-        {
-            var suppress = suppressBatchPlacementContextMenu;
-            suppressBatchPlacementContextMenu = false;
-            return suppress;
-        }
-
         public bool TryHandleBatchProjectilePlacementMouseDown(MouseButton button, Point viewportPoint)
         {
             if (button == MouseButton.Right)
@@ -247,7 +243,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (button != MouseButton.Left)
                 return false;
 
-            suppressBatchPlacementContextMenu = false;
             consumeBatchPlacementLeftMouseUp = false;
             batchPlacementGestureRequest = null;
             if (!IsRequestPlaceBatchProjectilePreview)

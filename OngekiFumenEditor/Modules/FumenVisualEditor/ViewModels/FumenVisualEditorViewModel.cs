@@ -208,6 +208,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UndoRedoManager = new DefaultEditorUndoManager(this);
 
             EditorGlobalSetting.Default.PropertyChanged += OnSettingPropertyChanged;
+            EditorManager.OnActivateEditorChanged += OnPlacementActiveEditorChanged;
             DisplayName = default;
 
             SelectionArea = new(this);
@@ -497,6 +498,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             CancelBatchProjectilePlacement();
+            EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
 
             var fumen = editorProjectData?.Fumen;
             if (fumen is not null)
