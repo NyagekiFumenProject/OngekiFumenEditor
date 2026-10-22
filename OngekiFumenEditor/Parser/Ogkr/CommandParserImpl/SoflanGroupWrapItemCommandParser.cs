@@ -1,15 +1,14 @@
-using OngekiFumenEditor.Base.OngekiObjects;
-using OngekiFumenEditor.Base;
-using System;
-using System.Collections.Generic;
+﻿using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using System.ComponentModel.Composition;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OngekiFumenEditor.Base.EditorObjects;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
+    /// <summary>
+    /// 旧格式 [SGWI] &lt;name&gt; &lt;id...&gt; 兼容解析。
+    /// 旧版 [SGC]/[SGF] 定义过的组（HasExplicitLayout）不会被 SGWI 重新挂载。
+    /// </summary>
     [Export(typeof(ICommandParser))]
     public class SoflanGroupWrapItemCommandParser : CommandParserBase
     {
@@ -17,24 +16,23 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
-            var groupName = args.GetData<string>(1);
-            var itemGroup = fumen.IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.OfType<SoflanGroupWrapItemGroup>().FirstOrDefault(x => x.DisplayName == groupName) ?? new SoflanGroupWrapItemGroup()
-            {
-                DisplayName = groupName
-            };
+            var tree = fumen.IndividualSoflanAreaMap.SoflanGroupTree;
+            var groupName = args.GetData<string>(1) ?? string.Empty;
+            var category = groupName == "default" || string.IsNullOrEmpty(groupName)
+                ? tree.Root
+                : tree.GetOrCreateCategory(new[] { groupName });
 
-            var arr = args.GetDataArray<int>().Skip(2);
-
-            foreach (var soflanGroupId in arr)
+            foreach (var soflanGroupId in args.GetDataArray<int>().Skip(2))
             {
-                var item = /*new SoflanGroupWrapItem(soflanGroupId)*/fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroupId, out _);
-                item.Parent?.Remove(item);
-                itemGroup.Add(item);
+                var group = tree.GetGroup(soflanGroupId) ?? tree.GetOrCreateGroup(soflanGroupId);
+                if (group.HasExplicitLayout)
+                    continue;
+
+                if (!group.IsDefault)
+                    tree.Move(group, category);
+                tree.MarkLayoutDefined(group);
             }
 
-            fumen.IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Add(itemGroup);
-
-            //nothing return
             return default;
         }
     }

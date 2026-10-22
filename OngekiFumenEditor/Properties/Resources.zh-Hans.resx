@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2374,7 +2374,7 @@
     <value>LaneBlockArea作用的墙壁轨道({0})和另一个墙壁轨道({1})错开</value>
   </data>
   <data name="NewItemGroup" xml:space="preserve">
-    <value>新建组层</value>
+    <value>新建变速组</value>
   </data>
   <data name="SoflanGroupMove" xml:space="preserve">
     <value>移动变速分组</value>
@@ -2394,11 +2394,8 @@
   <data name="SoflanGroupColumnSoflansTipText" xml:space="preserve">
     <value>选中后，右侧列表显示该组包含的变速点明细。</value>
   </data>
-  <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
-    <value>输入新变速组的名称，随后点击右侧按钮创建。</value>
-  </data>
   <data name="SoflanGroupCreateTipText" xml:space="preserve">
-    <value>用左侧输入框中的名称创建一个新的变速组。</value>
+    <value>创建新的变速组；名称可留空，默认使用「新的变速组」。</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>变速分组查看器</value>
@@ -3479,4 +3476,28 @@
   <data name="ShowBulletHitRanges" xml:space="preserve"><value>子弹判定范围</value></data>
   <data name="TipBeamHitRanges" xml:space="preserve"><value>编辑模式沿激光轨迹显示横向判定宽度。</value></data>
   <data name="TipBulletHitRanges" xml:space="preserve"><value>实心带表示本次预览落点；虚线表示完整随机范围。自机狙击使用已记录的玩家位置。</value></data>
+  <data name="SoflanGroupRename" xml:space="preserve"><value>重命名</value></data>
+  <data name="SoflanGroupNewCategory" xml:space="preserve"><value>新建组文件夹</value></data>
+  <data name="SoflanGroupDelete" xml:space="preserve"><value>删除</value></data>
+  <data name="SoflanGroupDeleteHasReferences" xml:space="preserve"><value>该变速组仍被 {0} 个对象引用，无法删除。</value></data>
+  <data name="SoflanGroupDeleteHasChildren" xml:space="preserve"><value>该文件夹下仍有内容，无法删除。</value></data>
+  <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>默认组（0）不能删除。</value></data>
+  <data name="SoflanGroupNameRequired" xml:space="preserve"><value>名称不能为空。</value></data>
+  <data name="SoflanGroupMoveToRoot" xml:space="preserve"><value>移动到根</value></data>
+  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>通用默认变速组</value></data>
+  <data name="SoflanGroupCategoryName" xml:space="preserve"><value>组文件夹</value></data>
+  <data name="SoflanGroupNameExists" xml:space="preserve"><value>已存在同名分组。</value></data>
+  <data name="SoflanGroupCreateCategoryTipText" xml:space="preserve"><value>创建仅用于组织变速组的文件夹；名称可留空，文件夹本身不绑定变速组。</value></data>
+  <data name="SoflanGroupRenameTipText" xml:space="preserve"><value>重命名当前选中的变速组或组文件夹。</value></data>
+  <data name="SoflanGroupDeleteTipText" xml:space="preserve"><value>删除当前选中的空变速组或空组文件夹（有引用或非空时不允许）。</value></data>
+  <data name="SoflanGroupMoveToRootTipText" xml:space="preserve"><value>把当前选中的节点移动到根目录。</value></data>
+  <data name="SoflanGroupDefaultNewGroupName" xml:space="preserve"><value>新的变速组</value></data>
+  <data name="SoflanGroupDefaultNewFolderName" xml:space="preserve"><value>新的组文件夹</value></data>
+  <data name="SoflanGroupDefaultGroupTipText" xml:space="preserve"><value>通用默认变速组（ID 0）：未被任何 Individual Soflan Area 覆盖的物件都归属于它，是谱面时间轴的兜底变速组；它始终存在，不能删除或拖动。</value></data>
+  <data name="SoflanGroupDesignCheckedTipText" xml:space="preserve"><value>已勾选：设计模式显示该组物件；组文件夹会同步应用到子项。</value></data>
+  <data name="SoflanGroupDesignUncheckedTipText" xml:space="preserve"><value>未勾选：设计模式隐藏该组物件；组文件夹会同步应用到子项。</value></data>
+  <data name="SoflanGroupPreviewCheckedTipText" xml:space="preserve"><value>已勾选：预览模式显示该组物件；组文件夹会同步应用到子项。</value></data>
+  <data name="SoflanGroupPreviewUncheckedTipText" xml:space="preserve"><value>未勾选：预览模式隐藏该组物件；组文件夹会同步应用到子项。</value></data>
+  <data name="SoflanGroupDrawCheckedTipText" xml:space="preserve"><value>已选中：画布上显示该变速组的变速线（同一时间只显示一个组）。</value></data>
+  <data name="SoflanGroupDrawUncheckedTipText" xml:space="preserve"><value>未选中：点击后改为显示该变速组的变速线（同一时间只显示一个组）。</value></data>
 </root>

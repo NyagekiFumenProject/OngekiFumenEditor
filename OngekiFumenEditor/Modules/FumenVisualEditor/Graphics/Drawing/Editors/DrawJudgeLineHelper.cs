@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Kernel.Graphics;
@@ -84,15 +84,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.Editors
             PrintSpeed(0, target.Editor.Fumen.SoflansMap.DefaultSoflanList, new(target.Editor.ViewWidth - 50, y - 10f), spdColor);
 
             //print specify soflan group speed
-            if (IoC.Get<IFumenSoflanGroupListViewer>().CurrentSoflansDisplaySoflanGroupWrapItem is SoflanGroupWrapItem item)
+            var drawnSoflanGroup = IoC.Get<IFumenSoflanGroupListViewer>().DrawnSoflanGroupId ?? 0;
+            if (drawnSoflanGroup != 0)
             {
-                var soflanGroup = item.SoflanGroupId;
-                if (soflanGroup != 0)
-                {
-                    var soflanList = target.Editor.Fumen.SoflansMap[item.SoflanGroupId];
-                    var color = IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(item.SoflanGroupId);
-                    PrintSpeed(item.SoflanGroupId, soflanList, new(target.Editor.ViewWidth - 100, y - 10f), color);
-                }
+                var soflanList = target.Editor.Fumen.SoflansMap[drawnSoflanGroup];
+                var color = IndividualSoflanAreaDrawingTarget.CalculateColorBySoflanGroup(drawnSoflanGroup);
+                PrintSpeed(drawnSoflanGroup, soflanList, new(target.Editor.ViewWidth - 100, y - 10f), color);
             }
         }
     }

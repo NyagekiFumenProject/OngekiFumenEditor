@@ -1,48 +1,25 @@
-<UserControl
+﻿<UserControl
     x:Class="OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Views.FumenSoflanGroupListViewerView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cal="http://caliburnmicro.com"
-    xmlns:converters="clr-namespace:OngekiFumenEditor.Modules.FumenVisualEditor.Converters"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:jas="clr-namespace:OngekiFumenEditor.UI.ListViewDragDropManager"
-    xmlns:local="clr-namespace:OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Views"
+    xmlns:cal="http://www.caliburnproject.org"
     xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ValueConverters"
+    xmlns:vm="clr-namespace:OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels"
     d:DesignHeight="300"
     d:DesignWidth="800"
+    xmlns:valueconverters="clr-namespace:OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ValueConverters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <Style x:Key="ItemContStyle" TargetType="ListViewItem">
-            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Style.Resources>
-                <LinearGradientBrush x:Key="MouseOverBrush" StartPoint="0.5, 0" EndPoint="0.5, 1">
-                    <GradientStop Offset="0" Color="#22000000" />
-                    <GradientStop Offset="0.4" Color="#44000000" />
-                    <GradientStop Offset="0.6" Color="#55000000" />
-                    <GradientStop Offset="0.9" Color="#33000000" />
-                    <GradientStop Offset="1" Color="#22000000" />
-                </LinearGradientBrush>
-            </Style.Resources>
-            <Style.Triggers>
-                <Trigger Property="jas:ListViewItemDragState.IsBeingDragged" Value="True">
-                    <Setter Property="FontWeight" Value="DemiBold" />
-                </Trigger>
-                <Trigger Property="jas:ListViewItemDragState.IsUnderDragCursor" Value="True">
-                    <Setter Property="Background" Value="{StaticResource MouseOverBrush}" />
-                </Trigger>
-            </Style.Triggers>
-        </Style>
-        <valueconverters:LevelToIndentConverter x:Key="LevelToIndentConverter" />
-        <SolidColorBrush x:Key="BlackBrush" Color="Black" />
-        <SolidColorBrush x:Key="GrayBrush1" Color="Gray" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <valueconverters:DepthToControlMarginConverter x:Key="DepthToControlMargin" />
+        <valueconverters:DepthToNameMarginConverter x:Key="DepthToNameMargin" />
     </UserControl.Resources>
-    <Grid>
+    <Grid IsEnabled="{Binding IsEditorAvailable}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="1.15*" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -52,240 +29,167 @@
         <StackPanel
             Grid.Row="0"
             Grid.Column="0"
+            Margin="4,0"
             Orientation="Horizontal">
             <ToolBar>
-                <TextBox
-                    Width="100"
-                    Margin="10,0,10,0"
-                    Text="{Binding CreateNewGroupName}"
-                    ToolTip="{markup:Translate [SoflanGroupCreateNameTipText]}" />
-                <Button cal:Message.Attach="[Event Click] = [Action CreateNewGroup()]" Content="{markup:Translate [NewItemGroup]}" ToolTip="{markup:Translate [SoflanGroupCreateTipText]}" />
+                <Button
+                    cal:Message.Attach="CreateNewGroup"
+                    Content="{markup:Translate [NewItemGroup]}"
+                    ToolTip="{markup:Translate [SoflanGroupCreateTipText]}" />
+                <Button
+                    cal:Message.Attach="CreateNewCategory"
+                    Content="{markup:Translate [SoflanGroupNewCategory]}"
+                    ToolTip="{markup:Translate [SoflanGroupCreateCategoryTipText]}" />
+                <Separator />
+                <Button
+                    cal:Message.Attach="RenameSelected"
+                    Content="{markup:Translate [SoflanGroupRename]}"
+                    ToolTip="{markup:Translate [SoflanGroupRenameTipText]}" />
+                <Button
+                    cal:Message.Attach="DeleteSelected"
+                    Content="{markup:Translate [SoflanGroupDelete]}"
+                    ToolTip="{markup:Translate [SoflanGroupDeleteTipText]}" />
+                <Button
+                    cal:Message.Attach="MoveSelectedToRoot"
+                    Content="{markup:Translate [SoflanGroupMoveToRoot]}"
+                    ToolTip="{markup:Translate [SoflanGroupMoveToRootTipText]}" />
             </ToolBar>
         </StackPanel>
 
-        <ListView
+        <TreeView
+            x:Name="GroupTree"
             Grid.Row="1"
             Grid.Column="0"
-            cal:Message.Attach="[Event Loaded] = [Action OnListLoaded($source)];"
+            AllowDrop="True"
             Background="Transparent"
-            ItemContainerStyle="{StaticResource ItemContStyle}"
-            ItemsSource="{Binding DisplaySoflanGroupItemGroupRoot.DisplayableItemSource}"
-            SelectionMode="Single">
-            <ListView.View>
-                <GridView>
-                    <GridView.ColumnHeaderContainerStyle>
-                        <Style TargetType="GridViewColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="Transparent" />
-                            <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
-                        </Style>
-                    </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn Width="220">
-                        <GridViewColumn.Header>
-                            <TextBlock Text="Name" ToolTip="{markup:Translate [SoflanGroupColumnNameTipText]}" />
-                        </GridViewColumn.Header>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Margin="{Binding Level, Converter={StaticResource LevelToIndentConverter}}" Orientation="Horizontal">
-                                    <ToggleButton
-                                        x:Name="Expander"
-                                        ClickMode="Press"
-                                        IsChecked="{Binding Path=IsExpanded, UpdateSourceTrigger=PropertyChanged}">
-                                        <ToggleButton.Style>
-                                            <Style TargetType="{x:Type ToggleButton}">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasChildren}" Value="False">
-                                                        <Setter Property="Visibility" Value="Hidden" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding HasChildren}" Value="{x:Null}">
-                                                        <Setter Property="Visibility" Value="Hidden" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                                <Setter Property="Focusable" Value="False" />
-                                                <Setter Property="Width" Value="19" />
-                                                <Setter Property="Height" Value="13" />
-                                                <Setter Property="Template">
-                                                    <Setter.Value>
-                                                        <ControlTemplate TargetType="{x:Type ToggleButton}">
-                                                            <Border
-                                                                Width="19"
-                                                                Height="13"
-                                                                Background="Transparent">
-                                                                <Border
-                                                                    Width="9"
-                                                                    Height="9"
-                                                                    BorderBrush="#FF7898B5"
-                                                                    BorderThickness="0"
-                                                                    CornerRadius="1"
-                                                                    SnapsToDevicePixels="true">
-                                                                    <Border.Background>
-                                                                        <SolidColorBrush Color="Transparent" />
-                                                                        <!--
-                                                                                    <LinearGradientBrush StartPoint="0,0"
-                                                                                        EndPoint="1,1">
-                                                                                        <LinearGradientBrush.GradientStops>
-                                                                                            <GradientStop Color="White"
-                                                                                    Offset=".2"/>
-                                                                                            <GradientStop Color="#FFC0B7A6"
-                                                                                    Offset="1"/>
-                                                                                        </LinearGradientBrush.GradientStops>
-                                                                                    </LinearGradientBrush>
-                                                                        -->
-                                                                    </Border.Background>
-                                                                    <Path
-                                                                        x:Name="ExpandPath"
-                                                                        Margin="1,2,1,1"
-                                                                        Data="M0,0 L0,6 L6,0 z"
-                                                                        Fill="Transparent"
-                                                                        Stroke="{DynamicResource BlackBrush}">
-                                                                        <Path.RenderTransform>
-                                                                            <RotateTransform Angle="135" CenterX="3" CenterY="3" />
-                                                                        </Path.RenderTransform>
-                                                                    </Path>
-                                                                    <!--
-                                                                            <Path x:Name="ExpandPath"
-                                                                            Margin="1,1,1,1"
-                                                                            Fill="Black"
-                                                                            Data="M 0 2 L 0 3 L 2 3 L 2 5 L 3 5 L 3 3 L 5 3 L 5 2 L 3 2 L 3 0 L 2 0 L 2 2 Z"/>
-                                                                    -->
-                                                                </Border>
-                                                            </Border>
-                                                            <ControlTemplate.Triggers>
-                                                                <Trigger Property="IsChecked" Value="True">
-                                                                    <Setter TargetName="ExpandPath" Property="RenderTransform">
-                                                                        <Setter.Value>
-                                                                            <RotateTransform Angle="180" CenterX="3" CenterY="3" />
-                                                                        </Setter.Value>
-                                                                    </Setter>
-                                                                    <Setter TargetName="ExpandPath" Property="Fill" Value="{DynamicResource GrayBrush1}" />
-                                                                    <Setter TargetName="ExpandPath" Property="Stroke" Value="{DynamicResource BlackBrush}" />
+            DragOver="OnGroupTreeDragOver"
+            Drop="OnGroupTreeDrop"
+            ItemsSource="{Binding RootNodes}"
+            PreviewMouseLeftButtonDown="OnGroupTreePreviewMouseLeftButtonDown"
+            PreviewMouseMove="OnGroupTreePreviewMouseMove"
+            SelectedItemChanged="OnGroupTreeSelectedItemChanged">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate
+                    DataType="{x:Type vm:SoflanGroupTreeNodeViewModel}"
+                    ItemsSource="{Binding Children}">
+                    <Grid Margin="0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="36" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel
+                            Margin="{Binding Depth, Converter={StaticResource DepthToNameMargin}}"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                            <Border
+                                Width="12"
+                                Height="12"
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"
+                                Background="{Binding ColorBrush}"
+                                CornerRadius="2" />
+                            <TextBlock
+                                Text="{Binding DisplayName}"
+                                TextTrimming="CharacterEllipsis"
+                                ToolTip="{Binding ToolTipText}"
+                                VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontWeight" Value="Normal" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCategory}" Value="True">
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsDefaultGroup}" Value="True">
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Border
+                                Margin="6,0,0,0"
+                                Padding="4,0"
+                                Background="#22000000"
+                                CornerRadius="2"
+                                Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock
+                                    FontSize="11"
+                                    Text="{Binding IdLabel}" />
+                            </Border>
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Column="1"
+                            Margin="{Binding Depth, Converter={StaticResource DepthToControlMargin}}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Margin="0,0,3,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Text="D"
+                                ToolTip="{Binding DesignToolTip}" />
+                            <CheckBox
+                                IsChecked="{Binding VisibleInDesign}"
+                                ToolTip="{Binding DesignToolTip}" />
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Column="2"
+                            Margin="{Binding Depth, Converter={StaticResource DepthToControlMargin}}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                            <TextBlock
+                                Margin="0,0,3,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Text="P"
+                                ToolTip="{Binding PreviewToolTip}" />
+                            <CheckBox
+                                IsChecked="{Binding VisibleInPreview}"
+                                ToolTip="{Binding PreviewToolTip}" />
+                        </StackPanel>
+                        <StackPanel
+                            Grid.Column="3"
+                            Margin="{Binding Depth, Converter={StaticResource DepthToControlMargin}}"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal"
+                            Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock
+                                Margin="0,0,3,0"
+                                VerticalAlignment="Center"
+                                FontSize="10"
+                                Text="S"
+                                ToolTip="{Binding DrawToolTip}" />
+                            <RadioButton
+                                GroupName="SoflanGroupDrawn"
+                                IsChecked="{Binding IsDrawn}"
+                                ToolTip="{Binding DrawToolTip}" />
+                        </StackPanel>
+                    </Grid>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
 
-                                                                    <!--
-                                                                                    <Setter Property="Data"
-                                                                            TargetName="ExpandPath"
-                                                                            Value="M 0 2 L 0 3 L 5 3 L 5 2 Z"/>
-                                                                    -->
-                                                                </Trigger>
-                                                            </ControlTemplate.Triggers>
-                                                        </ControlTemplate>
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Style>
-                                        </ToggleButton.Style>
-                                    </ToggleButton>
-
-                                    <RadioButton
-                                        Margin="5,0"
-                                        cal:Message.Attach="[Event Checked] = [Action OnItemChecked($dataContext)]"
-                                        GroupName="ILOVE2857IsSelected"
-                                        IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}">
-                                        <RadioButton.Style>
-                                            <Style TargetType="{x:Type RadioButton}">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsSelected}" Value="{x:Null}">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </RadioButton.Style>
-                                    </RadioButton>
-
-                                    <TextBlock Text="{Binding DisplayName}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="{x:Type TextBlock}">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding HasChildren}" Value="False">
-                                                        <Setter Property="FontWeight" Value="Normal" />
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding HasChildren}" Value="True">
-                                                        <Setter Property="FontWeight" Value="Bold" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </StackPanel>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn>
-                        <GridViewColumn.Header>
-                            <TextBlock Text="Design" ToolTip="{markup:Translate [SoflanGroupColumnDesignTipText]}" />
-                        </GridViewColumn.Header>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="2,5,2,5"
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding IsDisplayInDesignMode}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn>
-                        <GridViewColumn.Header>
-                            <TextBlock Text="Preview" ToolTip="{markup:Translate [SoflanGroupColumnPreviewTipText]}" />
-                        </GridViewColumn.Header>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <CheckBox
-                                    Margin="2,5,2,5"
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding IsDisplayInPreviewMode}" />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn>
-                        <GridViewColumn.Header>
-                            <TextBlock Text="Soflans" ToolTip="{markup:Translate [SoflanGroupColumnSoflansTipText]}" />
-                        </GridViewColumn.Header>
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <RadioButton
-                                    Margin="2,5,2,5"
-                                    cal:Message.Attach="[Event Checked] = [Action OnItemChecked_IsDisplaySoflanDesignMode($dataContext)]"
-                                    GroupName="ILOVE2857IsDisplaySoflanDesignMode"
-                                    IsChecked="{Binding IsDisplaySoflanDesignMode, UpdateSourceTrigger=PropertyChanged}">
-                                    <RadioButton.Style>
-                                        <Style TargetType="{x:Type RadioButton}">
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsDisplaySoflanDesignMode}" Value="{x:Null}">
-                                                    <Setter Property="Visibility" Value="Collapsed" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </RadioButton.Style>
-                                </RadioButton>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
         <Grid Grid.Row="0" Grid.Column="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <TextBlock VerticalAlignment="Center">
-                <TextBlock.Text>
-                    <MultiBinding Converter="{StaticResource LocalizeConverter}">
-                        <markup:Translate Path="[CurrentDisplaySelectedSoflanPointList]" />
-                        <Binding Path="CurrentSelectedSoflanGroupWrapItem.DisplayName" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-
-            <!--  not support yet  -->
-            <CheckBox
-                Grid.Column="1"
-                Margin="10,0"
-                HorizontalAlignment="Right"
+            <TextBlock
+                Margin="0,0,10,0"
                 VerticalAlignment="Center"
-                IsEnabled="False"
-                ToolTip="{markup:Translate [SoflanGroupShowPointListTipText]}">
-                <TextBlock Text="{markup:Translate [EditorShowSoflanPointList]}" />
-            </CheckBox>
+                Text="{Binding SelectedTitle}"
+                TextWrapping="Wrap" />
         </Grid>
+
         <ListView
             Grid.Row="1"
             Grid.Column="1"
@@ -293,7 +197,7 @@
             ItemsSource="{Binding DisplaySoflanPointList}"
             SelectionMode="Single">
             <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListViewItem}">
+                <Style TargetType="ListViewItem">
                     <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
                 </Style>
             </ListView.ItemContainerStyle>
@@ -306,23 +210,22 @@
                             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
-
-                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding Y}">
+                    <GridViewColumn Width="120" DisplayMemberBinding="{Binding Y}">
                         <GridViewColumn.Header>
                             <TextBlock Text="Y" ToolTip="{markup:Translate [SoflanPointColumnYTipText]}" />
                         </GridViewColumn.Header>
                     </GridViewColumn>
-                    <GridViewColumn Width="90" DisplayMemberBinding="{Binding TGrid}">
+                    <GridViewColumn Width="80" DisplayMemberBinding="{Binding TGrid}">
                         <GridViewColumn.Header>
                             <TextBlock Text="TGrid" ToolTip="{markup:Translate [SoflanPointColumnTGridTipText]}" />
                         </GridViewColumn.Header>
                     </GridViewColumn>
-                    <GridViewColumn Width="90" DisplayMemberBinding="{Binding Bpm.BPM}">
+                    <GridViewColumn Width="70" DisplayMemberBinding="{Binding Bpm.BPM}">
                         <GridViewColumn.Header>
                             <TextBlock Text="Bpm" ToolTip="{markup:Translate [SoflanPointColumnBpmTipText]}" />
                         </GridViewColumn.Header>
                     </GridViewColumn>
-                    <GridViewColumn Width="150" DisplayMemberBinding="{Binding Speed}">
+                    <GridViewColumn Width="80" DisplayMemberBinding="{Binding Speed}">
                         <GridViewColumn.Header>
                             <TextBlock Text="Speed" ToolTip="{markup:Translate [SoflanPointColumnSpeedTipText]}" />
                         </GridViewColumn.Header>

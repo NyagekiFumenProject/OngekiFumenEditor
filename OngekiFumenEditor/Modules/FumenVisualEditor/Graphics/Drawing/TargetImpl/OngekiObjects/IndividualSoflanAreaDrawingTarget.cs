@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -6,6 +6,7 @@ using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.DrawCommands.DefaultDrawCommands;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
     internal sealed class IndividualSoflanAreaDrawingTarget : CommonBatchDrawTargetBase<IndividualSoflanArea>
     {
         private IImage texture;
-        private static readonly int colorSeed = RandomHepler.Random(int.MinValue, int.MaxValue);
 
         public override IEnumerable<string> DrawTargetID { get; } = ["ISF"];
 
@@ -44,36 +44,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
             if (cacheColor.TryGetValue(soflanGroup, out var color))
                 return color;
 
-            (float r, float g, float b) HsvToRgb(float h, float s, float v)
-            {
-                h = Math.Clamp(h, 0, 360);
-                s = Math.Clamp(s, 0, 1);
-                v = Math.Clamp(v, 0, 1);
-
-                float c = v * s;
-                float x = c * (1 - Math.Abs((h / 60) % 2 - 1));
-                float m = v - c;
-
-                (float r, float g, float b) rgb;
-
-                if (h < 60) rgb = (c, x, 0);
-                else if (h < 120) rgb = (x, c, 0);
-                else if (h < 180) rgb = (0, c, x);
-                else if (h < 240) rgb = (0, x, c);
-                else if (h < 300) rgb = (x, 0, c);
-                else rgb = (c, 0, x);
-
-                return (rgb.r + m, rgb.g + m, rgb.b + m);
-            }
-
-            float hue = Math.Abs((HashCode.Combine(soflanGroup, soflanGroup) ^ colorSeed) % 360);
-            float saturation = 1f;
-            float value = 1f;
-
-            var (r, g, b) = HsvToRgb(hue, saturation, value);
-
-            color = new Vector4(r, g, b, 1);
-            return cacheColor[soflanGroup] = color;
+            return cacheColor[soflanGroup] = SoflanGroupColor.Get(soflanGroup);
         }
 
         public override void DrawBatch(IFumenEditorDrawingContext target, IDrawCommandListBuilder builder, IEnumerable<IndividualSoflanArea> isfList)

@@ -78,15 +78,7 @@ namespace OngekiFumenEditor.Base
         {
             if (arg2.PropertyName == nameof(ISoflan.SoflanGroup))
             {
-                var item = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(arg1.SoflanGroup, out var isCreated);
-                if (isCreated)
-                {
-                    if (IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.FirstOrDefault(x => x.DisplayName == "default") is SoflanGroupWrapItemGroup defaultGroup)
-                    {
-                        defaultGroup.Add(item);
-                        IndividualSoflanAreaMap.NotifyOfPropertyChange(nameof(IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot));
-                    }
-                }
+                IndividualSoflanAreaMap.SoflanGroupTree.GetOrCreateGroup(arg1.SoflanGroup);
             }
         }
 
@@ -142,31 +134,17 @@ namespace OngekiFumenEditor.Base
 
             #region IndividualSoflanAreaMap
 
-            foreach (var soflanGroup in SoflansMap.Keys)
+            foreach (var soflanGroup in SoflansMap.Keys
+                .Concat(IndividualSoflanAreaMap.Keys)
+                .Append(0)
+                .Distinct())
             {
                 //make sure soflanGroup in IndividualSoflanAreaMap had been create
                 _ = IndividualSoflanAreaMap[soflanGroup];
+                IndividualSoflanAreaMap.SoflanGroupTree.GetOrCreateGroup(soflanGroup);
             }
 
-            //setup SoflanGroupWrapItem
-            var groupName = "default";
-            var itemGroup = IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Children.OfType<SoflanGroupWrapItemGroup>().FirstOrDefault(x => x.DisplayName == groupName) ?? new SoflanGroupWrapItemGroup()
-            {
-                DisplayName = groupName
-            };
-            //enumerate soflan group which not asign by [SGWI]
-            foreach (var soflanGroupId in IndividualSoflanAreaMap.Keys.Concat([0]))
-            {
-                var item = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroupId, out var isCreated);
-                if (isCreated || item.Parent == null)
-                    itemGroup.Add(item);
-            }
-            IndividualSoflanAreaMap.SoflanGroupWrapItemGroupRoot.Add(itemGroup);
-
-            //setup default soflan group item
-            var defaultSoflanGroupItem = IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(0, out _);
-            defaultSoflanGroupItem.IsSelected = true;
-            defaultSoflanGroupItem.IsDisplaySoflanDesignMode = true;
+            IndividualSoflanAreaMap.SoflanGroupTree.EnsureDefaultGroup();
 
             #endregion
         }
@@ -204,6 +182,7 @@ namespace OngekiFumenEditor.Base
             else if (obj is ISoflan soflan)
             {
                 SoflansMap.Add(soflan);
+                IndividualSoflanAreaMap.SoflanGroupTree.GetOrCreateGroup(soflan.SoflanGroup);
             }
             else if (obj is Bullet bullet)
             {

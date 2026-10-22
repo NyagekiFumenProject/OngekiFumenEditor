@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using NAudio.Gui;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -187,13 +187,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 polygonPoints.Add((new(placeholdCenterX, placeholdY + 10), color));
             }
 
-            using var visibleSoflanGroups =
-                target.Editor.Fumen.IndividualSoflanAreaMap.Keys.Concat(target.Editor.Fumen.SoflansMap.Keys)
-                .Distinct()
-                .Select(x => target.Editor.Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(x, out _))
-                .Where(x => x.IsDisplaySoflanDesignMode)
-                .Select(x => x.SoflanGroupId)
-                .ToHashSetWithObjectPool();
+            var drawnSoflanGroup = IoC.Get<IFumenSoflanGroupListViewer>().DrawnSoflanGroupId ?? 0;
+            using var visibleSoflanGroups = ObjectPool.GetPooledSet<int>();
+            visibleSoflanGroups.Add(drawnSoflanGroup);
 
             //var queryPlaceholdPosIndex = 0;
             foreach (var s in soflans.Where(x => visibleSoflanGroups.Contains(x.SoflanGroup)))

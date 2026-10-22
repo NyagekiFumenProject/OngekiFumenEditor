@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
 using NAudio.Gui;
@@ -14,6 +14,7 @@ using OngekiFumenEditor.Kernel.Graphics.DrawCommands;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Scheduler;
 using OngekiFumenEditor.Modules.FumenBulletPalleteListViewer;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing;
@@ -990,18 +991,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         scrollViewer?.InvalidateMeasure();
     }
 
+    private IFumenSoflanGroupListViewer soflanGroupListViewer;
+
     public bool CheckSoflanGroupVisible(int soflanGroup)
-    {
-        var soflanGroupWrapItem = Fumen.IndividualSoflanAreaMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroup, out _);
-        if (IsDesignMode)
-        {
-            return soflanGroupWrapItem.IsDisplayInDesignMode;
-        }
-        else
-        {
-            return soflanGroupWrapItem.IsDisplayInPreviewMode;
-        }
-    }
+        => (soflanGroupListViewer ??= IoC.Get<IFumenSoflanGroupListViewer>()).IsGroupVisible(soflanGroup, IsDesignMode);
 
     /// <summary>
     /// 把 [minTGrid, maxTGrid] 区间内可见 soflan group 的对象按索引序写入 output。

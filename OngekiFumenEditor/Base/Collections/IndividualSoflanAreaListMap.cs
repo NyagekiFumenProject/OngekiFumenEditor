@@ -1,7 +1,7 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using OngekiFumenEditor.Base.Collections.Base;
-using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Base.OngekiObjects;
+using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -34,26 +34,13 @@ namespace OngekiFumenEditor.Base.Collections
             nameof(IndividualSoflanArea.EndIndicator.XGrid)
             );
 
-        private SoflanGroupWrapItemGroup soflanGroupWrapItemGroupRoot = new()
-        {
-            IsDisplayInDesignMode = false,
-            IsDisplayInPreviewMode = false,
-            DisplayName = "root"
-        };
-
-        private SoflanGroupWrapItemGroup defaultItemGroup = new()
-        {
-            DisplayName = "default",
-        };
-
-        private Dictionary<int, SoflanGroupWrapItem> cachedSoflanGroupWrapItemMap = new();
-        public SoflanGroupWrapItemGroup SoflanGroupWrapItemGroupRoot => soflanGroupWrapItemGroupRoot;
+        public SoflanGroupTree SoflanGroupTree { get; } = new();
 
         private Dictionary<int, IndividualSoflanAreaList> isfMap = new();
 
         public IndividualSoflanAreaListMap()
         {
-            SoflanGroupWrapItemGroupRoot.Add(defaultItemGroup);
+            SoflanGroupTree.EnsureDefaultGroup();
         }
 
         public IndividualSoflanAreaList this[int pattern]
@@ -87,10 +74,7 @@ namespace OngekiFumenEditor.Base.Collections
                 }
 
                 this[isf.SoflanGroup].Add(isf);
-
-                var wrapItem = TryGetOrCreateSoflanGroupWrapItem(isf.SoflanGroup, out var isCreated);
-                if (isCreated)
-                    defaultItemGroup.Add(wrapItem);
+                SoflanGroupTree.GetOrCreateGroup(isf.SoflanGroup);
             }
         }
 
@@ -105,10 +89,7 @@ namespace OngekiFumenEditor.Base.Collections
             this[isf.SoflanGroup].Add(isf);
             cacheTree.Add(isf);
             cacheTotalTree.Add(isf);
-
-            var wrapItem = TryGetOrCreateSoflanGroupWrapItem(isf.SoflanGroup, out var isCreated);
-            if (isCreated)
-                defaultItemGroup.Add(wrapItem);
+            SoflanGroupTree.GetOrCreateGroup(isf.SoflanGroup);
         }
 
         public void Remove(IndividualSoflanArea isf)
@@ -117,21 +98,6 @@ namespace OngekiFumenEditor.Base.Collections
             cacheTree.Remove(isf);
             cacheTotalTree.Remove(isf);
 
-            //不需要删除
-            /*
-            if (this[isf.SoflanGroup].Count == 0)
-            {
-                var item = TryGetOrCreateSoflanGroupWrapItem(isf.SoflanGroup, out _);
-                item.Parent?.Remove(item);
-            }
-            */
-        }
-
-        public SoflanGroupWrapItem TryGetOrCreateSoflanGroupWrapItem(int soflanGroup, out bool isCreated)
-        {
-            if (isCreated = !cachedSoflanGroupWrapItemMap.TryGetValue(soflanGroup, out var item))
-                cachedSoflanGroupWrapItemMap[soflanGroup] = item = new SoflanGroupWrapItem(soflanGroup);
-            return item;
         }
 
         IEnumerator IEnumerable.GetEnumerator() => isfMap.GetEnumerator();

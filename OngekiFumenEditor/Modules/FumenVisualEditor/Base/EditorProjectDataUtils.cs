@@ -1,6 +1,7 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.EditorProjectFile;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
@@ -46,6 +47,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             Log.LogInfo($"Fumen file loaded: {projectData.FumenFilePath}");
             projectData.Fumen = fumen;
 
+            if (projectData.SoflanGroupTree is not null)
+                SoflanGroupTreeProjectData.Apply(fumen.IndividualSoflanAreaMap.SoflanGroupTree, projectData.SoflanGroupTree);
+
             ApplyBulletPalleteListEditorData(projectData);
 
             return projectData;
@@ -61,6 +65,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                     bpl.EditorAxuiliaryLineColor = OngekiFumenEditor.Base.ValueTypes.Color.FromArgb(storeEditorData.AuxiliaryLineColor.A, storeEditorData.AuxiliaryLineColor.R, storeEditorData.AuxiliaryLineColor.G, storeEditorData.AuxiliaryLineColor.B);
                 }
             }
+        }
+
+        private static void StoreSoflanGroupTreeEditorData(EditorProjectDataModel projectData)
+        {
+            if (projectData?.Fumen is not null)
+                projectData.SoflanGroupTree = SoflanGroupTreeProjectData.Capture(projectData.Fumen.IndividualSoflanAreaMap.SoflanGroupTree);
         }
 
         private static void StoreBulletPalleteListEditorData(EditorProjectDataModel projectData)
@@ -91,6 +101,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                     throw new IOException(Resources.CantWriteProjectFileByIoError);
 
                 var tmpProjFilePath = TempFileHelper.GetTempFilePath("FumenProjFile", Path.GetFileNameWithoutExtension(projFileFullPath), Path.GetExtension(projFileFullPath));
+                StoreSoflanGroupTreeEditorData(editorProject);
                 StoreBulletPalleteListEditorData(editorProject);
 
                 await projFileManager.Save(tmpProjFilePath, editorProject);

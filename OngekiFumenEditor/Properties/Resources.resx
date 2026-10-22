@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2380,7 +2380,7 @@
     <value>Lane block start wall ({0}) is different than end wall ({1})</value>
   </data>
   <data name="NewItemGroup" xml:space="preserve">
-    <value>New item group</value>
+    <value>New soflan group</value>
   </data>
   <data name="SoflanGroupMove" xml:space="preserve">
     <value>Move soflan group</value>
@@ -2400,11 +2400,8 @@
   <data name="SoflanGroupColumnSoflansTipText" xml:space="preserve">
     <value>Selecting it shows the group's soflans in the list on the right.</value>
   </data>
-  <data name="SoflanGroupCreateNameTipText" xml:space="preserve">
-    <value>Type a name for the new soflan group, then click the button to create it.</value>
-  </data>
   <data name="SoflanGroupCreateTipText" xml:space="preserve">
-    <value>Create a new soflan group with the name typed on the left.</value>
+    <value>Create a new soflan group. The name may be left empty to use the default name.</value>
   </data>
   <data name="SoflanGroupListViewer" xml:space="preserve">
     <value>Soflan Groups</value>
@@ -3512,4 +3509,28 @@
   <data name="ShowBulletHitRanges" xml:space="preserve"><value>Bullet hit ranges</value></data>
   <data name="TipBeamHitRanges" xml:space="preserve"><value>Show horizontal hit widths along beam paths in design mode.</value></data>
   <data name="TipBulletHitRanges" xml:space="preserve"><value>Filled bands show this preview impact; dashed outlines show the full random range. Player targets use recorded player positions.</value></data>
+  <data name="SoflanGroupRename" xml:space="preserve"><value>Rename</value></data>
+  <data name="SoflanGroupNewCategory" xml:space="preserve"><value>New group folder</value></data>
+  <data name="SoflanGroupDelete" xml:space="preserve"><value>Delete</value></data>
+  <data name="SoflanGroupDeleteHasReferences" xml:space="preserve"><value>This soflan group is still referenced by {0} objects and cannot be deleted.</value></data>
+  <data name="SoflanGroupDeleteHasChildren" xml:space="preserve"><value>This folder still contains items and cannot be deleted.</value></data>
+  <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>The default group (0) cannot be deleted.</value></data>
+  <data name="SoflanGroupNameRequired" xml:space="preserve"><value>Name cannot be empty.</value></data>
+  <data name="SoflanGroupMoveToRoot" xml:space="preserve"><value>Move to root</value></data>
+  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>General default soflan group</value></data>
+  <data name="SoflanGroupCategoryName" xml:space="preserve"><value>Group folder</value></data>
+  <data name="SoflanGroupNameExists" xml:space="preserve"><value>A category with this name already exists.</value></data>
+  <data name="SoflanGroupCreateCategoryTipText" xml:space="preserve"><value>Create a folder used only to organize soflan groups; the name may be left empty and no group ID is bound.</value></data>
+  <data name="SoflanGroupRenameTipText" xml:space="preserve"><value>Rename the selected soflan group or group folder.</value></data>
+  <data name="SoflanGroupDeleteTipText" xml:space="preserve"><value>Delete the selected empty soflan group or group folder (blocked while referenced or non-empty).</value></data>
+  <data name="SoflanGroupMoveToRootTipText" xml:space="preserve"><value>Move the selected item to the root.</value></data>
+  <data name="SoflanGroupDefaultNewGroupName" xml:space="preserve"><value>New soflan group</value></data>
+  <data name="SoflanGroupDefaultNewFolderName" xml:space="preserve"><value>New group folder</value></data>
+  <data name="SoflanGroupDefaultGroupTipText" xml:space="preserve"><value>The general default soflan group (ID 0): objects not covered by any Individual Soflan Area belong to it. It is the fallback timing group of the chart, always exists, and cannot be deleted or dragged.</value></data>
+  <data name="SoflanGroupDesignCheckedTipText" xml:space="preserve"><value>Checked: show this group in design mode; a group folder applies this to all children.</value></data>
+  <data name="SoflanGroupDesignUncheckedTipText" xml:space="preserve"><value>Unchecked: hide this group in design mode; a group folder applies this to all children.</value></data>
+  <data name="SoflanGroupPreviewCheckedTipText" xml:space="preserve"><value>Checked: show this group in preview mode; a group folder applies this to all children.</value></data>
+  <data name="SoflanGroupPreviewUncheckedTipText" xml:space="preserve"><value>Unchecked: hide this group in preview mode; a group folder applies this to all children.</value></data>
+  <data name="SoflanGroupDrawCheckedTipText" xml:space="preserve"><value>Selected: display this soflan group's soflan lines (only one group is displayed at a time).</value></data>
+  <data name="SoflanGroupDrawUncheckedTipText" xml:space="preserve"><value>Not selected: click to display this soflan group's soflan lines (only one group is displayed at a time).</value></data>
 </root>

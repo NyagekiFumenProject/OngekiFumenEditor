@@ -1,4 +1,4 @@
-using Caliburn.Micro;
+﻿using Caliburn.Micro;
 using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.Toolbox;
@@ -1692,7 +1692,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             string updateLeft()
             {
-                var soflanGroup = IoC.Get<IFumenSoflanGroupListViewer>().CurrentSelectedSoflanGroupWrapItem?.SoflanGroupId ?? 0;
+                var soflanGroup = IoC.Get<IFumenSoflanGroupListViewer>().CurrentSelectedSoflanGroupId ?? 0;
                 if (soflanGroup == 0)
                     return string.Empty;
                 var soflanList = Fumen.SoflansMap[soflanGroup];
