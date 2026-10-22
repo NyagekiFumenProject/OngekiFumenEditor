@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace OngekiFumenEditor.Base
@@ -21,7 +22,7 @@ namespace OngekiFumenEditor.Base
             return $"{Unit}\t{Grid}";
         }
 
-        public override string ToString() => $"T[{Unit},{Grid}]";
+        public override string ToString() => $"T[{Unit.ToString("0.###", CultureInfo.CurrentCulture)},{Grid}]";
 
         public TGrid CopyNew() => new TGrid(Unit, Grid);
 

@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="OngekiFumenEditor.Modules.FumenBulletPalleteListViewer.Views.FumenBulletPalleteListViewerView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -172,7 +172,7 @@
                         </GridViewColumn.Header>
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBox Text="{Binding Speed}">
+                                <TextBox Text="{Binding Speed, StringFormat={}{0:0.####}}">
                                 </TextBox>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>

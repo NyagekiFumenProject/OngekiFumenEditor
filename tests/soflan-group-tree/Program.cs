@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.UIGenerator;
+using OngekiFumenEditor.UI.Controls.ObjectInspector.ViewModels;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
@@ -54,6 +58,7 @@ internal static class Program
             CheckProjectTreeRoundTrip();
             CheckProjectSaveCapture();
             CheckProjectLoadApply();
+            CheckNumericEditorFormatting();
             Console.WriteLine($"通过 {checks} 项 SoflanGroupTree 模型检查。");
             return 0;
         }
@@ -440,6 +445,54 @@ internal static class Program
 
         public IEnumerable<(string desc, string[] fileFormat)> GetDeserializerDescriptions()
             => Array.Empty<(string desc, string[] fileFormat)>();
+    }
+
+    private static void CheckNumericEditorFormatting()
+    {
+        var target = new NumericEditorTarget { Value = 1.2000000476837158 };
+        var property = typeof(NumericEditorTarget).GetProperty(nameof(NumericEditorTarget.Value));
+        var proxy = new FakePropertyProxy(property, target.Value);
+        var vm = new BaseValueTypeUIViewModel(proxy);
+
+        Check(Math.Abs(double.Parse(vm.ProxyValueText, CultureInfo.CurrentCulture) - 1.2) < 1e-9, "属性编辑器格式化 double 噪声");
+        vm.ProxyValueText = "2.345678";
+        Check(proxy.ProxyValue is double parsed && Math.Abs(parsed - 2.345678) < 1e-12, "属性编辑器解析 double");
+
+        Check(new TGrid(1.200000047f, 0).ToString() == $"T[{1.200000047f.ToString("0.###", CultureInfo.CurrentCulture)},0]", "TGrid 显示格式化");
+        Check(new XGrid(1.200000047f, 0).ToString() == $"X[{1.200000047f.ToString("0.###", CultureInfo.CurrentCulture)},0]", "XGrid 显示格式化");
+    }
+
+    private sealed class NumericEditorTarget
+    {
+        public double Value { get; set; }
+    }
+
+    private sealed class FakePropertyProxy : IObjectPropertyAccessProxy
+    {
+        public FakePropertyProxy(System.Reflection.PropertyInfo propertyInfo, object value)
+        {
+            PropertyInfo = propertyInfo;
+            ProxyValue = value;
+        }
+
+        public System.Reflection.PropertyInfo PropertyInfo { get; }
+
+        private object proxyValue;
+        public object ProxyValue
+        {
+            get => proxyValue;
+            set
+            {
+                proxyValue = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ProxyValue)));
+            }
+        }
+        public string DisplayPropertyName => PropertyInfo.Name;
+        public string DisplayPropertyTipText => string.Empty;
+        public bool IsAllowSetNull => false;
+        public bool IsReadOnly => false;
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void Clear() { }
     }
 
     private static void CheckRemoveAndRestore()

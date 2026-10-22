@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 namespace OngekiFumenEditor.Base
 {
     public class XGrid : GridBase
@@ -19,7 +20,7 @@ namespace OngekiFumenEditor.Base
             return Unit.ToString();
         }
 
-        public override string ToString() => $"X[{Unit},{Grid}]";
+        public override string ToString() => $"X[{Unit.ToString("0.###", CultureInfo.CurrentCulture)},{Grid}]";
 
         public static XGrid operator +(XGrid l, GridOffset r)
         {

@@ -15,6 +15,7 @@
 - **加载**：`OngekiFumen.Setup`、ISoflan `AddObject`、ISA `Add` 都会确保组节点；仅由 Soflan 引用的组现在会出现在树中。
 - **显示**：`TreeView` + `SoflanGroupTreeNodeViewModel` + `SoflanGroupNameDialogView`；工具栏按钮为「新建变速组」（Group）、「新建组文件夹」（Category）、重命名、删除、移动到根，五个按钮均有 ToolTip；两个新建按钮都弹窗输入名称，空名分别使用「新的变速组」/「新的组文件夹」（文件夹重名自动追加序号），工具栏不再保留输入框；拖拽 Group 到文件夹或根、Group 文件夹仅在根级重排；`SelectedItem`/`IsSelected` 双向同步；右侧明细只显示左侧选中的变速组；选中组文件夹时不显示明细内容，已移除 Group 列。Design/Preview/Draw 三列分别带 D/P/S 标签，使用固定列并抵消 TreeView 层级缩进，跨层级对齐；每个开关的 ToolTip 根据当前勾选/选中状态动态说明功能。变化列表标题包含组号（如 `#10`）。无活跃编辑器或编辑器没有谱面时，查看器根容器 `IsEnabled=false`，工具栏/树/明细整体禁用。
 - **显示状态**：组行 Design/Preview 复选（分类联动子项）、Draw 单选；`IFumenSoflanGroupListViewer` 改为 `CurrentSelectedSoflanGroupId` / `DrawnSoflanGroupId` / `IsGroupVisible`；`DurationSoflanDrawingTarget`、`DrawJudgeLineHelper`、状态栏与可见性检查已适配。
+- **数值显示**：属性编辑器、Soflan 明细、拍号/元信息 BPM、音频调整、TGrid 计算器、子弹速度、设置项以及 `TGrid`/`XGrid`/对象 `ToString` 统一格式化，避免 float/double 二进制噪声直接显示。
 - **颜色**：`SoflanGroupColor` 改为黄金角色相步进（137.508°）+ 固定 S=0.9/V=1.0 的明亮配色；组 ID 稳定、跨会话一致，前 16 组色相间隔 ≥ 12°，相邻新建组不会落到相近色相；树节点显示颜色块，ISA 区域与对象 tint 使用同一颜色。
 - **默认组**：ID 0 显示为「通用默认变速组」，提供说明性 ToolTip，并在视图/model 层禁止拖动；
 - **删除**：通用默认变速组、仍有子节点的分类、仍被引用的组会被拒绝并提示；空组/空分类可删除且可撤销。
@@ -33,7 +34,7 @@
 验证：
 
 - Debug/Release 构建 0 error。
-- `tests/soflan-group-tree`：237 项检查通过（模型、组文件夹不可嵌套、移动/防环、删除恢复、旧 SGWI 迁移、项目树 Capture/Apply（含清理谱面遗留分类）、项目 JSON 往返、项目保存 Capture、项目加载 Apply、仅 Soflan 组、名称转义、默认组、新颜色亮度/饱和度/撞色检查）。
+- `tests/soflan-group-tree`：241 项检查通过（模型、组文件夹不可嵌套、移动/防环、删除恢复、旧 SGWI 迁移、属性编辑器数值格式、项目树 Capture/Apply（含清理谱面遗留分类）、项目 JSON 往返、项目保存 Capture、项目加载 Apply、仅 Soflan 组、名称转义、默认组、新颜色亮度/饱和度/撞色检查）。
 - 后台 GUI 冒烟（UIAutomation）：打开带音频工程、创建组、删除并撤销、重命名对话框、空名新建默认命名、无编辑器/关闭编辑器时整体禁用、组文件夹根级平铺、树/右侧明细渲染；日志无异常。
 
 ## 重构前实现（历史）

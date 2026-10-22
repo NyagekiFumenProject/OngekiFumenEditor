@@ -25,6 +25,7 @@ using OngekiFumenEditor.UI.Controls;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Utils.ObjectPool;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -966,14 +967,14 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             {
                 X = totalLength,
                 XGridTotalUnit = totalUnitValue,
-                XGridTotalUnitDisplay = totalUnitValue.ToString()
+                XGridTotalUnitDisplay = totalUnitValue.ToString("0.###", CultureInfo.CurrentCulture)
             });
 
             cachedMagneticXGridLines.Add(new CacheDrawXLineResult
             {
                 X = baseX - (totalLength - baseX),
                 XGridTotalUnit = -totalUnitValue,
-                XGridTotalUnitDisplay = (-totalUnitValue).ToString()
+                XGridTotalUnitDisplay = (-totalUnitValue).ToString("0.###", CultureInfo.CurrentCulture)
             });
         }
 

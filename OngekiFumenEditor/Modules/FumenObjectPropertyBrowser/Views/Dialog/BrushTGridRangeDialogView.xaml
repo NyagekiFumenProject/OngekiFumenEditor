@@ -1,4 +1,4 @@
-<mah:MetroWindow
+﻿<mah:MetroWindow
     x:Class="OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.Dialog.BrushTGridRangeDialogView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,7 +34,7 @@
                         <TextBox
                             Width="60"
                             Margin="5,0,0,0"
-                            Text="{Binding BeginTGrid.Unit}" />
+                            Text="{Binding BeginTGrid.Unit, StringFormat={}{0:0.###}}" />
                     </StackPanel>
                     <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                         <TextBlock Text="Grid:" />
@@ -56,7 +56,7 @@
                         <TextBox
                             Width="60"
                             Margin="5,0,0,0"
-                            Text="{Binding EndTGrid.Unit}" />
+                            Text="{Binding EndTGrid.Unit, StringFormat={}{0:0.###}}" />
                     </StackPanel>
                     <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
                         <TextBlock Text="Grid:" />

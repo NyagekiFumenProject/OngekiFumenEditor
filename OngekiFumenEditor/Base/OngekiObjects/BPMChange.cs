@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 using System;
 
 namespace OngekiFumenEditor.Base.OngekiObjects
@@ -18,7 +19,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public static string CommandName => "BPM";
         public override string IDShortName => CommandName;
 
-        public override string ToString() => $"{base.ToString()} Bpm[{BPM}]";
+        public override string ToString() => $"{base.ToString()} Bpm[{BPM.ToString("0.###", CultureInfo.CurrentCulture)}]";
 
         public GridOffset LengthConvertToOffset(double len)
         {

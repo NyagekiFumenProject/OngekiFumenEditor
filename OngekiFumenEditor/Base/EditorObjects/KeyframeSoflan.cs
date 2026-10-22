@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,7 +42,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             set => Set(ref soflanGroup, value);
         }
 
-        public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
+        public override string ToString() => $"{base.ToString()} Speed[{speed:F3}x]";
 
         public override void Copy(OngekiObjectBase fromObj)
         {

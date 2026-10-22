@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Base.OngekiObjects;
+﻿using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
@@ -89,7 +89,7 @@ namespace OngekiFumenEditor.Base.EditorObjects
             set => Set(ref interpolateCountPerResT, value);
         }
 
-        public override string ToString() => $"{base.ToString()} --> EndSpeed[{((InterpolatableSoflanIndicator)EndIndicator)?.Speed}x]";
+        public override string ToString() => $"{base.ToString()} --> EndSpeed[{((InterpolatableSoflanIndicator)EndIndicator)?.Speed:F3}x]";
 
         public override void Copy(OngekiObjectBase fromObj)
         {

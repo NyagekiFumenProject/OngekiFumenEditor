@@ -1,4 +1,4 @@
-using OngekiFumenEditor.Base.EditorObjects;
+﻿using OngekiFumenEditor.Base.EditorObjects;
 using OngekiFumenEditor.Utils;
 using System.Collections.Generic;
 
@@ -98,7 +98,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
         public int GridLength => EndIndicator.TGrid.TotalGrid - TGrid.TotalGrid;
 
-        public override string ToString() => $"{base.ToString()} Speed[{speed}x]";
+        public override string ToString() => $"{base.ToString()} Speed[{speed:F3}x]";
 
         public override bool CheckVisiable(TGrid minVisibleTGrid, TGrid maxVisibleTGrid)
         {

@@ -188,7 +188,7 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 ## 2026-10-22：ISF 变速分组树状显示重构（WPF）
 
-- WPF：按方案 E 实施：新增 `SoflanGroupTree`（组文件夹根级、不可嵌套，只含 Group）；组树布局改由项目文件 `SoflanGroupTree` 节点持有，谱面文件不再写组布局，旧 `[SGC]`/`[SGF]`/`[SGWI]` 仅保留读取迁移；查看器改为 TreeView + 节点 VM，保留 Design/Preview/Draw（D/P/S 标签、固定列并跨层级对齐，开关 ToolTip 随勾选/选中状态动态说明）、右侧明细（仅显示选中组，标题带组号，组文件夹不显示，移除 Group 列）、通用默认变速组名称/说明 ToolTip/禁止拖动、新建/重命名/删除/拖拽/撤销与稳定组色；删除旧 `SoflanGroupWrapItem*` 双层模型。
+- WPF：按方案 E 实施：新增 `SoflanGroupTree`（组文件夹根级、不可嵌套，只含 Group）；组树布局改由项目文件 `SoflanGroupTree` 节点持有，谱面文件不再写组布局，旧 `[SGC]`/`[SGF]`/`[SGWI]` 仅保留读取迁移；查看器改为 TreeView + 节点 VM，保留 Design/Preview/Draw（D/P/S 标签、固定列并跨层级对齐，开关 ToolTip 随勾选/选中状态动态说明）、右侧明细（仅显示选中组，标题带组号，组文件夹不显示，移除 Group 列）、通用默认变速组名称/说明 ToolTip/禁止拖动、新建/重命名/删除/拖拽/撤销与稳定组色；统一属性编辑器/明细/设置等数值显示格式，消除 float 噪声；删除旧 `SoflanGroupWrapItem*` 双层模型。
 - WPF：查看器新建按钮改为弹窗输入名称（空名使用「新的变速组」/「新的组文件夹」默认名），移除工具栏左侧输入框；五个工具栏按钮全部补 ToolTip，按钮文案区分为「新建变速组」/「新建组文件夹」；组色改为黄金角高饱和/高亮度配色；无活跃编辑器或无谱面时查看器整体禁用。
-- 测试：`tests/soflan-group-tree` 237 项通过；Debug/Release 构建 0 error；后台 GUI 冒烟覆盖建组/删除撤销/重命名/空名默认命名/无编辑器禁用。
+- 测试：`tests/soflan-group-tree` 241 项通过；Debug/Release 构建 0 error；后台 GUI 冒烟覆盖建组/删除撤销/重命名/空名默认命名/无编辑器禁用。
 - Avalonia：本次未移植，不改变现有同步点。

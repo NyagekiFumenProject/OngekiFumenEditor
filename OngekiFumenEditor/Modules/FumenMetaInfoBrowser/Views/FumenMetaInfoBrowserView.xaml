@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="OngekiFumenEditor.Modules.FumenMetaInfoBrowser.Views.FumenMetaInfoBrowserView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -121,7 +121,7 @@
                         <Border Grid.Column="1">
                         </Border>
                         <TextBlock>First</TextBlock>
-                        <TextBox Grid.Column="1" Text="{Binding FumenProxy.FirstBpm}">
+                        <TextBox Grid.Column="1" Text="{Binding FumenProxy.FirstBpm, StringFormat={}{0:0.###}}">
                         </TextBox>
 
                         <Border Grid.Row="1">
@@ -132,7 +132,7 @@
                         <TextBox
                             Grid.Row="1"
                             Grid.Column="1"
-                            Text="{Binding FumenProxy.CommonBpm}">
+                            Text="{Binding FumenProxy.CommonBpm, StringFormat={}{0:0.###}}">
                         </TextBox>
 
                         <Border Grid.Row="2">
@@ -143,7 +143,7 @@
                         <TextBox
                             Grid.Row="2"
                             Grid.Column="1"
-                            Text="{Binding FumenProxy.MaxBpm}">
+                            Text="{Binding FumenProxy.MaxBpm, StringFormat={}{0:0.###}}">
                         </TextBox>
 
                         <Border Grid.Row="3">
@@ -154,7 +154,7 @@
                         <TextBox
                             Grid.Row="3"
                             Grid.Column="1"
-                            Text="{Binding FumenProxy.MinBpm}">
+                            Text="{Binding FumenProxy.MinBpm, StringFormat={}{0:0.###}}">
                         </TextBox>
                     </Grid>
                 </Expander>
@@ -335,7 +335,7 @@
                     <TextBox
                         Grid.Row="5"
                         Grid.Column="1"
-                        Text="{Binding FumenProxy.ProgJudgeBpm}">
+                        Text="{Binding FumenProxy.ProgJudgeBpm, StringFormat={}{0:0.####}}">
                     </TextBox>
                 </Grid>
             </StackPanel>

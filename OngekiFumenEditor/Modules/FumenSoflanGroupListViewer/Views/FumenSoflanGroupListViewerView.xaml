@@ -210,7 +210,7 @@
                             <Setter Property="Foreground" Value="{StaticResource EnvironmentToolWindowText}" />
                         </Style>
                     </GridView.ColumnHeaderContainerStyle>
-                    <GridViewColumn Width="120" DisplayMemberBinding="{Binding Y}">
+                    <GridViewColumn Width="120" DisplayMemberBinding="{Binding Y, StringFormat={}{0:0.##}}">
                         <GridViewColumn.Header>
                             <TextBlock Text="Y" ToolTip="{markup:Translate [SoflanPointColumnYTipText]}" />
                         </GridViewColumn.Header>
@@ -220,7 +220,7 @@
                             <TextBlock Text="TGrid" ToolTip="{markup:Translate [SoflanPointColumnTGridTipText]}" />
                         </GridViewColumn.Header>
                     </GridViewColumn>
-                    <GridViewColumn Width="70" DisplayMemberBinding="{Binding Bpm.BPM}">
+                    <GridViewColumn Width="70" DisplayMemberBinding="{Binding Bpm.BPM, StringFormat={}{0:0.###}}">
                         <GridViewColumn.Header>
                             <TextBlock Text="Bpm" ToolTip="{markup:Translate [SoflanPointColumnBpmTipText]}" />
                         </GridViewColumn.Header>

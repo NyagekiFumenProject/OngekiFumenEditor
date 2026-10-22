@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="OngekiFumenEditor.Kernel.SettingPages.FumenVisualEditor.Views.FumenVisualEditorGlobalSettingView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -168,7 +168,7 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.TextureSizeScale}"
+                        Text="{Binding Setting.TextureSizeScale, StringFormat={}{0:0.###}}"
                         ToolTip="{markup:Translate [SettingsToolTipEditorTextureSizeScale]}" />
                     <TextBlock VerticalAlignment="Center" Text="× (0.25–3)" />
                 </StackPanel>
@@ -177,7 +177,7 @@
                     <TextBox
                         Width="50"
                         Margin="5,0"
-                        Text="{Binding Setting.HoldBodyOpacity}"
+                        Text="{Binding Setting.HoldBodyOpacity, StringFormat={}{0:0.###}}"
                         ToolTip="{markup:Translate [SettingsToolTipEditorHoldBodyOpacity]}" />
                     <TextBlock VerticalAlignment="Center" Text="(0–1)" />
                 </StackPanel>

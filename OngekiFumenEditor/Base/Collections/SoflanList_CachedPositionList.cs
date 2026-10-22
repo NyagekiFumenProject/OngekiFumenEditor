@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 using OngekiFumenEditor.Base.Collections.Base;
 using OngekiFumenEditor.Base.Collections.Base.RangeTree;
 using OngekiFumenEditor.Base.EditorObjects;
@@ -27,7 +28,7 @@ namespace OngekiFumenEditor.Base.Collections
             public double Speed { get; set; }
             public BPMChange Bpm { get; set; }
 
-            public override string ToString() => $"Y:{Y} TGrid:{TGrid} SPD:{Speed} BPM:{Bpm.BPM}";
+            public override string ToString() => $"Y:{Y.ToString("0.##", CultureInfo.CurrentCulture)} TGrid:{TGrid} SPD:{Speed.ToString("0.####", CultureInfo.CurrentCulture)} BPM:{Bpm.BPM.ToString("0.###", CultureInfo.CurrentCulture)}";
         }
 
         private int cachedSoflanPositionBpmVersion = NonceGenerator.Next();

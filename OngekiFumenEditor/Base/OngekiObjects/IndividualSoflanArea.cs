@@ -1,3 +1,4 @@
+﻿using System.Globalization;
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Utils;
 using System;
@@ -95,7 +96,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects
             displayables = [this, EndIndicator];
         }
 
-        public override string ToString() => $"[{IDShortName}] Id({Id}) Group({SoflanGroup}) XGrid({XGrid.TotalUnit}, {EndIndicator.XGrid.TotalUnit}) TGrid({TGrid.TotalUnit}, {EndIndicator.TGrid.TotalUnit})";
+        public override string ToString() => $"[{IDShortName}] Id({Id}) Group({SoflanGroup}) XGrid({XGrid.TotalUnit.ToString("0.###", CultureInfo.CurrentCulture)}, {EndIndicator.XGrid.TotalUnit.ToString("0.###", CultureInfo.CurrentCulture)}) TGrid({TGrid.TotalUnit.ToString("0.###", CultureInfo.CurrentCulture)}, {EndIndicator.TGrid.TotalUnit.ToString("0.###", CultureInfo.CurrentCulture)})";
 
         private void EndIndicator_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
