@@ -167,7 +167,12 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                     return;
 
                 seekTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(seekTime, duration));
-                audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds), SeekOrigin.Begin);
+                var bytePosition = (long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds);
+                // 对齐到完整样本帧，避免从半帧/半样本开始读取导致左右声道错位。
+                var blockAlign = audioFileReader.WaveFormat.BlockAlign;
+                if (blockAlign > 0)
+                    bytePosition -= bytePosition % blockAlign;
+                audioFileReader.Seek(bytePosition, SeekOrigin.Begin);
                 // More accurate.
                 baseOffset = audioFileReader.CurrentTime;
                 pauseTime = baseOffset;

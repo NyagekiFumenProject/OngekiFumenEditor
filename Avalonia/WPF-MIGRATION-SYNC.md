@@ -285,3 +285,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`BufferWaveStream.Read(byte[])` / `Read(float[])` 从逐元素循环改为 `Buffer.BlockCopy` / `Span.CopyTo`，保持 `Position` 前进量与返回值语义；末尾不足和越界读取仍返回实际数量。
 - 验证：临时实例反射构造缓冲流，byte/float 读取内容、Position 前进与末尾读取均正确；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：Seek 按 BlockAlign 对齐（WPF）
+
+- WPF：`DefaultMusicPlayer.Seek` 的字节偏移向下对齐到 `WaveFormat.BlockAlign`，避免 `ConvertTGridToAudioTime` 的 ticks 精度落到半帧/半样本导致左右声道错位。
+- 验证：Seek 到 123.456ms 后位置为 47400 字节（8 的倍数），`CurrentTime=123.4375ms`（误差小于一个样本帧）；继续播放正常。
+- Avalonia：本次未移植，不改变现有同步点。
