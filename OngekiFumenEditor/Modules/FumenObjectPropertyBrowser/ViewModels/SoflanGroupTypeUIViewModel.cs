@@ -29,7 +29,7 @@ namespace OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels
 
                 var editor = IoC.Get<IFumenObjectPropertyBrowser>().Editor;
                 var group = editor?.Fumen?.IndividualSoflanAreaMap.SoflanGroupTree.GetGroup(id);
-                return group is null ? $"#{id}" : SoflanGroupDisplayName.FormatGroup(group);
+                return group is null ? $"#{id}" : SoflanGroupDisplayName.FormatGroupWithId(group);
             }
         }
 
