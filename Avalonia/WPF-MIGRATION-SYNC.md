@@ -291,3 +291,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`DefaultMusicPlayer.Seek` 的字节偏移向下对齐到 `WaveFormat.BlockAlign`，避免 `ConvertTGridToAudioTime` 的 ticks 精度落到半帧/半样本导致左右声道错位。
 - 验证：Seek 到 123.456ms 后位置为 47400 字节（8 的倍数），`CurrentTime=123.4375ms`（误差小于一个样本帧）；继续播放正常。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：新增基于设备播放位置的 DefaultMusicPlayer_new（WPF）
+
+- WPF：新增 `DefaultMusicPlayer_new`（未接入 `NAudioManager`，生产仍用旧实现）。时间源完全改为 `IWavePosition.GetPosition()` / `OutputWaveFormat`，不使用 Stopwatch 或旧逻辑回退；`Play` / `Pause` / `Seek` 以设备字节位置重建基准，并处理 WaveOut 32 位位置回绕；`NAudioManager` 增加 internal `TryGetOutputPosition`。
+- 验证：临时切换新实现后，6 轮 500ms 播放/暂停的 `CurrentTime` 与真实时间差约 2ms 且不累积；Seek 123.456ms 对齐到 123.4375ms（8 字节）；继续播放正常；Debug 构建 0 error。生产已恢复旧播放器。
+- Avalonia：本次未移植，不改变现有同步点。

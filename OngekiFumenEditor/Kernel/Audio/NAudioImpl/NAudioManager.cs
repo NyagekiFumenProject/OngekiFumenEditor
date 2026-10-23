@@ -409,5 +409,22 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         {
             speedProvider?.Reposition();
         }
+
+        /// <summary>
+        /// 读取输出设备当前已播放的字节位置。仅支持实现 <see cref="IWavePosition"/> 的后端。
+        /// </summary>
+        internal bool TryGetOutputPosition(out long position, out WaveFormat format)
+        {
+            if (audioOutputDevice is IWavePosition wavePosition)
+            {
+                position = wavePosition.GetPosition();
+                format = wavePosition.OutputWaveFormat;
+                return true;
+            }
+
+            position = 0;
+            format = null;
+            return false;
+        }
     }
 }
