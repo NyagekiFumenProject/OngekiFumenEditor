@@ -202,7 +202,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
             {
                 if (!IsPlaying)
                     return pauseTime;
-                var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
+                var offset = sw.Elapsed * manager.MusicSpeed;
                 var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs / 2);
                 return MathUtils.Max(TimeSpan.Zero, adjustedTime);
             }

@@ -254,3 +254,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`BatchModeToggle` 配置键直接改名为 `kbd_editor_ToggleBatchMode`，新增三语资源（复用原「切换批量模式」文案）；不保留旧键兼容或迁移。
 - 验证：隔离实例读回 `ConfigKey=kbd_editor_ToggleBatchMode`；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：修复 Playtime 的 Stopwatch tick 单位（WPF）
+
+- WPF：`DefaultMusicPlayer.GetTime` 中 `TimeSpan.FromTicks(sw.ElapsedTicks)` 改为 `sw.Elapsed`。前者把 Stopwatch 原始 tick 当成 TimeSpan tick（1e7/s）使用，在 QPC 频率非 10MHz 的机器上 Playtime 会按 `Frequency/1e7` 缩放（页面报告的 2,533,209Hz 机器为 0.2533x，慢约 3.95 倍）。
+- 验证：本机 `Stopwatch.Frequency=10,000,000`，修复前后均约 1.0x；模拟 2,533,209Hz 时错误写法 2 秒只得到 506.6ms，修复公式得到 2000ms；修复后实例播放 2 秒 `CurrentTime=2001.4ms`（ratio=1.00003）。
+- Avalonia：本次未移植，不改变现有同步点。
