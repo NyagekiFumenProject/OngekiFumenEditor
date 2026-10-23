@@ -1150,6 +1150,9 @@
   <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
     <value>選択中グループのソフラン詳細リストを表示します（現在は使用できません）。</value>
   </data>
+  <data name="IndividualSoflanAreaOverlap" xml:space="preserve">
+    <value>個別ソフランエリア(グループ {0})と(グループ {1})の範囲が重なっています。重なった範囲内のノーツは両方のソフラン pattern に属するため、ゲーム側で実際に適用される挙動は不定です。</value>
+  </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>個別ソフランエリア(グループ {0})内にホールド {1} がありますが、そのグループを使うソフランがありません。ゲーム側の読み込み時に例外が発生します。</value>
   </data>

@@ -5327,7 +5327,16 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.
+        ///   Looks up a localized string similar to Individual soflan areas (group {0}) and (group {1}) overlap. Notes inside the shared area fall under both soflan patterns, so the effect actually applied by the game is undefined..
+        /// </summary>
+        public static string IndividualSoflanAreaOverlap {
+            get {
+                return ResourceManager.GetString("IndividualSoflanAreaOverlap", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading..
         /// </summary>
         public static string SoflanPatternMissingForArea {
             get {

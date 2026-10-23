@@ -35,8 +35,9 @@ export default {
     ctx.hasKeys('check response shape', payload,
       ['success', 'editorId', 'ruleCount', 'minSeverity', 'total', 'errorCount', 'problemCount', 'suggestCount', 'matched', 'returned', 'truncated', 'results', 'ruleFailures']);
 
-    // WallConflictCheckRule ships without [Export] and is therefore a dead rule: 23, not 24.
-    ctx.equal('the host runs the expected number of check rules', payload.ruleCount, 23);
+    // WallConflictCheckRule ships without [Export] and is therefore a dead rule: 24 registered
+    // rules inclusive of IndividualSoflanAreaOverlap, not 25.
+    ctx.equal('the host runs the expected number of check rules', payload.ruleCount, 24);
     ctx.isArray('every rule that ran reports back', payload.ruleFailures, {});
     ctx.equal('no rule blew up', payload.ruleFailures.length, 0);
     ctx.equal('total equals the number of matched results when nothing is truncated', payload.total >= payload.matched, true);
@@ -312,5 +313,53 @@ export default {
     const alignLeftover = (await api.family(editorId, 'tap', { minTotalGrid: 0, maxTotalGrid: 479 }))
       .filter((tap) => [5, 80, 180].includes(Number(tap.tGrid?.grid)));
     ctx.equal('the lattice section leaves no taps behind', alignLeftover.length, 0);
+
+    // ---------------- IndividualSoflanAreaOverlap ----------------
+    // An ISA is a T×X rectangle. Two areas whose rectangles share a positive area are reported
+    // once (problem); touching only at an edge is the normal "back-to-back" layout and stays clean.
+    ctx.section('IndividualSoflanAreaOverlap reports area overlap, not edge contact');
+
+    const isfTaps = await api.family(editorId, 'tap');
+    const isfBase = isfTaps[0].tGrid.totalGrid;
+    const isfT = (n) => splitTotalGrid(isfBase + n * totalGridResolution);
+
+    const addArea = async (group, start, end, xUnit, endXUnit) => api.must(await api.addObject({
+      editorId, objectType: 'isfarea', soflanGroup: group,
+      ...isfT(start), xGridUnit: xUnit, xGridGrid: 0,
+      endTGridUnit: isfT(end).tGridUnit, endTGridGrid: isfT(end).tGridGrid,
+      endXGridUnit: endXUnit, endXGridGrid: 0,
+    }), `add ISF group ${group} T[${start},${end}) X[${xUnit},${endXUnit})`);
+
+    const areaA = await addArea(0, 100, 104, 0, 2);
+    const areaB = await addArea(1, 103, 107, 0, 2);  // overlaps A on T[103,104)
+    const areaC = await addArea(0, 107, 108, 0, 2);  // starts exactly where B ends
+    const areaD = await addArea(1, 100, 101, 2, 4);  // starts exactly where A's X ends
+
+    const overlapResults = (await api.must(await api.check({ editorId, limit: 1000 }), 'run check'))
+      .results.filter((result) => result.ruleName === 'IndividualSoflanAreaOverlap');
+
+    ctx.equal('exactly the overlapping pair is reported, edge contact is not', overlapResults.length, 1);
+    const overlap = overlapResults[0] ?? {};
+    ctx.equal('the area overlap is a problem', overlap.severity, 'problem');
+    ctx.equal('navigation targets the later-starting area', Number(overlap.objectId), areaB.objectId);
+    ctx.equal('navigation reports the area family', overlap.objectType, 'isfarea');
+
+    const areaADto = (await api.family(editorId, 'isfarea')).find((area) => area.id === areaA.objectId);
+    const totalUnitOf = (grid) => grid.unit + grid.grid / totalGridResolution;
+    const shared = String(overlap.location).match(/^TGrid\(([\d.]+),([\d.]+)\) XGrid\(([\d.]+),([\d.]+)\)$/);
+    ctx.check('the location names the shared T/X rectangle', !!shared, `location=${overlap.location}`);
+    if (shared) {
+      const [t0, t1, x0, x1] = shared.slice(1).map(Number);
+      // B starts 3 beats into A's 4-beat span, so the shared T window is exactly one beat wide.
+      const expectedT0 = totalUnitOf(areaADto.tGrid) + 3;
+      ctx.check('the shared T range is the one beat where A and B overlap',
+        Math.abs(t0 - expectedT0) < 0.001 && Math.abs(t1 - (expectedT0 + 1)) < 0.001,
+        `range=${t0}..${t1} expected=${expectedT0}..${expectedT0 + 1}`);
+      ctx.equal('the shared X range spans 0..2', `${x0},${x1}`, '0,2');
+    }
+
+    for (let undone = 0; undone < 4; undone++)
+      await api.undo({ editorId });
+    ctx.equal('the ISF section leaves no areas behind', (await api.family(editorId, 'isfarea')).length, 0);
   },
 };

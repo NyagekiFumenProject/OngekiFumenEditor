@@ -199,3 +199,17 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 文档：新增 `docs/pr46-implementation-status-2026-10-23.md`，逐条记录 A/B/C/D/E/F/G/H/U/S/V 状态、冲突处理与未实现项；G 组 15% 物件染色暂不实现。
 - 测试：`tests/soflan-group-tree` 290 项通过；Debug/Release 构建 0 error；后台 GUI 冒烟覆盖复选框/紧凑面板/连续放置/两点创建/撤销重做/树状组选择对话框（颜色、#组号、默认滚动）/删除对话框/目标组失效。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：新增 ISF 面积重叠检查规则（WPF）
+
+- WPF：新增 `IndividualSoflanAreaOverlap` 检查规则（`Modules/FumenCheckerListViewer/Base/DefaultRulesImpl/IndividualSoflanAreaOverlapCheckRule.cs`），级别 `problem`。把每个 `IndividualSoflanArea` 视为 T×X 矩形（`TGrid`/`EndIndicator` 两端范围归正），按 T 起点排序后扫描，只有两个矩形的交集面积为正才报（首尾相接、左右并排等仅共享边界的布局不报）；每条重叠对输出一条结果，`LocationDescription` 给出共享 T/X 范围，导航指向较晚开始的区域（`NavigateToObjectBehavior`，MCP `editor.check` 直接回报 objectId/tGrid）。三语文案（en/zh-Hans/ja）与 `Resources.Designer.cs` 同步新增 `IndividualSoflanAreaOverlap`。
+- 文档：`Resources/skills/ongeki-fumen-editor/references/05-runtime-automation-and-mcp.md` 规则目录更新为 24 条（core 20 条），补充新规则说明。
+- 测试：`tests/mcp-e2e/suites/70-metainfo-check.mjs` 的 ruleCount 断言更新为 24，并新增 8 条回归断言（跨组重叠命中 1 条、级别 problem、导航对象/家族/共享 T/X 范围、两种贴边方向不报、清理后无残留）；`node tests/mcp-e2e/run.mjs` 全套 1236/1236 通过；`dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug` 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：ISA 角标拖动重构（WPF）
+
+- WPF：新增 `IndividualSoflanAreaInteractiveAction`（`Modules/FumenVisualEditor/ViewModels/Interactives/Impls/`）并注册到 `ObjectInteractiveManager`：ISA 本体与 End 的三角角标拖动时，被拖顶点直接跟手，允许暂时越过另一顶点（`EndIndicator.SetTGridUnclamped` 绕过 `End >= Start` 的常规夹取）；松手时 `IndividualSoflanArea.NormalizeCorners()` 把 X/T 最小值写回本体、最大值写回 End，保证「左下=本体、右上=End」。拖动结束写入一个 `LambdaUndoAction`，撤销/重做同时恢复两个顶点。
+- WPF：`IndividualSoflanAreaDrawingTarget` 的矩形上下边改用 min/max，两个角标改为按各自对象坐标绘制并注册命中（原先固定注册在 bbox 左下/右上）；End 拖到另一侧后三角仍贴在指针下，不再出现角标与对象错位。
+- 验证：脚本直接驱动交互 action（关闭磁吸以取精确坐标）覆盖 End 拖到本体左下、T 越过本体下方、本体拖过 End、本体+End 多选整体平移，结果分别为 `(-3,8)..(0,10)`、`(0,6)..(5,10)`、`(0,10)..(5,16)`、平移 `(+3,+2)`；MCP undo/redo 恢复正确；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

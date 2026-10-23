@@ -1140,6 +1140,9 @@
   <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
     <value>Shows the soflan detail list of the selected group (not available yet).</value>
   </data>
+  <data name="IndividualSoflanAreaOverlap" xml:space="preserve">
+    <value>Individual soflan areas (group {0}) and (group {1}) overlap. Notes inside the shared area fall under both soflan patterns, so the effect actually applied by the game is undefined.</value>
+  </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.</value>
   </data>

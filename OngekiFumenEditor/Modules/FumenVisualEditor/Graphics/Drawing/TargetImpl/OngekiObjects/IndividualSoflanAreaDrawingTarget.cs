@@ -66,8 +66,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
 
                 var minXGrid = Math.Min(isf.XGrid.TotalUnit, isf.EndIndicator.XGrid.TotalUnit);
                 var maxXGrid = Math.Max(isf.XGrid.TotalUnit, isf.EndIndicator.XGrid.TotalUnit);
-                var minTGrid = isf.TGrid;
-                var maxTGrid = isf.EndIndicator.TGrid;
+                var swapT = isf.EndIndicator.TGrid.TotalUnit < isf.TGrid.TotalUnit;
+                var minTGrid = swapT ? isf.EndIndicator.TGrid : isf.TGrid;
+                var maxTGrid = swapT ? isf.TGrid : isf.EndIndicator.TGrid;
 
                 var leftX = (float)XGridCalculator.ConvertXGridToX(minXGrid, target.Editor);
                 var topY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(maxTGrid);
@@ -85,14 +86,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                 lineVertex.Add(new LineVertex(new(leftX, bottomY), color, dash));
                 lineVertex.Add(new LineVertex(new(leftX, topY), color, dash));
 
-                var topRightTriPos = new Vector2(rightX - texSize / 2 - bias, topY - texSize / 2 - bias);
-                var bottomLeftTriPos = new Vector2(leftX + texSize / 2 + bias, bottomY + texSize / 2 + bias);
+                var startX = (float)XGridCalculator.ConvertXGridToX(isf.XGrid, target.Editor);
+                var startY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(isf.TGrid);
+                var endX = (float)XGridCalculator.ConvertXGridToX(isf.EndIndicator.XGrid, target.Editor);
+                var endY = (float)target.ConvertToViewRelativeY_DefaultSoflanGroup(isf.EndIndicator.TGrid);
 
-                texList.Add((new(texSize, texSize), bottomLeftTriPos, 0, Vector4.One));
-                texList.Add((new(texSize, texSize), topRightTriPos, MathF.PI, Vector4.One));
+                // 角标跟随各自对象坐标：拖动时被拖的三角始终贴在指针下，越过另一顶点后也不会错位。
+                // 矩形框本身仍按 min/max 的四条边绘制。
+                var startTriPos = new Vector2(startX + texSize / 2 + bias, startY + texSize / 2 + bias);
+                var endTriPos = new Vector2(endX - texSize / 2 - bias, endY - texSize / 2 - bias);
 
-                target.RegisterSelectableObject(isf, bottomLeftTriPos, new(texSize, texSize));
-                target.RegisterSelectableObject(isf.EndIndicator, topRightTriPos, new(texSize, texSize));
+                texList.Add((new(texSize, texSize), startTriPos, 0, Vector4.One));
+                texList.Add((new(texSize, texSize), endTriPos, MathF.PI, Vector4.One));
+
+                target.RegisterSelectableObject(isf, startTriPos, new(texSize, texSize));
+                target.RegisterSelectableObject(isf.EndIndicator, endTriPos, new(texSize, texSize));
 
                 builder.DrawString($"SFL:{isf.SoflanGroup}", new Vector2(rightX, topY) + new Vector2(1, 11), Vector2.One, 16, 0, color, new(0, 0.5f), FontStyle.Normal, default);
 
@@ -118,9 +126,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Graphics.Drawing.TargetImp
                     });
 
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
-                        bottomLeftTriPos + new Vector2(highlightScale, highlightScale), 0, Vector4.One));
+                        startTriPos + new Vector2(highlightScale, highlightScale), 0, Vector4.One));
                     hightTexList.Add((new(texSize * highlightScale, texSize * highlightScale),
-                        topRightTriPos - new Vector2(highlightScale, highlightScale), MathF.PI, Vector4.One));
+                        endTriPos - new Vector2(highlightScale, highlightScale), MathF.PI, Vector4.One));
 
                     //画一个方框
                     lineVertex.Add(new LineVertex(new(leftX, topY), highlightLineColor, VertexDash.Solider));

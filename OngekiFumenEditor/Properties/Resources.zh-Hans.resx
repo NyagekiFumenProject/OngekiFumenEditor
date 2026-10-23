@@ -1140,6 +1140,9 @@
   <data name="SoflanGroupShowPointListTipText" xml:space="preserve">
     <value>显示当前所选组的变速点明细列表（该开关暂不可用）。</value>
   </data>
+  <data name="IndividualSoflanAreaOverlap" xml:space="preserve">
+    <value>局部Soflan区域(组 {0})与(组 {1})存在面积重叠：重叠区域内的物件会同时落入两个区域的soflan pattern，游戏侧实际生效的变速行为不确定。</value>
+  </data>
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>局部Soflan区域(组 {0})内有长条 {1}，但没有任何soflan使用该组：游戏读谱时查soflan表会因缺键抛异常崩溃。</value>
   </data>
