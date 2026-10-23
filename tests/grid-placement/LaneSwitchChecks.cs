@@ -141,14 +141,14 @@ public static class LaneSwitchChecks
             e.IsDirty = true;
             if (externalEdit)
                 other.XGrid = new XGrid(3);
-            e.CancelPlacementTools();
+            e.AbortSelectionDrag();
             check(tap.TGrid.TotalGrid == 173 && !e.InteractiveManager.IsSelectionDragging,
                 "取消恢复原位置并释放事务");
             check(e.IsDirty == (initiallyDirty || externalEdit), "取消恢复原脏状态且保留外来编辑");
             check(e.UndoRedoManager.UndoActionCount == 0, "取消不增加撤销动作");
             other.XGrid = new XGrid(4);
             e.IsDirty = true;
-            e.CancelPlacementTools();
+            e.AbortSelectionDrag();
             check(e.IsDirty, "无事务时取消不清除外来编辑脏状态");
         }
 

@@ -16,21 +16,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
 {
     public partial class ObjectInteractiveManager
     {
-        internal SelectionGridDrag selectionGridDrag;
-        private bool selectionWasDirty;
-        private object[] selectionUndoActions;
-        private int selectionUndoCount;
-        private bool selectionHasExternalChanges;
-        private bool applyingSelection;
-        private OngekiFumen observedFumen;
+        internal SelectionGridDrag activeSelectionDrag;
+        private bool isDirtyBeforeDrag;
+        private object[] undoStackBeforeDrag;
+        private int undoCountBeforeDrag;
+        private bool hasExternalChangesDuringDrag;
+        private bool isApplyingDragSnapshots;
+        private OngekiFumen dragFumen;
 
         private void ObserveSelectionChanges(OngekiObjectBase obj, PropertyChangedEventArgs args)
         {
-            if (!applyingSelection && args.PropertyName is not (nameof(ISelectableObject.IsSelected) or nameof(ConnectableChildObjectBase.IsAnyControlSelecting)))
-                selectionHasExternalChanges = true;
+            if (!isApplyingDragSnapshots && args.PropertyName is not (nameof(ISelectableObject.IsSelected) or nameof(ConnectableChildObjectBase.IsAnyControlSelecting)))
+                hasExternalChangesDuringDrag = true;
         }
 
-        public bool IsSelectionDragging => selectionGridDrag != null;
+        public bool IsSelectionDragging => activeSelectionDrag != null;
         internal void BeginSelectionDrag(FumenVisualEditorViewModel editor, Point point, IEnumerable<OngekiTimelineObjectBase> objects = null)
         {
             var selected = (objects ?? editor.SelectObjects.OfType<OngekiTimelineObjectBase>()).Distinct().ToArray();
@@ -87,23 +87,23 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             foreach (var hold in related.OfType<Hold>().ToArray())
                 if (hold.HoldEnd is not null)
                     related.Add(hold.HoldEnd);
-            if (observedFumen != null)
-                observedFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
-            selectionWasDirty = editor.IsDirty;
-            selectionUndoActions = editor.UndoRedoManager.ActionStack.Cast<object>().ToArray();
-            selectionUndoCount = editor.UndoRedoManager.UndoActionCount;
-            selectionHasExternalChanges = false;
-            observedFumen = editor.Fumen;
-            observedFumen.ObjectModifiedChanged += ObserveSelectionChanges;
-            selectionGridDrag = new SelectionGridDrag(selected, related);
-            var anchor = new Point(XGridCalculator.ConvertXGridToX(XGrid.FromTotalGrid((int)selectionGridDrag.AnchorX), editor),
-                editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid((int)selectionGridDrag.AnchorT)));
-            selectionGridDrag.GrabOffset = new Point(point.X - anchor.X, point.Y - anchor.Y);
+            if (dragFumen != null)
+                dragFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
+            isDirtyBeforeDrag = editor.IsDirty;
+            undoStackBeforeDrag = editor.UndoRedoManager.ActionStack.Cast<object>().ToArray();
+            undoCountBeforeDrag = editor.UndoRedoManager.UndoActionCount;
+            hasExternalChangesDuringDrag = false;
+            dragFumen = editor.Fumen;
+            dragFumen.ObjectModifiedChanged += ObserveSelectionChanges;
+            activeSelectionDrag = new SelectionGridDrag(selected, related);
+            var anchor = new Point(XGridCalculator.ConvertXGridToX(XGrid.FromTotalGrid((int)activeSelectionDrag.AnchorX), editor),
+                editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid((int)activeSelectionDrag.AnchorT)));
+            activeSelectionDrag.GrabOffset = new Point(point.X - anchor.X, point.Y - anchor.Y);
         }
 
-        internal void MoveSelectionDrag(FumenVisualEditorViewModel editor, Point point)
+        internal void UpdateSelectionDrag(FumenVisualEditorViewModel editor, Point point)
         {
-            var drag = selectionGridDrag;
+            var drag = activeSelectionDrag;
             if (drag is null)
                 return;
             var x = point.X - drag.GrabOffset.X;
@@ -118,7 +118,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             var wasDirty = editor.IsDirty;
             editor.ExecuteGridDragUpdate(() =>
             {
-                applyingSelection = true;
+                isApplyingDragSnapshots = true;
                 try
                 {
                     if (!drag.TryMoveInEditor((long)targetT.TotalGrid - drag.AnchorT, (long)targetX.TotalGrid - drag.AnchorX, editor))
@@ -126,29 +126,33 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                 }
                 finally
                 {
-                    applyingSelection = false;
+                    isApplyingDragSnapshots = false;
                 }
             });
         }
 
-        internal void EndSelectionDrag(FumenVisualEditorViewModel editor, bool cancel = false)
+        internal void CommitSelectionDrag(FumenVisualEditorViewModel editor) => FinishSelectionDrag(editor, abort: false);
+
+        internal void AbortSelectionDrag(FumenVisualEditorViewModel editor) => FinishSelectionDrag(editor, abort: true);
+
+        private void FinishSelectionDrag(FumenVisualEditorViewModel editor, bool abort)
         {
-            var drag = selectionGridDrag;
-            selectionGridDrag = null;
+            var drag = activeSelectionDrag;
+            activeSelectionDrag = null;
             if (drag is null)
                 return;
-            if (observedFumen != null)
+            if (dragFumen != null)
             {
-                observedFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
-                observedFumen = null;
+                dragFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
+                dragFumen = null;
             }
             var after = drag.CaptureCurrent();
-            if (cancel)
+            if (abort)
             {
                 editor.ExecuteGridDragUpdate(() => SelectionGridDrag.Apply(drag.Before));
-                editor.IsDirty = selectionWasDirty || selectionHasExternalChanges ||
-                    selectionUndoActions != null && (selectionUndoCount != editor.UndoRedoManager.UndoActionCount ||
-                    !selectionUndoActions.SequenceEqual(editor.UndoRedoManager.ActionStack.Cast<object>()));
+                editor.IsDirty = isDirtyBeforeDrag || hasExternalChangesDuringDrag ||
+                    undoStackBeforeDrag != null && (undoCountBeforeDrag != editor.UndoRedoManager.UndoActionCount ||
+                    !undoStackBeforeDrag.SequenceEqual(editor.UndoRedoManager.ActionStack.Cast<object>()));
             }
             else if (after.Where((p, i) => p.T != drag.Before[i].T || p.X != drag.Before[i].X || !ReferenceEquals(p.Lane, drag.Before[i].Lane)).Any())
                 editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects,

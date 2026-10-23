@@ -37,7 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         public override void OnDragMove(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
         {
             if (obj is Tap or Hold or HoldEnd)
-                editor.InteractiveManager.MoveSelectionDrag(editor, point);
+                editor.InteractiveManager.UpdateSelectionDrag(editor, point);
             else
                 base.OnDragMove(obj, point, editor);
         }
@@ -46,8 +46,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             if (obj is Tap or Hold or HoldEnd)
             {
-                editor.InteractiveManager.MoveSelectionDrag(editor, point);
-                editor.InteractiveManager.EndSelectionDrag(editor);
+                editor.InteractiveManager.UpdateSelectionDrag(editor, point);
+                editor.InteractiveManager.CommitSelectionDrag(editor);
             }
             else
                 base.OnDragEnd(obj, point, editor);

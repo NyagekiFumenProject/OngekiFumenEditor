@@ -58,7 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (isUserRequestHideEditorObject != value)
                 {
-                    CancelPlacementTools();
+                    AbortSelectionDrag();
                     CancelBatchProjectilePlacement();
                     CancelIsaPlacement();
                 }
@@ -467,7 +467,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// 表示指针是否已拖出滚动范围
         /// </summary>
         private bool dragOutBound;
-        private int currentDraggingActionId;
+        private int autoScrollRedispatchToken;
 
         public void MenuItemAction_RememberSelectedObjectAudioTime(ActionExecutionContext e)
         {
@@ -790,7 +790,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void DeleteSelection(IEnumerable<OngekiObjectBase> selection = null)
         {
-            EndSelectionGridDrag(true);
+            AbortSelectionDrag();
             if (!IsDesignMode)
             {
                 ToastNotify(Resources.EditorMustBeDesignMode);
@@ -874,7 +874,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
-            CancelPlacementTools();
+            AbortSelectionDrag();
 
             if (IsIsaPlacementActive)
             {
@@ -1183,17 +1183,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #endregion
 
-        // 模式切换、工具箱拖放和文档失焦共用同一取消入口。
-        public void CancelPlacementTools()
-        {
-            if (InteractiveManager.IsSelectionDragging)
-            {
-                EndSelectionGridDrag(true);
-                isSelectRangeDragging = false;
-                currentDraggingActionId = int.MaxValue;
-            }
-        }
-
         #region Drag Actions
 
         public void OnMouseLeave(ActionExecutionContext e)
@@ -1203,9 +1192,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             CurrentCursorPosition = null;
             if (InteractiveManager.IsSelectionDragging)
             {
-                EndSelectionGridDrag();
-                isSelectRangeDragging = false;
-                currentDraggingActionId = int.MaxValue;
+                CommitSelectionDrag();
+                isObjectDragStarted = false;
+                autoScrollRedispatchToken = int.MaxValue;
             }
 
             OnMouseUp(e);
@@ -1233,7 +1222,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             }
 
             if (!IsDesignMode || IsBatchMode)
-                CancelPlacementTools();
+                AbortSelectionDrag();
 
             Log.LogInfo("Visual mouseup");
 
@@ -1256,14 +1245,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     }
                     else
                     {
-                        if (isSelectRangeDragging)
+                        if (isObjectDragStarted)
                         {
                             var cp = pos;
                             cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
                             if (InteractiveManager.IsSelectionDragging)
                             {
-                                MoveSelectionGridDrag(cp);
-                                EndSelectionGridDrag();
+                                UpdateSelectionDrag(cp);
+                                CommitSelectionDrag();
                             }
                             else
                             {
@@ -1288,8 +1277,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    isSelectRangeDragging = false;
-                    currentDraggingActionId = int.MaxValue;
+                    isObjectDragStarted = false;
+                    autoScrollRedispatchToken = int.MaxValue;
                     SelectionArea.IsActive = false;
                 }
                 else if (isMiddleMouseDown)
@@ -1343,7 +1332,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
             if (!IsDesignMode || IsBatchMode)
-                CancelPlacementTools();
+                AbortSelectionDrag();
 
             if (TryHandleBatchProjectilePlacementMouseDown(arg.ChangedButton, position))
             {
@@ -1364,8 +1353,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     position.Y = Math.Max(0, RectInDesignMode.MaxY - position.Y);
 
-                    EndSelectionGridDrag(true);
-                    isSelectRangeDragging = false;
+                    AbortSelectionDrag();
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
                     if (ConvertYToTGrid_DesignMode(position.Y) is TGrid tGrid)
@@ -1487,14 +1475,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp)
             {
-                currentDraggingActionId = int.MaxValue;
+                autoScrollRedispatchToken = int.MaxValue;
                 OnMouseMove(args.GetPosition(e.Source));
                 return;
             }
 
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
-            currentDraggingActionId = int.MaxValue;
+            autoScrollRedispatchToken = int.MaxValue;
             OnMouseMove(args.GetPosition(parent));
         }
 
@@ -1507,7 +1495,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             if (!IsDesignMode || IsBatchMode)
-                CancelPlacementTools();
+                AbortSelectionDrag();
 
             if (IsDesignMode)
             {
@@ -1556,9 +1544,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var audioTime = ConvertYToAudioTime_DesignMode(y);
                         ScrollTo(audioTime);
 
-                        var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
+                        var currentid = autoScrollRedispatchToken = MathUtils.Random(int.MaxValue - 1);
                         await Task.Delay(1000 / 60);
-                        if (currentDraggingActionId == currentid)
+                        if (autoScrollRedispatchToken == currentid)
                             OnMouseMove(pos);
                     }
 
@@ -1570,8 +1558,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (Mouse.LeftButton == MouseButtonState.Pressed)
                 {
-                    var r = isSelectRangeDragging;
-                    isSelectRangeDragging = true;
+                    var r = isObjectDragStarted;
+                    isObjectDragStarted = true;
                     var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
                     {
                         var action = InteractiveManager.GetInteractive(vm);
@@ -1614,7 +1602,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         if (!r)
                             BeginSelectionGridDrag(mouseDownHitObjectPosition ?? cp);
                         if (InteractiveManager.IsSelectionDragging)
-                            MoveSelectionGridDrag(cp);
+                            UpdateSelectionDrag(cp);
                         else
                             SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
                     }
@@ -1669,7 +1657,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
-            CancelPlacementTools();
+            AbortSelectionDrag();
             CancelIsaPlacement();
             if (!CurrentCursorPosition.HasValue)
             {
@@ -1696,7 +1684,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void TryCancelAllObjectSelecting(params ISelectableObject[] expects)
         {
-            EndSelectionGridDrag(true);
+            AbortSelectionDrag();
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             expects = expects ?? new ISelectableObject[0];
 
@@ -1802,7 +1790,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 arg.Effects = DragDropEffects.None;
             else
-                CancelPlacementTools();
+                AbortSelectionDrag();
         }
 
         public void Grid_Drop(ActionExecutionContext e)
@@ -1819,7 +1807,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as DragEventArgs;
             if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
-                CancelPlacementTools();
+                AbortSelectionDrag();
                 var mousePosition = arg.GetPosition(e.View as FrameworkElement);
                 mousePosition.Y = RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY;
 

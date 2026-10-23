@@ -164,10 +164,10 @@ public static class StartCurveCacheChecks
             {
                 lane.IsSelected = true;
                 vmType.GetMethod("BeginSelectionGridDrag", F).Invoke(editor, new object[] { new Point(600, 0) });
-                drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+                drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
                 dragType = drag.GetType();
                 var grab = (Point)dragType.GetField("GrabOffset", F).GetValue(drag);
-                vmType.GetMethod("MoveSelectionGridDrag", F).Invoke(editor, new object[] { new Point(grab.X + XGridCalculator.ConvertXGridToX(fresh.lane.XGrid, editor), grab.Y + editor.ConvertTGridToY_DesignMode(lane.TGrid)) });
+                vmType.GetMethod("UpdateSelectionDrag", F).Invoke(editor, new object[] { new Point(grab.X + XGridCalculator.ConvertXGridToX(fresh.lane.XGrid, editor), grab.Y + editor.ConvertTGridToY_DesignMode(lane.TGrid)) });
             }
             else
             {

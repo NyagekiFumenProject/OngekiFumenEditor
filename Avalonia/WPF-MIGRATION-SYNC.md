@@ -272,3 +272,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`DefaultMusicPlayer.Pause` 的 `pauseTime` 从 `GetTime()`（Stopwatch 推算）改为 `audioFileReader.CurrentTime`，与 `Seek` 的校准口径一致，避免多次暂停/继续累积误差。
 - 验证：6 轮 500ms 播放/暂停，修复后前 4 轮 `CurrentTime` 精确为 500/1000/1500/2000ms；暂停按流位置校准后不再基于 Stopwatch 累积（输出缓冲预读可能带来一次约 10ms 前跳）。Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：Grid 拖动事务命名对齐实现（WPF）
+
+- WPF：取消入口 `CancelPlacementTools` 改名 `AbortSelectionDrag`；`EndSelectionGridDrag(bool cancel)` 拆为 `CommitSelectionDrag()` / `AbortSelectionDrag()`；`MoveSelectionGridDrag` 改名 `UpdateSelectionDrag`，调用点与 `tests/grid-placement` 反射入口同步。
+- WPF：拖动状态按实际语义重命名：`isSelectRangeDragging`→`isObjectDragStarted`、`currentDraggingActionId`→`autoScrollRedispatchToken`、`placementInputView`→`editorView`、`selectionGridDrag`→`activeSelectionDrag`、`selectionWasDirty`→`isDirtyBeforeDrag`、`selectionUndoActions/Count`→`undoStackBeforeDrag/undoCountBeforeDrag`、`selectionHasExternalChanges`→`hasExternalChangesDuringDrag`、`applyingSelection`→`isApplyingDragSnapshots`、`observedFumen`→`dragFumen`。
+- 验证：`dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug/Release` 均 0 error；`dotnet run --project tests/grid-placement/GridPlacement.csproj -c Release -p:EditorAssemblyDirectory=<隔离 Release 输出>` 228 项通过。本机有运行中的编辑器锁定默认 `bin`，构建输出重定向到未被版本控制的 `artifacts/`。
+- Avalonia：本次未移植，不改变现有同步点。

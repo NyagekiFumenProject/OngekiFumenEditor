@@ -127,7 +127,7 @@ public static class GridInteractionChecks
             tap
         };
         drag = Activator.CreateInstance(dragType, F, null, new object[] { selected, all }, null);
-        editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).SetValue(editor.InteractiveManager, drag);
+        editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).SetValue(editor.InteractiveManager, drag);
         for (var i = 0; i < 10000; i++)
             project.Fumen.AddObject(new Tap
             {
@@ -144,7 +144,7 @@ public static class GridInteractionChecks
         foreach (var obj in all)
             obj.PropertyChanged += (_, e) => modified.Invoke(editor, new object[] { obj, e });
         var point = new Point(XGridCalculator.ConvertXGridToX(XGrid.FromTotalGrid((int)(long)dragType.GetField("AnchorX", F).GetValue(drag)), editor), editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(2640)) + 1);
-        vmType.GetMethod("MoveSelectionGridDrag", F).Invoke(editor, new object[] { point });
+        vmType.GetMethod("UpdateSelectionDrag", F).Invoke(editor, new object[] { point });
         check(a.HoldEnd.TGrid.TotalGrid == 2640 && b.HoldEnd.TGrid.TotalGrid == 2640 && tap.TGrid.TotalGrid == 2880, "真实Move跨BPM逐物件时间吸附");
         check(a.HoldEnd.XGrid == a.ReferenceLaneStart.CalulateXGrid(a.HoldEnd.TGrid) && b.HoldEnd.XGrid == b.ReferenceLaneStart.CalulateXGrid(b.HoldEnd.TGrid), "多个Hold尾各自贴原轨");
         check(a.TGrid.TotalGrid == 100 && b.TGrid.TotalGrid == 100, "未选Hold头不移动");
@@ -157,16 +157,16 @@ public static class GridInteractionChecks
         foreach (var node in perfAll)
             node.PropertyChanged += (_, e) => modified.Invoke(editor, new object[] { node, e });
         drag = Activator.CreateInstance(dragType, F, null, new object[] { perfTails, perfAll }, null);
-        editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).SetValue(editor.InteractiveManager, drag);
+        editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).SetValue(editor.InteractiveManager, drag);
         metrics = 0;
         timer.Restart();
         for (var i = 1; i <= 20; i++)
-            vmType.GetMethod("MoveSelectionGridDrag", F).Invoke(editor, new object[] { new Point(600, editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(960 + i * 120))) });
+            vmType.GetMethod("UpdateSelectionDrag", F).Invoke(editor, new object[] { new Point(600, editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(960 + i * 120))) });
         timer.Stop();
         Console.WriteLine($"200个Hold尾/10000物件/20次变动：滚动全谱扫描={metrics}，耗时={timer.Elapsed.TotalMilliseconds:F2}ms");
         check(metrics <= 20, "实际移动时每事件至多一次全谱扫描");
         drag = restoreDrag;
-        editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).SetValue(editor.InteractiveManager, drag);
+        editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).SetValue(editor.InteractiveManager, drag);
         var snapshot = dragType.GetMethod("CaptureCurrent", F).Invoke(drag, null);
         var before = dragType.GetField("Before", F).GetValue(drag);
         var apply = dragType.GetMethod("Apply", BindingFlags.Static | BindingFlags.NonPublic);
@@ -179,9 +179,9 @@ public static class GridInteractionChecks
         setting.DisableTGridMagneticDock = true;
         var beforeX = selected.Select(o => ((IHorizonPositionObject)o).XGrid.TotalGrid).ToArray();
         drag = Activator.CreateInstance(dragType, F, null, new object[] { selected, all }, null);
-        editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).SetValue(editor.InteractiveManager, drag);
+        editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).SetValue(editor.InteractiveManager, drag);
         point = new Point(XGridCalculator.ConvertXGridToX(XGrid.FromTotalGrid((int)(long)dragType.GetField("AnchorX", F).GetValue(drag) + 500), editor), editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(2701)));
-        vmType.GetMethod("MoveSelectionGridDrag", F).Invoke(editor, new object[] { point });
+        vmType.GetMethod("UpdateSelectionDrag", F).Invoke(editor, new object[] { point });
         var deltas = selected.Select((o, i) => ((IHorizonPositionObject)o).XGrid.TotalGrid - beforeX[i]).ToArray();
         check(a.HoldEnd.XGrid == a.ReferenceLaneStart.CalulateXGrid(a.HoldEnd.TGrid) && b.HoldEnd.XGrid == b.ReferenceLaneStart.CalulateXGrid(b.HoldEnd.TGrid), "关闭吸附开关，Hold尾仍始终贴所属轨道");
         check(a.HoldEnd.TGrid.TotalGrid == 2701 && tap.TGrid.TotalGrid == 2941, "关闭时间吸附使用原始Grid");
@@ -273,9 +273,9 @@ public static class GridInteractionChecks
         project.Fumen.AddObject(passiveHold);
         movingLane.IsSelected = middle.IsSelected = finish.IsSelected = true;
         var begin = vmType.GetMethod("BeginSelectionGridDrag", F);
-        var realMove = vmType.GetMethod("MoveSelectionGridDrag", F);
+        var realMove = vmType.GetMethod("UpdateSelectionDrag", F);
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         void MoveDelta(int deltaT, int deltaX)
         {
             var grab = (Point)dragType.GetField("GrabOffset", F).GetValue(drag);
@@ -310,14 +310,14 @@ public static class GridInteractionChecks
         var startX = movingLane.XGrid.TotalGrid;
         var endX = finish.XGrid.TotalGrid;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(120, 777);
         check(movingLane.TGrid.TotalGrid == startTime && finish.TGrid.TotalGrid == endTime && movingLane.XGrid.TotalGrid == startX && finish.XGrid.TotalGrid == endX, "局部中间点混选移动不改变未选轨节点");
         check(passiveTap.TGrid.TotalGrid == 960 && passiveTap.XGrid == movingLane.CalulateXGrid(passiveTap.TGrid) && passiveHold.EndTGrid.TotalGrid == 2400 && passiveHold.HoldEnd.XGrid == movingLane.CalulateXGrid(passiveHold.EndTGrid), "局部轨形变化仅更新未选关联物件X");
         setting.DisableTGridMagneticDock = setting.DisableXGridMagneticDock = false;
         setting.ForceMagneticDock = true;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(133, 900);
         var basicAction = new OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls.DefaultObjectInteractiveAction();
         check(freeTap.XGrid.TotalGrid % XGrid.DEFAULT_RES_X == 0 && middle.XGrid.TotalGrid % XGrid.DEFAULT_RES_X == 0, "混选普通物件各自落横向网格线");
@@ -329,14 +329,14 @@ public static class GridInteractionChecks
         };
         project.Fumen.AddObject(flatPassive);
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         var middleBeforeRejectedX = middle.XGrid.TotalGrid;
         editor.IsDirty = false;
         var rejectUndo = new OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl.DefaultEditorUndoManager(editor);
         vmType.GetProperty("UndoRedoManager").SetValue(editor, rejectUndo);
         MoveDelta(0, 100);
         check(middle.XGrid.TotalGrid == middleBeforeRejectedX && !editor.IsDirty, "无有效投影时回滚整次移动且不改变Dirty");
-        vmType.GetMethod("EndSelectionGridDrag", F).Invoke(editor, new object[] { false });
+        vmType.GetMethod("CommitSelectionDrag", F).Invoke(editor, null);
         check(rejectUndo.ActionStack.Count == 0, "拒绝的拖动结束不增加Undo记录");
         check(flatPassive.TGrid.TotalGrid == 9000 && flatPassive.XGrid.TotalGrid == 1234, "未选附轨物件超出轨道有效时间时保留原坐标");
         project.Fumen.RemoveObject(flatPassive);
@@ -347,7 +347,7 @@ public static class GridInteractionChecks
             node.PropertyChanged += (_, e) => modified.Invoke(editor, new object[] { node, e });
         middle.IsSelected = true;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         check(drag != null, "单个轨道中间点进入统一Grid拖动");
         var priorTapTime = passiveTap.TGrid.TotalGrid;
         var priorMiddleTime = middle.TGrid.TotalGrid;
@@ -359,7 +359,7 @@ public static class GridInteractionChecks
         curveControl.IsSelected = true;
         var oldControlX = curveControl.XGrid.TotalGrid;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         check(drag != null, "单个曲线控制点进入统一Grid拖动");
         metrics = 0;
         MoveDelta(0, 111);
@@ -388,12 +388,12 @@ public static class GridInteractionChecks
         project.Fumen.AddObject(boundaryTap);
         boundaryLane.IsSelected = true;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(200, 0);
         check(boundaryLane.TGrid.TotalGrid == 600 && boundaryTap.TGrid.TotalGrid == 600 && boundaryTap.XGrid == boundaryLane.CalulateXGrid(boundaryTap.TGrid), "起点5拖到7时停在未选Tap的6且音符时间不变");
         project.Fumen.RemoveObject(boundaryTap);
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(100, 0);
         check(boundaryLane.TGrid.TotalGrid == 700, "删除边界Tap后轨道起点可以移动到7");
         boundaryTap.TGrid = TGrid.FromTotalGrid(1000);
@@ -401,13 +401,13 @@ public static class GridInteractionChecks
         boundaryLane.IsSelected = false;
         boundaryEnd.IsSelected = true;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(-1000, 0);
         check(boundaryEnd.TGrid.TotalGrid == 1000 && boundaryTap.TGrid.TotalGrid == 1000, "轨道终点向前拖动停在最后需要覆盖的未选音符时间");
         boundaryLane.IsSelected = true;
         var originalLength = boundaryEnd.TGrid.TotalGrid - boundaryLane.TGrid.TotalGrid;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(1000, 0);
         check(boundaryLane.TGrid.TotalGrid == 1000 && boundaryEnd.TGrid.TotalGrid - boundaryLane.TGrid.TotalGrid == originalLength, "整根线触及未选音符边界时统一限制dt且不压缩轨道");
         foreach (var node in project.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>())
@@ -422,7 +422,7 @@ public static class GridInteractionChecks
         boundaryLane.IsSelected = true;
         var importedStartT = boundaryLane.TGrid.TotalGrid;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(0, 333);
         check(boundaryLane.TGrid.TotalGrid == importedStartT && outsideImportedTap.TGrid.TotalGrid == 500, "原有轨道区间外音符不会让纯X拖动擅自修改轨道起点时间");
         var bezierLane = new LaneLeftStart
@@ -473,7 +473,7 @@ public static class GridInteractionChecks
         setting.DisableTGridMagneticDock = setting.DisableXGridMagneticDock = false;
         setting.ForceMagneticDock = true;
         begin.Invoke(editor, new object[] { new Point(600, 0) });
-        drag = editor.InteractiveManager.GetType().GetField("selectionGridDrag", F).GetValue(editor.InteractiveManager);
+        drag = editor.InteractiveManager.GetType().GetField("activeSelectionDrag", F).GetValue(editor.InteractiveManager);
         MoveDelta(333, 777);
         check(offbeatEnd.TGrid.TotalGrid - offbeatLane.TGrid.TotalGrid == 1348 && offbeatControl.TGrid.TotalGrid - offbeatLane.TGrid.TotalGrid == 532, "非网格整线吸附后仍保持节点和控制点原时间差");
         check(offbeatEnd.XGrid.TotalGrid - offbeatLane.XGrid.TotalGrid == 1878 && offbeatControl.XGrid.TotalGrid - offbeatLane.XGrid.TotalGrid == 876, "整线按实际起点吸附统一dx保留形状");

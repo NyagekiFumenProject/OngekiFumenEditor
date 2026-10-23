@@ -190,7 +190,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) &&
                                                        !Keyboard.Modifiers.HasFlag(ModifierKeys.Control) &&
                                                        !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift));
-        private bool isSelectRangeDragging;
+        private bool isObjectDragStarted;
 
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
@@ -476,7 +476,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
-            CancelPlacementTools();
+            AbortSelectionDrag();
             var deactivationSucceeded = false;
             try
             {
@@ -512,14 +512,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (Interlocked.Exchange(ref isDisposed, 1) != 0)
                 return;
 
-            CancelPlacementTools();
+            AbortSelectionDrag();
             CancelBatchProjectilePlacement();
             CancelIsaPlacement();
             UnhookWindowFocus();
-            if (placementInputView != null)
+            if (editorView != null)
             {
-                placementInputView.InteractionInterrupted -= OnInteractionInterrupted;
-                placementInputView = null;
+                editorView.InteractionInterrupted -= OnInteractionInterrupted;
+                editorView = null;
             }
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
             var fumen = editorProjectData?.Fumen;
