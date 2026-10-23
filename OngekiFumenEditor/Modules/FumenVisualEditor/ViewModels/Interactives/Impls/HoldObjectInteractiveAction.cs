@@ -22,20 +22,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             UpdateHoldEndXGrid(obj);
         }
 
-        public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
-        {
-            base.OnDragEnd(obj, point, editor);
-
-            editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.UpdateHoldEndPosition,
-                () =>
-                {
-                    //UpdateHoldEndXGrid(obj);
-                }, () =>
-                {
-                    UpdateHoldEndXGrid(obj);
-                }));
-        }
-
         private void UpdateHoldEndXGrid(OngekiObjectBase obj)
         {
             var hold = obj as Hold;

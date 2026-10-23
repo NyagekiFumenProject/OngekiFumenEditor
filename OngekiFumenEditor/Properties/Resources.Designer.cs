@@ -9380,5 +9380,6 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("SoflanGroupDrawUncheckedTipText", resourceCulture);
             }
         }
+        public static string PasteInvalidGridPosition => ResourceManager.GetString("PasteInvalidGridPosition", resourceCulture);
     }
 }

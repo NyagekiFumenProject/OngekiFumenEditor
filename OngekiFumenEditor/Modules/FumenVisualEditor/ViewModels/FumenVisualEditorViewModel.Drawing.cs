@@ -774,10 +774,18 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
     }
 
+    private OngekiFumenEditor.Modules.FumenVisualEditor.Views.FumenVisualEditorView placementInputView;
+    private void OnInteractionInterrupted(object sender, EventArgs args) => CancelPlacementTools();
+
     protected override void OnViewLoaded(object v)
     {
         base.OnViewLoaded(v);
         InitExtraMenuItems();
+        if (placementInputView != null)
+            placementInputView.InteractionInterrupted -= OnInteractionInterrupted;
+        placementInputView = v as OngekiFumenEditor.Modules.FumenVisualEditor.Views.FumenVisualEditorView;
+        if (placementInputView != null)
+            placementInputView.InteractionInterrupted += OnInteractionInterrupted;
     }
 
     private void ResortRenderOrder()

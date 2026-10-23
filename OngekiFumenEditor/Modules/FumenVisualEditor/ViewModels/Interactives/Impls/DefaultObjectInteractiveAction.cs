@@ -159,6 +159,36 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 : xGrid;
         }
 
+        internal override bool TryAdjustGrid(OngekiObjectBase obj, ref TGrid time, ref XGrid x, FumenVisualEditorViewModel editor, bool preserveTime = false)
+        {
+            if (time != null && !preserveTime && !editor.Setting.DisableTGridMagneticDock)
+            {
+                if (AdjustCandidateY((ITimelineObject)obj, editor.ConvertTGridToY_DesignMode(time), editor) is double y)
+                    time = editor.ConvertYToTGrid_DesignMode(y);
+                if (time == null || time.TotalGrid < 0)
+                    return false;
+            }
+            if (x != null && !editor.Setting.DisableXGridMagneticDock)
+            {
+                if (AdjustCandidateX((IHorizonPositionObject)obj, XGridCalculator.ConvertXGridToX(x, editor), editor) is double px)
+                {
+                    var total = XGridCalculator.ConvertXToXGridTotalUnit(px, editor) * XGrid.DEFAULT_RES_X;
+                    if (!double.IsFinite(total) || total < int.MinValue || total > int.MaxValue)
+                        return false;
+                    x = XGridCalculator.ConvertXToXGrid(px, editor);
+                }
+                if (editor.Setting.ForceXGridIntegerUnit)
+                    x = XGridCalculator.RoundToIntegerUnit(x);
+            }
+            return true;
+        }
+
+        protected virtual double? AdjustCandidateY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
+            => CheckAndAdjustY(obj, y, editor);
+
+        protected virtual double? AdjustCandidateX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
+            => CheckAndAdjustX(obj, x, editor);
+
         public virtual double? CheckAndAdjustY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
         {
             var enableMagneticAdjust = !editor.Setting.DisableTGridMagneticDock;

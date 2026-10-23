@@ -1,3 +1,6 @@
+using OngekiFumenEditor.Properties;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
@@ -15,6 +18,41 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
 
         protected override bool IsXGridSnappedToLaneThisMove => isXGridSnappedToLaneThisMove;
 
+        // 候选时间可跨越旧轨道边界；完整 Hold 覆盖与最终 X 在整组附轨预检中解析。
+        // 不能对尚未写入模型的候选坐标使用旧 ReferenceLane/TGrid 夹取。
+        protected override double? AdjustCandidateY(ITimelineObject obj, double y, FumenVisualEditorViewModel editor)
+            => base.CheckAndAdjustY(obj, y, editor);
+
+        protected override double? AdjustCandidateX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
+            => base.CheckAndAdjustX(obj, x, editor);
+
+        public override void OnDragStart(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (obj is Tap or Hold or HoldEnd)
+                editor.InteractiveManager.BeginSelectionDrag(editor, point, new[] { (OngekiTimelineObjectBase)obj });
+            else
+                base.OnDragStart(obj, point, editor);
+        }
+
+        public override void OnDragMove(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (obj is Tap or Hold or HoldEnd)
+                editor.InteractiveManager.MoveSelectionDrag(editor, point);
+            else
+                base.OnDragMove(obj, point, editor);
+        }
+
+        public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
+        {
+            if (obj is Tap or Hold or HoldEnd)
+            {
+                editor.InteractiveManager.MoveSelectionDrag(editor, point);
+                editor.InteractiveManager.EndSelectionDrag(editor);
+            }
+            else
+                base.OnDragEnd(obj, point, editor);
+        }
+
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
             return editor.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();
@@ -23,6 +61,39 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)
         {
             isXGridSnappedToLaneThisMove = false;
+            // Tap/Hold 头靠近有效目标轨才换线；纯横移保留原时间。
+            if (obj is ILaneDockable attached && attached.ReferenceLaneStart is LaneStartBase originalLane)
+            {
+                var originalY = editor.ConvertTGridToY_DesignMode(attached.TGrid);
+                var pureHorizontal = Math.Abs(relativePoint.Y - originalY) < .0001;
+                var basic = new DefaultObjectInteractiveAction();
+                var attachedT = pureHorizontal ? attached.TGrid.CopyNew() :
+                    basic.CheckAndAdjustY(attached, relativePoint.Y, editor) is double attachedY ? editor.ConvertYToTGrid_DesignMode(attachedY) : null;
+                if (attachedT == null)
+                    return;
+                var targetX = XGridCalculator.ConvertXToXGrid(relativePoint.X, editor);
+                var resolver = editor.InteractiveManager.CreateLaneSwitchResolver(editor);
+                var lane = originalLane;
+                var originalX = XGridCalculator.ConvertXGridToX(attached.XGrid, editor);
+                var tail = (obj as Hold)?.HoldEnd;
+                if (tail != null && attachedT > tail.TGrid)
+                    return;
+                if (obj is Tap or Hold && Math.Abs(relativePoint.X - originalX) > .0001)
+                    lane = resolver.Resolve(originalLane, attachedT, targetX, tail?.TGrid);
+                var attachedX = resolver.Project(lane, attachedT, targetX);
+                var tailX = tail != null ? resolver.Project(lane, tail.TGrid, tail.XGrid) : null;
+                if (attachedX == null || tail != null && tailX == null)
+                    return;
+                if (attached.TGrid.TotalGrid != attachedT.TotalGrid)
+                    attached.TGrid = attachedT;
+                if (!ReferenceEquals(attached.ReferenceLaneStart, lane))
+                    attached.ReferenceLaneStart = lane;
+                if (attached.XGrid.TotalGrid != attachedX.TotalGrid)
+                    attached.XGrid = attachedX;
+                if (tail != null && tail.XGrid.TotalGrid != tailX.TotalGrid)
+                    tail.XGrid = tailX;
+                return;
+            }
 
             var forceMagneticToLane = editor.Setting.ForceTapHoldMagneticDockToLane;
             var forceMagnetic = editor.Setting.ForceMagneticDock;
@@ -34,22 +105,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             {
                 var closestLaneObjects = PickDockableObjects(editor)
                     .Select(x => x switch
-                    {
-                        ConnectableChildObjectBase child => child.ReferenceStartObject as LaneStartBase,
-                        LaneStartBase start => start,
-                        _ => default
-                    })
+                {
+                    ConnectableChildObjectBase child => child.ReferenceStartObject as LaneStartBase,
+                    LaneStartBase start => start,
+                    _ => default
+                })
                     .FilterNull()
                     .Select(startObject => (position: CalculateConnectableObjectCurrentRelativeX(startObject, tGrid, editor), startObject))
                     .Where(x => x.position != null)
                     .Select(candidate =>
-                    {
-                        var dockX = candidate.position.Value;
-                        if (TryGetHorizontalSegmentDockingX(candidate.startObject, tGrid, relativePoint.X, editor, out var horizontalX))
-                            dockX = horizontalX;
+                {
+                    var dockX = candidate.position.Value;
+                    if (TryGetHorizontalSegmentDockingX(candidate.startObject, tGrid, relativePoint.X, editor, out var horizontalX))
+                        dockX = horizontalX;
 
-                        return (Math.Abs(dockX - relativePoint.X), Value: dockX, candidate.startObject);
-                    })
+                    return (Math.Abs(dockX - relativePoint.X), Value: dockX, candidate.startObject);
+                })
                     .GroupBy(x => x.Item1)
                     .OrderBy(x => x.Key)
                     .FirstOrDefault();
@@ -57,7 +128,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 var closestLaneObject = closestLaneObjects?
                     .OrderByDescending(x => x.startObject.RecordId)
                     .FirstOrDefault();
-
                 /*
                 var closestLaneObject = PickDockableObjects(editor)
                     .Select(x => x switch
@@ -74,7 +144,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                     .OrderBy(x => x.Item1)
                     .FirstOrDefault();
                 */
-
                 var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : 8;
 
                 if (closestLaneObject?.startObject is not null)
@@ -82,7 +151,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                     //如果已经附着到轨道的话，那就考虑如果拖动到另一条线上过近，或者最近的线依旧是自己附属的，
                     //那么就强制更新物件的水平位置成对应轨道的
                     if (closestLaneObject?.Item1 < magneticDockDistance || //可能拖动到另一条线上
-                        closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
+ closestLaneObject?.startObject == dockable.ReferenceLaneStart) //没拖到另一条线上(但还是要更新水平位置)
                     {
                         relativePoint.X = closestLaneObject?.Value ?? default;
                         isXGridSnappedToLaneThisMove = true;
@@ -97,6 +166,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
             if (enableMoveTo)
                 base.OnMoveCanvas(obj, relativePoint, editor);
         }
+
+        // 同时刻水平段覆盖一段 X 区间，保留目标横坐标在最近区间内的位置。
+        internal static XGrid CalculateOriginalLaneX(LaneStartBase lane, TGrid time, XGrid target)
+            => CreateOriginalLaneProjector(lane)(time, target);
+
+        // 每个动作按轨道建一次索引；有效性仅检查一次，同 T 插值结果复用。
+        internal static Func<TGrid, XGrid, XGrid> CreateOriginalLaneProjector(LaneStartBase lane) => LaneGeometry.CreateProjector(lane);
 
         public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {

@@ -26,6 +26,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         public override void OnMoveCanvas(OngekiObjectBase obj, Point relativePoint, FumenVisualEditorViewModel editor)
         {
             isHoldEndSnappedToLaneThisMove = false;
+            // 已附轨尾点直接使用公共路径，保留原始鼠标 X 和未夹取的时间。
+            if (obj is ILaneDockable dockable && dockable.ReferenceLaneStart is not null)
+            {
+                base.OnMoveCanvas(obj, relativePoint, editor);
+                return;
+            }
 
             var ry = CheckAndAdjustY((ITimelineObject)obj, relativePoint.Y, editor);
             if (ry is double y && editor.ConvertYToTGrid_DesignMode(y) is TGrid tGrid)

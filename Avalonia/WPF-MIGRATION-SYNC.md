@@ -239,3 +239,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：移除 `IndividualSoflanAreaEndIndicator` 的 `tGridHasSet` 标志，改用 `TGrid?` 背字段：`null` 表示终点尚未显式设置，首次读取时复制起点并固化；显式赋值后终点独立。赋值统一走 `SetTGridCore`，保留 `End >= Start` 约束、子属性变化订阅与 `SetTGridUnclamped`。
 - 验证：未设置终点的 ISA 读到 `End=Start`、`GridLength=0`；设置 `End=14` 后把 `Start` 移到 12，`End` 仍为 14；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：合并 PR #43（WPF）
+
+- 合并 `as2er:codex/grid-copy-paste-movement`（head `44417889`）到 `pr43` 分支，保留本树此前的 ISA/光标/剪贴板改动。
+- PR 自带记录摘要：
+  - 2026-10-18：Grid PR 补充修复——Start 横移与坐标 Unit/Grid 修改时先失效相邻路径缓存，再通知绘制与贴轨监听者；时间范围不变时不重建区间索引。
+  - 2026-10-18：Tap/Hold 邻近换线——8 像素内换线，Hold 以头决定轨道，单拖头保持尾时间、同拖头尾保持时长；仅拖尾不换线。
+  - 2026-10-21：WPF Grid 交互边界重构——选择拖动事务归入 ObjectInteractiveManager，剪贴板只调度纯 Grid 平移与交互吸附；LaneGeometry / LaneSwitchResolver 不引用 VM。
+- Avalonia：本次未移植，不改变现有同步点。

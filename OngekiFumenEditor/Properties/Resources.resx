@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -3563,4 +3563,5 @@
   <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>No other soflan group is available; you can only delete the group together with its references, or cancel.</value></data>
   <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>Transfer soflan group references and delete group</value></data>
   <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>Delete soflan group and its references</value></data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>The paste position exceeds the grid range or includes a time before the start of the chart.</value></data>
 </root>

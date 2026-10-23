@@ -1,6 +1,6 @@
-using Caliburn.Micro;
+using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Kernel.Graphics;
-using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -14,6 +14,53 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Views
         public FumenVisualEditorView()
         {
             InitializeComponent();
+            Loaded += OnPlacementViewLoaded;
+            Unloaded += OnPlacementViewUnloaded;
+            DataContextChanged += (_, e) => InteractionInterrupted?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler InteractionInterrupted;
+
+        private Window placementWindow;
+        private bool placementViewLoaded;
+
+        private void OnPlacementViewLoaded(object sender, RoutedEventArgs e)
+        {
+            if (placementViewLoaded)
+                return;
+            placementViewLoaded = true;
+            placementWindow = Window.GetWindow(this);
+            if (placementWindow != null)
+                placementWindow.Deactivated += OnPlacementWindowDeactivated;
+            // 将窗口级工具箱拖放转发为输入中断事件。
+            placementWindow?.AddHandler(DragDrop.PreviewDragEnterEvent,
+                new DragEventHandler(OnToolboxDragStarted), true);
+        }
+
+        private void OnPlacementViewUnloaded(object sender, RoutedEventArgs e)
+        {
+            if (!placementViewLoaded)
+                return;
+            placementViewLoaded = false;
+            placementWindow?.RemoveHandler(DragDrop.PreviewDragEnterEvent,
+                new DragEventHandler(OnToolboxDragStarted));
+            if (placementWindow != null)
+                placementWindow.Deactivated -= OnPlacementWindowDeactivated;
+            placementWindow = null;
+            InteractionInterrupted?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnPlacementWindowDeactivated(object sender, EventArgs e)
+        {
+            InteractionInterrupted?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void OnToolboxDragStarted(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+            {
+                InteractionInterrupted?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }
