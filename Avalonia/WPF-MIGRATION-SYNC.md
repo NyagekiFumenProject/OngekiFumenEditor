@@ -279,3 +279,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：拖动状态按实际语义重命名：`isSelectRangeDragging`→`isObjectDragStarted`、`currentDraggingActionId`→`autoScrollRedispatchToken`、`placementInputView`→`editorView`、`selectionGridDrag`→`activeSelectionDrag`、`selectionWasDirty`→`isDirtyBeforeDrag`、`selectionUndoActions/Count`→`undoStackBeforeDrag/undoCountBeforeDrag`、`selectionHasExternalChanges`→`hasExternalChangesDuringDrag`、`applyingSelection`→`isApplyingDragSnapshots`、`observedFumen`→`dragFumen`。
 - 验证：`dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug/Release` 均 0 error；`dotnet run --project tests/grid-placement/GridPlacement.csproj -c Release -p:EditorAssemblyDirectory=<隔离 Release 输出>` 228 项通过。本机有运行中的编辑器锁定默认 `bin`，构建输出重定向到未被版本控制的 `artifacts/`。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：音频缓冲读取改为块复制（WPF）
+
+- WPF：`BufferWaveStream.Read(byte[])` / `Read(float[])` 从逐元素循环改为 `Buffer.BlockCopy` / `Span.CopyTo`，保持 `Position` 前进量与返回值语义；末尾不足和越界读取仍返回实际数量。
+- 验证：临时实例反射构造缓冲流，byte/float 读取内容、Position 前进与末尾读取均正确；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
