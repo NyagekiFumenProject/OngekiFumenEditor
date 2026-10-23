@@ -18,6 +18,7 @@ using OngekiFumenEditor.Modules.FumenVisualEditor.Models.EditorProjectFiles;
 using OngekiFumenEditor.Parser;
 using OngekiFumenEditor.Parser.Ogkr;
 using OngekiFumenEditor.Parser.Ogkr.CommandParserImpl;
+using OngekiFumenEditor.Properties;
 
 internal static class Program
 {
@@ -52,7 +53,12 @@ internal static class Program
             CheckCycleGuard();
             CheckRenameAndNextId();
             CheckRemoveAndRestore();
+            CheckDeletedGroupIdReservation();
             CheckOnlySoflanGroup();
+            CheckIsaPlacementSession();
+            CheckSoflanGroupReferenceSnapshot();
+            CheckDeleteDialogOptions();
+            CheckSoflanGroupSelectDialog();
             CheckGroupColors();
             CheckLegacySgwi();
             CheckProjectTreeRoundTrip();
@@ -199,6 +205,158 @@ internal static class Program
 
         var text = Format(another);
         Check(!text.Contains("[SGWI]") && !text.Contains("[SGF]") && !text.Contains("[SGC]"), "谱面文件不再写组布局");
+    }
+
+    private static void CheckIsaPlacementSession()
+    {
+        var session = new IsaPlacementSession();
+        Check(!session.IsActive, "ISA 放置初始未激活");
+        Check(!session.TryTakePoint(new TGrid { Unit = 1, Grid = 0 }, new XGrid { Unit = 1, Grid = 0 }, out _), "未激活时不取点");
+
+        session.Begin(3);
+        Check(session.IsActive && session.Phase == IsaPlacementPhase.WaitingFirstPoint, "ISA 放置等待第一点");
+        Check(!session.TryTakePoint(new TGrid { Unit = 10, Grid = 0 }, new XGrid { Unit = 10, Grid = 0 }, out _), "第一点不产生 ISA");
+        Check(session.Phase == IsaPlacementPhase.WaitingSecondPoint, "第一点后等待第二点");
+
+        Check(session.TryTakePoint(new TGrid { Unit = 2, Grid = 0 }, new XGrid { Unit = 2, Grid = 0 }, out var result), "第二点完成 ISA");
+        Check(Math.Abs(result.StartTGrid.TotalUnit - 2) < 1e-6 && Math.Abs(result.EndTGrid.TotalUnit - 10) < 1e-6, "ISA 时间边界规范化");
+        Check(Math.Abs(result.StartXGrid.TotalUnit - 2) < 1e-6 && Math.Abs(result.EndXGrid.TotalUnit - 10) < 1e-6, "ISA 水平边界规范化");
+        Check(!session.IsActive, "ISA 完成后退出放置");
+
+        session.Begin(0);
+        session.TryTakePoint(new TGrid { Unit = 1, Grid = 0 }, new XGrid { Unit = 9, Grid = 0 }, out _);
+        Check(session.TryTakePoint(new TGrid { Unit = 8, Grid = 0 }, new XGrid { Unit = 3, Grid = 0 }, out var reversed), "反序两点完成 ISA");
+        Check(Math.Abs(reversed.StartTGrid.TotalUnit - 1) < 1e-6 && Math.Abs(reversed.EndTGrid.TotalUnit - 8) < 1e-6, "反序时间规范化");
+        Check(Math.Abs(reversed.StartXGrid.TotalUnit - 3) < 1e-6 && Math.Abs(reversed.EndXGrid.TotalUnit - 9) < 1e-6, "反序水平规范化");
+
+        session.Begin(1);
+        session.Cancel();
+        Check(!session.IsActive && session.Phase == IsaPlacementPhase.Inactive, "取消清空 ISA 放置状态");
+
+        session.Continuous = true;
+        session.Begin(5);
+        session.TryTakePoint(new TGrid { Unit = 1, Grid = 0 }, new XGrid { Unit = 1, Grid = 0 }, out _);
+        Check(session.TryTakePoint(new TGrid { Unit = 4, Grid = 0 }, new XGrid { Unit = 4, Grid = 0 }, out _), "连续模式完成第一个 ISA");
+        Check(session.IsActive && session.Phase == IsaPlacementPhase.WaitingFirstPoint, "连续模式完成后继续等待第一点");
+        Check(session.TargetSoflanGroupId == 5, "连续模式保持目标组");
+
+        session.TryTakePoint(new TGrid { Unit = 6, Grid = 0 }, new XGrid { Unit = 6, Grid = 0 }, out _);
+        Check(session.TryTakePoint(new TGrid { Unit = 8, Grid = 0 }, new XGrid { Unit = 8, Grid = 0 }, out var next), "连续模式可继续完成第二个 ISA");
+        Check(Math.Abs(next.StartTGrid.TotalUnit - 6) < 1e-6 && Math.Abs(next.EndTGrid.TotalUnit - 8) < 1e-6, "连续模式第二组边界正确");
+
+        session.Continuous = false;
+        session.Cancel();
+        Check(!session.IsActive, "关闭连续模式后取消退出");
+        Check(session.Continuous == false, "连续模式开关状态独立于取消");
+    }
+
+    private static void CheckSoflanGroupReferenceSnapshot()
+    {
+        var fumen = new OngekiFumen();
+        var soflan = new Soflan
+        {
+            SoflanGroup = 1,
+            TGrid = new TGrid { Unit = 0, Grid = 0 },
+            Speed = 1.25f,
+        };
+        var area = new IndividualSoflanArea
+        {
+            SoflanGroup = 1,
+            TGrid = new TGrid { Unit = 0, Grid = 0 },
+            XGrid = new XGrid { Unit = -2, Grid = 0 },
+        };
+        area.EndIndicator.TGrid = new TGrid { Unit = 4, Grid = 0 };
+        area.EndIndicator.XGrid = new XGrid { Unit = 2, Grid = 0 };
+
+        fumen.AddObject(soflan);
+        fumen.AddObject(area);
+        fumen.Setup();
+
+        var snapshot = SoflanGroupReferenceSnapshot.Capture(fumen, 1);
+        Check(snapshot.Count == 2, "引用快照包含 Soflan 与 ISA");
+        Check(snapshot.Soflans.Count == 1 && snapshot.Areas.Count == 1, "引用快照按类型拆分");
+
+        snapshot.ApplyGroup(2);
+        Check(soflan.SoflanGroup == 2 && area.SoflanGroup == 2, "引用转移到新组");
+        Check(!fumen.SoflansMap[1].Contains(soflan) && fumen.SoflansMap[2].Contains(soflan), "Soflan 随组迁移");
+        Check(!fumen.IndividualSoflanAreaMap[1].Contains(area) && fumen.IndividualSoflanAreaMap[2].Contains(area), "ISA 随组迁移");
+
+        snapshot.RestoreGroup();
+        Check(soflan.SoflanGroup == 1 && area.SoflanGroup == 1, "引用恢复原组");
+        Check(fumen.SoflansMap[1].Contains(soflan) && fumen.IndividualSoflanAreaMap[1].Contains(area), "恢复后回到原组列表");
+
+        soflan.IsSelected = true;
+        area.IsSelected = true;
+        snapshot = SoflanGroupReferenceSnapshot.Capture(fumen, 1);
+        snapshot.RemoveFrom(fumen);
+        Check(!fumen.SoflansMap[1].Contains(soflan) && !fumen.IndividualSoflanAreaMap[1].Contains(area), "连同引用删除");
+        snapshot.AddTo(fumen);
+        snapshot.RestoreSelection();
+        Check(fumen.SoflansMap[1].Contains(soflan) && fumen.IndividualSoflanAreaMap[1].Contains(area), "撤销恢复引用对象");
+        Check(soflan.IsSelected && area.IsSelected, "撤销恢复引用选中状态");
+    }
+
+    private static void CheckDeletedGroupIdReservation()
+    {
+        var tree = new SoflanGroupTree();
+        var deleted = tree.AddGroup(1, tree.Root, "one");
+        tree.Remove(deleted);
+
+        var reserved = new HashSet<int> { deleted.Id };
+        var newId = tree.GetNextGroupId(reserved);
+        Check(newId == 2, "待撤销删除的组编号不被新组复用");
+
+        tree.AddGroup(newId, tree.Root, "new");
+        tree.InsertExisting(deleted, tree.Root, 0);
+        Check(tree.GetGroup(1) == deleted && tree.GetGroup(2) is not null, "保留编号后撤销删除不冲突");
+    }
+
+    private static void CheckDeleteDialogOptions()
+    {
+        var tree = new SoflanGroupTree();
+        tree.AddGroup(1, tree.Root, "A");
+        tree.AddGroup(2, tree.Root, "B");
+        var dialog = new OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels.SoflanGroupDeleteDialogViewModel(
+            tree.GetGroup(2), 3, new[] { tree.GetGroup(0), tree.GetGroup(1) });
+
+        Check(dialog.CanTransfer, "删除对话框提供替代组");
+        Check(dialog.GroupOptions.Count == 2, "删除对话框列出其他有效组");
+        Check(dialog.GroupOptions.Any(x => x.Id == 0) && dialog.GroupOptions.Any(x => x.Id == 1), "替代组包含默认组与普通组");
+        Check(!dialog.GroupOptions.Any(x => x.Id == 2), "替代组排除被删组");
+    }
+
+    private static void CheckSoflanGroupSelectDialog()
+    {
+        var tree = new SoflanGroupTree();
+        var category = tree.AddCategory("A", tree.Root);
+        tree.AddGroup(1, category, "one");
+        tree.AddGroup(2, category, "two");
+
+        var dialog = new OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialogs.SoflanGroupSelectDialogViewModel(tree, 2);
+        Check(dialog.RootNodes.Count == 2, "组选择对话框含默认组与组文件夹");
+        Check(dialog.SelectedNode?.GroupId == 2, "组选择对话框默认选中当前组");
+        Check(dialog.CanConfirm, "组选择对话框当前组可确认");
+
+        var categoryNode = dialog.RootNodes.First(x => x.IsCategory);
+        Check(categoryNode.Children.Count == 2, "组选择对话框保留组文件夹层级");
+        Check(categoryNode.Children[0].IdLabel == "#1" && categoryNode.Children[0].ColorBrush is not null, "组选择节点带组号与颜色");
+
+        var mixed = new OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialogs.SoflanGroupSelectDialogViewModel(tree, null);
+        Check(mixed.SelectedNode is null, "多选混合值不默认选中任何项");
+        Check(!mixed.CanConfirm, "多选混合值不可直接确认");
+
+        mixed.CreateQuickGroup();
+        mixed.CreateQuickGroup();
+        var pending = mixed.RootNodes.Where(x => x.IsPending).ToList();
+        Check(pending.Count == 2, "连续快速新建生成两个待创建节点");
+        Check(pending.Select(x => x.GroupId).Distinct().Count() == 2, "待创建节点分配不同组号");
+        Check(pending.All(x => x.DisplayName == Resources.SoflanGroupDefaultNewGroupName), "待创建节点沿用默认组名");
+        Check(pending.All(x => tree.GetGroup(x.GroupId!.Value) is null), "确认前不写入组树");
+
+        var pendingId = mixed.SelectedGroupId!.Value;
+        mixed.OnSelectedNodeChanged(mixed.RootNodes.First(x => x.IsPending && x.GroupId == pendingId));
+        Check(mixed.ConfirmSelection(), "待创建组可以确认");
+        Check(tree.GetGroup(pendingId) is not null && tree.GetGroup(pendingId).Name == Resources.SoflanGroupDefaultNewGroupName, "确认后按默认名写入组树");
     }
 
     private static void CheckGroupColors()
