@@ -3517,7 +3517,7 @@
   <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>The default group (0) cannot be deleted.</value></data>
   <data name="SoflanGroupNameRequired" xml:space="preserve"><value>Name cannot be empty.</value></data>
   <data name="SoflanGroupMoveToRoot" xml:space="preserve"><value>Move to root</value></data>
-  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>General default soflan group</value></data>
+  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>Default soflan group</value></data>
   <data name="SoflanGroupCategoryName" xml:space="preserve"><value>Group folder</value></data>
   <data name="SoflanGroupNameExists" xml:space="preserve"><value>A category with this name already exists.</value></data>
   <data name="SoflanGroupCreateCategoryTipText" xml:space="preserve"><value>Create a folder used only to organize soflan groups; the name may be left empty and no group ID is bound.</value></data>
@@ -3533,4 +3533,31 @@
   <data name="SoflanGroupPreviewUncheckedTipText" xml:space="preserve"><value>Unchecked: hide this group in preview mode; a group folder applies this to all children.</value></data>
   <data name="SoflanGroupDrawCheckedTipText" xml:space="preserve"><value>Selected: display this soflan group's soflan lines (only one group is displayed at a time).</value></data>
   <data name="SoflanGroupDrawUncheckedTipText" xml:space="preserve"><value>Not selected: click to display this soflan group's soflan lines (only one group is displayed at a time).</value></data>
+  <data name="IsaPlacementToggleText" xml:space="preserve"><value>Place ISA</value></data>
+  <data name="IsaPlacementTipText" xml:space="preserve"><value>Place ISA: click two corners. Target: {0}</value></data>
+  <data name="IsaPlacementWaitingFirstPointTipText" xml:space="preserve"><value>Waiting for the first point. Target: {0}</value></data>
+  <data name="IsaPlacementWaitingSecondPointTipText" xml:space="preserve"><value>Waiting for the second point. Target: {0}</value></data>
+  <data name="IsaPlacementOverlayTitle" xml:space="preserve"><value>ISA placement</value></data>
+  <data name="IsaPlacementOverlayTargetGroup" xml:space="preserve"><value>Target: {0}</value></data>
+  <data name="IsaPlacementOverlaySummary" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="IsaPlacementOverlayWaitingFirstPoint" xml:space="preserve"><value>waiting for first point</value></data>
+  <data name="IsaPlacementOverlayWaitingSecondPoint" xml:space="preserve"><value>waiting for second point</value></data>
+  <data name="IsaPlacementOverlayCancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="IsaPlacementContinuousText" xml:space="preserve"><value>Continuous</value></data>
+  <data name="IsaPlacementContinuousTipText" xml:space="preserve"><value>Keep placement mode after completing an ISA.</value></data>
+  <data name="IsaPlacementAdd" xml:space="preserve"><value>Place ISA</value></data>
+  <data name="IsaPlacementTargetGroupInvalid" xml:space="preserve"><value>The target soflan group no longer exists; ISA placement has been canceled.</value></data>
+  <data name="IsaPlacementCannotStart" xml:space="preserve"><value>ISA placement is only available in design mode, outside batch mode, with an active chart.</value></data>
+  <data name="SoflanGroupSelectDialogTitle" xml:space="preserve"><value>Select soflan group</value></data>
+  <data name="SoflanGroupSelectTipText" xml:space="preserve"><value>Click to select the soflan group of this object.</value></data>
+  <data name="SoflanGroupQuickCreateTipText" xml:space="preserve"><value>Create a soflan group with the default name, without a naming dialog.</value></data>
+  <data name="SoflanGroupMixedValue" xml:space="preserve"><value>Multiple values</value></data>
+  <data name="SoflanGroupDeleteDialogTitle" xml:space="preserve"><value>Delete soflan group</value></data>
+  <data name="SoflanGroupDeleteDialogReferences" xml:space="preserve"><value>Soflan group "{0}" is still referenced by {1} object(s). Choose how to proceed:</value></data>
+  <data name="SoflanGroupDeleteDialogTransferLabel" xml:space="preserve"><value>Transfer to:</value></data>
+  <data name="SoflanGroupDeleteDialogTransferAndDelete" xml:space="preserve"><value>Transfer and delete</value></data>
+  <data name="SoflanGroupDeleteDialogDeleteReferences" xml:space="preserve"><value>Delete group and references</value></data>
+  <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>No other soflan group is available; you can only delete the group together with its references, or cancel.</value></data>
+  <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>Transfer soflan group references and delete group</value></data>
+  <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>Delete soflan group and its references</value></data>
 </root>

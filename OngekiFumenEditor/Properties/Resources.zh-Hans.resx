@@ -3484,7 +3484,7 @@
   <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>默认组（0）不能删除。</value></data>
   <data name="SoflanGroupNameRequired" xml:space="preserve"><value>名称不能为空。</value></data>
   <data name="SoflanGroupMoveToRoot" xml:space="preserve"><value>移动到根</value></data>
-  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>通用默认变速组</value></data>
+  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>默认变速组</value></data>
   <data name="SoflanGroupCategoryName" xml:space="preserve"><value>组文件夹</value></data>
   <data name="SoflanGroupNameExists" xml:space="preserve"><value>已存在同名分组。</value></data>
   <data name="SoflanGroupCreateCategoryTipText" xml:space="preserve"><value>创建仅用于组织变速组的文件夹；名称可留空，文件夹本身不绑定变速组。</value></data>
@@ -3493,11 +3493,38 @@
   <data name="SoflanGroupMoveToRootTipText" xml:space="preserve"><value>把当前选中的节点移动到根目录。</value></data>
   <data name="SoflanGroupDefaultNewGroupName" xml:space="preserve"><value>新的变速组</value></data>
   <data name="SoflanGroupDefaultNewFolderName" xml:space="preserve"><value>新的组文件夹</value></data>
-  <data name="SoflanGroupDefaultGroupTipText" xml:space="preserve"><value>通用默认变速组（ID 0）：未被任何 Individual Soflan Area 覆盖的物件都归属于它，是谱面时间轴的兜底变速组；它始终存在，不能删除或拖动。</value></data>
+  <data name="SoflanGroupDefaultGroupTipText" xml:space="preserve"><value>默认变速组（ID 0）：未被任何 Individual Soflan Area 覆盖的物件都归属于它，是谱面时间轴的兜底变速组；它始终存在，不能删除或拖动。</value></data>
   <data name="SoflanGroupDesignCheckedTipText" xml:space="preserve"><value>已勾选：设计模式显示该组物件；组文件夹会同步应用到子项。</value></data>
   <data name="SoflanGroupDesignUncheckedTipText" xml:space="preserve"><value>未勾选：设计模式隐藏该组物件；组文件夹会同步应用到子项。</value></data>
   <data name="SoflanGroupPreviewCheckedTipText" xml:space="preserve"><value>已勾选：预览模式显示该组物件；组文件夹会同步应用到子项。</value></data>
   <data name="SoflanGroupPreviewUncheckedTipText" xml:space="preserve"><value>未勾选：预览模式隐藏该组物件；组文件夹会同步应用到子项。</value></data>
   <data name="SoflanGroupDrawCheckedTipText" xml:space="preserve"><value>已选中：画布上显示该变速组的变速线（同一时间只显示一个组）。</value></data>
   <data name="SoflanGroupDrawUncheckedTipText" xml:space="preserve"><value>未选中：点击后改为显示该变速组的变速线（同一时间只显示一个组）。</value></data>
+  <data name="IsaPlacementToggleText" xml:space="preserve"><value>放置 ISA</value></data>
+  <data name="IsaPlacementTipText" xml:space="preserve"><value>放置 ISA：点击两个角点。目标：{0}</value></data>
+  <data name="IsaPlacementWaitingFirstPointTipText" xml:space="preserve"><value>等待第一点。目标：{0}</value></data>
+  <data name="IsaPlacementWaitingSecondPointTipText" xml:space="preserve"><value>等待第二点。目标：{0}</value></data>
+  <data name="IsaPlacementOverlayTitle" xml:space="preserve"><value>ISA 放置</value></data>
+  <data name="IsaPlacementOverlayTargetGroup" xml:space="preserve"><value>目标：{0}</value></data>
+  <data name="IsaPlacementOverlaySummary" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="IsaPlacementOverlayWaitingFirstPoint" xml:space="preserve"><value>等待第一点</value></data>
+  <data name="IsaPlacementOverlayWaitingSecondPoint" xml:space="preserve"><value>等待第二点</value></data>
+  <data name="IsaPlacementOverlayCancel" xml:space="preserve"><value>取消</value></data>
+  <data name="IsaPlacementContinuousText" xml:space="preserve"><value>连续放置</value></data>
+  <data name="IsaPlacementContinuousTipText" xml:space="preserve"><value>完成一个 ISA 后保持放置模式。</value></data>
+  <data name="IsaPlacementAdd" xml:space="preserve"><value>放置 ISA</value></data>
+  <data name="IsaPlacementTargetGroupInvalid" xml:space="preserve"><value>目标变速组已失效，ISA 放置已取消。</value></data>
+  <data name="IsaPlacementCannotStart" xml:space="preserve"><value>ISA 放置只能用于设计模式、非批量模式且已加载谱面时。</value></data>
+  <data name="SoflanGroupSelectDialogTitle" xml:space="preserve"><value>选择变速组</value></data>
+  <data name="SoflanGroupSelectTipText" xml:space="preserve"><value>点击选择该对象所属的变速组。</value></data>
+  <data name="SoflanGroupQuickCreateTipText" xml:space="preserve"><value>使用默认名称直接新建变速组，不弹出命名对话框。</value></data>
+  <data name="SoflanGroupMixedValue" xml:space="preserve"><value>多个值</value></data>
+  <data name="SoflanGroupDeleteDialogTitle" xml:space="preserve"><value>删除变速组</value></data>
+  <data name="SoflanGroupDeleteDialogReferences" xml:space="preserve"><value>变速组「{0}」仍被 {1} 个对象引用。请选择处理方式：</value></data>
+  <data name="SoflanGroupDeleteDialogTransferLabel" xml:space="preserve"><value>转移到：</value></data>
+  <data name="SoflanGroupDeleteDialogTransferAndDelete" xml:space="preserve"><value>转移并删除</value></data>
+  <data name="SoflanGroupDeleteDialogDeleteReferences" xml:space="preserve"><value>连同引用删除</value></data>
+  <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>没有其他可用的变速组，只能连同引用删除或取消。</value></data>
+  <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>转移变速组引用并删除组</value></data>
+  <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>删除变速组及其引用</value></data>
 </root>

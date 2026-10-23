@@ -870,6 +870,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
+            if (IsIsaPlacementActive)
+            {
+                CancelIsaPlacement();
+                return;
+            }
+
             if (!IsDesignMode)
             {
                 ToastNotify(Resources.EditorMustBeDesignMode);
@@ -1101,6 +1107,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
+            CancelIsaPlacement();
             BulletPallete.RandomSeed = DateTime.Now.ToString().GetHashCode();
 
             var tGrid = GetCurrentTGrid();
@@ -1191,6 +1198,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (TryHandleBatchProjectilePlacementMouseUp(arg.ChangedButton, arg.GetPosition(e.Source)))
             {
                 arg.Handled = true;
+                return;
+            }
+
+            if (IsIsaPlacementActive)
+            {
+                if (arg.ChangedButton is MouseButton.Left or MouseButton.Right)
+                    arg.Handled = true;
                 return;
             }
 
@@ -1296,6 +1310,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 view?.Focus();
                 arg.Handled = true;
+                return;
+            }
+
+            if (TryHandleIsaPlacementMouseDown(arg, position))
+            {
+                view?.Focus();
                 return;
             }
 
@@ -1450,6 +1470,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (IsDesignMode)
             {
+                if (IsIsaPlacementActive && !isMiddleMouseDown)
+                    return;
+
                 if (isMiddleMouseDown)
                 {
                     isCanvasDragging = true;
@@ -1600,6 +1623,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
+            CancelIsaPlacement();
             if (!CurrentCursorPosition.HasValue)
             {
                 return;
@@ -1725,6 +1749,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_DragEnter(ActionExecutionContext e)
         {
+            CancelIsaPlacement();
             var arg = e.EventArgs as DragEventArgs;
             if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
                 arg.Effects = DragDropEffects.None;
@@ -1732,6 +1757,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_Drop(ActionExecutionContext e)
         {
+            CancelIsaPlacement();
             CancelBatchProjectilePlacement();
 
             if (!IsDesignMode)

@@ -9141,6 +9141,141 @@ namespace OngekiFumenEditor.Properties {
                 return ResourceManager.GetString("SoflanGroupDefaultCannotDelete", resourceCulture);
             }
         }
+        public static string IsaPlacementToggleText {
+            get {
+                return ResourceManager.GetString("IsaPlacementToggleText", resourceCulture);
+            }
+        }
+        public static string IsaPlacementTipText {
+            get {
+                return ResourceManager.GetString("IsaPlacementTipText", resourceCulture);
+            }
+        }
+        public static string IsaPlacementWaitingFirstPointTipText {
+            get {
+                return ResourceManager.GetString("IsaPlacementWaitingFirstPointTipText", resourceCulture);
+            }
+        }
+        public static string IsaPlacementWaitingSecondPointTipText {
+            get {
+                return ResourceManager.GetString("IsaPlacementWaitingSecondPointTipText", resourceCulture);
+            }
+        }
+        public static string IsaPlacementOverlayTitle {
+            get {
+                return ResourceManager.GetString("IsaPlacementOverlayTitle", resourceCulture);
+            }
+        }
+        public static string IsaPlacementOverlayTargetGroup {
+            get {
+                return ResourceManager.GetString("IsaPlacementOverlayTargetGroup", resourceCulture);
+            }
+        }
+        public static string IsaPlacementOverlaySummary {
+            get {
+                return ResourceManager.GetString("IsaPlacementOverlaySummary", resourceCulture);
+            }
+        }
+        public static string IsaPlacementContinuousText {
+            get {
+                return ResourceManager.GetString("IsaPlacementContinuousText", resourceCulture);
+            }
+        }
+        public static string IsaPlacementContinuousTipText {
+            get {
+                return ResourceManager.GetString("IsaPlacementContinuousTipText", resourceCulture);
+            }
+        }
+        public static string SoflanGroupSelectDialogTitle {
+            get {
+                return ResourceManager.GetString("SoflanGroupSelectDialogTitle", resourceCulture);
+            }
+        }
+        public static string SoflanGroupSelectTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupSelectTipText", resourceCulture);
+            }
+        }
+        public static string SoflanGroupQuickCreateTipText {
+            get {
+                return ResourceManager.GetString("SoflanGroupQuickCreateTipText", resourceCulture);
+            }
+        }
+        public static string SoflanGroupMixedValue {
+            get {
+                return ResourceManager.GetString("SoflanGroupMixedValue", resourceCulture);
+            }
+        }
+        public static string IsaPlacementOverlayWaitingFirstPoint {
+            get {
+                return ResourceManager.GetString("IsaPlacementOverlayWaitingFirstPoint", resourceCulture);
+            }
+        }
+        public static string IsaPlacementOverlayWaitingSecondPoint {
+            get {
+                return ResourceManager.GetString("IsaPlacementOverlayWaitingSecondPoint", resourceCulture);
+            }
+        }
+        public static string IsaPlacementOverlayCancel {
+            get {
+                return ResourceManager.GetString("IsaPlacementOverlayCancel", resourceCulture);
+            }
+        }
+        public static string IsaPlacementAdd {
+            get {
+                return ResourceManager.GetString("IsaPlacementAdd", resourceCulture);
+            }
+        }
+        public static string IsaPlacementTargetGroupInvalid {
+            get {
+                return ResourceManager.GetString("IsaPlacementTargetGroupInvalid", resourceCulture);
+            }
+        }
+        public static string IsaPlacementCannotStart {
+            get {
+                return ResourceManager.GetString("IsaPlacementCannotStart", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteDialogTitle {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteDialogTitle", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteDialogReferences {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteDialogReferences", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteDialogTransferLabel {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteDialogTransferLabel", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteDialogTransferAndDelete {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteDialogTransferAndDelete", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteDialogDeleteReferences {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteDialogDeleteReferences", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteDialogCannotTransfer {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteDialogCannotTransfer", resourceCulture);
+            }
+        }
+        public static string SoflanGroupTransferReferencesAndDeleteAction {
+            get {
+                return ResourceManager.GetString("SoflanGroupTransferReferencesAndDeleteAction", resourceCulture);
+            }
+        }
+        public static string SoflanGroupDeleteReferencesAndGroupAction {
+            get {
+                return ResourceManager.GetString("SoflanGroupDeleteReferencesAndGroupAction", resourceCulture);
+            }
+        }
         public static string SoflanGroupNameRequired {
             get {
                 return ResourceManager.GetString("SoflanGroupNameRequired", resourceCulture);

@@ -139,6 +139,8 @@
 
         <views:BatchModeOverlayView DataContext="{Binding BatchModeBehavior}" Visibility="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type views:FumenVisualEditorView}}, Path=DataContext.IsBatchMode, Converter={StaticResource BoolToVisibilityConverter}}" />
 
+        <views:IsaPlacementOverlayView Visibility="{Binding IsIsaPlacementActive, Converter={StaticResource BoolToVisibilityConverter}}" />
+
         <TextBlock
             HorizontalAlignment="Left"
             VerticalAlignment="Top"

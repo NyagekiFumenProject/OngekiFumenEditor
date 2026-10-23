@@ -1,0 +1,109 @@
+<mah:MetroWindow
+    x:Class="OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.Views.Dialogs.SoflanGroupSelectDialogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:cal="http://caliburnmicro.com"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dialog="clr-namespace:OngekiFumenEditor.Modules.FumenObjectPropertyBrowser.ViewModels.Dialogs"
+    xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:markup="clr-namespace:OngekiFumenEditor.UI.Markup"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{markup:Translate [SoflanGroupSelectDialogTitle]}"
+    Width="400"
+    Height="400"
+    d:DataContext="{d:DesignInstance Type=dialog:SoflanGroupSelectDialogViewModel}"
+    Background="{StaticResource EnvironmentWindowBackground}"
+    Loaded="OnLoaded"
+    SaveWindowPosition="True"
+    Style="{StaticResource MainWindowStyle}"
+    mc:Ignorable="d">
+    <mah:MetroWindow.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </mah:MetroWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TreeView
+            x:Name="GroupTree"
+            Grid.Row="0"
+            Background="Transparent"
+            BorderBrush="Transparent"
+            ItemsSource="{Binding RootNodes}"
+            SelectedItemChanged="OnSelectedItemChanged"
+            VirtualizingPanel.IsVirtualizing="False">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                    <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                    <Setter Property="cal:Message.Attach" Value="[Event MouseDoubleClick]=[Action OnItemDoubleClick($dataContext)];" />
+                </Style>
+            </TreeView.ItemContainerStyle>
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate
+                    DataType="{x:Type dialog:SoflanGroupSelectNodeViewModel}"
+                    ItemsSource="{Binding Children}">
+                    <StackPanel
+                        Margin="0,2"
+                        Orientation="Horizontal">
+                        <Border
+                            Width="12"
+                            Height="12"
+                            Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            Background="{Binding ColorBrush}"
+                            CornerRadius="2" />
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            Text="{Binding DisplayName}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="FontWeight" Value="Normal" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCategory}" Value="True">
+                                            <Setter Property="FontWeight" Value="Bold" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Border
+                            Margin="6,0,0,0"
+                            Padding="4,0"
+                            Background="#22000000"
+                            CornerRadius="2"
+                            Visibility="{Binding IsGroup, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock FontSize="11" Text="{Binding IdLabel}" />
+                        </Border>
+                    </StackPanel>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+        <Grid Grid.Row="1">
+            <Button
+                Margin="10"
+                Padding="10,5,10,5"
+                HorizontalAlignment="Left"
+                Click="OnCreateQuickGroup"
+                Content="{markup:Translate [NewItemGroup]}"
+                ToolTip="{markup:Translate [SoflanGroupQuickCreateTipText]}" />
+            <StackPanel
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <Button
+                    Margin="10"
+                    Padding="10,5,10,5"
+                    cal:Message.Attach="[Event Click] = [Action Confirm()];"
+                    Content="{markup:Translate [Confirm]}"
+                    IsEnabled="{Binding CanConfirm}" />
+                <Button
+                    Margin="10"
+                    Padding="10,5,10,5"
+                    cal:Message.Attach="[Event Click] = [Action Cancel()];"
+                    Content="{markup:Translate [Cancel]}" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</mah:MetroWindow>

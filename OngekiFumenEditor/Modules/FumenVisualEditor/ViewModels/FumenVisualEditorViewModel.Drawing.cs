@@ -1031,6 +1031,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     public async void OnRenderControlHostLoaded(ActionExecutionContext executionContext)
     {
+        HookWindowFocus();
         if (executionContext.Source is not ContentControl contentControl)
             throw new InvalidOperationException($"Fumen render control host source must be ContentControl, actual={executionContext.Source?.GetType().FullName}");
         if (renderImpl != null)

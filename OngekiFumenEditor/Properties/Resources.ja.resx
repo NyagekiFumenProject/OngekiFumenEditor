@@ -2789,7 +2789,7 @@
   <data name="SoflanGroupDefaultCannotDelete" xml:space="preserve"><value>既定グループ（0）は削除できません。</value></data>
   <data name="SoflanGroupNameRequired" xml:space="preserve"><value>名前を空にできません。</value></data>
   <data name="SoflanGroupMoveToRoot" xml:space="preserve"><value>ルートへ移動</value></data>
-  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>汎用既定変速グループ</value></data>
+  <data name="SoflanGroupDefaultGroupName" xml:space="preserve"><value>既定変速グループ</value></data>
   <data name="SoflanGroupCategoryName" xml:space="preserve"><value>グループフォルダー</value></data>
   <data name="SoflanGroupNameExists" xml:space="preserve"><value>同じ名前の分類が既に存在します。</value></data>
   <data name="NewItemGroup" xml:space="preserve"><value>新しい変速グループ</value></data>
@@ -2799,11 +2799,38 @@
   <data name="SoflanGroupMoveToRootTipText" xml:space="preserve"><value>選択中の項目をルートへ移動します。</value></data>
   <data name="SoflanGroupDefaultNewGroupName" xml:space="preserve"><value>新しい変速グループ</value></data>
   <data name="SoflanGroupDefaultNewFolderName" xml:space="preserve"><value>新しいグループフォルダー</value></data>
-  <data name="SoflanGroupDefaultGroupTipText" xml:space="preserve"><value>汎用既定変速グループ（ID 0）：どの Individual Soflan Area にも含まれないオブジェクトが所属する、譜面タイムラインのフォールバック変速グループです。常に存在し、削除・ドラッグはできません。</value></data>
+  <data name="SoflanGroupDefaultGroupTipText" xml:space="preserve"><value>既定変速グループ（ID 0）：どの Individual Soflan Area にも含まれないオブジェクトが所属する、譜面タイムラインのフォールバック変速グループです。常に存在し、削除・ドラッグはできません。</value></data>
   <data name="SoflanGroupDesignCheckedTipText" xml:space="preserve"><value>チェックあり：編集モードでこのグループのオブジェクトを表示します。グループフォルダーは子項目にも適用されます。</value></data>
   <data name="SoflanGroupDesignUncheckedTipText" xml:space="preserve"><value>チェックなし：編集モードでこのグループのオブジェクトを非表示にします。グループフォルダーは子項目にも適用されます。</value></data>
   <data name="SoflanGroupPreviewCheckedTipText" xml:space="preserve"><value>チェックあり：プレビューモードでこのグループのオブジェクトを表示します。グループフォルダーは子項目にも適用されます。</value></data>
   <data name="SoflanGroupPreviewUncheckedTipText" xml:space="preserve"><value>チェックなし：プレビューモードでこのグループのオブジェクトを非表示にします。グループフォルダーは子項目にも適用されます。</value></data>
   <data name="SoflanGroupDrawCheckedTipText" xml:space="preserve"><value>選択中：この変速グループの変速線を表示します（同時に表示できるのは 1 グループのみ）。</value></data>
   <data name="SoflanGroupDrawUncheckedTipText" xml:space="preserve"><value>未選択：クリックするとこの変速グループの変速線を表示します（同時に表示できるのは 1 グループのみ）。</value></data>
+  <data name="IsaPlacementToggleText" xml:space="preserve"><value>ISA を配置</value></data>
+  <data name="IsaPlacementTipText" xml:space="preserve"><value>ISA を配置：2 点をクリック。対象：{0}</value></data>
+  <data name="IsaPlacementWaitingFirstPointTipText" xml:space="preserve"><value>1 点目を待機中。対象：{0}</value></data>
+  <data name="IsaPlacementWaitingSecondPointTipText" xml:space="preserve"><value>2 点目を待機中。対象：{0}</value></data>
+  <data name="IsaPlacementOverlayTitle" xml:space="preserve"><value>ISA 配置</value></data>
+  <data name="IsaPlacementOverlayTargetGroup" xml:space="preserve"><value>対象：{0}</value></data>
+  <data name="IsaPlacementOverlaySummary" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="IsaPlacementOverlayWaitingFirstPoint" xml:space="preserve"><value>1 点目を待機中</value></data>
+  <data name="IsaPlacementOverlayWaitingSecondPoint" xml:space="preserve"><value>2 点目を待機中</value></data>
+  <data name="IsaPlacementOverlayCancel" xml:space="preserve"><value>キャンセル</value></data>
+  <data name="IsaPlacementContinuousText" xml:space="preserve"><value>連続配置</value></data>
+  <data name="IsaPlacementContinuousTipText" xml:space="preserve"><value>ISA を 1 つ完成しても配置モードを維持します。</value></data>
+  <data name="IsaPlacementAdd" xml:space="preserve"><value>ISA を配置</value></data>
+  <data name="IsaPlacementTargetGroupInvalid" xml:space="preserve"><value>対象の変速グループが存在しないため、ISA 配置をキャンセルしました。</value></data>
+  <data name="IsaPlacementCannotStart" xml:space="preserve"><value>ISA 配置は編集モードかつバッチモード外、譜面を読み込んでいる場合にのみ使用できます。</value></data>
+  <data name="SoflanGroupSelectDialogTitle" xml:space="preserve"><value>変速グループを選択</value></data>
+  <data name="SoflanGroupSelectTipText" xml:space="preserve"><value>クリックしてこのオブジェクトの変速グループを選択します。</value></data>
+  <data name="SoflanGroupQuickCreateTipText" xml:space="preserve"><value>既定名で変速グループを直接作成します（名前入力なし）。</value></data>
+  <data name="SoflanGroupMixedValue" xml:space="preserve"><value>複数の値</value></data>
+  <data name="SoflanGroupDeleteDialogTitle" xml:space="preserve"><value>変速グループを削除</value></data>
+  <data name="SoflanGroupDeleteDialogReferences" xml:space="preserve"><value>変速グループ「{0}」はまだ {1} 個のオブジェクトから参照されています。処理方法を選択してください：</value></data>
+  <data name="SoflanGroupDeleteDialogTransferLabel" xml:space="preserve"><value>移動先：</value></data>
+  <data name="SoflanGroupDeleteDialogTransferAndDelete" xml:space="preserve"><value>移動して削除</value></data>
+  <data name="SoflanGroupDeleteDialogDeleteReferences" xml:space="preserve"><value>参照ごと削除</value></data>
+  <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>他の変速グループがないため、参照ごと削除するかキャンセルしてください。</value></data>
+  <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>変速グループ参照を移動してグループを削除</value></data>
+  <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>変速グループと参照を削除</value></data>
 </root>

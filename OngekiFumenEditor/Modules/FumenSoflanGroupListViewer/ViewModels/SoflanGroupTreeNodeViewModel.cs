@@ -46,21 +46,12 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         public bool HasChildren => Children.Count > 0;
 
         public string DisplayName => Group is not null
-            ? (Group.IsDefault && string.IsNullOrWhiteSpace(Group.Name)
-                ? Resources.SoflanGroupDefaultGroupName
-                : string.IsNullOrWhiteSpace(Group.Name) ? $"#{Group.Id}" : Group.Name)
+            ? SoflanGroupDisplayName.FormatGroup(Group)
             : string.IsNullOrWhiteSpace(Model.Name) ? Resources.SoflanGroupCategoryName : Model.Name;
 
-        public string DisplayNameWithId
-        {
-            get
-            {
-                if (GroupId is not int id)
-                    return DisplayName;
-                var suffix = $"#{id}";
-                return DisplayName.EndsWith(suffix, StringComparison.Ordinal) ? DisplayName : $"{DisplayName} {suffix}";
-            }
-        }
+        public string DisplayNameWithId => Group is not null
+            ? SoflanGroupDisplayName.FormatGroupWithId(Group)
+            : DisplayName;
 
         public Brush ColorBrush { get; }
 
@@ -267,17 +258,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             if (model is not SoflanGroupNode group)
                 return Brushes.Transparent;
 
-            var color = SoflanGroupColor.Get(group.Id);
-            var brush = new SolidColorBrush(ToColor(color));
-            brush.Freeze();
-            return brush;
+            return SoflanGroupColorBrush.Create(group.Id);
         }
-
-        private static Color ToColor(Vector4 color)
-            => Color.FromArgb(
-                (byte)(color.W * 255),
-                (byte)(color.X * 255),
-                (byte)(color.Y * 255),
-                (byte)(color.Z * 255));
     }
 }

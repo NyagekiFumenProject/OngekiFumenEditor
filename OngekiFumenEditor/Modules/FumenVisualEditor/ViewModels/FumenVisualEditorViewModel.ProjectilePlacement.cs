@@ -37,7 +37,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void OnPlacementActiveEditorChanged(FumenVisualEditorViewModel newEditor, FumenVisualEditorViewModel oldEditor)
         {
             if (!ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
+            {
                 CancelBatchProjectilePlacement();
+                CancelIsaPlacement();
+            }
         }
 
         public IPlaceBatchProjectileInfo RequestBatchPlaceProjectileInfo => requestBatchPlaceProjectileInfo;
@@ -52,6 +55,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (!CanRequestBatchProjectilePlacement || pallete is null || !Fumen.BulletPalleteList.Contains(pallete))
                 return;
+
+            CancelIsaPlacement();
 
             if (requestBatchPlaceProjectileInfo is { } current &&
                 ReferenceEquals(current.Pallete, pallete) && current.IsBell == isBell)

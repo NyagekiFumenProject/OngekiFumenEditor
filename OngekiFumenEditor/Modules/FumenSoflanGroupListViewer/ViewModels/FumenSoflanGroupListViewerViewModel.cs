@@ -3,9 +3,11 @@ using Gemini.Framework;
 using Gemini.Framework.Services;
 using Gemini.Modules.UndoRedo;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using static OngekiFumenEditor.Base.Collections.SoflanList;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -31,6 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
         public override PaneLocation PreferredLocation => PaneLocation.Bottom;
         private readonly List<SoflanGroupTreeNodeViewModel> allNodes = new();
         private readonly ConcurrentDictionary<int, GroupDisplayState> groupDisplayStates = new();
+        private readonly HashSet<int> reservedDeletedGroupIds = new();
 
         private OngekiFumen prevFumen;
         private SoflanGroupTree subscribedTree;
@@ -61,6 +64,16 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
                 RebuildTree();
                 RegisterFumenEvents();
                 NotifyOfPropertyChange(nameof(IsEditorAvailable));
+            }
+
+            switch (e.PropertyName)
+            {
+                case nameof(FumenVisualEditorViewModel.IsIsaPlacementActive):
+                case nameof(FumenVisualEditorViewModel.IsaPlacementPhase):
+                case nameof(FumenVisualEditorViewModel.IsaPlacementTargetSoflanGroupId):
+                    NotifyOfPropertyChange(nameof(IsIsaPlacementEnabled));
+                    NotifyOfPropertyChange(nameof(IsaPlacementToolTip));
+                    break;
             }
         }
 
@@ -136,10 +149,55 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
                 NotifyOfPropertyChange(() => CurrentSelectedSoflanGroupId);
                 NotifyOfPropertyChange(() => DisplaySoflanPointList);
                 NotifyOfPropertyChange(() => SelectedTitle);
+                NotifyOfPropertyChange(nameof(IsaPlacementToolTip));
             }
         }
 
         public int? CurrentSelectedSoflanGroupId => SelectedNode?.GroupId;
+
+        public bool IsIsaPlacementEnabled
+        {
+            get => Editor?.IsIsaPlacementActive ?? false;
+            set
+            {
+                if (value)
+                {
+                    if (Editor?.TryStartIsaPlacement(CurrentSelectedSoflanGroupId ?? 0) != true)
+                        NotifyOfPropertyChange();
+                }
+                else
+                {
+                    Editor?.CancelIsaPlacement();
+                }
+
+                NotifyOfPropertyChange();
+                NotifyOfPropertyChange(nameof(IsaPlacementToolTip));
+            }
+        }
+
+        public string IsaPlacementToolTip
+        {
+            get
+            {
+                var groupName = SelectedGroupDisplayName;
+                return Editor?.IsaPlacementPhase switch
+                {
+                    IsaPlacementPhase.WaitingFirstPoint => string.Format(Resources.IsaPlacementWaitingFirstPointTipText, groupName),
+                    IsaPlacementPhase.WaitingSecondPoint => string.Format(Resources.IsaPlacementWaitingSecondPointTipText, groupName),
+                    _ => string.Format(Resources.IsaPlacementTipText, groupName),
+                };
+            }
+        }
+
+        private string SelectedGroupDisplayName
+        {
+            get
+            {
+                var id = CurrentSelectedSoflanGroupId ?? 0;
+                var group = Editor?.Fumen?.IndividualSoflanAreaMap.SoflanGroupTree.GetGroup(id);
+                return group is null ? $"#{id}" : SoflanGroupDisplayName.FormatGroup(group);
+            }
+        }
         public string SelectedTitle => SelectedNode?.IsGroup == true
             ? string.Format(Resources.CurrentDisplaySelectedSoflanPointList, SelectedNode.DisplayNameWithId)
             : string.Empty;
@@ -197,7 +255,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             var name = string.IsNullOrWhiteSpace(dialog.Name)
                 ? Resources.SoflanGroupDefaultNewGroupName
                 : dialog.Name.Trim();
-            var id = tree.GetNextGroupId(fumen.SoflansMap.Keys.Concat(fumen.IndividualSoflanAreaMap.Keys));
+            var id = GetNextSoflanGroupId();
 
             SoflanGroupNode node = null;
             var action = LambdaUndoAction.Create(Resources.NewItemGroup,
@@ -207,6 +265,46 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             ExecuteAction(action);
             RebuildTree();
             SelectGroup(id);
+        }
+
+        public int GetNextSoflanGroupId()
+        {
+            var tree = GetTree();
+            if (tree is null)
+                return 1;
+
+            var fumen = Editor?.Fumen;
+            if (fumen is null)
+                return tree.GetNextGroupId(reservedDeletedGroupIds);
+
+            return tree.GetNextGroupId(fumen.SoflansMap.Keys
+                .Concat(fumen.IndividualSoflanAreaMap.Keys)
+                .Concat(reservedDeletedGroupIds));
+        }
+
+        public SoflanGroupNode CreateGroupWithDefaultName(int id, SoflanGroupCategoryNode parent)
+        {
+            var tree = GetTree();
+            if (tree is null || tree.ContainsGroup(id))
+                return null;
+
+            var name = Resources.SoflanGroupDefaultNewGroupName;
+            SoflanGroupNode node = null;
+            var action = LambdaUndoAction.Create(Resources.NewItemGroup,
+                () => node = tree.AddGroup(id, parent ?? tree.Root, name),
+                () =>
+                {
+                    if (node is not null)
+                    {
+                        tree.Remove(node);
+                        node = null;
+                    }
+                });
+
+            ExecuteAction(action);
+            RebuildTree();
+            SelectModel(node);
+            return node;
         }
 
         public void CreateNewCategory() => _ = CreateNewCategoryAsync();
@@ -292,7 +390,9 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             SelectModel(node.Model);
         }
 
-        public void DeleteSelected()
+        public void DeleteSelected() => _ = DeleteSelectedAsync();
+
+        private async Task DeleteSelectedAsync()
         {
             var node = SelectedNode;
             if (node is null || Editor?.Fumen is not OngekiFumen fumen)
@@ -312,25 +412,140 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
 
             if (node.IsGroup)
             {
-                var referenceCount = CountReferences(fumen, node.GroupId!.Value);
-                if (referenceCount > 0)
+                var groupId = node.GroupId!.Value;
+                var references = SoflanGroupReferenceSnapshot.Capture(fumen, groupId);
+                if (references.Count > 0)
                 {
-                    MessageBox.Show(string.Format(Resources.SoflanGroupDeleteHasReferences, referenceCount), Resources.SoflanGroupDelete);
+                    var alternatives = fumen.IndividualSoflanAreaMap.SoflanGroupTree
+                        .EnumerateGroups()
+                        .Where(x => x.Id != groupId);
+                    var dialog = new SoflanGroupDeleteDialogViewModel(node.Group, references.Count, alternatives);
+                    if (await IoC.Get<IWindowManager>().ShowDialogAsync(dialog) != true
+                        || dialog.Choice == SoflanGroupDeleteChoice.Cancel)
+                        return;
+
+                    if (dialog.Choice == SoflanGroupDeleteChoice.Transfer)
+                    {
+                        if (dialog.SelectedAlternative is not { } alternative)
+                            return;
+                        DeleteGroupWithTransfer(fumen, node, references, alternative.Id);
+                    }
+                    else
+                    {
+                        DeleteGroupWithReferences(fumen, node, references);
+                    }
                     return;
                 }
             }
 
+            DeleteEmptyNode(fumen, node);
+        }
+
+        private void DeleteEmptyNode(OngekiFumen fumen, SoflanGroupTreeNodeViewModel node)
+        {
             var tree = fumen.IndividualSoflanAreaMap.SoflanGroupTree;
             var model = node.Model;
             var parent = model.Parent;
             var index = tree.IndexOf(model);
+            var groupId = node.GroupId;
 
             var action = LambdaUndoAction.Create(Resources.SoflanGroupDelete,
-                () => tree.Remove(model),
-                () => tree.InsertExisting(model, parent, index));
+                () =>
+                {
+                    tree.Remove(model);
+                    if (groupId is int id)
+                        reservedDeletedGroupIds.Add(id);
+                    RebuildTree();
+                    SelectModel(parent);
+                },
+                () =>
+                {
+                    tree.InsertExisting(model, parent, index);
+                    if (groupId is int id)
+                        reservedDeletedGroupIds.Remove(id);
+                    RebuildTree();
+                    SelectModel(model);
+                });
+
             ExecuteAction(action);
-            RebuildTree();
-            SelectModel(parent);
+            if (groupId is int removedGroupId)
+                Editor?.CancelIsaPlacementIfTargetGroupRemoved(removedGroupId);
+        }
+
+        private void DeleteGroupWithTransfer(
+            OngekiFumen fumen,
+            SoflanGroupTreeNodeViewModel node,
+            SoflanGroupReferenceSnapshot references,
+            int alternativeGroupId)
+        {
+            var tree = fumen.IndividualSoflanAreaMap.SoflanGroupTree;
+            var model = node.Model;
+            var parent = model.Parent;
+            var index = tree.IndexOf(model);
+            var groupId = node.GroupId!.Value;
+
+            var action = LambdaUndoAction.Create(Resources.SoflanGroupTransferReferencesAndDeleteAction,
+                () =>
+                {
+                    references.ApplyGroup(alternativeGroupId);
+                    tree.Remove(model);
+                    reservedDeletedGroupIds.Add(groupId);
+                    RebuildTree();
+                    SelectModel(parent);
+                },
+                () =>
+                {
+                    tree.InsertExisting(model, parent, index);
+                    references.RestoreGroup();
+                    reservedDeletedGroupIds.Remove(groupId);
+                    RebuildTree();
+                    SelectModel(model);
+                });
+
+            ExecuteAction(action);
+            Editor?.CancelIsaPlacementIfTargetGroupRemoved(groupId);
+        }
+
+        private void DeleteGroupWithReferences(
+            OngekiFumen fumen,
+            SoflanGroupTreeNodeViewModel node,
+            SoflanGroupReferenceSnapshot references)
+        {
+            var tree = fumen.IndividualSoflanAreaMap.SoflanGroupTree;
+            var model = node.Model;
+            var parent = model.Parent;
+            var index = tree.IndexOf(model);
+            var groupId = node.GroupId!.Value;
+
+            var action = LambdaUndoAction.Create(Resources.SoflanGroupDeleteReferencesAndGroupAction,
+                () =>
+                {
+                    references.RemoveFrom(fumen);
+                    tree.Remove(model);
+                    reservedDeletedGroupIds.Add(groupId);
+                    RebuildTree();
+                    SelectModel(parent);
+                    RefreshPropertyBrowser();
+                },
+                () =>
+                {
+                    tree.InsertExisting(model, parent, index);
+                    references.AddTo(fumen);
+                    references.RestoreSelection();
+                    reservedDeletedGroupIds.Remove(groupId);
+                    RebuildTree();
+                    SelectModel(model);
+                    RefreshPropertyBrowser();
+                });
+
+            ExecuteAction(action);
+            Editor?.CancelIsaPlacementIfTargetGroupRemoved(groupId);
+        }
+
+        private void RefreshPropertyBrowser()
+        {
+            if (Editor is not null)
+                IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(Editor);
         }
 
         public void MoveSelectedToRoot()
@@ -416,13 +631,6 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
                 Editor.UndoRedoManager.ExecuteAction(action);
         }
 
-        private static int CountReferences(OngekiFumen fumen, int groupId)
-        {
-            var soflans = fumen.SoflansMap.Values.SelectMany(x => x).Count(x => x.SoflanGroup == groupId);
-            var areas = fumen.IndividualSoflanAreaMap.Values.SelectMany(x => x).Count(x => x.SoflanGroup == groupId);
-            return soflans + areas;
-        }
-
         public void SetGroupVisible(SoflanGroupTreeNodeViewModel node)
         {
             if (node.GroupId is not int id)
@@ -470,6 +678,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             if (!ReferenceEquals(rebuiltTree, tree))
             {
                 rebuiltTree = tree;
+                reservedDeletedGroupIds.Clear();
                 groupDisplayStates.Clear();
                 drawnSoflanGroupId = 0;
             }
@@ -538,6 +747,7 @@ namespace OngekiFumenEditor.Modules.FumenSoflanGroupListViewer.ViewModels
             SelectedNode = selected ?? allNodes.FirstOrDefault(x => x.GroupId == 0);
             NotifyOfPropertyChange(() => DisplaySoflanPointList);
             NotifyOfPropertyChange(() => SelectedTitle);
+            NotifyOfPropertyChange(nameof(IsaPlacementToolTip));
         }
 
         private readonly record struct GroupDisplayState(bool Design, bool Preview, bool Draw);

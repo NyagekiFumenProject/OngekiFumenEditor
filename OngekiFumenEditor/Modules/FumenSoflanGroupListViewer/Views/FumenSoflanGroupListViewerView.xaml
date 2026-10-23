@@ -32,6 +32,12 @@
             Margin="4,0"
             Orientation="Horizontal">
             <ToolBar>
+                <CheckBox
+                    Margin="4,0,8,0"
+                    VerticalAlignment="Center"
+                    Content="{markup:Translate [IsaPlacementToggleText]}"
+                    IsChecked="{Binding IsIsaPlacementEnabled, Mode=TwoWay}"
+                    ToolTip="{Binding IsaPlacementToolTip}" />
                 <Button
                     cal:Message.Attach="CreateNewGroup"
                     Content="{markup:Translate [NewItemGroup]}"

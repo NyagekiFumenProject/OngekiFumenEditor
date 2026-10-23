@@ -49,7 +49,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 if (!ReferenceEquals(editorProjectData, value))
+                {
                     CancelBatchProjectilePlacement();
+                    CancelIsaPlacement();
+                }
                 var previousProjectData = editorProjectData;
                 var prevFumen = editorProjectData?.Fumen;
                 Set(ref editorProjectData, value);
@@ -152,6 +155,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 case nameof(ISelectableObject.IsSelected):
                 case nameof(ConnectableChildObjectBase.IsAnyControlSelecting):
+                    break;
+                case nameof(ISoflan.SoflanGroup):
+                    // 组属性修改（含撤销/重做）后，普通物件的绘制归属缓存需要立即跟上。
+                    if (Fumen is not null)
+                        RebuildObjectSoflanGroupRecord();
+                    IsDirty = true;
+                    RecalculateScrollMetrics();
                     break;
                 default:
                     IsDirty = true;
@@ -459,6 +469,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             await base.OnActivatedAsync(cancellationToken);
             await IoC.Get<ISchedulerManager>().AddScheduler(this);
+            HookWindowFocus();
             EditorManager.NotifyActivate(this);
         }
 
@@ -468,6 +479,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             try
             {
                 CancelBatchProjectilePlacement();
+                CancelIsaPlacement();
+                UnhookWindowFocus();
                 await base.OnDeactivateAsync(close, cancellationToken);
                 await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
                 EditorManager.NotifyDeactivate(this);
@@ -498,6 +511,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
 
             CancelBatchProjectilePlacement();
+            CancelIsaPlacement();
+            UnhookWindowFocus();
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
 
             var fumen = editorProjectData?.Fumen;
