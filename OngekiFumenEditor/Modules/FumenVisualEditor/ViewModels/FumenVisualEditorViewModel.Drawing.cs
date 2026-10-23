@@ -72,6 +72,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
 
     private readonly StringBuilder stringBuilder = new(2048);
 
+    private FrameworkElement renderControlElement;
+
     private DrawTimeSignatureHelper timeSignatureHelper;
 
     private float viewHeight;
@@ -1049,8 +1051,23 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
 
         contentControl.Content = renderControl;
+        renderControlElement = renderControl;
+        PropertyChanged += OnIsaPlacementCursorPropertyChanged;
+        UpdateIsaPlacementCursor();
 
         PrepareRenderLoop(renderControl, renderImpl);
+    }
+
+    private void OnIsaPlacementCursorPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(IsIsaPlacementActive))
+            UpdateIsaPlacementCursor();
+    }
+
+    private void UpdateIsaPlacementCursor()
+    {
+        if (renderControlElement is not null)
+            renderControlElement.Cursor = IsIsaPlacementActive ? Cursors.Cross : null;
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
