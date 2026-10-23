@@ -297,3 +297,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：新增 `DefaultMusicPlayer_new`（未接入 `NAudioManager`，生产仍用旧实现）。时间源完全改为 `IWavePosition.GetPosition()` / `OutputWaveFormat`，不使用 Stopwatch 或旧逻辑回退；`Play` / `Pause` / `Seek` 以设备字节位置重建基准，并处理 WaveOut 32 位位置回绕；`NAudioManager` 增加 internal `TryGetOutputPosition`。
 - 验证：临时切换新实现后，6 轮 500ms 播放/暂停的 `CurrentTime` 与真实时间差约 2ms 且不累积；Seek 123.456ms 对齐到 123.4375ms（8 字节）；继续播放正常；Debug 构建 0 error。生产已恢复旧播放器。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：启用设备位置播放器，ASIO 回退旧实现（WPF）
+
+- WPF：`NAudioManager.LoadAudioAsync` 在非 ASIO 且输出设备实现 `IWavePosition` 时使用 `DefaultMusicPlayer_new`；ASIO 继续使用旧 `DefaultMusicPlayer`。新增播放器实现选择日志。
+- 验证：Wasapi 实例日志显示 `Music player implementation: DefaultMusicPlayer_new`；播放 1 秒 `CurrentTime=1001.8ms`（ratio 0.9987），Seek 123.456ms 对齐到 123.4375ms；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。ASIO 分支因本机无驱动未实机验证，按类型显式回退。
+- Avalonia：本次未移植，不改变现有同步点。
