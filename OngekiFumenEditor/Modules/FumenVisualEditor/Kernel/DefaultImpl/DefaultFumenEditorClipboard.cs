@@ -73,6 +73,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 LaneCurvePathControlObject => false,
                 LaneBlockArea.LaneBlockAreaEndIndicator => false,
                 Soflan.SoflanEndIndicator => false,
+                IndividualSoflanArea.IndividualSoflanAreaEndIndicator => false,
                 //允许被复制
                 _ => true,
             }))
@@ -288,11 +289,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
                     switch (copied)
                     {
-                        case Soflan or LaneBlockArea:
+                        case Soflan or LaneBlockArea or IndividualSoflanArea:
                             ITimelineObject endIndicator = copied switch
                             {
                                 Soflan _sfl => _sfl.EndIndicator,
                                 LaneBlockArea _lbk => _lbk.EndIndicator,
+                                IndividualSoflanArea _isf => _isf.EndIndicator,
                                 _ => throw new Exception("这都能炸真的牛皮")
                             };
                             var oldEndIndicatorTGrid = endIndicator.TGrid.CopyNew();
@@ -419,6 +421,22 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 undo += () => control.XGrid = oldControlXGrid.CopyNew();
                             }
                         }
+                    }
+
+                    //ISA 是矩形，终点 X 需要跟随本体做同样的平移/镜像。
+                    if (copied is IndividualSoflanArea area)
+                    {
+                        var oldEndXGrid = area.EndIndicator.XGrid.CopyNew();
+                        var endX = XGridCalculator.ConvertXGridToX(oldEndXGrid, targetEditor);
+                        var newEndX = CalcX(endX);
+
+                        if (XGridCalculator.ConvertXToXGrid(newEndX, targetEditor) is not XGrid newEndXGrid)
+                        {
+                            WarnPasteFailed($"convert ISA end x to XGrid failed, x={newEndX}");
+                            return;
+                        }
+                        updateX(area.EndIndicator, newEndX, newEndXGrid);
+                        undo += () => area.EndIndicator.XGrid = oldEndXGrid.CopyNew();
                     }
                 }
 
@@ -549,6 +567,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                                 horizon.XGrid = xGrid.CopyNew();
                         }
                     }
+
+                    // 粘贴位置经过取整/镜像后仍保证「左下=本体、右上=End」。
+                    if (copied is IndividualSoflanArea pastedArea)
+                        pastedArea.NormalizeCorners();
 
                     foreach (var selectObj in map.Keys)
                         selectObj.IsSelected = true;

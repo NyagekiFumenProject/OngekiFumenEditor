@@ -31,7 +31,9 @@ namespace OngekiFumenEditor.Base.OngekiObjects
                 }
                 set
                 {
-                    base.TGrid = value is not null && value < RefIndividualSoflanArea.TGrid ? RefIndividualSoflanArea.TGrid.CopyNew() : value;
+                    // RefIndividualSoflanArea 在 CopyNew 等“先构造后挂接”的路径上可能暂时为 null。
+                    var startTGrid = RefIndividualSoflanArea?.TGrid;
+                    base.TGrid = value is not null && startTGrid is not null && value < startTGrid ? startTGrid.CopyNew() : value;
                     tGridHasSet = true;
                 }
             }
@@ -120,6 +122,19 @@ namespace OngekiFumenEditor.Base.OngekiObjects
         public IndividualSoflanAreaEndIndicator EndIndicator { get; }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => displayables;
+
+        public override void Copy(OngekiObjectBase fromObj)
+        {
+            base.Copy(fromObj);
+
+            if (fromObj is not IndividualSoflanArea from)
+                return;
+
+            SoflanGroup = from.SoflanGroup;
+            EndIndicator.XGrid = from.EndIndicator.XGrid.CopyNew();
+            // 源区域始终是规范化的（End >= Start），本体 TGrid 已由 base.Copy 复制，因此这里的 clamp 不会触发。
+            EndIndicator.TGrid = from.EndIndicator.TGrid.CopyNew();
+        }
 
         public IndividualSoflanArea()
         {

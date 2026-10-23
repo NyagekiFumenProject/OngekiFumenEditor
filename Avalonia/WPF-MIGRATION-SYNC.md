@@ -213,3 +213,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`IndividualSoflanAreaDrawingTarget` 的矩形上下边改用 min/max，两个角标改为按各自对象坐标绘制并注册命中（原先固定注册在 bbox 左下/右上）；End 拖到另一侧后三角仍贴在指针下，不再出现角标与对象错位。
 - 验证：脚本直接驱动交互 action（关闭磁吸以取精确坐标）覆盖 End 拖到本体左下、T 越过本体下方、本体拖过 End、本体+End 多选整体平移，结果分别为 `(-3,8)..(0,10)`、`(0,6)..(5,10)`、`(0,10)..(5,16)`、平移 `(+3,+2)`；MCP undo/redo 恢复正确；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：修复 ISA 复制粘贴崩溃与端点丢失（WPF）
+
+- WPF：`IndividualSoflanAreaEndIndicator.TGrid` setter 在 `RefIndividualSoflanArea` 暂时为 null（`CopyNew` 构造期）时不再抛 `NullReferenceException`。
+- WPF：`IndividualSoflanArea.Copy` 补齐 `SoflanGroup` 与 End 的 X/T 复制；剪贴板来源过滤排除 `IndividualSoflanAreaEndIndicator`（与 Soflan/LaneBlockArea 的 End 一致），避免 End 被单独复制。
+- WPF：粘贴时为 ISA End 应用与本体相同的水平/时间偏移（移动与镜像模式），粘贴完成后调用 `NormalizeCorners()` 保持「左下=本体、右上=End」。
+- 验证：实际 GUI 实例中选中本体+End 后执行复制/粘贴，新区域组号、宽度、长度与源一致，剪贴板不再崩溃；MCP undo/redo 正常；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
