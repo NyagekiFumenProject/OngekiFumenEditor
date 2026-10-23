@@ -266,3 +266,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`DefaultMusicPlayer.Load` 最终 `Duration` 改为 `loadedReader.TotalTime`，与 `Seek`/`CurrentTime` 共用重采样后的流基准；原始 `processedProvider.Duration` 仅作为加载期临时值。
 - 验证：30s fixture 上 `Duration=30000ms`，`Seek(Duration)` 后 `CurrentTime=30000ms`；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：暂停时以音频流位置校准时间（WPF）
+
+- WPF：`DefaultMusicPlayer.Pause` 的 `pauseTime` 从 `GetTime()`（Stopwatch 推算）改为 `audioFileReader.CurrentTime`，与 `Seek` 的校准口径一致，避免多次暂停/继续累积误差。
+- 验证：6 轮 500ms 播放/暂停，修复后前 4 轮 `CurrentTime` 精确为 500/1000/1500/2000ms；暂停按流位置校准后不再基于 Stopwatch 累积（输出缓冲预读可能带来一次约 10ms 前跳）。Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

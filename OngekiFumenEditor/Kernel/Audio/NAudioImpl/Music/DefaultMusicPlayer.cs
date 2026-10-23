@@ -235,7 +235,8 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                 if (!IsAvaliable || !IsPlaying || finishProvider is null)
                     return;
 
-                pauseTime = GetTime();
+                // 以音频流实际读取位置为基准，避免 Stopwatch 推算的误差在多次暂停/继续后累积。
+                pauseTime = audioFileReader is not null ? audioFileReader.CurrentTime : GetTime();
                 baseOffset = pauseTime;
                 IsPlaying = false;
                 sw.Stop();
