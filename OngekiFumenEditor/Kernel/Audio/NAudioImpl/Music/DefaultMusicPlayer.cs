@@ -141,7 +141,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                     audioFileReader = loadedReader;
                     finishProvider = loadedFinishProvider;
                     finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
-                    duration = processedProvider.Duration;
+                    duration = loadedReader.TotalTime;
                     IsAvaliable = true;
                 }
 
