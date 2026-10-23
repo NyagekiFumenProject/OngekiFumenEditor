@@ -597,9 +597,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 
             (var minY, var maxY) = objects
                     .Where(x => x is not ConnectableObjectBase)
-                    .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
-                    .Where(x => x.Item1)
-                    .Select(x => x.Y)
+                    .SelectMany(GetMeasureCanvasPositions)
+                    .Select(p => p.Y)
                     .MaxMinBy(x => x);
 
             var diffY = maxY - minY;
@@ -616,9 +615,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             {
                 (var minX, var maxX) = objects
                     .Where(x => x is not ConnectableObjectBase)
-                    .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
-                    .Where(x => x.Item1)
-                    .Select(x => x.X)
+                    .SelectMany(GetMeasureCanvasPositions)
+                    .Select(p => p.X)
                     .MaxMinBy(x => x);
 
                 var diffX = maxX - minX;
@@ -627,6 +625,25 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// 该对象参与复制范围/重心计算的位置。ISA 是矩形，取 Start 与 End 两个顶点
+        /// （包围盒中心即 Start-End 直线中点）；其他对象仍只取自身位置。
+        /// </summary>
+        private IEnumerable<Point> GetMeasureCanvasPositions(OngekiObjectBase obj)
+        {
+            if (!currentCopiedSources.TryGetValue(obj, out var pos))
+                yield break;
+
+            yield return pos;
+
+            if (obj is IndividualSoflanArea area && sourceEditor is not null)
+            {
+                yield return new Point(
+                    XGridCalculator.ConvertXGridToX(area.EndIndicator.XGrid, sourceEditor),
+                    sourceEditor.ConvertTGridToY_DesignMode(area.EndIndicator.TGrid));
+            }
         }
 
         private Point CalculateRangeCenter(IEnumerable<OngekiObjectBase> objects)
@@ -639,20 +656,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             else
                 mesureObjects = mesureObjects.Where(x => x is ConnectableStartObject);
 
-            (var minX, var maxX) = mesureObjects
-                    .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.X) : default)
-                    .Where(x => x.Item1)
-                    .Select(x => x.X)
-                    .MaxMinBy(x => x);
+            var measurePositions = mesureObjects.SelectMany(GetMeasureCanvasPositions).ToList();
+
+            (var minX, var maxX) = measurePositions.Select(p => p.X).MaxMinBy(x => x);
 
             var diffX = maxX - minX;
             var x = minX + diffX / 2f;
 
-            (var minY, var maxY) = mesureObjects
-                    .Select(x => currentCopiedSources.TryGetValue(x, out var p) ? (true, p.Y) : default)
-                    .Where(x => x.Item1)
-                    .Select(x => x.Y)
-                    .MaxMinBy(x => x);
+            (var minY, var maxY) = measurePositions.Select(p => p.Y).MaxMinBy(x => x);
 
             var diffY = maxY - minY;
             var y = minY + diffY / 2f;

@@ -227,3 +227,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`FumenVisualEditorViewModel` 新增 `CurrentCursor`（ISA 放置期间为 `Cursors.Cross`，否则 null），随 `IsIsaPlacementActive` 一起通知；`OnRenderControlHostLoaded` 对动态创建的渲染控件用 `SetBinding(FrameworkElement.CursorProperty, ...)` 建立单向绑定，移除 `renderControlElement` 字段、`PropertyChanged` 手工订阅与 `UpdateIsaPlacementCursor`。
 - 验证：GUI 实例脚本检查渲染控件的 `Cursor` 在开始 ISA 放置后为 `Cursors.Cross`、取消后恢复 null；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：复制粘贴以 ISA 矩形中点为重心（WPF）
+
+- WPF：剪贴板范围/重心计算新增 `GetMeasureCanvasPositions`：ISA 贡献 Start 与 End 两个顶点，`CalculateRangeCenter`、`CalculateXMirror`、`CalculateYMirror` 都按包围盒计算；单块 ISA 的中心即 Start-End 直线中点，粘贴时目标点落在矩形中心。
+- 验证：GUI 脚本复制 Start(-3,10)-End(3,14) 的 ISA，以 (500, 源中心 Y+1000) 为目标粘贴，新区域中点 `(500.000009, 11285.714)` 与目标一致；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
