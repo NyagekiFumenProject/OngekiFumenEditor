@@ -100,7 +100,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor
              Key.Q);
 
         [Export] public static KeyBindingDefinition KBD_ToggleBatchMode = new KeyBindingDefinition(
-            nameof(Resources.BatchModeToggle),
+            nameof(Resources.kbd_editor_ToggleBatchMode),
             ModifierKeys.Alt,
             Key.B,
             layer: KeyBindingLayer.Global);

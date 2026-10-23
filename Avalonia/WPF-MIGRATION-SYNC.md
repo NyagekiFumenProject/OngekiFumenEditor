@@ -248,3 +248,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
   - 2026-10-18：Tap/Hold 邻近换线——8 像素内换线，Hold 以头决定轨道，单拖头保持尾时间、同拖头尾保持时长；仅拖尾不换线。
   - 2026-10-21：WPF Grid 交互边界重构——选择拖动事务归入 ObjectInteractiveManager，剪贴板只调度纯 Grid 平移与交互吸附；LaneGeometry / LaneSwitchResolver 不引用 VM。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：快捷键配置键统一 kbd_editor_*（WPF）
+
+- WPF：`BatchModeToggle` 配置键直接改名为 `kbd_editor_ToggleBatchMode`，新增三语资源（复用原「切换批量模式」文案）；不保留旧键兼容或迁移。
+- 验证：隔离实例读回 `ConfigKey=kbd_editor_ToggleBatchMode`；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

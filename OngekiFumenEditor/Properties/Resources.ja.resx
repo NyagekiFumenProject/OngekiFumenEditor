@@ -294,6 +294,9 @@
   <data name="BatchModeToggle" xml:space="preserve">
     <value>ブラシモードを切り替え</value>
   </data>
+  <data name="kbd_editor_ToggleBatchMode" xml:space="preserve">
+    <value>ブラシモードを切り替え</value>
+  </data>
   <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>ブラシモードが有効な場合，ほとんどのオブジェクトはドラッグできません。</value>
   </data>

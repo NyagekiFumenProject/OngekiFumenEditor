@@ -294,6 +294,9 @@
   <data name="BatchModeToggle" xml:space="preserve">
     <value>Toggle batch mode</value>
   </data>
+  <data name="kbd_editor_ToggleBatchMode" xml:space="preserve">
+    <value>Toggle batch mode</value>
+  </data>
   <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>Enable batch mode, which allows for placing objects with the mouse.</value>
   </data>
