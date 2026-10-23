@@ -233,3 +233,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：剪贴板范围/重心计算新增 `GetMeasureCanvasPositions`：ISA 贡献 Start 与 End 两个顶点，`CalculateRangeCenter`、`CalculateXMirror`、`CalculateYMirror` 都按包围盒计算；单块 ISA 的中心即 Start-End 直线中点，粘贴时目标点落在矩形中心。
 - 验证：GUI 脚本复制 Start(-3,10)-End(3,14) 的 ISA，以 (500, 源中心 Y+1000) 为目标粘贴，新区域中点 `(500.000009, 11285.714)` 与目标一致；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：ISA 终点默认值改用可空背字段（WPF）
+
+- WPF：移除 `IndividualSoflanAreaEndIndicator` 的 `tGridHasSet` 标志，改用 `TGrid?` 背字段：`null` 表示终点尚未显式设置，首次读取时复制起点并固化；显式赋值后终点独立。赋值统一走 `SetTGridCore`，保留 `End >= Start` 约束、子属性变化订阅与 `SetTGridUnclamped`。
+- 验证：未设置终点的 ISA 读到 `End=Start`、`GridLength=0`；设置 `End=14` 后把 `Start` 移到 12，`End` 仍为 14；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Utils;
 using System;
@@ -16,37 +16,32 @@ namespace OngekiFumenEditor.Base.OngekiObjects
 
             public override IEnumerable<IDisplayableObject> GetDisplayableObjects() => System.Array.Empty<IDisplayableObject>();
 
-            private bool tGridHasSet;
+            private TGrid tGrid;
 
             public override TGrid TGrid
             {
                 get
                 {
-                    if (!tGridHasSet)
-                    {
-                        TGrid = RefIndividualSoflanArea.TGrid.CopyNew();
-                        return TGrid;
-                    }
-                    return base.TGrid;
+                    // null 表示终点尚未显式设置：此时终点跟随起点（零长度区域）。
+                    if (tGrid is null)
+                        SetTGridCore(RefIndividualSoflanArea.TGrid.CopyNew(), clampToStart: false);
+                    return tGrid;
                 }
-                set
-                {
-                    // RefIndividualSoflanArea 在 CopyNew 等“先构造后挂接”的路径上可能暂时为 null。
-                    var startTGrid = RefIndividualSoflanArea?.TGrid;
-                    base.TGrid = value is not null && startTGrid is not null && value < startTGrid ? startTGrid.CopyNew() : value;
-                    tGridHasSet = true;
-                }
+                set => SetTGridCore(value, clampToStart: true);
             }
 
-            /// <summary>
-            /// 供编辑器拖动角标使用：允许终点暂时落到起点另一侧（矩形翻转），
-            /// 拖动结束后由交互层调用 <see cref="IndividualSoflanArea.NormalizeCorners"/> 规范化。
-            /// 常规赋值仍走上面的 setter，保持 End >= Start 的约束。
-            /// </summary>
-            internal void SetTGridUnclamped(TGrid value)
+            internal void SetTGridUnclamped(TGrid value) => SetTGridCore(value, clampToStart: false);
+
+            private void SetTGridCore(TGrid value, bool clampToStart)
             {
-                base.TGrid = value;
-                tGridHasSet = true;
+                var startTGrid = RefIndividualSoflanArea?.TGrid;
+                var clamped = clampToStart && value is not null && startTGrid is not null && value < startTGrid
+                    ? startTGrid.CopyNew()
+                    : value;
+
+                this.RegisterOrUnregisterPropertyChangeEvent(tGrid, clamped);
+                tGrid = clamped;
+                NotifyOfPropertyChange(() => TGrid);
             }
 
             public int SoflanGroup
