@@ -513,8 +513,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             CancelBatchProjectilePlacement();
             CancelIsaPlacement();
             UnhookWindowFocus();
-            PropertyChanged -= OnIsaPlacementCursorPropertyChanged;
-            renderControlElement = null;
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
 
             var fumen = editorProjectData?.Fumen;

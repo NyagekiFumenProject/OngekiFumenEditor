@@ -37,6 +37,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -71,8 +72,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private DrawSelectingRangeHelper selectingRangeHelper;
 
     private readonly StringBuilder stringBuilder = new(2048);
-
-    private FrameworkElement renderControlElement;
 
     private DrawTimeSignatureHelper timeSignatureHelper;
 
@@ -1051,23 +1050,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
 
         contentControl.Content = renderControl;
-        renderControlElement = renderControl;
-        PropertyChanged += OnIsaPlacementCursorPropertyChanged;
-        UpdateIsaPlacementCursor();
+        renderControl.SetBinding(FrameworkElement.CursorProperty,
+            new Binding(nameof(CurrentCursor)) { Source = this, Mode = BindingMode.OneWay });
 
         PrepareRenderLoop(renderControl, renderImpl);
-    }
-
-    private void OnIsaPlacementCursorPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName == nameof(IsIsaPlacementActive))
-            UpdateIsaPlacementCursor();
-    }
-
-    private void UpdateIsaPlacementCursor()
-    {
-        if (renderControlElement is not null)
-            renderControlElement.Cursor = IsIsaPlacementActive ? Cursors.Cross : null;
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)

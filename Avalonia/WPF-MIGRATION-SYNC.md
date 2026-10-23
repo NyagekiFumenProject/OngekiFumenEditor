@@ -221,3 +221,9 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：粘贴时为 ISA End 应用与本体相同的水平/时间偏移（移动与镜像模式），粘贴完成后调用 `NormalizeCorners()` 保持「左下=本体、右上=End」。
 - 验证：实际 GUI 实例中选中本体+End 后执行复制/粘贴，新区域组号、宽度、长度与源一致，剪贴板不再崩溃；MCP undo/redo 正常；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：ISA 放置光标改为数据绑定（WPF）
+
+- WPF：`FumenVisualEditorViewModel` 新增 `CurrentCursor`（ISA 放置期间为 `Cursors.Cross`，否则 null），随 `IsIsaPlacementActive` 一起通知；`OnRenderControlHostLoaded` 对动态创建的渲染控件用 `SetBinding(FrameworkElement.CursorProperty, ...)` 建立单向绑定，移除 `renderControlElement` 字段、`PropertyChanged` 手工订阅与 `UpdateIsaPlacementCursor`。
+- 验证：GUI 实例脚本检查渲染控件的 `Cursor` 在开始 ISA 放置后为 `Cursors.Cross`、取消后恢复 null；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

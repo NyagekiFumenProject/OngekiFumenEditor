@@ -25,6 +25,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public IsaPlacementPhase IsaPlacementPhase => isaPlacementSession.Phase;
         public int IsaPlacementTargetSoflanGroupId => isaPlacementSession.TargetSoflanGroupId;
 
+        /// <summary>
+        /// 当前渲染控件应使用的鼠标光标。ISA 两点放置期间为十字光标；视图通过数据绑定应用，
+        /// 不再由后置代码订阅 PropertyChanged 手工赋值。
+        /// </summary>
+        public Cursor CurrentCursor => IsIsaPlacementActive ? Cursors.Cross : null;
+
         public string IsaPlacementTargetGroupDisplayName
         {
             get
@@ -131,6 +137,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void NotifyIsaPlacementStateChanged()
         {
             NotifyOfPropertyChange(nameof(IsIsaPlacementActive));
+            NotifyOfPropertyChange(nameof(CurrentCursor));
             NotifyOfPropertyChange(nameof(IsaPlacementPhase));
             NotifyOfPropertyChange(nameof(IsaPlacementTargetSoflanGroupId));
             NotifyOfPropertyChange(nameof(IsaPlacementTargetGroupDisplayName));
