@@ -5,6 +5,7 @@
 - 范围：`Modules/FumenSoflanGroupListViewer/**`、`Base/EditorObjects/SoflanGroupWrapItem*.cs`、`Base/Collections/IndividualSoflanAreaListMap.cs`、SGWI 持久化、拖拽管理器，以及依赖组树状态的绘制/明细链路
 - 状态：**已按方案 E 实施（2026-10-22）**，审查部分保留为设计记录
 - 关联：上一版 `docs/soflan-group-viewer-audit-2026-10-22.md` 基于已回滚的 PR #46，其 SG-1/SG-2 等条目描述的是 PR 内容；当前 master 的结论以本文件为准
+- PR #46 功能需求：[`pr46-isa-placement-soflan-group-functional-requirements.md`](pr46-isa-placement-soflan-group-functional-requirements.md)（历史需求，不代表当前实现）
 
 ## 实施结果（方案 E，2026-10-22）
 
@@ -17,8 +18,8 @@
 - **显示状态**：组行 Design/Preview 复选（分类联动子项）、Draw 单选；`IFumenSoflanGroupListViewer` 改为 `CurrentSelectedSoflanGroupId` / `DrawnSoflanGroupId` / `IsGroupVisible`；`DurationSoflanDrawingTarget`、`DrawJudgeLineHelper`、状态栏与可见性检查已适配。
 - **数值显示**：属性编辑器、Soflan 明细、拍号/元信息 BPM、音频调整、TGrid 计算器、子弹速度、设置项以及 `TGrid`/`XGrid`/对象 `ToString` 统一格式化，避免 float/double 二进制噪声直接显示。
 - **颜色**：`SoflanGroupColor` 改为黄金角色相步进（137.508°）+ 固定 S=0.9/V=1.0 的明亮配色；组 ID 稳定、跨会话一致，前 16 组色相间隔 ≥ 12°，相邻新建组不会落到相近色相；树节点显示颜色块，ISA 区域与对象 tint 使用同一颜色。
-- **默认组**：ID 0 显示为「通用默认变速组」，提供说明性 ToolTip，并在视图/model 层禁止拖动；
-- **删除**：通用默认变速组、仍有子节点的分类、仍被引用的组会被拒绝并提示；空组/空分类可删除且可撤销。
+- **默认组**：ID 0 显示为「默认变速组」，提供说明性 ToolTip，并在视图/model 层禁止拖动；
+- **删除**：默认变速组、仍有子节点的分类、仍被引用的组会被拒绝并提示；空组/空分类可删除且可撤销。
 - **清理**：删除 `SoflanGroupWrapItem`、`SoflanGroupWrapItemGroup`、`SoflanGroupDisplayItemListViewBase`；`IndividualSoflanAreaListMap` 改为持有 `SoflanGroupTree`。
 
 已知边界（有意收敛，不是未完成项）：
@@ -114,7 +115,7 @@ flowchart LR
 - **位置**：`IndividualSoflanAreaListMap` 的 `defaultItemGroup` 与 `TryGetOrCreateSoflanGroupWrapItem`（`:41-61`、`:134-139`）、parser（`:18-39`）、formatter（`:78-86`）
 - **现象**：UI 显示 `default`（名称容器）与 `默认组（0）`/`SoflanGroup #N`（ID 项）两层；新建组只创建名称容器；`[SGWI]` 一行名称可包含多个 ID；`SoflanGroupWrapItem.DisplayName` 的 setter 为空（item 名只读）。
 - **影响**：用户无法从界面理解“组名”和“组 ID”的关系；一个名称下的多个 ID 无法单独命名；新建组与已有 ID 无法绑定。
-- **建议**：改为“一个组 = 一个节点（ID + 名称 + 父/顺序）”；通用默认变速组（ID 0）作为特殊根节点；同一旧 SGWI 行的多个 ID 迁移为兄弟节点（名称加后缀或保留别名）；持久化每个组一行。
+- **建议**：改为“一个组 = 一个节点（ID + 名称 + 父/顺序）”；默认变速组（ID 0）作为特殊根节点；同一旧 SGWI 行的多个 ID 迁移为兄弟节点（名称加后缀或保留别名）；持久化每个组一行。
 
 ### TR-8（中）组名无法编辑/重命名
 
