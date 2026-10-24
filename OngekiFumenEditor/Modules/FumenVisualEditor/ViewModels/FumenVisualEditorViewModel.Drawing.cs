@@ -1,4 +1,4 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
 using Gemini.Modules.Toolbox;
