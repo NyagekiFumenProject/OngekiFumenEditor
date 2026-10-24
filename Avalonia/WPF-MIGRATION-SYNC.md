@@ -312,3 +312,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
   - `Dispose` / `OnDeactivateAsync` 原有取消路径保持不变。
 - 验证：View 与 master 完全一致；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：DragEnter 注册迁入渲染控件生命周期（WPF）
+
+- WPF：`FumenVisualEditorView` 保持无事件代码；工具箱拖入监听从窗口 `PreviewDragEnterEvent` 改为渲染控件 `DragDrop.DragEnterEvent`。
+- `OnRenderControlHostLoaded` 注册 `renderControl.AddHandler(DragDrop.DragEnterEvent, ...)` 并保存控件与委托；`Dispose` 中注销。窗口失焦仍由 `HookWindowFocus` 的 `Window.Deactivated` 处理。
+- 验证：View 与 master 一致；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

@@ -516,6 +516,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             CancelBatchProjectilePlacement();
             CancelIsaPlacement();
             UnhookWindowFocus();
+            if (renderControlElement is not null && toolboxDragEnterHandler is not null)
+                renderControlElement.RemoveHandler(DragDrop.DragEnterEvent, toolboxDragEnterHandler);
+            renderControlElement = null;
+            toolboxDragEnterHandler = null;
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
             var fumen = editorProjectData?.Fumen;
             if (fumen is not null)

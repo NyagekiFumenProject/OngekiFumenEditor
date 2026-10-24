@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
+using Gemini.Modules.Toolbox;
 using NAudio.Gui;
 using NWaves.Utils;
 using OngekiFumenEditor.Base;
@@ -70,6 +71,8 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private Vector4 playFieldBackgroundColor;
 
     private DrawSelectingRangeHelper selectingRangeHelper;
+    private FrameworkElement renderControlElement;
+    private DragEventHandler toolboxDragEnterHandler;
 
     private readonly StringBuilder stringBuilder = new(2048);
 
@@ -1047,6 +1050,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderControl.Unloaded += RenderControl_UnLoaded;
         renderControl.SizeChanged += RenderControl_SizeChanged;
 
+        renderControlElement = renderControl;
+        toolboxDragEnterHandler = OnToolboxDragEntered;
+        renderControl.AddHandler(DragDrop.DragEnterEvent, toolboxDragEnterHandler, true);
+
         Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
 
         contentControl.Content = renderControl;
@@ -1054,6 +1061,12 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
             new Binding(nameof(CurrentCursor)) { Source = this, Mode = BindingMode.OneWay });
 
         PrepareRenderLoop(renderControl, renderImpl);
+    }
+
+    private void OnToolboxDragEntered(object sender, DragEventArgs e)
+    {
+        if (e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+            AbortSelectionDrag();
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
