@@ -14,11 +14,11 @@ internal sealed class CaliburnLogAdapter : ILog
 {
     private const string LogPrefix = "CMLog";
 
-    private readonly string typeName;
+    private readonly string displayTypeName;
 
     public CaliburnLogAdapter(Type type)
     {
-        typeName = type?.FullName ?? "Caliburn.Micro";
+        displayTypeName = (type?.FullName ?? string.Empty).TrimStart("Caliburn.Micro");
     }
 
     public void Info(string format, params object[] args)
@@ -32,7 +32,7 @@ internal sealed class CaliburnLogAdapter : ILog
 
     private void Forward(CoreLogLevel level, string message, Exception exception)
     {
-        var actualMessage = $"{typeName}: {message}";
+        var actualMessage = $"{displayTypeName}: {message}";
         try
         {
             switch (level)
