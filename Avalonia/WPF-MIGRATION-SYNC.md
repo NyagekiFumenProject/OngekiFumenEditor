@@ -327,6 +327,25 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：View 与 master 一致；Caliburn attach 无解析错误；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
 
+## 2026-10-24：验证 OnDeactivateAsync 不能替代 Window.Deactivated（WPF）
+
+- 实验：临时删除 `FumenVisualEditorViewModel.IsaPlacement.cs` 的 `focusedWindow` / `HookWindowFocus` / `UnhookWindowFocus` / `OnFocusedWindowDeactivated` 及三处调用，仅依赖 `OnDeactivateAsync(close:false)` 的现有清理；随后按精确反向编辑恢复。
+- 新增 `tests/bullet-placement/DeactivationChecks.cs` 并在 `Program.cs` 注册，用隐藏 `ProbeWindow.OnDeactivated` 触发真实 `Window.Deactivated`，不显示/激活窗口。覆盖 ISA 两阶段取消与迟到取点、真实选择拖动事务回滚（T 坐标、`IsDirty`、撤销栈、自动滚动重派发）、批量放置不受影响、文档失活/文档切换/关闭路径、重复失活与重复激活。
+- 实测结论：替换后 19 条窗口失焦断言失败——ISA 阶段/光标/目标组残留、迟到取点在 `WaitingSecondPoint` 下仍会创建 ISA 与撤销记录、拖动事务不中止不回滚、重新激活后不再监听窗口；文档切换与关闭场景全部通过。故 `OnDeactivateAsync` 只覆盖文档生命周期，不能等价取代窗口失焦处理，生产实现保留原样。
+- 验证：`dotnet build OngekiFumenEditor.sln -c Debug` 0 error；`tests/bullet-placement` 282/282；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs --url http://127.0.0.1:39281/mcp` 1236/1236。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：补充 IDeactivate 生命周期事件契约测试（WPF）
+
+- 新增 `tests/bullet-placement/LifecycleEventChecks.cs` 并在 `Program.cs` 注册，用真实编辑器固定 Caliburn `AttemptingDeactivation` / `Deactivated` 的行为：
+  - 窗口失焦不触发任一事件，文档保持 active；ISA 仍由窗口失焦专用路径取消。
+  - 文档切换/失活：`AttemptingDeactivation`（IsActive=true，ISA 仍在）→ 清理 → IsActive=false → `Deactivated`（WasClosed=false），各一次。
+  - 关闭：两次事件均 WasClosed=true，Dispose 先于 Deactivated；重复关闭会再次触发事件（IsInitialized 仍为 true），但 Dispose 与销毁通知只发生一次。
+  - `AttemptingDeactivation` 抛异常会阻止清理与 IsActive 转换；`Deactivated` 抛异常发生在清理之后，移除处理器后可重新激活。
+  - `Deactivated` 支持异步 handler，`DeactivateAsync` 会等待其 Task 完成后才结束。
+- 验证：`tests/bullet-placement` 320/320；生产代码未改动。
+- Avalonia：本次未移植，不改变现有同步点。
+
 ## 2026-10-24：Debug 构建转发 Caliburn.Micro 日志（WPF）
 
 - WPF：新增 `Utils/CaliburnLogAdapter.cs`（`#if DEBUG`），实现 `Caliburn.Micro.ILog` 并把 `Info` / `Warn` / `Error` 转发到项目 `Utils.Log`；消息保留 Caliburn 类型名（`{类型全名}: {内容}`），日志调用者标签固定为 `CMLog`（输出 `<CMLog:行号>`），格式化失败或日志管道未就绪时退回 `Debug.WriteLine`，不影响 Caliburn 控制流。
