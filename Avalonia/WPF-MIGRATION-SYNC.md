@@ -326,3 +326,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 删除 `renderControlElement` / `toolboxDragEnterHandler` 字段及 `Dispose` 中的手动注销。
 - 验证：View 与 master 一致；Caliburn attach 无解析错误；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：Debug 构建转发 Caliburn.Micro 日志（WPF）
+
+- WPF：新增 `Utils/CaliburnLogAdapter.cs`（`#if DEBUG`），实现 `Caliburn.Micro.ILog` 并把 `Info` / `Warn` / `Error` 转发到项目 `Utils.Log`；消息保留 Caliburn 类型名（`{类型全名}: {内容}`），日志调用者标签固定为 `CMLog`（输出 `<CMLog:行号>`），格式化失败或日志管道未就绪时退回 `Debug.WriteLine`，不影响 Caliburn 控制流。
+- `AppBootstrapper.Configure` 在日志输出与 `CoreLog` 解析器初始化后设置 `LogManager.GetLog = type => new CaliburnLogAdapter(type)`，同样位于 `#if DEBUG`。
+- 验证：Debug 实例启动日志出现 `<CMLog:41> Caliburn.Micro.NameTransformer/Screen/ViewModelBinder ...`；`tests/bullet-placement` 320/320；`dotnet build -c Release` 0 error，Release 产物不含 `CaliburnLogAdapter`（条件编译生效）。
+- Avalonia：本次未移植，不改变现有同步点。
