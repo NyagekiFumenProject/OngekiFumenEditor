@@ -38,6 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         {
             if (!ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
             {
+                AbortSelectionDrag();
                 CancelBatchProjectilePlacement();
                 CancelIsaPlacement();
             }

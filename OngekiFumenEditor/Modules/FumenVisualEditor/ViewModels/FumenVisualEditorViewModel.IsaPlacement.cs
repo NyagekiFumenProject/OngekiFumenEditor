@@ -1,5 +1,6 @@
 using Caliburn.Micro;
 using Gemini.Framework.Services;
+using Gemini.Modules.Toolbox;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
@@ -79,6 +80,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             UnhookWindowFocus();
             focusedWindow = window;
             focusedWindow.Deactivated += OnFocusedWindowDeactivated;
+            // View 不处理输入事件；窗口级工具箱拖放由 ViewModel 监听并转为取消选择拖动。
+            focusedWindow.AddHandler(DragDrop.PreviewDragEnterEvent, new DragEventHandler(OnToolboxDragStarted), true);
         }
 
         private void UnhookWindowFocus()
@@ -86,13 +89,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (focusedWindow is null)
                 return;
             focusedWindow.Deactivated -= OnFocusedWindowDeactivated;
+            focusedWindow.RemoveHandler(DragDrop.PreviewDragEnterEvent, new DragEventHandler(OnToolboxDragStarted));
             focusedWindow = null;
         }
 
         private void OnFocusedWindowDeactivated(object sender, EventArgs e)
         {
+            AbortSelectionDrag();
             if (ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
                 CancelIsaPlacement();
+        }
+
+        private void OnToolboxDragStarted(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+                AbortSelectionDrag();
         }
 
         public bool TryStartIsaPlacement(int soflanGroupId)

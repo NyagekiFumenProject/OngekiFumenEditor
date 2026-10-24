@@ -516,11 +516,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             CancelBatchProjectilePlacement();
             CancelIsaPlacement();
             UnhookWindowFocus();
-            if (editorView != null)
-            {
-                editorView.InteractionInterrupted -= OnInteractionInterrupted;
-                editorView = null;
-            }
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
             var fumen = editorProjectData?.Fumen;
             if (fumen is not null)

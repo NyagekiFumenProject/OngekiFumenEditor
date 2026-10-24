@@ -303,3 +303,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：`NAudioManager.LoadAudioAsync` 在非 ASIO 且输出设备实现 `IWavePosition` 时使用 `DefaultMusicPlayer_new`；ASIO 继续使用旧 `DefaultMusicPlayer`。新增播放器实现选择日志。
 - 验证：Wasapi 实例日志显示 `Music player implementation: DefaultMusicPlayer_new`；播放 1 秒 `CurrentTime=1001.8ms`（ratio 0.9987），Seek 123.456ms 对齐到 123.4375ms；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。ASIO 分支因本机无驱动未实机验证，按类型显式回退。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：输入中断监听移出 View（WPF）
+
+- WPF：`FumenVisualEditorView.xaml.cs` 恢复为无事件代码，View 不再新增或修改交互逻辑。原由 View 转发的窗口失焦、工具箱拖入、卸载/DataContext 变化改由 ViewModel 处理：
+  - `HookWindowFocus` 监听 `Window.Deactivated` 与 `DragDrop.PreviewDragEnterEvent`（工具箱数据格式），触发 `AbortSelectionDrag`；
+  - `OnPlacementActiveEditorChanged` 在编辑器切走时触发 `AbortSelectionDrag`；
+  - `Dispose` / `OnDeactivateAsync` 原有取消路径保持不变。
+- 验证：View 与 master 完全一致；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

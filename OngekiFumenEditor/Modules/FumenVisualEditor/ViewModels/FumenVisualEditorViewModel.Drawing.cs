@@ -774,18 +774,10 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         }
     }
 
-    private OngekiFumenEditor.Modules.FumenVisualEditor.Views.FumenVisualEditorView editorView;
-    private void OnInteractionInterrupted(object sender, EventArgs args) => AbortSelectionDrag();
-
     protected override void OnViewLoaded(object v)
     {
         base.OnViewLoaded(v);
         InitExtraMenuItems();
-        if (editorView != null)
-            editorView.InteractionInterrupted -= OnInteractionInterrupted;
-        editorView = v as OngekiFumenEditor.Modules.FumenVisualEditor.Views.FumenVisualEditorView;
-        if (editorView != null)
-            editorView.InteractionInterrupted += OnInteractionInterrupted;
     }
 
     private void ResortRenderOrder()
