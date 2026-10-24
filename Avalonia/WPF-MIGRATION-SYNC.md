@@ -319,3 +319,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - `OnRenderControlHostLoaded` 注册 `renderControl.AddHandler(DragDrop.DragEnterEvent, ...)` 并保存控件与委托；`Dispose` 中注销。窗口失焦仍由 `HookWindowFocus` 的 `Window.Deactivated` 处理。
 - 验证：View 与 master 一致；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：DragEnter 改用 Message.SetAttach 绑定（WPF）
+
+- WPF：渲染控件的 `DragEnter` 不再手动 `AddHandler`/`RemoveHandler`，改为在既有 `Message.SetAttach(renderControl, ...)` 字符串中增加 `[Event DragEnter] = [Action OnToolboxDragEntered($executionContext)]`；`OnToolboxDragEntered` 改为 `ActionExecutionContext` 签名，仍检查 `ToolboxDragDrop.DataFormat` 后调用 `AbortSelectionDrag()`。
+- 删除 `renderControlElement` / `toolboxDragEnterHandler` 字段及 `Dispose` 中的手动注销。
+- 验证：View 与 master 一致；Caliburn attach 无解析错误；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。

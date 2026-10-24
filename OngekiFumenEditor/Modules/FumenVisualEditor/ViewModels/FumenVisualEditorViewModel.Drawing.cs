@@ -71,8 +71,6 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     private Vector4 playFieldBackgroundColor;
 
     private DrawSelectingRangeHelper selectingRangeHelper;
-    private FrameworkElement renderControlElement;
-    private DragEventHandler toolboxDragEnterHandler;
 
     private readonly StringBuilder stringBuilder = new(2048);
 
@@ -1050,11 +1048,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderControl.Unloaded += RenderControl_UnLoaded;
         renderControl.SizeChanged += RenderControl_SizeChanged;
 
-        renderControlElement = renderControl;
-        toolboxDragEnterHandler = OnToolboxDragEntered;
-        renderControl.AddHandler(DragDrop.DragEnterEvent, toolboxDragEnterHandler, true);
-
-        Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
+        Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event DragEnter] = [Action OnToolboxDragEntered($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
 
         contentControl.Content = renderControl;
         renderControl.SetBinding(FrameworkElement.CursorProperty,
@@ -1063,9 +1057,9 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         PrepareRenderLoop(renderControl, renderImpl);
     }
 
-    private void OnToolboxDragEntered(object sender, DragEventArgs e)
+    public void OnToolboxDragEntered(ActionExecutionContext e)
     {
-        if (e.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+        if (e.EventArgs is DragEventArgs args && args.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             AbortSelectionDrag();
     }
 
