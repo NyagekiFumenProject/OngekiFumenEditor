@@ -361,3 +361,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - `DefaultFumenSoundPlayer`：`UpdateInternal` 返回距离下一个点音效/节拍器/循环音效开始或结束的毫秒数，`OnUpdate` 据此睡到触发前 5 ms（单次上限 50 ms，空闲 5 ms 轮询），消除常驻忙等且不延迟触发；`Prepare` 改用 `AbortAsync()`，不再在 UI 线程同步 `Wait()` 旧音效线程。
 - 验证：Debug 构建 0 error；`UpdateInternal` 调度断言 6/6（点音效间隔、消费后空闲、循环音效开始/结束、越过区间）；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs --url http://127.0.0.1:39281/mcp` 1236/1236。WASAPI 位置回退修复依据排查报告的实测（切 WaveOut 即正常、机制确认），本轮未重复音频设备长播实测。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-25：移除未使用的 AngleSharp 传递依赖（WPF）
+
+- 删除 4 处未使用的 `using AngleSharp.*`（`FumenBulletPalleteListViewerViewModel`、`StandardizeFormat`、`HoldDrawingTarget`、`SkiaRenderControl_OpenGL`）。
+- 移除 `SimpleSvg2LineSegementInterpolater` 包引用：它自 `SvgToLaneBrowser` 删除后已无代码使用，`AngleSharp` / `AngleSharp.Css` / `AngleSharp.Xml` 全部从依赖图消失，同时消除 `NU1902` 漏洞警告。
+- 验证：`dotnet restore` / `dotnet build` 0 error；`tests/bullet-placement` 320/320；`project.assets.json` 中 AngleSharp 与 SimpleSvg 相关条目均为 0。
+- Avalonia：本次未移植，不改变现有同步点。

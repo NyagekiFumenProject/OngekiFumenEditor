@@ -10,7 +10,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.Windows;
 using NWaves.Utils;
-using AngleSharp.Media;
 using OngekiFumenEditor.Utils;
 using OngekiFumenEditor.Kernel.Graphics.Skia.GlContexts;
 

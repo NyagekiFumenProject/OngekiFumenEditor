@@ -1,4 +1,3 @@
-using AngleSharp.Common;
 using Caliburn.Micro;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects;
