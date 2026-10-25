@@ -381,8 +381,7 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 - 去除：本轮无新增可去除的直接包；`SimpleSvg2LineSegementInterpolater` 与 `AngleSharp` 已在前一提交移除。
 - 低风险升级（patch/minor）：FontStashSharp 1.5.5→1.6.2、FontStashSharp.Rasterizers.FreeType 1.2.3→1.2.9、Microsoft.Xaml.Behaviors.Wpf 1.1.142→1.1.161、Nerdbank.GitVersioning 3.9.50→3.10.94、SharpVectors 1.8.5→1.8.6、Svg 3.4.7→3.4.8、System.CommandLine 2.0.8→2.0.13、Microsoft.Extensions.ObjectPool 10.0.0→10.0.13、System.ComponentModel.Composition 10.0.0→10.0.13。
-- 漏洞修复：Microsoft.Build 17.7.2→17.14.28，并显式引用并统一 `Microsoft.Build.Framework` / `Microsoft.Build.Tasks.Core` / `Microsoft.Build.Utilities.Core` 17.14.28（修复 GHSA-h4j7-5rxr-p4wc）；SixLabors.ImageSharp 3.1.12→4.1.3（修复 GHSA-gwg2-r3hj-4w44）。
-- 未升级的 major：AssetsTools.NET 2→3、Roslyn 4.11→5.9、ModelContextProtocol 1.3→2.3、NAudio 2.3→3.3、SixLabors.Fonts 2.1→3.2、SkiaSharp 3.119→4.153；均需单独的 API 迁移与设备/渲染验证。
-- 验证：`dotnet restore` / `dotnet build OngekiFumenEditor.sln -c Debug` 0 error；`dotnet list package --vulnerable --include-transitive` 无输出；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs` 1236/1236（含脚本编译）；ImageSharp 4 的 PNG/JPEG 加载、缩放、保存冒烟通过。
-- 注意：ImageSharp 4.x 使用 Six Labors Split License，构建会提示 license key；开源仓库使用需确认许可条款，商业分发需评估。
+- 漏洞修复：Microsoft.Build 17.7.2→17.14.28，并显式引用并统一 `Microsoft.Build.Framework` / `Microsoft.Build.Tasks.Core` / `Microsoft.Build.Utilities.Core` 17.14.28（修复 GHSA-h4j7-5rxr-p4wc）。SixLabors.ImageSharp 4.1.3 虽修复 GHSA-gwg2-r3hj-4w44，但其构建目标要求在 `dotnet publish` 阶段提供 Six Labors license；无 license 时发布直接失败，已回退到 3.1.12，保留该 Moderate 漏洞，待配置 license 后再升级。
+- 验证：`dotnet restore` / `dotnet build OngekiFumenEditor.sln -c Debug` 0 error；`dotnet publish OngekiFumenEditor.csproj -c Release` 成功；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs` 1236/1236（含脚本编译）。当前漏洞扫描仍会报告 ImageSharp 3.1.12 的 Moderate 问题。
+- 注意：ImageSharp 4.x 使用 Six Labors Split License；`dotnet publish` 必须有 `SixLaborsLicenseKey` / `SixLaborsLicenseFile` 或 `sixlabors.lic`，否则报错。开源仓库使用需确认许可条款，商业分发需评估。
 - Avalonia：本次未移植，不改变现有同步点。
