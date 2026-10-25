@@ -249,9 +249,18 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                 throw new NotSupportedException("当前音频输出设备不支持 IWavePosition，无法提供设备播放位置。");
 
             outputFormat = format;
-            // WaveOut 的位置是 32 位计数器；回绕时补上 2^32，64 位后端不会触发。
             if (rawPosition < lastRawDevicePosition)
-                deviceWrapOffset += 1L << 32;
+            {
+                // 只有 32 位计数器真正跨边界回绕时才补 2^32（WaveOut 的 waveOutGetPosition 是 32 位的）。
+                // WasapiOut 返回 64 位 AudioClockClient.AdjustedPosition（设备位置 + QPC 外插），
+                // 它不保证严格单调：延迟补偿和取整会让位置回退几个单位。
+                // 把这种回退当成回绕会让时间瞬间 +3.4 小时，视图被 clamp 到音频末尾。
+                if (lastRawDevicePosition >= (1L << 32) - (1L << 31) && rawPosition < (1L << 31))
+                    deviceWrapOffset += 1L << 32;
+                else
+                    // 回退按抖动处理：同步挪动基准，让 elapsedBytes 保持连续。
+                    devicePositionBase += rawPosition - lastRawDevicePosition;
+            }
 
             lastRawDevicePosition = rawPosition;
             return rawPosition + deviceWrapOffset;

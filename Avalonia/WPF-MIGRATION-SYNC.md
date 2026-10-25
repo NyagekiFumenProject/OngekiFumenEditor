@@ -352,3 +352,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - `AppBootstrapper.Configure` 在日志输出与 `CoreLog` 解析器初始化后设置 `LogManager.GetLog = type => new CaliburnLogAdapter(type)`，同样位于 `#if DEBUG`。
 - 验证：Debug 实例启动日志出现 `<CMLog:41> Caliburn.Micro.NameTransformer/Screen/ViewModelBinder ...`；`tests/bullet-placement` 320/320；`dotnet build -c Release` 0 error，Release 产物不含 `CaliburnLogAdapter`（条件编译生效）。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-25：修复 Playtime 跳末尾与音效线程占用（WPF）
+
+- `DefaultMusicPlayer_new.GetExpandedOutputPosition`：只有接近 32 位边界的回退才按 `WaveOut` 计数器回绕补 `2^32`；其余回退视为 `WasapiOut` 的 64 位位置抖动，同步调整 `devicePositionBase`，避免 `CurrentTime` 瞬间跳约 3.4 小时、视图被 clamp 到音频末尾。
+- `AudioPlayerToolViewerViewModel.OnPlaybackFinished`：删除播放完成后强制 `ScrollTo(Duration - 1s)`，避免把视图钉在末尾并通过自动保存写回工程。
+- `FumenVisualEditorViewModel`：加载与保存 `RememberLastDisplayTime` 时都 clamp 到 `[0, AudioDuration - 100ms]`，防止越界值写入工程或再次打开时停在末尾。
+- `DefaultFumenSoundPlayer`：`UpdateInternal` 返回距离下一个点音效/节拍器/循环音效开始或结束的毫秒数，`OnUpdate` 据此睡到触发前 5 ms（单次上限 50 ms，空闲 5 ms 轮询），消除常驻忙等且不延迟触发；`Prepare` 改用 `AbortAsync()`，不再在 UI 线程同步 `Wait()` 旧音效线程。
+- 验证：Debug 构建 0 error；`UpdateInternal` 调度断言 6/6（点音效间隔、消费后空闲、循环音效开始/结束、越过区间）；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs --url http://127.0.0.1:39281/mcp` 1236/1236。WASAPI 位置回退修复依据排查报告的实测（切 WaveOut 即正常、机制确认），本轮未重复音频设备长播实测。
+- Avalonia：本次未移植，不改变现有同步点。

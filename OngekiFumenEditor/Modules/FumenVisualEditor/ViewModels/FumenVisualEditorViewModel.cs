@@ -342,7 +342,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(projModel.AudioFilePath, session.CancellationToken);
             session.CancellationToken.ThrowIfCancellationRequested();
 
-            var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
+            var lastDisplayTime = projModel.RememberLastDisplayTime;
+            var maxDisplayTime = projModel.AudioDuration - TimeSpan.FromMilliseconds(100);
+            if (maxDisplayTime > TimeSpan.Zero && lastDisplayTime > maxDisplayTime)
+                lastDisplayTime = maxDisplayTime;
+            if (lastDisplayTime < TimeSpan.Zero)
+                lastDisplayTime = TimeSpan.Zero;
+
+            var dispTGrid = ConvertAudioTimeToTGrid(lastDisplayTime);
             ScrollTo(dispTGrid);
 
             LoadingFinished?.Invoke(this, new(Fumen));
@@ -384,7 +391,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            EditorProjectData.RememberLastDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
+            var currentDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
+            var maxDisplayTime = EditorProjectData.AudioDuration - TimeSpan.FromMilliseconds(100);
+            if (maxDisplayTime > TimeSpan.Zero && currentDisplayTime > maxDisplayTime)
+                currentDisplayTime = maxDisplayTime;
+            EditorProjectData.RememberLastDisplayTime = currentDisplayTime < TimeSpan.Zero ? TimeSpan.Zero : currentDisplayTime;
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.

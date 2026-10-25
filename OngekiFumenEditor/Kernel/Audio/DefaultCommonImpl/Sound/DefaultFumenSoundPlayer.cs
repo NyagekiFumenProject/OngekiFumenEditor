@@ -49,6 +49,11 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
         public bool IsPlaying => isPlaying && (player?.IsPlaying ?? false);
         private static int loopIdGen = 0;
 
+        private const int NoUpcomingEventMilliseconds = int.MaxValue;
+        private const int IdleWaitMilliseconds = 5;
+        private const int MaxWaitMilliseconds = 50;
+        private const int TriggerSafetyMarginMilliseconds = 5;
+
         /// <summary>
         /// 音效开关掩码。初始值读自用户设置 <see cref="AudioPlayerToolViewerSetting.SoundControlMask"/>（clamp 到 <see cref="SoundControl.All"/>）；
         /// 面板勾选变化由 AudioPlayerToolViewerViewModel 写回设置。
@@ -189,7 +194,7 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
 
             if (thread is not null)
             {
-                thread.Abort();
+                await thread.AbortAsync();
                 thread = null;
             }
 
@@ -387,15 +392,17 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
             currentMeterHitCount = 0;
         }
 
-        private void UpdateInternal(CancellationToken token)
+        private int UpdateInternal(CancellationToken token)
         {
-            if ((itor is null && meterActionsItor is null) || player is null || token.IsCancellationRequested)
-                return;
+            if (token.IsCancellationRequested)
+                return 0;
+            if ((itor is null && meterActionsItor is null) || player is null)
+                return NoUpcomingEventMilliseconds;
             if (!IsPlaying)
             {
                 //stop all looping
                 StopAllLoop();
-                return;
+                return NoUpcomingEventMilliseconds;
             }
 
             var currentTime = player.CurrentTime;
@@ -488,21 +495,51 @@ namespace OngekiFumenEditor.Kernel.Audio.DefaultCommonImpl.Sound
                 }
             }
 
-            /*
-            else
+            // 返回距离下一个需要处理的事件还有多久；调用方据此决定休眠时长。
+            var nowMs = currentTime.TotalMilliseconds;
+            var nextMs = double.MaxValue;
+
+            if (itor is not null)
+                nextMs = Math.Min(nextMs, itor.Value.Time.TotalMilliseconds);
+
+            if (meterActionsItor is not null)
             {
-                var sleepTime = Math.Min(1000, (int)((Math.Abs(ct) - 2) * player.Speed));
-                if (ct < -5 && sleepTime > 0)
-                    Thread.Sleep(sleepTime);
-                break;
-            }*/
+                var nextMeterTime = meterActionsItor.Value.Time +
+                    meterActionsItor.Value.BeatInterval * currentMeterHitCount;
+                nextMs = Math.Min(nextMs, nextMeterTime.TotalMilliseconds);
+            }
+
+            if (durationEvents.Count > 0)
+            {
+                foreach (var durationEvent in durationEvents.Values)
+                {
+                    var endMs = durationEvent.EndTime.TotalMilliseconds;
+                    if (endMs < nowMs)
+                        continue;
+
+                    var startMs = durationEvent.Time.TotalMilliseconds;
+                    nextMs = Math.Min(nextMs, startMs >= nowMs ? startMs : endMs);
+                }
+            }
+
+            if (nextMs == double.MaxValue)
+                return NoUpcomingEventMilliseconds;
+
+            return Math.Max(0, (int)Math.Ceiling(nextMs - nowMs));
         }
 
         private void OnUpdate(CancellationToken cancel)
         {
             while (!cancel.IsCancellationRequested)
             {
-                UpdateInternal(cancel);
+                var waitMs = UpdateInternal(cancel);
+                // 空闲时低频轮询；有明确触发时间时睡到触发前 5ms，最多 50ms，
+                // 既避免忙等，又不会因为睡过头导致音效延迟。
+                var sleepMs = waitMs == NoUpcomingEventMilliseconds
+                    ? IdleWaitMilliseconds
+                    : Math.Min(waitMs - TriggerSafetyMarginMilliseconds, MaxWaitMilliseconds);
+                if (sleepMs > 0)
+                    cancel.WaitHandle.WaitOne(sleepMs);
             }
         }
 

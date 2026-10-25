@@ -109,11 +109,6 @@ namespace OngekiFumenEditor.Modules.AudioPlayerToolViewer.ViewModels
 
                 Log.LogInfo($"OnPlaybackFinished()~~");
                 OnStopButtonClicked();
-                if (AudioPlayer is not null && Editor is not null)
-                {
-                    var audioTime = AudioPlayer.Duration - TimeSpan.FromSeconds(1);
-                    Editor.ScrollTo(audioTime);
-                }
             }));
         }
 
