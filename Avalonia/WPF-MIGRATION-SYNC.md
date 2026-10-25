@@ -368,3 +368,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 移除 `SimpleSvg2LineSegementInterpolater` 包引用：它自 `SvgToLaneBrowser` 删除后已无代码使用，`AngleSharp` / `AngleSharp.Css` / `AngleSharp.Xml` 全部从依赖图消失，同时消除 `NU1902` 漏洞警告。
 - 验证：`dotnet restore` / `dotnet build` 0 error；`tests/bullet-placement` 320/320；`project.assets.json` 中 AngleSharp 与 SimpleSvg 相关条目均为 0。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-25：CI 并行化 —— artifact 上传与谱面服务器推送拆分（仓库根，非 WPF 源码）
+
+- `.github/workflows/BuildProgram.yml`：`build` job 只负责构建与打包，并通过保留 1 天的中转 artifact `editor-zip` 交付 zip；新增 `Upload editor artifact`（job id `publish-artifact`）与 `Push editor zip to fumen server`（job id `push-editor-zip`）两个都 `needs: build`、彼此并行的 job，分别下载中转 zip 后执行 `actions/upload-artifact` 与 `updateEditorZip` 调用；推送 job 保留 job 级 `continue-on-error`。
+- 正式 artifact 名与 zip 名统一由 `Compose artifact name` 生成，zip 名由 artifact 名加 `.zip` 派生；名称输入经 env 传入，避免分支名中的 `$`、反引号等字符被 PowerShell 二次解析。
+- job 级 `if` 不能读取 `env` 上下文，推送条件改由 `github.event.inputs.BuildConfiguration || 'Release'` 表达；`workflow_dispatch` 选择 Debug 时仍跳过推送。
+- 验证：YAML 解析、job 依赖/`needs` 与 outputs 引用断言通过；全部 12 个 `run` 脚本 PowerShell 语法检查通过；artifact/zip 名称与下载路径边界冒烟（含 `/`、`$`、反引号分支名）。未在 GitHub Actions 上实跑。
+- Avalonia：本次未处理，不改变同步点 `8b2940785`。

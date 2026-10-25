@@ -24,6 +24,10 @@ env:
 jobs:
   build:
     runs-on: windows-latest
+    outputs:
+      version: ${{ steps.editor-version.outputs.version }}
+      artifact-name: ${{ steps.artifact.outputs.artifactName }}
+      zip-file: ${{ steps.package.outputs.name }}
     steps:
     - name: Get current time
       uses: josStorer/get-current-time@v2
@@ -87,27 +91,71 @@ jobs:
           throw "Unexpected built editor version: '$version'"
         }
         "version=$version" >> $env:GITHUB_OUTPUT
+    - name: Compose artifact name
+      id: artifact
+      shell: pwsh
+      env:
+        EDITOR_VERSION: ${{ steps.editor-version.outputs.version }}
+        BUILD_TIME: ${{ steps.current-time.outputs.formattedTime }}
+        SHORT_SHA: ${{ steps.short-sha.outputs.sha }}
+      run: |
+        # Values arrive through env so branch/version text is never re-parsed as PowerShell.
+        $artifactName = "OngekiFumenEditor_${env:EDITOR_VERSION}_${env:ArtifactBranch}_(GABuild${env:BUILD_TIME}_${env:SHORT_SHA}_${env:Configuration})"
+        "artifactName=$artifactName" >> $env:GITHUB_OUTPUT
     - name: Package editor artifact zip
       id: package
       shell: pwsh
+      env:
+        ARTIFACT_NAME: ${{ steps.artifact.outputs.artifactName }}
       run: |
-        $zipName = "OngekiFumenEditor_${{ steps.editor-version.outputs.version }}_${{ env.ArtifactBranch }}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{ env.Configuration }}).zip"
+        $zipName = "$env:ARTIFACT_NAME.zip"
         $zipPath = Join-Path $env:RUNNER_TEMP $zipName
         Compress-Archive -Path "C:\ogkrEditorBuild\*" -DestinationPath $zipPath -CompressionLevel Optimal -Force
         "path=$zipPath" >> $env:GITHUB_OUTPUT
         "name=$zipName" >> $env:GITHUB_OUTPUT
-    - uses: actions/upload-artifact@v4
+    - name: Stage editor zip for downstream jobs
+      uses: actions/upload-artifact@v4
       with:
-        name: OngekiFumenEditor_${{ steps.editor-version.outputs.version }}_${{ env.ArtifactBranch }}_(GABuild${{ steps.current-time.outputs.formattedTime }}_${{ steps.short-sha.outputs.sha }}_${{ env.Configuration }})
+        name: editor-zip
         path: ${{ steps.package.outputs.path }}
+        retention-days: 1
+
+  publish-artifact:
+    name: Upload editor artifact
+    needs: build
+    runs-on: windows-latest
+    steps:
+    - name: Download staged editor zip
+      uses: actions/download-artifact@v4
+      with:
+        name: editor-zip
+        path: ${{ runner.temp }}\editor-zip
+    - name: Upload editor artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ needs.build.outputs.artifact-name }}
+        path: ${{ runner.temp }}\editor-zip\${{ needs.build.outputs.zip-file }}
+
+  push-editor-zip:
+    name: Push editor zip to fumen server
+    needs: build
+    # job-level `if` cannot read the `env` context, so mirror env.Configuration from the input.
+    if: github.repository == 'NyagekiFumenProject/OngekiFumenEditor' && (github.event.inputs.BuildConfiguration || 'Release') == 'Release'
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+    - name: Download staged editor zip
+      uses: actions/download-artifact@v4
+      with:
+        name: editor-zip
+        path: ${{ runner.temp }}\editor-zip
     - name: Push editor zip to fumen server
-      if: github.repository == 'NyagekiFumenProject/OngekiFumenEditor' && env.Configuration == 'Release'
-      continue-on-error: true
       shell: pwsh
       env:
         FUMEN_SERVER_ADMIN_PASSWORD: ${{ secrets.FUMEN_SERVER_ADMIN_PASSWORD }}
-        EDITOR_ZIP_PATH: ${{ steps.package.outputs.path }}
+        EDITOR_ZIP_PATH: ${{ runner.temp }}\editor-zip\${{ needs.build.outputs.zip-file }}
         EDITOR_BRANCH: ${{ env.Branch }}
+        EDITOR_VERSION: ${{ needs.build.outputs.version }}
       run: |
         if ([string]::IsNullOrWhiteSpace($env:FUMEN_SERVER_ADMIN_PASSWORD)) {
           Write-Warning "FUMEN_SERVER_ADMIN_PASSWORD is not configured; skipping updateEditorZip."
@@ -130,7 +178,7 @@ jobs:
           $status = $_.Exception.Response.StatusCode.value__
           $body = $_.ErrorDetails.Message
           if ($status -eq 400 -and $body -match 'not newer') {
-            Write-Warning "Server already has version ${{ steps.editor-version.outputs.version }}; skipping updateEditorZip. $body"
+            Write-Warning "Server already has version $env:EDITOR_VERSION; skipping updateEditorZip. $body"
             return
           }
           throw "updateEditorZip failed (HTTP $status): $body"
