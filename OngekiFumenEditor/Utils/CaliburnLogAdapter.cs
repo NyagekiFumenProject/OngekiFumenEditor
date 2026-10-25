@@ -18,7 +18,7 @@ internal sealed class CaliburnLogAdapter : ILog
 
     public CaliburnLogAdapter(Type type)
     {
-        displayTypeName = (type?.FullName ?? string.Empty).TrimStart("Caliburn.Micro");
+        displayTypeName = (type?.FullName ?? string.Empty).TrimStart("Caliburn.Micro.");
     }
 
     public void Info(string format, params object[] args)
