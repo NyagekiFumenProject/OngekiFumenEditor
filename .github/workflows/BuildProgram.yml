@@ -104,6 +104,7 @@ jobs:
         path: ${{ steps.package.outputs.path }}
     - name: Push editor zip to fumen server
       if: github.repository == 'NyagekiFumenProject/OngekiFumenEditor' && env.Configuration == 'Release'
+      continue-on-error: true
       shell: pwsh
       env:
         FUMEN_SERVER_ADMIN_PASSWORD: ${{ secrets.FUMEN_SERVER_ADMIN_PASSWORD }}
