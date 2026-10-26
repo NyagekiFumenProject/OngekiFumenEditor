@@ -4,7 +4,6 @@ using OngekiFumenEditor.Base.Collections;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl;
 
 public static class GridClipboardChecks
 {

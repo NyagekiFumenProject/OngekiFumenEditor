@@ -1,4 +1,3 @@
-using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -8,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
+namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
-    public static class GridClipboardGeometry
+    internal static class GridClipboardGeometry
     {
         public static bool PalettesEquivalent(BulletPallete left, BulletPallete right) =>
             left != null && right != null && left.TypeValue == right.TypeValue &&

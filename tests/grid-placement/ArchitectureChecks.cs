@@ -10,7 +10,7 @@ internal static class ArchitectureChecks
     {
         var assembly = typeof(FumenVisualEditorViewModel).Assembly;
         foreach (var name in new[] {
-            "OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl.GridClipboardGeometry",
+            "OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridClipboardGeometry",
             "OngekiFumenEditor.Modules.FumenVisualEditor.Base.LaneGeometry",
             "OngekiFumenEditor.Modules.FumenVisualEditor.Base.LaneSwitchResolver" })
         {

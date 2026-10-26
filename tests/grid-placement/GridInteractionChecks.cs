@@ -343,7 +343,7 @@ public static class GridInteractionChecks
         setting.DisableTGridMagneticDock = setting.DisableXGridMagneticDock = true;
         foreach (var node in project.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>())
             node.IsSelected = false;
-        foreach (var node in OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl.GridClipboardGeometry.Enumerate(movingLane).Concat(new OngekiObjectBase[] { passiveTap, passiveHold, passiveHold.HoldEnd }))
+        foreach (var node in OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridClipboardGeometry.Enumerate(movingLane).Concat(new OngekiObjectBase[] { passiveTap, passiveHold, passiveHold.HoldEnd }))
             node.PropertyChanged += (_, e) => modified.Invoke(editor, new object[] { node, e });
         middle.IsSelected = true;
         begin.Invoke(editor, new object[] { new Point(600, 0) });

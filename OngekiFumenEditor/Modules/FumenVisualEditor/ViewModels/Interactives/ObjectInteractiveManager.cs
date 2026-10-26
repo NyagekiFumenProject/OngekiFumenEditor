@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
-using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
 {
