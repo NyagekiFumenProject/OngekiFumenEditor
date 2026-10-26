@@ -159,7 +159,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 : xGrid;
         }
 
-        internal override bool TryAdjustGrid(OngekiObjectBase obj, ref TGrid time, ref XGrid x, FumenVisualEditorViewModel editor, bool preserveTime = false)
+        public override bool TryAdjustGrid(OngekiObjectBase obj, ref TGrid time, ref XGrid x, FumenVisualEditorViewModel editor, bool preserveTime = false)
         {
             if (time != null && !preserveTime && !editor.Setting.DisableTGridMagneticDock)
             {

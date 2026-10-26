@@ -24,6 +24,9 @@ internal static class ArchitectureChecks
         var actionType = typeof(OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.ObjectInteractiveActionBase);
         check(!actionType.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic).Any(x => x.IsAbstract && x.IsAssembly),
             "公开交互基类不要求外部派生类实现不可访问的抽象成员");
+        var tryAdjustGrid = actionType.GetMethod("TryAdjustGrid", BindingFlags.Instance | BindingFlags.Public);
+        check(tryAdjustGrid is not null && tryAdjustGrid.IsVirtual && !tryAdjustGrid.IsFinal,
+            "公开交互基类的整组预检可被外部派生类重写");
         check(typeof(FumenVisualEditorViewModel).GetNestedType("SelectionGridDrag", BindingFlags.NonPublic) == null,
             "VM不再拥有群体拖动策略及快照类型");
     }
