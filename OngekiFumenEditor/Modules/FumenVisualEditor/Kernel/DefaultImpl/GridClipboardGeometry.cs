@@ -147,7 +147,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 TGrid.FromTotalGrid(ts.Length == 0 ? 0 : (int)Math.Round(isaCenters.Length > 0 ? (ts.Min() + ts.Max()) / 2d : ts.Min())));
         }
 
-        public static bool Place(IEnumerable<OngekiObjectBase> roots, XGrid targetX, TGrid targetT, GridPlacementOption option)
+        public static bool Place(IEnumerable<OngekiObjectBase> roots, XGrid targetX, TGrid targetT, PasteOption option)
         {
             var rootArray = roots.ToArray();
             var nodes = rootArray.SelectMany(Enumerate).Distinct().ToArray();
@@ -164,11 +164,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             var maxT = nodes.OfType<ITimelineObject>().Where(x => x.TGrid != null).Select(x => x.TGrid.TotalGrid).DefaultIfEmpty(0).Max();
             var xs = nodes.OfType<IHorizonPositionObject>().Select(x => (long)x.XGrid.TotalGrid).ToArray();
             var mirrorXSum = xs.Length == 0 ? 0 : xs.Min() + xs.Max();
-            var dx = option == GridPlacementOption.Direct || option == GridPlacementOption.XGridZeroMirror ? 0L : (long)targetX.TotalGrid - anchor.x.TotalGrid;
-            var dt = option == GridPlacementOption.Direct ? 0L : (long)targetT.TotalGrid - anchor.t.TotalGrid;
+            var dx = option == PasteOption.Direct || option == PasteOption.XGridZeroMirror ? 0L : (long)targetX.TotalGrid - anchor.x.TotalGrid;
+            var dt = option == PasteOption.Direct ? 0L : (long)targetT.TotalGrid - anchor.t.TotalGrid;
             var pending = nodes.Select(node => (node,
-                t: node is ITimelineObject t && t.TGrid != null ? (long?)(option == GridPlacementOption.SelectedRangeCenterTGridMirror ? (long)maxT + anchor.t.TotalGrid - t.TGrid.TotalGrid + dt : t.TGrid.TotalGrid + dt) : null,
-                x: node is IHorizonPositionObject x ? (long?)(option == GridPlacementOption.XGridZeroMirror ? -(long)x.XGrid.TotalGrid : option == GridPlacementOption.SelectedRangeCenterXGridMirror ? mirrorXSum - x.XGrid.TotalGrid + dx : x.XGrid.TotalGrid + dx) : null)).ToArray();
+                t: node is ITimelineObject t && t.TGrid != null ? (long?)(option == PasteOption.SelectedRangeCenterTGridMirror ? (long)maxT + anchor.t.TotalGrid - t.TGrid.TotalGrid + dt : t.TGrid.TotalGrid + dt) : null,
+                x: node is IHorizonPositionObject x ? (long?)(option == PasteOption.XGridZeroMirror ? -(long)x.XGrid.TotalGrid : option == PasteOption.SelectedRangeCenterXGridMirror ? mirrorXSum - x.XGrid.TotalGrid + dx : x.XGrid.TotalGrid + dx) : null)).ToArray();
             // 整组预检，禁止溢出或逐点钳零破坏物件间的相对坐标。
             if (pending.Any(v => v.t.HasValue && (v.t.Value < 0 || v.t.Value > int.MaxValue) ||
                 v.x.HasValue && (v.x.Value < int.MinValue || v.x.Value > int.MaxValue)))
@@ -182,7 +182,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     ((IHorizonPositionObject)value.node).XGrid = XGrid.FromTotalGrid(x);
             }
 
-            if (option == GridPlacementOption.SelectedRangeCenterTGridMirror)
+            if (option == PasteOption.SelectedRangeCenterTGridMirror)
             {
                 // 持续物件仍以较早端作为头，避免端点属性的最小时间约束截断镜像。
                 foreach (var root in rootArray)

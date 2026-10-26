@@ -239,15 +239,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
         }
 
-        public enum PasteOption
-        {
-            XGridZeroMirror,
-            SelectedRangeCenterXGridMirror,
-            SelectedRangeCenterTGridMirror,
-            Direct,
-            None
-        }
-
         public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
             => KeyboardAction_PasteCopiesObjects(ctx);
 

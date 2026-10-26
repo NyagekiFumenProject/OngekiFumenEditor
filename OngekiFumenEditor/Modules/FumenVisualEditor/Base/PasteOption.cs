@@ -1,6 +1,6 @@
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
-    public enum GridPlacementOption
+    public enum PasteOption
     {
         XGridZeroMirror,
         SelectedRangeCenterXGridMirror,

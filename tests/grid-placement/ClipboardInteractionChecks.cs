@@ -16,9 +16,9 @@ using OngekiFumenEditor.Modules.FumenObjectPropertyBrowser;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
 
 public static class ClipboardInteractionChecks
 {
@@ -111,7 +111,7 @@ public static class ClipboardInteractionChecks
             var pasted = editor.SelectObjects.OfType<Bell>().OrderBy(x => x.TGrid.TotalGrid).ToArray();
             check(pasted.Length == 3, "真实PasteObjects创建三个独立物件");
             var raw = GridClipboardGeometry.CloneSet(input);
-            GridClipboardGeometry.Place(raw, XGrid.FromTotalGrid(700), TGrid.FromTotalGrid(1810), OngekiFumenEditor.Modules.FumenVisualEditor.Base.GridPlacementOption.None);
+            GridClipboardGeometry.Place(raw, XGrid.FromTotalGrid(700), TGrid.FromTotalGrid(1810), PasteOption.None);
             var action = new OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls.DefaultObjectInteractiveAction();
             var expected = raw.Cast<Bell>().Select(x => (t: editor.ConvertYToTGrid_DesignMode(action.CheckAndAdjustY(x, editor.ConvertTGridToY_DesignMode(x.TGrid), editor).Value).TotalGrid,
                 x: XGridCalculator.ConvertXToXGrid(action.CheckAndAdjustX(x, XGridCalculator.ConvertXGridToX(x.XGrid, editor), editor).Value, editor).TotalGrid)).OrderBy(x => x.t).ToArray();

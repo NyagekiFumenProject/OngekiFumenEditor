@@ -16,7 +16,6 @@ using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using static OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.FumenVisualEditorViewModel;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
     [Export(typeof(IFumenEditorClipboard))]
@@ -85,7 +84,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     return Task.CompletedTask;
             }
 
-            if (!GridClipboardGeometry.Place(copies, targetX, targetT, (GridPlacementOption)pasteOption) ||
+            if (!GridClipboardGeometry.Place(copies, targetX, targetT, pasteOption) ||
                 (targetEditor.Setting.AdjustPastedObjects && !targetEditor.InteractiveManager.AdjustPastedObjects(copies, targetEditor)))
             {
                 targetEditor.ToastNotify(OngekiFumenEditor.Properties.Resources.PasteInvalidGridPosition);
