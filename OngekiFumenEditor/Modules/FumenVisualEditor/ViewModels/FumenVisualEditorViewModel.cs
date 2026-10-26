@@ -165,7 +165,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 default:
                     IsDirty = true;
-                    if (gridDragUpdateDepth == 0 || e.PropertyName == nameof(ITimelineObject.TGrid))
+                    if (!IsGridDragTransactionActive || e.PropertyName == nameof(ITimelineObject.TGrid))
                         RecalculateScrollMetrics();
                     break;
             }
