@@ -2,18 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OngekiFumenEditor.Base;
+using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public static class LaneGeometry
     {
-        public static Func<TGrid, XGrid, XGrid> CreateProjector(LaneStartBase lane)
+        internal static Dictionary<int, List<(int min, int max)>> BuildHorizontalRanges(ConnectableStartObject lane)
         {
-            var children = lane.Children.ToArray();
-            var valid = lane.IsPathVaild();
             var horizontalRanges = new Dictionary<int, List<(int min, int max)>>();
-            foreach (var child in children)
+            foreach (var child in lane.Children)
             {
                 if (child.PrevObject is not OngekiMovableObjectBase previous || previous.TGrid.TotalGrid != child.TGrid.TotalGrid)
                     continue;
@@ -49,6 +48,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                     horizontalRanges[t] = ranges = new();
                 ranges.Add((min, max));
             }
+
+            return horizontalRanges;
+        }
+
+        internal static bool TryGetHorizontalRanges(ConnectableStartObject lane, int totalT, out List<(int min, int max)> ranges)
+            => BuildHorizontalRanges(lane).TryGetValue(totalT, out ranges);
+
+        public static Func<TGrid, XGrid, XGrid> CreateProjector(LaneStartBase lane)
+        {
+            var children = lane.Children.ToArray();
+            var valid = lane.IsPathVaild();
+            var horizontalRanges = BuildHorizontalRanges(lane);
 
             var interpolated = new Dictionary<int, XGrid>();
             return (time, target) =>

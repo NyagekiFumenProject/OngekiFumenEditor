@@ -253,37 +253,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             minX = default;
             maxX = default;
-            var totalTGrid = tGrid.TotalGrid;
+            if (!LaneGeometry.TryGetHorizontalRanges(startObject, tGrid.TotalGrid, out var ranges))
+                return false;
+
             var hasCandidate = false;
             var closestDistance = double.MaxValue;
-
-            foreach (var child in startObject.Children)
+            foreach (var range in ranges)
             {
-                if (child.PrevObject is not OngekiMovableObjectBase previousObject ||
-                    previousObject.TGrid.TotalGrid != totalTGrid ||
-                    child.TGrid.TotalGrid != totalTGrid)
-                    continue;
-
-                var minXTotalGrid = (double)previousObject.XGrid.TotalGrid;
-                var maxXTotalGrid = (double)child.XGrid.TotalGrid;
-                var isHorizontal = true;
-                foreach (var control in child.PathControls)
-                {
-                    if (control.TGrid.TotalGrid != totalTGrid)
-                    {
-                        isHorizontal = false;
-                        break;
-                    }
-
-                    minXTotalGrid = Math.Min(minXTotalGrid, control.XGrid.TotalGrid);
-                    maxXTotalGrid = Math.Max(maxXTotalGrid, control.XGrid.TotalGrid);
-                }
-
-                if (!isHorizontal)
-                    continue;
-
-                var candidateMinX = XGridCalculator.ConvertXGridToX(minXTotalGrid / XGrid.DEFAULT_RES_X, editor);
-                var candidateMaxX = XGridCalculator.ConvertXGridToX(maxXTotalGrid / XGrid.DEFAULT_RES_X, editor);
+                var candidateMinX = XGridCalculator.ConvertXGridToX(range.min / (double)XGrid.DEFAULT_RES_X, editor);
+                var candidateMaxX = XGridCalculator.ConvertXGridToX(range.max / (double)XGrid.DEFAULT_RES_X, editor);
                 if (candidateMinX > candidateMaxX)
                     (candidateMinX, candidateMaxX) = (candidateMaxX, candidateMinX);
 
