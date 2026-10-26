@@ -35,6 +35,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### A-1 `GridPlacementOption` 复制 `PasteOption` 并以数值强转连接（PR 新增）
 
+- 状态：**已完成**（`94f7b5d3`）
 - 位置：`OngekiFumenEditor/Modules/FumenVisualEditor/Base/GridPlacementOption.cs:3-10`；`Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs:88`；`ViewModels/FumenVisualEditorViewModel.UserInteractionActions.cs:242-249`
 - 现象：两个枚举的成员名和顺序完全相同；`Place(..., (GridPlacementOption)pasteOption)` 依赖数值一致。新增、删除或重排任一枚举值都会静默改变语义。
 - 对照：`PasteOption` 是 `IFumenEditorClipboard.PasteObjects` 的公开参数，原本就是剪贴板选项的单一来源；项目没有为几何 helper 复制 UI 枚举的先例。
@@ -42,6 +43,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### A-2 Kernel 剪贴板实现与 ViewModel 交互管理器双向依赖（PR 新增）
 
+- 状态：**已处理（第一阶段）**（`5917cfb7`；A-3 未实施，Kernel→Impls 既有引用仍在）
 - 位置：`Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs:89,107`（调用 `targetEditor.InteractiveManager.AdjustPastedObjects`、`DockableObjectInteractiveAction.CreateOriginalLaneProjector`）；`ViewModels/Interactives/ObjectInteractiveManager.cs:32`（调用 `Kernel.DefaultImpl.GridClipboardGeometry.Enumerate`）
 - 现象：`Kernel.DefaultImpl` 的具体实现调用 `ViewModels.Interactives`；`ViewModels` 又调用 `Kernel.DefaultImpl` 的静态 helper。两者不是单向依赖，而是循环引用。
 - 对照：既有 `IFumenEditorClipboard` 的意义是让 ViewModel 只依赖 Kernel 接口；`DefaultImpl` 不应反向知道交互管理器。
@@ -56,6 +58,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### A-4 `internal virtual TryAdjustGrid` 破坏公开交互基类契约（PR 新增）
 
+- 状态：**已完成**（`76ac02bf`）
 - 位置：`ViewModels/Interactives/ObjectInteractiveActionBase.cs:5-7`；`tests/grid-placement/ArchitectureChecks.cs:25-28`
 - 现象：基类其他入口都是 `public abstract`，唯独新增的整组预检入口是 `internal virtual`。外部程序集/插件派生类无法 override，会在群体拖动时静默跳过自定义吸附。
 - 对照：`ArchitectureChecks` 专门断言“公开交互基类不要求外部派生类实现不可访问的抽象成员”，说明这是为兼容性打的补丁，而不是自然设计。
@@ -79,6 +82,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### B-1 三处重复构建“持续物件关联集合”（PR 新增）
 
+- 状态：**已完成**（`e253fe20`）
 - 位置：`ViewModels/Interactives/ObjectInteractiveManager.Selection.cs:40-75`；`ViewModels/Interactives/SelectionGridDrag.cs:40-56`；`SelectionGridDrag.cs:226-250`
 - 现象：Hold/HoldEnd、Soflan/EndIndicator、LaneBlockArea/EndIndicator、IndividualSoflanArea/EndIndicator 的配对逻辑在 `related` 集合、`changedLanes`、尾节点校验三处各写一遍。
 - 建议：复用模型既有 `GetDisplayableObjects()` 作为组件枚举来源，新增 `OngekiObjectComponents`（`EnumerateSelfAndComponents` / `GetHeadObject` / `GetTailObject` / `GetLaneStartObject`），`GridClipboardGeometry.Enumerate` 也复用它。
@@ -302,18 +306,18 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ## 9. 建议处理顺序
 
-| 优先级 | 编号 | 处理建议 |
-| --- | --- | --- |
-| P0 | E-1 | 修复 X 镜像时间平移，补 D-6 回归；这是用户可见行为回归 |
-| P0 | A-1 | 删除重复枚举/强转，消除新增/重排枚举的静默错位风险 |
-| P0 | A-2 | 拆分 Kernel ↔ ViewModel 双向依赖，至少把 `GridClipboardGeometry` 移出 `DefaultImpl` |
-| P1 | A-4 | `TryAdjustGrid` 改为 public virtual 或在管理器层实现，恢复插件兼容契约 |
-| P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` |
-| P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo |
-| P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` |
-| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 |
-| P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 |
-| P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 |
+| 优先级 | 编号 | 处理建议 | 状态 |
+| --- | --- | --- | --- |
+| P0 | E-1 | 修复 X 镜像时间平移，补 D-6 回归；这是用户可见行为回归 | 未开始 |
+| P0 | A-1 | 删除重复枚举/强转，消除新增/重排枚举的静默错位风险 | **已完成** `94f7b5d3` |
+| P0 | A-2 | 拆分 Kernel ↔ ViewModel 双向依赖，至少把 `GridClipboardGeometry` 移出 `DefaultImpl` | **已处理（第一阶段）** `5917cfb7`；A-3 未做 |
+| P1 | A-4 | `TryAdjustGrid` 改为 public virtual 或在管理器层实现，恢复插件兼容契约 | **已完成** `76ac02bf` |
+| P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` | 未开始 |
+| P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | 未开始 |
+| P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | 未开始 |
+| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | B-1 **已完成** `e253fe20`；其余未开始 |
+| P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | 未开始 |
+| P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 | 未开始 |
 
 ## 10. 验证与限制
 
@@ -370,10 +374,12 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 > 实施顺序建议按 §9；`A-1`/`A-2`/`A-3` 可合为一个“剪贴板分层”重构，`E-1` 单独修复以便回滚。`F-1..F-4` 已在 §8 关闭，不再列方案。
 
 #### A-1
+- 状态：**已完成**（`94f7b5d3`）
 - 方案：把 `PasteOption` 从 `FumenVisualEditorViewModel` 嵌套类型移到 `Modules/FumenVisualEditor/Base/PasteOption.cs`（public enum），`IFumenEditorClipboard`、`GridClipboardGeometry.Place`、`UserInteractionActions` 统一引用；删除 `GridPlacementOption` 与 `(GridPlacementOption)pasteOption` 强转。若暂不迁移枚举，至少改为显式 `switch` 映射函数，`default` 抛异常或返回失败。
 - 验收：全仓库无 `GridPlacementOption`；新增 `PasteOption` 值时，`Place` 的映射 `switch` 有明确未覆盖处理（`default => throw`），不会静默落到默认平移分支。
 
 #### A-2
+- 状态：**已处理（第一阶段）**（`5917cfb7`；第二步与 A-3 未实施）
 - 方案：第一步把 `GridClipboardGeometry` 移到 `Modules/FumenVisualEditor/Base`（或 `Base/Clipboard`），改为 `internal static`；`ObjectInteractiveManager` 与 `DefaultFumenEditorClipboard` 都只引用 Base，删除 `ViewModels → Kernel.DefaultImpl`。第二步（可选）把 `PasteObjects` 业务整体迁到 `ViewModels/FumenEditorClipboardService`，`DefaultFumenEditorClipboard` 仅做 `IFumenEditorClipboard` 转发与 MEF 装配。
 - 验收：A-2+A-3 完成后，`grep -r "Kernel.DefaultImpl" Modules/FumenVisualEditor/ViewModels` 为空；`DefaultFumenEditorClipboard` 不引用 `ViewModels.Interactives.Impls` 的具体类型（仅通过 `IFumenEditorClipboard` 参数访问 ViewModel）。
 
@@ -382,6 +388,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：无 `CreateOriginalLaneProjector`/`CalculateOriginalLaneX` 引用；换线、粘贴、回滚测试全部通过。
 
 #### A-4
+- 状态：**已完成**（`76ac02bf`）
 - 方案：`ObjectInteractiveActionBase.TryAdjustGrid` 改为 `public virtual`，默认返回 `true`，补 XML doc（“返回 false 表示整组拒绝，默认 true”）；`ArchitectureChecks` 改为断言所有公开抽象成员都能被外部程序集 override。备选是把整组预检移到 `ObjectInteractiveManager`，由 `IGridAdjustmentPolicy` 承担，但改动面更大。
 - 验收：外部测试程序集派生一个 action 并 override `TryAdjustGrid`，群体拖动时自定义吸附生效。
 
@@ -394,6 +401,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：`ScrollViewer.cs` 不再声明拖动字段；拖动期间滚动指标只重算一次（沿用现有性能回归）。
 
 #### B-1
+- 状态：**已完成**（`e253fe20`）
 - 方案：新增 `Base/OngekiObjectComponents.cs`，以模型既有 `GetDisplayableObjects()` 为组件来源：
   - `EnumerateSelfAndComponents()`：自身 + 持续物件尾节点 + 轨道子节点/曲线控制点；子节点/控制点单独作为根时只返回自身。
   - `GetHeadObject()`：尾节点找回所属头对象。
