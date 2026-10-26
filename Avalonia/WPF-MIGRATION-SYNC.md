@@ -430,3 +430,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` 255/255；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 每轮 1236/1236；B-2 的 Tap 水平拖动真机脚本执行成功。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 A-6/B-2/B-3/B-4/B-5 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-27：PR #43 审查整改 B-9（WPF）
+
+- B-9（`905a0fc7`）：`DefaultObjectInteractiveAction.OnDragStart/Move/End` 统一委托 `ObjectInteractiveManager` 的 `SelectionGridDrag`；删除 `DefaultObjectInteractiveAction`/`ConnectableObjectInteractiveAction` 的 `dragInfoMap` 与独立附轨 undo，删除 `DockableObjectInteractiveAction` 的 Tap/Hold 分支和 `IndividualSoflanAreaInteractiveAction`；`OnMouseUp` 删除旧 `BeginCombineAction` 路径；`SelectionGridDrag` 增加单角 ISA 越界后的规范化与统一撤销。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 257/257（新增 ISA 单角规范化、单撤销断言）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；真机 ISA 单角拖动后 head=50/tail=100、事务已释放。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 B-9 条目、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

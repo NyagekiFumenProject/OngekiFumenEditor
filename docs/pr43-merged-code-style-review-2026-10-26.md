@@ -140,6 +140,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### B-9 拖动框架双轨制（PR 新增）
 
+- 状态：**已完成**（`905a0fc7`）
 - 位置：`UserInteractionActions.cs:1248-1265`（新 `CommitSelectionDrag` 与旧 `BeginCombineAction` + `GetInteractive(obj).OnDragEnd` 并存）；`DockableObjectInteractiveAction.cs:29-54`（Tap/Hold 走新事务，其他走 `base.OnDragStart`）；`DefaultObjectInteractiveAction` 的 `dragInfoMap`
 - 现象：同一 `OnMouseUp` 入口按 `InteractiveManager.IsSelectionDragging` 分流到两套状态/撤销路径；`OnDragStart`/`OnDragEnd` 策略入口只对部分类型生效。
 - 对照：`ObjectInteractiveActionBase` 的 `OnDragStart/Move/End` 原本是统一策略入口。
@@ -322,7 +323,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` | **已完成** `3381ddf9` |
 | P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | B-3 **已完成（随 A-3）** `446b1edf`；B-4 **已完成** `dc6fddec` |
 | P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | 未开始 |
-| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、A-6、B-1、B-2、B-5 **已完成**；B-7/B-8/B-9 未开始 |
+| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、A-6、B-1、B-2、B-5、B-9 **已完成**；B-7/B-8 未开始 |
 | P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | 未开始 |
 | P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 | 未开始 |
 
@@ -349,7 +350,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - [ ] B-6 `BulletPallete` 等价接口
 - [ ] B-7 `GridClipboardGeometry` 拆分
 - [ ] B-8 `PasteObjects` 拆分
-- [ ] B-9 拖动框架统一
+- [x] B-9 拖动框架统一
 - [ ] C-1 全限定名统一
 - [ ] C-2 未使用 using/空 override/注释代码
 - [ ] C-3 热路径无分配
@@ -453,8 +454,9 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：`PasteObjects` 控制在 40 行内；原子拒绝、撤销/重做、选择恢复测试通过。
 
 #### B-9
-- 方案：分阶段迁移：先让 `ObjectInteractiveActionBase.OnDragStart/Move/End` 的默认实现委托给 `ObjectInteractiveManager` 的统一事务；删除 `DockableObjectInteractiveAction` 的 Tap/Hold 类型分支；再迁移 `ConnectableObjectInteractiveAction`；最后删除 `DefaultObjectInteractiveAction.dragInfoMap` 与 `OnMouseUp` 的旧组合撤销分支。
-- 验收：所有拖动只生成一个 `LambdaUndoAction`；`grep dragInfoMap` 为空；现有拖动测试通过。
+- 状态：**已完成**（`905a0fc7`）
+- 方案（实际采用）：`DefaultObjectInteractiveAction.OnDragStart/Move/End` 统一委托 `ObjectInteractiveManager.Begin/Update/CommitSelectionDrag`；删除 `DefaultObjectInteractiveAction`/`ConnectableObjectInteractiveAction` 的 `dragInfoMap` 与独立附轨 undo；删除 `DockableObjectInteractiveAction` 的 Tap/Hold 分支和 `IndividualSoflanAreaInteractiveAction`；`OnMouseUp` 删除 `BeginCombineAction` 旧路径；`SelectionGridDrag` 增加单角 ISA 越界规范化。
+- 验收：所有拖动只生成一个 `LambdaUndoAction`；`grep dragInfoMap` 为空；拖动/ISA/附轨回归通过。
 
 #### C-1
 - 方案：删除全限定名，统一使用文件顶部 `using`；用 IDE“简化名称”/`dotnet format` 清理；可在 `.editorconfig` 开启 `dotnet_diagnostic.IDE0001.severity = warning`。
@@ -574,12 +576,13 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | B-2 | 已完成 | `83c70558` | `LaneGeometry.BuildHorizontalRanges/TryGetHorizontalRanges` 与 `DockableObjectInteractiveAction` 共用同 T 水平段构建；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
 | B-4 | 已完成 | `dc6fddec` | 删除 `SelectionGridDrag.TryMove/TryMoveWithSnapping` 与 `LaneSwitchResolver.CandidateQueryCount`；测试改用私有 `TryMoveCore`/`candidates` 反射；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
 | B-5 | 已完成 | `40b0873d` | 新增 `LaneSnapDistancePixels=8`/`XGridMagneticDistancePixels=4`，四处阈值统一引用；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
+| B-9 | 已完成 | `905a0fc7` | Default/Connectable/Dockable 拖动统一委托 SelectionGridDrag，删除 dragInfoMap/旧组合撤销/ISA 专用 action；Debug/Release 0 error；grid-placement 257/257；MCP e2e 1236/1236；真机 ISA 单角拖动 head=50/tail=100 且事务释放 |
 | B-3 | 已完成（随 A-3） | `446b1edf` | `CalculateOriginalLaneX` 与测试反射调用删除，贝塞尔投影测试改用 `LaneGeometry.CreateProjector`；grid-placement 249/249 |
 
 说明：
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项（新增 ISA 单角规范化和单撤销断言）。
 - 测试直接引用的 helper 已改为 public，`InternalsVisibleTo("GridPlacement")` 已删除（`7f9f659b`）；`LaneSwitchResolver`/`SelectionGridDrag` 仍保持 internal，测试通过反射访问，不依赖友元。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。
