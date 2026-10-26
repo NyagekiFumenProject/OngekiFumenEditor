@@ -252,9 +252,6 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             switch (e.PropertyName)
             {
                 case nameof(TGrid):
-                // 属性面板直接修改坐标分量时，通知名是 Unit 或 Grid。
-                case nameof(GridBase.Unit):
-                case nameof(GridBase.Grid):
                     if (sender is ConnectableChildObjectBase child)
                     {
                         child.NotifyRefreshPaths();
@@ -265,7 +262,7 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
                         NextObject?.NotifyRefreshPaths();
                     }
 
-                    NotifyRefreshMinMaxTGrid(e.PropertyName != nameof(TGrid));
+                    NotifyRefreshMinMaxTGrid();
                     break;
                 case nameof(XGrid):
                     if (sender is ConnectableChildObjectBase child2)
@@ -292,17 +289,12 @@ namespace OngekiFumenEditor.Base.OngekiObjects.ConnectableObject
             ConnectableObjectsPropertyChanged?.Invoke(sender, e);
         }
 
-        private void NotifyRefreshMinMaxTGrid(bool notifyOnlyIfRangeChanged = false)
+        private void NotifyRefreshMinMaxTGrid()
         {
-            var previousMin = cachedMinTGrid;
-            var previousMax = cachedMaxTGrid;
             cachedMaxTGrid = default;
             cachedMinTGrid = default;
-            // Unit/Grid 通知未区分 X 与 T；范围未变时不重建时间索引。
-            if (!notifyOnlyIfRangeChanged || previousMin is null || previousMin != MinTGrid)
-                NotifyOfPropertyChange(() => MinTGrid);
-            if (!notifyOnlyIfRangeChanged || previousMax is null || previousMax != MaxTGrid)
-                NotifyOfPropertyChange(() => MaxTGrid);
+            NotifyOfPropertyChange(() => MinTGrid);
+            NotifyOfPropertyChange(() => MaxTGrid);
         }
 
         public override IEnumerable<IDisplayableObject> GetDisplayableObjects()

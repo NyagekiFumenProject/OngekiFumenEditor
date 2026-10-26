@@ -15,6 +15,12 @@ internal static class Program
                     throw new InvalidOperationException(name);
                 count++;
             });
+            GeometryNotificationChecks.Run((condition, name) =>
+            {
+                if (!condition)
+                    throw new InvalidOperationException(name);
+                count++;
+            });
             ArchitectureChecks.Run((condition, name) =>
             {
                 if (!condition)

@@ -1,5 +1,6 @@
 using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Utils;
+using System.ComponentModel;
 
 namespace OngekiFumenEditor.Base
 {
@@ -13,10 +14,18 @@ namespace OngekiFumenEditor.Base
             get => xGrid;
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(xGrid, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(xGrid, value, OnXGridPropertyChanged);
                 xGrid = value;
                 NotifyOfPropertyChange(() => XGrid);
             }
+        }
+
+        private void OnXGridPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Unit/Grid 是坐标分量内部通知；对外统一表达为 XGrid 变化。
+            NotifyOfPropertyChange(e.PropertyName is nameof(GridBase.Unit) or nameof(GridBase.Grid)
+                ? nameof(XGrid)
+                : e.PropertyName);
         }
 
         public override string ToString() => $"{base.ToString()} {XGrid}";

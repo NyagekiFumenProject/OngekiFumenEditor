@@ -2,6 +2,7 @@ using OngekiFumenEditor.Base.Attributes;
 using OngekiFumenEditor.Utils;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace OngekiFumenEditor.Base
 {
@@ -15,10 +16,18 @@ namespace OngekiFumenEditor.Base
             get => tGrid;
             set
             {
-                this.RegisterOrUnregisterPropertyChangeEvent(tGrid, value);
+                this.RegisterOrUnregisterPropertyChangeEvent(tGrid, value, OnTGridPropertyChanged);
                 tGrid = value;
                 NotifyOfPropertyChange(() => TGrid);
             }
+        }
+
+        private void OnTGridPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Unit/Grid 是坐标分量内部通知；对外统一表达为 TGrid 变化。
+            NotifyOfPropertyChange(e.PropertyName is nameof(GridBase.Unit) or nameof(GridBase.Grid)
+                ? nameof(TGrid)
+                : e.PropertyName);
         }
 
         private bool isSelecting = false;
