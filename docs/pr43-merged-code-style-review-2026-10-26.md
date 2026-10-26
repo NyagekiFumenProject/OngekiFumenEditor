@@ -75,6 +75,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### A-6 滚动指标抑制逻辑塞进 `ScrollViewer` partial（PR 新增）
 
+- 状态：**已完成**（`fb14d45a`）
 - 位置：`ViewModels/FumenVisualEditorViewModel.ScrollViewer.cs:118-136`；`ViewModels/FumenVisualEditorViewModel.cs:165-170`
 - 现象：`ExecuteGridDragUpdate` 与滚动无关，实际职责是“拖动期间延迟 `RecalculateScrollMetrics`”；`gridDragUpdateDepth` 被两个 partial 共享，`OnFumenObjectModifiedChanged` 又用 `e.PropertyName == nameof(ITimelineObject.TGrid)` 特例决定是否重算。
 - 对照：`FumenVisualEditorViewModel` 已按功能拆 partial（Drawing、ScrollViewer、UserInteractionActions、SelectionGridDrag）；事务级抑制应放在拖动事务或独立 partial，而不是滚动条 partial。
@@ -91,6 +92,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### B-2 两套“同一 T 的水平轨段”算法（PR 新增一套，既有算法未合并）
 
+- 状态：**已完成**（`83c70558`）
 - 位置：`Base/LaneGeometry.cs:15-51`；`ViewModels/Interactives/Impls/DockableObjectInteractiveAction.cs:250-306`
 - 现象：两者都判断 `PrevObject.TGrid == child.TGrid`、遍历 `PathControls` 要求同 T、计算 X min/max；`LaneGeometry` 还额外做了路径采样。
 - 建议：`LaneGeometry` 暴露 `TryGetHorizontalRange(lane, t, out min, out max)`，`DockableObjectInteractiveAction` 删除 `TryGetHorizontalSegmentXRange`，只保留像素换算。
@@ -100,10 +102,11 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 状态：**已完成（随 A-3）**（`446b1edf`）
 - 位置：`DockableObjectInteractiveAction.cs:171-172`；`tests/grid-placement/GridInteractionChecks.cs:449`
 - 现象：生产代码无任何引用；测试通过 `GetMethod("CalculateOriginalLaneX", NonPublic)` 反射调用。
-- 建议：删除该方法，测试改用 `LaneGeometry`/`GridClipboardGeometry` 的可用入口；如确需测试内部几何，使用 `InternalsVisibleTo` 暴露纯函数，而不是保留生产死代码。
+- 建议：删除该方法，测试改用 `LaneGeometry`/`GridClipboardGeometry` 的 public 入口；当前 `LaneGeometry.CreateProjector` 已公开。
 
 ### B-4 测试专用成员泄漏到生产类型（PR 新增）
 
+- 状态：**已完成**（`dc6fddec`）
 - 位置：`Base/LaneSwitchResolver.cs:18`（`CandidateQueryCount`）；`ViewModels/Interactives/SelectionGridDrag.cs:63-67`（`TryMove`、`TryMoveWithSnapping`）
 - 现象：`CandidateQueryCount` 仅 `LaneSwitchChecks.cs:317` 反射读取；`TryMove`/`TryMoveWithSnapping` 仅 `SelectionGridDragChecks.cs` 与 `GridInteractionChecks.cs:211` 使用；生产只调用 `TryMoveInEditor`。
 - 对照：项目既有测试通常测公开行为，不把计数器/测试入口挂在生产类型上。
@@ -111,6 +114,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### B-5 吸附阈值 `8` 三处硬编码（PR 新增 + 既有）
 
+- 状态：**已完成**（`40b0873d`）
 - 位置：`LaneSwitchResolver.cs:12`（`SnapDistance = 8`）；`DefaultFumenEditorClipboard.cs:119`（`distance <= 8`）；`DockableObjectInteractiveAction.cs:147`（`magneticDockDistance = ... : 8`）
 - 现象：三处表示“附轨/换线的画布像素阈值”，但各自定义；修改一处不会同步其他两处。
 - 建议：统一为 `LaneSnapThreshold`（或编辑器设置项）；`DefaultObjectInteractiveAction.CheckAndAdjustX` 的 `4` 也应在同一处说明语义。
@@ -316,9 +320,9 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | P0 | A-2 | 拆分 Kernel ↔ ViewModel 双向依赖，至少把 `GridClipboardGeometry` 移出 `DefaultImpl` | **已处理（第一阶段）** `5917cfb7`；A-3 已完成，Kernel→VM 未完全消除 |
 | P1 | A-4 | `TryAdjustGrid` 改为 public virtual 或在管理器层实现，恢复插件兼容契约 | **已完成** `76ac02bf` |
 | P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` | **已完成** `3381ddf9` |
-| P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | B-3 **已完成（随 A-3）** `446b1edf`；B-4 未开始 |
+| P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | B-3 **已完成（随 A-3）** `446b1edf`；B-4 **已完成** `dc6fddec` |
 | P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | 未开始 |
-| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、B-1 **已完成**；其余未开始 |
+| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、A-6、B-1、B-2、B-5 **已完成**；B-7/B-8/B-9 未开始 |
 | P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | 未开始 |
 | P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 | 未开始 |
 
@@ -336,12 +340,12 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - [x] A-3 拖动事务依赖具体 action
 - [x] A-4 `TryAdjustGrid` 可见性
 - [x] A-5 模型层 UI 通知
-- [ ] A-6 滚动指标抑制位置
+- [x] A-6 滚动指标抑制位置
 - [x] B-1 关联集合去重
-- [ ] B-2 水平段算法去重
+- [x] B-2 水平段算法去重
 - [x] B-3 `CalculateOriginalLaneX` 删除
-- [ ] B-4 测试成员下沉
-- [ ] B-5 阈值常量
+- [x] B-4 测试成员下沉
+- [x] B-5 阈值常量
 - [ ] B-6 `BulletPallete` 等价接口
 - [ ] B-7 `GridClipboardGeometry` 拆分
 - [ ] B-8 `PasteObjects` 拆分
@@ -402,7 +406,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：模型层不再出现“属性面板”注释；属性面板修改 `TGrid.Unit/Grid` 后路径与时间索引刷新；`tests/grid-placement` 新增 `GeometryNotificationChecks` 断言不泄漏 `Unit`/`Grid` 通知。
 
 #### A-6
-- 方案：新建 `FumenVisualEditorViewModel.DragTransactions.cs`，把 `gridDragUpdateDepth`、`gridDragMetricsPending`、`ExecuteGridDragUpdate` 移入并命名 `IsGridDragTransactionActive`；`ScrollViewer` 只保留 `RecalculateScrollMetrics` 并在入口查询该属性；`OnFumenObjectModifiedChanged` 用属性替换字段名判断。
+- 状态：**已完成**（`fb14d45a`）
+- 方案：新建 `FumenVisualEditorViewModel.DragTransactions.cs`，把 `gridDragUpdateDepth`、`gridDragMetricsPending`、`ExecuteGridDragUpdate` 移入，并暴露 `IsGridDragTransactionActive`；`ScrollViewer` 只保留 `RecalculateScrollMetrics` 并在入口查询该属性；`OnFumenObjectModifiedChanged` 用属性替换字段名判断。
 - 验收：`ScrollViewer.cs` 不再声明拖动字段；拖动期间滚动指标只重算一次（沿用现有性能回归）。
 
 #### B-1
@@ -416,7 +421,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：`tests/grid-placement` 新增 `ObjectComponentsChecks`，覆盖 Hold/Soflan/LaneBlockArea/ISA/轨道家族、无尾 Hold、子节点单独为根；现有复制粘贴/拖动回归全过。
 
 #### B-2
-- 方案：在 `LaneGeometry` 提取 `BuildHorizontalRanges(lane)` 与 `TryGetHorizontalRange(lane, totalT, out min, out max)`；`CreateProjector` 复用同一构建结果；`DockableObjectInteractiveAction.TryGetHorizontalSegmentXRange` 改为调用它并做 `ConvertXGridToX`，删除重复的 `PathControls` 遍历。
+- 状态：**已完成**（`83c70558`）
+- 方案：在 `LaneGeometry` 提取 `BuildHorizontalRanges(lane)` 与 `TryGetHorizontalRanges(lane, totalT, out ranges)`；`CreateProjector` 复用同一构建结果；`DockableObjectInteractiveAction.TryGetHorizontalSegmentXRange` 改为调用它并做 `ConvertXGridToX`，删除重复的 `PrevObject/PathControls` 遍历。
 - 验收：同 T 水平段（含 Bezier 采样）测试通过；水平段判断逻辑只在 `LaneGeometry` 一处。
 
 #### B-3
@@ -425,11 +431,13 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：无反射 `GetMethod("CalculateOriginalLaneX")`；贝塞尔镜像测试通过。
 
 #### B-4
-- 方案：`CandidateQueryCount` 改为 `#if DEBUG` 或移到 `LaneSwitchResolver.Diagnostics`；`TryMove`/`TryMoveWithSnapping` 从生产类移出，提取 `SelectionGridDragMath.TryCompute(...)` 纯函数供测试，生产只保留 `TryMoveInEditor`。
-- 验收：生产公开/内部 API 无测试入口；原有测试用例通过纯函数覆盖；`grep CandidateQueryCount` 只命中测试/DEBUG。
+- 状态：**已完成**（`dc6fddec`）
+- 方案（实际采用）：删除 `SelectionGridDrag.TryMove`/`TryMoveWithSnapping` 与 `LaneSwitchResolver.CandidateQueryCount`；测试改为反射调用私有 `TryMoveCore`，候选查询次数改用私有 `candidates` 缓存计数。生产只保留 `TryMoveInEditor`。
+- 验收：生产类型无测试专用入口；`grep CandidateQueryCount` 为空；原有拖动/换线用例通过。
 
 #### B-5
-- 方案：在 `LaneGeometry` 定义 `internal const double LaneSnapDistancePixels = 8;`（或改为 `EditorSetting` 项），三处引用；`DefaultObjectInteractiveAction` 的 `4` 命名 `XGridMagneticDistancePixels`。
+- 状态：**已完成**（`40b0873d`）
+- 方案：在 `LaneGeometry` 定义 `public const double LaneSnapDistancePixels = 8d` 与 `XGridMagneticDistancePixels = 4d`；`LaneSwitchResolver`、`DefaultFumenEditorClipboard`、`DockableObjectInteractiveAction`、`DefaultObjectInteractiveAction` 统一引用。
 - 验收：阈值字面量只在常量定义处出现；换线/磁吸测试通过。
 
 #### B-6
@@ -562,12 +570,16 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | A-4 | 已完成 | `76ac02bf` | `TryAdjustGrid` 改为 public virtual，派生类同步 public override；Debug/Release 0 error；grid-placement 229/229；MCP e2e 1236/1236；真实拖动 Tap 后 TGrid 5280→5340，脚本外部程序集可调用 `TryAdjustGrid` |
 | A-5 | 已完成 | `3381ddf9` | `Unit/Grid` 分量变化语义化转发为 `TGrid`/`XGrid`，`ConnectableStartObject` 删除 UI 语义分支；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236；真实修改 XGrid.Grid 后路径起点同步 65636，TGrid.Unit 修改后 MinTGrid 更新 |
 | B-1 | 已完成 | `e253fe20` | 新增 `OngekiObjectComponents` 并复用 `GetDisplayableObjects`；`GridClipboardGeometry.Enumerate`、`SelectionGridDrag`、`ObjectInteractiveManager.Selection` 去掉重复类型分支；Debug/Release 0 error；grid-placement 249/249；MCP e2e 1236/1236；真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90 且仅拖头时尾不变 |
+| A-6 | 已完成 | `fb14d45a` | 拖动事务状态移入 `FumenVisualEditorViewModel.DragTransactions.cs`，`ScrollViewer` 只查询 `IsGridDragTransactionActive`；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
+| B-2 | 已完成 | `83c70558` | `LaneGeometry.BuildHorizontalRanges/TryGetHorizontalRanges` 与 `DockableObjectInteractiveAction` 共用同 T 水平段构建；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
+| B-4 | 已完成 | `dc6fddec` | 删除 `SelectionGridDrag.TryMove/TryMoveWithSnapping` 与 `LaneSwitchResolver.CandidateQueryCount`；测试改用私有 `TryMoveCore`/`candidates` 反射；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
+| B-5 | 已完成 | `40b0873d` | 新增 `LaneSnapDistancePixels=8`/`XGridMagneticDistancePixels=4`，四处阈值统一引用；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
 | B-3 | 已完成（随 A-3） | `446b1edf` | `CalculateOriginalLaneX` 与测试反射调用删除，贝塞尔投影测试改用 `LaneGeometry.CreateProjector`；grid-placement 249/249 |
 
 说明：
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5 因新增通知语义断言为 255 项。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项。
 - 测试直接引用的 helper 已改为 public，`InternalsVisibleTo("GridPlacement")` 已删除（`7f9f659b`）；`LaneSwitchResolver`/`SelectionGridDrag` 仍保持 internal，测试通过反射访问，不依赖友元。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。

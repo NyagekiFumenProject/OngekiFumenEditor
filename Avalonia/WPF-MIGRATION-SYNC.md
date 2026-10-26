@@ -419,3 +419,14 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` 255/255；自构建 Debug 实例 MCP e2e 1236/1236。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已同步 A-2/A-3/B-3/B-7/D-2 的可见性描述与 §13 说明。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：PR #43 审查整改 A-6/B-2/B-3/B-4/B-5（WPF）
+
+- A-6（`fb14d45a`）：新增 `FumenVisualEditorViewModel.DragTransactions.cs`，集中拖动事务深度、滚动指标延迟重算与 `IsGridDragTransactionActive`；`ScrollViewer` 与 `OnFumenObjectModifiedChanged` 改为查询属性。
+- B-2（`83c70558`）：`LaneGeometry` 新增 `BuildHorizontalRanges`/`TryGetHorizontalRanges`，`CreateProjector` 与 `DockableObjectInteractiveAction.TryGetHorizontalSegmentXRange` 共用；删除交互层重复的 `PrevObject/PathControls` 遍历。
+- B-3：已随 A-3（`446b1edf`）完成，`CalculateOriginalLaneX` 与测试反射调用已删除；本轮复核通过。
+- B-4（`dc6fddec`）：删除 `SelectionGridDrag.TryMove`/`TryMoveWithSnapping` 与 `LaneSwitchResolver.CandidateQueryCount`；测试改用私有 `TryMoveCore` 与 `candidates` 缓存计数，生产类型不再暴露测试入口。
+- B-5（`40b0873d`）：`LaneGeometry` 定义 `LaneSnapDistancePixels = 8d` 与 `XGridMagneticDistancePixels = 4d`；`LaneSwitchResolver`、`DefaultFumenEditorClipboard`、`DockableObjectInteractiveAction`、`DefaultObjectInteractiveAction` 统一引用。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 255/255；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 每轮 1236/1236；B-2 的 Tap 水平拖动真机脚本执行成功。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 A-6/B-2/B-3/B-4/B-5 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
