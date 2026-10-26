@@ -7,7 +7,6 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -18,7 +17,6 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
         private class FontHandle : IFontHandle
         {
             public string FamilyName { get; set; }
-            public string FilePath { get; set; }
         }
 
         private readonly SkiaFontFallback fontFallback = new();
@@ -59,18 +57,9 @@ namespace OngekiFumenEditor.Kernel.Graphics.Skia.Drawing.StringDrawing
             if (defaultSupportFonts != null)
                 return defaultSupportFonts;
 
-            return defaultSupportFonts = SixLabors.Fonts.SystemFonts.Collection.Families.Select(x =>
-            {
-                if (!x.TryGetPaths(out var paths))
-                    return default;
-                var handle = new FontHandle()
-                {
-                    FamilyName = x.Name,
-                    FilePath = paths.FirstOrDefault(path => Path.GetExtension(path).ToLower() == ".ttf")
-                };
-                return handle;
-            }).Where(x => x?.FilePath != null)
-            .ToArray();
+            return defaultSupportFonts = SystemFontFamilyProvider.GetFamilyNames()
+                .Select(x => (IFontHandle)new FontHandle { FamilyName = x })
+                .ToArray();
         }
 
         private SKTypeface GetTypeface(IFontHandle handle, FontStyle style)

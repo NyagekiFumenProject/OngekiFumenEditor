@@ -4,9 +4,6 @@ using OngekiFumenEditor.Modules.OptionGeneratorTools.Base;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Models;
 using OngekiFumenEditor.Properties;
 using OngekiFumenEditor.Utils;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -201,30 +198,13 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel
 
                 var fmt = (TextureFormat)baseField.Get("m_TextureFormat").GetValue().AsInt();
 
-                using Image<Rgba32> image = Image.Load<Rgba32>(inputJacketFilePath);
-                if (targetImgSize is Vector2 targetSize)
-                {
-                    var targetWidth = (int)targetSize.X;
-                    var targetHeight = (int)targetSize.Y;
-                    if (image.Width != targetWidth || image.Height != targetHeight)
-                    {
-                        Console.WriteLine($"resize image from ({image.Width},{image.Height}) to ({targetWidth},{targetHeight})");
-                        image.Mutate(x => x.Resize(new ResizeOptions()
-                        {
-                            Size = new Size(targetWidth, targetHeight),
-                            Mode = ResizeMode.Stretch,
-                        }));
-                    }
-                }
-                image.Mutate(i => i.Flip(FlipMode.Vertical));
-                if (!image.DangerousTryGetSinglePixelMemory(out var pixelSpan))
-                {
-                    //warn
-                    return default;
-                }
+                var targetWidth = targetImgSize is Vector2 targetSize ? (int)targetSize.X : (int?)null;
+                var targetHeight = targetImgSize is Vector2 targetSize2 ? (int)targetSize2.Y : (int?)null;
+                var image = ImageUtils.LoadRgba32(inputJacketFilePath, targetWidth, targetHeight);
+                ImageUtils.FlipVertical(image.Data, image.Width, image.Height);
                 width = image.Width;
                 height = image.Height;
-                byte[] encImageBytes = TextureEncoderDecoder.Encode(MemoryMarshal.AsBytes(pixelSpan.Span).ToArray(), width, height, fmt);
+                byte[] encImageBytes = TextureEncoderDecoder.Encode(image.Data, width, height, fmt);
 
                 // Format and save the image data
                 var streamData = baseField.Get("m_StreamData");

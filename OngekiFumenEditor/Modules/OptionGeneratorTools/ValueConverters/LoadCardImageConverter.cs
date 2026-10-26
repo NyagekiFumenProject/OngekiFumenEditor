@@ -1,8 +1,6 @@
 using Caliburn.Micro;
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using OngekiFumenEditor.Utils;
 using System;
 using System.Globalization;
 using System.IO;
@@ -30,19 +28,15 @@ namespace OngekiFumenEditor.Modules.OptionGeneratorTools.ValueConverters
 
                 AsyncValue = await Task.Run(() =>
                 {
-                    using var image = Image.LoadPixelData<Rgba32>(imgData.Data, imgData.Width, imgData.Height);
-                    var memoryStream = new MemoryStream();
-                    image.Mutate(i => i.Flip(FlipMode.Vertical));
-                    image.SaveAsPng(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-
+                    ImageUtils.FlipVertical(imgData.Data, imgData.Width, imgData.Height);
+                    var pngData = ImageUtils.EncodePng(imgData.Data, imgData.Width, imgData.Height);
+                    using var memoryStream = new MemoryStream(pngData);
                     var bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
                     bitmapImage.StreamSource = memoryStream;
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                     bitmapImage.EndInit();
-
                     bitmapImage.Freeze();
-
                     return bitmapImage;
                 });
                 NotifyOfPropertyChange(() => AsyncValue);
