@@ -33,6 +33,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
         internal readonly long AnchorX;
         internal Point GrabOffset;
         private readonly bool allowLaneSwitch;
+        private readonly bool allowSoflanAreaCornerCrossing;
         private LaneSwitchResolver laneSwitchResolver;
 
         internal SelectionGridDrag(IEnumerable<OngekiTimelineObjectBase> selected, IEnumerable<OngekiTimelineObjectBase> related)
@@ -43,6 +44,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                 .Where(x => x != null)
                 .ToHashSet();
             allowLaneSwitch = changedLanes.Count == 0;
+            allowSoflanAreaCornerCrossing = targets.Count == 1 &&
+                targets.First() is IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator;
             Before = related.Concat(targets).Distinct().Select(o => new Position
             {
                 Object = o,
@@ -232,7 +235,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                     }
                 }
 
-                if (end != null && Time(end) < p.T)
+                if (end != null && Time(end) < p.T &&
+                    !(allowSoflanAreaCornerCrossing && p.Object is IndividualSoflanArea))
                     return false;
             }
 
@@ -257,7 +261,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                     dock.ReferenceLaneStart = p.Lane;
                 var targetT = (int)(p.T + (p.Selected ? dt : 0));
                 if (p.Object.TGrid.TotalGrid != targetT)
-                    p.Object.TGrid = TGrid.FromTotalGrid(targetT);
+                {
+                    if (p.Object is IndividualSoflanArea.IndividualSoflanAreaEndIndicator soflanAreaEnd)
+                        soflanAreaEnd.SetTGridUnclamped(TGrid.FromTotalGrid(targetT));
+                    else
+                        p.Object.TGrid = TGrid.FromTotalGrid(targetT);
+                }
             }
 
             // 附轨属性通知可能重算尾部 X；最后统一恢复真实横坐标。
@@ -295,6 +304,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             }
 
             return true;
+        }
+
+        internal void NormalizeSoflanAreas()
+        {
+            foreach (var area in Before.Select(p => p.Object).OfType<IndividualSoflanArea>().Distinct())
+                area.NormalizeCorners();
         }
 
         internal Position[] CaptureCurrent() => Before.Select(p => new Position

@@ -34,8 +34,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
         internal void BeginSelectionDrag(FumenVisualEditorViewModel editor, Point point, IEnumerable<OngekiTimelineObjectBase> objects = null)
         {
             var selected = (objects ?? editor.SelectObjects.OfType<OngekiTimelineObjectBase>()).Distinct().ToArray();
-            if (selected.Length == 0 ||
-                selected.Length == 1 && selected[0] is not (Tap or Hold or HoldEnd or ConnectableObjectBase or LaneCurvePathControlObject))
+            if (selected.Length == 0)
                 return;
             var related = new HashSet<OngekiTimelineObjectBase>(selected);
             foreach (var o in selected)
@@ -124,6 +123,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                 dragFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
                 dragFumen = null;
             }
+            if (!abort)
+                editor.ExecuteGridDragUpdate(drag.NormalizeSoflanAreas);
             var after = drag.CaptureCurrent();
             if (abort)
             {

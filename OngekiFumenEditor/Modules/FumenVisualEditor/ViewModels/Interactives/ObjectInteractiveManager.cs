@@ -68,7 +68,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                 Hold => new HoldObjectInteractiveAction(),
                 ILaneDockable => new DockableObjectInteractiveAction(),
                 ConnectableObjectBase or LaneCurvePathControlObject => new ConnectableObjectInteractiveAction(),
-                IndividualSoflanArea or IndividualSoflanArea.IndividualSoflanAreaEndIndicator => new IndividualSoflanAreaInteractiveAction(),
                 IHorizonPositionObject => new HorizonObjectInteractiveAction(),
                 _ => defaultAction,
             };

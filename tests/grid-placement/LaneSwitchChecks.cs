@@ -334,5 +334,30 @@ public static class LaneSwitchChecks
             check(Move(moved, 0, 4096, e) && h.ReferenceLaneStart == a, "轨道参与拖动时附轨物件不换线");
         }
 
+        {
+            var e = Editor();
+            var area = new IndividualSoflanArea
+            {
+                TGrid = TGrid.FromTotalGrid(100),
+                XGrid = XGrid.FromTotalGrid(10)
+            };
+            area.EndIndicator.TGrid = TGrid.FromTotalGrid(500);
+            area.EndIndicator.XGrid = XGrid.FromTotalGrid(50);
+            e.Fumen.AddObject(area);
+            e.Setting.DisableTGridMagneticDock = true;
+            e.Setting.DisableXGridMagneticDock = true;
+            var action = e.InteractiveManager.GetInteractive(area.EndIndicator);
+            var start = new Point(XGridCalculator.ConvertXGridToX(area.EndIndicator.XGrid, e), e.ConvertTGridToY_DesignMode(area.EndIndicator.TGrid));
+            var target = new Point(start.X, e.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(50)));
+            var undoBefore = e.UndoRedoManager.UndoActionCount;
+            action.OnDragStart(area.EndIndicator, start, e);
+            action.OnDragMove(area.EndIndicator, target, e);
+            action.OnDragEnd(area.EndIndicator, target, e);
+            check(area.TGrid.TotalGrid == 50 && area.EndIndicator.TGrid.TotalGrid == 100,
+                "ISA 单角越过另一角后统一事务自动规范化");
+            check(e.UndoRedoManager.UndoActionCount == undoBefore + 1,
+                "ISA 单角拖动只产生一个撤销动作");
+        }
+
     }
 }

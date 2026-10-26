@@ -26,33 +26,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         protected override double? AdjustCandidateX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
             => base.CheckAndAdjustX(obj, x, editor);
 
-        public override void OnDragStart(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
-        {
-            if (obj is Tap or Hold or HoldEnd)
-                editor.InteractiveManager.BeginSelectionDrag(editor, point, new[] { (OngekiTimelineObjectBase)obj });
-            else
-                base.OnDragStart(obj, point, editor);
-        }
-
-        public override void OnDragMove(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
-        {
-            if (obj is Tap or Hold or HoldEnd)
-                editor.InteractiveManager.UpdateSelectionDrag(editor, point);
-            else
-                base.OnDragMove(obj, point, editor);
-        }
-
-        public override void OnDragEnd(OngekiObjectBase obj, Point point, FumenVisualEditorViewModel editor)
-        {
-            if (obj is Tap or Hold or HoldEnd)
-            {
-                editor.InteractiveManager.UpdateSelectionDrag(editor, point);
-                editor.InteractiveManager.CommitSelectionDrag(editor);
-            }
-            else
-                base.OnDragEnd(obj, point, editor);
-        }
-
         public virtual IEnumerable<ConnectableObjectBase> PickDockableObjects(FumenVisualEditorViewModel editor = default)
         {
             return editor.Fumen.Lanes.Where(x => x.IsDockableLane).FilterNull();

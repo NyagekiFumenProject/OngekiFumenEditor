@@ -1245,17 +1245,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                                 UpdateSelectionDrag(cp);
                                 CommitSelectionDrag();
                             }
-                            else
-                            {
-                                UndoRedoManager.BeginCombineAction();
-                                SelectObjects.ToArray().ForEach(x =>
-                                {
-                                    var obj = x as OngekiObjectBase;
-                                    InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
-                                });
-                                var compositeAction = UndoRedoManager.EndCombineAction(Resources.DragObjects);
-                                UndoRedoManager.ExecuteAction(compositeAction);
-                            }
                         }
                         else
                         {
@@ -1551,14 +1540,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var r = isObjectDragStarted;
                     isObjectDragStarted = true;
-                    var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
-                    {
-                        var action = InteractiveManager.GetInteractive(vm);
-                        if (r)
-                            action.OnDragMove(vm, pos, this);
-                        else
-                            action.OnDragStart(vm, pos, this);
-                    });
 
                     var rp = 1 - pos.Y / RectInDesignMode.Height;
                     var offsetY = 0d;
@@ -1594,8 +1575,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             BeginSelectionGridDrag(mouseDownHitObjectPosition ?? cp);
                         if (InteractiveManager.IsSelectionDragging)
                             UpdateSelectionDrag(cp);
-                        else
-                            SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
                     }
                 }
             }
