@@ -10,6 +10,7 @@ using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 
@@ -446,8 +447,7 @@ public static class GridInteractionChecks
             TGrid = TGrid.FromTotalGrid(5000),
             XGrid = XGrid.FromTotalGrid(10000)
         });
-        var projector = typeof(OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls.DockableObjectInteractiveAction).GetMethod("CalculateOriginalLaneX", BindingFlags.Static | BindingFlags.NonPublic);
-        var actualBezier = (XGrid)projector.Invoke(null, new object[] { bezierLane, TGrid.FromTotalGrid(5000), XGrid.FromTotalGrid(10000) });
+        var actualBezier = LaneGeometry.CreateProjector(bezierLane)(TGrid.FromTotalGrid(5000), XGrid.FromTotalGrid(10000));
         check(actualBezier.TotalGrid <= 7500 && actualBezier.TotalGrid >= 7400, "同T三次Bezier贴合真实曲线范围而非控制点凸包");
         foreach (var node in project.Fumen.GetAllDisplayableObjects().OfType<ISelectableObject>())
             node.IsSelected = false;

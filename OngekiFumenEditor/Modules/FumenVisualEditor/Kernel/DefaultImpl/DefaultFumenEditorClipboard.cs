@@ -103,7 +103,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             XGrid Project(LaneStartBase lane, TGrid time, XGrid x)
             {
                 if (!projectors.TryGetValue(lane, out var project))
-                    projectors[lane] = project = DockableObjectInteractiveAction.CreateOriginalLaneProjector(lane);
+                    projectors[lane] = project = LaneGeometry.CreateProjector(lane);
                 return project(time, x);
             }
 

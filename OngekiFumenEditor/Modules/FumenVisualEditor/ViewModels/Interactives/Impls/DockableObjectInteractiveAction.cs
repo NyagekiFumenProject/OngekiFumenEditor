@@ -167,12 +167,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                 base.OnMoveCanvas(obj, relativePoint, editor);
         }
 
-        // 同时刻水平段覆盖一段 X 区间，保留目标横坐标在最近区间内的位置。
-        internal static XGrid CalculateOriginalLaneX(LaneStartBase lane, TGrid time, XGrid target)
-            => CreateOriginalLaneProjector(lane)(time, target);
-
         // 每个动作按轨道建一次索引；有效性仅检查一次，同 T 插值结果复用。
-        internal static Func<TGrid, XGrid, XGrid> CreateOriginalLaneProjector(LaneStartBase lane) => LaneGeometry.CreateProjector(lane);
+        // 轨道投影统一由 LaneGeometry.CreateProjector 提供，避免交互层二次转发。
 
         public override double? CheckAndAdjustX(IHorizonPositionObject obj, double x, FumenVisualEditorViewModel editor)
         {

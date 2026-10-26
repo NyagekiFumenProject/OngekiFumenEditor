@@ -282,7 +282,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
                     if (resolver != null)
                         return resolver.Project(lane, time, x);
                     if (!projectors.TryGetValue(lane, out var project))
-                        projectors[lane] = project = DockableObjectInteractiveAction.CreateOriginalLaneProjector(lane);
+                        projectors[lane] = project = LaneGeometry.CreateProjector(lane);
                     return project(time, x);
                 }
 
