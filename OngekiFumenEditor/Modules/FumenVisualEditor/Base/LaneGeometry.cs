@@ -6,9 +6,9 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
-    internal static class LaneGeometry
+    public static class LaneGeometry
     {
-        internal static Func<TGrid, XGrid, XGrid> CreateProjector(LaneStartBase lane)
+        public static Func<TGrid, XGrid, XGrid> CreateProjector(LaneStartBase lane)
         {
             var children = lane.Children.ToArray();
             var valid = lane.IsPathVaild();

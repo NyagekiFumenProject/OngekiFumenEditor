@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
-    internal static class GridClipboardGeometry
+    public static class GridClipboardGeometry
     {
         public static bool PalettesEquivalent(BulletPallete left, BulletPallete right) =>
             left != null && right != null && left.TypeValue == right.TypeValue &&
