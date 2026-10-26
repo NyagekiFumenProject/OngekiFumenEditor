@@ -387,3 +387,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：`dotnet restore` / `dotnet build OngekiFumenEditor.sln -c Debug` 0 error；`dotnet publish OngekiFumenEditor.csproj -c Release` 成功；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs` 1236/1236（含脚本编译）。当前漏洞扫描仍会报告 ImageSharp 3.1.12 的 Moderate 问题。
 - 注意：ImageSharp 4.x 使用 Six Labors Split License；`dotnet publish` 必须有 `SixLaborsLicenseKey` / `SixLaborsLicenseFile` 或 `sixlabors.lic`，否则报错。开源仓库使用需确认许可条款，商业分发需评估。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-26：PR #43 审查整改 A-1/A-2/A-4（WPF）
+
+- A-1（`94f7b5d3`）：把 `PasteOption` 从 `FumenVisualEditorViewModel` 嵌套类型移到 `Modules/FumenVisualEditor/Base/PasteOption.cs`；删除重复的 `GridPlacementOption` 及 `(GridPlacementOption)pasteOption` 数值强转，剪贴板接口、几何放置和测试统一使用同一枚举。
+- A-2（`5917cfb7`）：把 `GridClipboardGeometry` 从 `Kernel/DefaultImpl` 移到 `Modules/FumenVisualEditor/Base` 并降为 `internal`，测试程序集通过 `InternalsVisibleTo("GridPlacement")` 访问；`ObjectInteractiveManager` 不再引用 `Kernel.DefaultImpl`，消除 `ViewModels → Kernel` 具体实现的反向依赖。A-3 未实施，Kernel 侧对 `ViewModels.Interactives.Impls` 的既有引用仍在。
+- A-4（`76ac02bf`）：`ObjectInteractiveActionBase.TryAdjustGrid` 由 `internal virtual` 改为 `public virtual`，`DefaultObjectInteractiveAction` 同步改为 `public override`；`ArchitectureChecks` 增加公开可重写断言，外部交互实现可参与整组预检。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` A-1/A-2 228/228、A-4 229/229；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 每轮 1236/1236；MCP 运行时脚本驱动真实剪贴板复制/粘贴 3 个 Bell 后数量 +3，真实拖动 Tap 后 TGrid 5280→5340。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 §11 清单与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
