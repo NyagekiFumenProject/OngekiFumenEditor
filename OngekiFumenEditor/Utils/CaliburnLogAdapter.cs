@@ -22,7 +22,7 @@ internal sealed class CaliburnLogAdapter : ILog
     }
 
     public void Info(string format, params object[] args)
-        => Forward(CoreLogLevel.Info, Format(format, args), null);
+        => Forward(CoreLogLevel.Debug, Format(format, args), null); //redirect INFO to DEBUG
 
     public void Warn(string format, params object[] args)
         => Forward(CoreLogLevel.Warn, Format(format, args), null);
