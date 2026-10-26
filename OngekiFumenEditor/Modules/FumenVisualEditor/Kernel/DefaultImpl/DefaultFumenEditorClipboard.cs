@@ -115,7 +115,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                         lane = availableLanes.Select(x => (lane: x, position: Project(x, attached.TGrid, attached.XGrid)))
                             .Where(x => x.position != null)
                             .Select(x => (x.lane, distance: Math.Abs(XGridCalculator.ConvertXGridToX(x.position, targetEditor) - XGridCalculator.ConvertXGridToX(attached.XGrid, targetEditor))))
-                            .Where(x => x.distance <= 8).OrderBy(x => x.distance).Select(x => x.lane).FirstOrDefault();
+                            .Where(x => x.distance <= LaneGeometry.LaneSnapDistancePixels).OrderBy(x => x.distance).Select(x => x.lane).FirstOrDefault();
                     if (lane == null)
                         return RejectMissingLane();
                     var coordinates = GridClipboardGeometry.Enumerate(copied).Select(node => (node,

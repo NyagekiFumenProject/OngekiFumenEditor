@@ -9,7 +9,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
     // 仅在物件拖动期间复用；轨道自身参与移动时不使用该缓存。
     internal sealed class LaneSwitchResolver
     {
-        internal const double SnapDistance = 8;
+        internal const double SnapDistance = LaneGeometry.LaneSnapDistancePixels;
         private readonly Func<TGrid, IEnumerable<LaneStartBase>> queryLanes;
         private readonly Func<XGrid, double> displayX;
         private readonly Dictionary<int, LaneStartBase[]> candidates = new();

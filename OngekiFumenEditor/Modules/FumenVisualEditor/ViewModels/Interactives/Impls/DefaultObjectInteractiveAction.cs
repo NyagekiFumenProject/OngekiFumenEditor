@@ -208,7 +208,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
         {
             var enableMagneticAdjust = !editor.Setting.DisableXGridMagneticDock;
             var forceMagneticAdjust = editor.Setting.ForceMagneticDock || editor.Setting.ForceXGridMagneticDock;
-            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : 4;
+            var dockableTriggerDistance = forceMagneticAdjust ? int.MaxValue : (int)LaneGeometry.XGridMagneticDistancePixels;
 
             IEnumerable<double> calc2()
             {

@@ -144,7 +144,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Im
                     .OrderBy(x => x.Item1)
                     .FirstOrDefault();
                 */
-                var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : 8;
+                var magneticDockDistance = forceMagneticToLane || forceMagnetic ? int.MaxValue : (int)LaneGeometry.LaneSnapDistancePixels;
 
                 if (closestLaneObject?.startObject is not null)
                 {

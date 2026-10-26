@@ -9,6 +9,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
     public static class LaneGeometry
     {
+        public const double LaneSnapDistancePixels = 8d;
+        public const double XGridMagneticDistancePixels = 4d;
+
         internal static Dictionary<int, List<(int min, int max)>> BuildHorizontalRanges(ConnectableStartObject lane)
         {
             var horizontalRanges = new Dictionary<int, List<(int min, int max)>>();
