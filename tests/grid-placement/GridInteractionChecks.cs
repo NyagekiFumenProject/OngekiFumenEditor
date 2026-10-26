@@ -37,7 +37,7 @@ public static class GridInteractionChecks
         var tails = holds.Select(h => (OngekiTimelineObjectBase)h.HoldEnd).ToArray();
         var related = holds.Cast<OngekiTimelineObjectBase>().Concat(tails).ToArray();
         var drag = Activator.CreateInstance(dragType, F, null, new object[] { tails, related }, null);
-        var move = dragType.GetMethod("TryMove", F);
+        var move = dragType.GetMethod("TryMoveCore", F);
         var notifications = 0;
         foreach (var node in related)
             node.PropertyChanged += (_, e) =>
@@ -47,7 +47,7 @@ public static class GridInteractionChecks
             };
         var timer = Stopwatch.StartNew();
         for (var i = 0; i < 100; i++)
-            move.Invoke(drag, new object[] { 0L, 0L });
+            move.Invoke(drag, new object[] { 0L, 0L, false, null });
         timer.Stop();
         Console.WriteLine($"200个Hold尾/100次不变移动：坐标通知={notifications}，耗时={timer.Elapsed.TotalMilliseconds:F2}ms");
         check(notifications == 0, "不变移动不应触发任何坐标通知");
@@ -209,7 +209,7 @@ public static class GridInteractionChecks
         check(flatTap.XGrid.TotalGrid == 2000, "单选同T水平段夹至最近端点");
         flatTap.XGrid = XGrid.Zero;
         drag = Activator.CreateInstance(dragType, F, null, new object[] { new OngekiTimelineObjectBase[] { flatTap }, new OngekiTimelineObjectBase[] { flatTap } }, null);
-        dragType.GetMethod("TryMoveWithSnapping", F).Invoke(drag, new object[] { 0L, 1000L, true });
+        dragType.GetMethod("TryMoveCore", F).Invoke(drag, new object[] { 0L, 1000L, true, null });
         check(flatTap.XGrid.TotalGrid == 1000, "多选同T水平段保留公共dx目标");
         action.OnMoveCanvas(flatTap, new Point(XGridCalculator.ConvertXGridToX(XGrid.FromTotalGrid(1234), editor), editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid(3501))), editor);
         check(flatTap.TGrid.TotalGrid == 3000 && flatTap.XGrid.TotalGrid == 1000 && ReferenceEquals(flatTap.ReferenceLaneStart, flat), "单选Tap离开原轨有效区间时拒绝移动");

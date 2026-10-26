@@ -15,7 +15,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         private readonly Dictionary<int, LaneStartBase[]> candidates = new();
         private readonly Dictionary<LaneStartBase, Func<TGrid, XGrid, XGrid>> projectors = new();
         private readonly Dictionary<LaneStartBase, bool> validPaths = new();
-        internal int CandidateQueryCount { get; private set; }
 
         internal LaneSwitchResolver(Func<TGrid, IEnumerable<LaneStartBase>> queryLanes, Func<XGrid, double> displayX)
         {
@@ -42,7 +41,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                 if (candidates.Count >= 256)
                     candidates.Clear();
                 candidates[time.TotalGrid] = lanes;
-                CandidateQueryCount++;
             }
 
             var wantedX = displayX(target);

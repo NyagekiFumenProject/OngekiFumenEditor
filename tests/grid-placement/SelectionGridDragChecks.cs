@@ -21,7 +21,7 @@ public static class SelectionGridDragChecks
         public long AnchorX => (long)DragType.GetField("AnchorX", Members).GetValue(instance);
         public object Before => DragType.GetField("Before", Members).GetValue(instance);
 
-        public bool TryMove(long dt, long dx) => (bool)DragType.GetMethod("TryMove", Members).Invoke(instance, new object[] { dt, dx });
+        public bool TryMove(long dt, long dx) => (bool)DragType.GetMethod("TryMoveCore", Members).Invoke(instance, new object[] { dt, dx, false, null });
         public object CaptureCurrent() => DragType.GetMethod("CaptureCurrent", Members).Invoke(instance, null);
         public static void Apply(object positions) => DragType.GetMethod("Apply", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, new object[] { positions, 0L, 0L });
     }

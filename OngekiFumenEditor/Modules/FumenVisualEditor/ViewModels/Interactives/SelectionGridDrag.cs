@@ -58,10 +58,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             AnchorX = xs.Length == 0 ? 0 : (long)Math.Round((xs.Min() + xs.Max()) / 2d);
         }
 
-        internal bool TryMove(long dt, long dx) => TryMoveWithSnapping(dt, dx, false);
-
-        internal bool TryMoveWithSnapping(long dt, long dx, bool snapHoldEndsToLane) => TryMoveCore(dt, dx, snapHoldEndsToLane, null);
-
         internal bool TryMoveInEditor(long dt, long dx, FumenVisualEditorViewModel editor) => TryMoveCore(dt, dx, true, editor);
 
         private bool TryMoveCore(long dt, long dx, bool snapToLane, FumenVisualEditorViewModel editor)

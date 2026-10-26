@@ -314,7 +314,8 @@ public static class LaneSwitchChecks
                 Move(drag, 0, 8L * 4096, e);
             watch.Stop();
             var resolver = drag.GetType().GetField("laneSwitchResolver", F)?.GetValue(drag);
-            var queries = resolver == null ? -1 : (int)resolver.GetType().GetProperty("CandidateQueryCount", F).GetValue(resolver);
+            var candidates = resolver?.GetType().GetField("candidates", F)?.GetValue(resolver) as System.Collections.IDictionary;
+            var queries = candidates?.Count ?? -1;
             check(queries == 1, "同时间群体拖动只查询一次候选轨道");
             check(notifications == 0, "重复相同换线位置没有坐标或引用通知");
             Console.WriteLine($"200 Tap／10000 背景物件／100 次重复位置：{watch.Elapsed.TotalMilliseconds:F2} ms，候选查询={queries}，坐标与引用通知={notifications}");
