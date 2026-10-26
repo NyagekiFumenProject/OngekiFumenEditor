@@ -27,7 +27,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 对照“原项目风格”的依据：
   - `ObjectInteractiveActionBase` 既有入口均为 `public abstract`；
   - UI 文案统一走 `Resources`，撤销统一走 `LambdaUndoAction` + `UndoRedoManager`；
-  - 模块内实现类多为 `internal`（如 `LaneGeometry`、`LaneSwitchResolver`）；
+  - 模块内实现类多为 `internal`（如 `LaneSwitchResolver`）；测试直接引用的 helper 按需保持 `public`（`GridClipboardGeometry`、`LaneGeometry`、`OngekiObjectComponents`）；
   - 测试工程按 `tests/<feature>/<Feature>.csproj` 独立调用，不加入解决方案；
   - `.editorconfig` 要求 4 空格、LF、UTF-8、单行语句不加花括号。
 
@@ -250,7 +250,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 - 位置：`ClipboardInteractionChecks.cs:40-75`（`GetUninitializedObject`、反射 `editorProjectData`、`<Setting>k__BackingField`、`renderDataLock`）；`SelectionGridDragChecks.cs:11-26`（同名包装类 + 反射私有字段/方法）；`LaneSwitchChecks.cs:317`、`GridInteractionChecks.cs:449`
 - 现象：测试直接依赖私有字段名、编译器生成的 backing field 名、嵌套类型名和私有方法名；重命名/重构即失败，且测试绕过真实构造流程。
-- 建议：为测试提供 `InternalsVisibleTo` + 工厂/测试构造器；把可测几何提取为纯函数；避免 `GetUninitializedObject` 和 backing-field 反射。
+- 建议：优先为测试提供最小 public 测试 API 或真实构造工厂；当前已删除 `InternalsVisibleTo("GridPlacement")`，不要为测试重新扩大 internal 访问；逐步删除 `GetUninitializedObject` 与 backing-field 反射。
 
 ### D-3 `ArchitectureChecks` 用字符串包含判断依赖（PR 新增）
 
@@ -383,12 +383,12 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 #### A-2
 - 状态：**已处理（第一阶段）**（`5917cfb7`；A-3 已完成，但 Kernel 仍调用 `InteractiveManager.AdjustPastedObjects`）
-- 方案：第一步把 `GridClipboardGeometry` 移到 `Modules/FumenVisualEditor/Base`（或 `Base/Clipboard`），改为 `internal static`；`ObjectInteractiveManager` 与 `DefaultFumenEditorClipboard` 都只引用 Base，删除 `ViewModels → Kernel.DefaultImpl`。第二步（可选）把 `PasteObjects` 业务整体迁到 `ViewModels/FumenEditorClipboardService`，`DefaultFumenEditorClipboard` 仅做 `IFumenEditorClipboard` 转发与 MEF 装配。
+- 方案：第一步把 `GridClipboardGeometry` 移到 `Modules/FumenVisualEditor/Base`（或 `Base/Clipboard`），改为 `public static`（测试直接引用，不引入 `InternalsVisibleTo`）；`ObjectInteractiveManager` 与 `DefaultFumenEditorClipboard` 都只引用 Base，删除 `ViewModels → Kernel.DefaultImpl`。第二步（可选）把 `PasteObjects` 业务整体迁到 `ViewModels/FumenEditorClipboardService`，`DefaultFumenEditorClipboard` 仅做 `IFumenEditorClipboard` 转发与 MEF 装配。
 - 验收：A-2+A-3 完成后，`grep -r "Kernel.DefaultImpl" Modules/FumenVisualEditor/ViewModels` 为空；`DefaultFumenEditorClipboard` 不引用 `ViewModels.Interactives.Impls` 的具体类型（仅通过 `IFumenEditorClipboard` 参数访问 ViewModel）。
 
 #### A-3
 - 状态：**已完成**（`446b1edf`；同时关闭 B-3）
-- 方案：`SelectionGridDrag`、`DefaultFumenEditorClipboard` 直接调用 `LaneGeometry.CreateProjector`；删除 `DockableObjectInteractiveAction.CreateOriginalLaneProjector` 与 `CalculateOriginalLaneX`（同时关闭 B-3）。`LaneGeometry` 保持 `internal`，测试用 `InternalsVisibleTo("GridPlacement")`。
+- 方案：`SelectionGridDrag`、`DefaultFumenEditorClipboard` 直接调用 `LaneGeometry.CreateProjector`；删除 `DockableObjectInteractiveAction.CreateOriginalLaneProjector` 与 `CalculateOriginalLaneX`（同时关闭 B-3）。`LaneGeometry` 改为 `public`，测试直接引用；不再使用 `InternalsVisibleTo`。
 - 验收：无 `CreateOriginalLaneProjector`/`CalculateOriginalLaneX` 引用；换线、粘贴、回滚测试全部通过。
 
 #### A-4
@@ -421,7 +421,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 #### B-3
 - 状态：**已完成（随 A-3）**（`446b1edf`）
-- 方案：删除 `CalculateOriginalLaneX`；测试改用 `GridClipboardGeometry.Place` 行为或 `LaneGeometry.CreateProjector`（通过 `InternalsVisibleTo`）。`CreateOriginalLaneProjector` 随 A-3 一并删除。
+- 方案：删除 `CalculateOriginalLaneX`；测试改用 `GridClipboardGeometry.Place` 行为或直接调用 `public` 的 `LaneGeometry.CreateProjector`。`CreateOriginalLaneProjector` 随 A-3 一并删除。
 - 验收：无反射 `GetMethod("CalculateOriginalLaneX")`；贝塞尔镜像测试通过。
 
 #### B-4
@@ -437,7 +437,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：新增 `BulletPallete` 字段时只改一处；粘贴复用/追加测试不变。
 
 #### B-7
-- 方案：拆分 `GridClipboardGeometry` 为 `ClipboardObjectCloner`（Clone/CloneSet）、`ClipboardReferencePoint`（TryGet）、`ClipboardPlacement`（Place）；`BulletPallete` 等价比较归 B-6。类改 `internal`；`GridClipboardGeometry` 可暂留一版 façade，待调用方迁移后删除。
+- 方案：拆分 `GridClipboardGeometry` 为 `ClipboardObjectCloner`（Clone/CloneSet）、`ClipboardReferencePoint`（TryGet）、`ClipboardPlacement`（Place）；`BulletPallete` 等价比较归 B-6。拆分后可见性按调用方重新评估；当前因测试直接引用保持 `public`。
 - 验收：每个类职责单一；A-1/A-2 的命名空间调整后无循环引用；现有测试通过。
 
 #### B-8
@@ -557,7 +557,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | 编号 | 状态 | 提交 | 验证 |
 | --- | --- | --- | --- |
 | A-1 | 已完成 | `94f7b5d3` | `PasteOption` 已移到 `Base`，`GridPlacementOption` 删除；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
-| A-2 | 已完成（第一阶段） | `5917cfb7` | `GridClipboardGeometry` 移到 `Base` 并降为 internal，`ViewModels` 不再引用 `Kernel.DefaultImpl`；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
+| A-2 | 已完成（第一阶段） | `5917cfb7` | `GridClipboardGeometry` 移到 `Base` 并改为 public（测试直接引用），`ViewModels` 不再引用 `Kernel.DefaultImpl`；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
 | A-3 | 已完成 | `446b1edf` | 删除 `CreateOriginalLaneProjector`/`CalculateOriginalLaneX`，剪贴板与拖动直接使用 `LaneGeometry`；Debug/Release 0 error；grid-placement 249/249；MCP e2e 1236/1236；真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90 |
 | A-4 | 已完成 | `76ac02bf` | `TryAdjustGrid` 改为 public virtual，派生类同步 public override；Debug/Release 0 error；grid-placement 229/229；MCP e2e 1236/1236；真实拖动 Tap 后 TGrid 5280→5340，脚本外部程序集可调用 `TryAdjustGrid` |
 | A-5 | 已完成 | `3381ddf9` | `Unit/Grid` 分量变化语义化转发为 `TGrid`/`XGrid`，`ConnectableStartObject` 删除 UI 语义分支；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236；真实修改 XGrid.Grid 后路径起点同步 65636，TGrid.Unit 修改后 MinTGrid 更新 |
@@ -568,5 +568,6 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
 - A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5 因新增通知语义断言为 255 项。
+- 测试直接引用的 helper 已改为 public，`InternalsVisibleTo("GridPlacement")` 已删除（`7f9f659b`）；`LaneSwitchResolver`/`SelectionGridDrag` 仍保持 internal，测试通过反射访问，不依赖友元。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。

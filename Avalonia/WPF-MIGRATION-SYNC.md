@@ -411,3 +411,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` A-3 249/249、A-5 255/255（A-5 新增 `GeometryNotificationChecks` 6 项）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；真实复制/粘贴 Hold 数量 +1、拖动 Hold 头 TGrid +90，真实修改 XGrid.Grid 后子路径起点同步为 65636，TGrid.Unit 修改后 MinTGrid 更新。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 A-3/A-5/B-3 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：移除 GridPlacement 友元并公开 helper（WPF）
+
+- `7f9f659b`：删除 `AssemblyInfo.cs` 中的 `[assembly: InternalsVisibleTo("GridPlacement")]`；将测试直接引用的 `GridClipboardGeometry`、`LaneGeometry`、`OngekiObjectComponents` 改为 `public`，`OngekiObjectComponents` 的 `EnumerateSelfAndComponents` / `GetHeadObject` / `GetTailObject` / `GetLaneStartObject` 同步公开。
+- `LaneSwitchResolver` 与 `SelectionGridDrag` 仍保持 `internal`；测试通过反射访问它们，不依赖友元。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 255/255；自构建 Debug 实例 MCP e2e 1236/1236。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已同步 A-2/A-3/B-3/B-7/D-2 的可见性描述与 §13 说明。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
