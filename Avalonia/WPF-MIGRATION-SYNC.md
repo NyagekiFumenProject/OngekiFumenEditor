@@ -130,6 +130,8 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 | 2026-10-18 | 修复（WPF 侧，非同步） | `f47b823f`、`85799db1`、`0a7e4251`、`2e2c8a87` | 一次性验证工程 `tests/mcp-e2e/.tmp/undo-check`（未入库；40 项断言全过）+ `dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug` 0 error + 后台启动冒烟（自建实例启动到 MCP ready 无异常后停止） | 为四项此前不进 Undo/Redo 的编辑器操作补封装：① TGrid 计算器「赋给选中物件」改为 `LambdaUndoAction`（`TGridCalculatorToolViewerViewModel.CreateApplyTGridAction`）；②「重算编辑器滚动高度」改为命令内联 `LambdaUndoAction`（撤销恢复旧 `AudioDuration` 并重算）；③ 变速分组新建与拖拽移动改为 `LambdaUndoAction` / `FumenSoflanGroupListViewerViewModel.CreateMoveAction`（`SoflanGroupWrapItemGroup.Insert` 取代无调用者的 `InsertBefore`，新增三语资源 `SoflanGroupMove`；拖到空目标不再丢项）；④ 辅助菜单「调整可停靠物件水平位置」改为单个批量 `LambdaUndoAction`。**Avalonia 树尚未移植以上四项，本次不改变同步点。** |
 
+| 2026-10-25 | 清理（WPF 侧，非同步） | `cf367160` | `docs/sixlabors-removal.md` + `tests/sixlabors-removal/`（按 csproj 单独调用，不入 sln） | 移除 `SixLabors.Fonts 2.1.3` / `SixLabors.ImageSharp 3.1.12`（顺带消除 ImageSharp 3.1.12 的 Moderate 漏洞 GHSA-gwg2-r3hj-4w44）：字体枚举改用 `SKFontManager.Default.FontFamilies`（新增 `Kernel/Graphics/Text/SystemFontFamilyProvider`，替换 Skia 绘制与设置页两处，删除无消费者的 `FontHandle.FilePath`）；图片解码/拉伸/垂直翻转/PNG 编码改用 SkiaSharp 版 `Utils/ImageUtils`（替换 jacket 生成、`ImageLoader` 的 AB 分支、`LoadCardImageConverter`），像素语义保持未预乘 RGBA32 与原有翻转方向。`TexturePlugin.dll` 仅在未被调用的 `TextureImportExport` 中引用 ImageSharp，jacket 生成/读取路径实测不加载。验证：Release 构建 0 error；`tests/sixlabors-removal` 47/47 通过（含 Generate→AB→ImageLoader→Converter 端到端、错误路径、字体缓存与方向断言）；`project.assets.json`/`dotnet list package`/Release 产物无 SixLabors；自构建实例启动冒烟正常。**Avalonia 树仍使用 SixLabors，本次未处理，不改变同步点 `8b2940785`。** |
+
 ## 本次 WPF 独立改动（2026-10-16）
 
 - WPF：子弹和激光判定范围显示。
