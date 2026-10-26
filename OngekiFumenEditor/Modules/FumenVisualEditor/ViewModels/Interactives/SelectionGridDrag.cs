@@ -38,12 +38,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
         internal SelectionGridDrag(IEnumerable<OngekiTimelineObjectBase> selected, IEnumerable<OngekiTimelineObjectBase> related)
         {
             var targets = selected.ToHashSet();
-            var changedLanes = targets.Select(o => o switch
-            {
-                ConnectableObjectBase c => c.ReferenceStartObject,
-                LaneCurvePathControlObject control => control.RefCurveObject?.ReferenceStartObject,
-                _ => null
-            }).Where(x => x != null).ToHashSet();
+            var changedLanes = targets
+                .Select(o => o.GetLaneStartObject())
+                .Where(x => x != null)
+                .ToHashSet();
             allowLaneSwitch = changedLanes.Count == 0;
             Before = related.Concat(targets).Distinct().Select(o => new Position
             {
@@ -225,14 +223,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             long Time(OngekiTimelineObjectBase o) => byObject.TryGetValue(o, out var p) ? p.T : o.TGrid.TotalGrid;
             foreach (var p in desired)
             {
-                var end = p.Object switch
-                {
-                    Hold h => (OngekiTimelineObjectBase)h.HoldEnd,
-                    Soflan speed => speed.EndIndicator,
-                    LaneBlockArea block => block.EndIndicator,
-                    IndividualSoflanArea area => area.EndIndicator,
-                    _ => null
-                };
+                var end = p.Object.GetTailObject();
                 if (p.Object is ConnectableStartObject lane)
                 {
                     long previous = p.T;

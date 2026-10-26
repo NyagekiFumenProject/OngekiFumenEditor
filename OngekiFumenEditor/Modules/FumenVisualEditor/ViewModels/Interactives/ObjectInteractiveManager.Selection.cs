@@ -40,46 +40,24 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             var related = new HashSet<OngekiTimelineObjectBase>(selected);
             foreach (var o in selected)
             {
-                if (o is Hold h && h.HoldEnd is not null)
-                    related.Add(h.HoldEnd);
-                if (o is HoldEnd e && e.RefHold is not null)
-                    related.Add(e.RefHold);
-                if (o is Soflan s)
-                    related.Add(s.EndIndicator);
-                if (o is Soflan.SoflanEndIndicator se)
-                    related.Add(se.RefSoflan);
-                if (o is LaneBlockArea b)
-                    related.Add(b.EndIndicator);
-                if (o is LaneBlockArea.LaneBlockAreaEndIndicator be)
-                    related.Add(be.RefLaneBlockArea);
-                if (o is IndividualSoflanArea area)
-                    related.Add(area.EndIndicator);
-                if (o is IndividualSoflanArea.IndividualSoflanAreaEndIndicator areaEnd)
-                    related.Add(areaEnd.RefIndividualSoflanArea);
-                var laneStart = o switch
-                {
-                    ConnectableObjectBase c => c.ReferenceStartObject,
-                    LaneCurvePathControlObject control => control.RefCurveObject?.ReferenceStartObject,
-                    _ => null
-                };
-                if (laneStart != null)
-                {
-                    related.Add(laneStart);
-                    foreach (var child in laneStart.Children)
-                    {
-                        related.Add(child);
-                        foreach (var control in child.PathControls)
-                            related.Add(control);
-                    }
-                }
+                // 正向：自身 + 持续物件尾节点 + 轨道子节点/曲线控制点
+                foreach (var component in o.EnumerateSelfAndComponents().OfType<OngekiTimelineObjectBase>())
+                    related.Add(component);
+
+                // 反向：选中尾节点时把所属头对象纳入快照
+                if (o.GetHeadObject() is OngekiTimelineObjectBase head)
+                    related.Add(head);
+
+                // 选中轨道子节点/控制点时补齐整条轨道
+                if (o.GetLaneStartObject() is ConnectableStartObject laneStart)
+                    foreach (var component in laneStart.EnumerateSelfAndComponents().OfType<OngekiTimelineObjectBase>())
+                        related.Add(component);
             }
 
-            var lanes = selected.Select(o => o switch
-            {
-                ConnectableObjectBase c => c.ReferenceStartObject,
-                LaneCurvePathControlObject control => control.RefCurveObject?.ReferenceStartObject,
-                _ => null
-            }).Where(x => x != null).ToHashSet();
+            var lanes = selected
+                .Select(o => o.GetLaneStartObject())
+                .Where(x => x != null)
+                .ToHashSet();
             if (lanes.Count > 0)
                 foreach (var dock in editor.Fumen.GetAllDisplayableObjects().OfType<OngekiTimelineObjectBase>().Where(o => o is ILaneDockable d && lanes.Contains(d.ReferenceLaneStart)))
                     related.Add(dock);

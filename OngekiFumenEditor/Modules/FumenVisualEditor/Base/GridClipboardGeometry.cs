@@ -48,24 +48,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         }
 
         public static IEnumerable<OngekiObjectBase> Enumerate(OngekiObjectBase root)
-        {
-            yield return root;
-            if (root is ConnectableStartObject start)
-                foreach (var child in start.Children)
-                {
-                    yield return child;
-                    foreach (var control in child.PathControls)
-                        yield return control;
-                }
-            else if (root is Hold hold && hold.HoldEnd != null)
-                yield return hold.HoldEnd;
-            else if (root is IndividualSoflanArea area)
-                yield return area.EndIndicator;
-            else if (root is Soflan speed)
-                yield return speed.EndIndicator;
-            else if (root is LaneBlockArea block)
-                yield return block.EndIndicator;
-        }
+            => root.EnumerateSelfAndComponents();
 
         public static OngekiObjectBase Clone(OngekiObjectBase source)
         {
