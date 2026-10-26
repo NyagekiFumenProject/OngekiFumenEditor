@@ -403,3 +403,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` 249/249（新增 `ObjectComponentsChecks` 20 项）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；MCP 运行时脚本真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90，仅拖头时尾 TGrid 保持不变。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 B-1 方案、清单与 §13 实施状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：PR #43 审查整改 A-3/A-5（WPF）
+
+- A-3（`446b1edf`）：删除 `DockableObjectInteractiveAction.CalculateOriginalLaneX` 与 `CreateOriginalLaneProjector` 转发，`DefaultFumenEditorClipboard` 与 `SelectionGridDrag` 直接调用 `LaneGeometry.CreateProjector`；贝塞尔投影测试改用 `LaneGeometry`，同时关闭 B-3 的生产死代码。
+- A-5（`3381ddf9`）：`OngekiTimelineObjectBase` / `OngekiMovableObjectBase` 把网格子对象的 `Unit/Grid` 分量变化统一转发为 `TGrid`/`XGrid`；`ConnectableStartObject` 删除 `GridBase.Unit/Grid` 的 UI 语义分支，模型层不再出现“属性面板”注释。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` A-3 249/249、A-5 255/255（A-5 新增 `GeometryNotificationChecks` 6 项）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；真实复制/粘贴 Hold 数量 +1、拖动 Hold 头 TGrid +90，真实修改 XGrid.Grid 后子路径起点同步为 65636，TGrid.Unit 修改后 MinTGrid 更新。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 A-3/A-5/B-3 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

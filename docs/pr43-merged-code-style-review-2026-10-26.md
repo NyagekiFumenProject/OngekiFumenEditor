@@ -43,14 +43,15 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### A-2 Kernel 剪贴板实现与 ViewModel 交互管理器双向依赖（PR 新增）
 
-- 状态：**已处理（第一阶段）**（`5917cfb7`；A-3 未实施，Kernel→Impls 既有引用仍在）
-- 位置：`Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs:89,107`（调用 `targetEditor.InteractiveManager.AdjustPastedObjects`、`DockableObjectInteractiveAction.CreateOriginalLaneProjector`）；`ViewModels/Interactives/ObjectInteractiveManager.cs:32`（调用 `Kernel.DefaultImpl.GridClipboardGeometry.Enumerate`）
+- 状态：**已处理（第一阶段）**（`5917cfb7`；A-3 已完成，但 Kernel 仍调用 `InteractiveManager.AdjustPastedObjects`，Kernel→ViewModels 尚未完全消除）
+- 位置：`Kernel/DefaultImpl/DefaultFumenEditorClipboard.cs:89`（调用 `targetEditor.InteractiveManager.AdjustPastedObjects`；历史上的 `DockableObjectInteractiveAction.CreateOriginalLaneProjector` 已随 A-3 删除）；`ViewModels/Interactives/ObjectInteractiveManager.cs`（已不再引用 `Kernel.DefaultImpl`）
 - 现象：`Kernel.DefaultImpl` 的具体实现调用 `ViewModels.Interactives`；`ViewModels` 又调用 `Kernel.DefaultImpl` 的静态 helper。两者不是单向依赖，而是循环引用。
 - 对照：既有 `IFumenEditorClipboard` 的意义是让 ViewModel 只依赖 Kernel 接口；`DefaultImpl` 不应反向知道交互管理器。
 - 建议：至少把 `GridClipboardGeometry` 移到 `Base`，消除 `ViewModels → Kernel.DefaultImpl`；若需进一步消除 `Kernel → ViewModels`，可把 `PasteObjects` 业务迁到 ViewModel 服务，或通过 `IPasteAdjuster` 接口注入。
 
 ### A-3 拖动事务依赖具体交互实现，绕过已抽出的 `LaneGeometry`（PR 新增）
 
+- 状态：**已完成**（`446b1edf`；同时关闭 B-3）
 - 位置：`ViewModels/Interactives/SelectionGridDrag.cs:294`（`DockableObjectInteractiveAction.CreateOriginalLaneProjector`）；`ObjectInteractiveManager.Selection.cs:122`；`DockableObjectInteractiveAction.cs:171-175`
 - 现象：`SelectionGridDrag` 是拖动事务/快照模型，却直接调用 `ViewModels.Interactives.Impls` 的静态转发方法；`LaneGeometry` 已在 `Base` 提供相同能力。
 - 对照：`Base` 层的 `LaneGeometry`/`LaneSwitchResolver` 是 PR 为解耦专门抽出的；`CreateOriginalLaneProjector` 只是对 `LaneGeometry.CreateProjector` 的二次转发。
@@ -66,6 +67,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### A-5 模型层吸收 UI 通知语义（PR 新增）
 
+- 状态：**已完成**（`3381ddf9`）
 - 位置：`Base/OngekiObjects/ConnectableObject/ConnectableStartObject.cs:249-290`；`Base/GridBase.cs:31-35`
 - 现象：`ConnectableStartObject.OnPropertyChanged` 新增 `case nameof(GridBase.Unit)/nameof(GridBase.Grid)`，注释写明“属性面板直接修改坐标分量时”；`Unit/Grid` 通知无法区分 T/X，模型用 `NotifyRefreshMinMaxTGrid(e.PropertyName != nameof(TGrid))` 猜测范围是否变化。
 - 对照：`GridBase` 只负责数据与通用属性通知；属性浏览器刷新属于 UI 适配层。把“属性面板”写进模型注释，违反既有分层。
@@ -95,6 +97,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### B-3 `CalculateOriginalLaneX` 为死代码，仅测试反射调用（PR 新增）
 
+- 状态：**已完成（随 A-3）**（`446b1edf`）
 - 位置：`DockableObjectInteractiveAction.cs:171-172`；`tests/grid-placement/GridInteractionChecks.cs:449`
 - 现象：生产代码无任何引用；测试通过 `GetMethod("CalculateOriginalLaneX", NonPublic)` 反射调用。
 - 建议：删除该方法，测试改用 `LaneGeometry`/`GridClipboardGeometry` 的可用入口；如确需测试内部几何，使用 `InternalsVisibleTo` 暴露纯函数，而不是保留生产死代码。
@@ -310,12 +313,12 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | --- | --- | --- | --- |
 | P0 | E-1 | 修复 X 镜像时间平移，补 D-6 回归；这是用户可见行为回归 | 未开始 |
 | P0 | A-1 | 删除重复枚举/强转，消除新增/重排枚举的静默错位风险 | **已完成** `94f7b5d3` |
-| P0 | A-2 | 拆分 Kernel ↔ ViewModel 双向依赖，至少把 `GridClipboardGeometry` 移出 `DefaultImpl` | **已处理（第一阶段）** `5917cfb7`；A-3 未做 |
+| P0 | A-2 | 拆分 Kernel ↔ ViewModel 双向依赖，至少把 `GridClipboardGeometry` 移出 `DefaultImpl` | **已处理（第一阶段）** `5917cfb7`；A-3 已完成，Kernel→VM 未完全消除 |
 | P1 | A-4 | `TryAdjustGrid` 改为 public virtual 或在管理器层实现，恢复插件兼容契约 | **已完成** `76ac02bf` |
-| P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` | 未开始 |
-| P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | 未开始 |
+| P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` | **已完成** `3381ddf9` |
+| P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | B-3 **已完成（随 A-3）** `446b1edf`；B-4 未开始 |
 | P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | 未开始 |
-| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | B-1 **已完成** `e253fe20`；其余未开始 |
+| P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、B-1 **已完成**；其余未开始 |
 | P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | 未开始 |
 | P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 | 未开始 |
 
@@ -330,13 +333,13 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 - [x] A-1 枚举合并
 - [x] A-2 Kernel/ViewModel 依赖方向（第一阶段）
-- [ ] A-3 拖动事务依赖具体 action
+- [x] A-3 拖动事务依赖具体 action
 - [x] A-4 `TryAdjustGrid` 可见性
-- [ ] A-5 模型层 UI 通知
+- [x] A-5 模型层 UI 通知
 - [ ] A-6 滚动指标抑制位置
 - [x] B-1 关联集合去重
 - [ ] B-2 水平段算法去重
-- [ ] B-3 `CalculateOriginalLaneX` 删除
+- [x] B-3 `CalculateOriginalLaneX` 删除
 - [ ] B-4 测试成员下沉
 - [ ] B-5 阈值常量
 - [ ] B-6 `BulletPallete` 等价接口
@@ -379,11 +382,12 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：全仓库无 `GridPlacementOption`；新增 `PasteOption` 值时，`Place` 的映射 `switch` 有明确未覆盖处理（`default => throw`），不会静默落到默认平移分支。
 
 #### A-2
-- 状态：**已处理（第一阶段）**（`5917cfb7`；第二步与 A-3 未实施）
+- 状态：**已处理（第一阶段）**（`5917cfb7`；A-3 已完成，但 Kernel 仍调用 `InteractiveManager.AdjustPastedObjects`）
 - 方案：第一步把 `GridClipboardGeometry` 移到 `Modules/FumenVisualEditor/Base`（或 `Base/Clipboard`），改为 `internal static`；`ObjectInteractiveManager` 与 `DefaultFumenEditorClipboard` 都只引用 Base，删除 `ViewModels → Kernel.DefaultImpl`。第二步（可选）把 `PasteObjects` 业务整体迁到 `ViewModels/FumenEditorClipboardService`，`DefaultFumenEditorClipboard` 仅做 `IFumenEditorClipboard` 转发与 MEF 装配。
 - 验收：A-2+A-3 完成后，`grep -r "Kernel.DefaultImpl" Modules/FumenVisualEditor/ViewModels` 为空；`DefaultFumenEditorClipboard` 不引用 `ViewModels.Interactives.Impls` 的具体类型（仅通过 `IFumenEditorClipboard` 参数访问 ViewModel）。
 
 #### A-3
+- 状态：**已完成**（`446b1edf`；同时关闭 B-3）
 - 方案：`SelectionGridDrag`、`DefaultFumenEditorClipboard` 直接调用 `LaneGeometry.CreateProjector`；删除 `DockableObjectInteractiveAction.CreateOriginalLaneProjector` 与 `CalculateOriginalLaneX`（同时关闭 B-3）。`LaneGeometry` 保持 `internal`，测试用 `InternalsVisibleTo("GridPlacement")`。
 - 验收：无 `CreateOriginalLaneProjector`/`CalculateOriginalLaneX` 引用；换线、粘贴、回滚测试全部通过。
 
@@ -393,8 +397,9 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：外部测试程序集派生一个 action 并 override `TryAdjustGrid`，群体拖动时自定义吸附生效。
 
 #### A-5
-- 方案（推荐）：在 `GridBase` 增加 `GeometryChanged` 事件，`RecalculateTotalValues` 后触发；`ConnectableStartObject` 订阅自身及子节点的 `GeometryChanged` 刷新路径与 Min/Max，删除 `OnPropertyChanged` 中对 `GridBase.Unit/Grid` 的 UI 语义分支。方案（最小改动）：保留现有分支，但把注释改为“坐标分量变化”，并将 `NotifyRefreshMinMaxTGrid(bool)` 的命名/文档改为通用几何通知。
-- 验收：属性面板修改 `TGrid.Unit/Grid` 后路径与时间索引刷新；模型层注释不再出现“属性面板”。
+- 状态：**已完成**（`3381ddf9`）
+- 方案（实际采用）：`OngekiTimelineObjectBase`/`OngekiMovableObjectBase` 订阅网格对象的 `Unit/Grid` 分量变化时，对外统一转发为 `TGrid`/`XGrid`；`ConnectableStartObject` 删除 `GridBase.Unit/Grid` 的 UI 语义分支，只处理 `TGrid`/`XGrid`，并简化 `NotifyRefreshMinMaxTGrid()`。未采用新增 `GeometryChanged` 事件的方案。
+- 验收：模型层不再出现“属性面板”注释；属性面板修改 `TGrid.Unit/Grid` 后路径与时间索引刷新；`tests/grid-placement` 新增 `GeometryNotificationChecks` 断言不泄漏 `Unit`/`Grid` 通知。
 
 #### A-6
 - 方案：新建 `FumenVisualEditorViewModel.DragTransactions.cs`，把 `gridDragUpdateDepth`、`gridDragMetricsPending`、`ExecuteGridDragUpdate` 移入并命名 `IsGridDragTransactionActive`；`ScrollViewer` 只保留 `RecalculateScrollMetrics` 并在入口查询该属性；`OnFumenObjectModifiedChanged` 用属性替换字段名判断。
@@ -415,6 +420,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：同 T 水平段（含 Bezier 采样）测试通过；水平段判断逻辑只在 `LaneGeometry` 一处。
 
 #### B-3
+- 状态：**已完成（随 A-3）**（`446b1edf`）
 - 方案：删除 `CalculateOriginalLaneX`；测试改用 `GridClipboardGeometry.Place` 行为或 `LaneGeometry.CreateProjector`（通过 `InternalsVisibleTo`）。`CreateOriginalLaneProjector` 随 A-3 一并删除。
 - 验收：无反射 `GetMethod("CalculateOriginalLaneX")`；贝塞尔镜像测试通过。
 
@@ -552,12 +558,15 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | --- | --- | --- | --- |
 | A-1 | 已完成 | `94f7b5d3` | `PasteOption` 已移到 `Base`，`GridPlacementOption` 删除；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
 | A-2 | 已完成（第一阶段） | `5917cfb7` | `GridClipboardGeometry` 移到 `Base` 并降为 internal，`ViewModels` 不再引用 `Kernel.DefaultImpl`；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
+| A-3 | 已完成 | `446b1edf` | 删除 `CreateOriginalLaneProjector`/`CalculateOriginalLaneX`，剪贴板与拖动直接使用 `LaneGeometry`；Debug/Release 0 error；grid-placement 249/249；MCP e2e 1236/1236；真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90 |
 | A-4 | 已完成 | `76ac02bf` | `TryAdjustGrid` 改为 public virtual，派生类同步 public override；Debug/Release 0 error；grid-placement 229/229；MCP e2e 1236/1236；真实拖动 Tap 后 TGrid 5280→5340，脚本外部程序集可调用 `TryAdjustGrid` |
+| A-5 | 已完成 | `3381ddf9` | `Unit/Grid` 分量变化语义化转发为 `TGrid`/`XGrid`，`ConnectableStartObject` 删除 UI 语义分支；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236；真实修改 XGrid.Grid 后路径起点同步 65636，TGrid.Unit 修改后 MinTGrid 更新 |
 | B-1 | 已完成 | `e253fe20` | 新增 `OngekiObjectComponents` 并复用 `GetDisplayableObjects`；`GridClipboardGeometry.Enumerate`、`SelectionGridDrag`、`ObjectInteractiveManager.Selection` 去掉重复类型分支；Debug/Release 0 error；grid-placement 249/249；MCP e2e 1236/1236；真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90 且仅拖头时尾不变 |
+| B-3 | 已完成（随 A-3） | `446b1edf` | `CalculateOriginalLaneX` 与测试反射调用删除，贝塞尔投影测试改用 `LaneGeometry.CreateProjector`；grid-placement 249/249 |
 
 说明：
 
-- A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 未实施，因此 `DefaultFumenEditorClipboard` 仍通过 `DockableObjectInteractiveAction.CreateOriginalLaneProjector` 引用 `ViewModels.Interactives.Impls`（原方案中的 A-2+A-3 联合验收项保持部分完成）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 因新增架构断言为 229 项；B-1 因新增组件关系断言为 249 项。
+- A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5 因新增通知语义断言为 255 项。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。
