@@ -396,3 +396,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` A-1/A-2 228/228、A-4 229/229；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 每轮 1236/1236；MCP 运行时脚本驱动真实剪贴板复制/粘贴 3 个 Bell 后数量 +3，真实拖动 Tap 后 TGrid 5280→5340。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 §11 清单与 §13 实施状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：PR #43 审查整改 B-1（WPF）
+
+- B-1（`e253fe20`）：新增 `Modules/FumenVisualEditor/Base/OngekiObjectComponents.cs`，复用模型既有 `GetDisplayableObjects()` 提供 `EnumerateSelfAndComponents()` / `GetHeadObject()` / `GetTailObject()` / `GetLaneStartObject()`；`GridClipboardGeometry.Enumerate` 转发到组件枚举，`SelectionGridDrag` 与 `ObjectInteractiveManager.Selection` 删除重复的 Hold/End/轨道类型分支。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 249/249（新增 `ObjectComponentsChecks` 20 项）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；MCP 运行时脚本真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90，仅拖头时尾 TGrid 保持不变。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 B-1 方案、清单与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

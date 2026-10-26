@@ -81,7 +81,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 - 位置：`ViewModels/Interactives/ObjectInteractiveManager.Selection.cs:40-75`；`ViewModels/Interactives/SelectionGridDrag.cs:40-56`；`SelectionGridDrag.cs:226-250`
 - 现象：Hold/HoldEnd、Soflan/EndIndicator、LaneBlockArea/EndIndicator、IndividualSoflanArea/EndIndicator 的配对逻辑在 `related` 集合、`changedLanes`、尾节点校验三处各写一遍。
-- 建议：在模型层提供统一的家族遍历接口（如 `IEndIndicatorOwner.GetEndIndicator()` + `EnumerateFamily()`），`GridClipboardGeometry.Enumerate` 也复用它。
+- 建议：复用模型既有 `GetDisplayableObjects()` 作为组件枚举来源，新增 `OngekiObjectComponents`（`EnumerateSelfAndComponents` / `GetHeadObject` / `GetTailObject` / `GetLaneStartObject`），`GridClipboardGeometry.Enumerate` 也复用它。
 
 ### B-2 两套“同一 T 的水平轨段”算法（PR 新增一套，既有算法未合并）
 
@@ -330,7 +330,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - [x] A-4 `TryAdjustGrid` 可见性
 - [ ] A-5 模型层 UI 通知
 - [ ] A-6 滚动指标抑制位置
-- [ ] B-1 关联集合去重
+- [x] B-1 关联集合去重
 - [ ] B-2 水平段算法去重
 - [ ] B-3 `CalculateOriginalLaneX` 删除
 - [ ] B-4 测试成员下沉
@@ -394,8 +394,13 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：`ScrollViewer.cs` 不再声明拖动字段；拖动期间滚动指标只重算一次（沿用现有性能回归）。
 
 #### B-1
-- 方案：在 `OngekiObjectBase` 增加 `public virtual IEnumerable<OngekiObjectBase> EnumerateFamily()`，默认 `yield return this`；`ConnectableStartObject`、`Hold`、`Soflan`、`LaneBlockArea`、`IndividualSoflanArea` override 返回自身及子节点/EndIndicator。`GridClipboardGeometry.Enumerate`、`SelectionGridDrag` 的 `related` 构建、`ObjectInteractiveManager.Selection` 全部改用该接口。
-- 验收：三处不再出现 `HoldEnd/RefHold/EndIndicator` 的重复 switch；`Enumerate` 的现有行为测试不变。
+- 方案：新增 `Base/OngekiObjectComponents.cs`，以模型既有 `GetDisplayableObjects()` 为组件来源：
+  - `EnumerateSelfAndComponents()`：自身 + 持续物件尾节点 + 轨道子节点/曲线控制点；子节点/控制点单独作为根时只返回自身。
+  - `GetHeadObject()`：尾节点找回所属头对象。
+  - `GetTailObject()`：头对象找回尾节点。
+  - `GetLaneStartObject()`：轨道子节点/控制点找回 `ConnectableStartObject`。
+  `GridClipboardGeometry.Enumerate` 转发到 `EnumerateSelfAndComponents`；`SelectionGridDrag` 与 `ObjectInteractiveManager.Selection` 删除重复的 Hold/End/轨道类型分支，轨道附轨对象查询保留在管理器。
+- 验收：`tests/grid-placement` 新增 `ObjectComponentsChecks`，覆盖 Hold/Soflan/LaneBlockArea/ISA/轨道家族、无尾 Hold、子节点单独为根；现有复制粘贴/拖动回归全过。
 
 #### B-2
 - 方案：在 `LaneGeometry` 提取 `BuildHorizontalRanges(lane)` 与 `TryGetHorizontalRange(lane, totalT, out min, out max)`；`CreateProjector` 复用同一构建结果；`DockableObjectInteractiveAction.TryGetHorizontalSegmentXRange` 改为调用它并做 `ConvertXGridToX`，删除重复的 `PathControls` 遍历。
@@ -540,10 +545,11 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | A-1 | 已完成 | `94f7b5d3` | `PasteOption` 已移到 `Base`，`GridPlacementOption` 删除；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
 | A-2 | 已完成（第一阶段） | `5917cfb7` | `GridClipboardGeometry` 移到 `Base` 并降为 internal，`ViewModels` 不再引用 `Kernel.DefaultImpl`；Debug/Release 0 error；grid-placement 228/228；MCP e2e 1236/1236；真实复制/粘贴 3 个 Bell 后数量 +3 |
 | A-4 | 已完成 | `76ac02bf` | `TryAdjustGrid` 改为 public virtual，派生类同步 public override；Debug/Release 0 error；grid-placement 229/229；MCP e2e 1236/1236；真实拖动 Tap 后 TGrid 5280→5340，脚本外部程序集可调用 `TryAdjustGrid` |
+| B-1 | 已完成 | `e253fe20` | 新增 `OngekiObjectComponents` 并复用 `GetDisplayableObjects`；`GridClipboardGeometry.Enumerate`、`SelectionGridDrag`、`ObjectInteractiveManager.Selection` 去掉重复类型分支；Debug/Release 0 error；grid-placement 249/249；MCP e2e 1236/1236；真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90 且仅拖头时尾不变 |
 
 说明：
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 未实施，因此 `DefaultFumenEditorClipboard` 仍通过 `DockableObjectInteractiveAction.CreateOriginalLaneProjector` 引用 `ViewModels.Interactives.Impls`（原方案中的 A-2+A-3 联合验收项保持部分完成）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 因新增架构断言为 229 项。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 因新增架构断言为 229 项；B-1 因新增组件关系断言为 249 项。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。
