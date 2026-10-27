@@ -154,7 +154,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     flick.Direction = (Flick.FlickDirection)(-(int)flick.Direction);
                 if (copied is IBulletPalleteReferencable bullet && bullet.ReferenceBulletPallete is BulletPallete pallete)
                 {
-                    //如果IsAppend为false,那就直接改引用直接成这个。否则就新建一个
+                    // 同 ID 且等价则复用，否则追加副本。
                     var isAppend = false;
                     BulletPallete existPallete = default;
                     if (targetEditor.Fumen.BulletPalleteList.FirstOrDefault(x => x.StrID == pallete.StrID) is BulletPallete e)
@@ -191,7 +191,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     };
                 }
 
-                //粘贴特殊处理Tap/Hold(特别是跨编辑器粘贴时)
+                // 附轨 setter 可能改写尾点，先保存再恢复完整坐标。
                 var coordinates = GridClipboardGeometry.Enumerate(copied).Select(x => (obj: x,
                     t: (x as ITimelineObject)?.TGrid?.CopyNew(),
                     x: (x as IHorizonPositionObject)?.XGrid?.CopyNew())).ToArray();
@@ -216,7 +216,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     if (dockable != null)
                         dockable.ReferenceLaneStart = resolvedLane;
                     targetEditor.Fumen.AddObject(copied);
-                    // Hold 的附轨动作会修改尾点，因此先建立关联，再恢复已计算的全部坐标。
                     RestoreCoordinates();
                     foreach (var node in GridClipboardGeometry.Enumerate(copied).OfType<ISelectableObject>())
                         node.IsSelected = true;

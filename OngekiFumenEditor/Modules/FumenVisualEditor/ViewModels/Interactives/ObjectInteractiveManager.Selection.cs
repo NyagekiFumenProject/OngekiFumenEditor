@@ -51,15 +51,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             var related = new HashSet<OngekiTimelineObjectBase>(selected);
             foreach (var o in selected)
             {
-                // 正向：自身 + 持续物件尾节点 + 轨道子节点/曲线控制点
+                // 快照需包含组件、所属头对象，以及被拖动轨道上的其他节点。
                 foreach (var component in o.EnumerateSelfAndComponents().OfType<OngekiTimelineObjectBase>())
                     related.Add(component);
-
-                // 反向：选中尾节点时把所属头对象纳入快照
                 if (o.GetHeadObject() is OngekiTimelineObjectBase head)
                     related.Add(head);
-
-                // 选中轨道子节点/控制点时补齐整条轨道
                 if (o.GetLaneStartObject() is ConnectableStartObject laneStart)
                     foreach (var component in laneStart.EnumerateSelfAndComponents().OfType<OngekiTimelineObjectBase>())
                         related.Add(component);
