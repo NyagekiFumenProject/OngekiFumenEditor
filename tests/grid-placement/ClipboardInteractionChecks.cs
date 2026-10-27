@@ -208,6 +208,18 @@ public static class ClipboardInteractionChecks
             check(project.Fumen.GetAllDisplayableObjects().Count() == objectCount, "新粘贴无轨Tap无法首次附轨时整个事务拒绝");
             check(undo.ActionStack.Count == undoCount, "拒绝的粘贴不产生Undo记录");
 
+            var stateClipboard = (IFumenEditorClipboard)Activator.CreateInstance(clipboardType, true);
+            var stateList = (List<OngekiObjectBase>)clipboardType.GetField("currentCopiedSources", F).GetValue(stateClipboard);
+            var kept = Tap(100, 0);
+            stateList.Add(kept);
+            try
+            {
+                stateClipboard.CopyObjects(editor, new ISelectableObject[] { new ThrowingCopyTap() }).GetAwaiter().GetResult();
+            }
+            catch (InvalidOperationException)
+            {
+            }
+            check(stateClipboard.CurrentCopiedObjects.Contains(kept), "复制克隆异常时保留旧剪贴板内容");
         }
         finally
         {
@@ -216,3 +228,7 @@ public static class ClipboardInteractionChecks
     }
 }
 
+public sealed class ThrowingCopyTap : Tap
+{
+    public override void Copy(OngekiObjectBase fromObj) => throw new InvalidOperationException("copy failed");
+}

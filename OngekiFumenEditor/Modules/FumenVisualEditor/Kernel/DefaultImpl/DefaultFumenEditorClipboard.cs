@@ -37,7 +37,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 return Task.CompletedTask;
             }
 
-            currentCopiedSources.Clear();
             var sources = new List<OngekiObjectBase>();
             foreach (var obj in objects.OfType<OngekiObjectBase>().Distinct())
             {
@@ -51,7 +50,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                 sources.Add(obj);
             }
 
-            currentCopiedSources.AddRange(GridClipboardGeometry.CloneSet(sources));
+            var copies = GridClipboardGeometry.CloneSet(sources);
+            currentCopiedSources.Clear();
+            currentCopiedSources.AddRange(copies);
             sourceEditor.ToastNotify(currentCopiedSources.Count == 0 ? Resources.ClearCopyList :
                 currentCopiedSources.Count == 1 ? Resources.CopiedObjectsBrushAllowed.Format(1) : Resources.CopiedObjects.Format(currentCopiedSources.Count));
             return Task.CompletedTask;
