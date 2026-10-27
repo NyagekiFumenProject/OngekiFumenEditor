@@ -62,7 +62,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             var copy = source.CopyNew();
             if (copy == null)
                 return null;
-            copy.Tag = source.Tag;
             switch (copy)
             {
                 case ConnectableStartObject start:
