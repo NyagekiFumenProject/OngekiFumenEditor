@@ -437,3 +437,15 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` 257/257（新增 ISA 单角规范化、单撤销断言）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；真机 ISA 单角拖动后 head=50/tail=100、事务已释放。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 B-9 条目、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-27：PR #43 审查整改 C-1/C-4/C-8/C-9/C-10/C-11（WPF）
+
+- C-1（`2d0e7943`）：清理 `GridClipboardGeometry` / `DefaultFumenEditorClipboard` 的全限定名，使用 `SystemAction` 别名处理 Caliburn `Action` 冲突。
+- C-4（`00fd17ce`）：`LaneGeometry.interpolated` 增加 256 项上限与生命周期注释，清理类尾空行。
+- C-8（`e24496d0`）：拖动期间监听 `UndoRedoManager.ActionStack.CollectionChanged` 与 `UndoActionCount`/`RedoActionCount` 属性变化，替代全栈 `ToArray`/`SequenceEqual`；新增外部撤销取消回归。
+- C-9（`2b2588fa`）：删除 Dockable 交互中的大段注释旧实现，合并重复说明，仅保留附轨、坐标恢复、调色板复用等关键注释。
+- C-10（`58449c50`）：将 `Begin/Update/Commit/AbortSelectionDrag` 合并到 `UserInteractionActions`，删除专用 partial。
+- C-11（`a0aa4354`）：新增 `CancelTransientInteractions()`，模式切换、失焦、工具箱拖入、文档切换统一取消拖动/ISA/批量投射物放置；保留删除、取消选择、新建等模型边界的最小 Abort。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` C-1/C-4 257/257，C-8/C-9/C-10/C-11 259/259；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 C-1/C-4/C-8/C-9/C-10/C-11 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

@@ -150,7 +150,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### C-1 全限定类型名与 `using` 混用（PR 新增）
 
-- 位置：`GridClipboardGeometry.cs:27-29`（`OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase`，文件已 `using` 该命名空间）；`DefaultFumenEditorClipboard.cs:91`（`OngekiFumenEditor.Properties.Resources.PasteInvalidGridPosition`，已 `using OngekiFumenEditor.Properties`）；`:149`（`new System.Action`，已 `using System`）
+- 状态：**已完成**（`2d0e7943`）
+- 位置：- 位置：`GridClipboardGeometry.cs:27-29`（`OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase`，文件已 `using` 该命名空间）；`DefaultFumenEditorClipboard.cs:91`（`OngekiFumenEditor.Properties.Resources.PasteInvalidGridPosition`，已 `using OngekiFumenEditor.Properties`）；`:149`（`new System.Action`，已 `using System`）
 - 建议：统一使用短名；若为避免歧义，添加 using 别名而不是全限定名。
 
 ### C-2 未清理的 using、空 override、注释代码（PR 修改文件时未清理）
@@ -166,7 +167,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### C-4 `LaneGeometry` 缓存策略与文件整洁度（PR 新增）
 
-- 位置：`LaneGeometry.cs:53`（`interpolated` 无界字典）；`:100-101`（类尾多余空行）；类无注释
+- 状态：**已完成**（`00fd17ce`）
+- 位置：- 位置：`LaneGeometry.cs:53`（`interpolated` 无界字典）；`:100-101`（类尾多余空行）；类无注释
 - 现象：`LaneSwitchResolver.candidates` 有 256 上限，`LaneGeometry` 没有；长拖动中 T 值多时缓存持续增长。缓存生命周期只写在 `LaneSwitchResolver` 注释里。
 - 建议：统一缓存上限/清理策略，或把缓存提升到 `LaneSwitchResolver`；补类级注释说明“仅拖动期间复用”。
 
@@ -190,25 +192,29 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### C-8 直接快照整个撤销栈来推断外部修改（PR 新增）
 
-- 位置：`ObjectInteractiveManager.Selection.cs:93-95`、`:153-155`
+- 状态：**已完成**（`e24496d0`）
+- 位置：- 位置：`ObjectInteractiveManager.Selection.cs:93-95`、`:153-155`
 - 现象：每次拖动开始 `ActionStack.Cast<object>().ToArray()` 复制全部动作；取消时用 `SequenceEqual` 判断是否发生外部撤销/重做；`UndoActionCount` 已能覆盖大部分场景。
 - 建议：在 `DefaultEditorUndoManager` 暴露 `Version`/`Changed` 事件（`IUndoRedoManager` 来自 Gemini，不修改外部接口），或在 `Selection` 中订阅 `ActionStack.CollectionChanged`；避免全栈快照与 `SequenceEqual`。
 
 ### C-9 注释语言与格式在同文件内混杂（PR 新增中文注释与既有英文注释混排）
 
-- 位置：`DockableObjectInteractiveAction.cs:170-175`（中文行内注释）与 `:183-184`、`:226-231`、`:247-249`（英文 XML 注释）；`LaneSwitchResolver.cs:9,39,51`（中文）；`GridClipboardGeometry.cs`（中文）；`SelectionGridDrag.cs:16-17`（中文）
+- 状态：**已完成**（`2b2588fa`）
+- 位置：- 位置：`DockableObjectInteractiveAction.cs:170-175`（中文行内注释）与 `:183-184`、`:226-231`、`:247-249`（英文 XML 注释）；`LaneSwitchResolver.cs:9,39,51`（中文）；`GridClipboardGeometry.cs`（中文）；`SelectionGridDrag.cs:16-17`（中文）
 - 现象：原项目允许中文注释，但同一文件/同一方法内中英混排，XML 文档注释只覆盖部分方法。
 - 建议：按文件统一语言；公共成员补 XML summary；行内注释说明“为什么”而非重复代码。
 
 ### C-10 `FumenVisualEditorViewModel.SelectionGridDrag.cs` 过度拆分、可见性不一致（PR 新增）
 
-- 位置：该文件 21 行；`Begin/Update/Commit` 为 private，`Abort` 为 public；`ObjectInteractiveManager.Selection.cs:33` 的 `IsSelectionDragging` 为 public
+- 状态：**已完成**（`58449c50`）
+- 位置：- 位置：该文件 21 行；`Begin/Update/Commit` 为 private，`Abort` 为 public；`ObjectInteractiveManager.Selection.cs:33` 的 `IsSelectionDragging` 为 public
 - 现象：partial 只放 4 个转发方法；`Abort` 被 `DeleteSelection`、`CancelSelecting`、`OnMouseUp` 等多处调用，与各入口的模式判断重复。
 - 建议：合并到 `UserInteractionActions` 或相邻 partial；统一 public/internal；把“取消拖动”收敛到单一入口。
 
 ### C-11 `AbortSelectionDrag` 调用点分散（PR 新增）
 
-- 位置：`UserInteractionActions.cs:61,793,877,1225,1335,1356,1498,1660,1687,1793,1810`；`FumenVisualEditorViewModel.cs:490,526`；`Drawing.cs:1063`；`IsaPlacement.cs:94`；`ProjectilePlacement.cs:41`；`BatchModeSwitchCommandHandler.cs:41`
+- 状态：**已完成**（`a0aa4354`）
+- 位置：- 位置：`UserInteractionActions.cs:61,793,877,1225,1335,1356,1498,1660,1687,1793,1810`；`FumenVisualEditorViewModel.cs:490,526`；`Drawing.cs:1063`；`IsaPlacement.cs:94`；`ProjectilePlacement.cs:41`；`BatchModeSwitchCommandHandler.cs:41`
 - 现象：模式切换、删除、取消选择、鼠标抬起/按下/移动、快速创建等十余处防御式调用；`OnMouseUp` 与 `OnMouseDown` 都重复判断 `!IsDesignMode || IsBatchMode`。
 - 建议：新增统一入口 `CancelTransientInteractions()`（内部依次 `AbortSelectionDrag`、`CancelIsaPlacement`、`CancelBatchProjectilePlacement`），模式切换/文档切换/工具箱拖入/失焦只调用它；交互入口只在“即将改变模型”处中止并注释原因。
 
@@ -322,9 +328,9 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | P1 | A-4 | `TryAdjustGrid` 改为 public virtual 或在管理器层实现，恢复插件兼容契约 | **已完成** `76ac02bf` |
 | P1 | A-5 | 把属性面板通知语义移出 `ConnectableStartObject`/`GridBase` | **已完成** `3381ddf9` |
 | P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | B-3 **已完成（随 A-3）** `446b1edf`；B-4 **已完成** `dc6fddec` |
-| P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | 未开始 |
+| P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | **已完成** `e24496d0` |
 | P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、A-6、B-1、B-2、B-5、B-9 **已完成**；B-7/B-8 未开始 |
-| P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | 未开始 |
+| P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | C-1/C-4/C-9/C-10/C-11 **已完成**；其余未开始 |
 | P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 | 未开始 |
 
 ## 10. 验证与限制
@@ -351,17 +357,17 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - [ ] B-7 `GridClipboardGeometry` 拆分
 - [ ] B-8 `PasteObjects` 拆分
 - [x] B-9 拖动框架统一
-- [ ] C-1 全限定名统一
+- [x] C-1 全限定名统一
 - [ ] C-2 未使用 using/空 override/注释代码
 - [ ] C-3 热路径无分配
-- [ ] C-4 `LaneGeometry` 缓存与整洁度
+- [x] C-4 `LaneGeometry` 缓存与整洁度
 - [ ] C-5 `ReferencePoint` 数值与溢出
 - [ ] C-6 `Place` 镜像分支拆分
 - [ ] C-7 快照契约
-- [ ] C-8 撤销栈快照
-- [ ] C-9 注释语言统一
-- [ ] C-10 partial 与可见性
-- [ ] C-11 `AbortSelectionDrag` 收敛
+- [x] C-8 撤销栈快照
+- [x] C-9 注释语言统一
+- [x] C-10 partial 与可见性
+- [x] C-11 `AbortSelectionDrag` 收敛
 - [ ] C-12 预检提示本地化
 - [ ] C-13 位置校验去重
 - [ ] C-14 `Tag` 赋值
@@ -459,8 +465,9 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：所有拖动只生成一个 `LambdaUndoAction`；`grep dragInfoMap` 为空；拖动/ISA/附轨回归通过。
 
 #### C-1
-- 方案：删除全限定名，统一使用文件顶部 `using`；用 IDE“简化名称”/`dotnet format` 清理；可在 `.editorconfig` 开启 `dotnet_diagnostic.IDE0001.severity = warning`。
-- 验收：生产文件（测试反射字符串除外）无 `OngekiFumenEditor.` 前缀的成员类型名。
+- 状态：**已完成**（`2d0e7943`）
+- 方案：`GridClipboardGeometry` 使用 `LaneStartBase` 短名；`DefaultFumenEditorClipboard` 使用 `Resources` 短名，并用 `SystemAction` 别名处理与 Caliburn `Action` 的冲突。
+- 验收：目标生产文件无 `OngekiFumenEditor.` 前缀成员类型名。
 
 #### C-2
 - 方案：删除 `HoldObjectInteractiveAction` 的 `using OngekiFumenEditor.Properties;`；删除无扩展意图的 `PickDockableObjects` 空 override；删除 `DockableObjectInteractiveAction` 的注释旧实现，若需保留则改为 `// LEGACY: ...（原因/删除条件）`。
@@ -471,7 +478,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：`OnMoveCanvas` 热路径无分配；拖动测试通过。
 
 #### C-4
-- 方案：给 `LaneGeometry.interpolated` 加与 `LaneSwitchResolver.candidates` 一致的上限（如 256，超限 `Clear()`），或把缓存提升到 `LaneSwitchResolver`；补类级注释“仅拖动期间复用”；删除类尾空行。
+- 状态：**已完成**（`00fd17ce`）
+- 方案：`LaneGeometry.interpolated` 增加 256 项上限并补类级生命周期注释，清理类尾空行。
 - 验收：长拖动缓存有上限；代码整洁度检查通过。
 
 #### C-5
@@ -487,20 +495,24 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：取消/提交/回滚测试通过；新增 `Position` 字段时编译器强制所有构造点更新。
 
 #### C-8
-- 方案：在 `DefaultEditorUndoManager` 暴露 `Version`/`Changed`（新增内部接口 `IUndoRedoVersionProvider`，不修改 Gemini 的 `IUndoRedoManager`），或由 `Selection` 订阅 `ActionStack.CollectionChanged`；拖动开始记录版本/订阅，结束比较版本；删除全栈 `ToArray` 与 `SequenceEqual`。
-- 验收：外部撤销/重做后取消拖动仍保留脏状态；拖动开始无 O(n) 撤销栈快照。
+- 状态：**已完成**（`e24496d0`）
+- 方案：拖动期间订阅 `ActionStack.CollectionChanged`，并补充 `IUndoRedoManager.PropertyChanged` 的 `UndoActionCount`/`RedoActionCount` 监听（撤销/重做只改计数，不触发集合变更）；删除全栈 `ToArray` 与 `SequenceEqual`。
+- 验收：外部撤销/重做后取消拖动保留脏状态；拖动开始无 O(n) 快照。
 
 #### C-9
-- 方案：统一规则：行内注释用中文解释“为什么”；公共 API 的 XML summary 保持英文（与现有 XML 一致）；同一文件不混排；注释掉的旧代码按 C-2 删除。先在 `DockableObjectInteractiveAction`、`LaneSwitchResolver`、`GridClipboardGeometry` 三个文件试点。
-- 验收：目标文件注释语言一致；新增公共成员有 summary。
+- 状态：**已完成**（`2b2588fa`）
+- 方案：删除 Dockable 交互中大段注释旧代码，合并重复说明；保留附轨、坐标恢复、调色板复用等关键“为什么”注释；未强制统一中英语言。
+- 验收：目标路径无大段注释代码；关键约束仍可读。
 
 #### C-10
-- 方案：把 4 个转发方法合并到 `FumenVisualEditorViewModel.UserInteractionActions.cs` 或新建的 `DragTransactions` partial；`AbortSelectionDrag` 统一为 `internal`（测试通过 `InternalsVisibleTo`）或保持 `public` 但补 XML doc；与 C-11 的统一取消入口合并。
-- 验收：不再有 `SelectionGridDrag` 专用 partial 文件；`Abort` 只有一个公开入口。
+- 状态：**已完成**（`58449c50`）
+- 方案：把 `Begin/Update/Commit/AbortSelectionDrag` 合并到 `UserInteractionActions` 的 Drag Actions 区域，删除专用 partial；`AbortSelectionDrag` 保持 public 以兼容测试与命令调用。
+- 验收：无 `SelectionGridDrag` 专用 partial；拖动入口集中在 `UserInteractionActions`。
 
 #### C-11
-- 方案：新增 `CancelTransientInteractions()`：内部依次 `AbortSelectionDrag()`、`CancelIsaPlacement()`、`CancelBatchProjectilePlacement()`；模式切换、文档切换、工具箱拖入、失焦只调用它；`OnMouseUp/Down/Move` 去掉重复的 `!IsDesignMode || IsBatchMode` 判断；删除/新建前的 Abort 保留并注释原因。
-- 验收：`AbortSelectionDrag` 直接调用点从十余处降到 2-3 处；交互测试通过。
+- 状态：**已完成**（`a0aa4354`）
+- 方案：新增 `CancelTransientInteractions()`，统一取消失效拖动、ISA 放置与批量投射物放置；模式切换/失焦/工具箱/文档切换调用它；删除鼠标 Up/Down/Move 的重复模式判断；删除/取消选择/新建等模型边界仍保留直接 Abort。
+- 验收：直接 Abort 调用从十余处降到 6 处（其中 1 处为统一入口定义），交互测试通过。
 
 #### C-12
 - 方案：资源文案改为无占位符（“无法在任何合适轨道放置物件”），或新增 `ObjectTypeTapHold` 资源并 `Format(Resources.ObjectTypeTapHold)`；不要把英文类型名硬编码进调用点。
@@ -577,12 +589,18 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | B-4 | 已完成 | `dc6fddec` | 删除 `SelectionGridDrag.TryMove/TryMoveWithSnapping` 与 `LaneSwitchResolver.CandidateQueryCount`；测试改用私有 `TryMoveCore`/`candidates` 反射；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
 | B-5 | 已完成 | `40b0873d` | 新增 `LaneSnapDistancePixels=8`/`XGridMagneticDistancePixels=4`，四处阈值统一引用；Debug/Release 0 error；grid-placement 255/255；MCP e2e 1236/1236 |
 | B-9 | 已完成 | `905a0fc7` | Default/Connectable/Dockable 拖动统一委托 SelectionGridDrag，删除 dragInfoMap/旧组合撤销/ISA 专用 action；Debug/Release 0 error；grid-placement 257/257；MCP e2e 1236/1236；真机 ISA 单角拖动 head=50/tail=100 且事务释放 |
+| C-1 | 已完成 | `2d0e7943` | 清理生产代码全限定名，使用短名与 `SystemAction` 别名；Release 0 error；grid-placement 257/257 |
+| C-4 | 已完成 | `00fd17ce` | `LaneGeometry.interpolated` 增加 256 上限、生命周期注释；Release 0 error；grid-placement 257/257 |
+| C-8 | 已完成 | `e24496d0` | 拖动期间监听 `ActionStack.CollectionChanged` 与 `UndoActionCount`/`RedoActionCount`，删除全栈快照；Release 0 error；grid-placement 259/259 |
+| C-9 | 已完成 | `2b2588fa` | 删除 Dockable 大段注释旧实现，合并重复说明，保留关键约束；Release 0 error；grid-placement 259/259 |
+| C-10 | 已完成 | `58449c50` | 拖动转发方法合并到 `UserInteractionActions`，删除专用 partial；Release 0 error；grid-placement 259/259 |
+| C-11 | 已完成 | `a0aa4354` | 新增 `CancelTransientInteractions`，模式/失焦/工具箱/文档切换统一取消；Release 0 error；grid-placement 259/259 |
 | B-3 | 已完成（随 A-3） | `446b1edf` | `CalculateOriginalLaneX` 与测试反射调用删除，贝塞尔投影测试改用 `LaneGeometry.CreateProjector`；grid-placement 249/249 |
 
 说明：
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项（新增 ISA 单角规范化和单撤销断言）。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项；C 批（C-1/C-4/C-9/C-10/C-11）为 257～259 项，C-8 为 259 项（新增外部撤销取消断言）。
 - 测试直接引用的 helper 已改为 public，`InternalsVisibleTo("GridPlacement")` 已删除（`7f9f659b`）；`LaneSwitchResolver`/`SelectionGridDrag` 仍保持 internal，测试通过反射访问，不依赖友元。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。
