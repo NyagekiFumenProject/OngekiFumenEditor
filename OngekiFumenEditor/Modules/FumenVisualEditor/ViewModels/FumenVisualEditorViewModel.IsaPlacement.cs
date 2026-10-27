@@ -91,9 +91,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnFocusedWindowDeactivated(object sender, EventArgs e)
         {
-            AbortSelectionDrag();
             if (ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
-                CancelIsaPlacement();
+                CancelTransientInteractions();
+            else
+                AbortSelectionDrag();
         }
 
         public bool TryStartIsaPlacement(int soflanGroupId)

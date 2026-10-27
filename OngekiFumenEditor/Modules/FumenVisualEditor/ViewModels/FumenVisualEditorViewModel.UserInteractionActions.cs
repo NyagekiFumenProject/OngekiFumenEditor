@@ -58,9 +58,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 if (isUserRequestHideEditorObject != value)
                 {
-                    AbortSelectionDrag();
-                    CancelBatchProjectilePlacement();
-                    CancelIsaPlacement();
+                    CancelTransientInteractions();
                 }
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
@@ -1103,7 +1101,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
-            CancelIsaPlacement();
+            CancelTransientInteractions();
             BulletPallete.RandomSeed = DateTime.Now.ToString().GetHashCode();
 
             var tGrid = GetCurrentTGrid();
@@ -1190,6 +1188,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             autoScrollRedispatchToken = int.MaxValue;
         }
 
+        public void CancelTransientInteractions()
+        {
+            AbortSelectionDrag();
+            CancelIsaPlacement();
+            CancelBatchProjectilePlacement();
+        }
+
         public void OnMouseLeave(ActionExecutionContext e)
         {
             HideBatchPlacementPreview();
@@ -1225,9 +1230,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     arg.Handled = true;
                 return;
             }
-
-            if (!IsDesignMode || IsBatchMode)
-                AbortSelectionDrag();
 
             Log.LogInfo("Visual mouseup");
 
@@ -1325,9 +1327,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
-            if (!IsDesignMode || IsBatchMode)
-                AbortSelectionDrag();
-
             if (TryHandleBatchProjectilePlacementMouseDown(arg.ChangedButton, position))
             {
                 view?.Focus();
@@ -1488,9 +1487,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if ((IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp) && !isMiddleMouseDown)
                 return;
 
-            if (!IsDesignMode || IsBatchMode)
-                AbortSelectionDrag();
-
             if (IsDesignMode)
             {
                 if (IsIsaPlacementActive && !isMiddleMouseDown)
@@ -1641,8 +1637,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
-            AbortSelectionDrag();
-            CancelIsaPlacement();
+            CancelTransientInteractions();
             if (!CurrentCursorPosition.HasValue)
             {
                 return;
@@ -1769,18 +1764,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_DragEnter(ActionExecutionContext e)
         {
-            CancelIsaPlacement();
             var arg = e.EventArgs as DragEventArgs;
-            if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
-                arg.Effects = DragDropEffects.None;
+            if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+                CancelTransientInteractions();
             else
-                AbortSelectionDrag();
+            {
+                CancelIsaPlacement();
+                arg.Effects = DragDropEffects.None;
+            }
         }
 
         public void Grid_Drop(ActionExecutionContext e)
         {
-            CancelIsaPlacement();
-            CancelBatchProjectilePlacement();
+            CancelTransientInteractions();
 
             if (!IsDesignMode)
             {
@@ -1791,7 +1787,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             var arg = e.EventArgs as DragEventArgs;
             if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
             {
-                AbortSelectionDrag();
                 var mousePosition = arg.GetPosition(e.View as FrameworkElement);
                 mousePosition.Y = RectInDesignMode.Height - mousePosition.Y + RectInDesignMode.MinY;
 

@@ -38,9 +38,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Commands.BatchModeToggle
                     return TaskUtility.Completed;
                 }
 
-                editor.AbortSelectionDrag();
-                editor.CancelBatchProjectilePlacement();
-                editor.CancelIsaPlacement();
+                editor.CancelTransientInteractions();
                 var behaviors = Interaction.GetBehaviors((FumenVisualEditorView)editor.GetView());
 
                 if (editor.IsBatchMode)

@@ -487,12 +487,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
-            AbortSelectionDrag();
+            CancelTransientInteractions();
             var deactivationSucceeded = false;
             try
             {
-                CancelBatchProjectilePlacement();
-                CancelIsaPlacement();
                 UnhookWindowFocus();
                 await base.OnDeactivateAsync(close, cancellationToken);
                 await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
@@ -523,9 +521,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (Interlocked.Exchange(ref isDisposed, 1) != 0)
                 return;
 
-            AbortSelectionDrag();
-            CancelBatchProjectilePlacement();
-            CancelIsaPlacement();
+            CancelTransientInteractions();
             UnhookWindowFocus();
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
             var fumen = editorProjectData?.Fumen;

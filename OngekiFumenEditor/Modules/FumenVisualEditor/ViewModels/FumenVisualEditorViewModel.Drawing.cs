@@ -1060,7 +1060,7 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
     public void OnToolboxDragEntered(ActionExecutionContext e)
     {
         if (e.EventArgs is DragEventArgs args && args.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
-            AbortSelectionDrag();
+            CancelTransientInteractions();
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)

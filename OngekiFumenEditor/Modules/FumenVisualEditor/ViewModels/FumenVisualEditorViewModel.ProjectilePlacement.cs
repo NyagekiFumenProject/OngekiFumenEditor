@@ -37,11 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void OnPlacementActiveEditorChanged(FumenVisualEditorViewModel newEditor, FumenVisualEditorViewModel oldEditor)
         {
             if (!ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
-            {
-                AbortSelectionDrag();
-                CancelBatchProjectilePlacement();
-                CancelIsaPlacement();
-            }
+                CancelTransientInteractions();
         }
 
         public IPlaceBatchProjectileInfo RequestBatchPlaceProjectileInfo => requestBatchPlaceProjectileInfo;
