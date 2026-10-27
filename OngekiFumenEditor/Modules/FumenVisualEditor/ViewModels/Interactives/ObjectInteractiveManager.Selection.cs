@@ -1,8 +1,10 @@
 using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.ComponentModel;
+using Gemini.Modules.UndoRedo;
 using System.Windows;
 using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
@@ -18,8 +20,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
     {
         internal SelectionGridDrag activeSelectionDrag;
         private bool isDirtyBeforeDrag;
-        private object[] undoStackBeforeDrag;
-        private int undoCountBeforeDrag;
         private bool hasExternalChangesDuringDrag;
         private bool isApplyingDragSnapshots;
         private OngekiFumen dragFumen;
@@ -27,6 +27,18 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
         private void ObserveSelectionChanges(OngekiObjectBase obj, PropertyChangedEventArgs args)
         {
             if (!isApplyingDragSnapshots && args.PropertyName is not (nameof(ISelectableObject.IsSelected) or nameof(ConnectableChildObjectBase.IsAnyControlSelecting)))
+                hasExternalChangesDuringDrag = true;
+        }
+
+        private void OnUndoActionStackChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (!isApplyingDragSnapshots)
+                hasExternalChangesDuringDrag = true;
+        }
+
+        private void OnUndoManagerPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (!isApplyingDragSnapshots && e.PropertyName is nameof(IUndoRedoManager.UndoActionCount) or nameof(IUndoRedoManager.RedoActionCount))
                 hasExternalChangesDuringDrag = true;
         }
 
@@ -67,11 +79,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             if (dragFumen != null)
                 dragFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
             isDirtyBeforeDrag = editor.IsDirty;
-            undoStackBeforeDrag = editor.UndoRedoManager.ActionStack.Cast<object>().ToArray();
-            undoCountBeforeDrag = editor.UndoRedoManager.UndoActionCount;
             hasExternalChangesDuringDrag = false;
             dragFumen = editor.Fumen;
             dragFumen.ObjectModifiedChanged += ObserveSelectionChanges;
+            editor.UndoRedoManager.ActionStack.CollectionChanged += OnUndoActionStackChanged;
+            editor.UndoRedoManager.PropertyChanged += OnUndoManagerPropertyChanged;
             activeSelectionDrag = new SelectionGridDrag(selected, related);
             var anchor = new Point(XGridCalculator.ConvertXGridToX(XGrid.FromTotalGrid((int)activeSelectionDrag.AnchorX), editor),
                 editor.ConvertTGridToY_DesignMode(TGrid.FromTotalGrid((int)activeSelectionDrag.AnchorT)));
@@ -118,6 +130,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             activeSelectionDrag = null;
             if (drag is null)
                 return;
+            editor.UndoRedoManager.ActionStack.CollectionChanged -= OnUndoActionStackChanged;
+            editor.UndoRedoManager.PropertyChanged -= OnUndoManagerPropertyChanged;
             if (dragFumen != null)
             {
                 dragFumen.ObjectModifiedChanged -= ObserveSelectionChanges;
@@ -129,9 +143,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives
             if (abort)
             {
                 editor.ExecuteGridDragUpdate(() => SelectionGridDrag.Apply(drag.Before));
-                editor.IsDirty = isDirtyBeforeDrag || hasExternalChangesDuringDrag ||
-                    undoStackBeforeDrag != null && (undoCountBeforeDrag != editor.UndoRedoManager.UndoActionCount ||
-                    !undoStackBeforeDrag.SequenceEqual(editor.UndoRedoManager.ActionStack.Cast<object>()));
+                editor.IsDirty = isDirtyBeforeDrag || hasExternalChangesDuringDrag;
             }
             else if (after.Where((p, i) => p.T != drag.Before[i].T || p.X != drag.Before[i].X || !ReferenceEquals(p.Lane, drag.Before[i].Lane)).Any())
                 editor.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create(Resources.DragObjects,

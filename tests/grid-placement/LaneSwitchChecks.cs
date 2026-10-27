@@ -12,6 +12,7 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Modules.FumenVisualEditor;
+using OngekiFumenEditor.Modules.FumenVisualEditor.Base;
 using OngekiFumenEditor.Modules.FumenVisualEditor.Models;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels;
 using OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels.Interactives.Impls;
@@ -150,6 +151,22 @@ public static class LaneSwitchChecks
             e.IsDirty = true;
             e.AbortSelectionDrag();
             check(e.IsDirty, "无事务时取消不清除外来编辑脏状态");
+        }
+
+        {
+            var e = Editor();
+            var lane = Lane(e, -4, -4);
+            var tap = Tap(e, lane);
+            e.UndoRedoManager.ExecuteAction(LambdaUndoAction.Create("C8 probe", () => { }, () => { }));
+            e.IsDirty = false;
+            var action = e.InteractiveManager.GetInteractive(tap);
+            action.OnDragStart(tap, Point(e, lane, 173), e);
+            action.OnDragMove(tap, Point(e, lane, 960), e);
+            e.UndoRedoManager.Undo(1);
+            e.AbortSelectionDrag();
+            check(e.IsDirty, "取消保留拖动期间外部撤销产生的脏状态");
+            check(tap.TGrid.TotalGrid == 173 && !e.InteractiveManager.IsSelectionDragging,
+                "外部撤销后取消仍恢复拖动前位置");
         }
 
         foreach (var useGroup in new[] { false, true })
