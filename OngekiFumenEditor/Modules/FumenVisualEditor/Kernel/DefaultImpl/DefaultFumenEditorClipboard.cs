@@ -76,12 +76,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             if (pasteOption != PasteOption.Direct && placePoint is Point target)
             {
                 // 参考点只决定 Grid 平移；每个新物件在平移后独立吸附。
-                var rawX = XGridCalculator.ConvertXToXGridTotalUnit(target.X, targetEditor) * XGrid.DEFAULT_RES_X;
-                if (double.IsNaN(rawX) || double.IsInfinity(rawX) || rawX < int.MinValue || rawX > int.MaxValue)
+                var targetUnit = XGridCalculator.ConvertXToXGridTotalUnit(target.X, targetEditor);
+                var targetTotalGrid = targetUnit * XGrid.DEFAULT_RES_X;
+                if (!double.IsFinite(targetTotalGrid) || targetTotalGrid < int.MinValue || targetTotalGrid > int.MaxValue)
                     return Task.CompletedTask;
-                targetX = XGridCalculator.ConvertXToXGrid(target.X, targetEditor);
+                targetX = new XGrid((float)targetUnit);
                 targetT = targetEditor.ConvertYToTGrid_DesignMode(target.Y);
-                if (targetX is null || targetT is null)
+                if (targetT is null)
                     return Task.CompletedTask;
             }
 
