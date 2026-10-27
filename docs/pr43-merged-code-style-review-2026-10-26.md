@@ -226,24 +226,28 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### C-13 粘贴位置校验重复计算（PR 新增）
 
+- 状态：**已完成**（`81dd757c`）
 - 位置：`DefaultFumenEditorClipboard.cs:79-85`
 - 现象：`rawX` 只用于有限性/范围检查，随后 `ConvertXToXGrid(target.X, ...)` 又算一次；两个 API 的边界条件不一致时容易漏检。
 - 建议：直接调用一次并检查返回值；如需要 `TotalUnit` 预检，使用同一个 `TryConvert`。
 
 ### C-14 `Tag` 重复赋值（PR 新增）
 
+- 状态：**已完成**（`0cf61804`）
 - 位置：`GridClipboardGeometry.cs:82,116`
 - 现象：`copy.Tag = source.Tag` 后，`copiedNodes` 循环又逐节点覆盖 `node.Tag = sourceNodes[i].Tag`；根节点被赋两次。
 - 建议：只保留循环赋值；若根 `Tag` 有特殊语义，写明原因。
 
 ### C-15 手工修改自动生成的 `Resources.Designer.cs`（PR 新增）
 
+- 状态：**已完成**（`63e4227e`）
 - 位置：`Properties/Resources.Designer.cs:9392`
 - 现象：文件头明确“Changes to this file may cause incorrect behavior and will be lost if regenerated”；新增属性只有单行表达式，没有生成器惯用的 `/// <summary>`，与 `CantPlaceObjectsByNoSuiteLanes`（`:1030-1035`）格式不一致。
 - 建议：通过 resx + ResGen/IDE 重新生成，避免手工编辑；若必须手改，保持生成器格式并加注释。
 
 ### C-16 三个 resx 的 BOM 被移除（PR 附带变更）
 
+- 状态：**已完成**（`d6604d24`）
 - 位置：`Properties/Resources.resx`、`Resources.ja.resx`、`Resources.zh-Hans.resx` 第 1 行
 - 现象：PR 前三个文件均带 UTF-8 BOM，PR 删除；属于功能无关的编码变更，制造额外 diff，也可能影响依赖 BOM 的旧工具链。
 - 建议：恢复 BOM，或在独立提交中全仓库统一；功能 PR 不做无关格式变更。
@@ -330,7 +334,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | P1 | B-3/B-4 | 删除生产死代码与测试专用成员，测试改用纯函数/InternalsVisibleTo | B-3 **已完成（随 A-3）** `446b1edf`；B-4 **已完成** `dc6fddec` |
 | P1 | C-8 | 用撤销管理器版本号替代全栈快照与 `SequenceEqual` | **已完成** `e24496d0` |
 | P2 | A-3/A-6/B-1/B-2/B-5/B-7/B-8/B-9 | 收敛重复逻辑、拆分事务、统一阈值与缓存策略 | A-3、A-6、B-1、B-2、B-5、B-9 **已完成**；B-7/B-8 未开始 |
-| P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | C-1/C-4/C-9/C-10/C-11 **已完成**；其余未开始 |
+| P2 | C-1..C-16 | 代码卫生与格式统一，可随上述重构一并处理 | C-1/C-4/C-9/C-10/C-11/C-13/C-14/C-15/C-16 **已完成**；其余未开始 |
 | P2 | D-1..D-5 | 对齐 tests 工程约定与文档职责 | 未开始 |
 
 ## 10. 验证与限制
@@ -369,10 +373,10 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - [x] C-10 partial 与可见性
 - [x] C-11 `AbortSelectionDrag` 收敛
 - [ ] C-12 预检提示本地化
-- [ ] C-13 位置校验去重
-- [ ] C-14 `Tag` 赋值
-- [ ] C-15 自动生成文件
-- [ ] C-16 resx BOM
+- [x] C-13 位置校验去重
+- [x] C-14 `Tag` 赋值
+- [x] C-15 自动生成文件
+- [x] C-16 resx BOM
 - [ ] D-1 tests 工程约定
 - [ ] D-2 反射/未初始化构造
 - [ ] D-3 架构检查方式
@@ -519,19 +523,23 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：英/日/中三语界面均显示完整语义；无硬编码 `"Tap / Hold"`。
 
 #### C-13
-- 方案：删除 `rawX` 预检；只调用一次 `XGridCalculator.ConvertXToXGrid` 并检查返回值；若需要 `TotalUnit` 边界，新增 `TryConvertXToXGrid` 内部复用同一换算。
-- 验收：NaN/Infinity/越界测试通过；无重复换算。
+- 状态：**已完成**（`81dd757c`）
+- 方案：只调用一次 `ConvertXToXGridTotalUnit`，在同一结果上做 `TotalGrid` 范围检查并直接构造 `XGrid`，删除重复换算。
+- 验收：非法位置/越界测试通过；无重复换算。
 
 #### C-14
-- 方案：删除 `copy.Tag = source.Tag`（循环会覆盖根节点）或删除循环中的根节点赋值，只保留一次；在注释中说明 `Tag` 的用途。
-- 验收：克隆 `Tag` 行为测试不变；无重复赋值。
+- 状态：**已完成**（`0cf61804`）
+- 方案：删除根对象上的 `copy.Tag = source.Tag`，保留逐节点复制。
+- 验收：克隆 `Tag` 行为不变；无重复赋值。
 
 #### C-15
-- 方案：通过 resx + ResGen/VS“运行自定义工具”重新生成 `Resources.Designer.cs`，不要手写；提交生成器输出（含 summary/换行）。
-- 验收：`git diff` 只体现生成器格式；新增资源属性可正常访问。
+- 状态：**已完成**（`63e4227e`）
+- 方案：将 `PasteInvalidGridPosition` 改为生成器惯用的多行 getter；当前环境无 ResGen，未重写整个生成文件。
+- 验收：属性格式与相邻生成属性一致；构建通过。
 
 #### C-16
-- 方案：用“UTF-8 with BOM”重新保存三个 resx（或全仓库统一移除 BOM 的独立提交）；本功能 PR 只保留新增资源键的 diff。
+- 状态：**已完成**（`d6604d24`）
+- 方案：恢复三个 resx 的 UTF-8 BOM，保留新增资源键的内容差异。
 - 验收：`git diff` 首行不再变化；XML 读取与构建正常。
 
 #### D-1
@@ -595,12 +603,16 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | C-9 | 已完成 | `2b2588fa` | 删除 Dockable 大段注释旧实现，合并重复说明，保留关键约束；Release 0 error；grid-placement 259/259 |
 | C-10 | 已完成 | `58449c50` | 拖动转发方法合并到 `UserInteractionActions`，删除专用 partial；Release 0 error；grid-placement 259/259 |
 | C-11 | 已完成 | `a0aa4354` | 新增 `CancelTransientInteractions`，模式/失焦/工具箱/文档切换统一取消；Release 0 error；grid-placement 259/259 |
+| C-13 | 已完成 | `81dd757c` | 粘贴位置只做一次 `ConvertXToXGridTotalUnit` 并复用结果，删除重复换算；Release 0 error；grid-placement 259/259；真机非 Direct 粘贴数量 +2 |
+| C-14 | 已完成 | `0cf61804` | 删除克隆根对象重复 `Tag` 赋值；Release 0 error；grid-placement 259/259 |
+| C-15 | 已完成 | `63e4227e` | `PasteInvalidGridPosition` 对齐生成器多行 getter 格式；Release 0 error |
+| C-16 | 已完成 | `d6604d24` | 恢复三个 resx 的 UTF-8 BOM；Release 0 error；grid-placement 259/259 |
 | B-3 | 已完成（随 A-3） | `446b1edf` | `CalculateOriginalLaneX` 与测试反射调用删除，贝塞尔投影测试改用 `LaneGeometry.CreateProjector`；grid-placement 249/249 |
 
 说明：
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项；C 批（C-1/C-4/C-9/C-10/C-11）为 257～259 项，C-8 为 259 项（新增外部撤销取消断言）。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项；C 批最终为 259 项（C-8 外部撤销断言、B-9 ISA 断言）。
 - 测试直接引用的 helper 已改为 public，`InternalsVisibleTo("GridPlacement")` 已删除（`7f9f659b`）；`LaneSwitchResolver`/`SelectionGridDrag` 仍保持 internal，测试通过反射访问，不依赖友元。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。

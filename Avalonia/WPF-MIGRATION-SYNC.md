@@ -449,3 +449,14 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` C-1/C-4 257/257，C-8/C-9/C-10/C-11 259/259；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 C-1/C-4/C-8/C-9/C-10/C-11 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-27：PR #43 审查整改 C-13/C-11/C-14/C-15/C-16（WPF）
+
+- C-13（`81dd757c`）：粘贴目标 X 只调用一次 `ConvertXToXGridTotalUnit`，复用结果做范围预检并构造 `XGrid`，删除重复 `ConvertXToXGrid`。
+- C-11：已在 `a0aa4354` 完成，本轮复核 `CancelTransientInteractions` 入口与剩余 Abort 边界，无需新代码提交。
+- C-14（`0cf61804`）：删除 `GridClipboardGeometry.Clone` 根对象重复 `Tag` 赋值。
+- C-15（`63e4227e`）：`Resources.Designer.cs` 的 `PasteInvalidGridPosition` 改为生成器惯用多行 getter；当前环境无 ResGen，未重写整个生成文件。
+- C-16（`d6604d24`）：恢复三个 `Resources*.resx` 的 UTF-8 BOM。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 259/259；自构建 Debug 实例 MCP e2e 1236/1236；真机非 Direct 粘贴 2 个 Bell 后数量 +2。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新对应状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
