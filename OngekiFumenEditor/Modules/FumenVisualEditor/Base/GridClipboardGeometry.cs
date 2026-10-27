@@ -111,22 +111,36 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
         public static (XGrid x, TGrid t) ReferencePoint(IEnumerable<OngekiObjectBase> roots)
         {
             var rootArray = roots.ToArray();
-            var nodes = rootArray.SelectMany(Enumerate).Distinct().ToArray();
-            var xs = nodes.OfType<IHorizonPositionObject>().Select(x => x.XGrid.TotalGrid).ToArray();
 
-            var isaCenters = rootArray.OfType<IndividualSoflanArea>()
-                .Select(area => ((long)area.TGrid.TotalGrid + area.EndIndicator.TGrid.TotalGrid) / 2d)
-                .ToArray();
-            var ts = isaCenters.Length > 0
-                ? nodes.OfType<ITimelineObject>()
-                    .Where(x => x is not IndividualSoflanArea and not IndividualSoflanArea.IndividualSoflanAreaEndIndicator && x.TGrid != null)
-                    .Select(x => (double)x.TGrid.TotalGrid)
-                    .Concat(isaCenters)
-                    .ToArray()
-                : nodes.OfType<ITimelineObject>().Where(x => x.TGrid != null).Select(x => (double)x.TGrid.TotalGrid).ToArray();
+            // 与旧画布重心一致：纯轨道取起点，混合选择忽略轨道；ISA 取两个角点。
+            var measureRoots = rootArray.All(x => x is ConnectableObjectBase)
+                ? rootArray.Where(x => x is ConnectableStartObject).ToArray()
+                : rootArray.Where(x => x is not ConnectableObjectBase).ToArray();
 
-            return (XGrid.FromTotalGrid(xs.Length == 0 ? 0 : (int)Math.Round(((long)xs.Min() + xs.Max()) / 2d)),
-                TGrid.FromTotalGrid(ts.Length == 0 ? 0 : (int)Math.Round(isaCenters.Length > 0 ? (ts.Min() + ts.Max()) / 2d : ts.Min())));
+            var xs = new List<int>();
+            var ts = new List<int>();
+            foreach (var root in measureRoots)
+            {
+                if (root is IndividualSoflanArea area)
+                {
+                    AddPoint(xs, ts, area);
+                    AddPoint(xs, ts, area.EndIndicator);
+                }
+                else
+                {
+                    AddPoint(xs, ts, root);
+                }
+            }
+
+            return (
+                XGrid.FromTotalGrid(xs.Count == 0 ? 0 : (int)Math.Round((xs.Min() + (long)xs.Max()) / 2d)),
+                TGrid.FromTotalGrid(ts.Count == 0 ? 0 : (int)Math.Round((ts.Min() + (long)ts.Max()) / 2d)));
+
+            static void AddPoint(List<int> xs, List<int> ts, OngekiObjectBase obj)
+            {
+                xs.Add((obj as IHorizonPositionObject)?.XGrid?.TotalGrid ?? 0);
+                ts.Add((obj as ITimelineObject)?.TGrid?.TotalGrid ?? 0);
+            }
         }
 
         public static bool Place(IEnumerable<OngekiObjectBase> roots, XGrid targetX, TGrid targetT, PasteOption option)
@@ -143,13 +157,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             }
 
             var anchor = ReferencePoint(rootArray);
-            var maxT = nodes.OfType<ITimelineObject>().Where(x => x.TGrid != null).Select(x => x.TGrid.TotalGrid).DefaultIfEmpty(0).Max();
             var xs = nodes.OfType<IHorizonPositionObject>().Select(x => (long)x.XGrid.TotalGrid).ToArray();
             var mirrorXSum = xs.Length == 0 ? 0 : xs.Min() + xs.Max();
             var dx = option == PasteOption.Direct || option == PasteOption.XGridZeroMirror ? 0L : (long)targetX.TotalGrid - anchor.x.TotalGrid;
             var dt = option == PasteOption.Direct ? 0L : (long)targetT.TotalGrid - anchor.t.TotalGrid;
             var pending = nodes.Select(node => (node,
-                t: node is ITimelineObject t && t.TGrid != null ? (long?)(option == PasteOption.SelectedRangeCenterTGridMirror ? (long)maxT + anchor.t.TotalGrid - t.TGrid.TotalGrid + dt : t.TGrid.TotalGrid + dt) : null,
+                t: node is ITimelineObject t && t.TGrid != null ? (long?)(option == PasteOption.SelectedRangeCenterTGridMirror ? 2L * anchor.t.TotalGrid - t.TGrid.TotalGrid + dt : t.TGrid.TotalGrid + dt) : null,
                 x: node is IHorizonPositionObject x ? (long?)(option == PasteOption.XGridZeroMirror ? -(long)x.XGrid.TotalGrid : option == PasteOption.SelectedRangeCenterXGridMirror ? mirrorXSum - x.XGrid.TotalGrid + dx : x.XGrid.TotalGrid + dx) : null)).ToArray();
             // 整组预检，禁止溢出或逐点钳零破坏物件间的相对坐标。
             if (pending.Any(v => v.t.HasValue && (v.t.Value < 0 || v.t.Value > int.MaxValue) ||

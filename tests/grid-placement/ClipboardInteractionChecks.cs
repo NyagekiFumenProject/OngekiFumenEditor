@@ -129,7 +129,7 @@ public static class ClipboardInteractionChecks
             check(!previouslySelected.IsSelected && pasted.All(x => x.IsSelected), "真实Paste Redo仅选中复制集合");
             Paste(input, 1811, 703);
             var unsnapped = editor.SelectObjects.OfType<Bell>().OrderBy(x => x.TGrid.TotalGrid).ToArray();
-            check(unsnapped[0].TGrid.TotalGrid == 1811 && unsnapped[1].TGrid.TotalGrid - unsnapped[0].TGrid.TotalGrid == 373 && unsnapped[2].XGrid.TotalGrid - unsnapped[0].XGrid.TotalGrid == 2900, "关闭X/T吸附精确保留Grid偏移");
+            check(Math.Abs((unsnapped[0].TGrid.TotalGrid + unsnapped[2].TGrid.TotalGrid) / 2d - 1811) <= 1 && unsnapped[1].TGrid.TotalGrid - unsnapped[0].TGrid.TotalGrid == 373 && unsnapped[2].XGrid.TotalGrid - unsnapped[0].XGrid.TotalGrid == 2900, "关闭X/T吸附精确保留Grid偏移且参考中心落点");
             setting.DisableTGridMagneticDock = false;
             Paste(input, 1810, 703);
             var timeOnly = editor.SelectObjects.OfType<Bell>().OrderBy(x => x.TGrid.TotalGrid).ToArray();
@@ -138,7 +138,7 @@ public static class ClipboardInteractionChecks
             setting.DisableXGridMagneticDock = false;
             Paste(input, 1811, 700);
             var xOnly = editor.SelectObjects.OfType<Bell>().OrderBy(x => x.TGrid.TotalGrid).ToArray();
-            check(xOnly[0].TGrid.TotalGrid == 1811 && xOnly[1].TGrid.TotalGrid - xOnly[0].TGrid.TotalGrid == 373 && xOnly.All(x => x.XGrid.TotalGrid % XGrid.DEFAULT_RES_X == 0), "只开横向吸附仍保留时间Grid差");
+            check(Math.Abs((xOnly[0].TGrid.TotalGrid + xOnly[2].TGrid.TotalGrid) / 2d - 1811) <= 1 && xOnly[1].TGrid.TotalGrid - xOnly[0].TGrid.TotalGrid == 373 && xOnly.All(x => x.XGrid.TotalGrid % XGrid.DEFAULT_RES_X == 0), "只开横向吸附仍保留时间Grid差且参考中心落点");
             var lane = new LaneLeftStart
             {
                 TGrid = TGrid.Zero,
@@ -207,6 +207,7 @@ public static class ClipboardInteractionChecks
             Paste(new OngekiObjectBase[] { noLane, Tap(473, 1000) }, 2201, 200000);
             check(project.Fumen.GetAllDisplayableObjects().Count() == objectCount, "新粘贴无轨Tap无法首次附轨时整个事务拒绝");
             check(undo.ActionStack.Count == undoCount, "拒绝的粘贴不产生Undo记录");
+
         }
         finally
         {
@@ -214,3 +215,4 @@ public static class ClipboardInteractionChecks
         }
     }
 }
+

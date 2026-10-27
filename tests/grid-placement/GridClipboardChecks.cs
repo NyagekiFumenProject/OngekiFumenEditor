@@ -61,8 +61,22 @@ public static class GridClipboardChecks
             var snapA = Point(100, -100);
             var snapB = Point(1733, 300);
             Check(GridClipboardGeometry.Place(new[] { snapA, snapB }, XGrid.Zero, snappedTarget, PasteOption.None), "实际节奏线目标可整组粘贴");
-            Check(snapA.TGrid.TotalGrid == expectedTick && snapB.TGrid.TotalGrid - snapA.TGrid.TotalGrid == 1633, "参考点落线且非节奏线原始Grid差不变");
+            Check(Math.Abs((snapA.TGrid.TotalGrid + snapB.TGrid.TotalGrid) / 2d - expectedTick) <= 1 && snapB.TGrid.TotalGrid - snapA.TGrid.TotalGrid == 1633, "参考中心落线且非节奏线原始Grid差不变");
             Check(snapB.XGrid.TotalGrid - snapA.XGrid.TotalGrid == 400, "跨变更区域横向Grid差不变");
+
+        var cornerTopLeft = Point(500, -100);
+        var cornerTopRight = Point(500, 100);
+        var cornerBottomLeft = Point(100, -100);
+        var cornerBottomRight = Point(100, 100);
+        var fourObjectAnchor = GridClipboardGeometry.ReferencePoint(new[]
+        {
+            cornerTopLeft,
+            cornerTopRight,
+            cornerBottomLeft,
+            cornerBottomRight
+        });
+        Check(fourObjectAnchor.x.TotalGrid == 0 && fourObjectAnchor.t.TotalGrid == 300,
+            "四物件参考点取Grid包围盒中心而非最早时间");
         }
 
         var a = Point(100, -100);
@@ -111,8 +125,8 @@ public static class GridClipboardChecks
         Check(a.TGrid.TotalGrid == 100 && b.TGrid.TotalGrid == 300 && a.XGrid.TotalGrid == 10, "负时间拒绝无部分修改");
         Check(!GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(int.MaxValue), PasteOption.None), "整组拒绝时间溢出");
         Check(a.TGrid.TotalGrid == 100 && b.TGrid.TotalGrid == 300, "时间溢出拒绝无部分修改");
-        Check(GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(1), PasteOption.None), "向前负偏移可成功");
-        Check(a.TGrid.TotalGrid == 1 && b.TGrid.TotalGrid == 201, "向前移动保留时间间隔");
+        Check(GridClipboardGeometry.Place(new[] { a, b }, XGrid.Zero, TGrid.FromTotalGrid(100), PasteOption.None), "向前负偏移可成功");
+        Check(a.TGrid.TotalGrid == 0 && b.TGrid.TotalGrid == 200, "向前移动保留时间间隔");
 
         a = Point(100, 0);
         b = Point(300, 1000);
