@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Threading.Tasks;
+using SystemAction = System.Action;
 using System.Windows;
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
 {
@@ -87,7 +88,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
             if (!GridClipboardGeometry.Place(copies, targetX, targetT, pasteOption) ||
                 (targetEditor.Setting.AdjustPastedObjects && !targetEditor.InteractiveManager.AdjustPastedObjects(copies, targetEditor)))
             {
-                targetEditor.ToastNotify(OngekiFumenEditor.Properties.Resources.PasteInvalidGridPosition);
+                targetEditor.ToastNotify(Resources.PasteInvalidGridPosition);
                 return Task.CompletedTask;
             }
 
@@ -145,8 +146,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Kernel.DefaultImpl
                     selected.IsSelected = false;
             }
 
-            var redo = new System.Action(ClearSelection);
-            var undo = new System.Action(ClearSelection);
+            var redo = new SystemAction(ClearSelection);
+            var undo = new SystemAction(ClearSelection);
             foreach (var copied in copies.OrderBy(x => x is ConnectableStartObject ? 0 : 1))
             {
                 if (copied is Flick flick && (pasteOption == PasteOption.XGridZeroMirror || pasteOption == PasteOption.SelectedRangeCenterXGridMirror))

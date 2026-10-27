@@ -2,6 +2,7 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.EditorObjects.LaneCurve;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
+using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +24,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
             var originals = sources.Where(x => x != null).ToArray();
             var copies = originals.Select(Clone).ToArray();
             var lanes = originals.Select((source, index) => (source, copy: copies[index]))
-                .Where(x => x.source is OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase && x.copy != null)
-                .ToDictionary(x => (OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase)x.source,
-                    x => (OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase)x.copy);
+                .Where(x => x.source is LaneStartBase && x.copy != null)
+                .ToDictionary(x => (LaneStartBase)x.source,
+                    x => (LaneStartBase)x.copy);
             for (var i = 0; i < copies.Length; i++)
             {
                 if (originals[i] is ILaneDockable from && copies[i] is ILaneDockable to &&
@@ -88,8 +89,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                     break;
             }
 
-            if (copy is OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase laneCopy)
-                laneCopy.IsTransparent = ((OngekiFumenEditor.Base.OngekiObjects.Lane.Base.LaneStartBase)source).IsTransparent;
+            if (copy is LaneStartBase laneCopy)
+                laneCopy.IsTransparent = ((LaneStartBase)source).IsTransparent;
             // CopyNew 的基础实现共享 Grid，必须在快照边界断开所有子物件的引用。
             var copiedNodes = Enumerate(copy).ToArray();
             for (var i = 0; i < copiedNodes.Length; i++)
