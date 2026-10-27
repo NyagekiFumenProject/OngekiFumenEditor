@@ -7,10 +7,12 @@ using OngekiFumenEditor.Base.OngekiObjects.Lane.Base;
 
 namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
 {
+    // 轨道几何投影；投影器生命周期与单次拖动/粘贴事务一致。
     public static class LaneGeometry
     {
         public const double LaneSnapDistancePixels = 8d;
         public const double XGridMagneticDistancePixels = 4d;
+        private const int MaxInterpolatedCacheEntries = 256;
 
         internal static Dictionary<int, List<(int min, int max)>> BuildHorizontalRanges(ConnectableStartObject lane)
         {
@@ -106,10 +108,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Base
                         result = children[lo].CalulateXGrid(time);
                 }
 
+                if (interpolated.Count >= MaxInterpolatedCacheEntries)
+                    interpolated.Clear();
                 interpolated[time.TotalGrid] = result;
                 return result;
             };
         }
-
     }
 }
