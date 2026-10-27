@@ -302,6 +302,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### E-2 粘贴参考点从画布坐标改为 TGrid 坐标（PR 语义变化）
 
+- 状态：**已完成（按 Grid 语义）**（`72b09281`）
 - 位置：`GridClipboardGeometry.cs:129-148`；对照 `8fa0f771^1:...DefaultFumenEditorClipboard.cs` 的 `CalculateRangeCenter`/`CalculateXMirror`/`CalculateYMirror`
 - 现象：旧版在 canvas X/Y 空间计算范围中心与镜像轴（Y 受 `VerticalDisplayScale`、BPM、拍号影响，X 受横向缩放影响）；新版直接使用 `XGrid.TotalGrid`/`TGrid.TotalGrid`。在变速/变拍谱面上，同样鼠标位置得到的锚点不同。
 - 影响：PR 的目标是“按 Grid 复制粘贴”，新语义可能是有意为之；但需要 UI/回归确认，不能默认与旧版等价。
@@ -309,6 +310,7 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 
 ### E-3 剪贴板只校验集合非空，不校验源文档（PR 行为差异）
 
+- 状态：**已完成**（`7dc66e4b`）
 - 位置：`DefaultFumenEditorClipboard.cs:27`（`ContainPastableObjects => currentCopiedSources.Count > 0`）；`:40-54`（先 `Clear` 再 `CloneSet`）
 - 现象：旧版要求 `sourceEditor is not null`；新版保存克隆对象，通常更安全，但 `CopyObjects` 先 `Clear` 再 `CloneSet`，克隆过程中异常会清空旧剪贴板且新内容未写入，`ContainPastableObjects` 变为 false。
 - 建议：先构建到临时列表，成功后再替换；或给 `ContainPastableObjects` 增加源文档有效性校验。
@@ -327,6 +329,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | 优先级 | 编号 | 处理建议 | 状态 |
 | --- | --- | --- | --- |
 | P0 | E-1 | 修复 X 镜像时间平移，补 D-6 回归；这是用户可见行为回归 | 未开始 |
+| P0 | E-2 | 明确并固定以 Grid 为准的粘贴参考点/镜像轴 | **已完成** `72b09281` |
+| P1 | E-3 | 复制克隆失败不得清空旧剪贴板 | **已完成** `7dc66e4b` |
 | P0 | A-1 | 删除重复枚举/强转，消除新增/重排枚举的静默错位风险 | **已完成** `94f7b5d3` |
 | P0 | A-2 | 拆分 Kernel ↔ ViewModel 双向依赖，至少把 `GridClipboardGeometry` 移出 `DefaultImpl` | **已处理（第一阶段）** `5917cfb7`；A-3 已完成，Kernel→VM 未完全消除 |
 | P1 | A-4 | `TryAdjustGrid` 改为 public virtual 或在管理器层实现，恢复插件兼容契约 | **已完成** `76ac02bf` |
@@ -384,8 +388,8 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - [ ] D-5 检查聚合方式
 - [ ] D-6 X 镜像时间回归
 - [ ] E-1 镜像时间回归
-- [ ] E-2 参考点语义确认
-- [ ] E-3 剪贴板半更新防护
+- [x] E-2 参考点语义确认
+- [x] E-3 剪贴板半更新防护
 
 ## 12. 解决方案明细（与 §3-§7 编号一一对应）
 
@@ -573,14 +577,14 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 - 验收：两种 X 镜像粘贴后 T 不变；普通粘贴与 T 镜像行为不变；grid-placement 全量回归通过。
 
 #### E-2
-- 方案（推荐）：保留“以 Grid 为准”的新语义，在 `GridClipboardGeometry.Place` XML doc 与测试中写明参考点/镜像轴单位；补跨 BPM/拍号断言；发布说明标注行为变化。备选：`PasteObjects` 增加 `PasteReferenceSpace`（Grid/Canvas），Canvas 模式用 `ConvertXGridToX`/`ConvertTGridToY_DesignMode` 计算 anchor 与 target。
-- 验收：跨 BPM 谱面粘贴位置有明确断言；UI 手测结果与文档一致。
+- 状态：**已完成（按 Grid 语义）**（`72b09281`）
+- 方案：保留 Grid 坐标，不增加 Canvas 回退；`ReferencePoint` 按复制根对象的 Grid 包围盒取 X/T 中心（纯轨道取起点、混合选择忽略轨道、ISA 取两角），替代普通物件的 `minT`；`SelectedRangeCenterTGridMirror` 改用 `2 * anchor` 反射中心，避免 anchor 中心化后镜像轴偏移。
+- 验收：四物件两行两列参考点落在整体中心；跨 BPM 粘贴与 T 镜像回归通过。
 
 #### E-3
-- 方案：`CopyObjects` 先构建临时列表，再替换：
-  `var clones = GridClipboardGeometry.CloneSet(sources); currentCopiedSources.Clear(); currentCopiedSources.AddRange(clones);`
-  可选给 `ContainPastableObjects` 增加源文档/版本校验。
-- 验收：克隆异常时旧剪贴板不被清空（可用空输入/异常注入测试）；无半更新状态。
+- 状态：**已完成**（`7dc66e4b`）
+- 方案：`CopyObjects` 先完成 `CloneSet`，成功后再 `Clear`/`AddRange`；新增抛异常的测试对象验证旧剪贴板保留。
+- 验收：克隆异常时旧剪贴板仍可粘贴；无半更新状态。
 
 ## 13. 实施状态（2026-10-26）
 
@@ -607,12 +611,14 @@ PR #43 的功能与回归覆盖较完整（仓库内 `artifacts/grid_tests.log` 
 | C-14 | 已完成 | `0cf61804` | 删除克隆根对象重复 `Tag` 赋值；Release 0 error；grid-placement 259/259 |
 | C-15 | 已完成 | `63e4227e` | `PasteInvalidGridPosition` 对齐生成器多行 getter 格式；Release 0 error |
 | C-16 | 已完成 | `d6604d24` | 恢复三个 resx 的 UTF-8 BOM；Release 0 error；grid-placement 259/259 |
+| E-2 | 已完成（按 Grid 语义） | `72b09281` | 参考点改为根对象 Grid 包围盒中心，T 镜像用 `2*anchor`；Release 0 error；grid-placement 261/261；真机四物件两行两列粘贴中心为 T=300/X=0 |
+| E-3 | 已完成 | `7dc66e4b` | `CopyObjects` 先克隆后替换，异常保留旧剪贴板；Release 0 error；grid-placement 262/262 |
 | B-3 | 已完成（随 A-3） | `446b1edf` | `CalculateOriginalLaneX` 与测试反射调用删除，贝塞尔投影测试改用 `LaneGeometry.CreateProjector`；grid-placement 249/249 |
 
 说明：
 
 - A-2 只完成“移动 helper + 消除 `ViewModels → Kernel.DefaultImpl`”的第一阶段；A-3 已完成，`CreateOriginalLaneProjector` 已删除，但 `DefaultFumenEditorClipboard` 仍调用 `InteractiveManager.AdjustPastedObjects`（Kernel→ViewModels 未完全消除）。
-- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项；C 批最终为 259 项（C-8 外部撤销断言、B-9 ISA 断言）。
+- A-1/A-2 的单元回归使用 `tests/grid-placement`（228 项）；A-4 为 229 项；B-1/A-3 为 249 项；A-5/A-6/B-2/B-4/B-5 为 255 项；B-9 为 257 项；C 批为 259 项；E-2/E-3 最终为 262 项（四物件中心、异常克隆保留断言）。
 - 测试直接引用的 helper 已改为 public，`InternalsVisibleTo("GridPlacement")` 已删除（`7f9f659b`）；`LaneSwitchResolver`/`SelectionGridDrag` 仍保持 internal，测试通过反射访问，不依赖友元。
 - 真机测试使用自构建 Debug 实例（后台启动并最小化），先跑完整 `node tests/mcp-e2e/run.mjs`（1236 项），再通过 MCP 运行时脚本驱动真实剪贴板/拖动路径；临时脚本位于 `tests/mcp-e2e/.tmp/`（已清理）。
 - 本轮不改变 Avalonia 同步点 `8b2940785`；Avalonia 树未修改。

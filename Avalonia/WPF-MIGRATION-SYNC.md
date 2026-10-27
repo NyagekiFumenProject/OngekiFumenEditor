@@ -460,3 +460,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` 259/259；自构建 Debug 实例 MCP e2e 1236/1236；真机非 Direct 粘贴 2 个 Bell 后数量 +2。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新对应状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-28：PR #43 审查整改 E-2/E-3（WPF）
+
+- E-2（`72b09281`）：明确采用 Grid 语义；`GridClipboardGeometry.ReferencePoint` 按复制根对象的 Grid 包围盒取 X/T 中心（纯轨道取起点、混合选择忽略轨道、ISA 取两角），修复普通物件 T 取最早时间导致四物件参考点落在单行的问题；`SelectedRangeCenterTGridMirror` 改用 `2 * anchor` 保持范围镜像。
+- E-3（`7dc66e4b`）：`CopyObjects` 先完成 `CloneSet`，成功后再替换 `currentCopiedSources`；新增 `ThrowingCopyTap` 回归，克隆异常时旧剪贴板仍保留。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 262/262；自构建 Debug 实例 MCP e2e 1236/1236；真机四物件两行两列粘贴中心为 T=300/X=0。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 E-2/E-3 状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
