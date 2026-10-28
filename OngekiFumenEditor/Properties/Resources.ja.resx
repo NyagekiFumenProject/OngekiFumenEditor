@@ -294,6 +294,9 @@
   <data name="BatchModeToggle" xml:space="preserve">
     <value>ブラシモードを切り替え</value>
   </data>
+  <data name="kbd_editor_ToggleBatchMode" xml:space="preserve">
+    <value>ブラシモードを切り替え</value>
+  </data>
   <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>ブラシモードが有効な場合，ほとんどのオブジェクトはドラッグできません。</value>
   </data>
@@ -2836,4 +2839,5 @@
   <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>他の変速グループがないため、参照ごと削除するかキャンセルしてください。</value></data>
   <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>変速グループ参照を移動してグループを削除</value></data>
   <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>変速グループと参照を削除</value></data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>貼り付け位置が座標範囲外か、譜面の開始より前の時刻を含んでいます。</value></data>
 </root>

@@ -130,6 +130,8 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 | 2026-10-18 | 修复（WPF 侧，非同步） | `f47b823f`、`85799db1`、`0a7e4251`、`2e2c8a87` | 一次性验证工程 `tests/mcp-e2e/.tmp/undo-check`（未入库；40 项断言全过）+ `dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug` 0 error + 后台启动冒烟（自建实例启动到 MCP ready 无异常后停止） | 为四项此前不进 Undo/Redo 的编辑器操作补封装：① TGrid 计算器「赋给选中物件」改为 `LambdaUndoAction`（`TGridCalculatorToolViewerViewModel.CreateApplyTGridAction`）；②「重算编辑器滚动高度」改为命令内联 `LambdaUndoAction`（撤销恢复旧 `AudioDuration` 并重算）；③ 变速分组新建与拖拽移动改为 `LambdaUndoAction` / `FumenSoflanGroupListViewerViewModel.CreateMoveAction`（`SoflanGroupWrapItemGroup.Insert` 取代无调用者的 `InsertBefore`，新增三语资源 `SoflanGroupMove`；拖到空目标不再丢项）；④ 辅助菜单「调整可停靠物件水平位置」改为单个批量 `LambdaUndoAction`。**Avalonia 树尚未移植以上四项，本次不改变同步点。** |
 
+| 2026-10-25 | 清理（WPF 侧，非同步） | `cf367160` | `docs/sixlabors-removal.md` + `tests/sixlabors-removal/`（按 csproj 单独调用，不入 sln） | 移除 `SixLabors.Fonts 2.1.3` / `SixLabors.ImageSharp 3.1.12`（顺带消除 ImageSharp 3.1.12 的 Moderate 漏洞 GHSA-gwg2-r3hj-4w44）：字体枚举改用 `SKFontManager.Default.FontFamilies`（新增 `Kernel/Graphics/Text/SystemFontFamilyProvider`，替换 Skia 绘制与设置页两处，删除无消费者的 `FontHandle.FilePath`）；图片解码/拉伸/垂直翻转/PNG 编码改用 SkiaSharp 版 `Utils/ImageUtils`（替换 jacket 生成、`ImageLoader` 的 AB 分支、`LoadCardImageConverter`），像素语义保持未预乘 RGBA32 与原有翻转方向。`TexturePlugin.dll` 仅在未被调用的 `TextureImportExport` 中引用 ImageSharp，jacket 生成/读取路径实测不加载。验证：Release 构建 0 error；`tests/sixlabors-removal` 47/47 通过（含 Generate→AB→ImageLoader→Converter 端到端、错误路径、字体缓存与方向断言）；`project.assets.json`/`dotnet list package`/Release 产物无 SixLabors；自构建实例启动冒烟正常。**Avalonia 树仍使用 SixLabors，本次未处理，不改变同步点 `8b2940785`。** |
+
 ## 本次 WPF 独立改动（2026-10-16）
 
 - WPF：子弹和激光判定范围显示。
@@ -239,3 +241,230 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：移除 `IndividualSoflanAreaEndIndicator` 的 `tGridHasSet` 标志，改用 `TGrid?` 背字段：`null` 表示终点尚未显式设置，首次读取时复制起点并固化；显式赋值后终点独立。赋值统一走 `SetTGridCore`，保留 `End >= Start` 约束、子属性变化订阅与 `SetTGridUnclamped`。
 - 验证：未设置终点的 ISA 读到 `End=Start`、`GridLength=0`；设置 `End=14` 后把 `Start` 移到 12，`End` 仍为 14；`node tests/mcp-e2e/run.mjs` 1236/1236 通过；Debug 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：合并 PR #43（WPF）
+
+- 合并 `as2er:codex/grid-copy-paste-movement`（head `44417889`）到 `pr43` 分支，保留本树此前的 ISA/光标/剪贴板改动。
+- PR 自带记录摘要：
+  - 2026-10-18：Grid PR 补充修复——Start 横移与坐标 Unit/Grid 修改时先失效相邻路径缓存，再通知绘制与贴轨监听者；时间范围不变时不重建区间索引。
+  - 2026-10-18：Tap/Hold 邻近换线——8 像素内换线，Hold 以头决定轨道，单拖头保持尾时间、同拖头尾保持时长；仅拖尾不换线。
+  - 2026-10-21：WPF Grid 交互边界重构——选择拖动事务归入 ObjectInteractiveManager，剪贴板只调度纯 Grid 平移与交互吸附；LaneGeometry / LaneSwitchResolver 不引用 VM。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：快捷键配置键统一 kbd_editor_*（WPF）
+
+- WPF：`BatchModeToggle` 配置键直接改名为 `kbd_editor_ToggleBatchMode`，新增三语资源（复用原「切换批量模式」文案）；不保留旧键兼容或迁移。
+- 验证：隔离实例读回 `ConfigKey=kbd_editor_ToggleBatchMode`；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：修复 Playtime 的 Stopwatch tick 单位（WPF）
+
+- WPF：`DefaultMusicPlayer.GetTime` 中 `TimeSpan.FromTicks(sw.ElapsedTicks)` 改为 `sw.Elapsed`。前者把 Stopwatch 原始 tick 当成 TimeSpan tick（1e7/s）使用，在 QPC 频率非 10MHz 的机器上 Playtime 会按 `Frequency/1e7` 缩放（页面报告的 2,533,209Hz 机器为 0.2533x，慢约 3.95 倍）。
+- 验证：本机 `Stopwatch.Frequency=10,000,000`，修复前后均约 1.0x；模拟 2,533,209Hz 时错误写法 2 秒只得到 506.6ms，修复公式得到 2000ms；修复后实例播放 2 秒 `CurrentTime=2001.4ms`（ratio=1.00003）。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：Duration 使用重采样后的流时长（WPF）
+
+- WPF：`DefaultMusicPlayer.Load` 最终 `Duration` 改为 `loadedReader.TotalTime`，与 `Seek`/`CurrentTime` 共用重采样后的流基准；原始 `processedProvider.Duration` 仅作为加载期临时值。
+- 验证：30s fixture 上 `Duration=30000ms`，`Seek(Duration)` 后 `CurrentTime=30000ms`；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：暂停时以音频流位置校准时间（WPF）
+
+- WPF：`DefaultMusicPlayer.Pause` 的 `pauseTime` 从 `GetTime()`（Stopwatch 推算）改为 `audioFileReader.CurrentTime`，与 `Seek` 的校准口径一致，避免多次暂停/继续累积误差。
+- 验证：6 轮 500ms 播放/暂停，修复后前 4 轮 `CurrentTime` 精确为 500/1000/1500/2000ms；暂停按流位置校准后不再基于 Stopwatch 累积（输出缓冲预读可能带来一次约 10ms 前跳）。Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：Grid 拖动事务命名对齐实现（WPF）
+
+- WPF：取消入口 `CancelPlacementTools` 改名 `AbortSelectionDrag`；`EndSelectionGridDrag(bool cancel)` 拆为 `CommitSelectionDrag()` / `AbortSelectionDrag()`；`MoveSelectionGridDrag` 改名 `UpdateSelectionDrag`，调用点与 `tests/grid-placement` 反射入口同步。
+- WPF：拖动状态按实际语义重命名：`isSelectRangeDragging`→`isObjectDragStarted`、`currentDraggingActionId`→`autoScrollRedispatchToken`、`placementInputView`→`editorView`、`selectionGridDrag`→`activeSelectionDrag`、`selectionWasDirty`→`isDirtyBeforeDrag`、`selectionUndoActions/Count`→`undoStackBeforeDrag/undoCountBeforeDrag`、`selectionHasExternalChanges`→`hasExternalChangesDuringDrag`、`applyingSelection`→`isApplyingDragSnapshots`、`observedFumen`→`dragFumen`。
+- 验证：`dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug/Release` 均 0 error；`dotnet run --project tests/grid-placement/GridPlacement.csproj -c Release -p:EditorAssemblyDirectory=<隔离 Release 输出>` 228 项通过。本机有运行中的编辑器锁定默认 `bin`，构建输出重定向到未被版本控制的 `artifacts/`。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：音频缓冲读取改为块复制（WPF）
+
+- WPF：`BufferWaveStream.Read(byte[])` / `Read(float[])` 从逐元素循环改为 `Buffer.BlockCopy` / `Span.CopyTo`，保持 `Position` 前进量与返回值语义；末尾不足和越界读取仍返回实际数量。
+- 验证：临时实例反射构造缓冲流，byte/float 读取内容、Position 前进与末尾读取均正确；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：Seek 按 BlockAlign 对齐（WPF）
+
+- WPF：`DefaultMusicPlayer.Seek` 的字节偏移向下对齐到 `WaveFormat.BlockAlign`，避免 `ConvertTGridToAudioTime` 的 ticks 精度落到半帧/半样本导致左右声道错位。
+- 验证：Seek 到 123.456ms 后位置为 47400 字节（8 的倍数），`CurrentTime=123.4375ms`（误差小于一个样本帧）；继续播放正常。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：新增基于设备播放位置的 DefaultMusicPlayer_new（WPF）
+
+- WPF：新增 `DefaultMusicPlayer_new`（未接入 `NAudioManager`，生产仍用旧实现）。时间源完全改为 `IWavePosition.GetPosition()` / `OutputWaveFormat`，不使用 Stopwatch 或旧逻辑回退；`Play` / `Pause` / `Seek` 以设备字节位置重建基准，并处理 WaveOut 32 位位置回绕；`NAudioManager` 增加 internal `TryGetOutputPosition`。
+- 验证：临时切换新实现后，6 轮 500ms 播放/暂停的 `CurrentTime` 与真实时间差约 2ms 且不累积；Seek 123.456ms 对齐到 123.4375ms（8 字节）；继续播放正常；Debug 构建 0 error。生产已恢复旧播放器。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-23：启用设备位置播放器，ASIO 回退旧实现（WPF）
+
+- WPF：`NAudioManager.LoadAudioAsync` 在非 ASIO 且输出设备实现 `IWavePosition` 时使用 `DefaultMusicPlayer_new`；ASIO 继续使用旧 `DefaultMusicPlayer`。新增播放器实现选择日志。
+- 验证：Wasapi 实例日志显示 `Music player implementation: DefaultMusicPlayer_new`；播放 1 秒 `CurrentTime=1001.8ms`（ratio 0.9987），Seek 123.456ms 对齐到 123.4375ms；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。ASIO 分支因本机无驱动未实机验证，按类型显式回退。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：输入中断监听移出 View（WPF）
+
+- WPF：`FumenVisualEditorView.xaml.cs` 恢复为无事件代码，View 不再新增或修改交互逻辑。原由 View 转发的窗口失焦、工具箱拖入、卸载/DataContext 变化改由 ViewModel 处理：
+  - `HookWindowFocus` 监听 `Window.Deactivated` 与 `DragDrop.PreviewDragEnterEvent`（工具箱数据格式），触发 `AbortSelectionDrag`；
+  - `OnPlacementActiveEditorChanged` 在编辑器切走时触发 `AbortSelectionDrag`；
+  - `Dispose` / `OnDeactivateAsync` 原有取消路径保持不变。
+- 验证：View 与 master 完全一致；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：DragEnter 注册迁入渲染控件生命周期（WPF）
+
+- WPF：`FumenVisualEditorView` 保持无事件代码；工具箱拖入监听从窗口 `PreviewDragEnterEvent` 改为渲染控件 `DragDrop.DragEnterEvent`。
+- `OnRenderControlHostLoaded` 注册 `renderControl.AddHandler(DragDrop.DragEnterEvent, ...)` 并保存控件与委托；`Dispose` 中注销。窗口失焦仍由 `HookWindowFocus` 的 `Window.Deactivated` 处理。
+- 验证：View 与 master 一致；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：DragEnter 改用 Message.SetAttach 绑定（WPF）
+
+- WPF：渲染控件的 `DragEnter` 不再手动 `AddHandler`/`RemoveHandler`，改为在既有 `Message.SetAttach(renderControl, ...)` 字符串中增加 `[Event DragEnter] = [Action OnToolboxDragEntered($executionContext)]`；`OnToolboxDragEntered` 改为 `ActionExecutionContext` 签名，仍检查 `ToolboxDragDrop.DataFormat` 后调用 `AbortSelectionDrag()`。
+- 删除 `renderControlElement` / `toolboxDragEnterHandler` 字段及 `Dispose` 中的手动注销。
+- 验证：View 与 master 一致；Caliburn attach 无解析错误；`node tests/mcp-e2e/run.mjs --url ...` 1236/1236 通过；Debug 构建 0 error。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：验证 OnDeactivateAsync 不能替代 Window.Deactivated（WPF）
+
+- 实验：临时删除 `FumenVisualEditorViewModel.IsaPlacement.cs` 的 `focusedWindow` / `HookWindowFocus` / `UnhookWindowFocus` / `OnFocusedWindowDeactivated` 及三处调用，仅依赖 `OnDeactivateAsync(close:false)` 的现有清理；随后按精确反向编辑恢复。
+- 新增 `tests/bullet-placement/DeactivationChecks.cs` 并在 `Program.cs` 注册，用隐藏 `ProbeWindow.OnDeactivated` 触发真实 `Window.Deactivated`，不显示/激活窗口。覆盖 ISA 两阶段取消与迟到取点、真实选择拖动事务回滚（T 坐标、`IsDirty`、撤销栈、自动滚动重派发）、批量放置不受影响、文档失活/文档切换/关闭路径、重复失活与重复激活。
+- 实测结论：替换后 19 条窗口失焦断言失败——ISA 阶段/光标/目标组残留、迟到取点在 `WaitingSecondPoint` 下仍会创建 ISA 与撤销记录、拖动事务不中止不回滚、重新激活后不再监听窗口；文档切换与关闭场景全部通过。故 `OnDeactivateAsync` 只覆盖文档生命周期，不能等价取代窗口失焦处理，生产实现保留原样。
+- 验证：`dotnet build OngekiFumenEditor.sln -c Debug` 0 error；`tests/bullet-placement` 282/282；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs --url http://127.0.0.1:39281/mcp` 1236/1236。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：补充 IDeactivate 生命周期事件契约测试（WPF）
+
+- 新增 `tests/bullet-placement/LifecycleEventChecks.cs` 并在 `Program.cs` 注册，用真实编辑器固定 Caliburn `AttemptingDeactivation` / `Deactivated` 的行为：
+  - 窗口失焦不触发任一事件，文档保持 active；ISA 仍由窗口失焦专用路径取消。
+  - 文档切换/失活：`AttemptingDeactivation`（IsActive=true，ISA 仍在）→ 清理 → IsActive=false → `Deactivated`（WasClosed=false），各一次。
+  - 关闭：两次事件均 WasClosed=true，Dispose 先于 Deactivated；重复关闭会再次触发事件（IsInitialized 仍为 true），但 Dispose 与销毁通知只发生一次。
+  - `AttemptingDeactivation` 抛异常会阻止清理与 IsActive 转换；`Deactivated` 抛异常发生在清理之后，移除处理器后可重新激活。
+  - `Deactivated` 支持异步 handler，`DeactivateAsync` 会等待其 Task 完成后才结束。
+- 验证：`tests/bullet-placement` 320/320；生产代码未改动。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-24：Debug 构建转发 Caliburn.Micro 日志（WPF）
+
+- WPF：新增 `Utils/CaliburnLogAdapter.cs`（`#if DEBUG`），实现 `Caliburn.Micro.ILog` 并把 `Info` / `Warn` / `Error` 转发到项目 `Utils.Log`；消息保留 Caliburn 类型名（`{类型全名}: {内容}`），日志调用者标签固定为 `CMLog`（输出 `<CMLog:行号>`），格式化失败或日志管道未就绪时退回 `Debug.WriteLine`，不影响 Caliburn 控制流。
+- `AppBootstrapper.Configure` 在日志输出与 `CoreLog` 解析器初始化后设置 `LogManager.GetLog = type => new CaliburnLogAdapter(type)`，同样位于 `#if DEBUG`。
+- 验证：Debug 实例启动日志出现 `<CMLog:41> Caliburn.Micro.NameTransformer/Screen/ViewModelBinder ...`；`tests/bullet-placement` 320/320；`dotnet build -c Release` 0 error，Release 产物不含 `CaliburnLogAdapter`（条件编译生效）。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-25：修复 Playtime 跳末尾与音效线程占用（WPF）
+
+- `DefaultMusicPlayer_new.GetExpandedOutputPosition`：只有接近 32 位边界的回退才按 `WaveOut` 计数器回绕补 `2^32`；其余回退视为 `WasapiOut` 的 64 位位置抖动，同步调整 `devicePositionBase`，避免 `CurrentTime` 瞬间跳约 3.4 小时、视图被 clamp 到音频末尾。
+- `AudioPlayerToolViewerViewModel.OnPlaybackFinished`：删除播放完成后强制 `ScrollTo(Duration - 1s)`，避免把视图钉在末尾并通过自动保存写回工程。
+- `FumenVisualEditorViewModel`：加载与保存 `RememberLastDisplayTime` 时都 clamp 到 `[0, AudioDuration - 100ms]`，防止越界值写入工程或再次打开时停在末尾。
+- `DefaultFumenSoundPlayer`：`UpdateInternal` 返回距离下一个点音效/节拍器/循环音效开始或结束的毫秒数，`OnUpdate` 据此睡到触发前 5 ms（单次上限 50 ms，空闲 5 ms 轮询），消除常驻忙等且不延迟触发；`Prepare` 改用 `AbortAsync()`，不再在 UI 线程同步 `Wait()` 旧音效线程。
+- 验证：Debug 构建 0 error；`UpdateInternal` 调度断言 6/6（点音效间隔、消费后空闲、循环音效开始/结束、越过区间）；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs --url http://127.0.0.1:39281/mcp` 1236/1236。WASAPI 位置回退修复依据排查报告的实测（切 WaveOut 即正常、机制确认），本轮未重复音频设备长播实测。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-25：移除未使用的 AngleSharp 传递依赖（WPF）
+
+- 删除 4 处未使用的 `using AngleSharp.*`（`FumenBulletPalleteListViewerViewModel`、`StandardizeFormat`、`HoldDrawingTarget`、`SkiaRenderControl_OpenGL`）。
+- 移除 `SimpleSvg2LineSegementInterpolater` 包引用：它自 `SvgToLaneBrowser` 删除后已无代码使用，`AngleSharp` / `AngleSharp.Css` / `AngleSharp.Xml` 全部从依赖图消失，同时消除 `NU1902` 漏洞警告。
+- 验证：`dotnet restore` / `dotnet build` 0 error；`tests/bullet-placement` 320/320；`project.assets.json` 中 AngleSharp 与 SimpleSvg 相关条目均为 0。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-25：CI 并行化 —— artifact 上传与谱面服务器推送拆分（仓库根，非 WPF 源码）
+
+- `.github/workflows/BuildProgram.yml`：`build` job 只负责构建与打包，并通过保留 1 天的中转 artifact `editor-zip` 交付 zip；新增 `Upload editor artifact`（job id `publish-artifact`）与 `Push editor zip to fumen server`（job id `push-editor-zip`）两个都 `needs: build`、彼此并行的 job，分别下载中转 zip 后执行 `actions/upload-artifact` 与 `updateEditorZip` 调用；推送 job 保留 job 级 `continue-on-error`。
+- 正式 artifact 名与 zip 名统一由 `Compose artifact name` 生成，zip 名由 artifact 名加 `.zip` 派生；名称输入经 env 传入，避免分支名中的 `$`、反引号等字符被 PowerShell 二次解析。
+- job 级 `if` 不能读取 `env` 上下文，推送条件改由 `github.event.inputs.BuildConfiguration || 'Release'` 表达；`workflow_dispatch` 选择 Debug 时仍跳过推送。
+- 验证：YAML 解析、job 依赖/`needs` 与 outputs 引用断言通过；全部 12 个 `run` 脚本 PowerShell 语法检查通过；artifact/zip 名称与下载路径边界冒烟（含 `/`、`$`、反引号分支名）。未在 GitHub Actions 上实跑。
+- Avalonia：本次未处理，不改变同步点 `8b2940785`。
+
+## 2026-10-25：NuGet 依赖审计与升级（WPF）
+
+- 去除：本轮无新增可去除的直接包；`SimpleSvg2LineSegementInterpolater` 与 `AngleSharp` 已在前一提交移除。
+- 低风险升级（patch/minor）：FontStashSharp 1.5.5→1.6.2、FontStashSharp.Rasterizers.FreeType 1.2.3→1.2.9、Microsoft.Xaml.Behaviors.Wpf 1.1.142→1.1.161、Nerdbank.GitVersioning 3.9.50→3.10.94、SharpVectors 1.8.5→1.8.6、Svg 3.4.7→3.4.8、System.CommandLine 2.0.8→2.0.13、Microsoft.Extensions.ObjectPool 10.0.0→10.0.13、System.ComponentModel.Composition 10.0.0→10.0.13。
+- 漏洞修复：Microsoft.Build 17.7.2→17.14.28，并显式引用并统一 `Microsoft.Build.Framework` / `Microsoft.Build.Tasks.Core` / `Microsoft.Build.Utilities.Core` 17.14.28（修复 GHSA-h4j7-5rxr-p4wc）。SixLabors.ImageSharp 4.1.3 虽修复 GHSA-gwg2-r3hj-4w44，但其构建目标要求在 `dotnet publish` 阶段提供 Six Labors license；无 license 时发布直接失败，已回退到 3.1.12，保留该 Moderate 漏洞，待配置 license 后再升级。
+- 验证：`dotnet restore` / `dotnet build OngekiFumenEditor.sln -c Debug` 0 error；`dotnet publish OngekiFumenEditor.csproj -c Release` 成功；`tests/bullet-placement` 320/320；`tests/grid-placement` 228/228；自构建隔离实例 `node tests/mcp-e2e/run.mjs` 1236/1236（含脚本编译）。当前漏洞扫描仍会报告 ImageSharp 3.1.12 的 Moderate 问题。
+- 注意：ImageSharp 4.x 使用 Six Labors Split License；`dotnet publish` 必须有 `SixLaborsLicenseKey` / `SixLaborsLicenseFile` 或 `sixlabors.lic`，否则报错。开源仓库使用需确认许可条款，商业分发需评估。
+- Avalonia：本次未移植，不改变现有同步点。
+
+## 2026-10-26：PR #43 审查整改 A-1/A-2/A-4（WPF）
+
+- A-1（`94f7b5d3`）：把 `PasteOption` 从 `FumenVisualEditorViewModel` 嵌套类型移到 `Modules/FumenVisualEditor/Base/PasteOption.cs`；删除重复的 `GridPlacementOption` 及 `(GridPlacementOption)pasteOption` 数值强转，剪贴板接口、几何放置和测试统一使用同一枚举。
+- A-2（`5917cfb7`）：把 `GridClipboardGeometry` 从 `Kernel/DefaultImpl` 移到 `Modules/FumenVisualEditor/Base` 并降为 `internal`，测试程序集通过 `InternalsVisibleTo("GridPlacement")` 访问；`ObjectInteractiveManager` 不再引用 `Kernel.DefaultImpl`，消除 `ViewModels → Kernel` 具体实现的反向依赖。A-3 未实施，Kernel 侧对 `ViewModels.Interactives.Impls` 的既有引用仍在。
+- A-4（`76ac02bf`）：`ObjectInteractiveActionBase.TryAdjustGrid` 由 `internal virtual` 改为 `public virtual`，`DefaultObjectInteractiveAction` 同步改为 `public override`；`ArchitectureChecks` 增加公开可重写断言，外部交互实现可参与整组预检。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` A-1/A-2 228/228、A-4 229/229；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 每轮 1236/1236；MCP 运行时脚本驱动真实剪贴板复制/粘贴 3 个 Bell 后数量 +3，真实拖动 Tap 后 TGrid 5280→5340。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 §11 清单与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：PR #43 审查整改 B-1（WPF）
+
+- B-1（`e253fe20`）：新增 `Modules/FumenVisualEditor/Base/OngekiObjectComponents.cs`，复用模型既有 `GetDisplayableObjects()` 提供 `EnumerateSelfAndComponents()` / `GetHeadObject()` / `GetTailObject()` / `GetLaneStartObject()`；`GridClipboardGeometry.Enumerate` 转发到组件枚举，`SelectionGridDrag` 与 `ObjectInteractiveManager.Selection` 删除重复的 Hold/End/轨道类型分支。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 249/249（新增 `ObjectComponentsChecks` 20 项）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；MCP 运行时脚本真实复制/粘贴 Hold 数量 +1，拖动 Hold 头 TGrid +90，仅拖头时尾 TGrid 保持不变。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 B-1 方案、清单与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：PR #43 审查整改 A-3/A-5（WPF）
+
+- A-3（`446b1edf`）：删除 `DockableObjectInteractiveAction.CalculateOriginalLaneX` 与 `CreateOriginalLaneProjector` 转发，`DefaultFumenEditorClipboard` 与 `SelectionGridDrag` 直接调用 `LaneGeometry.CreateProjector`；贝塞尔投影测试改用 `LaneGeometry`，同时关闭 B-3 的生产死代码。
+- A-5（`3381ddf9`）：`OngekiTimelineObjectBase` / `OngekiMovableObjectBase` 把网格子对象的 `Unit/Grid` 分量变化统一转发为 `TGrid`/`XGrid`；`ConnectableStartObject` 删除 `GridBase.Unit/Grid` 的 UI 语义分支，模型层不再出现“属性面板”注释。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` A-3 249/249、A-5 255/255（A-5 新增 `GeometryNotificationChecks` 6 项）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；真实复制/粘贴 Hold 数量 +1、拖动 Hold 头 TGrid +90，真实修改 XGrid.Grid 后子路径起点同步为 65636，TGrid.Unit 修改后 MinTGrid 更新。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 A-3/A-5/B-3 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：移除 GridPlacement 友元并公开 helper（WPF）
+
+- `7f9f659b`：删除 `AssemblyInfo.cs` 中的 `[assembly: InternalsVisibleTo("GridPlacement")]`；将测试直接引用的 `GridClipboardGeometry`、`LaneGeometry`、`OngekiObjectComponents` 改为 `public`，`OngekiObjectComponents` 的 `EnumerateSelfAndComponents` / `GetHeadObject` / `GetTailObject` / `GetLaneStartObject` 同步公开。
+- `LaneSwitchResolver` 与 `SelectionGridDrag` 仍保持 `internal`；测试通过反射访问它们，不依赖友元。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 255/255；自构建 Debug 实例 MCP e2e 1236/1236。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已同步 A-2/A-3/B-3/B-7/D-2 的可见性描述与 §13 说明。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-26：PR #43 审查整改 A-6/B-2/B-3/B-4/B-5（WPF）
+
+- A-6（`fb14d45a`）：新增 `FumenVisualEditorViewModel.DragTransactions.cs`，集中拖动事务深度、滚动指标延迟重算与 `IsGridDragTransactionActive`；`ScrollViewer` 与 `OnFumenObjectModifiedChanged` 改为查询属性。
+- B-2（`83c70558`）：`LaneGeometry` 新增 `BuildHorizontalRanges`/`TryGetHorizontalRanges`，`CreateProjector` 与 `DockableObjectInteractiveAction.TryGetHorizontalSegmentXRange` 共用；删除交互层重复的 `PrevObject/PathControls` 遍历。
+- B-3：已随 A-3（`446b1edf`）完成，`CalculateOriginalLaneX` 与测试反射调用已删除；本轮复核通过。
+- B-4（`dc6fddec`）：删除 `SelectionGridDrag.TryMove`/`TryMoveWithSnapping` 与 `LaneSwitchResolver.CandidateQueryCount`；测试改用私有 `TryMoveCore` 与 `candidates` 缓存计数，生产类型不再暴露测试入口。
+- B-5（`40b0873d`）：`LaneGeometry` 定义 `LaneSnapDistancePixels = 8d` 与 `XGridMagneticDistancePixels = 4d`；`LaneSwitchResolver`、`DefaultFumenEditorClipboard`、`DockableObjectInteractiveAction`、`DefaultObjectInteractiveAction` 统一引用。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 255/255；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 每轮 1236/1236；B-2 的 Tap 水平拖动真机脚本执行成功。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 A-6/B-2/B-3/B-4/B-5 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-27：PR #43 审查整改 B-9（WPF）
+
+- B-9（`905a0fc7`）：`DefaultObjectInteractiveAction.OnDragStart/Move/End` 统一委托 `ObjectInteractiveManager` 的 `SelectionGridDrag`；删除 `DefaultObjectInteractiveAction`/`ConnectableObjectInteractiveAction` 的 `dragInfoMap` 与独立附轨 undo，删除 `DockableObjectInteractiveAction` 的 Tap/Hold 分支和 `IndividualSoflanAreaInteractiveAction`；`OnMouseUp` 删除旧 `BeginCombineAction` 路径；`SelectionGridDrag` 增加单角 ISA 越界后的规范化与统一撤销。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 257/257（新增 ISA 单角规范化、单撤销断言）；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236；真机 ISA 单角拖动后 head=50/tail=100、事务已释放。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 B-9 条目、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-27：PR #43 审查整改 C-1/C-4/C-8/C-9/C-10/C-11（WPF）
+
+- C-1（`2d0e7943`）：清理 `GridClipboardGeometry` / `DefaultFumenEditorClipboard` 的全限定名，使用 `SystemAction` 别名处理 Caliburn `Action` 冲突。
+- C-4（`00fd17ce`）：`LaneGeometry.interpolated` 增加 256 项上限与生命周期注释，清理类尾空行。
+- C-8（`e24496d0`）：拖动期间监听 `UndoRedoManager.ActionStack.CollectionChanged` 与 `UndoActionCount`/`RedoActionCount` 属性变化，替代全栈 `ToArray`/`SequenceEqual`；新增外部撤销取消回归。
+- C-9（`2b2588fa`）：删除 Dockable 交互中的大段注释旧实现，合并重复说明，仅保留附轨、坐标恢复、调色板复用等关键注释。
+- C-10（`58449c50`）：将 `Begin/Update/Commit/AbortSelectionDrag` 合并到 `UserInteractionActions`，删除专用 partial。
+- C-11（`a0aa4354`）：新增 `CancelTransientInteractions()`，模式切换、失焦、工具箱拖入、文档切换统一取消拖动/ISA/批量投射物放置；保留删除、取消选择、新建等模型边界的最小 Abort。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` C-1/C-4 257/257，C-8/C-9/C-10/C-11 259/259；自构建 Debug 实例后台启动并最小化后，`node tests/mcp-e2e/run.mjs` 1236/1236。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 C-1/C-4/C-8/C-9/C-10/C-11 的条目状态、§9 状态列、§11 清单、§12 方案与 §13 实施状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-27：PR #43 审查整改 C-13/C-11/C-14/C-15/C-16（WPF）
+
+- C-13（`81dd757c`）：粘贴目标 X 只调用一次 `ConvertXToXGridTotalUnit`，复用结果做范围预检并构造 `XGrid`，删除重复 `ConvertXToXGrid`。
+- C-11：已在 `a0aa4354` 完成，本轮复核 `CancelTransientInteractions` 入口与剩余 Abort 边界，无需新代码提交。
+- C-14（`0cf61804`）：删除 `GridClipboardGeometry.Clone` 根对象重复 `Tag` 赋值。
+- C-15（`63e4227e`）：`Resources.Designer.cs` 的 `PasteInvalidGridPosition` 改为生成器惯用多行 getter；当前环境无 ResGen，未重写整个生成文件。
+- C-16（`d6604d24`）：恢复三个 `Resources*.resx` 的 UTF-8 BOM。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 259/259；自构建 Debug 实例 MCP e2e 1236/1236；真机非 Direct 粘贴 2 个 Bell 后数量 +2。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新对应状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-10-28：PR #43 审查整改 E-2/E-3（WPF）
+
+- E-2（`72b09281`）：明确采用 Grid 语义；`GridClipboardGeometry.ReferencePoint` 按复制根对象的 Grid 包围盒取 X/T 中心（纯轨道取起点、混合选择忽略轨道、ISA 取两角），修复普通物件 T 取最早时间导致四物件参考点落在单行的问题；`SelectedRangeCenterTGridMirror` 改用 `2 * anchor` 保持范围镜像。
+- E-3（`7dc66e4b`）：`CopyObjects` 先完成 `CloneSet`，成功后再替换 `currentCopiedSources`；新增 `ThrowingCopyTap` 回归，克隆异常时旧剪贴板仍保留。
+- 验证：Debug/Release 构建 0 error；`tests/grid-placement` 262/262；自构建 Debug 实例 MCP e2e 1236/1236；真机四物件两行两列粘贴中心为 T=300/X=0。
+- 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 E-2/E-3 状态。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

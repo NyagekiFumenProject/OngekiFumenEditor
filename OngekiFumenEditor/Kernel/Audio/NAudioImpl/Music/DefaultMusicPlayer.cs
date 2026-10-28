@@ -141,7 +141,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                     audioFileReader = loadedReader;
                     finishProvider = loadedFinishProvider;
                     finishProvider.OnReturnEmptySamples += Provider_OnReturnEmptySamples;
-                    duration = processedProvider.Duration;
+                    duration = loadedReader.TotalTime;
                     IsAvaliable = true;
                 }
 
@@ -167,7 +167,12 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                     return;
 
                 seekTime = MathUtils.Max(TimeSpan.Zero, MathUtils.Min(seekTime, duration));
-                audioFileReader.Seek((long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds), SeekOrigin.Begin);
+                var bytePosition = (long)(audioFileReader.WaveFormat.AverageBytesPerSecond * seekTime.TotalSeconds);
+                // 对齐到完整样本帧，避免从半帧/半样本开始读取导致左右声道错位。
+                var blockAlign = audioFileReader.WaveFormat.BlockAlign;
+                if (blockAlign > 0)
+                    bytePosition -= bytePosition % blockAlign;
+                audioFileReader.Seek(bytePosition, SeekOrigin.Begin);
                 // More accurate.
                 baseOffset = audioFileReader.CurrentTime;
                 pauseTime = baseOffset;
@@ -202,7 +207,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
             {
                 if (!IsPlaying)
                     return pauseTime;
-                var offset = TimeSpan.FromTicks(sw.ElapsedTicks) * manager.MusicSpeed;
+                var offset = sw.Elapsed * manager.MusicSpeed;
                 var adjustedTime = offset + baseOffset - TimeSpan.FromMilliseconds(manager.SpeedCostDelayMs / 2);
                 return MathUtils.Max(TimeSpan.Zero, adjustedTime);
             }
@@ -235,7 +240,8 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
                 if (!IsAvaliable || !IsPlaying || finishProvider is null)
                     return;
 
-                pauseTime = GetTime();
+                // 以音频流实际读取位置为基准，避免 Stopwatch 推算的误差在多次暂停/继续后累积。
+                pauseTime = audioFileReader is not null ? audioFileReader.CurrentTime : GetTime();
                 baseOffset = pauseTime;
                 IsPlaying = false;
                 sw.Stop();

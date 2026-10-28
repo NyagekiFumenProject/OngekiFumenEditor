@@ -294,6 +294,9 @@
   <data name="BatchModeToggle" xml:space="preserve">
     <value>切换批量模式</value>
   </data>
+  <data name="kbd_editor_ToggleBatchMode" xml:space="preserve">
+    <value>切换批量模式</value>
+  </data>
   <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>如果开启批量模式,避免大部分物件拖拉操作</value>
   </data>
@@ -3530,4 +3533,5 @@
   <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>没有其他可用的变速组，只能连同引用删除或取消。</value></data>
   <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>转移变速组引用并删除组</value></data>
   <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>删除变速组及其引用</value></data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>粘贴位置超出坐标范围，或包含早于谱面起点的时间。</value></data>
 </root>

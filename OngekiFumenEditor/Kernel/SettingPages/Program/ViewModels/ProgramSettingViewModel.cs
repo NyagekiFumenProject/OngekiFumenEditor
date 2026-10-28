@@ -5,6 +5,7 @@ using Gemini.Modules.Settings;
 using OngekiFumenEditor.Kernel.Graphics;
 using OngekiFumenEditor.Kernel.Graphics.Performence;
 using OngekiFumenEditor.Kernel.Graphics.Skia;
+using OngekiFumenEditor.Kernel.Graphics.Text;
 using OngekiFumenEditor.Kernel.ProgramUpdater;
 using OngekiFumenEditor.Kernel.ProgramUpdater.Dialogs.ViewModels;
 using OngekiFumenEditor.Properties;
@@ -70,9 +71,7 @@ namespace OngekiFumenEditor.Kernel.SettingPages.Program.ViewModels
 
             try
             {
-                names.AddRange(SixLabors.Fonts.SystemFonts.Families
-                    .Select(x => x.Name)
-                    .Where(x => !string.IsNullOrWhiteSpace(x)));
+                names.AddRange(SystemFontFamilyProvider.GetFamilyNames());
             }
             catch (Exception ex)
             {

@@ -294,6 +294,9 @@
   <data name="BatchModeToggle" xml:space="preserve">
     <value>Toggle batch mode</value>
   </data>
+  <data name="kbd_editor_ToggleBatchMode" xml:space="preserve">
+    <value>Toggle batch mode</value>
+  </data>
   <data name="BatchModeToggleTipText" xml:space="preserve">
     <value>Enable batch mode, which allows for placing objects with the mouse.</value>
   </data>
@@ -3563,4 +3566,5 @@
   <data name="SoflanGroupDeleteDialogCannotTransfer" xml:space="preserve"><value>No other soflan group is available; you can only delete the group together with its references, or cancel.</value></data>
   <data name="SoflanGroupTransferReferencesAndDeleteAction" xml:space="preserve"><value>Transfer soflan group references and delete group</value></data>
   <data name="SoflanGroupDeleteReferencesAndGroupAction" xml:space="preserve"><value>Delete soflan group and its references</value></data>
+  <data name="PasteInvalidGridPosition" xml:space="preserve"><value>The paste position exceeds the grid range or includes a time before the start of the chart.</value></data>
 </root>

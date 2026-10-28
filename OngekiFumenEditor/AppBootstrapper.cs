@@ -196,6 +196,9 @@ public class AppBootstrapper : Gemini.AppBootstrapper
             FileLogOutput.Init();
             DumpFileHelper.Init();
             CoreLog.SetResolver(() => coreLogTarget);
+#if DEBUG
+            LogManager.GetLog = type => new CaliburnLogAdapter(type);
+#endif
             base.Configure();
         }
         catch (Exception exception)

@@ -1,4 +1,5 @@
 using NAudio.Wave;
+using System;
 using System.Runtime.InteropServices;
 
 namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
@@ -22,25 +23,26 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl.Music
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            var beforePosition = Position;
-            for (int i = 0; i < count && Position < waveBuffer.Length; i++)
-                buffer[offset + i] = waveBuffer[Position++];
-            return (int)(Position - beforePosition);
+            var available = (int)Math.Min((long)count, waveBuffer.Length - Position);
+            if (available <= 0)
+                return 0;
+
+            Buffer.BlockCopy(waveBuffer, (int)Position, buffer, offset, available);
+            Position += available;
+            return available;
         }
 
         public int Read(float[] buffer, int offset, int count)
         {
             var floatBuffer = MemoryMarshal.Cast<byte, float>(waveBuffer);
-
             var floatPosition = (int)(Position / sizeof(float));
-            var floatLength = waveBuffer.Length / sizeof(float);
+            var available = Math.Min(count, floatBuffer.Length - floatPosition);
+            if (available <= 0)
+                return 0;
 
-            var beforePosition = floatPosition;
-            for (int i = 0; i < count && floatPosition < floatLength; i++)
-                buffer[offset + i] = floatBuffer[floatPosition++];
-            var read = floatPosition - beforePosition;
-            Position = floatPosition * sizeof(float);
-            return read;
+            floatBuffer.Slice(floatPosition, available).CopyTo(buffer.AsSpan(offset, available));
+            Position = (floatPosition + available) * sizeof(float);
+            return available;
         }
     }
 }

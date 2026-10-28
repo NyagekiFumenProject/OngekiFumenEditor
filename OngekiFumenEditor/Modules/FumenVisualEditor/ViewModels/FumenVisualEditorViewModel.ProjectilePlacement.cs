@@ -37,10 +37,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         private void OnPlacementActiveEditorChanged(FumenVisualEditorViewModel newEditor, FumenVisualEditorViewModel oldEditor)
         {
             if (!ReferenceEquals(EditorManager.CurrentActivatedEditor, this))
-            {
-                CancelBatchProjectilePlacement();
-                CancelIsaPlacement();
-            }
+                CancelTransientInteractions();
         }
 
         public IPlaceBatchProjectileInfo RequestBatchPlaceProjectileInfo => requestBatchPlaceProjectileInfo;
@@ -78,7 +75,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             batchPlacementProject.PropertyChanged += OnBatchPlacementProjectChanged;
             Setting.PropertyChanged += OnBatchPlacementSettingChanged;
             SelectionArea.IsActive = false;
-            isSelectRangeDragging = false;
+            isObjectDragStarted = false;
             mouseDownHitObject = null;
             mouseDownNextHitObject = null;
             NotifyBatchPlacementRequestChanged();

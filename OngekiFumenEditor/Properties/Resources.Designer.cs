@@ -595,6 +595,15 @@ namespace OngekiFumenEditor.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Toggle batch mode.
         /// </summary>
+        public static string kbd_editor_ToggleBatchMode {
+            get {
+                return ResourceManager.GetString("kbd_editor_ToggleBatchMode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Toggle batch mode.
+        /// </summary>
         public static string BatchModeToggle {
             get {
                 return ResourceManager.GetString("BatchModeToggle", resourceCulture);
@@ -9378,6 +9387,11 @@ namespace OngekiFumenEditor.Properties {
         public static string SoflanGroupDrawUncheckedTipText {
             get {
                 return ResourceManager.GetString("SoflanGroupDrawUncheckedTipText", resourceCulture);
+            }
+        }
+        public static string PasteInvalidGridPosition {
+            get {
+                return ResourceManager.GetString("PasteInvalidGridPosition", resourceCulture);
             }
         }
     }

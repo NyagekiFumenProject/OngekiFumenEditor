@@ -30,6 +30,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         private int targetSampleRate;
         private bool enableVarspeed;
         private readonly IWavePlayer audioOutputDevice;
+        private readonly AudioOutputType audioOutputType;
 
         private readonly MixingSampleProvider masterMixer;
         private readonly MixingSampleProvider soundMixer;
@@ -95,7 +96,7 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
         public NAudioManager()
         {
-            var audioOutputType = (AudioOutputType)AudioSetting.Default.AudioOutputType;
+            audioOutputType = (AudioOutputType)AudioSetting.Default.AudioOutputType;
             enableSoundMultiPlay = AudioSetting.Default.EnableSoundMultiPlay;
             targetSampleRate = ResolveTargetSampleRate(AudioSetting.Default.AudioSampleRate);
             enableVarspeed = AudioSetting.Default.EnableVarspeed;
@@ -285,10 +286,23 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            var player = new DefaultMusicPlayer(musicMixer, this);
-            ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
-            await player.Load(filePath, targetSampleRate, cancellationToken);
-            return player;
+            // ASIO 不实现 IWavePosition；新播放器依赖设备播放位置，因此 ASIO 继续使用旧实现。
+            if (audioOutputType != AudioOutputType.Asio && audioOutputDevice is IWavePosition)
+            {
+                var player = new DefaultMusicPlayer_new(musicMixer, this);
+                Log.LogInfo($"Music player implementation: {player.GetType().Name}");
+                ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+                await player.Load(filePath, targetSampleRate, cancellationToken);
+                return player;
+            }
+
+            {
+                var player = new DefaultMusicPlayer(musicMixer, this);
+                Log.LogInfo($"Music player implementation: {player.GetType().Name}");
+                ownAudioPlayerRefs.Add(new WeakReference<IAudioPlayer>(player));
+                await player.Load(filePath, targetSampleRate, cancellationToken);
+                return player;
+            }
         }
 
         public async Task<ISoundPlayer> LoadSoundAsync(string filePath)
@@ -408,6 +422,23 @@ namespace OngekiFumenEditor.Kernel.Audio.NAudioImpl
         public void Reposition()
         {
             speedProvider?.Reposition();
+        }
+
+        /// <summary>
+        /// 读取输出设备当前已播放的字节位置。仅支持实现 <see cref="IWavePosition"/> 的后端。
+        /// </summary>
+        internal bool TryGetOutputPosition(out long position, out WaveFormat format)
+        {
+            if (audioOutputDevice is IWavePosition wavePosition)
+            {
+                position = wavePosition.GetPosition();
+                format = wavePosition.OutputWaveFormat;
+                return true;
+            }
+
+            position = 0;
+            format = null;
+            return false;
         }
     }
 }

@@ -51,6 +51,8 @@ internal static class Program
                     Console.WriteLine("PASS: " + label);
                 }
                 BehaviorChecks.Run(Check, repositoryRoot);
+                DeactivationChecks.Run(Check);
+                LifecycleEventChecks.Run(Check);
                 RenderingChecks.Run(Check, repositoryRoot);
                 Check(!hiddenWindow.IsVisible, "bootstrap window was never shown");
                 Console.WriteLine($"RESULT: {checks} assertions passed.");

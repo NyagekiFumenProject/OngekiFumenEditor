@@ -1,6 +1,7 @@
-﻿using Caliburn.Micro;
+using Caliburn.Micro;
 using ControlzEx.Standard;
 using Gemini.Framework;
+using Gemini.Modules.Toolbox;
 using NAudio.Gui;
 using NWaves.Utils;
 using OngekiFumenEditor.Base;
@@ -1047,13 +1048,19 @@ public partial class FumenVisualEditorViewModel : PersistedDocument, ISchedulabl
         renderControl.Unloaded += RenderControl_UnLoaded;
         renderControl.SizeChanged += RenderControl_SizeChanged;
 
-        Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
+        Message.SetAttach(renderControl, "[Event MouseWheel]=[Action OnMouseWheel($executionContext)];             [Event SizeChanged] = [Action OnSizeChanged($executionContext)];             [Event Loaded] = [Action OnLoaded($executionContext)];             [Event PreviewMouseDown] = [Action OnMouseDown($executionContext)];             [Event MouseMove] = [Action OnMouseMove($executionContext)];             [Event PreviewMouseUp] = [Action OnMouseUp($executionContext)];             [Event DragEnter] = [Action OnToolboxDragEntered($executionContext)];             [Event MouseLeave] = [Action OnMouseLeave($executionContext)];");
 
         contentControl.Content = renderControl;
         renderControl.SetBinding(FrameworkElement.CursorProperty,
             new Binding(nameof(CurrentCursor)) { Source = this, Mode = BindingMode.OneWay });
 
         PrepareRenderLoop(renderControl, renderImpl);
+    }
+
+    public void OnToolboxDragEntered(ActionExecutionContext e)
+    {
+        if (e.EventArgs is DragEventArgs args && args.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+            CancelTransientInteractions();
     }
 
     private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)

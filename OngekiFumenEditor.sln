@@ -8,8 +8,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini", "Dependences\gemin
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gemini.Modules.Output", "Dependences\gemini\src\Gemini.Modules.Output\Gemini.Modules.Output.csproj", "{3EFBCDA7-ABC6-4E97-870C-AD73ED3628E5}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{573B7FD6-0B10-4C15-8AE2-B9D5A3F93618}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dependences", "Dependences", "{52104FAE-CB77-4569-B3DC-4819A1BE2D34}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SvgConverter", "Dependences\SvgToXaml\SvgConverter\SvgConverter.csproj", "{D1B291FE-A21B-4C27-930D-39CC2C963E13}"
@@ -25,8 +23,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Caliburn.Micro.Platform", "Dependences\gemini\Dependences\Caliburn.Micro\src\Caliburn.Micro.Platform\Caliburn.Micro.Platform.csproj", "{8EC53E25-C1D3-4D46-907F-10FF64D70FD7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.CommandLine", "OngekiFumenEditor.CommandLine\OngekiFumenEditor.CommandLine.csproj", "{27A4738F-BE40-4037-A103-EF28FCEB4A82}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OngekiFumenEditor.Benchmark", "OngekiFumenEditor.Benchmark\OngekiFumenEditor.Benchmark.csproj", "{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildTools", "BuildTools", "{B3B3AB16-01DF-4A57-9C47-4FC39964DD05}"
 EndProject
@@ -74,10 +70,6 @@ Global
 		{27A4738F-BE40-4037-A103-EF28FCEB4A82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{27A4738F-BE40-4037-A103-EF28FCEB4A82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{27A4738F-BE40-4037-A103-EF28FCEB4A82}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A7AF4AF0-B8F7-18BF-0DE7-B7772F3419B9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -98,7 +90,7 @@ Global
 		{07D64AE7-64D0-4582-A0F3-10F424608B6E} = {B3B3AB16-01DF-4A57-9C47-4FC39964DD05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		        SolutionGuid = {4D0A040C-DC95-444E-A788-FDA822ED2244}
 		SolutionGuid = {BA2EE1AE-F82B-4185-B3BE-ECF595AC64A8}
+		        SolutionGuid = {4D0A040C-DC95-444E-A788-FDA822ED2244}
 	EndGlobalSection
 EndGlobal

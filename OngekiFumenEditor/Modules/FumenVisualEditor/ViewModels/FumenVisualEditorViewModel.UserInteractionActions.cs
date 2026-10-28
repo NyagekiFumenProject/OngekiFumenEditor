@@ -57,7 +57,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             set
             {
                 if (isUserRequestHideEditorObject != value)
-                    CancelBatchProjectilePlacement();
+                {
+                    CancelTransientInteractions();
+                }
                 Set(ref isUserRequestHideEditorObject, value);
                 NotifyOfPropertyChange(() => EditorObjectVisibility);
                 NotifyOfPropertyChange(() => IsDesignMode);
@@ -233,15 +235,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
             }
             IoC.Get<IFumenObjectPropertyBrowser>().RefreshSelected(this);
-        }
-
-        public enum PasteOption
-        {
-            XGridZeroMirror,
-            SelectedRangeCenterXGridMirror,
-            SelectedRangeCenterTGridMirror,
-            Direct,
-            None
         }
 
         public void MenuItemAction_PasteCopiesObjects(ActionExecutionContext ctx)
@@ -463,7 +456,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         /// 表示指针是否已拖出滚动范围
         /// </summary>
         private bool dragOutBound;
-        private int currentDraggingActionId;
+        private int autoScrollRedispatchToken;
 
         public void MenuItemAction_RememberSelectedObjectAudioTime(ActionExecutionContext e)
         {
@@ -786,6 +779,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void DeleteSelection(IEnumerable<OngekiObjectBase> selection = null)
         {
+            AbortSelectionDrag();
             if (!IsDesignMode)
             {
                 ToastNotify(Resources.EditorMustBeDesignMode);
@@ -794,7 +788,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             //获取要删除的物件
             var selects = selection?.ToArray() ?? SelectObjects.OfType<OngekiObjectBase>().ToArray();
-
             //依附于其他对象的子物件，比如轨道节点，曲线控制节点，无法做到单纯删除和添加
             //记录它们子节点相对于集合的位置，下次恢复的时候就是插入了
             var curveControlMaps = selects
@@ -870,12 +863,13 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void KeyboardAction_CancelSelectingObjects(ActionExecutionContext e)
         {
+            AbortSelectionDrag();
+
             if (IsIsaPlacementActive)
             {
                 CancelIsaPlacement();
                 return;
             }
-
             if (!IsDesignMode)
             {
                 ToastNotify(Resources.EditorMustBeDesignMode);
@@ -1107,7 +1101,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void SwitchMode(bool isPreviewMode)
         {
-            CancelIsaPlacement();
+            CancelTransientInteractions();
             BulletPallete.RandomSeed = DateTime.Now.ToString().GetHashCode();
 
             var tGrid = GetCurrentTGrid();
@@ -1180,10 +1174,39 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         #region Drag Actions
 
+        private void BeginSelectionGridDrag(Point point) => InteractiveManager.BeginSelectionDrag(this, point);
+        private void UpdateSelectionDrag(Point point) => InteractiveManager.UpdateSelectionDrag(this, point);
+        private void CommitSelectionDrag() => InteractiveManager.CommitSelectionDrag(this);
+
+        /// <summary>
+        /// 中止当前拖动事务并重置拖动输入状态；无事务时同样幂等。
+        /// </summary>
+        public void AbortSelectionDrag()
+        {
+            InteractiveManager.AbortSelectionDrag(this);
+            isObjectDragStarted = false;
+            autoScrollRedispatchToken = int.MaxValue;
+        }
+
+        public void CancelTransientInteractions()
+        {
+            AbortSelectionDrag();
+            CancelIsaPlacement();
+            CancelBatchProjectilePlacement();
+        }
+
         public void OnMouseLeave(ActionExecutionContext e)
         {
             HideBatchPlacementPreview();
             IoC.Get<CommonStatusBar>().SubRightMainContentViewModel.Message = string.Empty;
+            CurrentCursorPosition = null;
+            if (InteractiveManager.IsSelectionDragging)
+            {
+                CommitSelectionDrag();
+                isObjectDragStarted = false;
+                autoScrollRedispatchToken = int.MaxValue;
+            }
+
             OnMouseUp(e);
         }
 
@@ -1229,18 +1252,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     }
                     else
                     {
-                        if (isSelectRangeDragging)
+                        if (isObjectDragStarted)
                         {
                             var cp = pos;
                             cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
-                            UndoRedoManager.BeginCombineAction();
-                            SelectObjects.ToArray().ForEach(x =>
+                            if (InteractiveManager.IsSelectionDragging)
                             {
-                                var obj = x as OngekiObjectBase;
-                                InteractiveManager.GetInteractive(obj).OnDragEnd(obj, cp, this);
-                            });
-                            var compositeAction = UndoRedoManager.EndCombineAction(Resources.DragObjects);
-                            UndoRedoManager.ExecuteAction(compositeAction);
+                                UpdateSelectionDrag(cp);
+                                CommitSelectionDrag();
+                            }
                         }
                         else
                         {
@@ -1253,8 +1273,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         }
                     }
 
-                    isSelectRangeDragging = false;
-                    currentDraggingActionId = int.MaxValue;
+                    isObjectDragStarted = false;
+                    autoScrollRedispatchToken = int.MaxValue;
                     SelectionArea.IsActive = false;
                 }
                 else if (isMiddleMouseDown)
@@ -1299,13 +1319,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             {
                 return;
             }
+
+            // 上次释放若发生在视口之外，不得影响下一次普通右键。
             Log.LogInfo("Visual mousedown");
 
             prevRightButtonState = arg.RightButton;
 
             var view = e.View as FrameworkElement;
             var position = arg.GetPosition(e.Source);
-
             if (TryHandleBatchProjectilePlacementMouseDown(arg.ChangedButton, position))
             {
                 view?.Focus();
@@ -1325,7 +1346,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     position.Y = Math.Max(0, RectInDesignMode.MaxY - position.Y);
 
-                    isSelectRangeDragging = false;
+                    AbortSelectionDrag();
 
                     var hitResult = hits.AsParallel().Where(x => x.Value.Contains(position)).Select(x => x.Key).OrderBy(x => x.Id).ToList();
                     if (ConvertYToTGrid_DesignMode(position.Y) is TGrid tGrid)
@@ -1378,7 +1399,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                             mouseDownNextHitObject = hitResult[nextIdx];
                         }
                     }
-
 #if DEBUG
                     var xGrid = XGridCalculator.ConvertXToXGrid(position.X, this);
                     var tGrid2 = ConvertYToTGrid_DesignMode(position.Y);
@@ -1403,7 +1423,6 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 if (arg.ChangedButton == MouseButton.Left && EditorGlobalSetting.Default.EnableShowPlayerLocation)
                 {
                     //check if is dragging playerlocation
-
                     var y = ConvertAudioTimeToY_PreviewMode(CurrentPlayTime);
                     var x = XGridCalculator.ConvertXGridToX(PlayerLocationRecorder.GetLocationXUnit(CurrentPlayTime), this);
 
@@ -1449,14 +1468,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
             if (IsRequestPlaceBatchProjectilePreview || consumeBatchPlacementLeftMouseUp)
             {
-                currentDraggingActionId = int.MaxValue;
+                autoScrollRedispatchToken = int.MaxValue;
                 OnMouseMove(args.GetPosition(e.Source));
                 return;
             }
 
             if ((e.View as FrameworkElement)?.Parent is not IInputElement parent)
                 return;
-            currentDraggingActionId = int.MaxValue;
+            autoScrollRedispatchToken = int.MaxValue;
             OnMouseMove(args.GetPosition(parent));
         }
 
@@ -1487,15 +1506,15 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     var audioTime = ConvertYToAudioTime_DesignMode(canvasY);
                     //ScrollViewerVerticalOffset = Math.Max(0, Math.Min(TotalDurationHeight, startScrollOffset + diffY));
                     ScrollTo(audioTime);
-
                     //Log.LogInfo($"diffY: {diffY:F2}  ScrollViewerVerticalOffset: {ScrollViewerVerticalOffset:F2}");
                 }
+
+
 
                 if (SelectionArea.IsActive)
                 {
                     var rp = 1 - pos.Y / RectInDesignMode.Height;
                     var offsetY = 0d;
-
                     //const double dragDist = 0.7;
                     const double trigPrecent = 0.15;
                     const double autoScrollSpeed = 7;
@@ -1506,7 +1525,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else if (rp <= trigPrecent && dragOutBound)
                         offsetYAcc = rp / trigPrecent - 1;
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                    dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
                     offsetY = offsetYAcc * autoScrollSpeed;
                     var y = RectInDesignMode.MinY + Setting.JudgeLineOffsetY + offsetY;
 
@@ -1515,9 +1534,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var audioTime = ConvertYToAudioTime_DesignMode(y);
                         ScrollTo(audioTime);
 
-                        var currentid = currentDraggingActionId = MathUtils.Random(int.MaxValue - 1);
+                        var currentid = autoScrollRedispatchToken = MathUtils.Random(int.MaxValue - 1);
                         await Task.Delay(1000 / 60);
-                        if (currentDraggingActionId == currentid)
+                        if (autoScrollRedispatchToken == currentid)
                             OnMouseMove(pos);
                     }
 
@@ -1529,20 +1548,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
                 if (Mouse.LeftButton == MouseButtonState.Pressed)
                 {
-                    var r = isSelectRangeDragging;
-                    isSelectRangeDragging = true;
-                    var dragCall = new Action<OngekiObjectBase, Point>((vm, pos) =>
-                    {
-                        var action = InteractiveManager.GetInteractive(vm);
-                        if (r)
-                            action.OnDragMove(vm, pos, this);
-                        else
-                            action.OnDragStart(vm, pos, this);
-                    });
+                    var r = isObjectDragStarted;
+                    isObjectDragStarted = true;
 
                     var rp = 1 - pos.Y / RectInDesignMode.Height;
                     var offsetY = 0d;
-
                     //const double dragDist = 0.7;
                     const double trigPrecent = 0.15;
                     const double autoScrollSpeed = 7;
@@ -1553,14 +1563,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     else if (rp <= trigPrecent && dragOutBound)
                         offsetYAcc = rp / trigPrecent - 1;
                     else if (rp < 1 - trigPrecent && rp > trigPrecent)
-                    dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
+                        dragOutBound = true; //当指针在滑动范围外面，那么就可以进行任何的滑动操作了，避免指针从滑动范围内开始就滚动
                     offsetY = offsetYAcc * autoScrollSpeed;
 
                     var prev = CurrentPlayTime;
                     var y = RectInDesignMode.MinY + Setting.JudgeLineOffsetY + offsetY;
-
                     //Log.LogDebug($"pos={pos.X:F2},{pos.Y:F2} offsetYAcc={offsetYAcc:F2} dragOutBound={dragOutBound} y={y:F2}");
-
                     if (offsetY != 0)
                     {
                         var audioTime = ConvertYToAudioTime_DesignMode(y);
@@ -1573,7 +1581,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                         var cp = pos;
                         cp.Y = RectInDesignMode.Height - cp.Y + RectInDesignMode.MinY;
                         //Log.LogDebug($"SelectObjects: {SelectObjects.Count()}");
-                        SelectObjects.ToArray().ForEach(x => dragCall(x as OngekiObjectBase, cp));
+                        if (!r)
+                            BeginSelectionGridDrag(mouseDownHitObjectPosition ?? cp);
+                        if (InteractiveManager.IsSelectionDragging)
+                            UpdateSelectionDrag(cp);
                     }
                 }
             }
@@ -1605,7 +1616,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             => TryCreateObjectAtMouse(new ColorfulLaneStart(), clearSelection);
 
         public void KeyboardAction_AddNewFlick(bool switchDirection = false, bool clearSelection = false)
-            => TryCreateObjectAtMouse(new Flick() { Direction = switchDirection ? Flick.FlickDirection.Right : Flick.FlickDirection.Left }, clearSelection);
+            => TryCreateObjectAtMouse(new Flick()
+            {
+                Direction = switchDirection ? Flick.FlickDirection.Right : Flick.FlickDirection.Left
+            }, clearSelection);
 
         public void KeyboardAction_AddNewBlock(bool switchDirection = false, bool clearSelection = false)
             => TryCreateObjectAtMouse(
@@ -1623,7 +1637,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void TryCreateObjectAtMouse(OngekiObjectBase obj, bool clearSelection, bool autoSelectObj = true)
         {
-            CancelIsaPlacement();
+            CancelTransientInteractions();
             if (!CurrentCursorPosition.HasValue)
             {
                 return;
@@ -1649,6 +1663,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void TryCancelAllObjectSelecting(params ISelectableObject[] expects)
         {
+            AbortSelectionDrag();
             var objBrowser = IoC.Get<IFumenObjectPropertyBrowser>();
             expects = expects ?? new ISelectableObject[0];
 
@@ -1749,16 +1764,19 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void Grid_DragEnter(ActionExecutionContext e)
         {
-            CancelIsaPlacement();
             var arg = e.EventArgs as DragEventArgs;
-            if (!arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+            if (arg.Data.GetDataPresent(ToolboxDragDrop.DataFormat))
+                CancelTransientInteractions();
+            else
+            {
+                CancelIsaPlacement();
                 arg.Effects = DragDropEffects.None;
+            }
         }
 
         public void Grid_Drop(ActionExecutionContext e)
         {
-            CancelIsaPlacement();
-            CancelBatchProjectilePlacement();
+            CancelTransientInteractions();
 
             if (!IsDesignMode)
             {

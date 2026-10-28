@@ -117,6 +117,12 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         public void RecalculateScrollMetrics()
         {
+            if (IsGridDragTransactionActive)
+            {
+                gridDragMetricsPending = true;
+                return;
+            }
+
             var audioDuration = GetAudioDuration();
             var audioDurationMs = Math.Max(0, audioDuration.TotalMilliseconds);
 

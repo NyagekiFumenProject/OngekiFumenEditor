@@ -1,7 +1,4 @@
 using OngekiFumenEditor.Modules.OptionGeneratorTools.Kernel;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel.Composition;
@@ -191,13 +188,8 @@ namespace OngekiFumenEditor.Utils
                     var imgData = await JacketGenerateWrapper.GetMainImageDataAsync(r, path);
                     if (imgData is null)
                         return default;
-                    using var image = Image.LoadPixelData<Rgba32>(imgData.Data, imgData.Width, imgData.Height);
-                    var memoryStream = new MemoryStream();
-                    image.Mutate(i => i.Flip(FlipMode.Vertical));
-                    image.SaveAsPng(memoryStream);
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-
-                    return memoryStream.ToArray();
+                    ImageUtils.FlipVertical(imgData.Data, imgData.Width, imgData.Height);
+                    return ImageUtils.EncodePng(imgData.Data, imgData.Width, imgData.Height);
                 }
             }
 

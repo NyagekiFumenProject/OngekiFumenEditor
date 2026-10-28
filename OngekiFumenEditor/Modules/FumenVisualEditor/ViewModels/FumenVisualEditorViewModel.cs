@@ -165,7 +165,8 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                     break;
                 default:
                     IsDirty = true;
-                    RecalculateScrollMetrics();
+                    if (!IsGridDragTransactionActive || e.PropertyName == nameof(ITimelineObject.TGrid))
+                        RecalculateScrollMetrics();
                     break;
             }
 
@@ -189,7 +190,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
         public bool EnableDragging => !IsBatchMode || (Keyboard.Modifiers.HasFlag(ModifierKeys.Alt) &&
                                                        !Keyboard.Modifiers.HasFlag(ModifierKeys.Control) &&
                                                        !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift));
-        private bool isSelectRangeDragging;
+        private bool isObjectDragStarted;
 
         private bool isShowCurveControlAlways = false;
         private bool enableShowPlayerLocation;
@@ -341,7 +342,14 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             AudioPlayer = await IoC.Get<IAudioManager>().LoadAudioAsync(projModel.AudioFilePath, session.CancellationToken);
             session.CancellationToken.ThrowIfCancellationRequested();
 
-            var dispTGrid = ConvertAudioTimeToTGrid(projModel.RememberLastDisplayTime);
+            var lastDisplayTime = projModel.RememberLastDisplayTime;
+            var maxDisplayTime = projModel.AudioDuration - TimeSpan.FromMilliseconds(100);
+            if (maxDisplayTime > TimeSpan.Zero && lastDisplayTime > maxDisplayTime)
+                lastDisplayTime = maxDisplayTime;
+            if (lastDisplayTime < TimeSpan.Zero)
+                lastDisplayTime = TimeSpan.Zero;
+
+            var dispTGrid = ConvertAudioTimeToTGrid(lastDisplayTime);
             ScrollTo(dispTGrid);
 
             LoadingFinished?.Invoke(this, new(Fumen));
@@ -383,7 +391,11 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 return;
             }
             Log.LogInfo($"FumenVisualEditorViewModel DoSave() : {filePath}");
-            EditorProjectData.RememberLastDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
+            var currentDisplayTime = ConvertTGridToAudioTime(GetCurrentTGrid());
+            var maxDisplayTime = EditorProjectData.AudioDuration - TimeSpan.FromMilliseconds(100);
+            if (maxDisplayTime > TimeSpan.Zero && currentDisplayTime > maxDisplayTime)
+                currentDisplayTime = maxDisplayTime;
+            EditorProjectData.RememberLastDisplayTime = currentDisplayTime < TimeSpan.Zero ? TimeSpan.Zero : currentDisplayTime;
             if (string.IsNullOrWhiteSpace(EditorProjectData.FumenFilePath))
             {
                 //ask fumen file save path before save project.
@@ -475,11 +487,10 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         protected override async Task OnDeactivateAsync(bool close, CancellationToken cancellationToken)
         {
+            CancelTransientInteractions();
             var deactivationSucceeded = false;
             try
             {
-                CancelBatchProjectilePlacement();
-                CancelIsaPlacement();
                 UnhookWindowFocus();
                 await base.OnDeactivateAsync(close, cancellationToken);
                 await IoC.Get<ISchedulerManager>().RemoveScheduler(this);
@@ -510,11 +521,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
             if (Interlocked.Exchange(ref isDisposed, 1) != 0)
                 return;
 
-            CancelBatchProjectilePlacement();
-            CancelIsaPlacement();
+            CancelTransientInteractions();
             UnhookWindowFocus();
             EditorManager.OnActivateEditorChanged -= OnPlacementActiveEditorChanged;
-
             var fumen = editorProjectData?.Fumen;
             if (fumen is not null)
             {
