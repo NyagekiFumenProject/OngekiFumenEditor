@@ -468,3 +468,13 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：Debug/Release 构建 0 error；`tests/grid-placement` 262/262；自构建 Debug 实例 MCP e2e 1236/1236；真机四物件两行两列粘贴中心为 T=300/X=0。
 - 审查文档：`docs/pr43-merged-code-style-review-2026-10-26.md` 已更新 E-2/E-3 状态。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-15：目标框架升级到 .NET 11（WPF）
+
+- 全树 TFM `net10.0-windows` → `net11.0-windows`：`OngekiFumenEditor`、`OngekiFumenEditor.Benchmark`、`OngekiFumenEditor.CommandLine`、`Tools/RecommendedScriptVerifier`、`Dependences/SvgToXaml/SvgConverter`、`Dependences/gemini/src/Gemini`、`Dependences/gemini/src/Gemini.Modules.Output`，以及 `tests/` 下 5 个 harness。
+- `global.json`：`11.0.100-preview.7.26381.103`（本机未安装，导致仓库内任何 `dotnet` 命令不可用）→ `11.0.100`（GA）+ `rollForward: latestFeature`；`.github/workflows/BuildProgram.yml`、`DeployBrowserPages.yml` 的 `dotnet-version` 同步到 `11.0.100`。
+- 硬编码 TFM 的路径改为 `$(TargetFramework)`：主 csproj 的 `RecommendedScriptVerifierPath`、`tests/bullet-placement` 的 8 个 `Reference`、`tests/grid-placement` 与 `tests/soflan-group-tree` 的 `EditorAssemblyDirectory`。
+- `OngekiFumenEditor.Benchmark`：`Program.cs` 改从程序集元数据读取 TFM（csproj 注入 `TargetFrameworkMoniker`），不再硬编码；`BulletBellQueryBenchmarks` 跟随主项目 `SoflanGroupWrapItem` → `SoflanGroupTree` 的重构，改用内存可见性数组，恢复可编译。
+- 验证：Release 构建 0 error（仅既有 NU1701）；`OngekiFumenEditor.CommandLine svg --png` 渲染 800×60000 预览图成功（覆盖 Skia native 路径）；GUI 后台启动并立即最小化后存活至 Welcome 窗口（279.7 MB 工作集）。
+- 性能对比（15 个自包含 benchmark 类、357 个对齐用例、ShortRun、同机同 SDK）：net11/net10 Mean 几何平均比 **0.9546**（CV≤15% 高置信子集 0.9530），分配几何平均比 0.9951，59 个用例分配量归零；报告见 `OngekiFumenEditor.Benchmark/README.md` 的「目标框架与 .NET 10 → 11 对比」。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

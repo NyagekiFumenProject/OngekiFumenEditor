@@ -64,6 +64,28 @@ dotnet run -c Release --project .\OngekiFumenEditor.Benchmark -- --job dry
 
 支持的 `--job` 预设:`dry` / `short` / `medium` / `long` / `verylong` / `default`。
 
+## 目标框架与 .NET 10 → 11 对比
+
+项目 TFM 为 `net11.0-windows`（2026-11-15 由 `net10.0-windows` 升级）。`Program.cs` 不硬编码 TFM：它读取 csproj 注入的 `TargetFrameworkMoniker` 程序集元数据来构造 BDN toolchain，后续再升级目标框架不必改代码。
+
+同一台机器上比较两个运行时的方法：
+
+```powershell
+# A 侧：TFM 仍是 net10.0-windows 时跑
+dotnet run -c Release --project .\OngekiFumenEditor.Benchmark -- --filter "*GridNotificationAllocationBenchmarks*" --job short
+# 把 BenchmarkDotNet.Artifacts/results/ 归档为 results-net10/
+
+# B 侧：TFM 改成 net11.0-windows 后跑同一组 filter，归档为 results-net11/
+```
+
+两份 CSV 用 `OngekiFumenEditor.Benchmark/Tools/compare-tfm.py` 对齐比较（按类 / 方法 / 参数对齐，输出几何平均比、CV≤15% 的高置信子集、分配归零用例数）。
+
+```powershell
+python .\OngekiFumenEditor.Benchmark\Tools\compare-tfm.py .\BenchmarkDotNet.Artifacts\results-net10 .\BenchmarkDotNet.Artifacts\results-net11
+```
+
+实测结论（15 个自包含类、357 个对齐用例、ShortRun、同机同 SDK）：net11/net10 的 Mean 几何平均比为 **0.9546**（高置信子集 0.9530），分配几何平均比 0.9951，另有 59 个用例的分配量从非零降到 0 B。
+
 ## 已知限制
 
 ### 继承 `FumenBenchmarkBase` 的用例在当前环境跑不起来（既有问题，与具体用例无关）
@@ -91,6 +113,19 @@ BDN 在子进程里以 `dotnet <generated>.dll` 启动，于是 `Environment.Pro
   2. `DumpFileHelper.Init()` 与 `Plugins` 目录创建失败时降级为告警而非抛出。
 
 在修复之前，不要以「全部可跑」为前提用 `[0] 全部`。
+
+### Skia 用例的 native 加载陷阱（既有问题，与 TFM 无关）
+
+`SkiaLineDrawingBenchmarks` / `SkPathReuseBenchmarks` / `PostDrawBatchingBenchmarks` 的类内 `[Config]` 强制 `InProcessNoEmitToolchain`，原因是 BDN 的 `HintPathRewrite` wrapper 只复制 host bin 根目录的托管 dll，不复制 `runtimes/<rid>/native/`：子进程因此找不到 `libSkiaSharp.dll`，回退到进程 PATH 搜索。若 PATH 上存在旧版本（本机实测命中 `C:\Program Files\ProxyBridge\libSkiaSharp.dll`，native 版本 88.1），就会以
+
+```
+The version of the native libSkiaSharp library (88.1) is incompatible with this version of SkiaSharp.
+Supported versions of the native libSkiaSharp library are in the range [119.0, 120.0).
+```
+
+失败，该 job 的所有用例记为 `NA`。
+
+另外 `Program.cs` 的全局 `AddJob` 会和类内 `[Config]` 合并，于是这些类会各跑两份 job：`HintPathRewrite` 那份在当前环境恒为 `NA`（net10 时同样如此），有效数据只来自 `InProcessNoEmitToolchain`。跑这类用例时逐类单独 `--filter`（不要一次筛多个 Skia 类），可避免 InProcess 编译链连续工作时的退化。
 
 ## 基线对比
 

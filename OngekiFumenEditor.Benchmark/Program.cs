@@ -30,7 +30,14 @@ internal static class Program
 
         var hostBin = Path.GetDirectoryName(typeof(Program).Assembly.Location)
             ?? throw new InvalidOperationException("Cannot locate host benchmark bin directory.");
-        var toolchain = HintPathRewriteToolchain.Create("net10.0-windows", hostBin);
+
+        // TFM 由 csproj 注入的 AssemblyMetadata 提供,升级目标框架时无需改这里。
+        var tfm = typeof(Program).Assembly
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(x => x.Key == "TargetFrameworkMoniker")?.Value
+            ?? throw new InvalidOperationException("Assembly is missing TargetFrameworkMoniker metadata.");
+
+        var toolchain = HintPathRewriteToolchain.Create(tfm, hostBin);
 
         var job = jobPreset.WithToolchain(toolchain);
         var config = DefaultConfig.Instance

@@ -38,7 +38,7 @@ public class BulletBellQueryBenchmarks
 
     private TGridSortList<Bullet> bullets = null!;
     private GlobalCacheSoflanGroupRecorder recorder = null!;
-    private IndividualSoflanAreaListMap soflanMap = null!;
+    private bool[] visibleInPreview = null!;
     private SoflanList defaultSoflanList = null!;
     private TGrid curTGrid;
     private DrawingTargetContext[] contexts = null!;
@@ -50,10 +50,12 @@ public class BulletBellQueryBenchmarks
         recorder = new GlobalCacheSoflanGroupRecorder();
         recorder.SetDefault(defaultSoflanList);
 
-        // 1/8 的 soflan group 在预览模式隐藏，其余可见（对应真实谱面里用户关掉个别组）
-        soflanMap = new IndividualSoflanAreaListMap();
+        // 1/8 的 soflan group 在预览模式隐藏，其余可见（对应真实谱面里用户关掉个别组）。
+        // 主项目已把可见性从 IndividualSoflanAreaListMap 的 wrap item 移到查看器 ViewModel，
+        // 这里直接用等价的内存状态模拟，语义与 CheckSoflanGroupVisible(int) 一致。
+        visibleInPreview = new bool[SoflanGroupCount];
         for (var group = 0; group < SoflanGroupCount; group++)
-            soflanMap.TryGetOrCreateSoflanGroupWrapItem(group, out _).IsDisplayInPreviewMode = group != 0;
+            visibleInPreview[group] = group != 0;
 
         bullets = new TGridSortList<Bullet>();
         bullets.BeginBatchAction();
@@ -195,8 +197,7 @@ public class BulletBellQueryBenchmarks
     }
 
     // 与 CheckSoflanGroupVisible(int) 的预览模式分支一致
-    private bool CheckVisible(int soflanGroup)
-        => soflanMap.TryGetOrCreateSoflanGroupWrapItem(soflanGroup, out _).IsDisplayInPreviewMode;
+    private bool CheckVisible(int soflanGroup) => visibleInPreview[soflanGroup];
 
     private List<OngekiObjectBase> Filter_Reference() => bullets
         .BinaryFindRange(curTGrid, TGrid.MaxValue)
