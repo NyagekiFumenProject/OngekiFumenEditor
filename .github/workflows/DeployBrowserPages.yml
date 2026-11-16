@@ -177,6 +177,7 @@ jobs:
         with:
           path: ${{ runner.temp }}/browser-publish/wwwroot
           include-hidden-files: true
+          retention-days: 1
 
       - name: Upload Browser artifact for Cloudflare Pages
         # Cloudflare Pages can serve COOP/COEP, so it gets the multithread flavour.
@@ -187,6 +188,7 @@ jobs:
           path: ${{ runner.temp }}/browser-publish/wwwroot
           include-hidden-files: true
           if-no-files-found: error
+          retention-days: 1
 
   deploy:
     name: Deploy GitHub Pages

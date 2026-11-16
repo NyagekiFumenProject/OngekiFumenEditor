@@ -135,6 +135,7 @@ jobs:
       with:
         name: ${{ needs.build.outputs.artifact-name }}
         path: ${{ runner.temp }}\editor-zip\${{ needs.build.outputs.zip-file }}
+        retention-days: 1
 
   push-editor-zip:
     name: Push editor zip to fumen server
