@@ -282,3 +282,6 @@ paket-files/
 __pycache__/
 *.pyc
 AGENTS.md
+
+# Local-only working notes (kept out of the repository)
+/docs/
