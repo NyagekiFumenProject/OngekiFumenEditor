@@ -484,4 +484,5 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - WPF：新增 `SoflanPatternMissingForIdleArea` 检查规则（`Modules/FumenCheckerListViewer/Base/DefaultRulesImpl/SoflanPatternMissingForIdleAreaCheckRule.cs`），级别 `problem`。ISF 引用的 soflan group 没有对应 `SFL` 定义、且区域内当前没有 Hold 时报出；同一区域有 Hold 时仍由既有 `SoflanPatternMissingForArea` 报 `error`，两条规则共用 `IndividualSoflanAreaCheckUtils` 的 T/X 命中判定，互不重复。
 - 文档/资源：三语文案与 `Resources.Designer.cs` 新增 `SoflanPatternMissingForIdleArea`；skill 文档规则目录更新为 25 条（core 21 条）；`tests/mcp-e2e/suites/70-metainfo-check.mjs` 的 ruleCount 断言 24 → 25。
 - 验证：临时 headless harness（复用已删除的 FumenCheckerTests 驱动，未入库）74/74；67 张 Benchmark 样例谱面全部可加载且新规则无误报；Release 构建 0 error。
+- 后续修正（`94ce399d`）：`IndividualSoflanAreaOverlap` 不再报告**同组** ISF 的面积重叠——重叠区域最终落到同一个 soflan pattern，游戏行为确定；跨组重叠仍为 `problem`。三语文案、规则目录与 MCP e2e（新增同组重叠不报、跨组仍报）同步更新；临时 harness 72/72、67 张样例无回归、Release 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
