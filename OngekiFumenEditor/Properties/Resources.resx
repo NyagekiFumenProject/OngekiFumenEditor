@@ -1149,6 +1149,9 @@
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>Individual soflan area (group {0}) contains hold {1}, but no soflan uses that group: the game crashes while looking the group up during chart loading.</value>
   </data>
+  <data name="SoflanPatternMissingForIdleArea" xml:space="preserve">
+    <value>Individual soflan area (group {0}) references a soflan group that no soflan defines. No hold sits inside it yet, so chart loading succeeds today, but any hold entering the area will crash the game while looking the group up.</value>
+  </data>
   <data name="MissingEndObject" xml:space="preserve">
     <value>Hold (Oid:{0}) object is missing the HoldEnd object</value>
   </data>

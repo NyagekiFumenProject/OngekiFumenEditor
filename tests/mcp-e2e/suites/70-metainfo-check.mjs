@@ -35,9 +35,9 @@ export default {
     ctx.hasKeys('check response shape', payload,
       ['success', 'editorId', 'ruleCount', 'minSeverity', 'total', 'errorCount', 'problemCount', 'suggestCount', 'matched', 'returned', 'truncated', 'results', 'ruleFailures']);
 
-    // WallConflictCheckRule ships without [Export] and is therefore a dead rule: 24 registered
-    // rules inclusive of IndividualSoflanAreaOverlap, not 25.
-    ctx.equal('the host runs the expected number of check rules', payload.ruleCount, 24);
+    // WallConflictCheckRule ships without [Export] and is therefore a dead rule: 25 registered
+    // rules inclusive of IndividualSoflanAreaOverlap and SoflanPatternMissingForIdleArea, not 26.
+    ctx.equal('the host runs the expected number of check rules', payload.ruleCount, 25);
     ctx.isArray('every rule that ran reports back', payload.ruleFailures, {});
     ctx.equal('no rule blew up', payload.ruleFailures.length, 0);
     ctx.equal('total equals the number of matched results when nothing is truncated', payload.total >= payload.matched, true);
@@ -335,8 +335,9 @@ export default {
     const areaC = await addArea(0, 107, 108, 0, 2);  // starts exactly where B ends
     const areaD = await addArea(1, 100, 101, 2, 4);  // starts exactly where A's X ends
 
-    const overlapResults = (await api.must(await api.check({ editorId, limit: 1000 }), 'run check'))
-      .results.filter((result) => result.ruleName === 'IndividualSoflanAreaOverlap');
+    const overlapCheck = await api.must(await api.check({ editorId, limit: 1000 }), 'run check');
+    const overlapResults = overlapCheck.results
+      .filter((result) => result.ruleName === 'IndividualSoflanAreaOverlap');
 
     ctx.equal('exactly the overlapping pair is reported, edge contact is not', overlapResults.length, 1);
     const overlap = overlapResults[0] ?? {};
@@ -357,6 +358,13 @@ export default {
         `range=${t0}..${t1} expected=${expectedT0}..${expectedT0 + 1}`);
       ctx.equal('the shared X range spans 0..2', `${x0},${x1}`, '0,2');
     }
+
+    const idlePatternResults = overlapCheck.results
+      .filter((result) => result.ruleName === 'SoflanPatternMissingForIdleArea');
+    ctx.equal('ISF areas naming an undefined soflan group without holds are reported', idlePatternResults.length, 2);
+    ctx.check('the undefined-group findings are problems',
+      idlePatternResults.every((result) => result.severity === 'problem'),
+      `severities=${[...new Set(idlePatternResults.map((result) => result.severity))]}`);
 
     for (let undone = 0; undone < 4; undone++)
       await api.undo({ editorId });

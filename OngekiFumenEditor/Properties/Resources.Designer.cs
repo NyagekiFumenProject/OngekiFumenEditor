@@ -5354,6 +5354,15 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Individual soflan area (group {0}) references a soflan group that no soflan defines. No hold sits inside it yet, so chart loading succeeds today, but any hold entering the area will crash the game while looking the group up..
+        /// </summary>
+        public static string SoflanPatternMissingForIdleArea {
+            get {
+                return ResourceManager.GetString("SoflanPatternMissingForIdleArea", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Hold (Oid:{0}) object is missing the HoldEnd object.
         /// </summary>
         public static string MissingEndObject {

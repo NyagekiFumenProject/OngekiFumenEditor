@@ -1149,6 +1149,9 @@
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>局部Soflan区域(组 {0})内有长条 {1}，但没有任何soflan使用该组：游戏读谱时查soflan表会因缺键抛异常崩溃。</value>
   </data>
+  <data name="SoflanPatternMissingForIdleArea" xml:space="preserve">
+    <value>局部Soflan区域(组 {0})引用了未定义的soflan组：当前区域内没有长条，读谱暂时不会崩，但一旦有长条落入，游戏会因查不到该组而崩溃。</value>
+  </data>
   <data name="MissingEndObject" xml:space="preserve">
     <value>Hold(Oid:{0})物件缺少HoldEnd中止物件</value>
   </data>

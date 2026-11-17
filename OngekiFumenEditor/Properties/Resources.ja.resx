@@ -1159,6 +1159,9 @@
   <data name="SoflanPatternMissingForArea" xml:space="preserve">
     <value>個別ソフランエリア(グループ {0})内にホールド {1} がありますが、そのグループを使うソフランがありません。ゲーム側の読み込み時に例外が発生します。</value>
   </data>
+  <data name="SoflanPatternMissingForIdleArea" xml:space="preserve">
+    <value>個別ソフランエリア(グループ {0})が存在しないソフラングループを参照しています。現在この範囲内にホールドはないため読み込みは成功しますが、ホールドが入るとゲーム側の読み込み時に例外が発生します。</value>
+  </data>
   <data name="MissingEndObject" xml:space="preserve">
     <value>HOLD(Oid:{0})オブジェクトに終点が設定されていません</value>
   </data>
