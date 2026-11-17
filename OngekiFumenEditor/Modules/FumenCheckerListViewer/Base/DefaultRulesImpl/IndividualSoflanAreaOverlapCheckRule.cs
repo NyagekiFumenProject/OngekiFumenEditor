@@ -11,8 +11,9 @@ using System.Linq;
 namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
 {
     /// <summary>
-    /// 局部 Soflan 区域（ISF）是「T 区间 × X 区间」构成的矩形。两块区域的交集只要有正的面积，
-    /// 重叠部分就会同时落入两个区域的 soflan pattern，游戏侧实际生效的行为取决于处理顺序，属于谱面问题。
+    /// 局部 Soflan 区域（ISF）是「T 区间 × X 区间」构成的矩形。不同组的区域交集只要有正的面积，
+    /// 重叠部分就会同时落入两个 soflan pattern，游戏侧实际生效的行为取决于处理顺序，属于谱面问题。
+    /// 同组区域即使重叠，最终写入的也是同一个 soflan pattern，行为确定，不报。
     /// 只共享一条边（首尾相接、左右并排）不算重叠。
     /// </summary>
     [Export(typeof(IFumenCheckRule))]
@@ -36,6 +37,10 @@ namespace OngekiFumenEditor.Modules.FumenCheckerListViewer.Base.DefaultRulesImpl
                 for (var j = i + 1; j < areas.Count && areas[j].TMin < a.TMax; j++)
                 {
                     var b = areas[j];
+
+                    // 同组重叠最终落到同一个 soflan pattern，不存在「两个 pattern 同时生效」的不确定性。
+                    if (a.Area.SoflanGroup == b.Area.SoflanGroup)
+                        continue;
 
                     var tMin = Math.Max(a.TMin, b.TMin);
                     var tMax = Math.Min(a.TMax, b.TMax);

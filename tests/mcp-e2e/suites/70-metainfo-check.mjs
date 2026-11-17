@@ -334,6 +334,7 @@ export default {
     const areaB = await addArea(1, 103, 107, 0, 2);  // overlaps A on T[103,104)
     const areaC = await addArea(0, 107, 108, 0, 2);  // starts exactly where B ends
     const areaD = await addArea(1, 100, 101, 2, 4);  // starts exactly where A's X ends
+    await addArea(0, 100, 102, 0, 2);                // same group as A: overlap is harmless
 
     const overlapCheck = await api.must(await api.check({ editorId, limit: 1000 }), 'run check');
     const overlapResults = overlapCheck.results
@@ -366,7 +367,7 @@ export default {
       idlePatternResults.every((result) => result.severity === 'problem'),
       `severities=${[...new Set(idlePatternResults.map((result) => result.severity))]}`);
 
-    for (let undone = 0; undone < 4; undone++)
+    for (let undone = 0; undone < 5; undone++)
       await api.undo({ editorId });
     ctx.equal('the ISF section leaves no areas behind', (await api.family(editorId, 'isfarea')).length, 0);
   },

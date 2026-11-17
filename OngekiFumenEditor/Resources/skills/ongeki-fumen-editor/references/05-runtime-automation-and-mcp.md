@@ -239,9 +239,9 @@ WAVE1 or BOSS is missing — the game then discards every EnemySet and falls bac
 wave layout), `InvalidConnectablePath`, `LaneBlockAcrossWalls`, `Soflan`, `SoflanConflict`,
 `DefaultSoflanLastSpeedNonPositive` (the default soflan group's last speed change is not a
 positive speed, so the game's time mapping stalls or runs backwards — `problem`),
-`IndividualSoflanAreaOverlap` (two ISF areas share a positive T×X area, so notes inside the
-overlap belong to both soflan patterns and the applied speed is undefined — `problem`; areas
-that only touch at an edge are fine),
+`IndividualSoflanAreaOverlap` (two ISF areas from different soflan groups share a positive T×X
+area, so notes inside the overlap belong to both soflan patterns and the applied speed is
+undefined — `problem`; same-group overlaps and areas that only touch at an edge are fine),
 `SoflanPatternMissingForIdleArea` (an ISF area names a soflan group that no soflan defines, but no
 hold sits inside it yet: loading succeeds today, though any hold entering the area would crash the
 game — `problem`; the same area with a hold is reported as an error by

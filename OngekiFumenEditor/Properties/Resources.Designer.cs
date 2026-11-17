@@ -5336,7 +5336,7 @@ namespace OngekiFumenEditor.Properties {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Individual soflan areas (group {0}) and (group {1}) overlap. Notes inside the shared area fall under both soflan patterns, so the effect actually applied by the game is undefined..
+        ///   Looks up a localized string similar to Individual soflan areas of different groups (group {0} and group {1}) overlap. Notes inside the shared area fall under both soflan patterns, so the effect actually applied by the game is undefined..
         /// </summary>
         public static string IndividualSoflanAreaOverlap {
             get {
