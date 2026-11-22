@@ -1419,6 +1419,9 @@
   <data name="ResetDefault" xml:space="preserve">
     <value>Reset to default</value>
   </data>
+  <data name="ReverseMouseWheelScroll" xml:space="preserve">
+    <value>Reverse mouse wheel scroll direction in the editor</value>
+  </data>
   <data name="ReverseSelectAllObjects" xml:space="preserve">
     <value>Invert selection of all objects</value>
   </data>
@@ -3317,6 +3320,9 @@
   </data>
   <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
     <value>Checked: pausing/stopping from the audio-player panel returns the editor view to the position where that playback started.&#xA;Unchecked: keeps the view at its pause position.&#xA;This adjusts the view position, not the chart’s object timing.</value>
+  </data>
+  <data name="SettingsToolTipEditorReverseMouseWheelScroll" xml:space="preserve">
+    <value>Checked: the mouse wheel scrolls the chart in the opposite direction.&#xA;Unchecked: keeps the default scroll direction.&#xA;Only plain wheel scrolling is reversed; Ctrl/Shift/Alt + wheel actions are unchanged.</value>
   </data>
   <data name="SettingsToolTipEditorOffsetMs" xml:space="preserve">
     <value>Offsets the editor drawing viewport relative to its current time, in milliseconds. Positive values show a later chart position, negative values an earlier position (clamped at time zero); 0 adds no offset. Does not change music playback, sound-effect timing or saved object times.</value>

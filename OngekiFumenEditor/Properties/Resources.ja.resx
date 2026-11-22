@@ -1429,6 +1429,9 @@
   <data name="ResetDefault" xml:space="preserve">
     <value>リセット</value>
   </data>
+  <data name="ReverseMouseWheelScroll" xml:space="preserve">
+    <value>マウスホイールによるエディターのスクロール方向を反転</value>
+  </data>
   <data name="ReverseSelectAllObjects" xml:space="preserve">
     <value>オブジェクトの選択を反転</value>
   </data>
@@ -2583,6 +2586,9 @@
   </data>
   <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
     <value>オン：音声プレーヤーパネルで一時停止・停止すると、エディタ表示を今回の再生開始位置へ戻します。&#xA;オフ：停止位置の表示を保ちます。&#xA;表示位置だけを変更し、譜面オブジェクトの時刻は変えません。</value>
+  </data>
+  <data name="SettingsToolTipEditorReverseMouseWheelScroll" xml:space="preserve">
+    <value>オン：マウスホイールでの譜面スクロール方向を既定と逆にします。&#xA;オフ：既定のスクロール方向を保ちます。&#xA;通常のホイールスクロールのみを反転し、Ctrl／Shift／Alt + ホイールの操作は変更しません。</value>
   </data>
   <data name="SettingsToolTipEditorOffsetMs" xml:space="preserve">
     <value>描画する表示位置を現在時刻に対してミリ秒で補正します。正の値は後の位置、負の値は前の位置を表示し、最も早い位置は時刻 0 です。0 は補正しません。音楽再生、効果音、保存済みオブジェクト時刻は変更しません。</value>

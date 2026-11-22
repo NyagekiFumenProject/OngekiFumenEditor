@@ -486,3 +486,10 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 验证：临时 headless harness（复用已删除的 FumenCheckerTests 驱动，未入库）74/74；67 张 Benchmark 样例谱面全部可加载且新规则无误报；Release 构建 0 error。
 - 后续修正（`94ce399d`）：`IndividualSoflanAreaOverlap` 不再报告**同组** ISF 的面积重叠——重叠区域最终落到同一个 soflan pattern，游戏行为确定；跨组重叠仍为 `problem`。三语文案、规则目录与 MCP e2e（新增同组重叠不报、跨组仍报）同步更新；临时 harness 72/72、67 张样例无回归、Release 构建 0 error。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-22：新增鼠标滚轮滚动方向反转设置（WPF）
+
+- WPF：新增编辑器全局设置 `ReverseMouseWheelScroll`（默认关闭），在设置窗口「文档→编辑器→用户交互」组内以「反转鼠标滚轮滑动编辑器滚轴方向」复选框提供；勾选后普通鼠标滚轮滚动编辑器视图的方向取反，Ctrl/Shift/Alt + 滚轮的缩放、网格与节拍调整不受影响。实现落在 `FumenVisualEditorViewModel.OnWheelScrollViewer` 的局部 delta，设计模式自由滚动、设计模式判定线拍吸附与预览模式三条滚动路径统一生效；`EditorSetting` 包装属性随全局设置双向同步并延迟保存。
+- 资源：en/zh-Hans/ja 三语新增显示名与多行 tooltip（`ReverseMouseWheelScroll` / `SettingsToolTipEditorReverseMouseWheelScroll`）。
+- 验证：Debug 构建 0 error；临时无窗口探针（未入库）15/15，覆盖默认值、`EditorSetting` 双向同步、三语资源、设置页复选框绑定，以及真实 `OnWheelScrollViewer` 路径——默认 `+120` 偏移 7500→7550，开启反转后 `+120` 为 7500→7450、`-120` 为 7500→7550。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

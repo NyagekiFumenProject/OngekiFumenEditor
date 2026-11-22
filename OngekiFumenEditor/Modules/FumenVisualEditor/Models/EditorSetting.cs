@@ -249,6 +249,21 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
             }
         }
 
+        private bool reverseMouseWheelScroll = Properties.EditorGlobalSetting.Default.ReverseMouseWheelScroll;
+        /// <summary>
+        /// 反转普通鼠标滚轮滚动编辑器视图的方向；Ctrl/Shift/Alt + 滚轮的缩放、网格与节拍调整不受影响。
+        /// </summary>
+        public bool ReverseMouseWheelScroll
+        {
+            get => reverseMouseWheelScroll;
+            set
+            {
+                reverseMouseWheelScroll = Properties.EditorGlobalSetting.Default.ReverseMouseWheelScroll = value;
+                RequestSave();
+                NotifyOfPropertyChange(() => ReverseMouseWheelScroll);
+            }
+        }
+
         private bool adjustPastedObjects = Properties.EditorGlobalSetting.Default.AdjustPastedObjects;
         public bool AdjustPastedObjects
         {
@@ -342,6 +357,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.Models
                     break;
                 case nameof(Properties.EditorGlobalSetting.MouseWheelLength):
                     mouseWheelLength = Properties.EditorGlobalSetting.Default.MouseWheelLength;
+                    break;
+                case nameof(Properties.EditorGlobalSetting.ReverseMouseWheelScroll):
+                    reverseMouseWheelScroll = Properties.EditorGlobalSetting.Default.ReverseMouseWheelScroll;
                     break;
                 case nameof(Properties.EditorGlobalSetting.XOffset):
                     xOffset = Properties.EditorGlobalSetting.Default.XOffset;

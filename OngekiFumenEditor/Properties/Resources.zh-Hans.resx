@@ -1419,6 +1419,9 @@
   <data name="ResetDefault" xml:space="preserve">
     <value>恢复默认</value>
   </data>
+  <data name="ReverseMouseWheelScroll" xml:space="preserve">
+    <value>反转鼠标滚轮滑动编辑器滚轴方向</value>
+  </data>
   <data name="ReverseSelectAllObjects" xml:space="preserve">
     <value>反向选取所有物件</value>
   </data>
@@ -3284,6 +3287,9 @@
   </data>
   <data name="SettingsToolTipEditorReturnAfterPause" xml:space="preserve">
     <value>勾选：通过音频播放器面板暂停／停止时，将编辑器视图返回本次播放开始的位置。&#xA;取消勾选：视图停留在暂停的位置。&#xA;只调整视图位置，不改变谱面物件时间。</value>
+  </data>
+  <data name="SettingsToolTipEditorReverseMouseWheelScroll" xml:space="preserve">
+    <value>勾选：鼠标滚轮滚动谱面的方向与默认相反。&#xA;取消勾选：保持默认滚动方向。&#xA;只反转普通滚轮滚动，Ctrl／Shift／Alt + 滚轮操作不受影响。</value>
   </data>
   <data name="SettingsToolTipEditorOffsetMs" xml:space="preserve">
     <value>校正编辑器绘制视口相对于当前时间的偏移，单位毫秒。正数显示更晚的谱面位置，负数显示更早的位置（最早限制到零时刻），0 表示不偏移。不改变音乐播放、音效触发时间或已保存的物件时间。</value>

@@ -100,6 +100,13 @@
                 </Grid>
                 <CheckBox
                     Margin="0,10,0,0"
+                    VerticalContentAlignment="Center"
+                    IsChecked="{Binding Setting.ReverseMouseWheelScroll}"
+                    ToolTip="{markup:Translate [SettingsToolTipEditorReverseMouseWheelScroll]}">
+                    <TextBlock Text="{markup:Translate [ReverseMouseWheelScroll]}" TextWrapping="Wrap" />
+                </CheckBox>
+                <CheckBox
+                    Margin="0,10,0,0"
                     Content="{markup:Translate [EnableHorizonScroll]}"
                     IsChecked="{Binding Setting.EnableXOffset}"
                     ToolTip="{markup:Translate [SettingsToolTipEditorEnableHorizontalScroll]}" />

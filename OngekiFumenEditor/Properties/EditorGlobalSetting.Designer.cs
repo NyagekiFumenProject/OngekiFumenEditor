@@ -253,6 +253,18 @@ namespace OngekiFumenEditor.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ReverseMouseWheelScroll {
+            get {
+                return ((bool)(this["ReverseMouseWheelScroll"]));
+            }
+            set {
+                this["ReverseMouseWheelScroll"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
         public double XOffset {
             get {

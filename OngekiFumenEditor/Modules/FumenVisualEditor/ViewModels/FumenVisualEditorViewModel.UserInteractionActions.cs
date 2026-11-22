@@ -1835,6 +1835,9 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
 
         private void OnWheelScrollViewer(MouseWheelEventArgs arg)
         {
+            // 只反转普通滚轮滚动；Ctrl/Shift/Alt + 滚轮的分支在 OnMouseWheel 中，不受影响。
+            var delta = Setting.ReverseMouseWheelScroll ? -arg.Delta : arg.Delta;
+
             if (IsDesignMode && Setting.JudgeLineAlignBeat)
             {
                 var tGrid = GetCurrentTGrid();
@@ -1855,7 +1858,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 var nexts = TGridCalculator.GetVisbleTimelines_DesignMode(Fumen.SoflansMap.DefaultSoflanList, Fumen.BpmList, Fumen.MeterChanges, ScrollViewerVerticalOffset, nextY, 0, Setting.BeatSplit, Setting.VerticalDisplayScale);
                 var nextFirst = nexts.Where(x => x.tGrid != tGrid).FirstOrDefault();
 
-                var result = arg.Delta > 0 ? nextFirst : downFirst;
+                var result = delta > 0 ? nextFirst : downFirst;
                 if (result.tGrid is not null)
                 {
                     var audioTime = ConvertYToAudioTime_DesignMode(result.y);
@@ -1869,7 +1872,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 {
                     var audioTime = GetViewportAudioTime();
                     var offset = TimeSpan.FromMilliseconds(Setting.MouseWheelLength);
-                    if (Math.Sign(arg.Delta) > 0)
+                    if (Math.Sign(delta) > 0)
                         audioTime += offset;
                     else
                         audioTime -= offset;
@@ -1877,7 +1880,7 @@ namespace OngekiFumenEditor.Modules.FumenVisualEditor.ViewModels
                 }
                 else
                 {
-                    var y = ScrollViewerVerticalOffset + Math.Sign(arg.Delta) * Setting.MouseWheelLength;
+                    var y = ScrollViewerVerticalOffset + Math.Sign(delta) * Setting.MouseWheelLength;
                     y = Math.Max(Math.Min(y, TotalDurationHeight), 0);
                     var audioTime = ConvertYToAudioTime_DesignMode(y);
                     ScrollTo(audioTime);
