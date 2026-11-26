@@ -504,5 +504,6 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 
 - P-1（`TryGetStartObject`）：`Parser/Ogkr/CommandParserImpl` 下 5 处解析期 `Lanes.FirstOrDefault(x => x.RecordId == ...)` 改为 `Lanes.TryGetStartObject(...)`，并用返回的 `bool` 做 `if` 判断；`TapCommandParser`/`HoldCommandParser` 缺失时保留原 warn 后继续，`LaneCommandParser`/`WallCommandParser` 缺失时保留原 error + `ReportMissingLaneStart` + `return default`，`LaneBlockCommandParser` 用 `out` 变量取 `LaneType`。删除 4 个文件不再需要的 `using System.Linq;`（`LaneCommandParser` 仍用 LINQ，保留）。
 - 验证：`dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug` 0 error；临时 harness 解析 5 个官方谱面（最大 2465 轨道 / 9570 子段），共 10950 项检查——逐 lane 字典命中与枚举引用一致、Tap/Hold `ReferenceLaneStart` 全部解析、子段对象数与命令行数一致、LaneBlock 左右方向计数与 WLS 定义一致；临时 harness 已删除。
+- 基准（旧 `48f38545` vs 新 `54115ba5`，Release，4 谱面 × 5 轮中位数）：端到端耗时 −2.4%～−6.6%，分配 −6.1%～−17.7%，序列化摘要两版一致；微基准单次查找约 4–8 ns vs 1.1–13.2 µs。数据与结论见文档 §8.2。
 - 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 标记 P-1 已采纳，新增 §8 实施记录。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
