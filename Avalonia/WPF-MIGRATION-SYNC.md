@@ -493,3 +493,16 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 资源：en/zh-Hans/ja 三语新增显示名与多行 tooltip（`ReverseMouseWheelScroll` / `SettingsToolTipEditorReverseMouseWheelScroll`）。
 - 验证：Debug 构建 0 error；临时无窗口探针（未入库）15/15，覆盖默认值、`EditorSetting` 双向同步、三语资源、设置页复选框绑定，以及真实 `OnWheelScrollViewer` 路径——默认 `+120` 偏移 7500→7550，开启反转后 `+120` 为 7500→7450、`-120` 为 7500→7550。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-26：新增 ogkr 解析性能审核摘要文档（WPF）
+
+- 文档：新增 `OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md`，整理第三方（WorkBuddy）审核页对 ogkr 解析的 3 处 O(n²) 热点（`Lanes.FirstOrDefault` 触发 `IntervalTree.Values` 全量快照、解析期 `RelocateDockableObjects` 空转、区间索引逐条 Remove+Add）、`CommandArgs.GetDataArray<T>` 死代码与 `float.TryParse` locale bug、720 谱面实测数据、验证方式、下一轮 backlog 与落地顺序。
+- 性质：纯文档记录，未修改任何 WPF 代码；文中结论来自页面转述，未在仓库中逐条复核。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-27：实施 ogkr 解析 P-1 轨道查找优化（WPF）
+
+- P-1（`TryGetStartObject`）：`Parser/Ogkr/CommandParserImpl` 下 5 处解析期 `Lanes.FirstOrDefault(x => x.RecordId == ...)` 改为 `Lanes.TryGetStartObject(...)`，并用返回的 `bool` 做 `if` 判断；`TapCommandParser`/`HoldCommandParser` 缺失时保留原 warn 后继续，`LaneCommandParser`/`WallCommandParser` 缺失时保留原 error + `ReportMissingLaneStart` + `return default`，`LaneBlockCommandParser` 用 `out` 变量取 `LaneType`。删除 4 个文件不再需要的 `using System.Linq;`（`LaneCommandParser` 仍用 LINQ，保留）。
+- 验证：`dotnet build OngekiFumenEditor/OngekiFumenEditor.csproj -c Debug` 0 error；临时 harness 解析 5 个官方谱面（最大 2465 轨道 / 9570 子段），共 10950 项检查——逐 lane 字典命中与枚举引用一致、Tap/Hold `ReferenceLaneStart` 全部解析、子段对象数与命令行数一致、LaneBlock 左右方向计数与 WLS 定义一致；临时 harness 已删除。
+- 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 标记 P-1 已采纳，新增 §8 实施记录。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

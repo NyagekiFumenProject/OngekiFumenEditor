@@ -2,7 +2,6 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
-using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
@@ -16,8 +15,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             var dataArr = args.GetDataArray<float>();
 
             var laneId = args.GetData<int>(1);
-            var refLaneStart = fumen.Lanes.FirstOrDefault(x => x.RecordId == laneId);
-            if (refLaneStart is null)
+            if (!fumen.Lanes.TryGetStartObject(laneId, out var refLaneStart))
             {
                 CoreLog.LogWarn($"Tap parse can't find lane/wallLane RecordId = {laneId}");
             }

@@ -3,7 +3,6 @@ using OngekiFumenEditor.Base.OngekiObjects.ConnectableObject;
 using OngekiFumenEditor.Base.OngekiObjects.Lane;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
-using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
 {
@@ -40,7 +39,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (fumen.Lanes.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
+            if (!fumen.Lanes.TryGetStartObject(beamRecordId, out var beamStart))
             {
                 CoreLog.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 ReportMissingLaneStart(fumen, args, beamRecordId);

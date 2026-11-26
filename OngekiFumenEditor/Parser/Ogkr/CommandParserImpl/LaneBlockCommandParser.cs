@@ -2,7 +2,6 @@ using OngekiFumenEditor.Base;
 using OngekiFumenEditor.Base.OngekiObjects;
 using OngekiFumenEditor.Utils;
 using System.ComponentModel.Composition;
-using System.Linq;
 using static OngekiFumenEditor.Base.OngekiObjects.LaneBlockArea;
 
 namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
@@ -18,7 +17,12 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
             var lbk = new LaneBlockArea();
             var laneRecId = (int)dataArr[1];
 
-            var refLaneType = fumen.Lanes.FirstOrDefault(x => x.RecordId == laneRecId)?.LaneType;
+            LaneType? refLaneType = null;
+            if (fumen.Lanes.TryGetStartObject(laneRecId, out var refLaneStart))
+            {
+                refLaneType = refLaneStart.LaneType;
+            }
+
             lbk.Direction = refLaneType == LaneType.WallLeft ? BlockDirection.Left : BlockDirection.Right;
 
             lbk.TGrid = new TGrid(dataArr[2], (int)dataArr[3]);

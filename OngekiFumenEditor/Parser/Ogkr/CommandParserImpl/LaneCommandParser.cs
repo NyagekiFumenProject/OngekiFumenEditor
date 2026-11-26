@@ -69,7 +69,7 @@ namespace OngekiFumenEditor.Parser.Ogkr.CommandParserImpl
         public override OngekiObjectBase Parse(CommandArgs args, OngekiFumen fumen)
         {
             var beamRecordId = args.GetData<int>(1);
-            if (fumen.Lanes.FirstOrDefault(x => x.RecordId == beamRecordId) is not ConnectableStartObject beamStart)
+            if (!fumen.Lanes.TryGetStartObject(beamRecordId, out var beamStart))
             {
                 CoreLog.LogError($"Can't parse {CommandLineHeader} command because beam record id not found : {beamRecordId}");
                 ReportMissingLaneStart(fumen, args, beamRecordId);
