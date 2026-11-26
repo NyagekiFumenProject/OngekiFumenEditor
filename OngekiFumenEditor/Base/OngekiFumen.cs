@@ -36,6 +36,7 @@ namespace OngekiFumenEditor.Base
         public BulletPalleteList BulletPalleteList { get; } = new();
         public BpmList BpmList { get; } = new();
         public LaneList Lanes { get; } = new();
+
         public TGridSortList<Bell> Bells { get; } = new();
         public TGridSortList<Flick> Flicks { get; } = new();
         public TGridSortList<Bullet> Bullets { get; } = new();
@@ -228,7 +229,8 @@ namespace OngekiFumenEditor.Base
             } is ConnectableObjectBase lane)
             {
                 Lanes.Add(lane);
-                ConnectableObjectDockingHelper.RelocateDockableObjects(this, lane);
+                if (!Lanes.IsBatching)
+                    ConnectableObjectDockingHelper.RelocateDockableObjects(this, lane);
             }
             else
             {

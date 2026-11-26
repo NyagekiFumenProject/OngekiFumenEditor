@@ -145,3 +145,23 @@
 - 摘要对比：4 个谱面的序列化 SHA-256 摘要两版完全一致。
 - 临时 harness 与旧版 worktree 已删除，未入库。
 
+### 8.3 P-3（2026-11-27）
+
+- `IntervalTree` 新增 `RefreshRanges`：批量写入后按当前值一次性重算 staging 中所有范围，只递增一次版本号。
+- `IntervalTreeWrapper`：批量期间记录 dirty；`EndBatchAction` 一次性刷新，移除原来每个子段触发的逐条 `Remove` + `Add`。
+- `ConnectableObjectList` / `LaneList` 暴露 `BeginBatchAction` / `EndBatchAction` / `IsBatching`。
+- `DefaultOngekiFumenParser.DeserializeAsync` 在解析循环外 `fumen.Lanes.BeginBatchAction()`，`finally` 中 `EndBatchAction()`。
+- 为让批量期间不触发区间查询，`OngekiFumen.AddObject` 在 `Lanes.IsBatching` 时跳过 `RelocateDockableObjects`（P-2 的最小前置；`GetAllDisplayableObjects` 本身未改）。
+- 验证：Debug/Release 构建 0 error；4 个官方谱面摘要与 P-1 完全一致；9304 项检查（每个 lane 的区间查询命中自身、Tap/Hold 引用、子段数）。
+- 基准（P-3 前 `a037c659` vs P-3 后，Release，4 谱面 × 5 轮中位数）：
+
+  | 谱面 | 轨道 | 前耗时 ms | 后耗时 ms | 变化 | 前分配 MB | 后分配 MB | 变化 |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | 28903_04 | 1217 | 2570.57 | 535.54 | −79.2% | 3038.35 | 155.58 | −94.9% |
+  | 20996_04 | 2465 | 2902.06 | 141.49 | −95.1% | 2446.91 | 119.39 | −95.1% |
+  | 20993_04 | 282 | 43.46 | 10.65 | −75.5% | 47.36 | 11.83 | −75.0% |
+  | 20995_03 | 682 | 870.03 | 95.73 | −89.0% | 989.42 | 73.80 | −92.5% |
+
+- 结论：P-3 是页面所述 4.6× 的主要来源；本次 P-3 单独实测 4.1–20.5×，分配下降 75%–95%。`28903_04` 的 P-3 后耗时波动较大（min 163.58 / max 717.97 ms），中位数仍为 4.8×。
+- 临时 harness 与 worktree 已删除，未入库。
+

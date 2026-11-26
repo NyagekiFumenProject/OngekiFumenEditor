@@ -1,4 +1,5 @@
 //copy&modify from repo : https://github.com/mbuchetics/RangeTree , LICENSE.txt : https://github.com/mbuchetics/RangeTree/blob/master/LICENSE.txt
+using System;
 using System.Collections.Generic;
 
 namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
@@ -58,5 +59,11 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
         /// Notify implement that their items is dirty and need to rebuild again.
         /// </summary>
         void NotifyDirty();
+
+        /// <summary>
+        /// Recomputes every stored item's range from its current value, then marks the index dirty.
+        /// Used once after a batched update instead of removing and re-adding each item.
+        /// </summary>
+        void RefreshRanges(Func<TValue, (TKey From, TKey To)> rangeSelector);
     }
 }

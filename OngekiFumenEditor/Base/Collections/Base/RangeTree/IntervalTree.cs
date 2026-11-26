@@ -170,6 +170,30 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
                 version++;
         }
 
+        public void RefreshRanges(Func<TValue, (TKey From, TKey To)> rangeSelector)
+        {
+            lock (writeGate)
+            {
+                for (var i = 0; i < staging.Count; i++)
+                {
+                    var pair = staging[i];
+                    var (from, to) = rangeSelector(pair.Value);
+
+                    if (comparer.Compare(from, to) > 0)
+                    {
+                        if (EnableAutoSwapMinMax)
+                            (from, to) = (to, from);
+                        else
+                            throw new ArgumentOutOfRangeException(nameof(rangeSelector), $"{from} cannot be larger than {to}");
+                    }
+
+                    staging[i] = new RangeValuePair<TKey, TValue>(from, to, pair.Value);
+                }
+
+                version++;
+            }
+        }
+
         private void RebuildInternal()
         {
             if (Volatile.Read(ref syncedVersion) == Volatile.Read(ref version))

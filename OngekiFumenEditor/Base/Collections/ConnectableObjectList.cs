@@ -169,5 +169,17 @@ namespace OngekiFumenEditor.Base.Collections
         {
             return startObjects.FastContains(o);
         }
+
+        public bool IsBatching => startObjects.IsBatching;
+
+        public void BeginBatchAction()
+        {
+            startObjects.BeginBatchAction();
+        }
+
+        public void EndBatchAction()
+        {
+            startObjects.EndBatchAction();
+        }
     }
 }

@@ -507,3 +507,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 基准（旧 `48f38545` vs 新 `54115ba5`，Release，4 谱面 × 5 轮中位数）：端到端耗时 −2.4%～−6.6%，分配 −6.1%～−17.7%，序列化摘要两版一致；微基准单次查找约 4–8 ns vs 1.1–13.2 µs。数据与结论见文档 §8.2。
 - 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 标记 P-1 已采纳，新增 §8 实施记录。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-27：实施 ogkr 解析 P-3 区间索引批量刷新（WPF）
+
+- P-3（批量重索引）：`IntervalTree` 新增 `RefreshRanges`，批量结束后按当前值一次性重算 staging 中所有范围并只递增一次版本号；`IntervalTreeWrapper` 批量期间记录 dirty，`EndBatchAction` 一次性刷新，替代每个子段触发的逐条 `Remove` + `Add`；`ConnectableObjectList` 暴露 `BeginBatchAction`/`EndBatchAction`/`IsBatching`。
+- 解析器：`DefaultOngekiFumenParser.DeserializeAsync` 在解析循环外 `fumen.Lanes.BeginBatchAction()`，`finally` 中 `EndBatchAction()`。`OngekiFumen.AddObject` 在 `Lanes.IsBatching` 时跳过 `RelocateDockableObjects`（P-2 的最小前置，`GetAllDisplayableObjects` 未改）。
+- 验证：Debug/Release 0 error；4 个官方谱面摘要与 P-1 完全一致；9304 项检查——每个 lane 的区间查询命中自身、Tap/Hold `ReferenceLaneStart` 全部解析、子段对象数与命令行数一致。
+- 基准（P-3 前 `a037c659` vs P-3 后，Release，4 谱面 × 5 轮中位数）：耗时 2570.57→535.54、2902.06→141.49、43.46→10.65、870.03→95.73 ms；分配 3038.35→155.58、2446.91→119.39、47.36→11.83、989.42→73.80 MB。单独 P-3 约 4.1–20.5×，分配 −75%～−95%，与页面 4.6× 的量级一致。
+- 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.3。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

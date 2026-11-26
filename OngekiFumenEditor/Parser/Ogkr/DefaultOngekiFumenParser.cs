@@ -38,32 +38,42 @@ namespace OngekiFumenEditor.Parser.Ogkr
 
             var commandArg = new CommandArgs();
 
-            // 同步 ReadLine 替代 ReadLineAsync:DeserializeAsync 已在调用线程之外执行,
-            // 每行一个 Task 的累计开销在大谱面上不可忽略;且整流读取是顺序的,async 无并发收益。
-            // 用 Task.Run 把整段读取调度到线程池,避免阻塞 caller 的同步上下文。
-            await Task.Run(() =>
+            // 解析期间子段会连续改变所属 start 的 Min/MaxTGrid；先挂起区间索引的逐条重索引，
+            // 整段读取结束后一次性重算（见 ConnectableObjectList.BeginBatchAction）。
+            fumen.Lanes.BeginBatchAction();
+            try
             {
-                string line;
-                var lineCount = 0;
-                while ((line = reader.ReadLine()) != null)
+                // 同步 ReadLine 替代 ReadLineAsync:DeserializeAsync 已在调用线程之外执行,
+                // 每行一个 Task 的累计开销在大谱面上不可忽略;且整流读取是顺序的,async 无并发收益。
+                // 用 Task.Run 把整段读取调度到线程池,避免阻塞 caller 的同步上下文。
+                await Task.Run(() =>
                 {
-                    if ((++lineCount & 0xFF) == 0)
-                        cancellationToken.ThrowIfCancellationRequested();
-
-                    commandArg.Line = line;
-
-                    var cmdName = commandArg.GetData<string>(0);
-                    if (!string.IsNullOrEmpty(cmdName)
-                        && CommandParsers.TryGetValue(cmdName, out var parser))
+                    string line;
+                    var lineCount = 0;
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        if (parser.Parse(commandArg, fumen) is OngekiObjectBase obj)
+                        if ((++lineCount & 0xFF) == 0)
+                            cancellationToken.ThrowIfCancellationRequested();
+
+                        commandArg.Line = line;
+
+                        var cmdName = commandArg.GetData<string>(0);
+                        if (!string.IsNullOrEmpty(cmdName)
+                            && CommandParsers.TryGetValue(cmdName, out var parser))
                         {
-                            genObjList.Add((obj, parser));
-                            fumen.AddObject(obj);
+                            if (parser.Parse(commandArg, fumen) is OngekiObjectBase obj)
+                            {
+                                genObjList.Add((obj, parser));
+                                fumen.AddObject(obj);
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+            finally
+            {
+                fumen.Lanes.EndBatchAction();
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 

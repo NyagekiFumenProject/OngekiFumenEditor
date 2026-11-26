@@ -12,6 +12,7 @@ namespace OngekiFumenEditor.Base.Collections.Base
         private IIntervalTree<TKey, TValue> tree;
         private readonly Func<TValue, KeyRange> rangeKeySelector;
         private readonly HashSet<string> rebuildProperties;
+        private bool batchDirty;
 
         public bool IsBatching { get; private set; }
         public int Count => tree.Count;
@@ -45,7 +46,10 @@ namespace OngekiFumenEditor.Base.Collections.Base
             if (rebuildProperties.Contains(e.PropertyName))
             {
                 if (IsBatching)
+                {
+                    batchDirty = true;
                     return; //not to process dirty data yet.
+                }
 
                 var obj = (TValue)sender;
                 Remove(obj);
@@ -95,12 +99,22 @@ namespace OngekiFumenEditor.Base.Collections.Base
         public void BeginBatchAction()
         {
             IsBatching = true;
+            batchDirty = false;
         }
 
         public void EndBatchAction()
         {
             IsBatching = false;
-            tree.NotifyDirty();
+
+            if (!batchDirty)
+                return;
+
+            batchDirty = false;
+            tree.RefreshRanges(obj =>
+            {
+                var keyRange = rangeKeySelector(obj);
+                return (keyRange.Min, keyRange.Max);
+            });
         }
 
         public bool FastContains(TValue obj) => Contains(obj);
