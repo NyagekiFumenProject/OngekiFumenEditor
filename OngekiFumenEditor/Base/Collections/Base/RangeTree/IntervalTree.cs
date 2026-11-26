@@ -21,6 +21,11 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
 
         private List<RangeValuePair<TKey, TValue>> staging = new();
 
+        // 重复检查索引：把 Add 的 O(n) 线性扫描降为摊还 O(1)。
+        // TValue 现有实现要么是引用相等类型（未重写 Equals/GetHashCode），要么是 record（值相等），
+        // 与原来的 x.Value.Equals(value) 语义一致。
+        private readonly HashSet<TValue> addedValues = new();
+
         private IntervalTreeNode<TKey, TValue> root;
 
         private int version;
@@ -121,7 +126,7 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
 
             lock (writeGate)
             {
-                if (staging.Any(x => x.Value.Equals(value)))
+                if (!addedValues.Add(value))
                     throw new ArgumentOutOfRangeException($"{value} is exist");
 
                 staging.Add(new RangeValuePair<TKey, TValue>(from, to, value));
@@ -138,7 +143,9 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
                 if (index < 0)
                     return false;
 
+                var stored = staging[index].Value;
                 staging.RemoveAt(index);
+                addedValues.Remove(stored);
                 count = staging.Count;
                 version++;
                 return true;
@@ -150,6 +157,7 @@ namespace OngekiFumenEditor.Base.Collections.Base.RangeTree
             lock (writeGate)
             {
                 staging.Clear();
+                addedValues.Clear();
                 count = 0;
                 version++;
             }

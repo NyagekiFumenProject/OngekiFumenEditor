@@ -525,3 +525,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 附带发现（未修改）：`DefaultOngekiFumenFormatter` 的序列化仍受当前区域设置影响，de-DE 下输出逗号小数点；建议单独立项。
 - 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.4。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-27：实施 ogkr 解析 N-1 区间树查重优化（WPF）
+
+- N-1：`IntervalTree` 增加 `HashSet<TValue> addedValues`，`Add` 的 O(n) 线性查重改为 O(1)；`Remove` 同步移除实际存储值，`Clear` 同步清空，线程安全仍由 `writeGate` 保护。
+- Breaking change：当前 `TValue`（引用类型按引用相等、record 按值相等）语义与原来的 `x.Value.Equals(value)` 一致；未来若重写 `Equals` 必须同时正确重写 `GetHashCode`。null 边缘行为从 NRE 变为允许，但现有调用不传 null。
+- 验证：Debug/Release 0 error；4 个官方谱面摘要与 B-1/B-2 基线一致；12 项 `IntervalTree` 语义检查通过。
+- 基准（9 轮中位数）：端到端分配 −1.0%～−1.7%，GC0/1/2 无回退（`20996_04` Gen1 2→1）；耗时 190.01→190.24、110.35→99.50、9.07→9.23、62.54→71.81 ms，多数差异在噪声内（`20995_03` 均值 +0.8%）。10k 次 `Add` 微基准 36.60→0.37 ms（约 99×），分配 1.27→1.15 MB，常驻 +0.33 MB（HashSet 开销），GC2/1/0 各少 1 次。
+- 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.5。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

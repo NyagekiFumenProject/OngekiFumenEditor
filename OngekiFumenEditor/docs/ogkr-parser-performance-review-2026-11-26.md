@@ -173,3 +173,26 @@
 - 附带发现（未修改）：`DefaultOngekiFumenFormatter` 的字符串插值仍使用当前区域设置，`de-DE` 下序列化会输出逗号小数点并改变摘要（`00253B30…` → `FE2FAD0E…`）。这是固定格式序列化侧的独立 locale 问题，建议单独立项处理。
 - 临时 harness 已删除，未入库。
 
+### 8.5 N-1（2026-11-27）
+
+- 实现：`IntervalTree` 增加 `HashSet<TValue> addedValues`；`Add` 用 `addedValues.Add(value)` 判重；`Remove` 同步移除实际存储值；`Clear` 同步清空。
+- Breaking change 结论：对当前 `TValue` 无行为变化。
+  - 引用类型（`ConnectableStartObject`、`Hold`、`IndividualSoflanArea`、`LaneBlockArea`、`ISoflan`）未重写 `Equals`/`GetHashCode`，`HashSet` 与原来的 `x.Value.Equals(value)` 都是引用相等。
+  - record 类型（`SoflanSegment`、`CombinableRange<T>`）由编译器生成一致的 `Equals`/`GetHashCode`。
+  - 新增契约：未来 `TValue` 若重写 `Equals`，必须同时正确重写 `GetHashCode`，否则 `HashSet` 可能漏判重复。
+  - null 边缘：原实现遇到 null 会 NRE，`HashSet` 允许 null；现有调用不传 null。
+  - 线程安全不变：HashSet 与 staging 同在 `writeGate` 下维护。
+- 验证：Debug/Release 0 error；4 个官方谱面摘要与 B-1/B-2 基线一致；12 项 `IntervalTree` 语义检查（重复拒绝、删除、重加、Clear、record 值相等）。
+- 端到端基准（9 轮中位数，N-1 前 `b2f72351` vs 后）：
+
+  | 谱面 | 前耗时 ms | 后耗时 ms | 变化 | 前分配 MB | 后分配 MB | 变化 | 前 GC0/1/2 | 后 GC0/1/2 |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | 28903_04 | 190.01 | 190.24 | +0.1% | 150.34 | 148.54 | −1.2% | 9/1/0 | 9/1/0 |
+  | 20996_04 | 110.35 | 99.50 | −9.8% | 114.14 | 113.02 | −1.0% | 7/2/0 | 7/1/0 |
+  | 20993_04 | 9.07 | 9.23 | +1.8% | 11.02 | 10.83 | −1.7% | 0/0/0 | 0/0/0 |
+  | 20995_03 | 62.54 | 71.81 | +14.8% | 69.74 | 68.89 | −1.2% | 4/0/0 | 4/0/0 |
+
+- 微基准（10,000 个唯一 `object` 的 `IntervalTree.Add`）：36.60 → 0.37 ms（约 99×）；分配 1.27 → 1.15 MB（−9.4%）；常驻内存 0.25 → 0.58 MB（+0.33 MB，HashSet 开销）；GC0/1/2 2/2/2 → 1/1/1。
+- 结论：N-1 对当前调用者无 breaking change；收益集中在 Add 密集的构建路径，端到端耗时受解析其它阶段主导（多数在噪声内，`20995_03` 均值仅 +0.8%），分配稳定下降 1.0%–1.7%，GC 无回退；代价是每个 `IntervalTree` 约 +33 bytes/项 的常驻内存。
+- 临时 harness 与 worktree 已删除，未入库。
+
