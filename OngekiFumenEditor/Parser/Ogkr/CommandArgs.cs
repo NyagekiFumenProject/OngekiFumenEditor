@@ -2,7 +2,6 @@ using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr
@@ -13,6 +12,7 @@ namespace OngekiFumenEditor.Parser.Ogkr
         private static readonly Dictionary<Type, TypeConverter> staticConverterCache = new();
 
         private string line = string.Empty;
+        private string[] cachedInputs;
         private Dictionary<Type, Array> cacheDataArray = new Dictionary<Type, Array>();
         private Dictionary<Type, IArgValueConverter> converters = new Dictionary<Type, IArgValueConverter>();
 
@@ -30,13 +30,15 @@ namespace OngekiFumenEditor.Parser.Ogkr
             set
             {
                 cacheDataArray.Clear();
+                cachedInputs = null;
                 line = value;
             }
         }
 
         public T GetData<T>(int index)
         {
-            return GetDataArray<T>().ElementAtOrDefault(index);
+            var arr = GetDataArray<T>();
+            return (uint)index < (uint)arr.Length ? arr[index] : default;
         }
 
         public T[] GetDataArray<T>()
@@ -45,53 +47,50 @@ namespace OngekiFumenEditor.Parser.Ogkr
             if (cacheDataArray.TryGetValue(type, out var array))
                 return (T[])array;
 
-            var inputs = line.Trim().Split(SplitEmptyCharArray);
+            var inputs = GetInputs();
             T[] arr;
 
             if (converters.TryGetValue(type, out var argConverter))
             {
-                arr = argConverter.Parser(inputs).OfType<T>().ToArray();
+                // 内置 converter 对每个输入返回一个值；这里直接消费一次，不再经过
+                // OfType<T>().ToArray() 的两层迭代器和中间数组。
+                arr = new T[inputs.Length];
+                var count = 0;
+                foreach (var value in argConverter.Parser(inputs))
+                {
+                    if (value is not T typed)
+                        continue;
+
+                    if (count == arr.Length)
+                        Array.Resize(ref arr, Math.Max(4, arr.Length * 2));
+
+                    arr[count++] = typed;
+                }
+
+                if (count != arr.Length)
+                    Array.Resize(ref arr, count);
             }
             else
             {
+                // 无 MEF 环境（或自定义类型未注册 converter）时的后备；
+                // 固定使用不变区域设置，避免小数点随系统区域变化。
                 arr = new T[inputs.Length];
-
-                if (type == typeof(int))
+                var converter = GetCachedConverter(type);
+                for (var i = 0; i < inputs.Length; i++)
                 {
-                    for (var i = 0; i < inputs.Length; i++)
-                        if (int.TryParse(inputs[i].AsSpan(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var v))
-                            arr[i] = (T)(object)v;
-                }
-                else if (type == typeof(float))
-                {
-                    for (var i = 0; i < inputs.Length; i++)
-                        if (float.TryParse(inputs[i].AsSpan(), NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
-                            arr[i] = (T)(object)v;
-                }
-                else if (type == typeof(double))
-                {
-                    for (var i = 0; i < inputs.Length; i++)
-                        if (double.TryParse(inputs[i].AsSpan(), NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
-                            arr[i] = (T)(object)v;
-                }
-                else if (type == typeof(string))
-                {
-                    Array.Copy(inputs, arr, inputs.Length);
-                }
-                else
-                {
-                    var converter = GetCachedConverter(type);
-                    for (var i = 0; i < inputs.Length; i++)
-                    {
-                        var x = inputs[i];
-                        if (converter.IsValid(x))
-                            arr[i] = (T)converter.ConvertFromString(x);
-                    }
+                    var x = inputs[i];
+                    if (converter.IsValid(x))
+                        arr[i] = (T)converter.ConvertFromInvariantString(x);
                 }
             }
 
             cacheDataArray[type] = arr;
             return arr;
+        }
+
+        private string[] GetInputs()
+        {
+            return cachedInputs ??= line.Trim().Split(SplitEmptyCharArray);
         }
 
         private static TypeConverter GetCachedConverter(Type type)

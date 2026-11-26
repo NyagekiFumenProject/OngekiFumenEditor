@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Globalization;
 using System.Linq;
 
 namespace OngekiFumenEditor.Parser.Ogkr
@@ -23,14 +24,14 @@ namespace OngekiFumenEditor.Parser.Ogkr
     public class ArgSingleValueConverter : IArgValueConverter
     {
         public Type ConvertType => typeof(float);
-        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => float.TryParse(x, out var d) ? d : default);
+        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => float.TryParse(x, NumberStyles.Float, CultureInfo.InvariantCulture, out var d) ? d : default);
     }
 
     [Export(typeof(IArgValueConverter))]
     public class ArgDoubleValueConverter : IArgValueConverter
     {
         public Type ConvertType => typeof(double);
-        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => double.TryParse(x, out var d) ? d : default);
+        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => double.TryParse(x, NumberStyles.Float, CultureInfo.InvariantCulture, out var d) ? d : default);
     }
 
     [Export(typeof(IArgValueConverter))]
@@ -44,13 +45,13 @@ namespace OngekiFumenEditor.Parser.Ogkr
     public class ArgIntValueConverter : IArgValueConverter
     {
         public Type ConvertType => typeof(int);
-        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => int.TryParse(x, out var d) ? d : default);
+        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => int.TryParse(x, NumberStyles.Integer, CultureInfo.InvariantCulture, out var d) ? d : default);
     }
 
     [Export(typeof(IArgValueConverter))]
     public class ArgLongValueConverter : IArgValueConverter
     {
         public Type ConvertType => typeof(long);
-        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => long.TryParse(x, out var d) ? d : default);
+        public IEnumerable Parser(IEnumerable<string> inputs) => inputs.Select(x => long.TryParse(x, NumberStyles.Integer, CultureInfo.InvariantCulture, out var d) ? d : default);
     }
 }

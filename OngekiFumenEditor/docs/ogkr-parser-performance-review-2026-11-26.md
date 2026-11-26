@@ -165,3 +165,11 @@
 - 结论：P-3 是页面所述 4.6× 的主要来源；本次 P-3 单独实测 4.1–20.5×，分配下降 75%–95%。`28903_04` 的 P-3 后耗时波动较大（min 163.58 / max 717.97 ms），中位数仍为 4.8×。
 - 临时 harness 与 worktree 已删除，未入库。
 
+### 8.4 B-1 / B-2（2026-11-27）
+
+- B-1：删除 `CommandArgs.GetDataArray<T>` 中永不执行的 span 分支（内置 `IArgValueConverter` 恒命中 converters 分支）；converter 路径去掉 `OfType<T>().ToArray()` 的两层迭代器，改为一次 `foreach` + 按需 `Array.Resize`；`GetData<T>` 改用数组索引；同一行只 `Split` 一次（`cachedInputs`，`Line` setter 负责失效）。
+- B-2：`float`/`double` 改用 `NumberStyles.Float` + `CultureInfo.InvariantCulture`；`int`/`long` 统一 `NumberStyles.Integer` + InvariantCulture；无 converter 的 TypeConverter 后备改用 `ConvertFromInvariantString`。
+- 验证：Debug 构建 0 error；4 个官方谱面在 `InvariantCulture` 与 `de-DE` 下解析后（序列化固定 invariant）摘要完全一致，且等于 P-3 基线；临时 harness 14 项检查覆盖 float/double/int/long/bool/string、按类型缓存与 `Line` 变更失效。
+- 附带发现（未修改）：`DefaultOngekiFumenFormatter` 的字符串插值仍使用当前区域设置，`de-DE` 下序列化会输出逗号小数点并改变摘要（`00253B30…` → `FE2FAD0E…`）。这是固定格式序列化侧的独立 locale 问题，建议单独立项处理。
+- 临时 harness 已删除，未入库。
+

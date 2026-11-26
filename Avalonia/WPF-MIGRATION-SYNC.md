@@ -516,3 +516,12 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 基准（P-3 前 `a037c659` vs P-3 后，Release，4 谱面 × 5 轮中位数）：耗时 2570.57→535.54、2902.06→141.49、43.46→10.65、870.03→95.73 ms；分配 3038.35→155.58、2446.91→119.39、47.36→11.83、989.42→73.80 MB。单独 P-3 约 4.1–20.5×，分配 −75%～−95%，与页面 4.6× 的量级一致。
 - 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.3。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-27：修复 ogkr 参数解析 B-1/B-2（WPF）
+
+- B-1：删除 `CommandArgs.GetDataArray<T>` 中永不执行的 span 分支；converter 路径去掉 `OfType<T>().ToArray()`，改为一次 `foreach` + 按需 `Array.Resize`；`GetData<T>` 改用数组索引；同一行只 `Split` 一次（`cachedInputs`，`Line` setter 失效）。
+- B-2：`float`/`double` 改用 `NumberStyles.Float` + `CultureInfo.InvariantCulture`；`int`/`long` 统一 `NumberStyles.Integer` + InvariantCulture；TypeConverter 后备改用 `ConvertFromInvariantString`。
+- 验证：Debug 0 error；4 个官方谱面在 InvariantCulture 与 de-DE 下解析后（序列化固定 invariant）摘要完全一致且等于 P-3 基线；临时 harness 14 项检查覆盖各数值类型、缓存与换行失效。
+- 附带发现（未修改）：`DefaultOngekiFumenFormatter` 的序列化仍受当前区域设置影响，de-DE 下输出逗号小数点；建议单独立项。
+- 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.4。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
