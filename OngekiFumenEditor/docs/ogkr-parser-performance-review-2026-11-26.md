@@ -196,3 +196,14 @@
 - 结论：N-1 对当前调用者无 breaking change；收益集中在 Add 密集的构建路径，端到端耗时受解析其它阶段主导（多数在噪声内，`20995_03` 均值仅 +0.8%），分配稳定下降 1.0%–1.7%，GC 无回退；代价是每个 `IntervalTree` 约 +33 bytes/项 的常驻内存。
 - 临时 harness 与 worktree 已删除，未入库。
 
+
+### 8.6 N-2（2026-11-27）
+
+- 实现：`ConnectableObjectList` 增加 `maxRecordId` 缓存（初值 `-1`，即空集合）：
+  - `GetNewRecordId()` 直接返回 `maxRecordId + 1`，不再 `startObjects.Select(x => x.RecordId).Max()`——旧路径经 `IntervalTree.Values` 复制整张 `staging` 快照再枚举。
+  - `Add(START_TYPE)` 在入索引后按需提升；`Remove(START_TYPE)` 在移除项恰好是当前最大值时重算。
+  - `RecordId` 变更：`RemoveRecordIdIndexFor` 改为返回被移除的旧键；旧键为最大值或新值更大时重算，其余情况缓存不变。
+  - `Remove` 集合外对象、`RemoveRecordIdIndexFor` 找不到索引（返回 `-1`）都不会污染缓存。
+- 验证：Debug/Release 构建 0 error；临时 harness 16 项检查通过——空集合返回 0、自动分配 0/1/2、删除最大值回退、改大/改小/改回、显式 RecordId 加入与移除、移除集合外对象、`TryGetStartObject` 索引一致性、10000 次调用 0 分配。
+- 微基准（临时 harness，Release，2500 个轨道的列表 × 20000 次）：旧实现（以 `List` 枚举模拟 `Select().Max() + 1`，未含 `Values` 快照拷贝，故为下界）305 ms / 1.4 MB → 新实现 0.01 ms / 0 B，取值一致（50000000）。
+- 临时 harness 已删除，未入库。

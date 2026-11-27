@@ -534,3 +534,11 @@ git show -s --format='%h %ad %s%n%p' --date=iso <mergeCommit>      # 同步 merg
 - 基准（9 轮中位数）：端到端分配 −1.0%～−1.7%，GC0/1/2 无回退（`20996_04` Gen1 2→1）；耗时 190.01→190.24、110.35→99.50、9.07→9.23、62.54→71.81 ms，多数差异在噪声内（`20995_03` 均值 +0.8%）。10k 次 `Add` 微基准 36.60→0.37 ms（约 99×），分配 1.27→1.15 MB，常驻 +0.33 MB（HashSet 开销），GC2/1/0 各少 1 次。
 - 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.5。
 - Avalonia：本次未移植，不改变现有同步点 `8b2940785`。
+
+## 2026-11-27：实施 ogkr 解析 N-2 新 RecordId 分配优化（WPF）
+
+- N-2：`ConnectableObjectList` 增加 `maxRecordId` 缓存，`GetNewRecordId()` 从 `Select(x => x.RecordId).Max()`（经 `IntervalTree.Values` 全量快照）改为 `maxRecordId + 1`；`Add` 提升、`Remove` 命中最大值时重算、`RecordId` 变更时按旧/新值决定是否重算。
+- 验证：Debug/Release 0 error；临时 harness 16 项语义检查通过（自动分配、删除最大值回退、改大/改小/改回、显式 id、移除集合外对象、索引一致性、10000 次调用 0 分配）。
+- 基准（Release，2500 轨道 × 20000 次）：305 ms / 1.4 MB → 0.01 ms / 0 B（旧实现以 `List` 枚举模拟，为下界）。
+- 文档：`OngekiFumenEditor/docs/ogkr-parser-performance-review-2026-11-26.md` 新增 §8.6。
+- Avalonia：本次未移植，不改变现有同步点 `8b2940785`。

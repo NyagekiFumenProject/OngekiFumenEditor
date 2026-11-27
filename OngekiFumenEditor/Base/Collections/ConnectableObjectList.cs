@@ -19,6 +19,7 @@ namespace OngekiFumenEditor.Base.Collections
         );
 
         private readonly Dictionary<int, START_TYPE> startObjectByRecordId = new();
+        private int maxRecordId = -1;
 
         public bool TryGetStartObject(int recordId, out START_TYPE start)
         {
@@ -31,7 +32,7 @@ namespace OngekiFumenEditor.Base.Collections
                 startObjectByRecordId.Add(startObject.RecordId, startObject);
         }
 
-        private void RemoveRecordIdIndexFor(START_TYPE startObject)
+        private int RemoveRecordIdIndexFor(START_TYPE startObject)
         {
             var staleKey = 0;
             var found = false;
@@ -46,11 +47,12 @@ namespace OngekiFumenEditor.Base.Collections
             }
 
             if (!found)
-                return;
+                return -1;
 
             startObjectByRecordId.Remove(staleKey);
 
             ReindexRecordId(staleKey);
+            return staleKey;
         }
 
         private void ReindexRecordId(int recordId)
@@ -76,8 +78,11 @@ namespace OngekiFumenEditor.Base.Collections
             if (e.PropertyName != nameof(ConnectableObjectBase.RecordId) || sender is not START_TYPE startObject)
                 return;
 
-            RemoveRecordIdIndexFor(startObject);
+            var oldRecordId = RemoveRecordIdIndexFor(startObject);
             ReindexRecordId(startObject.RecordId);
+
+            if (oldRecordId == maxRecordId || startObject.RecordId > maxRecordId)
+                RecalculateMaxRecordId();
         }
 
         public int Count => startObjects.Count;
@@ -87,7 +92,17 @@ namespace OngekiFumenEditor.Base.Collections
 
         public int GetNewRecordId()
         {
-            return startObjects.Count > 0 ? startObjects.Select(x => x.RecordId).Max() + 1 : 0;
+            return maxRecordId + 1;
+        }
+
+        private void RecalculateMaxRecordId()
+        {
+            maxRecordId = -1;
+            foreach (var startObject in startObjects)
+            {
+                if (startObject.RecordId > maxRecordId)
+                    maxRecordId = startObject.RecordId;
+            }
         }
 
         public void Add(ConnectableObjectBase obj)
@@ -99,6 +114,8 @@ namespace OngekiFumenEditor.Base.Collections
 
                 startObjects.Add(startObject);
                 IndexStartObject(startObject);
+                if (startObject.RecordId > maxRecordId)
+                    maxRecordId = startObject.RecordId;
                 startObject.PropertyChanged += OnStartPropertyChanged;
                 return;
             }
@@ -114,9 +131,14 @@ namespace OngekiFumenEditor.Base.Collections
         {
             if (obj is START_TYPE startObj)
             {
+                var removingMax = startObj.RecordId == maxRecordId;
                 startObjects.Remove(startObj);
                 RemoveRecordIdIndexFor(startObj);
                 startObj.PropertyChanged -= OnStartPropertyChanged;
+
+                if (removingMax)
+                    RecalculateMaxRecordId();
+
                 return;
             }
 
